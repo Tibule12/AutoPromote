@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./GeneratePublishModal.css";
 import { API_BASE_URL } from "../config";
+import { getAuth } from "firebase/auth";
 
 export default function GeneratePublishModal({ open, contentItem, onClose, onStarted }) {
   const [aspect, setAspect] = useState("9:16");
@@ -24,9 +25,21 @@ export default function GeneratePublishModal({ open, contentItem, onClose, onSta
     setStatus("queued");
     setMessage("Queued for analysis");
     try {
+      const auth = getAuth();
+      const user = auth.currentUser;
+      if (!user) {
+        setStatus("failed");
+        setMessage("You must be signed in.");
+        return;
+      }
+      const token = await user.getIdToken();
+
       const res = await fetch(`${API_BASE_URL}/api/clips/generate-and-publish`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({
           contentId: contentItem.id,
           options: { aspect, addCaptions, platforms },
@@ -38,11 +51,39 @@ export default function GeneratePublishModal({ open, contentItem, onClose, onSta
       setMessage("Processing...");
       onStarted && onStarted(data.jobId || null);
 
-      // Poll or fake progress until success — UI shows progress; backend will send events in real integration
-      setTimeout(() => {
-        setStatus("success");
-        setMessage("Published successfully");
-      }, 1200);
+      // Poll status if jobId is available
+      if (data.jobId) {
+        const pollInterval = setInterval(async () => {
+          try {
+            const statusRes = await fetch(`${API_BASE_URL}/api/content/status/${data.jobId}`, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            if (statusRes.ok) {
+              const statusData = await statusRes.json();
+              const s = statusData.record?.status || statusData.status;
+              if (s === "completed" || s === "published") {
+                clearInterval(pollInterval);
+                setStatus("success");
+                setMessage("Published successfully");
+              } else if (s === "failed" || s === "error") {
+                clearInterval(pollInterval);
+                setStatus("failed");
+                setMessage(statusData.record?.error || "Generation failed");
+              }
+            }
+          } catch {
+            // keep polling
+          }
+        }, 4000);
+        // Stop polling after 2 minutes max
+        setTimeout(() => clearInterval(pollInterval), 120000);
+      } else {
+        // No jobId — fallback to optimistic after delay
+        setTimeout(() => {
+          setStatus("success");
+          setMessage("Published successfully");
+        }, 5000);
+      }
     } catch (err) {
       console.error("Generate & Publish error", err);
       setStatus("failed");

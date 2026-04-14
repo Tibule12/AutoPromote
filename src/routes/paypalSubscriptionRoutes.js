@@ -12,6 +12,8 @@ const {
   normalizePlanId,
   resolvePlan,
   getPlanCapabilities,
+  CREDIT_COSTS,
+  CREDIT_TOP_UP_PACKS,
 } = require("../config/subscriptionPlans");
 const { getEffectiveTierSnapshot } = require("../services/billingService");
 
@@ -844,6 +846,24 @@ router.get("/usage", authMiddleware, async (req, res) => {
     const postsUsed = countDocsSince([postsSnap], periodStart);
     const boostsUsed = countDocsSince([boostsSnap], periodStart);
 
+    // Credit usage for the current month
+    const monthKey = periodStart.toISOString().slice(0, 7) || new Date().toISOString().slice(0, 7);
+    const monthlyCreditsAllocation = plan.features.monthlyCredits || 0;
+    let monthlyCreditsUsed = 0;
+    try {
+      const creditLedgerSnap = await db.collection("credit_usage")
+        .where("userId", "==", userId)
+        .where("monthKey", "==", new Date().toISOString().slice(0, 7))
+        .get();
+      creditLedgerSnap.forEach(doc => {
+        monthlyCreditsUsed += doc.data().amount || 0;
+      });
+    } catch (e) {
+      console.log("[PayPal] Credit usage query error:", e.message);
+    }
+
+    const topUpBalance = userData.credits || 0;
+
     const usage = {
       uploads: {
         used: uploadsUsed,
@@ -860,6 +880,13 @@ router.get("/usage", authMiddleware, async (req, res) => {
         limit: isUnlimited(viralBoostLimit) ? null : viralBoostLimit,
         unlimited: isUnlimited(viralBoostLimit),
       },
+      credits: {
+        monthlyAllocation: monthlyCreditsAllocation,
+        monthlyUsed: monthlyCreditsUsed,
+        monthlyRemaining: Math.max(0, monthlyCreditsAllocation - monthlyCreditsUsed),
+        topUpBalance,
+        totalAvailable: Math.max(0, monthlyCreditsAllocation - monthlyCreditsUsed) + topUpBalance,
+      },
       periodStart: periodStart.toISOString(),
       periodEnd: userData.subscriptionPeriodEnd,
     };
@@ -869,6 +896,8 @@ router.get("/usage", authMiddleware, async (req, res) => {
       tier,
       usage,
       features: plan.features,
+      creditCosts: CREDIT_COSTS,
+      topUpPacks: CREDIT_TOP_UP_PACKS,
     });
   } catch (error) {
     console.error("[PayPal] Get usage error:", error);

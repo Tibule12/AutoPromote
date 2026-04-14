@@ -40,6 +40,8 @@ export const API_ENDPOINTS = {
   MEDIA_STATUS: jobId => `${API_BASE_URL}/api/media/status/${encodeURIComponent(jobId)}`,
   MY_CONTENT: `${API_BASE_URL}/api/content/my-content`,
   MY_SCHEDULES: `${API_BASE_URL}/api/content/my-promotion-schedules`,
+  REPOST_ACTIVITY: `${API_BASE_URL}/api/content/repost-activity`,
+  REPOST_PREVIEW: id => `${API_BASE_URL}/api/content/${encodeURIComponent(id)}/repost-preview`,
   CONTENT_DIAGNOSIS: id => `${API_BASE_URL}/api/content/${encodeURIComponent(id)}/diagnosis`,
   CONTENT_DIAGNOSIS_REMEDIATE: id =>
     `${API_BASE_URL}/api/content/${encodeURIComponent(id)}/diagnosis/remediate`,

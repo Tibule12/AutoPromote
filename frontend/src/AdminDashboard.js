@@ -1677,14 +1677,14 @@ function AdminDashboard({ analytics, user, onLogout }) {
             <StatCard
               title="Premium Users"
               value={stats.premium}
-              subtitle="$19.99/month each"
+              subtitle="$14.99/month each"
               color="#7b1fa2"
               icon="⭐"
             />
             <StatCard
               title="Pro Users"
               value={stats.pro}
-              subtitle="$49.99/month each"
+              subtitle="$34.99/month each"
               color="#2e7d32"
               icon="💎"
             />

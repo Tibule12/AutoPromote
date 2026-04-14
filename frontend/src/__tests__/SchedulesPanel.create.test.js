@@ -50,8 +50,9 @@ describe("SchedulesPanel create schedule", () => {
 
     const payload = mockOnCreate.mock.calls[0][0];
     expect(payload.contentId).toBe("c1");
-    // The component constructs the ISO string: `2030-01-01T12:00:00.000Z`
-    expect(payload.time).toContain("2030-01-01T12:00");
+    // The component constructs the ISO string from local timezone, UTC offset may differ
+    expect(payload.time).toContain("2030-01-01");
+    expect(payload.time).toMatch(/T\d{2}:\d{2}/);
     expect(Array.isArray(payload.platforms)).toBe(true);
     expect(payload.platforms).toContain("youtube");
   });

@@ -29,7 +29,7 @@ const InstagramForm = ({
   const [title, setTitle] = useState(initialData.title || globalTitle || "");
   const [isTitleDirty, setIsTitleDirty] = useState(false);
   const [caption, setCaption] = useState(
-    initialData.caption || globalTitle + "\n\n" + globalDescription
+    initialData.caption || [globalTitle, globalDescription].filter(Boolean).join("\n\n") || ""
   );
   const [isCaptionDirty, setIsCaptionDirty] = useState(false);
 

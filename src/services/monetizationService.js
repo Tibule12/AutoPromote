@@ -45,6 +45,7 @@ function buildTierConfig(planId) {
       platforms: plan.features?.platformLimit,
     },
     features: [
+      `${plan.features?.monthlyCredits || 0} monthly AI credits`,
       `${plan.features?.uploads} monthly uploads`,
       `${plan.features?.platformLimit} connected platforms`,
       `${Number(plan.features?.wolfHuntTasks) || 0} mission opportunities`,

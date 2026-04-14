@@ -122,7 +122,7 @@ describe("MemeticComposerPanel", () => {
     expect(clearBtn).toBeInTheDocument();
 
     // The generate button should become active
-    const generateBtn = screen.getByText(/GENERATE MUTATIONS/i);
+    const generateBtn = screen.getByText(/GENERATE VARIANTS/i);
     expect(generateBtn).toBeEnabled();
 
     // Click Generate

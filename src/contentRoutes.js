@@ -81,7 +81,6 @@ let _engagementBoostingService; // require('./services/engagementBoostingService
 let _growthAssuranceTracker; // require('./services/growthAssuranceTracker');
 
 let _contentQualityEnhancer; // require('./services/contentQualityEnhancer');
-let _repostDrivenEngine; // require('./services/repostDrivenEngine');
 let _referralGrowthEngine; // require('./services/referralGrowthEngine');
 let _monetizationService; // require('./services/monetizationService');
 let _userSegmentation; // require('./services/userSegmentation');
@@ -1296,6 +1295,134 @@ router.get("/my-promotion-schedules", authMiddleware, async (req, res) => {
   }
 });
 
+// GET /repost-activity - Aggregated repost dashboard data for the current user
+router.get("/repost-activity", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.userId || req.user?.uid;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    // 1. Fetch user's content that has autoRepostState
+    const contentSnap = await db
+      .collection("content")
+      .where("user_id", "==", userId)
+      .limit(200)
+      .get();
+
+    const contentItems = [];
+    contentSnap.forEach(doc => {
+      const data = doc.data();
+      if (data.autoRepostState || data.repostPreview) {
+        contentItems.push({
+          id: doc.id,
+          title: data.title || data.caption || "Untitled",
+          thumbnail: data.thumbnailUrl || data.mediaUrl || null,
+          platform: data.platform || null,
+          autoRepostState: data.autoRepostState || null,
+          repostPreview: data.repostPreview || null,
+          createdAt: data.createdAt || null,
+        });
+      }
+    });
+
+    // 2. Fetch repost-related platform_posts
+    // Use single-field filter + in-code filtering to avoid composite index requirement
+    const postsSnap = await db
+      .collection("platform_posts")
+      .where("uid", "==", userId)
+      .limit(500)
+      .get();
+
+    const repostDocs = postsSnap.docs
+      .filter(doc => doc.data().reason === "decay_repost")
+      .sort((a, b) => {
+        const aTime = a.data().createdAt?._seconds || 0;
+        const bTime = b.data().createdAt?._seconds || 0;
+        return bTime - aTime;
+      })
+      .slice(0, 50);
+
+    const repostPosts = repostDocs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        contentId: data.contentId || null,
+        platform: data.platform || null,
+        status: data.outcome || data.status || "unknown",
+        postUrl: data.post_url || data.postUrl || null,
+        metrics: {
+          views: data.views || data.metrics?.views || 0,
+          likes: data.likes || data.metrics?.likes || 0,
+          shares: data.shares || data.metrics?.shares || 0,
+        },
+        repostMetadata: data.payload?.repostMetadata || null,
+        createdAt: data.createdAt || null,
+        isOptimizationRun: data.isOptimizationRun || false,
+        validationStatus: data.validationStatus || null,
+      };
+    });
+
+    // 3. Fetch auto_repost schedules
+    // Use single-field filter + in-code filtering to avoid composite index requirement
+    const schedulesSnap = await db
+      .collection("promotion_schedules")
+      .where("user_id", "==", userId)
+      .limit(500)
+      .get();
+
+    const scheduleDocs = schedulesSnap.docs
+      .filter(doc => doc.data().scheduleType === "auto_repost")
+      .sort((a, b) => {
+        const aTime = a.data().startTime?._seconds || 0;
+        const bTime = b.data().startTime?._seconds || 0;
+        return bTime - aTime;
+      })
+      .slice(0, 30);
+
+    const repostSchedules = scheduleDocs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        contentId: data.contentId || null,
+        platform: data.platform || null,
+        status: data.status || "unknown",
+        reason: data.reason || null,
+        message: data.message || null,
+        repostAttempt: data.repostAttempt || 0,
+        repostLimit: data.repostLimit || 0,
+        startTime: data.startTime || null,
+        createdAt: data.createdAt || null,
+      };
+    });
+
+    // 4. Check user repost settings
+    const userDoc = await db.collection("users").doc(userId).get();
+    const userData = userDoc.exists ? userDoc.data() : {};
+    const autoRepostEnabled =
+      userData.autoRepostEnabled ??
+      userData.settings?.autoRepostEnabled ??
+      userData.preferences?.autoRepostEnabled ??
+      false;
+
+    res.json({
+      success: true,
+      autoRepostEnabled,
+      content: contentItems,
+      repostPosts,
+      repostSchedules,
+      summary: {
+        totalContent: contentItems.length,
+        totalReposts: repostPosts.length,
+        successfulReposts: repostPosts.filter(p => p.status === "posted" || p.status === "success").length,
+        failedReposts: repostPosts.filter(p => p.status === "failed" || p.status === "error").length,
+        pendingSchedules: repostSchedules.filter(s => s.status === "processing" || s.status === "queued").length,
+      },
+    });
+  } catch (error) {
+    console.error("[GET /repost-activity] Error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // POST /:contentId/promotion-schedules - Create a new promotion schedule
 router.post("/:contentId/promotion-schedules", authMiddleware, async (req, res) => {
   try {
@@ -1311,7 +1438,7 @@ router.post("/:contentId/promotion-schedules", authMiddleware, async (req, res) 
     const contentDoc = await db.collection("content").doc(contentId).get();
     if (!contentDoc.exists) return res.status(404).json({ error: "Content not found" });
     const content = contentDoc.data();
-    if (content.userId !== userId) return res.status(403).json({ error: "Forbidden" });
+    if ((content.user_id || content.userId) !== userId) return res.status(403).json({ error: "Forbidden" });
 
     const promotionService = require("./promotionService");
     const schedules = [];
@@ -1455,8 +1582,8 @@ router.get("/leaderboard", authMiddleware, async (req, res) => {
   }
 });
 
-// GET / - Get all content (stub)
-router.get("/", async (req, res) => {
+// GET / - Get all content (requires auth)
+router.get("/", authMiddleware, async (req, res) => {
   try {
     const contentRef = db.collection("content");
     const snapshot = await contentRef.orderBy("created_at", "desc").limit(10).get();
@@ -1621,6 +1748,7 @@ router.post("/:id/repost-preview", authMiddleware, async (req, res) => {
             taskId: task.id,
             status: "queued",
             profile: "smart_repost_preview_v1",
+            originalUrl: sourceUrl,
             hookText: creativePlan.hook,
             caption: creativePlan.caption,
             title: creativePlan.title,
@@ -1655,6 +1783,7 @@ router.post("/:id/repost-preview", authMiddleware, async (req, res) => {
       taskId: task.id,
       processed: !!(result && result.success),
       preview: (refreshed.data() || {}).repostPreview || null,
+      originalUrl: sourceUrl,
       creativePlan,
     });
   } catch (error) {
@@ -1684,6 +1813,17 @@ router.get("/:id", authMiddleware, async (req, res) => {
 // GET /:id/analytics - Get analytics for content
 router.get("/:id/analytics", authMiddleware, async (req, res) => {
   try {
+    const userId = req.userId || req.user?.uid;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    // Verify content ownership
+    const contentDoc = await db.collection("content").doc(req.params.id).get();
+    if (!contentDoc.exists) return res.status(404).json({ error: "Content not found" });
+    const cData = contentDoc.data();
+    if ((cData.user_id || cData.userId) !== userId) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+
     const analyticsSnap = await db
       .collection("analytics")
       .where("content_id", "==", req.params.id)

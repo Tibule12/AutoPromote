@@ -238,7 +238,9 @@ const LinkedInForm = ({
           onChange={handleCommentaryChange}
           placeholder="Share your thoughts or professional update..."
           rows={4}
+          maxLength={3000}
         />
+        <div className="char-count" style={{ textAlign: "right", fontSize: "0.76rem", opacity: 0.6, marginTop: "4px" }}>{commentary.length}/3,000</div>
       </div>
 
       <div className="form-group-modern">

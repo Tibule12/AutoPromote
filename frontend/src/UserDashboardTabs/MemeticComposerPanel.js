@@ -253,10 +253,10 @@ const MemeticComposerPanel = ({ onClose, initialVideoUrl = null }) => {
       <div className="composer-grid">
         {/* Left: Lab Controls */}
         <div className="lab-section">
-          <h3>🧬 Mutation Genes</h3>
+          <h3>🧬 Content Tweaks</h3>
 
           <div className="gene-control">
-            <label>Novelty (Surprise Factor)</label>
+            <label>How Different? (Surprise Factor)</label>
             <input
               type="range"
               min="0"
@@ -268,7 +268,7 @@ const MemeticComposerPanel = ({ onClose, initialVideoUrl = null }) => {
           </div>
 
           <div className="gene-control">
-            <label>Valence (Mood: Dark vs. Cute)</label>
+            <label>Mood (Dark ↔ Happy)</label>
             <input
               type="range"
               min="0"
@@ -283,7 +283,7 @@ const MemeticComposerPanel = ({ onClose, initialVideoUrl = null }) => {
           </div>
 
           <div className="gene-control">
-            <label>Chaos / Trendiness</label>
+            <label>Trend Following</label>
             <input
               type="range"
               min="0"
@@ -295,7 +295,7 @@ const MemeticComposerPanel = ({ onClose, initialVideoUrl = null }) => {
           </div>
 
           <div className="gene-control">
-            <label>Tempo Multiplier</label>
+            <label>Pacing Speed</label>
             <input
               type="range"
               min="0.5"
@@ -310,7 +310,7 @@ const MemeticComposerPanel = ({ onClose, initialVideoUrl = null }) => {
 
         {/* Center: Propagation Simulator */}
         <div className="simulation-section">
-          <h3>📈 Viral Propagation Simulator</h3>
+          <h3>📈 Spread Simulator</h3>
           <div className="canvas-container">
             <canvas ref={canvasRef} width={600} height={300}></canvas>
           </div>
@@ -351,18 +351,18 @@ const MemeticComposerPanel = ({ onClose, initialVideoUrl = null }) => {
             onClick={generateMutations}
             disabled={!videoUrl || loadingPlan}
           >
-            {loadingPlan ? "BREEDING VARIANTS..." : "🚀 GENERATE MUTATIONS"}
+            {loadingPlan ? "GENERATING VARIANTS..." : "🚀 GENERATE VARIANTS"}
           </button>
         </div>
 
         {/* Right: Results / Variants */}
         <div className="variants-section">
-          <h3>🧪 Experimental Results</h3>
+          <h3>🧪 Variants</h3>
 
           {!plan && (
             <div className="empty-state">
-              <p>No mutations generated yet.</p>
-              <p>Upload a seed video and adjust genes to begin breeding.</p>
+              <p>No variants generated yet.</p>
+              <p>Upload a seed video and adjust settings to begin.</p>
             </div>
           )}
 

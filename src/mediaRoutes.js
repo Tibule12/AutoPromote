@@ -10,7 +10,8 @@ const VideoEditingService = require("./services/videoEditingService");
 const videoEditingService = new VideoEditingService(); // Instantiate for general use
 
 const authMiddleware = require("./authMiddleware");
-const { deductCredits } = require("./creditSystem");
+const { deductCredits, getCreditBreakdown } = require("./creditSystem");
+const { CREDIT_COSTS, CREDIT_TOP_UP_PACKS } = require("./config/subscriptionPlans");
 const MEDIA_WORKER_URL =
   process.env.MEDIA_WORKER_URL || "https://media-worker-v1-jddzncgt2a-uc.a.run.app";
 const LOCAL_MEDIA_WORKER_URL = process.env.LOCAL_MEDIA_WORKER_URL || "http://127.0.0.1:8000";
@@ -54,7 +55,7 @@ const chargeVideoEditorCredits = async (userId, amount, routeName) => {
     return { success: true, remaining: null, skipped: true };
   }
 
-  return deductCredits(userId, amount);
+  return deductCredits(userId, amount, routeName);
 };
 
 // Configure Multer (Buffer storage)
@@ -66,6 +67,71 @@ const upload = multer({
 // Middleware to verify Firebase Token and attach user
 // Replaced local 'protect' with standard 'authMiddleware' for consistency
 router.use(authMiddleware);
+
+// Route: GET /api/media/credits
+// Returns the user's credit breakdown (monthly + top-up) and cost table
+router.get("/credits", async (req, res) => {
+  try {
+    const userId = req.user.uid;
+    const breakdown = await getCreditBreakdown(userId);
+    res.json({
+      success: true,
+      balance: breakdown.totalAvailable,
+      monthly: {
+        allocation: breakdown.monthlyAllocation,
+        used: breakdown.monthlyUsed,
+        remaining: breakdown.monthlyRemaining,
+      },
+      topUp: breakdown.topUpBalance,
+      tier: breakdown.tier,
+      costs: CREDIT_COSTS,
+      topUpPacks: CREDIT_TOP_UP_PACKS,
+    });
+  } catch (error) {
+    console.error("[MediaRoute] Credit balance error:", error.message);
+    res.status(500).json({ success: false, message: "Failed to fetch credit balance" });
+  }
+});
+
+// Route: POST /api/media/estimate
+// Returns cost estimate for a set of operations BEFORE processing
+router.post("/estimate", async (req, res) => {
+  try {
+    const userId = req.user.uid;
+    const operations = Array.isArray(req.body?.operations) ? req.body.operations : [];
+    const breakdown = await getCreditBreakdown(userId);
+
+    let totalCost = 0;
+    const items = [];
+    for (const op of operations) {
+      const cost = CREDIT_COSTS[op] || 0;
+      if (cost > 0) {
+        items.push({ operation: op, credits: cost });
+        totalCost += cost;
+      }
+    }
+
+    const canAfford = breakdown.totalAvailable >= totalCost;
+
+    res.json({
+      success: true,
+      items,
+      totalCost,
+      balance: breakdown.totalAvailable,
+      monthly: {
+        allocation: breakdown.monthlyAllocation,
+        remaining: breakdown.monthlyRemaining,
+      },
+      topUp: breakdown.topUpBalance,
+      canAfford,
+      deficit: canAfford ? 0 : totalCost - breakdown.totalAvailable,
+      topUpPacks: canAfford ? undefined : CREDIT_TOP_UP_PACKS,
+    });
+  } catch (error) {
+    console.error("[MediaRoute] Estimate error:", error.message);
+    res.status(500).json({ success: false, message: "Failed to estimate costs" });
+  }
+});
 
 // Route: POST /api/media/transcribe
 // Handles file upload -> Firebase Storage -> Python Worker -> Returns Captions
@@ -123,7 +189,7 @@ router.post("/process", async (req, res) => {
   const userId = req.user.uid;
   const { fileUrl, options } = req.body;
   console.log("[MediaRoute] Received request:", { fileUrl, options });
-  const cost = 10; // Cost per edit
+  const cost = CREDIT_COSTS.process || 10;
 
   if (!fileUrl) {
     return res.status(400).json({ message: "No file provided" });
@@ -131,12 +197,16 @@ router.post("/process", async (req, res) => {
 
   // 1. Deduct Credits
   try {
-    const result = await chargeVideoEditorCredits(userId, cost, "/process");
+    const result = await chargeVideoEditorCredits(userId, cost, "process");
     if (!result.success) {
       return res.status(403).json({
-        message: "Insufficient credits. Please purchase more credits.",
+        message: `This operation costs ${cost} credits. You have ${result.remaining || 0} credits available.`,
         required: cost,
-        remaining: result.remaining,
+        remaining: result.remaining || 0,
+        monthlyRemaining: result.monthlyRemaining,
+        topUpBalance: result.topUpBalance,
+        tier: result.tier,
+        topUpPacks: CREDIT_TOP_UP_PACKS,
       });
     }
 
@@ -184,7 +254,7 @@ router.post("/extract-audio", async (req, res) => {
 
 router.post("/render-multicam", async (req, res) => {
   const userId = req.user.uid;
-  const cost = 15;
+  const cost = CREDIT_COSTS["render-multicam"] || 15;
   const sources = Array.isArray(req.body?.sources) ? req.body.sources : [];
 
   if (sources.length < 2) {
@@ -192,12 +262,13 @@ router.post("/render-multicam", async (req, res) => {
   }
 
   try {
-    const result = await chargeVideoEditorCredits(userId, cost, "/render-multicam");
+    const result = await chargeVideoEditorCredits(userId, cost, "render-multicam");
     if (!result.success) {
       return res.status(403).json({
-        message: "Insufficient credits. Please purchase more credits.",
+        message: `Multicam rendering costs ${cost} credits. You have ${result.remaining || 0} credits available.`,
         required: cost,
-        remaining: result.remaining,
+        remaining: result.remaining || 0,
+        topUpPacks: CREDIT_TOP_UP_PACKS,
       });
     }
 
@@ -359,7 +430,7 @@ router.get("/status/:jobId", async (req, res) => {
 router.post("/analyze", async (req, res) => {
   const userId = req.user.uid;
   const { fileUrl } = req.body;
-  const cost = 20; // Higher cost for analysis
+  const cost = CREDIT_COSTS.analyze || 8;
 
   try {
     console.log(`[MediaRoute] Analyze clip request for user ${userId}, file: ${fileUrl}`);
@@ -395,7 +466,7 @@ router.post("/analyze", async (req, res) => {
 router.post("/render-clip", async (req, res) => {
   const userId = req.user.uid;
   const { fileUrl, startTime, endTime } = req.body;
-  const cost = 5; // Simpler cut is cheaper
+  const cost = CREDIT_COSTS["render-clip"] || 5;
 
   try {
     const creditRes = await chargeVideoEditorCredits(userId, cost, "/render-clip");

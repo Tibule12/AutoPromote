@@ -183,7 +183,6 @@ const AnalyticsPanel = () => {
   const loadRecoveryForContent = useCallback(
     async contentId => {
       if (!recoveryEnabled || !contentId) return;
-      if (!contentId) return;
       setRecoveryLoading(true);
       setRecoveryMessage("");
       try {

@@ -12,6 +12,7 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { getAuth } from "firebase/auth";
 import html2canvas from "html2canvas"; // For rendering styled captions
 import { trackClipWorkflowEvent } from "../utils/clipWorkflowAnalytics";
+import toast from "react-hot-toast";
 import "./ViralClipStudio.css"; // We'll create this CSS next
 
 const RAINBOW_COLORS = [
@@ -335,15 +336,6 @@ const buildClipGuidance = clip => {
 };
 
 const isGenericHookText = value => GENERIC_HOOK_TEXTS.has(normalizeHookText(value).toUpperCase());
-
-const formatPreviewTime = value => {
-  const totalSeconds = Math.max(0, Number(value) || 0);
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = Math.floor(totalSeconds % 60)
-    .toString()
-    .padStart(2, "0");
-  return `${minutes}:${seconds}`;
-};
 
 const formatPreviewTimePrecise = value => {
   const totalSeconds = Math.max(0, Number(value) || 0);
@@ -766,6 +758,14 @@ const ViralClipStudio = ({
   const [musicPreviewStatusMessage, setMusicPreviewStatusMessage] = useState("");
   const [musicPreviewNeedsGesture, setMusicPreviewNeedsGesture] = useState(false);
   const [extractedAudio, setExtractedAudio] = useState(null);
+
+  // Collapsible section state — start with AI Enhancements collapsed to reduce overwhelm
+  const [collapsedSections, setCollapsedSections] = useState({
+    aiEnhancements: true,
+    hookSettings: true,
+    musicAudio: true,
+  });
+  const toggleSection = key => setCollapsedSections(prev => ({ ...prev, [key]: !prev[key] }));
   const [audioExtractionStatus, setAudioExtractionStatus] = useState("");
   const [isExtractingAudio, setIsExtractingAudio] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -796,7 +796,6 @@ const ViralClipStudio = ({
   const musicPreviewBufferRef = useRef(null);
   const musicPreviewSourceRef = useRef(null);
   const musicPreviewSourceStateRef = useRef({ offset: 0, playbackRate: 1 });
-  const fileInputRef = useRef(null); // Hidden file input
   const imageInputRef = useRef(null);
   const audioSourceInputRef = useRef(null);
   const previewSourceCacheRef = useRef(new Map());
@@ -1528,98 +1527,6 @@ const ViralClipStudio = ({
     } else {
       previewPlaybackIntentRef.current = false;
       video.pause();
-    }
-  };
-
-  const togglePreviewMute = () => {
-    setPreviewMuted(current => !current);
-  };
-
-  const handlePreviewVolumeChange = event => {
-    const nextVolume = clampAudioControl(event.target.value, 0, 1, 1);
-    setPreviewVolume(nextVolume);
-    if (nextVolume > 0 && previewMuted) {
-      setPreviewMuted(false);
-    }
-  };
-
-  const togglePreviewFitMode = () => {
-    if (smartCrop) return;
-    setVideoFit(current => (current === "contain" ? "cover" : "contain"));
-  };
-
-  const enableMusicPreview = async () => {
-    const video = videoRef.current;
-    const music = musicPreviewRef.current;
-    if (!effectiveMusicPreviewUrl) return;
-
-    try {
-      if (musicSearchMode && musicPreviewBufferRef.current) {
-        const previewTimelineTime = video
-          ? clampAudioControl(getPreviewTimelineTime(video.currentTime || 0), 0, 36000, 0)
-          : 0;
-        const bufferDuration = Number(musicPreviewBufferRef.current.duration || 0);
-        const targetTime =
-          Number.isFinite(bufferDuration) && bufferDuration > 0.25
-            ? previewTimelineTime % bufferDuration
-            : previewTimelineTime;
-
-        await startMusicPreviewBufferPlayback(targetTime, video?.playbackRate || 1);
-        return;
-      }
-
-      if (!music) return;
-      music.muted = false;
-      music.defaultMuted = false;
-      music.loop = true;
-
-      const previewTimelineTime = video
-        ? clampAudioControl(getPreviewTimelineTime(video.currentTime || 0), 0, 36000, 0)
-        : 0;
-      const musicDuration = Number(music.duration || 0);
-      const targetTime =
-        Number.isFinite(musicDuration) && musicDuration > 0.25
-          ? previewTimelineTime % musicDuration
-          : previewTimelineTime;
-
-      if (Number.isFinite(targetTime)) {
-        try {
-          music.currentTime = targetTime;
-        } catch (error) {
-          console.log("Music preview direct seek skipped", error);
-        }
-      }
-
-      const playResult = music.play();
-      if (playResult && typeof playResult.then === "function") {
-        await playResult;
-      }
-
-      setMusicPreviewNeedsGesture(false);
-      setMusicPreviewStatus("ready");
-      setMusicPreviewStatusMessage(`Preview audio is playing for ${currentMusicLabel}.`);
-    } catch (error) {
-      console.log("Music preview manual enable failed", error);
-      setMusicPreviewNeedsGesture(true);
-      setMusicPreviewStatus("failed");
-      setMusicPreviewStatusMessage(
-        error?.message || "Preview audio is ready but the browser still blocked playback."
-      );
-    }
-  };
-
-  const togglePreviewFullscreen = async () => {
-    const frame = phoneFrameRef.current;
-    if (!frame) return;
-
-    try {
-      if (document.fullscreenElement === frame) {
-        await document.exitFullscreen();
-      } else {
-        await frame.requestFullscreen();
-      }
-    } catch (error) {
-      console.log("Preview fullscreen toggle failed", error);
     }
   };
 
@@ -2894,7 +2801,7 @@ const ViralClipStudio = ({
     const auth = getAuth();
     const user = auth.currentUser;
     if (!user) {
-      alert("Please login first");
+      toast.error("Please login first");
       event.target.value = "";
       return;
     }
@@ -3012,7 +2919,7 @@ const ViralClipStudio = ({
       setAudioExtractionStatus(error.message || "Audio extraction failed");
       if (onStatusChange)
         onStatusChange(`Audio extraction failed: ${error.message || "Unknown error"}`);
-      alert(`Audio extraction failed: ${error.message || "Unknown error"}`);
+      toast.error(`Audio extraction failed: ${error.message || "Unknown error"}`);
     } finally {
       setIsExtractingAudio(false);
       event.target.value = "";
@@ -3180,7 +3087,7 @@ const ViralClipStudio = ({
 
     const auth = getAuth();
     if (!auth.currentUser) {
-      alert("Please login first");
+      toast.error("Please login first");
       setIsExporting(false);
       setExportStatusLabel("Render Final Clip");
       return;
@@ -3341,7 +3248,7 @@ const ViralClipStudio = ({
           message: err?.message || "Export failed",
         });
       }
-      alert("Export failed: " + err.message);
+      toast.error("Export failed: " + err.message);
     } finally {
       setExportStatusLabel("Render Final Clip");
       setIsExporting(false);
@@ -4297,7 +4204,7 @@ const ViralClipStudio = ({
 
     // Basic check for video file
     if (!file.type.startsWith("video/")) {
-      alert("Please select a valid video file.");
+      toast.error("Please select a valid video file.");
       return;
     }
 
@@ -4312,7 +4219,7 @@ const ViralClipStudio = ({
 
     if (type === "overlay") {
       const newOverlay = {
-        id: Date.now(),
+        id: createSecureId("overlay"),
         type: "video",
         src: url,
         file: file,
@@ -4333,7 +4240,7 @@ const ViralClipStudio = ({
       const tempId = Date.now();
       const tempVideo = document.createElement("video");
       if (!applySafeMediaSource(tempVideo, url)) {
-        reject(new Error("This clip source uses an unsupported preview URL."));
+        console.error("This clip source uses an unsupported preview URL.");
         return;
       }
       tempVideo.preload = "metadata";
@@ -4370,7 +4277,7 @@ const ViralClipStudio = ({
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      alert("Please select a valid image file.");
+      toast.error("Please select a valid image file.");
       return;
     }
 
@@ -4389,7 +4296,7 @@ const ViralClipStudio = ({
   const addExistingImageOverlay = imageAsset => {
     const src = normalizeAssetUrl(imageAsset);
     if (!src) {
-      alert("This image could not be added as an overlay.");
+      toast.error("This image could not be added as an overlay.");
       return;
     }
 
@@ -4609,7 +4516,9 @@ const ViralClipStudio = ({
             >
               ↷ Redo
             </button>
-            <button className="close-btn" onClick={onCancel}>
+            <button className="close-btn" onClick={() => {
+              if (window.confirm("Close the studio? Unsaved changes will be lost.")) onCancel();
+            }}>
               &times;
             </button>
           </div>
@@ -4943,7 +4852,7 @@ const ViralClipStudio = ({
                               onTouchStart={e => handleDragStart(e, overlay)}
                               onDoubleClick={() => {
                                 if (overlay.type === "text") {
-                                  const newText = prompt("Edit Text:", safeOverlayText);
+                                  const newText = window.prompt("Edit Text:", safeOverlayText);
                                   if (newText !== null) updateOverlayText(overlay.id, newText);
                                 }
                               }}
@@ -5300,7 +5209,7 @@ const ViralClipStudio = ({
 
                           // 1. Get file blob
                           if (!clip.file) {
-                            alert("Can only caption freshly uploaded files. (No file data found)");
+                            toast.error("Can only caption freshly uploaded files. (No file data found)");
                             return;
                           }
 
@@ -5398,14 +5307,15 @@ const ViralClipStudio = ({
                             });
 
                             if (filteredSegments.length === 0) {
-                              alert(
-                                "Audio processed but no clear speech detected (music/noise filtered)."
+                              toast(
+                                "Audio processed but no clear speech detected (music/noise filtered).",
+                                { icon: "🔇" }
                               );
                               return;
                             }
 
                             const newCaptions = filteredSegments.map((seg, i) => ({
-                              id: Date.now() + i,
+                              id: createSecureId("caption"),
                               type: "text",
                               text: seg.text.trim(),
                               x: 50,
@@ -5425,11 +5335,11 @@ const ViralClipStudio = ({
                             }));
 
                             setOverlays(prev => [...prev, ...newCaptions]);
-                            alert(
-                              "✨ Captions generated via AI draft! Review the text before export. (Cute Mode Enabled 🌈)"
+                            toast.success(
+                              "Captions generated via AI draft! Review the text before export."
                             );
                           } catch (err) {
-                            alert("Error generating captions: " + err.message);
+                            toast.error("Error generating captions: " + err.message);
                           } finally {
                             e.target.innerText = "💬 CC";
                             e.target.disabled = false;
@@ -6218,7 +6128,14 @@ const ViralClipStudio = ({
                 </div>
               </div>
               <div className="ai-settings-card">
-                <h5 style={sidebarSectionTitleStyle}>🤖 AI Enhancements</h5>
+                <h5
+                  style={{ ...sidebarSectionTitleStyle, cursor: "pointer", userSelect: "none", display: "flex", justifyContent: "space-between", alignItems: "center" }}
+                  onClick={() => toggleSection("aiEnhancements")}
+                >
+                  <span>🤖 AI Enhancements</span>
+                  <span style={{ fontSize: "12px", opacity: 0.6 }}>{collapsedSections.aiEnhancements ? "▶" : "▼"}</span>
+                </h5>
+                {!collapsedSections.aiEnhancements && (<>
                 <label style={{ ...sidebarCheckboxLabelStyle, marginBottom: "8px" }}>
                   <input
                     type="checkbox"
@@ -6508,6 +6425,7 @@ const ViralClipStudio = ({
                     </div>
                   </div>
                 ) : null}
+                </>)}
                 <label style={{ ...sidebarCheckboxLabelStyle, marginTop: "10px" }}>
                   <input
                     type="checkbox"
@@ -6830,7 +6748,14 @@ const ViralClipStudio = ({
                 ) : null}
               </div>
               <div className="ai-settings-card">
-                <h5 style={sidebarSectionTitleStyle}>🎵 Music And Audio</h5>
+                <h5
+                  style={{ ...sidebarSectionTitleStyle, cursor: "pointer", userSelect: "none", display: "flex", justifyContent: "space-between", alignItems: "center" }}
+                  onClick={() => toggleSection("musicAudio")}
+                >
+                  <span>🎵 Music And Audio</span>
+                  <span style={{ fontSize: "12px", opacity: 0.6 }}>{collapsedSections.musicAudio ? "▶" : "▼"}</span>
+                </h5>
+                {!collapsedSections.musicAudio && (<>
                 <label style={{ ...sidebarCheckboxLabelStyle, marginBottom: "8px" }}>
                   <input
                     type="checkbox"
@@ -6933,6 +6858,7 @@ const ViralClipStudio = ({
                     ) : null}
                   </div>
                 ) : null}
+              </>)}
               </div>
             </section>
 

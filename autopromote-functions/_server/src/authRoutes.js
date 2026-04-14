@@ -77,7 +77,7 @@ router.post("/register", async (req, res) => {
 
     // Set custom claims for role (preserve existing admin role)
     const existingClaims = userRecord.customClaims || {};
-    const finalRole = existingClaims.role === "admin" ? "admin" : role;
+    const finalRole = existingClaims.role === "admin" ? "admin" : "user";
     await admin.auth().setCustomUserClaims(userRecord.uid, { role: finalRole });
 
     // Store additional user data in Firestore

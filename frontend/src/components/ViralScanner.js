@@ -248,9 +248,9 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
   const paypalButtonsRef = useRef(null);
 
   const CREDIT_PACKAGES = [
-    { id: "pack_small", credits: 50, price: "4.99", name: "Starter Pack" },
-    { id: "pack_medium", credits: 150, price: "12.99", name: "Pro Pack" },
-    { id: "pack_large", credits: 500, price: "39.99", name: "Mega Pack" },
+    { id: "pack_boost", credits: 50, price: "4.99", name: "Boost Pack" },
+    { id: "pack_pro", credits: 200, price: "14.99", name: "Pro Pack", savings: "25%" },
+    { id: "pack_studio", credits: 500, price: "29.99", name: "Studio Pack", savings: "40%" },
   ];
 
   const formatBalance = balance => {

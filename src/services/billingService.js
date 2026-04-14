@@ -21,7 +21,8 @@ const TIERS = {
     monthly_upload_cap: getUploadLimitForPlan("free"),
     monthly_ai_cap: 3,
     monthly_bot_cap: 2, // TEASER: Allow 2 bot-boosted uploads to get them hooked
-    platform_limit: 1, // NEW: Single platform only for free users
+    platform_limit: 1, // Single platform only for free users
+    monthly_credits: FREE_PLAN.features.monthlyCredits || 0,
     monthly_price: Number(FREE_PLAN.price) || 0,
     allowed_features: {
       organic_upload: true,
@@ -29,6 +30,7 @@ const TIERS = {
       repost_boost: false, // Keep locked as Premium upsell
       share_boost: false, // Keep locked as Premium upsell
       global_distribution: false, // Block "Publish Everywhere"
+      multicam: false,
     },
     features: ["organic_upload", "basic_analytics", "teaser_bot_boost"],
   },
@@ -39,6 +41,7 @@ const TIERS = {
     monthly_ai_cap: 50,
     monthly_bot_cap: 5,
     platform_limit: getPlatformLimitForPlan("premium"),
+    monthly_credits: PREMIUM_PLAN.features.monthlyCredits || 0,
     monthly_price: Number(PREMIUM_PLAN.price) || 0,
     allowed_features: {
       organic_upload: true,
@@ -46,6 +49,7 @@ const TIERS = {
       repost_boost: false,
       share_boost: false,
       global_distribution: true,
+      multicam: false,
     },
     features: ["organic_upload", "basic_analytics", "bot_views", "multi_platform"],
   },
@@ -56,6 +60,7 @@ const TIERS = {
     monthly_ai_cap: 20,
     monthly_bot_cap: 10,
     platform_limit: getPlatformLimitForPlan("premium"),
+    monthly_credits: PREMIUM_PLAN.features.monthlyCredits || 0,
     monthly_price: Number(PREMIUM_PLAN.price) || 0,
     allowed_features: {
       organic_upload: true,
@@ -63,6 +68,7 @@ const TIERS = {
       repost_boost: false,
       share_boost: false,
       global_distribution: true,
+      multicam: false,
     },
     features: ["organic_upload", "basic_analytics", "bot_views", "multi_platform"],
   },
@@ -73,6 +79,7 @@ const TIERS = {
     monthly_ai_cap: 500,
     monthly_bot_cap: 100,
     platform_limit: getPlatformLimitForPlan("pro"),
+    monthly_credits: PRO_PLAN.features.monthlyCredits || 0,
     monthly_price: Number(PRO_PLAN.price) || 0,
     allowed_features: {
       organic_upload: true,
@@ -80,6 +87,7 @@ const TIERS = {
       repost_boost: true,
       share_boost: true,
       global_distribution: true,
+      multicam: true,
     },
     features: [
       "organic_upload",
@@ -87,6 +95,7 @@ const TIERS = {
       "priority_scheduling",
       "all_bot_tools",
       "global_distribution",
+      "multicam",
     ],
   },
   ENTERPRISE: {
@@ -96,6 +105,7 @@ const TIERS = {
     monthly_ai_cap: 2000,
     monthly_bot_cap: 500,
     platform_limit: getPlatformLimitForPlan("enterprise"),
+    monthly_credits: ENTERPRISE_PLAN.features.monthlyCredits || 0,
     monthly_price: Number(ENTERPRISE_PLAN.price) || 0,
     allowed_features: {
       organic_upload: true,
@@ -103,6 +113,7 @@ const TIERS = {
       repost_boost: true,
       share_boost: true,
       global_distribution: true,
+      multicam: true,
     },
     features: [
       "organic_upload",
@@ -110,6 +121,7 @@ const TIERS = {
       "priority_scheduling",
       "all_bot_tools",
       "global_distribution",
+      "multicam",
     ],
   },
 };

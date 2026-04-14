@@ -96,7 +96,7 @@ const TikTokForm = ({
     }
   }, [currentFile]);
 
-  const [privacy, setPrivacy] = useState(initialData.privacy || "");
+  const [privacy, setPrivacy] = useState(initialData.privacy || "PUBLIC_TO_EVERYONE");
   const [allowComments, setAllowComments] = useState(initialData.allowComments !== false);
   const [allowDuet, setAllowDuet] = useState(initialData.allowDuet !== false);
   const [allowStitch, setAllowStitch] = useState(initialData.allowStitch !== false);

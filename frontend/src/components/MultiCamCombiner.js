@@ -9,7 +9,22 @@ import {
   normalizeSourceLabel,
   normalizeSwitches,
 } from "./multicamUtils";
+import { getAuth } from "firebase/auth";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { API_BASE_URL } from "../config";
+import toast from "react-hot-toast";
 import "./MultiCamCombiner.css";
+
+const MULTICAM_MAX_SOURCES = 6;
+
+const CAMERA_COLORS = [
+  "#f97316", "#38bdf8", "#a78bfa", "#34d399", "#fb7185", "#facc15",
+];
+
+const getCameraColor = (cameraId, sources) => {
+  const idx = sources.findIndex(s => s.id === cameraId);
+  return CAMERA_COLORS[idx % CAMERA_COLORS.length] || CAMERA_COLORS[0];
+};
 
 const DRIFT_THRESHOLD_SECONDS = 0.18;
 const EXPORT_FRAME_RATE = 30;
@@ -122,8 +137,11 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const [statusMessage, setStatusMessage] = useState("");
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
+  const [outputAspectRatio, setOutputAspectRatio] = useState("9:16");
   const [exportResult, setExportResult] = useState(null);
+  const [serverExportPending, setServerExportPending] = useState(false);
 
+  const cancelExportRef = useRef(false);
   const fileInputRef = useRef(null);
   const nextCameraIndexRef = useRef(3);
   const objectUrlsRef = useRef(new Set());
@@ -132,6 +150,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const previewVideoRefs = useRef({});
   const thumbnailVideoRefs = useRef({});
   const audioVideoRefs = useRef({});
+  const handleRecordSwitchRef = useRef(null);
 
   const readySources = useMemo(
     () => sources.filter(source => getSourceMediaUrl(source) && Number(source.duration) > 0.05),
@@ -303,7 +322,13 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   }, [exportResult]);
 
   const appendFiles = files => {
-    const nextSources = Array.from(files || []).map(file => {
+    const available = MULTICAM_MAX_SOURCES - sources.length;
+    if (available <= 0) {
+      toast.error(`Maximum ${MULTICAM_MAX_SOURCES} camera sources allowed.`);
+      return;
+    }
+    const filesToAdd = Array.from(files || []).slice(0, available);
+    const nextSources = filesToAdd.map(file => {
       const previewUrl = URL.createObjectURL(file);
       objectUrlsRef.current.add(previewUrl);
       const cameraNumber = nextCameraIndexRef.current;
@@ -329,6 +354,40 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         `${nextSources.length} camera source${nextSources.length > 1 ? "s" : ""} added.`
       );
     }
+    if (filesToAdd.length < Array.from(files || []).length) {
+      toast(`Only ${filesToAdd.length} added — max ${MULTICAM_MAX_SOURCES} sources.`);
+    }
+  };
+
+  const handleRemoveSource = cameraId => {
+    if (sources.length <= 2) {
+      toast.error("At least two camera sources are required.");
+      return;
+    }
+    const removedSource = sources.find(s => s.id === cameraId);
+    setSources(current => current.filter(s => s.id !== cameraId));
+    setSwitches(current => {
+      const cleaned = current.filter(sw => sw.cameraId !== cameraId);
+      if (!cleaned.length) {
+        const remaining = sources.filter(s => s.id !== cameraId);
+        return [{ id: "switch-1", cameraId: remaining[0]?.id || "cam-1", startTime: 0 }];
+      }
+      return cleaned;
+    });
+    if (masterAudioCameraId === cameraId) {
+      const remaining = sources.filter(s => s.id !== cameraId);
+      setMasterAudioCameraId(remaining[0]?.id || "cam-1");
+    }
+    if (removedSource?.previewUrl && objectUrlsRef.current.has(removedSource.previewUrl)) {
+      URL.revokeObjectURL(removedSource.previewUrl);
+      objectUrlsRef.current.delete(removedSource.previewUrl);
+    }
+    setStatusMessage(`Removed ${removedSource?.label || "source"}.`);
+  };
+
+  const handleCancelExport = () => {
+    cancelExportRef.current = true;
+    setStatusMessage("Cancelling export...");
   };
 
   const handleOffsetChange = (cameraId, nextValue) => {
@@ -375,6 +434,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     });
   };
 
+  handleRecordSwitchRef.current = handleRecordSwitch;
+
   const handleRemoveSwitch = switchId => {
     if (!switchId) return;
     setSwitches(currentSwitches => {
@@ -417,6 +478,47 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     });
   };
 
+  const handleLoadFileForCamera = (cameraId, file) => {
+    if (!file) return;
+    const previewUrl = URL.createObjectURL(file);
+    objectUrlsRef.current.add(previewUrl);
+    setSources(current =>
+      current.map(s =>
+        s.id === cameraId
+          ? { ...s, file, name: file.name, previewUrl, url: "", uploadedUrl: "", duration: 0 }
+          : s
+      )
+    );
+    setStatusMessage(`Loaded ${file.name} into ${cameraId}.`);
+  };
+
+  // Keyboard shortcuts: 1-6 switch cameras, Space play/pause
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA" || e.target.tagName === "SELECT") return;
+
+      if (e.code === "Space") {
+        e.preventDefault();
+        if (!timelineDuration) return;
+        if (playheadRef.current >= timelineDuration) {
+          setPlayhead(0);
+        }
+        setIsPlaying(prev => !prev);
+        return;
+      }
+
+      const keyNum = parseInt(e.key, 10);
+      if (keyNum >= 1 && keyNum <= MULTICAM_MAX_SOURCES && sources[keyNum - 1]) {
+        const target = sources[keyNum - 1];
+        if (getSourceMediaUrl(target) && handleRecordSwitchRef.current) {
+          handleRecordSwitchRef.current(target.id);
+        }
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [sources, timelineDuration]);
+
   const handleExport = async () => {
     if (readySources.length < 2) {
       setStatusMessage("Load at least two video sources before exporting.");
@@ -431,9 +533,10 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       return;
     }
 
+    cancelExportRef.current = false;
     setIsExporting(true);
     setExportProgress(0);
-    setStatusMessage("Rendering browser-based multicam master...");
+    setStatusMessage("Rendering browser-based multicam master (runs in real-time)...");
 
     const exportVideos = new Map();
     let recorder;
@@ -502,6 +605,11 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       await new Promise(resolve => {
         const startedAt = performance.now();
         const renderFrame = now => {
+          if (cancelExportRef.current) {
+            recorder.stop();
+            resolve();
+            return;
+          }
           const exportPlayhead = Math.min(timelineDuration, (now - startedAt) / 1000);
           setExportProgress(exportPlayhead / timelineDuration);
 
@@ -549,6 +657,12 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       });
 
       await completion;
+
+      if (cancelExportRef.current) {
+        setStatusMessage("Export cancelled.");
+        return;
+      }
+
       const blob = new Blob(chunks, { type: recorder.mimeType || "video/webm" });
       const exportUrl = URL.createObjectURL(blob);
       const exportFile = new File([blob], `multicam-master-${Date.now()}.webm`, {
@@ -585,6 +699,114 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     }
   };
 
+  const handleServerExport = async () => {
+    if (readySources.length < 2) {
+      setStatusMessage("Load at least two video sources before exporting.");
+      return;
+    }
+    if (!timelineDuration) {
+      setStatusMessage("Set up synced sources before exporting.");
+      return;
+    }
+
+    setServerExportPending(true);
+    setIsExporting(true);
+    setExportProgress(0);
+    setStatusMessage("Uploading sources for server-side render (MP4)...");
+
+    try {
+      const auth = getAuth();
+      const user = auth.currentUser;
+      if (!user) throw new Error("You must be signed in to use server rendering.");
+      const token = await user.getIdToken();
+
+      const storage = getStorage();
+      const sourcesPayload = [];
+      for (let i = 0; i < readySources.length; i++) {
+        const source = readySources[i];
+        setExportProgress((i / readySources.length) * 0.5);
+        setStatusMessage(`Uploading ${source.label || `source ${i + 1}`}...`);
+
+        let remoteUrl = source.url || source.uploadedUrl;
+        if (!remoteUrl && source.file) {
+          const safeName = source.file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+          const tempRef = ref(
+            storage,
+            `temp/multicam/${user.uid}/${Date.now()}_${safeName}`
+          );
+          await uploadBytes(tempRef, source.file);
+          remoteUrl = await getDownloadURL(tempRef);
+        }
+        if (!remoteUrl) throw new Error(`No video file for ${source.label}.`);
+
+        sourcesPayload.push({
+          id: source.id,
+          url: remoteUrl,
+          label: source.label || `Camera ${i + 1}`,
+          offset_seconds: Number(source.offsetSeconds) || 0,
+        });
+      }
+
+      setExportProgress(0.6);
+      setStatusMessage("Sources uploaded. Rendering on server...");
+
+      const switchesPayload = normalizedSwitches.map(sw => ({
+        camera_id: sw.cameraId,
+        start_time: Number(sw.startTime) || 0,
+      }));
+
+      const response = await fetch(`${API_BASE_URL}/api/media/render-multicam`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          sources: sourcesPayload,
+          switches: switchesPayload,
+          primaryAudioCameraId: masterAudioCameraId,
+          overlapStart: overlapBounds.overlapStart || 0,
+          overlapDuration: overlapBounds.overlapDuration || 0,
+          outputAspectRatio: outputAspectRatio,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Server returned ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (!data.success && !data.output_url) {
+        throw new Error(data.error || "Server render did not return a result.");
+      }
+
+      setExportProgress(1);
+      const outputUrl = data.output_url || data.outputUrl;
+      if (outputUrl) {
+        setExportResult({
+          url: outputUrl,
+          file: { name: `multicam-master-${Date.now()}.mp4` },
+          duration: data.duration || timelineDuration,
+          isServerRender: true,
+        });
+        setStatusMessage("Server render complete (MP4). Download or continue into the editor.");
+      } else {
+        setStatusMessage(
+          `Server render started (Job: ${data.jobId || "unknown"}). Check back in a few minutes.`
+        );
+      }
+    } catch (error) {
+      console.error(error);
+      setStatusMessage(error.message || "Server export failed.");
+      toast.error(error.message || "Server export failed.");
+    } finally {
+      setServerExportPending(false);
+      setIsExporting(false);
+      setExportProgress(0);
+    }
+  };
+
   return (
     <div
       className="nle-overlay"
@@ -615,7 +837,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         <div className="nle-summary-row">
           <div className="nle-summary-card">
             <span>Sources</span>
-            <strong>{readySources.length}</strong>
+            <strong>{readySources.length} / {MULTICAM_MAX_SOURCES}</strong>
           </div>
           <div className="nle-summary-card">
             <span>Master Audio</span>
@@ -624,6 +846,21 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           <div className="nle-summary-card">
             <span>Shared Timeline</span>
             <strong>{formatDurationLabel(timelineDuration || 0)}</strong>
+          </div>
+          <div className="nle-summary-card">
+            <span>Output</span>
+            <div className="nle-aspect-buttons">
+              {["9:16", "16:9", "1:1"].map(ar => (
+                <button
+                  key={ar}
+                  type="button"
+                  className={`nle-aspect-btn ${outputAspectRatio === ar ? "is-active" : ""}`}
+                  onClick={() => setOutputAspectRatio(ar)}
+                >
+                  {ar}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -730,10 +967,24 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                   <article
                     key={source.id}
                     className={`nle-camera-card ${source.id === activeCameraId ? "is-active" : ""}`}
+                    onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "copy"; }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      const droppedFile = e.dataTransfer.files?.[0];
+                      if (droppedFile?.type?.startsWith("video/")) {
+                        handleLoadFileForCamera(source.id, droppedFile);
+                      }
+                    }}
                   >
                     <div className="nle-camera-header">
                       <div>
-                        <strong>{normalizeSourceLabel(source.label, index)}</strong>
+                        <strong>
+                          <span
+                            className="nle-camera-color-dot"
+                            style={{ background: getCameraColor(source.id, sources) }}
+                          />
+                          {normalizeSourceLabel(source.label, index)}
+                        </strong>
                         <span>{source.name || normalizeSourceLabel(source.label, index)}</span>
                       </div>
                       <span className={`nle-camera-badge ${isAvailable ? "is-live" : ""}`}>
@@ -752,7 +1003,21 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                           muted
                         />
                       ) : (
-                        <div className="nle-thumbnail-placeholder">No video loaded</div>
+                        <button
+                          type="button"
+                          className="nle-thumbnail-placeholder nle-drop-target"
+                          onClick={() => {
+                            const input = document.createElement("input");
+                            input.type = "file";
+                            input.accept = "video/*";
+                            input.onchange = (evt) => {
+                              if (evt.target.files?.[0]) handleLoadFileForCamera(source.id, evt.target.files[0]);
+                            };
+                            input.click();
+                          }}
+                        >
+                          Click or drop video here
+                        </button>
                       )}
                     </div>
                     <div className="nle-field-grid">
@@ -787,10 +1052,22 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                         className="nle-btn secondary"
                         type="button"
                         onClick={() => handleRecordSwitch(source.id)}
-                        disabled={!timelineDuration}
+                        disabled={!timelineDuration || !mediaUrl}
                       >
                         Cut To {normalizeSourceLabel(source.label, index)}
+                        <kbd className="nle-hotkey-hint">{index + 1}</kbd>
                       </button>
+                      {index > 0 && (
+                        <button
+                          className="nle-btn danger"
+                          type="button"
+                          onClick={() => handleRemoveSource(source.id)}
+                          disabled={isExporting || sources.length <= 2}
+                          title="Remove this camera source"
+                        >
+                          Remove
+                        </button>
+                      )}
                     </div>
                   </article>
                 );
@@ -817,6 +1094,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                     disabled={!timelineDuration}
                   >
                     {normalizeSourceLabel(source.label, index)}
+                    <kbd className="nle-hotkey-hint">{sources.findIndex(s => s.id === source.id) + 1}</kbd>
                   </button>
                 ))}
               </div>
@@ -836,7 +1114,11 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                   key={segment.id}
                   type="button"
                   className={`nle-switch-segment ${selectedSwitchId === segment.id ? "is-selected" : ""}`}
-                  style={{ left: `${segment.startPercent}%`, width: `${segment.widthPercent}%` }}
+                  style={{
+                    left: `${segment.startPercent}%`,
+                    width: `${segment.widthPercent}%`,
+                    background: `${getCameraColor(segment.cameraId, readySources.length ? readySources : sources)}cc`,
+                  }}
                   onClick={event => {
                     event.stopPropagation();
                     setSelectedSwitchId(segment.id);
@@ -850,6 +1132,12 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                 className="nle-playhead-marker-inline"
                 style={{ left: `${timelineDuration ? (playhead / timelineDuration) * 100 : 0}%` }}
               />
+            </div>
+
+            <div className="nle-timeline-markers">
+              <span>{formatDurationLabel(0)}</span>
+              {timelineDuration > 2 && <span>{formatDurationLabel(timelineDuration / 2)}</span>}
+              <span>{formatDurationLabel(timelineDuration || 0)}</span>
             </div>
 
             <div className="nle-switch-list">
@@ -903,13 +1191,32 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                 >
                   Cancel
                 </button>
+                {isExporting && (
+                  <button
+                    className="nle-btn danger"
+                    type="button"
+                    onClick={handleCancelExport}
+                  >
+                    Stop Export
+                  </button>
+                )}
                 <button
-                  className="nle-btn danger"
+                  className="nle-btn"
+                  type="button"
+                  onClick={handleServerExport}
+                  disabled={isExporting || readySources.length < 2 || !timelineDuration}
+                  title="Server render produces MP4 (15 credits)"
+                >
+                  {serverExportPending ? "Server Rendering..." : "Render MP4 on Server (15 cr)"}
+                </button>
+                <button
+                  className="nle-btn secondary"
                   type="button"
                   onClick={handleExport}
                   disabled={isExporting || readySources.length < 2 || !timelineDuration}
+                  title="Browser render runs in real-time and produces WebM"
                 >
-                  {isExporting ? "Rendering Browser Export..." : "Render Final Video In Browser"}
+                  {isExporting && !serverExportPending ? "Rendering..." : "Render WebM in Browser"}
                 </button>
               </div>
             </div>
@@ -920,6 +1227,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                   className="nle-export-progress-bar"
                   style={{ width: `${Math.round(exportProgress * 100)}%` }}
                 />
+                <span className="nle-export-progress-label">{Math.round(exportProgress * 100)}%</span>
               </div>
             ) : null}
 
@@ -927,13 +1235,17 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
               <div className="nle-export-result">
                 <strong>Multicam master ready</strong>
                 <span>
-                  The browser render is available as WebM. Download it or continue into the editor.
+                  {exportResult.isServerRender
+                    ? "Server render is available as MP4. Download it or continue into the editor."
+                    : "The browser render is available as WebM. Download it or continue into the editor."}
                 </span>
                 <div className="nle-export-actions">
                   <a
                     className="nle-btn secondary"
                     href={exportResult.url}
-                    download={exportResult.file.name}
+                    download={exportResult.file?.name || exportResult.file}
+                    target={exportResult.isServerRender ? "_blank" : undefined}
+                    rel={exportResult.isServerRender ? "noopener noreferrer" : undefined}
                   >
                     Download Master
                   </a>

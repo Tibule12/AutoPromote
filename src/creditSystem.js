@@ -1,9 +1,53 @@
 const { db } = require("./firebaseAdmin");
+const { normalizePlanId, resolvePlan } = require("./config/subscriptionPlans");
+const { getEffectiveTierSnapshot } = require("./services/billingService");
 
-// Deduct credits from a user
-// Returns { success: true, remaining: 10 } or { success: false, message: "..." }
-const deductCredits = async (userId, amount) => {
+/**
+ * Get the current credit breakdown for a user.
+ * Returns { monthlyRemaining, topUpBalance, totalAvailable, monthlyAllocation, monthKey }
+ */
+const getCreditBreakdown = async (userId) => {
+  const monthKey = new Date().toISOString().slice(0, 7);
+  const [userSnap, creditLedgerSnap] = await Promise.all([
+    db.collection("users").doc(userId).get(),
+    db.collection("credit_usage")
+      .where("userId", "==", userId)
+      .where("monthKey", "==", monthKey)
+      .get(),
+  ]);
+
+  const userData = userSnap.exists ? userSnap.data() : {};
+  const tier = normalizePlanId(userData.subscriptionTier || "free");
+  const plan = resolvePlan(tier);
+  const monthlyAllocation = plan.features.monthlyCredits || 0;
+
+  let monthlyUsed = 0;
+  creditLedgerSnap.forEach(doc => {
+    monthlyUsed += doc.data().amount || 0;
+  });
+
+  const monthlyRemaining = Math.max(0, monthlyAllocation - monthlyUsed);
+  const topUpBalance = userData.credits || 0; // purchased top-up credits
+
+  return {
+    monthlyRemaining,
+    monthlyUsed,
+    monthlyAllocation,
+    topUpBalance,
+    totalAvailable: monthlyRemaining + topUpBalance,
+    monthKey,
+    tier,
+  };
+};
+
+/**
+ * Deduct credits from a user.
+ * Priority: monthly allocation first, then top-up balance.
+ * Records a ledger entry for monthly tracking.
+ */
+const deductCredits = async (userId, amount, operation = "unknown") => {
   const userRef = db.collection("users").doc(userId);
+  const monthKey = new Date().toISOString().slice(0, 7);
 
   try {
     return await db.runTransaction(async transaction => {
@@ -13,18 +57,71 @@ const deductCredits = async (userId, amount) => {
       }
 
       const userData = userDoc.data();
-      const currentCredits = userData.credits || 0;
+      const tier = normalizePlanId(userData.subscriptionTier || "free");
+      const plan = resolvePlan(tier);
+      const monthlyAllocation = plan.features.monthlyCredits || 0;
 
-      if (currentCredits < amount) {
-        return { success: false, message: "Insufficient credits" };
-      }
+      // Count monthly usage from ledger (use transaction-safe query)
+      const ledgerQuery = db.collection("credit_usage")
+        .where("userId", "==", userId)
+        .where("monthKey", "==", monthKey);
+      const ledgerSnap = await transaction.get(ledgerQuery);
 
-      transaction.update(userRef, {
-        credits: currentCredits - amount,
-        last_credit_deduction: new Date().toISOString(),
+      let monthlyUsed = 0;
+      ledgerSnap.forEach(doc => {
+        monthlyUsed += doc.data().amount || 0;
       });
 
-      return { success: true, remaining: currentCredits - amount };
+      const monthlyRemaining = Math.max(0, monthlyAllocation - monthlyUsed);
+      const topUpBalance = userData.credits || 0;
+      const totalAvailable = monthlyRemaining + topUpBalance;
+
+      if (totalAvailable < amount) {
+        return {
+          success: false,
+          message: "Not enough credits",
+          required: amount,
+          remaining: totalAvailable,
+          monthlyRemaining,
+          topUpBalance,
+          tier,
+        };
+      }
+
+      // Deduct from monthly first, then top-up
+      let fromMonthly = Math.min(amount, monthlyRemaining);
+      let fromTopUp = amount - fromMonthly;
+
+      // Update top-up balance if used
+      if (fromTopUp > 0) {
+        transaction.update(userRef, {
+          credits: topUpBalance - fromTopUp,
+          last_credit_deduction: new Date().toISOString(),
+        });
+      }
+
+      // Record ledger entry for monthly tracking
+      const ledgerRef = db.collection("credit_usage").doc();
+      transaction.set(ledgerRef, {
+        userId,
+        amount,
+        fromMonthly,
+        fromTopUp,
+        operation,
+        monthKey,
+        createdAt: new Date().toISOString(),
+      });
+
+      const newTotal = totalAvailable - amount;
+
+      return {
+        success: true,
+        remaining: newTotal,
+        monthlyRemaining: monthlyRemaining - fromMonthly,
+        topUpBalance: topUpBalance - fromTopUp,
+        deducted: amount,
+        source: fromTopUp > 0 ? "monthly+topup" : "monthly",
+      };
     });
   } catch (error) {
     console.error("Credit deduction failed:", error);
@@ -32,4 +129,4 @@ const deductCredits = async (userId, amount) => {
   }
 };
 
-module.exports = { deductCredits };
+module.exports = { deductCredits, getCreditBreakdown };

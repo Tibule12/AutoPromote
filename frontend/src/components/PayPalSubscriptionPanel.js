@@ -566,6 +566,8 @@ const PayPalSubscriptionPanel = ({
       teamSeats: "👥",
       whiteLabel: "🎨",
       wolfHuntTasks: "🐺",
+      monthlyCredits: "🎟️",
+      multicam: "🎬",
     };
     return icons[feature] || "✨";
   };
@@ -587,6 +589,8 @@ const PayPalSubscriptionPanel = ({
       teamSeats: "Team seats",
       whiteLabel: "White-label",
       wolfHuntTasks: "Mission opportunities",
+      monthlyCredits: "Monthly AI credits",
+      multicam: "Multi-camera editing",
     };
 
     return (
@@ -600,12 +604,15 @@ const PayPalSubscriptionPanel = ({
 
   const renderFeatureValue = (key, value) => {
     if (typeof value === "boolean") return value ? "Included" : "Not included";
-    if (value === "unlimited") return "Unlimited";
+    if (value === "unlimited" || value === "Unlimited") return "Unlimited";
     if (key === "platformLimit" && typeof value === "number") {
       return `${value} platform${value === 1 ? "" : "s"}`;
     }
     if (key === "wolfHuntTasks" && typeof value === "number") {
       return `${value} mission actions`;
+    }
+    if (key === "monthlyCredits" && typeof value === "number") {
+      return `${value} credits/mo`;
     }
     if (typeof value === "number") {
       return `${value} ${key === "teamSeats" ? "seats" : "per month"}`;
