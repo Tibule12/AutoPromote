@@ -7,6 +7,7 @@ import { API_BASE_URL, API_ENDPOINTS } from "../config";
 import { getAuth } from "firebase/auth";
 import { storage } from "../firebaseClient";
 import { ref, uploadBytes, getDownloadURL, deleteObject, getStorage } from "firebase/storage";
+import MultiCamCombiner from "./MultiCamCombiner";
 import ViralClipStudio from "./ViralClipStudio"; // Import the new Studio component
 import { sanitizeUrl } from "../utils/security";
 
@@ -40,6 +41,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
 
   const [processedFile, setProcessedFile] = useState(null);
   const [clipSuggestions, setClipSuggestions] = useState(null); // Store detected clips or manual studio entry
+  const [showMultiCamCombiner, setShowMultiCamCombiner] = useState(false);
   const autoOpenedStudioRef = useRef(false);
 
   const getDownloadFileName = () => {
@@ -471,16 +473,18 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
     }
   };
 
-  const handleProcess = async () => {
+  const handleProcess = async (targetOverride = null, optionsOverride = null) => {
+    const effectiveOptions = optionsOverride || options;
+
     if (
-      !options.smartCrop &&
-      !options.silenceRemoval &&
-      !options.captions &&
-      !options.muteAudio &&
-      !options.addMusic &&
-      !options.removeWatermark &&
-      !options.analyzeClips &&
-      !options.addHook
+      !effectiveOptions.smartCrop &&
+      !effectiveOptions.silenceRemoval &&
+      !effectiveOptions.captions &&
+      !effectiveOptions.muteAudio &&
+      !effectiveOptions.addMusic &&
+      !effectiveOptions.removeWatermark &&
+      !effectiveOptions.analyzeClips &&
+      !effectiveOptions.addHook
     ) {
       setStatusMessage("Please select at least one AI feature.");
       return;
@@ -502,7 +506,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
       let tempUploadRef = null;
 
       // Use the CURRENT processed file (initially clean, then result of previous op)
-      const targetFile = processedFile || file;
+      const targetFile = targetOverride || processedFile || file;
 
       if (targetFile instanceof File || targetFile instanceof Blob) {
         setStatusMessage("Uploading video for processing...");
@@ -520,7 +524,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
       setStatusMessage("Processing Video (This may take a minute)...");
 
       // 3. Call Node.js Backend
-      console.log("Sending AI Request:", { fileUrl, options });
+      console.log("Sending AI Request:", { fileUrl, options: effectiveOptions });
 
       const response = await fetch(`${API_BASE_URL}/api/media/process`, {
         method: "POST",
@@ -530,7 +534,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
         },
         body: JSON.stringify({
           fileUrl: fileUrl,
-          options: options,
+          options: effectiveOptions,
         }),
       });
 
@@ -703,10 +707,15 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
     }
   };
 
-  const handleLaunchStudio = () => {
+  const handleLaunchStudio = durationOverride => {
+    const explicitDuration = Number(durationOverride || 0);
     const previewDuration = Number(videoRef.current?.duration || 0);
     const fallbackDuration =
-      Number.isFinite(previewDuration) && previewDuration > 0 ? previewDuration : 30;
+      Number.isFinite(explicitDuration) && explicitDuration > 0
+        ? explicitDuration
+        : Number.isFinite(previewDuration) && previewDuration > 0
+          ? previewDuration
+          : 30;
 
     setStatusMessage("");
     setClipSuggestions([
@@ -976,6 +985,56 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
     }
   };
 
+  const handleMultiCamComplete = async multiCamFile => {
+    const finalUrl =
+      multiCamFile?.url || (multiCamFile?.file ? URL.createObjectURL(multiCamFile.file) : "");
+
+    if (!finalUrl) {
+      setStatusMessage("Multi-camera render finished without a usable output URL.");
+      return;
+    }
+
+    const workflowAction = multiCamFile.workflowAction || "rendered-master";
+    const isBlobUrl = finalUrl.startsWith("blob:");
+    const isSigned =
+      finalUrl.includes("Signature") || finalUrl.includes("token=") || finalUrl.includes("Expires");
+    const urlWithCacheBuster = isSigned
+      ? finalUrl
+      : isBlobUrl
+        ? finalUrl
+        : finalUrl.includes("?")
+          ? `${finalUrl}&t=${Date.now()}`
+          : `${finalUrl}?t=${Date.now()}`;
+
+    autoOpenedStudioRef.current = true;
+    setProcessedFile(multiCamFile.file || multiCamFile);
+    setVideoSrc(urlWithCacheBuster);
+    setShowMultiCamCombiner(false);
+
+    if (workflowAction === "generate-clips") {
+      setStatusMessage("Preparing AI clip analysis from the preview master...");
+      await handleProcess(multiCamFile.file || multiCamFile, {
+        smartCrop: false,
+        silenceRemoval: false,
+        captions: false,
+        muteAudio: false,
+        addMusic: false,
+        removeWatermark: false,
+        analyzeClips: true,
+        addHook: false,
+      });
+      return;
+    }
+
+    if (workflowAction === "refine-full-video") {
+      setStatusMessage("Opening Viral Clip Studio with the preview master...");
+      handleLaunchStudio(multiCamFile.duration || 30);
+      return;
+    }
+
+    handleLaunchStudio(multiCamFile.duration || 30);
+  };
+
   if (clipSuggestions) {
     const studio = (
       <ViralClipStudio
@@ -998,6 +1057,23 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
     }
 
     return studio;
+  }
+
+  if (showMultiCamCombiner) {
+    const combiner = (
+      <MultiCamCombiner
+        primaryFile={processedFile || file}
+        onCancel={() => setShowMultiCamCombiner(false)}
+        onComplete={handleMultiCamComplete}
+        onStatusChange={setStatusMessage}
+      />
+    );
+
+    if (typeof document !== "undefined" && document.body) {
+      return createPortal(combiner, document.body);
+    }
+
+    return combiner;
   }
 
   return (
@@ -1234,6 +1310,17 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                 disabled={processing}
               >
                 {processing ? "Launching Studio..." : "🔥 Launch Viral Clip Studio"}
+              </button>
+              <button
+                className="legacy-toggle-btn multicam-launch-btn"
+                onClick={() => {
+                  setStatusMessage("");
+                  setShowMultiCamCombiner(true);
+                }}
+                disabled={processing}
+                type="button"
+              >
+                Combine Multi-Camera Angles First
               </button>
             </div>
           </div>
