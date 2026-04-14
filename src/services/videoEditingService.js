@@ -114,6 +114,32 @@ class VideoEditingService {
     }
   }
 
+  async startMulticamRenderJob(multicamRequest, userId) {
+    const jobId = uuidv4();
+    console.log(`[VideoEditing] Starting multicam render job ${jobId} for User ${userId}`);
+
+    try {
+      await db.collection("video_edits").doc(jobId).set({
+        jobId,
+        userId,
+        type: "multicam_render",
+        multicamRequest,
+        status: "queued",
+        progress: 0,
+        createdAt: new Date().toISOString(),
+      });
+
+      this.processMulticamJobBackground(jobId, multicamRequest, userId).catch(err => {
+        console.error(`[VideoEditing] Multicam Job ${jobId} Failed (uncaught):`, err);
+      });
+
+      return { jobId };
+    } catch (error) {
+      console.error("Failed to start multicam render job:", error);
+      throw new Error("Failed to queue multi-camera render job");
+    }
+  }
+
   /**
    * Background processor that wraps processVideo
    */
@@ -155,6 +181,43 @@ class VideoEditingService {
       console.log(`[VideoEditing] Job ${jobId} Completed Successfully.`);
     } catch (error) {
       console.error(`[VideoEditing] Job ${jobId} Failed:`, error.message);
+      await docRef.update({
+        status: "failed",
+        error: error.message,
+        progress: 0,
+        failedAt: new Date().toISOString(),
+      });
+    }
+  }
+
+  async processMulticamJobBackground(jobId, multicamRequest, userId) {
+    const docRef = db.collection("video_edits").doc(jobId);
+
+    try {
+      await docRef.update({
+        status: "processing",
+        progress: 10,
+        updatedAt: new Date().toISOString(),
+      });
+
+      const result = await this.renderMulticam(multicamRequest, userId, jobId);
+      if (result.status === "processing" && result.mode === "async") {
+        await docRef.update({
+          status: "processing_remote",
+          updatedAt: new Date().toISOString(),
+        });
+        return;
+      }
+
+      await docRef.update({
+        status: "completed",
+        progress: 100,
+        result,
+        outputUrl: result.url,
+        completedAt: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error(`[VideoEditing] Multicam Job ${jobId} Failed:`, error.message);
       await docRef.update({
         status: "failed",
         error: error.message,
@@ -622,6 +685,69 @@ class VideoEditingService {
       // Fallback or rethrow
       throw new Error("Transcription failed");
     }
+  }
+  async renderMulticam(multicamRequest, userId, jobId = null) {
+    console.log("[VideoEditing] Rendering multicam request", {
+      userId,
+      jobId,
+      sourceCount: Array.isArray(multicamRequest?.sources) ? multicamRequest.sources.length : 0,
+    });
+
+    const payload = {
+      sources: Array.isArray(multicamRequest?.sources)
+        ? multicamRequest.sources.map(source => ({
+            id: source.id,
+            label: source.label || "",
+            url: source.url,
+            offset_seconds: Number(source.offsetSeconds ?? source.offset_seconds ?? 0),
+          }))
+        : [],
+      segments: Array.isArray(multicamRequest?.segments)
+        ? multicamRequest.segments.map(segment => ({
+            camera_id: segment.cameraId || segment.camera_id,
+            timeline_start: Number(segment.timelineStart ?? segment.timeline_start ?? 0),
+            timeline_end: Number(segment.timelineEnd ?? segment.timeline_end ?? 0),
+            source_start: Number(segment.sourceStart ?? segment.source_start ?? 0),
+            source_end: Number(segment.sourceEnd ?? segment.source_end ?? 0),
+          }))
+        : [],
+      switches: Array.isArray(multicamRequest?.switches)
+        ? multicamRequest.switches.map(item => ({
+            camera_id: item.cameraId || item.camera_id,
+            start_time: Number(item.startTime ?? item.start_time ?? 0),
+          }))
+        : [],
+      auto_switch: !!multicamRequest?.autoSwitch,
+      audio_based_auto_switch: multicamRequest?.audioBasedAutoSwitch !== false,
+      auto_switch_interval: Number(multicamRequest?.autoSwitchInterval ?? 3),
+      auto_switch_aggressiveness: multicamRequest?.autoSwitchAggressiveness || "balanced",
+      primary_audio_camera_id: multicamRequest?.primaryAudioCameraId || null,
+      overlap_start: Number(multicamRequest?.overlapStart ?? 0),
+      overlap_duration: Number(multicamRequest?.overlapDuration ?? 0),
+      output_aspect_ratio: multicamRequest?.outputAspectRatio || "9:16",
+      job_id: jobId,
+      async_mode: !!jobId,
+    };
+
+    const response = await axios.post(`${MEDIA_WORKER_URL}/render-multicam`, payload, {
+      timeout: 1800000,
+    });
+
+    const result = response.data;
+    if (result.status === "processing" && result.mode === "async") {
+      return { status: "processing", mode: "async", jobId: result.job_id };
+    }
+
+    if (result.output_url && result.output_url.startsWith("http")) {
+      return {
+        success: true,
+        url: result.output_url,
+        duration: result.duration || 0,
+        message: "Multi-camera render completed",
+      };
+    }
+
+    throw new Error("Worker failed to return a multi-camera output URL");
   }
 }
 

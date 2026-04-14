@@ -108,6 +108,21 @@ except ImportError:
 # Logging setup
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("MediaWorker")
+
+
+def env_flag(name, default=False):
+    raw_value = str(os.getenv(name, "true" if default else "false")).strip().lower()
+    return raw_value in {"1", "true", "yes", "on"}
+
+
+IS_PRODUCTION_ENV = str(os.getenv("NODE_ENV") or os.getenv("ENVIRONMENT") or "").strip().lower() == "production"
+LOCAL_MEDIA_OUTPUT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../tmp/worker_outputs"))
+LOCAL_MEDIA_OUTPUT_BASE_URL = str(os.getenv("LOCAL_MEDIA_OUTPUT_BASE_URL", "http://127.0.0.1:8000")).rstrip("/")
+ENABLE_LOCAL_MEDIA_OUTPUT_FALLBACK = env_flag(
+    "ENABLE_LOCAL_MEDIA_OUTPUT_FALLBACK",
+    default=not IS_PRODUCTION_ENV,
+)
+
 FIREBASE_STATUS_UPDATES_ENABLED = bool(firebase_admin._apps)
 MEDIA_WORKER_TASK_SECRET = os.getenv("MEDIA_WORKER_TASK_SECRET", "")
 
@@ -1124,6 +1139,28 @@ def upload_file_to_firebase(local_path, destination_path=None):
     """
     Uploads file to Firebase (Signed URL + Fallback).
     """
+    def local_output_fallback():
+        if not ENABLE_LOCAL_MEDIA_OUTPUT_FALLBACK:
+            return None
+        if not local_path or not os.path.exists(local_path):
+            return None
+
+        try:
+            os.makedirs(LOCAL_MEDIA_OUTPUT_DIR, exist_ok=True)
+            requested_name = os.path.basename(destination_path or local_path)
+            safe_name = re.sub(r"[^A-Za-z0-9._-]+", "-", requested_name).strip("-.")
+            stem, extension = os.path.splitext(safe_name or os.path.basename(local_path))
+            final_extension = extension or os.path.splitext(local_path)[1] or ".bin"
+            published_name = f"{stem or 'media-output'}-{uuid.uuid4().hex[:8]}{final_extension}"
+            published_path = os.path.join(LOCAL_MEDIA_OUTPUT_DIR, published_name)
+            shutil.copy2(local_path, published_path)
+            fallback_url = f"{LOCAL_MEDIA_OUTPUT_BASE_URL}/local-output/{published_name}"
+            logger.warning(f"Using local media output fallback: {fallback_url}")
+            return fallback_url
+        except Exception as fallback_error:
+            logger.error(f"Local media output fallback failed: {fallback_error}")
+            return None
+
     try:
         bucket = storage.bucket()
         if not destination_path:
@@ -1157,7 +1194,19 @@ def upload_file_to_firebase(local_path, destination_path=None):
 
     except Exception as e:
         logger.error(f"Firebase Upload CRITICAL: {e}")
+        return local_output_fallback()
+
+
+def resolve_local_output_path(file_name):
+    safe_name = os.path.basename(str(file_name or "")).strip()
+    if not safe_name or safe_name in {".", ".."}:
         return None
+    resolved_path = os.path.abspath(os.path.join(LOCAL_MEDIA_OUTPUT_DIR, safe_name))
+    if not resolved_path.startswith(os.path.abspath(LOCAL_MEDIA_OUTPUT_DIR) + os.sep):
+        return None
+    if not os.path.exists(resolved_path):
+        return None
+    return resolved_path
 
 def encode_file_as_data_url(local_path):
     try:
@@ -1456,6 +1505,20 @@ def reset_worker():
 @app.get("/")
 def read_root():
     return {"status": "online", "worker_state": current_job_info, "service": "python_media_worker", "phase": 2, "whisper_ready": whisper is not None}
+
+
+@app.get("/local-output/{file_name}")
+def get_local_output(file_name: str):
+    output_path = resolve_local_output_path(file_name)
+    if not output_path:
+        raise HTTPException(status_code=404, detail="Local output not found")
+
+    media_type, _ = mimetypes.guess_type(output_path)
+    return FileResponse(
+        output_path,
+        media_type=media_type or "application/octet-stream",
+        filename=os.path.basename(output_path),
+    )
 
 
 # --- Phase 1: Smart Cropping (OpenCV + FFmpeg) ---
@@ -3450,6 +3513,876 @@ async def render_montage(request: RenderMontageRequest):
         logger.error(f"Montage Error: {e}")
         try: os.remove(input_path) 
         except: pass
+
+class MultiCamSource(BaseModel):
+    id: str
+    url: str
+    label: str = ""
+    offset_seconds: float = 0.0
+
+class MultiCamSwitch(BaseModel):
+    camera_id: str
+    start_time: float = 0.0
+
+class MultiCamSegment(BaseModel):
+    camera_id: str
+    timeline_start: float = 0.0
+    timeline_end: float = 0.0
+    source_start: float = 0.0
+    source_end: float = 0.0
+
+class RenderMultiCamRequest(BaseModel):
+    sources: List[MultiCamSource]
+    segments: Optional[List[MultiCamSegment]] = None
+    switches: Optional[List[MultiCamSwitch]] = None
+    auto_switch: bool = False
+    audio_based_auto_switch: bool = True
+    auto_switch_interval: float = 3.0
+    auto_switch_aggressiveness: str = "balanced"
+    primary_audio_camera_id: Optional[str] = None
+    overlap_start: float = 0.0
+    overlap_duration: float = 0.0
+    output_aspect_ratio: str = "9:16"
+    job_id: Optional[str] = None
+    async_mode: bool = False
+
+multicam_face_detector = None
+
+def get_multicam_face_detector():
+    global multicam_face_detector
+    if multicam_face_detector is not None:
+        return multicam_face_detector
+
+    cascade_path = os.path.join(cv2.data.haarcascades, "haarcascade_frontalface_default.xml")
+    if not os.path.exists(cascade_path):
+        multicam_face_detector = None
+        return None
+
+    detector = cv2.CascadeClassifier(cascade_path)
+    multicam_face_detector = detector if not detector.empty() else None
+    return multicam_face_detector
+
+def normalize_multicam_aggressiveness(value):
+    normalized = str(value or "balanced").strip().lower()
+    if normalized == "low":
+        return "steady"
+    if normalized == "high":
+        return "dynamic"
+    if normalized in {"steady", "balanced", "dynamic"}:
+        return normalized
+    return "balanced"
+
+def get_multicam_switch_tuning(aggressiveness, interval_seconds):
+    normalized = normalize_multicam_aggressiveness(aggressiveness)
+    safe_interval = clamp_float(interval_seconds, 1.0, 10.0)
+
+    tuning = {
+        "steady": {
+            "audio_bonus": 0.26,
+            "continuity_bonus": 0.13,
+            "primary_bonus": 0.07,
+            "switch_threshold": 0.17,
+            "low_confidence_threshold": 0.14,
+            "low_confidence_hold": max(1.8, safe_interval * 1.15),
+            "low_confidence_proximity": 0.04,
+            "min_hold_factor": 1.2,
+            "min_hold_floor": 1.8,
+            "min_hold_cap": 4.4,
+            "placeholder_penalty_weight": 0.62,
+            "placeholder_source_penalty_weight": 0.38,
+        },
+        "dynamic": {
+            "audio_bonus": 0.31,
+            "continuity_bonus": 0.03,
+            "primary_bonus": 0.03,
+            "switch_threshold": 0.05,
+            "low_confidence_threshold": 0.22,
+            "low_confidence_hold": max(1.0, safe_interval * 0.62),
+            "low_confidence_proximity": 0.12,
+            "min_hold_factor": 0.62,
+            "min_hold_floor": 0.95,
+            "min_hold_cap": 2.6,
+            "placeholder_penalty_weight": 0.52,
+            "placeholder_source_penalty_weight": 0.26,
+        },
+        "balanced": {
+            "audio_bonus": 0.28,
+            "continuity_bonus": 0.07,
+            "primary_bonus": 0.05,
+            "switch_threshold": 0.12,
+            "low_confidence_threshold": 0.18,
+            "low_confidence_hold": max(1.5, safe_interval * 0.85),
+            "low_confidence_proximity": 0.08,
+            "min_hold_factor": 0.9,
+            "min_hold_floor": 1.25,
+            "min_hold_cap": 3.5,
+            "placeholder_penalty_weight": 0.58,
+            "placeholder_source_penalty_weight": 0.34,
+        },
+    }
+
+    return tuning[normalized]
+
+def estimate_multicam_placeholder_penalty(frame):
+    if frame is None or getattr(frame, "size", 0) == 0:
+        return 0.0
+
+    try:
+        preview = cv2.resize(frame, (96, 54), interpolation=cv2.INTER_AREA)
+        preview_float = preview.astype(np.float32)
+        hsv = cv2.cvtColor(preview, cv2.COLOR_BGR2HSV)
+
+        column_texture = np.mean(np.std(preview_float, axis=0))
+        column_means = np.mean(preview_float, axis=0)
+        column_deltas = np.linalg.norm(np.diff(column_means, axis=0), axis=1)
+        adjacent_delta = float(np.percentile(column_deltas, 88)) if column_deltas.size else 0.0
+        low_texture_ratio = float(np.mean(np.std(preview_float, axis=0) < 14.0))
+        saturation_mean = float(np.mean(hsv[:, :, 1]))
+        gray = cv2.cvtColor(preview, cv2.COLOR_BGR2GRAY)
+        vertical_edges = float(np.mean(np.abs(cv2.Sobel(gray, cv2.CV_32F, 1, 0, ksize=3))))
+        horizontal_edges = float(np.mean(np.abs(cv2.Sobel(gray, cv2.CV_32F, 0, 1, ksize=3))))
+        vertical_dominance = vertical_edges / max(1.0, horizontal_edges)
+
+        saturated_pixels = hsv[:, :, 1] > 92
+        hue_bins = 0
+        if np.any(saturated_pixels):
+            hue_bins = len(np.unique((hsv[:, :, 0][saturated_pixels] / 15).astype(np.int32)))
+
+        if saturation_mean > 140.0 and vertical_dominance > 1.8 and adjacent_delta > 20.0:
+            return round(clamp_float(0.46 + ((vertical_dominance - 1.8) * 0.08), 0.0, 0.72), 4)
+
+        if saturation_mean < 65.0 or low_texture_ratio < 0.58 or hue_bins < 4:
+            return 0.0
+
+        stripe_score = clamp_float(((16.0 - column_texture) / 16.0), 0.0, 1.0)
+        band_transition_score = clamp_float((adjacent_delta - 18.0) / 44.0, 0.0, 1.0)
+        palette_score = 1.0 if 5 <= hue_bins <= 10 else 0.35
+        vertical_pattern_score = clamp_float((vertical_dominance - 1.4) / 1.3, 0.0, 1.0)
+
+        return round(
+            clamp_float(
+                (stripe_score * 0.28)
+                + (band_transition_score * 0.16)
+                + (low_texture_ratio * 0.14)
+                + (palette_score * 0.12)
+                + (vertical_pattern_score * 0.3),
+                0.0,
+                0.72,
+            ),
+            4,
+        )
+    except Exception:
+        return 0.0
+
+def analyze_multicam_visual_windows(video_path, source_offset, overlap_start, overlap_duration, interval_seconds):
+    safe_duration = max(0.0, float(overlap_duration or 0.0))
+    if safe_duration <= 0.0:
+        return []
+
+    capture = cv2.VideoCapture(video_path)
+    if not capture.isOpened():
+        return []
+
+    detector = get_multicam_face_detector()
+    windows = []
+    previous_gray = None
+    current_start = 0.0
+    step = clamp_float(interval_seconds, 0.75, 10.0)
+
+    try:
+        while current_start < safe_duration - 0.001:
+            current_end = min(safe_duration, current_start + step)
+            midpoint = current_start + ((current_end - current_start) / 2.0)
+            relative_time = float(overlap_start or 0.0) + midpoint - float(source_offset or 0.0)
+            capture.set(cv2.CAP_PROP_POS_MSEC, max(0.0, relative_time) * 1000.0)
+            success, frame = capture.read()
+
+            face_score = 0.0
+            motion_score = 0.0
+            face_count = 0
+            placeholder_penalty = 0.0
+            if success and frame is not None:
+                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                placeholder_penalty = estimate_multicam_placeholder_penalty(frame)
+                if detector is not None:
+                    min_face = max(24, min(gray.shape[0], gray.shape[1]) // 7)
+                    faces = detector.detectMultiScale(
+                        gray,
+                        scaleFactor=1.1,
+                        minNeighbors=4,
+                        minSize=(min_face, min_face),
+                    )
+                    face_count = len(faces)
+                    if face_count:
+                        frame_area = float(gray.shape[0] * gray.shape[1]) or 1.0
+                        face_area = sum(w * h for (_, _, w, h) in faces)
+                        face_score = min(1.0, (face_count * 0.22) + ((face_area / frame_area) * 8.0))
+
+                if previous_gray is not None and previous_gray.shape == gray.shape:
+                    motion_delta = cv2.absdiff(gray, previous_gray)
+                    motion_score = min(1.0, float(np.mean(motion_delta)) / 28.0)
+                previous_gray = gray
+
+            windows.append(
+                {
+                    "start_time": round(current_start, 3),
+                    "end_time": round(current_end, 3),
+                    "sample_time": round(midpoint, 3),
+                    "face_score": round(face_score, 4),
+                    "motion_score": round(motion_score, 4),
+                    "placeholder_penalty": placeholder_penalty,
+                    "face_count": face_count,
+                }
+            )
+            current_start = current_end
+    finally:
+        capture.release()
+
+    return windows
+
+def dedupe_multicam_switches(switches):
+    ordered = sorted(switches, key=lambda item: float(item.get("start_time", 0.0)))
+    deduped = []
+    for item in ordered:
+        if deduped and abs(float(deduped[-1]["start_time"]) - float(item["start_time"])) < 0.01:
+            deduped[-1] = item
+            continue
+        if deduped and deduped[-1].get("camera_id") == item.get("camera_id"):
+            continue
+        deduped.append(item)
+    return deduped
+
+def smooth_multicam_switches(switches, overlap_duration, interval_seconds, aggressiveness="balanced"):
+    safe_duration = max(0.0, float(overlap_duration or 0.0))
+    if len(switches) < 2 or safe_duration <= 0.0:
+        return switches
+
+    tuning = get_multicam_switch_tuning(aggressiveness, interval_seconds)
+    min_hold_seconds = min(
+        max(clamp_float(interval_seconds, 1.0, 10.0) * tuning["min_hold_factor"], tuning["min_hold_floor"]),
+        tuning["min_hold_cap"],
+    )
+    current = dedupe_multicam_switches(list(switches))
+    changed = True
+
+    while changed and len(current) > 1:
+        changed = False
+        for index in range(1, len(current)):
+            segment_start = float(current[index]["start_time"])
+            segment_end = (
+                float(current[index + 1]["start_time"])
+                if index + 1 < len(current)
+                else safe_duration
+            )
+            segment_duration = max(0.0, segment_end - segment_start)
+            if segment_duration >= min_hold_seconds:
+                continue
+
+            previous_item = current[index - 1] if index - 1 >= 0 else None
+            next_item = current[index + 1] if index + 1 < len(current) else None
+            current_score = float(current[index].get("score", 0.0))
+            previous_score = float(previous_item.get("score", 0.0)) if previous_item else -1.0
+            next_score = float(next_item.get("score", 0.0)) if next_item else -1.0
+
+            if next_item and next_score > previous_score + 0.03:
+                next_item["start_time"] = current[index]["start_time"]
+                current.pop(index)
+            elif previous_item:
+                current[index]["camera_id"] = previous_item["camera_id"]
+                current[index]["score"] = max(current_score, previous_score)
+            else:
+                current.pop(index)
+
+            current = dedupe_multicam_switches(current)
+            changed = True
+            break
+
+    return current
+
+def is_time_in_silence(target_time, intervals):
+    safe_time = float(target_time or 0.0)
+    for start_time, end_time in intervals or []:
+        if safe_time >= float(start_time) and safe_time < float(end_time):
+            return True
+    return False
+
+def normalize_multicam_switches(request, prepared_sources, overlap_duration):
+    safe_duration = max(0.0, float(overlap_duration or 0.0))
+    source_ids = [source["id"] for source in prepared_sources]
+    source_map = {source["id"]: source for source in prepared_sources}
+    default_camera_id = request.primary_audio_camera_id or (source_ids[0] if source_ids else None)
+
+    if not default_camera_id:
+        return []
+
+    interval = clamp_float(request.auto_switch_interval, 1.0, 10.0)
+    tuning = get_multicam_switch_tuning(request.auto_switch_aggressiveness, interval)
+    switches = []
+
+    if request.auto_switch:
+        current_time = 0.0
+        current_camera_id = default_camera_id
+        source_cursor = 0
+        last_switch_time = 0.0
+
+        while current_time < safe_duration - 0.01:
+            if any(source.get("window_scores") for source in prepared_sources):
+                ranked_sources = []
+                for source in prepared_sources:
+                    relative_time = float(request.overlap_start or 0.0) + current_time - source["offset_seconds"]
+                    if relative_time < 0 or relative_time >= source["duration"]:
+                        continue
+
+                    window_scores = source.get("window_scores") or []
+                    slot_index = min(
+                        max(0, int(current_time / interval)),
+                        max(0, len(window_scores) - 1),
+                    )
+                    slot = window_scores[slot_index] if window_scores else {}
+                    raw_visual_score = (float(slot.get("face_score", 0.0)) * 0.65) + (
+                        float(slot.get("motion_score", 0.0)) * 0.35
+                    )
+                    placeholder_penalty = float(slot.get("placeholder_penalty", 0.0))
+                    source_placeholder_penalty = float(source.get("placeholder_score", 0.0))
+                    visual_score = max(
+                        0.0,
+                        raw_visual_score
+                        - (placeholder_penalty * tuning["placeholder_penalty_weight"])
+                        - (source_placeholder_penalty * tuning["placeholder_source_penalty_weight"]),
+                    )
+                    speaking = source["has_audio"] and not is_time_in_silence(
+                        relative_time, source.get("silence_intervals")
+                    )
+                    audio_bonus = tuning["audio_bonus"] if request.audio_based_auto_switch and speaking else 0.0
+                    continuity_bonus = tuning["continuity_bonus"] if source["id"] == current_camera_id else 0.0
+                    primary_bonus = tuning["primary_bonus"] if source["id"] == request.primary_audio_camera_id else 0.0
+
+                    ranked_sources.append(
+                        {
+                            "camera_id": source["id"],
+                            "score": visual_score + audio_bonus + continuity_bonus + primary_bonus,
+                            "visual_score": visual_score,
+                            "raw_visual_score": raw_visual_score,
+                            "placeholder_penalty": placeholder_penalty,
+                            "source_placeholder_penalty": source_placeholder_penalty,
+                            "speaking": speaking,
+                        }
+                    )
+
+                ranked_sources.sort(key=lambda item: item["score"], reverse=True)
+                best_choice = ranked_sources[0]["camera_id"] if ranked_sources else current_camera_id
+                current_choice = next(
+                    (item for item in ranked_sources if item["camera_id"] == current_camera_id),
+                    None,
+                )
+                low_confidence_mode = bool(ranked_sources) and max(
+                    item["visual_score"] + (0.1 if item["speaking"] else 0.0) for item in ranked_sources
+                ) < tuning["low_confidence_threshold"]
+                time_since_last_switch = current_time - float(last_switch_time or 0.0)
+                alternate_choice = next(
+                    (item for item in ranked_sources if item["camera_id"] != current_camera_id),
+                    None,
+                )
+
+                if current_choice and ranked_sources:
+                    score_gap = ranked_sources[0]["score"] - current_choice["score"]
+                    alternate_is_placeholder_regression = bool(alternate_choice and current_choice) and (
+                        alternate_choice["source_placeholder_penalty"]
+                        > current_choice["source_placeholder_penalty"] + 0.18
+                    )
+                    if (
+                        low_confidence_mode
+                        and alternate_choice
+                        and not alternate_is_placeholder_regression
+                        and time_since_last_switch >= tuning["low_confidence_hold"]
+                        and not current_choice["speaking"]
+                        and alternate_choice["visual_score"] >= current_choice["visual_score"] - tuning["low_confidence_proximity"]
+                    ):
+                        next_camera_id = alternate_choice["camera_id"]
+                    else:
+                        next_camera_id = current_camera_id if score_gap < tuning["switch_threshold"] else best_choice
+                else:
+                    next_camera_id = best_choice
+                winning_score = float(ranked_sources[0]["score"]) if ranked_sources else 0.0
+            else:
+                next_camera_id = source_ids[source_cursor % len(source_ids)]
+                source_cursor += 1
+                winning_score = 0.0
+
+            if not switches or switches[-1]["camera_id"] != next_camera_id:
+                switches.append({
+                    "camera_id": next_camera_id,
+                    "start_time": round(current_time, 3),
+                    "score": round(winning_score, 4),
+                })
+                last_switch_time = current_time
+            current_camera_id = next_camera_id
+            current_time += interval
+    else:
+        raw_switches = request.switches or []
+        for switch in raw_switches:
+            if switch.camera_id not in source_map:
+                continue
+            switches.append({
+                "camera_id": switch.camera_id,
+                "start_time": round(clamp_float(switch.start_time, 0.0, safe_duration), 3),
+            })
+        switches.sort(key=lambda item: item["start_time"])
+
+    if not switches or switches[0]["start_time"] > 0.001:
+        switches.insert(0, {"camera_id": default_camera_id, "start_time": 0.0})
+
+    deduped = dedupe_multicam_switches(switches)
+    if request.auto_switch:
+        deduped = smooth_multicam_switches(
+            deduped,
+            safe_duration,
+            interval,
+            request.auto_switch_aggressiveness,
+        )
+
+    return [
+        {"camera_id": item["camera_id"], "start_time": round(float(item["start_time"]), 3)}
+        for item in deduped
+    ]
+
+def build_multicam_segments_from_switches(request, prepared_sources, overlap_start, overlap_duration):
+    switches = normalize_multicam_switches(request, prepared_sources, overlap_duration)
+    if not switches:
+        return []
+
+    source_map = {source["id"]: source for source in prepared_sources}
+    segments = []
+    for index, switch in enumerate(switches):
+        next_switch = switches[index + 1] if index + 1 < len(switches) else None
+        timeline_start = float(switch["start_time"])
+        timeline_end = float(next_switch["start_time"]) if next_switch else float(overlap_duration)
+        segment_duration = max(0.0, timeline_end - timeline_start)
+        if segment_duration <= 0.02:
+            continue
+
+        source = source_map.get(switch["camera_id"])
+        if not source:
+            continue
+
+        source_start = float(overlap_start) + timeline_start - float(source["offset_seconds"])
+        source_end = source_start + segment_duration
+        if source_start < -0.01 or source_end > float(source["duration"]) + 0.01:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Switch segment exceeds source bounds for {source['label']}",
+            )
+
+        segments.append(
+            {
+                "camera_id": source["id"],
+                "timeline_start": round(timeline_start, 3),
+                "timeline_end": round(timeline_end, 3),
+                "source_start": round(max(0.0, source_start), 3),
+                "source_end": round(min(float(source["duration"]), source_end), 3),
+            }
+        )
+
+    return segments
+
+def normalize_multicam_segments(request, prepared_sources, overlap_start, overlap_duration):
+    source_map = {source["id"]: source for source in prepared_sources}
+    safe_duration = max(0.0, float(overlap_duration or 0.0))
+    raw_segments = request.segments or []
+
+    if not raw_segments:
+        return build_multicam_segments_from_switches(
+            request,
+            prepared_sources,
+            overlap_start,
+            overlap_duration,
+        )
+
+    ordered_segments = sorted(raw_segments, key=lambda item: float(item.timeline_start or 0.0))
+    normalized_segments = []
+    timeline_cursor = 0.0
+
+    for segment in ordered_segments:
+        source = source_map.get(segment.camera_id)
+        if not source:
+            continue
+
+        requested_duration = max(
+            0.0,
+            float(segment.timeline_end or 0.0) - float(segment.timeline_start or 0.0),
+        )
+        if requested_duration <= 0.02:
+            continue
+
+        requested_source_duration = max(
+            0.0,
+            float(segment.source_end or 0.0) - float(segment.source_start or 0.0),
+        )
+        segment_duration = requested_duration if requested_source_duration <= 0.0 else min(requested_duration, requested_source_duration)
+        if segment_duration <= 0.02:
+            continue
+
+        source_start = clamp_float(
+            float(segment.source_start or 0.0),
+            0.0,
+            max(0.0, float(source["duration"]) - segment_duration),
+        )
+        source_end = source_start + segment_duration
+        timeline_start = timeline_cursor
+        timeline_end = min(safe_duration, timeline_start + segment_duration) if safe_duration > 0.0 else timeline_start + segment_duration
+        actual_duration = timeline_end - timeline_start
+        if actual_duration <= 0.02:
+            continue
+
+        normalized_segments.append(
+            {
+                "camera_id": source["id"],
+                "timeline_start": round(timeline_start, 3),
+                "timeline_end": round(timeline_end, 3),
+                "source_start": round(source_start, 3),
+                "source_end": round(source_start + actual_duration, 3),
+            }
+        )
+        timeline_cursor = timeline_end
+
+        if safe_duration > 0.0 and timeline_cursor >= safe_duration - 0.001:
+            break
+
+    return normalized_segments
+
+def build_multicam_switches_from_segments(segments):
+    switches = []
+    last_camera_id = None
+    for segment in segments or []:
+        camera_id = segment.get("camera_id")
+        if not camera_id or camera_id == last_camera_id:
+            continue
+        switches.append(
+            {
+                "camera_id": camera_id,
+                "start_time": round(float(segment.get("timeline_start", 0.0)), 3),
+            }
+        )
+        last_camera_id = camera_id
+    return switches
+
+@app.post("/render-multicam")
+async def render_multicam(request: RenderMultiCamRequest, background_tasks: BackgroundTasks):
+    if request.async_mode:
+        job_id = request.job_id or str(uuid.uuid4())
+        logger.info(f"Queuing ASYNC multicam render job {job_id}")
+        background_tasks.add_task(render_multicam_impl, request, job_id)
+        return {"status": "processing", "job_id": job_id, "mode": "async"}
+
+    return await render_multicam_impl(request)
+
+async def render_multicam_impl(request: RenderMultiCamRequest, provided_job_id: str = None):
+    if len(request.sources or []) < 2:
+        raise HTTPException(status_code=400, detail="At least two camera sources are required")
+
+    job_id = provided_job_id or str(uuid.uuid4())
+    shared_tmp_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../tmp"))
+    if not os.path.exists(shared_tmp_dir):
+        os.makedirs(shared_tmp_dir)
+
+    concat_list_path = os.path.join(shared_tmp_dir, f"{job_id}_multicam_concat.txt")
+    output_path = os.path.join(shared_tmp_dir, f"{job_id}_multicam.mp4")
+    video_only_output_path = os.path.join(shared_tmp_dir, f"{job_id}_multicam_video.mp4")
+    primary_audio_output_path = os.path.join(shared_tmp_dir, f"{job_id}_multicam_audio.m4a")
+    prepared_sources = []
+    segment_paths = []
+
+    if request.async_mode:
+        try:
+            update_firestore_job(job_id, {"status": "processing", "progress": 0, "detail": "Preparing sources"})
+        except Exception:
+            pass
+
+    try:
+        for index, source in enumerate(request.sources):
+            local_path = os.path.join(shared_tmp_dir, f"{job_id}_multicam_src_{index}.mp4")
+            await materialize_video_input(source.url, local_path)
+            source_duration = get_media_duration(local_path)
+            if source_duration <= 0.1:
+                raise HTTPException(status_code=400, detail=f"Source {source.label or source.id} has no readable duration")
+
+            prepared_sources.append(
+                {
+                    "id": source.id,
+                    "label": source.label or source.id,
+                    "path": local_path,
+                    "duration": source_duration,
+                    "offset_seconds": float(source.offset_seconds or 0.0),
+                    "has_audio": has_audio_stream(local_path),
+                    "silence_intervals": [],
+                }
+            )
+
+        if request.async_mode:
+            update_firestore_job(job_id, {"progress": 20, "detail": "Sources ready"})
+
+        calculated_overlap_start = max(source["offset_seconds"] for source in prepared_sources)
+        calculated_overlap_end = min(
+            source["offset_seconds"] + source["duration"] for source in prepared_sources
+        )
+
+        overlap_start = max(calculated_overlap_start, float(request.overlap_start or calculated_overlap_start))
+        overlap_end = calculated_overlap_end
+        if float(request.overlap_duration or 0.0) > 0:
+            overlap_end = min(overlap_end, overlap_start + float(request.overlap_duration))
+
+        overlap_duration = max(0.0, overlap_end - overlap_start)
+        if overlap_duration <= 0.25:
+            raise HTTPException(status_code=400, detail="The selected camera offsets do not produce a usable overlap")
+
+        if request.auto_switch:
+            if request.async_mode:
+                update_firestore_job(job_id, {"progress": 35, "detail": "Scoring faces, motion, and speech"})
+            for source in prepared_sources:
+                source["window_scores"] = analyze_multicam_visual_windows(
+                    source["path"],
+                    source["offset_seconds"],
+                    overlap_start,
+                    overlap_duration,
+                    request.auto_switch_interval,
+                )
+                placeholder_penalties = [
+                    float(slot.get("placeholder_penalty", 0.0))
+                    for slot in source["window_scores"]
+                    if slot is not None
+                ]
+                source["placeholder_score"] = round(
+                    float(np.median(placeholder_penalties)) if placeholder_penalties else 0.0,
+                    4,
+                )
+                if source["has_audio"]:
+                    source["silence_intervals"] = await detect_silence_intervals(
+                        source["path"], threshold="-32dB", duration=0.45
+                    )
+
+        segments = normalize_multicam_segments(request, prepared_sources, overlap_start, overlap_duration)
+        if not segments:
+            raise HTTPException(status_code=400, detail="No valid multicam segment plan could be generated")
+        switches = build_multicam_switches_from_segments(segments)
+        master_duration = float(segments[-1]["timeline_end"])
+
+        normalize_vf = "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2"
+        if str(request.output_aspect_ratio or "9:16") != "9:16":
+            normalize_vf = "scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2"
+
+        if request.async_mode:
+            update_firestore_job(job_id, {"progress": 55, "detail": "Rendering switched segments"})
+
+        source_map = {source["id"]: source for source in prepared_sources}
+        for index, segment in enumerate(segments):
+            segment_start = float(segment["timeline_start"])
+            segment_end = float(segment["timeline_end"])
+            segment_duration = max(0.0, segment_end - segment_start)
+            if segment_duration <= 0.02:
+                continue
+
+            source = source_map.get(segment["camera_id"]) or prepared_sources[0]
+            trim_start = float(segment["source_start"])
+            trim_end = float(segment["source_end"])
+
+            if trim_start < 0 or trim_end > source["duration"] + 0.01:
+                raise HTTPException(status_code=400, detail=f"Segment exceeds source bounds for {source['label']}")
+
+            segment_output_path = os.path.join(shared_tmp_dir, f"{job_id}_multicam_segment_{index}.mp4")
+            await run_subprocess_async(
+                [
+                    "ffmpeg",
+                    "-ss",
+                    str(trim_start),
+                    "-i",
+                    source["path"],
+                    "-t",
+                    str(segment_duration),
+                    "-vf",
+                    normalize_vf,
+                    "-map",
+                    "0:v:0",
+                    "-c:v",
+                    "libx264",
+                    "-preset",
+                    "ultrafast",
+                    "-an",
+                    "-pix_fmt",
+                    "yuv420p",
+                    "-movflags",
+                    "+faststart",
+                    "-y",
+                    segment_output_path,
+                ],
+                check=True,
+                job_context=job_id,
+            )
+            segment_paths.append(segment_output_path)
+
+        if not segment_paths:
+            raise HTTPException(status_code=400, detail="No multicam segments were produced")
+
+        if request.async_mode:
+            update_firestore_job(job_id, {"progress": 82, "detail": "Concatenating master"})
+
+        with open(concat_list_path, "w", encoding="utf-8") as concat_file:
+            for segment_path in segment_paths:
+                concat_file.write(f"file '{segment_path}'\n")
+
+        try:
+            await run_subprocess_async(
+                [
+                    "ffmpeg",
+                    "-f",
+                    "concat",
+                    "-safe",
+                    "0",
+                    "-i",
+                    concat_list_path,
+                    "-c",
+                    "copy",
+                    "-y",
+                    video_only_output_path,
+                ],
+                check=True,
+                job_context=job_id,
+            )
+        except Exception:
+            await run_subprocess_async(
+                [
+                    "ffmpeg",
+                    "-f",
+                    "concat",
+                    "-safe",
+                    "0",
+                    "-i",
+                    concat_list_path,
+                    "-c:v",
+                    "libx264",
+                    "-an",
+                    "-pix_fmt",
+                    "yuv420p",
+                    "-movflags",
+                    "+faststart",
+                    "-y",
+                    video_only_output_path,
+                ],
+                check=True,
+                job_context=job_id,
+            )
+
+        audio_source = source_map.get(request.primary_audio_camera_id or "")
+        if not audio_source or not audio_source.get("has_audio"):
+            audio_source = next((source for source in prepared_sources if source.get("has_audio")), None)
+
+        if audio_source and audio_source.get("has_audio"):
+            audio_anchor = overlap_start - float(audio_source["offset_seconds"])
+            primary_segments = [segment for segment in segments if segment["camera_id"] == audio_source["id"]]
+            if primary_segments:
+                inferred_anchor = float(primary_segments[0]["source_start"]) - float(primary_segments[0]["timeline_start"])
+                if inferred_anchor >= -0.01:
+                    audio_anchor = inferred_anchor
+            audio_trim_start = max(0.0, audio_anchor)
+            await run_subprocess_async(
+                [
+                    "ffmpeg",
+                    "-ss",
+                    str(audio_trim_start),
+                    "-i",
+                    audio_source["path"],
+                    "-t",
+                    str(master_duration),
+                    "-map",
+                    "0:a:0",
+                    "-vn",
+                    "-c:a",
+                    "aac",
+                    "-y",
+                    primary_audio_output_path,
+                ],
+                check=True,
+                job_context=job_id,
+            )
+
+            await run_subprocess_async(
+                [
+                    "ffmpeg",
+                    "-i",
+                    video_only_output_path,
+                    "-i",
+                    primary_audio_output_path,
+                    "-map",
+                    "0:v:0",
+                    "-map",
+                    "1:a:0",
+                    "-c:v",
+                    "copy",
+                    "-c:a",
+                    "aac",
+                    "-shortest",
+                    "-movflags",
+                    "+faststart",
+                    "-y",
+                    output_path,
+                ],
+                check=True,
+                job_context=job_id,
+            )
+        else:
+            shutil.copy2(video_only_output_path, output_path)
+
+        if request.async_mode:
+            update_firestore_job(job_id, {"progress": 94, "detail": "Uploading master"})
+
+        public_url = upload_file_to_firebase(output_path, f"processed/multicam_{job_id}.mp4")
+        if not public_url:
+            raise HTTPException(status_code=500, detail="Failed to upload multi-camera output")
+
+        result_data = {
+            "status": "completed",
+            "job_id": job_id,
+            "output_path": os.path.abspath(output_path),
+            "output_url": public_url,
+            "duration": round(master_duration, 3),
+            "segments": segments,
+            "switches": switches,
+        }
+
+        if request.async_mode:
+            update_firestore_job(job_id, {
+                "status": "completed",
+                "progress": 100,
+                "detail": "Multi-camera master ready",
+                **result_data,
+            })
+
+        return result_data
+    except HTTPException as e:
+        if request.async_mode:
+            update_firestore_job(job_id, {"status": "failed", "error": str(e.detail), "progress": 0})
+            return
+        raise
+    except Exception as e:
+        logger.error(f"Multicam render failed: {e}")
+        if request.async_mode:
+            update_firestore_job(job_id, {"status": "failed", "error": str(e), "progress": 0})
+            return
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        for source in prepared_sources:
+            if os.path.exists(source["path"]):
+                os.remove(source["path"])
+        for segment_path in segment_paths:
+            if os.path.exists(segment_path):
+                os.remove(segment_path)
+        if os.path.exists(concat_list_path):
+            os.remove(concat_list_path)
+        if os.path.exists(video_only_output_path):
+            os.remove(video_only_output_path)
+        if os.path.exists(primary_audio_output_path):
+            os.remove(primary_audio_output_path)
+        if os.path.exists(output_path):
+            os.remove(output_path)
         
 # --- Idea-to-Video Generation (Text + Stock + TTS) ---
 try:

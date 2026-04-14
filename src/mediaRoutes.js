@@ -182,6 +182,60 @@ router.post("/extract-audio", async (req, res) => {
   }
 });
 
+router.post("/render-multicam", async (req, res) => {
+  const userId = req.user.uid;
+  const cost = 15;
+  const sources = Array.isArray(req.body?.sources) ? req.body.sources : [];
+
+  if (sources.length < 2) {
+    return res.status(400).json({ message: "At least two camera sources are required" });
+  }
+
+  try {
+    const result = await chargeVideoEditorCredits(userId, cost, "/render-multicam");
+    if (!result.success) {
+      return res.status(403).json({
+        message: "Insufficient credits. Please purchase more credits.",
+        required: cost,
+        remaining: result.remaining,
+      });
+    }
+
+    const job = await videoEditingService.startMulticamRenderJob(
+      {
+        sources,
+        segments: Array.isArray(req.body?.segments) ? req.body.segments : [],
+        switches: Array.isArray(req.body?.switches) ? req.body.switches : [],
+        autoSwitch: !!req.body?.autoSwitch,
+        audioBasedAutoSwitch: req.body?.audioBasedAutoSwitch !== false,
+        autoSwitchInterval: Number(req.body?.autoSwitchInterval ?? 3),
+        autoSwitchAggressiveness:
+          typeof req.body?.autoSwitchAggressiveness === "string"
+            ? req.body.autoSwitchAggressiveness
+            : "balanced",
+        primaryAudioCameraId:
+          typeof req.body?.primaryAudioCameraId === "string" ? req.body.primaryAudioCameraId : null,
+        overlapStart: Number(req.body?.overlapStart ?? 0),
+        overlapDuration: Number(req.body?.overlapDuration ?? 0),
+        outputAspectRatio:
+          typeof req.body?.outputAspectRatio === "string" ? req.body.outputAspectRatio : "9:16",
+      },
+      userId
+    );
+
+    res.json({
+      success: true,
+      jobId: job.jobId,
+      message: "Multi-camera render started",
+      remainingCredits: result.remaining,
+      billingDisabled: !!result.skipped,
+    });
+  } catch (error) {
+    console.error("[MediaRoute] Multicam render error:", error.message);
+    res.status(500).json({ message: "Multi-camera render failed", details: error.message });
+  }
+});
+
 router.post("/preview-silence", async (req, res) => {
   const fileUrl = typeof req.body?.fileUrl === "string" ? req.body.fileUrl.trim() : "";
   if (!fileUrl) {
