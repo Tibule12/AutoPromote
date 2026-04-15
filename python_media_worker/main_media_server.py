@@ -1146,6 +1146,629 @@ def build_delogo_filters(width, height, mode, duration=None, video_path=None, ma
         filters.append(f"delogo=x={x}:y={y}:w={region_w}:h={region_h}:show=0")
     return filters
 
+# ============================================================
+# ANIMATED WORD-LEVEL CAPTIONS (5 STYLES) — OpusClip Competitor
+# ============================================================
+
+CAPTION_STYLES = {
+    "bold_pop": {
+        "label": "Bold Pop",
+        "fontname": "DejaVu Sans",
+        "primary_color": "&H00FFFFFF",  # White (ASS BGR)
+        "outline_color": "&H00000000",  # Black
+        "highlight_color": "&H0000D4FF",  # Orange highlight (BGR)
+        "fontsize": 52,
+        "bold": True,
+        "outline": 4,
+        "shadow": 2,
+        "alignment": 2,  # Bottom center
+        "margin_v": 120,
+        "animation": "scale_pop",
+    },
+    "karaoke": {
+        "label": "Karaoke Highlight",
+        "fontname": "DejaVu Sans",
+        "primary_color": "&H00FFFFFF",
+        "outline_color": "&H00000000",
+        "highlight_color": "&H0042F5F5",  # Yellow highlight
+        "fontsize": 48,
+        "bold": True,
+        "outline": 3,
+        "shadow": 1,
+        "alignment": 2,
+        "margin_v": 110,
+        "animation": "karaoke_fill",
+    },
+    "glow": {
+        "label": "Neon Glow",
+        "fontname": "DejaVu Sans",
+        "primary_color": "&H00FFAA00",  # Cyan-ish (BGR)
+        "outline_color": "&H00FF6600",  # Blue glow
+        "highlight_color": "&H0000FFFF",  # Yellow highlight
+        "fontsize": 50,
+        "bold": True,
+        "outline": 6,
+        "shadow": 4,
+        "alignment": 2,
+        "margin_v": 115,
+        "animation": "glow_pulse",
+    },
+    "bounce": {
+        "label": "Bounce",
+        "fontname": "DejaVu Sans",
+        "primary_color": "&H00FFFFFF",
+        "outline_color": "&H00222222",
+        "highlight_color": "&H005050FF",  # Red highlight (BGR)
+        "fontsize": 54,
+        "bold": True,
+        "outline": 4,
+        "shadow": 3,
+        "alignment": 2,
+        "margin_v": 125,
+        "animation": "bounce_word",
+    },
+    "minimal": {
+        "label": "Minimal Clean",
+        "fontname": "DejaVu Sans",
+        "primary_color": "&H00FFFFFF",
+        "outline_color": "&H80000000",  # Semi-transparent black
+        "highlight_color": "&H00FFFFFF",
+        "fontsize": 42,
+        "bold": False,
+        "outline": 2,
+        "shadow": 0,
+        "alignment": 2,
+        "margin_v": 100,
+        "animation": "fade_word",
+    },
+}
+
+
+def generate_ass_captions(whisper_result, style_name="bold_pop", video_width=1080, video_height=1920):
+    """
+    Generate ASS (Advanced SubStation Alpha) subtitle file content
+    with word-level animated captions from Whisper's word_timestamps output.
+    """
+    style = CAPTION_STYLES.get(style_name, CAPTION_STYLES["bold_pop"])
+    segments = whisper_result.get("segments", [])
+
+    # ASS header
+    ass_lines = [
+        "[Script Info]",
+        "ScriptType: v4.00+",
+        f"PlayResX: {video_width}",
+        f"PlayResY: {video_height}",
+        "WrapStyle: 0",
+        "ScaledBorderAndShadow: yes",
+        "",
+        "[V4+ Styles]",
+        "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, "
+        "Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, "
+        "Shadow, Alignment, MarginL, MarginR, MarginV, Encoding",
+        f"Style: Default,{style['fontname']},{style['fontsize']},{style['primary_color']},"
+        f"{style['highlight_color']},{style['outline_color']},&H80000000,"
+        f"{'-1' if style['bold'] else '0'},0,0,0,100,100,0,0,1,{style['outline']},"
+        f"{style['shadow']},{style['alignment']},40,40,{style['margin_v']},1",
+        f"Style: Active,{style['fontname']},{style['fontsize']},{style['highlight_color']},"
+        f"{style['primary_color']},{style['outline_color']},&H80000000,"
+        f"-1,0,0,0,100,100,0,0,1,{style['outline'] + 1},"
+        f"{style['shadow']},{style['alignment']},40,40,{style['margin_v']},1",
+        "",
+        "[Events]",
+        "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text",
+    ]
+
+    hallucinations = {"thank you.", "thanks.", "bye.", "music.", "watching.", "mbc", "lbc", "you", "silence"}
+
+    for segment in segments:
+        words = segment.get("words", [])
+        seg_text = str(segment.get("text", "")).strip()
+
+        # Filter hallucinations
+        if seg_text.lower().strip(". ") in hallucinations:
+            continue
+        if segment.get("no_speech_prob", 0) > 0.8:
+            continue
+
+        if not words:
+            # Fallback: show full segment text without word-level animation
+            start_ass = _seconds_to_ass_time(segment["start"])
+            end_ass = _seconds_to_ass_time(segment["end"])
+            clean = re.sub(r"\[.*?\]|\(.*?\)", "", seg_text).strip()
+            if clean and len(clean) >= 2:
+                ass_lines.append(f"Dialogue: 0,{start_ass},{end_ass},Default,,0,0,0,,{_escape_ass(clean)}")
+            continue
+
+        # Build word groups (3-5 words per line for readability)
+        groups = _chunk_words(words, max_words=5)
+
+        for group in groups:
+            if not group:
+                continue
+            group_start = group[0]["start"]
+            group_end = group[-1]["end"]
+            start_ass = _seconds_to_ass_time(group_start)
+            end_ass = _seconds_to_ass_time(group_end)
+
+            # Build the animated text line
+            if style["animation"] == "karaoke_fill":
+                # Karaoke: words fill with color as they're spoken
+                text_parts = []
+                for word in group:
+                    w_dur_cs = max(1, int((word["end"] - word["start"]) * 100))
+                    word_text = _escape_ass(word.get("word", "").strip())
+                    if word_text:
+                        text_parts.append(f"{{\\kf{w_dur_cs}}}{word_text}")
+                if text_parts:
+                    line = "".join(text_parts)
+                    ass_lines.append(f"Dialogue: 0,{start_ass},{end_ass},Default,,0,0,0,,{line}")
+
+            elif style["animation"] == "scale_pop":
+                # Bold Pop: active word scales up briefly
+                for i, word in enumerate(group):
+                    w_start = _seconds_to_ass_time(word["start"])
+                    w_end = _seconds_to_ass_time(word["end"])
+                    word_text = _escape_ass(word.get("word", "").strip())
+                    if not word_text:
+                        continue
+                    # Build line: all words shown, active word is highlighted + scaled
+                    parts = []
+                    for j, w in enumerate(group):
+                        wt = _escape_ass(w.get("word", "").strip())
+                        if not wt:
+                            continue
+                        if j == i:
+                            parts.append(f"{{\\fscx115\\fscy115\\c{style['highlight_color']}\\b1}}{wt}{{\\fscx100\\fscy100\\c{style['primary_color']}\\b1}}")
+                        else:
+                            parts.append(wt)
+                    line = " ".join(parts)
+                    ass_lines.append(f"Dialogue: 0,{w_start},{w_end},Default,,0,0,0,,{line}")
+
+            elif style["animation"] == "bounce_word":
+                # Bounce: active word moves up slightly
+                for i, word in enumerate(group):
+                    w_start = _seconds_to_ass_time(word["start"])
+                    w_end = _seconds_to_ass_time(word["end"])
+                    word_text = _escape_ass(word.get("word", "").strip())
+                    if not word_text:
+                        continue
+                    parts = []
+                    for j, w in enumerate(group):
+                        wt = _escape_ass(w.get("word", "").strip())
+                        if not wt:
+                            continue
+                        if j == i:
+                            parts.append(f"{{\\move(0,0,0,-12)\\c{style['highlight_color']}\\b1}}{wt}{{\\c{style['primary_color']}\\b0}}")
+                        else:
+                            parts.append(wt)
+                    line = " ".join(parts)
+                    ass_lines.append(f"Dialogue: 0,{w_start},{w_end},Default,,0,0,0,,{line}")
+
+            elif style["animation"] == "glow_pulse":
+                # Glow: active word gets extra outline glow
+                for i, word in enumerate(group):
+                    w_start = _seconds_to_ass_time(word["start"])
+                    w_end = _seconds_to_ass_time(word["end"])
+                    word_text = _escape_ass(word.get("word", "").strip())
+                    if not word_text:
+                        continue
+                    parts = []
+                    for j, w in enumerate(group):
+                        wt = _escape_ass(w.get("word", "").strip())
+                        if not wt:
+                            continue
+                        if j == i:
+                            parts.append(f"{{\\bord{style['outline'] + 3}\\3c{style['highlight_color']}\\c{style['highlight_color']}}}{wt}{{\\bord{style['outline']}\\3c{style['outline_color']}\\c{style['primary_color']}}}")
+                        else:
+                            parts.append(wt)
+                    line = " ".join(parts)
+                    ass_lines.append(f"Dialogue: 0,{w_start},{w_end},Default,,0,0,0,,{line}")
+
+            else:
+                # fade_word (minimal): simple fade per word group
+                clean_text = " ".join(_escape_ass(w.get("word", "").strip()) for w in group if w.get("word", "").strip())
+                if clean_text:
+                    fade_in_ms = 100
+                    fade_out_ms = 150
+                    ass_lines.append(
+                        f"Dialogue: 0,{start_ass},{end_ass},Default,,0,0,0,,"
+                        f"{{\\fad({fade_in_ms},{fade_out_ms})}}{clean_text}"
+                    )
+
+    return "\n".join(ass_lines)
+
+
+def _seconds_to_ass_time(seconds):
+    """Convert seconds to ASS time format: H:MM:SS.CC"""
+    s = max(0.0, float(seconds))
+    h = int(s // 3600)
+    m = int((s % 3600) // 60)
+    sec = int(s % 60)
+    cs = int(round((s % 1) * 100))
+    return f"{h}:{m:02d}:{sec:02d}.{cs:02d}"
+
+
+def _escape_ass(text):
+    """Escape special ASS characters in dialogue text."""
+    return str(text or "").replace("\\", "\\\\").replace("{", "\\{").replace("}", "\\}")
+
+
+def _chunk_words(words, max_words=5):
+    """Split words into display groups of max_words."""
+    groups = []
+    current = []
+    for w in words:
+        word_text = str(w.get("word", "")).strip()
+        if not word_text:
+            continue
+        clean = re.sub(r"\[.*?\]|\(.*?\)", "", word_text).strip()
+        if not clean:
+            continue
+        current.append(w)
+        if len(current) >= max_words:
+            groups.append(current)
+            current = []
+    if current:
+        groups.append(current)
+    return groups
+
+
+# ============================================================
+# SPEAKER TRACKING AUTO-REFRAME (Face detection + dynamic crop)
+# ============================================================
+
+def detect_speaker_positions(video_path, sample_interval=0.5):
+    """
+    Use OpenCV Haar cascade face detection to track speaker positions
+    throughout the video. Returns a list of (timestamp, center_x_ratio, center_y_ratio) tuples.
+    """
+    face_cascade_paths = [
+        cv2.data.haarcascades + "haarcascade_frontalface_default.xml",
+        cv2.data.haarcascades + "haarcascade_frontalface_alt2.xml",
+    ]
+
+    face_cascade = None
+    for cascade_path in face_cascade_paths:
+        if os.path.exists(cascade_path):
+            face_cascade = cv2.CascadeClassifier(cascade_path)
+            break
+
+    if face_cascade is None or face_cascade.empty():
+        logger.warning("No Haar cascade found for face detection")
+        return []
+
+    cap = cv2.VideoCapture(video_path)
+    if not cap.isOpened():
+        return []
+
+    fps = cap.get(cv2.CAP_PROP_FPS) or 30
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT) or 0)
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH) or 1080)
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) or 1920)
+    duration = total_frames / fps if fps > 0 else 0
+
+    positions = []
+    sample_times = [t for t in _frange(0, duration, sample_interval)]
+
+    for t in sample_times:
+        frame_no = int(t * fps)
+        cap.set(cv2.CAP_PROP_POS_FRAMES, frame_no)
+        ret, frame = cap.read()
+        if not ret:
+            continue
+
+        # Downscale for speed
+        scale = min(1.0, 480.0 / max(frame.shape[1], 1))
+        small = cv2.resize(frame, None, fx=scale, fy=scale, interpolation=cv2.INTER_AREA)
+        gray = cv2.cvtColor(small, cv2.COLOR_BGR2GRAY)
+
+        faces = face_cascade.detectMultiScale(gray, scaleFactor=1.15, minNeighbors=4, minSize=(30, 30))
+
+        if len(faces) > 0:
+            # Pick the largest face
+            areas = [w * h for (x, y, w, h) in faces]
+            best_idx = areas.index(max(areas))
+            fx, fy, fw, fh = faces[best_idx]
+            # Convert back to original scale
+            cx = (fx + fw / 2) / scale / width
+            cy = (fy + fh / 2) / scale / height
+            positions.append((t, cx, cy))
+        else:
+            # No face detected — use center
+            positions.append((t, 0.5, 0.5))
+
+    cap.release()
+    return positions
+
+
+def _frange(start, stop, step):
+    """Float range generator."""
+    val = start
+    while val < stop:
+        yield round(val, 3)
+        val += step
+
+
+def smooth_positions(positions, window=5):
+    """Apply rolling average to smooth face tracking path."""
+    if len(positions) <= window:
+        return positions
+
+    smoothed = []
+    for i in range(len(positions)):
+        start = max(0, i - window // 2)
+        end = min(len(positions), i + window // 2 + 1)
+        window_slice = positions[start:end]
+        avg_x = sum(p[1] for p in window_slice) / len(window_slice)
+        avg_y = sum(p[2] for p in window_slice) / len(window_slice)
+        smoothed.append((positions[i][0], avg_x, avg_y))
+    return smoothed
+
+
+def build_speaker_track_crop_filter(positions, src_width, src_height, target_aspect="9:16"):
+    """
+    Build FFmpeg sendcmd filter for dynamic cropping that follows the speaker.
+    """
+    if not positions:
+        # Fallback to center crop
+        return "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920"
+
+    aspect_map = {"9:16": (9, 16), "1:1": (1, 1), "16:9": (16, 9)}
+    aspect_w, aspect_h = aspect_map.get(target_aspect, (9, 16))
+
+    # Calculate crop dimensions
+    if src_width / src_height > aspect_w / aspect_h:
+        # Source is wider — crop width
+        crop_h = src_height
+        crop_w = int(crop_h * aspect_w / aspect_h)
+    else:
+        # Source is taller — crop height
+        crop_w = src_width
+        crop_h = int(crop_w * aspect_h / aspect_w)
+
+    crop_w = min(crop_w, src_width)
+    crop_h = min(crop_h, src_height)
+
+    # Build sendcmd keyframes for dynamic crop position
+    smoothed = smooth_positions(positions, window=7)
+    keyframes = []
+    for t, cx, cy in smoothed:
+        # Center crop on face position
+        crop_x = int(cx * src_width - crop_w / 2)
+        crop_y = int(cy * src_height - crop_h / 2)
+        # Clamp to bounds
+        crop_x = max(0, min(crop_x, src_width - crop_w))
+        crop_y = max(0, min(crop_y, src_height - crop_h))
+        keyframes.append(f"{t:.3f} crop x {crop_x};\n{t:.3f} crop y {crop_y};")
+
+    return keyframes, crop_w, crop_h
+
+
+# ============================================================
+# ENHANCED VIRALITY SCORING — Audio energy + motion analysis
+# ============================================================
+
+def analyze_audio_energy(video_path, segment_duration=1.0):
+    """
+    Analyze audio energy levels throughout the video using FFmpeg loudnorm.
+    Returns per-second RMS energy levels.
+    """
+    try:
+        result = subprocess.run(
+            [
+                "ffmpeg", "-i", video_path,
+                "-af", f"asegment=timestamps='',astats=metadata=1:reset={segment_duration}",
+                "-f", "null", "-"
+            ],
+            stderr=subprocess.PIPE, stdout=subprocess.PIPE, text=True,
+            timeout=120,
+        )
+
+        # Parse astats output for RMS levels
+        rms_values = []
+        current_time = 0.0
+        for line in result.stderr.split("\n"):
+            if "RMS level" in line or "lavfi.astats.Overall.RMS_level" in line:
+                try:
+                    val = float(line.split("=")[-1].strip().split()[0].replace("dB", ""))
+                    rms_values.append((current_time, val))
+                    current_time += segment_duration
+                except (ValueError, IndexError):
+                    pass
+        return rms_values
+    except Exception as e:
+        logger.warning(f"Audio energy analysis failed: {e}")
+        return []
+
+
+def analyze_visual_motion(video_path, sample_interval=1.0):
+    """
+    Analyze visual motion intensity using frame differencing.
+    Higher values = more action/movement.
+    """
+    cap = cv2.VideoCapture(video_path)
+    if not cap.isOpened():
+        return []
+
+    fps = cap.get(cv2.CAP_PROP_FPS) or 30
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT) or 0)
+    duration = total_frames / fps if fps > 0 else 0
+    motion_scores = []
+    prev_gray = None
+
+    for t in _frange(0, duration, sample_interval):
+        frame_no = int(t * fps)
+        cap.set(cv2.CAP_PROP_POS_FRAMES, frame_no)
+        ret, frame = cap.read()
+        if not ret:
+            continue
+
+        # Downscale for speed
+        small = cv2.resize(frame, (160, 90), interpolation=cv2.INTER_AREA)
+        gray = cv2.cvtColor(small, cv2.COLOR_BGR2GRAY)
+
+        if prev_gray is not None:
+            diff = cv2.absdiff(gray, prev_gray)
+            motion = float(np.mean(diff)) / 255.0  # Normalize 0-1
+            motion_scores.append((t, motion))
+        prev_gray = gray
+
+    cap.release()
+    return motion_scores
+
+
+def compute_enhanced_viral_score(
+    base_score, start_time, end_time, text,
+    keyword_weights, audio_energy=None, motion_scores=None
+):
+    """
+    Enhanced viral scoring combining keyword matching, audio energy,
+    visual motion, hook strength, and segment completeness.
+    """
+    score = base_score
+    reasons = []
+
+    # 1. Keyword boost (already computed in base_score typically)
+    keyword_boost, found_keywords = score_text_for_virality(text, keyword_weights)
+    if keyword_boost > 0 and base_score < 90:
+        # Only add if not already counted
+        pass
+
+    # 2. Audio energy boost — loud = engaging
+    if audio_energy:
+        segment_energy = [e for t, e in audio_energy if start_time <= t <= end_time]
+        if segment_energy:
+            avg_energy = sum(segment_energy) / len(segment_energy)
+            peak_energy = max(segment_energy)
+            # Energy spikes (laughter, emphasis, applause)
+            if peak_energy > -15:
+                score += 8
+                reasons.append("High audio energy")
+            elif avg_energy > -25:
+                score += 4
+                reasons.append("Active speech")
+            # Volume contrast (quiet→loud transition)
+            if len(segment_energy) >= 3:
+                energy_change = max(segment_energy) - min(segment_energy)
+                if energy_change > 15:
+                    score += 5
+                    reasons.append("Dynamic audio shift")
+
+    # 3. Visual motion boost — action moments
+    if motion_scores:
+        segment_motion = [m for t, m in motion_scores if start_time <= t <= end_time]
+        if segment_motion:
+            avg_motion = sum(segment_motion) / len(segment_motion)
+            peak_motion = max(segment_motion)
+            if peak_motion > 0.15:
+                score += 6
+                reasons.append("High visual motion")
+            elif avg_motion > 0.08:
+                score += 3
+                reasons.append("Active visuals")
+
+    # 4. Hook strength — first 3 seconds matter most
+    if audio_energy and start_time < 3:
+        first_3s = [e for t, e in audio_energy if t <= 3]
+        if first_3s and max(first_3s) > -20:
+            score += 5
+            reasons.append("Strong opening")
+
+    # 5. Duration sweet spot — 15-45s is optimal for shorts
+    duration = end_time - start_time
+    if 15 <= duration <= 45:
+        score += 4
+        reasons.append("Optimal length")
+    elif duration < 8:
+        score -= 3
+    elif duration > 60:
+        score -= 5
+
+    # 6. Question/command presence (engagement triggers)
+    if text:
+        lower_text = text.lower()
+        if "?" in lower_text:
+            score += 4
+            reasons.append("Question hook")
+        if any(cmd in lower_text for cmd in ["you need to", "here's how", "don't", "stop", "watch"]):
+            score += 3
+            reasons.append("Direct address")
+
+    return min(99, max(10, score)), reasons
+
+
+# ============================================================
+# CLIP TEMPLATES (server-side preset definitions)
+# ============================================================
+
+CLIP_TEMPLATES = {
+    "podcast": {
+        "label": "Podcast / Interview",
+        "aspect_ratio": "9:16",
+        "caption_style": "bold_pop",
+        "smart_crop_mode": "speaker_track",
+        "auto_captions": True,
+        "hook_template": "freeze_text",
+        "music": None,
+        "target_duration": (30, 60),
+        "description": "Speaker-tracking crop with bold captions. Perfect for talking-head clips.",
+    },
+    "gaming": {
+        "label": "Gaming Highlights",
+        "aspect_ratio": "9:16",
+        "caption_style": "glow",
+        "smart_crop_mode": "center",
+        "auto_captions": True,
+        "hook_template": "zoom_focus",
+        "music": None,
+        "target_duration": (15, 45),
+        "description": "High-energy with neon glow captions and zoom focus hooks.",
+    },
+    "tutorial": {
+        "label": "Tutorial / How-To",
+        "aspect_ratio": "9:16",
+        "caption_style": "minimal",
+        "smart_crop_mode": "center",
+        "auto_captions": True,
+        "hook_template": "blur_reveal",
+        "music": None,
+        "target_duration": (30, 60),
+        "description": "Clean minimal captions with blur reveal hooks. Great for educational content.",
+    },
+    "reaction": {
+        "label": "Reaction / Commentary",
+        "aspect_ratio": "9:16",
+        "caption_style": "bounce",
+        "smart_crop_mode": "speaker_track",
+        "auto_captions": True,
+        "hook_template": "zoom_focus",
+        "music": None,
+        "target_duration": (15, 30),
+        "description": "Bouncy animated captions following the speaker. High energy.",
+    },
+    "story": {
+        "label": "Story / Vlog",
+        "aspect_ratio": "9:16",
+        "caption_style": "karaoke",
+        "smart_crop_mode": "speaker_track",
+        "auto_captions": True,
+        "hook_template": "blur_reveal",
+        "music": None,
+        "target_duration": (15, 60),
+        "description": "Karaoke-style word-by-word captions. Perfect for vlogs and stories.",
+    },
+}
+
+PLATFORM_PRESETS = {
+    "tiktok": {"max_duration": 60, "aspect_ratio": "9:16", "hook_style": "fast", "cta": None},
+    "youtube_shorts": {"max_duration": 58, "aspect_ratio": "9:16", "hook_style": "direct", "cta": "Subscribe for more!"},
+    "instagram_reels": {"max_duration": 90, "aspect_ratio": "9:16", "hook_style": "visual", "cta": None},
+    "instagram_feed": {"max_duration": 60, "aspect_ratio": "1:1", "hook_style": "clean", "cta": None},
+    "youtube": {"max_duration": None, "aspect_ratio": "16:9", "hook_style": "intro", "cta": None},
+    "facebook": {"max_duration": 60, "aspect_ratio": "9:16", "hook_style": "direct", "cta": None},
+}
+
+
 def upload_file_to_firebase(local_path, destination_path=None):
     """
     Uploads file to Firebase (Signed URL + Fallback).
@@ -3093,6 +3716,22 @@ async def analyze_clips(request: Dict[str, Any]):
 
         logger.info(f"Parallel Analysis Complete. Scenes: {len(scene_list)}, Segments: {len(transcription_segments)}")
 
+        # 4.5. Enhanced scoring: audio energy + visual motion analysis (parallel)
+        audio_energy = []
+        motion_scores = []
+        try:
+            logger.info("Running enhanced scoring analysis (audio energy + motion)...")
+            future_audio = loop.run_in_executor(None, analyze_audio_energy, input_path, 1.0)
+            future_motion = loop.run_in_executor(None, analyze_visual_motion, input_path, 1.0)
+            scoring_results = await asyncio.gather(future_audio, future_motion, return_exceptions=True)
+            if not isinstance(scoring_results[0], Exception):
+                audio_energy = scoring_results[0]
+            if not isinstance(scoring_results[1], Exception):
+                motion_scores = scoring_results[1]
+            logger.info(f"Enhanced scoring data: {len(audio_energy)} audio samples, {len(motion_scores)} motion samples")
+        except Exception as scoring_err:
+            logger.warning(f"Enhanced scoring failed (non-fatal): {scoring_err}")
+
         # Map visual scenes to data structure
         scenes = []
         for i, scene in enumerate(scene_list):
@@ -3109,14 +3748,12 @@ async def analyze_clips(request: Dict[str, Any]):
             scene_text = ""
 
             # 4. Integrate Transcription (Keyword Spotting)
-            # Find segments that overlap with this scene
             scene_segments_txt = [
                 seg for seg in transcription_segments 
                 if (seg["start"] < end_time_sec and seg["end"] > start_time_sec)
             ]
             
             if scene_segments_txt:
-                # Combine text for this scene
                 full_text = " ".join([s["text"].strip() for s in scene_segments_txt]).lower()
                 scene_text = full_text[:150] + "..." if len(full_text) > 150 else full_text
                 
@@ -3125,19 +3762,24 @@ async def analyze_clips(request: Dict[str, Any]):
                 if keyword_boost > 0:
                     score += keyword_boost
                     reason_parts.append(f"Keywords: {', '.join(found_keywords)}")
-                    # Cap score at 99
                     score = min(99, score)
                 
-                # Boost for high-energy words (rudimentary sentiment)
                 if "!" in full_text: 
                     score += 5
-            
+
+            # Enhanced scoring with audio + motion
+            enhanced_score, enhanced_reasons = compute_enhanced_viral_score(
+                score, start_time_sec, end_time_sec, scene_text,
+                VIRAL_KEYWORDS, audio_energy, motion_scores
+            )
+            reason_parts.extend(enhanced_reasons)
+
             scenes.append({
                 "id": f"scene_{i}",
                 "start": round(start_time_sec, 2),
                 "end": round(end_time_sec, 2),
                 "duration": round(duration_sec, 2),
-                "viralScore": min(99, score),
+                "viralScore": min(99, enhanced_score),
                 "reason": " + ".join(reason_parts),
                 "text": scene_text or f"Scene {i+1} (No speech detected)",
                 "source": "scene_detect"
@@ -4527,6 +5169,323 @@ def cleanup_file(path: str, temp_files: list):
     # For now, let's leave the final output file in tmp. It will be cleaned up eventually or we can add a cron job.
     pass
 
+
+# ============================================================
+# NEW ENDPOINTS: Speaker Track Crop + Auto-Generate All Clips
+# ============================================================
+
+@app.post("/speaker-track-crop")
+async def speaker_track_crop(request: Dict[str, Any]):
+    """
+    Speaker-tracking auto-reframe: detects faces and dynamically crops
+    the video to follow the speaker for vertical format.
+    """
+    video_url = request.get("video_url")
+    if not video_url:
+        raise HTTPException(status_code=400, detail="video_url is required")
+
+    target_aspect = str(request.get("target_aspect_ratio", "9:16")).strip()
+    job_id = str(uuid.uuid4())
+    SHARED_TMP_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../tmp"))
+    os.makedirs(SHARED_TMP_DIR, exist_ok=True)
+
+    input_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_input.mp4")
+    output_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_tracked.mp4")
+
+    try:
+        await materialize_video_input(video_url, input_path)
+        src_w, src_h = get_video_dimensions(input_path)
+        loop = asyncio.get_running_loop()
+
+        logger.info(f"Detecting speaker positions in {input_path}...")
+        positions = await loop.run_in_executor(None, detect_speaker_positions, input_path, 0.5)
+
+        if positions and len(positions) >= 3:
+            keyframes, crop_w, crop_h = build_speaker_track_crop_filter(positions, src_w, src_h, target_aspect)
+            sendcmd_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_sendcmd.txt")
+            with open(sendcmd_path, "w") as f:
+                f.write("\n".join(keyframes))
+            vf = f"sendcmd=f='{sendcmd_path}',crop={crop_w}:{crop_h}:0:0,scale=1080:1920"
+            await run_subprocess_async([
+                "ffmpeg", "-i", input_path, "-vf", vf,
+                "-c:v", "libx264", "-preset", "fast", "-c:a", "copy", "-y", output_path
+            ], check=True)
+        else:
+            logger.info("No faces detected, using center crop fallback")
+            vf = "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920"
+            await run_subprocess_async([
+                "ffmpeg", "-i", input_path, "-vf", vf,
+                "-c:v", "libx264", "-c:a", "copy", "-y", output_path
+            ], check=True)
+
+        if os.path.exists(output_path):
+            url = upload_file_to_firebase(output_path)
+            return {
+                "status": "completed",
+                "job_id": job_id,
+                "output_url": url,
+                "faces_detected": len([p for p in (positions or []) if p[1] != 0.5]),
+                "total_samples": len(positions or []),
+            }
+        raise Exception("Output not generated")
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Speaker track crop error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        for p in [input_path]:
+            if os.path.exists(p):
+                try: os.remove(p)
+                except: pass
+
+
+@app.post("/auto-generate-clips")
+async def auto_generate_clips(request: Dict[str, Any], background_tasks: BackgroundTasks):
+    """
+    One-click auto-generate: analyze video → render top N clips automatically.
+    Returns immediately with job_id, results are written to Firestore.
+    """
+    video_url = request.get("video_url")
+    if not video_url:
+        raise HTTPException(status_code=400, detail="video_url is required")
+
+    job_id = request.get("job_id") or str(uuid.uuid4())
+    max_clips = min(int(request.get("max_clips", 5)), 10)
+    caption_style = str(request.get("caption_style", "bold_pop")).strip()
+    smart_crop_mode = str(request.get("smart_crop_mode", "center")).strip()
+    target_aspect = str(request.get("target_aspect_ratio", "9:16")).strip()
+    template_name = str(request.get("template", "")).strip()
+
+    # Apply template defaults if specified
+    if template_name in CLIP_TEMPLATES:
+        tmpl = CLIP_TEMPLATES[template_name]
+        caption_style = caption_style or tmpl["caption_style"]
+        smart_crop_mode = smart_crop_mode or tmpl["smart_crop_mode"]
+        target_aspect = target_aspect or tmpl["aspect_ratio"]
+
+    logger.info(f"Auto-generate job {job_id}: {max_clips} clips, style={caption_style}, crop={smart_crop_mode}")
+
+    try:
+        update_firestore_job(job_id, {
+            "status": "analyzing",
+            "progress": 0,
+            "total_clips": max_clips,
+            "completed_clips": 0,
+            "clips": [],
+        })
+    except Exception:
+        pass
+
+    background_tasks.add_task(
+        _auto_generate_clips_impl,
+        video_url, job_id, max_clips, caption_style, smart_crop_mode, target_aspect
+    )
+    return {"status": "processing", "job_id": job_id, "mode": "async"}
+
+
+async def _auto_generate_clips_impl(video_url, job_id, max_clips, caption_style, smart_crop_mode, target_aspect):
+    """Background task: analyze → sort → render top clips."""
+    SHARED_TMP_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../tmp"))
+    os.makedirs(SHARED_TMP_DIR, exist_ok=True)
+    input_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_autogen_input.mp4")
+
+    try:
+        # 1. Download
+        await materialize_video_input(video_url, input_path)
+        update_firestore_job(job_id, {"status": "analyzing", "progress": 10})
+
+        # 2. Analyze (reuse analyze-clips logic)
+        loop = asyncio.get_running_loop()
+
+        def run_whisper_local():
+            model = get_whisper_model()
+            if model:
+                return model.transcribe(
+                    input_path, fp16=False, word_timestamps=True,
+                    condition_on_previous_text=False,
+                    initial_prompt=build_transcription_prompt(),
+                ).get("segments", [])
+            return []
+
+        def run_scenedetect_local():
+            vm = VideoManager([input_path])
+            vm.set_downscale_factor(8)
+            sm = SceneManager()
+            sm.add_detector(ContentDetector(threshold=27.0))
+            vm.start()
+            sm.detect_scenes(frame_source=vm)
+            return sm.get_scene_list()
+
+        results = await asyncio.gather(
+            loop.run_in_executor(None, run_whisper_local),
+            loop.run_in_executor(None, run_scenedetect_local),
+            loop.run_in_executor(None, analyze_audio_energy, input_path, 1.0),
+            loop.run_in_executor(None, analyze_visual_motion, input_path, 1.0),
+            return_exceptions=True,
+        )
+
+        transcription_segments = results[0] if not isinstance(results[0], Exception) else []
+        scene_list = results[1] if not isinstance(results[1], Exception) else []
+        audio_energy = results[2] if not isinstance(results[2], Exception) else []
+        motion_scores_data = results[3] if not isinstance(results[3], Exception) else []
+
+        update_firestore_job(job_id, {"status": "analyzing", "progress": 40})
+
+        # Build candidates with enhanced scoring
+        VIRAL_KEYWORDS = {
+            "money": 15, "rich": 10, "secret": 20, "hack": 15, "trick": 10,
+            "mistake": 15, "stop": 10, "wait": 10, "shocking": 15, "crazy": 10,
+            "millions": 15, "dollars": 10, "profit": 10, "loss": 10,
+            "tutorial": 10, "example": 5, "how to": 10, "why": 5,
+            "essential": 10, "proven": 10, "guaranteed": 15,
+            "love": 10, "hate": 10, "fail": 15, "win": 10,
+        }
+
+        scenes = []
+        for i, scene in enumerate(scene_list):
+            start_sec = scene[0].get_seconds()
+            end_sec = scene[1].get_seconds()
+            dur = end_sec - start_sec
+            if dur < 2.0:
+                continue
+
+            scene_text = ""
+            overlapping = [s for s in transcription_segments if s["start"] < end_sec and s["end"] > start_sec]
+            if overlapping:
+                scene_text = " ".join(s["text"].strip() for s in overlapping).lower()
+
+            enhanced_score, reasons = compute_enhanced_viral_score(
+                60, start_sec, end_sec, scene_text, VIRAL_KEYWORDS, audio_energy, motion_scores_data
+            )
+            scenes.append({
+                "id": f"scene_{i}",
+                "start": round(start_sec, 2),
+                "end": round(end_sec, 2),
+                "duration": round(dur, 2),
+                "viralScore": enhanced_score,
+                "reason": " + ".join(["Visual scene"] + reasons),
+                "text": (scene_text[:150] + "...") if len(scene_text) > 150 else scene_text,
+            })
+
+        transcript_windows = build_transcript_windows(transcription_segments, VIRAL_KEYWORDS)
+        aligned_windows = [align_clip_to_scenes(c, scene_list) for c in transcript_windows]
+        ranked = dedupe_ranked_candidates(scenes + aligned_windows, max_results=max_clips)
+
+        update_firestore_job(job_id, {
+            "status": "rendering",
+            "progress": 50,
+            "clipSuggestions": ranked,
+            "total_clips": len(ranked),
+        })
+
+        # 3. Render each clip
+        completed = []
+        for idx, clip in enumerate(ranked):
+            try:
+                clip_output = os.path.join(SHARED_TMP_DIR, f"{job_id}_clip_{idx}.mp4")
+                duration = clip["end"] - clip["start"]
+
+                # Build FFmpeg for this clip
+                if smart_crop_mode == "speaker_track":
+                    vf = "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920"
+                elif target_aspect == "9:16":
+                    vf = "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920"
+                elif target_aspect == "1:1":
+                    vf = "scale=1080:1080:force_original_aspect_ratio=increase,crop=1080:1080"
+                else:
+                    vf = "scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080"
+
+                # Render with captions if style is set
+                if caption_style in CAPTION_STYLES:
+                    # First trim
+                    trimmed = os.path.join(SHARED_TMP_DIR, f"{job_id}_trim_{idx}.mp4")
+                    await run_subprocess_async([
+                        "ffmpeg", "-ss", str(clip["start"]), "-i", input_path,
+                        "-t", str(duration), "-vf", vf,
+                        "-c:v", "libx264", "-preset", "fast", "-c:a", "aac", "-y", trimmed
+                    ], check=True)
+
+                    # Generate captions
+                    model = get_whisper_model()
+                    if model:
+                        whisper_res = model.transcribe(trimmed, fp16=False, word_timestamps=True, condition_on_previous_text=False)
+                        w, h = get_video_dimensions(trimmed)
+                        ass_content = generate_ass_captions(whisper_res, caption_style, w, h)
+                        ass_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_cap_{idx}.ass")
+                        with open(ass_path, "w", encoding="utf-8") as f:
+                            f.write(ass_content)
+                        safe_ass = ass_path.replace("\\", "/").replace(":", "\\:")
+                        await run_subprocess_async([
+                            "ffmpeg", "-i", trimmed, "-vf", f"ass='{safe_ass}'",
+                            "-c:v", "libx264", "-preset", "fast", "-c:a", "copy", "-y", clip_output
+                        ], check=True)
+                        if os.path.exists(ass_path): os.remove(ass_path)
+                    else:
+                        shutil.copy(trimmed, clip_output)
+                    if os.path.exists(trimmed): os.remove(trimmed)
+                else:
+                    await run_subprocess_async([
+                        "ffmpeg", "-ss", str(clip["start"]), "-i", input_path,
+                        "-t", str(duration), "-vf", vf,
+                        "-c:v", "libx264", "-preset", "fast", "-c:a", "aac", "-y", clip_output
+                    ], check=True)
+
+                if os.path.exists(clip_output):
+                    url = upload_file_to_firebase(clip_output)
+                    completed.append({
+                        **clip,
+                        "url": url,
+                        "rendered": True,
+                    })
+                    if os.path.exists(clip_output): os.remove(clip_output)
+
+                update_firestore_job(job_id, {
+                    "progress": 50 + int(50 * (idx + 1) / len(ranked)),
+                    "completed_clips": idx + 1,
+                    "clips": completed,
+                })
+            except Exception as clip_err:
+                logger.error(f"Auto-gen clip {idx} failed: {clip_err}")
+                completed.append({**clip, "rendered": False, "error": str(clip_err)})
+
+        update_firestore_job(job_id, {
+            "status": "completed",
+            "progress": 100,
+            "clips": completed,
+            "completed_clips": len([c for c in completed if c.get("rendered")]),
+            "total_clips": len(ranked),
+        })
+
+    except Exception as e:
+        logger.error(f"Auto-generate failed: {e}")
+        try:
+            update_firestore_job(job_id, {"status": "failed", "error": str(e)})
+        except:
+            pass
+    finally:
+        if os.path.exists(input_path):
+            try: os.remove(input_path)
+            except: pass
+
+
+@app.get("/clip-templates")
+def get_clip_templates():
+    """Return available clip templates and caption styles."""
+    return {
+        "templates": {k: {**v, "target_duration": list(v["target_duration"])} for k, v in CLIP_TEMPLATES.items()},
+        "caption_styles": {k: {"label": v["label"], "animation": v["animation"]} for k, v in CAPTION_STYLES.items()},
+        "platform_presets": PLATFORM_PRESETS,
+    }
+
+
+@app.get("/caption-styles")
+def get_caption_styles():
+    """Return available animated caption styles."""
+    return {k: {"label": v["label"], "animation": v["animation"], "description": f"{v['label']} style"} for k, v in CAPTION_STYLES.items()}
+
+
 # --- Viral Clip Rendering ---
 
 class ViralOverlay(BaseModel):
@@ -4578,7 +5537,9 @@ class RenderViralRequest(BaseModel):
     end_time: float
     overlays: List[ViralOverlay] = []
     auto_captions: bool = False
+    caption_style: str = ""  # "", "bold_pop", "karaoke", "glow", "bounce", "minimal"
     smart_crop: bool = False
+    smart_crop_mode: str = "center"  # "center" or "speaker_track"
     add_hook: bool = False
     hook_text: str = ""
     hook_intro_seconds: float = 3.0
@@ -4596,6 +5557,7 @@ class RenderViralRequest(BaseModel):
     background_audio: Optional[BackgroundAudioTrack] = None
     job_id: Optional[str] = None
     async_mode: bool = False
+    template: str = ""  # preset template name from CLIP_TEMPLATES
 
 @app.post("/render-viral-clip")
 async def render_viral_clip(request: RenderViralRequest, background_tasks: BackgroundTasks):
@@ -4779,78 +5741,104 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         working_path = trimmed_path
         if request.smart_crop:
             cropped_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_cropped.mp4")
+            crop_mode = str(request.smart_crop_mode or "center").strip().lower()
             try:
-                logger.info("Applying Smart Crop (Center Focus 9:16)...")
-                # Scale height to 1920 (or width to 1080) ensuring coverage, then crop center
-                # This focuses on the center of the frame (usually the speaker)
-                vf_crop = "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920"
-                
-                await run_subprocess_async([
-                    "ffmpeg", "-i", trimmed_path, 
-                    "-vf", vf_crop, 
-                    "-c:v", "libx264", "-c:a", "copy", "-y", cropped_path
-                ], check=True)
-                working_path = cropped_path # Update reference for further steps
+                if crop_mode == "speaker_track":
+                    logger.info("Applying Speaker-Tracking Smart Crop...")
+                    src_w, src_h = get_video_dimensions(trimmed_path)
+                    loop = asyncio.get_running_loop()
+                    positions = await loop.run_in_executor(None, detect_speaker_positions, trimmed_path, 0.5)
+
+                    if positions and len(positions) >= 3:
+                        keyframes, crop_w, crop_h = build_speaker_track_crop_filter(positions, src_w, src_h, "9:16")
+                        sendcmd_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_sendcmd.txt")
+                        with open(sendcmd_path, "w") as f:
+                            f.write("\n".join(keyframes))
+                        vf_track = (
+                            f"sendcmd=f='{sendcmd_path}',"
+                            f"crop={crop_w}:{crop_h}:0:0,"
+                            f"scale=1080:1920"
+                        )
+                        await run_subprocess_async([
+                            "ffmpeg", "-i", trimmed_path,
+                            "-vf", vf_track,
+                            "-c:v", "libx264", "-preset", "fast", "-c:a", "copy", "-y", cropped_path
+                        ], check=True)
+                        working_path = cropped_path
+                    else:
+                        logger.info("Speaker tracking found no faces, falling back to center crop")
+                        vf_crop = "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920"
+                        await run_subprocess_async([
+                            "ffmpeg", "-i", trimmed_path,
+                            "-vf", vf_crop,
+                            "-c:v", "libx264", "-c:a", "copy", "-y", cropped_path
+                        ], check=True)
+                        working_path = cropped_path
+                else:
+                    logger.info("Applying Smart Crop (Center Focus 9:16)...")
+                    vf_crop = "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920"
+                    await run_subprocess_async([
+                        "ffmpeg", "-i", trimmed_path,
+                        "-vf", vf_crop,
+                        "-c:v", "libx264", "-c:a", "copy", "-y", cropped_path
+                    ], check=True)
+                    working_path = cropped_path
             except Exception as e:
                 logger.error(f"Smart Crop failed: {e}. Proceeding with original aspect ratio.")
                 # Fallback to trimmed_path
 
-        # 3. Auto-Captions (Optional)
+        # 3. Auto-Captions (Optional) — supports animated ASS styles
+        ass_subtitle_path = None
         if request.auto_captions:
+            caption_style_name = str(request.caption_style or "").strip().lower()
+            use_animated = caption_style_name in CAPTION_STYLES
             try:
-                logger.info("Generating auto-captions...")
+                logger.info(f"Generating auto-captions (style={caption_style_name or 'legacy'}, animated={use_animated})...")
                 loop = asyncio.get_running_loop()
                 model = get_whisper_model()
                 if model:
-                    # Run CPU-bound task in thread pool
-                    # For singing/music videos, we relax the no_speech_threshold slightly
-                    # but keep hallucinaton filters.
-                    result = await loop.run_in_executor(None, lambda: model.transcribe(
-                        working_path, 
+                    whisper_result = await loop.run_in_executor(None, lambda: model.transcribe(
+                        working_path,
                         fp16=False,
-                        condition_on_previous_text=False, 
-                        # no_speech_threshold=0.6  <-- Removed to allow singing/lyrics detection
-                        # logprob_threshold=-1.0   <-- Removed to catch sung words which might have lower confidence
+                        condition_on_previous_text=False,
+                        word_timestamps=use_animated,
                     ))
-                    segments = result.get("segments", [])
-                    logger.info(f"Generated {len(segments)} caption segments")
-                    
-                    # Common Whisper hallucinations during instrumental breaks
-                    hallucinations = ["Thank you.", "Thanks.", "Bye.", "Music.", "Watching.", "MBC", "LBC", "You", "Silence"]
+                    segments = whisper_result.get("segments", [])
+                    logger.info(f"Generated {len(segments)} caption segments (word_timestamps={use_animated})")
 
-                    for seg in segments:
-                        txt = seg.get('text', '').strip()
-                        
-                        # simple clean up of [Music] or (Music) tags if they exist
-                        txt = txt.replace("[Music]", "").replace("(Music)", "").strip()
-
-                        # Basic filtering of empty or known hallucination strings
-                        if not txt or txt in hallucinations: 
-                            continue
-                        
-                        # Only filter if HIGHLY likely to be non-speech (instrumental)
-                        # Standard singing usually has no_speech_prob < 0.8
-                        if seg.get('no_speech_prob', 0) > 0.85:
-                            continue
-
-                        start = float(seg['start'])
-                        end = float(seg['end'])
-                        
-                        # Create Caption Overlay (Yellow text on semi-transparent black box, bottom center)
-                        ov = ViralOverlay(
-                            id=f"auto_{seg['id']}",
-                            type='text',
-                            text=txt,
-                            x=50, y=85,      # Bottom Center
-                            bg="black@0.5",  # Semi-transparent background
-                            color="yellow",  # High contrast
-                            start_time=start,
-                            duration=(end - start)
-                        )
-                        request.overlays.append(ov)
+                    if use_animated and segments:
+                        # Generate ASS subtitle file with animated word-level captions
+                        w, h = get_video_dimensions(working_path)
+                        ass_content = generate_ass_captions(whisper_result, caption_style_name, w, h)
+                        ass_subtitle_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_captions.ass")
+                        with open(ass_subtitle_path, "w", encoding="utf-8") as f:
+                            f.write(ass_content)
+                        logger.info(f"ASS subtitle file written to {ass_subtitle_path}")
+                    else:
+                        # Legacy: add text overlays the old way
+                        hallucinations = ["Thank you.", "Thanks.", "Bye.", "Music.", "Watching.", "MBC", "LBC", "You", "Silence"]
+                        for seg in segments:
+                            txt = seg.get('text', '').strip()
+                            txt = txt.replace("[Music]", "").replace("(Music)", "").strip()
+                            if not txt or txt in hallucinations:
+                                continue
+                            if seg.get('no_speech_prob', 0) > 0.85:
+                                continue
+                            start = float(seg['start'])
+                            end = float(seg['end'])
+                            ov = ViralOverlay(
+                                id=f"auto_{seg['id']}",
+                                type='text',
+                                text=txt,
+                                x=50, y=85,
+                                bg="black@0.5",
+                                color="yellow",
+                                start_time=start,
+                                duration=(end - start)
+                            )
+                            request.overlays.append(ov)
             except Exception as e:
                 logger.error(f"Auto-caption generation failed: {e}")
-                # Continue without captions
         
         # Use working_path (either original trimmed or cropped version) as base for overlays
         base_width, base_height = get_video_dimensions(working_path)
@@ -4858,6 +5846,12 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         filter_chain = []
         current_v_label = "0:v"
         input_idx = 1
+
+        # If ASS captions were generated, apply them as a video filter
+        if ass_subtitle_path and os.path.exists(ass_subtitle_path):
+            safe_ass = ass_subtitle_path.replace("\\", "/").replace(":", "\\:")
+            filter_chain.append(f"[{current_v_label}]ass='{safe_ass}'[v_captions];")
+            current_v_label = "v_captions"
 
         if request.add_hook and request.hook_text:
             hook_chain = build_hook_filter_chain(

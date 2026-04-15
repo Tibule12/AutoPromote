@@ -32,6 +32,8 @@ function ViralClipFinder({ file, onSave, onCancel }) {
   const [statusMessage, setStatusMessage] = useState("");
   const [sourceUrl, setSourceUrl] = useState(null);
   const [aspectRatio, setAspectRatio] = useState("9:16");
+  const [captionStyle, setCaptionStyle] = useState("bold_pop");
+  const [smartCropMode, setSmartCropMode] = useState("center");
   const [sortBy, setSortBy] = useState("score");
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [trimAdjustments, setTrimAdjustments] = useState({}); // { [sceneId]: { start, end } }
@@ -193,6 +195,8 @@ function ViralClipFinder({ file, onSave, onCancel }) {
         body: JSON.stringify({
           fileUrl: sourceUrl && sourceUrl.url ? sourceUrl.url : sourceUrl,
           aspectRatio,
+          captionStyle,
+          smartCropMode,
         }),
       });
 
@@ -208,11 +212,13 @@ function ViralClipFinder({ file, onSave, onCancel }) {
       const foundScenes = (data.scenes || []).map((s, i) => ({
         ...s,
         id: s.id || `clip-${i + 1}`,
-        duration: s.duration || (s.end - s.start),
+        duration: s.duration || s.end - s.start,
       }));
       setScenes(foundScenes);
       setProgress(100);
-      setStatusMessage(`Found ${foundScenes.length} viral moments! (${data.remainingCredits ?? "—"} credits left)`);
+      setStatusMessage(
+        `Found ${foundScenes.length} viral moments! (${data.remainingCredits ?? "—"} credits left)`
+      );
 
       if (foundScenes.length > 0) {
         setSelectedScene(foundScenes[0]);
@@ -227,7 +233,7 @@ function ViralClipFinder({ file, onSave, onCancel }) {
     }
   };
 
-  const renderSingleClip = async (scene) => {
+  const renderSingleClip = async scene => {
     const auth = getAuth();
     const token = await auth.currentUser.getIdToken();
     const timing = getEffectiveTiming(scene);
@@ -243,6 +249,8 @@ function ViralClipFinder({ file, onSave, onCancel }) {
         startTime: timing.start,
         endTime: timing.end,
         aspectRatio,
+        captionStyle,
+        smartCropMode,
       }),
     });
 
@@ -305,7 +313,7 @@ function ViralClipFinder({ file, onSave, onCancel }) {
     toast.success(`${done} clips rendered!`);
   };
 
-  const handleDownloadClip = (sceneId) => {
+  const handleDownloadClip = sceneId => {
     const result = clipResults[sceneId];
     if (!result) return;
     if (result.file instanceof File || result.file instanceof Blob) {
@@ -337,14 +345,16 @@ function ViralClipFinder({ file, onSave, onCancel }) {
       url: sourceUrl?.url || sourceUrl,
       isRemote: true,
       openStudio: true,
-      clips: [{
-        id: scene.id,
-        start: timing.start,
-        end: timing.end,
-        duration: timing.end - timing.start,
-        reason: scene.reason || "AI-detected viral moment",
-        viralScore: scene.viralScore,
-      }],
+      clips: [
+        {
+          id: scene.id,
+          start: timing.start,
+          end: timing.end,
+          duration: timing.end - timing.start,
+          reason: scene.reason || "AI-detected viral moment",
+          viralScore: scene.viralScore,
+        },
+      ],
     });
   };
 
@@ -373,7 +383,9 @@ function ViralClipFinder({ file, onSave, onCancel }) {
               <span className="stat-badge">⏱ {Math.round(totalDuration)}s total</span>
             </div>
           )}
-          <button className="close-btn" onClick={onCancel}>&times;</button>
+          <button className="close-btn" onClick={onCancel}>
+            &times;
+          </button>
         </div>
       </div>
 
@@ -394,6 +406,64 @@ function ViralClipFinder({ file, onSave, onCancel }) {
                 </button>
               ))}
             </div>
+          </div>
+          <div style={{ display: "flex", gap: "12px", marginTop: "10px", flexWrap: "wrap" }}>
+            <label
+              style={{
+                fontSize: "13px",
+                color: "#bbb",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+              }}
+            >
+              Caption Style:
+              <select
+                value={captionStyle}
+                onChange={e => setCaptionStyle(e.target.value)}
+                style={{
+                  padding: "4px 8px",
+                  borderRadius: "4px",
+                  background: "#1a1a2e",
+                  color: "#fff",
+                  border: "1px solid rgba(255,255,255,0.15)",
+                  fontSize: "12px",
+                }}
+              >
+                <option value="bold_pop">Bold Pop</option>
+                <option value="karaoke">Karaoke Fill</option>
+                <option value="glow">Neon Glow</option>
+                <option value="bounce">Bounce</option>
+                <option value="minimal">Minimal</option>
+                <option value="">Classic</option>
+              </select>
+            </label>
+            <label
+              style={{
+                fontSize: "13px",
+                color: "#bbb",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+              }}
+            >
+              Smart Crop:
+              <select
+                value={smartCropMode}
+                onChange={e => setSmartCropMode(e.target.value)}
+                style={{
+                  padding: "4px 8px",
+                  borderRadius: "4px",
+                  background: "#1a1a2e",
+                  color: "#fff",
+                  border: "1px solid rgba(255,255,255,0.15)",
+                  fontSize: "12px",
+                }}
+              >
+                <option value="center">🎯 Center</option>
+                <option value="speaker_track">👤 Speaker</option>
+              </select>
+            </label>
           </div>
         </div>
       )}
@@ -441,7 +511,9 @@ function ViralClipFinder({ file, onSave, onCancel }) {
                   <label>Sort:</label>
                   <select value={sortBy} onChange={e => setSortBy(e.target.value)}>
                     {SORT_OPTIONS.map(o => (
-                      <option key={o.key} value={o.key}>{o.label}</option>
+                      <option key={o.key} value={o.key}>
+                        {o.label}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -503,7 +575,9 @@ function ViralClipFinder({ file, onSave, onCancel }) {
                           step="0.1"
                           min="0"
                           value={getEffectiveTiming(selectedScene).start.toFixed(1)}
-                          onChange={e => handleTrimChange(selectedScene.id, "start", e.target.value)}
+                          onChange={e =>
+                            handleTrimChange(selectedScene.id, "start", e.target.value)
+                          }
                           className="trim-input"
                         />
                       </label>
@@ -519,7 +593,12 @@ function ViralClipFinder({ file, onSave, onCancel }) {
                         />
                       </label>
                       <span className="trim-duration">
-                        {Math.max(0, getEffectiveTiming(selectedScene).end - getEffectiveTiming(selectedScene).start).toFixed(1)}s
+                        {Math.max(
+                          0,
+                          getEffectiveTiming(selectedScene).end -
+                            getEffectiveTiming(selectedScene).start
+                        ).toFixed(1)}
+                        s
                       </span>
                     </div>
                   </div>
@@ -561,9 +640,7 @@ function ViralClipFinder({ file, onSave, onCancel }) {
                         {formatTime(timing.start)} — {formatTime(timing.end)}
                       </div>
 
-                      {scene.reason && (
-                        <div className="scene-reason">{scene.reason}</div>
-                      )}
+                      {scene.reason && <div className="scene-reason">{scene.reason}</div>}
 
                       {/* Viral score bar */}
                       <div className="score-bar-container">
@@ -578,22 +655,33 @@ function ViralClipFinder({ file, onSave, onCancel }) {
                         {!isRendered ? (
                           <button
                             className="scene-action-btn render"
-                            onClick={e => { e.stopPropagation(); handleRender(scene); }}
+                            onClick={e => {
+                              e.stopPropagation();
+                              handleRender(scene);
+                            }}
                             disabled={rendering || batchRendering}
                           >
-                            {rendering && selectedScene?.id === scene.id ? "Rendering..." : "🎬 Render (5 cr)"}
+                            {rendering && selectedScene?.id === scene.id
+                              ? "Rendering..."
+                              : "🎬 Render (5 cr)"}
                           </button>
                         ) : (
                           <>
                             <button
                               className="scene-action-btn download"
-                              onClick={e => { e.stopPropagation(); handleDownloadClip(scene.id); }}
+                              onClick={e => {
+                                e.stopPropagation();
+                                handleDownloadClip(scene.id);
+                              }}
                             >
                               📥 Download
                             </button>
                             <button
                               className="scene-action-btn use"
-                              onClick={e => { e.stopPropagation(); handleSendToEditor(scene.id); }}
+                              onClick={e => {
+                                e.stopPropagation();
+                                handleSendToEditor(scene.id);
+                              }}
                             >
                               ✅ Use Clip
                             </button>
@@ -601,7 +689,10 @@ function ViralClipFinder({ file, onSave, onCancel }) {
                         )}
                         <button
                           className="scene-action-btn studio"
-                          onClick={e => { e.stopPropagation(); handleOpenInStudio(scene); }}
+                          onClick={e => {
+                            e.stopPropagation();
+                            handleOpenInStudio(scene);
+                          }}
                           title="Open in Viral Clip Studio for advanced editing"
                         >
                           🎛️ Studio

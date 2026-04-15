@@ -653,3 +653,9 @@ button {
     font-size: 3.5rem;
   }
 }
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

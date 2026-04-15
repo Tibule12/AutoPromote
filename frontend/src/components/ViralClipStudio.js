@@ -705,7 +705,9 @@ const ViralClipStudio = ({
 
   // New AI Options for users
   const [autoCaptions, setAutoCaptions] = useState(false);
+  const [captionStyle, setCaptionStyle] = useState("bold_pop");
   const [smartCrop, setSmartCrop] = useState(false);
+  const [smartCropMode, setSmartCropMode] = useState("center"); // "center" or "speaker_track"
   const [enhanceQuality, setEnhanceQuality] = useState(false);
   const [silenceRemoval, setSilenceRemoval] = useState(false);
   const [silenceThreshold, setSilenceThreshold] = useState(-35);
@@ -3181,7 +3183,9 @@ const ViralClipStudio = ({
       setOverlays(newOverlays);
       onSave(selectedClip, normalizedOverlays, {
         autoCaptions,
+        captionStyle,
         smartCrop,
+        smartCropMode,
         enhanceQuality,
         silenceRemoval,
         silenceThreshold,
@@ -3378,7 +3382,9 @@ const ViralClipStudio = ({
     activeOverlayId,
     videoFit,
     autoCaptions,
+    captionStyle,
     smartCrop,
+    smartCropMode,
     silenceRemoval,
     silenceThreshold,
     minSilenceDuration,
@@ -3443,7 +3449,9 @@ const ViralClipStudio = ({
     activeOverlayId,
     videoFit,
     autoCaptions,
+    captionStyle,
     smartCrop,
+    smartCropMode,
     silenceRemoval,
     silenceThreshold,
     minSilenceDuration,
@@ -4516,9 +4524,12 @@ const ViralClipStudio = ({
             >
               ↷ Redo
             </button>
-            <button className="close-btn" onClick={() => {
-              if (window.confirm("Close the studio? Unsaved changes will be lost.")) onCancel();
-            }}>
+            <button
+              className="close-btn"
+              onClick={() => {
+                if (window.confirm("Close the studio? Unsaved changes will be lost.")) onCancel();
+              }}
+            >
               &times;
             </button>
           </div>
@@ -5209,7 +5220,9 @@ const ViralClipStudio = ({
 
                           // 1. Get file blob
                           if (!clip.file) {
-                            toast.error("Can only caption freshly uploaded files. (No file data found)");
+                            toast.error(
+                              "Can only caption freshly uploaded files. (No file data found)"
+                            );
                             return;
                           }
 
@@ -6129,303 +6142,434 @@ const ViralClipStudio = ({
               </div>
               <div className="ai-settings-card">
                 <h5
-                  style={{ ...sidebarSectionTitleStyle, cursor: "pointer", userSelect: "none", display: "flex", justifyContent: "space-between", alignItems: "center" }}
+                  style={{
+                    ...sidebarSectionTitleStyle,
+                    cursor: "pointer",
+                    userSelect: "none",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
                   onClick={() => toggleSection("aiEnhancements")}
                 >
                   <span>🤖 AI Enhancements</span>
-                  <span style={{ fontSize: "12px", opacity: 0.6 }}>{collapsedSections.aiEnhancements ? "▶" : "▼"}</span>
+                  <span style={{ fontSize: "12px", opacity: 0.6 }}>
+                    {collapsedSections.aiEnhancements ? "▶" : "▼"}
+                  </span>
                 </h5>
-                {!collapsedSections.aiEnhancements && (<>
-                <label style={{ ...sidebarCheckboxLabelStyle, marginBottom: "8px" }}>
-                  <input
-                    type="checkbox"
-                    checked={autoCaptions}
-                    onChange={e => setAutoCaptions(e.target.checked)}
-                    style={{ marginRight: "8px" }}
-                  />
-                  Auto-Captions (Burn-in)
-                </label>
-                <div style={{ ...sidebarBodyTextStyle, marginBottom: "10px" }}>
-                  Captions are generated as an AI draft. Clean English and Afrikaans speech usually
-                  performs best. Mixed South African languages and slang may need manual review.
-                </div>
-                <label style={sidebarCheckboxLabelStyle}>
-                  <input
-                    type="checkbox"
-                    checked={smartCrop}
-                    onChange={e => setSmartCrop(e.target.checked)}
-                    style={{ marginRight: "8px" }}
-                  />
-                  Smart Crop (Keep face centered)
-                </label>
-                <label style={{ ...sidebarCheckboxLabelStyle, marginTop: "10px" }}>
-                  <input
-                    type="checkbox"
-                    checked={enhanceQuality}
-                    onChange={e => setEnhanceQuality(e.target.checked)}
-                    style={{ marginRight: "8px" }}
-                  />
-                  Quality Enhancement (Safe clean-up)
-                </label>
-                {enhanceQuality ? (
-                  <div style={{ ...sidebarBodyTextStyle, marginTop: "8px", marginBottom: "10px" }}>
-                    Uses a conservative export pass to reduce noise and add light sharpening. It is
-                    designed to improve soft footage gently, not to fake missing detail.
-                  </div>
-                ) : null}
-                <label style={{ ...sidebarCheckboxLabelStyle, marginTop: "10px" }}>
-                  <input
-                    type="checkbox"
-                    checked={silenceRemoval}
-                    onChange={e => setSilenceRemoval(e.target.checked)}
-                    style={{ marginRight: "8px" }}
-                  />
-                  Remove Silence
-                </label>
-                {silenceRemoval ? (
-                  <div className="micro-settings-card">
-                    <label className="studio-slider-label">
-                      <span>Silence threshold {silenceThreshold} dB</span>
+                {!collapsedSections.aiEnhancements && (
+                  <>
+                    <label style={{ ...sidebarCheckboxLabelStyle, marginBottom: "8px" }}>
                       <input
-                        type="range"
-                        min={-55}
-                        max={-20}
-                        step={1}
-                        value={silenceThreshold}
-                        onChange={e => setSilenceThreshold(Number(e.target.value))}
+                        type="checkbox"
+                        checked={autoCaptions}
+                        onChange={e => setAutoCaptions(e.target.checked)}
+                        style={{ marginRight: "8px" }}
                       />
+                      Auto-Captions (Burn-in)
                     </label>
-                    <label className="studio-slider-label">
-                      <span>Minimum pause {Number(minSilenceDuration).toFixed(2)}s</span>
+                    {autoCaptions && (
+                      <div style={{ marginBottom: "10px", paddingLeft: "4px" }}>
+                        <label
+                          style={{ ...sidebarBodyTextStyle, display: "block", marginBottom: "6px" }}
+                        >
+                          Caption Style:
+                        </label>
+                        <select
+                          value={captionStyle}
+                          onChange={e => setCaptionStyle(e.target.value)}
+                          style={{
+                            width: "100%",
+                            padding: "6px 8px",
+                            borderRadius: "6px",
+                            border: "1px solid #444",
+                            background: "#1a1a2e",
+                            color: "#fff",
+                            fontSize: "13px",
+                          }}
+                        >
+                          <option value="">Classic (Plain text)</option>
+                          <option value="bold_pop">Bold Pop ✦</option>
+                          <option value="karaoke">Karaoke Highlight ♫</option>
+                          <option value="glow">Neon Glow ✧</option>
+                          <option value="bounce">Bounce ⬆</option>
+                          <option value="minimal">Minimal Clean</option>
+                        </select>
+                        <div
+                          style={{
+                            ...sidebarBodyTextStyle,
+                            marginTop: "4px",
+                            fontSize: "11px",
+                            opacity: 0.6,
+                          }}
+                        >
+                          {captionStyle === "bold_pop" &&
+                            "Active word scales up with orange highlight"}
+                          {captionStyle === "karaoke" && "Words fill with color as they're spoken"}
+                          {captionStyle === "glow" && "Active word gets neon glow outline effect"}
+                          {captionStyle === "bounce" && "Active word bounces up with red highlight"}
+                          {captionStyle === "minimal" && "Subtle fade in/out per word group"}
+                          {!captionStyle && "Yellow text on dark background (legacy)"}
+                        </div>
+                      </div>
+                    )}
+                    <div style={{ ...sidebarBodyTextStyle, marginBottom: "10px" }}>
+                      Captions are generated as an AI draft. Clean English and Afrikaans speech
+                      usually performs best. Mixed South African languages and slang may need manual
+                      review.
+                    </div>
+                    <label style={sidebarCheckboxLabelStyle}>
                       <input
-                        type="range"
-                        min={0.25}
-                        max={2.5}
-                        step={0.05}
-                        value={minSilenceDuration}
-                        onChange={e => setMinSilenceDuration(Number(e.target.value))}
+                        type="checkbox"
+                        checked={smartCrop}
+                        onChange={e => setSmartCrop(e.target.checked)}
+                        style={{ marginRight: "8px" }}
                       />
+                      Smart Crop (Vertical reframe)
                     </label>
-                  </div>
-                ) : null}
-                <label style={{ ...sidebarCheckboxLabelStyle, marginTop: "10px" }}>
-                  <input
-                    type="checkbox"
-                    checked={removeWatermark}
-                    onChange={e => setRemoveWatermark(e.target.checked)}
-                    style={{ marginRight: "8px" }}
-                  />
-                  Remove Platform Watermarks
-                </label>
-                {removeWatermark ? (
-                  <div className="micro-settings-card compact">
-                    <label className="studio-slider-label">
-                      <span>Watermark cleanup mode</span>
-                      <select
-                        value={watermarkMode}
-                        onChange={e => setWatermarkMode(e.target.value)}
-                      >
-                        <option value="adaptive">Adaptive tracking</option>
-                        <option value="manual">Manual cleanup boxes</option>
-                        <option value="corners">Static opposite corners</option>
-                        <option value="top_right">Top right only</option>
-                        <option value="bottom_left">Bottom left only</option>
-                        <option value="all">Aggressive all corners</option>
-                      </select>
-                    </label>
-                    {watermarkMode === "manual" ? (
-                      <div className="watermark-manual-tools">
-                        <p style={{ ...sidebarBodyTextStyle, margin: 0 }}>
-                          Add a cleanup box, drag it over the watermark in the preview, then size it
-                          until it covers the badge cleanly.
-                        </p>
-                        <div className="watermark-manual-actions">
+                    {smartCrop && (
+                      <div style={{ marginBottom: "10px", paddingLeft: "4px", marginTop: "6px" }}>
+                        <label
+                          style={{ ...sidebarBodyTextStyle, display: "block", marginBottom: "4px" }}
+                        >
+                          Crop Mode:
+                        </label>
+                        <div style={{ display: "flex", gap: "6px" }}>
                           <button
-                            type="button"
-                            className="mini-toggle-btn"
-                            onClick={() => addManualWatermarkRegion()}
+                            onClick={() => setSmartCropMode("center")}
+                            style={{
+                              flex: 1,
+                              padding: "6px 8px",
+                              borderRadius: "6px",
+                              fontSize: "12px",
+                              cursor: "pointer",
+                              border:
+                                smartCropMode === "center" ? "2px solid #6366f1" : "1px solid #444",
+                              background: smartCropMode === "center" ? "#2d2b55" : "#1a1a2e",
+                              color: "#fff",
+                            }}
                           >
-                            Add cleanup box
+                            🎯 Center
                           </button>
-                          {activeWatermarkRegionId ? (
+                          <button
+                            onClick={() => setSmartCropMode("speaker_track")}
+                            style={{
+                              flex: 1,
+                              padding: "6px 8px",
+                              borderRadius: "6px",
+                              fontSize: "12px",
+                              cursor: "pointer",
+                              border:
+                                smartCropMode === "speaker_track"
+                                  ? "2px solid #6366f1"
+                                  : "1px solid #444",
+                              background: smartCropMode === "speaker_track" ? "#2d2b55" : "#1a1a2e",
+                              color: "#fff",
+                            }}
+                          >
+                            👤 Follow Speaker
+                          </button>
+                        </div>
+                        <div
+                          style={{
+                            ...sidebarBodyTextStyle,
+                            marginTop: "4px",
+                            fontSize: "11px",
+                            opacity: 0.6,
+                          }}
+                        >
+                          {smartCropMode === "speaker_track"
+                            ? "AI detects faces and dynamically follows the speaker"
+                            : "Crops to center of frame (fast, works for all content)"}
+                        </div>
+                      </div>
+                    )}
+                    <label style={{ ...sidebarCheckboxLabelStyle, marginTop: "10px" }}>
+                      <input
+                        type="checkbox"
+                        checked={enhanceQuality}
+                        onChange={e => setEnhanceQuality(e.target.checked)}
+                        style={{ marginRight: "8px" }}
+                      />
+                      Quality Enhancement (Safe clean-up)
+                    </label>
+                    {enhanceQuality ? (
+                      <div
+                        style={{ ...sidebarBodyTextStyle, marginTop: "8px", marginBottom: "10px" }}
+                      >
+                        Uses a conservative export pass to reduce noise and add light sharpening. It
+                        is designed to improve soft footage gently, not to fake missing detail.
+                      </div>
+                    ) : null}
+                    <label style={{ ...sidebarCheckboxLabelStyle, marginTop: "10px" }}>
+                      <input
+                        type="checkbox"
+                        checked={silenceRemoval}
+                        onChange={e => setSilenceRemoval(e.target.checked)}
+                        style={{ marginRight: "8px" }}
+                      />
+                      Remove Silence
+                    </label>
+                    {silenceRemoval ? (
+                      <div className="micro-settings-card">
+                        <label className="studio-slider-label">
+                          <span>Silence threshold {silenceThreshold} dB</span>
+                          <input
+                            type="range"
+                            min={-55}
+                            max={-20}
+                            step={1}
+                            value={silenceThreshold}
+                            onChange={e => setSilenceThreshold(Number(e.target.value))}
+                          />
+                        </label>
+                        <label className="studio-slider-label">
+                          <span>Minimum pause {Number(minSilenceDuration).toFixed(2)}s</span>
+                          <input
+                            type="range"
+                            min={0.25}
+                            max={2.5}
+                            step={0.05}
+                            value={minSilenceDuration}
+                            onChange={e => setMinSilenceDuration(Number(e.target.value))}
+                          />
+                        </label>
+                      </div>
+                    ) : null}
+                    <label style={{ ...sidebarCheckboxLabelStyle, marginTop: "10px" }}>
+                      <input
+                        type="checkbox"
+                        checked={removeWatermark}
+                        onChange={e => setRemoveWatermark(e.target.checked)}
+                        style={{ marginRight: "8px" }}
+                      />
+                      Remove Platform Watermarks
+                    </label>
+                    {removeWatermark ? (
+                      <div className="micro-settings-card compact">
+                        <label className="studio-slider-label">
+                          <span>Watermark cleanup mode</span>
+                          <select
+                            value={watermarkMode}
+                            onChange={e => setWatermarkMode(e.target.value)}
+                          >
+                            <option value="adaptive">Adaptive tracking</option>
+                            <option value="manual">Manual cleanup boxes</option>
+                            <option value="corners">Static opposite corners</option>
+                            <option value="top_right">Top right only</option>
+                            <option value="bottom_left">Bottom left only</option>
+                            <option value="all">Aggressive all corners</option>
+                          </select>
+                        </label>
+                        {watermarkMode === "manual" ? (
+                          <div className="watermark-manual-tools">
+                            <p style={{ ...sidebarBodyTextStyle, margin: 0 }}>
+                              Add a cleanup box, drag it over the watermark in the preview, then
+                              size it until it covers the badge cleanly.
+                            </p>
+                            <div className="watermark-manual-actions">
+                              <button
+                                type="button"
+                                className="mini-toggle-btn"
+                                onClick={() => addManualWatermarkRegion()}
+                              >
+                                Add cleanup box
+                              </button>
+                              {activeWatermarkRegionId ? (
+                                <button
+                                  type="button"
+                                  className="mini-toggle-btn"
+                                  onClick={() =>
+                                    deleteManualWatermarkRegion(activeWatermarkRegionId)
+                                  }
+                                >
+                                  Delete selected box
+                                </button>
+                              ) : null}
+                            </div>
+                            <div className="watermark-region-list">
+                              {manualWatermarkRegions.length ? (
+                                manualWatermarkRegions.map((region, index) => (
+                                  <button
+                                    key={region.id}
+                                    type="button"
+                                    className={`mini-toggle-btn ${
+                                      activeWatermarkRegionId === region.id ? "active" : ""
+                                    }`}
+                                    onClick={() => setActiveWatermarkRegionId(region.id)}
+                                  >
+                                    Box {index + 1}
+                                  </button>
+                                ))
+                              ) : (
+                                <span style={sidebarBodyTextStyle}>No manual boxes yet.</span>
+                              )}
+                            </div>
+                            {activeWatermarkRegionId
+                              ? (() => {
+                                  const activeRegion = manualWatermarkRegions.find(
+                                    region => region.id === activeWatermarkRegionId
+                                  );
+                                  if (!activeRegion) return null;
+
+                                  return (
+                                    <div className="watermark-region-editor">
+                                      <label
+                                        style={{ ...sidebarCheckboxLabelStyle, marginTop: "2px" }}
+                                      >
+                                        <input
+                                          type="checkbox"
+                                          checked={activeRegion.track !== false}
+                                          onChange={e =>
+                                            updateManualWatermarkRegion(activeRegion.id, {
+                                              track: e.target.checked,
+                                            })
+                                          }
+                                          style={{ marginRight: "8px" }}
+                                        />
+                                        Track this cleanup box across the clip
+                                      </label>
+                                      <div className="watermark-manual-actions">
+                                        <button
+                                          type="button"
+                                          className="mini-toggle-btn"
+                                          onClick={() =>
+                                            updateManualWatermarkRegion(activeRegion.id, {
+                                              seedTime: clampNumber(videoTime, 0, 36000, 0),
+                                            })
+                                          }
+                                        >
+                                          Use current frame as seed
+                                        </button>
+                                      </div>
+                                      <div className="watermark-cleanup-preview-status">
+                                        Tracking seed:{" "}
+                                        {Number(activeRegion.seedTime || 0).toFixed(2)}s
+                                      </div>
+                                      <label className="studio-slider-label">
+                                        <span>Box width</span>
+                                        <input
+                                          type="range"
+                                          min={8}
+                                          max={58}
+                                          step={1}
+                                          value={activeRegion.width}
+                                          onChange={e =>
+                                            updateManualWatermarkRegion(activeRegion.id, {
+                                              width: Number(e.target.value),
+                                            })
+                                          }
+                                        />
+                                      </label>
+                                      <label className="studio-slider-label">
+                                        <span>Box height</span>
+                                        <input
+                                          type="range"
+                                          min={4}
+                                          max={24}
+                                          step={1}
+                                          value={activeRegion.height}
+                                          onChange={e =>
+                                            updateManualWatermarkRegion(activeRegion.id, {
+                                              height: Number(e.target.value),
+                                            })
+                                          }
+                                        />
+                                      </label>
+                                    </div>
+                                  );
+                                })()
+                              : null}
+                          </div>
+                        ) : null}
+                        <div className="watermark-cleanup-preview-panel">
+                          <div className="watermark-cleanup-preview-actions">
+                            <p style={{ ...sidebarBodyTextStyle, margin: 0 }}>
+                              Pause on the frame you want to inspect, then run a real cleanup
+                              preview to verify the worker removes the watermark without damaging
+                              nearby content.
+                            </p>
+                            {watermarkCleanupPreview ? (
+                              <label style={{ ...sidebarCheckboxLabelStyle, marginTop: "2px" }}>
+                                <input
+                                  type="checkbox"
+                                  checked={showWatermarkCleanupOnVideo}
+                                  onChange={e => setShowWatermarkCleanupOnVideo(e.target.checked)}
+                                  style={{ marginRight: "8px" }}
+                                />
+                                Show cleaned frame on video when paused
+                              </label>
+                            ) : null}
                             <button
                               type="button"
                               className="mini-toggle-btn"
-                              onClick={() => deleteManualWatermarkRegion(activeWatermarkRegionId)}
+                              onClick={handleGenerateWatermarkCleanupPreview}
+                              disabled={
+                                isWatermarkCleanupPreviewLoading ||
+                                !currentTimelineClip ||
+                                (watermarkMode === "manual" && !manualWatermarkRegions.length)
+                              }
                             >
-                              Delete selected box
+                              {isWatermarkCleanupPreviewLoading
+                                ? "Rendering real preview..."
+                                : "Preview real cleanup"}
                             </button>
+                          </div>
+                          {watermarkCleanupPreviewError ? (
+                            <div className="watermark-cleanup-preview-status error">
+                              {watermarkCleanupPreviewError}
+                            </div>
                           ) : null}
-                        </div>
-                        <div className="watermark-region-list">
-                          {manualWatermarkRegions.length ? (
-                            manualWatermarkRegions.map((region, index) => (
-                              <button
-                                key={region.id}
-                                type="button"
-                                className={`mini-toggle-btn ${
-                                  activeWatermarkRegionId === region.id ? "active" : ""
-                                }`}
-                                onClick={() => setActiveWatermarkRegionId(region.id)}
-                              >
-                                Box {index + 1}
-                              </button>
-                            ))
-                          ) : (
-                            <span style={sidebarBodyTextStyle}>No manual boxes yet.</span>
-                          )}
-                        </div>
-                        {activeWatermarkRegionId
-                          ? (() => {
-                              const activeRegion = manualWatermarkRegions.find(
-                                region => region.id === activeWatermarkRegionId
-                              );
-                              if (!activeRegion) return null;
-
-                              return (
-                                <div className="watermark-region-editor">
-                                  <label style={{ ...sidebarCheckboxLabelStyle, marginTop: "2px" }}>
-                                    <input
-                                      type="checkbox"
-                                      checked={activeRegion.track !== false}
-                                      onChange={e =>
-                                        updateManualWatermarkRegion(activeRegion.id, {
-                                          track: e.target.checked,
-                                        })
-                                      }
-                                      style={{ marginRight: "8px" }}
-                                    />
-                                    Track this cleanup box across the clip
-                                  </label>
-                                  <div className="watermark-manual-actions">
-                                    <button
-                                      type="button"
-                                      className="mini-toggle-btn"
-                                      onClick={() =>
-                                        updateManualWatermarkRegion(activeRegion.id, {
-                                          seedTime: clampNumber(videoTime, 0, 36000, 0),
-                                        })
-                                      }
-                                    >
-                                      Use current frame as seed
-                                    </button>
-                                  </div>
-                                  <div className="watermark-cleanup-preview-status">
-                                    Tracking seed: {Number(activeRegion.seedTime || 0).toFixed(2)}s
-                                  </div>
-                                  <label className="studio-slider-label">
-                                    <span>Box width</span>
-                                    <input
-                                      type="range"
-                                      min={8}
-                                      max={58}
-                                      step={1}
-                                      value={activeRegion.width}
-                                      onChange={e =>
-                                        updateManualWatermarkRegion(activeRegion.id, {
-                                          width: Number(e.target.value),
-                                        })
-                                      }
-                                    />
-                                  </label>
-                                  <label className="studio-slider-label">
-                                    <span>Box height</span>
-                                    <input
-                                      type="range"
-                                      min={4}
-                                      max={24}
-                                      step={1}
-                                      value={activeRegion.height}
-                                      onChange={e =>
-                                        updateManualWatermarkRegion(activeRegion.id, {
-                                          height: Number(e.target.value),
-                                        })
-                                      }
-                                    />
-                                  </label>
+                          {watermarkCleanupPreview ? (
+                            <div className="watermark-cleanup-preview-grid">
+                              <div className="watermark-cleanup-preview-card">
+                                <span className="watermark-cleanup-preview-label">
+                                  Original frame
+                                </span>
+                                {watermarkCleanupPreview.originalImageUrl ? (
+                                  <img
+                                    src={getSafeMediaSource(
+                                      watermarkCleanupPreview.originalImageUrl
+                                    )}
+                                    alt="Original watermark frame"
+                                    className="watermark-cleanup-preview-image"
+                                  />
+                                ) : null}
+                              </div>
+                              <div className="watermark-cleanup-preview-card">
+                                <span className="watermark-cleanup-preview-label">
+                                  Cleaned frame
+                                </span>
+                                {watermarkCleanupPreview.cleanedImageUrl ? (
+                                  <img
+                                    src={getSafeMediaSource(
+                                      watermarkCleanupPreview.cleanedImageUrl
+                                    )}
+                                    alt="Watermark-cleaned frame preview"
+                                    className="watermark-cleanup-preview-image"
+                                  />
+                                ) : null}
+                              </div>
+                              <div className="watermark-cleanup-preview-status">
+                                Captured at{" "}
+                                {Number(watermarkCleanupPreview.previewTime || 0).toFixed(2)}s. If
+                                you move the box or scrub to another moment, run the preview again.
+                              </div>
+                              {showWatermarkCleanupOnVideo &&
+                              !isWatermarkCleanupPreviewFrameAligned ? (
+                                <div className="watermark-cleanup-preview-status">
+                                  Pause near{" "}
+                                  {Number(watermarkCleanupPreview.previewTime || 0).toFixed(2)}s to
+                                  see the cleaned frame directly on the video preview.
                                 </div>
-                              );
-                            })()
-                          : null}
-                      </div>
-                    ) : null}
-                    <div className="watermark-cleanup-preview-panel">
-                      <div className="watermark-cleanup-preview-actions">
-                        <p style={{ ...sidebarBodyTextStyle, margin: 0 }}>
-                          Pause on the frame you want to inspect, then run a real cleanup preview to
-                          verify the worker removes the watermark without damaging nearby content.
-                        </p>
-                        {watermarkCleanupPreview ? (
-                          <label style={{ ...sidebarCheckboxLabelStyle, marginTop: "2px" }}>
-                            <input
-                              type="checkbox"
-                              checked={showWatermarkCleanupOnVideo}
-                              onChange={e => setShowWatermarkCleanupOnVideo(e.target.checked)}
-                              style={{ marginRight: "8px" }}
-                            />
-                            Show cleaned frame on video when paused
-                          </label>
-                        ) : null}
-                        <button
-                          type="button"
-                          className="mini-toggle-btn"
-                          onClick={handleGenerateWatermarkCleanupPreview}
-                          disabled={
-                            isWatermarkCleanupPreviewLoading ||
-                            !currentTimelineClip ||
-                            (watermarkMode === "manual" && !manualWatermarkRegions.length)
-                          }
-                        >
-                          {isWatermarkCleanupPreviewLoading
-                            ? "Rendering real preview..."
-                            : "Preview real cleanup"}
-                        </button>
-                      </div>
-                      {watermarkCleanupPreviewError ? (
-                        <div className="watermark-cleanup-preview-status error">
-                          {watermarkCleanupPreviewError}
-                        </div>
-                      ) : null}
-                      {watermarkCleanupPreview ? (
-                        <div className="watermark-cleanup-preview-grid">
-                          <div className="watermark-cleanup-preview-card">
-                            <span className="watermark-cleanup-preview-label">Original frame</span>
-                            {watermarkCleanupPreview.originalImageUrl ? (
-                              <img
-                                src={getSafeMediaSource(watermarkCleanupPreview.originalImageUrl)}
-                                alt="Original watermark frame"
-                                className="watermark-cleanup-preview-image"
-                              />
-                            ) : null}
-                          </div>
-                          <div className="watermark-cleanup-preview-card">
-                            <span className="watermark-cleanup-preview-label">Cleaned frame</span>
-                            {watermarkCleanupPreview.cleanedImageUrl ? (
-                              <img
-                                src={getSafeMediaSource(watermarkCleanupPreview.cleanedImageUrl)}
-                                alt="Watermark-cleaned frame preview"
-                                className="watermark-cleanup-preview-image"
-                              />
-                            ) : null}
-                          </div>
-                          <div className="watermark-cleanup-preview-status">
-                            Captured at{" "}
-                            {Number(watermarkCleanupPreview.previewTime || 0).toFixed(2)}s. If you
-                            move the box or scrub to another moment, run the preview again.
-                          </div>
-                          {showWatermarkCleanupOnVideo && !isWatermarkCleanupPreviewFrameAligned ? (
-                            <div className="watermark-cleanup-preview-status">
-                              Pause near{" "}
-                              {Number(watermarkCleanupPreview.previewTime || 0).toFixed(2)}s to see
-                              the cleaned frame directly on the video preview.
+                              ) : null}
                             </div>
                           ) : null}
                         </div>
-                      ) : null}
-                    </div>
-                  </div>
-                ) : null}
-                </>)}
+                      </div>
+                    ) : null}
+                  </>
+                )}
                 <label style={{ ...sidebarCheckboxLabelStyle, marginTop: "10px" }}>
                   <input
                     type="checkbox"
@@ -6749,116 +6893,127 @@ const ViralClipStudio = ({
               </div>
               <div className="ai-settings-card">
                 <h5
-                  style={{ ...sidebarSectionTitleStyle, cursor: "pointer", userSelect: "none", display: "flex", justifyContent: "space-between", alignItems: "center" }}
+                  style={{
+                    ...sidebarSectionTitleStyle,
+                    cursor: "pointer",
+                    userSelect: "none",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
                   onClick={() => toggleSection("musicAudio")}
                 >
                   <span>🎵 Music And Audio</span>
-                  <span style={{ fontSize: "12px", opacity: 0.6 }}>{collapsedSections.musicAudio ? "▶" : "▼"}</span>
+                  <span style={{ fontSize: "12px", opacity: 0.6 }}>
+                    {collapsedSections.musicAudio ? "▶" : "▼"}
+                  </span>
                 </h5>
-                {!collapsedSections.musicAudio && (<>
-                <label style={{ ...sidebarCheckboxLabelStyle, marginBottom: "8px" }}>
-                  <input
-                    type="checkbox"
-                    checked={addMusic}
-                    onChange={e => setAddMusic(e.target.checked)}
-                    style={{ marginRight: "8px" }}
-                  />
-                  Add Background Music
-                </label>
-                <label
-                  style={{ ...sidebarCheckboxLabelStyle, marginBottom: addMusic ? "10px" : 0 }}
-                >
-                  <input
-                    type="checkbox"
-                    checked={muteOriginalAudio}
-                    onChange={e => setMuteOriginalAudio(e.target.checked)}
-                    style={{ marginRight: "8px" }}
-                  />
-                  Mute Original Audio
-                </label>
-                <div style={{ ...sidebarBodyTextStyle, marginBottom: addMusic ? "12px" : 0 }}>
-                  {addMusic
-                    ? `Music source: ${currentMusicLabel}`
-                    : "Keep original audio live, replace it with music, or mute it entirely from here."}
-                </div>
-                {addMusic ? (
-                  <div className="micro-settings-card">
-                    {!musicSearchMode ? (
-                      <label className="studio-slider-label">
-                        <span>Music preset</span>
-                        <select
-                          value={musicSelection}
-                          onChange={e => {
-                            setMusicSelection(e.target.value);
-                            if (onMusicChange) onMusicChange(e.target.value, false);
-                          }}
-                        >
-                          <option value="upbeat_pop.mp3">Upbeat Pop</option>
-                          <option value="lofi_chill.mp3">Lofi Chill</option>
-                          <option value="cinematic.mp3">Cinematic</option>
-                          <option value="corporate.mp3">Corporate</option>
-                        </select>
-                      </label>
-                    ) : (
-                      <div className="hook-suggestion-card compact-audio-note">
-                        <strong>Custom searched track active</strong>
-                        <p>{currentMusicLabel}</p>
-                        <button
-                          type="button"
-                          className="mini-toggle-btn"
-                          onClick={() => {
-                            setMusicSearchMode(false);
-                            setMusicSelection("upbeat_pop.mp3");
-                            if (onMusicChange) onMusicChange("upbeat_pop.mp3", false);
-                          }}
-                        >
-                          Switch to presets
-                        </button>
-                      </div>
-                    )}
-                    <label className="studio-slider-label">
-                      <span>Music volume {Math.round(Number(musicVolume || 0) * 100)}%</span>
+                {!collapsedSections.musicAudio && (
+                  <>
+                    <label style={{ ...sidebarCheckboxLabelStyle, marginBottom: "8px" }}>
                       <input
-                        type="range"
-                        min={0.05}
-                        max={0.6}
-                        step={0.01}
-                        value={musicVolume}
-                        onChange={e => setMusicVolume(Number(e.target.value))}
+                        type="checkbox"
+                        checked={addMusic}
+                        onChange={e => setAddMusic(e.target.checked)}
+                        style={{ marginRight: "8px" }}
                       />
+                      Add Background Music
                     </label>
-                    {!muteOriginalAudio ? (
-                      <>
-                        <label style={sidebarCheckboxLabelStyle}>
-                          <input
-                            type="checkbox"
-                            checked={musicDucking}
-                            onChange={e => setMusicDucking(e.target.checked)}
-                            style={{ marginRight: "8px" }}
-                          />
-                          Auto-lower music under speech
-                        </label>
-                        {musicDucking ? (
+                    <label
+                      style={{ ...sidebarCheckboxLabelStyle, marginBottom: addMusic ? "10px" : 0 }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={muteOriginalAudio}
+                        onChange={e => setMuteOriginalAudio(e.target.checked)}
+                        style={{ marginRight: "8px" }}
+                      />
+                      Mute Original Audio
+                    </label>
+                    <div style={{ ...sidebarBodyTextStyle, marginBottom: addMusic ? "12px" : 0 }}>
+                      {addMusic
+                        ? `Music source: ${currentMusicLabel}`
+                        : "Keep original audio live, replace it with music, or mute it entirely from here."}
+                    </div>
+                    {addMusic ? (
+                      <div className="micro-settings-card">
+                        {!musicSearchMode ? (
                           <label className="studio-slider-label">
-                            <span>
-                              Ducking strength {Math.round(Number(musicDuckingStrength || 0) * 100)}
-                              %
-                            </span>
-                            <input
-                              type="range"
-                              min={0.15}
-                              max={0.85}
-                              step={0.05}
-                              value={musicDuckingStrength}
-                              onChange={e => setMusicDuckingStrength(Number(e.target.value))}
-                            />
+                            <span>Music preset</span>
+                            <select
+                              value={musicSelection}
+                              onChange={e => {
+                                setMusicSelection(e.target.value);
+                                if (onMusicChange) onMusicChange(e.target.value, false);
+                              }}
+                            >
+                              <option value="upbeat_pop.mp3">Upbeat Pop</option>
+                              <option value="lofi_chill.mp3">Lofi Chill</option>
+                              <option value="cinematic.mp3">Cinematic</option>
+                              <option value="corporate.mp3">Corporate</option>
+                            </select>
                           </label>
+                        ) : (
+                          <div className="hook-suggestion-card compact-audio-note">
+                            <strong>Custom searched track active</strong>
+                            <p>{currentMusicLabel}</p>
+                            <button
+                              type="button"
+                              className="mini-toggle-btn"
+                              onClick={() => {
+                                setMusicSearchMode(false);
+                                setMusicSelection("upbeat_pop.mp3");
+                                if (onMusicChange) onMusicChange("upbeat_pop.mp3", false);
+                              }}
+                            >
+                              Switch to presets
+                            </button>
+                          </div>
+                        )}
+                        <label className="studio-slider-label">
+                          <span>Music volume {Math.round(Number(musicVolume || 0) * 100)}%</span>
+                          <input
+                            type="range"
+                            min={0.05}
+                            max={0.6}
+                            step={0.01}
+                            value={musicVolume}
+                            onChange={e => setMusicVolume(Number(e.target.value))}
+                          />
+                        </label>
+                        {!muteOriginalAudio ? (
+                          <>
+                            <label style={sidebarCheckboxLabelStyle}>
+                              <input
+                                type="checkbox"
+                                checked={musicDucking}
+                                onChange={e => setMusicDucking(e.target.checked)}
+                                style={{ marginRight: "8px" }}
+                              />
+                              Auto-lower music under speech
+                            </label>
+                            {musicDucking ? (
+                              <label className="studio-slider-label">
+                                <span>
+                                  Ducking strength{" "}
+                                  {Math.round(Number(musicDuckingStrength || 0) * 100)}%
+                                </span>
+                                <input
+                                  type="range"
+                                  min={0.15}
+                                  max={0.85}
+                                  step={0.05}
+                                  value={musicDuckingStrength}
+                                  onChange={e => setMusicDuckingStrength(Number(e.target.value))}
+                                />
+                              </label>
+                            ) : null}
+                          </>
                         ) : null}
-                      </>
+                      </div>
                     ) : null}
-                  </div>
-                ) : null}
-              </>)}
+                  </>
+                )}
               </div>
             </section>
 

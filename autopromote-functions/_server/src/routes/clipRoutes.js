@@ -375,4 +375,156 @@ router.post("/memetic/seed", authMiddleware, async (req, res) => {
   }
 });
 
+/**
+ * @route POST /auto-generate
+ * @desc One-click: analyze video + render top clips automatically
+ * @access Private
+ */
+router.post("/auto-generate", authMiddleware, async (req, res) => {
+  const {
+    videoUrl,
+    contentId,
+    maxClips = 5,
+    captionStyle = "bold_pop",
+    smartCropMode = "center",
+    targetAspectRatio = "9:16",
+    template = "",
+  } = req.body;
+  const userId = req.user.uid;
+
+  if (!videoUrl) {
+    return res.status(400).json({ error: "Missing videoUrl" });
+  }
+
+  try {
+    const jobId = `autogen-${Date.now()}-${userId.slice(0, 6)}`;
+
+    // Create tracking doc immediately
+    await db.collection("clip_analyses").doc(jobId).set({
+      userId,
+      videoUrl,
+      contentId: contentId || null,
+      type: "auto_generate",
+      status: "processing",
+      maxClips,
+      captionStyle,
+      smartCropMode,
+      template,
+      clips: [],
+      createdAt: new Date().toISOString(),
+    });
+
+    // Fire-and-forget to Python worker
+    const MEDIA_WORKER_URL = process.env.MEDIA_WORKER_URL || "http://127.0.0.1:8000";
+    const axios = require("axios");
+    axios
+      .post(
+        `${MEDIA_WORKER_URL}/auto-generate-clips`,
+        {
+          video_url: videoUrl,
+          job_id: jobId,
+          max_clips: Math.min(Number(maxClips) || 5, 10),
+          caption_style: captionStyle,
+          smart_crop_mode: smartCropMode,
+          target_aspect_ratio: targetAspectRatio,
+          template,
+        },
+        { timeout: 600000 }
+      )
+      .catch(err => {
+        console.error(`[ClipRoute] Auto-generate worker call failed: ${err.message}`);
+        db.collection("clip_analyses")
+          .doc(jobId)
+          .update({ status: "failed", error: err.message })
+          .catch(() => {});
+      });
+
+    res.json({
+      success: true,
+      jobId,
+      message: "Auto-generation started. Poll /analysis/{jobId} for status.",
+      async: true,
+    });
+  } catch (error) {
+    console.error("[ClipRoute] Auto-generate error:", error.message);
+    res.status(500).json({ error: "Auto-generate failed", details: error.message });
+  }
+});
+
+/**
+ * @route GET /templates
+ * @desc Get available clip templates, caption styles, and platform presets
+ * @access Private
+ */
+router.get("/templates", authMiddleware, async (req, res) => {
+  try {
+    const MEDIA_WORKER_URL = process.env.MEDIA_WORKER_URL || "http://127.0.0.1:8000";
+    const axios = require("axios");
+    const response = await axios.get(`${MEDIA_WORKER_URL}/clip-templates`, { timeout: 10000 });
+    res.json({ success: true, ...response.data });
+  } catch (error) {
+    // Fallback: return hardcoded templates if worker is down
+    res.json({
+      success: true,
+      templates: {
+        podcast: {
+          label: "Podcast / Interview",
+          aspect_ratio: "9:16",
+          caption_style: "bold_pop",
+          smart_crop_mode: "speaker_track",
+          auto_captions: true,
+          description: "Speaker-tracking crop with bold captions.",
+        },
+        gaming: {
+          label: "Gaming Highlights",
+          aspect_ratio: "9:16",
+          caption_style: "glow",
+          smart_crop_mode: "center",
+          auto_captions: true,
+          description: "High-energy with neon glow captions.",
+        },
+        tutorial: {
+          label: "Tutorial / How-To",
+          aspect_ratio: "9:16",
+          caption_style: "minimal",
+          smart_crop_mode: "center",
+          auto_captions: true,
+          description: "Clean minimal captions.",
+        },
+        reaction: {
+          label: "Reaction / Commentary",
+          aspect_ratio: "9:16",
+          caption_style: "bounce",
+          smart_crop_mode: "speaker_track",
+          auto_captions: true,
+          description: "Bouncy animated captions following the speaker.",
+        },
+        story: {
+          label: "Story / Vlog",
+          aspect_ratio: "9:16",
+          caption_style: "karaoke",
+          smart_crop_mode: "speaker_track",
+          auto_captions: true,
+          description: "Karaoke-style word-by-word captions.",
+        },
+      },
+      caption_styles: {
+        bold_pop: { label: "Bold Pop", animation: "scale_pop" },
+        karaoke: { label: "Karaoke Highlight", animation: "karaoke_fill" },
+        glow: { label: "Neon Glow", animation: "glow_pulse" },
+        bounce: { label: "Bounce", animation: "bounce_word" },
+        minimal: { label: "Minimal Clean", animation: "fade_word" },
+      },
+      platform_presets: {
+        tiktok: { max_duration: 60, aspect_ratio: "9:16" },
+        youtube_shorts: { max_duration: 58, aspect_ratio: "9:16" },
+        instagram_reels: { max_duration: 90, aspect_ratio: "9:16" },
+        instagram_feed: { max_duration: 60, aspect_ratio: "1:1" },
+        youtube: { max_duration: null, aspect_ratio: "16:9" },
+        facebook: { max_duration: 60, aspect_ratio: "9:16" },
+      },
+    });
+  }
+});
+
 module.exports = router;
