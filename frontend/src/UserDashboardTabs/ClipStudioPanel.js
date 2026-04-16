@@ -42,6 +42,15 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
   const [selectedClipIds, setSelectedClipIds] = useState([]); // Array of selected clip IDs
   const [isMontageMode, setIsMontageMode] = useState(false); // To toggle button text/state
 
+  // Auto-Generate & Template state
+  const [selectedTemplate, setSelectedTemplate] = useState("");
+  const [captionStyle, setCaptionStyle] = useState("bold_pop");
+  const [smartCropMode, setSmartCropMode] = useState("center");
+  const [autoGenerating, setAutoGenerating] = useState(false);
+  const [autoGenJobId, setAutoGenJobId] = useState(null);
+  const [autoGenProgress, setAutoGenProgress] = useState("");
+  const autoGenPollRef = useRef(null);
+
   // Memetic Composer UI toggle and state
   const [composerOpen, setComposerOpen] = useState(false);
   const [preloadedClipUrl, setPreloadedClipUrl] = useState(null);
@@ -55,10 +64,11 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
   const [showLibrary, setShowLibrary] = useState(false);
   const fileInputRef = useRef(null); // Ref for file upload
 
-  // Cleanup polling interval on unmount
+  // Cleanup polling intervals on unmount
   useEffect(() => {
     return () => {
       if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+      if (autoGenPollRef.current) clearInterval(autoGenPollRef.current);
     };
   }, []);
 
@@ -75,12 +85,137 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
   // Filter for videos only, and exclude generated AI clips to keep the library clean
   // Show all user-uploaded videos (Clip Studio and general uploads) so users can access their full library
   const videoContent = content.filter(
-    c =>
-      c.type === "video" &&
-      c.sourceType !== "ai_clip" &&
-      !c.sourceAnalysisId &&
-      !c.sourceClipId
+    c => c.type === "video" && c.sourceType !== "ai_clip" && !c.sourceAnalysisId && !c.sourceClipId
   );
+
+  // Template definitions (fallback if /templates endpoint unavailable)
+  const TEMPLATES = {
+    podcast: {
+      label: "🎙️ Podcast",
+      desc: "Speaker tracking + bold captions",
+      captionStyle: "bold_pop",
+      smartCrop: "speaker_track",
+    },
+    gaming: {
+      label: "🎮 Gaming",
+      desc: "Center crop + neon glow captions",
+      captionStyle: "glow",
+      smartCrop: "center",
+    },
+    tutorial: {
+      label: "📚 Tutorial",
+      desc: "Clean minimal captions",
+      captionStyle: "minimal",
+      smartCrop: "center",
+    },
+    reaction: {
+      label: "😱 Reaction",
+      desc: "Speaker tracking + bounce captions",
+      captionStyle: "bounce",
+      smartCrop: "speaker_track",
+    },
+    story: {
+      label: "📖 Story",
+      desc: "Karaoke-style animated captions",
+      captionStyle: "karaoke",
+      smartCrop: "speaker_track",
+    },
+  };
+
+  const PLATFORM_PRESETS = {
+    tiktok: { label: "TikTok", maxDuration: 60, aspectRatio: "9:16" },
+    youtube_shorts: { label: "YouTube Shorts", maxDuration: 58, aspectRatio: "9:16" },
+    instagram_reels: { label: "Instagram Reels", maxDuration: 90, aspectRatio: "9:16" },
+    instagram_feed: { label: "Instagram Feed", maxDuration: 60, aspectRatio: "1:1" },
+    youtube: { label: "YouTube", maxDuration: 0, aspectRatio: "16:9" },
+  };
+
+  const applyTemplate = key => {
+    const t = TEMPLATES[key];
+    if (!t) return;
+    setSelectedTemplate(key);
+    setCaptionStyle(t.captionStyle);
+    setSmartCropMode(t.smartCrop);
+  };
+
+  const autoGenerateClips = async video => {
+    if (autoGenerating) return;
+    const user = auth.currentUser;
+    if (!user) {
+      toast.error("Please sign in first.");
+      return;
+    }
+
+    const videoUrl = resolveContentVideoUrl(video);
+    if (!videoUrl) {
+      toast.error("No video URL found.");
+      return;
+    }
+
+    setAutoGenerating(true);
+    setAutoGenProgress("Starting auto-generation...");
+    const toastId = toast.loading("⚡ Auto-generating clips...");
+
+    try {
+      const token = await user.getIdToken();
+      const res = await fetch(`${API_BASE_URL}/api/clips/auto-generate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          contentId: video.id,
+          videoUrl,
+          captionStyle,
+          smartCropMode,
+          template: selectedTemplate,
+          maxClips: 5,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Failed to start auto-generation");
+      const data = await res.json();
+      const jobId = data.jobId;
+      setAutoGenJobId(jobId);
+      setAutoGenProgress("Analyzing video & generating clips...");
+
+      // Poll for completion
+      autoGenPollRef.current = setInterval(async () => {
+        try {
+          const pollRes = await fetch(`${API_BASE_URL}/api/clips/analysis/${jobId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (!pollRes.ok) return;
+          const pollData = await pollRes.json();
+
+          if (pollData.status === "complete" || pollData.status === "completed") {
+            clearInterval(autoGenPollRef.current);
+            autoGenPollRef.current = null;
+            setAutoGenerating(false);
+            setAutoGenProgress("");
+            setAutoGenJobId(null);
+            toast.success("Clips generated successfully!", { id: toastId });
+            if (onRefresh) onRefresh();
+            loadGeneratedClips();
+          } else if (pollData.status === "error" || pollData.status === "failed") {
+            clearInterval(autoGenPollRef.current);
+            autoGenPollRef.current = null;
+            setAutoGenerating(false);
+            setAutoGenProgress("");
+            setAutoGenJobId(null);
+            toast.error(pollData.error || "Auto-generation failed.", { id: toastId });
+          } else {
+            setAutoGenProgress(pollData.progress || "Processing clips...");
+          }
+        } catch {
+          // Silently retry on transient network errors
+        }
+      }, 4000);
+    } catch (err) {
+      toast.error(err.message || "Auto-generation failed.");
+      toast.dismiss(toastId);
+      setAutoGenerating(false);
+      setAutoGenProgress("");
+    }
+  };
 
   const handleFileUpload = async event => {
     const file = event.target.files[0];
@@ -676,7 +811,91 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
                   <button className="btn-primary" onClick={() => setShowLibrary(true)}>
                     Select Video from Library
                   </button>
-                  {/* If we had an upload function passed down, we'd add it here */}
+                </div>
+              </div>
+
+              {/* Template Picker */}
+              <div style={{ marginTop: "2rem", padding: "0 20px" }}>
+                <h4 style={{ marginBottom: "12px", color: "#e2e8f0" }}>🎬 Quick Templates</h4>
+                <p style={{ fontSize: "13px", color: "#888", marginBottom: "16px" }}>
+                  Pick a template to pre-configure caption style and crop mode for your clips.
+                </p>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
+                    gap: "12px",
+                  }}
+                >
+                  {Object.entries(TEMPLATES).map(([key, t]) => (
+                    <button
+                      key={key}
+                      onClick={() => applyTemplate(key)}
+                      style={{
+                        padding: "14px 12px",
+                        borderRadius: "10px",
+                        border:
+                          selectedTemplate === key
+                            ? "2px solid #00ff88"
+                            : "1px solid rgba(255,255,255,0.1)",
+                        background:
+                          selectedTemplate === key
+                            ? "rgba(0,255,136,0.1)"
+                            : "rgba(255,255,255,0.03)",
+                        color: "#fff",
+                        cursor: "pointer",
+                        textAlign: "left",
+                        transition: "all 0.2s",
+                      }}
+                    >
+                      <div style={{ fontSize: "18px", marginBottom: "6px" }}>{t.label}</div>
+                      <div style={{ fontSize: "11px", color: "#aaa" }}>{t.desc}</div>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Caption Style + Smart Crop selectors */}
+                <div style={{ display: "flex", gap: "16px", marginTop: "16px", flexWrap: "wrap" }}>
+                  <label style={{ color: "#e2e8f0", fontSize: "13px" }}>
+                    Caption Style:
+                    <select
+                      value={captionStyle}
+                      onChange={e => setCaptionStyle(e.target.value)}
+                      style={{
+                        marginLeft: "8px",
+                        padding: "6px 10px",
+                        borderRadius: "6px",
+                        background: "#1a1a2e",
+                        color: "#fff",
+                        border: "1px solid rgba(255,255,255,0.1)",
+                      }}
+                    >
+                      <option value="bold_pop">Bold Pop</option>
+                      <option value="karaoke">Karaoke Fill</option>
+                      <option value="glow">Neon Glow</option>
+                      <option value="bounce">Bounce</option>
+                      <option value="minimal">Minimal Fade</option>
+                      <option value="">Classic (no animation)</option>
+                    </select>
+                  </label>
+                  <label style={{ color: "#e2e8f0", fontSize: "13px" }}>
+                    Smart Crop:
+                    <select
+                      value={smartCropMode}
+                      onChange={e => setSmartCropMode(e.target.value)}
+                      style={{
+                        marginLeft: "8px",
+                        padding: "6px 10px",
+                        borderRadius: "6px",
+                        background: "#1a1a2e",
+                        color: "#fff",
+                        border: "1px solid rgba(255,255,255,0.1)",
+                      }}
+                    >
+                      <option value="center">🎯 Center Crop</option>
+                      <option value="speaker_track">👤 Follow Speaker</option>
+                    </select>
+                  </label>
                 </div>
               </div>
 
@@ -777,13 +996,32 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
                             </button>
                           </div>
                         ) : (
-                          <button
-                            className="btn-primary"
-                            onClick={() => analyzeVideo(video)}
-                            disabled={analyzing}
-                          >
-                            {analyzing ? "Analyzing..." : "Generate Clips"}
-                          </button>
+                          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                            <button
+                              className="btn-primary"
+                              onClick={() => analyzeVideo(video)}
+                              disabled={analyzing}
+                            >
+                              {analyzing ? "Analyzing..." : "Generate Clips"}
+                            </button>
+                            <button
+                              onClick={() => autoGenerateClips(video)}
+                              disabled={autoGenerating || analyzing}
+                              style={{
+                                padding: "8px 14px",
+                                borderRadius: "6px",
+                                border: "none",
+                                background: "linear-gradient(135deg, #00ff88, #00ccff)",
+                                color: "#000",
+                                fontWeight: "bold",
+                                fontSize: "13px",
+                                cursor: autoGenerating ? "not-allowed" : "pointer",
+                                opacity: autoGenerating ? 0.6 : 1,
+                              }}
+                            >
+                              {autoGenerating ? "⏳ Generating..." : "⚡ Auto-Generate"}
+                            </button>
+                          </div>
                         )}
                       </div>
                     </div>
@@ -820,6 +1058,41 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
                 </div>
               </div>
             </div>
+
+            {/* Auto-Generate Progress */}
+            {autoGenerating && (
+              <div
+                style={{
+                  margin: "1rem 0",
+                  padding: "16px 20px",
+                  background: "linear-gradient(135deg, rgba(0,255,136,0.08), rgba(0,204,255,0.08))",
+                  borderRadius: "10px",
+                  border: "1px solid rgba(0,255,136,0.2)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
+                }}
+              >
+                <div
+                  style={{
+                    width: "20px",
+                    height: "20px",
+                    border: "3px solid rgba(0,255,136,0.3)",
+                    borderTop: "3px solid #00ff88",
+                    borderRadius: "50%",
+                    animation: "spin 1s linear infinite",
+                  }}
+                />
+                <div>
+                  <div style={{ fontWeight: "bold", color: "#00ff88", fontSize: "14px" }}>
+                    ⚡ Auto-Generating Clips
+                  </div>
+                  <div style={{ color: "#aaa", fontSize: "12px", marginTop: "2px" }}>
+                    {autoGenProgress}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Generated Clips (Ready to Download) */}
             {generatedClips.filter(c => c.sourceAnalysisId === currentAnalysis.id).length > 0 && (
@@ -963,6 +1236,68 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
                     <option value="1:1">1:1 (Square - Instagram)</option>
                   </select>
                 </label>
+                {exportOptions.addCaptions && (
+                  <label>
+                    Caption Style:
+                    <select
+                      value={captionStyle}
+                      onChange={e => setCaptionStyle(e.target.value)}
+                      style={{ marginLeft: "6px" }}
+                    >
+                      <option value="bold_pop">Bold Pop</option>
+                      <option value="karaoke">Karaoke Fill</option>
+                      <option value="glow">Neon Glow</option>
+                      <option value="bounce">Bounce</option>
+                      <option value="minimal">Minimal Fade</option>
+                      <option value="">Classic</option>
+                    </select>
+                  </label>
+                )}
+                <label>
+                  Smart Crop:
+                  <select
+                    value={smartCropMode}
+                    onChange={e => setSmartCropMode(e.target.value)}
+                    style={{ marginLeft: "6px" }}
+                  >
+                    <option value="center">🎯 Center Crop</option>
+                    <option value="speaker_track">👤 Follow Speaker</option>
+                  </select>
+                </label>
+              </div>
+
+              {/* Platform Presets */}
+              <div style={{ marginTop: "12px" }}>
+                <span style={{ fontSize: "13px", color: "#aaa", marginRight: "10px" }}>
+                  Platform preset:
+                </span>
+                {Object.entries(PLATFORM_PRESETS).map(([key, p]) => (
+                  <button
+                    key={key}
+                    onClick={() =>
+                      setExportOptions({ ...exportOptions, aspectRatio: p.aspectRatio })
+                    }
+                    style={{
+                      padding: "4px 10px",
+                      marginRight: "6px",
+                      marginBottom: "6px",
+                      borderRadius: "4px",
+                      border:
+                        exportOptions.aspectRatio === p.aspectRatio
+                          ? "1px solid #00ff88"
+                          : "1px solid rgba(255,255,255,0.1)",
+                      background:
+                        exportOptions.aspectRatio === p.aspectRatio
+                          ? "rgba(0,255,136,0.1)"
+                          : "transparent",
+                      color: "#ccc",
+                      fontSize: "12px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {p.label}
+                  </button>
+                ))}
               </div>
             </div>
 
