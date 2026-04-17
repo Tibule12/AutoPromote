@@ -5,6 +5,7 @@ import { OPTIMAL_TIMES } from "../BestTimeToPost";
 import FilterEffects from "../FilterEffects";
 import ImageCropper from "../ImageCropper";
 import { sanitizeUrl } from "../../utils/security";
+import MetaConnectionRequirementsNotice from "../MetaConnectionRequirementsNotice";
 
 const InstagramForm = ({
   onChange,
@@ -173,6 +174,12 @@ const InstagramForm = ({
           </span>
         </div>
       )}
+
+      <MetaConnectionRequirementsNotice
+        title="Instagram publishing requirements"
+        pages={facebookPages}
+        style={{ marginBottom: "16px" }}
+      />
 
       {/* Scope Disclaimer / Permission Box */}
       {selectedPageId && (

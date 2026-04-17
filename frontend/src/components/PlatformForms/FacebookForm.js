@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import MetaConnectionRequirementsNotice from "../MetaConnectionRequirementsNotice";
 import { sanitizeUrl } from "../../utils/security";
 
 const FacebookForm = ({
@@ -71,6 +72,12 @@ const FacebookForm = ({
         </span>{" "}
         Facebook Manager
       </h4>
+
+      <MetaConnectionRequirementsNotice
+        title="Facebook publishing requirements"
+        pages={pages}
+        style={{ marginBottom: "16px" }}
+      />
 
       <div className="form-group-modern">
         <label className="form-label-bold">Media File</label>
@@ -330,7 +337,12 @@ const FacebookForm = ({
           rows={4}
           maxLength={63206}
         />
-        <div className="char-count" style={{ textAlign: "right", fontSize: "0.76rem", opacity: 0.6, marginTop: "4px" }}>{message.length}/63,206</div>
+        <div
+          className="char-count"
+          style={{ textAlign: "right", fontSize: "0.76rem", opacity: 0.6, marginTop: "4px" }}
+        >
+          {message.length}/63,206
+        </div>
       </div>
 
       <div className="commercial-section">

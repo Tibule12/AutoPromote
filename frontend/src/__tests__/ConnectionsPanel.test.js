@@ -82,6 +82,87 @@ describe("ConnectionsPanel display and disconnect", () => {
 
     expect(screen.getByText("Upload-ready for TikTok publishing.")).toBeInTheDocument();
   });
+
+  test("shows Meta requirements when Facebook auth exists without a publishable Meta setup", () => {
+    render(
+      <ConnectionsPanel
+        platformSummary={{ summary: {} }}
+        twitterStatus={{ connected: false }}
+        tiktokStatus={{ connected: false }}
+        youtubeStatus={{ connected: false }}
+        spotifyStatus={{ connected: false }}
+        redditStatus={{ connected: false }}
+        discordStatus={{ connected: false }}
+        facebookStatus={{ connected: true, pages: [] }}
+        linkedinStatus={{ connected: false }}
+        snapchatStatus={{ connected: false }}
+        telegramStatus={{ connected: false }}
+        pinterestStatus={{ connected: false }}
+        handleConnectTwitter={() => {}}
+        handleConnectTikTok={() => {}}
+        handleConnectYouTube={() => {}}
+        handleConnectSpotify={() => {}}
+        handleConnectReddit={() => {}}
+        handleConnectDiscord={() => {}}
+        handleConnectFacebook={() => {}}
+        handleConnectLinkedin={() => {}}
+        handleConnectSnapchat={() => {}}
+        handleConnectTelegram={() => {}}
+        handleConnectPinterest={() => {}}
+      />
+    );
+
+    expect(
+      screen.getAllByText(
+        /Meta requires a Facebook Page and an Instagram business account linked to that Page/i
+      ).length
+    ).toBeGreaterThan(0);
+  });
+
+  test("hides Meta requirements once a page and linked Instagram business account are connected", () => {
+    render(
+      <ConnectionsPanel
+        platformSummary={{ summary: {} }}
+        twitterStatus={{ connected: false }}
+        tiktokStatus={{ connected: false }}
+        youtubeStatus={{ connected: false }}
+        spotifyStatus={{ connected: false }}
+        redditStatus={{ connected: false }}
+        discordStatus={{ connected: false }}
+        facebookStatus={{
+          connected: true,
+          pages: [
+            {
+              id: "page-1",
+              name: "Main Page",
+              instagram_business_account: { id: "ig-1", username: "brand.ig" },
+            },
+          ],
+        }}
+        linkedinStatus={{ connected: false }}
+        snapchatStatus={{ connected: false }}
+        telegramStatus={{ connected: false }}
+        pinterestStatus={{ connected: false }}
+        handleConnectTwitter={() => {}}
+        handleConnectTikTok={() => {}}
+        handleConnectYouTube={() => {}}
+        handleConnectSpotify={() => {}}
+        handleConnectReddit={() => {}}
+        handleConnectDiscord={() => {}}
+        handleConnectFacebook={() => {}}
+        handleConnectLinkedin={() => {}}
+        handleConnectSnapchat={() => {}}
+        handleConnectTelegram={() => {}}
+        handleConnectPinterest={() => {}}
+      />
+    );
+
+    expect(
+      screen.queryByText(
+        /Meta requires a Facebook Page and an Instagram business account linked to that Page/i
+      )
+    ).not.toBeInTheDocument();
+  });
 });
 
 export {};
