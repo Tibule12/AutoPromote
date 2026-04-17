@@ -1,0 +1,531 @@
+/* CinematicEffectsPanel.css
+   Modern glass-dark design system.
+   No external deps — pure CSS. */
+
+/* ─── Panel Shell ─────────────────────────────────────────────── */
+.cep-panel {
+  display: flex;
+  flex-direction: column;
+  width: 280px;
+  height: 100%;
+  background: rgba(10, 10, 18, 0.96);
+  backdrop-filter: blur(18px);
+  border-left: 1px solid rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #e2e8f0;
+  flex-shrink: 0;
+}
+
+/* Slide-in animation when panel opens */
+@keyframes cep-slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+.cep-panel {
+  animation: cep-slide-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ─── Header ─────────────────────────────────────────────────── */
+.cep-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
+}
+
+.cep-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cep-header-icon {
+  font-size: 18px;
+}
+
+.cep-header-title {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  background: linear-gradient(135deg, #c084fc, #67e8f9);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.cep-reset-btn {
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 100, 100, 0.35);
+  background: rgba(255, 80, 80, 0.08);
+  color: #f87171;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.cep-reset-btn:hover {
+  background: rgba(255, 80, 80, 0.18);
+  border-color: rgba(255, 100, 100, 0.6);
+}
+
+/* ─── Scrollable body ─────────────────────────────────────────── */
+.cep-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 6px 0 24px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+}
+.cep-body::-webkit-scrollbar {
+  width: 4px;
+}
+.cep-body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 99px;
+}
+
+/* ─── Section ─────────────────────────────────────────────────── */
+.cep-section {
+  padding: 14px 16px 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.cep-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.35);
+  margin-bottom: 12px;
+}
+
+.cep-section-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #c084fc, #67e8f9);
+  flex-shrink: 0;
+}
+
+/* ─── Preset Cards ────────────────────────────────────────────── */
+.cep-presets-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 4px;
+}
+/* Last preset (5th) centers alone on bottom row */
+.cep-presets-grid .cep-preset-card:last-child:nth-child(odd) {
+  grid-column: span 2;
+}
+
+.cep-preset-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 12px 8px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  text-align: center;
+  color: #e2e8f0;
+}
+.cep-preset-card:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+}
+.cep-preset-card.is-active {
+  background: rgba(192, 132, 252, 0.12);
+  border-color: rgba(192, 132, 252, 0.5);
+  box-shadow: 0 0 16px rgba(192, 132, 252, 0.15);
+}
+
+.cep-preset-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.cep-preset-name {
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: #cbd5e1;
+}
+
+.cep-preset-check {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-size: 10px;
+  color: #c084fc;
+  font-weight: 800;
+}
+
+/* ─── Sliders ─────────────────────────────────────────────────── */
+.cep-slider-row {
+  margin-bottom: 12px;
+}
+
+.cep-slider-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.cep-slider-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.cep-slider-value {
+  font-size: 11px;
+  font-weight: 600;
+  color: #c084fc;
+  font-feature-settings: "tnum";
+}
+
+/* Custom range styling */
+.cep-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.1);
+  outline: none;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.cep-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #c084fc, #818cf8);
+  box-shadow: 0 0 8px rgba(192, 132, 252, 0.5);
+  cursor: pointer;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s;
+}
+.cep-range::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 14px rgba(192, 132, 252, 0.7);
+}
+.cep-range::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #c084fc, #818cf8);
+  cursor: pointer;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+.cep-range:focus-visible {
+  outline: 2px solid rgba(192, 132, 252, 0.6);
+  outline-offset: 3px;
+  border-radius: 99px;
+}
+
+/* ─── Zoom Anchor ─────────────────────────────────────────────── */
+.cep-anchor-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 8px;
+}
+.cep-anchor-label {
+  font-size: 12px;
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+.cep-anchor-buttons {
+  display: flex;
+  gap: 4px;
+}
+.cep-anchor-btn {
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.cep-anchor-btn:hover {
+  background: rgba(255, 255, 255, 0.09);
+  color: #e2e8f0;
+}
+.cep-anchor-btn.is-active {
+  background: rgba(192, 132, 252, 0.18);
+  border-color: rgba(192, 132, 252, 0.5);
+  color: #c084fc;
+}
+
+/* ─── Overlay type buttons ────────────────────────────────────── */
+.cep-overlay-type-block {
+  margin-bottom: 12px;
+}
+
+.cep-overlay-type-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.cep-overlay-type-btn {
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.cep-overlay-type-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+}
+.cep-overlay-type-btn.is-active {
+  background: rgba(103, 232, 249, 0.12);
+  border-color: rgba(103, 232, 249, 0.4);
+  color: #67e8f9;
+}
+
+/* ─── Overlay extra controls ─────────────────────────────────── */
+.cep-overlay-controls {
+  margin-top: 4px;
+}
+
+.cep-color-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.cep-color-pick-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cep-color-pick {
+  width: 32px;
+  height: 24px;
+  border: none;
+  border-radius: 6px;
+  padding: 0;
+  cursor: pointer;
+  background: none;
+  overflow: hidden;
+}
+.cep-color-pick::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+.cep-color-pick::-webkit-color-swatch {
+  border: none;
+  border-radius: 5px;
+}
+
+.cep-color-value {
+  font-size: 11px;
+  color: #64748b;
+  font-feature-settings: "tnum";
+}
+
+/* ─── Toggle Button (used in VideoEditor & MultiCamCombiner) ──── */
+.cep-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid rgba(192, 132, 252, 0.3);
+  background: rgba(192, 132, 252, 0.08);
+  color: #c084fc;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+}
+.cep-toggle-btn:hover {
+  background: rgba(192, 132, 252, 0.15);
+  border-color: rgba(192, 132, 252, 0.55);
+  box-shadow: 0 0 14px rgba(192, 132, 252, 0.2);
+}
+.cep-toggle-btn.is-active {
+  background: rgba(192, 132, 252, 0.2);
+  border-color: rgba(192, 132, 252, 0.65);
+  box-shadow: 0 0 20px rgba(192, 132, 252, 0.25);
+}
+.cep-toggle-btn .cep-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #c084fc;
+  box-shadow: 0 0 6px #c084fc;
+}
+
+/* ─── Effects wrapper (wraps video/canvas for overlay stacking) ── */
+.cep-media-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* In VideoEditor the wrapper fills available space */
+.video-preview .cep-media-wrapper {
+  height: 100%;
+}
+
+/* In MultiCam the wrapper sizes to the preview stage inside */
+.nle-preview-panel .cep-media-wrapper {
+  height: auto;
+  display: block;
+  width: 100%;
+  border-radius: 16px;
+}
+
+/* ─── Responsive for small screens ───────────────────────────── */
+@media (max-width: 600px) {
+  .cep-panel {
+    width: 100%;
+    height: auto;
+    max-height: 55vh;
+    border-left: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    animation: none;
+  }
+}
+
+/* ─── Film Grain animation ───────────────────────────────────── */
+@keyframes cep-grain-drift {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-2px, 3px);
+  }
+  50% {
+    transform: translate(3px, -1px);
+  }
+  75% {
+    transform: translate(-1px, -3px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+/* ─── Blur Mode Buttons ──────────────────────────────────────── */
+.cep-blur-mode-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 4px;
+}
+.cep-blur-mode-buttons {
+  display: flex;
+  gap: 4px;
+}
+.cep-blur-mode-btn {
+  flex: 1;
+  padding: 6px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+.cep-blur-mode-btn:hover {
+  background: rgba(192, 132, 252, 0.1);
+  border-color: rgba(192, 132, 252, 0.3);
+  color: #c084fc;
+}
+.cep-blur-mode-btn.is-active {
+  background: rgba(192, 132, 252, 0.15);
+  border-color: rgba(192, 132, 252, 0.5);
+  color: #c084fc;
+  box-shadow: 0 0 8px rgba(192, 132, 252, 0.15);
+}
+
+/* ─── Timed Blur Inputs ──────────────────────────────────────── */
+.cep-timed-blur-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 6px;
+}
+.cep-timed-blur-inputs {
+  display: flex;
+  gap: 8px;
+}
+.cep-time-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+.cep-time-label {
+  font-size: 11px;
+  color: #64748b;
+  min-width: 30px;
+}
+.cep-time-input {
+  width: 56px;
+  padding: 4px 6px;
+  font-size: 12px;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: #e2e8f0;
+  outline: none;
+  font-feature-settings: "tnum";
+  transition: border-color 0.15s ease;
+}
+.cep-time-input:focus {
+  border-color: rgba(192, 132, 252, 0.5);
+}
+.cep-time-unit {
+  font-size: 10px;
+  color: #64748b;
+}
+.cep-time-hint {
+  font-size: 10px;
+  color: #475569;
+  font-style: italic;
+}

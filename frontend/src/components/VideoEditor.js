@@ -10,6 +10,8 @@ import { ref, uploadBytes, getDownloadURL, deleteObject, getStorage } from "fire
 import MultiCamCombiner from "./MultiCamCombiner";
 import ViralClipStudio from "./ViralClipStudio"; // Import the new Studio component
 import { sanitizeUrl } from "../utils/security";
+import useCinematicEffects from "../hooks/useCinematicEffects";
+import CinematicEffectsPanel from "./CinematicEffectsPanel";
 
 function VideoEditor({ file, onSave, onCancel, images = [] }) {
   const [videoSrc, setVideoSrc] = useState("");
@@ -222,7 +224,9 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
         script.onload = () => setPaypalLoaded(true);
         script.onerror = () => {
           console.warn("PayPal SDK failed to load");
-          setStatusMessage("Credit purchase unavailable — payment SDK failed to load. Try refreshing.");
+          setStatusMessage(
+            "Credit purchase unavailable — payment SDK failed to load. Try refreshing."
+          );
         };
         document.body.appendChild(script);
       } catch (e) {
@@ -429,6 +433,30 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
 
   const videoRef = useRef(null);
   const blobUrlRef = useRef(null);
+
+  // Cinematic Effects — all CSS-based, no backend needed
+  const {
+    fx,
+    showPanel: showEffectsPanel,
+    setShowPanel: setShowEffectsPanel,
+    applyPreset,
+    updateFx,
+    resetFx,
+    mediaStyle: effectsMediaStyle,
+    edgeBlurStyle,
+    vignetteStyle,
+    overlayStyle,
+    grainStyle,
+    letterboxStyle,
+    fadeStyle,
+    hasEffects,
+    attachVideo,
+  } = useCinematicEffects();
+
+  // Attach video element for timed effects (blur timing, fade)
+  useEffect(() => {
+    if (videoRef.current) attachVideo(videoRef.current);
+  });
 
   // Initialize video source from file prop
   useEffect(() => {
@@ -1184,7 +1212,9 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
           }}
         >
           <div style={{ marginBottom: "8px" }}>Not enough credits for this operation.</div>
-          <div style={{ fontSize: "0.82rem", fontWeight: 500, opacity: 0.85, marginBottom: "10px" }}>
+          <div
+            style={{ fontSize: "0.82rem", fontWeight: 500, opacity: 0.85, marginBottom: "10px" }}
+          >
             {creditBreakdown
               ? `Monthly: ${creditBreakdown.remaining} remaining · Top-up: ${formatBalance(creditBalance) - (creditBreakdown.remaining || 0)} available`
               : `Balance: ${formatBalance(creditBalance)} credits`}
@@ -1316,35 +1346,109 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
       ) : null}
 
       <div className="editor-layout studio-first">
-        <div className="video-preview">
-          {videoSrc ? (
-            <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-              <video
-                key={videoSrc} // Force component remount on source change
-                ref={videoRef}
-                src={sanitizeUrl(videoSrc)}
-                controls
-                style={{ width: "100%", flex: 1, objectFit: "contain" }}
-              />
-              <div
-                style={{
-                  padding: "8px",
-                  textAlign: "center",
-                  background: "#222",
-                  marginTop: "4px",
-                }}
-              >
-                <button
-                  type="button"
-                  onClick={handleDownloadVideo}
-                  style={{ color: "#4caf50", textDecoration: "none", fontWeight: "bold" }}
+        <div
+          className="video-preview"
+          style={{ display: "flex", overflow: "hidden", position: "relative" }}
+        >
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              flex: 1,
+              minWidth: 0,
+              height: "100%",
+            }}
+          >
+            {videoSrc ? (
+              <>
+                {/* Video wrapped with effects layer */}
+                <div
+                  className="cep-media-wrapper"
+                  style={{ flex: 1, background: "#000", position: "relative", overflow: "hidden" }}
                 >
-                  📥 Download / Open Video
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="loading-placeholder">Loading Video...</div>
+                  <video
+                    key={videoSrc}
+                    ref={videoRef}
+                    src={sanitizeUrl(videoSrc)}
+                    controls
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "contain",
+                      display: "block",
+                      ...effectsMediaStyle,
+                    }}
+                  />
+                  {/* Edge blur overlay (depth-of-field) */}
+                  {edgeBlurStyle && <div style={edgeBlurStyle} />}
+                  {/* Vignette overlay */}
+                  {vignetteStyle && <div style={vignetteStyle} />}
+                  {/* Color / gradient overlay */}
+                  {overlayStyle && <div style={overlayStyle} />}
+                  {/* Film grain */}
+                  {grainStyle && <div style={grainStyle} />}
+                  {/* Letterbox bars */}
+                  {letterboxStyle && (
+                    <>
+                      <div style={letterboxStyle.top} />
+                      <div style={letterboxStyle.bottom} />
+                    </>
+                  )}
+                  {/* Fade in/out */}
+                  {fadeStyle && <div style={fadeStyle} />}
+                </div>
+
+                {/* Bottom bar: Effects toggle + Download */}
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    padding: "8px 12px",
+                    background: "#111",
+                    gap: "10px",
+                    flexShrink: 0,
+                  }}
+                >
+                  <button
+                    type="button"
+                    className={`cep-toggle-btn ${showEffectsPanel ? "is-active" : ""}`}
+                    onClick={() => setShowEffectsPanel(v => !v)}
+                    title="Toggle Cinematic Effects panel"
+                  >
+                    {hasEffects && <span className="cep-dot" />}✨{" "}
+                    {showEffectsPanel ? "Hide Effects" : "Effects"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDownloadVideo}
+                    style={{
+                      color: "#4caf50",
+                      background: "none",
+                      border: "none",
+                      fontWeight: "bold",
+                      cursor: "pointer",
+                      fontSize: "13px",
+                    }}
+                  >
+                    📥 Download
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="loading-placeholder">Loading Video...</div>
+            )}
+          </div>
+
+          {/* Cinematic Effects Panel — slides in from the right */}
+          {showEffectsPanel && (
+            <CinematicEffectsPanel
+              fx={fx}
+              onUpdate={(key, val) => updateFx(key, val)}
+              onApplyPreset={applyPreset}
+              onReset={resetFx}
+              hasEffects={hasEffects}
+            />
           )}
         </div>
 
@@ -1356,14 +1460,52 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
               Edit timing, overlays, captions, donor audio, and export — all from one workspace.
             </p>
             {creditCosts && (
-              <div style={{
-                display: "flex", flexWrap: "wrap", gap: "6px", margin: "8px 0 12px",
-                fontSize: "0.78rem", opacity: 0.85,
-              }}>
-                <span style={{ background: "rgba(255,255,255,0.08)", padding: "3px 8px", borderRadius: "4px" }}>Render clip: {creditCosts["render-clip"] || 5} cr</span>
-                <span style={{ background: "rgba(255,255,255,0.08)", padding: "3px 8px", borderRadius: "4px" }}>Full process: {creditCosts.process || 10} cr</span>
-                <span style={{ background: "rgba(255,255,255,0.08)", padding: "3px 8px", borderRadius: "4px" }}>Analyze: {creditCosts.analyze || 8} cr</span>
-                <span style={{ background: "rgba(255,255,255,0.08)", padding: "3px 8px", borderRadius: "4px" }}>Transcribe: {creditCosts.transcribe || 3} cr</span>
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: "6px",
+                  margin: "8px 0 12px",
+                  fontSize: "0.78rem",
+                  opacity: 0.85,
+                }}
+              >
+                <span
+                  style={{
+                    background: "rgba(255,255,255,0.08)",
+                    padding: "3px 8px",
+                    borderRadius: "4px",
+                  }}
+                >
+                  Render clip: {creditCosts["render-clip"] || 5} cr
+                </span>
+                <span
+                  style={{
+                    background: "rgba(255,255,255,0.08)",
+                    padding: "3px 8px",
+                    borderRadius: "4px",
+                  }}
+                >
+                  Full process: {creditCosts.process || 10} cr
+                </span>
+                <span
+                  style={{
+                    background: "rgba(255,255,255,0.08)",
+                    padding: "3px 8px",
+                    borderRadius: "4px",
+                  }}
+                >
+                  Analyze: {creditCosts.analyze || 8} cr
+                </span>
+                <span
+                  style={{
+                    background: "rgba(255,255,255,0.08)",
+                    padding: "3px 8px",
+                    borderRadius: "4px",
+                  }}
+                >
+                  Transcribe: {creditCosts.transcribe || 3} cr
+                </span>
               </div>
             )}
             <div className="studio-launch-actions">
@@ -1397,7 +1539,10 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                   <button
                     className="cancel-btn"
                     style={{ marginLeft: "12px", padding: "4px 12px", fontSize: "0.8rem" }}
-                    onClick={() => { abortRef.current = true; setStatusMessage("Cancelling..."); }}
+                    onClick={() => {
+                      abortRef.current = true;
+                      setStatusMessage("Cancelling...");
+                    }}
                   >
                     Cancel Processing
                   </button>
