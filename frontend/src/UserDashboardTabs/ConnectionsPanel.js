@@ -4,6 +4,7 @@ import { auth } from "../firebaseClient";
 import { API_ENDPOINTS } from "../config";
 // API_ENDPOINTS used for debug fetch
 import ExplainButton from "../components/ExplainButton";
+import MetaConnectionRequirementsNotice from "../components/MetaConnectionRequirementsNotice";
 
 const ConnectionsPanel = ({
   platformSummary,
@@ -394,12 +395,18 @@ const ConnectionsPanel = ({
               </button>
               <span style={{ color: "#9aa4b2" }}>
                 {facebookStatus?.connected
-                  ? "Link your Instagram Business account to this Page."
-                  : "Connect to manage Instagram via Facebook."}
+                  ? "Link your Instagram business account to your Facebook Page to finish Meta publishing setup."
+                  : "Connect the Facebook account that manages your Facebook Page and linked Instagram business account."}
               </span>
             </>
           )}
         </div>
+        <MetaConnectionRequirementsNotice
+          compact
+          title="Instagram publish requirements"
+          facebookStatus={facebookStatus}
+          style={{ marginTop: 0 }}
+        />
         <div style={{ display: "flex", gap: ".75rem", alignItems: "center" }}>
           {snapchatStatus?.connected ? (
             <>
@@ -459,10 +466,19 @@ const ConnectionsPanel = ({
               <button className="check-quality" onClick={handleConnectFacebook}>
                 Connect Facebook
               </button>
-              <span style={{ color: "#9aa4b2" }}>Connect to manage Pages and Instagram.</span>
+              <span style={{ color: "#9aa4b2" }}>
+                Connect the Facebook account that manages your Facebook Page and linked Instagram
+                business account.
+              </span>
             </>
           )}
         </div>
+        <MetaConnectionRequirementsNotice
+          compact
+          title="Facebook publish requirements"
+          facebookStatus={facebookStatus}
+          style={{ marginTop: 0 }}
+        />
         {/* Show explicit list of connected Pages with IDs so reviewers can match selection -> outcome */}
         {facebookStatus?.pages &&
           Array.isArray(facebookStatus.pages) &&

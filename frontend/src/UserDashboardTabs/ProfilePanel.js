@@ -1,4 +1,5 @@
 import React from "react";
+import MetaConnectionRequirementsNotice from "../components/MetaConnectionRequirementsNotice";
 
 const ProfilePanel = ({
   user,
@@ -147,7 +148,8 @@ const ProfilePanel = ({
             const helper =
               {
                 tiktok: "Connect to link your TikTok account for future posting and analytics.",
-                facebook: "Connect to manage Pages and Instagram.",
+                facebook:
+                  "Connect the Facebook account that manages your Facebook Page and linked Instagram business account.",
                 youtube: "Connect to upload videos directly.",
                 twitter: "Connect to post tweets and schedule posts.",
                 snapchat: "Connect to post Snaps (if enabled).",
@@ -159,21 +161,31 @@ const ProfilePanel = ({
                 pinterest: "Connect to create pins and boards.",
               }[p] || "";
             return (
-              <div key={p} style={{ display: "flex", gap: ".75rem", alignItems: "center" }}>
-                {status?.connected ? (
-                  <>
-                    <span style={{ color: "#cbd5e1" }}>{label} connected</span>
-                    <button className="check-quality" onClick={handler}>
-                      Reconnect
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button className="check-quality" onClick={handler}>
-                      Connect {label}
-                    </button>
-                    <span style={{ color: "#9aa4b2" }}>{helper}</span>
-                  </>
+              <div key={p} style={{ display: "grid", gap: ".45rem" }}>
+                <div style={{ display: "flex", gap: ".75rem", alignItems: "center" }}>
+                  {status?.connected ? (
+                    <>
+                      <span style={{ color: "#cbd5e1" }}>{label} connected</span>
+                      <button className="check-quality" onClick={handler}>
+                        Reconnect
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button className="check-quality" onClick={handler}>
+                        Connect {label}
+                      </button>
+                      <span style={{ color: "#9aa4b2" }}>{helper}</span>
+                    </>
+                  )}
+                </div>
+                {p === "facebook" && (
+                  <MetaConnectionRequirementsNotice
+                    compact
+                    title="Meta connection requirements"
+                    facebookStatus={facebookStatus}
+                    style={{ marginTop: 0 }}
+                  />
                 )}
               </div>
             );
