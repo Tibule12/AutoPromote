@@ -7,12 +7,23 @@
 const crypto = require("crypto");
 const { db, admin } = require("../firebaseAdmin");
 const { postViaBot } = require("./discordService");
+const { normalizePlanId, resolvePlan } = require("../config/subscriptionPlans");
 
 function randomId(len = 9) {
   return crypto
     .randomBytes(Math.ceil(len / 2))
     .toString("hex")
     .substr(0, len);
+}
+
+function getCurrentMonthKey(date = new Date()) {
+  return date.toISOString().slice(0, 7);
+}
+
+function getMonthlyMissionLimitForTier(tierId) {
+  const plan = resolvePlan(normalizePlanId(tierId || "free"));
+  const quota = Number(plan.features?.wolfHuntTasks);
+  return Number.isFinite(quota) && quota >= 0 ? quota : 0;
 }
 
 // --- CORE ENGAGEMENT EXCHANGE LOGIC ---
@@ -80,28 +91,15 @@ async function createEngagementBounty(
     }
   }
 
-  // 2. Check User Balance
+  // 2. Check User Balance + Monthly mission quota
   const userRef = db.collection("users").doc(userId);
-  const userSnap = await userRef.get();
-  const credits = (userSnap.data() || {}).growth_credits || 0;
 
   // Cost calculation
   // Base cost: 2 credits per Like, 5 per Comment
   const UNIT_COST = actionType === "comment" ? 5 : 2;
   const TOTAL_COST = UNIT_COST * quantity;
 
-  if (credits < TOTAL_COST) {
-    throw new Error(
-      `Insufficient growth credits. You need ${TOTAL_COST} credits for ${quantity} interactions.`
-    );
-  }
-
-  // 3. Deduct Credits
-  await userRef.update({
-    growth_credits: admin.firestore.FieldValue.increment(-TOTAL_COST),
-  });
-
-  // 4. Create Bounty Campaign
+  // 3. Create Bounty Campaign
   // ENGINEERING: Add GAMIFICATION & URGENCY
   // - status: "active" but also "frenzy" if reward is high?
 
@@ -120,6 +118,10 @@ async function createEngagementBounty(
 
   const unitReward = Math.floor(UNIT_COST * 0.8); // 20% platform tax (burn rate)
   const campaignRef = db.collection("engagement_campaigns").doc();
+  const createdAtIso = new Date().toISOString();
+  const monthKey = getCurrentMonthKey();
+  const missionStatsRef = userRef.collection("monthly_stats").doc(monthKey);
+  let remainingCredits = 0;
 
   // Auto-calculate "Frenzy Mode" if high reward
   const isFrenzy = unitReward >= 5; // High value task
@@ -142,20 +144,59 @@ async function createEngagementBounty(
     unitReward,
     isFrenzy,
     status: "active",
-    createdAt: new Date().toISOString(),
+    createdAt: createdAtIso,
     visibleAt: visibleAt.toISOString(),
     // URGENCY: Expiry is shorter for Frenzy tasks (4h vs 48h) to force rapid engagement
     // This simulates a "flash mob" effect algorithm loves
     expiresAt: new Date(Date.now() + (isFrenzy ? 4 : 48) * 60 * 60 * 1000).toISOString(),
     claimedBy: [],
+    monthKey,
   };
 
-  await campaignRef.set(campaignData);
+  await db.runTransaction(async transaction => {
+    const userDoc = await transaction.get(userRef);
+    const missionStatsDoc = await transaction.get(missionStatsRef);
+    const userData = userDoc.exists ? userDoc.data() || {} : {};
+    const credits = userData.growth_credits || 0;
+    const tierId = normalizePlanId(userData.subscriptionTier || "free");
+    const plan = resolvePlan(tierId);
+    const missionLimit = getMonthlyMissionLimitForTier(tierId);
+    const missionsUsed = missionStatsDoc.exists ? missionStatsDoc.data()?.campaignsCreated || 0 : 0;
+
+    if (missionsUsed >= missionLimit) {
+      throw new Error(
+        `Your ${plan.name} plan includes ${missionLimit} mission opportunities per month. Upgrade to create more missions.`
+      );
+    }
+
+    if (credits < TOTAL_COST) {
+      throw new Error(
+        `Insufficient growth credits. You need ${TOTAL_COST} credits for ${quantity} interactions.`
+      );
+    }
+
+    remainingCredits = credits - TOTAL_COST;
+
+    transaction.update(userRef, {
+      growth_credits: admin.firestore.FieldValue.increment(-TOTAL_COST),
+    });
+    transaction.set(
+      missionStatsRef,
+      {
+        monthKey,
+        tierId,
+        campaignsCreated: admin.firestore.FieldValue.increment(1),
+        updatedAt: createdAtIso,
+      },
+      { merge: true }
+    );
+    transaction.set(campaignRef, campaignData);
+  });
 
   return {
     success: true,
     campaignId: campaignRef.id,
-    remainingCredits: credits - TOTAL_COST,
+    remainingCredits,
     message: isFrenzy
       ? `🔥 FRENZY ACTIVE! High reward task created. The wolf pack will be summoned.`
       : `Boost active! ${quantity} users can now earn credits.`,

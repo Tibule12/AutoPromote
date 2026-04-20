@@ -12,6 +12,22 @@ jest.mock("../src/creditSystem", () => ({
   deductCredits: jest.fn().mockResolvedValue({ success: true, remaining: 85 }),
 }));
 
+jest.mock("../src/services/billingService", () => ({
+  getEffectiveTierSnapshot: jest.fn().mockResolvedValue({ tierId: "pro" }),
+}));
+
+jest.mock("../src/config/subscriptionPlans", () => {
+  const actual = jest.requireActual("../src/config/subscriptionPlans");
+  return {
+    ...actual,
+    getPlanCapabilities: jest.fn(() => ({
+      planId: "pro",
+      planName: "Studio",
+      multicam: true,
+    })),
+  };
+});
+
 jest.mock("../src/services/videoEditingService", () =>
   jest.fn().mockImplementation(() => ({
     startMulticamRenderJob: mockStartMulticamRenderJob,

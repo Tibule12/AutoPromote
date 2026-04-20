@@ -77,6 +77,123 @@ async function getAccessToken() {
   return __tokenCache.token;
 }
 
+function extractPayPalNextBillingDate(paypalSub) {
+  return (
+    paypalSub?.billing_info?.next_billing_time ||
+    paypalSub?.billing_info?.cycle_executions?.find(cycle => cycle?.next_billing_time)
+      ?.next_billing_time ||
+    paypalSub?.next_billing_time ||
+    null
+  );
+}
+
+function findInternalPlanIdByPayPalPlanId(paypalPlanId) {
+  if (!paypalPlanId) return null;
+  try {
+    const { SUBSCRIPTION_PLANS } = require("../config/subscriptionPlans");
+    const match = Object.values(SUBSCRIPTION_PLANS).find(plan => {
+      const configuredId = plan.paypalPlanIdEnv ? process.env[plan.paypalPlanIdEnv] : null;
+      return configuredId && configuredId === paypalPlanId;
+    });
+    return match ? match.id : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+function inferMonthlyPeriodStart(nextBillingDate, fallback) {
+  if (!nextBillingDate) return fallback || null;
+  const nextDate = new Date(nextBillingDate);
+  if (Number.isNaN(nextDate.getTime())) return fallback || null;
+  const periodStart = new Date(nextDate);
+  periodStart.setMonth(periodStart.getMonth() - 1);
+  return periodStart.toISOString();
+}
+
+async function fetchSubscriptionDetails(subscriptionId) {
+  if (!subscriptionId || !fetchFn) return null;
+  const access = await getAccessToken();
+  const base =
+    process.env.PAYPAL_MODE === "live"
+      ? "https://api-m.paypal.com"
+      : "https://api-m.sandbox.paypal.com";
+  const res = await safeFetch(base + `/v1/billing/subscriptions/${subscriptionId}`, fetchFn, {
+    fetchOptions: {
+      method: "GET",
+      headers: { Authorization: `Bearer ${access}` },
+    },
+    requireHttps: true,
+    allowHosts: ["api-m.paypal.com", "api-m.sandbox.paypal.com"],
+  });
+  if (!res.ok) return null;
+  return await res.json().catch(() => null);
+}
+
+async function refreshSubscriptionDatesFromPayPal(subscriptionId) {
+  if (!subscriptionId) return null;
+
+  const subsQuery = await db
+    .collection("user_subscriptions")
+    .where("paypalSubscriptionId", "==", subscriptionId)
+    .limit(1)
+    .get();
+  if (subsQuery.empty) return null;
+
+  const subDoc = subsQuery.docs[0];
+  const data = subDoc.data() || {};
+  const userId = data.userId;
+  if (!userId) return null;
+
+  const paypalSub = await fetchSubscriptionDetails(subscriptionId);
+  if (!paypalSub) return null;
+
+  const nextBillingDate = extractPayPalNextBillingDate(paypalSub) || data.nextBillingDate || null;
+  const remoteStatus = String(paypalSub.status || data.status || "active").toLowerCase();
+  const planId = findInternalPlanIdByPayPalPlanId(paypalSub.plan_id) || data.planId || "free";
+  const nowIso = new Date().toISOString();
+  const subscriptionPeriodStart = inferMonthlyPeriodStart(nextBillingDate, data.periodStart);
+
+  await subDoc.ref.set(
+    {
+      planId,
+      status: remoteStatus,
+      nextBillingDate,
+      periodStart: subscriptionPeriodStart,
+      updatedAt: nowIso,
+    },
+    { merge: true }
+  );
+
+  await db
+    .collection("users")
+    .doc(userId)
+    .set(
+      {
+        subscriptionTier: planId,
+        subscriptionStatus: remoteStatus,
+        subscriptionPeriodStart,
+        subscriptionPeriodEnd: nextBillingDate,
+        paypalSubscriptionId: subscriptionId,
+        isPaid: remoteStatus === "active" || remoteStatus === "approved",
+        updatedAt: nowIso,
+      },
+      { merge: true }
+    );
+
+  await db.collection("user_billing").doc(userId).set(
+    {
+      tier: planId,
+      status: remoteStatus,
+      nextBillingDate,
+      paypalSubscriptionId: subscriptionId,
+      updatedAt: nowIso,
+    },
+    { merge: true }
+  );
+
+  return { userId, nextBillingDate, status: remoteStatus };
+}
+
 async function createOrder({ amount, currency = "USD", internalId, userId }) {
   const base =
     process.env.PAYPAL_MODE === "live"
@@ -368,10 +485,20 @@ router.post(
         }
       }
 
-      // Handle subscription activations and cancellations
-      if (event.event_type === "BILLING.SUBSCRIPTION.ACTIVATED") {
+      // Handle subscription activations and renewal/state refreshes
+      if (
+        event.event_type === "BILLING.SUBSCRIPTION.ACTIVATED" ||
+        event.event_type === "BILLING.SUBSCRIPTION.UPDATED" ||
+        event.event_type === "BILLING.SUBSCRIPTION.RE-ACTIVATED" ||
+        event.event_type === "PAYMENT.SALE.COMPLETED" ||
+        event.event_type === "BILLING.SUBSCRIPTION.PAYMENT.COMPLETED"
+      ) {
         const subscriptionId =
-          event.resource && (event.resource.id || event.resource.subscription_id);
+          event.resource &&
+          (event.resource.id ||
+            event.resource.subscription_id ||
+            event.resource.billing_agreement_id ||
+            event.resource?.supplementary_data?.related_ids?.subscription_id);
         if (subscriptionId) {
           try {
             const intentDoc = await db.collection("subscription_intents").doc(subscriptionId).get();
@@ -464,20 +591,9 @@ router.post(
                 });
               } catch (e) {}
             } else {
-              // No intent found; attempt to match by user_subscriptions
-              const subsQuery = await db
-                .collection("user_subscriptions")
-                .where("paypalSubscriptionId", "==", subscriptionId)
-                .limit(1)
-                .get();
-              if (!subsQuery.empty) {
-                subsQuery.forEach(doc => {
-                  doc.ref
-                    .update({ status: "active", updatedAt: new Date().toISOString() })
-                    .catch(() => {});
-                });
-              }
+              await refreshSubscriptionDatesFromPayPal(subscriptionId);
             }
+            await refreshSubscriptionDatesFromPayPal(subscriptionId);
           } catch (e) {
             console.error("[PayPal webhook] Activation handling error:", e);
           }

@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
+  clampNumber,
+  DEFAULT_SEGMENT_FRAMING,
   buildDefaultSegments,
   buildSegmentDisplaySegments,
   buildInitialSources,
@@ -8,9 +10,12 @@ import {
   getActiveCameraAtTime,
   getActiveSegmentAtTime,
   getMasterTimelineBounds,
+  getSegmentFocusPoint,
+  getSegmentTransformOrigin,
   getSourceDurationBounds,
   mapTimelineTimeToSourceTime,
   normalizeSourceLabel,
+  normalizeSegmentFraming,
   normalizeSegments,
   normalizeSwitches,
   splitSegmentAtTimelineTime,
@@ -37,6 +42,12 @@ const EXPORT_FRAME_RATE = 30;
 const FRAME_STEP_SECONDS = 1 / 30;
 const AUDIO_SYNC_BINS_PER_SECOND = 20;
 const WAVEFORM_BAR_COUNT = 24;
+
+const SINGLE_CAM_FOCUS_PRESETS = [
+  { id: "two-shot", label: "Two Shot", zoom: 1 },
+  { id: "body", label: "Body", zoom: 1.22 },
+  { id: "face", label: "Face", zoom: 1.45 },
+];
 
 const getSourceMediaUrl = source => source?.previewUrl || source?.url || source?.uploadedUrl || "";
 
@@ -201,14 +212,26 @@ const drawVideoToCanvas = (context, canvas, activeVideo, label, framing = {}) =>
     const sourceWidth = activeVideo.videoWidth || canvas.width;
     const sourceHeight = activeVideo.videoHeight || canvas.height;
     const baseScale = Math.min(canvas.width / sourceWidth, canvas.height / sourceHeight);
-    const zoom = Math.max(1, Number(framing.zoom) || 1);
+    const normalizedFraming = normalizeSegmentFraming(framing);
+    const focusPoint = getSegmentFocusPoint(normalizedFraming);
+    const zoom = Math.max(1, Number(normalizedFraming.zoom) || 1);
     const scale = baseScale * zoom;
     const drawWidth = sourceWidth * scale;
     const drawHeight = sourceHeight * scale;
-    const anchor = framing.zoomAnchor || "center";
-    const anchorX = anchor === "left" ? 0.32 : anchor === "right" ? 0.68 : 0.5;
-    const offsetX = canvas.width * anchorX - drawWidth * anchorX;
-    const offsetY = (canvas.height - drawHeight) / 2;
+    const requestedOffsetX = canvas.width * focusPoint.x - drawWidth * focusPoint.x;
+    const requestedOffsetY = canvas.height * focusPoint.y - drawHeight * focusPoint.y;
+    const offsetX = clampNumber(
+      requestedOffsetX,
+      Math.min(0, canvas.width - drawWidth),
+      0,
+      (canvas.width - drawWidth) / 2
+    );
+    const offsetY = clampNumber(
+      requestedOffsetY,
+      Math.min(0, canvas.height - drawHeight),
+      0,
+      (canvas.height - drawHeight) / 2
+    );
     context.drawImage(activeVideo, offsetX, offsetY, drawWidth, drawHeight);
     return;
   }
@@ -252,6 +275,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const [singleCamSegments, setSingleCamSegments] = useState([]);
   const [selectedSingleCamSegmentId, setSelectedSingleCamSegmentId] = useState(null);
   const [singleCamSegmentFraming, setSingleCamSegmentFraming] = useState({});
+  const [focusPickerActive, setFocusPickerActive] = useState(false);
 
   const cancelExportRef = useRef(false);
   const fileInputRef = useRef(null);
@@ -260,6 +284,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const animationFrameRef = useRef(null);
   const playheadRef = useRef(0);
   const scrollContainerRef = useRef(null);
+  const previewStageRef = useRef(null);
   const audioAnalysisCacheRef = useRef(new Map());
   const previewVideoRefs = useRef({});
   const thumbnailVideoRefs = useRef({});
@@ -376,15 +401,23 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const masterAudioSource = readySources.find(source => source.id === masterAudioCameraId) || null;
   const activeSingleCamFraming = useMemo(() => {
     if (!isSingleSourceWorkflow || !activeSegment?.id) {
-      return { zoom: 1, zoomAnchor: "center" };
+      return DEFAULT_SEGMENT_FRAMING;
     }
-    return singleCamSegmentFraming[activeSegment.id] || { zoom: 1, zoomAnchor: "center" };
+    return normalizeSegmentFraming(singleCamSegmentFraming[activeSegment.id]);
   }, [isSingleSourceWorkflow, activeSegment, singleCamSegmentFraming]);
   const selectedSingleCamSegment = useMemo(
     () =>
       normalizedSingleCamSegments.find(segment => segment.id === selectedSingleCamSegmentId) ||
       null,
     [normalizedSingleCamSegments, selectedSingleCamSegmentId]
+  );
+  const selectedSingleCamFraming = useMemo(() => {
+    if (!selectedSingleCamSegmentId) return DEFAULT_SEGMENT_FRAMING;
+    return normalizeSegmentFraming(singleCamSegmentFraming[selectedSingleCamSegmentId]);
+  }, [selectedSingleCamSegmentId, singleCamSegmentFraming]);
+  const activeFocusPoint = useMemo(
+    () => getSegmentFocusPoint(activeSingleCamFraming),
+    [activeSingleCamFraming]
   );
   const previewActiveVideoStyle = useMemo(() => {
     const style = {};
@@ -401,16 +434,10 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       style.transform = `scale(${combinedZoom})`;
     }
 
-    const preferredAnchor = isSingleSourceWorkflow
-      ? activeSingleCamFraming.zoomAnchor || fx.zoomAnchor || "center"
-      : fx.zoomAnchor || "center";
     if (style.transform) {
-      style.transformOrigin =
-        preferredAnchor === "left"
-          ? "18% 50%"
-          : preferredAnchor === "right"
-            ? "82% 50%"
-            : "50% 50%";
+      style.transformOrigin = isSingleSourceWorkflow
+        ? getSegmentTransformOrigin(activeSingleCamFraming)
+        : getSegmentTransformOrigin({ zoomAnchor: fx.zoomAnchor || "center" });
     }
 
     if (style.transform || style.filter) {
@@ -493,9 +520,17 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     setSingleCamSegments(nextSegments);
     setSelectedSingleCamSegmentId(nextSegments[0]?.id || null);
     setSingleCamSegmentFraming(
-      nextSegments[0]?.id ? { [nextSegments[0].id]: { zoom: 1, zoomAnchor: "center" } } : {}
+      nextSegments[0]?.id
+        ? { [nextSegments[0].id]: normalizeSegmentFraming(DEFAULT_SEGMENT_FRAMING) }
+        : {}
     );
   }, [isSingleSourceWorkflow, singleCamSource, singleCamSegments.length]);
+
+  useEffect(() => {
+    if (!isSingleSourceWorkflow || !selectedSingleCamSegmentId) {
+      setFocusPickerActive(false);
+    }
+  }, [isSingleSourceWorkflow, selectedSingleCamSegmentId]);
 
   useEffect(() => {
     if (!isSingleSourceWorkflow) return;
@@ -867,10 +902,9 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     if (nextSegments.length === normalizedSingleCamSegments.length) return;
 
     setSingleCamSegments(nextSegments);
-    const sourceFraming = singleCamSegmentFraming[selectedSingleCamSegmentId] || {
-      zoom: 1,
-      zoomAnchor: "center",
-    };
+    const sourceFraming = normalizeSegmentFraming(
+      singleCamSegmentFraming[selectedSingleCamSegmentId] || DEFAULT_SEGMENT_FRAMING
+    );
     const splitIndex = nextSegments.findIndex(
       segment => segment.id === `${selectedSingleCamSegmentId}-a`
     );
@@ -880,8 +914,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       setSelectedSingleCamSegmentId(rightId || leftId || selectedSingleCamSegmentId);
       setSingleCamSegmentFraming(current => ({
         ...current,
-        [leftId]: sourceFraming,
-        [rightId]: sourceFraming,
+        [leftId]: normalizeSegmentFraming(sourceFraming),
+        [rightId]: normalizeSegmentFraming(sourceFraming),
       }));
     }
   };
@@ -938,13 +972,54 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     if (!selectedSingleCamSegmentId) return;
     setSingleCamSegmentFraming(current => ({
       ...current,
-      [selectedSingleCamSegmentId]: {
-        zoom: 1,
-        zoomAnchor: "center",
+      [selectedSingleCamSegmentId]: normalizeSegmentFraming({
+        ...DEFAULT_SEGMENT_FRAMING,
         ...(current[selectedSingleCamSegmentId] || {}),
         ...patch,
-      },
+      }),
     }));
+  };
+
+  const handleApplySingleCamFocusPreset = preset => {
+    if (!selectedSingleCamSegmentId) return;
+
+    if (preset.id === "two-shot") {
+      handleUpdateSingleCamFraming({
+        zoom: 1,
+        zoomAnchor: "center",
+        targetX: 0.5,
+        targetY: 0.5,
+      });
+      setFocusPickerActive(false);
+      return;
+    }
+
+    handleUpdateSingleCamFraming({ zoom: preset.zoom });
+    setFocusPickerActive(true);
+    setStatusMessage(
+      `Click the preview on the ${preset.id === "face" ? "face" : "person"} you want this segment to frame.`
+    );
+  };
+
+  const handlePreviewStageFocusPick = event => {
+    if (!focusPickerActive || !isSingleSourceWorkflow || !selectedSingleCamSegmentId) return;
+
+    const rect = previewStageRef.current?.getBoundingClientRect();
+    if (!rect || rect.width <= 0 || rect.height <= 0) return;
+
+    const targetX = clampNumber((event.clientX - rect.left) / rect.width, 0.05, 0.95, 0.5);
+    const targetY = clampNumber((event.clientY - rect.top) / rect.height, 0.08, 0.92, 0.5);
+    const zoomAnchor = targetX < 0.4 ? "left" : targetX > 0.6 ? "right" : "center";
+    const nextZoom = Math.max(1.12, Number(selectedSingleCamFraming.zoom) || 1.12);
+
+    handleUpdateSingleCamFraming({
+      zoom: nextZoom,
+      zoomAnchor,
+      targetX,
+      targetY,
+    });
+    setFocusPickerActive(false);
+    setStatusMessage("Subject focus saved for the selected segment.");
   };
 
   const handleStepFrame = frameDelta => {
@@ -1482,7 +1557,12 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         <div className="nle-container" ref={scrollContainerRef}>
           <div className="nle-preview-panel">
             <div className="nle-preview-shell">
-              <div className="nle-preview-stage" style={previewStageStyle}>
+              <div
+                ref={previewStageRef}
+                className={`nle-preview-stage ${focusPickerActive ? "is-focus-picking" : ""}`}
+                style={previewStageStyle}
+                onClick={handlePreviewStageFocusPick}
+              >
                 {readySources.map(source => (
                   <video
                     key={`preview-${source.id}`}
@@ -1516,6 +1596,22 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                   </>
                 )}
                 {fadeStyle && <div style={fadeStyle} />}
+                {isSingleSourceWorkflow && readySources.length > 0 ? (
+                  <>
+                    <div
+                      className={`nle-focus-reticle ${focusPickerActive ? "is-picking" : ""}`}
+                      style={{
+                        left: `${(activeFocusPoint.x * 100).toFixed(2)}%`,
+                        top: `${(activeFocusPoint.y * 100).toFixed(2)}%`,
+                      }}
+                    />
+                    {focusPickerActive && (
+                      <div className="nle-focus-hint">
+                        Click the face or body you want this segment to punch into.
+                      </div>
+                    )}
+                  </>
+                ) : null}
               </div>
             </div>
 
@@ -1568,6 +1664,16 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                 <span className="nle-chip nle-chip-secondary">
                   Audio source: {masterAudioSource?.label || "None"}
                 </span>
+                {isSingleSourceWorkflow && (
+                  <span className="nle-chip nle-chip-secondary">
+                    Focus:{" "}
+                    {focusPickerActive
+                      ? "Pick in preview"
+                      : selectedSingleCamFraming.zoom > 1.01
+                        ? "Punch-in active"
+                        : "Two shot"}
+                  </span>
+                )}
                 {/* Effects toggle */}
                 <button
                   type="button"
@@ -2054,7 +2160,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                       {[1, 1.12, 1.28, 1.45].map(zoomLevel => (
                         <button
                           key={`zoom-${zoomLevel}`}
-                          className={`nle-mini-btn ${Math.abs((selectedSingleCamSegment ? singleCamSegmentFraming[selectedSingleCamSegment.id]?.zoom || 1 : 1) - zoomLevel) < 0.01 ? "nle-mini-btn-accent" : ""}`}
+                          className={`nle-mini-btn ${Math.abs(selectedSingleCamFraming.zoom - zoomLevel) < 0.01 ? "nle-mini-btn-accent" : ""}`}
                           type="button"
                           onClick={() => handleUpdateSingleCamFraming({ zoom: zoomLevel })}
                           disabled={!selectedSingleCamSegment}
@@ -2074,7 +2180,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                       ].map(anchor => (
                         <button
                           key={anchor.id}
-                          className={`nle-mini-btn ${(selectedSingleCamSegment ? singleCamSegmentFraming[selectedSingleCamSegment.id]?.zoomAnchor || "center" : "center") === anchor.id ? "nle-mini-btn-accent" : ""}`}
+                          className={`nle-mini-btn ${selectedSingleCamFraming.zoomAnchor === anchor.id ? "nle-mini-btn-accent" : ""}`}
                           type="button"
                           onClick={() => handleUpdateSingleCamFraming({ zoomAnchor: anchor.id })}
                           disabled={!selectedSingleCamSegment}
@@ -2082,6 +2188,47 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                           {anchor.label}
                         </button>
                       ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="nle-single-cam-trim-grid">
+                  <div className="nle-single-cam-tool-group">
+                    <span>Subject Focus</span>
+                    <div className="nle-sync-actions">
+                      {SINGLE_CAM_FOCUS_PRESETS.map(preset => (
+                        <button
+                          key={preset.id}
+                          className={`nle-mini-btn ${
+                            (preset.id === "two-shot" && selectedSingleCamFraming.zoom <= 1.01) ||
+                            (preset.id !== "two-shot" &&
+                              Math.abs(selectedSingleCamFraming.zoom - preset.zoom) < 0.03)
+                              ? "nle-mini-btn-accent"
+                              : ""
+                          }`}
+                          type="button"
+                          onClick={() => handleApplySingleCamFocusPreset(preset)}
+                          disabled={!selectedSingleCamSegment}
+                        >
+                          {preset.label}
+                        </button>
+                      ))}
+                      <button
+                        className={`nle-mini-btn ${focusPickerActive ? "nle-mini-btn-accent" : ""}`}
+                        type="button"
+                        onClick={() => setFocusPickerActive(current => !current)}
+                        disabled={!selectedSingleCamSegment}
+                      >
+                        {focusPickerActive ? "Cancel Pick" : "Pick in Preview"}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="nle-single-cam-tool-group">
+                    <span>Focus Notes</span>
+                    <div className="nle-single-cam-help">
+                      Split each speaker turn, then click the preview on the person you want this
+                      segment to frame. Use Body for upper-body coverage and Face for a tighter
+                      reaction shot.
                     </div>
                   </div>
                 </div>

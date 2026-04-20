@@ -620,6 +620,8 @@ const PayPalSubscriptionPanel = ({
     return value;
   };
 
+  const missionUsage = usage?.missionOpportunities || usage?.viralBoosts || null;
+
   const renderUsageBar = (used, limit, unlimited) => {
     if (unlimited) {
       return (
@@ -742,11 +744,8 @@ const PayPalSubscriptionPanel = ({
 
             <div className="usage-item">
               <label>Mission Opportunities</label>
-              {renderUsageBar(
-                usage.viralBoosts.used,
-                usage.viralBoosts.limit,
-                usage.viralBoosts.unlimited
-              )}
+              {missionUsage &&
+                renderUsageBar(missionUsage.used, missionUsage.limit, missionUsage.unlimited)}
             </div>
           </div>
         </div>

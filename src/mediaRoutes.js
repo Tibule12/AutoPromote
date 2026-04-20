@@ -11,7 +11,12 @@ const videoEditingService = new VideoEditingService(); // Instantiate for genera
 
 const authMiddleware = require("./authMiddleware");
 const { deductCredits, getCreditBreakdown } = require("./creditSystem");
-const { CREDIT_COSTS, CREDIT_TOP_UP_PACKS } = require("./config/subscriptionPlans");
+const {
+  CREDIT_COSTS,
+  CREDIT_TOP_UP_PACKS,
+  getPlanCapabilities,
+} = require("./config/subscriptionPlans");
+const { getEffectiveTierSnapshot } = require("./services/billingService");
 const MEDIA_WORKER_URL =
   process.env.MEDIA_WORKER_URL || "https://media-worker-v1-jddzncgt2a-uc.a.run.app";
 const LOCAL_MEDIA_WORKER_URL = process.env.LOCAL_MEDIA_WORKER_URL || "http://127.0.0.1:8000";
@@ -253,15 +258,31 @@ router.post("/extract-audio", async (req, res) => {
 });
 
 router.post("/render-multicam", async (req, res) => {
-  const userId = req.user.uid;
+  const userId = req.user?.uid || req.userId;
   const cost = CREDIT_COSTS["render-multicam"] || 15;
   const sources = Array.isArray(req.body?.sources) ? req.body.sources : [];
+
+  if (!userId) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
 
   if (sources.length < 2) {
     return res.status(400).json({ message: "At least two camera sources are required" });
   }
 
   try {
+    const tierSnapshot = await getEffectiveTierSnapshot(userId);
+    const capabilities = getPlanCapabilities(tierSnapshot.tierId);
+
+    if (!capabilities.multicam) {
+      return res.status(403).json({
+        message: `${capabilities.planName} plan does not include multi-camera rendering.`,
+        code: "MULTICAM_PLAN_REQUIRED",
+        upgradeRequired: true,
+        entitlements: capabilities,
+      });
+    }
+
     const result = await chargeVideoEditorCredits(userId, cost, "render-multicam");
     if (!result.success) {
       return res.status(403).json({
