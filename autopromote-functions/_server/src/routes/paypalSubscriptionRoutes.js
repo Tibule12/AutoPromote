@@ -709,6 +709,7 @@ router.get("/status", async (req, res) => {
     }
 
     const subscription = subDoc.exists ? subDoc.data() : {};
+    let snapshot = await getEffectiveTierSnapshot(userId);
 
     // Sync with PayPal if active
     if (subscription.paypalSubscriptionId && subscription.status === "active") {
@@ -733,7 +734,7 @@ router.get("/status", async (req, res) => {
       }
     }
 
-    const snapshot = await getEffectiveTierSnapshot(userId);
+    snapshot = await getEffectiveTierSnapshot(userId);
     res.json({
       success: true,
       subscription: buildSubscriptionStatusPayload(snapshot, subscription),
@@ -822,7 +823,7 @@ router.get("/usage", authMiddleware, async (req, res) => {
 
     const uploadLimit = plan.features.uploads;
     const communityPostLimit = plan.features.communityPosts;
-    const viralBoostLimit = plan.features.viralBoost;
+    const missionOpportunityLimit = plan.features.wolfHuntTasks;
     const isUnlimited = value =>
       value === undefined || value === null || value === "unlimited" || value === "Unlimited";
 
@@ -841,10 +842,15 @@ router.get("/usage", authMiddleware, async (req, res) => {
         limit: isUnlimited(communityPostLimit) ? null : communityPostLimit,
         unlimited: isUnlimited(communityPostLimit),
       },
+      missionOpportunities: {
+        used: boostsUsed,
+        limit: isUnlimited(missionOpportunityLimit) ? null : missionOpportunityLimit,
+        unlimited: isUnlimited(missionOpportunityLimit),
+      },
       viralBoosts: {
         used: boostsUsed,
-        limit: isUnlimited(viralBoostLimit) ? null : viralBoostLimit,
-        unlimited: isUnlimited(viralBoostLimit),
+        limit: isUnlimited(missionOpportunityLimit) ? null : missionOpportunityLimit,
+        unlimited: isUnlimited(missionOpportunityLimit),
       },
       periodStart: periodStart.toISOString(),
       periodEnd: userData.subscriptionPeriodEnd,

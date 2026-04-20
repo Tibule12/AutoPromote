@@ -56,6 +56,128 @@ function findInternalPlanIdByPayPalPlanId(paypalPlanId) {
   return match ? match.id : null;
 }
 
+function extractPayPalNextBillingDate(paypalSub) {
+  return (
+    paypalSub?.billing_info?.next_billing_time ||
+    paypalSub?.billing_info?.cycle_executions?.find(cycle => cycle?.next_billing_time)
+      ?.next_billing_time ||
+    paypalSub?.billing_info?.last_payment?.next_billing_time ||
+    paypalSub?.next_billing_time ||
+    null
+  );
+}
+
+function extractPayPalStartDate(paypalSub) {
+  return paypalSub?.start_time || paypalSub?.create_time || new Date().toISOString();
+}
+
+function inferMonthlyPeriodStart(nextBillingDate, fallback) {
+  if (!nextBillingDate) return fallback || null;
+  const nextDate = new Date(nextBillingDate);
+  if (Number.isNaN(nextDate.getTime())) return fallback || null;
+  const periodStart = new Date(nextDate);
+  periodStart.setMonth(periodStart.getMonth() - 1);
+  return periodStart.toISOString();
+}
+
+async function refreshPersistedSubscriptionFromPayPal({ userId, subscriptionId, paypalSub }) {
+  if (!userId || !subscriptionId || !paypalSub) return null;
+
+  const nowIso = new Date().toISOString();
+  const resolvedPlanId =
+    findInternalPlanIdByPayPalPlanId(paypalSub.plan_id) ||
+    normalizePlanId(paypalSub?.custom_id_plan || "free");
+
+  const existingSubDoc = await db.collection("user_subscriptions").doc(userId).get();
+  const existingSub = existingSubDoc.exists ? existingSubDoc.data() || {} : {};
+  const existingUserDoc = await db.collection("users").doc(userId).get();
+  const existingUser = existingUserDoc.exists ? existingUserDoc.data() || {} : {};
+
+  const planId =
+    resolvedPlanId !== "free"
+      ? resolvedPlanId
+      : normalizePlanId(existingSub.planId || existingUser.subscriptionTier || "free");
+  const plan = resolvePlan(planId);
+  const nextBillingDate =
+    extractPayPalNextBillingDate(paypalSub) ||
+    existingSub.nextBillingDate ||
+    existingUser.subscriptionPeriodEnd ||
+    null;
+  const startDate =
+    existingSub.startDate ||
+    existingUser.subscriptionStartedAt ||
+    extractPayPalStartDate(paypalSub);
+  const subscriptionPeriodStart =
+    inferMonthlyPeriodStart(nextBillingDate, existingUser.subscriptionPeriodStart) || startDate;
+  const normalizedStatus = String(paypalSub.status || existingSub.status || "active").toLowerCase();
+  const amount =
+    Number(paypalSub?.billing_info?.last_payment?.amount?.value) ||
+    Number(existingSub.amount) ||
+    Number(plan.price) ||
+    0;
+  const currency =
+    paypalSub?.billing_info?.last_payment?.amount?.currency_code || existingSub.currency || "USD";
+
+  await db
+    .collection("users")
+    .doc(userId)
+    .set(
+      {
+        subscriptionTier: planId,
+        subscriptionStatus: normalizedStatus,
+        paypalSubscriptionId: subscriptionId,
+        subscriptionStartedAt: startDate,
+        subscriptionPeriodStart,
+        subscriptionPeriodEnd: nextBillingDate,
+        subscriptionExpiresAt: normalizedStatus === "cancelled" ? nextBillingDate : null,
+        isPaid: normalizedStatus === "active" || normalizedStatus === "approved",
+        unlimited: plan.features.uploads === "unlimited",
+        features: plan.features,
+        updatedAt: nowIso,
+      },
+      { merge: true }
+    );
+
+  await db.collection("user_billing").doc(userId).set(
+    {
+      tier: planId,
+      status: normalizedStatus,
+      paypalSubscriptionId: subscriptionId,
+      nextBillingDate,
+      updatedAt: nowIso,
+    },
+    { merge: true }
+  );
+
+  await db.collection("user_subscriptions").doc(userId).set(
+    {
+      userId,
+      planId,
+      planName: plan.name,
+      paypalSubscriptionId: subscriptionId,
+      status: normalizedStatus,
+      amount,
+      currency,
+      billingCycle: "monthly",
+      startDate,
+      nextBillingDate,
+      periodStart: subscriptionPeriodStart,
+      updatedAt: nowIso,
+    },
+    { merge: true }
+  );
+
+  return {
+    planId,
+    planName: plan.name,
+    status: normalizedStatus,
+    nextBillingDate,
+    amount,
+    currency,
+    paypalSubscriptionId: subscriptionId,
+  };
+}
+
 function buildSubscriptionStatusPayload(snapshot, subscription = {}) {
   const effectivePlan = resolvePlan(snapshot.tierId || "free");
   const rawStatus = String(
@@ -725,23 +847,30 @@ router.get("/status", async (req, res) => {
     }
 
     const subscription = subDoc.exists ? subDoc.data() : {};
+    let snapshot = await getEffectiveTierSnapshot(userId);
 
     // Sync with PayPal if active
     if (subscription.paypalSubscriptionId && subscription.status === "active") {
       try {
-        const client = paypalClient.client();
-        const request = new paypal.subscriptions.SubscriptionsGetRequest(
-          subscription.paypalSubscriptionId
-        );
-        const paypalSub = await client.execute(request);
+        const paypalSub = await fetchPayPalSubscriptionDetails(subscription.paypalSubscriptionId);
+        if (paypalSub) {
+          const remoteStatus = String(paypalSub.status || "").toLowerCase();
+          const remoteNextBillingDate = extractPayPalNextBillingDate(paypalSub);
+          const localNextBillingDate =
+            subscription.nextBillingDate || snapshot.userData?.subscriptionPeriodEnd || null;
+          const needsDateRefresh =
+            remoteNextBillingDate && remoteNextBillingDate !== localNextBillingDate;
+          const needsStatusRefresh =
+            remoteStatus && remoteStatus !== String(subscription.status || "").toLowerCase();
 
-        // Update status if changed
-        if (paypalSub.result.status !== subscription.status.toUpperCase()) {
-          await db.collection("user_subscriptions").doc(userId).update({
-            status: paypalSub.result.status.toLowerCase(),
-            updatedAt: new Date().toISOString(),
-          });
-          subscription.status = paypalSub.result.status.toLowerCase();
+          if (needsDateRefresh || needsStatusRefresh) {
+            const refreshed = await refreshPersistedSubscriptionFromPayPal({
+              userId,
+              subscriptionId: subscription.paypalSubscriptionId,
+              paypalSub,
+            });
+            Object.assign(subscription, refreshed || {});
+          }
         }
       } catch (syncError) {
         console.error("[PayPal] Status sync error:", syncError);
@@ -749,7 +878,7 @@ router.get("/status", async (req, res) => {
       }
     }
 
-    const snapshot = await getEffectiveTierSnapshot(userId);
+    snapshot = await getEffectiveTierSnapshot(userId);
     res.json({
       success: true,
       subscription: buildSubscriptionStatusPayload(snapshot, subscription),
@@ -838,7 +967,7 @@ router.get("/usage", authMiddleware, async (req, res) => {
 
     const uploadLimit = plan.features.uploads;
     const communityPostLimit = plan.features.communityPosts;
-    const viralBoostLimit = plan.features.viralBoost;
+    const missionOpportunityLimit = plan.features.wolfHuntTasks;
     const isUnlimited = value =>
       value === undefined || value === null || value === "unlimited" || value === "Unlimited";
 
@@ -851,7 +980,8 @@ router.get("/usage", authMiddleware, async (req, res) => {
     const monthlyCreditsAllocation = plan.features.monthlyCredits || 0;
     let monthlyCreditsUsed = 0;
     try {
-      const creditLedgerSnap = await db.collection("credit_usage")
+      const creditLedgerSnap = await db
+        .collection("credit_usage")
         .where("userId", "==", userId)
         .where("monthKey", "==", new Date().toISOString().slice(0, 7))
         .get();
@@ -875,10 +1005,15 @@ router.get("/usage", authMiddleware, async (req, res) => {
         limit: isUnlimited(communityPostLimit) ? null : communityPostLimit,
         unlimited: isUnlimited(communityPostLimit),
       },
+      missionOpportunities: {
+        used: boostsUsed,
+        limit: isUnlimited(missionOpportunityLimit) ? null : missionOpportunityLimit,
+        unlimited: isUnlimited(missionOpportunityLimit),
+      },
       viralBoosts: {
         used: boostsUsed,
-        limit: isUnlimited(viralBoostLimit) ? null : viralBoostLimit,
-        unlimited: isUnlimited(viralBoostLimit),
+        limit: isUnlimited(missionOpportunityLimit) ? null : missionOpportunityLimit,
+        unlimited: isUnlimited(missionOpportunityLimit),
       },
       credits: {
         monthlyAllocation: monthlyCreditsAllocation,

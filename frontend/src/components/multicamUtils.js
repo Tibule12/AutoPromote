@@ -9,6 +9,13 @@ export const clampNumber = (value, minimum, maximum, fallback) => {
   return Math.max(minimum, Math.min(maximum, numeric));
 };
 
+export const DEFAULT_SEGMENT_FRAMING = Object.freeze({
+  zoom: 1,
+  zoomAnchor: "center",
+  targetX: null,
+  targetY: null,
+});
+
 export const formatDurationLabel = seconds => {
   const safeSeconds = Math.max(0, Number(seconds) || 0);
   const hours = Math.floor(safeSeconds / 3600);
@@ -26,6 +33,55 @@ export const formatDurationLabel = seconds => {
 export const normalizeSourceLabel = (label, index) => {
   const text = String(label || "").trim();
   return text || `Camera ${index + 1}`;
+};
+
+const getAnchorTargetX = zoomAnchor => {
+  if (zoomAnchor === "left") return 0.32;
+  if (zoomAnchor === "right") return 0.68;
+  return 0.5;
+};
+
+const resolveOptionalUnitPoint = (value, minimum, maximum, fallback) => {
+  if (value === null || value === undefined || value === "") {
+    return fallback;
+  }
+  return clampNumber(value, minimum, maximum, fallback);
+};
+
+export const getSegmentFocusPoint = framing => {
+  const safeFraming = framing || DEFAULT_SEGMENT_FRAMING;
+  const x = resolveOptionalUnitPoint(
+    safeFraming.targetX,
+    0.05,
+    0.95,
+    getAnchorTargetX(safeFraming.zoomAnchor || "center")
+  );
+  const y = resolveOptionalUnitPoint(safeFraming.targetY, 0.08, 0.92, 0.5);
+
+  return { x, y };
+};
+
+export const normalizeSegmentFraming = framing => {
+  const safeFraming = { ...DEFAULT_SEGMENT_FRAMING, ...(framing || {}) };
+  const zoomAnchor = ["left", "center", "right"].includes(safeFraming.zoomAnchor)
+    ? safeFraming.zoomAnchor
+    : "center";
+  const { x, y } = getSegmentFocusPoint({
+    ...safeFraming,
+    zoomAnchor,
+  });
+
+  return {
+    zoom: clampNumber(safeFraming.zoom, 1, 2.4, 1),
+    zoomAnchor,
+    targetX: Number(x.toFixed(4)),
+    targetY: Number(y.toFixed(4)),
+  };
+};
+
+export const getSegmentTransformOrigin = framing => {
+  const focusPoint = getSegmentFocusPoint(framing);
+  return `${(focusPoint.x * 100).toFixed(2)}% ${(focusPoint.y * 100).toFixed(2)}%`;
 };
 
 export const getCameraColor = (cameraId, sources) => {

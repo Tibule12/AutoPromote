@@ -1,4 +1,36 @@
 import {
+  DEFAULT_SEGMENT_FRAMING,
+  getSegmentFocusPoint,
+  getSegmentTransformOrigin,
+  normalizeSegmentFraming,
+} from "../multicamUtils";
+
+describe("multicam single-cam framing helpers", () => {
+  test("normalizes defaults into a stable center framing", () => {
+    expect(normalizeSegmentFraming()).toEqual({
+      ...DEFAULT_SEGMENT_FRAMING,
+      targetX: 0.5,
+      targetY: 0.5,
+    });
+  });
+
+  test("derives focus point from explicit target coordinates", () => {
+    expect(getSegmentFocusPoint({ zoomAnchor: "left", targetX: 0.81, targetY: 0.27 })).toEqual({
+      x: 0.81,
+      y: 0.27,
+    });
+  });
+
+  test("falls back to anchor-based focus when explicit target is missing", () => {
+    expect(getSegmentFocusPoint({ zoomAnchor: "left" })).toEqual({ x: 0.32, y: 0.5 });
+    expect(getSegmentFocusPoint({ zoomAnchor: "right" })).toEqual({ x: 0.68, y: 0.5 });
+  });
+
+  test("builds transform origins from normalized focus points", () => {
+    expect(getSegmentTransformOrigin({ targetX: 0.2, targetY: 0.3 })).toBe("20.00% 30.00%");
+  });
+});
+import {
   buildAutoSwitchPlan,
   buildRenderSegments,
   buildSwitchDisplaySegments,

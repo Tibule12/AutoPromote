@@ -20,19 +20,19 @@ const TIERS = {
     name: FREE_PLAN.name,
     monthly_upload_cap: getUploadLimitForPlan("free"),
     monthly_ai_cap: 3,
-    monthly_bot_cap: 2, // TEASER: Allow 2 bot-boosted uploads to get them hooked
+    monthly_bot_cap: 0,
     platform_limit: 1, // Single platform only for free users
     monthly_credits: FREE_PLAN.features.monthlyCredits || 0,
     monthly_price: Number(FREE_PLAN.price) || 0,
     allowed_features: {
       organic_upload: true,
-      bot_boost: true, // Unlocked for teaser
+      bot_boost: false,
       repost_boost: false, // Keep locked as Premium upsell
       share_boost: false, // Keep locked as Premium upsell
       global_distribution: false, // Block "Publish Everywhere"
       multicam: false,
     },
-    features: ["organic_upload", "basic_analytics", "teaser_bot_boost"],
+    features: ["organic_upload", "basic_analytics"],
   },
   BASIC: {
     id: "basic", // Legacy ID
