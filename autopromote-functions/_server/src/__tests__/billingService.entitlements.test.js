@@ -30,12 +30,22 @@ jest.mock("../firebaseAdmin", () => {
   };
 });
 
-const { checkBotEntitlement } = require("../services/billingService");
+const { checkBotEntitlement, getEffectiveTierSnapshot } = require("../services/billingService");
 
 describe("functions billingService entitlement enforcement", () => {
   it("denies free-tier bot boost access when the plan does not include it", async () => {
     await expect(checkBotEntitlement("user-1", "bot_boost")).rejects.toThrow(
       "requires a paid subscription"
     );
+  });
+
+  it("treats externally missing PayPal subscriptions as free tier", async () => {
+    const snapshot = await getEffectiveTierSnapshot(
+      "user-1",
+      { tier: "premium", status: "external_missing" },
+      { subscriptionTier: "premium", subscriptionStatus: "external_missing" }
+    );
+
+    expect(snapshot.tierId).toBe("free");
   });
 });

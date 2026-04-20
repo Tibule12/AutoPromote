@@ -151,7 +151,7 @@ async function resolveEffectiveTierId(userId, billingData, userData) {
   const hasKnownExpiry = Number.isFinite(expiryMs);
   const hasFutureExpiry = hasKnownExpiry && expiryMs > now;
   const isExpired = hasKnownExpiry && expiryMs <= now;
-  const isCancelledState = ["cancelled", "canceled", "suspended", "expired", "inactive"].includes(
+  const isCancelledState = ["cancelled", "canceled", "suspended", "expired", "inactive", "external_missing"].includes(
     normalizedStatus
   );
 

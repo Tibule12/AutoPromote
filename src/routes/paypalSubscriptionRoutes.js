@@ -71,6 +71,26 @@ function extractPayPalStartDate(paypalSub) {
   return paypalSub?.start_time || paypalSub?.create_time || new Date().toISOString();
 }
 
+function extractPayPalPlanFixedPrice(paypalPlan) {
+  const cycles = Array.isArray(paypalPlan?.billing_cycles) ? paypalPlan.billing_cycles : [];
+  const regularCycle =
+    cycles.find(cycle => String(cycle?.tenure_type || "").toUpperCase() === "REGULAR") || cycles[0];
+  const rawValue = regularCycle?.pricing_scheme?.fixed_price?.value;
+  const numericValue = Number(rawValue);
+  return Number.isFinite(numericValue) ? numericValue : null;
+}
+
+function isPayPalMissingResource(value) {
+  if (!value) return false;
+  if (value.__missing === true) return true;
+  const message = String(value.message || value.name || value.issue || "");
+  return (
+    value.status === 404 ||
+    value.statusCode === 404 ||
+    /INVALID_RESOURCE_ID|RESOURCE_NOT_FOUND|404/.test(message)
+  );
+}
+
 function inferMonthlyPeriodStart(nextBillingDate, fallback) {
   if (!nextBillingDate) return fallback || null;
   const nextDate = new Date(nextBillingDate);
@@ -178,6 +198,119 @@ async function refreshPersistedSubscriptionFromPayPal({ userId, subscriptionId, 
   };
 }
 
+async function fetchPayPalPlanDetails(paypalPlanId) {
+  if (!paypalPlanId) return null;
+
+  const access = await getAccessToken();
+  const base =
+    process.env.PAYPAL_MODE === "live"
+      ? "https://api-m.paypal.com"
+      : "https://api-m.sandbox.paypal.com";
+  const res = await safeFetch(base + `/v1/billing/plans/${paypalPlanId}`, fetchFn, {
+    fetchOptions: {
+      method: "GET",
+      headers: { Authorization: `Bearer ${access}` },
+    },
+    requireHttps: true,
+    allowHosts: ["api-m.paypal.com", "api-m.sandbox.paypal.com"],
+  });
+  if (res.status === 404) {
+    return { __missing: true, id: paypalPlanId, status: 404 };
+  }
+  if (!res.ok) {
+    throw new Error(`paypal_plan_http_${res.status}`);
+  }
+  return await res.json().catch(() => null);
+}
+
+async function validateConfiguredPayPalPlan(normalizedPlanId, paypalPlanId) {
+  const internalPlan = resolvePlan(normalizedPlanId);
+  const paypalPlan = await fetchPayPalPlanDetails(paypalPlanId);
+
+  if (!paypalPlan || isPayPalMissingResource(paypalPlan)) {
+    return {
+      ok: false,
+      code: "PAYPAL_PLAN_NOT_FOUND",
+      message: `${internalPlan.name} PayPal plan is missing or unavailable in PayPal.`,
+    };
+  }
+
+  if (String(paypalPlan.status || "").toUpperCase() !== "ACTIVE") {
+    return {
+      ok: false,
+      code: "PAYPAL_PLAN_INACTIVE",
+      message: `${internalPlan.name} PayPal plan is not active.`,
+    };
+  }
+
+  const livePrice = extractPayPalPlanFixedPrice(paypalPlan);
+  const expectedPrice = Number(internalPlan.price);
+  if (
+    Number.isFinite(livePrice) &&
+    Number.isFinite(expectedPrice) &&
+    Math.abs(livePrice - expectedPrice) > 0.001
+  ) {
+    return {
+      ok: false,
+      code: "PAYPAL_PLAN_PRICE_MISMATCH",
+      message: `${internalPlan.name} PayPal plan is charging ${livePrice.toFixed(2)} but the app expects ${expectedPrice.toFixed(2)}.`,
+      expectedPrice,
+      livePrice,
+    };
+  }
+
+  return {
+    ok: true,
+    expectedPrice,
+    livePrice,
+    paypalPlanId,
+  };
+}
+
+async function markSubscriptionExternalMissing(userId, subscriptionId) {
+  if (!userId || !subscriptionId) return;
+
+  const nowIso = new Date().toISOString();
+  await db.collection("users").doc(userId).set(
+    {
+      paypalSubscriptionId: null,
+      subscriptionStatus: "external_missing",
+      subscriptionPeriodEnd: null,
+      updatedAt: nowIso,
+      subscriptionExternalIssue: "INVALID_RESOURCE_ID",
+      subscriptionExternalIssueAt: nowIso,
+    },
+    { merge: true }
+  );
+
+  await db.collection("user_billing").doc(userId).set(
+    {
+      paypalSubscriptionId: null,
+      status: "external_missing",
+      nextBillingDate: null,
+      updatedAt: nowIso,
+    },
+    { merge: true }
+  );
+
+  await db.collection("user_subscriptions").doc(userId).set(
+    {
+      paypalSubscriptionId: null,
+      status: "external_missing",
+      nextBillingDate: null,
+      updatedAt: nowIso,
+    },
+    { merge: true }
+  );
+
+  await db.collection("subscription_events").add({
+    userId,
+    type: "subscription_external_missing",
+    paypalSubscriptionId: subscriptionId,
+    timestamp: nowIso,
+  });
+}
+
 function buildSubscriptionStatusPayload(snapshot, subscription = {}) {
   const effectivePlan = resolvePlan(snapshot.tierId || "free");
   const rawStatus = String(
@@ -222,10 +355,17 @@ async function fetchPayPalSubscriptionDetails(subscriptionId) {
   if (!subscriptionId) return null;
 
   if (paypal && paypal.subscriptions && paypal.subscriptions.SubscriptionsGetRequest) {
-    const client = paypalClient.client();
-    const request = new paypal.subscriptions.SubscriptionsGetRequest(subscriptionId);
-    const subscription = await client.execute(request);
-    return subscription.result;
+    try {
+      const client = paypalClient.client();
+      const request = new paypal.subscriptions.SubscriptionsGetRequest(subscriptionId);
+      const subscription = await client.execute(request);
+      return subscription.result;
+    } catch (error) {
+      if (isPayPalMissingResource(error)) {
+        return { __missing: true, id: subscriptionId, status: 404 };
+      }
+      throw error;
+    }
   }
 
   console.warn("[PayPal] SDK SubscriptionsGetRequest missing; using REST fallback");
@@ -239,6 +379,12 @@ async function fetchPayPalSubscriptionDetails(subscriptionId) {
     requireHttps: true,
     allowHosts: ["api-m.paypal.com", "api-m.sandbox.paypal.com"],
   });
+  if (res.status === 404) {
+    return { __missing: true, id: subscriptionId, status: 404 };
+  }
+  if (!res.ok) {
+    throw new Error(`paypal_subscription_http_${res.status}`);
+  }
   return await res.json().catch(() => null);
 }
 
@@ -363,6 +509,16 @@ async function reconcileMissedPayPalActivation(userId) {
 
     try {
       const paypalSub = await fetchPayPalSubscriptionDetails(subscriptionId);
+      if (isPayPalMissingResource(paypalSub)) {
+        await db.collection("subscription_intents").doc(subscriptionId).set(
+          {
+            status: "external_missing",
+            updatedAt: new Date().toISOString(),
+          },
+          { merge: true }
+        );
+        continue;
+      }
       if (
         !paypalSub ||
         !["ACTIVE", "APPROVED"].includes(String(paypalSub.status || "").toUpperCase())
@@ -508,6 +664,16 @@ router.post("/create-subscription", authMiddleware, async (req, res) => {
       return res.status(500).json({
         error: "PayPal plan not configured",
         message: "Please contact support to set up this plan",
+      });
+    }
+
+    const planValidation = await validateConfiguredPayPalPlan(normalizedPlanId, paypalPlanId);
+    if (!planValidation.ok) {
+      return res.status(503).json({
+        error: planValidation.code,
+        message: planValidation.message,
+        expectedPrice: planValidation.expectedPrice,
+        livePrice: planValidation.livePrice,
       });
     }
 
@@ -853,7 +1019,14 @@ router.get("/status", async (req, res) => {
     if (subscription.paypalSubscriptionId && subscription.status === "active") {
       try {
         const paypalSub = await fetchPayPalSubscriptionDetails(subscription.paypalSubscriptionId);
-        if (paypalSub) {
+        if (isPayPalMissingResource(paypalSub)) {
+          await markSubscriptionExternalMissing(userId, subscription.paypalSubscriptionId);
+          Object.assign(subscription, {
+            paypalSubscriptionId: null,
+            status: "external_missing",
+            nextBillingDate: null,
+          });
+        } else if (paypalSub) {
           const remoteStatus = String(paypalSub.status || "").toLowerCase();
           const remoteNextBillingDate = extractPayPalNextBillingDate(paypalSub);
           const localNextBillingDate =
