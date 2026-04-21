@@ -1,8 +1,21 @@
 import {
+  buildAutoSwitchPlan,
+  buildRenderSegments,
+  buildSwitchDisplaySegments,
   DEFAULT_SEGMENT_FRAMING,
+  formatDurationLabel,
+  getActiveCameraAtTime,
+  getAudioActivityScoreForSourceTime,
+  getAutoSwitchIntervalForAggressiveness,
+  getSourceTimelineTimeAtPlayhead,
+  getSourceDurationBounds,
   getSegmentFocusPoint,
   getSegmentTransformOrigin,
+  normalizeSegments,
   normalizeSegmentFraming,
+  normalizeSwitches,
+  pickCompanionCameraAtTime,
+  resolveSmartMulticamLayoutAtTime,
 } from "../multicamUtils";
 
 describe("multicam single-cam framing helpers", () => {
@@ -29,18 +42,11 @@ describe("multicam single-cam framing helpers", () => {
   test("builds transform origins from normalized focus points", () => {
     expect(getSegmentTransformOrigin({ targetX: 0.2, targetY: 0.3 })).toBe("20.00% 30.00%");
   });
+
+  test("maps timeline playhead back into a source using offsets", () => {
+    expect(getSourceTimelineTimeAtPlayhead({ offsetSeconds: 1.5 }, 4, 0)).toBe(2.5);
+  });
 });
-import {
-  buildAutoSwitchPlan,
-  buildRenderSegments,
-  buildSwitchDisplaySegments,
-  formatDurationLabel,
-  getAutoSwitchIntervalForAggressiveness,
-  getActiveCameraAtTime,
-  getSourceDurationBounds,
-  normalizeSegments,
-  normalizeSwitches,
-} from "../multicamUtils";
 
 describe("multicam utils", () => {
   const sources = [
@@ -203,6 +209,116 @@ describe("multicam utils", () => {
     expect(getAutoSwitchIntervalForAggressiveness(3, "low")).toBeCloseTo(4.05);
     expect(getAutoSwitchIntervalForAggressiveness(3, "balanced")).toBe(3);
     expect(getAutoSwitchIntervalForAggressiveness(3, "high")).toBeCloseTo(2.16);
+  });
+
+  test("scores envelope-based audio activity at a source time", () => {
+    expect(
+      getAudioActivityScoreForSourceTime(
+        {
+          envelope: [0.1, 0.2, 0.85, 0.95, 0.25],
+          secondsPerBin: 0.5,
+        },
+        1.5,
+        0.25
+      )
+    ).toBeCloseTo(0.9, 4);
+  });
+
+  test("selects the strongest in-range companion camera for a shared moment", () => {
+    const companion = pickCompanionCameraAtTime(sources, "cam-1", 4, 0, {
+      "cam-2": [
+        { time: 2.4, score: 0.78 },
+        { time: 2.6, score: 0.84 },
+      ],
+    });
+
+    expect(companion).toEqual(
+      expect.objectContaining({
+        cameraId: "cam-2",
+      })
+    );
+  });
+
+  test("smart layout chooses split when both cameras are lively", () => {
+    const layout = resolveSmartMulticamLayoutAtTime(
+      sources,
+      "cam-1",
+      4,
+      0,
+      {
+        "cam-1": [{ time: 4, score: 0.72 }],
+        "cam-2": [{ time: 2.5, score: 0.68 }],
+      },
+      "smart"
+    );
+
+    expect(layout).toEqual(
+      expect.objectContaining({
+        layoutMode: "split-vertical",
+        secondaryCameraId: "cam-2",
+        reason: "shared_energy",
+      })
+    );
+  });
+
+  test("smart layout chooses scene-grid when several cameras are active together", () => {
+    const ensembleSources = [
+      ...sources,
+      {
+        id: "cam-3",
+        label: "Camera 3",
+        duration: 14,
+        offsetSeconds: 0.5,
+        uploadedUrl: "https://example.com/cam-3.mp4",
+      },
+      {
+        id: "cam-4",
+        label: "Camera 4",
+        duration: 12,
+        offsetSeconds: 0.25,
+        uploadedUrl: "https://example.com/cam-4.mp4",
+      },
+    ];
+
+    const layout = resolveSmartMulticamLayoutAtTime(
+      ensembleSources,
+      "cam-1",
+      4,
+      0,
+      {
+        "cam-1": [{ time: 4, score: 0.62 }],
+        "cam-2": [{ time: 2.5, score: 0.58 }],
+        "cam-3": [{ time: 3.5, score: 0.54 }],
+        "cam-4": [{ time: 3.75, score: 0.49 }],
+      },
+      "smart"
+    );
+
+    expect(layout.layoutMode).toBe("scene-grid");
+    expect(layout.visibleCameraIds).toEqual(expect.arrayContaining(["cam-1", "cam-2", "cam-3"]));
+    expect(layout.visibleCameraIds.length).toBeGreaterThanOrEqual(3);
+  });
+
+  test("smart layout chooses pip when a companion surges harder than the lead", () => {
+    const layout = resolveSmartMulticamLayoutAtTime(
+      sources,
+      "cam-1",
+      4,
+      0,
+      {
+        "cam-1": [{ time: 4, score: 0.18 }],
+        "cam-2": [{ time: 2.5, score: 0.76 }],
+      },
+      "smart"
+    );
+
+    expect(layout).toEqual(
+      expect.objectContaining({
+        layoutMode: "pip",
+        secondaryCameraId: "cam-2",
+        reason: "reaction_insert",
+      })
+    );
   });
 
   test("formats long durations using hours minutes and seconds", () => {

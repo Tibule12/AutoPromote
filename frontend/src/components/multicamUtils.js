@@ -1,7 +1,14 @@
-export const MULTICAM_MAX_SOURCES = 3;
+export const MULTICAM_MAX_SOURCES = 6;
 export const MULTICAM_MIN_SOURCES = 2;
 export const DEFAULT_SWITCH_INTERVAL = 3;
-export const MULTICAM_CAMERA_COLORS = ["#f97316", "#38bdf8", "#34d399"];
+export const MULTICAM_CAMERA_COLORS = [
+  "#f97316",
+  "#38bdf8",
+  "#34d399",
+  "#a78bfa",
+  "#fb7185",
+  "#facc15",
+];
 
 export const clampNumber = (value, minimum, maximum, fallback) => {
   const numeric = Number(value);
@@ -558,6 +565,18 @@ export const getActiveCameraAtTime = (switches, sources, previewTime, overlapDur
   return current || displaySegments[displaySegments.length - 1] || null;
 };
 
+export const getSourceTimelineTimeAtPlayhead = (source, playhead, timelineStart = 0) => {
+  const offsetSeconds = Number(source?.offsetSeconds) || 0;
+  return Number(
+    ((Number(playhead) || 0) + (Number(timelineStart) || 0) - offsetSeconds).toFixed(3)
+  );
+};
+
+export const isSourceAvailableAtTime = (source, sourceTime) => {
+  const duration = Number(source?.duration) || 0;
+  return Number.isFinite(sourceTime) && sourceTime >= 0 && sourceTime <= duration - 0.01;
+};
+
 export const getAutoSwitchIntervalForAggressiveness = (
   intervalSeconds,
   aggressiveness = "balanced"
@@ -615,6 +634,237 @@ const getAudioActivityScoreAtTime = (profile, targetTime, windowSeconds) => {
   }, null);
 
   return clampNumber(nearest?.score, 0, 1, 0);
+};
+
+const getEnvelopeAudioActivityScoreAtTime = (analysis, sourceTime, windowSeconds) => {
+  if (!Array.isArray(analysis?.envelope) || !analysis.envelope.length) {
+    return 0;
+  }
+
+  const secondsPerBin = clampNumber(analysis?.secondsPerBin, 0.01, 10, 0.05);
+  const centerIndex = Math.round((Number(sourceTime) || 0) / secondsPerBin);
+  const windowBins = Math.max(1, Math.round((windowSeconds || 0.4) / secondsPerBin));
+  const startIndex = Math.max(0, centerIndex - windowBins);
+  const endIndex = Math.min(analysis.envelope.length - 1, centerIndex + windowBins);
+
+  let total = 0;
+  let count = 0;
+  for (let index = startIndex; index <= endIndex; index += 1) {
+    total += clampNumber(analysis.envelope[index], 0, 1, 0);
+    count += 1;
+  }
+
+  return count ? total / count : 0;
+};
+
+export const getAudioActivityScoreForSourceTime = (
+  analysisOrProfile,
+  sourceTime,
+  windowSeconds = 0.4
+) => {
+  if (!Number.isFinite(Number(sourceTime))) return 0;
+  if (Array.isArray(analysisOrProfile)) {
+    return getAudioActivityScoreAtTime(analysisOrProfile, Number(sourceTime), windowSeconds);
+  }
+  return getEnvelopeAudioActivityScoreAtTime(analysisOrProfile, Number(sourceTime), windowSeconds);
+};
+
+export const pickCompanionCameraAtTime = (
+  sources,
+  activeCameraId,
+  playhead,
+  timelineStart = 0,
+  audioActivityBySource = {}
+) => {
+  const validSources = (Array.isArray(sources) ? sources : []).filter(
+    source => source?.id && (source.url || source.previewUrl || source.uploadedUrl)
+  );
+  if (!activeCameraId || validSources.length <= 1) return null;
+
+  const candidates = validSources
+    .filter(source => source.id !== activeCameraId)
+    .map(source => {
+      const sourceTime = getSourceTimelineTimeAtPlayhead(source, playhead, timelineStart);
+      if (!isSourceAvailableAtTime(source, sourceTime)) return null;
+
+      return {
+        cameraId: source.id,
+        sourceTime,
+        score: getAudioActivityScoreForSourceTime(audioActivityBySource?.[source.id], sourceTime),
+      };
+    })
+    .filter(Boolean)
+    .sort((left, right) => right.score - left.score);
+
+  return candidates[0] || null;
+};
+
+const rankAvailableSourcesAtTime = (
+  sources,
+  activeCameraId,
+  playhead,
+  timelineStart = 0,
+  audioActivityBySource = {}
+) => {
+  const validSources = (Array.isArray(sources) ? sources : []).filter(
+    source => source?.id && (source.url || source.previewUrl || source.uploadedUrl)
+  );
+
+  return validSources
+    .map(source => {
+      const sourceTime = getSourceTimelineTimeAtPlayhead(source, playhead, timelineStart);
+      if (!isSourceAvailableAtTime(source, sourceTime)) return null;
+
+      const score = getAudioActivityScoreForSourceTime(
+        audioActivityBySource?.[source.id],
+        sourceTime
+      );
+      const isPrimary = source.id === activeCameraId;
+      return {
+        cameraId: source.id,
+        sourceTime,
+        score,
+        isPrimary,
+        rankScore: score + (isPrimary ? 0.08 : 0),
+      };
+    })
+    .filter(Boolean)
+    .sort((left, right) => {
+      if (right.rankScore !== left.rankScore) return right.rankScore - left.rankScore;
+      if (left.isPrimary) return -1;
+      if (right.isPrimary) return 1;
+      return right.score - left.score;
+    });
+};
+
+export const resolveSmartMulticamLayoutAtTime = (
+  sources,
+  activeCameraId,
+  playhead,
+  timelineStart = 0,
+  audioActivityBySource = {},
+  preferredMode = "smart"
+) => {
+  const normalizedMode = String(preferredMode || "smart")
+    .trim()
+    .toLowerCase();
+  const validSources = (Array.isArray(sources) ? sources : []).filter(
+    source => source?.id && (source.url || source.previewUrl || source.uploadedUrl)
+  );
+  const activeSource = validSources.find(source => source.id === activeCameraId) || null;
+  const rankedAvailableSources = rankAvailableSourcesAtTime(
+    validSources,
+    activeCameraId,
+    playhead,
+    timelineStart,
+    audioActivityBySource
+  );
+  const companion =
+    rankedAvailableSources.find(source => source.cameraId !== activeCameraId) || null;
+  const activeSourceTime = activeSource
+    ? getSourceTimelineTimeAtPlayhead(activeSource, playhead, timelineStart)
+    : null;
+  const activeScore = getAudioActivityScoreForSourceTime(
+    audioActivityBySource?.[activeCameraId],
+    activeSourceTime
+  );
+
+  const base = {
+    layoutMode: "cut",
+    primaryCameraId: activeCameraId || validSources[0]?.id || null,
+    secondaryCameraId: null,
+    visibleCameraIds: [activeCameraId || validSources[0]?.id].filter(Boolean),
+    activeScore,
+    secondaryScore: companion?.score || 0,
+    reason: companion ? "primary_focus" : "no_companion",
+  };
+
+  if (!companion) {
+    return base;
+  }
+
+  if (normalizedMode === "split" || normalizedMode === "split-vertical") {
+    return {
+      ...base,
+      layoutMode: "split-vertical",
+      secondaryCameraId: companion.cameraId,
+      secondaryScore: companion.score,
+      reason: "manual_split",
+    };
+  }
+
+  if (normalizedMode === "pip") {
+    return {
+      ...base,
+      layoutMode: "pip",
+      secondaryCameraId: companion.cameraId,
+      secondaryScore: companion.score,
+      reason: "manual_pip",
+    };
+  }
+
+  if (normalizedMode === "scene-grid" || normalizedMode === "grid" || normalizedMode === "matrix") {
+    const visibleCameraIds = rankedAvailableSources.slice(0, 6).map(source => source.cameraId);
+    if (visibleCameraIds.length >= 3) {
+      return {
+        ...base,
+        layoutMode: "scene-grid",
+        secondaryCameraId: visibleCameraIds[1] || null,
+        visibleCameraIds,
+        secondaryScore: rankedAvailableSources[1]?.score || 0,
+        reason: "manual_ensemble",
+      };
+    }
+  }
+
+  if (normalizedMode === "cut") {
+    return base;
+  }
+
+  const topEnsemble = rankedAvailableSources.slice(0, Math.min(6, rankedAvailableSources.length));
+  const ensembleAverage = topEnsemble.length
+    ? topEnsemble.reduce((sum, source) => sum + source.score, 0) / topEnsemble.length
+    : 0;
+  const livelySources = rankedAvailableSources.filter(source => source.score >= 0.16);
+
+  if (
+    rankedAvailableSources.length >= 3 &&
+    (livelySources.length >= 3 || ensembleAverage >= 0.18)
+  ) {
+    const visibleCameraIds = rankedAvailableSources.slice(0, 6).map(source => source.cameraId);
+    return {
+      ...base,
+      layoutMode: "scene-grid",
+      secondaryCameraId: visibleCameraIds[1] || null,
+      visibleCameraIds,
+      secondaryScore: rankedAvailableSources[1]?.score || 0,
+      reason: "ensemble_peak",
+    };
+  }
+
+  if (activeScore >= 0.35 && companion.score >= 0.35) {
+    return {
+      ...base,
+      layoutMode: "split-vertical",
+      secondaryCameraId: companion.cameraId,
+      visibleCameraIds: [base.primaryCameraId, companion.cameraId].filter(Boolean),
+      secondaryScore: companion.score,
+      reason: "shared_energy",
+    };
+  }
+
+  if (companion.score >= 0.48) {
+    return {
+      ...base,
+      layoutMode: "pip",
+      secondaryCameraId: companion.cameraId,
+      visibleCameraIds: [base.primaryCameraId, companion.cameraId].filter(Boolean),
+      secondaryScore: companion.score,
+      reason: "reaction_insert",
+    };
+  }
+
+  return base;
 };
 
 export const buildAutoSwitchPlan = (
