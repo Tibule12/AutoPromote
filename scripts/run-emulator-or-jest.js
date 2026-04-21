@@ -12,23 +12,117 @@ Behavior:
   ALLOW_FALLBACK_NO_EMULATOR=1 is set.
 */
 const { spawnSync, spawn } = require('child_process');
-const { EOL } = require('os');
+const fs = require('fs');
+const path = require('path');
+
+const WINDOWS_LAUNCHERS = new Set(['npm', 'npx']);
+
+function getExecutable(command) {
+  if (process.platform === 'win32' && WINDOWS_LAUNCHERS.has(command)) {
+    return `${command}.cmd`;
+  }
+  return command;
+}
+
+function runCommandSync(command, args, options = {}) {
+  return spawnSync(getExecutable(command), args, {
+    shell: false,
+    ...options,
+  });
+}
+
+function runCommand(command, args, options = {}) {
+  return spawn(getExecutable(command), args, {
+    shell: false,
+    ...options,
+  });
+}
+
+function getJavaMajorVersion(javaExecutable) {
+  const result = runCommandSync(javaExecutable, ['-version'], { stdio: 'pipe' });
+  const versionOutput = `${result.stderr || ''}${result.stdout || ''}`;
+  const match = versionOutput.match(/version\s+"(\d+)(?:\.([\d.]+))?/);
+  if (!match) return null;
+  const major = parseInt(match[1], 10);
+  return Number.isFinite(major) ? major : null;
+}
+
+function collectJavaCandidates() {
+  const candidates = [];
+  const seen = new Set();
+  const homeDir = process.env.HOME || '';
+
+  const addCandidate = javaExecutable => {
+    if (!javaExecutable) return;
+    const normalized = path.resolve(javaExecutable);
+    if (seen.has(normalized) || !fs.existsSync(normalized)) return;
+    seen.add(normalized);
+    candidates.push(normalized);
+  };
+
+  if (process.env.JAVA_HOME) {
+    addCandidate(path.join(process.env.JAVA_HOME, 'bin', 'java'));
+  }
+
+  const currentJava = spawnSync('bash', ['-lc', 'command -v java'], { stdio: 'pipe' });
+  if (currentJava.status === 0) {
+    addCandidate((currentJava.stdout || '').toString().trim());
+  }
+
+  const candidateRoots = [
+    path.join(homeDir, '.local', 'jdks'),
+    path.join(homeDir, '.sdkman', 'candidates', 'java'),
+    path.join(homeDir, '.jabba', 'jdk'),
+    '/usr/lib/jvm',
+  ];
+
+  candidateRoots.forEach(root => {
+    if (!root || !fs.existsSync(root)) return;
+    fs.readdirSync(root, { withFileTypes: true }).forEach(entry => {
+      if (!entry.isDirectory()) return;
+      addCandidate(path.join(root, entry.name, 'bin', 'java'));
+    });
+  });
+
+  addCandidate(path.join(homeDir, '.jdk', 'bin', 'java'));
+
+  return candidates;
+}
+
+function resolveJavaRuntime(minimumMajor = 21) {
+  const candidates = collectJavaCandidates();
+  for (const javaExecutable of candidates) {
+    const major = getJavaMajorVersion(javaExecutable);
+    if (major && major >= minimumMajor) {
+      return {
+        javaExecutable,
+        javaHome: path.dirname(path.dirname(javaExecutable)),
+        major,
+      };
+    }
+  }
+  return null;
+}
+
+function applyJavaRuntime(javaRuntime) {
+  if (!javaRuntime) return;
+  process.env.JAVA_HOME = javaRuntime.javaHome;
+  const pathEntries = (process.env.PATH || '').split(path.delimiter).filter(Boolean);
+  const javaBin = path.join(javaRuntime.javaHome, 'bin');
+  process.env.PATH = [javaBin, ...pathEntries.filter(entry => path.resolve(entry) !== path.resolve(javaBin))].join(path.delimiter);
+}
 
 function tryRunFirebaseExec() {
   console.log('[run-emulator-or-jest] Attempting: npx firebase emulators:exec --only firestore "node ./scripts/exec-jest.js"');
-  // Combine the command and script into a single argument for the script parameter
-  const res = spawnSync('npx', ['firebase', 'emulators:exec', '--only', 'firestore', 'node ./scripts/exec-jest.js'], {
+  const res = runCommandSync('npx', ['firebase', 'emulators:exec', '--only', 'firestore', 'node ./scripts/exec-jest.js'], {
     stdio: 'inherit',
     env: process.env,
-    shell: true,
   });
   return res.status;
 }
 
 function runJestDirect(envExtras = {}) {
   console.log('[run-emulator-or-jest] Running Jest directly (node ./scripts/exec-jest.js)');
-  const path = require('path');
-  const fs = require('fs');
   const env = Object.assign({}, process.env, envExtras);
   // Remove any JEST_MATCH to ensure we run the full suite by default
   // if (env.JEST_MATCH) delete env.JEST_MATCH;
@@ -36,10 +130,10 @@ function runJestDirect(envExtras = {}) {
   const frontendNodeModules = path.join(process.cwd(), 'frontend', 'node_modules');
   if (!fs.existsSync(frontendNodeModules)) {
     console.log('[run-emulator-or-jest] frontend/node_modules missing — attempting to install frontend deps (npm ci --prefix frontend)');
-    const install = spawnSync('npm', ['ci', '--prefix', 'frontend'], { stdio: 'inherit', shell: true });
+    const install = runCommandSync('npm', ['ci', '--prefix', 'frontend'], { stdio: 'inherit' });
     if (install.status !== 0) {
       console.warn('[run-emulator-or-jest] npm ci --prefix frontend failed; trying npm install --prefix frontend');
-      const install2 = spawnSync('npm', ['install', '--prefix', 'frontend'], { stdio: 'inherit', shell: true });
+      const install2 = runCommandSync('npm', ['install', '--prefix', 'frontend'], { stdio: 'inherit' });
       if (install2.status !== 0) {
         console.warn('[run-emulator-or-jest] Failed to install frontend dependencies automatically. CI should run `npm ci --prefix frontend` before tests.');
       } else {
@@ -62,10 +156,9 @@ function runJestDirect(envExtras = {}) {
 function startEmulatorBackground({timeoutMs = 60_000} = {}) {
   return new Promise((resolve, reject) => {
     console.log('[run-emulator-or-jest] Starting Firestore emulator in background: npx firebase emulators:start --only firestore');
-    const child = spawn('npx', ['firebase', 'emulators:start', '--only', 'firestore'], {
+    const child = runCommand('npx', ['firebase', 'emulators:start', '--only', 'firestore'], {
       stdio: ['ignore', 'pipe', 'pipe'],
       env: process.env,
-      shell: true,
     });
 
     let stdout = '';
@@ -172,7 +265,7 @@ function waitForHttpReady(host, port, timeoutMs = 10000) {
 (async function main() {
   try {
     // Check firebase CLI availability first
-    const check = spawnSync('npx', ['firebase', '--version'], { stdio: 'pipe', shell: true });
+    const check = runCommandSync('npx', ['firebase', '--version'], { stdio: 'pipe' });
     if (check.status !== 0) {
       console.error('[run-emulator-or-jest] Firebase CLI (`firebase`) not available via npx.');
       console.error('Install it locally with `npm install --save-dev firebase-tools` or set ALLOW_FALLBACK_NO_EMULATOR=1 to run tests without the emulator (not recommended for emulator-dependent tests).');
@@ -184,29 +277,21 @@ function waitForHttpReady(host, port, timeoutMs = 10000) {
       process.exit(1);
     }
 
-    // Check Java version for Firestore emulator (requires JDK 21+ as of firebase-tools 15+)
-    try {
-      const jv = spawnSync('java', ['-version'], { stdio: 'pipe', shell: false });
-      const verOut = (jv.stderr || jv.stdout || {}).toString();
-      const m = verOut.match(/version\s+"(\d+)(?:\.([\d.]+))?/);
-      if (m) {
-        const major = parseInt(m[1], 10);
-        if (isNaN(major) || major < 21) {
-          console.error('[run-emulator-or-jest] Detected Java major version:', m[1]);
-          console.error('firebase emulators require JDK 21 or newer. Please install Temurin/OpenJDK 21+ to run the Firestore emulator.');
-          console.error('As a temporary measure, set ALLOW_FALLBACK_NO_EMULATOR=1 to run Jest without the emulator (some tests will fail).');
-          if (process.env.ALLOW_FALLBACK_NO_EMULATOR === '1' || process.env.ALLOW_FALLBACK_NO_EMULATOR === 'true') {
-            console.warn('[run-emulator-or-jest] ALLOW_FALLBACK_NO_EMULATOR set — running Jest directly (skipping emulator).');
-            const fallback = runJestDirect();
-            process.exit(fallback || 1);
-          }
-          process.exit(1);
-        }
+    const javaRuntime = resolveJavaRuntime(21);
+    if (!javaRuntime) {
+      console.error('[run-emulator-or-jest] No Java 21+ runtime was found.');
+      console.error('firebase emulators require JDK 21 or newer. Please install Temurin/OpenJDK 21+ to run the Firestore emulator.');
+      console.error('As a temporary measure, set ALLOW_FALLBACK_NO_EMULATOR=1 to run Jest without the emulator (some tests will fail).');
+      if (process.env.ALLOW_FALLBACK_NO_EMULATOR === '1' || process.env.ALLOW_FALLBACK_NO_EMULATOR === 'true') {
+        console.warn('[run-emulator-or-jest] ALLOW_FALLBACK_NO_EMULATOR set — running Jest directly (skipping emulator).');
+        const fallback = runJestDirect();
+        process.exit(fallback || 1);
       }
-    } catch (e) {
-      // If java check fails, surface a helpful message but continue to emulator attempt which may fail similarly
-      console.warn('[run-emulator-or-jest] Could not determine Java version:', e && e.message);
+      process.exit(1);
     }
+
+    applyJavaRuntime(javaRuntime);
+    console.log('[run-emulator-or-jest] Using Java', javaRuntime.major, 'from', javaRuntime.javaExecutable);
 
     // First try emulators:exec path — it's the simplest and isolates env to the child
     const execCode = (function(){ try { return tryRunFirebaseExec(); } catch (e) { console.warn('[run-emulator-or-jest] tryRunFirebaseExec threw:', e && e.message); return 1; } })();

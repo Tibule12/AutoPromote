@@ -211,7 +211,7 @@ describe("multicam utils", () => {
     expect(getAutoSwitchIntervalForAggressiveness(3, "high")).toBeCloseTo(2.16);
   });
 
-  test("scores envelope-based audio activity at a source time", () => {
+  test("averages envelope-based audio activity across the requested window", () => {
     expect(
       getAudioActivityScoreForSourceTime(
         {
@@ -221,7 +221,7 @@ describe("multicam utils", () => {
         1.5,
         0.25
       )
-    ).toBeCloseTo(0.9, 4);
+    ).toBeCloseTo(0.6833, 4);
   });
 
   test("selects the strongest in-range companion camera for a shared moment", () => {
