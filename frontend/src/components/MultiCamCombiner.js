@@ -8,17 +8,21 @@ import {
   buildSwitchDisplaySegments,
   formatDurationLabel,
   getActiveCameraAtTime,
+  getAudioActivityScoreForSourceTime,
   getActiveSegmentAtTime,
   getMasterTimelineBounds,
   getSegmentFocusPoint,
   getSegmentTransformOrigin,
+  getSourceTimelineTimeAtPlayhead,
   getSourceDurationBounds,
+  isSourceAvailableAtTime,
   mapTimelineTimeToSourceTime,
   normalizeSourceLabel,
   normalizeSegmentFraming,
   normalizeSegments,
   normalizeSwitches,
   splitSegmentAtTimelineTime,
+  resolveSmartMulticamLayoutAtTime,
 } from "./multicamUtils";
 import { getAuth } from "firebase/auth";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -49,12 +53,38 @@ const SINGLE_CAM_FOCUS_PRESETS = [
   { id: "face", label: "Face", zoom: 1.45 },
 ];
 
+const MULTICAM_LAYOUT_OPTIONS = [
+  { id: "smart", label: "Pulse Director" },
+  { id: "split-vertical", label: "Dual Pulse" },
+  { id: "pip", label: "Orbit Echo" },
+  { id: "scene-grid", label: "Scene Matrix" },
+  { id: "cut", label: "Mono Focus" },
+];
+
+const MULTICAM_LAYOUT_TITLES = {
+  smart: "Pulse Director",
+  "split-vertical": "Dual Pulse",
+  pip: "Orbit Echo",
+  "scene-grid": "Scene Matrix",
+  cut: "Mono Focus",
+};
+
+const MULTICAM_REASON_TITLES = {
+  single_source: "Solo presence",
+  shared_energy: "Shared voltage",
+  reaction_insert: "Reaction bloom",
+  primary_focus: "Hero lock",
+  manual_split: "Manual duet",
+  manual_pip: "Manual orbit",
+  ensemble_peak: "Ensemble bloom",
+  manual_ensemble: "Manual matrix",
+  manual_cut: "Manual hero",
+};
+
 const getSourceMediaUrl = source => source?.previewUrl || source?.url || source?.uploadedUrl || "";
 
-const getSourceTimelineTime = (source, playhead, timelineStart) => {
-  const offsetSeconds = Number(source?.offsetSeconds) || 0;
-  return playhead + timelineStart - offsetSeconds;
-};
+const getSourceTimelineTime = (source, playhead, timelineStart) =>
+  getSourceTimelineTimeAtPlayhead(source, playhead, timelineStart);
 
 const loadVideoMetadata = mediaUrl =>
   new Promise((resolve, reject) => {
@@ -204,42 +234,269 @@ const syncMediaElement = (element, desiredTime, shouldPlay, options = {}) => {
   }
 };
 
-const drawVideoToCanvas = (context, canvas, activeVideo, label, framing = {}) => {
+const drawCanvasBadge = (context, text, x, y) => {
+  if (!text) return;
+  context.save();
+  context.font = "600 20px sans-serif";
+  const paddingX = 14;
+  const paddingY = 10;
+  const textWidth = context.measureText(text).width;
+  const width = textWidth + paddingX * 2;
+  const height = 36;
+  context.fillStyle = "rgba(6, 10, 18, 0.72)";
+  context.fillRect(x, y, width, height);
+  context.strokeStyle = "rgba(255, 255, 255, 0.14)";
+  context.strokeRect(x + 0.5, y + 0.5, width - 1, height - 1);
+  context.fillStyle = "rgba(255, 248, 236, 0.96)";
+  context.fillText(text, x + paddingX, y + height - paddingY);
+  context.restore();
+};
+
+const paintVideoToViewport = (context, viewport, activeVideo, label, framing = {}) => {
+  const safeViewport = {
+    x: Number(viewport?.x) || 0,
+    y: Number(viewport?.y) || 0,
+    width: Math.max(1, Number(viewport?.width) || 1),
+    height: Math.max(1, Number(viewport?.height) || 1),
+  };
+
+  context.save();
+  context.beginPath();
+  context.rect(safeViewport.x, safeViewport.y, safeViewport.width, safeViewport.height);
+  context.clip();
   context.fillStyle = "#04070d";
-  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.fillRect(safeViewport.x, safeViewport.y, safeViewport.width, safeViewport.height);
 
   if (activeVideo && activeVideo.readyState >= 2) {
-    const sourceWidth = activeVideo.videoWidth || canvas.width;
-    const sourceHeight = activeVideo.videoHeight || canvas.height;
-    const baseScale = Math.min(canvas.width / sourceWidth, canvas.height / sourceHeight);
+    const sourceWidth = activeVideo.videoWidth || safeViewport.width;
+    const sourceHeight = activeVideo.videoHeight || safeViewport.height;
+    const baseScale = Math.min(
+      safeViewport.width / sourceWidth,
+      safeViewport.height / sourceHeight
+    );
     const normalizedFraming = normalizeSegmentFraming(framing);
     const focusPoint = getSegmentFocusPoint(normalizedFraming);
     const zoom = Math.max(1, Number(normalizedFraming.zoom) || 1);
     const scale = baseScale * zoom;
     const drawWidth = sourceWidth * scale;
     const drawHeight = sourceHeight * scale;
-    const requestedOffsetX = canvas.width * focusPoint.x - drawWidth * focusPoint.x;
-    const requestedOffsetY = canvas.height * focusPoint.y - drawHeight * focusPoint.y;
+    const requestedOffsetX =
+      safeViewport.x + safeViewport.width * focusPoint.x - drawWidth * focusPoint.x;
+    const requestedOffsetY =
+      safeViewport.y + safeViewport.height * focusPoint.y - drawHeight * focusPoint.y;
     const offsetX = clampNumber(
       requestedOffsetX,
-      Math.min(0, canvas.width - drawWidth),
-      0,
-      (canvas.width - drawWidth) / 2
+      Math.min(safeViewport.x, safeViewport.x + safeViewport.width - drawWidth),
+      safeViewport.x,
+      safeViewport.x + (safeViewport.width - drawWidth) / 2
     );
     const offsetY = clampNumber(
       requestedOffsetY,
-      Math.min(0, canvas.height - drawHeight),
-      0,
-      (canvas.height - drawHeight) / 2
+      Math.min(safeViewport.y, safeViewport.y + safeViewport.height - drawHeight),
+      safeViewport.y,
+      safeViewport.y + (safeViewport.height - drawHeight) / 2
     );
     context.drawImage(activeVideo, offsetX, offsetY, drawWidth, drawHeight);
+  } else {
+    context.fillStyle = "rgba(255, 255, 255, 0.75)";
+    context.font = `${Math.max(16, Math.round(safeViewport.width * 0.038))}px sans-serif`;
+    context.textAlign = "center";
+    context.fillText(
+      label || "No active camera frame",
+      safeViewport.x + safeViewport.width / 2,
+      safeViewport.y + safeViewport.height / 2
+    );
+  }
+
+  context.restore();
+};
+
+const getSceneGridViewports = (width, height, visibleCount) => {
+  const gap = Math.max(4, Math.round(Math.min(width, height) * 0.012));
+  const count = Math.max(1, Math.min(6, Number(visibleCount) || 1));
+
+  if (count <= 1) {
+    return [{ x: 0, y: 0, width, height }];
+  }
+
+  if (count === 2) {
+    const halfHeight = Math.round((height - gap) / 2);
+    return [
+      { x: 0, y: 0, width, height: halfHeight },
+      { x: 0, y: halfHeight + gap, width, height: height - halfHeight - gap },
+    ];
+  }
+
+  if (count === 3) {
+    const topHeight = Math.round(height * 0.56);
+    const bottomHeight = height - topHeight - gap;
+    const lowerWidth = Math.round((width - gap) / 2);
+    return [
+      { x: 0, y: 0, width, height: topHeight },
+      { x: 0, y: topHeight + gap, width: lowerWidth, height: bottomHeight },
+      {
+        x: lowerWidth + gap,
+        y: topHeight + gap,
+        width: width - lowerWidth - gap,
+        height: bottomHeight,
+      },
+    ];
+  }
+
+  if (count === 4) {
+    const cellWidth = Math.round((width - gap) / 2);
+    const cellHeight = Math.round((height - gap) / 2);
+    return [0, 1, 2, 3].map(index => ({
+      x: (index % 2) * (cellWidth + gap),
+      y: Math.floor(index / 2) * (cellHeight + gap),
+      width: index % 2 === 0 ? cellWidth : width - cellWidth - gap,
+      height: Math.floor(index / 2) === 0 ? cellHeight : height - cellHeight - gap,
+    }));
+  }
+
+  if (count === 5) {
+    const heroHeight = Math.round(height * 0.36);
+    const lowerHeight = height - heroHeight - gap;
+    const cellWidth = Math.round((width - gap) / 2);
+    const cellHeight = Math.round((lowerHeight - gap) / 2);
+    return [
+      { x: 0, y: 0, width, height: heroHeight },
+      { x: 0, y: heroHeight + gap, width: cellWidth, height: cellHeight },
+      {
+        x: cellWidth + gap,
+        y: heroHeight + gap,
+        width: width - cellWidth - gap,
+        height: cellHeight,
+      },
+      {
+        x: 0,
+        y: heroHeight + gap + cellHeight + gap,
+        width: cellWidth,
+        height: height - heroHeight - cellHeight - gap * 2,
+      },
+      {
+        x: cellWidth + gap,
+        y: heroHeight + gap + cellHeight + gap,
+        width: width - cellWidth - gap,
+        height: height - heroHeight - cellHeight - gap * 2,
+      },
+    ];
+  }
+
+  const cellWidth = Math.round((width - gap) / 2);
+  const cellHeight = Math.round((height - gap * 2) / 3);
+  return Array.from({ length: 6 }, (_, index) => ({
+    x: (index % 2) * (cellWidth + gap),
+    y: Math.floor(index / 2) * (cellHeight + gap),
+    width: index % 2 === 0 ? cellWidth : width - cellWidth - gap,
+    height: Math.floor(index / 2) < 2 ? cellHeight : height - cellHeight * 2 - gap * 2,
+  }));
+};
+
+const drawVideoToCanvas = (context, canvas, activeVideo, label, framing = {}) => {
+  context.fillStyle = "#04070d";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+
+  paintVideoToViewport(
+    context,
+    { x: 0, y: 0, width: canvas.width, height: canvas.height },
+    activeVideo,
+    label,
+    framing
+  );
+};
+
+const drawCompositeVideoToCanvas = (
+  context,
+  canvas,
+  {
+    layoutMode = "cut",
+    primaryVideo,
+    secondaryVideo,
+    primaryLabel,
+    secondaryLabel,
+    primaryFraming = {},
+    visibleFeeds = [],
+  }
+) => {
+  if (layoutMode === "scene-grid") {
+    const feeds =
+      Array.isArray(visibleFeeds) && visibleFeeds.length
+        ? visibleFeeds.slice(0, 6)
+        : [
+            { video: primaryVideo, label: primaryLabel, framing: primaryFraming },
+            secondaryVideo ? { video: secondaryVideo, label: secondaryLabel, framing: {} } : null,
+          ].filter(Boolean);
+    const viewports = getSceneGridViewports(canvas.width, canvas.height, feeds.length);
+    context.fillStyle = "#04070d";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    feeds.forEach((feed, index) => {
+      const viewport = viewports[index];
+      if (!viewport) return;
+      paintVideoToViewport(
+        context,
+        viewport,
+        feed.video,
+        feed.label,
+        index === 0 ? feed.framing || primaryFraming : feed.framing || {}
+      );
+      if (feed.label) {
+        drawCanvasBadge(context, feed.label, viewport.x + 12, viewport.y + 12);
+      }
+    });
     return;
   }
 
-  context.fillStyle = "rgba(255, 255, 255, 0.75)";
-  context.font = `${Math.max(24, Math.round(canvas.width * 0.028))}px sans-serif`;
-  context.textAlign = "center";
-  context.fillText(label || "No active camera frame", canvas.width / 2, canvas.height / 2);
+  if (!secondaryVideo || layoutMode === "cut") {
+    drawVideoToCanvas(context, canvas, primaryVideo, primaryLabel, primaryFraming);
+    if (primaryLabel) {
+      drawCanvasBadge(context, primaryLabel, 18, 18);
+    }
+    return;
+  }
+
+  if (layoutMode === "split-vertical") {
+    const halfHeight = canvas.height / 2;
+    context.fillStyle = "#04070d";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    paintVideoToViewport(
+      context,
+      { x: 0, y: 0, width: canvas.width, height: halfHeight },
+      primaryVideo,
+      primaryLabel,
+      primaryFraming
+    );
+    paintVideoToViewport(
+      context,
+      { x: 0, y: halfHeight, width: canvas.width, height: halfHeight },
+      secondaryVideo,
+      secondaryLabel,
+      {}
+    );
+    context.fillStyle = "rgba(255, 255, 255, 0.14)";
+    context.fillRect(0, halfHeight - 1, canvas.width, 2);
+    drawCanvasBadge(context, primaryLabel, 18, 18);
+    drawCanvasBadge(context, secondaryLabel, 18, halfHeight + 18);
+    return;
+  }
+
+  drawVideoToCanvas(context, canvas, primaryVideo, primaryLabel, primaryFraming);
+  const pipWidth = Math.round(canvas.width * 0.34);
+  const pipHeight = Math.round(canvas.height * 0.28);
+  const pipX = canvas.width - pipWidth - 26;
+  const pipY = 26;
+  paintVideoToViewport(
+    context,
+    { x: pipX, y: pipY, width: pipWidth, height: pipHeight },
+    secondaryVideo,
+    secondaryLabel,
+    {}
+  );
+  context.strokeStyle = "rgba(255, 255, 255, 0.88)";
+  context.lineWidth = 3;
+  context.strokeRect(pipX + 1.5, pipY + 1.5, pipWidth - 3, pipHeight - 3);
+  drawCanvasBadge(context, primaryLabel, 18, 18);
+  drawCanvasBadge(context, secondaryLabel, pipX + 12, pipY + pipHeight - 48);
 };
 
 const pickExportMimeType = () => {
@@ -276,6 +533,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const [selectedSingleCamSegmentId, setSelectedSingleCamSegmentId] = useState(null);
   const [singleCamSegmentFraming, setSingleCamSegmentFraming] = useState({});
   const [focusPickerActive, setFocusPickerActive] = useState(false);
+  const [multicamLayoutMode, setMulticamLayoutMode] = useState("smart");
 
   const cancelExportRef = useRef(false);
   const fileInputRef = useRef(null);
@@ -312,7 +570,6 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     hasEffects,
     attachVideo,
   } = useCinematicEffects();
-
   const readySources = useMemo(
     () => sources.filter(source => getSourceMediaUrl(source) && Number(source.duration) > 0.05),
     [sources]
@@ -399,6 +656,50 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const activeCameraId = activeSegment?.cameraId || readySources[0]?.id || sources[0]?.id || null;
   const activeCamera = readySources.find(source => source.id === activeCameraId) || null;
   const masterAudioSource = readySources.find(source => source.id === masterAudioCameraId) || null;
+  const resolvedMulticamLayout = useMemo(() => {
+    if (isSingleSourceWorkflow) {
+      return {
+        layoutMode: "cut",
+        primaryCameraId: activeCameraId,
+        secondaryCameraId: null,
+        reason: "single_source",
+      };
+    }
+
+    return resolveSmartMulticamLayoutAtTime(
+      readySources.length ? readySources : sources,
+      activeCameraId,
+      playhead,
+      timelineBounds.timelineStart,
+      audioAnalysisByCameraId,
+      multicamLayoutMode
+    );
+  }, [
+    isSingleSourceWorkflow,
+    activeCameraId,
+    readySources,
+    sources,
+    playhead,
+    timelineBounds.timelineStart,
+    audioAnalysisByCameraId,
+    multicamLayoutMode,
+  ]);
+  const effectiveMulticamLayoutMode = resolvedMulticamLayout.layoutMode || "cut";
+  const secondaryCameraId = resolvedMulticamLayout.secondaryCameraId || null;
+  const secondaryCamera = readySources.find(source => source.id === secondaryCameraId) || null;
+  const visibleLayoutCameraIds = useMemo(() => {
+    const candidateIds = Array.isArray(resolvedMulticamLayout.visibleCameraIds)
+      ? resolvedMulticamLayout.visibleCameraIds
+      : [activeCameraId, secondaryCameraId].filter(Boolean);
+    return candidateIds.filter(Boolean).slice(0, 6);
+  }, [resolvedMulticamLayout.visibleCameraIds, activeCameraId, secondaryCameraId]);
+  const visibleLayoutCameras = useMemo(
+    () =>
+      visibleLayoutCameraIds
+        .map(cameraId => readySources.find(source => source.id === cameraId))
+        .filter(Boolean),
+    [visibleLayoutCameraIds, readySources]
+  );
   const activeSingleCamFraming = useMemo(() => {
     if (!isSingleSourceWorkflow || !activeSegment?.id) {
       return DEFAULT_SEGMENT_FRAMING;
@@ -452,10 +753,358 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     isSingleSourceWorkflow,
     activeSingleCamFraming,
   ]);
+  const previewVideoStylesByCameraId = useMemo(() => {
+    const styles = {};
+    readySources.forEach(source => {
+      styles[source.id] = {
+        opacity: 0,
+        zIndex: 0,
+      };
+    });
+
+    if (!activeCameraId) return styles;
+
+    styles[activeCameraId] = {
+      opacity: 1,
+      zIndex: 2,
+      ...previewActiveVideoStyle,
+    };
+
+    if (effectiveMulticamLayoutMode === "scene-grid") {
+      const viewports = getSceneGridViewports(100, 100, visibleLayoutCameraIds.length);
+      visibleLayoutCameraIds.forEach((cameraId, index) => {
+        const viewport = viewports[index];
+        if (!viewport) return;
+        styles[cameraId] = {
+          opacity: 1,
+          zIndex: 2,
+          left: `${viewport.x}%`,
+          top: `${viewport.y}%`,
+          width: `${viewport.width}%`,
+          height: `${viewport.height}%`,
+          borderRadius: index === 0 ? "18px" : "16px",
+          ...(cameraId === activeCameraId ? previewActiveVideoStyle : {}),
+        };
+      });
+      return styles;
+    }
+
+    if (!secondaryCameraId || effectiveMulticamLayoutMode === "cut") {
+      return styles;
+    }
+
+    if (effectiveMulticamLayoutMode === "split-vertical") {
+      styles[activeCameraId] = {
+        opacity: 1,
+        zIndex: 2,
+        top: "0%",
+        left: 0,
+        width: "100%",
+        height: "50%",
+        ...previewActiveVideoStyle,
+      };
+      styles[secondaryCameraId] = {
+        opacity: 1,
+        zIndex: 2,
+        top: "50%",
+        left: 0,
+        width: "100%",
+        height: "50%",
+      };
+      return styles;
+    }
+
+    styles[secondaryCameraId] = {
+      opacity: 1,
+      zIndex: 3,
+      top: "4%",
+      right: "4%",
+      left: "auto",
+      width: "34%",
+      height: "30%",
+      borderRadius: "18px",
+      border: "2px solid rgba(255, 255, 255, 0.86)",
+      boxShadow: "0 18px 32px rgba(0, 0, 0, 0.35)",
+    };
+    return styles;
+  }, [
+    readySources,
+    activeCameraId,
+    secondaryCameraId,
+    visibleLayoutCameraIds,
+    effectiveMulticamLayoutMode,
+    previewActiveVideoStyle,
+  ]);
+  const multicamLayoutInsight = useMemo(() => {
+    if (isSingleSourceWorkflow) return null;
+    if (effectiveMulticamLayoutMode === "scene-grid") {
+      return visibleLayoutCameraIds.length >= 5
+        ? "AI opened a full scene matrix so the whole conversation stays visible at once."
+        : "AI widened the stage to keep several active angles visible together.";
+    }
+    if (effectiveMulticamLayoutMode === "split-vertical") {
+      return resolvedMulticamLayout.reason === "shared_energy"
+        ? "AI stacked both angles because they are both lively right now."
+        : "Split mode keeps two cameras on screen at once.";
+    }
+    if (effectiveMulticamLayoutMode === "pip") {
+      return resolvedMulticamLayout.reason === "reaction_insert"
+        ? "AI kept a second angle on screen as a reaction insert."
+        : "PiP mode keeps the secondary angle visible in a corner.";
+    }
+    return multicamLayoutMode === "smart"
+      ? "AI is currently staying on the lead angle because the companion angle is not strong enough."
+      : "Cut mode shows one angle at a time.";
+  }, [
+    isSingleSourceWorkflow,
+    visibleLayoutCameraIds.length,
+    effectiveMulticamLayoutMode,
+    resolvedMulticamLayout.reason,
+    multicamLayoutMode,
+  ]);
+  const leadEnergyScore = useMemo(() => {
+    if (!activeCamera || isSingleSourceWorkflow) return 0;
+    return getAudioActivityScoreForSourceTime(
+      audioAnalysisByCameraId?.[activeCamera.id],
+      getSourceTimelineTime(activeCamera, playhead, timelineBounds.timelineStart)
+    );
+  }, [
+    activeCamera,
+    isSingleSourceWorkflow,
+    audioAnalysisByCameraId,
+    playhead,
+    timelineBounds.timelineStart,
+  ]);
+  const companionEnergyScore = resolvedMulticamLayout.secondaryScore || 0;
+  const directorSnapshot = useMemo(() => {
+    if (isSingleSourceWorkflow) {
+      return {
+        modeTitle: "Single Lens",
+        reasonTitle: "Solo presence",
+        narrative:
+          "One lens is carrying the whole scene, so the director stays intimate and direct.",
+        temperature: 0.28,
+      };
+    }
+
+    const modeTitle = MULTICAM_LAYOUT_TITLES[effectiveMulticamLayoutMode] || "Pulse Director";
+    const reasonTitle = MULTICAM_REASON_TITLES[resolvedMulticamLayout.reason] || "Adaptive framing";
+    const temperature = Math.max(leadEnergyScore, companionEnergyScore, 0);
+
+    let narrative = multicamLayoutInsight;
+    if (resolvedMulticamLayout.reason === "shared_energy") {
+      narrative =
+        "Both angles are peaking together, so the director opens the frame and lets the moment breathe as a duet.";
+    } else if (resolvedMulticamLayout.reason === "reaction_insert") {
+      narrative =
+        "A secondary angle is flaring up harder than the lead, so the director keeps it alive as an orbiting reaction window.";
+    } else if (effectiveMulticamLayoutMode === "cut") {
+      narrative =
+        "The scene is cleaner with one hero angle, so the director collapses the frame into a decisive single-camera statement.";
+    }
+
+    return {
+      modeTitle,
+      reasonTitle,
+      narrative,
+      temperature,
+    };
+  }, [
+    isSingleSourceWorkflow,
+    effectiveMulticamLayoutMode,
+    resolvedMulticamLayout.reason,
+    leadEnergyScore,
+    companionEnergyScore,
+    multicamLayoutInsight,
+  ]);
+  const previewStageMoodClass = useMemo(() => {
+    if (isSingleSourceWorkflow) return "is-mood-solo";
+    if (effectiveMulticamLayoutMode === "scene-grid") return "is-mood-ensemble";
+    if (effectiveMulticamLayoutMode === "split-vertical") return "is-mood-dual";
+    if (effectiveMulticamLayoutMode === "pip") return "is-mood-orbit";
+    return "is-mood-focus";
+  }, [isSingleSourceWorkflow, effectiveMulticamLayoutMode]);
+  const inSyncSourceCount = useMemo(
+    () =>
+      readySources.filter(source => {
+        const mappedTime = getSourceTimelineTime(source, playhead, timelineBounds.timelineStart);
+        return mappedTime >= 0 && mappedTime <= Number(source.duration || 0) - 0.01;
+      }).length,
+    [readySources, playhead, timelineBounds.timelineStart]
+  );
+  const directorConfidence = useMemo(() => {
+    if (isSingleSourceWorkflow) {
+      return 0.86;
+    }
+
+    const baseConfidence =
+      effectiveMulticamLayoutMode === "scene-grid"
+        ? 0.82
+        : effectiveMulticamLayoutMode === "split-vertical"
+          ? 0.78
+          : effectiveMulticamLayoutMode === "pip"
+            ? 0.72
+            : 0.66;
+    const energyLift = Math.max(leadEnergyScore, companionEnergyScore) * 0.22;
+    const syncLift = readySources.length ? (inSyncSourceCount / readySources.length) * 0.12 : 0;
+
+    return clampNumber(baseConfidence + energyLift + syncLift, 0.42, 0.97, 0.72);
+  }, [
+    isSingleSourceWorkflow,
+    effectiveMulticamLayoutMode,
+    leadEnergyScore,
+    companionEnergyScore,
+    readySources.length,
+    inSyncSourceCount,
+  ]);
+  const activeFocusSummary = useMemo(() => {
+    if (isSingleSourceWorkflow) {
+      if (focusPickerActive) return "Focus pick armed";
+      if (selectedSingleCamFraming.zoom > 1.35) return "Tight reaction framing";
+      if (selectedSingleCamFraming.zoom > 1.05) return "Medium punch framing";
+      return "Wide two-shot framing";
+    }
+
+    if (secondaryCamera && effectiveMulticamLayoutMode !== "cut") {
+      return `${activeCamera?.label || "Lead"} with ${secondaryCamera.label || "companion"}`;
+    }
+
+    return `${activeCamera?.label || "Lead"} owns the frame`;
+  }, [
+    isSingleSourceWorkflow,
+    focusPickerActive,
+    selectedSingleCamFraming.zoom,
+    secondaryCamera,
+    effectiveMulticamLayoutMode,
+    activeCamera,
+  ]);
+  const syncWindowLabel = useMemo(() => {
+    if (readySources.length <= 1) {
+      return "Single stream online";
+    }
+
+    return `${formatDurationLabel(overlapBounds.overlapDuration || 0)} overlap live`;
+  }, [readySources.length, overlapBounds.overlapDuration]);
+  const liveMomentLabel = useMemo(() => {
+    if (isSingleSourceWorkflow) {
+      return "Solo lens edit";
+    }
+
+    if (effectiveMulticamLayoutMode === "scene-grid") return "Conversation matrix live";
+    if (effectiveMulticamLayoutMode === "split-vertical") return "Shared reaction moment";
+    if (effectiveMulticamLayoutMode === "pip") return "Reaction orbit live";
+    return "Hero angle locked";
+  }, [isSingleSourceWorkflow, effectiveMulticamLayoutMode]);
+  const directorHeroNarrative = useMemo(() => {
+    if (isSingleSourceWorkflow) {
+      return "Solo lens edit with guided reframing.";
+    }
+    if (effectiveMulticamLayoutMode === "split-vertical") {
+      return "Two angles stay open because both are active.";
+    }
+    if (effectiveMulticamLayoutMode === "scene-grid") {
+      return "The whole conversation stays open in a living vertical matrix.";
+    }
+    if (effectiveMulticamLayoutMode === "pip") {
+      return "The lead holds frame while a reaction stays alive in orbit.";
+    }
+    return "The director is holding one hero angle.";
+  }, [isSingleSourceWorkflow, effectiveMulticamLayoutMode]);
+  const stageCommandSummary = useMemo(() => {
+    if (isSingleSourceWorkflow) {
+      return "Split, trim, and reframe this one recording.";
+    }
+    return multicamLayoutInsight;
+  }, [isSingleSourceWorkflow, multicamLayoutInsight]);
+  const workflowModeLabel = isSingleSourceWorkflow ? "Single-Cam Edit" : "Multicam Director";
   const workflowTitle = isSingleSourceWorkflow ? "Single-Camera Workflow" : "Angle Timeline";
   const workflowDescription = isSingleSourceWorkflow
     ? "Split, trim, delete, and reframe sections of one recording. Add more camera angles later if you want multicam switching."
-    : "Angle buttons write cut events. Audio stays on the selected audio source throughout.";
+    : "Angle buttons write cut events. Audio stays on the selected audio source throughout, while AI layouts can surface shared moments and reactions.";
+  const cameraPanelTitle = isSingleSourceWorkflow ? "Primary Recording" : "Camera Sources";
+  const cameraPanelDescription = isSingleSourceWorkflow
+    ? "This recording is your source canvas. Split it into beats, trim dead air, and punch into the speaker without leaving the single-cam workflow."
+    : "Every recording lines up against the same timeline. Offsets move the source start, not your edit points.";
+  const deckPrimaryLabel = isSingleSourceWorkflow ? "Edit Mode" : "Sources Live";
+  const deckPrimaryValue = isSingleSourceWorkflow
+    ? "Single Lens"
+    : `${inSyncSourceCount} / ${readySources.length || 0}`;
+  const deckPrimaryNote = isSingleSourceWorkflow
+    ? "Guided split, trim, and reframe workflow"
+    : "Angles aligned at current playhead";
+  const deckAudioLabel = isSingleSourceWorkflow ? "Primary Audio" : "Voice Bed";
+  const deckTimelineLabel = isSingleSourceWorkflow ? "Edit Span" : "Timeline Span";
+  const stageKickerLabel = isSingleSourceWorkflow ? "Single-Cam Edit" : "Stage Intelligence";
+  const timelinePanelTitle = isSingleSourceWorkflow ? "Segment Editor" : workflowTitle;
+  const timelinePanelDescription = isSingleSourceWorkflow
+    ? "Shape this one recording into clean beats, reframed shots, and punch-ins."
+    : workflowDescription;
+  const footerNoteTitle = isSingleSourceWorkflow ? "Single-cam edit mode" : "Sync window";
+  const footerNoteCopy = isSingleSourceWorkflow
+    ? "One source loaded. Use split, trim, punch-in, and reframe controls to build a sharper cut without adding another angle."
+    : `Overlap start ${formatDurationLabel(overlapBounds.overlapStart || 0)} | overlap duration ${formatDurationLabel(overlapBounds.overlapDuration || 0)}`;
+  const quickActionItems = useMemo(() => {
+    if (isSingleSourceWorkflow) {
+      return [
+        {
+          id: "single-wide",
+          label: "Keep It Natural",
+          caption: "Wide two-shot framing",
+          isActive: selectedSingleCamFraming.zoom <= 1.01 && !focusPickerActive,
+        },
+        {
+          id: "single-body",
+          label: "Body Punch",
+          caption: "Medium cinematic crop",
+          isActive: Math.abs(selectedSingleCamFraming.zoom - 1.22) < 0.03,
+        },
+        {
+          id: "single-face",
+          label: "Face Reaction",
+          caption: "Tight emotional close-up",
+          isActive: Math.abs(selectedSingleCamFraming.zoom - 1.45) < 0.03,
+        },
+        {
+          id: "single-pick",
+          label: "Pick Subject",
+          caption: "Tap the person to frame",
+          isActive: focusPickerActive,
+        },
+      ];
+    }
+
+    return [
+      {
+        id: "multi-smart",
+        label: "Auto Direct",
+        caption: "Let AI steer the conversation",
+        isActive: multicamLayoutMode === "smart",
+      },
+      {
+        id: "multi-grid",
+        label: "Show Everyone",
+        caption: "Open a live conversation matrix",
+        isActive: multicamLayoutMode === "scene-grid",
+      },
+      {
+        id: "multi-reaction",
+        label: "Catch Reactions",
+        caption: "Keep a live reaction window up",
+        isActive: multicamLayoutMode === "pip",
+      },
+      {
+        id: "multi-duet",
+        label: "Shared Moment",
+        caption: "Hold two speakers together",
+        isActive: multicamLayoutMode === "split-vertical",
+      },
+    ];
+  }, [
+    isSingleSourceWorkflow,
+    selectedSingleCamFraming.zoom,
+    focusPickerActive,
+    multicamLayoutMode,
+  ]);
   const previewStageStyle = useMemo(() => {
     const aspectRatioMap = {
       "9:16": "9 / 16",
@@ -676,11 +1325,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           ? mapTimelineTimeToSourceTime(activeSegment, playhead)
           : null
         : getSourceTimelineTime(source, playhead, timelineBounds.timelineStart);
-      const isInRange =
-        Number.isFinite(mappedTime) &&
-        mappedTime >= 0 &&
-        mappedTime <= Number(source.duration || 0) - 0.01;
-      const isActivePreview = source.id === activeCameraId;
+      const isInRange = isSourceAvailableAtTime(source, mappedTime);
+      const isActivePreview = source.id === activeCameraId || source.id === secondaryCameraId;
 
       syncMediaElement(
         previewVideoRefs.current[source.id],
@@ -712,6 +1358,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     timelineBounds.timelineStart,
     masterAudioCameraId,
     activeCameraId,
+    secondaryCameraId,
     isSingleSourceWorkflow,
     activeSegment,
   ]);
@@ -999,6 +1646,53 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     setStatusMessage(
       `Click the preview on the ${preset.id === "face" ? "face" : "person"} you want this segment to frame.`
     );
+  };
+
+  const handleRunQuickAction = actionId => {
+    if (isSingleSourceWorkflow) {
+      if (actionId === "single-wide") {
+        handleApplySingleCamFocusPreset({ id: "two-shot", zoom: 1 });
+        setStatusMessage("Natural wide framing applied.");
+        return;
+      }
+      if (actionId === "single-body") {
+        handleApplySingleCamFocusPreset({ id: "body", zoom: 1.22 });
+        return;
+      }
+      if (actionId === "single-face") {
+        handleApplySingleCamFocusPreset({ id: "face", zoom: 1.45 });
+        return;
+      }
+      if (actionId === "single-pick") {
+        setFocusPickerActive(current => !current);
+        setStatusMessage(
+          focusPickerActive
+            ? "Focus pick cancelled."
+            : "Click the preview on the face or body you want framed."
+        );
+      }
+      return;
+    }
+
+    if (actionId === "multi-smart") {
+      setMulticamLayoutMode("smart");
+      setStatusMessage("AI Director is steering the scene.");
+      return;
+    }
+    if (actionId === "multi-grid") {
+      setMulticamLayoutMode("scene-grid");
+      setStatusMessage("Conversation matrix opened.");
+      return;
+    }
+    if (actionId === "multi-reaction") {
+      setMulticamLayoutMode("pip");
+      setStatusMessage("Reaction window mode enabled.");
+      return;
+    }
+    if (actionId === "multi-duet") {
+      setMulticamLayoutMode("split-vertical");
+      setStatusMessage("Shared-moment split is active.");
+    }
   };
 
   const handlePreviewStageFocusPick = event => {
@@ -1308,8 +2002,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                 exportPlayhead,
                 timelineBounds.timelineStart
               );
-              const isInRange =
-                mappedTime >= 0 && mappedTime <= Number(source.duration || 0) - 0.01;
+              const isInRange = isSourceAvailableAtTime(source, mappedTime);
               syncMediaElement(video, mappedTime, isInRange, {
                 muted: true,
                 volume: 0,
@@ -1326,12 +2019,33 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
             const currentCameraLabel = readySources.find(
               source => source.id === currentSegment?.cameraId
             )?.label;
-            drawVideoToCanvas(
-              context,
-              canvas,
-              exportVideos.get(currentSegment?.cameraId),
-              currentCameraLabel
+            const exportLayout = resolveSmartMulticamLayoutAtTime(
+              readySources,
+              currentSegment?.cameraId,
+              exportPlayhead,
+              timelineBounds.timelineStart,
+              audioAnalysisByCameraId,
+              multicamLayoutMode
             );
+            const visibleFeeds = (exportLayout.visibleCameraIds || [currentSegment?.cameraId])
+              .filter(Boolean)
+              .slice(0, 6)
+              .map((cameraId, index) => ({
+                video: exportVideos.get(cameraId),
+                label: readySources.find(source => source.id === cameraId)?.label || cameraId,
+                framing: index === 0 ? activeSingleCamFraming : {},
+              }))
+              .filter(feed => feed.video);
+            drawCompositeVideoToCanvas(context, canvas, {
+              layoutMode: exportLayout.layoutMode,
+              primaryVideo: exportVideos.get(currentSegment?.cameraId),
+              secondaryVideo: exportVideos.get(exportLayout.secondaryCameraId),
+              primaryLabel: currentCameraLabel,
+              secondaryLabel: readySources.find(
+                source => source.id === exportLayout.secondaryCameraId
+              )?.label,
+              visibleFeeds,
+            });
           }
 
           if (exportPlayhead >= timelineDuration) {
@@ -1502,7 +2216,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       aria-modal="true"
       aria-label="Combine Multi-Camera Studio"
     >
-      <div className="nle-shell">
+      <div className={`nle-shell ${isSingleSourceWorkflow ? "is-single-cam" : "is-multicam"}`}>
         <div className="nle-header">
           <div className="nle-header-copy">
             <span className="nle-eyebrow">Multicam Studio</span>
@@ -1522,58 +2236,141 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           </button>
         </div>
 
-        <div className="nle-summary-row">
-          <div className="nle-summary-card">
-            <span>Sources</span>
-            <strong>
-              {readySources.length} / {MULTICAM_MAX_SOURCES}
-            </strong>
-          </div>
-          <div className="nle-summary-card">
-            <span>Audio Source</span>
-            <strong>{masterAudioSource?.label || "Not set"}</strong>
-          </div>
-          <div className="nle-summary-card">
-            <span>Shared Timeline</span>
-            <strong>{formatDurationLabel(timelineDuration || 0)}</strong>
-          </div>
-          <div className="nle-summary-card">
-            <span>Output</span>
-            <div className="nle-aspect-buttons">
-              {["9:16", "16:9", "1:1"].map(ar => (
-                <button
-                  key={ar}
-                  type="button"
-                  className={`nle-aspect-btn ${outputAspectRatio === ar ? "is-active" : ""}`}
-                  onClick={() => setOutputAspectRatio(ar)}
-                >
-                  {ar}
-                </button>
-              ))}
+        <div className="nle-director-deck">
+          <div className="nle-director-hero-card">
+            <div className="nle-director-hero-topline">
+              <span className="nle-eyebrow">Live Director</span>
+              <span className="nle-director-signal-pill">{liveMomentLabel}</span>
             </div>
+            <h4>{directorSnapshot.modeTitle}</h4>
+            <p>{directorHeroNarrative}</p>
+            <div className="nle-director-hero-meta">
+              <span className="nle-chip nle-chip-secondary">Mode: {workflowModeLabel}</span>
+              <span className="nle-chip">Reason: {directorSnapshot.reasonTitle}</span>
+              <span className="nle-chip nle-chip-secondary">
+                Confidence: {Math.round(directorConfidence * 100)}%
+              </span>
+              <span className="nle-chip nle-chip-secondary">Focus: {activeFocusSummary}</span>
+            </div>
+          </div>
+
+          <div className="nle-director-meta-grid">
+            <div className="nle-director-stat-card">
+              <span>{deckPrimaryLabel}</span>
+              <strong>{deckPrimaryValue}</strong>
+              <small>{deckPrimaryNote}</small>
+            </div>
+            <div className="nle-director-stat-card">
+              <span>{deckAudioLabel}</span>
+              <strong>{masterAudioSource?.label || "Not set"}</strong>
+              <small>Audio anchor for the whole render</small>
+            </div>
+            <div className="nle-director-stat-card">
+              <span>{deckTimelineLabel}</span>
+              <strong>{formatDurationLabel(timelineDuration || 0)}</strong>
+              <small>{workflowTitle}</small>
+            </div>
+            <div className="nle-director-stat-card is-output-card">
+              <span>Output Stage</span>
+              <strong>{outputAspectRatio}</strong>
+              <div className="nle-aspect-buttons">
+                {["9:16", "16:9", "1:1"].map(ar => (
+                  <button
+                    key={ar}
+                    type="button"
+                    className={`nle-aspect-btn ${outputAspectRatio === ar ? "is-active" : ""}`}
+                    onClick={() => setOutputAspectRatio(ar)}
+                  >
+                    {ar}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="nle-quickstart-strip">
+          <div className="nle-quickstart-copy">
+            <span className="nle-eyebrow">Magic Moves</span>
+            <strong>
+              {isSingleSourceWorkflow
+                ? "One tap to shape a polished single-camera edit"
+                : "One tap to direct the conversation with confidence"}
+            </strong>
+            <p>
+              {isSingleSourceWorkflow
+                ? "Start with a framing move, then refine only if you need to."
+                : "Pick the conversation behavior you want first. The detailed controls stay available underneath."}
+            </p>
+          </div>
+          <div className="nle-quickstart-actions">
+            {quickActionItems.map(action => (
+              <button
+                key={action.id}
+                type="button"
+                className={`nle-quickstart-card ${action.isActive ? "is-active" : ""}`}
+                onClick={() => handleRunQuickAction(action.id)}
+              >
+                <strong>{action.label}</strong>
+                <span>{action.caption}</span>
+              </button>
+            ))}
           </div>
         </div>
 
         <div className="nle-container" ref={scrollContainerRef}>
           <div className="nle-preview-panel">
+            <div className="nle-stage-command-bar">
+              <div className="nle-stage-command-copy">
+                <span className="nle-stage-kicker">{stageKickerLabel}</span>
+                <strong>{liveMomentLabel}</strong>
+                <p>{stageCommandSummary}</p>
+              </div>
+              {!isSingleSourceWorkflow && (
+                <div className="nle-stage-command-actions">
+                  {MULTICAM_LAYOUT_OPTIONS.map(option => (
+                    <button
+                      key={option.id}
+                      type="button"
+                      className={`nle-layout-mode-btn ${multicamLayoutMode === option.id ? "is-active" : ""}`}
+                      onClick={() => setMulticamLayoutMode(option.id)}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <div className="nle-preview-shell">
               <div
                 ref={previewStageRef}
-                className={`nle-preview-stage ${focusPickerActive ? "is-focus-picking" : ""}`}
+                className={`nle-preview-stage ${focusPickerActive ? "is-focus-picking" : ""} ${previewStageMoodClass}`}
                 style={previewStageStyle}
                 onClick={handlePreviewStageFocusPick}
               >
+                <div className="nle-stage-live-overlay">
+                  <div className="nle-stage-overlay-cluster">
+                    <span className="nle-stage-live-pill">LIVE</span>
+                    <span className="nle-stage-overlay-text">{directorSnapshot.modeTitle}</span>
+                  </div>
+                  <div className="nle-stage-overlay-cluster is-right">
+                    <span className="nle-stage-overlay-text">
+                      {Math.round(directorSnapshot.temperature * 100)}% heat ·{" "}
+                      {Math.round(directorConfidence * 100)}% sure
+                    </span>
+                  </div>
+                </div>
                 {readySources.map(source => (
                   <video
                     key={`preview-${source.id}`}
                     ref={node => {
                       previewVideoRefs.current[source.id] = node;
                     }}
-                    className={`nle-preview-video ${source.id === activeCameraId ? "is-active" : ""}`}
+                    className={`nle-preview-video ${source.id === activeCameraId ? "is-active" : ""} ${source.id === secondaryCameraId ? "is-secondary" : ""}`}
                     src={getSourceMediaUrl(source)}
                     playsInline
                     muted
-                    style={source.id === activeCameraId ? previewActiveVideoStyle : undefined}
+                    style={previewVideoStylesByCameraId[source.id]}
                   />
                 ))}
                 {!readySources.length ? (
@@ -1596,6 +2393,51 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                   </>
                 )}
                 {fadeStyle && <div style={fadeStyle} />}
+                {!isSingleSourceWorkflow &&
+                  effectiveMulticamLayoutMode === "split-vertical" &&
+                  secondaryCamera && <div className="nle-preview-split-divider" />}
+                {!isSingleSourceWorkflow &&
+                  effectiveMulticamLayoutMode === "scene-grid" &&
+                  visibleLayoutCameras.length > 0 && (
+                    <>
+                      {visibleLayoutCameras.map((camera, index) => {
+                        const viewport = getSceneGridViewports(
+                          100,
+                          100,
+                          visibleLayoutCameras.length
+                        )[index];
+                        if (!viewport) return null;
+                        return (
+                          <div
+                            key={`preview-label-${camera.id}`}
+                            className={`nle-preview-label nle-preview-label-grid ${camera.id === activeCameraId ? "is-grid-primary" : ""}`}
+                            style={{
+                              left: `calc(${viewport.x}% + 12px)`,
+                              top: `calc(${viewport.y}% + 12px)`,
+                            }}
+                          >
+                            {camera.label || `Camera ${index + 1}`}
+                          </div>
+                        );
+                      })}
+                    </>
+                  )}
+                {!isSingleSourceWorkflow &&
+                  effectiveMulticamLayoutMode !== "scene-grid" &&
+                  activeCamera && (
+                    <>
+                      <div className="nle-preview-label nle-preview-label-primary">
+                        {activeCamera.label || "Primary"}
+                      </div>
+                      {secondaryCamera && effectiveMulticamLayoutMode !== "cut" && (
+                        <div
+                          className={`nle-preview-label nle-preview-label-secondary ${effectiveMulticamLayoutMode === "pip" ? "is-pip" : "is-split"}`}
+                        >
+                          {secondaryCamera.label || "Secondary"}
+                        </div>
+                      )}
+                    </>
+                  )}
                 {isSingleSourceWorkflow && readySources.length > 0 ? (
                   <>
                     <div
@@ -1660,10 +2502,15 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                 </div>
               </div>
               <div className="nle-preview-badges">
-                <span className="nle-chip">Active video: {activeCamera?.label || "None"}</span>
+                <span className="nle-chip">Lead: {activeCamera?.label || "None"}</span>
                 <span className="nle-chip nle-chip-secondary">
-                  Audio source: {masterAudioSource?.label || "None"}
+                  Voice bed: {masterAudioSource?.label || "None"}
                 </span>
+                {!isSingleSourceWorkflow && (
+                  <span className="nle-chip nle-chip-secondary">
+                    Director mode: {directorSnapshot.modeTitle}
+                  </span>
+                )}
                 {isSingleSourceWorkflow && (
                   <span className="nle-chip nle-chip-secondary">
                     Focus:{" "}
@@ -1688,6 +2535,54 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
               </div>
             </div>
 
+            <div className="nle-layout-control-row">
+              <div className="nle-layout-insight nle-director-insight-card">
+                <div className="nle-director-headline-row">
+                  <div>
+                    <strong>Director Console</strong>
+                    <span className="nle-director-mode-title">{directorSnapshot.modeTitle}</span>
+                  </div>
+                  <span className="nle-director-reason-pill">{directorSnapshot.reasonTitle}</span>
+                </div>
+                <p className="nle-director-copy">{directorSnapshot.narrative}</p>
+                <div className="nle-director-meters">
+                  <div className="nle-director-meter-card">
+                    <label>Lead charge</label>
+                    <div className="nle-director-meter-track">
+                      <span
+                        className="nle-director-meter-fill is-lead"
+                        style={{ width: `${Math.round(leadEnergyScore * 100)}%` }}
+                      />
+                    </div>
+                    <strong>{Math.round(leadEnergyScore * 100)}%</strong>
+                  </div>
+                  <div className="nle-director-meter-card">
+                    <label>Companion charge</label>
+                    <div className="nle-director-meter-track">
+                      <span
+                        className="nle-director-meter-fill is-companion"
+                        style={{ width: `${Math.round(companionEnergyScore * 100)}%` }}
+                      />
+                    </div>
+                    <strong>{Math.round(companionEnergyScore * 100)}%</strong>
+                  </div>
+                  <div className="nle-director-meter-card">
+                    <label>Scene temperature</label>
+                    <div className="nle-director-temperature-readout">
+                      <span>{Math.round(directorSnapshot.temperature * 100)}%</span>
+                      <small>
+                        {directorSnapshot.temperature >= 0.7
+                          ? "Voltage spike"
+                          : directorSnapshot.temperature >= 0.4
+                            ? "Building pressure"
+                            : "Calm frame"}
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Cinematic Effects Panel — appears below toolbar for multicam */}
             {showEffectsPanel && (
               <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
@@ -1705,11 +2600,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           <div className="nle-panel nle-camera-panel">
             <div className="nle-panel-header">
               <div>
-                <h4>Camera Sources</h4>
-                <p>
-                  Every recording lines up against the same timeline. Offsets move the source start,
-                  not your edit points.
-                </p>
+                <h4>{cameraPanelTitle}</h4>
+                <p>{cameraPanelDescription}</p>
               </div>
               <div className="nle-panel-actions">
                 <input
@@ -1932,8 +2824,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           <div className="nle-panel nle-switch-panel">
             <div className="nle-panel-header">
               <div>
-                <h4>{workflowTitle}</h4>
-                <p>{workflowDescription}</p>
+                <h4>{timelinePanelTitle}</h4>
+                <p>{timelinePanelDescription}</p>
               </div>
               <div className="nle-panel-actions nle-switch-buttons">
                 {readySources.map((source, index) => (
@@ -2237,12 +3129,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
 
             <div className="nle-footer-grid">
               <div className="nle-footer-note">
-                <strong>Sync window</strong>
-                <span>
-                  {readySources.length > 1
-                    ? `Overlap start ${formatDurationLabel(overlapBounds.overlapStart || 0)} | overlap duration ${formatDurationLabel(overlapBounds.overlapDuration || 0)}`
-                    : "One source loaded. Add more angles only when you want cutaways or alternate views."}
-                </span>
+                <strong>{footerNoteTitle}</strong>
+                <span>{footerNoteCopy}</span>
               </div>
               <div className="nle-footer-actions">
                 <button
