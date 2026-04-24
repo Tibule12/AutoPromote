@@ -10,7 +10,7 @@ async function startServers() {
   process.env.NODE_ENV = process.env.NODE_ENV || "test";
   // Ensure the server uses the provided service account (set via env) if present
   const app = require("../../../src/server");
-  const mainServer = app.listen(0);
+  const mainServer = app.listen(0, "127.0.0.1");
   await new Promise(r => mainServer.once("listening", r));
   const mainPort = mainServer.address().port;
 
@@ -49,7 +49,7 @@ async function startServers() {
     }
   });
 
-  const fixtureServer = fixtures.listen(0);
+  const fixtureServer = fixtures.listen(0, "127.0.0.1");
   await new Promise(r => fixtureServer.once("listening", r));
   const fixturePort = fixtureServer.address().port;
   return { mainServer, fixtureServer, mainPort, fixturePort };

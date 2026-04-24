@@ -1,13 +1,12 @@
 const { test, expect } = require("@playwright/test");
 const STATIC_PORT = process.env.STATIC_SERVER_PORT || 5000;
+const getBase = () => process.env.E2E_BASE_URL || `http://localhost:${STATIC_PORT}`;
 
 test.beforeAll(async () => {
   // Start the in-process static server module so it sets E2E_BASE_URL reliably
   const staticReady = require("./static-server");
   await staticReady;
 });
-
-const getBase = () => process.env.E2E_BASE_URL || `http://localhost:${STATIC_PORT}`;
 
 // Track whether the upload route simulated an error for assertions
 let lastUploadError = { flag: false };

@@ -12,19 +12,13 @@ test.skip(
 );
 
 const STATIC_PORT = process.env.STATIC_SERVER_PORT || 5000;
-const BASE = `http://localhost:${STATIC_PORT}`;
+const getBase = () => process.env.E2E_BASE_URL || `http://localhost:${STATIC_PORT}`;
 
 let serverProcess;
 
 test.beforeAll(async () => {
-  serverProcess = require("child_process").spawn("node", ["test/e2e/playwright/static-server.js"], {
-    stdio: "inherit",
-  });
-  await new Promise(r => setTimeout(r, 800));
-});
-
-test.afterAll(async () => {
-  if (serverProcess) serverProcess.kill();
+  const staticReady = require("./static-server");
+  await staticReady;
 });
 
 test("admin payouts list and process single payout", async ({ page }) => {
@@ -39,7 +33,7 @@ test("admin payouts list and process single payout", async ({ page }) => {
 
   const { db } = hasDbAccess ? require("../../../src/firebaseAdmin") : { db: null };
   const app = require("../../../src/server");
-  const mainServer = app.listen(0);
+  const mainServer = app.listen(0, "127.0.0.1");
   await new Promise(r => mainServer.once("listening", r));
   const mainPort = mainServer.address().port;
 
@@ -83,7 +77,7 @@ test("admin payouts list and process single payout", async ({ page }) => {
     // Navigate to admin dashboard: prefer local fixture when GOOGLE_APPLICATION_CREDENTIALS is not set
     const path = require("path");
     const fileFixture = `file://${path.resolve(__dirname, "..", "fixtures", "admin_dashboard_fixture.html")}`;
-    const targetUrl = hasDbAccess ? BASE + "/#/admin" : fileFixture;
+    const targetUrl = hasDbAccess ? getBase() + "/#/admin" : fileFixture;
     const navStart = Date.now();
     let navErr = null;
     while (Date.now() - navStart < 15000) {
