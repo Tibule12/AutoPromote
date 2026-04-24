@@ -2,18 +2,13 @@ const { test, expect } = require("@playwright/test");
 const { spawn } = require("child_process");
 
 const STATIC_PORT = process.env.STATIC_SERVER_PORT || 5000;
-const BASE = `http://localhost:${STATIC_PORT}`;
+const getBase = () => process.env.E2E_BASE_URL || `http://localhost:${STATIC_PORT}`;
 
 let serverProcess;
 
 test.beforeAll(async () => {
-  serverProcess = spawn("node", ["test/e2e/playwright/static-server.js"], { stdio: "inherit" });
-  // wait a bit for server to start
-  await new Promise(r => setTimeout(r, 800));
-});
-
-test.afterAll(async () => {
-  if (serverProcess) serverProcess.kill();
+  const staticReady = require("./static-server");
+  await staticReady;
 });
 
 test("upgrade flow opens PayPal and handles cancel return", async ({ page }) => {
@@ -114,7 +109,7 @@ test("upgrade flow opens PayPal and handles cancel return", async ({ page }) => 
       JSON.stringify({ uid: "testUser", email: "test@local", name: "Test User", role: "user" })
     );
   });
-  await page.goto(BASE + "/#/pricing");
+  await page.goto(getBase() + "/#/pricing");
   // Debug: capture a short console dump and page title
   const pageTitle = await page.title();
   console.log("[DEBUG] Page title after goto:", pageTitle);
@@ -153,7 +148,7 @@ test("upgrade flow opens PayPal and handles cancel return", async ({ page }) => 
   expect(lastOpen).toContain("paypal-approve");
 
   // Simulate user cancel by navigating back to dashboard with cancelled flag
-  await page.goto(BASE + "/#/dashboard?payment=cancelled&subscription_id=sub_123");
+  await page.goto(getBase() + "/#/dashboard?payment=cancelled&subscription_id=sub_123");
 
   // Ensure the page did not show server Not Found and dashboard is visible
   const notFound = await page.locator("text=Not Found").count();
@@ -221,7 +216,7 @@ test("activation flow after approval updates subscription state", async ({ page 
       JSON.stringify({ uid: "testUser", email: "test@local", name: "Test User", role: "user" })
     );
   });
-  await page.goto(BASE + "/#/pricing");
+  await page.goto(getBase() + "/#/pricing");
   await page.waitForSelector("text=Available Plans");
 
   // Intercept window.open call instead of relying on a browser popup
@@ -254,7 +249,7 @@ test("activation flow after approval updates subscription state", async ({ page 
       }),
     });
   });
-  await page.goto(BASE + "/#/pricing?payment=success&subscriptionId=sub_456");
+  await page.goto(getBase() + "/#/pricing?payment=success&subscriptionId=sub_456");
 
   // Wait for plan to be reflected on page - look for plan name
   await page.waitForSelector("text=Pro", { timeout: 4000 });

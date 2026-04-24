@@ -82,6 +82,19 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
     contentItem?.file_url ||
     null;
 
+  const getAuthToken = async () => {
+    try {
+      const current = auth?.currentUser;
+      if (current) return await current.getIdToken(true);
+    } catch (_) {
+      // ignore and fall back to E2E token if present
+    }
+    if (typeof window !== "undefined" && window.__E2E_BYPASS === true && window.__E2E_TEST_TOKEN) {
+      return window.__E2E_TEST_TOKEN;
+    }
+    return null;
+  };
+
   // Filter for videos only, and exclude generated AI clips to keep the library clean
   // Show all user-uploaded videos (Clip Studio and general uploads) so users can access their full library
   const videoContent = content.filter(
@@ -140,12 +153,6 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
 
   const autoGenerateClips = async video => {
     if (autoGenerating) return;
-    const user = auth.currentUser;
-    if (!user) {
-      toast.error("Please sign in first.");
-      return;
-    }
-
     const videoUrl = resolveContentVideoUrl(video);
     if (!videoUrl) {
       toast.error("No video URL found.");
@@ -157,7 +164,8 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
     const toastId = toast.loading("⚡ Auto-generating clips...");
 
     try {
-      const token = await user.getIdToken();
+      const token = await getAuthToken();
+      if (!token) throw new Error("Authentication token missing for auto-generate request");
       const res = await fetch(`${API_BASE_URL}/api/clips/auto-generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -294,7 +302,7 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
   const loadGeneratedClips = async () => {
     try {
       const start = Date.now();
-      const token = await auth.currentUser?.getIdToken();
+      const token = await getAuthToken();
       if (!token) {
         console.warn("No auth token available, skipping clip load");
         return;
@@ -334,8 +342,8 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
     const toastId = toast.loading("Analyzing video... This takes ~1-2 mins per 10min of video");
 
     try {
-      const user = auth.currentUser;
-      const token = await user.getIdToken();
+      const token = await getAuthToken();
+      if (!token) throw new Error("Authentication token missing for analysis request");
 
       const response = await fetch(`${API_BASE_URL}/api/clips/analyze`, {
         method: "POST",
@@ -382,7 +390,7 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
         // Start Polling (store ref for cleanup on unmount)
         if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
         const pollInterval = setInterval(async () => {
-          const token = await auth.currentUser?.getIdToken();
+          const token = await getAuthToken();
           try {
             const pollRes = await fetch(`${API_BASE_URL}/api/clips/analysis/${analysisId}`, {
               headers: { Authorization: `Bearer ${token}` },
@@ -430,7 +438,8 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
 
   const loadAnalysis = async analysisId => {
     try {
-      const token = await auth.currentUser?.getIdToken();
+      const token = await getAuthToken();
+      if (!token) throw new Error("Authentication token missing for analysis load");
 
       const response = await fetch(`${API_BASE_URL}/api/clips/analysis/${analysisId}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -462,7 +471,8 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
     setGeneratingMontage(true);
     const toastId = toast.loading("Stitching Montage...");
     try {
-      const token = await auth.currentUser?.getIdToken();
+      const token = await getAuthToken();
+      if (!token) throw new Error("Authentication token missing for montage request");
 
       // Find the actual clip objects
       const segmentsToStitch = (currentAnalysis.clipSuggestions || [])
@@ -518,7 +528,8 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
     setGeneratingClipId(clip.id);
     const toastId = toast.loading("Generating clip...");
     try {
-      const token = await auth.currentUser?.getIdToken();
+      const token = await getAuthToken();
+      if (!token) throw new Error("Authentication token missing for clip generation request");
       // Payload for single clip
       const response = await fetch(`${API_BASE_URL}/api/clips/generate`, {
         method: "POST",
@@ -558,7 +569,8 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
     const toastId = toast.loading("Scheduling export...");
 
     try {
-      const token = await auth.currentUser?.getIdToken();
+      const token = await getAuthToken();
+      if (!token) throw new Error("Authentication token missing for export request");
       const payload = {
         platforms: confirmExport.platforms,
         scheduledTime: confirmExport.scheduledTime,

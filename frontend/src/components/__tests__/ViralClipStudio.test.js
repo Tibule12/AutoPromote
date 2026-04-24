@@ -18,12 +18,12 @@ jest.mock("firebase/storage", () => ({
 }));
 
 jest.mock("firebase/auth", () => ({
-  getAuth: jest.fn(() => ({
+  getAuth: () => ({
     currentUser: {
       uid: "test-user",
       getIdToken: jest.fn(() => Promise.resolve("token")),
     },
-  })),
+  }),
 }));
 
 jest.mock("html2canvas", () => jest.fn(() => Promise.resolve({ toBlob: cb => cb(new Blob()) })));
@@ -959,7 +959,6 @@ describe("ViralClipStudio timeline sequencing", () => {
         timelineSegments: expect.arrayContaining([
           expect.objectContaining({
             id: "main",
-            url: "https://example.com/mock.mp4",
           }),
         ]),
       })

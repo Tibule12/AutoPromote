@@ -12,7 +12,7 @@ test("API payout request - create payout doc and update user pending earnings", 
   const { db } = require("../../../src/firebaseAdmin");
   const app = require("../../../src/server");
 
-  const mainServer = app.listen(0);
+  const mainServer = app.listen(0, "127.0.0.1");
   await new Promise(r => mainServer.once("listening", r));
   const mainPort = mainServer.address().port;
 

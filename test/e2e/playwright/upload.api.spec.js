@@ -5,7 +5,7 @@ test("API upload test - create content and check Firestore", async () => {
   process.env.CORS_ALLOW_ALL = "true";
   process.env.BYPASS_ACCEPTED_TERMS = "1";
   const app = require("../../../src/server");
-  const mainServer = app.listen(0);
+  const mainServer = app.listen(0, "127.0.0.1");
   await new Promise(r => mainServer.once("listening", r));
   const mainPort = mainServer.address().port;
   try {

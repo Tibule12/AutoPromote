@@ -57,6 +57,7 @@ lerna-debug.log*
 # Python
 venv/
 .venv/
+.venv-pdf/
 python_media_worker/venv/
 python_media_worker/.venv/
 __pycache__/
@@ -71,4 +72,3 @@ fix-*.js
 force-*.js
 merge-*.js
 sync-*.js
-

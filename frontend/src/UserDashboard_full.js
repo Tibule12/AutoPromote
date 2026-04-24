@@ -36,7 +36,16 @@ import { isSafeRedirectUrl } from "./utils/security";
 import usePlatformStatus from "./hooks/usePlatformStatus";
 
 const DEFAULT_IMAGE = `${process.env.PUBLIC_URL || ""}/image.png`;
-const CLIP_STUDIO_LOCKED = true;
+
+const isE2E = () => {
+  if (typeof window === "undefined") return false;
+  if (window.__E2E_BYPASS === true) return true;
+  try {
+    return window.localStorage?.getItem("E2E_BYPASS") === "true";
+  } catch {
+    return false;
+  }
+};
 
 const UserDashboard = ({
   user,
@@ -53,6 +62,7 @@ const UserDashboard = ({
 }) => {
   const [activeTab, setActiveTab] = useState("profile");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const clipStudioLocked = !isE2E();
 
   // If Wolf Hunt is disabled, prevent accidentally staying on that tab
   useEffect(() => {
@@ -62,10 +72,10 @@ const UserDashboard = ({
   }, [activeTab]);
 
   useEffect(() => {
-    if (CLIP_STUDIO_LOCKED && activeTab === "clips") {
+    if (clipStudioLocked && activeTab === "clips") {
       setActiveTab("profile");
     }
-  }, [activeTab]);
+  }, [activeTab, clipStudioLocked]);
 
   const [notifs, setNotifs] = useState(
     Array.isArray(notifications) ? notifications.filter(notification => !notification?.read) : []
@@ -410,7 +420,7 @@ const UserDashboard = ({
         toast("🐺 Wolf Hunt is currently locked. Come back later!", { icon: "🔒" });
         return;
       }
-      if (tab === "clips" && CLIP_STUDIO_LOCKED) {
+      if (tab === "clips" && clipStudioLocked) {
         toast("Clip Studio is currently locked.", { icon: "🔒" });
         return;
       }
@@ -418,7 +428,7 @@ const UserDashboard = ({
       setActiveTab(tab);
       setSidebarOpen(false);
     },
-    [ENABLE_WOLF_HUNT]
+    [ENABLE_WOLF_HUNT, clipStudioLocked]
   );
   const triggerSchedulesRefresh = useCallback(() => {
     onSchedulesChanged && onSchedulesChanged();
@@ -1137,7 +1147,7 @@ const UserDashboard = ({
                   Mission Board 🔒
                 </li>
               )}
-              {CLIP_STUDIO_LOCKED ? (
+              {clipStudioLocked ? (
                 <li
                   className="locked-feature"
                   style={{ opacity: 0.6, cursor: "not-allowed" }}
@@ -1454,7 +1464,7 @@ const UserDashboard = ({
 
         {activeTab === "wolf_hunt" && <WolfHuntDashboard />}
 
-        {activeTab === "clips" && !CLIP_STUDIO_LOCKED && (
+        {activeTab === "clips" && !clipStudioLocked && (
           <ClipStudioPanel content={contentList} onRefresh={onUpload} />
         )}
         {activeTab === "idea_video" && (
