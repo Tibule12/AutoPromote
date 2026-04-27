@@ -85,7 +85,7 @@ module.exports = {
       transform: {
         "^.+\\.[tj]sx?$": "babel-jest",
       },
-      transformIgnorePatterns: ["/node_modules/"],
+      transformIgnorePatterns: ["/node_modules/(?!(uuid)/)"],
       testTimeout: 20000,
     },
     {
