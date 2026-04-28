@@ -433,6 +433,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
 
   const videoRef = useRef(null);
   const blobUrlRef = useRef(null);
+  const [thumbnailDataUrl, setThumbnailDataUrl] = useState(null);
 
   // Cinematic Effects — all CSS-based, no backend needed
   const {
@@ -790,13 +791,24 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
     ]);
   };
 
+  const captureThumbnail = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    setThumbnailDataUrl(canvas.toDataURL("image/jpeg", 0.85));
+  };
+
   const handleSave = () => {
-    // Return the processed file (or original if failed/skipped) to the parent form
-    if (processedFile) {
-      onSave(processedFile);
-    } else {
-      onSave(file);
+    const payload = processedFile || file;
+    if (thumbnailDataUrl) {
+      payload.thumbnailFrame = thumbnailDataUrl;
+      payload.coverFrame = thumbnailDataUrl;
     }
+    onSave(payload);
   };
 
   const handleViralRender = async (selectedClip, overlays, extraOptions = {}) => {
@@ -1366,6 +1378,24 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                   className="cep-media-wrapper"
                   style={{ flex: 1, background: "#000", position: "relative", overflow: "hidden" }}
                 >
+                  {thumbnailDataUrl && (
+                    <div
+                      style={{
+                        position: "absolute", top: 8, right: 8, zIndex: 10,
+                        background: "rgba(0,0,0,0.7)", borderRadius: 8, padding: 4,
+                        border: "2px solid #a78bfa",
+                      }}
+                    >
+                      <img
+                        src={thumbnailDataUrl}
+                        alt="Thumbnail preview"
+                        style={{ width: 80, height: 45, objectFit: "cover", borderRadius: 4, display: "block" }}
+                      />
+                      <div style={{ color: "#a78bfa", fontSize: 9, textAlign: "center", marginTop: 2 }}>
+                        Thumbnail
+                      </div>
+                    </div>
+                  )}
                   <video
                     key={videoSrc}
                     ref={videoRef}
@@ -1552,6 +1582,20 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
           </div>
 
           <div className="video-actions">
+            <button
+              type="button"
+              onClick={captureThumbnail}
+              disabled={!videoSrc || processing}
+              style={{
+                padding: "6px 16px", borderRadius: 8, border: "2px solid #a78bfa",
+                background: thumbnailDataUrl ? "rgba(167,139,250,0.15)" : "transparent",
+                color: thumbnailDataUrl ? "#c4b5fd" : "#a78bfa",
+                fontWeight: 600, fontSize: 14, cursor: videoSrc ? "pointer" : "not-allowed",
+                display: "flex", alignItems: "center", gap: 6,
+              }}
+            >
+              {thumbnailDataUrl ? "📸 ✓ Thumbnail Captured" : "📸 Capture Thumbnail"}
+            </button>
             <button className="cancel-btn" onClick={onCancel} disabled={processing}>
               Cancel
             </button>
