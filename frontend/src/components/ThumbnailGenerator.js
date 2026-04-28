@@ -69,7 +69,7 @@ export default function ThumbnailGenerator({ videoSrc, videoRef: externalRef, on
     const duration = video.duration || 60;
     const seekPoints = [0.1, 0.2, 0.3, 0.42, 0.55, 0.68, 0.78, 0.9].map(p => p * duration);
     const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
 
     const results = [];
     for (const t of seekPoints) {
