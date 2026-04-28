@@ -13,7 +13,7 @@ function ff(d,w,h){let mx=w,Mx=0,my=h,My=0,c=0;for(let y=0;y<h;y+=4)for(let x=0;
 const HEADS=["STOP SCROLLING","DONT SKIP","WAIT FOR IT","MIND BLOWN","YOU WONT BELIEVE","THE TRUTH","I WAS SHOCKED","GAME OVER","THIS IS CRAZY","MUST WATCH"];
 const SUBS=["Watch till the end...","Like & Subscribe!","Full video below","You need to see this","Only 1% will understand"];
 const COLS=["#FF3B30","#FFD60A","#32D74B","#FF6B6B","#00D4FF","#FF9500","#BF5AF2","#FFFFFF"];
-const ALL_EMOJIS="😀😃😄😁😆😅🤣😂🙂🙃😉😊😇🥰😍🤩😘😗😚😋😛😜🤪😝🤑🤗🤭🤫🤔🤐🤨😐😑😶😏😒🙄😬🤥😌😔😪🤤😴😷🤒🤕🤢🤮🤧🥵🥶🥴😵🤯🤠🥳🥸😎🤓🧐😕😟🙁😮😯😲😳🥺😦😧😨😰😥😢😭😱😖😣😞😓😩😫🥱😤😡😠🤬😈👿💀☠💩🤡👹👺👻👽👾🤖😺😸😹😻😼😽🙀😿😾🔥⚡💥💯💢💨💦💤🕳🎉🎊🎈✨🎯🎃🎄🧨🎆🎇🧸".split("");
+const ALL_EMOJIS=["😀","😃","😄","😁","😆","😅","🤣","😂","🙂","🙃","😉","😊","😇","🥰","😍","🤩","😘","😗","😚","😋","😛","😜","🤪","😝","🤑","🤗","🤭","🤫","🤔","🤐","🤨","😐","😑","😶","😏","😒","🙄","😬","🤥","😌","😔","😪","🤤","😴","😷","🤒","🤕","🤢","🤮","🤧","🥵","🥶","🥴","😵","🤯","🤠","🥳","🥸","😎","🤓","🧐","😕","😟","🙁","😮","😯","😲","😳","🥺","😦","😧","😨","😰","😥","😢","😭","😱","😖","😣","😞","😓","😩","😫","🥱","😤","😡","😠","🤬","😈","👿","💀","☠","💩","🤡","👹","👺","👻","👽","👾","🤖","😺","😸","😹","😻","😼","😽","🙀","😿","😾","🔥","⚡","💥","💯","💢","💨","💦","💤","🕳","🎉","🎊","🎈","✨","🎯","🎃","🎄","🧨","🎆","🎇","🧸"];
 
 function drawTxt(ctx,t,x,y,mw,sz,clr,ang=0,al="center"){
   ctx.save();ctx.translate(x,y);if(ang)ctx.rotate(ang*Math.PI/180);
