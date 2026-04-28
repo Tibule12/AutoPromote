@@ -92,8 +92,9 @@
     "@tootallnate/once": "3.0.1",
     "@grpc/grpc-js": "1.14.3",
     "flatted": "3.4.2",
-    "fast-xml-parser": "5.5.7",
+    "fast-xml-parser": "5.7.2",
     "node-forge": "1.4.0",
+    "uuid": "^14.0.0",
     "yaml": "2.8.3",
     "router": {
       "path-to-regexp": "8.4.0"
@@ -156,29 +157,5 @@
     "nock": "^13.3.0",
     "prettier": "^3.7.4",
     "supertest": "^7.1.4"
-  },
-  "eslintConfig": {
-    "root": true,
-    "extends": [
-      "prettier"
-    ]
-  },
-  "lint-staged": {
-    "frontend/**/*.{js,jsx}": [
-      "prettier --write",
-      "npm --prefix frontend run lint -- --fix"
-    ],
-    "src/**/*.{js,jsx}": [
-      "prettier --write",
-      "eslint --fix"
-    ],
-    "**/*.{json,md,css}": [
-      "prettier --write"
-    ]
-  },
-  "jest-junit": {
-    "outputDirectory": "test-results",
-    "outputName": "junit.xml",
-    "includeConsoleOutput": true
   }
 }

@@ -33,7 +33,7 @@ jobs:
             core.info('Artifacts available for this run: ' + names.join(', '));
             return names.includes('junit-test-results');
 
-      - name: Download test-results artifact
+      - name: Download junit-test-results artifact from CI workflow
         if: steps.check_artifact.outputs.result == 'true'
         uses: actions/download-artifact@v4
         with:
@@ -44,9 +44,8 @@ jobs:
         if: steps.check_artifact.outputs.result == 'true'
         uses: dorny/test-reporter@v2
         with:
-          artifact: junit-test-results
           name: "JEST Tests"
-          path: "**/*.xml"
+          path: "test-results/*.xml"
           reporter: jest-junit
 
       - name: No test-results artifact found - skip report

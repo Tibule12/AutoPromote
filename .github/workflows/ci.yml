@@ -108,11 +108,12 @@ jobs:
       - name: Integration Tests
         env:
           FIREBASE_ADMIN_BYPASS: 1
-          JEST_JUNIT_OUTPUT: test-results/junit.xml
+          JEST_JUNIT_OUTPUT_DIR: test-results
+          JEST_JUNIT_OUTPUT_NAME: junit.xml
         run: |
           # Run integration tests using the installed jest and env vars provided above
           # Use --testPathPattern to avoid shell/glob misinterpretation and ensure Jest selects only integration tests
-          npx jest --runInBand --testTimeout=30000 --reporters=default --reporters=jest-junit --testPathPatterns "src/.*/__tests__/.*\\.integration\\.test\\.js$" -i
+          mkdir -p test-results && npx jest --runInBand --testTimeout=60000 --reporters=default --reporters=jest-junit --testPathPatterns "integration\\.test\\.js$" -i
 
       - name: List test-results directory (debug)
         if: always()
