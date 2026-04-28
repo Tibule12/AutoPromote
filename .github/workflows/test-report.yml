@@ -33,20 +33,13 @@ jobs:
             core.info('Artifacts available for this run: ' + names.join(', '));
             return names.includes('junit-test-results');
 
-      - name: Download test-results artifact
-        if: steps.check_artifact.outputs.result == 'true'
-        uses: actions/download-artifact@v4
-        with:
-          name: junit-test-results
-          path: ./test-results
-
       - name: Create test report
         if: steps.check_artifact.outputs.result == 'true'
         uses: dorny/test-reporter@v2
         with:
           artifact: junit-test-results
           name: "JEST Tests"
-          path: "**/*.xml"
+          path: "*.xml"
           reporter: jest-junit
 
       - name: No test-results artifact found - skip report
