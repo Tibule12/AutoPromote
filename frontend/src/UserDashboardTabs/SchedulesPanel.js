@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "./SchedulesPanel.css";
 import { toast } from "react-hot-toast";
+import ThumbnailPicker from "../components/ThumbnailPicker";
 
 const SchedulesPanel = ({
   schedulesList,
@@ -13,6 +14,7 @@ const SchedulesPanel = ({
 }) => {
   const [viewMode, setViewMode] = useState("orchestrator"); // 'orchestrator' | 'list'
   const [currentDate] = useState(new Date());
+  const [thumbnailContentId, setThumbnailContentId] = useState(null);
 
   // Injection State (Creation)
   const [showInjector, setShowInjector] = useState(false);
@@ -107,6 +109,41 @@ const SchedulesPanel = ({
   };
 
   return (
+    <>
+      {thumbnailContentId && (
+        <div
+          style={{
+            position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 9999,
+            display: "flex", alignItems: "flex-start", justifyContent: "center",
+            padding: "40px 16px", overflowY: "auto",
+          }}
+          onClick={() => setThumbnailContentId(null)}
+        >
+          <div style={{ position: "relative", maxWidth: 960, width: "100%" }} onClick={e => e.stopPropagation()}>
+            <button
+              onClick={() => setThumbnailContentId(null)}
+              style={{
+                position: "absolute", top: 12, right: 16, zIndex: 10,
+                background: "rgba(255,255,255,0.1)", border: "none", color: "white",
+                fontSize: 22, cursor: "pointer", borderRadius: "50%",
+                width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center",
+              }}
+            >✕</button>
+            <ThumbnailPicker
+              contentId={thumbnailContentId}
+              mediaUrl={
+                (() => {
+                  const c = contentList?.find(x => x.id === thumbnailContentId);
+                  return c?.processedUrl || c?.persistentMediaUrl || c?.url || c?.mediaUrl || c?.video_url || "";
+                })()
+              }
+              title={contentList?.find(c => c.id === thumbnailContentId)?.title || ""}
+              onSaved={() => setThumbnailContentId(null)}
+            />
+          </div>
+        </div>
+      )}
+
     <div className="schedules-panel">
       {/* Header */}
       <div className="orchestrator-header">
@@ -366,8 +403,21 @@ const SchedulesPanel = ({
                 }}
               >
                 <div>
-                  <div style={{ fontWeight: "bold", color: "white" }}>
+                  <div style={{ fontWeight: "bold", color: "white", display: "flex", alignItems: "center", gap: 8 }}>
                     {content?.title || "Unknown Content"}
+                    {content?.type === "video" && sch.contentId && (
+                      <button
+                        onClick={() => setThumbnailContentId(sch.contentId)}
+                        style={{
+                          padding: "2px 10px", borderRadius: 6, fontSize: 11, fontWeight: 600,
+                          border: "1px solid rgba(162,155,254,0.5)",
+                          background: "linear-gradient(135deg, rgba(108,92,231,0.2), rgba(162,155,254,0.1))",
+                          color: "#a29bfe", cursor: "pointer", whiteSpace: "nowrap",
+                        }}
+                      >
+                        🎨 Thumbnail
+                      </button>
+                    )}
                   </div>
                   <div style={{ fontSize: "0.8rem", color: "#94a3b8" }}>
                     Target: {time ? new Date(time).toLocaleString() : "Unscheduled"} •{" "}
@@ -451,6 +501,7 @@ const SchedulesPanel = ({
         </div>
       )}
     </div>
+    </>
   );
 };
 
