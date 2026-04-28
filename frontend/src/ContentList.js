@@ -1,10 +1,35 @@
-import React from "react";
+import React, { useState } from "react";
+import ThumbnailPicker from "./components/ThumbnailPicker";
 
 function ContentList({ content }) {
+  const [thumbnailModal, setThumbnailModal] = useState(null); // contentId of open modal (or null)
+
   if (!content || content.length === 0) {
     return <div>No content uploaded yet.</div>;
   }
+
+  const getMediaUrl = (item) =>
+    item.processedUrl || item.persistentMediaUrl || item.url || item.mediaUrl || item.video_url;
+
   return (
+    <>
+      {thumbnailModal && (
+        <div style={styles.modalOverlay} onClick={() => setThumbnailModal(null)}>
+          <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <button style={styles.modalClose} onClick={() => setThumbnailModal(null)}>✕</button>
+            <ThumbnailPicker
+              contentId={thumbnailModal}
+              mediaUrl={getMediaUrl(content.find(c => c.id === thumbnailModal) || {})}
+              title={(content.find(c => c.id === thumbnailModal) || {}).title || ""}
+              onSaved={(result) => {
+                console.log("Thumbnail saved:", result);
+                setThumbnailModal(null);
+              }}
+            />
+          </div>
+        </div>
+      )}
+
     <div style={{ marginTop: 24 }}>
       <h3>Your Content</h3>
       <ul>
@@ -206,11 +231,82 @@ function ContentList({ content }) {
                 View {item.type}
               </a>
             )}
+            {item.type === "video" && (
+              <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 10 }}>
+                <button
+                  onClick={() => setThumbnailModal(item.id)}
+                  style={styles.thumbBtn}
+                >
+                  🎨 Edit Thumbnail
+                </button>
+                {item.thumbnailUrl && (
+                  <img
+                    src={item.thumbnailUrl}
+                    alt="thumbnail"
+                    style={styles.thumbPreview}
+                  />
+                )}
+              </div>
+            )}
           </li>
         ))}
       </ul>
     </div>
   );
 }
+
+const styles = {
+  modalOverlay: {
+    position: "fixed",
+    inset: 0,
+    background: "rgba(0,0,0,0.75)",
+    zIndex: 9999,
+    display: "flex",
+    alignItems: "flex-start",
+    justifyContent: "center",
+    padding: "40px 16px",
+    overflowY: "auto",
+  },
+  modalContent: {
+    position: "relative",
+    maxWidth: 960,
+    width: "100%",
+  },
+  modalClose: {
+    position: "absolute",
+    top: 12,
+    right: 16,
+    zIndex: 10,
+    background: "rgba(255,255,255,0.1)",
+    border: "none",
+    color: "white",
+    fontSize: 22,
+    cursor: "pointer",
+    borderRadius: "50%",
+    width: 36,
+    height: 36,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  thumbBtn: {
+    padding: "6px 14px",
+    borderRadius: 8,
+    border: "1px solid rgba(108, 92, 231, 0.5)",
+    background: "linear-gradient(135deg, rgba(108,92,231,0.2), rgba(162,155,254,0.15))",
+    color: "#a29bfe",
+    fontSize: 13,
+    fontWeight: 600,
+    cursor: "pointer",
+    transition: "all 0.2s",
+  },
+  thumbPreview: {
+    width: 60,
+    height: 34,
+    objectFit: "cover",
+    borderRadius: 4,
+    border: "1px solid rgba(255,255,255,0.15)",
+  },
+};
 
 export default ContentList;
