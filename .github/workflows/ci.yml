@@ -112,7 +112,7 @@ jobs:
         run: |
           # Run integration tests using the installed jest and env vars provided above
           # Use --testPathPattern to avoid shell/glob misinterpretation and ensure Jest selects only integration tests
-          mkdir -p test-results && npx jest --runInBand --testTimeout=30000 --reporters=default --reporters=jest-junit --testPathPattern="src/.*/__tests__/.*integration\\.test\\.js$" -i
+          mkdir -p test-results && npx jest --runInBand --testTimeout=30000 --reporters=default --reporters=jest-junit --testPathPatterns "src/.*/__tests__/.*integration\\.test\\.js$" -i
 
       - name: List test-results directory (debug)
         if: always()
