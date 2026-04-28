@@ -201,7 +201,7 @@ export default function ThumbnailGenerator({videoSrc,videoRef:extRef,onSelect,on
         <label>SUBTEXT</label><input className="tg-input" value={subtext} onChange={e=>setSubtext(e.target.value)} placeholder="Watch till the end..." maxLength={35}/>
         <label>COLOR</label><div className="tg-chip-row">{COLS.map(c=><button key={c} className={"tg-chip tg-chip-color"+(color===c?" tg-chip-on":"")} style={{background:c}} onClick={()=>setColor(c)}>{color===c?"✓":""}</button>)}</div>
         <label>EMOJI — pick one ({ALL_EMOJIS.length} options)</label>
-        <div className="tg-emoji-grid">{ALL_EMOJIS.map(e=><button key={e} className={"tg-chip"+(emoji===e?" tg-chip-on":"")} onClick={()=>setEmoji(e)} style={{fontSize:20,minWidth:36,height:36,padding:2}}>{e}</button>)}</div>
+        <div className="tg-emoji-grid">{ALL_EMOJIS.map((e,i)=><button key={i} className={"tg-chip"+(emoji===e?" tg-chip-on":"")} onClick={()=>setEmoji(e)} style={{fontSize:20,minWidth:36,height:36,padding:2}}>{e}</button>)}</div>
         <div style={{display:"flex",gap:10,marginTop:14}}><button className="tg-btn tg-btn-primary" onClick={applyEdit}>✨ Generate 6</button><button className="tg-btn tg-btn-outline" onClick={()=>setTab("grid")}>← Back</button></div>
       </div>
     </div>
