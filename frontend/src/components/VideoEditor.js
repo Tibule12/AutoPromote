@@ -434,6 +434,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
   const videoRef = useRef(null);
   const blobUrlRef = useRef(null);
   const [thumbnailDataUrl, setThumbnailDataUrl] = useState(null);
+  const [thumbnailStorageUrl, setThumbnailStorageUrl] = useState(null);
 
   // Cinematic Effects — all CSS-based, no backend needed
   const {
@@ -799,7 +800,22 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
     canvas.height = video.videoHeight;
     const ctx = canvas.getContext("2d");
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    setThumbnailDataUrl(canvas.toDataURL("image/jpeg", 0.85));
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+    setThumbnailDataUrl(dataUrl);
+
+    // Upload to Firebase Storage for a permanent shareable URL
+    canvas.toBlob(async blob => {
+      try {
+        const auth = getAuth();
+        const userId = auth.currentUser?.uid || "anonymous";
+        const storageRef = ref(storage, `thumbnails/${userId}/${Date.now()}.jpg`);
+        await uploadBytes(storageRef, blob, { contentType: "image/jpeg" });
+        const downloadUrl = await getDownloadURL(storageRef);
+        setThumbnailStorageUrl(downloadUrl);
+      } catch (e) {
+        console.warn("Thumbnail upload failed, using local preview only", e.message);
+      }
+    }, "image/jpeg", 0.85);
   };
 
   const handleSave = () => {
@@ -807,6 +823,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
     if (thumbnailDataUrl) {
       payload.thumbnailFrame = thumbnailDataUrl;
       payload.coverFrame = thumbnailDataUrl;
+      payload.thumbnailUrl = thumbnailStorageUrl || thumbnailDataUrl;
     }
     onSave(payload);
   };
