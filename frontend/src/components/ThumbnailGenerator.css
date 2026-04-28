@@ -96,3 +96,19 @@
   display: flex; align-items: center; justify-content: center;
 }
 .tg-close:hover { background: rgba(255,255,255,0.14); color: white; }
+
+/* Edit mode */
+.tg-edit-layout { display: flex; gap: 24px; flex-wrap: wrap; }
+.tg-edit-preview { flex: 1; min-width: 280px; }
+.tg-edit-controls { flex: 1; min-width: 260px; display: flex; flex-direction: column; gap: 10px; }
+.tg-edit-controls label { color: #7868a0; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+.tg-input {
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;
+  padding: 10px 14px; color: #fff; font-size: 15px; font-weight: 700; outline: none; font-family: "Impact","Arial Black",sans-serif;
+}
+.tg-input:focus { border-color: #a78bfa; box-shadow: 0 0 0 3px rgba(139,92,246,0.15); }
+.tg-chip-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+.tg-chip { padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.04); color: #8892b0; font-size: 16px; cursor: pointer; transition: all 0.15s; }
+.tg-chip:hover { border-color: #a78bfa; color: #ccc; }
+.tg-chip-on { border-color: #a78bfa; background: rgba(139,92,246,0.2); color: #fff; }
+.tg-chip-color { width: 32px; height: 32px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center; }
