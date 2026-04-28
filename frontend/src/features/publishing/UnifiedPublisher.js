@@ -300,6 +300,11 @@ const PlatformPreview = ({
   platformId,
   creatorInfo,
 }) => {
+  // Sanitize thumbnailUrl at entry point to stop taint flow
+  const safeThumbUrl =
+    typeof thumbnailUrl === "string" && thumbnailUrl.startsWith("https://")
+      ? thumbnailUrl
+      : undefined;
   // Correctly resolve the file to preview: Platform specific > Global
   const fileToPreview = data.file || globalFile;
 
@@ -392,7 +397,7 @@ const PlatformPreview = ({
           <video
             key={effectivePreviewUrl} // Force reload on URL change
             src={sanitizeUrl(effectivePreviewUrl)}
-            poster={thumbnailUrl && String(thumbnailUrl).startsWith("https://") ? thumbnailUrl : undefined}
+            poster={safeThumbUrl}
             controls={showControls}
             playsInline
             loop
@@ -2239,7 +2244,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                       {thumbnailUrl && (
                         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
                           <img
-                            src={String(thumbnailUrl).startsWith("https://") ? thumbnailUrl : undefined}
+                            src={safeThumbUrl}
                             alt="Thumbnail"
                             style={{ width: 120, height: 68, objectFit: "cover", borderRadius: 6, border: "2px solid #a78bfa" }}
                           />
