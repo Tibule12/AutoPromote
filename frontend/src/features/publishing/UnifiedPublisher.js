@@ -392,7 +392,7 @@ const PlatformPreview = ({
           <video
             key={effectivePreviewUrl} // Force reload on URL change
             src={sanitizeUrl(effectivePreviewUrl)}
-            poster={sanitizeUrl(thumbnailUrl) || undefined}
+            poster={thumbnailUrl ? sanitizeUrl(thumbnailUrl) : undefined}
             controls={showControls}
             playsInline
             loop
@@ -2239,7 +2239,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                       {thumbnailUrl && (
                         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
                           <img
-                            src={sanitizeUrl(thumbnailUrl)}
+                            src={sanitizeUrl(String(thumbnailUrl))}
                             alt="Thumbnail"
                             style={{ width: 120, height: 68, objectFit: "cover", borderRadius: 6, border: "2px solid #a78bfa" }}
                           />
