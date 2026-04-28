@@ -112,3 +112,5 @@
 .tg-chip:hover { border-color: #a78bfa; color: #ccc; }
 .tg-chip-on { border-color: #a78bfa; background: rgba(139,92,246,0.2); color: #fff; }
 .tg-chip-color { width: 32px; height: 32px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center; }
+.tg-emoji-grid { display: flex; flex-wrap: wrap; gap: 4px; max-height: 160px; overflow-y: auto; padding: 4px; background: rgba(0,0,0,0.2); border-radius: 8px; }
+.tg-edit-controls input[type=range] { accent-color: #a78bfa; height: 6px; }
