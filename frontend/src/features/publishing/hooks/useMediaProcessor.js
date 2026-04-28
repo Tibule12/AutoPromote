@@ -100,6 +100,7 @@ export const useMediaProcessor = (initialFile = null) => {
     file,
     sourceFiles,
     previewUrl,
+    thumbnailUrl: file?.thumbnailUrl || null,
     type,
     duration,
     setDuration, // Needed for video metadata loading
