@@ -9,6 +9,7 @@ import { storage } from "../firebaseClient";
 import { ref, uploadBytes, getDownloadURL, deleteObject, getStorage } from "firebase/storage";
 import MultiCamCombiner from "./MultiCamCombiner";
 import ViralClipStudio from "./ViralClipStudio"; // Import the new Studio component
+import ThumbnailGenerator from "./ThumbnailGenerator";
 import { sanitizeUrl } from "../utils/security";
 import useCinematicEffects from "../hooks/useCinematicEffects";
 import CinematicEffectsPanel from "./CinematicEffectsPanel";
@@ -433,8 +434,8 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
 
   const videoRef = useRef(null);
   const blobUrlRef = useRef(null);
-  const [thumbnailDataUrl, setThumbnailDataUrl] = useState(null);
-  const [thumbnailStorageUrl, setThumbnailStorageUrl] = useState(null);
+  const [showThumbnailGenerator, setShowThumbnailGenerator] = useState(false);
+  const [thumbnailData, setThumbnailData] = useState(null); // { dataUrl, storageUrl, text, time }
 
   // Cinematic Effects — all CSS-based, no backend needed
   const {
@@ -792,38 +793,17 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
     ]);
   };
 
-  const captureThumbnail = () => {
-    const video = videoRef.current;
-    if (!video) return;
-    const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const ctx = canvas.getContext("2d");
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
-    setThumbnailDataUrl(dataUrl);
-
-    // Upload to Firebase Storage for a permanent shareable URL
-    canvas.toBlob(async blob => {
-      try {
-        const auth = getAuth();
-        const userId = auth.currentUser?.uid || "anonymous";
-        const storageRef = ref(storage, `thumbnails/${userId}/${Date.now()}.jpg`);
-        await uploadBytes(storageRef, blob, { contentType: "image/jpeg" });
-        const downloadUrl = await getDownloadURL(storageRef);
-        setThumbnailStorageUrl(downloadUrl);
-      } catch (e) {
-        console.warn("Thumbnail upload failed, using local preview only", e.message);
-      }
-    }, "image/jpeg", 0.85);
+  const handleThumbnailSelect = (thumbData) => {
+    setThumbnailData(thumbData);
+    setShowThumbnailGenerator(false);
   };
 
   const handleSave = () => {
     const payload = processedFile || file;
-    if (thumbnailDataUrl) {
-      payload.thumbnailFrame = thumbnailDataUrl;
-      payload.coverFrame = thumbnailDataUrl;
-      payload.thumbnailUrl = thumbnailStorageUrl || thumbnailDataUrl;
+    if (thumbnailData) {
+      payload.thumbnailFrame = thumbnailData.dataUrl;
+      payload.coverFrame = thumbnailData.dataUrl;
+      payload.thumbnailUrl = thumbnailData.storageUrl;
     }
     onSave(payload);
   };
@@ -1395,7 +1375,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                   className="cep-media-wrapper"
                   style={{ flex: 1, background: "#000", position: "relative", overflow: "hidden" }}
                 >
-                  {thumbnailDataUrl && (
+                  {thumbnailData && (
                     <div
                       style={{
                         position: "absolute", top: 8, right: 8, zIndex: 10,
@@ -1404,7 +1384,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                       }}
                     >
                       <img
-                        src={thumbnailDataUrl}
+                        src={thumbnailData.dataUrl}
                         alt="Thumbnail preview"
                         style={{ width: 80, height: 45, objectFit: "cover", borderRadius: 4, display: "block" }}
                       />
@@ -1601,17 +1581,17 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
           <div className="video-actions">
             <button
               type="button"
-              onClick={captureThumbnail}
+              onClick={() => setShowThumbnailGenerator(true)}
               disabled={!videoSrc || processing}
               style={{
                 padding: "6px 16px", borderRadius: 8, border: "2px solid #a78bfa",
-                background: thumbnailDataUrl ? "rgba(167,139,250,0.15)" : "transparent",
-                color: thumbnailDataUrl ? "#c4b5fd" : "#a78bfa",
+                background: thumbnailData ? "rgba(167,139,250,0.15)" : "transparent",
+                color: thumbnailData ? "#c4b5fd" : "#a78bfa",
                 fontWeight: 600, fontSize: 14, cursor: videoSrc ? "pointer" : "not-allowed",
                 display: "flex", alignItems: "center", gap: 6,
               }}
             >
-              {thumbnailDataUrl ? "📸 ✓ Thumbnail Captured" : "📸 Capture Thumbnail"}
+              {thumbnailData ? "📸 ✓ Thumbnail Ready" : "🎬 Generate Thumbnail"}
             </button>
             <button className="cancel-btn" onClick={onCancel} disabled={processing}>
               Cancel
@@ -1622,6 +1602,14 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
           </div>
         </div>
       </div>
+      {showThumbnailGenerator && (
+        <ThumbnailGenerator
+          videoSrc={videoSrc}
+          videoRef={videoRef}
+          onSelect={handleThumbnailSelect}
+          onClose={() => setShowThumbnailGenerator(false)}
+        />
+      )}
     </div>
   );
 }
