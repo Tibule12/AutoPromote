@@ -65,6 +65,11 @@ export default function ThumbnailGenerator({ videoSrc, videoRef: externalRef, on
     if (!video) return;
     setStatus("extracting");
 
+    // Wait for video to be seekable
+    if (video.readyState < 2) {
+      await new Promise(r => { video.oncanplay = r; });
+    }
+
     // Pause video and seek through 8 smart points
     const duration = video.duration || 60;
     const seekPoints = [0.1, 0.2, 0.3, 0.42, 0.55, 0.68, 0.78, 0.9].map(p => p * duration);
