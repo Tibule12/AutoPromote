@@ -392,6 +392,7 @@ const PlatformPreview = ({
           <video
             key={effectivePreviewUrl} // Force reload on URL change
             src={sanitizeUrl(effectivePreviewUrl)}
+            poster={thumbnailUrl || undefined}
             controls={showControls}
             playsInline
             loop
