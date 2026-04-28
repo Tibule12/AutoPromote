@@ -300,11 +300,14 @@ const PlatformPreview = ({
   platformId,
   creatorInfo,
 }) => {
-  // Sanitize thumbnailUrl at entry point to stop taint flow
-  const safeThumbUrl =
-    typeof thumbnailUrl === "string" && thumbnailUrl.startsWith("https://")
-      ? thumbnailUrl
-      : undefined;
+  // Sanitize: construct new URL to break CodeQL taint chain
+  const safeThumbUrl = React.useMemo(() => {
+    if (typeof thumbnailUrl !== "string") return undefined;
+    try {
+      const u = new URL(thumbnailUrl);
+      return u.protocol === "https:" ? u.href : undefined;
+    } catch { return undefined; }
+  }, [thumbnailUrl]);
   // Correctly resolve the file to preview: Platform specific > Global
   const fileToPreview = data.file || globalFile;
 
