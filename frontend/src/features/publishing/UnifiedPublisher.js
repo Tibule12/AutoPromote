@@ -396,7 +396,7 @@ const PlatformPreview = ({
             controls={showControls}
             playsInline
             loop
-            autoPlay
+            autoPlay={!thumbnailUrl}
             muted // Start muted for autoplay policy
             style={{ width: "100%", height: "100%", objectFit: "cover" }}
             onError={e => {
