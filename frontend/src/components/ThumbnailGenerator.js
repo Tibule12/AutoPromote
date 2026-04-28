@@ -1,8 +1,6 @@
 /**
- * ThumbnailGenerator — YouTube-style clickbait thumbnail creator.
- * Extracts frames from a video, scores them, overlays bold text,
- * and lets the user pick, edit, download, and save.
- * Pure client-side: canvas + video element. No server, no FFmpeg.
+ * ThumbnailGenerator — AI-style YouTube thumbnails.
+ * Face zoom, glow text, emoji, contrast boost, random frames.
  */
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import { getAuth } from "firebase/auth";
@@ -10,323 +8,118 @@ import { storage } from "../firebaseClient";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import "./ThumbnailGenerator.css";
 
-/* ── helpers ─────────────────────────────────────────────── */
+const W = 1280, H = 720;
 
-/** Calculate image variance (higher = more contrast / less flat) */
-function imageVariance(imageData) {
-  const d = imageData.data;
-  let sum = 0, sumSq = 0, n = d.length / 4;
-  for (let i = 0; i < d.length; i += 4) {
-    const gray = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
-    sum += gray;
-    sumSq += gray * gray;
-  }
-  const mean = sum / n;
-  return sumSq / n - mean * mean;
+function variance(d)      { let s=0,s2=0; for(let i=0;i<d.length;i+=4){ const g=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2]; s+=g; s2+=g*g; } const m=s/(d.length/4); return s2/(d.length/4)-m*m; }
+function skinRatio(d)     { let sk=0; for(let i=0;i<d.length;i+=4){ const r=d[i],g=d[i+1],b=d[i+2]; if(r>95&&g>40&&b>20&&Math.max(r,g,b)-Math.min(r,g,b)>15&&Math.abs(r-g)>15&&r>g&&r>b)sk++; } return sk/(d.length/4); }
+function rnd(a,b)         { return a+Math.random()*(b-a); }
+
+function findFace(d,w,h) {
+  let mx=w,Mx=0,my=h,My=0,c=0;
+  for(let y=0;y<h;y+=4) for(let x=0;x<w;x+=4){ const i=(y*w+x)*4,r=d[i],g=d[i+1],b=d[i+2]; if(r>95&&g>40&&b>20&&Math.max(r,g,b)-Math.min(r,g,b)>15&&Math.abs(r-g)>15&&r>g&&r>b){ mx=Math.min(mx,x);Mx=Math.max(Mx,x);my=Math.min(my,y);My=Math.max(My,y);c++; } }
+  return c>100?{x:mx,y:my,w:Mx-mx+30,h:My-my+30}:null;
 }
 
-/** Simple skin-tone detector — rough proxy for "person in frame" */
-function skinPixelRatio(imageData) {
-  const d = imageData.data;
-  let skin = 0, total = d.length / 4;
-  for (let i = 0; i < d.length; i += 4) {
-    const r = d[i], g = d[i + 1], b = d[i + 2];
-    if (r > 95 && g > 40 && b > 20 && Math.max(r, g, b) - Math.min(r, g, b) > 15 && Math.abs(r - g) > 15 && r > g && r > b) {
-      skin++;
-    }
-  }
-  return skin / total;
+function filterCanvas(ctx,w,h){
+  const d=ctx.getImageData(0,0,w,h).data;
+  for(let i=0;i<d.length;i+=4){ d[i]=Math.min(255,(d[i]-128)*1.12+128);d[i+1]=Math.min(255,(d[i+1]-128)*1.12+128);d[i+2]=Math.min(255,(d[i+2]-128)*1.12+128); }
+  ctx.putImageData(new ImageData(d,w,h),0,0);
 }
 
-/* ── TEXT OVERLAY STYLES ─────────────────────────────────── */
-const TEXT_STYLES = [
-  { name: "🔥 Bold Red",    font: "900 52px Impact, sans-serif", color: "#FF3B30", stroke: "#000", strokeW: 4 },
-  { name: "⚡ Neon Yellow", font: "900 48px Impact, sans-serif", color: "#FFD60A", stroke: "#8B5A00", strokeW: 4 },
-  { name: "💚 Toxic Green", font: "900 50px Impact, sans-serif", color: "#32D74B", stroke: "#000", strokeW: 5 },
-  { name: "🤍 Clean White", font: "900 54px Arial Black, sans-serif", color: "#FFFFFF", stroke: "#000", strokeW: 5 },
-];
+function drawTxt(ctx,t,x,y,mw,sz,clr,glow,al){
+  ctx.save();ctx.font='900 '+sz+'px Impact,"Arial Black",sans-serif';ctx.textAlign=al||'center';ctx.textBaseline='middle';
+  if(glow){ctx.shadowColor=glow;ctx.shadowBlur=sz*0.3;}
+  ctx.strokeStyle='#000';ctx.lineWidth=sz*0.14;ctx.lineJoin='round';
+  ctx.strokeText(t,x,y,mw);ctx.fillStyle=clr;ctx.fillText(t,x,y,mw);ctx.restore();
+}
 
-/* ── component ───────────────────────────────────────────── */
+const HEADS=["STOP SCROLLING","DON'T SKIP","WAIT FOR IT","MIND BLOWN","YOU WON'T BELIEVE","THE TRUTH","I WAS SHOCKED","GAME OVER","THIS IS CRAZY","MUST WATCH"];
+const SUBS=["Watch till the end...","Like & Subscribe!","Full video in description","You need to see this","This went viral"];
+const EMJS=["🔥","⚡","😱","💀","👀","🚀"];
+const COLS=["#FF3B30","#FFD60A","#32D74B","#FF6B6B","#00D4FF","#FF9500"];
 
-export default function ThumbnailGenerator({ videoSrc, videoRef: externalRef, onSelect, onClose }) {
-  const internalRef = useRef(null);
-  const vidRef = externalRef || internalRef;
-  const canvasRef = useRef(null);
+export default function ThumbnailGenerator({videoSrc,videoRef:extRef,onSelect,onClose}){
+  const ir=useRef(null),vr=extRef||ir,cr=useRef(null);
+  const [thumbs,setThumbs]=useState([]);
+  const [sel,setSel]=useState(0);
+  const [st,setSt]=useState("idle");
+  const [up,setUp]=useState(false);
+  const origRef=useRef([]); // raw frame dataURLs for re-render
 
-  const [frames, setFrames] = useState([]);        // { dataUrl, time, score }
-  const [thumbnails, setThumbnails] = useState([]); // { dataUrl, text, styleIdx }
-  const [status, setStatus] = useState("idle");     // idle | extracting | ready
-  const [selectedIdx, setSelectedIdx] = useState(0);
-  const [uploading, setUploading] = useState(false);
+  const buildOne=useCallback((frame,opts={})=>{
+    const c=document.createElement("canvas");c.width=W;c.height=H;const ctx=c.getContext("2d");
+    const src=document.createElement("canvas");src.width=frame.id.width;src.height=frame.id.height;src.getContext("2d").putImageData(frame.id,0,0);
+    const face=findFace(frame.id.data,frame.id.width,frame.id.height);
+    if(face&&face.w>80&&face.h>80){ const px=face.w*0.5,py=face.h*0.4,sx=Math.max(0,face.x-px),sy=Math.max(0,face.y-py),sw=Math.min(frame.id.width-sx,face.w+px*2),sh=Math.min(frame.id.height-sy,face.h+py*2); ctx.drawImage(src,sx,sy,sw,sh,0,0,W,H); }
+    else ctx.drawImage(src,0,0,W,H);
+    filterCanvas(ctx,W,H);
+    const g=ctx.createLinearGradient(0,H*0.35,0,H);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(0.5,'rgba(0,0,0,0.3)');g.addColorStop(1,'rgba(0,0,0,0.72)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    const v=ctx.createRadialGradient(W/2,H/2,W*0.55,W/2,H/2,W*0.9);v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(0,0,0,0.4)');ctx.fillStyle=v;ctx.fillRect(0,0,W,H);
+    const head=opts.headline||HEADS[Math.floor(Math.random()*HEADS.length)];
+    const sub=opts.subtext||SUBS[Math.floor(Math.random()*SUBS.length)];
+    const col=opts.color||COLS[Math.floor(Math.random()*COLS.length)];
+    const emj=opts.emoji||EMJS[Math.floor(Math.random()*EMJS.length)];
+    drawTxt(ctx,head,W/2,H-120,W-80,58,col,col);
+    drawTxt(ctx,sub,W/2,H-50,W-140,26,'#FFFFFF',null);
+    ctx.font='64px serif';ctx.textAlign='left';ctx.fillText(emj,36,H-108);
+    ctx.strokeStyle=col;ctx.lineWidth=5;ctx.beginPath();ctx.arc(W-56,H-98,32,0,Math.PI*2);ctx.stroke();
+    ctx.fillStyle=col;ctx.font='bold 32px sans-serif';ctx.textAlign='center';ctx.fillText('▶',W-56,H-88);
+    return{dataUrl:c.toDataURL('image/jpeg',0.92),headline:head,subtext:sub,emoji:emj,color:col,time:frame.time,score:frame.score};
+  },[]);
 
-  /* ── extract & score frames ────────────────────────────── */
-  const generateFrames = useCallback(async () => {
-    const video = vidRef.current;
-    if (!video) return;
-    setStatus("extracting");
+  const generate=useCallback(async()=>{
+    const v=vr.current;if(!v)return;setSt("extracting");
+    if(v.readyState<2)await new Promise(r=>{v.oncanplay=r;});
+    const dur=v.duration||60,pts=[];
+    for(let i=0;i<10;i++)pts.push(rnd(dur*0.08,dur*0.92));
+    pts.sort((a,b)=>a-b);
+    const off=document.createElement("canvas"),ox=off.getContext("2d",{willReadFrequently:true});
+    const scored=[];
+    for(const t of pts){v.currentTime=t;await new Promise(r=>{v.onseeked=r;});await new Promise(r=>setTimeout(r,40));off.width=v.videoWidth||W;off.height=v.videoHeight||H;ox.drawImage(v,0,0,off.width,off.height);const id=ox.getImageData(0,0,off.width,off.height);scored.push({time:Math.round(t*10)/10,score:Math.round(variance(id.data)/80+skinRatio(id.data)*50+rnd(0,10)),id});}
+    scored.sort((a,b)=>b.score-a.score);
+    const top=scored.slice(0,6);
+    origRef.current=top.map(f=>f);
+    const result=top.map((f,i)=>buildOne(f,{headline:HEADS[i],subtext:SUBS[i%SUBS.length],emoji:EMJS[i%EMJS.length],color:COLS[i%COLS.length]}));
+    setThumbs(result);setSel(0);setSt("ready");
+  },[vr,buildOne]);
 
-    // Wait for video to be seekable
-    if (video.readyState < 2) {
-      await new Promise(r => { video.oncanplay = r; });
-    }
-
-    // Pause video and seek through 8 smart points
-    const duration = video.duration || 60;
-    const seekPoints = [0.1, 0.2, 0.3, 0.42, 0.55, 0.68, 0.78, 0.9].map(p => p * duration);
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d", { willReadFrequently: true });
-
-    const results = [];
-    for (const t of seekPoints) {
-      video.currentTime = t;
-      await new Promise(r => { video.onseeked = r; });
-      // Small delay for frame to render
-      await new Promise(r => setTimeout(r, 80));
-
-      canvas.width = video.videoWidth || 1280;
-      canvas.height = video.videoHeight || 720;
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const variance = imageVariance(imageData);
-      const skin = skinPixelRatio(imageData);
-
-      // Score: 40% variance + 40% skin detection + 20% position bonus
-      const posBonus = (t / duration > 0.3 && t / duration < 0.7) ? 20 : 10;
-      const score = (variance / 1000) * 40 + skin * 40 + posBonus;
-
-      results.push({
-        dataUrl: canvas.toDataURL("image/jpeg", 0.9),
-        time: Math.round(t * 10) / 10,
-        score: Math.round(score),
-      });
-    }
-
-    // Sort by score, take top 6
-    results.sort((a, b) => b.score - a.score);
-    const top = results.slice(0, 6);
-
-    // Apply text overlay to each
-    const withText = top.map((f, i) => ({
-      ...f,
-      text: getDefaultText(i),
-      styleIdx: i % TEXT_STYLES.length,
+  const regenerate=useCallback(()=>{
+    if(!origRef.current.length)return generate();
+    const result=origRef.current.map((f,i)=>buildOne(f,{
+      headline:HEADS[Math.floor(Math.random()*HEADS.length)],
+      subtext:SUBS[Math.floor(Math.random()*SUBS.length)],
+      emoji:EMJS[Math.floor(Math.random()*EMJS.length)],
+      color:COLS[Math.floor(Math.random()*COLS.length)],
     }));
+    setThumbs(result);setSel(0);
+  },[buildOne,generate]);
 
-    setFrames(top);
-    setThumbnails(withText);
-    setSelectedIdx(0);
-    setStatus("ready");
-  }, [vidRef]);
+  useEffect(()=>{if(thumbs.length&&cr.current){const img=new Image();img.onload=()=>{cr.current.width=W;cr.current.height=H;cr.current.getContext("2d").drawImage(img,0,0);};img.src=thumbs[sel]?.dataUrl;}},[sel,thumbs]);
 
-  /* ── draw text on canvas ───────────────────────────────── */
-  const renderThumbnail = useCallback((frame, text, styleIdx) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+  const dl=t=>{const a=document.createElement("a");a.download='thumbnail-'+Date.now()+'.jpg';a.href=t.dataUrl;a.click();};
+  const save=async()=>{const t=thumbs[sel];if(!t)return;setUp(true);try{const b=await(await fetch(t.dataUrl)).blob();const auth=getAuth();const uid=auth.currentUser?.uid||"anon";const sref=ref(storage,'thumbnails/'+uid+'/'+Date.now()+'.jpg');await uploadBytes(sref,b,{contentType:"image/jpeg"});const url=await getDownloadURL(sref);onSelect?.({dataUrl:t.dataUrl,storageUrl:url,text:t.headline,time:t.time});}catch(e){console.warn(e);}finally{setUp(false);}};
 
-    // Draw base image
-    const img = new Image();
-    img.onload = () => {
-      canvas.width = 1280;
-      canvas.height = 720;
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-      if (!text.trim()) return;
-
-      const style = TEXT_STYLES[styleIdx] || TEXT_STYLES[0];
-      ctx.font = style.font;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-
-      // Shadow / stroke
-      if (style.stroke) {
-        ctx.strokeStyle = style.stroke;
-        ctx.lineWidth = style.strokeW;
-        ctx.lineJoin = "round";
-      }
-
-      // Semi-transparent dark bar behind text
-      const metrics = ctx.measureText(text);
-      const barH = 110;
-      const barY = canvas.height - barH - 20;
-      const barX = canvas.width / 2 - metrics.width / 2 - 60;
-      const barW = metrics.width + 120;
-      ctx.fillStyle = "rgba(0,0,0,0.65)";
-      ctx.beginPath();
-      ctx.roundRect(barX, barY, barW, barH, 16);
-      ctx.fill();
-
-      // Text with stroke
-      ctx.fillStyle = style.color;
-      if (style.stroke) ctx.strokeText(text, canvas.width / 2, barY + barH / 2);
-      ctx.fillText(text, canvas.width / 2, barY + barH / 2);
-    };
-    img.src = frame.dataUrl;
-  }, []);
-
-  useEffect(() => {
-    if (status === "ready" && thumbnails.length > 0) {
-      renderThumbnail(thumbnails[selectedIdx], thumbnails[selectedIdx].text, thumbnails[selectedIdx].styleIdx);
-    }
-  }, [status, selectedIdx, thumbnails, renderThumbnail]);
-
-  /* ── actions ───────────────────────────────────────────── */
-  const updateText = (idx, text) => {
-    setThumbnails(prev => prev.map((t, i) => i === idx ? { ...t, text } : t));
-    if (idx === selectedIdx) renderThumbnail(thumbnails[idx], text, thumbnails[idx].styleIdx);
-  };
-
-  const cycleStyle = (idx) => {
-    setThumbnails(prev => prev.map((t, i) => {
-      if (i !== idx) return t;
-      const next = (t.styleIdx + 1) % TEXT_STYLES.length;
-      if (idx === selectedIdx) renderThumbnail(t, t.text, next);
-      return { ...t, styleIdx: next };
-    }));
-  };
-
-  const downloadThumbnail = (frame, text, styleIdx) => {
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    canvas.width = 1280;
-    canvas.height = 720;
-    const img = new Image();
-    img.onload = () => {
-      ctx.drawImage(img, 0, 0, 1280, 720);
-      if (text.trim()) {
-        const style = TEXT_STYLES[styleIdx] || TEXT_STYLES[0];
-        ctx.font = style.font;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillStyle = style.color;
-        if (style.stroke) { ctx.strokeStyle = style.stroke; ctx.lineWidth = style.strokeW; ctx.lineJoin = "round"; ctx.strokeText(text, 640, 620); }
-        ctx.fillText(text, 640, 620);
-      }
-      const link = document.createElement("a");
-      link.download = `thumbnail-${Date.now()}.jpg`;
-      link.href = canvas.toDataURL("image/jpeg", 0.95);
-      link.click();
-    };
-    img.src = frame.dataUrl;
-  };
-
-  const saveAndClose = async () => {
-    const t = thumbnails[selectedIdx];
-    if (!t) return;
-    setUploading(true);
-    try {
-      const canvas = canvasRef.current;
-      const blob = await new Promise(r => canvas.toBlob(r, "image/jpeg", 0.92));
-      const auth = getAuth();
-      const userId = auth.currentUser?.uid || "anonymous";
-      const storageRef = ref(storage, `thumbnails/${userId}/${Date.now()}.jpg`);
-      await uploadBytes(storageRef, blob, { contentType: "image/jpeg" });
-      const url = await getDownloadURL(storageRef);
-      onSelect?.({
-        dataUrl: canvas.toDataURL("image/jpeg", 0.92),
-        storageUrl: url,
-        text: t.text,
-        time: t.time,
-      });
-    } catch (e) {
-      console.warn("Upload failed", e);
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  /* ── render ────────────────────────────────────────────── */
-  const selected = thumbnails[selectedIdx];
-
-  return (
-    <div className="tg-overlay" onClick={onClose}>
-      <div className="tg-panel" onClick={e => e.stopPropagation()}>
-        {/* Header */}
-        <div className="tg-header">
-          <h2>🎬 Thumbnail Studio</h2>
-          <p>Stop the scroll. Get the click.</p>
-          <div className="tg-header-actions">
-            {status === "idle" && (
-              <button className="tg-btn tg-btn-primary" onClick={generateFrames}>
-                ⚡ Generate Thumbnails
-              </button>
-            )}
-            {status === "extracting" && (
-              <button className="tg-btn tg-btn-primary" disabled>
-                ⏳ Analyzing video frames...
-              </button>
-            )}
-            {status === "ready" && (
-              <>
-                <button className="tg-btn tg-btn-outline" onClick={generateFrames}>
-                  🔄 Regenerate
-                </button>
-                <button className="tg-btn tg-btn-primary" onClick={saveAndClose} disabled={uploading}>
-                  {uploading ? "⏳ Uploading..." : "✅ Use This Thumbnail"}
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-
-        {status === "ready" && (
-          <>
-            {/* Large Preview */}
-            <div className="tg-preview-section">
-              <canvas ref={canvasRef} className="tg-preview-canvas" />
-            </div>
-
-            {/* Grid */}
-            <div className="tg-grid-label">Pick a thumbnail — edit text to make it yours</div>
-            <div className="tg-grid">
-              {thumbnails.map((t, i) => (
-                <div
-                  key={i}
-                  className={`tg-card ${i === selectedIdx ? "tg-card-selected" : ""}`}
-                  onClick={() => setSelectedIdx(i)}
-                >
-                  <img src={t.dataUrl} alt={`Frame ${t.time}s`} className="tg-card-img" />
-                  <div className="tg-card-info">
-                    <span className="tg-card-score">Score: {t.score}</span>
-                    <span className="tg-card-time">{t.time}s</span>
-                  </div>
-                  <button className="tg-card-style-btn" onClick={e => { e.stopPropagation(); cycleStyle(i); }} title="Change text style">
-                    🎨 {TEXT_STYLES[t.styleIdx]?.name}
-                  </button>
-                  <input
-                    className="tg-card-text"
-                    value={t.text}
-                    onChange={e => updateText(i, e.target.value)}
-                    onClick={e => e.stopPropagation()}
-                    placeholder="Add bold text..."
-                    maxLength={40}
-                  />
-                  <button className="tg-card-dl" onClick={e => { e.stopPropagation(); downloadThumbnail(t, t.text, t.styleIdx); }}>
-                    ⬇
-                  </button>
-                </div>
-              ))}
-            </div>
-          </>
-        )}
-
-        <button className="tg-close" onClick={onClose}>✕</button>
+  return(<div className="tg-overlay" onClick={onClose}><div className="tg-panel" onClick={e=>e.stopPropagation()}>
+    <div className="tg-header"><h2>🎬 Thumbnail Studio</h2><p>AI-powered. Face zoom. Glow text. Clickbait style.</p>
+      <div className="tg-header-actions">
+        {st==="idle"&&<button className="tg-btn tg-btn-primary" onClick={generate}>⚡ Generate Thumbnails</button>}
+        {st==="extracting"&&<button className="tg-btn tg-btn-primary" disabled>⏳ AI analyzing your video...</button>}
+        {st==="ready"&&<><button className="tg-btn tg-btn-outline" onClick={generate}>🔄 New Frames</button><button className="tg-btn tg-btn-outline" onClick={regenerate}>🎲 Remix All</button><button className="tg-btn tg-btn-primary" onClick={save} disabled={up}>{up?"⏳ Uploading...":"✅ Use This Thumbnail"}</button></>}
       </div>
-      {videoSrc && (
-        <video
-          ref={internalRef}
-          src={videoSrc}
-          style={{ display: "none" }}
-          crossOrigin="anonymous"
-          preload="auto"
-        />
-      )}
     </div>
-  );
-}
-
-function getDefaultText(i) {
-  const defaults = ["WATCH THIS", "YOU WON'T BELIEVE", "DON'T SCROLL", "WAIT FOR IT", "MIND BLOWN", "MUST SEE"];
-  return defaults[i % defaults.length];
+    {st==="ready"&&thumbs.length>0&&<>
+      <div className="tg-preview-section"><canvas ref={cr} className="tg-preview-canvas"/></div>
+      <div className="tg-grid-label">{thumbs[sel]?.headline} — {thumbs[sel]?.subtext}</div>
+      <div className="tg-grid">
+        {thumbs.map((t,i)=>(<div key={i} className={'tg-card'+(i===sel?' tg-card-selected':'')} onClick={()=>setSel(i)}>
+          <img src={t.dataUrl} alt={'Frame '+t.time+'s'} className="tg-card-img"/>
+          <div className="tg-card-overlay"><span className="tg-card-emoji">{t.emoji}</span><span className="tg-card-score">Score {t.score}</span></div>
+          <button className="tg-card-dl" onClick={e=>{e.stopPropagation();dl(t);}}>⬇</button>
+        </div>))}
+      </div>
+    </>}
+    <button className="tg-close" onClick={onClose}>✕</button>
+  </div>
+  {videoSrc&&<video ref={ir} src={videoSrc} style={{position:"fixed",opacity:0,pointerEvents:"none",width:1,height:1}} crossOrigin="anonymous" preload="auto"/>}
+  </div>);
 }
