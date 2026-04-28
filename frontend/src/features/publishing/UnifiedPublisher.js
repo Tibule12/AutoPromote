@@ -295,6 +295,7 @@ const PlatformPreview = ({
   data,
   globalFile,
   previewUrl,
+  thumbnailUrl,
   mediaType,
   platformId,
   creatorInfo,
@@ -391,10 +392,11 @@ const PlatformPreview = ({
           <video
             key={effectivePreviewUrl} // Force reload on URL change
             src={sanitizeUrl(effectivePreviewUrl)}
+            poster={thumbnailUrl || undefined}
             controls={showControls}
             playsInline
             loop
-            autoPlay
+            autoPlay={!thumbnailUrl}
             muted // Start muted for autoplay policy
             style={{ width: "100%", height: "100%", objectFit: "cover" }}
             onError={e => {
@@ -1357,6 +1359,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
   const {
     file: mediaFile,
     previewUrl,
+    thumbnailUrl,
     type: mediaType,
     showVideoEditor,
     setShowVideoEditor,
@@ -1639,6 +1642,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                   data={data}
                   globalFile={globalFile}
                   previewUrl={previewUrl}
+                  thumbnailUrl={thumbnailUrl}
                   mediaType={mediaType}
                   platformId={platformId}
                   creatorInfo={tiktokCreator}
@@ -1682,6 +1686,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
               </div>
               <div className="platform-preview-column">
                 <PlatformPreview
+                  thumbnailUrl={thumbnailUrl}
                   label="YouTube Preview"
                   data={data}
                   globalFile={globalFile}
@@ -1729,6 +1734,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
               </div>
               <div className="platform-preview-column">
                 <PlatformPreview
+                  thumbnailUrl={thumbnailUrl}
                   label="Instagram Preview"
                   data={data}
                   globalFile={globalFile}
@@ -1775,6 +1781,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
               </div>
               <div className="platform-preview-column">
                 <PlatformPreview
+                  thumbnailUrl={thumbnailUrl}
                   label="Facebook Preview"
                   data={data}
                   globalFile={globalFile}
@@ -1821,6 +1828,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
               </div>
               <div className="platform-preview-column">
                 <PlatformPreview
+                  thumbnailUrl={thumbnailUrl}
                   label="LinkedIn Preview"
                   data={data}
                   globalFile={globalFile}
@@ -1868,6 +1876,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
               </div>
               <div className="platform-preview-column">
                 <PlatformPreview
+                  thumbnailUrl={thumbnailUrl}
                   label="Reddit Preview"
                   data={data}
                   globalFile={globalFile}
@@ -2227,6 +2236,16 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                       >
                         Preview:
                       </label>
+                      {thumbnailUrl && (
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                          <img
+                            src={thumbnailUrl}
+                            alt="Thumbnail"
+                            style={{ width: 120, height: 68, objectFit: "cover", borderRadius: 6, border: "2px solid #a78bfa" }}
+                          />
+                          <span style={{ color: "#a78bfa", fontSize: 11 }}>📸 Your Thumbnail</span>
+                        </div>
+                      )}
                       <video
                         key={previewUrl}
                         src={sanitizeUrl(previewUrl)}

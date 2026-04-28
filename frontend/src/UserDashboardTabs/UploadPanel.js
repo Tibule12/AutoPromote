@@ -610,11 +610,13 @@ function UploadPanel({
                       <div className="cute-video-thumb">
                         {item.mediaUrl && item.type === "video" ? (
                           <>
-                            <video src={item.mediaUrl} className="cute-video" />
+                            <video src={item.mediaUrl} className="cute-video" poster={item.thumbnailUrl || undefined} preload="metadata" />
                             <div className="cute-play">▶</div>
                           </>
                         ) : item.mediaUrl && item.type === "image" ? (
-                          <img src={item.mediaUrl} alt={item.title} className="cute-video" />
+                          <img src={item.thumbnailUrl || item.mediaUrl} alt={item.title} className="cute-video" />
+                        ) : item.thumbnailUrl ? (
+                          <img src={item.thumbnailUrl} alt={item.title} className="cute-video" />
                         ) : item.mediaUrl && item.type === "audio" ? (
                           <div className="cute-placeholder">Audio ready</div>
                         ) : (
