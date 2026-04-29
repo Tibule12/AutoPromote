@@ -8,7 +8,6 @@ const { getCreditBreakdown } = require("../creditSystem");
 const { getEffectiveTierSnapshot } = require("../services/billingService");
 const {
   SUBSCRIPTION_PLANS,
-  PLAN_CAPABILITIES,
   getPlanCapabilities,
   normalizePlanId,
 } = require("../config/subscriptionPlans");
@@ -31,8 +30,6 @@ router.get("/profile", apiLimiter, async (req, res) => {
     const capabilities = getPlanCapabilities(normalizedPlanId);
 
     // 3. Firestore user doc (basic info)
-    const userDoc = await admin.firestore().collection("users").doc(userId).get();
-    const userData = userDoc.exists ? userDoc.data() : {};
 
     res.json({
       success: true,

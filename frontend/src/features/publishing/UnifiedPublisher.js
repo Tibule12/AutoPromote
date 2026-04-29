@@ -3,8 +3,6 @@
 // Wraps existing platform forms and delegates upload to App.js
 
 import React, { useState, useEffect } from "react";
-import LinkedInForm from "../../components/PlatformForms/LinkedInForm";
-import RedditForm from "../../components/PlatformForms/RedditForm";
 import "./UnifiedPublisher.css";
 // Ensure platform form styles are loaded
 import "../../components/PlatformForms/PlatformForms.css";
@@ -25,17 +23,8 @@ import {
 } from "../../utils/sourceUpload";
 
 // --- Components ---
-import VideoEditor from "../../components/VideoEditor";
-import ImageCropper from "../../components/ImageCropper";
-import BestTimeToPost from "../../components/BestTimeToPost";
-import TikTokForm from "../../components/PlatformForms/TikTokForm";
-import YouTubeForm from "../../components/PlatformForms/YouTubeForm";
-import InstagramForm from "../../components/PlatformForms/InstagramForm";
-import FacebookForm from "../../components/PlatformForms/FacebookForm";
-import PayPalSubscriptionPanel from "../../components/PayPalSubscriptionPanel";
 
 // --- New Features ---
-import ViralScanner from "../../components/ViralScanner";
 
 // --- Helpers ---
 const PLATFORM_LABELS = {
@@ -2722,8 +2711,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
             onClose={() => setShowViralScanner(false)}
             onSelectClip={clip => {
               if (editingTarget) {
-                const currentData = getPlatformEffectiveData(editingTarget);
-                updatePlatformData(editingTarget, {
+                                updatePlatformData(editingTarget, {
                   trimStart: clip.start,
                   trimEnd: clip.end,
                 });
