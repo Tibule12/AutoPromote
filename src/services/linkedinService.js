@@ -368,10 +368,12 @@ async function postToLinkedIn({
   const accessToken = await getValidAccessToken(uid);
   if (!accessToken) throw new Error("No valid LinkedIn access token");
 
-  // If a companyId is provided, use org posting rules; otherwise get person ID
+  // Resolve posting identity from connected account by default.
+  // companyId is optional and only used when explicitly provided and valid.
   const resolvedPersonId = personIdParam || (await getUserProfile(accessToken));
-  const authorUrn = companyId
-    ? `urn:li:organization:${companyId}`
+  const hasExplicitOrgTarget = typeof companyId === "string" && /^\d+$/.test(companyId.trim());
+  const authorUrn = hasExplicitOrgTarget
+    ? `urn:li:organization:${companyId.trim()}`
     : `urn:li:person:${resolvedPersonId}`;
 
   // Build share payload
@@ -468,7 +470,22 @@ async function postToLinkedIn({
 
   if (!response.ok) {
     const errorMsg = responseData.message || responseData.error || "LinkedIn posting failed";
-    throw new Error(`LinkedIn posting failed: ${errorMsg}`);
+    const orgHint =
+      hasExplicitOrgTarget && response.status === 403
+        ? " Organization posting was denied. Reconnect LinkedIn with company permissions, or post as personal profile."
+        : "";
+    const diagnostic = {
+      status: response.status,
+      statusText: response.statusText,
+      authorUrn,
+      hasExplicitOrgTarget,
+      endpoint: "https://api.linkedin.com/v2/ugcPosts",
+      response: responseData,
+    };
+    console.error("[LinkedIn] Publish failed diagnostic:", JSON.stringify(diagnostic));
+    throw new Error(
+      `LinkedIn posting failed: ${errorMsg}.${orgHint} [status=${response.status} endpoint=/v2/ugcPosts]`
+    );
   }
 
   const shareId = responseData.id;

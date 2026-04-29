@@ -73,20 +73,8 @@ module.exports = {
           return sendBadRequest(res, "`channelId` is required for Discord promotions.");
         break;
       case "linkedin":
-        // either companyId or personId (allow passing via platform_options)
-        if (
-          !body.companyId &&
-          !body.personId &&
-          !(
-            body.platform_options &&
-            body.platform_options.linkedin &&
-            (body.platform_options.linkedin.companyId || body.platform_options.linkedin.personId)
-          )
-        )
-          return sendBadRequest(
-            res,
-            "`companyId` or `personId` is required for LinkedIn promotions."
-          );
+        // LinkedIn author identity is auto-resolved from connected OAuth account.
+        // Optional overrides can still be passed via platform options.
         break;
       case "telegram":
         if (
@@ -125,17 +113,34 @@ module.exports = {
           if (!budget && !target) return sendBadRequest(res, "`boostBudget` or `targetViews` is required when role=\"boosted\".");
         }
         break;
-      case "reddit":
-        if (
-          !body.subreddit &&
-          !(
-            body.platform_options &&
+      case "reddit": {
+        const rawSubreddit =
+          body.subreddit ||
+          (body.platform_options &&
             body.platform_options.reddit &&
-            body.platform_options.reddit.subreddit
-          )
-        )
+            body.platform_options.reddit.subreddit) ||
+          (body.platformOptions && body.platformOptions.subreddit) ||
+          (body.platformOptions &&
+            body.platformOptions.reddit &&
+            body.platformOptions.reddit.subreddit);
+
+        const subreddit = String(rawSubreddit || "")
+          .replace(/^r\//i, "")
+          .trim();
+
+        if (!subreddit) {
           return sendBadRequest(res, "`subreddit` is required for Reddit promotions.");
+        }
+
+        // Normalize for downstream handlers so enqueue/publisher gets consistent value.
+        body.subreddit = subreddit;
+        if (!body.platformOptions) body.platformOptions = {};
+        body.platformOptions.subreddit = subreddit;
+        if (!body.platform_options) body.platform_options = {};
+        if (!body.platform_options.reddit) body.platform_options.reddit = {};
+        body.platform_options.reddit.subreddit = subreddit;
         break;
+      }
       case "spotify":
         if (
           !body.name &&
