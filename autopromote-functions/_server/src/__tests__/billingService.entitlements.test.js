@@ -7,11 +7,13 @@ jest.mock("../firebaseAdmin", () => {
   const db = {
     collection: jest.fn(name => ({
       doc: jest.fn(() => ({
-        get: jest.fn().mockResolvedValue(
-          name === "user_billing"
-            ? makeDoc({ tier: "free", bot_actions_used: 0, status: "active" })
-            : makeDoc({ subscriptionTier: "free", subscriptionStatus: "active" })
-        ),
+        get: jest
+          .fn()
+          .mockResolvedValue(
+            name === "user_billing"
+              ? makeDoc({ tier: "free", bot_actions_used: 0, status: "active" })
+              : makeDoc({ subscriptionTier: "free", subscriptionStatus: "active" })
+          ),
         set: jest.fn(),
         update: jest.fn(),
       })),
@@ -32,7 +34,7 @@ jest.mock("../firebaseAdmin", () => {
 
 const { checkBotEntitlement, getEffectiveTierSnapshot } = require("../services/billingService");
 
-describe("functions billingService entitlement enforcement", () => {
+describe("billingService entitlement enforcement", () => {
   it("denies free-tier bot boost access when the plan does not include it", async () => {
     await expect(checkBotEntitlement("user-1", "bot_boost")).rejects.toThrow(
       "requires a paid subscription"

@@ -8,7 +8,7 @@ const { normalizePlanId, getUploadLimitForPlan } = require("../config/subscripti
 const { getEffectiveTierSnapshot } = require("../services/billingService");
 
 // Free tier upload limit (per month). Can be overridden with env var FREE_UPLOAD_LIMIT.
-// Default matches the PayPal plan configuration (5 uploads/month).
+// Default matches the subscription plan configuration (3 uploads/month for free tier).
 const FREE_UPLOAD_LIMIT = parseInt(
   process.env.FREE_UPLOAD_LIMIT || String(getUploadLimitForPlan("free")),
   10

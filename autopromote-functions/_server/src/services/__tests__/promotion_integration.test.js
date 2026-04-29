@@ -539,10 +539,7 @@ describe("Promotion integration (mocked platforms)", () => {
         db.collection("promotion_tasks").doc(r1.id).get(),
         db.collection("promotion_tasks").doc(r2.id).get(),
       ]);
-      statuses = [
-        t1b.exists ? t1b.data().status : null,
-        t2b.exists ? t2b.data().status : null,
-      ];
+      statuses = [t1b.exists ? t1b.data().status : null, t2b.exists ? t2b.data().status : null];
       if (statuses.some(s => s && s !== "queued")) break;
     }
 

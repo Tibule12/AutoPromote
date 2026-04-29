@@ -7,6 +7,7 @@ import {
 import { API_BASE_URL, API_ENDPOINTS } from "../config";
 import { uploadSourceFileViaBackend } from "../utils/sourceUpload";
 import React, { useState, useRef, useEffect } from "react";
+import { useSubscription } from "../hooks/useSubscription";
 import { storage } from "../firebaseClient";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { getAuth } from "firebase/auth";
@@ -760,6 +761,13 @@ const ViralClipStudio = ({
   const [musicPreviewStatusMessage, setMusicPreviewStatusMessage] = useState("");
   const [musicPreviewNeedsGesture, setMusicPreviewNeedsGesture] = useState(false);
   const [extractedAudio, setExtractedAudio] = useState(null);
+
+  const { capabilities, credits, canUseFeature, requiresUpgrade } = useSubscription();
+  const canUseWatermarkRemoval = canUseFeature("watermarkRemoval");
+  const canUseAudioExtract = canUseFeature("audioExtract");
+  const canUseMulticam = canUseFeature("multicam");
+  const showCreditWarning = (credits?.monthlyRemaining || 0) < 20;
+  const upgradeMessage = "Upgrade your subscription to unlock this feature.";
 
   // Collapsible section state — start with AI Enhancements collapsed to reduce overwhelm
   const [collapsedSections, setCollapsedSections] = useState({

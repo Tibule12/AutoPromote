@@ -3475,8 +3475,9 @@ if (process.env.SCHEDULER_ENABLED !== "false" && !isTestEnv) {
         if (!isLeader) return;
         try {
           const { analyzeAndScheduleReposts } = require("./services/repostSchedulerService");
-          const count = await analyzeAndScheduleReposts({ limit: 10 });
-          if (count > 0) console.log(`[Scheduler] ♻️ Auto-cycled ${count} posts due to view decay`);
+          const result = await analyzeAndScheduleReposts({ limit: 10 });
+          const scheduled = result?.scheduled || 0;
+          if (scheduled > 0) console.log(`[Scheduler] ♻️ Auto-cycled ${scheduled} posts due to view decay`);
         } catch (e) {
           console.warn("[Scheduler] ⚠️ Repost analysis failed:", e.message);
         }

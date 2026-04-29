@@ -204,7 +204,13 @@ function scopeStringIncludes(scopeString, scope) {
 }
 
 function getTikTokOpenId(connection = {}) {
-  return connection.open_id || connection.openId || connection.meta?.open_id || connection.meta?.openId || null;
+  return (
+    connection.open_id ||
+    connection.openId ||
+    connection.meta?.open_id ||
+    connection.meta?.openId ||
+    null
+  );
 }
 
 function getTikTokScopeValue(connection = {}) {
@@ -227,7 +233,9 @@ function getTikTokPublishReadiness(connection = {}) {
   );
   const hasOpenId = !!getTikTokOpenId(connection);
   const grantedScopes = parseScopeList(scopeValue);
-  const missingScopes = REQUIRED_PUBLISH_SCOPES.filter(scope => !scopeStringIncludes(scopeValue, scope));
+  const missingScopes = REQUIRED_PUBLISH_SCOPES.filter(
+    scope => !scopeStringIncludes(scopeValue, scope)
+  );
   const publishReady = hasAccessToken && hasOpenId && missingScopes.length === 0;
 
   return {
@@ -1965,12 +1973,8 @@ router.get("/creator_info", authMiddleware, ttPublicLimiter, async (req, res) =>
 
 // --- Admin-only endpoints for audit / review evidence ---
 // Returns recent assistant actions (requires admin privileges)
-router.get(
-  "/admin/assistant_actions",
-  authMiddleware,
-  ttWriteLimiter,
-  async (req, res) => {
-    try {
+router.get("/admin/assistant_actions", authMiddleware, ttWriteLimiter, async (req, res) => {
+  try {
     if (!req.user || !req.user.isAdmin) return res.status(403).json({ error: "forbidden" });
     const limit = Math.min(200, parseInt(req.query.limit || "50", 10));
     const q = db.collection("assistant_actions").orderBy("createdAt", "desc").limit(limit);
@@ -1985,12 +1989,8 @@ router.get(
 });
 
 // Returns recent TikTok creator_info audit logs (requires admin privileges)
-router.get(
-  "/admin/tiktok_checks",
-  authMiddleware,
-  ttWriteLimiter,
-  async (req, res) => {
-    try {
+router.get("/admin/tiktok_checks", authMiddleware, ttWriteLimiter, async (req, res) => {
+  try {
     if (!req.user || !req.user.isAdmin) return res.status(403).json({ error: "forbidden" });
     const limit = Math.min(200, parseInt(req.query.limit || "50", 10));
     const q = db

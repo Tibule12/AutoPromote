@@ -2,6 +2,7 @@ const { storage, db } = require("../firebaseAdmin");
 const { cleanupSourceFile, extractOwnedStoragePathFromUrl } = require("../utils/cleanupSource");
 
 const SOURCE_UPLOAD_RETENTION_DAYS = parseInt(process.env.SOURCE_UPLOAD_RETENTION_DAYS || "14", 10);
+const TEMP_SCAN_RETENTION_DAYS = parseInt(process.env.TEMP_SCAN_RETENTION_DAYS || "3", 10);
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 const DEFAULT_SCAN_LIMIT = parseInt(process.env.SOURCE_UPLOAD_RETENTION_SCAN_LIMIT || "200", 10);
 
@@ -99,36 +100,52 @@ async function cleanupTempUploads() {
   }
 
   const bucket = storage.bucket();
-  const tempFolder = "temp_sources/";
   const now = Date.now();
-  try {
-    const [files] = await bucket.getFiles({ prefix: tempFolder });
 
-    if (files.length === 0) {
-      // console.debug("[StorageCleanup] No files found in temp_sources to clean.");
-      return;
+  const cleanupConfigs = [
+    {
+      prefix: "temp_sources/",
+      retentionMs: ONE_DAY_MS,
+      label: "temp source",
+    },
+    {
+      prefix: "temp_scans/",
+      retentionMs: TEMP_SCAN_RETENTION_DAYS * ONE_DAY_MS,
+      label: "scanner upload",
+    },
+  ];
+
+  try {
+    for (const config of cleanupConfigs) {
+      const [files] = await bucket.getFiles({ prefix: config.prefix });
+
+      if (files.length === 0) {
+        continue;
+      }
+
+      console.log(
+        `[StorageCleanup] Checking ${files.length} files in ${config.prefix} for cleanup...`
+      );
+
+      const deletePromises = files.map(async file => {
+        if (file.name === config.prefix) return;
+
+        const [metadata] = await file.getMetadata();
+        const createdTime = new Date(metadata.timeCreated).getTime();
+
+        if (now - createdTime > config.retentionMs) {
+          console.log(`[StorageCleanup] Deleting old ${config.label} file: ${file.name}`);
+          try {
+            await file.delete();
+          } catch (delErr) {
+            console.error(`[StorageCleanup] Failed to delete ${file.name}: ${delErr.message}`);
+          }
+        }
+      });
+
+      await Promise.all(deletePromises);
     }
 
-    console.log(`[StorageCleanup] Checking ${files.length} files in ${tempFolder} for cleanup...`);
-
-    const deletePromises = files.map(async file => {
-      // Skip the folder placeholder itself if it exists
-      if (file.name === tempFolder) return;
-
-      const [metadata] = await file.getMetadata();
-      const createdTime = new Date(metadata.timeCreated).getTime();
-
-      if (now - createdTime > ONE_DAY_MS) {
-        console.log(`[StorageCleanup] Deleting old temp file: ${file.name}`);
-        try {
-          await file.delete();
-        } catch (delErr) {
-          console.error(`[StorageCleanup] Failed to delete ${file.name}: ${delErr.message}`);
-        }
-      }
-    });
-
-    await Promise.all(deletePromises);
     console.log("[StorageCleanup] Cleanup cycle complete");
   } catch (error) {
     console.error("[StorageCleanup] Error cleaning up temp files:", error);

@@ -36,9 +36,7 @@ function resolveProjectId() {
 function buildTaskHeaders() {
   return {
     "Content-Type": "application/json",
-    ...(MEDIA_WORKER_TASK_SECRET
-      ? { "X-Worker-Task-Secret": MEDIA_WORKER_TASK_SECRET }
-      : {}),
+    ...(MEDIA_WORKER_TASK_SECRET ? { "X-Worker-Task-Secret": MEDIA_WORKER_TASK_SECRET } : {}),
   };
 }
 

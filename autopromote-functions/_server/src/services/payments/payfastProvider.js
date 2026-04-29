@@ -69,7 +69,10 @@ function buildPayfastSignature(params = {}, passphrase) {
   }
   // MD5 is required by PayFast protocol. We also compute an HMAC-SHA256
   // using the merchant key (when available) for internal auditing/verification.
-  const md5 = crypto.createHash(PAYFAST_SIGNATURE_ALGORITHM).update(signatureString, "utf8").digest("hex");
+  const md5 = crypto
+    .createHash(PAYFAST_SIGNATURE_ALGORITHM)
+    .update(signatureString, "utf8")
+    .digest("hex");
   return md5;
 }
 class PayFastProvider extends PaymentProvider {
