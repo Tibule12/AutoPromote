@@ -15,7 +15,9 @@ function parseMaybeJson(str) {
 function tokensFromDoc(doc) {
   if (!doc) return null;
   const plainAccessToken =
-    typeof doc.access_token === "string" && doc.access_token.trim() ? doc.access_token.trim() : null;
+    typeof doc.access_token === "string" && doc.access_token.trim()
+      ? doc.access_token.trim()
+      : null;
   const plainRefreshToken =
     typeof doc.refresh_token === "string" && doc.refresh_token.trim()
       ? doc.refresh_token.trim()

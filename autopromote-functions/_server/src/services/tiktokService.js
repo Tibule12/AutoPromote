@@ -944,7 +944,10 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
   // Construct Caption/Title: TikTok 'title' is actually the post caption.
   // We must incorporate hashtags if they are provided separately.
   let baseTitle =
-    captionText || [titleText, descriptionText].filter(Boolean).join("\n") || payload?.message || "AutoPromote Video";
+    captionText ||
+    [titleText, descriptionText].filter(Boolean).join("\n") ||
+    payload?.message ||
+    "AutoPromote Video";
 
   // Append hashtags if present and not already in the title
   if (payload?.hashtagString && !baseTitle.includes(payload.hashtagString.trim())) {

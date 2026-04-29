@@ -164,7 +164,10 @@ async function cleanupSourceFile(fileUrl, options = {}) {
   // Ignore external URLs that are clearly not ours (e.g. random internet videos)
   // Only target our storage buckets to prevent accidents
   if (!filePath) {
-    if (normalizeComparableUrl(fileUrl).startsWith("gs://") || normalizeComparableUrl(fileUrl).startsWith("http")) {
+    if (
+      normalizeComparableUrl(fileUrl).startsWith("gs://") ||
+      normalizeComparableUrl(fileUrl).startsWith("http")
+    ) {
       return { status: "skipped_external_url" };
     }
     return { status: "skipped_invalid_url" };

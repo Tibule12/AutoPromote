@@ -46,7 +46,13 @@ function getTikTokScopeValue(connection) {
 }
 
 function getTikTokOpenId(connection) {
-  return connection?.open_id || connection?.openId || connection?.meta?.open_id || connection?.meta?.openId || null;
+  return (
+    connection?.open_id ||
+    connection?.openId ||
+    connection?.meta?.open_id ||
+    connection?.meta?.openId ||
+    null
+  );
 }
 
 function hasTikTokAccessToken(connection) {
@@ -54,7 +60,11 @@ function hasTikTokAccessToken(connection) {
   if (connection.hasAccessToken === true) return true;
   if (connection.hasEncryption === true) return true;
   if (typeof connection.access_token === "string" && connection.access_token.trim()) return true;
-  if (typeof connection.encrypted_access_token === "string" && connection.encrypted_access_token.trim()) return true;
+  if (
+    typeof connection.encrypted_access_token === "string" &&
+    connection.encrypted_access_token.trim()
+  )
+    return true;
   if (
     typeof connection.encrypted_user_access_token === "string" &&
     connection.encrypted_user_access_token.trim()
@@ -201,14 +211,16 @@ router.get(
     const telegram = connections.telegram || { connected: false };
     const pinterest = connections.pinterest || { connected: false };
     const snapchat = connections.snapchat || { connected: false };
-    const tiktokReadiness = tiktok.connected ? buildTikTokReadiness(connectionDocs.tiktok || tiktok) : {
-      hasAccessToken: false,
-      hasOpenId: false,
-      grantedScopes: [],
-      missingScopes: [],
-      publishReady: false,
-      reauthRecommended: false,
-    };
+    const tiktokReadiness = tiktok.connected
+      ? buildTikTokReadiness(connectionDocs.tiktok || tiktok)
+      : {
+          hasAccessToken: false,
+          hasOpenId: false,
+          grantedScopes: [],
+          missingScopes: [],
+          publishReady: false,
+          reauthRecommended: false,
+        };
 
     const summary = {
       twitter: {

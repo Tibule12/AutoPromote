@@ -741,14 +741,12 @@ router.post("/:platform/auth/simulate", authMiddleware, platformWriteLimiter, as
       await checkConnectionLimit(uid, platform);
     } catch (limitErr) {
       if (limitErr.code === "CONNECTION_LIMIT_EXCEEDED") {
-        return res
-          .status(403)
-          .json({
-            ok: false,
-            error: "connection_limit_exceeded",
-            message: limitErr.message,
-            context: limitErr.context,
-          });
+        return res.status(403).json({
+          ok: false,
+          error: "connection_limit_exceeded",
+          message: limitErr.message,
+          context: limitErr.context,
+        });
       }
       throw limitErr;
     }

@@ -400,19 +400,22 @@ router.post("/auto-generate", authMiddleware, async (req, res) => {
     const jobId = `autogen-${Date.now()}-${userId.slice(0, 6)}`;
 
     // Create tracking doc immediately
-    await db.collection("clip_analyses").doc(jobId).set({
-      userId,
-      videoUrl,
-      contentId: contentId || null,
-      type: "auto_generate",
-      status: "processing",
-      maxClips,
-      captionStyle,
-      smartCropMode,
-      template,
-      clips: [],
-      createdAt: new Date().toISOString(),
-    });
+    await db
+      .collection("clip_analyses")
+      .doc(jobId)
+      .set({
+        userId,
+        videoUrl,
+        contentId: contentId || null,
+        type: "auto_generate",
+        status: "processing",
+        maxClips,
+        captionStyle,
+        smartCropMode,
+        template,
+        clips: [],
+        createdAt: new Date().toISOString(),
+      });
 
     // Fire-and-forget to Python worker
     const MEDIA_WORKER_URL = process.env.MEDIA_WORKER_URL || "http://127.0.0.1:8000";

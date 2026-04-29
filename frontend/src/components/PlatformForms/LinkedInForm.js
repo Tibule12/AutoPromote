@@ -41,6 +41,7 @@ const LinkedInForm = ({
 
   const [companyId, setCompanyId] = useState(initialData.companyId || "");
   const [isPromotional, setIsPromotional] = useState(initialData.isPromotional || false);
+  const [postingTarget, setPostingTarget] = useState(initialData.companyId ? "company" : "profile");
 
   // Sync global descriptions if not manually edited
   useEffect(() => {
@@ -61,10 +62,10 @@ const LinkedInForm = ({
       visibility,
       commentary,
       title,
-      companyId, // Export companyId
+      companyId: postingTarget === "company" ? companyId : "",
       isPromotional,
     });
-  }, [visibility, commentary, title, companyId, isPromotional]);
+  }, [visibility, commentary, title, companyId, isPromotional, postingTarget]);
 
   const handleCommentaryChange = e => {
     setCommentary(e.target.value);
@@ -113,19 +114,36 @@ const LinkedInForm = ({
       )}
 
       <div className="form-group-modern">
-        <label htmlFor="linkedin-company-id">Organization / Company ID (Required)</label>
-        <input
-          id="linkedin-company-id"
-          type="text"
-          className="modern-input"
-          value={companyId}
-          onChange={e => setCompanyId(e.target.value)}
-          placeholder="e.g. 12345678"
-        />
+        <label>Post As</label>
+        <select
+          className="modern-select"
+          value={postingTarget}
+          onChange={e => setPostingTarget(e.target.value)}
+        >
+          <option value="profile">My Profile (auto-detected)</option>
+          <option value="company">Company Page (optional)</option>
+        </select>
         <p className="help-text" style={{ fontSize: "0.75rem", color: "#666", marginTop: "4px" }}>
-          The numeric ID of your LinkedIn Organization page.
+          Profile posting uses your connected LinkedIn account automatically.
         </p>
       </div>
+
+      {postingTarget === "company" && (
+        <div className="form-group-modern">
+          <label htmlFor="linkedin-company-id">Organization / Company ID</label>
+          <input
+            id="linkedin-company-id"
+            type="text"
+            className="modern-input"
+            value={companyId}
+            onChange={e => setCompanyId(e.target.value)}
+            placeholder="e.g. 12345678"
+          />
+          <p className="help-text" style={{ fontSize: "0.75rem", color: "#666", marginTop: "4px" }}>
+            Optional numeric LinkedIn Organization ID. Leave blank to post as your personal profile.
+          </p>
+        </div>
+      )}
 
       <div className="form-group-modern">
         <label htmlFor="linkedin-file-input" className="form-label-bold">

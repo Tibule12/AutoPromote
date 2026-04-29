@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { sanitizeUrl } from "../../utils/security";
+import { API_BASE_URL } from "../../config";
 
 const RedditForm = ({
   onChange,
@@ -29,6 +30,10 @@ const RedditForm = ({
   }, [currentFile]);
 
   const [subreddit, setSubreddit] = useState(initialData.subreddit || "");
+  const [manualSubreddit, setManualSubreddit] = useState(initialData.subreddit || "");
+  const [availableSubreddits, setAvailableSubreddits] = useState([]);
+  const [isLoadingSubreddits, setIsLoadingSubreddits] = useState(false);
+  const [subredditFetchError, setSubredditFetchError] = useState("");
   const [title, setTitle] = useState(initialData.title || globalTitle || "");
   const [flairId, setFlairId] = useState(initialData.flairId || "");
   const [isNSFW, setIsNSFW] = useState(initialData.isNSFW || false);
@@ -46,17 +51,94 @@ const RedditForm = ({
 
   // Mock flairs for now, in real app would fetch based on subreddit
   const [availableFlairs, setAvailableFlairs] = useState([]);
+  const normalizedAvailableSubreddits = useMemo(
+    () =>
+      (availableSubreddits || [])
+        .map(s => ({
+          name: String(s.name || "").trim().replace(/^r\//i, ""),
+          title: s.title || s.name || "",
+        }))
+        .filter(s => !!s.name),
+    [availableSubreddits]
+  );
 
   useEffect(() => {
+    let isMounted = true;
+
+    const fetchSubreddits = async () => {
+      setIsLoadingSubreddits(true);
+      setSubredditFetchError("");
+
+      try {
+        const token =
+          (typeof window !== "undefined" &&
+            (localStorage.getItem("token") ||
+              localStorage.getItem("authToken") ||
+              sessionStorage.getItem("token") ||
+              sessionStorage.getItem("authToken"))) ||
+          null;
+
+        const res = await fetch(`${API_BASE_URL}/api/reddit/metadata`, {
+          credentials: "include",
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+
+        if (!res.ok) {
+          throw new Error(`Failed to load subreddits (${res.status})`);
+        }
+
+        const data = await res.json();
+        const subs = data?.meta?.subreddits || [];
+
+        if (!isMounted) return;
+        setAvailableSubreddits(subs);
+
+        const normalizedInitial = String(initialData.subreddit || "")
+          .replace(/^r\//i, "")
+          .trim();
+
+        const storedLast = (typeof window !== "undefined" && localStorage.getItem("lastRedditSubreddit")) || "";
+        const normalizedStored = String(storedLast).replace(/^r\//i, "").trim();
+
+        const fallback =
+          normalizedInitial ||
+          normalizedStored ||
+          (subs[0] && String(subs[0].name || "").replace(/^r\//i, "").trim()) ||
+          "";
+
+        if (fallback) {
+          setSubreddit(fallback);
+          setManualSubreddit(fallback);
+        }
+      } catch (err) {
+        if (!isMounted) return;
+        setSubredditFetchError(err.message || "Could not load subreddit list");
+      } finally {
+        if (isMounted) setIsLoadingSubreddits(false);
+      }
+    };
+
+    fetchSubreddits();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [initialData.subreddit]);
+
+  useEffect(() => {
+    const normalized = String(subreddit || "").replace(/^r\//i, "").trim();
     onChange({
       platform: "reddit",
-      subreddit,
+      subreddit: normalized,
       title,
       flairId,
       isNSFW,
       isSpoiler,
       isPromotional,
     });
+    if (normalized && typeof window !== "undefined") {
+      localStorage.setItem("lastRedditSubreddit", normalized);
+    }
   }, [subreddit, title, flairId, isNSFW, isSpoiler, isPromotional]);
 
   return (
@@ -204,17 +286,65 @@ const RedditForm = ({
       </div>
 
       <div className="form-group-modern">
-        <label>Subreddit (r/)</label>
-        <div className="input-with-icon">
-          <span className="input-icon">r/</span>
-          <input
-            type="text"
-            className="modern-input"
-            value={subreddit}
-            onChange={e => setSubreddit(e.target.value)}
-            placeholder="videos"
-          />
-        </div>
+        <label>Where should this be posted? (required)</label>
+
+        {normalizedAvailableSubreddits.length > 0 ? (
+          <>
+            <select
+              className="modern-input"
+              value={subreddit}
+              onChange={e => setSubreddit(String(e.target.value || "").replace(/^r\//i, "").trim())}
+              required
+            >
+              {normalizedAvailableSubreddits.map(s => (
+                <option key={s.name} value={s.name}>
+                  r/{s.name} — {s.title}
+                </option>
+              ))}
+            </select>
+
+            <div style={{ marginTop: 8, fontSize: "0.8rem", color: "#64748b" }}>
+              Connected communities loaded automatically. You can still enter one manually below.
+            </div>
+
+            <div className="input-with-icon" style={{ marginTop: 8 }}>
+              <span className="input-icon">r/</span>
+              <input
+                type="text"
+                className="modern-input"
+                value={manualSubreddit}
+                onChange={e => {
+                  const v = String(e.target.value || "").replace(/^r\//i, "").trim();
+                  setManualSubreddit(v);
+                  setSubreddit(v);
+                }}
+                placeholder="Type another subreddit if needed"
+              />
+            </div>
+          </>
+        ) : (
+          <div className="input-with-icon">
+            <span className="input-icon">r/</span>
+            <input
+              type="text"
+              className="modern-input"
+              value={subreddit}
+              onChange={e => setSubreddit(String(e.target.value || "").replace(/^r\//i, "").trim())}
+              placeholder={isLoadingSubreddits ? "Loading communities..." : "videos"}
+              required
+            />
+          </div>
+        )}
+
+        {subredditFetchError && (
+          <p className="help-text" style={{ fontSize: "0.75rem", color: "#b91c1c", marginTop: "4px" }}>
+            Could not auto-load your communities. You can still type one manually.
+          </p>
+        )}
+
+        <p className="help-text" style={{ fontSize: "0.75rem", color: "#666", marginTop: "4px" }}>
+          We auto-fill communities from your connected Reddit account. Example: <code>videos</code>.
+        </p>
       </div>
 
       <div className="form-group-modern">

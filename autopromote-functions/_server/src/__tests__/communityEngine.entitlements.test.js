@@ -17,9 +17,11 @@ jest.mock("../firebaseAdmin", () => {
       if (name === "content") {
         return {
           doc: jest.fn(() => ({
-            get: jest.fn().mockResolvedValue(
-              makeDoc("content-1", { publishedUrl: "https://youtube.com/watch?v=abc123" })
-            ),
+            get: jest
+              .fn()
+              .mockResolvedValue(
+                makeDoc("content-1", { publishedUrl: "https://youtube.com/watch?v=abc123" })
+              ),
           })),
         };
       }
@@ -82,7 +84,7 @@ jest.mock("../services/viralMissionControl", () => ({
 
 const { createEngagementBounty } = require("../services/communityEngine");
 
-describe("functions communityEngine entitlement enforcement", () => {
+describe("communityEngine entitlement enforcement", () => {
   it("blocks mission creation after the monthly plan quota is reached", async () => {
     await expect(
       createEngagementBounty("user-1", "content-1", "youtube", "like", 5)

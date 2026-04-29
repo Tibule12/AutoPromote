@@ -12,6 +12,8 @@ const {
   normalizePlanId,
   resolvePlan,
   getPlanCapabilities,
+  CREDIT_COSTS,
+  CREDIT_TOP_UP_PACKS,
 } = require("../config/subscriptionPlans");
 const { getEffectiveTierSnapshot } = require("../services/billingService");
 
@@ -54,6 +56,21 @@ function findInternalPlanIdByPayPalPlanId(paypalPlanId) {
   return match ? match.id : null;
 }
 
+function extractPayPalNextBillingDate(paypalSub) {
+  return (
+    paypalSub?.billing_info?.next_billing_time ||
+    paypalSub?.billing_info?.cycle_executions?.find(cycle => cycle?.next_billing_time)
+      ?.next_billing_time ||
+    paypalSub?.billing_info?.last_payment?.next_billing_time ||
+    paypalSub?.next_billing_time ||
+    null
+  );
+}
+
+function extractPayPalStartDate(paypalSub) {
+  return paypalSub?.start_time || paypalSub?.create_time || new Date().toISOString();
+}
+
 function extractPayPalPlanFixedPrice(paypalPlan) {
   const cycles = Array.isArray(paypalPlan?.billing_cycles) ? paypalPlan.billing_cycles : [];
   const regularCycle =
@@ -74,43 +91,110 @@ function isPayPalMissingResource(value) {
   );
 }
 
-function buildSubscriptionStatusPayload(snapshot, subscription = {}) {
-  const effectivePlan = resolvePlan(snapshot.tierId || "free");
-  const rawStatus = String(
-    subscription.status ||
-      snapshot.userData?.subscriptionStatus ||
-      snapshot.billingData?.status ||
-      "active"
-  ).toLowerCase();
+function inferMonthlyPeriodStart(nextBillingDate, fallback) {
+  if (!nextBillingDate) return fallback || null;
+  const nextDate = new Date(nextBillingDate);
+  if (Number.isNaN(nextDate.getTime())) return fallback || null;
+  const periodStart = new Date(nextDate);
+  periodStart.setMonth(periodStart.getMonth() - 1);
+  return periodStart.toISOString();
+}
+
+async function refreshPersistedSubscriptionFromPayPal({ userId, subscriptionId, paypalSub }) {
+  if (!userId || !subscriptionId || !paypalSub) return null;
+
+  const nowIso = new Date().toISOString();
+  const resolvedPlanId =
+    findInternalPlanIdByPayPalPlanId(paypalSub.plan_id) ||
+    normalizePlanId(paypalSub?.custom_id_plan || "free");
+
+  const existingSubDoc = await db.collection("user_subscriptions").doc(userId).get();
+  const existingSub = existingSubDoc.exists ? existingSubDoc.data() || {} : {};
+  const existingUserDoc = await db.collection("users").doc(userId).get();
+  const existingUser = existingUserDoc.exists ? existingUserDoc.data() || {} : {};
+
+  const planId =
+    resolvedPlanId !== "free"
+      ? resolvedPlanId
+      : normalizePlanId(existingSub.planId || existingUser.subscriptionTier || "free");
+  const plan = resolvePlan(planId);
+  const nextBillingDate =
+    extractPayPalNextBillingDate(paypalSub) ||
+    existingSub.nextBillingDate ||
+    existingUser.subscriptionPeriodEnd ||
+    null;
+  const startDate =
+    existingSub.startDate ||
+    existingUser.subscriptionStartedAt ||
+    extractPayPalStartDate(paypalSub);
+  const subscriptionPeriodStart =
+    inferMonthlyPeriodStart(nextBillingDate, existingUser.subscriptionPeriodStart) || startDate;
+  const normalizedStatus = String(paypalSub.status || existingSub.status || "active").toLowerCase();
+  const amount =
+    Number(paypalSub?.billing_info?.last_payment?.amount?.value) ||
+    Number(existingSub.amount) ||
+    Number(plan.price) ||
+    0;
+  const currency =
+    paypalSub?.billing_info?.last_payment?.amount?.currency_code || existingSub.currency || "USD";
+
+  await db
+    .collection("users")
+    .doc(userId)
+    .set(
+      {
+        subscriptionTier: planId,
+        subscriptionStatus: normalizedStatus,
+        paypalSubscriptionId: subscriptionId,
+        subscriptionStartedAt: startDate,
+        subscriptionPeriodStart,
+        subscriptionPeriodEnd: nextBillingDate,
+        subscriptionExpiresAt: normalizedStatus === "cancelled" ? nextBillingDate : null,
+        isPaid: normalizedStatus === "active" || normalizedStatus === "approved",
+        unlimited: plan.features.uploads === "unlimited",
+        features: plan.features,
+        updatedAt: nowIso,
+      },
+      { merge: true }
+    );
+
+  await db.collection("user_billing").doc(userId).set(
+    {
+      tier: planId,
+      status: normalizedStatus,
+      paypalSubscriptionId: subscriptionId,
+      nextBillingDate,
+      updatedAt: nowIso,
+    },
+    { merge: true }
+  );
+
+  await db.collection("user_subscriptions").doc(userId).set(
+    {
+      userId,
+      planId,
+      planName: plan.name,
+      paypalSubscriptionId: subscriptionId,
+      status: normalizedStatus,
+      amount,
+      currency,
+      billingCycle: "monthly",
+      startDate,
+      nextBillingDate,
+      periodStart: subscriptionPeriodStart,
+      updatedAt: nowIso,
+    },
+    { merge: true }
+  );
 
   return {
-    planId: snapshot.tierId,
-    planName: effectivePlan.name,
-    status: snapshot.tierId === "free" ? "active" : rawStatus,
-    rawStatus,
-    effectiveTier: snapshot.tierId,
-    billingTier: normalizePlanId(snapshot.billingData?.tier || "free"),
-    userTier: normalizePlanId(
-      snapshot.userData?.subscriptionTier || snapshot.userData?.subscription?.planId || "free"
-    ),
-    amount: subscription.amount || effectivePlan.price || 0,
-    currency: subscription.currency || "USD",
-    nextBillingDate:
-      snapshot.tierId === "free"
-        ? null
-        : subscription.nextBillingDate || snapshot.userData?.subscriptionPeriodEnd || null,
-    capabilities: getPlanCapabilities(snapshot.tierId),
-    features: effectivePlan.features,
-    cancelledAt: subscription.cancelledAt || snapshot.userData?.subscriptionCancelledAt || null,
-    expiresAt:
-      snapshot.tierId === "free"
-        ? null
-        : subscription.expiresAt ||
-          snapshot.userData?.subscriptionExpiresAt ||
-          snapshot.userData?.subscriptionPeriodEnd ||
-          null,
-    subscriptionId:
-      subscription.paypalSubscriptionId || snapshot.userData?.paypalSubscriptionId || null,
+    planId,
+    planName: plan.name,
+    status: normalizedStatus,
+    nextBillingDate,
+    amount,
+    currency,
+    paypalSubscriptionId: subscriptionId,
   };
 }
 
@@ -227,6 +311,46 @@ async function markSubscriptionExternalMissing(userId, subscriptionId) {
   });
 }
 
+function buildSubscriptionStatusPayload(snapshot, subscription = {}) {
+  const effectivePlan = resolvePlan(snapshot.tierId || "free");
+  const rawStatus = String(
+    subscription.status ||
+      snapshot.userData?.subscriptionStatus ||
+      snapshot.billingData?.status ||
+      "active"
+  ).toLowerCase();
+
+  return {
+    planId: snapshot.tierId,
+    planName: effectivePlan.name,
+    status: snapshot.tierId === "free" ? "active" : rawStatus,
+    rawStatus,
+    effectiveTier: snapshot.tierId,
+    billingTier: normalizePlanId(snapshot.billingData?.tier || "free"),
+    userTier: normalizePlanId(
+      snapshot.userData?.subscriptionTier || snapshot.userData?.subscription?.planId || "free"
+    ),
+    amount: subscription.amount || effectivePlan.price || 0,
+    currency: subscription.currency || "USD",
+    nextBillingDate:
+      snapshot.tierId === "free"
+        ? null
+        : subscription.nextBillingDate || snapshot.userData?.subscriptionPeriodEnd || null,
+    capabilities: getPlanCapabilities(snapshot.tierId),
+    features: effectivePlan.features,
+    cancelledAt: subscription.cancelledAt || snapshot.userData?.subscriptionCancelledAt || null,
+    expiresAt:
+      snapshot.tierId === "free"
+        ? null
+        : subscription.expiresAt ||
+          snapshot.userData?.subscriptionExpiresAt ||
+          snapshot.userData?.subscriptionPeriodEnd ||
+          null,
+    subscriptionId:
+      subscription.paypalSubscriptionId || snapshot.userData?.paypalSubscriptionId || null,
+  };
+}
+
 async function fetchPayPalSubscriptionDetails(subscriptionId) {
   if (!subscriptionId) return null;
 
@@ -322,18 +446,21 @@ async function persistActivatedSubscription({ userId, subscriptionId, planId, pa
       { merge: true }
     );
 
-  await db.collection("subscription_intents").doc(subscriptionId).set(
-    {
-      userId,
-      planId: normalizedPlanId,
-      paypalSubscriptionId: subscriptionId,
-      status: "activated",
-      activatedAt: nowIso,
-      amount: plan.price,
-      source: intent?.source || "paypal_reconcile",
-    },
-    { merge: true }
-  );
+  await db
+    .collection("subscription_intents")
+    .doc(subscriptionId)
+    .set(
+      {
+        userId,
+        planId: normalizedPlanId,
+        paypalSubscriptionId: subscriptionId,
+        status: "activated",
+        activatedAt: nowIso,
+        amount: plan.price,
+        source: intent?.source || "paypal_reconcile",
+      },
+      { merge: true }
+    );
 
   await db.collection("subscription_events").add({
     userId,
@@ -363,13 +490,18 @@ async function persistActivatedSubscription({ userId, subscriptionId, planId, pa
 async function reconcileMissedPayPalActivation(userId) {
   if (!userId) return null;
 
-  const intentSnapshot = await db.collection("subscription_intents").where("userId", "==", userId).get();
+  const intentSnapshot = await db
+    .collection("subscription_intents")
+    .where("userId", "==", userId)
+    .get();
   if (intentSnapshot.empty) return null;
 
   const candidateIntents = intentSnapshot.docs
     .map(doc => ({ id: doc.id, ...doc.data() }))
     .filter(intent => ["pending", "approved"].includes(String(intent.status || "").toLowerCase()))
-    .sort((left, right) => String(right.createdAt || "").localeCompare(String(left.createdAt || "")));
+    .sort((left, right) =>
+      String(right.createdAt || "").localeCompare(String(left.createdAt || ""))
+    );
 
   for (const intent of candidateIntents) {
     const subscriptionId = intent.paypalSubscriptionId || intent.id;
@@ -387,7 +519,10 @@ async function reconcileMissedPayPalActivation(userId) {
         );
         continue;
       }
-      if (!paypalSub || !["ACTIVE", "APPROVED"].includes(String(paypalSub.status || "").toUpperCase())) {
+      if (
+        !paypalSub ||
+        !["ACTIVE", "APPROVED"].includes(String(paypalSub.status || "").toUpperCase())
+      ) {
         continue;
       }
       if (paypalSub.custom_id && paypalSub.custom_id !== userId) {
@@ -697,15 +832,18 @@ router.post("/activate", authMiddleware, async (req, res) => {
     }
 
     if (!intentDoc.exists) {
-      await db.collection("subscription_intents").doc(subscriptionId).set({
-        userId,
-        planId,
-        paypalSubscriptionId: subscriptionId,
-        status: "approved",
-        amount: resolvePlan(planId).price,
-        createdAt: new Date().toISOString(),
-        source: "paypal_sdk",
-      });
+      await db
+        .collection("subscription_intents")
+        .doc(subscriptionId)
+        .set({
+          userId,
+          planId,
+          paypalSubscriptionId: subscriptionId,
+          status: "approved",
+          amount: resolvePlan(planId).price,
+          createdAt: new Date().toISOString(),
+          source: "paypal_sdk",
+        });
     }
 
     const activatedSubscription = await persistActivatedSubscription({
@@ -888,12 +1026,24 @@ router.get("/status", async (req, res) => {
             status: "external_missing",
             nextBillingDate: null,
           });
-        } else if (paypalSub && paypalSub.status !== subscription.status.toUpperCase()) {
-          await db.collection("user_subscriptions").doc(userId).update({
-            status: paypalSub.status.toLowerCase(),
-            updatedAt: new Date().toISOString(),
-          });
-          subscription.status = paypalSub.status.toLowerCase();
+        } else if (paypalSub) {
+          const remoteStatus = String(paypalSub.status || "").toLowerCase();
+          const remoteNextBillingDate = extractPayPalNextBillingDate(paypalSub);
+          const localNextBillingDate =
+            subscription.nextBillingDate || snapshot.userData?.subscriptionPeriodEnd || null;
+          const needsDateRefresh =
+            remoteNextBillingDate && remoteNextBillingDate !== localNextBillingDate;
+          const needsStatusRefresh =
+            remoteStatus && remoteStatus !== String(subscription.status || "").toLowerCase();
+
+          if (needsDateRefresh || needsStatusRefresh) {
+            const refreshed = await refreshPersistedSubscriptionFromPayPal({
+              userId,
+              subscriptionId: subscription.paypalSubscriptionId,
+              paypalSub,
+            });
+            Object.assign(subscription, refreshed || {});
+          }
         }
       } catch (syncError) {
         console.error("[PayPal] Status sync error:", syncError);
@@ -998,6 +1148,25 @@ router.get("/usage", authMiddleware, async (req, res) => {
     const postsUsed = countDocsSince([postsSnap], periodStart);
     const boostsUsed = countDocsSince([boostsSnap], periodStart);
 
+    // Credit usage for the current month
+    const monthKey = periodStart.toISOString().slice(0, 7) || new Date().toISOString().slice(0, 7);
+    const monthlyCreditsAllocation = plan.features.monthlyCredits || 0;
+    let monthlyCreditsUsed = 0;
+    try {
+      const creditLedgerSnap = await db
+        .collection("credit_usage")
+        .where("userId", "==", userId)
+        .where("monthKey", "==", new Date().toISOString().slice(0, 7))
+        .get();
+      creditLedgerSnap.forEach(doc => {
+        monthlyCreditsUsed += doc.data().amount || 0;
+      });
+    } catch (e) {
+      console.log("[PayPal] Credit usage query error:", e.message);
+    }
+
+    const topUpBalance = userData.credits || 0;
+
     const usage = {
       uploads: {
         used: uploadsUsed,
@@ -1019,6 +1188,13 @@ router.get("/usage", authMiddleware, async (req, res) => {
         limit: isUnlimited(missionOpportunityLimit) ? null : missionOpportunityLimit,
         unlimited: isUnlimited(missionOpportunityLimit),
       },
+      credits: {
+        monthlyAllocation: monthlyCreditsAllocation,
+        monthlyUsed: monthlyCreditsUsed,
+        monthlyRemaining: Math.max(0, monthlyCreditsAllocation - monthlyCreditsUsed),
+        topUpBalance,
+        totalAvailable: Math.max(0, monthlyCreditsAllocation - monthlyCreditsUsed) + topUpBalance,
+      },
       periodStart: periodStart.toISOString(),
       periodEnd: userData.subscriptionPeriodEnd,
     };
@@ -1028,6 +1204,8 @@ router.get("/usage", authMiddleware, async (req, res) => {
       tier,
       usage,
       features: plan.features,
+      creditCosts: CREDIT_COSTS,
+      topUpPacks: CREDIT_TOP_UP_PACKS,
     });
   } catch (error) {
     console.error("[PayPal] Get usage error:", error);

@@ -1473,22 +1473,48 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
   };
 
   const preflightUploadReadiness = async ({ token, platforms, scheduledTime }) => {
-    const readinessResponse = await fetch(API_ENDPOINTS.CONTENT_UPLOAD_READINESS, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({
-        target_platforms: platforms,
-        scheduled_promotion_time: scheduledTime || null,
-      }),
-    });
+    const controller = new AbortController();
+    const timeoutMs = 12000;
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+    let readinessResponse;
+    try {
+      readinessResponse = await fetch(API_ENDPOINTS.CONTENT_UPLOAD_READINESS, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          target_platforms: platforms,
+          scheduled_promotion_time: scheduledTime || null,
+        }),
+        signal: controller.signal,
+      });
+    } catch (error) {
+      if (error?.name === "AbortError") {
+        const timeoutError = new Error(
+          "Plan check timed out. Please retry in a moment."
+        );
+        timeoutError.code = "READINESS_TIMEOUT";
+        timeoutError.httpStatus = 408;
+        throw timeoutError;
+      }
+      throw error;
+    } finally {
+      clearTimeout(timeoutId);
+    }
 
     let readinessResult = null;
+    const contentType = readinessResponse.headers.get("content-type") || "";
     try {
-      readinessResult = await readinessResponse.json();
+      if (contentType.includes("application/json")) {
+        readinessResult = await readinessResponse.json();
+      } else {
+        const textBody = await readinessResponse.text();
+        readinessResult = textBody ? { text: textBody } : null;
+      }
     } catch (_) {
       readinessResult = null;
     }
@@ -1496,7 +1522,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
     if (!readinessResponse.ok) {
       throw buildStructuredUploadError(
         readinessResult,
-        `HTTP ${readinessResponse.status}`,
+        `Plan check failed (HTTP ${readinessResponse.status})`,
         readinessResponse.status
       );
     }

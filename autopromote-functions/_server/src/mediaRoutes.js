@@ -10,12 +10,17 @@ const VideoEditingService = require("./services/videoEditingService");
 const videoEditingService = new VideoEditingService(); // Instantiate for general use
 
 const authMiddleware = require("./authMiddleware");
-const { deductCredits } = require("./creditSystem");
+const { deductCredits, getCreditBreakdown } = require("./creditSystem");
+const {
+  CREDIT_COSTS,
+  CREDIT_TOP_UP_PACKS,
+  getPlanCapabilities,
+} = require("./config/subscriptionPlans");
+const { getEffectiveTierSnapshot } = require("./services/billingService");
 const MEDIA_WORKER_URL =
   process.env.MEDIA_WORKER_URL || "https://media-worker-v1-jddzncgt2a-uc.a.run.app";
 const LOCAL_MEDIA_WORKER_URL = process.env.LOCAL_MEDIA_WORKER_URL || "http://127.0.0.1:8000";
-const VIDEO_EDITOR_CREDITS_DISABLED =
-  process.env.DISABLE_VIDEO_EDITOR_CREDITS === "true";
+const VIDEO_EDITOR_CREDITS_DISABLED = process.env.DISABLE_VIDEO_EDITOR_CREDITS === "true";
 
 const shouldRetryWithLocalWorker = error => {
   const status = error.response?.status;
@@ -55,7 +60,7 @@ const chargeVideoEditorCredits = async (userId, amount, routeName) => {
     return { success: true, remaining: null, skipped: true };
   }
 
-  return deductCredits(userId, amount);
+  return deductCredits(userId, amount, routeName);
 };
 
 // Configure Multer (Buffer storage)
@@ -67,6 +72,71 @@ const upload = multer({
 // Middleware to verify Firebase Token and attach user
 // Replaced local 'protect' with standard 'authMiddleware' for consistency
 router.use(authMiddleware);
+
+// Route: GET /api/media/credits
+// Returns the user's credit breakdown (monthly + top-up) and cost table
+router.get("/credits", async (req, res) => {
+  try {
+    const userId = req.user.uid;
+    const breakdown = await getCreditBreakdown(userId);
+    res.json({
+      success: true,
+      balance: breakdown.totalAvailable,
+      monthly: {
+        allocation: breakdown.monthlyAllocation,
+        used: breakdown.monthlyUsed,
+        remaining: breakdown.monthlyRemaining,
+      },
+      topUp: breakdown.topUpBalance,
+      tier: breakdown.tier,
+      costs: CREDIT_COSTS,
+      topUpPacks: CREDIT_TOP_UP_PACKS,
+    });
+  } catch (error) {
+    console.error("[MediaRoute] Credit balance error:", error.message);
+    res.status(500).json({ success: false, message: "Failed to fetch credit balance" });
+  }
+});
+
+// Route: POST /api/media/estimate
+// Returns cost estimate for a set of operations BEFORE processing
+router.post("/estimate", async (req, res) => {
+  try {
+    const userId = req.user.uid;
+    const operations = Array.isArray(req.body?.operations) ? req.body.operations : [];
+    const breakdown = await getCreditBreakdown(userId);
+
+    let totalCost = 0;
+    const items = [];
+    for (const op of operations) {
+      const cost = CREDIT_COSTS[op] || 0;
+      if (cost > 0) {
+        items.push({ operation: op, credits: cost });
+        totalCost += cost;
+      }
+    }
+
+    const canAfford = breakdown.totalAvailable >= totalCost;
+
+    res.json({
+      success: true,
+      items,
+      totalCost,
+      balance: breakdown.totalAvailable,
+      monthly: {
+        allocation: breakdown.monthlyAllocation,
+        remaining: breakdown.monthlyRemaining,
+      },
+      topUp: breakdown.topUpBalance,
+      canAfford,
+      deficit: canAfford ? 0 : totalCost - breakdown.totalAvailable,
+      topUpPacks: canAfford ? undefined : CREDIT_TOP_UP_PACKS,
+    });
+  } catch (error) {
+    console.error("[MediaRoute] Estimate error:", error.message);
+    res.status(500).json({ success: false, message: "Failed to estimate costs" });
+  }
+});
 
 // Route: POST /api/media/transcribe
 // Handles file upload -> Firebase Storage -> Python Worker -> Returns Captions
@@ -124,7 +194,7 @@ router.post("/process", async (req, res) => {
   const userId = req.user.uid;
   const { fileUrl, options } = req.body;
   console.log("[MediaRoute] Received request:", { fileUrl, options });
-  const cost = 10; // Cost per edit
+  const cost = CREDIT_COSTS.process || 10;
 
   if (!fileUrl) {
     return res.status(400).json({ message: "No file provided" });
@@ -132,12 +202,16 @@ router.post("/process", async (req, res) => {
 
   // 1. Deduct Credits
   try {
-    const result = await chargeVideoEditorCredits(userId, cost, "/process");
+    const result = await chargeVideoEditorCredits(userId, cost, "process");
     if (!result.success) {
       return res.status(403).json({
-        message: "Insufficient credits. Please purchase more credits.",
+        message: `This operation costs ${cost} credits. You have ${result.remaining || 0} credits available.`,
         required: cost,
-        remaining: result.remaining,
+        remaining: result.remaining || 0,
+        monthlyRemaining: result.monthlyRemaining,
+        topUpBalance: result.topUpBalance,
+        tier: result.tier,
+        topUpPacks: CREDIT_TOP_UP_PACKS,
       });
     }
 
@@ -183,6 +257,77 @@ router.post("/extract-audio", async (req, res) => {
   }
 });
 
+router.post("/render-multicam", async (req, res) => {
+  const userId = req.user?.uid || req.userId;
+  const cost = CREDIT_COSTS["render-multicam"] || 15;
+  const sources = Array.isArray(req.body?.sources) ? req.body.sources : [];
+
+  if (!userId) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  if (sources.length < 2) {
+    return res.status(400).json({ message: "At least two camera sources are required" });
+  }
+
+  try {
+    const tierSnapshot = await getEffectiveTierSnapshot(userId);
+    const capabilities = getPlanCapabilities(tierSnapshot.tierId);
+
+    if (!capabilities.multicam) {
+      return res.status(403).json({
+        message: `${capabilities.planName} plan does not include multi-camera rendering.`,
+        code: "MULTICAM_PLAN_REQUIRED",
+        upgradeRequired: true,
+        entitlements: capabilities,
+      });
+    }
+
+    const result = await chargeVideoEditorCredits(userId, cost, "render-multicam");
+    if (!result.success) {
+      return res.status(403).json({
+        message: `Multicam rendering costs ${cost} credits. You have ${result.remaining || 0} credits available.`,
+        required: cost,
+        remaining: result.remaining || 0,
+        topUpPacks: CREDIT_TOP_UP_PACKS,
+      });
+    }
+
+    const job = await videoEditingService.startMulticamRenderJob(
+      {
+        sources,
+        segments: Array.isArray(req.body?.segments) ? req.body.segments : [],
+        switches: Array.isArray(req.body?.switches) ? req.body.switches : [],
+        autoSwitch: !!req.body?.autoSwitch,
+        audioBasedAutoSwitch: req.body?.audioBasedAutoSwitch !== false,
+        autoSwitchInterval: Number(req.body?.autoSwitchInterval ?? 3),
+        autoSwitchAggressiveness:
+          typeof req.body?.autoSwitchAggressiveness === "string"
+            ? req.body.autoSwitchAggressiveness
+            : "balanced",
+        primaryAudioCameraId:
+          typeof req.body?.primaryAudioCameraId === "string" ? req.body.primaryAudioCameraId : null,
+        overlapStart: Number(req.body?.overlapStart ?? 0),
+        overlapDuration: Number(req.body?.overlapDuration ?? 0),
+        outputAspectRatio:
+          typeof req.body?.outputAspectRatio === "string" ? req.body.outputAspectRatio : "9:16",
+      },
+      userId
+    );
+
+    res.json({
+      success: true,
+      jobId: job.jobId,
+      message: "Multi-camera render started",
+      remainingCredits: result.remaining,
+      billingDisabled: !!result.skipped,
+    });
+  } catch (error) {
+    console.error("[MediaRoute] Multicam render error:", error.message);
+    res.status(500).json({ message: "Multi-camera render failed", details: error.message });
+  }
+});
+
 router.post("/preview-silence", async (req, res) => {
   const fileUrl = typeof req.body?.fileUrl === "string" ? req.body.fileUrl.trim() : "";
   if (!fileUrl) {
@@ -220,7 +365,8 @@ router.post("/preview-watermark-cleanup", async (req, res) => {
       "/preview-watermark-cleanup",
       {
         video_url: fileUrl,
-        watermark_mode: typeof req.body?.watermarkMode === "string" ? req.body.watermarkMode : "adaptive",
+        watermark_mode:
+          typeof req.body?.watermarkMode === "string" ? req.body.watermarkMode : "adaptive",
         watermark_regions: Array.isArray(req.body?.manualWatermarkRegions)
           ? req.body.manualWatermarkRegions
           : [],
@@ -305,7 +451,7 @@ router.get("/status/:jobId", async (req, res) => {
 router.post("/analyze", async (req, res) => {
   const userId = req.user.uid;
   const { fileUrl } = req.body;
-  const cost = 20; // Higher cost for analysis
+  const cost = CREDIT_COSTS.analyze || 8;
 
   try {
     console.log(`[MediaRoute] Analyze clip request for user ${userId}, file: ${fileUrl}`);
@@ -316,13 +462,11 @@ router.post("/analyze", async (req, res) => {
       console.warn(
         `[MediaRoute] Insufficient credits for user ${userId}. Required: ${cost}, Msg: ${credits.message}`
       );
-      return res
-        .status(403)
-        .json({
-          message: "Insufficient credits. Please purchase more.",
-          required: cost,
-          balance: credits.remaining,
-        });
+      return res.status(403).json({
+        message: "Insufficient credits. Please purchase more.",
+        required: cost,
+        balance: credits.remaining,
+      });
     }
 
     console.log(`[MediaRoute] Credits OK. Starting analysis...`);
@@ -343,7 +487,7 @@ router.post("/analyze", async (req, res) => {
 router.post("/render-clip", async (req, res) => {
   const userId = req.user.uid;
   const { fileUrl, startTime, endTime } = req.body;
-  const cost = 5; // Simpler cut is cheaper
+  const cost = CREDIT_COSTS["render-clip"] || 5;
 
   try {
     const creditRes = await chargeVideoEditorCredits(userId, cost, "/render-clip");

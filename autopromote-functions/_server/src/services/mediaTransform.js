@@ -226,8 +226,7 @@ function getHookStyle(platform) {
   return styles[normalizePlatformKey(platform)] || styles.default;
 }
 
-const GENERATED_SUBTITLE_FILENAME_PATTERN =
-  /^repost-captions-[A-Za-z0-9_-]+-[A-Za-z0-9_-]+\.srt$/;
+const GENERATED_SUBTITLE_FILENAME_PATTERN = /^repost-captions-[A-Za-z0-9_-]+-[A-Za-z0-9_-]+\.srt$/;
 
 function escapeSubtitlePath(filePath) {
   const normalizedPath = path.resolve(String(filePath || "")).replace(/\\/g, "/");

@@ -28,19 +28,21 @@ gcloud config set project "$PROJECT_ID"
 echo "Step 1: Building container image via Cloud Build..."
 gcloud builds submit --tag "gcr.io/$PROJECT_ID/$SERVICE_NAME" .
 
-# 2. Deploy to Cloud Run
+# 2. Deploy to Cloud Run (2nd Gen for CPU always-on + background task support)
 echo "Step 2: Deploying to Cloud Run..."
 gcloud run deploy "$SERVICE_NAME" \
     --image "gcr.io/$PROJECT_ID/$SERVICE_NAME" \
     --platform managed \
+    --execution-environment gen2 \
     --region "$REGION" \
     --allow-unauthenticated \
     --memory 4Gi \
     --cpu 4 \
+    --cpu-boost \
     --timeout 900 \
     --concurrency 1 \
-    --min-instances 0 \
-    --max-instances 3 \
+    --min-instances 2 \
+    --max-instances 50 \
     --set-env-vars "FIREBASE_STORAGE_BUCKET=autopromote-cc6d3.firebasestorage.app"
 
 echo "=========================================="
