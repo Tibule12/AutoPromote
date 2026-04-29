@@ -3,6 +3,7 @@ const router = express.Router();
 const admin = require("firebase-admin");
 
 const authMiddleware = require("../authMiddleware");
+const { apiLimiter } = require("../validationMiddleware");
 const { getCreditBreakdown } = require("../creditSystem");
 const { getEffectiveTierSnapshot } = require("../services/billingService");
 const {
@@ -16,7 +17,7 @@ const {
 router.use(authMiddleware);
 
 // GET /api/user/profile - User subscription/credits profile
-router.get("/profile", async (req, res) => {
+router.get("/profile", apiLimiter, async (req, res) => {
   try {
     const userId = req.user.uid;
 
