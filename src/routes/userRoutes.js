@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const admin = require("firebase-admin");
 
 const authMiddleware = require("../authMiddleware");
 const { apiLimiter } = require("../validationMiddleware");

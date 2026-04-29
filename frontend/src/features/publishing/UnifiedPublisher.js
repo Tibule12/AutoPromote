@@ -278,9 +278,8 @@ async function fetchPlatformStatusSnapshot(token) {
 }
 
 // --- Sub-components ---
-
 const PlatformPreview = ({
-  label = "Platform Preview",
+  label,
   data,
   globalFile,
   previewUrl,
@@ -1141,7 +1140,6 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
     togglePlatform,
     updatePlatformData,
     getPlatformEffectiveData,
-    platformStates, // Expose platform selection overrides if needed, but usually we rely on "selectedPlatforms" array
   } = usePublishingState(["tiktok", "youtube"]); // Default selection
 
   // Handle Initial File
@@ -1390,7 +1388,6 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
     setSelectedFilter,
     duration,
     setDuration,
-    setFile: setMediaFile, // Expose manually
     setPreviewUrl, // Expose manually
   } = useMediaProcessor(globalFile);
 
