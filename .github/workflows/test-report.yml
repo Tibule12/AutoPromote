@@ -22,29 +22,51 @@ jobs:
             const runId = context.payload.workflow_run && context.payload.workflow_run.id;
             if (!runId) {
               core.info('No workflow_run.id found on event payload; assuming no artifacts.');
-              return false;
+              core.setOutput('found', 'false');
+              return;
             }
             const res = await github.rest.actions.listWorkflowRunArtifacts({
               owner: context.repo.owner,
               repo: context.repo.repo,
               run_id: runId,
             });
-            const names = (res.data.artifacts || []).map(a => a.name);
+            const artifacts = res.data.artifacts || [];
+            const names = artifacts.map(a => a.name);
             core.info('Artifacts available for this run: ' + names.join(', '));
-            return names.includes('junit-test-results');
+            const artifact = artifacts.find(a => a.name === 'junit-test-results' && !a.expired);
+            if (!artifact) {
+              core.setOutput('found', 'false');
+              return;
+            }
+            core.setOutput('found', 'true');
+            core.setOutput('artifact_id', String(artifact.id));
+            core.setOutput('artifact_url', artifact.archive_download_url);
 
       - name: Download junit-test-results artifact from CI workflow
-        if: steps.check_artifact.outputs.result == 'true'
-        uses: actions/download-artifact@v4
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          repository: ${{ github.repository }}
-          run-id: ${{ github.event.workflow_run.id }}
-          name: junit-test-results
-          path: ./test-results
+        if: steps.check_artifact.outputs.found == 'true'
+        env:
+          ARTIFACT_URL: ${{ steps.check_artifact.outputs.artifact_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p ./test-results
+          for attempt in 1 2 3 4 5; do
+            echo "Downloading junit-test-results artifact (attempt ${attempt})"
+            if curl -fL \
+              -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+              -H "Accept: application/vnd.github+json" \
+              "${ARTIFACT_URL}" \
+              -o artifact.zip; then
+              unzip -o artifact.zip -d ./test-results
+              rm -f artifact.zip
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Unable to download junit-test-results artifact after retries."
+          exit 1
 
       - name: Create test report
-        if: steps.check_artifact.outputs.result == 'true'
+        if: steps.check_artifact.outputs.found == 'true'
         uses: dorny/test-reporter@v2
         with:
           name: "JEST Tests"
@@ -52,6 +74,6 @@ jobs:
           reporter: jest-junit
 
       - name: No test-results artifact found - skip report
-        if: steps.check_artifact.outputs.result != 'true'
+        if: steps.check_artifact.outputs.found != 'true'
         run: |
           echo "No 'junit-test-results' artifact found for this CI run. Skipping test report generation."
