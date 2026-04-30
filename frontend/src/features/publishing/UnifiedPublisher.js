@@ -23,6 +23,17 @@ import {
 } from "../../utils/sourceUpload";
 
 // --- Components ---
+import TikTokForm from "../../components/PlatformForms/TikTokForm";
+import YouTubeForm from "../../components/PlatformForms/YouTubeForm";
+import InstagramForm from "../../components/PlatformForms/InstagramForm";
+import FacebookForm from "../../components/PlatformForms/FacebookForm";
+import LinkedInForm from "../../components/PlatformForms/LinkedInForm";
+import RedditForm from "../../components/PlatformForms/RedditForm";
+import BestTimeToPost from "../../components/BestTimeToPost";
+import VideoEditor from "../../components/VideoEditor";
+import ViralScanner from "../../components/ViralScanner";
+import ImageCropper from "../../components/ImageCropper";
+import PayPalSubscriptionPanel from "../../components/PayPalSubscriptionPanel";
 
 // --- New Features ---
 

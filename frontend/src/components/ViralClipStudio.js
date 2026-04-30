@@ -702,7 +702,9 @@ const ViralClipStudio = ({
   const [overlays, setOverlays] = useState([]);
   const [activeOverlayId, setActiveOverlayId] = useState(null);
   const [videoTime, setVideoTime] = useState(0);
-  const [videoFit, setVideoFit] = useState("contain"); // 'contain', 'cover' (fill), 'fill' (stretch)
+  const [videoFit, setVideoFit] = useState("contain"); // safe: 'contain' (no stretch), optional: 'cover' (may crop)
+  const [safeFaceFraming, setSafeFaceFraming] = useState(true);
+  const [faceAnchorPreset, setFaceAnchorPreset] = useState("center"); // center | face_top | face_mid
 
   // New AI Options for users
   const [autoCaptions, setAutoCaptions] = useState(false);
@@ -1029,6 +1031,10 @@ const ViralClipStudio = ({
     setOverlays(snapshot.overlays || []);
     setActiveOverlayId(snapshot.activeOverlayId || null);
     setVideoFit(snapshot.videoFit || "contain");
+    setSafeFaceFraming(
+      snapshot.safeFaceFraming !== undefined ? !!snapshot.safeFaceFraming : true
+    );
+    setFaceAnchorPreset(snapshot.faceAnchorPreset || "center");
     setAutoCaptions(!!snapshot.autoCaptions);
     setSmartCrop(!!snapshot.smartCrop);
     setEnhanceQuality(!!snapshot.enhanceQuality);
@@ -2379,7 +2385,13 @@ const ViralClipStudio = ({
   const presetMusicPreviewUrl =
     addMusic && !musicSearchMode && musicSelection ? `/music/${musicSelection}` : "";
   const effectiveMusicPreviewUrl = musicSearchMode ? musicPreviewUrl : presetMusicPreviewUrl;
-  const effectiveVideoFit = smartCrop ? "cover" : videoFit;
+  const faceAnchorY =
+    faceAnchorPreset === "face_top" ? 32 : faceAnchorPreset === "face_mid" ? 42 : 50;
+  const safeObjectPosition = `${resolvedHookFocusPoint.x}% ${faceAnchorY}%`;
+  const effectiveVideoFit = safeFaceFraming ? "contain" : smartCrop ? "cover" : videoFit;
+  const showCropRiskIndicator =
+    !safeFaceFraming &&
+    (effectiveVideoFit === "cover" || smartCrop || hookFreezeFrame || isZoomFocusTemplate);
   const previewClarityBrightness = 1.025;
   const previewClarityContrast = 1.08;
   const previewClaritySaturate = 1.05;
@@ -4559,8 +4571,11 @@ const ViralClipStudio = ({
                   <span className="panel-chip">9:16 output</span>
                   <span className="panel-chip">Clip {activeTimelineIndex + 1}</span>
                   <span className="panel-chip">
-                    {videoFit === "contain" ? "Full frame" : "Zoomed fill"}
+                    {effectiveVideoFit === "contain" ? "Safe full frame" : "Fill frame (may crop)"}
                   </span>
+                  {showCropRiskIndicator ? (
+                    <span className="panel-chip panel-chip-risk">Crop risk</span>
+                  ) : null}
                 </div>
               </div>
 
@@ -4585,7 +4600,7 @@ const ViralClipStudio = ({
                       playsInline
                       style={{
                         objectFit: effectiveVideoFit,
-                        objectPosition: hookObjectPosition,
+                        objectPosition: safeObjectPosition,
                         width: "100%",
                         height: "100%",
                         background: "transparent",
@@ -4614,7 +4629,7 @@ const ViralClipStudio = ({
                         preload="auto"
                         muted
                         playsInline
-                        style={{ objectPosition: hookObjectPosition }}
+                        style={{ objectPosition: safeObjectPosition }}
                       />
                     ) : null}
                     <video
@@ -4623,7 +4638,7 @@ const ViralClipStudio = ({
                       preload="auto"
                       muted
                       playsInline
-                      style={{ opacity: hookBackdropOpacity, objectPosition: hookObjectPosition }}
+                      style={{ opacity: hookBackdropOpacity, objectPosition: safeObjectPosition }}
                     />
                     <video
                       ref={hookFreezeVideoRef}
@@ -4633,7 +4648,7 @@ const ViralClipStudio = ({
                       playsInline
                       style={{
                         opacity: hookFreezeOpacity,
-                        objectPosition: hookObjectPosition,
+                        objectPosition: safeObjectPosition,
                         transformOrigin: hookTransformOrigin,
                         transform: `scale(${effectiveHookZoomTarget.toFixed(3)})`,
                       }}
@@ -6082,8 +6097,37 @@ const ViralClipStudio = ({
                 <button
                   className="tool-btn"
                   onClick={() => setVideoFit(prev => (prev === "contain" ? "cover" : "contain"))}
+                  disabled={safeFaceFraming}
+                  title={
+                    safeFaceFraming
+                      ? "Disable Safe Face Framing to switch to Fill mode"
+                      : "Switch between Full frame and Fill frame"
+                  }
                 >
-                  <span>📐</span> Fit: {videoFit === "contain" ? "FULL" : "ZOOM"}
+                  <span>📐</span> Fit: {videoFit === "contain" ? "FULL" : "FILL"}
+                </button>
+                <button
+                  className={`tool-btn ${safeFaceFraming ? "active" : ""}`}
+                  onClick={() => setSafeFaceFraming(prev => !prev)}
+                  title="Prevent stretched/cropped faces by preserving aspect ratio"
+                >
+                  <span>🧠</span> Safe Face Framing: {safeFaceFraming ? "ON" : "OFF"}
+                </button>
+                <button
+                  className="tool-btn"
+                  onClick={() =>
+                    setFaceAnchorPreset(prev =>
+                      prev === "center" ? "face_top" : prev === "face_top" ? "face_mid" : "center"
+                    )
+                  }
+                  title="Choose a face-safe vertical anchor"
+                >
+                  <span>🎯</span> Anchor:{" "}
+                  {faceAnchorPreset === "center"
+                    ? "Center"
+                    : faceAnchorPreset === "face_top"
+                      ? "Face Top"
+                      : "Face Mid"}
                 </button>
               </div>
               <input

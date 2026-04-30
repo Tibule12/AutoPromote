@@ -28,6 +28,8 @@ function boostContrast(ctx,ww,hh){
   ctx.putImageData(id,0,0);
 }
 function darkGrad(ctx,topPct,hgt){const g=ctx.createLinearGradient(0,hgt*topPct,0,hgt);g.addColorStop(0,"rgba(0,0,0,0)");g.addColorStop(1,"rgba(0,0,0,0.75)");ctx.fillStyle=g;ctx.fillRect(0,0,W,hgt);}
+function drawContain(ctx,src,dw,dh,bg="#000"){const sw=src.width||dw,sh=src.height||dh;ctx.fillStyle=bg;ctx.fillRect(0,0,dw,dh);const s=Math.min(dw/sw,dh/sh);const tw=sw*s,th=sh*s;const dx=(dw-tw)/2,dy=(dh-th)/2;ctx.drawImage(src,0,0,sw,sh,dx,dy,tw,th);return{dx,dy,tw,th,s};}
+function drawFaceSafeContain(ctx,src,raw,w,h,bg="#000"){const face=ff(raw.id.data,raw.id.width,raw.id.height);if(!face)return drawContain(ctx,src,w,h,bg);const cx=face.x+face.w/2,cy=face.y+face.h/2;const padX=Math.max(face.w*0.35,raw.id.width*0.08),padY=Math.max(face.h*0.35,raw.id.height*0.08);const sx=Math.max(0,cx-face.w/2-padX),sy=Math.max(0,cy-face.h/2-padY),sw=Math.min(raw.id.width-sx,face.w+padX*2),sh=Math.min(raw.id.height-sy,face.h+padY*2);const crop=document.createElement("canvas");crop.width=Math.max(8,Math.round(sw));crop.height=Math.max(8,Math.round(sh));crop.getContext("2d").drawImage(src,sx,sy,sw,sh,0,0,crop.width,crop.height);return drawContain(ctx,crop,w,h,bg);}
 
 const TEMPLATES={
   classic:{
@@ -35,10 +37,7 @@ const TEMPLATES={
     render(raw,opts){
       const{headline,subtext,color,emoji,tx,ty}=opts;const c=document.createElement("canvas");c.width=W;c.height=H;const ctx=c.getContext("2d");
       const src=document.createElement("canvas");src.width=raw.id.width;src.height=raw.id.height;src.getContext("2d").putImageData(raw.id,0,0);
-      const face=ff(raw.id.data,raw.id.width,raw.id.height);
-      if(face&&face.w>80){const px=face.w*0.55,py=face.h*0.45;ctx.drawImage(src,Math.max(0,face.x-px),Math.max(0,face.y-py),Math.min(raw.id.width,face.w+px*2),Math.min(raw.id.height,face.h+py*2),80,0,W-160,H-40);
-        ctx.save();ctx.strokeStyle=color;ctx.lineWidth=5;ctx.shadowColor=color;ctx.shadowBlur=20;ctx.beginPath();ctx.roundRect(70,-5,W-140,H-25,16);ctx.stroke();ctx.restore();}
-      else ctx.drawImage(src,0,0,W,H);
+      drawFaceSafeContain(ctx,src,raw,W,H,"#000");
       boostContrast(ctx,W,H);darkGrad(ctx,0.35,H);
       ctx.font="68px serif";ctx.textAlign="left";ctx.fillText(emoji,44,80);
       const hx=tx||W/2,hy=ty||H-140;drawTxt(ctx,headline,hx,hy,W-80,62,color,-1);
@@ -56,7 +55,11 @@ const TEMPLATES={
       for(let i=0;i<12;i++){const h=30+rnd(20,80);ctx.beginPath();ctx.moveTo(80+i*95,100);ctx.lineTo(80+i*95,100+h);ctx.stroke();}
       const src=document.createElement("canvas");src.width=raw.id.width;src.height=raw.id.height;src.getContext("2d").putImageData(raw.id,0,0);
       const face=ff(raw.id.data,raw.id.width,raw.id.height);
-      if(face){const px=face.w*0.4,py=face.h*0.3;ctx.save();ctx.beginPath();ctx.roundRect(60,180,340,340,20);ctx.clip();ctx.drawImage(src,Math.max(0,face.x-px),Math.max(0,face.y-py),Math.min(raw.id.width,face.w+px*2),Math.min(raw.id.height,face.h+py*2),60,180,340,340);ctx.restore();ctx.strokeStyle=color;ctx.lineWidth=3;ctx.beginPath();ctx.roundRect(60,180,340,340,20);ctx.stroke();}
+      const bx=60,by=180,bw=340,bh=340;
+      ctx.save();ctx.beginPath();ctx.roundRect(bx,by,bw,bh,20);ctx.clip();
+      if(face){const cx=face.x+face.w/2,cy=face.y+face.h/2;const side=Math.max(face.w,face.h)*1.9;const sx=Math.max(0,cx-side/2),sy=Math.max(0,cy-side/2);const sw=Math.min(raw.id.width-sx,side),sh=Math.min(raw.id.height-sy,side);const crop=document.createElement("canvas");crop.width=Math.max(8,Math.round(sw));crop.height=Math.max(8,Math.round(sh));crop.getContext("2d").drawImage(src,sx,sy,sw,sh,0,0,crop.width,crop.height);drawContain(ctx,crop,bw,bh,"#101018");}
+      else{drawContain(ctx,src,bw,bh,"#101018");}
+      ctx.restore();ctx.strokeStyle=color;ctx.lineWidth=3;ctx.beginPath();ctx.roundRect(bx,by,bw,bh,20);ctx.stroke();
       ctx.strokeStyle="rgba(255,255,255,0.12)";ctx.lineWidth=2;ctx.setLineDash([8,4]);ctx.beginPath();ctx.roundRect(440,220,300,300,20);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle="rgba(255,255,255,0.04)";ctx.fill();ctx.font="48px serif";ctx.textAlign="center";ctx.fillText("🎙️",590,380);
       drawTxt(ctx,"NEW",870,250,200,44,color,0,"center");drawTxt(ctx,"EPISODE",870,305,200,36,color,0,"center");
       ctx.fillStyle="rgba(0,0,0,0.6)";ctx.fillRect(0,H-200,W,200);
@@ -71,13 +74,10 @@ const TEMPLATES={
       const{headline,color,emoji,tx,ty}=opts;const c=document.createElement("canvas");c.width=W;c.height=H;const ctx=c.getContext("2d");
       const src=document.createElement("canvas");src.width=raw.id.width;src.height=raw.id.height;src.getContext("2d").putImageData(raw.id,0,0);
       ctx.fillStyle="#0a0a10";ctx.fillRect(0,0,W,H);
-      const face=ff(raw.id.data,raw.id.width,raw.id.height);
-      if(face){const px=face.w*0.3,py=face.h*0.3;ctx.drawImage(src,Math.max(0,face.x-px),Math.max(0,face.y-py),Math.min(raw.id.width,face.w+px*2),Math.min(raw.id.height,face.h+py*2),0,0,W,H);}
-      else ctx.drawImage(src,0,0,W,H);
+      drawFaceSafeContain(ctx,src,raw,W,H,"#0a0a10");
       boostContrast(ctx,W,H);darkGrad(ctx,0.5,H);
-      ctx.save();ctx.strokeStyle=color;ctx.lineWidth=4;ctx.shadowColor=color;ctx.shadowBlur=12;ctx.beginPath();ctx.roundRect(W-320,20,280,180,10);ctx.stroke();ctx.restore();
-      ctx.drawImage(src,0,0,raw.id.width,raw.id.height,W-315,25,270,170);
-      ctx.strokeStyle=color;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(W-180,210);ctx.lineTo(W-140,500);ctx.stroke();
+      ctx.save();ctx.globalAlpha=0.35;ctx.strokeStyle=color;ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(W-320,20,280,180,10);ctx.stroke();ctx.restore();
+      ctx.globalAlpha=0.9;ctx.drawImage(src,0,0,raw.id.width,raw.id.height,W-315,25,270,170);ctx.globalAlpha=1;
       drawTxt(ctx,headline,tx||80,ty||H-160,W-500,58,color,-2,"left");
       ctx.font="64px serif";ctx.textAlign="left";ctx.fillText(emoji,40,70);
       return c.toDataURL("image/jpeg",0.92);
@@ -88,11 +88,9 @@ const TEMPLATES={
     render(raw,opts){
       const{headline,subtext,color,emoji,tx,ty}=opts;const c=document.createElement("canvas");c.width=SW;c.height=SH;const ctx=c.getContext("2d");
       const src=document.createElement("canvas");src.width=raw.id.width;src.height=raw.id.height;src.getContext("2d").putImageData(raw.id,0,0);
-      const face=ff(raw.id.data,raw.id.width,raw.id.height);
-      if(face){const px=face.w*0.8,py=face.h*0.4;ctx.drawImage(src,Math.max(0,face.x-px),Math.max(0,face.y-py),Math.min(raw.id.width,face.w+px*2),Math.min(raw.id.height,face.h+py*2),0,0,SW,SH);}
-      else ctx.drawImage(src,0,0,SW,SH);
+      drawFaceSafeContain(ctx,src,raw,SW,SH,"#000");
       boostContrast(ctx,SW,SH);
-      const g=ctx.createLinearGradient(0,0,0,SH);g.addColorStop(0,"rgba(0,0,0,0.6)");g.addColorStop(0.3,"rgba(0,0,0,0)");g.addColorStop(0.7,"rgba(0,0,0,0)");g.addColorStop(1,"rgba(0,0,0,0.8)");ctx.fillStyle=g;ctx.fillRect(0,0,SW,SH);
+      const g=ctx.createLinearGradient(0,0,0,SH);g.addColorStop(0,"rgba(0,0,0,0.35)");g.addColorStop(0.3,"rgba(0,0,0,0)");g.addColorStop(0.7,"rgba(0,0,0,0)");g.addColorStop(1,"rgba(0,0,0,0.45)");ctx.fillStyle=g;ctx.fillRect(0,0,SW,SH);
       drawTxt(ctx,headline,tx||SW/2,ty||220,SW-80,64,color,-2);
       drawTxt(ctx,subtext,SW/2,SH-240,SW-120,32,"#FFFFFF");
       drawTxt(ctx,"👇 WATCH NOW",SW/2,SH-100,SW-200,36,color);
