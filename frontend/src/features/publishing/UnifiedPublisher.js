@@ -3,8 +3,6 @@
 // Wraps existing platform forms and delegates upload to App.js
 
 import React, { useState, useEffect } from "react";
-import LinkedInForm from "../../components/PlatformForms/LinkedInForm";
-import RedditForm from "../../components/PlatformForms/RedditForm";
 import "./UnifiedPublisher.css";
 // Ensure platform form styles are loaded
 import "../../components/PlatformForms/PlatformForms.css";
@@ -25,17 +23,19 @@ import {
 } from "../../utils/sourceUpload";
 
 // --- Components ---
-import VideoEditor from "../../components/VideoEditor";
-import ImageCropper from "../../components/ImageCropper";
-import BestTimeToPost from "../../components/BestTimeToPost";
 import TikTokForm from "../../components/PlatformForms/TikTokForm";
 import YouTubeForm from "../../components/PlatformForms/YouTubeForm";
 import InstagramForm from "../../components/PlatformForms/InstagramForm";
 import FacebookForm from "../../components/PlatformForms/FacebookForm";
+import LinkedInForm from "../../components/PlatformForms/LinkedInForm";
+import RedditForm from "../../components/PlatformForms/RedditForm";
+import BestTimeToPost from "../../components/BestTimeToPost";
+import VideoEditor from "../../components/VideoEditor";
+import ViralScanner from "../../components/ViralScanner";
+import ImageCropper from "../../components/ImageCropper";
 import PayPalSubscriptionPanel from "../../components/PayPalSubscriptionPanel";
 
 // --- New Features ---
-import ViralScanner from "../../components/ViralScanner";
 
 // --- Helpers ---
 const PLATFORM_LABELS = {
@@ -52,6 +52,39 @@ const getPlatformName = platformId => {
   return (
     PLATFORM_LABELS[platformId] || `${platformId.charAt(0).toUpperCase()}${platformId.slice(1)}`
   );
+};
+
+const DEFAULT_SELECTED_PLATFORMS = ["tiktok", "youtube"];
+
+const buildMediaMeta = ({
+  trimStart = 0,
+  trimEnd = 0,
+  rotate = 0,
+  flipH = false,
+  flipV = false,
+  filter = null,
+  duration = 0,
+} = {}) => ({
+  trimStart: trimStart > 0 ? trimStart : undefined,
+  trimEnd: trimEnd > 0 ? trimEnd : undefined,
+  rotate: rotate !== 0 ? rotate : undefined,
+  flipH: flipH ? true : undefined,
+  flipV: flipV ? true : undefined,
+  filter: filter || undefined,
+  duration: duration || undefined,
+});
+
+const hasMeaningfulMediaMeta = meta =>
+  !!(meta && Object.values(meta).some(value => value !== undefined && value !== null && value !== ""));
+
+const normalizeEditedAsset = (result, fallbackName = "edited-media") => {
+  if (!result) return null;
+  if (result instanceof File) return result;
+  if (result instanceof Blob) {
+    const extension = result.type && result.type.startsWith("image/") ? ".png" : ".mp4";
+    return new File([result], `${fallbackName}${extension}`, { type: result.type || undefined });
+  }
+  return result;
 };
 
 const buildStructuredUploadError = (result, fallbackMessage, httpStatus) => {
@@ -289,9 +322,8 @@ async function fetchPlatformStatusSnapshot(token) {
 }
 
 // --- Sub-components ---
-
 const PlatformPreview = ({
-  label = "Platform Preview",
+  label,
   data,
   globalFile,
   previewUrl,
@@ -300,14 +332,25 @@ const PlatformPreview = ({
   platformId,
   creatorInfo,
 }) => {
-  // Sanitize: construct new URL to break CodeQL taint chain
-  const safeThumbUrl = React.useMemo(() => {
-    if (typeof thumbnailUrl !== "string") return undefined;
+  // Sanitize: strict URL normalization and protocol allowlist to prevent DOM sink taint
+  const normalizeSafeHttpUrl = React.useCallback(raw => {
+    if (typeof raw !== "string") return undefined;
+    const trimmed = raw.trim();
+    if (!trimmed) return undefined;
     try {
-      const u = new URL(thumbnailUrl);
-      return u.protocol === "https:" ? u.href : undefined;
-    } catch { return undefined; }
-  }, [thumbnailUrl]);
+      const parsed = new URL(trimmed, window.location.origin);
+      const protocol = parsed.protocol.toLowerCase();
+      if (protocol !== "https:" && protocol !== "http:") return undefined;
+      return parsed.href;
+    } catch {
+      return undefined;
+    }
+  }, []);
+
+  const safeThumbUrl = React.useMemo(() => normalizeSafeHttpUrl(thumbnailUrl), [
+    thumbnailUrl,
+    normalizeSafeHttpUrl,
+  ]);
   // Correctly resolve the file to preview: Platform specific > Global
   const fileToPreview = data.file || globalFile;
 
@@ -1141,8 +1184,9 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
     togglePlatform,
     updatePlatformData,
     getPlatformEffectiveData,
-    platformStates, // Expose platform selection overrides if needed, but usually we rely on "selectedPlatforms" array
-  } = usePublishingState(["tiktok", "youtube"]); // Default selection
+    platformData,
+    resetPublishingState,
+  } = usePublishingState(DEFAULT_SELECTED_PLATFORMS); // Default selection
 
   // Handle Initial File
   useEffect(() => {
@@ -1390,8 +1434,8 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
     setSelectedFilter,
     duration,
     setDuration,
-    setFile: setMediaFile, // Expose manually
     setPreviewUrl, // Expose manually
+    resetMediaState,
   } = useMediaProcessor(globalFile);
 
   const [isPublishing, setIsPublishing] = useState(false);
@@ -1407,6 +1451,45 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
   // --- Viral Scanner State ---
   const [showViralScanner, setShowViralScanner] = useState(false);
   const [viralScannerFile, setViralScannerFile] = useState(null);
+
+  const restoreMasterPreview = () => {
+    if (globalFile) {
+      processFileChange(globalFile);
+      return;
+    }
+    resetMediaState();
+  };
+
+  const getEffectiveMediaMetaForPlatform = platformId => {
+    const platformOverrides = (platformData && platformData[platformId]) || {};
+    return buildMediaMeta({
+      trimStart:
+        platformOverrides.trimStart !== undefined ? platformOverrides.trimStart : trimStart,
+      trimEnd: platformOverrides.trimEnd !== undefined ? platformOverrides.trimEnd : trimEnd,
+      rotate: platformOverrides.rotate !== undefined ? platformOverrides.rotate : rotate,
+      flipH: platformOverrides.flipH !== undefined ? platformOverrides.flipH : flipH,
+      flipV: platformOverrides.flipV !== undefined ? platformOverrides.flipV : flipV,
+      filter:
+        platformOverrides.selectedFilter !== undefined
+          ? platformOverrides.selectedFilter
+          : selectedFilter,
+      duration,
+    });
+  };
+
+  const resetPublisherForm = () => {
+    resetPublishingState();
+    resetMediaState();
+    setFeedbackMessage("");
+    setFallbackPublishPlatform(null);
+    setEditingTarget(null);
+    setShowVideoEditor(false);
+    setShowCropper(false);
+    setShowViralScanner(false);
+    setViralScannerFile(null);
+    setIsPublishing(false);
+    setPublishingPlatform(null);
+  };
 
   const formatPublisherError = err => {
     if (err?.code === "PLATFORM_LIMIT_EXCEEDED" || err?.code === "TIER_LIMIT_EXCEEDED") {
@@ -1608,7 +1691,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
           // Currently, VideoEditor takes 'file={mediaFile}'.
           // So let's temporarily swap mediaFile (or ensure VideoEditor uses a different state if target is set).
 
-          processFileChange(fileToEdit); // Load this file into the main editor state properly
+          processFileChange(fileToEdit);
           setShowVideoEditor(true);
         } else {
           setFeedbackMessage("Please select a file first.");
@@ -2040,6 +2123,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
 
       // --- 3. Construct Payload ---
       const platformOptionsMap = {};
+      const platformFiles = {};
 
       platforms.forEach(p => {
         const data = getPlatformEffectiveData(p);
@@ -2052,6 +2136,26 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
         }
         if (platformDescription) {
           platformOptionsMap[p].description = platformDescription;
+        }
+
+        const platformSpecificFile = data.file;
+        if (
+          platformSpecificFile &&
+          platformSpecificFile !== globalFile &&
+          (platformSpecificFile instanceof File || platformSpecificFile instanceof Blob)
+        ) {
+          platformFiles[p] = platformSpecificFile;
+        } else if (
+          platformSpecificFile &&
+          typeof platformSpecificFile === "object" &&
+          platformSpecificFile.url
+        ) {
+          platformOptionsMap[p].media_url = platformSpecificFile.url;
+        }
+
+        const platformMeta = getEffectiveMediaMetaForPlatform(p);
+        if (hasMeaningfulMediaMeta(platformMeta)) {
+          platformOptionsMap[p].meta = platformMeta;
         }
 
         if (p === "tiktok") {
@@ -2082,6 +2186,19 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
         }
       });
 
+      const uploadMeta =
+        platforms.length === 1
+          ? getEffectiveMediaMetaForPlatform(platforms[0])
+          : buildMediaMeta({
+              trimStart,
+              trimEnd,
+              rotate,
+              flipH,
+              flipV,
+              filter: selectedFilter,
+              duration,
+            });
+
       const primaryPlatformData =
         platforms.length === 1 ? getPlatformEffectiveData(platforms[0]) : null;
       const resolvedTitle =
@@ -2102,6 +2219,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
         title: resolvedTitle,
         description: resolvedDescription,
         platform_options: platformOptionsMap,
+        platform_files: Object.keys(platformFiles).length > 0 ? platformFiles : undefined,
         bounty: {
           amount: bountyAmount,
           niche: bountyNiche || "general",
@@ -2116,15 +2234,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
             }
           : undefined,
         isDryRun: false,
-        meta: {
-          trimStart: trimStart > 0 ? trimStart : undefined,
-          trimEnd: trimEnd > 0 ? trimEnd : undefined,
-          rotate: rotate !== 0 ? rotate : undefined,
-          flipH: flipH ? true : undefined,
-          flipV: flipV ? true : undefined,
-          filter: selectedFilter || undefined,
-          duration: duration || undefined,
-        },
+        meta: uploadMeta,
       };
 
       if (onUpload) {
@@ -2228,7 +2338,10 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                     <button
                       className="btn-secondary-sm"
                       style={{ flex: 1 }}
-                      onClick={() => setShowVideoEditor(true)}
+                      onClick={() => {
+                        setEditingTarget("global");
+                        setShowVideoEditor(true);
+                      }}
                     >
                       {mediaType === "image" ? "🎬 Create Slideshow" : "✨ Review AI Enhancements"}
                     </button>
@@ -2238,6 +2351,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                         className="btn-secondary-sm"
                         style={{ flex: 1, background: "#e94560", color: "white", border: "none" }}
                         onClick={() => {
+                          setEditingTarget("global");
                           setViralScannerFile(mediaFile);
                           setShowViralScanner(true);
                         }}
@@ -2588,13 +2702,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
             <div style={{ display: "flex", gap: "15px", marginRight: "20px" }}>
               <button
                 className="btn-secondary-sm"
-                onClick={() => {
-                  // Reset Logic
-                  setGlobalTitle("");
-                  setGlobalDescription("");
-                  setGlobalFile(null);
-                  setPreviewUrl("");
-                }}
+                onClick={resetPublisherForm}
                 style={{ background: "transparent", border: "1px solid #4a5568" }}
               >
                 Reset Form
@@ -2647,7 +2755,13 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
           >
             <button
               className="close-btn"
-              onClick={() => setShowVideoEditor(false)}
+              onClick={() => {
+                setShowVideoEditor(false);
+                if (editingTarget && editingTarget !== "global") {
+                  restoreMasterPreview();
+                }
+                setEditingTarget(null);
+              }}
               style={{
                 position: "absolute",
                 top: 10,
@@ -2665,26 +2779,33 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
             </button>
             <VideoEditor
               file={mediaFile}
-              // images={sourceFiles} // Removed images prop as it might not be defined in scope here or handled by useMediaProcessor?
-              // The original code passed `sourceFiles` but I don't see `sourceFiles` in useMediaProcessor return values in my read snippet (line 46-60).
-              // Wait, checking useMediaProcessor hook return values usage
-              // Line 65: file: mediaFile...
-              // I should check if sourceFiles is available in UnifiedPublisher scope.
-              // It is not destructured from useMediaProcessor in line 65.
-              // It was just `images={sourceFiles}` in the original code. Let me check if sourceFiles is defined.
-              // Ah, I missed reading where sourceFiles is defined. Let me double check usage.
-              // Assuming sourceFiles was there before, I should keep it if possible or remove if undefined.
-              // In ContentUploadForm, sourceFiles was state. Here, it might be missing or handled differently.
-              // I will keep `images={[]}` for now to be safe or check if sourceFiles is defined.
               onSave={async result => {
                 try {
-                  if (result && result.isRemote && result.url) {
-                    // For viral clips, use remote URL directly to prevent download/timeout issues
-                    processFileChange(result);
+                  const target = editingTarget || "global";
+                  const fallbackName =
+                    target === "global" ? "master-content" : `${target}-content-edit`;
+                  const normalizedResult = normalizeEditedAsset(result, fallbackName);
+
+                  if (target !== "global") {
+                    if (normalizedResult && normalizedResult.url) {
+                      updatePlatformData(target, {
+                        file: normalizedResult,
+                        media_url: normalizedResult.url,
+                      });
+                    } else if (normalizedResult instanceof File || normalizedResult instanceof Blob) {
+                      updatePlatformData(target, {
+                        file: normalizedResult,
+                      });
+                    }
+                    restoreMasterPreview();
+                    toast.success(`${getPlatformName(target)} edits saved.`);
+                  } else if (normalizedResult && normalizedResult.url) {
+                    processFileChange(normalizedResult);
+                    setGlobalFile(normalizedResult);
                     toast.success("Viral clip ready for scheduling!");
-                  } else if (result instanceof File || result instanceof Blob) {
-                    // FIX: Usse processFileChange
-                    processFileChange(result);
+                  } else if (normalizedResult instanceof File || normalizedResult instanceof Blob) {
+                    processFileChange(normalizedResult);
+                    setGlobalFile(normalizedResult);
                     toast.success("Edits applied!");
                   }
                 } catch (e) {
@@ -2696,6 +2817,9 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
               }}
               onCancel={() => {
                 setShowVideoEditor(false);
+                if (editingTarget && editingTarget !== "global") {
+                  restoreMasterPreview();
+                }
                 setEditingTarget(null);
               }}
             />
@@ -2708,16 +2832,19 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
         <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 3000 }}>
           <ViralScanner
             file={viralScannerFile || mediaFile} // specific file or fallback
-            onClose={() => setShowViralScanner(false)}
+            onClose={() => {
+              setShowViralScanner(false);
+              setViralScannerFile(null);
+              setEditingTarget(null);
+            }}
             onSelectClip={clip => {
-              if (editingTarget) {
-                const currentData = getPlatformEffectiveData(editingTarget);
+              if (editingTarget && editingTarget !== "global") {
                 updatePlatformData(editingTarget, {
                   trimStart: clip.start,
                   trimEnd: clip.end,
                 });
                 setFeedbackMessage(
-                  `Analyzed & applied viral moment (${clip.start}s-${clip.end}s) for ${editingTarget}!`
+                  `Saved a clip window (${clip.start}s-${clip.end}s) for ${getPlatformName(editingTarget)}. Publish that platform on its own to apply the trim.`
                 );
               } else {
                 // Apply globally if no specific target
@@ -2726,6 +2853,8 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                 setFeedbackMessage(`Global trim applied: ${clip.start}s - ${clip.end}s`);
               }
               setShowViralScanner(false);
+              setViralScannerFile(null);
+              setEditingTarget(null);
             }}
           />
         </div>

@@ -113,8 +113,15 @@ function applyJavaRuntime(javaRuntime) {
 }
 
 function tryRunFirebaseExec() {
-  console.log('[run-emulator-or-jest] Attempting: npx firebase emulators:exec --only firestore "node ./scripts/exec-jest.js"');
-  const res = runCommandSync('npx', ['firebase', 'emulators:exec', '--only', 'firestore', 'node ./scripts/exec-jest.js'], {
+  const childCommand =
+    process.env.SKIP_JEST === '1' || process.env.SKIP_EMULATOR_TEST === '1'
+      ? 'node -e "process.exit(0)"'
+      : 'node ./scripts/exec-jest.js';
+  console.log(
+    '[run-emulator-or-jest] Attempting: npx firebase emulators:exec --only firestore',
+    JSON.stringify(childCommand)
+  );
+  const res = runCommandSync('npx', ['firebase', 'emulators:exec', '--only', 'firestore', childCommand], {
     stdio: 'inherit',
     env: process.env,
   });
@@ -262,6 +269,93 @@ function waitForHttpReady(host, port, timeoutMs = 10000) {
   });
 }
 
+function isProcessAlive(pid) {
+  if (!pid || !Number.isFinite(Number(pid))) return false;
+  try {
+    process.kill(Number(pid), 0);
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
+function parseHostPort(hostString, fallbackPort = 8080) {
+  if (!hostString || typeof hostString !== 'string') {
+    return { host: '127.0.0.1', port: fallbackPort };
+  }
+  const trimmed = hostString.trim();
+  const lastColon = trimmed.lastIndexOf(':');
+  if (lastColon === -1) {
+    return { host: trimmed, port: fallbackPort };
+  }
+  const host = trimmed.slice(0, lastColon) || '127.0.0.1';
+  const parsedPort = Number.parseInt(trimmed.slice(lastColon + 1), 10);
+  return {
+    host,
+    port: Number.isFinite(parsedPort) ? parsedPort : fallbackPort,
+  };
+}
+
+async function detectExistingEmulator() {
+  const envHost = process.env.FIRESTORE_EMULATOR_HOST;
+  if (envHost) {
+    const { host, port } = parseHostPort(envHost);
+    try {
+      await waitForHttpReady(host, port, 1500);
+      return {
+        firestoreHost: `${host}:${port}`,
+        hub: process.env.FIREBASE_EMULATOR_HUB || null,
+        source: 'env',
+      };
+    } catch (_) {}
+  }
+
+  try {
+    const tmp = require('os').tmpdir();
+    const locatorCandidates = fs
+      .readdirSync(tmp)
+      .filter(name => /^hub-.*\.json$/i.test(name))
+      .map(name => {
+        const fullPath = path.join(tmp, name);
+        const stat = fs.statSync(fullPath);
+        return { fullPath, mtimeMs: stat.mtimeMs };
+      })
+      .sort((a, b) => b.mtimeMs - a.mtimeMs);
+
+    for (const candidate of locatorCandidates) {
+      try {
+        const contents = fs.readFileSync(candidate.fullPath, 'utf8');
+        const parsed = JSON.parse(contents);
+        if (parsed && parsed.pid && !isProcessAlive(parsed.pid)) {
+          continue;
+        }
+        const hubOrigin = Array.isArray(parsed && parsed.origins) ? parsed.origins[0] : null;
+        const hubMatch = hubOrigin && hubOrigin.match(/https?:\/\/([^:]+):(\d+)/i);
+        const hub = hubMatch ? `${hubMatch[1]}:${hubMatch[2]}` : null;
+        const firestoreHost = process.env.FIRESTORE_EMULATOR_HOST || '127.0.0.1:8080';
+        const { host, port } = parseHostPort(firestoreHost);
+        await waitForHttpReady(host, port, 1500);
+        return {
+          firestoreHost: `${host}:${port}`,
+          hub,
+          source: candidate.fullPath,
+        };
+      } catch (_) {}
+    }
+  } catch (_) {}
+
+  try {
+    await waitForHttpReady('127.0.0.1', 8080, 1000);
+    return {
+      firestoreHost: '127.0.0.1:8080',
+      hub: process.env.FIREBASE_EMULATOR_HUB || null,
+      source: 'port-probe',
+    };
+  } catch (_) {
+    return null;
+  }
+}
+
 (async function main() {
   try {
     // Check firebase CLI availability first
@@ -292,6 +386,27 @@ function waitForHttpReady(host, port, timeoutMs = 10000) {
 
     applyJavaRuntime(javaRuntime);
     console.log('[run-emulator-or-jest] Using Java', javaRuntime.major, 'from', javaRuntime.javaExecutable);
+
+    const existingEmulator = await detectExistingEmulator();
+    if (existingEmulator) {
+      const directEnv = { FIRESTORE_EMULATOR_HOST: existingEmulator.firestoreHost };
+      if (existingEmulator.hub) {
+        directEnv.FIREBASE_EMULATOR_HUB = existingEmulator.hub;
+      }
+      console.log(
+        '[run-emulator-or-jest] Reusing existing Firestore emulator at',
+        existingEmulator.firestoreHost,
+        existingEmulator.hub ? `(hub ${existingEmulator.hub})` : '',
+        'source:',
+        existingEmulator.source
+      );
+      if (process.env.SKIP_JEST === '1' || process.env.SKIP_EMULATOR_TEST === '1') {
+        console.log('[run-emulator-or-jest] SKIP_JEST set — existing emulator is healthy.');
+        process.exit(0);
+      }
+      const jestStatus = runJestDirect(directEnv);
+      process.exit(jestStatus || 0);
+    }
 
     // First try emulators:exec path — it's the simplest and isolates env to the child
     const execCode = (function(){ try { return tryRunFirebaseExec(); } catch (e) { console.warn('[run-emulator-or-jest] tryRunFirebaseExec threw:', e && e.message); return 1; } })();

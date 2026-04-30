@@ -1,4 +1,4 @@
-import React from "react";
+import { useState } from "react";
 import "./WelcomePage.css";
 import Footer from "./components/Footer";
 import PublicFeatureAvailability from "./components/PublicFeatureAvailability";
@@ -11,6 +11,11 @@ const Section = ({ id, title, children }) => (
 );
 
 const WelcomePage = ({ onGetStarted, onSignIn }) => {
+  const demoVideoUrl = "/demo-teaser.mp4";
+  const fullDemoVideoUrl = "/demo-full.mp4";
+  const demoPosterUrl = "/demo-poster.jpg";
+  const [videoFailed, setVideoFailed] = useState(false);
+  const hasDemoVideo = Boolean(demoVideoUrl) && !videoFailed;
   return (
     <div className="new-welcome-root">
       <div className="new-welcome-bg-gradient" />
@@ -124,6 +129,83 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
               AutoPromote focuses on improving consistency, clarity, and measurable results rather
               than chasing unpredictable virality.
             </p>
+          </Section>
+
+          <Section id="demo" title="See AutoPromote in action">
+            <div className="hp-demo-wrap">
+              <div className="hp-demo-media hp-fade-in" aria-label="AutoPromote demo preview">
+                {hasDemoVideo ? (
+                  <video
+                    className="hp-demo-video"
+                    controls
+                    playsInline
+                    preload="metadata"
+                    poster={demoPosterUrl}
+                    onError={() => setVideoFailed(true)}
+                    src={demoVideoUrl}
+                  />
+                ) : demoVideoUrl ? (
+                  <img
+                    className="hp-demo-image"
+                    src={demoPosterUrl}
+                    alt="Preview of the AutoPromote demo video"
+                  />
+                ) : (
+                  <div className="hp-demo-placeholder">
+                    <div className="hp-demo-mock">
+                      <div className="hp-demo-mock-top" />
+                      <div className="hp-demo-mock-row" />
+                      <div className="hp-demo-mock-row short" />
+                      <div className="hp-demo-mock-row" />
+                    </div>
+                  </div>
+                )}
+                <div className="hp-demo-play-overlay" aria-hidden="true">
+                  <span className="hp-demo-play-btn">▶</span>
+                </div>
+              </div>
+
+              <p className="hp-demo-caption">
+                Upload content → publish across platforms → track performance → improve with data
+              </p>
+              {!demoVideoUrl && (
+                <p className="hp-demo-status">
+                  Demo video is not available yet.
+                </p>
+              )}
+              {demoVideoUrl && videoFailed && (
+                <p className="hp-demo-status">
+                  Demo video could not be played inline, so a preview image is shown instead. The
+                  current MP4 likely needs a browser-friendly re-export such as H.264 at 30 or 60
+                  fps.
+                </p>
+              )}
+
+              <div className="hp-demo-ctas">
+                <button
+                  className="new-welcome-btn primary"
+                  onClick={onGetStarted}
+                  aria-label="Get Started"
+                >
+                  Get Started
+                </button>
+                <button
+                  className="new-welcome-btn"
+                  onClick={() => {
+                    if (fullDemoVideoUrl) {
+                      window.open(fullDemoVideoUrl, "_blank", "noopener,noreferrer");
+                      return;
+                    }
+                    document
+                      .getElementById("demo")
+                      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }}
+                  aria-label="View Demo"
+                >
+                  View Demo
+                </button>
+              </div>
+            </div>
           </Section>
 
           <Section id="how-it-works" title="How It Works">

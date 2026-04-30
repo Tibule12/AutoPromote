@@ -1916,6 +1916,58 @@
   line-height: 1.45;
 }
 
+.clip-guidance-packaging {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(103, 209, 255, 0.18);
+  background: rgba(103, 209, 255, 0.08);
+}
+
+.clip-guidance-packaging strong {
+  color: #effbff;
+  font-size: 0.82rem;
+}
+
+.clip-guidance-packaging p {
+  margin: 0;
+  color: rgba(248, 250, 252, 0.86);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.clip-guidance-scoreboard {
+  display: grid;
+  gap: 8px;
+}
+
+.clip-guidance-score-item {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) 40px;
+  gap: 10px;
+  align-items: center;
+  color: #f8fafc;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.clip-guidance-score-track {
+  position: relative;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.clip-guidance-score-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(255, 196, 92, 0.95), rgba(229, 46, 113, 0.95));
+}
+
 .clip-guidance-timing,
 .clip-jump-row {
   display: flex;

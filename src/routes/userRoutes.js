@@ -1,13 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const admin = require("firebase-admin");
 
 const authMiddleware = require("../authMiddleware");
+const { apiLimiter } = require("../validationMiddleware");
 const { getCreditBreakdown } = require("../creditSystem");
 const { getEffectiveTierSnapshot } = require("../services/billingService");
 const {
   SUBSCRIPTION_PLANS,
-  PLAN_CAPABILITIES,
   getPlanCapabilities,
   normalizePlanId,
 } = require("../config/subscriptionPlans");
@@ -16,7 +15,7 @@ const {
 router.use(authMiddleware);
 
 // GET /api/user/profile - User subscription/credits profile
-router.get("/profile", async (req, res) => {
+router.get("/profile", apiLimiter, async (req, res) => {
   try {
     const userId = req.user.uid;
 
@@ -30,8 +29,6 @@ router.get("/profile", async (req, res) => {
     const capabilities = getPlanCapabilities(normalizedPlanId);
 
     // 3. Firestore user doc (basic info)
-    const userDoc = await admin.firestore().collection("users").doc(userId).get();
-    const userData = userDoc.exists ? userDoc.data() : {};
 
     res.json({
       success: true,

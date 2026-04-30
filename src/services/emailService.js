@@ -9,13 +9,21 @@ function renderTemplate(tpl, vars) {
   );
 }
 
-async function sendEmail({ to, subject, html, text, headers }) {
+async function sendEmail({ to, subject, html, htmlbody, text, headers, sensitive = false }) {
   if (!ENABLE_EMAIL) {
     console.log("[emailService] disabled ->", subject, "to", maskEmail(to));
     return { ok: false, disabled: true };
   }
   const provider = getEmailProvider();
-  const resp = await provider.send({ to, subject, html, text, headers });
+  const finalHtmlBody = htmlbody || html;
+  const resp = await provider.send({
+    to,
+    subject,
+    htmlbody: finalHtmlBody,
+    text,
+    headers,
+    sensitive,
+  });
   if (!resp || resp.ok === false) {
     try {
       const { recordEmailFailure } = require("./alertingService");
@@ -26,7 +34,7 @@ async function sendEmail({ to, subject, html, text, headers }) {
 }
 
 function buildLayout(innerHtml) {
-  return `<!DOCTYPE html><html><head><meta charset="utf-8"/><style>body{font-family:Arial,sans-serif;background:#fafafa;padding:24px;color:#222} .box{background:#fff;border:1px solid #eee;border-radius:8px;padding:24px;} h1{font-size:20px;margin:0 0 16px;} .footer{font-size:12px;color:#666;margin-top:24px}</style></head><body><div class="box">${innerHtml}<div class="footer">© ${new Date().getFullYear()} AutoPromote</div></div></body></html>`;
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><style>body{margin:0;padding:0;background:#09090f;color:#e8e8f2;font-family:Arial,sans-serif} .shell{padding:32px 16px;background:radial-gradient(circle at top,#5b21b6 0%,#111827 42%,#050816 100%)} .box{max-width:560px;margin:0 auto;background:rgba(15,23,42,.94);border:1px solid rgba(139,92,246,.26);border-radius:20px;padding:32px;box-shadow:0 30px 80px rgba(0,0,0,.45)} .brand{display:inline-block;margin-bottom:18px;padding:8px 12px;border-radius:999px;background:rgba(139,92,246,.15);border:1px solid rgba(139,92,246,.28);color:#c4b5fd;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase} h1{font-size:28px;line-height:1.2;margin:0 0 14px;color:#fff} p{font-size:15px;line-height:1.65;color:#d1d5db;margin:0 0 14px} .button{display:inline-block;margin:18px 0;padding:14px 22px;border-radius:14px;background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:#fff !important;text-decoration:none;font-weight:700} .linkbox{margin:18px 0;padding:14px 16px;border-radius:14px;background:rgba(17,24,39,.85);border:1px solid rgba(148,163,184,.15);word-break:break-all;color:#cbd5e1;font-size:13px} .note{margin-top:18px;padding-top:18px;border-top:1px solid rgba(148,163,184,.16);font-size:13px;color:#94a3b8} .footer{font-size:12px;color:#7c83a1;margin-top:24px;text-align:center}</style></head><body><div class="shell"><div class="box"><div class="brand">AutoPromote</div>${innerHtml}<div class="footer">© ${new Date().getFullYear()} AutoPromote</div></div></div></body></html>`;
 }
 
 function escapeHtml(s) {
@@ -54,13 +62,16 @@ async function sendVerificationEmail({ email, link }) {
 async function sendPasswordResetEmail({ email, link }) {
   const subject = "Reset your AutoPromote password";
   const vars = { link };
-  const textTpl = "Password reset requested. Reset using: {{link}}";
-  const htmlInner = `<h1>Password Reset</h1><p>Click below to reset your password:</p><p><a href="${escapeHtml(link)}">Reset Password</a></p>`;
+  const textTpl =
+    "Reset your AutoPromote password.\n\nUse this link within 15 minutes: {{link}}\n\nIf you did not request this, you can ignore this email.";
+  const safeLink = escapeHtml(link);
+  const htmlInner = `<h1>Reset your AutoPromote password</h1><p>We received a request to reset your password. Use the button below to choose a new one.</p><p><a class="button" href="${safeLink}">Reset Password</a></p><p>This link expires in 15 minutes.</p><div class="linkbox">${safeLink}</div><p class="note">If you did not request this, you can ignore this email.</p>`;
   return sendEmail({
     to: email,
     subject,
     text: renderTemplate(textTpl, vars),
-    html: buildLayout(htmlInner),
+    htmlbody: buildLayout(htmlInner),
+    sensitive: true,
   });
 }
 

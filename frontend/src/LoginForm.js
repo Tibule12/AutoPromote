@@ -1,15 +1,18 @@
 import React, { useState, useCallback } from "react";
 import "./Auth.css";
-import { PUBLIC_SITE_URL, API_ENDPOINTS } from "./config";
+import { PUBLIC_SITE_URL } from "./config";
+
+const loginHighlights = [
+  "Jump back into your publishing command center.",
+  "Manage content, clips, thumbnails, and distribution from one place.",
+  "Keep your workflow moving with a faster creator-grade dashboard.",
+];
 
 const LoginForm = ({ onLogin, onClose }) => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [agreed, setAgreed] = useState(false);
-  const [resetRequested, setResetRequested] = useState(false);
-  const [resetEmail, setResetEmail] = useState("");
-  const [resetMsg, setResetMsg] = useState("");
 
   const handleChange = useCallback(
     event => {
@@ -80,154 +83,139 @@ const LoginForm = ({ onLogin, onClose }) => {
     }
   };
 
-  const requestReset = async event => {
-    event.preventDefault();
-    setResetMsg("");
-
-    const email = resetEmail || formData.email;
-    if (!email) {
-      setResetMsg("Enter email first");
-      return;
-    }
-
-    try {
-      const response = await fetch(API_ENDPOINTS.REQUEST_RESET, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-      const data = await response.json().catch(() => ({}));
-
-      if (response.ok) {
-        setResetMsg(data.message || "If the email exists, a reset link has been sent.");
-      } else {
-        setResetMsg(data.error || "Request failed");
-      }
-    } catch (resetError) {
-      setResetMsg(resetError.message);
-    }
-  };
-
   return (
     <div className="auth-container">
-      <form onSubmit={handleSubmit} className="auth-form">
-        <h2 className="auth-title">Welcome Back</h2>
-        {error && <div className="error-message">{error}</div>}
+      <div className="auth-stage">
+        <section className="auth-stage__panel auth-stage__panel--brand">
+          <div className="auth-stage__badge">AutoPromote Access</div>
+          <h1 className="auth-stage__title">Welcome back to your growth engine.</h1>
+          <p className="auth-stage__copy">
+            Sign in to keep building campaigns, packaging content, and pushing your creator stack
+            forward without losing momentum.
+          </p>
+          <div className="auth-stage__highlights">
+            {loginHighlights.map(item => (
+              <div key={item} className="auth-stage__highlight">
+                <span className="auth-stage__highlight-mark">+</span>
+                <span>{item}</span>
+              </div>
+            ))}
+          </div>
+        </section>
 
-        <div className="form-group">
-          <label className="form-label">Email</label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            className="form-input"
-            placeholder="Enter your email"
-            required
-            autoComplete="email"
-          />
-        </div>
+        <form onSubmit={handleSubmit} className="auth-form auth-form--modal">
+          <div className="auth-form__header">
+            <div className="auth-form__eyebrow">Sign In</div>
+            <h2 className="auth-title auth-title--left">Welcome Back</h2>
+            <p className="auth-subtitle">
+              Step back into AutoPromote and pick up where you left off.
+            </p>
+          </div>
+          {error && <div className="error-message">{error}</div>}
 
-        <div className="form-group terms-row">
-          <input
-            id="agreeTerms"
-            type="checkbox"
-            checked={agreed}
-            onChange={event => setAgreed(event.target.checked)}
-          />
-          <label htmlFor="agreeTerms" className="form-label">
-            I agree to the{" "}
-            <a href={`${PUBLIC_SITE_URL}/terms`} target="_blank" rel="noreferrer">
-              Terms of Service
-            </a>{" "}
-            and{" "}
-            <a href={`${PUBLIC_SITE_URL}/privacy`} target="_blank" rel="noreferrer">
-              Privacy Policy
-            </a>
-            .
-          </label>
-        </div>
+          <div className="auth-form__fields">
+            <div className="form-group">
+              <label className="form-label">Email</label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                className="form-input"
+                placeholder="Enter your email"
+                required
+                autoComplete="email"
+              />
+            </div>
 
-        <div className="form-group">
-          <label className="form-label">Password</label>
-          <input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            className="form-input"
-            placeholder="Enter your password"
-            required
-            autoComplete="current-password"
-          />
-        </div>
+            <div className="form-group">
+              <label className="form-label">Password</label>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                className="form-input"
+                placeholder="Enter your password"
+                required
+                autoComplete="current-password"
+              />
+            </div>
+          </div>
 
-        <div className="form-group" style={{ marginTop: 8 }}>
-          <small>
+          <div className="form-group auth-form__inline">
+            <div className="terms-row terms-row--compact">
+              <input
+                id="agreeTerms"
+                type="checkbox"
+                checked={agreed}
+                onChange={event => setAgreed(event.target.checked)}
+              />
+              <label htmlFor="agreeTerms" className="form-label">
+                I agree to the{" "}
+                <a href={`${PUBLIC_SITE_URL}/terms`} target="_blank" rel="noreferrer">
+                  Terms
+                </a>{" "}
+                and{" "}
+                <a href={`${PUBLIC_SITE_URL}/privacy`} target="_blank" rel="noreferrer">
+                  Privacy Policy
+                </a>
+                .
+              </label>
+            </div>
             <button
               type="button"
-              onClick={() => setResetRequested(prev => !prev)}
+              onClick={() => {
+                if (onClose) onClose();
+                const email = encodeURIComponent(formData.email || "");
+                window.location.hash = email
+                  ? `#/forgot-password?email=${email}`
+                  : "#/forgot-password";
+              }}
               className="link-like"
             >
-              {resetRequested ? "Hide password reset" : "Forgot password?"}
+              Forgot password?
             </button>
-          </small>
-        </div>
+          </div>
 
-        {resetRequested && (
-          <div style={{ marginBottom: 12 }}>
-            <input
-              type="email"
-              placeholder="Email for reset"
-              className="form-input"
-              value={resetEmail}
-              onChange={event => setResetEmail(event.target.value)}
-            />
+          <button type="submit" disabled={isLoading || !agreed} className="auth-button">
+            {isLoading ? (
+              <>
+                <span className="loading-spinner" />
+                Signing in...
+              </>
+            ) : (
+              "Enter AutoPromote"
+            )}
+          </button>
+
+          <div className="auth-form__note">
+            Secure access to your creator workflows, publishing tools, and growth systems.
+          </div>
+
+          <div className="auth-action-row">
             <button
               type="button"
-              className="auth-button"
-              style={{ marginTop: 8 }}
-              onClick={requestReset}
+              className="auth-home-button"
+              onClick={() => {
+                window.location.href = PUBLIC_SITE_URL || "/";
+              }}
             >
-              Send Reset Email
+              Back Home
             </button>
-            {resetMsg && (
-              <div style={{ marginTop: 6, fontSize: 12, color: "#1976d2" }}>{resetMsg}</div>
-            )}
+
+            <button
+              type="button"
+              onClick={() => {
+                if (onClose) onClose();
+              }}
+              className="auth-link auth-link--inline"
+            >
+              Don&apos;t have an account? Create one
+            </button>
           </div>
-        )}
-
-        <button type="submit" disabled={isLoading || !agreed} className="auth-button">
-          {isLoading ? (
-            <>
-              <span className="loading-spinner" />
-              Signing in...
-            </>
-          ) : (
-            "Sign In"
-          )}
-        </button>
-
-        <button
-          type="button"
-          className="auth-link"
-          onClick={() => {
-            window.location.href = PUBLIC_SITE_URL || "/";
-          }}
-        >
-          Back to home
-        </button>
-
-        <button
-          type="button"
-          onClick={() => {
-            if (onClose) onClose();
-          }}
-          className="auth-link"
-        >
-          Don&apos;t have an account? Create one
-        </button>
-      </form>
+        </form>
+      </div>
     </div>
   );
 };

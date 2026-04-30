@@ -27,7 +27,9 @@ export const API_ENDPOINTS = {
   // Auth endpoints
   LOGIN: `${API_BASE_URL}/api/auth/login`,
   REGISTER: `${API_BASE_URL}/api/auth/register`,
-  REQUEST_RESET: `${API_BASE_URL}/api/auth/request-password-reset`,
+  FORGOT_PASSWORD: `${API_BASE_URL}/api/auth/forgot-password`,
+  REQUEST_RESET: `${API_BASE_URL}/api/auth/forgot-password`,
+  RESET_PASSWORD: `${API_BASE_URL}/api/auth/reset-password`,
   ADMIN_LOGIN: `${API_BASE_URL}/api/auth/admin-login`,
   VERIFY_TOKEN: `${API_BASE_URL}/api/auth/verify`,
 
@@ -35,7 +37,9 @@ export const API_ENDPOINTS = {
   CONTENT_UPLOAD: `${API_BASE_URL}/api/content/upload`,
   CONTENT_SOURCE_UPLOAD: `${API_BASE_URL}/api/content/upload/source-file`,
   CONTENT_UPLOAD_READINESS: `${API_BASE_URL}/api/content/upload/readiness`,
+  MEDIA_PROCESS: `${API_BASE_URL}/api/media/process`,
   MEDIA_EXTRACT_AUDIO: `${API_BASE_URL}/api/media/extract-audio`,
+  MEDIA_RENDER_CLIP: `${API_BASE_URL}/api/media/render-clip`,
   MEDIA_RENDER_MULTICAM: `${API_BASE_URL}/api/media/render-multicam`,
   MEDIA_STATUS: jobId => `${API_BASE_URL}/api/media/status/${encodeURIComponent(jobId)}`,
   MY_CONTENT: `${API_BASE_URL}/api/content/my-content`,

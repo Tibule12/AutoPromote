@@ -129,6 +129,7 @@ jobs:
         with:
           name: junit-test-results
           path: test-results/**
+          if-no-files-found: warn
 
       - name: Annotate PR with test results (internal PRs only)
         # Only run reporter for pull requests originating from this repository (not forks)

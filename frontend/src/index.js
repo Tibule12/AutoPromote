@@ -8,6 +8,14 @@ import App from "./App";
 import { ToastProvider } from "./components/ToastProvider";
 import { AuthProvider } from "./contexts/AuthContext";
 
+if (typeof window !== "undefined" && !window.location.hash) {
+  const routePath = window.location.pathname || "/";
+  if (routePath === "/reset-password" || routePath === "/forgot-password") {
+    const hashTarget = `#${routePath}${window.location.search || ""}`;
+    window.history.replaceState(null, "", `${window.location.origin}/${hashTarget}`);
+  }
+}
+
 const root = ReactDOM.createRoot(document.getElementById("root"));
 initSentry();
 root.render(
