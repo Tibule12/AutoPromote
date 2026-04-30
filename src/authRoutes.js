@@ -1,7 +1,60 @@
 const express = require("express");
+const crypto = require("crypto");
 const admin = require("firebase-admin");
 const router = express.Router();
 const { sendVerificationEmail, sendPasswordResetEmail } = require("./services/emailService");
+const { strictLimiter } = require("./middleware/rateLimiter");
+const rateLimitBasic = require("./middlewares/rateLimitBasic");
+const authMiddleware = require("./authMiddleware");
+
+const PASSWORD_RESET_WINDOW_MINUTES = 15;
+const SAFE_PASSWORD_RESET_RESPONSE = "If an account exists, a password reset email has been sent.";
+const usersCollection = () => admin.firestore().collection("users");
+
+function normalizeEmail(email) {
+  return String(email || "")
+    .trim()
+    .toLowerCase();
+}
+
+function buildResetTokenHash(rawToken) {
+  return crypto
+    .createHash("sha256")
+    .update(String(rawToken || ""))
+    .digest("hex");
+}
+
+function buildPasswordResetLink(rawToken) {
+  const baseUrl = String(process.env.FRONTEND_URL || "https://autopromote.org").replace(/\/$/, "");
+  return `${baseUrl}/#/reset-password?token=${encodeURIComponent(rawToken)}`;
+}
+
+function isValidPasswordResetExpiry(value) {
+  if (!value) return false;
+  if (typeof value.toMillis === "function") {
+    return value.toMillis() > Date.now();
+  }
+  const parsed = new Date(value).getTime();
+  return Number.isFinite(parsed) && parsed > Date.now();
+}
+
+const passwordResetRequestLimiter = [
+  strictLimiter,
+  rateLimitBasic({
+    windowMs: 15 * 60 * 1000,
+    max: 5,
+    key: req => `${req.ip}:${normalizeEmail(req.body && req.body.email) || "unknown"}`,
+  }),
+];
+
+const passwordResetSubmitLimiter = [
+  strictLimiter,
+  rateLimitBasic({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    key: req => `${req.ip}:reset-password`,
+  }),
+];
 
 // Middleware to verify Firebase token
 const _verifyFirebaseToken = async (req, res, next) => {
@@ -192,52 +245,125 @@ router.post("/verify-email", async (req, res) => {
   }
 });
 
-// Request password reset
-router.post("/request-password-reset", async (req, res) => {
+async function forgotPasswordHandler(req, res) {
   try {
-    const { email } = req.body || {};
-    if (!email) return res.status(400).json({ error: "Email required" });
+    const email = normalizeEmail(req.body && req.body.email);
+    if (!email) {
+      return res.status(400).json({ error: "Email required" });
+    }
+
     const user = await admin
       .auth()
       .getUserByEmail(email)
       .catch(() => null);
-    if (!user)
-      return res.status(200).json({ message: "If the email exists, a reset link will be sent." }); // do not leak existence
-    const redirectUrl =
-      process.env.PASSWORD_RESET_REDIRECT_URL || "https://example.com/reset-complete";
-    const link = await admin.auth().generatePasswordResetLink(email, { url: redirectUrl });
-    const resp = await sendPasswordResetEmail({ email, link });
-    const diagnostics = {};
-    // Detect obvious placeholder configuration so user knows why mail might not arrive
-    if (process.env.SENDGRID_API_KEY && process.env.SENDGRID_API_KEY.startsWith("SG.xxxx"))
-      diagnostics.placeholderApiKey = true;
-    if ((process.env.EMAIL_FROM || "").includes("yourdomain.com"))
-      diagnostics.placeholderFrom = true;
-    if ((process.env.PASSWORD_RESET_REDIRECT_URL || "").includes("yourapp.com"))
-      diagnostics.placeholderRedirect = true;
-    diagnostics.provider = process.env.EMAIL_PROVIDER || "console";
-    diagnostics.mode = process.env.EMAIL_SENDER_MODE || "unknown";
-    diagnostics.delivery =
-      resp && resp.provider ? resp.provider : resp.disabled ? "disabled" : "unknown";
-    // Optionally surface the raw link in non-production for manual testing
-    if (process.env.NODE_ENV !== "production" || process.env.EXPOSE_RESET_LINK === "true")
-      diagnostics.resetLink = link;
-    return res.json({ message: "Password reset email requested", diagnostics });
+
+    if (user && user.uid) {
+      const rawToken = crypto.randomBytes(32).toString("hex");
+      const tokenHash = buildResetTokenHash(rawToken);
+      const expiresAt = admin.firestore.Timestamp.fromDate(
+        new Date(Date.now() + PASSWORD_RESET_WINDOW_MINUTES * 60 * 1000)
+      );
+      const userRef = usersCollection().doc(user.uid);
+
+      await userRef.set(
+        {
+          email,
+          passwordResetTokenHash: tokenHash,
+          passwordResetExpiresAt: expiresAt,
+          passwordResetRequestedAt: admin.firestore.FieldValue.serverTimestamp(),
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      );
+
+      const link = buildPasswordResetLink(rawToken);
+      const emailResponse = await sendPasswordResetEmail({ email, link });
+      if (!emailResponse || emailResponse.ok === false) {
+        await userRef.set(
+          {
+            passwordResetTokenHash: admin.firestore.FieldValue.delete(),
+            passwordResetExpiresAt: admin.firestore.FieldValue.delete(),
+          },
+          { merge: true }
+        );
+        console.error(
+          "[auth] password reset email failed for %s: %s",
+          email,
+          emailResponse && emailResponse.error ? emailResponse.error : "unknown email error"
+        );
+      }
+    }
+
+    return res.status(200).json({ message: SAFE_PASSWORD_RESET_RESPONSE });
   } catch (e) {
-    return res.status(500).json({ error: e.message });
+    console.error("[auth] forgot-password error:", e.message);
+    return res.status(200).json({ message: SAFE_PASSWORD_RESET_RESPONSE });
+  }
+}
+
+router.post("/forgot-password", ...passwordResetRequestLimiter, forgotPasswordHandler);
+router.post("/request-password-reset", ...passwordResetRequestLimiter, forgotPasswordHandler);
+
+router.post("/reset-password", ...passwordResetSubmitLimiter, async (req, res) => {
+  try {
+    const token = String((req.body && req.body.token) || "").trim();
+    const password = String((req.body && req.body.password) || "").trim();
+
+    if (!token || !password) {
+      return res.status(400).json({ error: "token and password required" });
+    }
+    if (password.length < 8) {
+      return res.status(400).json({ error: "Password must be at least 8 characters long" });
+    }
+
+    const tokenHash = buildResetTokenHash(token);
+    const matches = await usersCollection()
+      .where("passwordResetTokenHash", "==", tokenHash)
+      .limit(2)
+      .get();
+
+    if (matches.empty) {
+      return res.status(400).json({ error: "Invalid or expired reset token" });
+    }
+
+    const userDoc = matches.docs[0];
+    const userData = userDoc.data() || {};
+    const storedHash = String(userData.passwordResetTokenHash || "");
+    const tokenMatches =
+      storedHash.length === tokenHash.length &&
+      crypto.timingSafeEqual(Buffer.from(storedHash), Buffer.from(tokenHash));
+
+    if (!tokenMatches || !isValidPasswordResetExpiry(userData.passwordResetExpiresAt)) {
+      return res.status(400).json({ error: "Invalid or expired reset token" });
+    }
+
+    // Firebase Auth stores the password using its own secure hashing pipeline.
+    await admin.auth().updateUser(userDoc.id, { password });
+    await userDoc.ref.set(
+      {
+        passwordResetTokenHash: admin.firestore.FieldValue.delete(),
+        passwordResetExpiresAt: admin.firestore.FieldValue.delete(),
+        passwordResetRequestedAt: admin.firestore.FieldValue.delete(),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    );
+
+    return res.json({ message: "Password has been reset successfully." });
+  } catch (e) {
+    console.error("[auth] reset-password error:", e.message);
+    return res.status(500).json({ error: "Unable to reset password" });
   }
 });
 
-// Complete password reset (admin override path)
-// SECURITY: Requires authentication + admin role — otherwise anyone can reset any password
-const authMiddleware = require("./authMiddleware");
+// Admin-only override path for support operations.
 const adminOnly = (req, res, next) => {
   if (!req.user || !req.user.isAdmin) {
     return res.status(403).json({ error: "Admin access required" });
   }
   next();
 };
-router.post("/reset-password", authMiddleware, adminOnly, async (req, res) => {
+router.post("/admin/reset-password", authMiddleware, adminOnly, async (req, res) => {
   try {
     const { uid, newPassword } = req.body || {};
     if (!uid || !newPassword)

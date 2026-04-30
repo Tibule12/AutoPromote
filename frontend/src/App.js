@@ -73,6 +73,8 @@ const AdminDashboard = lazy(() => import("./AdminDashboard"));
 import WelcomePage from "./WelcomePage";
 import LoginForm from "./LoginForm";
 import RegisterForm from "./RegisterForm";
+import ForgotPasswordPage from "./ForgotPasswordPage";
+import ResetPasswordPage from "./ResetPasswordPage";
 import UserDashboard from "./UserDashboard_full";
 
 const PageLoader = () => (
@@ -1305,6 +1307,8 @@ function App() {
           <Route path="/security" element={<Security />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
 
           {/* Live Streaming Pages */}
           <Route path="/live" element={<LiveLanding />} />

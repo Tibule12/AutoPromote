@@ -323,15 +323,104 @@ const buildClipGuidance = clip => {
     (signals.idealLength ? 20 : 0) +
     (signals.hook ? 20 : 0);
 
+  const captionReadiness = clampNumber(
+    (transcriptWordCount >= 8 ? 42 : transcriptWordCount >= 4 ? 28 : 12) +
+      (signals.speech ? 24 : 0) +
+      (signals.hook ? 18 : 0) +
+      (duration <= 32 ? 16 : 6),
+    0,
+    100,
+    0
+  );
+  const thumbnailPotential = clampNumber(
+    (signals.subject ? 34 : 14) +
+      (signals.motion ? 14 : 0) +
+      (signals.hook ? 22 : 0) +
+      (/(shock|surprise|face|reaction|before|after|truth|secret|mistake|result)/i.test(
+        descriptorText
+      )
+        ? 20
+        : 8),
+    0,
+    100,
+    0
+  );
+  const retentionPotential = clampNumber(
+    (signals.hook ? 28 : 10) +
+      (signals.motion ? 22 : 6) +
+      (signals.idealLength ? 20 : duration < 8 ? 8 : 12) +
+      (/(reveal|wait|until|next|watch|switch|flip|turning point|answer)/i.test(descriptorText)
+        ? 18
+        : 6),
+    0,
+    100,
+    0
+  );
+  const conversionPotential = clampNumber(
+    (signals.speech ? 26 : 10) +
+      (/(tutorial|lesson|how|why|product|offer|sale|mistake|truth|secret|guide)/i.test(
+        descriptorText
+      )
+        ? 34
+        : 12) +
+      (signals.subject ? 16 : 6) +
+      (signals.idealLength ? 14 : 8),
+    0,
+    100,
+    0
+  );
+  const packagingPotential = Math.round(
+    thumbnailPotential * 0.34 +
+      captionReadiness * 0.24 +
+      retentionPotential * 0.28 +
+      conversionPotential * 0.14
+  );
+  const editorialScore = Math.round(
+    heuristicScore * 0.46 + packagingPotential * 0.34 + backendScore * 0.2
+  );
+  const bestFor = [];
+  if (retentionPotential >= 72) bestFor.push("Best for retention");
+  if (thumbnailPotential >= 68) bestFor.push("Best for thumbnail-led packaging");
+  if (conversionPotential >= 68) bestFor.push("Best for conversion");
+  if (captionReadiness >= 68) bestFor.push("Best for caption-first cuts");
+  if (!bestFor.length) bestFor.push("Best for balanced publishing");
+
+  const openingMove =
+    retentionPotential >= 74
+      ? "Open on the strongest beat and hit it with a fast curiosity hook."
+      : thumbnailPotential >= 72
+        ? "Lead with the clearest face or object frame and let the visual promise carry the intro."
+        : conversionPotential >= 70
+          ? "Use a direct claim-and-proof opening instead of a vague teaser."
+          : "Trim the setup and make the payoff arrive faster.";
+  const exportFit =
+    retentionPotential >= 74
+      ? "Shorts and Reels"
+      : conversionPotential >= 70
+        ? "YouTube and conversion-led clips"
+        : "Cross-platform short form";
+
   return {
     descriptorText,
     duration,
     backendScore,
-    score: clampNumber(heuristicScore, 0, 100, 0),
+    score: clampNumber(editorialScore, 0, 100, 0),
+    heuristicScore,
+    packagingPotential,
     reasons: reasons.slice(0, 5),
     improvements: [...new Set(improvements)].slice(0, 3),
     categories,
     signals,
+    bestFor: bestFor.slice(0, 2),
+    exportFit,
+    openingMove,
+    scoreBreakdown: [
+      { label: "Hook", value: clampNumber(Math.round((signals.hook ? 70 : 34) + retentionPotential * 0.3), 0, 100, 0) },
+      { label: "Retention", value: retentionPotential },
+      { label: "Thumbnail", value: thumbnailPotential },
+      { label: "Captions", value: captionReadiness },
+      { label: "Conversion", value: conversionPotential },
+    ],
     hookText: getHookCopySuggestions(clip)[0] || DEFAULT_HOOK_TEXT,
   };
 };
@@ -5838,6 +5927,20 @@ const ViralClipStudio = ({
                   </div>
 
                   <div className="clip-guidance-tag-row">
+                    {selectedClipGuidance.bestFor.map((fit, index) => (
+                      <span
+                        key={`${selectedClip.id}-fit-${fit}-${index}`}
+                        className="clip-tag-pill compact"
+                      >
+                        {fit}
+                      </span>
+                    ))}
+                    <span className="clip-tag-pill compact">
+                      Export fit: {selectedClipGuidance.exportFit}
+                    </span>
+                  </div>
+
+                  <div className="clip-guidance-tag-row">
                     {selectedClipGuidance.categories.map((category, index) => (
                       <span
                         key={`${selectedClip.id}-${category.label}-${index}`}
@@ -5846,6 +5949,25 @@ const ViralClipStudio = ({
                         {category.icon} {category.label}
                       </span>
                     ))}
+                  </div>
+
+                  <div className="clip-guidance-packaging">
+                    <strong>Packaging move</strong>
+                    <p>{selectedClipGuidance.openingMove}</p>
+                    <div className="clip-guidance-scoreboard">
+                      {selectedClipGuidance.scoreBreakdown.slice(0, 5).map(entry => (
+                        <div key={`${selectedClip.id}-${entry.label}`} className="clip-guidance-score-item">
+                          <span>{entry.label}</span>
+                          <div className="clip-guidance-score-track">
+                            <span
+                              className="clip-guidance-score-fill"
+                              style={{ width: `${entry.value}%` }}
+                            />
+                          </div>
+                          <strong>{entry.value}</strong>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
                   <div className="clip-guidance-actions compact">
@@ -5972,6 +6094,14 @@ const ViralClipStudio = ({
                         <p>{normalizePlainText(clip.reason || "Primary detected moment")}</p>
 
                         <div className="clip-tag-row">
+                          {(clipGuidance?.bestFor || []).map((fit, index) => (
+                            <span
+                              key={`${clip.id}-best-for-${fit}-${index}`}
+                              className="clip-tag-pill compact"
+                            >
+                              {fit}
+                            </span>
+                          ))}
                           {(clipGuidance?.categories || []).map((category, index) => (
                             <span
                               key={`${clip.id}-${category.label}-${index}`}
@@ -5983,6 +6113,11 @@ const ViralClipStudio = ({
                         </div>
 
                         <div className="clip-guidance-mini-list">
+                          {clipGuidance?.openingMove ? (
+                            <div className="clip-guidance-mini-item">
+                              ↳ {clipGuidance.openingMove}
+                            </div>
+                          ) : null}
                           {(clipGuidance?.reasons || []).slice(0, 3).map((reason, index) => (
                             <div
                               key={`${clip.id}-${reason}-${index}`}

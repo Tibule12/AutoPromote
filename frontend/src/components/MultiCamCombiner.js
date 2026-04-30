@@ -81,6 +81,132 @@ const MULTICAM_REASON_TITLES = {
   manual_cut: "Manual hero",
 };
 
+const DIRECTOR_STYLE_PRESETS = [
+  {
+    id: "podcast",
+    label: "Podcast Lock",
+    summary: "Fewer gimmicks, longer hero holds, and calm conversational framing.",
+    guidance: "Stay disciplined. Use split only when both people are genuinely active.",
+  },
+  {
+    id: "interview",
+    label: "Interview Pulse",
+    summary: "Protect the main speaker, but surface reactions when they deepen the answer.",
+    guidance: "Favor hero framing with selective reaction inserts.",
+  },
+  {
+    id: "reaction",
+    label: "Reaction Engine",
+    summary: "Chase emotional counters, shared laughter, and fast interplay between angles.",
+    guidance: "Keep secondary emotion alive when it adds voltage.",
+  },
+  {
+    id: "performance",
+    label: "Performance Stage",
+    summary: "Let the whole room breathe with ensemble layouts and bigger visual crescendos.",
+    guidance: "Open the frame when several angles are alive together.",
+  },
+];
+
+const getDirectorStylePreset = styleId =>
+  DIRECTOR_STYLE_PRESETS.find(style => style.id === styleId) || DIRECTOR_STYLE_PRESETS[0];
+
+const applyDirectorStyleToLayout = (layout, directorStyleId, rankedSources = []) => {
+  const safeLayout = layout || {};
+  const primaryCameraId = safeLayout.primaryCameraId || rankedSources[0]?.id || null;
+  const companionCameraId =
+    safeLayout.secondaryCameraId ||
+    rankedSources.find(source => source?.id && source.id !== primaryCameraId)?.id ||
+    null;
+  const companionPool = rankedSources
+    .map(source => source?.id)
+    .filter(cameraId => cameraId && cameraId !== primaryCameraId);
+  const visibleCameraIds = Array.isArray(safeLayout.visibleCameraIds)
+    ? safeLayout.visibleCameraIds.filter(Boolean)
+    : [primaryCameraId, companionCameraId].filter(Boolean);
+
+  if (!primaryCameraId) return safeLayout;
+
+  switch (directorStyleId) {
+    case "podcast":
+      if (safeLayout.reason === "shared_energy") {
+        return {
+          ...safeLayout,
+          layoutMode: "split-vertical",
+          secondaryCameraId: companionCameraId,
+          visibleCameraIds: [primaryCameraId, companionCameraId].filter(Boolean),
+        };
+      }
+      return {
+        ...safeLayout,
+        layoutMode: "cut",
+        secondaryCameraId: null,
+        visibleCameraIds: [primaryCameraId],
+      };
+    case "interview":
+      if (safeLayout.reason === "reaction_insert" || safeLayout.layoutMode === "pip") {
+        return {
+          ...safeLayout,
+          layoutMode: "pip",
+          secondaryCameraId: companionCameraId,
+          visibleCameraIds: [primaryCameraId, companionCameraId].filter(Boolean),
+        };
+      }
+      if (safeLayout.reason === "shared_energy") {
+        return {
+          ...safeLayout,
+          layoutMode: "split-vertical",
+          secondaryCameraId: companionCameraId,
+          visibleCameraIds: [primaryCameraId, companionCameraId].filter(Boolean),
+        };
+      }
+      return {
+        ...safeLayout,
+        layoutMode: "cut",
+        secondaryCameraId: null,
+        visibleCameraIds: [primaryCameraId],
+      };
+    case "reaction":
+      if (safeLayout.reason === "shared_energy") {
+        return {
+          ...safeLayout,
+          layoutMode: "split-vertical",
+          secondaryCameraId: companionCameraId,
+          visibleCameraIds: [primaryCameraId, companionCameraId].filter(Boolean),
+        };
+      }
+      if (companionCameraId) {
+        return {
+          ...safeLayout,
+          layoutMode: "pip",
+          secondaryCameraId: companionCameraId,
+          visibleCameraIds: [primaryCameraId, companionCameraId].filter(Boolean),
+        };
+      }
+      return safeLayout;
+    case "performance":
+      if (visibleCameraIds.length >= 3 || companionPool.length >= 2) {
+        return {
+          ...safeLayout,
+          layoutMode: "scene-grid",
+          secondaryCameraId: companionCameraId,
+          visibleCameraIds: [primaryCameraId, ...companionPool].slice(0, 6),
+        };
+      }
+      if (companionCameraId) {
+        return {
+          ...safeLayout,
+          layoutMode: "split-vertical",
+          secondaryCameraId: companionCameraId,
+          visibleCameraIds: [primaryCameraId, companionCameraId].filter(Boolean),
+        };
+      }
+      return safeLayout;
+    default:
+      return safeLayout;
+  }
+};
+
 const getSourceMediaUrl = source => source?.previewUrl || source?.url || source?.uploadedUrl || "";
 
 const getSourceTimelineTime = (source, playhead, timelineStart) =>
@@ -534,6 +660,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const [singleCamSegmentFraming, setSingleCamSegmentFraming] = useState({});
   const [focusPickerActive, setFocusPickerActive] = useState(false);
   const [multicamLayoutMode, setMulticamLayoutMode] = useState("smart");
+  const [directorStyleId, setDirectorStyleId] = useState(DIRECTOR_STYLE_PRESETS[0].id);
 
   const cancelExportRef = useRef(false);
   const fileInputRef = useRef(null);
@@ -656,6 +783,10 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const activeCameraId = activeSegment?.cameraId || readySources[0]?.id || sources[0]?.id || null;
   const activeCamera = readySources.find(source => source.id === activeCameraId) || null;
   const masterAudioSource = readySources.find(source => source.id === masterAudioCameraId) || null;
+  const activeDirectorStyle = useMemo(
+    () => getDirectorStylePreset(directorStyleId),
+    [directorStyleId]
+  );
   const resolvedMulticamLayout = useMemo(() => {
     if (isSingleSourceWorkflow) {
       return {
@@ -666,13 +797,18 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       };
     }
 
-    return resolveSmartMulticamLayoutAtTime(
+    const baseLayout = resolveSmartMulticamLayoutAtTime(
       readySources.length ? readySources : sources,
       activeCameraId,
       playhead,
       timelineBounds.timelineStart,
       audioAnalysisByCameraId,
       multicamLayoutMode
+    );
+    return applyDirectorStyleToLayout(
+      baseLayout,
+      directorStyleId,
+      readySources.length ? readySources : sources
     );
   }, [
     isSingleSourceWorkflow,
@@ -683,6 +819,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     timelineBounds.timelineStart,
     audioAnalysisByCameraId,
     multicamLayoutMode,
+    directorStyleId,
   ]);
   const effectiveMulticamLayoutMode = resolvedMulticamLayout.layoutMode || "cut";
   const secondaryCameraId = resolvedMulticamLayout.secondaryCameraId || null;
@@ -879,10 +1016,13 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const directorSnapshot = useMemo(() => {
     if (isSingleSourceWorkflow) {
       return {
+        styleTitle: "Solo Operator",
         modeTitle: "Single Lens",
         reasonTitle: "Solo presence",
         narrative:
           "One lens is carrying the whole scene, so the director stays intimate and direct.",
+        mission:
+          "Shape one recording into confident beats with reframing and emotional punch-ins only when they help.",
         temperature: 0.28,
       };
     }
@@ -904,13 +1044,16 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     }
 
     return {
+      styleTitle: activeDirectorStyle.label,
       modeTitle,
       reasonTitle,
-      narrative,
+      narrative: `${narrative} ${activeDirectorStyle.guidance}`,
+      mission: activeDirectorStyle.summary,
       temperature,
     };
   }, [
     isSingleSourceWorkflow,
+    activeDirectorStyle,
     effectiveMulticamLayoutMode,
     resolvedMulticamLayout.reason,
     leadEnergyScore,
@@ -2019,13 +2162,17 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
             const currentCameraLabel = readySources.find(
               source => source.id === currentSegment?.cameraId
             )?.label;
-            const exportLayout = resolveSmartMulticamLayoutAtTime(
-              readySources,
-              currentSegment?.cameraId,
-              exportPlayhead,
-              timelineBounds.timelineStart,
-              audioAnalysisByCameraId,
-              multicamLayoutMode
+            const exportLayout = applyDirectorStyleToLayout(
+              resolveSmartMulticamLayoutAtTime(
+                readySources,
+                currentSegment?.cameraId,
+                exportPlayhead,
+                timelineBounds.timelineStart,
+                audioAnalysisByCameraId,
+                multicamLayoutMode
+              ),
+              directorStyleId,
+              readySources
             );
             const visibleFeeds = (exportLayout.visibleCameraIds || [currentSegment?.cameraId])
               .filter(Boolean)
@@ -2540,10 +2687,27 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                 <div className="nle-director-headline-row">
                   <div>
                     <strong>Director Console</strong>
+                    <span className="nle-director-mode-title">{directorSnapshot.styleTitle}</span>
                     <span className="nle-director-mode-title">{directorSnapshot.modeTitle}</span>
                   </div>
                   <span className="nle-director-reason-pill">{directorSnapshot.reasonTitle}</span>
                 </div>
+                <p className="nle-director-copy">{directorSnapshot.mission}</p>
+                {!isSingleSourceWorkflow && (
+                  <div className="nle-layout-mode-group">
+                    {DIRECTOR_STYLE_PRESETS.map(style => (
+                      <button
+                        key={style.id}
+                        type="button"
+                        className={`nle-layout-mode-btn ${directorStyleId === style.id ? "is-active" : ""}`}
+                        onClick={() => setDirectorStyleId(style.id)}
+                        title={style.summary}
+                      >
+                        {style.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
                 <p className="nle-director-copy">{directorSnapshot.narrative}</p>
                 <div className="nle-director-meters">
                   <div className="nle-director-meter-card">

@@ -66,7 +66,10 @@ class StartupDiagnostics {
       "PAYPAL_CLIENT_SECRET",
       "OPENAI_API_KEY",
       "FRONTEND_URL",
-      "RESEND_API_KEY",
+      "ZEPTOMAIL_API_KEY",
+      "ZEPTOMAIL_API_URL",
+      "ZEPTOMAIL_FROM_EMAIL",
+      "ZEPTOMAIL_FROM_NAME",
     ];
 
     const optional = [
@@ -453,18 +456,20 @@ class StartupDiagnostics {
   async checkEmailService() {
     console.log("\n🔍 Checking Email Service...");
 
-    const hasResend = !!process.env.RESEND_API_KEY;
-    const hasSendGrid = !!process.env.SENDGRID_API_KEY;
+    const hasZeptoMail =
+      !!process.env.ZEPTOMAIL_API_KEY &&
+      !!process.env.ZEPTOMAIL_API_URL &&
+      !!process.env.ZEPTOMAIL_FROM_EMAIL &&
+      !!process.env.ZEPTOMAIL_FROM_NAME;
 
-    if (!hasResend && !hasSendGrid) {
+    if (!hasZeptoMail) {
       this.log("error", "email", "No email service configured", {
-        action_required: "Add RESEND_API_KEY or SENDGRID_API_KEY",
+        action_required:
+          "Add ZEPTOMAIL_API_KEY, ZEPTOMAIL_API_URL, ZEPTOMAIL_FROM_EMAIL, and ZEPTOMAIL_FROM_NAME",
         impact: "Transactional emails will not be sent",
       });
-    } else if (hasResend) {
-      this.log("success", "email", "Resend email service configured");
-    } else if (hasSendGrid) {
-      this.log("success", "email", "SendGrid email service configured");
+    } else {
+      this.log("success", "email", "ZeptoMail email service configured");
     }
   }
 
