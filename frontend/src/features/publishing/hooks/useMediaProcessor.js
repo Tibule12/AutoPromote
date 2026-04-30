@@ -87,6 +87,20 @@ export const useMediaProcessor = (initialFile = null) => {
     }
   };
 
+  const resetMediaState = () => {
+    setFile(null);
+    setSourceFiles([]);
+    setPreviewUrl("");
+    setType("video");
+    setDuration(0);
+    setRotate(0);
+    setFlipH(false);
+    setFlipV(false);
+    setTrimStart(0);
+    setTrimEnd(0);
+    setSelectedFilter(null);
+  };
+
   // Cleanup effect
   useEffect(() => {
     return () => {
@@ -127,6 +141,7 @@ export const useMediaProcessor = (initialFile = null) => {
 
     // Actions
     handleFileChange,
+    resetMediaState,
 
     // Explicit setters for advanced integration
     setFile,

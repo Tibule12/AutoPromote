@@ -89,6 +89,22 @@ export const usePublishingState = (initialPlatforms = []) => {
     [globalFile, globalTitle, globalDescription, platformData]
   );
 
+  const resetPublishingState = useCallback(() => {
+    setGlobalFile(null);
+    setGlobalTitle("");
+    setGlobalDescription("");
+    setBountyAmount(0);
+    setBountyNiche("");
+    setProtocol7Enabled(false);
+    setProtocol7Volatility("medium");
+    setOptimizeViral(false);
+    setVariants([]);
+    setScheduledTime("");
+    setFrequency("once");
+    setSelectedPlatforms(initialPlatforms);
+    setPlatformData({});
+  }, [initialPlatforms]);
+
   return {
     // State
     globalFile,
@@ -123,10 +139,13 @@ export const usePublishingState = (initialPlatforms = []) => {
     // State (Selection/Data)
     selectedPlatforms,
     platformData,
+    setSelectedPlatforms,
+    setPlatformData,
 
     // Actions
     togglePlatform,
     updatePlatformData,
     getPlatformEffectiveData,
+    resetPublishingState,
   };
 };

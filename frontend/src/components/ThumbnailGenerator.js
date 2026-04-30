@@ -248,6 +248,105 @@ const STYLE_COPY_LIBRARY = {
   },
 };
 
+const CONTENT_PROFILES = [
+  {
+    id: "talking_head",
+    name: "Talking Head",
+    summary: "For commentary, education, reactions, and single-host storytelling.",
+    detectionLabel: "Face-led host read",
+    hooks: [
+      "I HAD TO SAY THIS",
+      "THIS CHANGES THE WAY YOU SEE IT",
+      "THE ANSWER IS CLEAR NOW",
+    ],
+    faceHooks: ["THE REACTION SELLS IT", "THIS LOOK CARRIES THE HOOK", "YOU FEEL IT FAST"],
+    objectHooks: ["THE EXPLANATION LANDS", "THE POINT IS CLEAN", "THE TAKE IS SHARP"],
+    badges: ["HOST POV", "STRAIGHT TALK", "CLEAR TAKE"],
+    subtexts: [
+      "Lead with expression, then let the copy finish the promise.",
+      "A direct face read should feel confident, not crowded.",
+    ],
+    weights: { face: 1.3, whitespace: 1.1, composition: 1.05, drama: 1 },
+  },
+  {
+    id: "performance",
+    name: "Choir / Singer / Performance",
+    summary: "For choirs, solo singers, worship sets, live performance, and musical moments.",
+    detectionLabel: "Performance-stage energy",
+    hooks: [
+      "THIS MOMENT LIFTS",
+      "THE ROOM CHANGED HERE",
+      "YOU CAN FEEL THE SOUND",
+      "THIS PART HITS LIVE",
+    ],
+    faceHooks: ["THE VOCAL MOMENT LANDED", "THE EXPRESSION CARRIES THE NOTE", "THIS FACE SINGS THE PAYOFF"],
+    objectHooks: ["THE WHOLE ROOM FEELS IT", "THE STAGE MOMENT OPENS UP", "THIS SHOT SOUNDS BIG"],
+    badges: ["LIVE MOMENT", "VOCAL HIT", "FULL ROOM"],
+    subtexts: [
+      "For music content, sell feeling, scale, and live energy before details.",
+      "Wide frames, harmony, and crowd emotion should feel deliberate, not generic.",
+    ],
+    weights: { face: 1.05, whitespace: 0.95, composition: 1.15, drama: 1.35, sequence: 1.2, symmetry: 1.1 },
+  },
+  {
+    id: "tutorial",
+    name: "Tutorial / System",
+    summary: "For dashboards, explainers, walkthroughs, business tools, and software demos.",
+    detectionLabel: "System-screen clarity",
+    hooks: [
+      "THIS MAKES IT CLICK",
+      "THE PROCESS GETS SIMPLE",
+      "NOW IT ACTUALLY MAKES SENSE",
+    ],
+    faceHooks: ["THE TEACHING MOMENT LANDS", "YOU GET IT IMMEDIATELY", "THIS EXPLAINS THE WHOLE MOVE"],
+    objectHooks: ["THE SCREEN TELLS THE STORY", "THE SYSTEM IS THE HOOK", "THE WORKFLOW LOOKS OBVIOUS"],
+    badges: ["SYSTEM VIEW", "STEP BREAKDOWN", "WORKFLOW LOCK"],
+    subtexts: [
+      "Tutorial thumbnails need a readable promise before they need spectacle.",
+      "Whitespace and proof matter more than fake intensity here.",
+    ],
+    weights: { face: 0.95, whitespace: 1.35, composition: 1.2, drama: 0.9, detail: 1.15 },
+  },
+  {
+    id: "product",
+    name: "Product / Lifestyle",
+    summary: "For product shots, reveals, makeovers, food, fashion, and setup transformations.",
+    detectionLabel: "Object-first packaging",
+    hooks: [
+      "THIS LOOKS DIFFERENT NOW",
+      "THE FINISH IS THE STORY",
+      "THIS IS WHAT CHANGED",
+    ],
+    faceHooks: ["THE REACTION CONFIRMS IT", "THIS LOOK SOLD THE RESULT", "THE FACE ADDS THE PAYOFF"],
+    objectHooks: ["THE OBJECT DOES THE WORK", "THE BEFORE/AFTER FEELS REAL", "THE FINISH CARRIES THE CLICK"],
+    badges: ["PRODUCT HIT", "THE FINISH", "LOOK CLOSE"],
+    subtexts: [
+      "Sell the result with a cleaner object lane and stronger surface contrast.",
+      "If the product is the star, the copy should not compete with it.",
+    ],
+    weights: { face: 0.8, whitespace: 1.1, composition: 1.15, drama: 1.1, detail: 1.25 },
+  },
+  {
+    id: "gameplay",
+    name: "Gameplay / Action",
+    summary: "For gameplay, sports, fast-motion highlights, and kinetic reaction clips.",
+    detectionLabel: "Fast action read",
+    hooks: [
+      "THIS PART POPS OFF",
+      "THE PLAY HITS HERE",
+      "IT SPIKES RIGHT NOW",
+    ],
+    faceHooks: ["THE REACTION SEALS IT", "THIS FACE TELLS YOU EVERYTHING", "YOU FEEL THE MOMENT FAST"],
+    objectHooks: ["THE ACTION FRAME CARRIES IT", "THIS SHOT MOVES HARD", "THE MOTION SELLS THE CLICK"],
+    badges: ["ACTION SPIKE", "LIVE PLAY", "PRESSURE MOMENT"],
+    subtexts: [
+      "Fast content still needs a single readable focal point.",
+      "Use motion and drama without turning the frame into noise.",
+    ],
+    weights: { face: 1, whitespace: 0.85, composition: 1.05, drama: 1.25, detail: 1.15 },
+  },
+];
+
 const DEFAULT_DIRECTION_ID = DIRECTION_PRESETS[0].id;
 
 function clamp(value, min, max) {
@@ -284,6 +383,53 @@ function getDirectionPreset(directionId) {
 
 function getStylePreset(styleId) {
   return STYLE_PRESETS.find(style => style.id === styleId) || STYLE_PRESETS[0];
+}
+
+function getContentProfile(profileId) {
+  return CONTENT_PROFILES.find(profile => profile.id === profileId) || CONTENT_PROFILES[0];
+}
+
+function inferContentProfile(frames = []) {
+  if (!frames.length) return CONTENT_PROFILES[0].id;
+
+  const summary = frames.reduce(
+    (accumulator, frame) => {
+      const metrics = frame.metrics || {};
+      accumulator.faceFrames += metrics.face ? 1 : 0;
+      accumulator.faceArea += Number(metrics.faceAreaRatio || 0);
+      accumulator.blankLane += Number(metrics.blankLane || 0);
+      accumulator.drama += Number(metrics.drama || 0);
+      accumulator.symmetry += Number(metrics.symmetry || 0);
+      accumulator.detail += Number(metrics.edgeEnergy || 0);
+      accumulator.skin += Number(metrics.skinRatio || 0);
+      return accumulator;
+    },
+    {
+      faceFrames: 0,
+      faceArea: 0,
+      blankLane: 0,
+      drama: 0,
+      symmetry: 0,
+      detail: 0,
+      skin: 0,
+    }
+  );
+
+  const total = Math.max(1, frames.length);
+  const faceRatio = summary.faceFrames / total;
+  const avgFaceArea = summary.faceArea / total;
+  const avgBlankLane = summary.blankLane / total;
+  const avgDrama = summary.drama / total;
+  const avgSymmetry = summary.symmetry / total;
+  const avgDetail = summary.detail / total;
+  const avgSkin = summary.skin / total;
+
+  if (avgDrama > 0.58 && avgSymmetry > 0.62 && faceRatio < 0.6) return "performance";
+  if (faceRatio > 0.6 && avgFaceArea > 0.08) return "talking_head";
+  if (avgBlankLane > 0.44 && avgDetail > 20) return "tutorial";
+  if (avgDetail > 28 && avgSkin < 0.04 && avgBlankLane < 0.3) return "gameplay";
+  if (avgDetail > 24 && avgBlankLane > 0.28 && faceRatio < 0.45) return "product";
+  return "talking_head";
 }
 
 function createFrameCanvas(frame) {
@@ -456,31 +602,51 @@ function measureFrame(imageData) {
   };
 }
 
-function buildAudit(metrics, score) {
+function buildAudit(metrics, score, contentProfile) {
+  const weights = contentProfile?.weights || {};
   const brightnessScore = clamp(1 - Math.abs(metrics.brightness - 126) / 126, 0, 1);
   const contrastScore = clamp(metrics.contrast / 82, 0, 1);
   const detailScore = clamp(metrics.edgeEnergy / 52, 0, 1);
-  const subjectScore = clamp(metrics.subjectConfidence * 0.7 + metrics.faceAreaRatio * 1.4, 0, 1);
-  const dramaScore = clamp(metrics.drama, 0, 1);
+  const subjectScore = clamp(
+    (metrics.subjectConfidence * 0.7 + metrics.faceAreaRatio * 1.4) * (weights.face || 1),
+    0,
+    1
+  );
+  const whitespaceScore = clamp(metrics.blankLane * (weights.whitespace || 1), 0, 1);
+  const dramaScore = clamp(metrics.drama * (weights.drama || 1), 0, 1);
 
   return [
     { label: "Clarity", value: Math.round((brightnessScore * 0.4 + contrastScore * 0.6) * 100) },
-    { label: "Punch", value: Math.round((contrastScore * 0.5 + detailScore * 0.5) * 100) },
+    {
+      label: "Punch",
+      value: Math.round((contrastScore * 0.5 + detailScore * 0.5 * (weights.detail || 1)) * 100),
+    },
     { label: "Subject", value: Math.round(subjectScore * 100) },
-    { label: "Whitespace", value: Math.round(metrics.blankLane * 100) },
+    { label: "Whitespace", value: Math.round(whitespaceScore * 100) },
     { label: "Drama", value: Math.round(dramaScore * 100) },
     { label: "Total", value: Math.round(clamp(score / 1, 0, 100)) },
   ];
 }
 
-function scoreFrame(metrics, time, duration) {
+function scoreFrame(metrics, time, duration, contentProfile) {
+  const weights = contentProfile?.weights || {};
   const brightnessScore = clamp(1 - Math.abs(metrics.brightness - 124) / 124, 0, 1);
   const contrastScore = clamp(metrics.contrast / 82, 0, 1);
   const saturationScore = clamp(metrics.saturation / 86, 0, 1);
-  const detailScore = clamp(metrics.edgeEnergy / 50, 0, 1);
-  const compositionScore = clamp(metrics.thirdsScore * 0.56 + metrics.blankLane * 0.44, 0, 1);
-  const subjectScore = clamp(metrics.subjectConfidence * 0.72 + metrics.faceAreaRatio * 1.2, 0, 1);
-  const dramaScore = clamp(metrics.drama, 0, 1);
+  const detailScore = clamp((metrics.edgeEnergy / 50) * (weights.detail || 1), 0, 1);
+  const compositionScore = clamp(
+    (metrics.thirdsScore * 0.56 + metrics.blankLane * 0.44) * (weights.composition || 1),
+    0,
+    1
+  );
+  const subjectScore = clamp(
+    (metrics.subjectConfidence * 0.72 + metrics.faceAreaRatio * 1.2) * (weights.face || 1),
+    0,
+    1
+  );
+  const whitespaceScore = clamp(metrics.blankLane * (weights.whitespace || 1), 0, 1);
+  const dramaScore = clamp(metrics.drama * (weights.drama || 1), 0, 1);
+  const symmetryScore = clamp(metrics.symmetry * (weights.symmetry || 1), 0, 1);
   const timingBias = duration > 0 ? 1 - Math.abs(time / duration - 0.42) : 0.5;
 
   return Math.round(
@@ -488,9 +654,11 @@ function scoreFrame(metrics, time, duration) {
       contrastScore * 18 +
       saturationScore * 10 +
       detailScore * 14 +
-      compositionScore * 16 +
+      compositionScore * 12 +
       subjectScore * 18 +
       dramaScore * 8 +
+      whitespaceScore * 4 +
+      symmetryScore * 4 +
       clamp(timingBias, 0, 1) * 4
   );
 }
@@ -505,7 +673,7 @@ function getAnchorSide(frame) {
   return metrics.textSafeRight >= metrics.textSafeLeft ? "right" : "left";
 }
 
-function describeFrame(frame) {
+function describeFrame(frame, contentProfile) {
   if (!frame?.metrics) return "Balanced frame with usable contrast.";
 
   const notes = [];
@@ -516,13 +684,19 @@ function describeFrame(frame) {
   if (metrics.blankLane > 0.38) notes.push(`clean text lane on the ${anchor}`);
   if (metrics.thirdsScore > 0.58) notes.push("good rule-of-thirds placement");
   if (metrics.drama > 0.55) notes.push("cinematic light contrast");
+  if (contentProfile?.id === "performance" && metrics.symmetry > 0.62) {
+    notes.push("strong ensemble or stage balance");
+  }
+  if (contentProfile?.id === "tutorial" && metrics.blankLane > 0.42) {
+    notes.push("clear screen space for promise-driven copy");
+  }
   if (metrics.edgeEnergy > 36) notes.push("crisp visual detail");
   if (notes.length === 0) notes.push("balanced packaging frame");
 
   return notes.slice(0, 3).join(", ");
 }
 
-function summarizeSignals(frame) {
+function summarizeSignals(frame, contentProfile) {
   if (!frame?.metrics) return ["Balanced", "Usable"];
   const metrics = frame.metrics;
   const signals = [];
@@ -532,6 +706,9 @@ function summarizeSignals(frame) {
   if (metrics.drama > 0.55) signals.push("High drama");
   if (metrics.thirdsScore > 0.58) signals.push("Strong composition");
   if (metrics.highlightRatio > 0.08) signals.push("Bright focal hit");
+  if (contentProfile?.id === "performance" && metrics.symmetry > 0.62) signals.push("Stage balance");
+  if (contentProfile?.id === "tutorial" && metrics.blankLane > 0.42) signals.push("Copy space");
+  if (contentProfile?.id === "product" && metrics.edgeEnergy > 34) signals.push("Product detail");
   if (!signals.length) signals.push("Balanced read");
 
   return signals.slice(0, 3);
@@ -1101,17 +1278,28 @@ function renderSequenceFrame(frames, direction, copy) {
   return canvas.toDataURL("image/jpeg", 0.92);
 }
 
-function buildAutoCopy(direction, style, frame, index) {
+function buildAutoCopy(direction, style, frame, index, contentProfile) {
   const styleLibrary = STYLE_COPY_LIBRARY[style.id] || STYLE_COPY_LIBRARY.signal;
-  const signals = summarizeSignals(frame);
+  const signals = summarizeSignals(frame, contentProfile);
   const seed = Math.round(frame.time * 10 + frame.score + index * 17);
   const headlinePool = [
     ...styleLibrary.hooks,
+    ...((frame.metrics.face ? contentProfile?.faceHooks : contentProfile?.objectHooks) || []),
+    ...(contentProfile?.hooks || []),
     ...(frame.metrics.face ? direction.faceHooks : direction.objectHooks),
     ...direction.hooks,
   ];
-  const subtextPool = [...styleLibrary.subtexts, ...direction.subtexts];
-  const eyebrowPool = [...styleLibrary.badges, ...direction.badge.split("|"), direction.badge];
+  const subtextPool = [
+    ...styleLibrary.subtexts,
+    ...(contentProfile?.subtexts || []),
+    ...direction.subtexts,
+  ];
+  const eyebrowPool = [
+    ...styleLibrary.badges,
+    ...((contentProfile?.badges || []).flatMap(badge => badge.split("|"))),
+    ...direction.badge.split("|"),
+    direction.badge,
+  ];
   const accent = direction.palette[index % direction.palette.length];
   const accentAlt = direction.palette[(index + 1) % direction.palette.length];
 
@@ -1140,36 +1328,60 @@ function pickSequenceFrames(frames) {
   ].filter(Boolean);
 }
 
-function getPreferredFrames(frames) {
+function getPreferredFrames(frames, contentProfile) {
   const faceFrames = frames.filter(frame => frame.metrics.face);
+  const weights = contentProfile?.weights || {};
 
   return {
     signal: pickBestFrame(
       frames,
-      frame => frame.score + frame.metrics.blankLane * 22 + frame.metrics.thirdsScore * 18
+      frame =>
+        frame.score +
+        frame.metrics.blankLane * 22 * (weights.whitespace || 1) +
+        frame.metrics.thirdsScore * 18 * (weights.composition || 1)
     ),
     vault: pickBestFrame(
       frames,
-      frame => frame.score + frame.metrics.subjectConfidence * 24 + frame.metrics.drama * 18
+      frame =>
+        frame.score +
+        frame.metrics.subjectConfidence * 24 * (weights.face || 1) +
+        frame.metrics.drama * 18 * (weights.drama || 1)
     ),
     vector: pickBestFrame(
       frames,
       frame =>
         frame.score +
         Math.abs(frame.metrics.focusXNorm - 0.5) * 28 +
-        Math.max(frame.metrics.textSafeLeft, frame.metrics.textSafeRight) * 14
+        Math.max(frame.metrics.textSafeLeft, frame.metrics.textSafeRight) * 14 * (weights.whitespace || 1)
     ),
     orbit: faceFrames[0] ||
-      pickBestFrame(frames, frame => frame.score + frame.metrics.subjectConfidence * 22 + frame.metrics.drama * 12),
+      pickBestFrame(
+        frames,
+        frame =>
+          frame.score +
+          frame.metrics.subjectConfidence * 22 * (weights.face || 1) +
+          frame.metrics.drama * 12 * (weights.drama || 1)
+      ),
     proof: pickBestFrame(
       frames,
-      frame => frame.score + frame.metrics.contrast * 0.3 + frame.metrics.edgeEnergy * 0.4
+      frame =>
+        frame.score +
+        frame.metrics.contrast * 0.3 +
+        frame.metrics.edgeEnergy * 0.4 * (weights.detail || 1)
     ),
-    sequence: pickSequenceFrames(frames),
+    sequence:
+      contentProfile?.id === "performance" || contentProfile?.id === "product"
+        ? pickSequenceFrames(
+            [...frames].sort(
+              (left, right) =>
+                right.metrics.drama + right.metrics.symmetry - (left.metrics.drama + left.metrics.symmetry)
+            )
+          )
+        : pickSequenceFrames(frames),
   };
 }
 
-function buildThumbnailVariant(style, direction, frame, frames, copy) {
+function buildThumbnailVariant(style, direction, frame, frames, copy, contentProfile) {
   const usableFrames = (Array.isArray(frames) ? frames : [frames]).filter(Boolean);
   const primaryFrame = frame?.metrics ? frame : usableFrames[0];
 
@@ -1182,6 +1394,8 @@ function buildThumbnailVariant(style, direction, frame, frames, copy) {
       styleName: style.name,
       directionId: direction.id,
       directionName: direction.name,
+      contentProfileId: contentProfile?.id,
+      contentProfileName: contentProfile?.name,
       summary: style.summary,
       why: "Balanced packaging frame",
       audit: [],
@@ -1195,10 +1409,10 @@ function buildThumbnailVariant(style, direction, frame, frames, copy) {
     };
   }
 
-  const audit = buildAudit(primaryFrame.metrics, primaryFrame.score);
+  const audit = buildAudit(primaryFrame.metrics, primaryFrame.score, contentProfile);
   const completeCopy = {
     ...copy,
-    signalSummary: copy.signalSummary || summarizeSignals(primaryFrame),
+    signalSummary: copy.signalSummary || summarizeSignals(primaryFrame, contentProfile),
   };
 
   let dataUrl = "";
@@ -1235,8 +1449,10 @@ function buildThumbnailVariant(style, direction, frame, frames, copy) {
     styleName: style.name,
     directionId: direction.id,
     directionName: direction.name,
+    contentProfileId: contentProfile?.id,
+    contentProfileName: contentProfile?.name,
     summary: style.summary,
-    why: describeFrame(primaryFrame),
+    why: describeFrame(primaryFrame, contentProfile),
     audit,
     signalSummary: completeCopy.signalSummary,
     headline: completeCopy.headline,
@@ -1261,6 +1477,8 @@ export default function ThumbnailGenerator({ videoSrc, videoRef: externalVideoRe
   const [isUploading, setIsUploading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [directionId, setDirectionId] = useState(DEFAULT_DIRECTION_ID);
+  const [contentProfileMode, setContentProfileMode] = useState("auto");
+  const [detectedContentProfileId, setDetectedContentProfileId] = useState(CONTENT_PROFILES[0].id);
   const [selectedStyleId, setSelectedStyleId] = useState(STYLE_PRESETS[0].id);
   const [headline, setHeadline] = useState("");
   const [subtext, setSubtext] = useState("");
@@ -1270,13 +1488,20 @@ export default function ThumbnailGenerator({ videoSrc, videoRef: externalVideoRe
   const [copyOverrides, setCopyOverrides] = useState(null);
 
   const activeDirection = useMemo(() => getDirectionPreset(directionId), [directionId]);
+  const activeContentProfile = useMemo(
+    () =>
+      getContentProfile(
+        contentProfileMode === "auto" ? detectedContentProfileId : contentProfileMode
+      ),
+    [contentProfileMode, detectedContentProfileId]
+  );
   const selectedThumb = thumbnails[selectedIndex];
   const accentOptions = activeDirection.palette;
 
-  const renderConcepts = useCallback((frames, direction, overrides = null) => {
+  const renderConcepts = useCallback((frames, direction, contentProfile, overrides = null) => {
     if (!frames.length) return [];
 
-    const byStyle = getPreferredFrames(frames);
+    const byStyle = getPreferredFrames(frames, contentProfile);
 
     return STYLE_PRESETS.map((style, index) => {
       const preferred = byStyle[style.id];
@@ -1285,7 +1510,7 @@ export default function ThumbnailGenerator({ videoSrc, videoRef: externalVideoRe
           ? preferred || byStyle.sequence || frames.slice(0, 3)
           : [preferred || frames[0]];
       const leadFrame = Array.isArray(preferred) ? preferred[0] || frames[0] : preferred || frames[0];
-      const autoCopy = buildAutoCopy(direction, style, leadFrame, index);
+      const autoCopy = buildAutoCopy(direction, style, leadFrame, index, contentProfile);
       const mergedCopy = overrides
         ? {
             ...autoCopy,
@@ -1295,7 +1520,7 @@ export default function ThumbnailGenerator({ videoSrc, videoRef: externalVideoRe
           }
         : autoCopy;
 
-      return buildThumbnailVariant(style, direction, leadFrame, sourceFrames, mergedCopy);
+      return buildThumbnailVariant(style, direction, leadFrame, sourceFrames, mergedCopy, contentProfile);
     });
   }, []);
 
@@ -1318,6 +1543,18 @@ export default function ThumbnailGenerator({ videoSrc, videoRef: externalVideoRe
     drawSelectedPreview(thumbnails[selectedIndex]?.dataUrl, previewCanvasRef);
   }, [drawSelectedPreview, selectedIndex, thumbnails]);
 
+  useEffect(() => {
+    if (stage !== "ready" || !sampledFramesRef.current.length) return;
+    const nextThumbs = renderConcepts(
+      sampledFramesRef.current,
+      activeDirection,
+      activeContentProfile,
+      copyOverrides
+    );
+    setThumbnails(nextThumbs);
+    setSelectedIndex(currentIndex => clamp(currentIndex, 0, Math.max(0, nextThumbs.length - 1)));
+  }, [activeContentProfile, activeDirection, copyOverrides, renderConcepts, stage]);
+
   const applyDirection = useCallback(
     nextDirectionId => {
       const nextDirection = getDirectionPreset(nextDirectionId);
@@ -1326,7 +1563,7 @@ export default function ThumbnailGenerator({ videoSrc, videoRef: externalVideoRe
 
       if (!sampledFramesRef.current.length) return;
 
-      const nextThumbs = renderConcepts(sampledFramesRef.current, nextDirection, null);
+      const nextThumbs = renderConcepts(sampledFramesRef.current, nextDirection, activeContentProfile, null);
       setThumbnails(nextThumbs);
       const nextIndex = Math.max(
         0,
@@ -1334,7 +1571,7 @@ export default function ThumbnailGenerator({ videoSrc, videoRef: externalVideoRe
       );
       setSelectedIndex(nextIndex === -1 ? 0 : nextIndex);
     },
-    [renderConcepts, selectedStyleId]
+    [activeContentProfile, renderConcepts, selectedStyleId]
   );
 
   const generateThumbnails = useCallback(async () => {
@@ -1361,7 +1598,7 @@ export default function ThumbnailGenerator({ videoSrc, videoRef: externalVideoRe
       captureContext.drawImage(video, 0, 0, captureCanvas.width, captureCanvas.height);
       const imageData = captureContext.getImageData(0, 0, captureCanvas.width, captureCanvas.height);
       const metrics = measureFrame(imageData);
-      const score = scoreFrame(metrics, time, duration);
+      const score = scoreFrame(metrics, time, duration, activeContentProfile);
 
       capturedFrames.push({
         imageData,
@@ -1374,8 +1611,12 @@ export default function ThumbnailGenerator({ videoSrc, videoRef: externalVideoRe
     capturedFrames.sort((left, right) => right.score - left.score);
     const topFrames = capturedFrames.slice(0, 10);
     sampledFramesRef.current = topFrames;
+    const inferredProfileId = inferContentProfile(topFrames);
+    setDetectedContentProfileId(inferredProfileId);
+    const resolvedContentProfile =
+      contentProfileMode === "auto" ? getContentProfile(inferredProfileId) : activeContentProfile;
 
-    const nextThumbs = renderConcepts(topFrames, activeDirection, copyOverrides);
+    const nextThumbs = renderConcepts(topFrames, activeDirection, resolvedContentProfile, copyOverrides);
     setThumbnails(nextThumbs);
     setSelectedIndex(0);
     setSelectedStyleId(nextThumbs[0]?.styleId || STYLE_PRESETS[0].id);
@@ -1384,14 +1625,19 @@ export default function ThumbnailGenerator({ videoSrc, videoRef: externalVideoRe
 
     await seekVideo(video, originalTime);
     if (!wasPaused) video.play().catch(() => {});
-  }, [activeDirection, activeVideoRef, copyOverrides, renderConcepts]);
+  }, [activeContentProfile, activeDirection, activeVideoRef, contentProfileMode, copyOverrides, renderConcepts]);
 
   const regenerateCurrentSet = useCallback(() => {
     if (!sampledFramesRef.current.length) return;
-    const nextThumbs = renderConcepts(sampledFramesRef.current, activeDirection, copyOverrides);
+    const nextThumbs = renderConcepts(
+      sampledFramesRef.current,
+      activeDirection,
+      activeContentProfile,
+      copyOverrides
+    );
     setThumbnails(nextThumbs);
     setSelectedIndex(0);
-  }, [activeDirection, copyOverrides, renderConcepts]);
+  }, [activeContentProfile, activeDirection, copyOverrides, renderConcepts]);
 
   const saveThumbnail = useCallback(async () => {
     const thumb = thumbnails[selectedIndex];
@@ -1463,7 +1709,7 @@ export default function ThumbnailGenerator({ videoSrc, videoRef: externalVideoRe
     };
     const direction = getDirectionPreset(directionId);
     const style = getStylePreset(selectedStyleId);
-    const autoCopy = buildAutoCopy(direction, style, previewFrame, 0);
+    const autoCopy = buildAutoCopy(direction, style, previewFrame, 0, activeContentProfile);
     const previewThumb = buildThumbnailVariant(
       style,
       direction,
@@ -1476,11 +1722,12 @@ export default function ThumbnailGenerator({ videoSrc, videoRef: externalVideoRe
         subtext: subtext || autoCopy.subtext,
         accent: accent || autoCopy.accent,
         accentAlt: direction.palette[1] || autoCopy.accentAlt,
-      }
+      },
+      activeContentProfile
     );
 
     drawSelectedPreview(previewThumb.dataUrl, editCanvasRef);
-  }, [accent, activeVideoRef, directionId, drawSelectedPreview, eyebrow, headline, scrubTime, selectedStyleId, subtext]);
+  }, [accent, activeContentProfile, activeVideoRef, directionId, drawSelectedPreview, eyebrow, headline, scrubTime, selectedStyleId, subtext]);
 
   useEffect(() => {
     if (isEditing) {
@@ -1501,7 +1748,7 @@ export default function ThumbnailGenerator({ videoSrc, videoRef: externalVideoRe
     };
 
     setCopyOverrides(overrides);
-    const nextThumbs = renderConcepts(sampledFramesRef.current, direction, overrides);
+    const nextThumbs = renderConcepts(sampledFramesRef.current, direction, activeContentProfile, overrides);
     setThumbnails(nextThumbs);
     const nextIndex = Math.max(
       0,
@@ -1509,7 +1756,7 @@ export default function ThumbnailGenerator({ videoSrc, videoRef: externalVideoRe
     );
     setSelectedIndex(nextIndex === -1 ? 0 : nextIndex);
     setIsEditing(false);
-  }, [accent, directionId, eyebrow, headline, renderConcepts, selectedStyleId, subtext]);
+  }, [accent, activeContentProfile, directionId, eyebrow, headline, renderConcepts, selectedStyleId, subtext]);
 
   const remixCopy = useCallback(() => {
     const referenceFrame =
@@ -1520,20 +1767,26 @@ export default function ThumbnailGenerator({ videoSrc, videoRef: externalVideoRe
 
     const direction = getDirectionPreset(directionId);
     const style = getStylePreset(selectedStyleId);
-    const autoCopy = buildAutoCopy(direction, style, referenceFrame, Math.floor(Math.random() * 11) + 1);
+    const autoCopy = buildAutoCopy(
+      direction,
+      style,
+      referenceFrame,
+      Math.floor(Math.random() * 11) + 1,
+      activeContentProfile
+    );
     setEyebrow(autoCopy.eyebrow);
     setHeadline(autoCopy.headline);
     setSubtext(autoCopy.subtext);
     setAccent(autoCopy.accent);
-  }, [directionId, scrubTime, selectedIndex, selectedStyleId]);
+  }, [activeContentProfile, directionId, scrubTime, selectedIndex, selectedStyleId]);
 
   const resetSystemCopy = useCallback(() => {
     setCopyOverrides(null);
     if (!sampledFramesRef.current.length) return;
-    const nextThumbs = renderConcepts(sampledFramesRef.current, activeDirection, null);
+    const nextThumbs = renderConcepts(sampledFramesRef.current, activeDirection, activeContentProfile, null);
     setThumbnails(nextThumbs);
     setSelectedIndex(0);
-  }, [activeDirection, renderConcepts]);
+  }, [activeContentProfile, activeDirection, renderConcepts]);
 
   return (
     <div className="tg-overlay" onClick={onClose}>
@@ -1589,6 +1842,32 @@ export default function ThumbnailGenerator({ videoSrc, videoRef: externalVideoRe
                     </button>
                   ))}
                 </div>
+
+                <label>Content Fit</label>
+                <div className="tg-system-strip">
+                  <button
+                    type="button"
+                    className={`tg-system-chip ${contentProfileMode === "auto" ? "tg-system-chip-active" : ""}`}
+                    onClick={() => setContentProfileMode("auto")}
+                  >
+                    Auto
+                  </button>
+                  {CONTENT_PROFILES.map(profile => (
+                    <button
+                      key={profile.id}
+                      type="button"
+                      className={`tg-system-chip ${contentProfileMode === profile.id ? "tg-system-chip-active" : ""}`}
+                      onClick={() => setContentProfileMode(profile.id)}
+                    >
+                      {profile.name}
+                    </button>
+                  ))}
+                </div>
+                <p className="tg-help-text">
+                  {contentProfileMode === "auto"
+                    ? `Detected fit: ${activeContentProfile.name} (${activeContentProfile.detectionLabel}).`
+                    : activeContentProfile.summary}
+                </p>
 
                 <label>Layout</label>
                 <div className="tg-style-grid">
@@ -1728,6 +2007,36 @@ export default function ThumbnailGenerator({ videoSrc, videoRef: externalVideoRe
               ))}
             </div>
 
+            <div className="tg-system-grid">
+              <button
+                type="button"
+                className={`tg-system-card ${contentProfileMode === "auto" ? "tg-system-card-active" : ""}`}
+                onClick={() => setContentProfileMode("auto")}
+              >
+                <span className="tg-system-badge">AUTO FIT</span>
+                <strong>Auto Detect</strong>
+                <p>{activeContentProfile.name}</p>
+                <span className="tg-system-note">{activeContentProfile.detectionLabel}</span>
+              </button>
+              {CONTENT_PROFILES.map(profile => (
+                <button
+                  key={profile.id}
+                  type="button"
+                  className={`tg-system-card ${contentProfileMode === profile.id ? "tg-system-card-active" : ""}`}
+                  onClick={() => setContentProfileMode(profile.id)}
+                >
+                  <span className="tg-system-badge">{profile.detectionLabel}</span>
+                  <strong>{profile.name}</strong>
+                  <p>{profile.summary}</p>
+                  <span className="tg-system-note">
+                    {profile.id === "performance"
+                      ? "Built to read choir, singer, worship, and stage-performance moments better."
+                      : profile.subtexts[0]}
+                  </span>
+                </button>
+              ))}
+            </div>
+
             {stage === "idle" && (
               <div className="tg-empty-state">
                 <div className="tg-empty-card">
@@ -1770,6 +2079,12 @@ export default function ThumbnailGenerator({ videoSrc, videoRef: externalVideoRe
                           </span>
                         ))}
                       </div>
+                    </div>
+
+                    <div className="tg-insight-card">
+                      <span className="tg-insight-label">Content Fit</span>
+                      <strong>{selectedThumb.contentProfileName || activeContentProfile.name}</strong>
+                      <p>{activeContentProfile.summary}</p>
                     </div>
 
                     <div className="tg-insight-card">

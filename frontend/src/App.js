@@ -85,6 +85,112 @@ const PageLoader = () => (
   </div>
 );
 
+function hasRenderableImageMeta(meta = {}) {
+  return Boolean(
+    meta &&
+      (Number(meta.rotate || 0) !== 0 ||
+        meta.flipH === true ||
+        meta.flipV === true ||
+        typeof meta.filter === "string")
+  );
+}
+
+function hasRenderableVideoTrimMeta(meta = {}) {
+  return Boolean(
+    meta &&
+      ((Number(meta.trimStart || 0) > 0 || Number(meta.trimEnd || 0) > 0) &&
+        Number(meta.trimEnd || 0) > Number(meta.trimStart || 0))
+  );
+}
+
+function buildCanvasFilter(filterName) {
+  switch (String(filterName || "").toLowerCase()) {
+    case "grayscale":
+      return "grayscale(1)";
+    case "sepia":
+      return "sepia(1)";
+    case "invert":
+      return "invert(1)";
+    case "brightness":
+      return "brightness(1.14)";
+    case "contrast":
+      return "contrast(1.26) saturate(1.05)";
+    default:
+      return "none";
+  }
+}
+
+async function renderPlatformImageVariant(file, meta, platformName) {
+  const objectUrl = URL.createObjectURL(file);
+
+  try {
+    const image = await new Promise((resolve, reject) => {
+      const nextImage = new Image();
+      nextImage.onload = () => resolve(nextImage);
+      nextImage.onerror = () => reject(new Error("Could not load the source image for rendering."));
+      nextImage.src = objectUrl;
+    });
+
+    const radians = ((Number(meta?.rotate || 0) % 360) * Math.PI) / 180;
+    const quarterTurn = Math.abs(Math.round(Number(meta?.rotate || 0) / 90)) % 2 === 1;
+    const outputWidth = quarterTurn ? image.height : image.width;
+    const outputHeight = quarterTurn ? image.width : image.height;
+    const canvas = document.createElement("canvas");
+    canvas.width = outputWidth;
+    canvas.height = outputHeight;
+    const context = canvas.getContext("2d");
+
+    context.save();
+    context.translate(outputWidth / 2, outputHeight / 2);
+    context.rotate(radians);
+    context.scale(meta?.flipH ? -1 : 1, meta?.flipV ? -1 : 1);
+    context.filter = buildCanvasFilter(meta?.filter);
+    context.drawImage(image, -image.width / 2, -image.height / 2);
+    context.restore();
+
+    const blob = await new Promise((resolve, reject) => {
+      canvas.toBlob(nextBlob => {
+        if (nextBlob) resolve(nextBlob);
+        else reject(new Error("Failed to render the image variant."));
+      }, file.type || "image/jpeg", 0.92);
+    });
+
+    const extension =
+      file.name && file.name.includes(".") ? file.name.slice(file.name.lastIndexOf(".")) : ".jpg";
+    return new File([blob], `${platformName}-variant${extension}`, {
+      type: blob.type || file.type || "image/jpeg",
+      lastModified: Date.now(),
+    });
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+}
+
+async function renderPlatformVideoTrimVariant({ fileUrl, token, meta, platformName }) {
+  const response = await fetch(API_ENDPOINTS.MEDIA_RENDER_CLIP, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      fileUrl,
+      startTime: Number(meta.trimStart || 0),
+      endTime: Number(meta.trimEnd || 0),
+    }),
+  });
+
+  const result = await response.json().catch(() => null);
+  if (!response.ok || !result?.url) {
+    throw buildBackendUploadError(
+      new Error(result?.message || `Failed to render the trimmed ${platformName} clip.`)
+    );
+  }
+
+  return result.url;
+}
+
 function App() {
   const [user, setUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -975,38 +1081,72 @@ function App() {
         }
       }
 
-      // 2. Upload Platform-Specific Files (if any)
-      // This allows "Upload Once, Publish Everywhere" with tailored content per platform.
-      const platformFiles = params.platform_files || {};
-      // Ensure we have a mutable reference to platform options
-      const platformOptionsObj = params.platformOptions || params.platform_options || {};
+      // 2. Build/Upload Platform-Specific Media Variants
+      const platformFiles = { ...(params.platform_files || {}) };
+      const platformOptionsObj = { ...(params.platformOptions || params.platform_options || {}) };
+      const platformRenderWarnings = [];
+
+      if (!isDryRun && finalUrl && file && Object.keys(platformOptionsObj).length > 0) {
+        for (const [platformName, options] of Object.entries(platformOptionsObj)) {
+          const meta = options?.meta;
+          if (!meta || platformFiles[platformName]) continue;
+
+          try {
+            if (type === "image" && file instanceof File && hasRenderableImageMeta(meta)) {
+              platformFiles[platformName] = await renderPlatformImageVariant(file, meta, platformName);
+            } else if (type === "video" && hasRenderableVideoTrimMeta(meta)) {
+              const renderedUrl = await renderPlatformVideoTrimVariant({
+                fileUrl: finalUrl,
+                token,
+                meta,
+                platformName,
+              });
+              if (!platformOptionsObj[platformName]) platformOptionsObj[platformName] = {};
+              platformOptionsObj[platformName].media_url = renderedUrl;
+              platformOptionsObj[platformName].renderPipeline = "trimmed_clip";
+            } else if (type === "video" && (meta.rotate || meta.flipH || meta.flipV || meta.filter)) {
+              platformRenderWarnings.push(
+                `${platformName}: save a platform-specific edited file to apply rotate/flip/filter on video.`
+              );
+            }
+          } catch (error) {
+            console.error(`[App] Failed to build platform render for ${platformName}`, error);
+            platformRenderWarnings.push(
+              `${platformName}: variant render failed, so this publish will fall back to the master media.`
+            );
+          }
+        }
+      }
 
       if (platformFiles && Object.keys(platformFiles).length > 0 && !isDryRun) {
         for (const [pName, pFile] of Object.entries(platformFiles)) {
-          if (pFile && pFile instanceof File) {
+          if (pFile && pFile instanceof Blob) {
             try {
               const uploadResult = await uploadSourceFileViaBackend({
                 file: pFile,
                 token,
                 mediaType: inferUploadMediaType(pFile, type || "video"),
-                fileName: `${pName}_${pFile.name}`,
+                fileName: `${pName}_${pFile.name || "variant"}`,
               });
               const pUrl = uploadResult.url;
-
-              // Inject into options so backend sees it
               if (!platformOptionsObj[pName]) platformOptionsObj[pName] = {};
               platformOptionsObj[pName].media_url = pUrl;
             } catch (err) {
               console.error(`[App] Failed to upload file for ${pName}`, err);
-              // Non-fatal, fallback to global URL will happen in backend
+              platformRenderWarnings.push(
+                `${pName}: variant upload failed, so this publish will use the master media.`
+              );
             }
           }
         }
-        // Re-assign back to params to ensure downstream logic uses updated object
-        params.platform_options = platformOptionsObj;
-        // Ensure we keep `platformOptions` in sync if it was passed that way
-        if (params.platformOptions) params.platformOptions = platformOptionsObj;
       }
+
+      if (platformRenderWarnings.length > 0) {
+        console.warn("[App] Platform render warnings:", platformRenderWarnings);
+      }
+
+      params.platform_options = platformOptionsObj;
+      if (params.platformOptions) params.platformOptions = platformOptionsObj;
 
       const schedule_hint = {
         ...schedule,
