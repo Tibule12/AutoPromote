@@ -65,6 +65,12 @@ const buildPromoCaption = (clip, index) => {
 const getPromoExpiresAtIso = () =>
   new Date(Date.now() + PROMO_SUMMARY_RETENTION_HOURS * 60 * 60 * 1000).toISOString();
 
+const sanitizeErrorMessage = error => {
+  const rawMessage =
+    typeof error === "string" ? error : typeof error?.message === "string" ? error.message : "unknown_error";
+  return rawMessage.replace(/[\r\n\t]+/g, " ").slice(0, 240).trim() || "unknown_error";
+};
+
 async function persistPromoSummaryOutputs(docRef, data) {
   if (data.outputsPersistedAt) return data;
 
@@ -563,14 +569,18 @@ router.post("/promo-summary", authMiddleware, async (req, res) => {
         { timeout: 600000 }
       )
       .catch(async error => {
-        console.error(`[ClipRoute] Promo summary worker call failed: ${error.message}`);
+        const safeWorkerError = sanitizeErrorMessage(error);
+        console.error("[ClipRoute] Promo summary worker call failed", {
+          jobId,
+          message: safeWorkerError,
+        });
         await db
           .collection("clip_analyses")
           .doc(jobId)
           .set(
             {
               status: "failed",
-              error: error.message,
+              error: safeWorkerError,
               failedAt: new Date().toISOString(),
             },
             { merge: true }
@@ -579,7 +589,10 @@ router.post("/promo-summary", authMiddleware, async (req, res) => {
       });
 
     monitorPromoSummaryJob(jobId).catch(error => {
-      console.error(`[ClipRoute] Promo summary monitor failed for ${jobId}:`, error.message);
+      console.error("[ClipRoute] Promo summary monitor failed", {
+        jobId,
+        message: sanitizeErrorMessage(error),
+      });
     });
 
     res.json({
@@ -591,8 +604,10 @@ router.post("/promo-summary", authMiddleware, async (req, res) => {
       message: "Smart Promo Summary started.",
     });
   } catch (error) {
-    console.error("[ClipRoute] Promo summary error:", error.message);
-    res.status(500).json({ error: "Smart Promo Summary failed", details: error.message });
+    console.error("[ClipRoute] Promo summary error", {
+      message: sanitizeErrorMessage(error),
+    });
+    res.status(500).json({ error: "Smart Promo Summary failed" });
   }
 });
 
