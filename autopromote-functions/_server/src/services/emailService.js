@@ -9,13 +9,21 @@ function renderTemplate(tpl, vars) {
   );
 }
 
-async function sendEmail({ to, subject, html, text, headers }) {
+async function sendEmail({ to, subject, html, htmlbody, text, headers, sensitive = false }) {
   if (!ENABLE_EMAIL) {
     console.log("[emailService] disabled ->", subject, "to", maskEmail(to));
     return { ok: false, disabled: true };
   }
   const provider = getEmailProvider();
-  const resp = await provider.send({ to, subject, html, text, headers });
+  const finalHtmlBody = htmlbody || html;
+  const resp = await provider.send({
+    to,
+    subject,
+    htmlbody: finalHtmlBody,
+    text,
+    headers,
+    sensitive,
+  });
   if (!resp || resp.ok === false) {
     try {
       const { recordEmailFailure } = require("./alertingService");

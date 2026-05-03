@@ -860,9 +860,21 @@ try {
   ) {
     app.use(global.__sentry.Handlers.requestHandler());
   }
-  // Honor X-Forwarded-* headers from Render/production proxies so req.protocol
-  // reflects the original HTTPS scheme when we build OAuth redirect URLs.
-  app.set("trust proxy", true);
+  // Honor X-Forwarded-* headers from proxies without enabling permissive trust-proxy
+  // behavior that weakens IP-based rate limiting.
+  const trustProxySetting = String(
+    process.env.TRUST_PROXY_HOPS || process.env.TRUST_PROXY || (process.env.NODE_ENV === "production" ? "1" : "0")
+  )
+    .trim()
+    .toLowerCase();
+  if (["0", "false", "off", "no"].includes(trustProxySetting)) {
+    app.set("trust proxy", false);
+  } else if (["true", "on", "yes"].includes(trustProxySetting)) {
+    app.set("trust proxy", 1);
+  } else {
+    const trustProxyHops = parseInt(trustProxySetting, 10);
+    app.set("trust proxy", Number.isFinite(trustProxyHops) && trustProxyHops > 0 ? trustProxyHops : 1);
+  }
 
   // CodeQL-recognizable rate limiters (express-rate-limit). These are additive to our
   // distributed limiter and provide a conservative global safety net to satisfy scanners.

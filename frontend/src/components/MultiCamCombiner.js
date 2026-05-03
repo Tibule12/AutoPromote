@@ -36,7 +36,7 @@ import {
 import { getAuth } from "firebase/auth";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { API_BASE_URL } from "../config";
-import { applySafeMediaSource, getSafeMediaSource } from "../utils/security";
+import { applySafeMediaSource } from "../utils/security";
 import toast from "react-hot-toast";
 import "./MultiCamCombiner.css";
 import useCinematicEffects from "../hooks/useCinematicEffects";
@@ -1649,6 +1649,16 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       }
     };
   }, [isPlaying, timelineDuration, flowEditEnabled, flowAudioUrl]);
+
+  useEffect(() => {
+    readySources.forEach(source => {
+      applySafeMediaSource(audioVideoRefs.current[source.id], getSourceMediaUrl(source));
+    });
+  }, [readySources]);
+
+  useEffect(() => {
+    applySafeMediaSource(flowAudioRef.current, flowAudioUrl);
+  }, [flowAudioUrl]);
 
   useEffect(() => {
     readySources.forEach(source => {
@@ -4347,12 +4357,14 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
               key={`audio-${source.id}`}
               ref={node => {
                 audioVideoRefs.current[source.id] = node;
+                if (node) {
+                  applySafeMediaSource(node, getSourceMediaUrl(source));
+                }
               }}
-              src={getSafeMediaSource(getSourceMediaUrl(source))}
               playsInline
             />
           ))}
-          <audio ref={flowAudioRef} src={getSafeMediaSource(flowAudioUrl)} preload="auto" />
+          <audio ref={flowAudioRef} preload="auto" />
         </div>
       </div>
     </div>
