@@ -3,6 +3,19 @@
 
 const { maskEmail } = require("../utils/logSanitizer");
 
+function hasZeptoMailConfig() {
+  return Boolean(
+    process.env.ZEPTOMAIL_API_KEY &&
+      process.env.ZEPTOMAIL_API_URL &&
+      process.env.ZEPTOMAIL_FROM_EMAIL &&
+      process.env.ZEPTOMAIL_FROM_NAME
+  );
+}
+
+function hasSmtpConfig() {
+  return Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+}
+
 const providers = {
   console: () => ({
     name: "console",
@@ -151,6 +164,11 @@ function getEmailProvider() {
     (process.env.ZEPTOMAIL_API_KEY && process.env.ZEPTOMAIL_API_URL ? "zeptomail" : "console")
   ).toLowerCase();
 
+  if ((providerName === "smtp" || providerName === "zoho") && !hasSmtpConfig() && hasZeptoMailConfig()) {
+    console.warn("[email] SMTP requested but not fully configured, falling back to ZeptoMail");
+    return providers.zeptomail();
+  }
+
   const factory = providers[providerName];
   if (!factory) {
     console.warn(`[email] provider '${providerName}' not found in registry, using console`);
@@ -160,6 +178,12 @@ function getEmailProvider() {
   try {
     return factory();
   } catch (e) {
+    if (providerName !== "zeptomail" && hasZeptoMailConfig()) {
+      try {
+        console.warn(`[email] provider '${providerName}' failed to init, falling back to ZeptoMail`);
+        return providers.zeptomail();
+      } catch (_) {}
+    }
     console.error(`[email] failed to init provider '${providerName}':`, e.message);
     return providers.console();
   }
