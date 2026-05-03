@@ -9,8 +9,8 @@ const { db } = require("../firebaseAdmin");
 const { SUBSCRIPTION_PLANS, normalizePlanId, resolvePlan } = require("../config/subscriptionPlans");
 
 function formatLimitValue(value, noun) {
-  if (value === Infinity || value === "Unlimited" || value === "unlimited") {
-    return `Unlimited ${noun}`;
+  if (value === Infinity) {
+    return `Custom ${noun}`;
   }
   return `${value} ${noun}`;
 }

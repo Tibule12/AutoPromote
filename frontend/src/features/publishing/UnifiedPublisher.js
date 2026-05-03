@@ -15,6 +15,7 @@ import toast from "react-hot-toast";
 // --- Hooks ---
 import { usePublishingState } from "./hooks/usePublishingState";
 import { useMediaProcessor } from "./hooks/useMediaProcessor";
+import { useSubscription } from "../../hooks/useSubscription";
 import { sanitizeUrl } from "../../utils/security";
 import {
   buildBackendUploadError,
@@ -1150,6 +1151,8 @@ const PlatformPreview = ({
 };
 
 const UnifiedPublisher = ({ onUpload, initialFile }) => {
+  const { editing } = useSubscription();
+  const viralClipCost = editing?.features?.findViralClips?.creditCost || 8;
   // 1. Initialize State Logic
   const {
     // Global File (Raw)
@@ -2360,6 +2363,20 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                       </button>
                     )}
                   </div>
+                  {mediaType === "video" && (
+                    <div
+                      style={{
+                        marginTop: "8px",
+                        color: "#94a3b8",
+                        fontSize: "0.78rem",
+                        lineHeight: 1.45,
+                      }}
+                    >
+                      Review AI Enhancements opens your included paid-plan editor tools. Find Viral
+                      Clips uses {viralClipCost} credits per analysis, and you can top up anytime
+                      if you use your monthly allowance early.
+                    </div>
+                  )}
 
                   {previewUrl && (
                     <div

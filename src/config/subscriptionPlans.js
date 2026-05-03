@@ -26,7 +26,7 @@ const SUBSCRIPTION_PLANS = {
       wolfHuntTasks: 20,
       analytics: "Workflow analytics",
       support: "Email support",
-      multicam: false,
+      multicam: true,
       teamSeats: 1,
     },
   },
@@ -37,8 +37,8 @@ const SUBSCRIPTION_PLANS = {
     paypalPlanIdEnv: "PAYPAL_PRO_PLAN_ID",
     features: {
       monthlyCredits: 500,
-      uploads: "Unlimited",
-      platformLimit: "Unlimited",
+      uploads: 80,
+      platformLimit: 12,
       wolfHuntTasks: 100,
       analytics: "Advanced insights",
       support: "Priority support",
@@ -53,8 +53,8 @@ const SUBSCRIPTION_PLANS = {
     paypalPlanIdEnv: "PAYPAL_ENTERPRISE_PLAN_ID",
     features: {
       monthlyCredits: 2000,
-      uploads: "Unlimited",
-      platformLimit: "Unlimited",
+      uploads: 240,
+      platformLimit: 30,
       wolfHuntTasks: 500,
       analytics: "Team reporting",
       support: "Dedicated support",
@@ -87,6 +87,117 @@ const CREDIT_TOP_UP_PACKS = [
   { id: "pack_pro", credits: 200, price: 14.99, name: "Pro Pack", savings: "25%" },
   { id: "pack_studio", credits: 500, price: 29.99, name: "Studio Pack", savings: "40%" },
 ];
+
+const EDITING_FEATURE_CATALOG = {
+  watermarkRemoval: {
+    label: "Watermark Cleanup",
+    clientSide: false,
+    backendProcessing: true,
+    pythonWorker: true,
+    usesStorage: true,
+    creditOperation: "process",
+    limitModel: "monthly_credits_then_topups",
+  },
+  audioExtract: {
+    label: "Audio Extraction",
+    clientSide: false,
+    backendProcessing: true,
+    pythonWorker: true,
+    usesStorage: true,
+    creditOperation: "transcribe",
+    limitModel: "monthly_credits_then_topups",
+  },
+  multicam: {
+    label: "Cam Combiner",
+    clientSide: true,
+    backendProcessing: false,
+    pythonWorker: false,
+    usesStorage: false,
+    creditOperation: null,
+    limitModel: "included_on_paid_plans",
+  },
+  autoDirector: {
+    label: "Auto Director",
+    clientSide: true,
+    backendProcessing: false,
+    pythonWorker: false,
+    usesStorage: false,
+    creditOperation: null,
+    limitModel: "included_on_paid_plans",
+  },
+  flowEdit: {
+    label: "Flow Edit / Sync to Sound",
+    clientSide: true,
+    backendProcessing: false,
+    pythonWorker: false,
+    usesStorage: false,
+    creditOperation: null,
+    limitModel: "included_on_paid_plans",
+  },
+  thumbnailLab: {
+    label: "Thumbnail Lab",
+    clientSide: true,
+    backendProcessing: false,
+    pythonWorker: false,
+    usesStorage: false,
+    creditOperation: null,
+    limitModel: "included_on_paid_plans",
+  },
+  findViralClips: {
+    label: "Find Viral Clips",
+    clientSide: false,
+    backendProcessing: true,
+    pythonWorker: false,
+    usesStorage: true,
+    creditOperation: "analyze",
+    limitModel: "monthly_credits_then_topups",
+  },
+  viralClipStudio: {
+    label: "Viral Clip Studio",
+    clientSide: true,
+    backendProcessing: false,
+    pythonWorker: false,
+    usesStorage: false,
+    creditOperation: null,
+    limitModel: "included_on_paid_plans",
+  },
+  clipRender: {
+    label: "Render Final Clip",
+    clientSide: false,
+    backendProcessing: true,
+    pythonWorker: true,
+    usesStorage: true,
+    creditOperation: "render-clip",
+    limitModel: "monthly_credits_then_topups",
+  },
+  smartPromoSummary: {
+    label: "Smart Promo Summary",
+    clientSide: false,
+    backendProcessing: true,
+    pythonWorker: true,
+    usesStorage: true,
+    creditOperation: "promo-summary",
+    limitModel: "monthly_credits_then_topups",
+  },
+  videoProcessing: {
+    label: "AI Video Processing",
+    clientSide: false,
+    backendProcessing: true,
+    pythonWorker: true,
+    usesStorage: true,
+    creditOperation: "process",
+    limitModel: "monthly_credits_then_topups",
+  },
+  multicamRender: {
+    label: "Server Multicam Render",
+    clientSide: false,
+    backendProcessing: true,
+    pythonWorker: true,
+    usesStorage: true,
+    creditOperation: "render-multicam",
+    limitModel: "monthly_credits_then_topups",
+  },
+};
 
 const PLAN_CAPABILITIES = {
   free: {
@@ -180,6 +291,23 @@ function getPlanCapabilities(planId) {
   const plan = resolvePlan(normalizedPlanId);
   const base = PLAN_CAPABILITIES[normalizedPlanId] || PLAN_CAPABILITIES.free;
   const missionQuota = Number(plan.features.wolfHuntTasks);
+  const isPaidPlan = normalizedPlanId !== "free";
+  const editing = Object.fromEntries(
+    Object.entries(EDITING_FEATURE_CATALOG).map(([featureId, feature]) => {
+      const enabled = isPaidPlan;
+      const creditCost = feature.creditOperation ? getCreditCost(feature.creditOperation) : 0;
+      return [
+        featureId,
+        {
+          label: feature.label,
+          enabled,
+          creditCost,
+          topUpEligible: enabled && creditCost > 0,
+          included: enabled && creditCost === 0,
+        },
+      ];
+    })
+  );
 
   return {
     planId: normalizedPlanId,
@@ -202,6 +330,14 @@ function getPlanCapabilities(planId) {
     },
     multicam: !!plan.features.multicam,
     teamSeats: plan.features.teamSeats || 1,
+    editing: {
+      allPaidFeaturesUnlocked: isPaidPlan,
+      topUpsEnabled: isPaidPlan,
+      monthlyCreditsIncluded: plan.features.monthlyCredits || 0,
+      policy:
+        "Paid plans include the creative toolset. Credit-based generations draw from your monthly allowance first, and you can top up anytime.",
+      features: editing,
+    },
   };
 }
 
@@ -218,6 +354,7 @@ module.exports = {
   PLAN_CAPABILITIES,
   CREDIT_COSTS,
   CREDIT_TOP_UP_PACKS,
+  EDITING_FEATURE_CATALOG,
   normalizePlanId,
   resolvePlan,
   getUploadLimitForPlan,

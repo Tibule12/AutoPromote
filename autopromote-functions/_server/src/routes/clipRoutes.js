@@ -1,11 +1,286 @@
 const express = require("express");
 const router = express.Router();
+const axios = require("axios");
 const videoClippingService = require("../services/videoClippingService");
 const authMiddleware = require("../authMiddleware");
-const { deductCredits } = require("../creditSystem");
+const { deductCredits, refundCredits } = require("../creditSystem");
 const { db } = require("../firebaseAdmin");
+const { cleanupSourceFile } = require("../utils/cleanupSource");
+const { CREDIT_COSTS } = require("../config/subscriptionPlans");
 
 const CLIP_ANALYSIS_COST = 0; // Cost per analysis (Phase 1 default)
+const MEDIA_WORKER_URL =
+  process.env.MEDIA_WORKER_URL || "https://media-worker-v1-341498038874.us-central1.run.app";
+const PROMO_SUMMARY_COST = parseInt(
+  process.env.SMART_PROMO_SUMMARY_CREDIT_COST || `${CREDIT_COSTS["promo-summary"] || 18}`,
+  10
+);
+const PROMO_SUMMARY_CLIP_COUNT = parseInt(process.env.SMART_PROMO_SUMMARY_CLIP_COUNT || "4", 10);
+const PROMO_SUMMARY_RETENTION_HOURS = parseInt(
+  process.env.SMART_PROMO_SUMMARY_RETENTION_HOURS || "24",
+  10
+);
+
+const PROMO_STYLE_MAP = {
+  clean: { captionStyle: "minimal", smartCropMode: "speaker_track" },
+  hype: { captionStyle: "bold_pop", smartCropMode: "speaker_track" },
+  minimal: { captionStyle: "minimal", smartCropMode: "center" },
+};
+
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+const getPromoStyleConfig = style => {
+  const key = String(style || "clean").trim().toLowerCase();
+  return PROMO_STYLE_MAP[key] || PROMO_STYLE_MAP.clean;
+};
+
+const normalizePromoCaption = (value, fallback) => {
+  const cleaned = String(value || "")
+    .replace(/[#@]/g, " ")
+    .replace(/[^a-zA-Z0-9'\s-]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!cleaned) return fallback;
+  const words = cleaned
+    .split(" ")
+    .map(word => word.trim())
+    .filter(Boolean)
+    .slice(0, 6);
+  if (!words.length) return fallback;
+  if (words.length === 1) words.push("Moment");
+  return words
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};
+
+const buildPromoCaption = (clip, index) => {
+  const text = String(clip?.text || "").trim();
+  const reason = String(clip?.reason || "").trim();
+  const fallback = `Promo Cut ${index + 1}`;
+  if (text) return normalizePromoCaption(text, fallback);
+  if (reason) return normalizePromoCaption(reason, fallback);
+  return fallback;
+};
+
+const getPromoExpiresAtIso = () =>
+  new Date(Date.now() + PROMO_SUMMARY_RETENTION_HOURS * 60 * 60 * 1000).toISOString();
+
+async function persistPromoSummaryOutputs(docRef, data) {
+  if (data.outputsPersistedAt) return data;
+
+  const renderedClips = (Array.isArray(data.clips) ? data.clips : [])
+    .filter(clip => clip?.rendered && clip?.url)
+    .slice(0, PROMO_SUMMARY_CLIP_COUNT);
+
+  if (!renderedClips.length) {
+    throw new Error("Promo generation completed without usable clips");
+  }
+
+  const nowIso = new Date().toISOString();
+  const expiresAt = getPromoExpiresAtIso();
+  const batch = db.batch();
+  const generatedClipIds = [];
+  const promoClips = [];
+
+  renderedClips.forEach((clip, index) => {
+    const clipId = `promo-${docRef.id}-${index + 1}`;
+    const promoCaption = buildPromoCaption(clip, index);
+    const payload = {
+      id: clipId,
+      userId: data.userId,
+      url: clip.url,
+      storagePath: clip.storagePath || null,
+      title: promoCaption,
+      description: clip.reason || "AI-generated promotional clip",
+      promoCaption,
+      createdAt: nowIso,
+      expiresAt,
+      sourceType: "promo_summary_clip",
+      sourceContext: "smart_promo_summary",
+      sourceAnalysisId: docRef.id,
+      sourceClipId: clip.id || `clip-${index + 1}`,
+      contentId: data.contentId || null,
+      viralScore: clip.viralScore || null,
+      duration: clip.duration || data.targetDurationSeconds || null,
+      promoStyle: data.style || "clean",
+      promoDurationSeconds: data.targetDurationSeconds || null,
+      downloadAvailable: true,
+      type: "video",
+    };
+
+    batch.set(db.collection("generated_clips").doc(clipId), payload);
+    batch.set(db.collection("content").doc(clipId), payload);
+    generatedClipIds.push(clipId);
+    promoClips.push(payload);
+  });
+
+  batch.set(
+    docRef,
+    {
+      outputsPersistedAt: nowIso,
+      generatedClipIds,
+      generatedClipsCount: generatedClipIds.length,
+      promoClips,
+      expiresAt,
+    },
+    { merge: true }
+  );
+
+  await batch.commit();
+
+  let sourceCleanupStatus = "not_requested";
+  if (data.cleanupTempSourceOnComplete && data.videoUrl) {
+    const cleanupResult = await cleanupSourceFile(data.videoUrl, {
+      currentPlatform: "smart_promo_summary",
+    });
+    sourceCleanupStatus = cleanupResult?.status || "unknown";
+    await docRef.set(
+      {
+        sourceCleanupStatus,
+        sourceCleanedAt: new Date().toISOString(),
+      },
+      { merge: true }
+    );
+  }
+
+  return {
+    ...data,
+    outputsPersistedAt: nowIso,
+    generatedClipIds,
+    generatedClipsCount: generatedClipIds.length,
+    promoClips,
+    expiresAt,
+    sourceCleanupStatus,
+  };
+}
+
+async function refundPromoSummaryJob(docRef, data, reason = "processing_failed") {
+  if (!data?.billing?.charged || data?.billing?.refundedAt) {
+    return data;
+  }
+
+  const refundResult = await refundCredits(
+    data.userId,
+    {
+      amount: data.billing.cost || 0,
+      deducted: data.billing.cost || 0,
+      fromMonthly: data.billing.fromMonthly || 0,
+      fromTopUp: data.billing.fromTopUp || 0,
+      monthKey: data.billing.monthKey,
+    },
+    "promo-summary-refund",
+    {
+      jobId: docRef.id,
+      reason,
+    }
+  );
+
+  const refundAt = new Date().toISOString();
+  await docRef.set(
+    {
+      billing: {
+        ...data.billing,
+        refundedAt: refundAt,
+        refundReason: reason,
+        refundSuccess: !!refundResult.success,
+      },
+    },
+    { merge: true }
+  );
+
+  if (data.cleanupTempSourceOnComplete && data.videoUrl) {
+    await cleanupSourceFile(data.videoUrl, {
+      currentPlatform: "smart_promo_summary_failed",
+    }).catch(() => {});
+  }
+
+  return {
+    ...data,
+    billing: {
+      ...data.billing,
+      refundedAt: refundAt,
+      refundReason: reason,
+      refundSuccess: !!refundResult.success,
+    },
+  };
+}
+
+async function reconcilePromoSummaryJob(docRef, data) {
+  if (!data || data.type !== "promo_summary") {
+    return data;
+  }
+
+  if (data.status === "completed" && !data.outputsPersistedAt) {
+    try {
+      return await persistPromoSummaryOutputs(docRef, data);
+    } catch (error) {
+      await docRef.set(
+        {
+          status: "failed",
+          error: error.message,
+          failedAt: new Date().toISOString(),
+        },
+        { merge: true }
+      );
+      const failedData = {
+        ...data,
+        status: "failed",
+        error: error.message,
+      };
+      return refundPromoSummaryJob(docRef, failedData, "persist_failed");
+    }
+  }
+
+  if (data.status === "failed") {
+    return refundPromoSummaryJob(docRef, data, data.error || "worker_failed");
+  }
+
+  return data;
+}
+
+async function monitorPromoSummaryJob(jobId) {
+  const jobRef = db.collection("clip_analyses").doc(jobId);
+
+  for (let attempt = 0; attempt < 720; attempt += 1) {
+    const snap = await jobRef.get();
+    if (!snap.exists) return;
+    const data = snap.data() || {};
+
+    if (data.outputsPersistedAt || data.billing?.refundedAt) {
+      return;
+    }
+
+    if (data.status === "completed" || data.status === "failed") {
+      await reconcilePromoSummaryJob(jobRef, data);
+      return;
+    }
+
+    await sleep(5000);
+  }
+
+  const timeoutSnap = await jobRef.get();
+  if (!timeoutSnap.exists) return;
+  const timeoutData = timeoutSnap.data() || {};
+  if (timeoutData.outputsPersistedAt || timeoutData.billing?.refundedAt) return;
+
+  await jobRef.set(
+    {
+      status: "failed",
+      error: "Promo summary timed out while waiting for worker completion.",
+      failedAt: new Date().toISOString(),
+    },
+    { merge: true }
+  );
+  await refundPromoSummaryJob(
+    jobRef,
+    {
+      ...timeoutData,
+      status: "failed",
+      error: "Promo summary timed out while waiting for worker completion.",
+    },
+    "timeout"
+  );
+}
 
 /**
  * @route POST /analyze
@@ -144,44 +419,24 @@ router.get("/history", authMiddleware, getUserAnalyses);
 router.get("/user", authMiddleware, async (req, res) => {
   const userId = req.user.uid;
   try {
-    // Fetch generated clips for this specific user
-    // Note: This query requires a composite index: userId ASC, sourceType ASC, createdAt DESC
-    // If index is missing, this will throw an error with a link to create it.
-
-    // Simplification for rapid fix:
-    // If the complex query fails, fall back to a simpler query and filter in memory
-    let snapshot;
-    try {
-      snapshot = await db
-        .collection("content")
-        .where("userId", "==", userId)
-        .where("sourceType", "==", "ai_clip")
-        .orderBy("createdAt", "desc")
-        .limit(50)
-        .get();
-    } catch (err) {
-      console.warn(
-        "[ClipRoute] Complex query failed (likely missing index), falling back to simple query:",
-        err.message
-      );
-      // Fallback: Just get by userId and filter
-      snapshot = await db
-        .collection("content")
-        .where("userId", "==", userId)
-        .orderBy("createdAt", "desc")
-        .limit(100)
-        .get();
-    }
+    const snapshot = await db
+      .collection("content")
+      .where("userId", "==", userId)
+      .orderBy("createdAt", "desc")
+      .limit(100)
+      .get();
 
     const clips = [];
     const now = new Date();
 
     snapshot.forEach(doc => {
       const data = doc.data();
+      if (!["ai_clip", "promo_summary_clip"].includes(String(data.sourceType || ""))) return;
       // Filter out expired clips if an expiration date is set
       if (data.expiresAt) {
         const expiry = new Date(data.expiresAt);
         if (expiry < now) return;
+        data.expiresInMs = Math.max(0, expiry.getTime() - now.getTime());
       }
       clips.push({ id: doc.id, ...data });
     });
@@ -202,7 +457,8 @@ router.get("/user", authMiddleware, async (req, res) => {
  */
 router.get("/analysis/:id", authMiddleware, async (req, res) => {
   try {
-    const doc = await db.collection("clip_analyses").doc(req.params.id).get();
+    const docRef = db.collection("clip_analyses").doc(req.params.id);
+    const doc = await docRef.get();
 
     if (!doc.exists) {
       return res.status(404).json({ error: "Analysis not found" });
@@ -213,10 +469,130 @@ router.get("/analysis/:id", authMiddleware, async (req, res) => {
       return res.status(403).json({ error: "Unauthorized" });
     }
 
-    res.json({ analysis: { id: doc.id, ...doc.data() } });
+    const reconciled = await reconcilePromoSummaryJob(docRef, doc.data());
+    res.json({ analysis: { id: doc.id, ...reconciled } });
   } catch (error) {
     console.error("Fetch analysis error:", error);
     res.status(500).json({ error: "Server error" });
+  }
+});
+
+/**
+ * @route POST /promo-summary
+ * @desc Generate multiple short promo clips with auto story captions
+ * @access Private
+ */
+router.post("/promo-summary", authMiddleware, async (req, res) => {
+  const {
+    videoUrl,
+    contentId = null,
+    durationSeconds = 30,
+    style = "clean",
+    sourceStoragePath = null,
+  } = req.body || {};
+  const userId = req.user.uid;
+
+  const targetDurationSeconds = [15, 30, 60].includes(Number(durationSeconds))
+    ? Number(durationSeconds)
+    : 30;
+  const normalizedStyle = String(style || "clean").trim().toLowerCase();
+  const styleConfig = getPromoStyleConfig(normalizedStyle);
+
+  if (!videoUrl) {
+    return res.status(400).json({ error: "Missing videoUrl" });
+  }
+
+  try {
+    const credits = await deductCredits(userId, PROMO_SUMMARY_COST, "promo-summary");
+    if (!credits.success) {
+      return res.status(402).json({
+        error: "Insufficient credits",
+        message: "Smart Promo Summary is a premium feature and requires credits.",
+        required: PROMO_SUMMARY_COST,
+        remaining: credits.remaining || 0,
+      });
+    }
+
+    const jobId = `promo-${Date.now()}-${userId.slice(0, 6)}`;
+    await db
+      .collection("clip_analyses")
+      .doc(jobId)
+      .set({
+        userId,
+        videoUrl,
+        contentId,
+        type: "promo_summary",
+        status: "queued",
+        progress: 0,
+        phase: "queued",
+        requestedClipCount: PROMO_SUMMARY_CLIP_COUNT,
+        targetDurationSeconds,
+        style: normalizedStyle,
+        captionStyle: styleConfig.captionStyle,
+        smartCropMode: styleConfig.smartCropMode,
+        clips: [],
+        createdAt: new Date().toISOString(),
+        cleanupTempSourceOnComplete: Boolean(
+          sourceStoragePath &&
+            /^(temp_uploads|temp_sources)\//.test(String(sourceStoragePath))
+        ),
+        sourceStoragePath: sourceStoragePath || null,
+        billing: {
+          charged: true,
+          cost: PROMO_SUMMARY_COST,
+          chargedAt: new Date().toISOString(),
+          fromMonthly: credits.fromMonthly || 0,
+          fromTopUp: credits.fromTopUp || 0,
+          monthKey: credits.monthKey || new Date().toISOString().slice(0, 7),
+        },
+      });
+
+    axios
+      .post(
+        `${MEDIA_WORKER_URL}/auto-generate-clips`,
+        {
+          video_url: videoUrl,
+          job_id: jobId,
+          max_clips: PROMO_SUMMARY_CLIP_COUNT,
+          target_duration: targetDurationSeconds,
+          caption_style: styleConfig.captionStyle,
+          smart_crop_mode: styleConfig.smartCropMode,
+          target_aspect_ratio: "9:16",
+          template: normalizedStyle === "hype" ? "reaction" : normalizedStyle === "minimal" ? "tutorial" : "story",
+        },
+        { timeout: 600000 }
+      )
+      .catch(async error => {
+        console.error(`[ClipRoute] Promo summary worker call failed: ${error.message}`);
+        await db
+          .collection("clip_analyses")
+          .doc(jobId)
+          .set(
+            {
+              status: "failed",
+              error: error.message,
+              failedAt: new Date().toISOString(),
+            },
+            { merge: true }
+          )
+          .catch(() => {});
+      });
+
+    monitorPromoSummaryJob(jobId).catch(error => {
+      console.error(`[ClipRoute] Promo summary monitor failed for ${jobId}:`, error.message);
+    });
+
+    res.json({
+      success: true,
+      jobId,
+      cost: PROMO_SUMMARY_COST,
+      creditsRemaining: credits.remaining,
+      clipCount: PROMO_SUMMARY_CLIP_COUNT,
+      message: "Smart Promo Summary started.",
+    });
+  } catch (error) {
+    console.error("[ClipRoute] Promo summary error:", error.message);
+    res.status(500).json({ error: "Smart Promo Summary failed", details: error.message });
   }
 });
 

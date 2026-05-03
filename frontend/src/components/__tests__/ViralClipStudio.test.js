@@ -764,33 +764,9 @@ describe("ViralClipStudio timeline sequencing", () => {
     });
   });
 
-  test("adds extracted background audio controls after uploading a source video", async () => {
-    uploadSourceFileViaBackend.mockResolvedValue({
-      url: "https://example.com/source-upload.mp4",
-    });
-    global.fetch
-      .mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: async () => ({ jobId: "audio-job-1" }),
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: async () => ({
-          status: "completed",
-          progress: 100,
-          audio_url: "https://example.com/audio.mp3",
-          result: {
-            audioUrl: "https://example.com/audio.mp3",
-            audioDuration: 14.5,
-            format: "mp3",
-          },
-        }),
-      });
-
+  test("keeps only original-audio controls in the studio", async () => {
     const onStatusChange = jest.fn();
-    const { container } = render(
+    render(
       <ViralClipStudio
         videoUrl="https://example.com/source.mp4"
         clips={[{ id: "clip-1", start: 0, end: 10, duration: 10, reason: "Hook" }]}
@@ -802,71 +778,15 @@ describe("ViralClipStudio timeline sequencing", () => {
       />
     );
 
-    const audioUploadInput = screen.getByTestId("background-audio-upload-input");
-
-    await act(async () => {
-      fireEvent.change(audioUploadInput, {
-        target: {
-          files: [new File(["video"], "sound-source.mp4", { type: "video/mp4" })],
-        },
-      });
-    });
-
-    await waitFor(() => {
-      expect(uploadSourceFileViaBackend).toHaveBeenCalledWith(
-        expect.objectContaining({
-          mediaType: "video",
-          fileName: "sound-source.mp4",
-        })
-      );
-    });
-
-    await waitFor(
-      () => {
-        expect(screen.getByText("Background audio added to the timeline.")).toBeInTheDocument();
-        expect(screen.getByText("sound-source.mp4")).toBeInTheDocument();
-        expect(screen.getByText(/Trim Start:/i)).toBeInTheDocument();
-        expect(screen.getByText(/Volume:/i)).toBeInTheDocument();
-        expect(screen.getByRole("button", { name: /Pause Track/i })).toBeInTheDocument();
-      },
-      { timeout: 4000 }
-    );
-
-    fireEvent.click(screen.getByRole("button", { name: /Pause Track/i }));
-    expect(screen.getByRole("button", { name: /Play Track/i })).toBeInTheDocument();
-
-    expect(global.fetch).toHaveBeenCalledTimes(2);
-    expect(onStatusChange).toHaveBeenCalledWith(
-      "Background audio extracted and added to the timeline."
-    );
+    expect(screen.queryByTestId("background-audio-upload-input")).toBeNull();
+    expect(screen.queryByText(/Upload donor video/i)).toBeNull();
+    expect(screen.queryByText(/Add Background Music/i)).toBeNull();
+    expect(screen.getAllByLabelText(/Mute Original Audio/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/Original audio control/i)).toBeInTheDocument();
+    expect(onStatusChange).not.toHaveBeenCalled();
   });
 
-  test("exports the selected background audio mode with the render options", async () => {
-    uploadSourceFileViaBackend.mockResolvedValue({
-      url: "https://example.com/source-upload.mp4",
-    });
-    global.fetch
-      .mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: async () => ({ jobId: "audio-job-2" }),
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        status: 200,
-        json: async () => ({
-          status: "completed",
-          stage: "completed",
-          progress: 100,
-          audio_url: "https://example.com/audio.mp3",
-          result: {
-            audioUrl: "https://example.com/audio.mp3",
-            audioDuration: 14.5,
-            format: "mp3",
-          },
-        }),
-      });
-
+  test("exports mute-original-audio without background audio options", async () => {
     const onSave = jest.fn();
     render(
       <ViralClipStudio
@@ -880,25 +800,7 @@ describe("ViralClipStudio timeline sequencing", () => {
       />
     );
 
-    await act(async () => {
-      fireEvent.change(screen.getByTestId("background-audio-upload-input"), {
-        target: {
-          files: [new File(["video"], "sound-source.mp4", { type: "video/mp4" })],
-        },
-      });
-    });
-
-    await waitFor(
-      () => {
-        expect(screen.getByText("Background audio added to the timeline.")).toBeInTheDocument();
-        expect(screen.getByLabelText("Background audio mode")).toBeInTheDocument();
-      },
-      { timeout: 4000 }
-    );
-
-    fireEvent.change(screen.getByLabelText("Background audio mode"), {
-      target: { value: "replace" },
-    });
+    fireEvent.click(screen.getAllByLabelText(/Mute Original Audio/i)[0]);
 
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /Render Final Clip/i }));
@@ -912,10 +814,10 @@ describe("ViralClipStudio timeline sequencing", () => {
       expect.any(Object),
       expect.any(Array),
       expect.objectContaining({
-        backgroundAudio: expect.objectContaining({
-          mode: "replace",
-          ducking_strength: 0.45,
-        }),
+        muteAudio: true,
+        addMusic: false,
+        musicFile: null,
+        backgroundAudio: null,
       })
     );
   });
@@ -1231,6 +1133,13 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(guidanceCard.textContent).toContain(
       "Strong speech or a spoken setup lands in the opening seconds"
     );
+    expect(guidanceCard.textContent).toContain("Family:");
+    expect(guidanceCard.textContent).toContain("Why this can travel");
+    expect(guidanceCard.textContent).toContain("Alternate recuts");
+    expect(guidanceCard.textContent).toContain("Curiosity Cut");
+    expect(screen.getByText("Multiple angles from one source")).toBeInTheDocument();
+    expect(screen.getByText("Clusters, not duplicates")).toBeInTheDocument();
+    expect(screen.getByText("Stop Scroll")).toBeInTheDocument();
     expect(guidanceCard.textContent).toContain("🔥 High Energy");
     expect(guidanceCard.textContent).toContain("😳 Emotional");
     expect(guidanceCard.textContent).toContain("🎓 Educational");

@@ -120,6 +120,10 @@ const deductCredits = async (userId, amount, operation = "unknown") => {
         monthlyRemaining: monthlyRemaining - fromMonthly,
         topUpBalance: topUpBalance - fromTopUp,
         deducted: amount,
+        fromMonthly,
+        fromTopUp,
+        monthKey,
+        operation,
         source: fromTopUp > 0 ? "monthly+topup" : "monthly",
       };
     });
@@ -129,4 +133,63 @@ const deductCredits = async (userId, amount, operation = "unknown") => {
   }
 };
 
-module.exports = { deductCredits, getCreditBreakdown };
+const refundCredits = async (
+  userId,
+  refund,
+  operation = "refund",
+  metadata = {}
+) => {
+  const amount = Math.max(0, Number(refund?.deducted ?? refund?.amount ?? 0) || 0);
+  const fromMonthly = Math.max(0, Number(refund?.fromMonthly || 0) || 0);
+  const fromTopUp = Math.max(0, Number(refund?.fromTopUp || 0) || 0);
+  const monthKey = refund?.monthKey || new Date().toISOString().slice(0, 7);
+
+  if (amount <= 0) {
+    return { success: false, message: "No refundable amount provided" };
+  }
+
+  const userRef = db.collection("users").doc(userId);
+
+  try {
+    return await db.runTransaction(async transaction => {
+      const userDoc = await transaction.get(userRef);
+      if (!userDoc.exists) {
+        throw new Error("User not found");
+      }
+
+      const userData = userDoc.data() || {};
+      const topUpBalance = Number(userData.credits || 0) || 0;
+
+      if (fromTopUp > 0) {
+        transaction.update(userRef, {
+          credits: topUpBalance + fromTopUp,
+          last_credit_refund: new Date().toISOString(),
+        });
+      }
+
+      const ledgerRef = db.collection("credit_usage").doc();
+      transaction.set(ledgerRef, {
+        userId,
+        amount: -amount,
+        fromMonthly: -fromMonthly,
+        fromTopUp: -fromTopUp,
+        operation,
+        monthKey,
+        createdAt: new Date().toISOString(),
+        metadata,
+      });
+
+      return {
+        success: true,
+        refunded: amount,
+        fromMonthly,
+        fromTopUp,
+      };
+    });
+  } catch (error) {
+    console.error("Credit refund failed:", error);
+    return { success: false, message: error.message };
+  }
+};
+
+module.exports = { deductCredits, refundCredits, getCreditBreakdown };

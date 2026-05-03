@@ -228,6 +228,329 @@ const CATEGORY_TAG_RULES = [
   },
 ];
 
+const NARRATIVE_ROLE_RULES = [
+  {
+    id: "payoff",
+    label: "Payoff",
+    pattern:
+      /(result|reveal|payoff|before|after|final|ending|turned out|this happened|proof|transformation)/i,
+  },
+  {
+    id: "hook",
+    label: "Hook",
+    pattern:
+      /(\?|why|how|what|wait|watch|secret|mistake|truth|don't|stop|before|until|never|crazy|wild)/i,
+  },
+  {
+    id: "reaction",
+    label: "Reaction",
+    pattern: /(reaction|laugh|shock|surprise|cry|stunned|face|emotional|crowd|applause)/i,
+  },
+  {
+    id: "proof",
+    label: "Proof",
+    pattern: /(shows|demo|proves|example|evidence|breakdown|explains|walkthrough|tutorial|guide)/i,
+  },
+  {
+    id: "story",
+    label: "Story Beat",
+    pattern: /(story|moment|confession|lesson|journey|remember|told me|happened|realized)/i,
+  },
+];
+
+const AUDIENCE_PROFILE_RULES = [
+  {
+    id: "performance",
+    label: "Performance",
+    pattern:
+      /(choir|singer|singing|vocal|harmony|chorus|worship|performance|concert|band|stage|music video)/i,
+  },
+  {
+    id: "education",
+    label: "Education",
+    pattern:
+      /(tutorial|lesson|guide|how to|mistake|truth|secret|explains|learn|teaches|education)/i,
+  },
+  {
+    id: "reaction",
+    label: "Reaction",
+    pattern: /(reaction|laugh|prank|funny|shock|surprise|face|commentary|responding)/i,
+  },
+  {
+    id: "product",
+    label: "Product",
+    pattern: /(product|offer|sale|brand|launch|ad|promo|review|feature|tool|app)/i,
+  },
+  {
+    id: "story",
+    label: "Story",
+    pattern: /(story|confession|journey|moment|experience|realized|happened|behind the scenes)/i,
+  },
+];
+
+const MOMENT_TAG_RULES = [
+  "reveal",
+  "mistake",
+  "truth",
+  "secret",
+  "reaction",
+  "laugh",
+  "result",
+  "proof",
+  "lesson",
+  "before",
+  "after",
+  "performance",
+  "vocal",
+  "energy",
+  "switch",
+];
+
+const inferRuleMatch = (rules, text, fallback) =>
+  rules.find(rule => rule.pattern.test(text)) || fallback;
+
+const getSemanticTokens = text => {
+  const normalized = normalizePlainText(text).toLowerCase();
+  const matches = MOMENT_TAG_RULES.filter(token => normalized.includes(token));
+
+  if (matches.length) return matches;
+
+  return normalized
+    .split(/[^a-z0-9]+/)
+    .filter(token => token.length >= 5)
+    .slice(0, 3);
+};
+
+const buildTravelReason = (narrativeRole, audienceProfile, signals) => {
+  if (audienceProfile.id === "performance") {
+    return "This moment can travel because the emotional rise is visual even before captions land.";
+  }
+  if (narrativeRole.id === "payoff") {
+    return "This moment travels because it gets to proof fast and rewards the click quickly.";
+  }
+  if (signals.hook && signals.motion) {
+    return "This moment travels because the promise lands early and the pacing keeps people moving.";
+  }
+  if (signals.speech) {
+    return "This moment travels because the spoken idea is clear enough to package in one sentence.";
+  }
+  return "This moment travels because it has enough clarity to recut into multiple social angles.";
+};
+
+const buildRecutVariants = (clip, context) => {
+  const start = Number(clip?.start || 0);
+  const end = Math.max(start + 0.6, Number(clip?.end || start));
+  const duration = Math.max(0.6, end - start);
+  const hookOptions = getHookCopySuggestions(clip);
+  const boundedVariant = (nextStart, nextEnd) => {
+    const safeStart = Math.max(start, Math.min(nextStart, end - 0.6));
+    const safeEnd = Math.max(safeStart + 0.6, Math.min(end, nextEnd));
+    return { start: safeStart, end: safeEnd, duration: safeEnd - safeStart };
+  };
+
+  const curiosityBounds = boundedVariant(
+    start,
+    end - Math.min(1.2, duration * 0.06)
+  );
+  const authorityBounds = boundedVariant(
+    start + Math.min(0.55, duration * 0.08),
+    end - Math.min(0.4, duration * 0.03)
+  );
+  const payoffBounds = boundedVariant(
+    start + Math.min(Math.max(0.9, duration * 0.18), Math.max(1.2, duration - 2.4)),
+    end
+  );
+
+  return [
+    {
+      id: "curiosity",
+      label: "Curiosity Cut",
+      summary: "Lead with tension and let the answer arrive a beat later.",
+      openingMove:
+        context.narrativeRole.id === "payoff"
+          ? "Hold back the proof for one beat so the viewer leans in."
+          : "Start on the question or strange moment before the explanation lands.",
+      hookText: hookOptions[0] || "WAIT FOR THIS",
+      templateKey: "blur_reveal",
+      ...curiosityBounds,
+    },
+    {
+      id: "authority",
+      label: "Authority Cut",
+      summary: "Trim the setup and open on the clearest confident statement.",
+      openingMove:
+        context.audienceProfile.id === "education"
+          ? "Open directly on the lesson and let the clip prove it."
+          : "Use the strongest claim frame first so the clip feels decisive.",
+      hookText: hookOptions[1] || "HERE'S WHAT CHANGED",
+      templateKey: "freeze_text",
+      ...authorityBounds,
+    },
+    {
+      id: "payoff",
+      label: "Payoff First",
+      summary: "Jump closer to the reward and use contrast to keep it replayable.",
+      openingMove:
+        context.audienceProfile.id === "performance"
+          ? "Start near the vocal lift or emotional swell, then let the room react."
+          : "Open close to the visual or spoken payoff and let the rest explain itself.",
+      hookText: hookOptions[2] || "THIS IS THE PAYOFF",
+      templateKey: "zoom_focus",
+      ...payoffBounds,
+    },
+  ];
+};
+
+const getClipMidpoint = clip => {
+  const start = Number(clip?.start || 0);
+  const end = Number(clip?.end || start);
+  return start + Math.max(0, end - start) / 2;
+};
+
+const countTokenOverlap = (leftTokens, rightTokens) => {
+  const left = new Set(leftTokens || []);
+  const right = new Set(rightTokens || []);
+  let overlap = 0;
+  left.forEach(token => {
+    if (right.has(token)) overlap += 1;
+  });
+  return overlap;
+};
+
+const buildMomentFamilies = rankedEntries => {
+  const families = [];
+
+  rankedEntries.forEach(entry => {
+    const midpoint = getClipMidpoint(entry.clip);
+    const semanticTokens = entry.semanticTokens || [];
+
+    const existingFamily = families.find(family => {
+      const overlap = countTokenOverlap(family.semanticTokens, semanticTokens);
+      const proximity = Math.abs(family.anchorMidpoint - midpoint);
+      const sameAudience = family.audienceProfileId === entry.audienceProfile.id;
+      const sameNarrative = family.narrativeRoleId === entry.narrativeRole.id;
+
+      return (
+        overlap >= 2 ||
+        (overlap >= 1 && sameAudience) ||
+        (sameAudience && sameNarrative && proximity <= 24) ||
+        (sameAudience && proximity <= 12)
+      );
+    });
+
+    if (existingFamily) {
+      existingFamily.members.push(entry);
+      existingFamily.semanticTokens = [...new Set([...existingFamily.semanticTokens, ...semanticTokens])];
+      existingFamily.anchorMidpoint =
+        (existingFamily.anchorMidpoint * (existingFamily.members.length - 1) + midpoint) /
+        existingFamily.members.length;
+      if (entry.score > existingFamily.score) {
+        existingFamily.topEntry = entry;
+        existingFamily.score = entry.score;
+      }
+      return;
+    }
+
+    families.push({
+      id: `family-${families.length + 1}`,
+      score: entry.score,
+      topEntry: entry,
+      members: [entry],
+      semanticTokens: [...semanticTokens],
+      anchorMidpoint: midpoint,
+      audienceProfileId: entry.audienceProfile.id,
+      audienceProfileLabel: entry.audienceProfile.label,
+      narrativeRoleId: entry.narrativeRole.id,
+      narrativeRoleLabel: entry.narrativeRole.label,
+    });
+  });
+
+  return families
+    .map(family => {
+      const topEntry = family.topEntry;
+      const leadToken = family.semanticTokens[0] || family.narrativeRoleLabel.toLowerCase();
+      return {
+        ...family,
+        label: `${family.audienceProfileLabel} • ${family.narrativeRoleLabel}`,
+        headline: `${family.narrativeRoleLabel} around ${leadToken}`,
+        summary: topEntry.travelReason,
+        clipIds: family.members.map(member => member.clip.id),
+        members: family.members.sort(
+          (left, right) =>
+            right.score - left.score || right.backendScore - left.backendScore || left.index - right.index
+        ),
+      };
+    })
+    .sort((left, right) => right.score - left.score);
+};
+
+const pickCampaignEntry = (entries, preferredIds = [], excludedIds = new Set()) => {
+  for (const id of preferredIds) {
+    const match = entries.find(entry => entry.clip.id === id && !excludedIds.has(entry.clip.id));
+    if (match) return match;
+  }
+  return entries.find(entry => !excludedIds.has(entry.clip.id)) || null;
+};
+
+const buildCampaignSet = (rankedEntries, families) => {
+  if (!rankedEntries.length) return [];
+
+  const usedClipIds = new Set();
+  const bestOverall = rankedEntries[0];
+  if (bestOverall) usedClipIds.add(bestOverall.clip.id);
+
+  const proofCandidate = pickCampaignEntry(
+    [...rankedEntries].sort(
+      (left, right) =>
+        right.scoreBreakdown.find(item => item.label === "Conversion")?.value -
+          left.scoreBreakdown.find(item => item.label === "Conversion")?.value ||
+        right.semanticArcScore - left.semanticArcScore
+    ),
+    [],
+    usedClipIds
+  );
+  if (proofCandidate) usedClipIds.add(proofCandidate.clip.id);
+
+  const replayCandidate = pickCampaignEntry(
+    [...rankedEntries].sort(
+      (left, right) =>
+        right.scoreBreakdown.find(item => item.label === "Retention")?.value -
+          left.scoreBreakdown.find(item => item.label === "Retention")?.value ||
+        right.packagingPotential - left.packagingPotential
+    ),
+    families[1]?.clipIds || [],
+    usedClipIds
+  );
+  if (replayCandidate) usedClipIds.add(replayCandidate.clip.id);
+
+  return [
+    bestOverall
+      ? {
+          id: "stop-scroll",
+          label: "Stop Scroll",
+          summary: "Lead with the moment most likely to earn the first pause.",
+          entry: bestOverall,
+        }
+      : null,
+    proofCandidate
+      ? {
+          id: "proof",
+          label: "Proof Angle",
+          summary: "Use the strongest explanatory or convincing version for trust.",
+          entry: proofCandidate,
+        }
+      : null,
+    replayCandidate
+      ? {
+          id: "replay",
+          label: "Replay Angle",
+          summary: "Use the most replayable or loop-friendly version for retention.",
+          entry: replayCandidate,
+        }
+      : null,
+  ].filter(Boolean);
+};
+
 const buildClipGuidance = clip => {
   const descriptorText = getClipDescriptorText(clip);
   const duration = getClipDurationSeconds(clip);
@@ -259,6 +582,19 @@ const buildClipGuidance = clip => {
       /!/.test(descriptorText) ||
       transcriptWordCount >= 8,
   };
+
+  const narrativeRole = inferRuleMatch(NARRATIVE_ROLE_RULES, descriptorText, {
+    id: signals.hook ? "hook" : signals.motion ? "reaction" : "proof",
+    label: signals.hook ? "Hook" : signals.motion ? "Reaction" : "Proof",
+  });
+  const audienceProfile = inferRuleMatch(AUDIENCE_PROFILE_RULES, descriptorText, {
+    id: signals.speech ? "education" : signals.motion ? "reaction" : "story",
+    label: signals.speech ? "Education" : signals.motion ? "Reaction" : "Story",
+  });
+  const semanticTokens = getSemanticTokens(descriptorText);
+  const familyAnchor = semanticTokens[0] || (signals.motion ? "energy" : "clarity");
+  const momentFamilyKey = `${audienceProfile.id}:${narrativeRole.id}:${familyAnchor}`;
+  const momentFamilyLabel = `${audienceProfile.label} • ${narrativeRole.label}`;
 
   const reasons = [];
   if (signals.speech) reasons.push("Strong speech or a spoken setup lands in the opening seconds");
@@ -369,6 +705,20 @@ const buildClipGuidance = clip => {
     100,
     0
   );
+  const semanticArcScore = clampNumber(
+    (signals.hook ? 24 : 10) +
+      (signals.speech ? 18 : 8) +
+      (/(before|after|then|because|so|when|until|result|lesson|truth|secret|finally|instead)/i.test(
+        descriptorText
+      )
+        ? 26
+        : 8) +
+      (narrativeRole.id === "payoff" ? 18 : narrativeRole.id === "proof" ? 14 : 10) +
+      (audienceProfile.id === "performance" ? 12 : 8),
+    0,
+    100,
+    0
+  );
   const packagingPotential = Math.round(
     thumbnailPotential * 0.34 +
       captionReadiness * 0.24 +
@@ -376,7 +726,10 @@ const buildClipGuidance = clip => {
       conversionPotential * 0.14
   );
   const editorialScore = Math.round(
-    heuristicScore * 0.46 + packagingPotential * 0.34 + backendScore * 0.2
+    heuristicScore * 0.34 +
+      packagingPotential * 0.28 +
+      semanticArcScore * 0.22 +
+      backendScore * 0.16
   );
   const bestFor = [];
   if (retentionPotential >= 72) bestFor.push("Best for retention");
@@ -399,6 +752,13 @@ const buildClipGuidance = clip => {
       : conversionPotential >= 70
         ? "YouTube and conversion-led clips"
         : "Cross-platform short form";
+  const travelReason = buildTravelReason(narrativeRole, audienceProfile, signals);
+  const recutVariants = buildRecutVariants(clip, {
+    signals,
+    duration,
+    narrativeRole,
+    audienceProfile,
+  });
 
   return {
     descriptorText,
@@ -406,20 +766,29 @@ const buildClipGuidance = clip => {
     backendScore,
     score: clampNumber(editorialScore, 0, 100, 0),
     heuristicScore,
+    semanticArcScore,
     packagingPotential,
     reasons: reasons.slice(0, 5),
     improvements: [...new Set(improvements)].slice(0, 3),
     categories,
     signals,
+    narrativeRole,
+    audienceProfile,
+    semanticTokens,
+    momentFamilyKey,
+    momentFamilyLabel,
+    travelReason,
     bestFor: bestFor.slice(0, 2),
     exportFit,
     openingMove,
+    recutVariants,
     scoreBreakdown: [
       { label: "Hook", value: clampNumber(Math.round((signals.hook ? 70 : 34) + retentionPotential * 0.3), 0, 100, 0) },
       { label: "Retention", value: retentionPotential },
       { label: "Thumbnail", value: thumbnailPotential },
       { label: "Captions", value: captionReadiness },
       { label: "Conversion", value: conversionPotential },
+      { label: "Story", value: semanticArcScore },
     ],
     hookText: getHookCopySuggestions(clip)[0] || DEFAULT_HOOK_TEXT,
   };
@@ -853,10 +1222,13 @@ const ViralClipStudio = ({
   const [musicPreviewNeedsGesture, setMusicPreviewNeedsGesture] = useState(false);
   const [extractedAudio, setExtractedAudio] = useState(null);
 
-  const { capabilities, credits, canUseFeature, requiresUpgrade } = useSubscription();
+  const { capabilities, credits, editing, canUseFeature, requiresUpgrade } = useSubscription();
   const canUseWatermarkRemoval = canUseFeature("watermarkRemoval");
   const canUseAudioExtract = canUseFeature("audioExtract");
   const canUseMulticam = canUseFeature("multicam");
+  const clipFinderCost = editing?.features?.findViralClips?.creditCost || 8;
+  const clipRenderCost = editing?.features?.clipRender?.creditCost || 5;
+  const transcribeCost = editing?.features?.audioExtract?.creditCost || 3;
   const showCreditWarning = (credits?.monthlyRemaining || 0) < 20;
   const upgradeMessage = "Upgrade your subscription to unlock this feature.";
 
@@ -1176,6 +1548,11 @@ const ViralClipStudio = ({
     setMusicSelection(currentMusic);
     setMusicSearchMode(!isPresetMusicSelection(currentMusic));
   }, [currentMusic]);
+
+  useEffect(() => {
+    if (addMusic) setAddMusic(false);
+    if (extractedAudio) setExtractedAudio(null);
+  }, [addMusic, extractedAudio]);
 
   useEffect(
     () => () => {
@@ -2028,6 +2405,54 @@ const ViralClipStudio = ({
     onStatusChange?.("Applied guided improvements to strengthen the selected clip.");
   };
 
+  const applyClipVariant = (clip, variant) => {
+    if (!clip || !variant) return;
+
+    setTimeline(prev =>
+      prev.map((item, index) =>
+        index === 0 && item.id === "main"
+          ? {
+              ...item,
+              startRequest: variant.start,
+              endRequest: variant.end,
+            }
+          : item
+      )
+    );
+
+    setAutoCaptions(true);
+    if (variant.id !== "authority") {
+      setSmartCrop(true);
+    }
+
+    setAddHook(true);
+    applyHookTemplate(variant.templateKey || "blur_reveal");
+    setHookAnalysisStatus("ready");
+    setHookAnalysisMessage(`Loaded ${variant.label.toLowerCase()} for the selected moment.`);
+    setHookSegmentRange(
+      Math.max(0, Number(variant.start || 0) - Number(clip.start || 0)),
+      Math.max(
+        Math.max(0.5, Number(variant.end || 0) - Number(clip.start || 0)),
+        Math.max(0.6, Number(variant.end || 0) - Number(variant.start || 0))
+      ),
+      {
+        textSuggestion: variant.hookText || clipGuidanceById.get(clip.id)?.hookText,
+        preview: false,
+      }
+    );
+
+    focusClipInEditor(
+      {
+        ...clip,
+        start: variant.start,
+        end: variant.end,
+      },
+      { boundary: "start", play: false }
+    );
+
+    onStatusChange?.(`Applied ${variant.label} to give this moment a sharper editorial angle.`);
+  };
+
   const handleClipAction = (clip, action) => {
     if (!clip || !action) return;
 
@@ -2054,6 +2479,11 @@ const ViralClipStudio = ({
 
     if (action.type === "improve") {
       applyClipImprovements(clip);
+      return;
+    }
+
+    if (action.type === "apply-variant") {
+      applyClipVariant(clip, action.variant);
       return;
     }
 
@@ -2175,10 +2605,26 @@ const ViralClipStudio = ({
     (left, right) =>
       right.score - left.score || right.backendScore - left.backendScore || left.index - right.index
   );
+  const momentFamilies = buildMomentFamilies(rankedClipGuidance);
   const bestClipId = rankedClipGuidance[0]?.clip?.id || null;
-  const topPickIds = new Set(rankedClipGuidance.slice(0, 2).map(entry => entry.clip.id));
+  const topFamilyKeys = new Set();
+  const familyHighlights = [];
+  momentFamilies.forEach(family => {
+    const entry = family.topEntry;
+    if (!entry || topFamilyKeys.has(entry.momentFamilyKey)) return;
+    topFamilyKeys.add(entry.momentFamilyKey);
+    familyHighlights.push(entry);
+  });
+  const topPickIds = new Set(familyHighlights.slice(0, 2).map(entry => entry.clip.id));
   const clipGuidanceById = new Map(clipGuidanceEntries.map(entry => [entry.clip.id, entry]));
   const selectedClipGuidance = selectedClip ? clipGuidanceById.get(selectedClip.id) || null : null;
+  const selectedMomentFamily = selectedClipGuidance
+    ? momentFamilies.find(family => family.clipIds.includes(selectedClipGuidance.clip.id)) || null
+    : null;
+  const familySiblingEntries = selectedMomentFamily
+    ? selectedMomentFamily.members.filter(entry => entry.clip.id !== selectedClipGuidance?.clip?.id).slice(0, 3)
+    : [];
+  const campaignSet = buildCampaignSet(rankedClipGuidance, momentFamilies);
   const hookTemplateConfig = getHookTemplateConfig(hookTemplate);
   const hookMinDuration = Math.min(
     HOOK_MIN_SEGMENT_DURATION,
@@ -3340,16 +3786,16 @@ const ViralClipStudio = ({
         hookFreezeFrame,
         hookZoomScale,
         hookTextAnimation,
-        addMusic,
-        musicFile: musicSelection,
-        isSearch: musicSearchMode,
+        addMusic: false,
+        musicFile: null,
+        isSearch: false,
         safeSearch,
-        musicVolume,
-        musicDucking,
-        musicDuckingStrength,
+        musicVolume: 0,
+        musicDucking: false,
+        musicDuckingStrength: 0,
         muteAudio: muteOriginalAudio,
         timelineSegments: exportTimeline,
-        backgroundAudio: normalizeBackgroundAudioForExport(extractedAudio),
+        backgroundAudio: null,
         exportDestination: destination || "general",
       });
     } catch (err) {
@@ -3441,6 +3887,11 @@ const ViralClipStudio = ({
 
     if (pendingAction.type === "improve") {
       applyClipImprovements(selectedClip);
+      return;
+    }
+
+    if (pendingAction.type === "apply-variant") {
+      applyClipVariant(selectedClip, pendingAction.variant);
       return;
     }
 
@@ -4593,6 +5044,16 @@ const ViralClipStudio = ({
               Build the hook, shape the frame, and lock audio, captions, and retention in one
               visible workspace.
             </p>
+            <div className="studio-billing-strip">
+              <span className="studio-billing-pill is-included">Studio access included</span>
+              <span className="studio-billing-pill">Find Viral Clips: {clipFinderCost} credits</span>
+              <span className="studio-billing-pill">Render Final Clip: {clipRenderCost} credits</span>
+              <span className="studio-billing-pill">Audio extraction: {transcribeCost} credits</span>
+              <span className="studio-billing-pill is-balance">
+                {credits?.monthlyRemaining ?? 0} monthly credits left
+              </span>
+              <span className="studio-billing-pill">Top up anytime</span>
+            </div>
           </div>
 
           <div className="studio-header-status">
@@ -4606,7 +5067,7 @@ const ViralClipStudio = ({
             </div>
             <div className="studio-status-pill">
               <span className="studio-status-label">Audio</span>
-              <strong>{extractedAudio ? "Ready" : "Original only"}</strong>
+              <strong>{muteOriginalAudio ? "Muted" : "Original live"}</strong>
             </div>
           </div>
 
@@ -4653,7 +5114,7 @@ const ViralClipStudio = ({
                   <h4>Vertical composition</h4>
                   <p className="panel-description">
                     The preview mirrors the export contract: clip timing, overlay stack, captions,
-                    and donor-audio behavior stay aligned.
+                    and original-audio behavior stay aligned.
                   </p>
                 </div>
                 <div className="panel-chip-group">
@@ -4921,15 +5382,6 @@ const ViralClipStudio = ({
                           <strong>Long pauses will be tightened</strong>
                         </div>
                       ) : null}
-                      {addMusic ? (
-                        <div
-                          className={`music-preview-pill music-preview-pill-${musicPreviewStatus}`}
-                        >
-                          {musicSearchMode
-                            ? `Music search ${musicPreviewStatusLabel.toLowerCase()}: ${currentMusicLabel}`
-                            : `Music preview live: ${currentMusicLabel}`}
-                        </div>
-                      ) : null}
                       {overlays
                         .filter(o => {
                           const currentClipId = timeline[activeTimelineIndex]?.id;
@@ -5193,10 +5645,12 @@ const ViralClipStudio = ({
                     </span>
                   </div>
                   <div className="signal-card">
-                    <span className="signal-label">Background audio</span>
-                    <strong>{extractedAudio ? "Donor track loaded" : "Not added"}</strong>
+                    <span className="signal-label">Original audio</span>
+                    <strong>{muteOriginalAudio ? "Muted on export" : "Kept live"}</strong>
                     <span>
-                      {extractedAudio ? audioModeSummary : "Upload a donor video to extract sound."}
+                      {muteOriginalAudio
+                        ? "Use this when the visual story is stronger than the raw source sound."
+                        : "Keep live voice, reactions, and ambient energy when they help the hook land."}
                     </span>
                   </div>
                 </div>
@@ -5639,222 +6093,27 @@ const ViralClipStudio = ({
               <div className="panel-heading compact">
                 <div>
                   <span className="panel-kicker">Sound</span>
-                  <h4>Background audio lane</h4>
+                  <h4>Original audio control</h4>
                   <p className="panel-description">
-                    Extract sound from a donor video, preview the mode live, and send the same audio
-                    instructions to export.
+                    Keep the source audio when it helps the clip, or mute it when the visual story
+                    is strong enough on its own.
                   </p>
                 </div>
               </div>
-              <div className="audio-action-row">
-                <button
-                  type="button"
-                  className="tool-btn"
-                  onClick={() => audioSourceInputRef.current?.click()}
-                  disabled={isExtractingAudio}
-                >
-                  <span>🎵</span> {isExtractingAudio ? "Extracting..." : "Upload donor video"}
-                </button>
-                {extractedAudio ? (
-                  <button
-                    type="button"
-                    className="tool-btn"
-                    onClick={() =>
-                      setExtractedAudio(prev => (prev ? { ...prev, enabled: !prev.enabled } : prev))
-                    }
-                  >
-                    <span>{extractedAudio.enabled === false ? "▶️" : "⏸️"}</span>{" "}
-                    {extractedAudio.enabled === false ? "Play Track" : "Pause Track"}
-                  </button>
-                ) : null}
-                {extractedAudio ? (
-                  <button
-                    type="button"
-                    className="tool-btn"
-                    onClick={() => setExtractedAudio(null)}
-                  >
-                    <span>🗑️</span> Remove Track
-                  </button>
-                ) : null}
+              <label style={sidebarCheckboxLabelStyle}>
                 <input
-                  data-testid="background-audio-upload-input"
-                  ref={audioSourceInputRef}
-                  type="file"
-                  accept="video/*"
-                  style={{ display: "none" }}
-                  onChange={handleAudioSourceUpload}
+                  type="checkbox"
+                  checked={muteOriginalAudio}
+                  onChange={e => setMuteOriginalAudio(e.target.checked)}
+                  style={{ marginRight: "8px" }}
                 />
+                Mute Original Audio
+              </label>
+              <div style={{ ...sidebarBodyTextStyle, marginTop: "10px" }}>
+                {muteOriginalAudio
+                  ? "Original audio will be muted for export."
+                  : "Original audio stays active for preview and export."}
               </div>
-
-              {audioExtractionStatus ? (
-                <div className="audio-status-banner">{audioExtractionStatus}</div>
-              ) : null}
-
-              {extractedAudio ? (
-                <div className="audio-track-card">
-                  <div className="audio-track-topline">
-                    <span className="audio-track-label">Track loaded</span>
-                    <span
-                      className={`audio-state-pill ${
-                        extractedAudio.enabled === false ? "muted" : "live"
-                      }`}
-                    >
-                      {extractedAudio.enabled === false ? "Paused in preview" : "Live in preview"}
-                    </span>
-                  </div>
-                  <div className="audio-track-title">
-                    {extractedAudio.sourceVideoName || "Extracted audio"}
-                  </div>
-                  <div className="audio-track-description">
-                    Added as a single background-audio lane for preview and final export.
-                  </div>
-                  <div className="audio-level-meter">
-                    <div
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        background:
-                          extractedAudio.enabled === false
-                            ? "linear-gradient(90deg, #9ca3af 0%, #6b7280 100%)"
-                            : "linear-gradient(90deg, #f59e0b 0%, #ef4444 100%)",
-                      }}
-                    />
-                  </div>
-                  <div className="slider-stack">
-                    <label className="studio-slider-label">
-                      <span>
-                        Trim Start:{" "}
-                        {clampAudioControl(
-                          extractedAudio.trimStart,
-                          0,
-                          extractedAudio.duration || 36000,
-                          0
-                        ).toFixed(1)}
-                        s
-                      </span>
-                      <input
-                        type="range"
-                        min={0}
-                        max={Math.max(0, extractedAudio.duration || 0)}
-                        step={0.1}
-                        value={clampAudioControl(
-                          extractedAudio.trimStart,
-                          0,
-                          extractedAudio.duration || 36000,
-                          0
-                        )}
-                        onChange={e =>
-                          setExtractedAudio(prev =>
-                            prev
-                              ? {
-                                  ...prev,
-                                  trimStart: clampAudioControl(
-                                    e.target.value,
-                                    0,
-                                    prev.duration || 36000,
-                                    0
-                                  ),
-                                }
-                              : prev
-                          )
-                        }
-                        style={{ width: "100%", marginTop: "6px" }}
-                      />
-                    </label>
-                    <label className="studio-slider-label">
-                      <span>Audio mode</span>
-                      <select
-                        aria-label="Background audio mode"
-                        value={normalizeAudioMode(extractedAudio.mode)}
-                        onChange={e =>
-                          setExtractedAudio(prev =>
-                            prev
-                              ? {
-                                  ...prev,
-                                  mode: normalizeAudioMode(e.target.value),
-                                }
-                              : prev
-                          )
-                        }
-                        style={{
-                          width: "100%",
-                          marginTop: "6px",
-                          padding: "8px",
-                          borderRadius: "8px",
-                        }}
-                      >
-                        <option value="mix">Mix with original audio</option>
-                        <option value="replace">Replace original audio</option>
-                        <option value="duck_original">Duck original audio</option>
-                      </select>
-                    </label>
-                    {normalizeAudioMode(extractedAudio.mode) === "duck_original" ? (
-                      <label className="studio-slider-label">
-                        <span>
-                          Ducking strength{" "}
-                          {Math.round(
-                            clampAudioControl(extractedAudio.duckingStrength, 0.15, 0.95, 0.45) *
-                              100
-                          )}
-                          %
-                        </span>
-                        <input
-                          type="range"
-                          min={0.15}
-                          max={0.95}
-                          step={0.05}
-                          value={clampAudioControl(
-                            extractedAudio.duckingStrength,
-                            0.15,
-                            0.95,
-                            0.45
-                          )}
-                          onChange={e =>
-                            setExtractedAudio(prev =>
-                              prev
-                                ? {
-                                    ...prev,
-                                    duckingStrength: clampAudioControl(
-                                      e.target.value,
-                                      0.15,
-                                      0.95,
-                                      0.45
-                                    ),
-                                  }
-                                : prev
-                            )
-                          }
-                          style={{ width: "100%", marginTop: "6px" }}
-                        />
-                      </label>
-                    ) : null}
-                    <label className="studio-slider-label">
-                      <span>
-                        Volume:{" "}
-                        {Math.round(clampAudioControl(extractedAudio.volume, 0, 1, 0.7) * 100)}%
-                      </span>
-                      <input
-                        type="range"
-                        min={0}
-                        max={1}
-                        step={0.05}
-                        value={clampAudioControl(extractedAudio.volume, 0, 1, 0.7)}
-                        onChange={e =>
-                          setExtractedAudio(prev =>
-                            prev
-                              ? {
-                                  ...prev,
-                                  volume: clampAudioControl(e.target.value, 0, 1, 0.7),
-                                }
-                              : prev
-                          )
-                        }
-                        style={{ width: "100%", marginTop: "6px" }}
-                      />
-                    </label>
-                  </div>
-                </div>
-              ) : null}
             </section>
           </div>
 
@@ -5881,6 +6140,72 @@ const ViralClipStudio = ({
                 </div>
               </div>
             </section>
+
+            {campaignSet.length ? (
+              <section className="studio-panel">
+                <div className="panel-heading compact">
+                  <div>
+                    <span className="panel-kicker">Campaign Set</span>
+                    <h4>Multiple angles from one source</h4>
+                    <p className="panel-description">
+                      Use different strategic cuts instead of betting everything on one export.
+                    </p>
+                  </div>
+                </div>
+                <div className="campaign-set-grid">
+                  {campaignSet.map(item => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      className="campaign-set-card"
+                      onClick={() => handleClipAction(item.entry.clip, { type: "use" })}
+                    >
+                      <span className="campaign-set-label">{item.label}</span>
+                      <strong>{item.entry.momentFamilyLabel}</strong>
+                      <span className="campaign-set-summary">{item.summary}</span>
+                      <span className="campaign-set-score">
+                        Viral Score {item.entry.score}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </section>
+            ) : null}
+
+            {momentFamilies.length ? (
+              <section className="studio-panel">
+                <div className="panel-heading compact">
+                  <div>
+                    <span className="panel-kicker">Moment Families</span>
+                    <h4>Clusters, not duplicates</h4>
+                    <p className="panel-description">
+                      Similar highlights are grouped so the best angle wins without flooding the list.
+                    </p>
+                  </div>
+                </div>
+                <div className="family-cluster-list">
+                  {momentFamilies.slice(0, 4).map(family => (
+                    <button
+                      key={family.id}
+                      type="button"
+                      className={`family-cluster-card ${
+                        selectedMomentFamily?.id === family.id ? "active" : ""
+                      }`}
+                      onClick={() => handleClipAction(family.topEntry.clip, { type: "use" })}
+                    >
+                      <div className="family-cluster-topline">
+                        <span className="family-cluster-label">{family.label}</span>
+                        <span className="family-cluster-size">
+                          {family.members.length} angle{family.members.length === 1 ? "" : "s"}
+                        </span>
+                      </div>
+                      <strong>{family.headline}</strong>
+                      <span className="family-cluster-summary">{family.summary}</span>
+                    </button>
+                  ))}
+                </div>
+              </section>
+            ) : null}
 
             <section className="studio-panel clips-list">
               <div className="panel-heading compact">
@@ -5927,6 +6252,9 @@ const ViralClipStudio = ({
                   </div>
 
                   <div className="clip-guidance-tag-row">
+                    <span className="clip-tag-pill compact clip-tag-pill-family">
+                      Family: {selectedClipGuidance.momentFamilyLabel}
+                    </span>
                     {selectedClipGuidance.bestFor.map((fit, index) => (
                       <span
                         key={`${selectedClip.id}-fit-${fit}-${index}`}
@@ -5954,8 +6282,14 @@ const ViralClipStudio = ({
                   <div className="clip-guidance-packaging">
                     <strong>Packaging move</strong>
                     <p>{selectedClipGuidance.openingMove}</p>
+                    <div className="clip-guidance-storyline">
+                      <span className="clip-guidance-storyline-label">
+                        Why this can travel
+                      </span>
+                      <p>{selectedClipGuidance.travelReason}</p>
+                    </div>
                     <div className="clip-guidance-scoreboard">
-                      {selectedClipGuidance.scoreBreakdown.slice(0, 5).map(entry => (
+                      {selectedClipGuidance.scoreBreakdown.slice(0, 6).map(entry => (
                         <div key={`${selectedClip.id}-${entry.label}`} className="clip-guidance-score-item">
                           <span>{entry.label}</span>
                           <div className="clip-guidance-score-track">
@@ -5969,6 +6303,55 @@ const ViralClipStudio = ({
                       ))}
                     </div>
                   </div>
+
+                  <div className="clip-guidance-variants">
+                    <strong>Alternate recuts</strong>
+                    <div className="clip-guidance-variant-grid">
+                      {selectedClipGuidance.recutVariants.map(variant => (
+                        <button
+                          key={`${selectedClip.id}-${variant.id}`}
+                          type="button"
+                          className="clip-guidance-variant-card"
+                          onClick={() =>
+                            handleClipAction(selectedClip, {
+                              type: "apply-variant",
+                              variant,
+                            })
+                          }
+                        >
+                          <span className="clip-guidance-variant-label">{variant.label}</span>
+                          <span className="clip-guidance-variant-summary">{variant.summary}</span>
+                          <span className="clip-guidance-variant-range">
+                            {variant.start.toFixed(1)}s - {variant.end.toFixed(1)}s
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {familySiblingEntries.length ? (
+                    <div className="clip-guidance-family">
+                      <strong>Sibling angles in this family</strong>
+                      <div className="clip-guidance-family-grid">
+                        {familySiblingEntries.map(entry => (
+                          <button
+                            key={`${selectedClip.id}-family-${entry.clip.id}`}
+                            type="button"
+                            className="clip-guidance-family-card"
+                            onClick={() => handleClipAction(entry.clip, { type: "use" })}
+                          >
+                            <span className="clip-guidance-family-label">
+                              {entry.narrativeRole.label}
+                            </span>
+                            <span className="clip-guidance-family-summary">
+                              {entry.openingMove}
+                            </span>
+                            <span className="clip-guidance-family-score">Score {entry.score}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
 
                   <div className="clip-guidance-actions compact">
                     <button
@@ -6094,6 +6477,11 @@ const ViralClipStudio = ({
                         <p>{normalizePlainText(clip.reason || "Primary detected moment")}</p>
 
                         <div className="clip-tag-row">
+                          {clipGuidance?.momentFamilyLabel ? (
+                            <span className="clip-tag-pill compact clip-tag-pill-family">
+                              {clipGuidance.momentFamilyLabel}
+                            </span>
+                          ) : null}
                           {(clipGuidance?.bestFor || []).map((fit, index) => (
                             <span
                               key={`${clip.id}-best-for-${fit}-${index}`}
@@ -6113,6 +6501,11 @@ const ViralClipStudio = ({
                         </div>
 
                         <div className="clip-guidance-mini-list">
+                          {clipGuidance?.travelReason ? (
+                            <div className="clip-guidance-mini-item emphasis">
+                              ★ {clipGuidance.travelReason}
+                            </div>
+                          ) : null}
                           {clipGuidance?.openingMove ? (
                             <div className="clip-guidance-mini-item">
                               ↳ {clipGuidance.openingMove}
@@ -6151,6 +6544,21 @@ const ViralClipStudio = ({
                           >
                             Apply Hook
                           </button>
+                          {clipGuidance?.recutVariants?.[0] ? (
+                            <button
+                              type="button"
+                              className="clip-action-btn"
+                              onClick={e => {
+                                e.stopPropagation();
+                                handleClipAction(clip, {
+                                  type: "apply-variant",
+                                  variant: clipGuidance.recutVariants[0],
+                                });
+                              }}
+                            >
+                              {clipGuidance.recutVariants[0].label}
+                            </button>
+                          ) : null}
                         </div>
 
                         {clipGuidance && clipGuidance.score < 60 ? (
@@ -7097,18 +7505,7 @@ const ViralClipStudio = ({
                 </h5>
                 {!collapsedSections.musicAudio && (
                   <>
-                    <label style={{ ...sidebarCheckboxLabelStyle, marginBottom: "8px" }}>
-                      <input
-                        type="checkbox"
-                        checked={addMusic}
-                        onChange={e => setAddMusic(e.target.checked)}
-                        style={{ marginRight: "8px" }}
-                      />
-                      Add Background Music
-                    </label>
-                    <label
-                      style={{ ...sidebarCheckboxLabelStyle, marginBottom: addMusic ? "10px" : 0 }}
-                    >
+                    <label style={{ ...sidebarCheckboxLabelStyle, marginBottom: "10px" }}>
                       <input
                         type="checkbox"
                         checked={muteOriginalAudio}
@@ -7117,88 +7514,11 @@ const ViralClipStudio = ({
                       />
                       Mute Original Audio
                     </label>
-                    <div style={{ ...sidebarBodyTextStyle, marginBottom: addMusic ? "12px" : 0 }}>
-                      {addMusic
-                        ? `Music source: ${currentMusicLabel}`
-                        : "Keep original audio live, replace it with music, or mute it entirely from here."}
+                    <div style={sidebarBodyTextStyle}>
+                      {muteOriginalAudio
+                        ? "This export will stay visually driven with the source audio muted."
+                        : "Keep the natural voice, reactions, and ambient sound when they strengthen the clip."}
                     </div>
-                    {addMusic ? (
-                      <div className="micro-settings-card">
-                        {!musicSearchMode ? (
-                          <label className="studio-slider-label">
-                            <span>Music preset</span>
-                            <select
-                              value={musicSelection}
-                              onChange={e => {
-                                setMusicSelection(e.target.value);
-                                if (onMusicChange) onMusicChange(e.target.value, false);
-                              }}
-                            >
-                              <option value="upbeat_pop.mp3">Upbeat Pop</option>
-                              <option value="lofi_chill.mp3">Lofi Chill</option>
-                              <option value="cinematic.mp3">Cinematic</option>
-                              <option value="corporate.mp3">Corporate</option>
-                            </select>
-                          </label>
-                        ) : (
-                          <div className="hook-suggestion-card compact-audio-note">
-                            <strong>Custom searched track active</strong>
-                            <p>{currentMusicLabel}</p>
-                            <button
-                              type="button"
-                              className="mini-toggle-btn"
-                              onClick={() => {
-                                setMusicSearchMode(false);
-                                setMusicSelection("upbeat_pop.mp3");
-                                if (onMusicChange) onMusicChange("upbeat_pop.mp3", false);
-                              }}
-                            >
-                              Switch to presets
-                            </button>
-                          </div>
-                        )}
-                        <label className="studio-slider-label">
-                          <span>Music volume {Math.round(Number(musicVolume || 0) * 100)}%</span>
-                          <input
-                            type="range"
-                            min={0.05}
-                            max={0.6}
-                            step={0.01}
-                            value={musicVolume}
-                            onChange={e => setMusicVolume(Number(e.target.value))}
-                          />
-                        </label>
-                        {!muteOriginalAudio ? (
-                          <>
-                            <label style={sidebarCheckboxLabelStyle}>
-                              <input
-                                type="checkbox"
-                                checked={musicDucking}
-                                onChange={e => setMusicDucking(e.target.checked)}
-                                style={{ marginRight: "8px" }}
-                              />
-                              Auto-lower music under speech
-                            </label>
-                            {musicDucking ? (
-                              <label className="studio-slider-label">
-                                <span>
-                                  Ducking strength{" "}
-                                  {Math.round(Number(musicDuckingStrength || 0) * 100)}%
-                                </span>
-                                <input
-                                  type="range"
-                                  min={0.15}
-                                  max={0.85}
-                                  step={0.05}
-                                  value={musicDuckingStrength}
-                                  onChange={e => setMusicDuckingStrength(Number(e.target.value))}
-                                />
-                              </label>
-                            ) : null}
-                          </>
-                        ) : null}
-                      </div>
-                    ) : null}
                   </>
                 )}
               </div>

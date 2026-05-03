@@ -10,11 +10,14 @@ import { ref, uploadBytes, getDownloadURL, deleteObject, getStorage } from "fire
 import MultiCamCombiner from "./MultiCamCombiner";
 import ViralClipStudio from "./ViralClipStudio"; // Import the new Studio component
 import ThumbnailGenerator from "./ThumbnailGenerator";
+import SmartPromoSummaryPanel from "./SmartPromoSummaryPanel";
 import { sanitizeUrl } from "../utils/security";
 import useCinematicEffects from "../hooks/useCinematicEffects";
 import CinematicEffectsPanel from "./CinematicEffectsPanel";
+import { useSubscription } from "../hooks/useSubscription";
 
 function VideoEditor({ file, onSave, onCancel, images = [] }) {
+  const { editing, credits: subscriptionCredits } = useSubscription();
   const [videoSrc, setVideoSrc] = useState("");
   const [processing, setProcessing] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
@@ -53,6 +56,13 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
   const [clipSuggestions, setClipSuggestions] = useState(null); // Store detected clips or manual studio entry
   const [showMultiCamCombiner, setShowMultiCamCombiner] = useState(false);
   const autoOpenedStudioRef = useRef(false);
+  const analyzeCost = editing?.features?.findViralClips?.creditCost || creditCosts?.analyze || 8;
+  const renderClipCost =
+    editing?.features?.clipRender?.creditCost || creditCosts?.["render-clip"] || 5;
+  const promoSummaryCost =
+    editing?.features?.smartPromoSummary?.creditCost || creditCosts?.["promo-summary"] || 18;
+  const monthlyCreditsRemaining =
+    subscriptionCredits?.monthlyRemaining ?? creditBreakdown?.remaining ?? creditBalance;
 
   const getDownloadFileName = () => {
     const candidateName = processedFile?.name || file?.name || "edited-video.mp4";
@@ -436,6 +446,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
   const blobUrlRef = useRef(null);
   const [showThumbnailGenerator, setShowThumbnailGenerator] = useState(false);
   const [thumbnailData, setThumbnailData] = useState(null); // { dataUrl, storageUrl, text, time }
+  const [showSmartPromoSummary, setShowSmartPromoSummary] = useState(false);
 
   // Cinematic Effects — all CSS-based, no backend needed
   const {
@@ -796,6 +807,29 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
   const handleThumbnailSelect = (thumbData) => {
     setThumbnailData(thumbData);
     setShowThumbnailGenerator(false);
+  };
+
+  const handlePromoClipUse = clip => {
+    if (!clip?.url) {
+      setStatusMessage("Promo clip is missing a usable URL.");
+      return;
+    }
+
+    const refreshedUrl = clip.url.includes("?")
+      ? `${clip.url}&t=${Date.now()}`
+      : `${clip.url}?t=${Date.now()}`;
+    setProcessedFile({
+      name: `${(clip.promoCaption || clip.title || "promo-clip").replace(/[^a-zA-Z0-9._-]+/g, "-")}.mp4`,
+      type: "video/mp4",
+      url: clip.url,
+      isRemote: true,
+      expiresAt: clip.expiresAt || null,
+      promoCaption: clip.promoCaption || clip.title || "",
+      sourceType: "promo_summary_clip",
+    });
+    setVideoSrc(refreshedUrl);
+    setShowSmartPromoSummary(false);
+    setStatusMessage(`Loaded promo clip: ${clip.promoCaption || clip.title || "Promo cut"}`);
   };
 
   const handleSave = () => {
@@ -1159,6 +1193,26 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
     return combiner;
   }
 
+  if (showSmartPromoSummary) {
+    const promoPanel = (
+      <SmartPromoSummaryPanel
+        sourceFile={processedFile || file}
+        sourceUrl={videoSrc}
+        creditBalance={creditBalance}
+        creditCosts={creditCosts}
+        onClose={() => setShowSmartPromoSummary(false)}
+        onUseClip={handlePromoClipUse}
+        onStatusChange={setStatusMessage}
+      />
+    );
+
+    if (typeof document !== "undefined" && document.body) {
+      return createPortal(promoPanel, document.body);
+    }
+
+    return promoPanel;
+  }
+
   return (
     <div className="video-editor-container">
       <div className="video-editor-header">
@@ -1484,57 +1538,29 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
             <div className="studio-launch-eyebrow">Primary workflow</div>
             <h3>Open Viral Clip Studio</h3>
             <p>
-              Edit timing, overlays, captions, donor audio, and export — all from one workspace.
+              Edit timing, overlays, captions, and export from one workspace. Studio access stays
+              included on paid plans, while heavier generations use credits only when you actually
+              run them.
             </p>
-            {creditCosts && (
-              <div
-                style={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                  gap: "6px",
-                  margin: "8px 0 12px",
-                  fontSize: "0.78rem",
-                  opacity: 0.85,
-                }}
-              >
-                <span
-                  style={{
-                    background: "rgba(255,255,255,0.08)",
-                    padding: "3px 8px",
-                    borderRadius: "4px",
-                  }}
-                >
-                  Render clip: {creditCosts["render-clip"] || 5} cr
-                </span>
-                <span
-                  style={{
-                    background: "rgba(255,255,255,0.08)",
-                    padding: "3px 8px",
-                    borderRadius: "4px",
-                  }}
-                >
-                  Full process: {creditCosts.process || 10} cr
-                </span>
-                <span
-                  style={{
-                    background: "rgba(255,255,255,0.08)",
-                    padding: "3px 8px",
-                    borderRadius: "4px",
-                  }}
-                >
-                  Analyze: {creditCosts.analyze || 8} cr
-                </span>
-                <span
-                  style={{
-                    background: "rgba(255,255,255,0.08)",
-                    padding: "3px 8px",
-                    borderRadius: "4px",
-                  }}
-                >
-                  Transcribe: {creditCosts.transcribe || 3} cr
-                </span>
-              </div>
-            )}
+            <div className="studio-launch-badge-row">
+              <span className="studio-launch-badge included">Cam Combiner included</span>
+              <span className="studio-launch-badge included">Flow Edit included</span>
+              <span className="studio-launch-badge included">Thumbnail Lab included</span>
+              <span className="studio-launch-badge metered">
+                Find Viral Clips: {analyzeCost} credits
+              </span>
+              <span className="studio-launch-badge metered">
+                Render Final Clip: {renderClipCost} credits
+              </span>
+              <span className="studio-launch-badge metered">
+                Smart Promo Summary: {promoSummaryCost} credits
+              </span>
+            </div>
+            <div className="studio-launch-billing-note">
+              <strong>{monthlyCreditsRemaining ?? "..."}</strong> monthly credits remaining.
+              Credit-based runs draw from your allowance first, and you can top up anytime without
+              losing access to the included editing tools.
+            </div>
             <div className="studio-launch-actions">
               <button
                 className="process-btn studio-launch-btn"
@@ -1553,6 +1579,17 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                 type="button"
               >
                 Combine Multi-Camera Angles First
+              </button>
+              <button
+                className="legacy-toggle-btn multicam-launch-btn"
+                onClick={() => {
+                  setStatusMessage("");
+                  setShowSmartPromoSummary(true);
+                }}
+                disabled={processing}
+                type="button"
+              >
+                Smart Promo Summary
               </button>
             </div>
           </div>
@@ -1579,6 +1616,10 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
           </div>
 
           <div className="video-actions">
+            <div className="video-actions-note">
+              Thumbnail Lab, Cam Combiner, and Flow Edit stay included on paid plans. Save your
+              credits for analysis, promo generation, and final rendering.
+            </div>
             <button
               type="button"
               onClick={() => setShowThumbnailGenerator(true)}

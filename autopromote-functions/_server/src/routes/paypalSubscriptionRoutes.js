@@ -151,7 +151,7 @@ async function refreshPersistedSubscriptionFromPayPal({ userId, subscriptionId, 
         subscriptionPeriodEnd: nextBillingDate,
         subscriptionExpiresAt: normalizedStatus === "cancelled" ? nextBillingDate : null,
         isPaid: normalizedStatus === "active" || normalizedStatus === "approved",
-        unlimited: plan.features.uploads === "unlimited",
+        unlimited: plan.features.uploads === Infinity,
         features: plan.features,
         updatedAt: nowIso,
       },
@@ -406,7 +406,7 @@ async function persistActivatedSubscription({ userId, subscriptionId, planId, pa
         subscriptionPeriodStart: nowIso,
         subscriptionPeriodEnd: nextBillingDate,
         isPaid: true,
-        unlimited: plan.features.uploads === "unlimited",
+        unlimited: plan.features.uploads === Infinity,
         features: plan.features,
         updatedAt: nowIso,
       },
@@ -628,11 +628,13 @@ router.get("/plans", async (req, res) => {
     const plans = Object.values(SUBSCRIPTION_PLANS).map(plan => ({
       ...plan,
       paypalPlanId: plan.paypalPlanIdEnv ? process.env[plan.paypalPlanIdEnv] : undefined,
+      capabilities: getPlanCapabilities(plan.id),
     }));
     res.json({
       success: true,
       plans,
       currency: "USD",
+      creditTopUpPacks: CREDIT_TOP_UP_PACKS,
     });
   } catch (error) {
     console.error("[PayPal] Get plans error:", error);
@@ -1141,8 +1143,7 @@ router.get("/usage", authMiddleware, async (req, res) => {
     const uploadLimit = plan.features.uploads;
     const communityPostLimit = plan.features.communityPosts;
     const missionOpportunityLimit = plan.features.wolfHuntTasks;
-    const isUnlimited = value =>
-      value === undefined || value === null || value === "unlimited" || value === "Unlimited";
+    const isUnlimited = value => value === Infinity || value === "unlimited" || value === "Unlimited";
 
     const uploadsUsed = countDocsSince([uploadsByUserIdSnap, uploadsByLegacySnap], periodStart);
     const postsUsed = countDocsSince([postsSnap], periodStart);

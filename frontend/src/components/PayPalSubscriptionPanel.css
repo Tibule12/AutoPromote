@@ -388,6 +388,89 @@
   margin-top: 8px;
 }
 
+.plan-editing-summary {
+  margin: 0 0 20px;
+  padding: 16px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+  border: 1px solid #dbe4ff;
+}
+
+.plan-editing-block + .plan-editing-block {
+  margin-top: 14px;
+}
+
+.plan-editing-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #4338ca;
+  margin-bottom: 8px;
+}
+
+.plan-editing-copy {
+  margin: 0;
+  color: #334155;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.plan-editing-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.plan-editing-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.plan-editing-badge.included {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.plan-editing-badge.metered {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.plan-editing-badge.topup {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.plan-editing-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.plan-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: white;
+  border: 1px solid #dbe4ff;
+  color: #1e293b;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.plan-pill.accent {
+  background: #fff7ed;
+  border-color: #fdba74;
+  color: #9a3412;
+}
+
 .paypal-subscription-button-shell {
   min-height: 46px;
   padding: 10px;
@@ -431,6 +514,59 @@
   padding: 24px;
   background: #f9f9f9;
   border-radius: 12px;
+}
+
+.topup-section {
+  margin-top: 28px;
+  margin-bottom: 24px;
+  padding: 24px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.topup-section h3 {
+  margin: 0 0 8px;
+  font-size: 22px;
+}
+
+.topup-copy {
+  margin: 0 0 18px;
+  color: #64748b;
+  line-height: 1.55;
+}
+
+.topup-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+.topup-card {
+  border: 1px solid #dbe4ff;
+  border-radius: 14px;
+  padding: 16px;
+  background: linear-gradient(180deg, #f8fafc 0%, #eff6ff 100%);
+}
+
+.topup-credits {
+  font-size: 18px;
+  font-weight: 800;
+  color: #1e3a8a;
+}
+
+.topup-price {
+  font-size: 24px;
+  font-weight: 800;
+  color: #111827;
+  margin-top: 4px;
+}
+
+.topup-name,
+.topup-savings {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #475569;
 }
 
 .secure-payment-badge img {

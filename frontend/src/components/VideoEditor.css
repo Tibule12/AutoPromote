@@ -124,6 +124,45 @@
   margin-top: 16px;
 }
 
+.studio-launch-badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 10px;
+}
+
+.studio-launch-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.studio-launch-badge.included {
+  background: rgba(52, 211, 153, 0.16);
+  color: #b8ffde;
+  border: 1px solid rgba(52, 211, 153, 0.28);
+}
+
+.studio-launch-badge.metered {
+  background: rgba(251, 191, 36, 0.14);
+  color: #ffe3a3;
+  border: 1px solid rgba(251, 191, 36, 0.26);
+}
+
+.studio-launch-billing-note {
+  margin-top: 2px;
+  color: #efe3d3;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.studio-launch-billing-note strong {
+  color: #fff;
+}
+
 .studio-launch-btn {
   margin-top: 0;
 }
@@ -1208,11 +1247,19 @@
 
 .video-actions {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
   gap: 12px;
   margin-top: 24px;
   border-top: 1px solid #333;
   padding-top: 20px;
+}
+
+.video-actions-note {
+  flex: 1 1 100%;
+  color: #cbd5e1;
+  font-size: 0.82rem;
+  line-height: 1.45;
 }
 
 .save-btn {

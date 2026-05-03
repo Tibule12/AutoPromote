@@ -43,6 +43,7 @@ const PayPalSubscriptionPanel = ({
   subtitle,
 }) => {
   const [plans, setPlans] = useState([]);
+  const [creditTopUpPacks, setCreditTopUpPacks] = useState([]);
   const [currentSubscription, setCurrentSubscription] = useState(null);
   const [usage, setUsage] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -85,6 +86,7 @@ const PayPalSubscriptionPanel = ({
       const parsed = await parseJsonSafe(res);
       if (parsed.ok && parsed.json && Array.isArray(parsed.json.plans)) {
         setPlans(parsed.json.plans || []);
+        setCreditTopUpPacks(parsed.json.creditTopUpPacks || []);
       }
     } catch (error) {
       console.error("Error fetching plans:", error);
@@ -604,7 +606,7 @@ const PayPalSubscriptionPanel = ({
 
   const renderFeatureValue = (key, value) => {
     if (typeof value === "boolean") return value ? "Included" : "Not included";
-    if (value === "unlimited" || value === "Unlimited") return "Unlimited";
+    if (value === Infinity || value === "unlimited" || value === "Unlimited") return "Custom";
     if (key === "platformLimit" && typeof value === "number") {
       return `${value} platform${value === 1 ? "" : "s"}`;
     }
@@ -621,6 +623,36 @@ const PayPalSubscriptionPanel = ({
   };
 
   const missionUsage = usage?.missionOpportunities || usage?.viralBoosts || null;
+  const editingFeatureGroups = [
+    "multicam",
+    "autoDirector",
+    "flowEdit",
+    "thumbnailLab",
+    "viralClipStudio",
+    "findViralClips",
+    "smartPromoSummary",
+  ];
+
+  const getPlanEditingSummary = plan => {
+    const editing = plan.capabilities?.editing;
+    const features = editing?.features || {};
+    const includedTools = editingFeatureGroups
+      .map(featureId => features[featureId])
+      .filter(feature => feature?.enabled && feature?.included)
+      .map(feature => feature.label);
+    const creditTools = editingFeatureGroups
+      .map(featureId => features[featureId])
+      .filter(feature => feature?.enabled && feature?.creditCost > 0)
+      .map(feature => `${feature.label} (${feature.creditCost} credits)`);
+
+    return {
+      includedTools,
+      creditTools,
+      monthlyCredits: editing?.monthlyCreditsIncluded || plan.features?.monthlyCredits || 0,
+      topUpsEnabled: Boolean(editing?.topUpsEnabled),
+      policy: editing?.policy || "",
+    };
+  };
 
   const renderUsageBar = (used, limit, unlimited) => {
     if (unlimited) {
@@ -794,6 +826,57 @@ const PayPalSubscriptionPanel = ({
                   ))}
                 </div>
 
+                {(() => {
+                  const editingSummary = getPlanEditingSummary(plan);
+                  return (
+                    <div className="plan-editing-summary">
+                      <div className="plan-editing-block">
+                        <div className="plan-editing-title">Editing Access</div>
+                        <p className="plan-editing-copy">
+                          {plan.id === "free"
+                            ? "Paid plans unlock the editing suite. Free users can explore the platform before moving into premium creative workflows."
+                            : `${editingSummary.monthlyCredits} editing credits are included every month. Top up anytime if you need more before renewal.`}
+                        </p>
+                        {plan.id !== "free" && (
+                          <div className="plan-editing-badges">
+                            <span className="plan-editing-badge included">Creative tools included</span>
+                            <span className="plan-editing-badge metered">Generations use credits</span>
+                            {editingSummary.topUpsEnabled && (
+                              <span className="plan-editing-badge topup">Top up anytime</span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {editingSummary.includedTools.length > 0 && (
+                        <div className="plan-editing-block">
+                          <div className="plan-editing-title">Included tools</div>
+                          <div className="plan-editing-list">
+                            {editingSummary.includedTools.map(label => (
+                              <span key={label} className="plan-pill">
+                                {label}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {editingSummary.creditTools.length > 0 && (
+                        <div className="plan-editing-block">
+                          <div className="plan-editing-title">Credit-based generations</div>
+                          <div className="plan-editing-list">
+                            {editingSummary.creditTools.map(label => (
+                              <span key={label} className="plan-pill accent">
+                                {label}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
+
                 {!isCurrent && plan.id !== "free" && (
                   <div className="plan-checkout-zone">
                     {canUseEmbeddedCheckout ? (
@@ -843,6 +926,25 @@ const PayPalSubscriptionPanel = ({
 
       {!compact && (
         <>
+          {creditTopUpPacks.length > 0 && (
+            <div className="topup-section">
+              <h3>Top Up Anytime</h3>
+              <p className="topup-copy">
+                If you use up your monthly editing credits before renewal, you can add more and keep going.
+              </p>
+              <div className="topup-grid">
+                {creditTopUpPacks.map(pack => (
+                  <div key={pack.id} className="topup-card">
+                    <div className="topup-credits">{pack.credits} credits</div>
+                    <div className="topup-price">${pack.price}</div>
+                    <div className="topup-name">{pack.name}</div>
+                    {pack.savings && <div className="topup-savings">Save {pack.savings}</div>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="secure-payment-badge">
             <img
               src="https://www.paypalobjects.com/webstatic/mktg/logo/PP_AcceptanceMarkTray_150x40.png"
