@@ -2429,8 +2429,14 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
 
                   {mediaType === "video" && (
                     <div className="trim-controls" style={{ margin: "10px 0" }}>
-                      <label>
+                      <label style={{ display: "block", marginBottom: "6px" }}>
                         Start: {trimStart}s / End: {trimEnd > 0 ? trimEnd + "s" : "Full"}
+                      </label>
+                      <div style={{ fontSize: "0.78rem", color: "#94a3b8", marginBottom: "6px" }}>
+                        Trim the master clip window before it flows into the platform-specific forms.
+                      </div>
+                      <label style={{ display: "block", fontSize: "0.8rem", marginBottom: "4px" }}>
+                        Start time
                       </label>
                       <input
                         type="range"
@@ -2438,7 +2444,39 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                         max={duration}
                         step="0.1"
                         value={trimStart}
-                        onChange={e => setTrimStart(Number(e.target.value))}
+                        onChange={e => {
+                          const nextStart = Number(e.target.value);
+                          setTrimStart(nextStart);
+                          if (trimEnd > 0 && trimEnd < nextStart) {
+                            setTrimEnd(nextStart);
+                          }
+                        }}
+                        style={{ width: "100%" }}
+                      />
+                      <label
+                        style={{
+                          display: "block",
+                          fontSize: "0.8rem",
+                          marginTop: "8px",
+                          marginBottom: "4px",
+                        }}
+                      >
+                        End time
+                      </label>
+                      <input
+                        type="range"
+                        min={trimStart}
+                        max={duration}
+                        step="0.1"
+                        value={trimEnd > 0 ? trimEnd : duration}
+                        onChange={e => {
+                          const nextEnd = Number(e.target.value);
+                          if (duration > 0 && Math.abs(nextEnd - duration) < 0.11) {
+                            setTrimEnd(0);
+                            return;
+                          }
+                          setTrimEnd(Math.max(nextEnd, trimStart));
+                        }}
                         style={{ width: "100%" }}
                       />
                     </div>

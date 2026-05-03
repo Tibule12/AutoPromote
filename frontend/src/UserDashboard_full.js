@@ -1044,21 +1044,6 @@ const UserDashboard = ({
           <div className="profile-section">
             <img className="profile-avatar" src={user?.avatarUrl || DEFAULT_IMAGE} alt="Avatar" />
             <h2>{user?.name || "User Name"}</h2>
-
-            <div className="profile-stats">
-              <div>
-                <strong>Views:</strong> {stats?.views ?? 0}
-              </div>
-              <div>
-                <strong>Clicks:</strong> {stats?.clicks ?? 0}
-              </div>
-              <div>
-                <strong>CTR:</strong> {stats?.ctr ?? 0}%
-              </div>
-              <div>
-                <strong>Revenue:</strong> ${stats?.revenue ?? "0.00"}
-              </div>
-            </div>
           </div>
           <nav className="dashboard-navbar-vertical" role="navigation">
             <ul>
