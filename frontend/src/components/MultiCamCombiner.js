@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
+  buildAutoDirectorPlan,
   clampNumber,
   DEFAULT_SEGMENT_FRAMING,
   buildDefaultSegments,
@@ -24,6 +25,14 @@ import {
   splitSegmentAtTimelineTime,
   resolveSmartMulticamLayoutAtTime,
 } from "./multicamUtils";
+import {
+  FLOW_EDIT_STYLE_PRESETS,
+  buildFlowEditPlan,
+  buildFlowTimelineDisplaySegments,
+  buildSingleLensAutoPlan,
+  getFlowSegmentAtTime,
+  getFlowSourceTimeAtPlayhead,
+} from "./flowEditUtils";
 import { getAuth } from "firebase/auth";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { API_BASE_URL } from "../config";
@@ -31,6 +40,7 @@ import toast from "react-hot-toast";
 import "./MultiCamCombiner.css";
 import useCinematicEffects from "../hooks/useCinematicEffects";
 import CinematicEffectsPanel from "./CinematicEffectsPanel";
+import { useSubscription } from "../hooks/useSubscription";
 
 const MULTICAM_MAX_SOURCES = 6;
 
@@ -106,6 +116,13 @@ const DIRECTOR_STYLE_PRESETS = [
     summary: "Let the whole room breathe with ensemble layouts and bigger visual crescendos.",
     guidance: "Open the frame when several angles are alive together.",
   },
+];
+
+const FLOW_EDIT_STATUS_STEPS = [
+  "Analyzing audio...",
+  "Detecting rhythm...",
+  "Generating flow edit...",
+  "Preview ready",
 ];
 
 const getDirectorStylePreset = styleId =>
@@ -634,6 +651,7 @@ const pickExportMimeType = () => {
 };
 
 function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange }) {
+  const { canUseFeature } = useSubscription();
   const [sources, setSources] = useState(() =>
     buildInitialSources(primaryFile).map((source, index) => ({
       ...source,
@@ -658,22 +676,39 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const [singleCamSegments, setSingleCamSegments] = useState([]);
   const [selectedSingleCamSegmentId, setSelectedSingleCamSegmentId] = useState(null);
   const [singleCamSegmentFraming, setSingleCamSegmentFraming] = useState({});
+  const [singleLensAutoSummary, setSingleLensAutoSummary] = useState("");
   const [focusPickerActive, setFocusPickerActive] = useState(false);
   const [multicamLayoutMode, setMulticamLayoutMode] = useState("smart");
   const [directorStyleId, setDirectorStyleId] = useState(DIRECTOR_STYLE_PRESETS[0].id);
+  const [autoDirectorEnabled, setAutoDirectorEnabled] = useState(true);
+  const [autoDirectorSummary, setAutoDirectorSummary] = useState(null);
+  const [studioMode, setStudioMode] = useState("combine");
+  const [flowEditStyleId, setFlowEditStyleId] = useState(FLOW_EDIT_STYLE_PRESETS[1].id);
+  const [flowAudioTrack, setFlowAudioTrack] = useState(null);
+  const [flowEditPlan, setFlowEditPlan] = useState(null);
+  const [flowEditEnabled, setFlowEditEnabled] = useState(false);
+  const [isGeneratingFlowEdit, setIsGeneratingFlowEdit] = useState(false);
+  const [flowEditStatusStep, setFlowEditStatusStep] = useState("");
+  const [selectedFlowSegmentId, setSelectedFlowSegmentId] = useState(null);
+  const [flowEditVariants, setFlowEditVariants] = useState([]);
+  const [flowEditInsight, setFlowEditInsight] = useState("");
+  const [flowEditWarning, setFlowEditWarning] = useState("");
 
   const cancelExportRef = useRef(false);
   const fileInputRef = useRef(null);
+  const flowAudioInputRef = useRef(null);
   const nextCameraIndexRef = useRef(3);
   const objectUrlsRef = useRef(new Set());
   const animationFrameRef = useRef(null);
   const playheadRef = useRef(0);
   const scrollContainerRef = useRef(null);
   const previewStageRef = useRef(null);
+  const autoDirectorSignatureRef = useRef("");
   const audioAnalysisCacheRef = useRef(new Map());
   const previewVideoRefs = useRef({});
   const thumbnailVideoRefs = useRef({});
   const audioVideoRefs = useRef({});
+  const flowAudioRef = useRef(null);
   const handleRecordSwitchRef = useRef(null);
   const singleCamSignatureRef = useRef("");
   const [audioAnalysisByCameraId, setAudioAnalysisByCameraId] = useState({});
@@ -701,6 +736,20 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     () => sources.filter(source => getSourceMediaUrl(source) && Number(source.duration) > 0.05),
     [sources]
   );
+  const flowFrameQualityByCameraId = useMemo(
+    () =>
+      readySources.reduce((accumulator, source) => {
+        const resolutionPixels =
+          Math.max(1, Number(source.videoWidth || 0)) * Math.max(1, Number(source.videoHeight || 0));
+        const normalizedResolution = clampNumber(resolutionPixels / (1920 * 1080), 0.2, 1, 0.58);
+        const durationScore = clampNumber((Number(source.duration) || 0) / 12, 0.3, 1, 0.72);
+        accumulator[source.id] = {
+          score: Number((normalizedResolution * 0.58 + durationScore * 0.42).toFixed(3)),
+        };
+        return accumulator;
+      }, {}),
+    [readySources]
+  );
   const singleCamSource = readySources[0] || null;
 
   const timelineBounds = useMemo(() => getMasterTimelineBounds(readySources), [readySources]);
@@ -720,9 +769,20 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     () => normalizedSingleCamSegments[normalizedSingleCamSegments.length - 1]?.timelineEnd || 0,
     [normalizedSingleCamSegments]
   );
-  const timelineDuration = isSingleSourceWorkflow
+  const baseTimelineDuration = isSingleSourceWorkflow
     ? singleCamTimelineDuration
     : timelineBounds.timelineDuration;
+  const flowAudioSource = useMemo(() => {
+    if (flowAudioTrack?.cameraId) {
+      return readySources.find(source => source.id === flowAudioTrack.cameraId) || null;
+    }
+    return null;
+  }, [flowAudioTrack, readySources]);
+  const flowAudioUrl = flowAudioTrack?.previewUrl || getSourceMediaUrl(flowAudioSource);
+  const timelineDuration =
+    !isSingleSourceWorkflow && flowEditEnabled && flowEditPlan?.duration
+      ? Math.min(baseTimelineDuration, Number(flowEditPlan.duration) || baseTimelineDuration)
+      : baseTimelineDuration;
   const canExportProject = readySources.length >= 1 && timelineDuration > 0;
   const normalizedSwitches = useMemo(
     () =>
@@ -732,6 +792,19 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         timelineDuration || 0
       ),
     [readySources, sources, switches, timelineDuration]
+  );
+  const activeFlowSegments = useMemo(
+    () =>
+      !isSingleSourceWorkflow && flowEditEnabled && Array.isArray(flowEditPlan?.segments)
+        ? flowEditPlan.segments.filter(
+            segment => Number(segment.endTime) > Number(segment.startTime)
+          )
+        : [],
+    [isSingleSourceWorkflow, flowEditEnabled, flowEditPlan]
+  );
+  const currentFlowSegment = useMemo(
+    () => getFlowSegmentAtTime(activeFlowSegments, playhead),
+    [activeFlowSegments, playhead]
   );
   const displaySegments = useMemo(() => {
     if (isSingleSourceWorkflow) {
@@ -745,6 +818,14 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       }));
     }
 
+    if (activeFlowSegments.length) {
+      return buildFlowTimelineDisplaySegments(
+        activeFlowSegments,
+        readySources.length ? readySources : sources,
+        timelineDuration || 0.01
+      );
+    }
+
     return buildSwitchDisplaySegments(
       normalizedSwitches,
       readySources.length ? readySources : sources,
@@ -755,6 +836,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     normalizedSingleCamSegments,
     singleCamSource,
     timelineDuration,
+    activeFlowSegments,
     normalizedSwitches,
     readySources,
     sources,
@@ -762,6 +844,10 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const activeSegment = useMemo(() => {
     if (isSingleSourceWorkflow) {
       return getActiveSegmentAtTime(normalizedSingleCamSegments, playhead);
+    }
+
+    if (currentFlowSegment) {
+      return currentFlowSegment;
     }
 
     return getActiveCameraAtTime(
@@ -774,6 +860,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     isSingleSourceWorkflow,
     normalizedSingleCamSegments,
     playhead,
+    currentFlowSegment,
     normalizedSwitches,
     readySources,
     sources,
@@ -848,6 +935,10 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       normalizedSingleCamSegments.find(segment => segment.id === selectedSingleCamSegmentId) ||
       null,
     [normalizedSingleCamSegments, selectedSingleCamSegmentId]
+  );
+  const selectedFlowSegment = useMemo(
+    () => activeFlowSegments.find(segment => segment.id === selectedFlowSegmentId) || null,
+    [activeFlowSegments, selectedFlowSegmentId]
   );
   const selectedSingleCamFraming = useMemo(() => {
     if (!selectedSingleCamSegmentId) return DEFAULT_SEGMENT_FRAMING;
@@ -1121,13 +1212,6 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     effectiveMulticamLayoutMode,
     activeCamera,
   ]);
-  const syncWindowLabel = useMemo(() => {
-    if (readySources.length <= 1) {
-      return "Single stream online";
-    }
-
-    return `${formatDurationLabel(overlapBounds.overlapDuration || 0)} overlap live`;
-  }, [readySources.length, overlapBounds.overlapDuration]);
   const liveMomentLabel = useMemo(() => {
     if (isSingleSourceWorkflow) {
       return "Solo lens edit";
@@ -1157,8 +1241,11 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     if (isSingleSourceWorkflow) {
       return "Split, trim, and reframe this one recording.";
     }
+    if (flowEditEnabled && flowEditPlan?.segments?.length) {
+      return flowEditInsight || "Flow Edit is driving cut timing, motion, and pace from the selected audio.";
+    }
     return multicamLayoutInsight;
-  }, [isSingleSourceWorkflow, multicamLayoutInsight]);
+  }, [isSingleSourceWorkflow, flowEditEnabled, flowEditPlan, flowEditInsight, multicamLayoutInsight]);
   const workflowModeLabel = isSingleSourceWorkflow ? "Single-Cam Edit" : "Multicam Director";
   const workflowTitle = isSingleSourceWorkflow ? "Single-Camera Workflow" : "Angle Timeline";
   const workflowDescription = isSingleSourceWorkflow
@@ -1184,16 +1271,17 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     : workflowDescription;
   const footerNoteTitle = isSingleSourceWorkflow ? "Single-cam edit mode" : "Sync window";
   const footerNoteCopy = isSingleSourceWorkflow
-    ? "One source loaded. Use split, trim, punch-in, and reframe controls to build a sharper cut without adding another angle."
+    ? singleLensAutoSummary ||
+      "One source loaded. Use split, trim, punch-in, and reframe controls to build a sharper cut without adding another angle."
     : `Overlap start ${formatDurationLabel(overlapBounds.overlapStart || 0)} | overlap duration ${formatDurationLabel(overlapBounds.overlapDuration || 0)}`;
   const quickActionItems = useMemo(() => {
     if (isSingleSourceWorkflow) {
       return [
         {
-          id: "single-wide",
-          label: "Keep It Natural",
-          caption: "Wide two-shot framing",
-          isActive: selectedSingleCamFraming.zoom <= 1.01 && !focusPickerActive,
+          id: "single-auto",
+          label: "Auto Shape",
+          caption: "Let AI pace the lens",
+          isActive: Boolean(singleLensAutoSummary),
         },
         {
           id: "single-body",
@@ -1221,7 +1309,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         id: "multi-smart",
         label: "Auto Direct",
         caption: "Let AI steer the conversation",
-        isActive: multicamLayoutMode === "smart",
+        isActive: multicamLayoutMode === "smart" && autoDirectorEnabled,
       },
       {
         id: "multi-grid",
@@ -1244,9 +1332,11 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     ];
   }, [
     isSingleSourceWorkflow,
+    singleLensAutoSummary,
     selectedSingleCamFraming.zoom,
     focusPickerActive,
     multicamLayoutMode,
+    autoDirectorEnabled,
   ]);
   const previewStageStyle = useMemo(() => {
     const aspectRatioMap = {
@@ -1268,6 +1358,24 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       maxWidth: "100%",
     };
   }, [outputAspectRatio]);
+  const flowBeatCount = flowEditPlan?.beatMarkers?.length || 0;
+  const flowEnergyZoneCount = flowEditPlan?.energyZones?.length || 0;
+  const isFlowWorkspace = !isSingleSourceWorkflow && studioMode === "flow";
+  const headerTitle = isSingleSourceWorkflow
+    ? "Combine Multi-Camera Angles"
+    : isFlowWorkspace
+      ? "Flow Edit / Sync to Sound"
+      : "Combine Multi-Camera Angles";
+  const headerDescription = isSingleSourceWorkflow
+    ? "Load one full recording to edit it on a shared timeline, or add extra camera angles and switch between them while keeping one audio source locked in."
+    : isFlowWorkspace
+      ? "Use Cam Combiner footage as your visual pool, then optionally drive pacing, camera switches, and speed ramps from uploaded audio or a master source."
+      : "Stay in manual Cam Combiner mode to sync cameras, switch angles, and build the edit yourself. Flow Edit is optional and can be opened only when you want rhythm-driven automation.";
+  const billingMessage = !canUseFeature("multicam")
+    ? "Upgrade to a paid plan to unlock Cam Combiner, Auto Director, and Flow Edit."
+    : isFlowWorkspace
+      ? "Included on paid plans. Flow Edit preview, Auto Director, and local rhythm shaping do not spend generation credits."
+      : "Included on paid plans. Manual combine, Auto Director, and camera switching stay available without spending generation credits.";
 
   // Attach the active camera's video for timed effects
   useEffect(() => {
@@ -1287,6 +1395,16 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   }, [readySources, masterAudioCameraId]);
 
   useEffect(() => {
+    if (flowAudioTrack?.mode === "camera" && flowAudioTrack.cameraId !== masterAudioCameraId) {
+      setFlowAudioTrack({
+        cameraId: masterAudioCameraId,
+        name: `${masterAudioSource?.label || "Master"} audio`,
+        mode: "camera",
+      });
+    }
+  }, [flowAudioTrack, masterAudioCameraId, masterAudioSource]);
+
+  useEffect(() => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTop = 0;
     }
@@ -1298,6 +1416,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       setSingleCamSegments([]);
       setSelectedSingleCamSegmentId(null);
       setSingleCamSegmentFraming({});
+      setSingleLensAutoSummary("");
       return;
     }
 
@@ -1334,6 +1453,24 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       return activeId;
     });
   }, [isSingleSourceWorkflow, activeSegment, normalizedSingleCamSegments]);
+
+  useEffect(() => {
+    if (isSingleSourceWorkflow || !flowEditEnabled || !activeFlowSegments.length) {
+      setSelectedFlowSegmentId(null);
+      return;
+    }
+    setSelectedFlowSegmentId(current => {
+      if (current && activeFlowSegments.some(segment => segment.id === current)) {
+        return current;
+      }
+      return currentFlowSegment?.id || activeFlowSegments[0]?.id || null;
+    });
+  }, [
+    isSingleSourceWorkflow,
+    flowEditEnabled,
+    activeFlowSegments,
+    currentFlowSegment,
+  ]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -1378,6 +1515,33 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       isCancelled = true;
     };
   }, [readySources]);
+
+  useEffect(() => {
+    if (
+      isSingleSourceWorkflow ||
+      flowEditEnabled ||
+      !autoDirectorEnabled ||
+      readySources.length < 2 ||
+      !timelineDuration
+    ) {
+      if (isSingleSourceWorkflow || readySources.length < 2) {
+        setAutoDirectorSummary(null);
+      }
+      return;
+    }
+
+    applyAutoDirectorPlan(false);
+  }, [
+    isSingleSourceWorkflow,
+    flowEditEnabled,
+    autoDirectorEnabled,
+    readySources,
+    timelineDuration,
+    timelineBounds.timelineStart,
+    directorStyleId,
+    audioAnalysisByCameraId,
+    flowFrameQualityByCameraId,
+  ]);
 
   useEffect(() => {
     if (!timelineDuration) {
@@ -1440,6 +1604,27 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       return undefined;
     }
 
+    if (flowEditEnabled && flowAudioUrl && flowAudioRef.current) {
+      const tick = () => {
+        const audioTime = Math.min(timelineDuration, Number(flowAudioRef.current?.currentTime) || 0);
+        setPlayhead(audioTime);
+        if (audioTime >= timelineDuration) {
+          setIsPlaying(false);
+          animationFrameRef.current = null;
+          return;
+        }
+        animationFrameRef.current = requestAnimationFrame(tick);
+      };
+
+      animationFrameRef.current = requestAnimationFrame(tick);
+      return () => {
+        if (animationFrameRef.current) {
+          cancelAnimationFrame(animationFrameRef.current);
+          animationFrameRef.current = null;
+        }
+      };
+    }
+
     const startedAt = performance.now() - playheadRef.current * 1000;
     const tick = now => {
       const nextPlayhead = Math.min(timelineDuration, (now - startedAt) / 1000);
@@ -1459,7 +1644,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         animationFrameRef.current = null;
       }
     };
-  }, [isPlaying, timelineDuration]);
+  }, [isPlaying, timelineDuration, flowEditEnabled, flowAudioUrl]);
 
   useEffect(() => {
     readySources.forEach(source => {
@@ -1467,9 +1652,12 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         ? source.id === activeCameraId
           ? mapTimelineTimeToSourceTime(activeSegment, playhead)
           : null
-        : getSourceTimelineTime(source, playhead, timelineBounds.timelineStart);
+        : currentFlowSegment
+          ? getFlowSourceTimeAtPlayhead(source, currentFlowSegment, playhead, timelineBounds.timelineStart)
+          : getSourceTimelineTime(source, playhead, timelineBounds.timelineStart);
       const isInRange = isSourceAvailableAtTime(source, mappedTime);
       const isActivePreview = source.id === activeCameraId || source.id === secondaryCameraId;
+      const playbackRate = currentFlowSegment?.playbackRate || 1;
 
       syncMediaElement(
         previewVideoRefs.current[source.id],
@@ -1478,22 +1666,39 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         {
           muted: true,
           volume: 0,
+          playbackRate,
         }
       );
       syncMediaElement(thumbnailVideoRefs.current[source.id], mappedTime, false, {
         muted: true,
         volume: 0,
+        playbackRate,
       });
       syncMediaElement(
         audioVideoRefs.current[source.id],
         mappedTime,
-        isPlaying && isInRange && source.id === masterAudioCameraId,
+        !flowAudioUrl && isPlaying && isInRange && source.id === masterAudioCameraId,
         {
-          muted: source.id !== masterAudioCameraId,
-          volume: source.id === masterAudioCameraId ? 1 : 0,
+          muted: !!flowAudioUrl || source.id !== masterAudioCameraId,
+          volume: !!flowAudioUrl ? 0 : source.id === masterAudioCameraId ? 1 : 0,
+          playbackRate,
         }
       );
     });
+
+    if (flowAudioRef.current) {
+      syncMediaElement(
+        flowAudioRef.current,
+        playhead,
+        !!flowAudioUrl && isPlaying,
+        {
+          muted: false,
+          volume: 1,
+          playbackRate: 1,
+          driftThreshold: 0.22,
+        }
+      );
+    }
   }, [
     readySources,
     playhead,
@@ -1504,6 +1709,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     secondaryCameraId,
     isSingleSourceWorkflow,
     activeSegment,
+    currentFlowSegment,
+    flowAudioUrl,
   ]);
 
   useEffect(() => {
@@ -1578,6 +1785,12 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       const remaining = sources.filter(s => s.id !== cameraId);
       setMasterAudioCameraId(remaining[0]?.id || "cam-1");
     }
+    if (flowAudioTrack?.cameraId === cameraId) {
+      setFlowAudioTrack(null);
+      setFlowEditEnabled(false);
+      setFlowEditPlan(null);
+      setFlowEditVariants([]);
+    }
     if (removedSource?.previewUrl && objectUrlsRef.current.has(removedSource.previewUrl)) {
       URL.revokeObjectURL(removedSource.previewUrl);
       objectUrlsRef.current.delete(removedSource.previewUrl);
@@ -1597,12 +1810,70 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         source.id === cameraId
           ? { ...source, offsetSeconds: Number.isFinite(numericOffset) ? numericOffset : 0 }
           : source
-      )
+        )
     );
+  };
+
+  const applyAutoDirectorPlan = (forceStatus = false) => {
+    if (
+      isSingleSourceWorkflow ||
+      flowEditEnabled ||
+      readySources.length < 2 ||
+      !timelineDuration
+    ) {
+      return;
+    }
+
+    const nextPlan = buildAutoDirectorPlan(readySources, timelineDuration, {
+      timelineStart: timelineBounds.timelineStart,
+      directorStyleId,
+      audioActivityBySource: audioAnalysisByCameraId,
+      qualityBySource: flowFrameQualityByCameraId,
+    });
+    const signature = JSON.stringify(
+      nextPlan.switches.map(item => [item.cameraId, Number(item.startTime).toFixed(2)])
+    );
+
+    setAutoDirectorSummary(nextPlan.summary);
+    if (signature !== autoDirectorSignatureRef.current) {
+      autoDirectorSignatureRef.current = signature;
+      setSwitches(nextPlan.switches);
+      setSelectedSwitchId(nextPlan.switches[0]?.id || null);
+      if (forceStatus) {
+        setStatusMessage(
+          `Auto Director built ${nextPlan.summary.switchesCount} cuts with ${Math.round(
+            nextPlan.summary.confidence * 100
+          )}% confidence.`
+        );
+      }
+    } else if (forceStatus) {
+      setStatusMessage(
+        `Auto Director is active in ${nextPlan.summary.modeLabel.toLowerCase()}.`
+      );
+    }
+  };
+
+  const disableAutoDirectorForManualControl = reason => {
+    setAutoDirectorEnabled(false);
+    if (reason) {
+      setStatusMessage(reason);
+    }
   };
 
   const handleRecordSwitch = cameraId => {
     if (!cameraId || !timelineDuration) return;
+
+    if (!isSingleSourceWorkflow && flowEditEnabled && selectedFlowSegmentId) {
+      handleApplyCameraToFlowSegment(cameraId);
+      setStatusMessage(`Flow segment switched to ${cameraId}.`);
+      return;
+    }
+
+    if (!isSingleSourceWorkflow && autoDirectorEnabled) {
+      disableAutoDirectorForManualControl(
+        "Manual cut override engaged. Auto Director is paused until you re-arm it."
+      );
+    }
 
     const sourceScope = readySources.length ? readySources : sources;
     const targetSource = sourceScope.find(source => source.id === cameraId);
@@ -1793,9 +2064,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
 
   const handleRunQuickAction = actionId => {
     if (isSingleSourceWorkflow) {
-      if (actionId === "single-wide") {
-        handleApplySingleCamFocusPreset({ id: "two-shot", zoom: 1 });
-        setStatusMessage("Natural wide framing applied.");
+      if (actionId === "single-auto") {
+        handleAutoShapeSingleLens();
         return;
       }
       if (actionId === "single-body") {
@@ -1819,7 +2089,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
 
     if (actionId === "multi-smart") {
       setMulticamLayoutMode("smart");
-      setStatusMessage("AI Director is steering the scene.");
+      setAutoDirectorEnabled(true);
+      applyAutoDirectorPlan(true);
       return;
     }
     if (actionId === "multi-grid") {
@@ -1890,6 +2161,33 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     return normalizedAnalysis;
   };
 
+  const handleAutoShapeSingleLens = async () => {
+    if (!isSingleSourceWorkflow || !singleCamSource) return;
+
+    try {
+      setStatusMessage("Auto Shape is reading the mood of your single-lens take...");
+      const analysis = await getOrCreateAudioAnalysis(singleCamSource);
+      const plan = buildSingleLensAutoPlan({
+        source: singleCamSource,
+        audioAnalysis: analysis,
+        timelineDuration: Number(singleCamSource.duration) || timelineDuration,
+      });
+      if (!plan.segments.length) {
+        toast.error("Auto Shape could not build a single-lens plan from this take.");
+        return;
+      }
+      setSingleCamSegments(plan.segments);
+      setSingleCamSegmentFraming(plan.framingMap);
+      setSelectedSingleCamSegmentId(plan.segments[0]?.id || null);
+      setPlayhead(0);
+      setSingleLensAutoSummary(plan.summary);
+      setStatusMessage(plan.summary);
+    } catch (error) {
+      toast.error(error.message || "Auto Shape failed for this single-lens take.");
+      setStatusMessage(error.message || "Auto Shape failed.");
+    }
+  };
+
   const handleAutoSyncToMasterAudio = async cameraId => {
     const source = sources.find(item => item.id === cameraId);
     const masterSource = sources.find(item => item.id === masterAudioCameraId);
@@ -1933,10 +2231,274 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     }
   };
 
+  const persistFlowPlan = nextPlan => {
+    setFlowEditPlan(nextPlan);
+    setFlowEditEnabled(Boolean(nextPlan?.segments?.length));
+    setSelectedFlowSegmentId(nextPlan?.segments?.[0]?.id || null);
+    if (nextPlan?.switches?.length) {
+      setSwitches(nextPlan.switches);
+      setSelectedSwitchId(nextPlan.switches[0]?.id || null);
+    }
+  };
+
+  const handleUseMasterAudioForFlow = () => {
+    if (!masterAudioSource) {
+      toast.error("Pick a master audio source first.");
+      return;
+    }
+    setFlowAudioTrack({
+      cameraId: masterAudioSource.id,
+      name: `${masterAudioSource.label} audio`,
+      mode: "camera",
+    });
+    setFlowEditInsight(`${masterAudioSource.label} will drive the rhythm analysis.`);
+  };
+
+  const handleLoadFlowAudioFile = file => {
+    if (!file) return;
+    const previewUrl = URL.createObjectURL(file);
+    objectUrlsRef.current.add(previewUrl);
+    setFlowAudioTrack({
+      file,
+      previewUrl,
+      name: file.name,
+      mode: "upload",
+    });
+    setFlowEditInsight(`${file.name} is loaded as the Flow Edit soundtrack.`);
+  };
+
+  const handleClearFlowAudio = () => {
+    if (flowAudioTrack?.previewUrl && objectUrlsRef.current.has(flowAudioTrack.previewUrl)) {
+      URL.revokeObjectURL(flowAudioTrack.previewUrl);
+      objectUrlsRef.current.delete(flowAudioTrack.previewUrl);
+    }
+    setFlowAudioTrack(null);
+    setFlowEditPlan(null);
+    setFlowEditVariants([]);
+    setFlowEditEnabled(false);
+    setSelectedFlowSegmentId(null);
+    setFlowEditWarning("");
+    setFlowEditStatusStep("");
+    setFlowEditInsight("");
+  };
+
+  const updateFlowPlanSegments = updater => {
+    setFlowEditPlan(currentPlan => {
+      if (!currentPlan?.segments?.length) return currentPlan;
+      const updatedSegments = updater(currentPlan.segments.map(segment => ({ ...segment })));
+      if (!Array.isArray(updatedSegments) || !updatedSegments.length) return currentPlan;
+      const normalizedSegments = updatedSegments.map((segment, index) => ({
+        ...segment,
+        id: segment.id || `flow-segment-${index + 1}`,
+        startTime: Number(segment.startTime.toFixed(3)),
+        endTime: Number(segment.endTime.toFixed(3)),
+        duration: Number((segment.endTime - segment.startTime).toFixed(3)),
+        sourceTimeByCameraId: (readySources.length ? readySources : sources).reduce(
+          (accumulator, source) => {
+            accumulator[source.id] = {
+              sourceStart: getSourceTimelineTime(
+                source,
+                Number(segment.startTime.toFixed(3)),
+                timelineBounds.timelineStart
+              ),
+              playbackRate: segment.playbackRate || 1,
+            };
+            return accumulator;
+          },
+          {}
+        ),
+      }));
+      const nextPlan = {
+        ...currentPlan,
+        segments: normalizedSegments,
+        switches: normalizeSwitches(
+          normalizedSegments.map(segment => ({
+            id: segment.id,
+            cameraId: segment.cameraId,
+            startTime: segment.startTime,
+          })),
+          readySources.length ? readySources : sources,
+          currentPlan.duration || timelineDuration
+        ),
+      };
+      setSwitches(nextPlan.switches);
+      return nextPlan;
+    });
+  };
+
+  const handleGenerateFlowEdit = async (styleOverride = null) => {
+    const analysisUrl = flowAudioUrl || getSourceMediaUrl(masterAudioSource);
+    if (isSingleSourceWorkflow || readySources.length < 2) {
+      toast.error("Flow Edit needs at least two synced camera sources.");
+      return;
+    }
+    if (!analysisUrl) {
+      toast.error("Load or choose audio first.");
+      return;
+    }
+
+    setIsGeneratingFlowEdit(true);
+    setFlowEditWarning("");
+    setFlowEditStatusStep(FLOW_EDIT_STATUS_STEPS[0]);
+    setStatusMessage("Analyzing audio for Flow Edit...");
+
+    try {
+      const analysis = await analyzeAudioTrack(analysisUrl);
+      setFlowEditStatusStep(FLOW_EDIT_STATUS_STEPS[1]);
+      const variants = FLOW_EDIT_STYLE_PRESETS.map(style => ({
+        ...style,
+        plan: buildFlowEditPlan({
+          sources: readySources,
+          timelineDuration: baseTimelineDuration,
+          timelineStart: timelineBounds.timelineStart,
+          audioAnalysis: analysis,
+          sourceActivityByCameraId: audioAnalysisByCameraId,
+          styleId: style.id,
+          frameQualityByCameraId: flowFrameQualityByCameraId,
+        }),
+      }));
+      setFlowEditStatusStep(FLOW_EDIT_STATUS_STEPS[2]);
+      const preferred =
+        variants.find(variant => variant.id === (styleOverride || flowEditStyleId)) || variants[0];
+      persistFlowPlan(preferred.plan);
+      setFlowEditVariants(
+        variants.map(variant => ({
+          id: variant.id,
+          label: variant.label,
+          summary: variant.summary,
+          duration: variant.plan.duration,
+          clipCount: variant.plan.segments.length,
+          audioType: variant.plan.audioType,
+          rescueMode: variant.plan.rescueMode,
+          warning: variant.plan.warning,
+        }))
+      );
+      setSelectedFlowSegmentId(preferred.plan.segments[0]?.id || null);
+      setFlowEditWarning(preferred.plan.warning || "");
+      setFlowEditInsight(preferred.plan.rescueSummary || preferred.plan.audioExplanation || "");
+      setFlowEditStatusStep(FLOW_EDIT_STATUS_STEPS[3]);
+      setStatusMessage("Flow Edit preview is ready.");
+    } catch (error) {
+      toast.error(error.message || "Flow Edit analysis failed.");
+      setFlowEditStatusStep("");
+      setStatusMessage(error.message || "Flow Edit analysis failed.");
+    } finally {
+      setIsGeneratingFlowEdit(false);
+    }
+  };
+
+  const handleApplyFlowVariant = styleId => {
+    if (!flowAudioUrl && !masterAudioSource) {
+      setFlowEditStyleId(styleId);
+      return;
+    }
+    setFlowEditStyleId(styleId);
+    handleGenerateFlowEdit(styleId);
+  };
+
+  const handleDisableFlowEdit = () => {
+    setFlowEditEnabled(false);
+    setFlowEditStatusStep("");
+    setFlowEditWarning("");
+    setFlowEditInsight("Flow Edit is off. Manual multicam control is back in charge.");
+  };
+
+  const handleMoveFlowCut = deltaSeconds => {
+    if (!selectedFlowSegmentId) return;
+    updateFlowPlanSegments(segments => {
+      const targetIndex = segments.findIndex(segment => segment.id === selectedFlowSegmentId);
+      if (targetIndex <= 0) return segments;
+      const previous = segments[targetIndex - 1];
+      const current = segments[targetIndex];
+      const nextStart = clampNumber(
+        current.startTime + deltaSeconds,
+        previous.startTime + 0.35,
+        current.endTime - 0.35,
+        current.startTime
+      );
+      previous.endTime = Number(nextStart.toFixed(3));
+      current.startTime = Number(nextStart.toFixed(3));
+      previous.duration = Number((previous.endTime - previous.startTime).toFixed(3));
+      current.duration = Number((current.endTime - current.startTime).toFixed(3));
+      return segments;
+    });
+  };
+
+  const handleDeleteFlowSegment = (segmentId = selectedFlowSegmentId) => {
+    if (!segmentId) return;
+    updateFlowPlanSegments(segments => {
+      if (segments.length <= 1) return segments;
+      const targetIndex = segments.findIndex(segment => segment.id === segmentId);
+      if (targetIndex < 0) return segments;
+      if (targetIndex === 0) {
+        segments[1].startTime = 0;
+        return segments.slice(1);
+      }
+      const previous = segments[targetIndex - 1];
+      previous.endTime = segments[targetIndex].endTime;
+      previous.duration = Number((previous.endTime - previous.startTime).toFixed(3));
+      return segments.filter(segment => segment.id !== segmentId);
+    });
+    setSelectedFlowSegmentId(currentFlowSegment?.id || null);
+  };
+
+  const handleSplitFlowAtPlayhead = () => {
+    if (!currentFlowSegment) return;
+    const splitTime = clampNumber(
+      playhead,
+      currentFlowSegment.startTime + 0.35,
+      currentFlowSegment.endTime - 0.35,
+      currentFlowSegment.startTime
+    );
+    if (splitTime <= currentFlowSegment.startTime + 0.2 || splitTime >= currentFlowSegment.endTime - 0.2) {
+      return;
+    }
+    updateFlowPlanSegments(segments => {
+      const index = segments.findIndex(segment => segment.id === currentFlowSegment.id);
+      if (index < 0) return segments;
+      const current = segments[index];
+      const alternate =
+        readySources.find(source => source.id !== current.cameraId)?.id || current.cameraId;
+      const left = {
+        ...current,
+        id: `${current.id}-a`,
+        endTime: Number(splitTime.toFixed(3)),
+      };
+      left.duration = Number((left.endTime - left.startTime).toFixed(3));
+      const right = {
+        ...current,
+        id: `${current.id}-b`,
+        cameraId: alternate,
+        startTime: Number(splitTime.toFixed(3)),
+      };
+      right.duration = Number((right.endTime - right.startTime).toFixed(3));
+      return [...segments.slice(0, index), left, right, ...segments.slice(index + 1)];
+    });
+  };
+
+  const handleApplyCameraToFlowSegment = cameraId => {
+    if (!selectedFlowSegmentId || !cameraId) return;
+    updateFlowPlanSegments(segments =>
+      segments.map(segment =>
+        segment.id === selectedFlowSegmentId ? { ...segment, cameraId } : segment
+      )
+    );
+  };
+
   handleRecordSwitchRef.current = handleRecordSwitch;
 
   const handleRemoveSwitch = switchId => {
     if (!switchId) return;
+    if (!isSingleSourceWorkflow && flowEditEnabled) {
+      setSelectedFlowSegmentId(switchId);
+      handleDeleteFlowSegment(switchId);
+      return;
+    }
+    if (!isSingleSourceWorkflow && autoDirectorEnabled) {
+      disableAutoDirectorForManualControl(
+        "Manual timeline editing paused Auto Director. Re-enable Auto Direct when you want it back in control."
+      );
+    }
     setSwitches(currentSwitches => {
       const sourceScope = readySources.length ? readySources : sources;
       const removableSwitch = currentSwitches.find(item => item.id === switchId);
@@ -1958,6 +2520,11 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     if (!timelineDuration) return;
     if (playhead >= timelineDuration) {
       setPlayhead(0);
+      if (flowAudioRef.current) {
+        try {
+          flowAudioRef.current.currentTime = 0;
+        } catch {}
+      }
     }
     setIsPlaying(currentValue => !currentValue);
   };
@@ -2028,8 +2595,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       setStatusMessage("Load at least one video source before exporting.");
       return;
     }
-    if (!timelineDuration || !activeCameraId || !masterAudioSource) {
-      setStatusMessage("Set up synced sources and a master audio camera before exporting.");
+    if (!timelineDuration || !activeCameraId || (!masterAudioSource && !flowAudioUrl)) {
+      setStatusMessage("Set up synced sources and choose audio before exporting.");
       return;
     }
     if (typeof MediaRecorder === "undefined") {
@@ -2047,6 +2614,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     let recorderStream;
     let audioContext;
     let audioDestination;
+    let externalFlowAudio;
 
     try {
       await Promise.all(
@@ -2079,7 +2647,20 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       await audioContext.resume();
       audioDestination = audioContext.createMediaStreamDestination();
 
-      if (masterVideo) {
+      if (flowAudioUrl) {
+        externalFlowAudio = document.createElement("audio");
+        externalFlowAudio.src = flowAudioUrl;
+        externalFlowAudio.preload = "auto";
+        await new Promise((resolve, reject) => {
+          externalFlowAudio.onloadeddata = resolve;
+          externalFlowAudio.onerror = () => reject(new Error("Unable to load Flow Edit audio."));
+        });
+        const audioSource = audioContext.createMediaElementSource(externalFlowAudio);
+        const gainNode = audioContext.createGain();
+        gainNode.gain.value = 1;
+        audioSource.connect(gainNode);
+        gainNode.connect(audioDestination);
+      } else if (masterVideo) {
         const audioSource = audioContext.createMediaElementSource(masterVideo);
         const gainNode = audioContext.createGain();
         gainNode.gain.value = 1;
@@ -2117,6 +2698,15 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           const exportPlayhead = Math.min(timelineDuration, (now - startedAt) / 1000);
           setExportProgress(exportPlayhead / timelineDuration);
 
+          if (externalFlowAudio) {
+            syncMediaElement(externalFlowAudio, exportPlayhead, true, {
+              muted: false,
+              volume: 1,
+              playbackRate: 1,
+              driftThreshold: 0.24,
+            });
+          }
+
           if (isSingleSourceWorkflow) {
             const currentSegment = getActiveSegmentAtTime(
               normalizedSingleCamSegments,
@@ -2140,25 +2730,30 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           } else {
             readySources.forEach(source => {
               const video = exportVideos.get(source.id);
-              const mappedTime = getSourceTimelineTime(
-                source,
-                exportPlayhead,
-                timelineBounds.timelineStart
-              );
+              const exportFlowSegment = flowEditEnabled
+                ? getFlowSegmentAtTime(activeFlowSegments, exportPlayhead)
+                : null;
+              const mappedTime = exportFlowSegment
+                ? getFlowSourceTimeAtPlayhead(
+                    source,
+                    exportFlowSegment,
+                    exportPlayhead,
+                    timelineBounds.timelineStart
+                  )
+                : getSourceTimelineTime(source, exportPlayhead, timelineBounds.timelineStart);
               const isInRange = isSourceAvailableAtTime(source, mappedTime);
               syncMediaElement(video, mappedTime, isInRange, {
                 muted: true,
                 volume: 0,
                 driftThreshold: 0.24,
+                playbackRate: exportFlowSegment?.playbackRate || 1,
               });
             });
 
-            const currentSegment = getActiveCameraAtTime(
-              normalizedSwitches,
-              readySources,
-              exportPlayhead,
-              timelineDuration
-            );
+            const currentSegment =
+              flowEditEnabled && activeFlowSegments.length
+                ? getFlowSegmentAtTime(activeFlowSegments, exportPlayhead)
+                : getActiveCameraAtTime(normalizedSwitches, readySources, exportPlayhead, timelineDuration);
             const currentCameraLabel = readySources.find(
               source => source.id === currentSegment?.cameraId
             )?.label;
@@ -2247,10 +2842,21 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       if (audioContext) {
         audioContext.close().catch(() => {});
       }
+      if (externalFlowAudio) {
+        externalFlowAudio.pause();
+        externalFlowAudio.removeAttribute("src");
+        externalFlowAudio.load();
+      }
     }
   };
 
   const handleServerExport = async () => {
+    if (flowEditEnabled) {
+      setStatusMessage(
+        "Flow Edit currently exports in-browser so your local soundtrack and speed ramps stay intact."
+      );
+      return;
+    }
     if (!readySources.length) {
       setStatusMessage("Load at least one video source before exporting.");
       return;
@@ -2363,15 +2969,41 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       aria-modal="true"
       aria-label="Combine Multi-Camera Studio"
     >
-      <div className={`nle-shell ${isSingleSourceWorkflow ? "is-single-cam" : "is-multicam"}`}>
+      <div
+        className={`nle-shell ${isSingleSourceWorkflow ? "is-single-cam" : "is-multicam"} ${
+          isFlowWorkspace ? "is-flow-workspace" : "is-combine-workspace"
+        }`}
+      >
         <div className="nle-header">
           <div className="nle-header-copy">
             <span className="nle-eyebrow">Multicam Studio</span>
-            <h3>Combine Multi-Camera Angles</h3>
-            <p>
-              Load one full recording to edit it on a shared timeline, or add extra camera angles
-              and switch between them while keeping one audio source locked in.
-            </p>
+            <h3>{headerTitle}</h3>
+            <p>{headerDescription}</p>
+            {!isSingleSourceWorkflow && (
+              <div className="nle-mode-switcher">
+                <button
+                  type="button"
+                  className={`nle-mode-btn ${studioMode === "combine" ? "is-active" : ""}`}
+                  onClick={() => setStudioMode("combine")}
+                >
+                  Cam Combiner
+                </button>
+                <button
+                  type="button"
+                  className={`nle-mode-btn ${studioMode === "flow" ? "is-active" : ""}`}
+                  onClick={() => setStudioMode("flow")}
+                >
+                  Flow Edit
+                </button>
+                {flowEditEnabled && (
+                  <span className="nle-chip nle-chip-secondary">Flow edit active</span>
+                )}
+              </div>
+            )}
+            <div className="nle-billing-strip">
+              <span className="nle-billing-pill is-included">Included workflow</span>
+              <span className="nle-billing-pill">{billingMessage}</span>
+            </div>
           </div>
           <button
             className="nle-close-btn"
@@ -2393,6 +3025,11 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
             <p>{directorHeroNarrative}</p>
             <div className="nle-director-hero-meta">
               <span className="nle-chip nle-chip-secondary">Mode: {workflowModeLabel}</span>
+              {!isSingleSourceWorkflow && (
+                <span className={`nle-chip ${autoDirectorEnabled ? "" : "nle-chip-secondary"}`}>
+                  {autoDirectorEnabled ? "Auto Director armed" : "Manual override live"}
+                </span>
+              )}
               <span className="nle-chip">Reason: {directorSnapshot.reasonTitle}</span>
               <span className="nle-chip nle-chip-secondary">
                 Confidence: {Math.round(directorConfidence * 100)}%
@@ -2415,7 +3052,13 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
             <div className="nle-director-stat-card">
               <span>{deckTimelineLabel}</span>
               <strong>{formatDurationLabel(timelineDuration || 0)}</strong>
-              <small>{workflowTitle}</small>
+              <small>
+                {autoDirectorSummary?.switchesCount
+                  ? `${autoDirectorSummary.switchesCount} auto cuts · ${autoDirectorSummary.averageHold.toFixed(
+                      1
+                    )}s avg hold`
+                  : workflowTitle}
+              </small>
             </div>
             <div className="nle-director-stat-card is-output-card">
               <span>Output Stage</span>
@@ -2465,6 +3108,179 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           </div>
         </div>
 
+        {!isSingleSourceWorkflow && isFlowWorkspace && (
+          <div className="nle-flow-shell">
+            <div className="nle-flow-topline">
+              <div className="nle-flow-copy">
+                <span className="nle-eyebrow">Flow Edit / Sync to Sound</span>
+                <strong>Auto-switch cameras and shape motion to the rhythm, energy, and emotion of audio.</strong>
+                <p>
+                  Everything stays local during preview. Bring your boring audio if you want to.
+                  We will still shape the mood, pace, and contrast so the edit feels smarter than
+                  the source material had any right to feel.
+                </p>
+              </div>
+              <div className="nle-flow-status-stack">
+                {FLOW_EDIT_STATUS_STEPS.map(step => (
+                  <span
+                    key={step}
+                    className={`nle-flow-status-pill ${
+                      flowEditStatusStep === step
+                        ? "is-active"
+                        : flowEditStatusStep && FLOW_EDIT_STATUS_STEPS.indexOf(flowEditStatusStep) > FLOW_EDIT_STATUS_STEPS.indexOf(step)
+                          ? "is-complete"
+                          : ""
+                    }`}
+                  >
+                    {step}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="nle-flow-grid">
+              <div className="nle-flow-card">
+                <div className="nle-flow-card-header">
+                  <div>
+                    <strong>Audio Driver</strong>
+                    <span>{flowAudioTrack?.name || masterAudioSource?.label || "Choose the soundtrack for Flow Edit."}</span>
+                  </div>
+                  {flowAudioUrl && <span className="nle-chip nle-chip-secondary">Ready</span>}
+                </div>
+                <div className="nle-flow-action-row">
+                  <input
+                    ref={flowAudioInputRef}
+                    type="file"
+                    accept="audio/*,video/*"
+                    className="nle-hidden-input"
+                    onChange={event => {
+                      handleLoadFlowAudioFile(event.target.files?.[0]);
+                      event.target.value = "";
+                    }}
+                  />
+                  <button className="nle-btn secondary" type="button" onClick={handleUseMasterAudioForFlow}>
+                    Use Master Audio
+                  </button>
+                  <button className="nle-btn secondary" type="button" onClick={() => flowAudioInputRef.current?.click()}>
+                    Upload Audio / Video
+                  </button>
+                  <button
+                    className="nle-btn secondary"
+                    type="button"
+                    onClick={handleClearFlowAudio}
+                    disabled={!flowAudioTrack}
+                  >
+                    Clear
+                  </button>
+                </div>
+                <div className="nle-flow-source-note">
+                  {flowEditInsight ||
+                    "Music, speech, choir, and ambient beds each trigger different pacing logic."}
+                </div>
+              </div>
+
+              <div className="nle-flow-card">
+                <div className="nle-flow-card-header">
+                  <div>
+                    <strong>Editing Style</strong>
+                    <span>Generate one version or flip between Smooth, Hype, and Cinematic.</span>
+                  </div>
+                  <span className="nle-chip nle-chip-secondary">
+                    {flowEditEnabled ? "Preview live" : "Optional layer"}
+                  </span>
+                </div>
+                <div className="nle-flow-style-row">
+                  {FLOW_EDIT_STYLE_PRESETS.map(style => (
+                    <button
+                      key={style.id}
+                      type="button"
+                      className={`nle-flow-style-card ${flowEditStyleId === style.id ? "is-active" : ""}`}
+                      onClick={() => handleApplyFlowVariant(style.id)}
+                    >
+                      <strong>{style.label}</strong>
+                      <span>{style.summary}</span>
+                    </button>
+                  ))}
+                </div>
+                {flowEditVariants.length > 0 && (
+                  <div className="nle-flow-variant-row">
+                    {flowEditVariants.map(variant => (
+                      <div key={variant.id} className="nle-flow-variant-chip">
+                        <strong>{variant.label}</strong>
+                        <span>
+                          {variant.clipCount} cuts · {variant.audioType}
+                          {variant.rescueMode ? " · rescue" : ""}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div className="nle-flow-action-row">
+                  <button
+                    className="nle-btn"
+                    type="button"
+                    onClick={handleGenerateFlowEdit}
+                    disabled={isGeneratingFlowEdit || readySources.length < 2}
+                  >
+                    {isGeneratingFlowEdit ? "Generating..." : "Flow Edit"}
+                  </button>
+                  <button
+                    className="nle-btn secondary"
+                    type="button"
+                    onClick={handleDisableFlowEdit}
+                    disabled={!flowEditEnabled}
+                  >
+                    Disable Flow
+                  </button>
+                  <button
+                    className="nle-btn secondary"
+                    type="button"
+                    onClick={handleSplitFlowAtPlayhead}
+                    disabled={!flowEditEnabled || !currentFlowSegment}
+                  >
+                    Add Cut at Playhead
+                  </button>
+                </div>
+              </div>
+
+              <div className="nle-flow-card nle-flow-card-stats">
+                <div className="nle-flow-card-header">
+                  <div>
+                    <strong>Flow Signals</strong>
+                    <span>Beat map, energy zones, and auto-switch confidence for the current pass.</span>
+                  </div>
+                  {flowEditPlan?.audioType && (
+                    <span className="nle-chip">{flowEditPlan.audioType}</span>
+                  )}
+                  {flowEditPlan?.rescueMode && (
+                    <span className="nle-chip nle-chip-secondary">Mismatch rescue</span>
+                  )}
+                </div>
+                <div className="nle-flow-metric-grid">
+                  <div className="nle-director-stat-card">
+                    <span>Beat Markers</span>
+                    <strong>{flowBeatCount}</strong>
+                    <small>{flowEditWarning || "Beat and timing cues detected for this timeline."}</small>
+                  </div>
+                  <div className="nle-director-stat-card">
+                    <span>Energy Zones</span>
+                    <strong>{flowEnergyZoneCount}</strong>
+                    <small>Low, build, peak, and release lanes shape the cut density.</small>
+                  </div>
+                  <div className="nle-director-stat-card">
+                    <span>Generated Cuts</span>
+                    <strong>{flowEditPlan?.segments?.length || 0}</strong>
+                    <small>
+                      {flowEditPlan?.rescueSummary ||
+                        "Every segment keeps manual override available after generation."}
+                    </small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="nle-container" ref={scrollContainerRef}>
           <div className="nle-preview-panel">
             <div className="nle-stage-command-bar">
@@ -2499,12 +3315,22 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                   <div className="nle-stage-overlay-cluster">
                     <span className="nle-stage-live-pill">LIVE</span>
                     <span className="nle-stage-overlay-text">{directorSnapshot.modeTitle}</span>
+                    {flowEditEnabled && flowEditPlan?.audioType && (
+                      <span className="nle-stage-overlay-text">
+                        Flow {flowEditPlan.audioType} · {flowEditStyleId}
+                      </span>
+                    )}
                   </div>
                   <div className="nle-stage-overlay-cluster is-right">
                     <span className="nle-stage-overlay-text">
                       {Math.round(directorSnapshot.temperature * 100)}% heat ·{" "}
                       {Math.round(directorConfidence * 100)}% sure
                     </span>
+                    {currentFlowSegment && (
+                      <span className="nle-stage-overlay-text">
+                        {currentFlowSegment.energyZone} · {Number(currentFlowSegment.playbackRate || 1).toFixed(2)}x
+                      </span>
+                    )}
                   </div>
                 </div>
                 {readySources.map(source => (
@@ -3024,11 +3850,37 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                     handleSeek(nextPlayhead);
                   }}
                 >
+                  {flowEditEnabled &&
+                    flowEditPlan?.energyZones?.map(zone => (
+                      <div
+                        key={zone.id}
+                        className={`nle-energy-zone nle-energy-zone-${zone.zone}`}
+                        style={{
+                          left: `${timelineDuration ? (zone.startTime / timelineDuration) * 100 : 0}%`,
+                          width: `${timelineDuration ? ((zone.endTime - zone.startTime) / timelineDuration) * 100 : 0}%`,
+                        }}
+                      />
+                    ))}
+                  {flowEditEnabled &&
+                    flowEditPlan?.beatMarkers?.map(marker => (
+                      <span
+                        key={marker.id}
+                        className="nle-beat-marker"
+                        style={{
+                          left: `${timelineDuration ? (marker.time / timelineDuration) * 100 : 0}%`,
+                          opacity: clampNumber(marker.strength, 0.32, 1, 0.62),
+                        }}
+                      />
+                    ))}
                   {displaySegments.map(segment => (
                     <button
                       key={segment.id}
                       type="button"
-                      className={`nle-switch-segment ${selectedSwitchId === segment.id ? "is-selected" : ""}`}
+                      className={`nle-switch-segment ${
+                        (flowEditEnabled ? selectedFlowSegmentId : selectedSwitchId) === segment.id
+                          ? "is-selected"
+                          : ""
+                      } ${flowEditEnabled ? "is-flow-segment" : ""}`}
                       style={{
                         left: `${segment.startPercent}%`,
                         width: `${segment.widthPercent}%`,
@@ -3036,11 +3888,20 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                       }}
                       onClick={event => {
                         event.stopPropagation();
-                        setSelectedSwitchId(segment.id);
-                        handleSeek(segment.startTime);
+                        if (flowEditEnabled) {
+                          setSelectedFlowSegmentId(segment.id);
+                        } else {
+                          setSelectedSwitchId(segment.id);
+                        }
+                        handleSeek(segment.startTime || segment.timelineStart);
                       }}
                     >
-                      <span>{segment.label}</span>
+                      <span>
+                        {segment.label}
+                        {flowEditEnabled && segment.playbackRate
+                          ? ` · ${Number(segment.playbackRate).toFixed(2)}x`
+                          : ""}
+                      </span>
                     </button>
                   ))}
                   <div
@@ -3057,26 +3918,108 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                   <span>{formatDurationLabel(timelineDuration || 0)}</span>
                 </div>
 
+                {flowEditEnabled && selectedFlowSegment && (
+                  <div className="nle-flow-manual-panel">
+                    <div className="nle-single-cam-note">
+                      <strong>
+                        {selectedFlowSegment.label || selectedFlowSegment.cameraId} ·{" "}
+                        {selectedFlowSegment.energyZone} ·{" "}
+                        {Number(selectedFlowSegment.playbackRate || 1).toFixed(2)}x
+                      </strong>
+                      <span>{selectedFlowSegment.reason}</span>
+                    </div>
+                    <div className="nle-flow-manual-grid">
+                      <div className="nle-single-cam-tool-group">
+                        <span>Move Cut Point</span>
+                        <div className="nle-sync-actions">
+                          <button
+                            className="nle-mini-btn"
+                            type="button"
+                            onClick={() => handleMoveFlowCut(-0.1)}
+                            disabled={!selectedFlowSegment}
+                          >
+                            -0.1s
+                          </button>
+                          <button
+                            className="nle-mini-btn"
+                            type="button"
+                            onClick={() => handleMoveFlowCut(0.1)}
+                            disabled={!selectedFlowSegment}
+                          >
+                            +0.1s
+                          </button>
+                        </div>
+                      </div>
+                      <div className="nle-single-cam-tool-group">
+                        <span>Switch Camera</span>
+                        <div className="nle-sync-actions">
+                          {readySources.map(source => (
+                            <button
+                              key={`flow-segment-camera-${source.id}`}
+                              className={`nle-mini-btn ${
+                                selectedFlowSegment.cameraId === source.id
+                                  ? "nle-mini-btn-accent"
+                                  : ""
+                              }`}
+                              type="button"
+                              onClick={() => handleApplyCameraToFlowSegment(source.id)}
+                            >
+                              {source.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="nle-single-cam-tool-group">
+                        <span>Segment Actions</span>
+                        <div className="nle-sync-actions">
+                          <button className="nle-mini-btn" type="button" onClick={handleSplitFlowAtPlayhead}>
+                            Add Cut
+                          </button>
+                          <button
+                            className="nle-mini-btn nle-mini-btn-accent"
+                            type="button"
+                            onClick={() => handleDeleteFlowSegment(selectedFlowSegment.id)}
+                            disabled={!selectedFlowSegment}
+                          >
+                            Delete Cut
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="nle-switch-list">
-                  {normalizedSwitches.map((switchItem, index) => {
-                    const label =
-                      readySources.find(source => source.id === switchItem.cameraId)?.label ||
+                  {(flowEditEnabled ? activeFlowSegments : normalizedSwitches).map((switchItem, index) => {
+                    const label = readySources.find(source => source.id === switchItem.cameraId)?.label ||
                       switchItem.cameraId;
-                    const isLocked = Number(switchItem.startTime) <= 0.001;
+                    const isLocked =
+                      !flowEditEnabled && Number(switchItem.startTime) <= 0.001;
                     return (
                       <div
                         key={switchItem.id}
-                        className={`nle-switch-row ${selectedSwitchId === switchItem.id ? "is-selected" : ""}`}
+                        className={`nle-switch-row ${
+                          (flowEditEnabled ? selectedFlowSegmentId : selectedSwitchId) === switchItem.id
+                            ? "is-selected"
+                            : ""
+                        }`}
                       >
                         <button
                           className="nle-text-btn"
                           type="button"
                           onClick={() => {
-                            setSelectedSwitchId(switchItem.id);
+                            if (flowEditEnabled) {
+                              setSelectedFlowSegmentId(switchItem.id);
+                            } else {
+                              setSelectedSwitchId(switchItem.id);
+                            }
                             handleSeek(switchItem.startTime);
                           }}
                         >
                           {index + 1}. {label} at {formatDurationLabel(switchItem.startTime)}
+                          {flowEditEnabled && switchItem.endTime
+                            ? ` · ${formatDurationLabel(switchItem.endTime - switchItem.startTime)} · ${Number(switchItem.playbackRate || 1).toFixed(2)}x`
+                            : ""}
                         </button>
                         <button
                           className="nle-btn secondary"
@@ -3314,16 +4257,20 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                   className="nle-btn"
                   type="button"
                   onClick={handleServerExport}
-                  disabled={isExporting || !canExportProject || isSingleSourceWorkflow}
+                  disabled={isExporting || !canExportProject || isSingleSourceWorkflow || flowEditEnabled}
                   title={
-                    isSingleSourceWorkflow
+                    flowEditEnabled
+                      ? "Flow Edit uses local soundtrack analysis and speed ramps, so export it in-browser."
+                      : isSingleSourceWorkflow
                       ? "Server render is disabled for single-camera segment edits. Use browser export."
                       : "Server render produces MP4 (15 credits)"
                   }
                 >
                   {serverExportPending
                     ? "Server Rendering..."
-                    : isSingleSourceWorkflow
+                    : flowEditEnabled
+                      ? "Server MP4 Disabled for Flow Edit"
+                      : isSingleSourceWorkflow
                       ? "MP4 Server Export Unavailable"
                       : "Render MP4 on Server (15 cr)"}
                 </button>
@@ -3399,6 +4346,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
               playsInline
             />
           ))}
+          <audio ref={flowAudioRef} src={flowAudioUrl || undefined} preload="auto" />
         </div>
       </div>
     </div>

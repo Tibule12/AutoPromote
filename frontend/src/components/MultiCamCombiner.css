@@ -25,6 +25,17 @@
   font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
 }
 
+.nle-shell.is-flow-workspace {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.nle-shell.is-flow-workspace .nle-container {
+  flex: 0 0 auto;
+  min-height: auto;
+  overflow: visible;
+}
+
 .nle-shell.is-single-cam .nle-preview-panel,
 .nle-shell.is-single-cam .nle-switch-panel {
   border-color: rgba(56, 189, 248, 0.12);
@@ -40,6 +51,162 @@
 
 .nle-shell.is-multicam .nle-switch-panel {
   border-color: rgba(56, 189, 248, 0.12);
+}
+
+.nle-shell.is-combine-workspace .nle-header {
+  padding: 14px 20px 12px;
+}
+
+.nle-shell.is-combine-workspace .nle-header-copy h3 {
+  margin: 4px 0 2px;
+  font-size: 1.2rem;
+}
+
+.nle-shell.is-combine-workspace .nle-header-copy p {
+  display: none;
+}
+
+.nle-shell.is-combine-workspace .nle-mode-switcher {
+  margin-top: 8px;
+}
+
+.nle-shell.is-combine-workspace .nle-director-deck {
+  grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.75fr);
+  gap: 8px;
+  padding: 8px 20px 0;
+}
+
+.nle-shell.is-combine-workspace .nle-director-hero-card {
+  min-height: unset;
+  padding: 10px 12px;
+  gap: 4px;
+}
+
+.nle-shell.is-combine-workspace .nle-director-hero-card h4 {
+  font-size: 1.02rem;
+}
+
+.nle-shell.is-combine-workspace .nle-director-hero-card p {
+  display: none;
+}
+
+.nle-shell.is-combine-workspace .nle-director-signal-pill {
+  padding: 5px 8px;
+  font-size: 0.62rem;
+}
+
+.nle-shell.is-combine-workspace .nle-director-hero-meta {
+  gap: 4px;
+}
+
+.nle-shell.is-combine-workspace .nle-director-meta-grid {
+  gap: 8px;
+}
+
+.nle-shell.is-combine-workspace .nle-director-stat-card {
+  padding: 9px 11px;
+}
+
+.nle-shell.is-combine-workspace .nle-director-stat-card small {
+  display: none;
+}
+
+.nle-shell.is-combine-workspace .nle-director-stat-card strong {
+  font-size: 0.92rem;
+}
+
+.nle-shell.is-combine-workspace .nle-quickstart-strip {
+  grid-template-columns: minmax(180px, 0.7fr) minmax(0, 1.3fr);
+  gap: 8px;
+  padding: 8px 20px 0;
+}
+
+.nle-shell.is-combine-workspace .nle-quickstart-copy {
+  padding: 10px 12px;
+  gap: 2px;
+}
+
+.nle-shell.is-combine-workspace .nle-quickstart-copy p {
+  display: none;
+}
+
+.nle-shell.is-combine-workspace .nle-quickstart-copy strong {
+  font-size: 0.88rem;
+}
+
+.nle-shell.is-combine-workspace .nle-quickstart-actions {
+  gap: 8px;
+}
+
+.nle-shell.is-combine-workspace .nle-quickstart-card {
+  min-height: 58px;
+  padding: 9px 10px;
+  border-radius: 14px;
+}
+
+.nle-shell.is-combine-workspace .nle-quickstart-card span {
+  display: none;
+}
+
+.nle-shell.is-combine-workspace .nle-container {
+  padding: 10px 20px 20px;
+  grid-template-columns: minmax(420px, 560px) minmax(0, 1fr);
+  gap: 12px;
+}
+
+.nle-shell.is-combine-workspace .nle-preview-panel {
+  top: 2px;
+  padding: 12px;
+}
+
+.nle-shell.is-combine-workspace .nle-preview-shell {
+  min-height: clamp(500px, 74vh, 760px);
+  padding: 10px;
+}
+
+.nle-shell.is-combine-workspace .nle-preview-video,
+.nle-shell.is-combine-workspace .nle-thumbnail-video {
+  object-fit: contain;
+  background: #02050b;
+}
+
+.nle-shell.is-combine-workspace .nle-stage-command-bar {
+  margin-bottom: 8px;
+}
+
+.nle-shell.is-combine-workspace .nle-stage-command-copy p {
+  display: none;
+}
+
+.nle-shell.is-combine-workspace .nle-preview-toolbar {
+  margin-top: 10px;
+  gap: 10px;
+}
+
+.nle-shell.is-combine-workspace .nle-layout-control-row {
+  margin-top: 10px;
+  padding-top: 10px;
+}
+
+.nle-shell.is-combine-workspace .nle-panel {
+  padding: 12px;
+}
+
+.nle-shell.is-combine-workspace .nle-camera-grid {
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.nle-shell.is-combine-workspace .nle-thumbnail-shell {
+  max-height: 220px;
+}
+
+.nle-shell.is-combine-workspace .nle-switch-track {
+  margin-top: 12px;
+}
+
+.nle-shell.is-combine-workspace .nle-switch-list {
+  margin-top: 12px;
 }
 
 .nle-header {
@@ -70,6 +237,60 @@
   max-width: 72ch;
   color: #cfd6e4;
   line-height: 1.5;
+}
+
+.nle-mode-switcher {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.nle-billing-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.nle-billing-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(247, 248, 251, 0.82);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.nle-billing-pill.is-included {
+  background: rgba(52, 211, 153, 0.14);
+  border-color: rgba(52, 211, 153, 0.22);
+  color: #bbf7d0;
+}
+
+.nle-mode-btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 248, 236, 0.8);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.nle-mode-btn.is-active {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.24), rgba(56, 189, 248, 0.18));
+  border-color: rgba(255, 255, 255, 0.22);
+  color: #fff8ec;
 }
 
 .nle-close-btn {
@@ -265,6 +486,238 @@
   color: rgba(255, 255, 255, 0.66);
   font-size: 0.74rem;
   line-height: 1.4;
+}
+
+.nle-flow-entry-shell {
+  padding: 14px 24px 0;
+}
+
+.nle-flow-entry-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  padding: 16px 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background:
+    radial-gradient(circle at top left, rgba(249, 115, 22, 0.12), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(56, 189, 248, 0.1), transparent 36%),
+    rgba(255, 255, 255, 0.04);
+}
+
+.nle-flow-entry-copy {
+  display: grid;
+  gap: 5px;
+  max-width: 72ch;
+}
+
+.nle-flow-entry-copy strong {
+  color: #fff8ec;
+  font-size: 0.96rem;
+}
+
+.nle-flow-entry-copy p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.nle-flow-entry-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.nle-flow-shell {
+  display: grid;
+  gap: 14px;
+  padding: 14px 24px 0;
+}
+
+.nle-flow-topline {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.nle-flow-copy {
+  display: grid;
+  gap: 6px;
+  max-width: 72ch;
+}
+
+.nle-flow-copy strong {
+  color: #fff8ec;
+  font-size: 1rem;
+}
+
+.nle-flow-copy p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.nle-flow-status-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.nle-flow-status-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.nle-flow-status-pill.is-active {
+  border-color: rgba(56, 189, 248, 0.38);
+  background: rgba(56, 189, 248, 0.14);
+  color: #e0f2fe;
+}
+
+.nle-flow-status-pill.is-complete {
+  border-color: rgba(34, 197, 94, 0.28);
+  background: rgba(34, 197, 94, 0.12);
+  color: #d1fae5;
+}
+
+.nle-flow-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.nle-flow-card {
+  display: grid;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background:
+    radial-gradient(circle at top left, rgba(249, 115, 22, 0.12), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(56, 189, 248, 0.12), transparent 36%),
+    rgba(255, 255, 255, 0.04);
+}
+
+.nle-flow-card-stats {
+  align-content: start;
+}
+
+.nle-flow-card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.nle-flow-card-header > div {
+  display: grid;
+  gap: 4px;
+}
+
+.nle-flow-card-header strong {
+  color: #fff8ec;
+  font-size: 0.94rem;
+}
+
+.nle-flow-card-header span {
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.nle-flow-action-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.nle-flow-source-note {
+  color: rgba(255, 255, 255, 0.74);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.nle-flow-style-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.nle-flow-style-card {
+  display: grid;
+  gap: 6px;
+  text-align: left;
+  min-height: 104px;
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(6, 10, 18, 0.72);
+  color: #fff;
+  cursor: pointer;
+}
+
+.nle-flow-style-card.is-active {
+  border-color: rgba(255, 255, 255, 0.2);
+  background:
+    radial-gradient(circle at top left, rgba(249, 115, 22, 0.18), transparent 40%),
+    radial-gradient(circle at bottom right, rgba(56, 189, 248, 0.16), transparent 36%),
+    rgba(255, 255, 255, 0.07);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.18);
+}
+
+.nle-flow-style-card strong {
+  color: #fff8ec;
+  font-size: 0.86rem;
+}
+
+.nle-flow-style-card span {
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 0.74rem;
+  line-height: 1.42;
+}
+
+.nle-flow-variant-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.nle-flow-variant-chip {
+  display: grid;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.nle-flow-variant-chip strong {
+  color: #fff8ec;
+  font-size: 0.78rem;
+}
+
+.nle-flow-variant-chip span {
+  color: rgba(255, 255, 255, 0.64);
+  font-size: 0.72rem;
+}
+
+.nle-flow-metric-grid {
+  display: grid;
+  gap: 10px;
 }
 
 .nle-summary-card {
@@ -1160,6 +1613,45 @@
   cursor: pointer;
 }
 
+.nle-energy-zone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  opacity: 0.26;
+  pointer-events: none;
+}
+
+.nle-energy-zone-low {
+  background: linear-gradient(180deg, rgba(56, 189, 248, 0.22), rgba(15, 23, 42, 0.12));
+}
+
+.nle-energy-zone-mid {
+  background: linear-gradient(180deg, rgba(56, 189, 248, 0.18), rgba(249, 115, 22, 0.12));
+}
+
+.nle-energy-zone-build {
+  background: linear-gradient(180deg, rgba(251, 191, 36, 0.22), rgba(249, 115, 22, 0.16));
+}
+
+.nle-energy-zone-high,
+.nle-energy-zone-peak {
+  background: linear-gradient(180deg, rgba(244, 63, 94, 0.24), rgba(249, 115, 22, 0.18));
+}
+
+.nle-energy-zone-release {
+  background: linear-gradient(180deg, rgba(167, 139, 250, 0.18), rgba(56, 189, 248, 0.12));
+}
+
+.nle-beat-marker {
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background: rgba(255, 248, 236, 0.9);
+  box-shadow: 0 0 12px rgba(255, 248, 236, 0.32);
+  pointer-events: none;
+}
+
 .nle-switch-segment {
   position: absolute;
   top: 10px;
@@ -1173,6 +1665,13 @@
   font-weight: 700;
   background: linear-gradient(135deg, rgba(249, 115, 22, 0.5), rgba(56, 189, 248, 0.42));
   cursor: pointer;
+}
+
+.nle-switch-segment.is-flow-segment {
+  backdrop-filter: blur(8px);
+  background:
+    linear-gradient(135deg, rgba(249, 115, 22, 0.66), rgba(56, 189, 248, 0.5)),
+    rgba(6, 10, 18, 0.45);
 }
 
 .nle-switch-segment.is-selected {
@@ -1200,6 +1699,18 @@
   display: grid;
   gap: 10px;
   margin-top: 16px;
+}
+
+.nle-flow-manual-panel {
+  margin-top: 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.nle-flow-manual-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
 }
 
 .nle-switch-row {
@@ -1337,12 +1848,14 @@
 
   .nle-director-deck,
   .nle-quickstart-strip,
+  .nle-flow-grid,
   .nle-director-meta-grid,
   .nle-summary-row,
   .nle-footer-grid,
   .nle-field-grid,
   .nle-preview-toolbar,
-  .nle-single-cam-trim-grid {
+  .nle-single-cam-trim-grid,
+  .nle-flow-manual-grid {
     grid-template-columns: 1fr;
   }
 
@@ -1357,10 +1870,16 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .nle-flow-style-row {
+    grid-template-columns: 1fr;
+  }
+
   .nle-panel-header,
   .nle-switch-row,
   .nle-source-meta-row,
-  .nle-stage-command-bar {
+  .nle-stage-command-bar,
+  .nle-flow-entry-card,
+  .nle-flow-topline {
     flex-direction: column;
     align-items: flex-start;
   }

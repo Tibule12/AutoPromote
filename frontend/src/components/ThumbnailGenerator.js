@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getAuth } from "firebase/auth";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { storage } from "../firebaseClient";
+import { useSubscription } from "../hooks/useSubscription";
 import "./ThumbnailGenerator.css";
 
 const THUMB_WIDTH = 1280;
@@ -1465,6 +1466,7 @@ function buildThumbnailVariant(style, direction, frame, frames, copy, contentPro
 }
 
 export default function ThumbnailGenerator({ videoSrc, videoRef: externalVideoRef, onSelect, onClose }) {
+  const { canUseFeature } = useSubscription();
   const fallbackVideoRef = useRef(null);
   const previewCanvasRef = useRef(null);
   const editCanvasRef = useRef(null);
@@ -1958,6 +1960,11 @@ export default function ThumbnailGenerator({ videoSrc, videoRef: externalVideoRe
                 We are not generating random templates here. We are building deliberate click
                 packaging with stronger composition, cleaner proof, and more ownable visual taste.
               </p>
+              <div className="tg-billing-note">
+                {canUseFeature("thumbnailLab")
+                  ? "Included on paid plans. Concepting, remixing, and creative direction stay available without spending generation credits."
+                  : "Upgrade to a paid plan to unlock Thumbnail Lab."}
+              </div>
               <div className="tg-header-actions">
                 {stage === "idle" && (
                   <button className="tg-btn tg-btn-primary" type="button" onClick={generateThumbnails}>

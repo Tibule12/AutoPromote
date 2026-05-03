@@ -9,6 +9,7 @@ const {
   SUBSCRIPTION_PLANS,
   getPlanCapabilities,
   normalizePlanId,
+  CREDIT_TOP_UP_PACKS,
 } = require("../config/subscriptionPlans");
 
 // Apply auth middleware to all routes
@@ -49,6 +50,9 @@ router.get("/profile", apiLimiter, async (req, res) => {
         teamSeats: capabilities.teamSeats,
         analyticsExport: capabilities.analytics?.canExport || false,
       },
+      editing: capabilities.editing,
+      entitlements: capabilities,
+      topUpPacks: CREDIT_TOP_UP_PACKS,
       subscriptionStatus: tierSnapshot.status || "inactive",
       email: req.user.email,
       // Legacy

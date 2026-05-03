@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import EmojiPicker from "../EmojiPicker";
 import { sanitizeUrl } from "../../utils/security";
 import { API_BASE_URL } from "../../config";
 
@@ -35,6 +36,7 @@ const RedditForm = ({
   const [isLoadingSubreddits, setIsLoadingSubreddits] = useState(false);
   const [subredditFetchError, setSubredditFetchError] = useState("");
   const [title, setTitle] = useState(initialData.title || globalTitle || "");
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [flairId, setFlairId] = useState(initialData.flairId || "");
   const [isNSFW, setIsNSFW] = useState(initialData.isNSFW || false);
   const [isSpoiler, setIsSpoiler] = useState(initialData.isSpoiler || false);
@@ -140,6 +142,13 @@ const RedditForm = ({
       localStorage.setItem("lastRedditSubreddit", normalized);
     }
   }, [subreddit, title, flairId, isNSFW, isSpoiler, isPromotional]);
+
+  const handleInsertEmoji = emoji => {
+    const emojiChar = typeof emoji === "object" && emoji.native ? emoji.native : emoji;
+    setTitle(prev => prev + emojiChar);
+    setIsDirtyTitle(true);
+    setShowEmojiPicker(false);
+  };
 
   return (
     <div className="platform-form reddit-form">
@@ -349,17 +358,43 @@ const RedditForm = ({
 
       <div className="form-group-modern">
         <label>Title</label>
-        <input
-          type="text"
-          className="modern-input"
-          value={title}
-          onChange={e => {
-            setTitle(e.target.value);
-            setIsDirtyTitle(true);
-          }}
-          placeholder="An interesting title"
-          maxLength={300}
-        />
+        <div style={{ position: "relative" }}>
+          <input
+            type="text"
+            className="modern-input"
+            value={title}
+            onChange={e => {
+              setTitle(e.target.value);
+              setIsDirtyTitle(true);
+            }}
+            placeholder="An interesting title"
+            maxLength={300}
+          />
+          <button
+            type="button"
+            style={{
+              position: "absolute",
+              right: "12px",
+              top: "12px",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              fontSize: "1.2rem",
+              opacity: 0.7,
+            }}
+            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+          >
+            😊
+          </button>
+          {showEmojiPicker && (
+            <div style={{ position: "absolute", zIndex: 10, top: "100%", right: 0 }}>
+              <EmojiPicker
+                onSelect={handleInsertEmoji}
+                onClose={() => setShowEmojiPicker(false)}
+              />
+            </div>
+          )}
+        </div>
         <div className="char-count">{title.length}/300</div>
       </div>
 

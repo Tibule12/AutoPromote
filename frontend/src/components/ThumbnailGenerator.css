@@ -112,6 +112,14 @@
   line-height: 1.68;
 }
 
+.tg-billing-note {
+  max-width: 820px;
+  margin: -2px 0 0;
+  color: #d8fce7;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
 .tg-header-actions {
   display: flex;
   flex-wrap: wrap;

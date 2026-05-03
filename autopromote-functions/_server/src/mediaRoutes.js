@@ -91,6 +91,7 @@ router.get("/credits", async (req, res) => {
       tier: breakdown.tier,
       costs: CREDIT_COSTS,
       topUpPacks: CREDIT_TOP_UP_PACKS,
+      entitlements: getPlanCapabilities(breakdown.tier),
     });
   } catch (error) {
     console.error("[MediaRoute] Credit balance error:", error.message);

@@ -5253,6 +5253,7 @@ async def auto_generate_clips(request: Dict[str, Any], background_tasks: Backgro
 
     job_id = request.get("job_id") or str(uuid.uuid4())
     max_clips = min(int(request.get("max_clips", 5)), 10)
+    target_duration = max(6, min(int(request.get("target_duration", 30)), 60))
     caption_style = str(request.get("caption_style", "bold_pop")).strip()
     smart_crop_mode = str(request.get("smart_crop_mode", "center")).strip()
     target_aspect = str(request.get("target_aspect_ratio", "9:16")).strip()
@@ -5265,7 +5266,7 @@ async def auto_generate_clips(request: Dict[str, Any], background_tasks: Backgro
         smart_crop_mode = smart_crop_mode or tmpl["smart_crop_mode"]
         target_aspect = target_aspect or tmpl["aspect_ratio"]
 
-    logger.info(f"Auto-generate job {job_id}: {max_clips} clips, style={caption_style}, crop={smart_crop_mode}")
+    logger.info(f"Auto-generate job {job_id}: {max_clips} clips, style={caption_style}, crop={smart_crop_mode}, duration={target_duration}")
 
     try:
         update_firestore_job(job_id, {
@@ -5280,12 +5281,12 @@ async def auto_generate_clips(request: Dict[str, Any], background_tasks: Backgro
 
     background_tasks.add_task(
         _auto_generate_clips_impl,
-        video_url, job_id, max_clips, caption_style, smart_crop_mode, target_aspect
+        video_url, job_id, max_clips, target_duration, caption_style, smart_crop_mode, target_aspect
     )
     return {"status": "processing", "job_id": job_id, "mode": "async"}
 
 
-async def _auto_generate_clips_impl(video_url, job_id, max_clips, caption_style, smart_crop_mode, target_aspect):
+async def _auto_generate_clips_impl(video_url, job_id, max_clips, target_duration, caption_style, smart_crop_mode, target_aspect):
     """Background task: analyze → sort → render top clips."""
     SHARED_TMP_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../tmp"))
     os.makedirs(SHARED_TMP_DIR, exist_ok=True)
@@ -5373,6 +5374,30 @@ async def _auto_generate_clips_impl(video_url, job_id, max_clips, caption_style,
         aligned_windows = [align_clip_to_scenes(c, scene_list) for c in transcript_windows]
         ranked = dedupe_ranked_candidates(scenes + aligned_windows, max_results=max_clips)
 
+        def rebalance_clip_duration(clip):
+            start_sec = float(clip.get("start", 0.0))
+            end_sec = float(clip.get("end", start_sec))
+            source_duration = max(0.0, get_media_duration(input_path))
+            desired = max(6.0, min(float(target_duration or 30), 60.0))
+            current = max(0.1, end_sec - start_sec)
+            if source_duration <= 0 or current >= desired * 0.92:
+                clip["duration"] = round(current, 2)
+                return clip
+
+            midpoint = start_sec + current / 2.0
+            half = desired / 2.0
+            new_start = max(0.0, midpoint - half)
+            new_end = min(source_duration, new_start + desired)
+            if new_end - new_start < desired:
+                new_start = max(0.0, new_end - desired)
+
+            clip["start"] = round(new_start, 2)
+            clip["end"] = round(new_end, 2)
+            clip["duration"] = round(new_end - new_start, 2)
+            return clip
+
+        ranked = [rebalance_clip_duration(dict(clip)) for clip in ranked]
+
         update_firestore_job(job_id, {
             "status": "rendering",
             "progress": 50,
@@ -5433,10 +5458,12 @@ async def _auto_generate_clips_impl(video_url, job_id, max_clips, caption_style,
                     ], check=True)
 
                 if os.path.exists(clip_output):
-                    url = upload_file_to_firebase(clip_output)
+                    storage_path = f"generated_clips/{job_id}/clip_{idx}_{uuid.uuid4().hex[:8]}.mp4"
+                    url = upload_file_to_firebase(clip_output, storage_path)
                     completed.append({
                         **clip,
                         "url": url,
+                        "storagePath": storage_path,
                         "rendered": True,
                     })
                     if os.path.exists(clip_output): os.remove(clip_output)

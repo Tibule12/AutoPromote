@@ -625,6 +625,20 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
+  const formatExpiry = clip => {
+    const expiresAt = clip?.expiresAt;
+    if (!expiresAt) return "";
+    const msRemaining =
+      typeof clip?.expiresInMs === "number"
+        ? clip.expiresInMs
+        : new Date(expiresAt).getTime() - Date.now();
+    if (msRemaining <= 0) return "Expired";
+    const hours = Math.floor(msRemaining / (60 * 60 * 1000));
+    const minutes = Math.floor((msRemaining % (60 * 60 * 1000)) / (60 * 1000));
+    if (hours > 0) return `Expires in ${hours}h ${minutes}m`;
+    return `Expires in ${minutes}m`;
+  };
+
   const formatTimestamp = seconds => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
@@ -764,6 +778,17 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
                     >
                       Created: {new Date(clip.createdAt).toLocaleDateString()}
                     </p>
+                    {clip.expiresAt && (
+                      <p
+                        style={{
+                          fontSize: "12px",
+                          color: clip.sourceType === "promo_summary_clip" ? "#fbbf24" : "#94a3b8",
+                          margin: "0 0 10px 0",
+                        }}
+                      >
+                        {formatExpiry(clip)}
+                      </p>
+                    )}
                     <div
                       style={{
                         display: "flex",
@@ -784,6 +809,20 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
                       >
                         ⚡ Score: {clip.viralScore || "—"}
                       </span>
+                      {clip.sourceType === "promo_summary_clip" && (
+                        <span
+                          className="viral-chip"
+                          style={{
+                            fontSize: "12px",
+                            background: "rgba(59,130,246,0.14)",
+                            color: "#93c5fd",
+                            padding: "2px 8px",
+                            borderRadius: "4px",
+                          }}
+                        >
+                          Promo
+                        </span>
+                      )}
                       <span style={{ fontSize: "12px", color: "#aaa" }}>
                         {formatDuration(clip.duration)}
                       </span>

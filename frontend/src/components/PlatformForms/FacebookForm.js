@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import MetaConnectionRequirementsNotice from "../MetaConnectionRequirementsNotice";
+import EmojiPicker from "../EmojiPicker";
 import { sanitizeUrl } from "../../utils/security";
 
 const FacebookForm = ({
@@ -35,6 +36,7 @@ const FacebookForm = ({
   }, [pages, pageId]);
   const [message, setMessage] = useState(initialData.message || globalDescription || "");
   const [isDirtyMessage, setIsDirtyMessage] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [postType, setPostType] = useState(initialData.postType || "feed"); // feed, story, reel
   const [isPaidPartnership, setIsPaidPartnership] = useState(
     initialData.isPaidPartnership || false
@@ -63,6 +65,13 @@ const FacebookForm = ({
       sponsorUser,
     });
   }, [pageId, message, postType, isPaidPartnership, sponsorUser, pages]);
+
+  const handleInsertEmoji = emoji => {
+    const emojiChar = typeof emoji === "object" && emoji.native ? emoji.native : emoji;
+    setMessage(prev => prev + emojiChar);
+    setIsDirtyMessage(true);
+    setShowEmojiPicker(false);
+  };
 
   return (
     <div className="platform-form facebook-form">
@@ -326,17 +335,43 @@ const FacebookForm = ({
 
       <div className="form-group-modern">
         <label>Post Text</label>
-        <textarea
-          className="modern-input"
-          value={message}
-          onChange={e => {
-            setMessage(e.target.value);
-            setIsDirtyMessage(true);
-          }}
-          placeholder="What's on your mind?"
-          rows={4}
-          maxLength={63206}
-        />
+        <div style={{ position: "relative" }}>
+          <textarea
+            className="modern-input"
+            value={message}
+            onChange={e => {
+              setMessage(e.target.value);
+              setIsDirtyMessage(true);
+            }}
+            placeholder="What's on your mind?"
+            rows={4}
+            maxLength={63206}
+          />
+          <button
+            type="button"
+            style={{
+              position: "absolute",
+              right: "12px",
+              top: "12px",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              fontSize: "1.2rem",
+              opacity: 0.7,
+            }}
+            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+          >
+            😊
+          </button>
+          {showEmojiPicker && (
+            <div style={{ position: "absolute", zIndex: 10, top: "100%", right: 0 }}>
+              <EmojiPicker
+                onSelect={handleInsertEmoji}
+                onClose={() => setShowEmojiPicker(false)}
+              />
+            </div>
+          )}
+        </div>
         <div
           className="char-count"
           style={{ textAlign: "right", fontSize: "0.76rem", opacity: 0.6, marginTop: "4px" }}

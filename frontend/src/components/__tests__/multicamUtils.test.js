@@ -1,4 +1,5 @@
 import {
+  buildAutoDirectorPlan,
   buildAutoSwitchPlan,
   buildRenderSegments,
   buildSwitchDisplaySegments,
@@ -11,7 +12,6 @@ import {
   getSourceDurationBounds,
   getSegmentFocusPoint,
   getSegmentTransformOrigin,
-  normalizeSegments,
   normalizeSegmentFraming,
   normalizeSwitches,
   pickCompanionCameraAtTime,
@@ -156,6 +156,52 @@ describe("multicam utils", () => {
       expect.objectContaining({ cameraId: "cam-2", startTime: 3 }),
       expect.objectContaining({ cameraId: "cam-1", startTime: 6 }),
     ]);
+  });
+
+  test("builds an autonomous director plan with dynamic switches and a confidence summary", () => {
+    const plan = buildAutoDirectorPlan(
+      [
+        {
+          ...sources[0],
+          offsetSeconds: 0,
+          videoWidth: 1920,
+          videoHeight: 1080,
+        },
+        {
+          ...sources[1],
+          offsetSeconds: 0,
+          videoWidth: 1080,
+          videoHeight: 1920,
+        },
+      ],
+      9,
+      {
+        timelineStart: 0,
+        directorStyleId: "reaction",
+        audioActivityBySource: {
+          "cam-1": [
+            { time: 0, score: 0.92 },
+            { time: 3, score: 0.18 },
+            { time: 6, score: 0.82 },
+          ],
+          "cam-2": [
+            { time: 0, score: 0.22 },
+            { time: 3, score: 0.88 },
+            { time: 6, score: 0.16 },
+          ],
+        },
+      }
+    );
+
+    expect(plan.switches.length).toBeGreaterThanOrEqual(3);
+    expect(plan.summary.switchesCount).toBe(plan.switches.length);
+    expect(plan.summary.confidence).toBeGreaterThan(0.4);
+    expect(plan.switches[0]).toEqual(
+      expect.objectContaining({
+        cameraId: "cam-1",
+        startTime: 0,
+      })
+    );
   });
 
   test("builds display segments for the visual switch timeline", () => {

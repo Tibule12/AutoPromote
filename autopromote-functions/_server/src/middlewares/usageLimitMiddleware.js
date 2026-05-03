@@ -51,8 +51,7 @@ async function cleanupUnauthorizedUpload(fileUrl) {
 
 /**
  * Check if user has exceeded their monthly upload limit
- * Free tier: 10 uploads per month
- * Paid tier: Unlimited
+ * Every plan has a real monthly cap.
  *
  * @param {Object} options - Configuration options
  * @param {number} options.freeLimit - Upload limit for free users (default: 10)
@@ -131,10 +130,7 @@ function usageLimitMiddleware(options = {}) {
 
       // Determine upload limit for the user based on plan
       const planLimit = SUBSCRIPTION_UPLOAD_LIMITS[subscriptionTier] ?? FREE_UPLOAD_LIMIT;
-      const hasUnlimitedUploads = planLimit === Infinity;
-
-      // Paid tiers with unlimited uploads bypass monthly counting.
-      if (hasUnlimitedUploads) {
+      if (planLimit === Infinity) {
         req.userUsage = {
           limit: planLimit,
           used: 0,
@@ -186,7 +182,7 @@ function usageLimitMiddleware(options = {}) {
 
         return res.status(403).json({
           error: "Monthly upload limit reached",
-          message: `You've reached your plan limit of ${planLimit} uploads per month. Upgrade for more uploads.`,
+          message: `You've reached your plan limit of ${planLimit} uploads this month. Upgrade or move to a higher tier for more capacity.`,
           limit: planLimit,
           used: usageCount,
           remaining: 0,

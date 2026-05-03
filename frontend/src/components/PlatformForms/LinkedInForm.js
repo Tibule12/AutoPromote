@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import EmojiPicker from "../EmojiPicker";
 import { sanitizeUrl } from "../../utils/security";
 
 const LinkedInForm = ({
@@ -38,6 +39,7 @@ const LinkedInForm = ({
   const [title, setTitle] = useState(initialData.title || globalTitle || ""); // For articles/videos
   const [isDirtyCommentary, setIsDirtyCommentary] = useState(!!initialData.commentary);
   const [isDirtyTitle, setIsDirtyTitle] = useState(!!initialData.title);
+  const [showEmojiPicker, setShowEmojiPicker] = useState({ field: null, visible: false });
 
   const [companyId, setCompanyId] = useState(initialData.companyId || "");
   const [isPromotional, setIsPromotional] = useState(initialData.isPromotional || false);
@@ -75,6 +77,18 @@ const LinkedInForm = ({
   const handleTitleChange = e => {
     setTitle(e.target.value);
     setIsDirtyTitle(true);
+  };
+
+  const handleInsertEmoji = emoji => {
+    const emojiChar = typeof emoji === "object" && emoji.native ? emoji.native : emoji;
+    if (showEmojiPicker.field === "commentary") {
+      setCommentary(prev => prev + emojiChar);
+      setIsDirtyCommentary(true);
+    } else if (showEmojiPicker.field === "title") {
+      setTitle(prev => prev + emojiChar);
+      setIsDirtyTitle(true);
+    }
+    setShowEmojiPicker({ field: null, visible: false });
   };
 
   return (
@@ -250,26 +264,89 @@ const LinkedInForm = ({
 
       <div className="form-group-modern">
         <label>Post Text</label>
-        <textarea
-          className="modern-input"
-          value={commentary}
-          onChange={handleCommentaryChange}
-          placeholder="Share your thoughts or professional update..."
-          rows={4}
-          maxLength={3000}
-        />
+        <div style={{ position: "relative" }}>
+          <textarea
+            className="modern-input"
+            value={commentary}
+            onChange={handleCommentaryChange}
+            placeholder="Share your thoughts or professional update..."
+            rows={4}
+            maxLength={3000}
+          />
+          <button
+            type="button"
+            style={{
+              position: "absolute",
+              right: "12px",
+              top: "12px",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              fontSize: "1.2rem",
+              opacity: 0.7,
+            }}
+            onClick={() =>
+              setShowEmojiPicker({
+                field: "commentary",
+                visible:
+                  !showEmojiPicker.visible || showEmojiPicker.field !== "commentary",
+              })
+            }
+          >
+            😊
+          </button>
+          {showEmojiPicker.visible && showEmojiPicker.field === "commentary" && (
+            <div style={{ position: "absolute", zIndex: 10, top: "100%", right: 0 }}>
+              <EmojiPicker
+                onSelect={handleInsertEmoji}
+                onClose={() => setShowEmojiPicker({ field: null, visible: false })}
+              />
+            </div>
+          )}
+        </div>
         <div className="char-count" style={{ textAlign: "right", fontSize: "0.76rem", opacity: 0.6, marginTop: "4px" }}>{commentary.length}/3,000</div>
       </div>
 
       <div className="form-group-modern">
         <label>Video Title (Optional)</label>
-        <input
-          type="text"
-          className="modern-input"
-          value={title}
-          onChange={handleTitleChange}
-          placeholder="Professional Video Title"
-        />
+        <div style={{ position: "relative" }}>
+          <input
+            type="text"
+            className="modern-input"
+            value={title}
+            onChange={handleTitleChange}
+            placeholder="Professional Video Title"
+          />
+          <button
+            type="button"
+            style={{
+              position: "absolute",
+              right: "12px",
+              top: "12px",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              fontSize: "1.2rem",
+              opacity: 0.7,
+            }}
+            onClick={() =>
+              setShowEmojiPicker({
+                field: "title",
+                visible: !showEmojiPicker.visible || showEmojiPicker.field !== "title",
+              })
+            }
+          >
+            😊
+          </button>
+          {showEmojiPicker.visible && showEmojiPicker.field === "title" && (
+            <div style={{ position: "absolute", zIndex: 10, top: "100%", right: 0 }}>
+              <EmojiPicker
+                onSelect={handleInsertEmoji}
+                onClose={() => setShowEmojiPicker({ field: null, visible: false })}
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="commercial-section">

@@ -486,7 +486,10 @@ function ViralClipFinder({ file, onSave, onCancel }) {
             >
               {analyzing ? "Analyzing..." : "🔍 Find Viral Clips (8 credits)"}
             </button>
-            <p className="credit-hint">AI scans your video for the best moments</p>
+            <p className="credit-hint">
+              AI scans your video for the best moments. This uses monthly editing credits, and you
+              can top up anytime if you need more runs.
+            </p>
           </div>
         ) : (
           <>
