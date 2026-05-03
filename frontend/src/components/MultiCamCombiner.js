@@ -36,6 +36,7 @@ import {
 import { getAuth } from "firebase/auth";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { API_BASE_URL } from "../config";
+import { applySafeMediaSource, getSafeMediaSource } from "../utils/security";
 import toast from "react-hot-toast";
 import "./MultiCamCombiner.css";
 import useCinematicEffects from "../hooks/useCinematicEffects";
@@ -233,7 +234,10 @@ const loadVideoMetadata = mediaUrl =>
   new Promise((resolve, reject) => {
     const video = document.createElement("video");
     video.preload = "metadata";
-    video.src = mediaUrl;
+    if (!applySafeMediaSource(video, mediaUrl)) {
+      reject(new Error("Failed to read video metadata"));
+      return;
+    }
     video.onloadedmetadata = () => {
       resolve({
         duration: Number(video.duration) || 0,
@@ -2649,8 +2653,10 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
 
       if (flowAudioUrl) {
         externalFlowAudio = document.createElement("audio");
-        externalFlowAudio.src = flowAudioUrl;
         externalFlowAudio.preload = "auto";
+        if (!applySafeMediaSource(externalFlowAudio, flowAudioUrl)) {
+          throw new Error("Unable to load Flow Edit audio.");
+        }
         await new Promise((resolve, reject) => {
           externalFlowAudio.onloadeddata = resolve;
           externalFlowAudio.onerror = () => reject(new Error("Unable to load Flow Edit audio."));
@@ -4342,11 +4348,11 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
               ref={node => {
                 audioVideoRefs.current[source.id] = node;
               }}
-              src={getSourceMediaUrl(source)}
+              src={getSafeMediaSource(getSourceMediaUrl(source))}
               playsInline
             />
           ))}
-          <audio ref={flowAudioRef} src={flowAudioUrl || undefined} preload="auto" />
+          <audio ref={flowAudioRef} src={getSafeMediaSource(flowAudioUrl)} preload="auto" />
         </div>
       </div>
     </div>
