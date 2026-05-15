@@ -12,6 +12,35 @@ const { queueAudioExtractionTask } = require("./mediaWorkerTaskQueue");
 // Use the deployed URL for stability if env var is missing
 const MEDIA_WORKER_URL =
   process.env.MEDIA_WORKER_URL || "https://media-worker-v1-jddzncgt2a-uc.a.run.app";
+const LOCAL_MEDIA_WORKER_URL = process.env.LOCAL_MEDIA_WORKER_URL || "http://127.0.0.1:8000";
+
+function getWorkerErrorDetail(error) {
+  const status = error.response?.status;
+  const data = error.response?.data;
+  if (!data) return error.message;
+  const workerMessage =
+    data.detail ||
+    data.details ||
+    data.message ||
+    data.error ||
+    (typeof data === "string" ? data : JSON.stringify(data));
+  return status ? `Worker ${status}: ${workerMessage}` : workerMessage;
+}
+
+function shouldTryLocalWorker(error) {
+  if (!LOCAL_MEDIA_WORKER_URL || LOCAL_MEDIA_WORKER_URL === MEDIA_WORKER_URL) return false;
+  const status = error.response?.status;
+  return (
+    status === 404 ||
+    status === 500 ||
+    status === 502 ||
+    status === 503 ||
+    error.code === "ECONNREFUSED" ||
+    error.code === "ENOTFOUND" ||
+    error.code === "ETIMEDOUT" ||
+    error.code === "ECONNABORTED"
+  );
+}
 
 const { v4: uuidv4 } = require("uuid");
 
@@ -519,23 +548,38 @@ class VideoEditingService {
    * @param {string} userId
    * @returns {Promise<Array>} List of scene objects {start, end, viralScore}
    */
-  async analyzeVideo(videoUrl, userId) {
-    console.log(`[VideoAnalysis] Analyzing for User: ${userId}`);
+  async analyzeVideo(videoUrl, userId, options = {}) {
+    console.log(
+      `[VideoAnalysis] Analyzing for User: ${userId}, forceFresh=${Boolean(options.forceFresh)}`
+    );
+    const payload = {
+      video_url: videoUrl,
+      target_aspect_ratio: "9:16",
+      force_fresh: Boolean(options.forceFresh),
+      scan_nonce: typeof options.scanNonce === "string" ? options.scanNonce : "",
+    };
     try {
-      const response = await axios.post(
-        `${MEDIA_WORKER_URL}/analyze-clips`,
-        {
-          video_url: videoUrl,
-          target_aspect_ratio: "9:16",
-        },
-        { timeout: 600000 }
-      ); // 10 minutes for analysis
+      let response;
+      try {
+        response = await axios.post(`${MEDIA_WORKER_URL}/analyze-clips`, payload, {
+          timeout: 600000,
+        });
+      } catch (error) {
+        if (!shouldTryLocalWorker(error)) throw error;
+        console.warn(
+          `[VideoAnalysis] Primary worker failed (${getWorkerErrorDetail(error)}). Retrying local worker.`
+        );
+        response = await axios.post(`${LOCAL_MEDIA_WORKER_URL}/analyze-clips`, payload, {
+          timeout: 600000,
+        });
+      }
 
       // Returns { status, job_id, scenes: [...] }
       return response.data.scenes || [];
     } catch (error) {
-      console.error("[VideoAnalysis] Error:", error.message);
-      throw new Error("Video analysis failed");
+      const detail = getWorkerErrorDetail(error);
+      console.error("[VideoAnalysis] Error:", detail);
+      throw new Error(`Video analysis failed: ${detail}`);
     }
   }
 
@@ -725,6 +769,10 @@ class VideoEditingService {
       overlap_start: Number(multicamRequest?.overlapStart ?? 0),
       overlap_duration: Number(multicamRequest?.overlapDuration ?? 0),
       output_aspect_ratio: multicamRequest?.outputAspectRatio || "9:16",
+      external_audio_url: multicamRequest?.externalAudio?.url || null,
+      external_audio_offset_seconds: Number(multicamRequest?.externalAudio?.offset_seconds ?? 0),
+      external_audio_mix_mode: multicamRequest?.externalAudio?.mix_mode || "external_only",
+      external_audio_cache_key: multicamRequest?.externalAudio?.cache_key || null,
       job_id: jobId,
       async_mode: !!jobId,
     };

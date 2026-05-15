@@ -255,7 +255,7 @@ const UserDashboard = ({
                 <span style={{ fontSize: "20px" }}>🐺</span>
                 <b>RECRUITMENT NOTICE</b>
               </div>
-              <span>You've published content. Now it's time to hunt.</span>
+                    <span>You&apos;ve published content. Now it&apos;s time to hunt.</span>
               <button
                 onClick={() => {
                   toast.dismiss(t.id);
@@ -510,15 +510,58 @@ const UserDashboard = ({
       if (!window.confirm("Delete this schedule?")) return;
       await withAuth(async token => {
         try {
-          await fetch(API_ENDPOINTS.SCHEDULE_DELETE(id), {
+          const response = await fetch(API_ENDPOINTS.SCHEDULE_DELETE(id), {
             method: "DELETE",
             headers: { Authorization: `Bearer ${token}` },
           });
+          if (!response.ok && response.status !== 404) {
+            throw new Error(`Delete failed with status ${response.status}`);
+          }
           triggerSchedulesRefresh();
           toast.success("Schedule deleted");
         } catch (e) {
           console.warn(e);
           toast.error("Failed to delete schedule");
+        }
+      });
+    },
+    [withAuth, triggerSchedulesRefresh]
+  );
+
+  const doDeleteMany = useCallback(
+    async ids => {
+      const uniqueIds = Array.from(new Set((ids || []).filter(Boolean)));
+      if (uniqueIds.length === 0) return;
+      if (!window.confirm(`Abort ${uniqueIds.length} queued schedule${uniqueIds.length === 1 ? "" : "s"}?`)) {
+        return;
+      }
+
+      await withAuth(async token => {
+        const toastId = toast.loading(`Aborting ${uniqueIds.length} schedule${uniqueIds.length === 1 ? "" : "s"}...`);
+        try {
+          const results = await Promise.all(
+            uniqueIds.map(async id => {
+              const response = await fetch(API_ENDPOINTS.SCHEDULE_DELETE(id), {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${token}` },
+              });
+              return { id, ok: response.ok || response.status === 404, status: response.status };
+            })
+          );
+          const failed = results.filter(result => !result.ok);
+          triggerSchedulesRefresh();
+          if (failed.length > 0) {
+            toast.error(`${failed.length} schedule${failed.length === 1 ? "" : "s"} could not be aborted`, {
+              id: toastId,
+            });
+          } else {
+            toast.success(`Aborted ${uniqueIds.length} schedule${uniqueIds.length === 1 ? "" : "s"}`, {
+              id: toastId,
+            });
+          }
+        } catch (e) {
+          console.warn(e);
+          toast.error("Failed to abort selected schedules", { id: toastId });
         }
       });
     },
@@ -1389,6 +1432,8 @@ const UserDashboard = ({
             onResume={doResume}
             onReschedule={doReschedule}
             onDelete={doDelete}
+            onDeleteMany={doDeleteMany}
+            onNavigate={handleNav}
           />
         )}
 

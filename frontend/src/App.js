@@ -42,6 +42,12 @@ import PayPalSubscriptionPanel from "./components/PayPalSubscriptionPanel";
 import { Sentry } from "./sentryClient";
 import TestSentryButton from "./components/TestSentryButton";
 import Footer from "./components/Footer";
+import WelcomePage from "./WelcomePage";
+import LoginForm from "./LoginForm";
+import RegisterForm from "./RegisterForm";
+import ForgotPasswordPage from "./ForgotPasswordPage";
+import ResetPasswordPage from "./ResetPasswordPage";
+import UserDashboard from "./UserDashboard_full";
 
 // Static Pages — lazy loaded for bundle splitting
 const About = lazy(() => import("./About"));
@@ -69,13 +75,6 @@ const LiveWatch = lazy(() => import("./LiveWatch"));
 const StreamerDashboard = lazy(() => import("./StreamerDashboard"));
 const EngagementMarketplace = lazy(() => import("./EngagementMarketplace"));
 const AdminDashboard = lazy(() => import("./AdminDashboard"));
-
-import WelcomePage from "./WelcomePage";
-import LoginForm from "./LoginForm";
-import RegisterForm from "./RegisterForm";
-import ForgotPasswordPage from "./ForgotPasswordPage";
-import ResetPasswordPage from "./ResetPasswordPage";
-import UserDashboard from "./UserDashboard_full";
 
 const PageLoader = () => (
   <div
@@ -985,6 +984,12 @@ function App() {
         platforms && platforms.length
           ? platforms
           : userDefaults.defaultPlatforms || ["youtube", "tiktok", "instagram"];
+      const scheduledPromotionTime =
+        params.scheduled_promotion_time ||
+        schedule?.date ||
+        schedule?.when ||
+        schedule?.scheduled_promotion_time ||
+        null;
       // Use Firebase auth token when available; fall back to app user token or runtime E2E test token
       let token = null;
       try {
@@ -1014,11 +1019,7 @@ function App() {
           },
           body: JSON.stringify({
             target_platforms: requestedPlatforms,
-            scheduled_promotion_time:
-              params.scheduled_promotion_time ||
-              schedule?.when ||
-              schedule?.scheduled_promotion_time ||
-              null,
+            scheduled_promotion_time: scheduledPromotionTime,
           }),
         });
         let readinessResult = null;
@@ -1152,6 +1153,7 @@ function App() {
         ...schedule,
         frequency: schedule?.frequency || userDefaults.defaultFrequency || "once",
         timezone: userDefaults.timezone || "UTC",
+        mode: scheduledPromotionTime ? "queued_new_upload" : "publish_now",
       };
       // Defensive: ensure non-empty URL for real uploads (avoid sending empty "url" to server)
       if (!isDryRun && (!finalUrl || String(finalUrl).trim() === "")) {
@@ -1175,14 +1177,21 @@ function App() {
         product_link: tiktokOps.product_link || "",
         commercial_rights: !!tiktokOps.commercialContent,
       };
-      const normalizedTitle = (title || "").trim() || "Untitled Post";
+      const firstPlatformTitle = Object.values(pOps)
+        .map(options => options?.title)
+        .find(value => String(value || "").trim());
+      const firstPlatformDescription = Object.values(pOps)
+        .map(options => options?.description || options?.caption || options?.message || options?.commentary)
+        .find(value => String(value || "").trim());
+      const normalizedTitle = String(title || firstPlatformTitle || "").trim() || "Untitled Post";
+      const normalizedDescription = String(description || firstPlatformDescription || "").trim();
 
       const payload = {
         isDryRun: !!isDryRun,
         title: normalizedTitle,
         type: type || "video",
         url: finalUrl,
-        description: description || "",
+        description: normalizedDescription,
         monetization_settings,
         // Pass through Viral/Bounty/Quality fields from ContentUploadForm
         bounty: params.bounty,
@@ -1200,6 +1209,8 @@ function App() {
             ? platforms
             : userDefaults.defaultPlatforms || ["youtube", "tiktok", "instagram"],
         platform_options: pOps,
+        scheduled_promotion_time: scheduledPromotionTime,
+        promotion_frequency: schedule_hint.frequency,
         schedule_hint,
         meta: {
           ...(params.meta || {}),

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useMemo, useState } from "react";
 import "./SchedulesPanel.css";
 import { toast } from "react-hot-toast";
 
@@ -10,6 +10,8 @@ const SchedulesPanel = ({
   onResume,
   onReschedule,
   onDelete,
+  onDeleteMany,
+  onNavigate,
 }) => {
   const [viewMode, setViewMode] = useState("orchestrator"); // 'orchestrator' | 'list'
   const [currentDate] = useState(new Date());
@@ -24,6 +26,7 @@ const SchedulesPanel = ({
     frequency: "once",
   });
   const [isInjecting, setIsInjecting] = useState(false);
+  const [selectedScheduleIds, setSelectedScheduleIds] = useState(() => new Set());
 
   // Platform Definitions
   const platforms = [
@@ -84,6 +87,57 @@ const SchedulesPanel = ({
     }));
   };
 
+  const visibleSchedules = useMemo(
+    () =>
+      Array.isArray(schedulesList)
+        ? schedulesList.filter(schedule => {
+            if (!schedule?.id) return false;
+            if (schedule.isActive === false) return false;
+            return !["executed", "completed", "failed", "skipped", "error"].includes(
+              String(schedule.status || "").toLowerCase()
+            );
+          })
+        : [],
+    [schedulesList]
+  );
+  const selectedCount = selectedScheduleIds.size;
+  const allVisibleSelected =
+    visibleSchedules.length > 0 && visibleSchedules.every(schedule => selectedScheduleIds.has(schedule.id));
+
+  const toggleScheduleSelection = id => {
+    if (!id) return;
+    setSelectedScheduleIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleAllVisibleSchedules = () => {
+    setSelectedScheduleIds(prev => {
+      if (allVisibleSelected) return new Set();
+      const next = new Set(prev);
+      visibleSchedules.forEach(schedule => next.add(schedule.id));
+      return next;
+    });
+  };
+
+  const abortSelectedSchedules = async () => {
+    const ids = Array.from(selectedScheduleIds);
+    if (ids.length === 0 || !onDeleteMany) return;
+    await onDeleteMany(ids);
+    setSelectedScheduleIds(new Set());
+  };
+
+  const scheduleTitle = (schedule, content) => {
+    const scheduleLabel = String(schedule?.title || "").trim();
+    const contentLabel = String(content?.title || "").trim();
+    if (scheduleLabel) return scheduleLabel;
+    if (contentLabel && contentLabel.toLowerCase() !== "untitled post") return contentLabel;
+    return "Queued Upload";
+  };
+
   // Helper to position events on the timeline
   const getEventStyle = scheduleDate => {
     const eventTime = new Date(scheduleDate);
@@ -111,9 +165,9 @@ const SchedulesPanel = ({
       {/* Header */}
       <div className="orchestrator-header">
         <div>
-          <h2 className="orchestrator-title">DEPLOYMENT TIMELINE</h2>
+          <h2 className="orchestrator-title">PUBLISH QUEUE</h2>
           <div style={{ color: "#64748b", fontSize: "0.9rem" }}>
-            Coordinate your organic content drops
+            Monitor new uploads that are scheduled for future platform releases.
           </div>
         </div>
 
@@ -133,11 +187,25 @@ const SchedulesPanel = ({
           <button
             className="control-btn"
             style={{ borderColor: "#10b981", color: "#10b981" }}
-            onClick={() => setShowInjector(!showInjector)}
+            onClick={() => (onNavigate ? onNavigate("upload") : setShowInjector(!showInjector))}
           >
-            {showInjector ? "CANCEL DROP" : "+ SCHEDULE DROP"}
+            {onNavigate ? "+ QUEUE NEW UPLOAD" : showInjector ? "CANCEL DROP" : "+ SCHEDULE DROP"}
           </button>
         </div>
+      </div>
+
+      <div className="queue-guidance">
+        <div>
+          <span className="queue-guidance-kicker">How queue works</span>
+          <strong>Choose a fresh media file in Publish, select platforms, then pick a future time.</strong>
+          <p>
+            Queue never auto-selects old uploads. Each selected platform uses one automated
+            distribution task from the user&apos;s monthly plan allowance.
+          </p>
+        </div>
+        <button className="queue-guidance-action" onClick={() => onNavigate && onNavigate("upload")}>
+          Open Publisher
+        </button>
       </div>
 
       {/* Injection Panel (Create Form) */}
@@ -309,7 +377,7 @@ const SchedulesPanel = ({
                   )}
 
                   {/* Render Scheduled Events */}
-                  {schedulesList
+                  {visibleSchedules
                     ?.filter(s => {
                       const sp = s.platforms || (s.platform ? [s.platform] : []);
                       return sp.includes(platform.id);
@@ -321,6 +389,8 @@ const SchedulesPanel = ({
 
                       const content = contentList?.find(c => c.id === sched.contentId);
 
+                      const label = scheduleTitle(sched, content);
+
                       return (
                         <div
                           key={idx}
@@ -330,9 +400,9 @@ const SchedulesPanel = ({
                             borderLeft: `3px solid ${platform.color}`,
                             background: "rgba(30, 41, 59, 0.9)",
                           }}
-                          onClick={() => toast(`Scheduled: ${content?.title || "Unknown"}`)}
+                          onClick={() => toast(`Scheduled: ${label}`)}
                         >
-                          {content?.title || "Unknown Payload"}
+                          {label}
                         </div>
                       );
                     })}
@@ -344,19 +414,40 @@ const SchedulesPanel = ({
       ) : (
         /* Legacy List View */
         <div className="schedules-list-legacy">
-          {(!schedulesList || schedulesList.length === 0) && (
+          {visibleSchedules.length === 0 && (
             <div style={{ textAlign: "center", padding: "40px", color: "#64748b" }}>
               NO ACTIVE TRANSMISSIONS FOUND
             </div>
           )}
-          {schedulesList?.map((sch, i) => {
+          {visibleSchedules.length > 0 && (
+            <div className="schedule-bulk-bar">
+              <label className="schedule-select-all">
+                <input
+                  type="checkbox"
+                  checked={allVisibleSelected}
+                  onChange={toggleAllVisibleSchedules}
+                />
+                Select all visible
+              </label>
+              <span>{selectedCount} selected</span>
+              <button
+                className="control-btn"
+                disabled={selectedCount === 0 || !onDeleteMany}
+                onClick={abortSelectedSchedules}
+              >
+                ABORT SELECTED
+              </button>
+            </div>
+          )}
+          {visibleSchedules.map((sch, i) => {
             const content = contentList?.find(c => c.id === sch.contentId);
+            const label = scheduleTitle(sch, content);
             const time = sch.startTime || sch.time;
             const channelList = sch.platforms || (sch.platform ? [sch.platform] : []);
 
             return (
               <div
-                key={i}
+                key={sch.id || i}
                 className="control-module"
                 style={{
                   marginBottom: "10px",
@@ -365,13 +456,21 @@ const SchedulesPanel = ({
                   alignItems: "center",
                 }}
               >
+                <label className="schedule-row-select" onClick={event => event.stopPropagation()}>
+                  <input
+                    type="checkbox"
+                    checked={selectedScheduleIds.has(sch.id)}
+                    onChange={() => toggleScheduleSelection(sch.id)}
+                    aria-label={`Select schedule ${label || sch.id}`}
+                  />
+                </label>
                 <div>
                   <div style={{ fontWeight: "bold", color: "white" }}>
-                    {content?.title || "Unknown Content"}
+                    {label}
                   </div>
                   <div style={{ fontSize: "0.8rem", color: "#94a3b8" }}>
                     Target: {time ? new Date(time).toLocaleString() : "Unscheduled"} •{" "}
-                    {sch.frequency}
+                    {sch.frequency || "once"} • {sch.source === "new_upload_queue" ? "new upload" : "legacy queue"}
                   </div>
                 </div>
                 <div style={{ display: "flex", gap: "5px", alignItems: "center" }}>

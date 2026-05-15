@@ -203,7 +203,7 @@ const DojoPage = () => {
                   fontSize: "1rem",
                 }}
               >
-                <span>Grinder's Box (Popular)</span>
+                        <span>Grinder&apos;s Box (Popular)</span>
                 <span>550 Coins - $4.99</span>
               </button>
               <button

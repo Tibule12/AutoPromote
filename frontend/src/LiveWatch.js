@@ -1,8 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import "./LiveWatch.css";
 import FloatingActions from "./components/FloatingActions";
-import { auth } from "./firebaseClient";
-import toast from "react-hot-toast";
 import { API_ENDPOINTS } from "./config";
 import { isSafeRedirectUrl } from "./utils/security";
 

@@ -157,17 +157,33 @@
 .nle-shell.is-combine-workspace .nle-preview-panel {
   top: 2px;
   padding: 12px;
+  max-height: calc(100dvh - 118px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(56, 189, 248, 0.42) rgba(255, 255, 255, 0.06);
 }
 
 .nle-shell.is-combine-workspace .nle-preview-shell {
-  min-height: clamp(500px, 74vh, 760px);
+  min-height: clamp(360px, 54vh, 580px);
   padding: 10px;
 }
 
-.nle-shell.is-combine-workspace .nle-preview-video,
+.nle-shell.is-combine-workspace .nle-preview-video {
+  object-fit: contain;
+  background: #02050b;
+}
+
 .nle-shell.is-combine-workspace .nle-thumbnail-video {
   object-fit: contain;
   background: #02050b;
+}
+
+.nle-preview-transition-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  border-radius: inherit;
 }
 
 .nle-shell.is-combine-workspace .nle-stage-command-bar {
@@ -192,13 +208,86 @@
   padding: 12px;
 }
 
+.nle-shell.is-combine-workspace .nle-camera-panel {
+  min-height: 0;
+  overflow: visible;
+}
+
+.nle-shell.is-combine-workspace .nle-camera-panel .nle-panel-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.nle-shell.is-combine-workspace .nle-camera-panel .nle-panel-header p {
+  max-width: 58ch;
+  margin-top: 4px;
+}
+
 .nle-shell.is-combine-workspace .nle-camera-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  overflow: visible;
   gap: 12px;
   margin-top: 12px;
+  padding: 0;
+  align-items: start;
+}
+
+.nle-shell.is-combine-workspace .nle-camera-card {
+  gap: 10px;
+  min-height: 0;
+  min-width: 0;
 }
 
 .nle-shell.is-combine-workspace .nle-thumbnail-shell {
-  max-height: 220px;
+  min-height: 0;
+  max-height: 330px;
+  aspect-ratio: 16 / 9;
+  border-color: rgba(255, 255, 255, 0.12);
+  display: grid;
+  place-items: center;
+}
+
+.nle-shell.is-combine-workspace .nle-camera-quick-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.nle-shell.is-combine-workspace .nle-camera-quick-controls .nle-field-block {
+  gap: 5px;
+}
+
+.nle-shell.is-combine-workspace .nle-camera-quick-controls .nle-input {
+  padding: 8px 10px;
+}
+
+.nle-shell.is-combine-workspace .nle-camera-advanced-controls {
+  display: grid;
+  gap: 8px;
+  padding: 9px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.nle-shell.is-combine-workspace .nle-camera-actions {
+  gap: 7px;
+}
+
+.nle-shell.is-combine-workspace .nle-camera-actions .nle-btn {
+  padding: 9px 10px;
+}
+
+.nle-shell.is-single-cam.is-combine-workspace .nle-camera-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.nle-shell.is-single-cam.is-combine-workspace .nle-thumbnail-shell {
+  min-height: clamp(220px, 24vw, 330px);
+  max-height: 360px;
 }
 
 .nle-shell.is-combine-workspace .nle-switch-track {
@@ -645,6 +734,50 @@
   flex-wrap: wrap;
 }
 
+.nle-flow-sound-check {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid rgba(125, 211, 252, 0.24);
+  border-radius: 14px;
+  background:
+    linear-gradient(135deg, rgba(15, 23, 42, 0.72), rgba(8, 47, 73, 0.32)),
+    rgba(255, 255, 255, 0.04);
+}
+
+.nle-flow-sound-check strong {
+  display: block;
+  color: #fff8ec;
+  font-size: 0.88rem;
+}
+
+.nle-flow-sound-check span {
+  display: block;
+  margin-top: 3px;
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.nle-flow-sound-check audio,
+.nle-flow-sound-check video {
+  width: 100%;
+  min-height: 38px;
+  accent-color: #60a5fa;
+}
+
+.nle-flow-sound-check video {
+  max-height: 180px;
+  border-radius: 12px;
+  background: #020617;
+}
+
+.nle-flow-sound-check-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .nle-flow-source-note {
   color: rgba(255, 255, 255, 0.74);
   font-size: 0.8rem;
@@ -655,6 +788,27 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
+}
+
+.nle-flow-template-block {
+  display: grid;
+  gap: 10px;
+}
+
+.nle-flow-template-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.nle-flow-template-copy strong {
+  color: #fff8ec;
+  font-size: 0.86rem;
+}
+
+.nle-flow-template-copy span {
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 0.75rem;
+  line-height: 1.4;
 }
 
 .nle-flow-style-card {
@@ -772,17 +926,198 @@
   top: 0;
 }
 
+.nle-preview-panel::-webkit-scrollbar {
+  width: 9px;
+}
+
+.nle-preview-panel::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 999px;
+}
+
+.nle-preview-panel::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(249, 115, 22, 0.72), rgba(56, 189, 248, 0.66));
+  border-radius: 999px;
+}
+
+.nle-preview-scroll-rail {
+  position: sticky;
+  bottom: 10px;
+  z-index: 20;
+  align-self: flex-end;
+  display: inline-flex;
+  gap: 6px;
+  padding: 6px;
+  margin-top: 10px;
+  border-radius: 999px;
+  background: rgba(5, 9, 18, 0.74);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(16px);
+}
+
+.nle-preview-scroll-btn {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 999px;
+  color: #fff8ec;
+  font-weight: 900;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.nle-preview-scroll-btn:hover {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.88), rgba(14, 165, 233, 0.82));
+}
+
 .nle-camera-panel,
 .nle-switch-panel {
   grid-column: 2;
+}
+
+.nle-right-stack {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  min-width: 0;
+}
+
+.nle-right-stack .nle-camera-panel,
+.nle-right-stack .nle-switch-panel {
+  grid-column: auto;
+  grid-row: auto;
+  min-width: 0;
 }
 
 .nle-camera-panel {
   grid-row: 1;
 }
 
+.nle-clean-audio-panel {
+  position: relative;
+  overflow: hidden;
+  border-color: rgba(56, 189, 248, 0.16);
+  background:
+    radial-gradient(circle at top left, rgba(20, 184, 166, 0.16), transparent 36%),
+    radial-gradient(circle at bottom right, rgba(249, 115, 22, 0.12), transparent 38%),
+    rgba(9, 12, 24, 0.86);
+}
+
+.nle-clean-audio-panel.is-active {
+  border-color: rgba(45, 212, 191, 0.42);
+  box-shadow: 0 16px 42px rgba(20, 184, 166, 0.1);
+}
+
+.nle-clean-audio-toggle {
+  display: inline-flex;
+  gap: 9px;
+  align-items: center;
+  margin-top: 14px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  color: #ecfeff;
+  font-weight: 800;
+  font-size: 0.84rem;
+}
+
+.nle-clean-audio-toggle input {
+  accent-color: #2dd4bf;
+}
+
+.nle-clean-audio-tip,
+.nle-clean-audio-empty span,
+.nle-clean-audio-track span {
+  color: rgba(255, 255, 255, 0.68);
+  line-height: 1.45;
+}
+
+.nle-clean-audio-tip {
+  margin: 12px 0 0;
+  font-size: 0.82rem;
+}
+
+.nle-clean-audio-empty,
+.nle-clean-audio-track {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 13px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(3, 7, 18, 0.54);
+}
+
+.nle-clean-audio-empty strong,
+.nle-clean-audio-track strong {
+  color: #fff8ec;
+}
+
+.nle-clean-audio-meter {
+  min-height: 46px;
+  background:
+    linear-gradient(90deg, rgba(20, 184, 166, 0.13), rgba(249, 115, 22, 0.12)),
+    rgba(255, 255, 255, 0.04);
+}
+
+.nle-clean-audio-offset-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+  margin-top: 12px;
+}
+
+.nle-clean-audio-nudges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.nle-clean-audio-mix-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.nle-mix-option {
+  display: grid;
+  gap: 5px;
+  min-height: 88px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(5, 9, 18, 0.76);
+  color: #fff8ec;
+  text-align: left;
+  cursor: pointer;
+}
+
+.nle-mix-option span {
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+
+.nle-mix-option.is-active {
+  border-color: rgba(45, 212, 191, 0.5);
+  background:
+    radial-gradient(circle at top left, rgba(45, 212, 191, 0.22), transparent 52%),
+    rgba(15, 23, 42, 0.88);
+  box-shadow: inset 0 0 0 1px rgba(45, 212, 191, 0.16);
+}
+
 .nle-switch-panel {
   grid-row: 2;
+}
+
+.nle-shell.is-single-cam.is-combine-workspace .nle-switch-panel {
+  grid-row: 1 / span 2;
 }
 
 /* Cinematic effects panel inside multicam — override width to fill */
@@ -1361,9 +1696,18 @@
   flex-wrap: wrap;
 }
 
-.nle-hidden-input,
-.nle-hidden-audio-rack {
+.nle-hidden-input {
   display: none;
+}
+
+.nle-hidden-audio-rack {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  left: -9999px;
 }
 
 .nle-camera-grid {
@@ -1561,6 +1905,11 @@
 
 .nle-single-cam-note strong {
   color: #fff8ec;
+}
+
+.nle-single-cam-reason {
+  color: rgba(255, 255, 255, 0.62);
+  line-height: 1.5;
 }
 
 .nle-single-cam-tools {
@@ -1814,6 +2163,14 @@
   background: rgba(255, 255, 255, 0.14);
 }
 
+.nle-btn.secondary.is-hot {
+  background:
+    radial-gradient(circle at top left, rgba(249, 115, 22, 0.22), transparent 42%),
+    radial-gradient(circle at bottom right, rgba(56, 189, 248, 0.18), transparent 38%),
+    rgba(255, 255, 255, 0.12);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+}
+
 .nle-btn.danger {
   background: #cc3333;
 }
@@ -1853,6 +2210,8 @@
   .nle-summary-row,
   .nle-footer-grid,
   .nle-field-grid,
+  .nle-clean-audio-offset-row,
+  .nle-clean-audio-mix-grid,
   .nle-preview-toolbar,
   .nle-single-cam-trim-grid,
   .nle-flow-manual-grid {
@@ -1860,10 +2219,43 @@
   }
 
   .nle-preview-panel,
+  .nle-right-stack,
   .nle-camera-panel,
   .nle-switch-panel {
     grid-column: auto;
     grid-row: auto;
+  }
+
+  .nle-shell.is-combine-workspace {
+    overflow-y: auto;
+  }
+
+  .nle-shell.is-combine-workspace .nle-director-deck,
+  .nle-shell.is-combine-workspace .nle-quickstart-strip,
+  .nle-shell.is-combine-workspace .nle-container {
+    grid-template-columns: 1fr;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .nle-shell.is-combine-workspace .nle-preview-panel {
+    position: relative;
+    top: auto;
+    max-height: none;
+  }
+
+  .nle-shell.is-combine-workspace .nle-preview-shell {
+    min-height: min(72dvh, 680px);
+  }
+
+  .nle-shell.is-combine-workspace .nle-camera-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .nle-shell.is-combine-workspace .nle-thumbnail-shell {
+    min-height: clamp(210px, 48vw, 340px);
+    max-height: 340px;
+    aspect-ratio: 16 / 9;
   }
 
   .nle-quickstart-actions {
@@ -1888,6 +2280,90 @@
   .nle-footer-actions,
   .nle-export-actions {
     justify-content: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  .nle-overlay {
+    padding: 0;
+  }
+
+  .nle-shell,
+  .nle-shell.is-combine-workspace {
+    width: 100vw;
+    height: 100dvh;
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+  }
+
+  .nle-shell.is-combine-workspace .nle-header {
+    padding: 12px 14px;
+  }
+
+  .nle-shell.is-combine-workspace .nle-header-copy h3 {
+    font-size: 1.05rem;
+  }
+
+  .nle-shell.is-combine-workspace .nle-director-deck,
+  .nle-shell.is-combine-workspace .nle-quickstart-strip,
+  .nle-shell.is-combine-workspace .nle-container {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .nle-shell.is-combine-workspace .nle-preview-panel,
+  .nle-shell.is-combine-workspace .nle-panel {
+    padding: 10px;
+    border-radius: 16px;
+  }
+
+  .nle-shell.is-combine-workspace .nle-preview-shell {
+    min-height: 68dvh;
+    padding: 8px;
+  }
+
+  .nle-shell.is-combine-workspace .nle-thumbnail-shell {
+    min-height: clamp(190px, 54vw, 300px);
+    max-height: 300px;
+    aspect-ratio: 16 / 9;
+  }
+
+  .nle-stage-live-overlay {
+    align-items: flex-start;
+  }
+
+  .nle-stage-overlay-cluster.is-right {
+    display: none;
+  }
+
+  .nle-preview-toolbar,
+  .nle-stage-command-actions,
+  .nle-panel-actions,
+  .nle-sync-actions {
+    width: 100%;
+  }
+
+  .nle-transport-controls,
+  .nle-preview-badges,
+  .nle-stage-command-actions,
+  .nle-panel-actions,
+  .nle-sync-actions {
+    justify-content: stretch;
+  }
+
+  .nle-btn,
+  .nle-mini-btn,
+  .nle-layout-mode-btn {
+    flex: 1 1 auto;
+  }
+
+  .nle-camera-header,
+  .nle-field-grid,
+  .nle-source-meta-row {
+    grid-template-columns: 1fr;
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 
@@ -1998,4 +2474,39 @@
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+}
+
+.nle-clean-audio-tip.is-warning {
+  border-color: rgba(56, 189, 248, 0.28);
+  background: linear-gradient(135deg, rgba(14, 116, 144, 0.2), rgba(99, 102, 241, 0.14));
+  color: rgba(226, 246, 255, 0.92);
+}
+
+.nle-clean-audio-job {
+  display: grid;
+  gap: 7px;
+  padding: 12px;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 14px;
+  background: rgba(8, 14, 28, 0.68);
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.nle-clean-audio-job strong {
+  color: #ffffff;
+}
+
+.nle-clean-audio-progress {
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.nle-clean-audio-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #22d3ee, #f97316);
+  transition: width 0.25s ease;
 }

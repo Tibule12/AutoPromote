@@ -7,10 +7,17 @@ import { applySafeMediaSource, createSecureId } from "../utils/security";
 import { trackClipWorkflowEvent } from "../utils/clipWorkflowAnalytics";
 
 const CLIP_SCANNER_CACHE_TTL_MS = 3 * 24 * 60 * 60 * 1000;
+const CLIP_SCANNER_TEMP_SCAN_TTL_MS = 20 * 60 * 1000;
+const CLIP_SCANNER_UPLOAD_CACHE_TTL_MS = CLIP_SCANNER_TEMP_SCAN_TTL_MS;
+const CLIP_SCANNER_UPLOAD_CACHE_PREFIX = "autopromote:viralScannerUpload:";
+const CONTROL_TEXT_PATTERN = new RegExp(
+  `[${String.fromCharCode(0)}-${String.fromCharCode(31)}${String.fromCharCode(127)}]`,
+  "g"
+);
 
 const normalizePlainText = value =>
   String(value ?? "")
-    .replace(/[\u0000-\u001f\u007f]/g, " ")
+    .replace(CONTROL_TEXT_PATTERN, " ")
     .replace(/[<>]/g, "")
     .trim();
 
@@ -39,7 +46,12 @@ const CATEGORY_TAG_RULES = [
   {
     label: "Promotional",
     icon: "💰",
-    pattern: /(promo|promotional|offer|sale|product|launch|brand|ad|subscribe|buy|deal)/i,
+    pattern: /(offer|sale|product|launch|brand|ad|subscribe|buy|deal|discount|limited time)/i,
+  },
+  {
+    label: "Live Performance",
+    icon: "🎵",
+    pattern: /(choir|worship|praise|gospel|performance|harmony|stage|live moment|live performance)/i,
   },
 ];
 
@@ -50,6 +62,28 @@ const getHookPreviewCopy = clip => {
   if (/(fast|motion|energy|action|impact)/i.test(reason)) return "DON'T BLINK HERE";
   return "WATCH WHAT HAPPENS NEXT";
 };
+
+const getClipVisualAssets = clip => {
+  const assets = [
+    ...(Array.isArray(clip?.thumbnailOptions) ? clip.thumbnailOptions : []),
+    ...(Array.isArray(clip?.posterOptions) ? clip.posterOptions : []),
+    ...(Array.isArray(clip?.visualAssets) ? clip.visualAssets : []),
+  ].filter(asset => asset?.url);
+  return Array.from(new Map(assets.map(asset => [asset.id || asset.url, asset])).values());
+};
+
+const getClipIdentity = clip => String(clip?.id ?? `${clip?.start || 0}-${clip?.end || 0}`);
+
+const getVisualCopySourceMeta = asset => {
+  const source = normalizePlainText(asset?.copySource || "").toLowerCase();
+  if (source === "ai_refined") {
+    return { label: "AI Refined", className: "ai-refined" };
+  }
+  return { label: "Fallback Copy", className: "heuristic" };
+};
+
+const getVisualWhyText = asset =>
+  normalizePlainText(asset?.aiWhy || asset?.subtitle || asset?.label || "");
 
 const scrollElementIntoView = (element, options) => {
   if (!element || typeof element.scrollIntoView !== "function") return;
@@ -67,13 +101,22 @@ const buildScannerClipGuidance = clip => {
   const transcriptWordCount = normalizePlainText(clip?.transcript || clip?.text || "")
     .split(/\s+/)
     .filter(Boolean).length;
+  const isVisualOnly = clip?.hasAudio === false || clip?.analysisMode === "visual_only";
+  const transcriptConfidence = Number(clip?.transcriptConfidence || 0);
+  const contentType = normalizePlainText(clip?.contentType || "general").toLowerCase();
+  const musicLike = /choir_performance|music_performance/.test(contentType);
+  const speechTrusted =
+    clip?.speechTrusted === true ||
+    (!musicLike && transcriptConfidence >= 0.58 && transcriptWordCount >= 4);
 
   const signals = {
     speech:
-      transcriptWordCount >= 4 ||
-      /(question|asks|says|voice|speaks|talks|explains|dialogue|quote|story|lesson|statement|answer)/i.test(
-        descriptorText
-      ),
+      !isVisualOnly &&
+      !musicLike &&
+      (speechTrusted ||
+        /(question|asks|says|voice|speaks|talks|explains|dialogue|quote|story|lesson|statement|answer)/i.test(
+          descriptorText
+        )),
     subject:
       /(face|speaker|person|host|reaction|close[- ]?up|portrait|eye contact|subject|center|centered|framed)/i.test(
         descriptorText
@@ -97,20 +140,34 @@ const buildScannerClipGuidance = clip => {
     (signals.hook ? 20 : 0);
 
   const reasons = [];
-  if (signals.speech) reasons.push("Starts with a spoken beat or voice-led setup");
+  if (isVisualOnly) reasons.push("Visual-only scan: no audio stream was detected");
+  if (musicLike) reasons.push("Performance energy carries the opening without needing a speech hook");
+  else if (signals.speech) reasons.push("Starts with a spoken beat or voice-led setup");
   if (signals.subject) reasons.push("Clear face or central subject stays visible");
   if (signals.motion) reasons.push("Fast pacing or a scene change adds momentum");
   if (signals.idealLength) reasons.push("Length fits the short-form sweet spot");
   if (signals.hook) reasons.push("The opening has clear hook potential");
-  if (reasons.length < 3 && descriptorText) reasons.push(descriptorText);
+  if (reasons.length < 3 && descriptorText && !musicLike && transcriptConfidence >= 0.58) {
+    reasons.push(descriptorText);
+  }
   while (reasons.length < 3) {
-    reasons.push("The clip is cleanly isolated and ready for editing");
+    reasons.push(
+      isVisualOnly
+        ? "Scene changes and motion shaped this clip candidate"
+        : musicLike
+          ? "The clip is cleanly isolated around a strong live-performance beat"
+        : "The clip is cleanly isolated and ready for editing"
+    );
   }
 
   const improvements = [];
-  if (!signals.speech || !signals.hook) improvements.push("Cut the first 2 seconds");
+  if (!isVisualOnly && !musicLike && (!signals.speech || !signals.hook)) improvements.push("Cut the first 2 seconds");
   if (!signals.hook) improvements.push("Add hook");
-  if (!signals.speech) improvements.push("Add captions");
+  if (!signals.speech) {
+    improvements.push(
+      isVisualOnly || musicLike ? "Add a visual hook/title" : "Add captions"
+    );
+  }
   if (!signals.subject) improvements.push("Use zoom or crop to center the subject");
   if (!signals.idealLength) {
     improvements.push(duration < 10 ? "Extend to the payoff" : "Trim closer to 10-25 seconds");
@@ -156,6 +213,27 @@ const buildSourceFingerprint = file => {
   return `local:${name}:${size}:${lastModified}:${type}`.slice(0, 180);
 };
 
+const buildStableSourceFingerprint = file => {
+  if (!file) return "";
+
+  if (typeof file === "string") {
+    try {
+      const parsedUrl = new URL(file, window.location.origin);
+      return `remote:${parsedUrl.origin}${parsedUrl.pathname}`.slice(0, 180);
+    } catch (_error) {
+      return `remote:${String(file).split("?")[0]}`.slice(0, 180);
+    }
+  }
+
+  const name = normalizePlainText(file.name || "scan.mp4");
+  const size = Number(file.size || 0);
+  const type = normalizePlainText(file.type || "application/octet-stream");
+  return `local-stable:${name}:${size}:${type}`.slice(0, 180);
+};
+
+const getSourceFingerprints = file =>
+  Array.from(new Set([buildSourceFingerprint(file), buildStableSourceFingerprint(file)].filter(Boolean)));
+
 const getSourceLabel = file => {
   if (!file) return "Untitled source";
   if (typeof file === "string") {
@@ -188,7 +266,7 @@ const applyGuidanceToScenes = scenes =>
     const guidance = buildScannerClipGuidance(baseClip);
     return {
       ...baseClip,
-      score: Number(scene?.score ?? guidance.score),
+      score: Number(scene?.score ?? scene?.viralScore ?? scene?.viral_score ?? guidance.score),
       reasons:
         Array.isArray(scene?.reasons) && scene.reasons.length ? scene.reasons : guidance.reasons,
       improvements:
@@ -201,6 +279,17 @@ const applyGuidanceToScenes = scenes =>
           : guidance.categories,
       hookText: scene?.hookText || guidance.hookText,
       signals: scene?.signals || guidance.signals,
+      hasAudio: scene?.hasAudio,
+      analysisMode: scene?.analysisMode,
+      visualAssets: getClipVisualAssets(scene),
+      thumbnailOptions: Array.isArray(scene?.thumbnailOptions) ? scene.thumbnailOptions : [],
+      posterOptions: Array.isArray(scene?.posterOptions) ? scene.posterOptions : [],
+      thumbnailUrl:
+        scene?.thumbnailUrl ||
+        scene?.thumbnail_url ||
+        scene?.thumbnailOptions?.[0]?.url ||
+        scene?.visualAssets?.[0]?.url ||
+        "",
     };
   });
 
@@ -223,6 +312,92 @@ const saveClipScannerCache = async ({ token, sourceFingerprint, sourceLabel, res
   });
 };
 
+const getUploadCacheKey = fingerprint =>
+  `${CLIP_SCANNER_UPLOAD_CACHE_PREFIX}${encodeURIComponent(fingerprint || "unknown")}`;
+
+const readCachedUploadUrl = fingerprint => {
+  if (!fingerprint) return "";
+  try {
+    const rawValue = window.localStorage.getItem(getUploadCacheKey(fingerprint));
+    if (!rawValue) return "";
+    const parsedValue = JSON.parse(rawValue);
+    if (Number(parsedValue.expiresAt || 0) <= Date.now()) {
+      window.localStorage.removeItem(getUploadCacheKey(fingerprint));
+      return "";
+    }
+    return typeof parsedValue.url === "string" ? parsedValue.url : "";
+  } catch (_error) {
+    return "";
+  }
+};
+
+const writeCachedUploadUrl = (fingerprints, url) => {
+  if (!url || !Array.isArray(fingerprints)) return;
+  try {
+    const payload = JSON.stringify({
+      url,
+      createdAt: Date.now(),
+      expiresAt: Date.now() + CLIP_SCANNER_UPLOAD_CACHE_TTL_MS,
+    });
+    fingerprints.filter(Boolean).forEach(fingerprint => {
+      window.localStorage.setItem(getUploadCacheKey(fingerprint), payload);
+    });
+  } catch (_error) {}
+};
+
+const clearCachedUploadUrls = fingerprints => {
+  if (!Array.isArray(fingerprints)) return;
+  try {
+    fingerprints.filter(Boolean).forEach(fingerprint => {
+      window.localStorage.removeItem(getUploadCacheKey(fingerprint));
+    });
+  } catch (_error) {}
+};
+
+const ClipResultThumbnail = ({ videoSrc, clip, isActive }) => {
+  const previewRef = useRef(null);
+  const visualUrl = clip?.thumbnailUrl || getClipVisualAssets(clip)[0]?.url || "";
+
+  useEffect(() => {
+    const video = previewRef.current;
+    if (!video || !videoSrc || !clip) return;
+
+    const seekToClipStart = () => {
+      try {
+        video.currentTime = Math.max(0, Number(clip.start || 0));
+      } catch (_) {
+        // Some remote videos do not allow seeking until more metadata is ready.
+      }
+    };
+
+    seekToClipStart();
+    video.addEventListener("loadedmetadata", seekToClipStart, { once: true });
+    video.addEventListener("loadeddata", seekToClipStart, { once: true });
+
+    return () => {
+      video.removeEventListener("loadedmetadata", seekToClipStart);
+      video.removeEventListener("loadeddata", seekToClipStart);
+    };
+  }, [videoSrc, clip]);
+
+  return (
+    <div className={`scanner-clip-thumbnail ${isActive ? "active" : ""}`}>
+      {visualUrl ? (
+        <img src={visualUrl} alt={clip?.hookText || "Generated clip visual"} />
+      ) : videoSrc ? (
+        <video ref={previewRef} src={videoSrc} muted playsInline preload="metadata" />
+      ) : (
+        <span>No preview</span>
+      )}
+      <div className="scanner-clip-thumbnail-shade" />
+      <span className="scanner-clip-thumbnail-score">🔥 {Math.round(Number(clip?.score || 0))}</span>
+      <span className="scanner-clip-thumbnail-duration">
+        {Math.max(0, Math.round(Number(clip?.duration || 0)))}s
+      </span>
+    </div>
+  );
+};
+
 const ViralScanner = ({ file, onSelectClip, onClose }) => {
   const videoRef = useRef(null);
   const videoSectionRef = useRef(null);
@@ -230,14 +405,18 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
   const scanSessionIdRef = useRef(createSecureId("scan"));
   const loggedPreviewClipIdsRef = useRef(new Set());
   const sourceFingerprintRef = useRef("");
+  const scanInFlightRef = useRef(false);
   const [isScanning, setIsScanning] = useState(false);
   const [scanProgress, setScanProgress] = useState(0);
   const [results, setResults] = useState([]);
   const [previewClip, setPreviewClip] = useState(null);
+  const [previewRelativeTime, setPreviewRelativeTime] = useState(0);
   const [selectedClip, setSelectedClip] = useState(null);
   const [statusMessage, setStatusMessage] = useState("");
   const [videoSrc, setVideoSrc] = useState(null);
   const [cachedScanMeta, setCachedScanMeta] = useState(null);
+  const [cachedResultsReady, setCachedResultsReady] = useState(false);
+  const [cacheLoadPending, setCacheLoadPending] = useState(false);
 
   // --- Credit System State ---
   const [creditBalance, setCreditBalance] = useState(null);
@@ -245,6 +424,7 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
   const [showCreditShop, setShowCreditShop] = useState(false);
   const [paypalLoaded, setPaypalLoaded] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState(null);
+  const [selectedVisualByClipId, setSelectedVisualByClipId] = useState({});
   const paypalButtonsRef = useRef(null);
 
   const CREDIT_PACKAGES = [
@@ -271,6 +451,7 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
     });
 
     sourceFingerprintRef.current = buildSourceFingerprint(file);
+    setCachedResultsReady(false);
     setCachedScanMeta(null);
     setResults([]);
     setSelectedClip(null);
@@ -305,24 +486,40 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
     const loadCachedScan = async () => {
       try {
         const user = auth.currentUser;
-        const sourceFingerprint = sourceFingerprintRef.current;
-        if (!user || !sourceFingerprint) return;
+        const sourceFingerprints = getSourceFingerprints(file);
+        if (!user || !sourceFingerprints.length) return;
+        setCacheLoadPending(true);
 
         const token = await user.getIdToken();
-        const response = await fetch(
-          `${API_ENDPOINTS.ANALYTICS_CLIP_SCANNER_CACHE}?sourceFingerprint=${encodeURIComponent(sourceFingerprint)}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-            credentials: "include",
+        let cache = null;
+        let matchedFingerprint = "";
+
+        for (const sourceFingerprint of sourceFingerprints) {
+          const response = await fetch(
+            `${API_ENDPOINTS.ANALYTICS_CLIP_SCANNER_CACHE}?sourceFingerprint=${encodeURIComponent(sourceFingerprint)}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+              credentials: "include",
+            }
+          );
+
+          if (!response.ok) continue;
+
+          const data = await response.json();
+          const candidateCache = data?.cache;
+          if (
+            candidateCache &&
+            Array.isArray(candidateCache.results) &&
+            candidateCache.results.length &&
+            Number(candidateCache.expiresAt || 0) > Date.now()
+          ) {
+            cache = candidateCache;
+            matchedFingerprint = sourceFingerprint;
+            break;
           }
-        );
+        }
 
-        if (!response.ok) return;
-
-        const data = await response.json();
-        const cache = data?.cache;
-        if (!cache || !Array.isArray(cache.results) || !cache.results.length) return;
-        if (Number(cache.expiresAt || 0) <= Date.now()) return;
+        if (!cache) return;
 
         const hydratedResults = applyGuidanceToScenes(cache.results);
         const rankedCachedResults = [...hydratedResults].sort(
@@ -332,6 +529,7 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
 
         setResults(hydratedResults);
         setSelectedClip(bestCachedClip);
+        setCachedResultsReady(true);
         setCachedScanMeta({
           createdAt: cache.createdAt,
           expiresAt: cache.expiresAt,
@@ -343,11 +541,14 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
 
         void trackClipWorkflowEvent("scan_cache_loaded", {
           scanSessionId: scanSessionIdRef.current,
-          sourceFingerprint,
+          sourceFingerprint: matchedFingerprint,
           resultCount: hydratedResults.length,
           cacheAgeHours: Math.round((Date.now() - Number(cache.createdAt || Date.now())) / 3600000),
         });
-      } catch (_error) {}
+      } catch (_error) {
+      } finally {
+        setCacheLoadPending(false);
+      }
     };
 
     void loadCachedScan();
@@ -474,15 +675,31 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
       .render(container);
   }, [paypalLoaded, selectedPackage]);
 
-  const startScan = async () => {
+  const startScan = async (options = {}) => {
+    if (scanInFlightRef.current || isScanning) return;
+    const forceFresh = Boolean(options.forceFresh);
+
+    if (!forceFresh && cachedResultsReady && results.length) {
+      setStatusMessage(
+        "Saved clips are already loaded. Use Fresh rescan only if you want to spend credits and analyze again."
+      );
+      return;
+    }
+
     const activeSessionId = createSecureId("scan");
+    const scanNonce = forceFresh ? createSecureId("fresh") : "";
+    scanInFlightRef.current = true;
     scanSessionIdRef.current = activeSessionId;
     loggedPreviewClipIdsRef.current = new Set();
 
     setIsScanning(true);
     setScanProgress(0);
-    setResults([]);
-    setSelectedClip(null);
+    if (forceFresh) {
+      setResults([]);
+      setSelectedClip(null);
+      setCachedResultsReady(false);
+      setCachedScanMeta(null);
+    }
     setStatusMessage("Preparing video for AI analysis...");
 
     void trackClipWorkflowEvent("scan_started", {
@@ -496,28 +713,69 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
       const token = await user.getIdToken();
 
       let fileUrl = "";
+      const sourceFingerprints = getSourceFingerprints(file);
+      if (forceFresh) {
+        clearCachedUploadUrls(sourceFingerprints);
+      }
+
+      setStatusMessage("Checking AI worker availability...");
+      const workerHealth = await fetch(API_ENDPOINTS.MEDIA_WORKER_HEALTH, {
+        headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
+      });
+      if (!workerHealth.ok) {
+        const healthText = await workerHealth.text().catch(() => "");
+        throw new Error(
+          `AI worker is offline, so the video was not uploaded. ${healthText || "Try again when the worker is running."}`
+        );
+      }
 
       // 1. Upload if necessary
       if (file instanceof File || file instanceof Blob) {
-        setStatusMessage("Uploading video to cloud for processing...");
-        const storagePath = `temp_scans/${Date.now()}_${file.name || "scan.mp4"}`;
-        const storageRef = ref(storage, storagePath);
-        const uploadTask = uploadBytesResumable(storageRef, file);
+        fileUrl = forceFresh ? "" : sourceFingerprints.map(readCachedUploadUrl).find(Boolean) || "";
 
-        await new Promise((resolve, reject) => {
-          uploadTask.on(
-            "state_changed",
-            snapshot => {
-              const prog = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-              setScanProgress(Math.round(prog / 2)); // First 50% is upload
-            },
-            error => reject(error),
-            async () => {
-              fileUrl = await getDownloadURL(uploadTask.snapshot.ref);
-              resolve();
-            }
+        if (fileUrl) {
+          setStatusMessage("Reusing the temporary upload for this video. No duplicate storage upload.");
+          setScanProgress(50);
+        } else {
+          setStatusMessage(
+            forceFresh
+              ? "Uploading a fresh temporary scan copy. This forces a brand-new analysis pass."
+              : "Uploading temporary scan copy. AutoPromote marks it for 20-minute cleanup."
           );
-        });
+          const safeName = normalizePlainText(file.name || "scan.mp4").replace(/[^a-zA-Z0-9._-]+/g, "-");
+          const expiresAt = Date.now() + CLIP_SCANNER_TEMP_SCAN_TTL_MS;
+          const storagePath = `temp_scans/${user.uid}/${expiresAt}_${Date.now()}_${scanNonce || "scan"}_${safeName}`;
+          const storageRef = ref(storage, storagePath);
+          const uploadTask = uploadBytesResumable(storageRef, file, {
+            customMetadata: {
+              temporary: "true",
+              feature: "find_viral_clips",
+              forceFresh: String(forceFresh),
+              scanNonce: scanNonce || "",
+              deleteAfter: new Date(expiresAt).toISOString(),
+              expiresAt: String(expiresAt),
+            },
+          });
+
+          await new Promise((resolve, reject) => {
+            uploadTask.on(
+              "state_changed",
+              snapshot => {
+                const prog = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                setScanProgress(Math.round(prog / 2)); // First 50% is upload
+              },
+              error => reject(error),
+              async () => {
+                fileUrl = await getDownloadURL(uploadTask.snapshot.ref);
+                if (!forceFresh) {
+                  writeCachedUploadUrl(sourceFingerprints, fileUrl);
+                }
+                resolve();
+              }
+            );
+          });
+        }
       } else if (typeof file === "string") {
         fileUrl = file;
         setScanProgress(50);
@@ -533,7 +791,9 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          fileUrl: fileUrl,
+          fileUrl,
+          forceFresh,
+          scanNonce,
         }),
       });
 
@@ -573,6 +833,7 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
         (left, right) => right.score - left.score || right.backendScore - left.backendScore
       );
       setResults(validScenes);
+      setCachedResultsReady(true);
       setCachedScanMeta({
         createdAt: Date.now(),
         expiresAt: Date.now() + CLIP_SCANNER_CACHE_TTL_MS,
@@ -581,12 +842,16 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
         sourceLabel: getSourceLabel(file),
       });
 
-      await saveClipScannerCache({
-        token,
-        sourceFingerprint: sourceFingerprintRef.current,
-        sourceLabel: getSourceLabel(file),
-        results: validScenes,
-      }).catch(() => {});
+      await Promise.all(
+        sourceFingerprints.map(sourceFingerprint =>
+          saveClipScannerCache({
+            token,
+            sourceFingerprint,
+            sourceLabel: getSourceLabel(file),
+            results: validScenes,
+          }).catch(() => {})
+        )
+      );
 
       void trackClipWorkflowEvent("scan_completed", {
         scanSessionId: activeSessionId,
@@ -611,6 +876,7 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
       });
       setStatusMessage("Error: " + err.message);
     } finally {
+      scanInFlightRef.current = false;
       setIsScanning(false);
       setScanProgress(100);
     }
@@ -644,6 +910,7 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
     video.currentTime = clip.start;
     video.play();
     setPreviewClip(clip);
+    setPreviewRelativeTime(0);
     if (!options.keepSelection) {
       setSelectedClip(clip);
     }
@@ -655,11 +922,14 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
         return;
       }
 
+      const relativeTime = Math.max(0, activeVideo.currentTime - Number(clip.start || 0));
+      setPreviewRelativeTime(Math.min(relativeTime, Math.max(0, Number(clip.duration || 0))));
+
       if (activeVideo.currentTime >= clip.end) {
         activeVideo.pause();
         activeVideo.removeEventListener("timeupdate", stopHandler);
         previewStopHandlerRef.current = null;
-        setPreviewClip(null);
+        setPreviewRelativeTime(Math.max(0, Number(clip.duration || 0)));
       }
     };
 
@@ -678,32 +948,59 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
   );
   const bestClipId = rankedResults[0]?.id ?? null;
   const topPickIds = new Set(rankedResults.slice(0, 2).map(clip => clip.id));
+  const activePreviewDuration = Math.max(0, Number((previewClip || selectedClip)?.duration || 0));
+  const activePreviewProgress = activePreviewDuration
+    ? Math.min(100, (previewRelativeTime / activePreviewDuration) * 100)
+    : 0;
 
-  const jumpToClipBoundary = (clip, boundary) => {
-    const video = videoRef.current;
-    if (!video || !clip) return;
+  const getSelectedVisualForClip = clip => {
+    const clipId = getClipIdentity(clip);
+    return selectedVisualByClipId[clipId] || getClipVisualAssets(clip)[0] || null;
+  };
+  const activePreviewClip = previewClip || selectedClip;
+  const activeSelectedVisual = getSelectedVisualForClip(activePreviewClip);
 
-    scrollElementIntoView(videoSectionRef.current, {
-      behavior: "smooth",
-      block: "start",
-      inline: "nearest",
-    });
+  const handleSelectVisual = (clip, asset) => {
+    if (!clip || !asset) return;
+    setSelectedVisualByClipId(current => ({
+      ...current,
+      [getClipIdentity(clip)]: asset,
+    }));
+  };
 
-    const targetTime = boundary === "end" ? Number(clip.end || 0) : Number(clip.start || 0);
-    video.currentTime = targetTime;
-    video.pause();
-    setPreviewClip(null);
-    setSelectedClip(clip);
+  const handleDownloadVisual = async asset => {
+    if (!asset?.url) return;
+    const safeName = normalizePlainText(asset.hookText || asset.label || asset.type || "promo-visual")
+      .replace(/[^a-zA-Z0-9._-]+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "") || "promo-visual";
+    try {
+      const response = await fetch(asset.url, { mode: "cors" });
+      if (!response.ok) throw new Error(`Visual fetch failed with ${response.status}`);
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = `${safeName}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 1200);
+    } catch (_error) {
+      window.open(asset.url, "_blank", "noopener,noreferrer");
+    }
   };
 
   const handleUseClip = (clip, improvementMode = false) => {
     if (!clip) return;
+    const selectedVisual = getSelectedVisualForClip(clip);
 
-    void trackClipWorkflowEvent("clip_sent_to_editor", {
+    void trackClipWorkflowEvent("clip_package_selected", {
       scanSessionId: scanSessionIdRef.current,
       clipId: String(clip.id),
       score: Number(clip.score || 0),
       improveInEditor: improvementMode,
+      selectedVisualType: selectedVisual?.type || null,
       rank: rankedResults.findIndex(item => item.id === clip.id) + 1,
     });
 
@@ -713,6 +1010,9 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
       suggestedImprovements: clip.improvements,
       guidedScore: clip.score,
       improveInEditor: improvementMode,
+      openStudio: false,
+      selectedVisual,
+      selectedThumbnailUrl: selectedVisual?.url || clip.thumbnailUrl || null,
       scanSessionId: scanSessionIdRef.current,
     });
   };
@@ -817,7 +1117,48 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
           <div ref={videoSectionRef} className="scanner-video-column">
             {videoSrc ? (
               <div className="scanner-video-frame">
-                <video ref={videoRef} controls style={{ borderRadius: "8px" }} />
+                <video ref={videoRef} controls={!selectedClip} style={{ borderRadius: "8px" }} />
+                {activeSelectedVisual?.url ? (
+                  <div className="scanner-selected-visual-preview">
+                    <div>
+                      <span>Selected thumbnail/poster</span>
+                      <strong>{activeSelectedVisual.hookText || activeSelectedVisual.label || "Promo visual"}</strong>
+                      <div className="scanner-visual-copy-meta">
+                        <span
+                          className={`scanner-copy-source-pill ${getVisualCopySourceMeta(activeSelectedVisual).className}`}
+                        >
+                          {getVisualCopySourceMeta(activeSelectedVisual).label}
+                        </span>
+                      </div>
+                      {getVisualWhyText(activeSelectedVisual) ? (
+                        <p>{getVisualWhyText(activeSelectedVisual)}</p>
+                      ) : null}
+                    </div>
+                    <img src={activeSelectedVisual.url} alt="Selected thumbnail/poster preview" />
+                  </div>
+                ) : null}
+                {selectedClip ? (
+                  <div className="scanner-clip-preview-controls">
+                    <div>
+                      <strong>
+                        Previewing clip only: {formatTime(selectedClip.start)} -{" "}
+                        {formatTime(selectedClip.end)}
+                      </strong>
+                      <span>
+                        {formatTime(previewRelativeTime)} / {formatTime(activePreviewDuration)}
+                      </span>
+                    </div>
+                    <div className="scanner-clip-preview-bar">
+                      <span style={{ width: `${activePreviewProgress}%` }} />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handlePreviewClip(selectedClip, { keepSelection: true })}
+                    >
+                      Play selected clip
+                    </button>
+                  </div>
+                ) : null}
               </div>
             ) : (
               <div style={{ color: "#fff" }}>No video loaded</div>
@@ -829,8 +1170,9 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
               {!isScanning && results.length === 0 ? (
                 <div style={{ textAlign: "center" }}>
                   <p style={{ color: "#cbd5e1", marginBottom: "15px" }}>
-                    Let AutoPromote rank the moments most likely to earn the next watch, then move
-                    the winner into Studio.
+                    {cacheLoadPending
+                      ? "Checking whether this video already has saved viral clips..."
+                      : "Let AutoPromote rank the moments most likely to earn the next watch, then move the winner into Studio."}
                   </p>
 
                   {needsCredits ? (
@@ -854,7 +1196,7 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
                       </button>
                     </div>
                   ) : (
-                    <button className="scan-btn" onClick={startScan}>
+                    <button className="scan-btn" onClick={() => startScan({ forceFresh: true })} disabled={cacheLoadPending}>
                       Start AI Scan{" "}
                       <span style={{ fontSize: "0.8em", opacity: 0.8, marginLeft: "5px" }}>
                         (20 💎)
@@ -886,18 +1228,35 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
                       available for 3 days.
                     </p>
                   ) : null}
-                  <button
-                    className="scan-btn"
-                    onClick={startScan}
-                    style={{
-                      marginTop: "10px",
-                      fontSize: "0.9rem",
-                      padding: "8px 16px",
-                      background: "#334155",
-                    }}
-                  >
-                    Rescan
-                  </button>
+                  <div className="scanner-rescan-actions">
+                    <button
+                      className="scan-btn"
+                      onClick={() => {
+                        setStatusMessage("These saved clips are ready. Pick one, preview it, or open it in Studio.");
+                      }}
+                      style={{
+                        marginTop: "10px",
+                        fontSize: "0.9rem",
+                        padding: "8px 16px",
+                        background: "#0f766e",
+                      }}
+                    >
+                      Keep saved clips
+                    </button>
+                    <button
+                      className="scan-btn"
+                      onClick={() => startScan({ forceFresh: true })}
+                      disabled={isScanning}
+                      style={{
+                        marginTop: "10px",
+                        fontSize: "0.9rem",
+                        padding: "8px 16px",
+                        background: "#334155",
+                      }}
+                    >
+                      Fresh rescan
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -961,7 +1320,7 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
                     className="scanner-action-btn scanner-action-btn-primary"
                     onClick={() => handleUseClip(selectedClip)}
                   >
-                    Open in Studio
+                    Use clip package
                   </button>
                 </div>
                 {selectedClip.score < 60 ? (
@@ -976,7 +1335,7 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
                       className="scanner-action-btn scanner-action-btn-primary"
                       onClick={() => handleUseClip(selectedClip, true)}
                     >
-                      Improve Clip
+                      Use with fixes
                     </button>
                   </div>
                 ) : null}
@@ -991,6 +1350,11 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
                   className={`result-card ${selectedClip?.id === clip.id ? "active" : ""} ${clip.id === bestClipId ? "best-pick" : ""} ${topPickIds.has(clip.id) && clip.id !== bestClipId ? "runner-up" : ""}`}
                   onClick={() => handlePreviewClip(clip)}
                 >
+                  <ClipResultThumbnail
+                    videoSrc={videoSrc}
+                    clip={clip}
+                    isActive={selectedClip?.id === clip.id}
+                  />
                   <div className="result-header">
                     <div>
                       <div className="result-badge-row">
@@ -1022,6 +1386,67 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
                       </div>
                     ))}
                   </div>
+                  {getClipVisualAssets(clip).length > 0 ? (
+                    <div className="scanner-visual-pack">
+                      <div className="scanner-visual-pack-head">
+                        <span>Choose package visual</span>
+                        <small>{getClipVisualAssets(clip).length} visuals</small>
+                      </div>
+                      {getSelectedVisualForClip(clip)?.url ? (
+                        <div className="scanner-visual-pack-summary">
+                          <span
+                            className={`scanner-copy-source-pill ${getVisualCopySourceMeta(getSelectedVisualForClip(clip)).className}`}
+                          >
+                            {getVisualCopySourceMeta(getSelectedVisualForClip(clip)).label}
+                          </span>
+                          {getVisualWhyText(getSelectedVisualForClip(clip)) ? (
+                            <p>{getVisualWhyText(getSelectedVisualForClip(clip))}</p>
+                          ) : null}
+                        </div>
+                      ) : null}
+                      <div className="scanner-visual-strip">
+                        {getClipVisualAssets(clip)
+                          .slice(0, 4)
+                          .map(asset => {
+                            const isSelected = getSelectedVisualForClip(clip)?.url === asset.url;
+                            const copyMeta = getVisualCopySourceMeta(asset);
+                            return (
+                            <button
+                              key={asset.id || asset.url}
+                              type="button"
+                              className={`scanner-visual-option ${isSelected ? "is-selected" : ""}`}
+                              onClick={event => {
+                                event.stopPropagation();
+                                handleSelectVisual(clip, asset);
+                              }}
+                              title={asset.label || "Generated visual"}
+                            >
+                              <img src={asset.url} alt={asset.label || "Generated visual"} />
+                              <span className={`scanner-visual-option-pill ${copyMeta.className}`}>
+                                {copyMeta.label}
+                              </span>
+                              <span className="scanner-visual-option-label">
+                                {isSelected ? "Selected" : asset.type || "Visual"}
+                              </span>
+                            </button>
+                          );
+                          })}
+                      </div>
+                      {getSelectedVisualForClip(clip)?.url ? (
+                        <div className="scanner-visual-actions">
+                          <button
+                            type="button"
+                            onClick={event => {
+                              event.stopPropagation();
+                              handleDownloadVisual(getSelectedVisualForClip(clip));
+                            }}
+                          >
+                            Download selected visual
+                          </button>
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
                   <div className="scanner-card-actions">
                     <button
                       className="scanner-card-btn"
@@ -1039,7 +1464,7 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
                         handleUseClip(clip);
                       }}
                     >
-                      Open in Studio
+                      Use package
                     </button>
                   </div>
                   {clip.score < 60 ? (

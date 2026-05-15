@@ -5,7 +5,9 @@ import { OPTIMAL_TIMES } from "../BestTimeToPost";
 import FilterEffects from "../FilterEffects";
 import ImageCropper from "../ImageCropper";
 import { sanitizeUrl } from "../../utils/security";
+import AdaptiveMediaPreview from "./AdaptiveMediaPreview";
 import MetaConnectionRequirementsNotice from "../MetaConnectionRequirementsNotice";
+import { revokeObjectUrlLater } from "../../utils/objectUrl";
 
 const InstagramForm = ({
   onChange,
@@ -75,7 +77,7 @@ const InstagramForm = ({
     if (currentFile && currentFile instanceof File) {
       const url = URL.createObjectURL(currentFile);
       setVideoPreviewUrl(url);
-      return () => URL.revokeObjectURL(url);
+      return () => revokeObjectUrlLater(url);
     } else {
       setVideoPreviewUrl(null);
     }
@@ -85,7 +87,7 @@ const InstagramForm = ({
     if (currentFile && currentFile.type.startsWith("image/")) {
       const url = URL.createObjectURL(currentFile);
       setPreviewUrl(url);
-      return () => URL.revokeObjectURL(url);
+      return () => revokeObjectUrlLater(url);
     } else {
       setPreviewUrl(null);
     }
@@ -98,12 +100,6 @@ const InstagramForm = ({
     setCaption(prev => prev + emojiChar);
     setShowEmojiPicker(false);
   };
-
-  // Branded Content / Partnership
-  const [isPaidPartnership, setIsPaidPartnership] = useState(
-    initialData.isPaidPartnership || false
-  );
-  const [sponsorUser, setSponsorUser] = useState(initialData.sponsorUser || "");
 
   useEffect(() => {
     // Find the page object to get a display name
@@ -118,8 +114,8 @@ const InstagramForm = ({
       location,
       isReel,
       shareToFeed,
-      isPaidPartnership,
-      sponsorUser,
+      isPaidPartnership: false,
+      sponsorUser: "",
       pageId: selectedPageId, // Include identity in payload
       username, // Pass username for preview
     });
@@ -129,8 +125,6 @@ const InstagramForm = ({
     location,
     isReel,
     shareToFeed,
-    isPaidPartnership,
-    sponsorUser,
     selectedPageId,
     facebookPages,
   ]);
@@ -332,18 +326,11 @@ const InstagramForm = ({
 
         {/* SIMPLE INLINE VIDEO PREVIEW */}
         {videoPreviewUrl && (currentFile?.type?.startsWith("video/") || !currentFile) && (
-          <div style={{ marginTop: "10px" }}>
-            <video
-              src={sanitizeUrl(videoPreviewUrl)}
-              controls
-              style={{
-                width: "100%",
-                maxHeight: "300px",
-                borderRadius: "8px",
-                border: "1px solid #334155",
-              }}
-            />
-          </div>
+          <AdaptiveMediaPreview
+            src={videoPreviewUrl}
+            mediaType="video"
+            label="Instagram media preview"
+          />
         )}
 
         {previewUrl && (
@@ -675,39 +662,6 @@ const InstagramForm = ({
           </label>
         </div>
       )}
-
-      <div className="commercial-section">
-        <label className="checkbox-modern">
-          <input
-            type="checkbox"
-            checked={isPaidPartnership}
-            onChange={e => setIsPaidPartnership(e.target.checked)}
-          />
-          <span className="checkmark"></span>
-          <span className="label-text">Add "Paid Partnership" Label</span>
-        </label>
-
-        {isPaidPartnership && (
-          <div className="sub-settings fade-in">
-            <div className="form-group-modern">
-              <label>Brand Partner (Username)</label>
-              <div className="input-with-icon">
-                <span className="input-icon">@</span>
-                <input
-                  type="text"
-                  className="modern-input"
-                  placeholder="nike"
-                  value={sponsorUser}
-                  onChange={e => setSponsorUser(e.target.value)}
-                />
-              </div>
-              <p className="legal-hint">
-                This will tag the brand partner and allow them to see metrics.
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
 
       {setProtocol7Enabled && (
         <div

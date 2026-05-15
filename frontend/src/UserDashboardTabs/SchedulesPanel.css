@@ -27,6 +27,54 @@
   letter-spacing: 2px;
 }
 
+.queue-guidance {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 18px;
+  border: 1px solid rgba(96, 165, 250, 0.22);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 8% 20%, rgba(16, 185, 129, 0.18), transparent 34%),
+    linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(30, 27, 75, 0.72));
+  box-shadow: 0 22px 55px rgba(2, 6, 23, 0.32);
+}
+
+.queue-guidance-kicker {
+  display: block;
+  margin-bottom: 6px;
+  color: #67e8f9;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.queue-guidance strong {
+  display: block;
+  color: #f8fafc;
+  font-size: 1rem;
+}
+
+.queue-guidance p {
+  margin: 8px 0 0;
+  color: #cbd5e1;
+  line-height: 1.55;
+}
+
+.queue-guidance-action {
+  border: 0;
+  border-radius: 999px;
+  padding: 12px 18px;
+  color: #020617;
+  background: linear-gradient(135deg, #38bdf8, #22c55e);
+  font-weight: 900;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
 /* Controls */
 .time-controls {
   display: flex;
@@ -49,6 +97,55 @@
   background: rgba(96, 165, 250, 0.1);
   border-color: #60a5fa;
   color: #60a5fa;
+}
+
+.control-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.schedule-bulk-bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  border: 1px solid rgba(96, 165, 250, 0.2);
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 0% 50%, rgba(59, 130, 246, 0.16), transparent 34%),
+    rgba(15, 23, 42, 0.82);
+  color: #cbd5e1;
+}
+
+.schedule-select-all,
+.schedule-row-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #e2e8f0;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.schedule-select-all input,
+.schedule-row-select input {
+  width: 16px;
+  height: 16px;
+  accent-color: #38bdf8;
+  cursor: pointer;
+}
+
+.schedule-row-select {
+  flex: 0 0 auto;
+  padding: 8px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.schedule-row-select:hover {
+  background: rgba(96, 165, 250, 0.1);
 }
 
 /* The Chronoline (Timeline) */

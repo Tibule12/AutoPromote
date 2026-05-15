@@ -77,7 +77,7 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
               across multiple platforms at scale.
             </p>
             <p style={{ marginTop: "1rem", marginBottom: "0.5rem", fontWeight: 600 }}>
-              Who it's for:
+                    Who it&apos;s for:
             </p>
             <ul className="hp-list" style={{ marginTop: "0.25rem" }}>
               <li>Creators publishing on multiple platforms</li>
@@ -326,8 +326,8 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
 
           <footer className="hp-footer">
             <h3 className="hp-northstar">
-              "Every upload should give the creator a better chance and a clearer lesson than the
-              last one."
+              &quot;Every upload should give the creator a better chance and a clearer lesson than the
+              last one.&quot;
             </h3>
             <div className="hp-footer-ctas">
               <button

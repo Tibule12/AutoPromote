@@ -19,7 +19,7 @@ const MissionControlPanel = () => {
   const [availableContent, setAvailableContent] = useState([]); // List of selectable content
   const [selectedContentId, setSelectedContentId] = useState(null); // Currently selected content ID
   const [selectedContentThumbnail, setSelectedContentThumbnail] = useState(null); // Currently selected content thumbnail
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false); // New state for upload status
   const [isLocked] = useState(false);
   const [missionStatus, setMissionStatus] = useState(null);
@@ -217,7 +217,6 @@ const MissionControlPanel = () => {
           p.velocity = Math.random() * (powerLevel / 8) + 0.5;
         }
 
-        const colorIntensity = Math.min(255, powerLevel * 2.5);
         // Color shifts based on velocity
         const hue = (frequency * 2 + p.velocity * 20) % 360;
         ctx.fillStyle = `hsla(${120 + hue / 2}, 100%, 60%, ${p.life / 100})`;

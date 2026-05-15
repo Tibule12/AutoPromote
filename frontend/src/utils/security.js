@@ -1,11 +1,15 @@
 const SAFE_DATA_URL_PATTERN = /^data:(image|video|audio)\/[a-z0-9.+-]+;base64,[a-z0-9+/=]+$/i;
 const SAFE_PROTOCOLS = new Set(["http:", "https:"]);
 const UNSAFE_URL_TEXT_PATTERN = /[<>"'`\\]/;
+const CONTROL_OR_SPACE_PATTERN = new RegExp(
+  `[${String.fromCharCode(0)}-${String.fromCharCode(31)}${String.fromCharCode(127)}\\s]+`,
+  "g"
+);
 
-function stripUnsafeCharacters(value) {
+export function stripUnsafeCharacters(value) {
   return String(value ?? "")
     .trim()
-    .replace(/[\u0000-\u001f\u007f\s]+/g, "");
+    .replace(CONTROL_OR_SPACE_PATTERN, "");
 }
 
 function sanitizeRelativeUrl(url) {

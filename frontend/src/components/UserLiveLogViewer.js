@@ -6,7 +6,6 @@ import { collection, query, where, orderBy, limit, onSnapshot } from "firebase/f
 const UserLiveLogViewer = () => {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [active, setActive] = useState(true);
   const logsEndRef = useRef(null);
 
   useEffect(() => {

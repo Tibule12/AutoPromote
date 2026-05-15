@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import ImageCropper from "../ImageCropper";
 import { OPTIMAL_TIMES } from "../BestTimeToPost";
 import { sanitizeUrl } from "../../utils/security";
+import AdaptiveMediaPreview from "./AdaptiveMediaPreview";
+import { revokeObjectUrlLater } from "../../utils/objectUrl";
 
 const PinterestForm = ({
   onChange,
@@ -51,7 +53,7 @@ const PinterestForm = ({
     if (currentFile && currentFile.type.startsWith("image/")) {
       const url = URL.createObjectURL(currentFile);
       setPreviewUrl(url);
-      return () => URL.revokeObjectURL(url);
+      return () => revokeObjectUrlLater(url);
     } else {
       setPreviewUrl(null);
     }
@@ -156,6 +158,13 @@ const PinterestForm = ({
           className="modern-input"
           style={{ padding: 8 }}
         />
+        {previewUrl && (
+          <AdaptiveMediaPreview
+            src={previewUrl}
+            mediaType="image"
+            label="Pinterest image preview"
+          />
+        )}
         {previewUrl && (
           <div style={{ marginTop: 10 }}>
             <button

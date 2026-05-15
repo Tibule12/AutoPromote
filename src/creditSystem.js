@@ -2,6 +2,39 @@ const { db } = require("./firebaseAdmin");
 const { normalizePlanId, resolvePlan } = require("./config/subscriptionPlans");
 const { getEffectiveTierSnapshot } = require("./services/billingService");
 
+const LOCAL_TEST_CREDIT_BALANCE = 999999;
+const LOCAL_BYPASS_OPERATIONS = new Set([
+  "process",
+  "render-multicam",
+  "clean-audio-sync",
+  "/analyze",
+  "analyze",
+  "find-viral-clips",
+  "/render-clip",
+  "render-clip",
+  "clip-render",
+  "promo-summary",
+  "smart-promo-summary",
+  "audio-extract",
+  "transcribe",
+]);
+
+const isProductionRuntime = () =>
+  process.env.NODE_ENV === "production" ||
+  process.env.RENDER === "true" ||
+  Boolean(process.env.K_SERVICE) ||
+  Boolean(process.env.FUNCTION_TARGET);
+
+const isLocalEditingCreditBypassEnabled = () => {
+  if (process.env.DISABLE_VIDEO_EDITOR_CREDITS === "true") return true;
+  if (process.env.LOCAL_EDITING_CREDIT_BYPASS === "false") return false;
+  if (process.env.LOCAL_EDITING_CREDIT_BYPASS === "true") return !isProductionRuntime();
+  return !isProductionRuntime();
+};
+
+const shouldBypassEditingCredits = operation =>
+  isLocalEditingCreditBypassEnabled() && LOCAL_BYPASS_OPERATIONS.has(String(operation || ""));
+
 /**
  * Get the current credit breakdown for a user.
  * Returns { monthlyRemaining, topUpBalance, totalAvailable, monthlyAllocation, monthKey }
@@ -28,15 +61,19 @@ const getCreditBreakdown = async (userId) => {
 
   const monthlyRemaining = Math.max(0, monthlyAllocation - monthlyUsed);
   const topUpBalance = userData.credits || 0; // purchased top-up credits
+  const localCreditBypass = isLocalEditingCreditBypassEnabled();
 
   return {
-    monthlyRemaining,
+    monthlyRemaining: localCreditBypass ? LOCAL_TEST_CREDIT_BALANCE : monthlyRemaining,
     monthlyUsed,
-    monthlyAllocation,
+    monthlyAllocation: localCreditBypass ? LOCAL_TEST_CREDIT_BALANCE : monthlyAllocation,
     topUpBalance,
-    totalAvailable: monthlyRemaining + topUpBalance,
+    totalAvailable: localCreditBypass
+      ? LOCAL_TEST_CREDIT_BALANCE
+      : monthlyRemaining + topUpBalance,
     monthKey,
     tier,
+    localCreditBypass,
   };
 };
 
@@ -46,6 +83,26 @@ const getCreditBreakdown = async (userId) => {
  * Records a ledger entry for monthly tracking.
  */
 const deductCredits = async (userId, amount, operation = "unknown") => {
+  if (Number(amount || 0) > 0 && shouldBypassEditingCredits(operation)) {
+    console.log(
+      `[credits] Local editing credit bypass active for ${operation}. User ${userId}, skipped ${amount} credits.`
+    );
+    return {
+      success: true,
+      remaining: LOCAL_TEST_CREDIT_BALANCE,
+      monthlyRemaining: LOCAL_TEST_CREDIT_BALANCE,
+      topUpBalance: 0,
+      deducted: 0,
+      fromMonthly: 0,
+      fromTopUp: 0,
+      billedAmount: amount,
+      monthKey: new Date().toISOString().slice(0, 7),
+      operation,
+      source: "local_editing_credit_bypass",
+      skipped: true,
+    };
+  }
+
   const userRef = db.collection("users").doc(userId);
   const monthKey = new Date().toISOString().slice(0, 7);
 
@@ -120,6 +177,10 @@ const deductCredits = async (userId, amount, operation = "unknown") => {
         monthlyRemaining: monthlyRemaining - fromMonthly,
         topUpBalance: topUpBalance - fromTopUp,
         deducted: amount,
+        fromMonthly,
+        fromTopUp,
+        monthKey,
+        operation,
         source: fromTopUp > 0 ? "monthly+topup" : "monthly",
       };
     });
@@ -129,4 +190,69 @@ const deductCredits = async (userId, amount, operation = "unknown") => {
   }
 };
 
-module.exports = { deductCredits, getCreditBreakdown };
+const refundCredits = async (
+  userId,
+  refund,
+  operation = "refund",
+  metadata = {}
+) => {
+  const amount = Math.max(0, Number(refund?.deducted ?? refund?.amount ?? 0) || 0);
+  const fromMonthly = Math.max(0, Number(refund?.fromMonthly || 0) || 0);
+  const fromTopUp = Math.max(0, Number(refund?.fromTopUp || 0) || 0);
+  const monthKey = refund?.monthKey || new Date().toISOString().slice(0, 7);
+
+  if (amount <= 0) {
+    return { success: false, message: "No refundable amount provided" };
+  }
+
+  const userRef = db.collection("users").doc(userId);
+
+  try {
+    return await db.runTransaction(async transaction => {
+      const userDoc = await transaction.get(userRef);
+      if (!userDoc.exists) {
+        throw new Error("User not found");
+      }
+
+      const userData = userDoc.data() || {};
+      const topUpBalance = Number(userData.credits || 0) || 0;
+
+      if (fromTopUp > 0) {
+        transaction.update(userRef, {
+          credits: topUpBalance + fromTopUp,
+          last_credit_refund: new Date().toISOString(),
+        });
+      }
+
+      const ledgerRef = db.collection("credit_usage").doc();
+      transaction.set(ledgerRef, {
+        userId,
+        amount: -amount,
+        fromMonthly: -fromMonthly,
+        fromTopUp: -fromTopUp,
+        operation,
+        monthKey,
+        createdAt: new Date().toISOString(),
+        metadata,
+      });
+
+      return {
+        success: true,
+        refunded: amount,
+        fromMonthly,
+        fromTopUp,
+      };
+    });
+  } catch (error) {
+    console.error("Credit refund failed:", error);
+    return { success: false, message: error.message };
+  }
+};
+
+module.exports = {
+  deductCredits,
+  refundCredits,
+  getCreditBreakdown,
+  isLocalEditingCreditBypassEnabled,
+  shouldBypassEditingCredits,
+};

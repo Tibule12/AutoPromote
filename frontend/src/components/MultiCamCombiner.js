@@ -3,6 +3,7 @@ import {
   buildAutoDirectorPlan,
   clampNumber,
   DEFAULT_SEGMENT_FRAMING,
+  DEFAULT_IMAGE_SEGMENT_DURATION,
   buildDefaultSegments,
   buildSegmentDisplaySegments,
   buildInitialSources,
@@ -27,16 +28,21 @@ import {
 } from "./multicamUtils";
 import {
   FLOW_EDIT_STYLE_PRESETS,
+  FLOW_AURA_TEMPLATE_PRESETS,
+  IMAGE_STORY_TEMPLATE_PRESETS,
+  buildImageStoryFramingMap,
   buildFlowEditPlan,
   buildFlowTimelineDisplaySegments,
+  buildVideoFlowFramingMap,
   buildSingleLensAutoPlan,
+  getFlowAuraPreset,
   getFlowSegmentAtTime,
   getFlowSourceTimeAtPlayhead,
 } from "./flowEditUtils";
 import { getAuth } from "firebase/auth";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { API_BASE_URL } from "../config";
-import { applySafeMediaSource } from "../utils/security";
+import { applySafeMediaSource, getSafeMediaSource } from "../utils/security";
 import toast from "react-hot-toast";
 import "./MultiCamCombiner.css";
 import useCinematicEffects from "../hooks/useCinematicEffects";
@@ -57,6 +63,19 @@ const EXPORT_FRAME_RATE = 30;
 const FRAME_STEP_SECONDS = 1 / 30;
 const AUDIO_SYNC_BINS_PER_SECOND = 20;
 const WAVEFORM_BAR_COUNT = 24;
+const IMAGE_SOURCE_DURATION_MIN = 1;
+const IMAGE_SOURCE_DURATION_MAX = 20;
+const BYTES_PER_MB = 1024 * 1024;
+const BYTES_PER_GB = 1024 * BYTES_PER_MB;
+const BROWSER_SYNC_MAX_SINGLE_VISUAL_BYTES = 1.25 * BYTES_PER_GB;
+const BROWSER_SYNC_MAX_TOTAL_VISUAL_BYTES = 2.5 * BYTES_PER_GB;
+const BROWSER_SYNC_MAX_EXTERNAL_AUDIO_BYTES = 250 * BYTES_PER_MB;
+const BROWSER_SYNC_MAX_DURATION_SECONDS = 30 * 60;
+
+// Client-side compression before upload — turns raw 4K/ProRes into web-friendly bitrates
+const UPLOAD_COMPRESSION_THRESHOLD_BYTES = 250 * BYTES_PER_MB; // Compress files > 250 MB
+const UPLOAD_COMPRESSION_TARGET_BPS = 8_000_000;               // 8 Mbps video
+const UPLOAD_COMPRESSION_AUDIO_BPS = 128_000;                  // 128 Kbps audio
 
 const SINGLE_CAM_FOCUS_PRESETS = [
   { id: "two-shot", label: "Two Shot", zoom: 1 },
@@ -69,7 +88,7 @@ const MULTICAM_LAYOUT_OPTIONS = [
   { id: "split-vertical", label: "Dual Pulse" },
   { id: "pip", label: "Orbit Echo" },
   { id: "scene-grid", label: "Scene Matrix" },
-  { id: "cut", label: "Mono Focus" },
+  { id: "cut", label: "Hero Angle / Single Speaker" },
 ];
 
 const MULTICAM_LAYOUT_TITLES = {
@@ -77,7 +96,7 @@ const MULTICAM_LAYOUT_TITLES = {
   "split-vertical": "Dual Pulse",
   pip: "Orbit Echo",
   "scene-grid": "Scene Matrix",
-  cut: "Mono Focus",
+  cut: "Hero Angle",
 };
 
 const MULTICAM_REASON_TITLES = {
@@ -226,6 +245,79 @@ const applyDirectorStyleToLayout = (layout, directorStyleId, rankedSources = [])
 };
 
 const getSourceMediaUrl = source => source?.previewUrl || source?.url || source?.uploadedUrl || "";
+const getSourceMediaKind = source =>
+  source?.mediaKind === "image" || String(source?.file?.type || "").startsWith("image/")
+    ? "image"
+    : "video";
+const isImageSource = source => getSourceMediaKind(source) === "image";
+const isVideoSource = source => getSourceMediaKind(source) === "video";
+const normalizeImageSourceDuration = value =>
+  Number(clampNumber(value, IMAGE_SOURCE_DURATION_MIN, IMAGE_SOURCE_DURATION_MAX, DEFAULT_IMAGE_SEGMENT_DURATION).toFixed(2));
+const formatMediaBytes = bytes => {
+  const safeBytes = Number(bytes) || 0;
+  if (safeBytes >= BYTES_PER_GB) return `${(safeBytes / BYTES_PER_GB).toFixed(2)}GB`;
+  if (safeBytes >= BYTES_PER_MB) return `${(safeBytes / BYTES_PER_MB).toFixed(1)}MB`;
+  return `${Math.max(1, Math.round(safeBytes / 1024))}KB`;
+};
+const getSourceFileSize = source => Number(source?.file?.size || 0);
+const getBrowserSyncBlockReason = (visualSources = [], externalTrack = null) => {
+  const videoSources = visualSources.filter(isVideoSource);
+  const oversizedVisual = videoSources.find(
+    source => getSourceFileSize(source) > BROWSER_SYNC_MAX_SINGLE_VISUAL_BYTES
+  );
+  if (oversizedVisual) {
+    return `${oversizedVisual.name || oversizedVisual.label || "One video"} is ${formatMediaBytes(
+      getSourceFileSize(oversizedVisual)
+    )}. Browser clean-audio sync is capped at ${formatMediaBytes(
+      BROWSER_SYNC_MAX_SINGLE_VISUAL_BYTES
+    )} per source.`;
+  }
+
+  const totalVisualBytes = videoSources.reduce((sum, source) => sum + getSourceFileSize(source), 0);
+  if (totalVisualBytes > BROWSER_SYNC_MAX_TOTAL_VISUAL_BYTES) {
+    return `Your camera files total ${formatMediaBytes(totalVisualBytes)}. Browser clean-audio sync is capped at ${formatMediaBytes(
+      BROWSER_SYNC_MAX_TOTAL_VISUAL_BYTES
+    )} total to avoid crashing Chrome/Firefox.`;
+  }
+
+  const externalAudioBytes = Number(externalTrack?.file?.size || 0);
+  if (externalAudioBytes > BROWSER_SYNC_MAX_EXTERNAL_AUDIO_BYTES) {
+    return `${externalTrack?.name || "External audio"} is ${formatMediaBytes(
+      externalAudioBytes
+    )}. Browser waveform analysis is capped at ${formatMediaBytes(
+      BROWSER_SYNC_MAX_EXTERNAL_AUDIO_BYTES
+    )}; larger clean audio needs server/proxy sync.`;
+  }
+
+  const longSource = videoSources.find(
+    source => Number(source.duration || 0) > BROWSER_SYNC_MAX_DURATION_SECONDS
+  );
+  if (longSource) {
+    return `${longSource.name || longSource.label || "One video"} is ${formatDurationLabel(
+      longSource.duration
+    )}. Browser waveform sync is capped at ${formatDurationLabel(
+      BROWSER_SYNC_MAX_DURATION_SECONDS
+    )}; longer podcast sessions need server/proxy sync.`;
+  }
+
+  return "";
+};
+const estimateCleanAudioSyncCredits = (visualSources = [], externalTrack = null) => {
+  const videoSources = visualSources.filter(isVideoSource);
+  const longestDuration = Math.max(
+    0,
+    ...videoSources.map(source => Number(source.duration || 0)),
+    Number(externalTrack?.duration || 0)
+  );
+  const durationMinutes = Math.max(1, longestDuration / 60);
+  const totalBytes =
+    videoSources.reduce((sum, source) => sum + getSourceFileSize(source), 0) +
+    Number(externalTrack?.file?.size || 0);
+  return Math.max(
+    18,
+    Math.ceil(10 + videoSources.length * 6 + durationMinutes * 1.25 + totalBytes / BYTES_PER_GB * 4)
+  );
+};
 
 const getSourceTimelineTime = (source, playhead, timelineStart) =>
   getSourceTimelineTimeAtPlayhead(source, playhead, timelineStart);
@@ -250,6 +342,87 @@ const loadVideoMetadata = mediaUrl =>
     video.onerror = () => reject(new Error("Failed to read video metadata"));
   });
 
+const loadImageMetadata = mediaUrl =>
+  new Promise((resolve, reject) => {
+    const image = new Image();
+    image.decoding = "async";
+    image.onload = () =>
+      resolve({
+        duration: DEFAULT_IMAGE_SEGMENT_DURATION,
+        videoWidth: Number(image.naturalWidth) || 0,
+        videoHeight: Number(image.naturalHeight) || 0,
+      });
+    image.onerror = () => reject(new Error("Failed to read image metadata"));
+    if (!applySafeMediaSource(image, mediaUrl)) {
+      reject(new Error("Failed to read image metadata"));
+    }
+  });
+
+const canRenderVisual = visual => {
+  if (!visual) return false;
+  if (typeof visual.tagName === "string" && visual.tagName.toLowerCase() === "img") {
+    return Boolean(visual.complete && (visual.naturalWidth || visual.width));
+  }
+  return Number(visual.readyState) >= 2;
+};
+
+const getVisualDimensions = (visual, fallbackWidth, fallbackHeight) => {
+  if (typeof visual?.tagName === "string" && visual.tagName.toLowerCase() === "img") {
+    return {
+      width: Number(visual.naturalWidth || visual.width) || fallbackWidth,
+      height: Number(visual.naturalHeight || visual.height) || fallbackHeight,
+    };
+  }
+  return {
+    width: Number(visual?.videoWidth) || fallbackWidth,
+    height: Number(visual?.videoHeight) || fallbackHeight,
+  };
+};
+
+const buildFallbackAudioAnalysis = duration => {
+  const safeDuration = clampNumber(duration, 4, 240, 30);
+  const binCount = Math.max(32, Math.ceil(safeDuration * AUDIO_SYNC_BINS_PER_SECOND));
+  return {
+    envelope: Array.from({ length: binCount }, (_, index) => {
+      const position = index / Math.max(1, binCount - 1);
+      const pulse = Math.sin(position * Math.PI * 8) * 0.18;
+      const build = position < 0.68 ? position * 0.45 : (1 - position) * 0.28;
+      return clampNumber(0.38 + pulse + build, 0.14, 1, 0.42);
+    }),
+    secondsPerBin: safeDuration / binCount,
+    duration: safeDuration,
+    synthetic: true,
+  };
+};
+
+const getMediaDuration = mediaUrl =>
+  new Promise(resolve => {
+    if (typeof document === "undefined") {
+      resolve(30);
+      return;
+    }
+    const media = document.createElement("video");
+    media.preload = "metadata";
+    media.muted = true;
+    const cleanup = () => {
+      media.removeAttribute("src");
+      media.load?.();
+    };
+    media.onloadedmetadata = () => {
+      const duration = Number(media.duration);
+      cleanup();
+      resolve(Number.isFinite(duration) && duration > 0 ? duration : 30);
+    };
+    media.onerror = () => {
+      cleanup();
+      resolve(30);
+    };
+    if (!applySafeMediaSource(media, mediaUrl)) {
+      cleanup();
+      resolve(30);
+    }
+  });
+
 const analyzeAudioTrack = async mediaUrl => {
   const response = await fetch(mediaUrl);
   if (!response.ok) {
@@ -264,7 +437,13 @@ const analyzeAudioTrack = async mediaUrl => {
 
   const audioContext = new AudioContextClass();
   try {
-    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer.slice(0));
+    let audioBuffer;
+    try {
+      audioBuffer = await audioContext.decodeAudioData(arrayBuffer.slice(0));
+    } catch {
+      const fallbackDuration = await getMediaDuration(mediaUrl);
+      return buildFallbackAudioAnalysis(fallbackDuration);
+    }
     const channelCount = Math.max(1, audioBuffer.numberOfChannels || 1);
     const sampleRate = audioBuffer.sampleRate || 44100;
     const samplesPerBin = Math.max(256, Math.floor(sampleRate / AUDIO_SYNC_BINS_PER_SECOND));
@@ -348,6 +527,7 @@ const estimateAudioOffsetSeconds = (masterAnalysis, targetAnalysis, maxShiftSeco
 
 const syncMediaElement = (element, desiredTime, shouldPlay, options = {}) => {
   if (!element) return;
+  if (typeof element.play !== "function" || typeof element.pause !== "function") return;
 
   const {
     muted = true,
@@ -381,6 +561,22 @@ const syncMediaElement = (element, desiredTime, shouldPlay, options = {}) => {
   }
 };
 
+const forceMediaAudible = element => {
+  if (!element) return;
+  element.defaultMuted = false;
+  element.muted = false;
+  element.volume = 1;
+  element.removeAttribute?.("muted");
+};
+
+const getLoopedTrackTime = (desiredTime, trackDuration, shouldLoop) => {
+  const safeDesiredTime = Math.max(0, Number(desiredTime) || 0);
+  const safeDuration = Math.max(0, Number(trackDuration) || 0);
+  if (!shouldLoop || safeDuration <= 0.2) return safeDesiredTime;
+  const loopTime = safeDesiredTime % safeDuration;
+  return Number(loopTime.toFixed(3));
+};
+
 const drawCanvasBadge = (context, text, x, y) => {
   if (!text) return;
   context.save();
@@ -399,7 +595,7 @@ const drawCanvasBadge = (context, text, x, y) => {
   context.restore();
 };
 
-const paintVideoToViewport = (context, viewport, activeVideo, label, framing = {}) => {
+const paintVisualToViewport = (context, viewport, activeVisual, label, framing = {}) => {
   const safeViewport = {
     x: Number(viewport?.x) || 0,
     y: Number(viewport?.y) || 0,
@@ -414,9 +610,12 @@ const paintVideoToViewport = (context, viewport, activeVideo, label, framing = {
   context.fillStyle = "#04070d";
   context.fillRect(safeViewport.x, safeViewport.y, safeViewport.width, safeViewport.height);
 
-  if (activeVideo && activeVideo.readyState >= 2) {
-    const sourceWidth = activeVideo.videoWidth || safeViewport.width;
-    const sourceHeight = activeVideo.videoHeight || safeViewport.height;
+  if (canRenderVisual(activeVisual)) {
+    const { width: sourceWidth, height: sourceHeight } = getVisualDimensions(
+      activeVisual,
+      safeViewport.width,
+      safeViewport.height
+    );
     const baseScale = Math.min(
       safeViewport.width / sourceWidth,
       safeViewport.height / sourceHeight
@@ -443,7 +642,52 @@ const paintVideoToViewport = (context, viewport, activeVideo, label, framing = {
       safeViewport.y,
       safeViewport.y + (safeViewport.height - drawHeight) / 2
     );
-    context.drawImage(activeVideo, offsetX, offsetY, drawWidth, drawHeight);
+    const translateXPx = safeViewport.width * (Number(normalizedFraming.translateX) || 0);
+    const translateYPx = safeViewport.height * (Number(normalizedFraming.translateY) || 0);
+    const tiltRadians = ((Number(normalizedFraming.tilt) || 0) * Math.PI) / 180;
+    context.filter = `brightness(${Number(normalizedFraming.brightness || 1).toFixed(3)}) contrast(${Number(
+      normalizedFraming.contrast || 1
+    ).toFixed(3)}) saturate(${Number(normalizedFraming.saturation || 1).toFixed(3)})`;
+    if (normalizedFraming.glow > 0) {
+      context.shadowColor =
+        normalizedFraming.frameStyle === "poster"
+          ? "rgba(249, 115, 22, 0.55)"
+          : "rgba(125, 211, 252, 0.48)";
+      context.shadowBlur = 26 * Number(normalizedFraming.glow);
+    }
+    context.translate(
+      safeViewport.x + safeViewport.width / 2 + translateXPx,
+      safeViewport.y + safeViewport.height / 2 + translateYPx
+    );
+    if (tiltRadians) {
+      context.rotate(tiltRadians);
+    }
+    context.drawImage(
+      activeVisual,
+      offsetX - (safeViewport.x + safeViewport.width / 2),
+      offsetY - (safeViewport.y + safeViewport.height / 2),
+      drawWidth,
+      drawHeight
+    );
+    context.filter = "none";
+    context.shadowBlur = 0;
+    context.shadowColor = "transparent";
+    if (normalizedFraming.frameStyle !== "none") {
+      const inset = normalizedFraming.frameStyle === "poster" ? 8 : normalizedFraming.frameStyle === "cinematic" ? 14 : 10;
+      context.strokeStyle =
+        normalizedFraming.frameStyle === "poster"
+          ? "rgba(255, 247, 237, 0.78)"
+          : normalizedFraming.frameStyle === "glow"
+            ? "rgba(186, 230, 253, 0.62)"
+            : "rgba(255, 255, 255, 0.34)";
+      context.lineWidth = normalizedFraming.frameStyle === "poster" ? 4 : 2;
+      context.strokeRect(
+        -safeViewport.width / 2 + inset,
+        -safeViewport.height / 2 + inset,
+        safeViewport.width - inset * 2,
+        safeViewport.height - inset * 2
+      );
+    }
   } else {
     context.fillStyle = "rgba(255, 255, 255, 0.75)";
     context.font = `${Math.max(16, Math.round(safeViewport.width * 0.038))}px sans-serif`;
@@ -453,6 +697,117 @@ const paintVideoToViewport = (context, viewport, activeVideo, label, framing = {
       safeViewport.x + safeViewport.width / 2,
       safeViewport.y + safeViewport.height / 2
     );
+  }
+
+  context.restore();
+};
+
+const getTransitionPalette = accentTone => {
+  if (accentTone === "warm") {
+    return {
+      primary: "rgba(249, 115, 22, ALPHA)",
+      secondary: "rgba(251, 191, 36, ALPHA)",
+      glow: "rgba(255, 247, 237, ALPHA)",
+    };
+  }
+  if (accentTone === "rose") {
+    return {
+      primary: "rgba(244, 114, 182, ALPHA)",
+      secondary: "rgba(251, 146, 60, ALPHA)",
+      glow: "rgba(255, 228, 230, ALPHA)",
+    };
+  }
+  if (accentTone === "gold") {
+    return {
+      primary: "rgba(250, 204, 21, ALPHA)",
+      secondary: "rgba(249, 115, 22, ALPHA)",
+      glow: "rgba(255, 251, 235, ALPHA)",
+    };
+  }
+  if (accentTone === "choir") {
+    return {
+      primary: "rgba(251, 191, 36, ALPHA)",
+      secondary: "rgba(255, 255, 255, ALPHA)",
+      glow: "rgba(254, 249, 195, ALPHA)",
+    };
+  }
+  return {
+    primary: "rgba(56, 189, 248, ALPHA)",
+    secondary: "rgba(125, 211, 252, ALPHA)",
+    glow: "rgba(239, 246, 255, ALPHA)",
+  };
+};
+
+const getFlowTransitionState = (segment, playhead) => {
+  if (!segment) {
+    return { active: false, progress: 1, intensity: 0 };
+  }
+  const segmentDuration = Math.max(0.12, Number(segment.duration) || 0.12);
+  const introWindow = Math.min(0.34, Math.max(0.12, segmentDuration * 0.34));
+  const progress = clampNumber(
+    (Number(playhead) - Number(segment.startTime || 0)) / introWindow,
+    0,
+    1,
+    1
+  );
+  const active = progress < 0.98;
+  return {
+    active,
+    progress,
+    intensity: Number((1 - progress).toFixed(4)),
+  };
+};
+
+const drawFlowTransitionOverlay = (context, width, height, framing = {}, transitionState = {}) => {
+  const normalizedFraming = normalizeSegmentFraming(framing);
+  const transitionStyle = normalizedFraming.transitionStyle || "cut";
+  const baseStrength = Number(normalizedFraming.transitionStrength || 0);
+  const activeStrength = baseStrength * Number(transitionState?.intensity || 0);
+  if (transitionStyle === "cut" || activeStrength <= 0.01) return;
+
+  const palette = getTransitionPalette(normalizedFraming.accentTone);
+  context.save();
+
+  if (transitionStyle === "flash") {
+    context.fillStyle = palette.glow.replace("ALPHA", (0.1 + activeStrength * 0.22).toFixed(3));
+    context.fillRect(0, 0, width, height);
+  } else if (transitionStyle === "bloom") {
+    const gradient = context.createRadialGradient(
+      width * 0.5,
+      height * 0.48,
+      width * 0.08,
+      width * 0.5,
+      height * 0.48,
+      width * 0.62
+    );
+    gradient.addColorStop(0, palette.glow.replace("ALPHA", (0.16 + activeStrength * 0.22).toFixed(3)));
+    gradient.addColorStop(0.42, palette.primary.replace("ALPHA", (0.08 + activeStrength * 0.14).toFixed(3)));
+    gradient.addColorStop(1, "rgba(5, 8, 16, 0)");
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, width, height);
+  } else if (transitionStyle === "sweep") {
+    const sweepX = width * (0.18 + (1 - Number(transitionState?.progress || 0)) * 0.64);
+    const gradient = context.createLinearGradient(sweepX - width * 0.24, 0, sweepX + width * 0.24, 0);
+    gradient.addColorStop(0, "rgba(5, 8, 16, 0)");
+    gradient.addColorStop(0.48, palette.primary.replace("ALPHA", (0.08 + activeStrength * 0.18).toFixed(3)));
+    gradient.addColorStop(0.56, palette.secondary.replace("ALPHA", (0.14 + activeStrength * 0.22).toFixed(3)));
+    gradient.addColorStop(1, "rgba(5, 8, 16, 0)");
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, width, height);
+  } else if (transitionStyle === "lift") {
+    const gradient = context.createLinearGradient(0, height, 0, height * 0.22);
+    gradient.addColorStop(0, palette.primary.replace("ALPHA", (0.08 + activeStrength * 0.16).toFixed(3)));
+    gradient.addColorStop(0.4, palette.secondary.replace("ALPHA", (0.05 + activeStrength * 0.12).toFixed(3)));
+    gradient.addColorStop(1, "rgba(5, 8, 16, 0)");
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, width, height);
+  } else if (transitionStyle === "drift") {
+    const gradient = context.createLinearGradient(0, 0, width, height);
+    gradient.addColorStop(0, palette.secondary.replace("ALPHA", (0.05 + activeStrength * 0.09).toFixed(3)));
+    gradient.addColorStop(0.52, "rgba(5, 8, 16, 0)");
+    gradient.addColorStop(1, palette.primary.replace("ALPHA", (0.04 + activeStrength * 0.08).toFixed(3)));
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, width, height);
   }
 
   context.restore();
@@ -540,20 +895,28 @@ const getSceneGridViewports = (width, height, visibleCount) => {
   }));
 };
 
-const drawVideoToCanvas = (context, canvas, activeVideo, label, framing = {}) => {
+const drawVisualToCanvas = (
+  context,
+  canvas,
+  activeVisual,
+  label,
+  framing = {},
+  transitionState = null
+) => {
   context.fillStyle = "#04070d";
   context.fillRect(0, 0, canvas.width, canvas.height);
 
-  paintVideoToViewport(
+  paintVisualToViewport(
     context,
     { x: 0, y: 0, width: canvas.width, height: canvas.height },
-    activeVideo,
+    activeVisual,
     label,
     framing
   );
+  drawFlowTransitionOverlay(context, canvas.width, canvas.height, framing, transitionState);
 };
 
-const drawCompositeVideoToCanvas = (
+const drawCompositeVisualToCanvas = (
   context,
   canvas,
   {
@@ -563,6 +926,7 @@ const drawCompositeVideoToCanvas = (
     primaryLabel,
     secondaryLabel,
     primaryFraming = {},
+    transitionState = null,
     visibleFeeds = [],
   }
 ) => {
@@ -580,7 +944,7 @@ const drawCompositeVideoToCanvas = (
     feeds.forEach((feed, index) => {
       const viewport = viewports[index];
       if (!viewport) return;
-      paintVideoToViewport(
+      paintVisualToViewport(
         context,
         viewport,
         feed.video,
@@ -595,7 +959,7 @@ const drawCompositeVideoToCanvas = (
   }
 
   if (!secondaryVideo || layoutMode === "cut") {
-    drawVideoToCanvas(context, canvas, primaryVideo, primaryLabel, primaryFraming);
+    drawVisualToCanvas(context, canvas, primaryVideo, primaryLabel, primaryFraming, transitionState);
     if (primaryLabel) {
       drawCanvasBadge(context, primaryLabel, 18, 18);
     }
@@ -606,14 +970,14 @@ const drawCompositeVideoToCanvas = (
     const halfHeight = canvas.height / 2;
     context.fillStyle = "#04070d";
     context.fillRect(0, 0, canvas.width, canvas.height);
-    paintVideoToViewport(
+    paintVisualToViewport(
       context,
       { x: 0, y: 0, width: canvas.width, height: halfHeight },
       primaryVideo,
       primaryLabel,
       primaryFraming
     );
-    paintVideoToViewport(
+    paintVisualToViewport(
       context,
       { x: 0, y: halfHeight, width: canvas.width, height: halfHeight },
       secondaryVideo,
@@ -622,17 +986,18 @@ const drawCompositeVideoToCanvas = (
     );
     context.fillStyle = "rgba(255, 255, 255, 0.14)";
     context.fillRect(0, halfHeight - 1, canvas.width, 2);
+    drawFlowTransitionOverlay(context, canvas.width, canvas.height, primaryFraming, transitionState);
     drawCanvasBadge(context, primaryLabel, 18, 18);
     drawCanvasBadge(context, secondaryLabel, 18, halfHeight + 18);
     return;
   }
 
-  drawVideoToCanvas(context, canvas, primaryVideo, primaryLabel, primaryFraming);
+  drawVisualToCanvas(context, canvas, primaryVideo, primaryLabel, primaryFraming);
   const pipWidth = Math.round(canvas.width * 0.34);
   const pipHeight = Math.round(canvas.height * 0.28);
   const pipX = canvas.width - pipWidth - 26;
   const pipY = 26;
-  paintVideoToViewport(
+  paintVisualToViewport(
     context,
     { x: pipX, y: pipY, width: pipWidth, height: pipHeight },
     secondaryVideo,
@@ -688,6 +1053,11 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const [autoDirectorSummary, setAutoDirectorSummary] = useState(null);
   const [studioMode, setStudioMode] = useState("combine");
   const [flowEditStyleId, setFlowEditStyleId] = useState(FLOW_EDIT_STYLE_PRESETS[1].id);
+  const [flowImageStoryTemplateId, setFlowImageStoryTemplateId] = useState(
+    IMAGE_STORY_TEMPLATE_PRESETS[0].id
+  );
+  const [flowAuraTemplateId, setFlowAuraTemplateId] = useState(FLOW_AURA_TEMPLATE_PRESETS[0].id);
+  const [flowIntensityMode, setFlowIntensityMode] = useState("standard");
   const [flowAudioTrack, setFlowAudioTrack] = useState(null);
   const [flowEditPlan, setFlowEditPlan] = useState(null);
   const [flowEditEnabled, setFlowEditEnabled] = useState(false);
@@ -697,15 +1067,22 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const [flowEditVariants, setFlowEditVariants] = useState([]);
   const [flowEditInsight, setFlowEditInsight] = useState("");
   const [flowEditWarning, setFlowEditWarning] = useState("");
+  const [flowSegmentFraming, setFlowSegmentFraming] = useState({});
+  const [useExternalCleanAudio, setUseExternalCleanAudio] = useState(false);
+  const [externalAudioTrack, setExternalAudioTrack] = useState(null);
+  const [externalAudioMixMode, setExternalAudioMixMode] = useState("external_only");
+  const [cleanAudioSyncJob, setCleanAudioSyncJob] = useState(null);
 
   const cancelExportRef = useRef(false);
   const fileInputRef = useRef(null);
   const flowAudioInputRef = useRef(null);
+  const externalAudioInputRef = useRef(null);
   const nextCameraIndexRef = useRef(3);
   const objectUrlsRef = useRef(new Set());
   const animationFrameRef = useRef(null);
   const playheadRef = useRef(0);
   const scrollContainerRef = useRef(null);
+  const previewPanelRef = useRef(null);
   const previewStageRef = useRef(null);
   const autoDirectorSignatureRef = useRef("");
   const audioAnalysisCacheRef = useRef(new Map());
@@ -713,10 +1090,15 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const thumbnailVideoRefs = useRef({});
   const audioVideoRefs = useRef({});
   const flowAudioRef = useRef(null);
+  const externalAudioRef = useRef(null);
+  const diagnosticAudioContextRef = useRef(null);
+  const diagnosticMediaRef = useRef(null);
+  const flowIntensityRefreshRef = useRef(false);
   const handleRecordSwitchRef = useRef(null);
   const singleCamSignatureRef = useRef("");
   const [audioAnalysisByCameraId, setAudioAnalysisByCameraId] = useState({});
   const [syncingCameraId, setSyncingCameraId] = useState(null);
+  const [expandedCameraId, setExpandedCameraId] = useState(null);
 
   // Cinematic Effects — CSS-based real-time preview effects
   const {
@@ -783,10 +1165,49 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     return null;
   }, [flowAudioTrack, readySources]);
   const flowAudioUrl = flowAudioTrack?.previewUrl || getSourceMediaUrl(flowAudioSource);
+  const externalAudioUrl = externalAudioTrack?.previewUrl || externalAudioTrack?.url || "";
+  const hasExternalCleanAudio = Boolean(useExternalCleanAudio && externalAudioUrl);
+  const browserCleanAudioSyncBlockReason = useMemo(
+    () => getBrowserSyncBlockReason(readySources, externalAudioTrack),
+    [readySources, externalAudioTrack]
+  );
+  const shouldUseBackendCleanAudioSync = Boolean(browserCleanAudioSyncBlockReason);
+  const cleanAudioSyncCreditEstimate = useMemo(
+    () => estimateCleanAudioSyncCredits(readySources, externalAudioTrack),
+    [readySources, externalAudioTrack]
+  );
+  const externalAudioSourceProxy = useMemo(
+    () =>
+      externalAudioTrack
+        ? {
+            id: "external-clean-audio",
+            offsetSeconds: Number(externalAudioTrack.offsetSeconds) || 0,
+            duration: Number(externalAudioTrack.duration) || timelineBounds.timelineDuration || 0,
+          }
+        : null,
+    [externalAudioTrack, timelineBounds.timelineDuration]
+  );
+  const flowAudioIsVideoSoundtrack =
+    flowAudioTrack?.mode === "camera" ||
+    String(flowAudioTrack?.file?.type || "").startsWith("video/") ||
+    /\.(mp4|m4v|mov|webm|mkv|avi)$/i.test(String(flowAudioTrack?.name || flowAudioUrl || ""));
+  const isImageStoryEligible =
+    !isSingleSourceWorkflow && readySources.length >= 2 && readySources.every(isImageSource);
   const timelineDuration =
-    !isSingleSourceWorkflow && flowEditEnabled && flowEditPlan?.duration
-      ? Math.min(baseTimelineDuration, Number(flowEditPlan.duration) || baseTimelineDuration)
+    flowEditEnabled && flowEditPlan?.duration
+      ? flowEditPlan?.visualMode === "image_story" || flowEditPlan?.visualMode === "single_highlight_flow"
+        ? Number(flowEditPlan.duration) || baseTimelineDuration
+        : !isSingleSourceWorkflow
+          ? Math.min(baseTimelineDuration, Number(flowEditPlan.duration) || baseTimelineDuration)
+          : baseTimelineDuration
       : baseTimelineDuration;
+  const shouldLoopFlowAudio =
+    !!flowAudioUrl &&
+    !!flowEditEnabled &&
+    ((flowEditPlan?.loopsAudio &&
+      Number(flowEditPlan?.audioDuration) > 0.2 &&
+      Number(flowEditPlan?.audioDuration) < timelineDuration - 0.2) ||
+      false);
   const canExportProject = readySources.length >= 1 && timelineDuration > 0;
   const normalizedSwitches = useMemo(
     () =>
@@ -799,18 +1220,26 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   );
   const activeFlowSegments = useMemo(
     () =>
-      !isSingleSourceWorkflow && flowEditEnabled && Array.isArray(flowEditPlan?.segments)
+      flowEditEnabled && Array.isArray(flowEditPlan?.segments)
         ? flowEditPlan.segments.filter(
             segment => Number(segment.endTime) > Number(segment.startTime)
           )
         : [],
-    [isSingleSourceWorkflow, flowEditEnabled, flowEditPlan]
+    [flowEditEnabled, flowEditPlan]
   );
   const currentFlowSegment = useMemo(
     () => getFlowSegmentAtTime(activeFlowSegments, playhead),
     [activeFlowSegments, playhead]
   );
   const displaySegments = useMemo(() => {
+    if (activeFlowSegments.length) {
+      return buildFlowTimelineDisplaySegments(
+        activeFlowSegments,
+        readySources.length ? readySources : sources,
+        timelineDuration || 0.01
+      );
+    }
+
     if (isSingleSourceWorkflow) {
       return buildSegmentDisplaySegments(
         normalizedSingleCamSegments,
@@ -820,14 +1249,6 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         ...segment,
         label: `Part ${index + 1}`,
       }));
-    }
-
-    if (activeFlowSegments.length) {
-      return buildFlowTimelineDisplaySegments(
-        activeFlowSegments,
-        readySources.length ? readySources : sources,
-        timelineDuration || 0.01
-      );
     }
 
     return buildSwitchDisplaySegments(
@@ -846,12 +1267,12 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     sources,
   ]);
   const activeSegment = useMemo(() => {
-    if (isSingleSourceWorkflow) {
-      return getActiveSegmentAtTime(normalizedSingleCamSegments, playhead);
-    }
-
     if (currentFlowSegment) {
       return currentFlowSegment;
+    }
+
+    if (isSingleSourceWorkflow) {
+      return getActiveSegmentAtTime(normalizedSingleCamSegments, playhead);
     }
 
     return getActiveCameraAtTime(
@@ -878,6 +1299,11 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     () => getDirectorStylePreset(directorStyleId),
     [directorStyleId]
   );
+  const activeFlowAuraPreset = useMemo(
+    () => getFlowAuraPreset(flowAuraTemplateId),
+    [flowAuraTemplateId]
+  );
+  const isImageStoryFlow = !isSingleSourceWorkflow && flowEditEnabled && flowEditPlan?.visualMode === "image_story";
   const resolvedMulticamLayout = useMemo(() => {
     if (isSingleSourceWorkflow) {
       return {
@@ -885,6 +1311,16 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         primaryCameraId: activeCameraId,
         secondaryCameraId: null,
         reason: "single_source",
+      };
+    }
+
+    if (isImageStoryFlow) {
+      return {
+        layoutMode: "cut",
+        primaryCameraId: activeCameraId,
+        secondaryCameraId: null,
+        visibleCameraIds: [activeCameraId].filter(Boolean),
+        reason: "image_story",
       };
     }
 
@@ -911,6 +1347,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     audioAnalysisByCameraId,
     multicamLayoutMode,
     directorStyleId,
+    isImageStoryFlow,
   ]);
   const effectiveMulticamLayoutMode = resolvedMulticamLayout.layoutMode || "cut";
   const secondaryCameraId = resolvedMulticamLayout.secondaryCameraId || null;
@@ -932,8 +1369,18 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     if (!isSingleSourceWorkflow || !activeSegment?.id) {
       return DEFAULT_SEGMENT_FRAMING;
     }
+    if (flowEditEnabled && currentFlowSegment?.id) {
+      return normalizeSegmentFraming(flowSegmentFraming[currentFlowSegment.id]);
+    }
     return normalizeSegmentFraming(singleCamSegmentFraming[activeSegment.id]);
-  }, [isSingleSourceWorkflow, activeSegment, singleCamSegmentFraming]);
+  }, [
+    isSingleSourceWorkflow,
+    activeSegment,
+    singleCamSegmentFraming,
+    flowEditEnabled,
+    currentFlowSegment,
+    flowSegmentFraming,
+  ]);
   const selectedSingleCamSegment = useMemo(
     () =>
       normalizedSingleCamSegments.find(segment => segment.id === selectedSingleCamSegmentId) ||
@@ -952,29 +1399,92 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     () => getSegmentFocusPoint(activeSingleCamFraming),
     [activeSingleCamFraming]
   );
+  const activeFlowFraming = useMemo(() => {
+    if (!flowEditEnabled || !currentFlowSegment?.id) {
+      return DEFAULT_SEGMENT_FRAMING;
+    }
+    return normalizeSegmentFraming(flowSegmentFraming[currentFlowSegment.id]);
+  }, [flowEditEnabled, currentFlowSegment, flowSegmentFraming]);
+  const currentFlowTransitionState = useMemo(
+    () => (flowEditEnabled ? getFlowTransitionState(currentFlowSegment, playhead) : { active: false, progress: 1, intensity: 0 }),
+    [flowEditEnabled, currentFlowSegment, playhead]
+  );
   const previewActiveVideoStyle = useMemo(() => {
     const style = {};
-    if (effectsMediaStyle.filter) {
-      style.filter = effectsMediaStyle.filter;
-    }
-
     const cinematicZoom = Math.max(1, Number(fx.zoom) || 1);
+    const segmentFraming = isSingleSourceWorkflow
+      ? activeSingleCamFraming
+      : flowEditEnabled && currentFlowSegment
+        ? activeFlowFraming
+        : DEFAULT_SEGMENT_FRAMING;
     const segmentZoom = isSingleSourceWorkflow
       ? Math.max(1, Number(activeSingleCamFraming.zoom) || 1)
-      : 1;
+      : flowEditEnabled && currentFlowSegment
+        ? Math.max(1, Number(activeFlowFraming.zoom) || 1)
+        : 1;
     const combinedZoom = cinematicZoom * segmentZoom;
-    if (combinedZoom !== 1) {
-      style.transform = `scale(${combinedZoom})`;
+    const translateX = Number(segmentFraming.translateX || 0) * 100;
+    const translateY = Number(segmentFraming.translateY || 0) * 100;
+    const tilt = Number(segmentFraming.tilt || 0);
+    const transformParts = [];
+    if (translateX || translateY) {
+      transformParts.push(`translate(${translateX.toFixed(2)}%, ${translateY.toFixed(2)}%)`);
+    }
+    if (tilt) {
+      transformParts.push(`rotate(${tilt.toFixed(2)}deg)`);
+    }
+    if (flowEditEnabled && currentFlowSegment && currentFlowTransitionState.active) {
+      const introLift = currentFlowTransitionState.intensity * (segmentFraming.transitionStyle === "flash" ? 0.032 : 0.018);
+      transformParts.push(`scale(${(combinedZoom + introLift).toFixed(3)})`);
+    } else if (combinedZoom !== 1) {
+      transformParts.push(`scale(${combinedZoom.toFixed(3)})`);
+    }
+    if (transformParts.length) {
+      style.transform = transformParts.join(" ");
     }
 
-    if (style.transform) {
-      style.transformOrigin = isSingleSourceWorkflow
+    const filterParts = [];
+    if (effectsMediaStyle.filter) {
+      filterParts.push(effectsMediaStyle.filter);
+    }
+    if (segmentFraming.brightness && segmentFraming.brightness !== 1) {
+      filterParts.push(`brightness(${Number(segmentFraming.brightness).toFixed(3)})`);
+    }
+    if (segmentFraming.contrast && segmentFraming.contrast !== 1) {
+      filterParts.push(`contrast(${Number(segmentFraming.contrast).toFixed(3)})`);
+    }
+    if (segmentFraming.saturation && segmentFraming.saturation !== 1) {
+      filterParts.push(`saturate(${Number(segmentFraming.saturation).toFixed(3)})`);
+    }
+    if (filterParts.length) {
+      style.filter = filterParts.join(" ");
+    }
+
+    style.transformOrigin = isSingleSourceWorkflow
         ? getSegmentTransformOrigin(activeSingleCamFraming)
-        : getSegmentTransformOrigin({ zoomAnchor: fx.zoomAnchor || "center" });
+        : flowEditEnabled && currentFlowSegment
+          ? getSegmentTransformOrigin(activeFlowFraming)
+          : getSegmentTransformOrigin({ zoomAnchor: fx.zoomAnchor || "center" });
+    if (segmentFraming.glow > 0) {
+      style.boxShadow =
+        segmentFraming.frameStyle === "poster"
+          ? `0 0 ${Math.round(20 + segmentFraming.glow * 26)}px rgba(249, 115, 22, 0.28)`
+          : `0 0 ${Math.round(18 + segmentFraming.glow * 24)}px rgba(56, 189, 248, 0.24)`;
+    }
+    if (segmentFraming.frameStyle !== "none") {
+      style.outline =
+        segmentFraming.frameStyle === "poster"
+          ? "4px solid rgba(255,247,237,0.72)"
+          : segmentFraming.frameStyle === "cinematic"
+            ? "2px solid rgba(255,255,255,0.22)"
+            : "2px solid rgba(186,230,253,0.42)";
+      style.outlineOffset = "-10px";
+      style.borderRadius = segmentFraming.frameStyle === "poster" ? "18px" : "14px";
     }
 
-    if (style.transform || style.filter) {
-      style.transition = "transform 0.2s ease, filter 0.25s ease";
+    if (style.transform || style.filter || style.boxShadow || style.outline) {
+      style.transition =
+        "transform 0.42s cubic-bezier(0.22, 1, 0.36, 1), filter 0.35s ease, box-shadow 0.35s ease, outline-color 0.35s ease";
     }
 
     return style;
@@ -983,8 +1493,58 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     fx.zoom,
     fx.zoomAnchor,
     isSingleSourceWorkflow,
+    flowEditEnabled,
+    currentFlowSegment,
+    currentFlowTransitionState,
     activeSingleCamFraming,
+    activeFlowFraming,
   ]);
+  const flowTransitionOverlayStyle = useMemo(() => {
+    if (!flowEditEnabled || !currentFlowSegment || !currentFlowTransitionState.active) {
+      return null;
+    }
+    const framing = activeFlowFraming;
+    const intensity = Number(currentFlowTransitionState.intensity || 0);
+    const styleName = framing.transitionStyle || "cut";
+    if (styleName === "cut" || intensity <= 0.01) return null;
+    const palette = getTransitionPalette(framing.accentTone);
+    const alpha = (base, multiplier = 1) => (base + intensity * multiplier).toFixed(3);
+
+    if (styleName === "flash") {
+      return {
+        background: palette.glow.replace("ALPHA", alpha(0.06, 0.22)),
+        mixBlendMode: "screen",
+        opacity: 1,
+      };
+    }
+    if (styleName === "bloom") {
+      return {
+        background: `radial-gradient(circle at 50% 46%, ${palette.glow.replace("ALPHA", alpha(0.1, 0.18))} 0%, ${palette.primary.replace("ALPHA", alpha(0.06, 0.12))} 36%, rgba(5,8,16,0) 72%)`,
+        mixBlendMode: "screen",
+        opacity: 1,
+      };
+    }
+    if (styleName === "sweep") {
+      const sweep = 24 + (1 - Number(currentFlowTransitionState.progress || 0)) * 52;
+      return {
+        background: `linear-gradient(90deg, rgba(5,8,16,0) 0%, rgba(5,8,16,0) ${Math.max(0, sweep - 18)}%, ${palette.primary.replace("ALPHA", alpha(0.08, 0.16))} ${Math.max(0, sweep - 6)}%, ${palette.secondary.replace("ALPHA", alpha(0.12, 0.22))} ${Math.min(100, sweep + 2)}%, rgba(5,8,16,0) ${Math.min(100, sweep + 18)}%, rgba(5,8,16,0) 100%)`,
+        mixBlendMode: "screen",
+        opacity: 1,
+      };
+    }
+    if (styleName === "lift") {
+      return {
+        background: `linear-gradient(180deg, rgba(5,8,16,0) 0%, rgba(5,8,16,0) 52%, ${palette.secondary.replace("ALPHA", alpha(0.04, 0.1))} 72%, ${palette.primary.replace("ALPHA", alpha(0.08, 0.18))} 100%)`,
+        mixBlendMode: "screen",
+        opacity: 1,
+      };
+    }
+    return {
+      background: `linear-gradient(135deg, ${palette.secondary.replace("ALPHA", alpha(0.03, 0.08))} 0%, rgba(5,8,16,0) 48%, ${palette.primary.replace("ALPHA", alpha(0.03, 0.08))} 100%)`,
+      mixBlendMode: "screen",
+      opacity: 1,
+    };
+  }, [flowEditEnabled, currentFlowSegment, currentFlowTransitionState, activeFlowFraming]);
   const previewVideoStylesByCameraId = useMemo(() => {
     const styles = {};
     readySources.forEach(source => {
@@ -1198,6 +1758,14 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const activeFocusSummary = useMemo(() => {
     if (isSingleSourceWorkflow) {
       if (focusPickerActive) return "Focus pick armed";
+      if (singleLensAutoSummary.toLowerCase().includes("phone rescue")) return "Phone rescue framing";
+      if (singleLensAutoSummary.toLowerCase().includes("performance lift")) return "Performance lift framing";
+      if (singleLensAutoSummary.toLowerCase().includes("healing mode")) return "Healing framing";
+      if (selectedSingleCamSegment?.role === "hook") return "Hook framing armed";
+      if (selectedSingleCamSegment?.role === "claim") return "Claim framing";
+      if (selectedSingleCamSegment?.role === "payoff") return "Payoff framing";
+      if (selectedSingleCamSegment?.role === "crescendo") return "Crescendo framing";
+      if (selectedSingleCamSegment?.role === "afterglow") return "Afterglow framing";
       if (selectedSingleCamFraming.zoom > 1.35) return "Tight reaction framing";
       if (selectedSingleCamFraming.zoom > 1.05) return "Medium punch framing";
       return "Wide two-shot framing";
@@ -1211,6 +1779,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   }, [
     isSingleSourceWorkflow,
     focusPickerActive,
+    singleLensAutoSummary,
+    selectedSingleCamSegment,
     selectedSingleCamFraming.zoom,
     secondaryCamera,
     effectiveMulticamLayoutMode,
@@ -1218,17 +1788,27 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   ]);
   const liveMomentLabel = useMemo(() => {
     if (isSingleSourceWorkflow) {
+      if (selectedSingleCamSegment?.role) {
+        return `${selectedSingleCamSegment.role.replace(/_/g, " ")} beat live`;
+      }
       return "Solo lens edit";
+    }
+
+    if (flowEditEnabled && currentFlowSegment?.heroMoment) {
+      return currentFlowSegment.heroLabel === "premium hero" ? "Premium hero moment" : "Hero moment live";
     }
 
     if (effectiveMulticamLayoutMode === "scene-grid") return "Conversation matrix live";
     if (effectiveMulticamLayoutMode === "split-vertical") return "Shared reaction moment";
     if (effectiveMulticamLayoutMode === "pip") return "Reaction orbit live";
     return "Hero angle locked";
-  }, [isSingleSourceWorkflow, effectiveMulticamLayoutMode]);
+  }, [isSingleSourceWorkflow, flowEditEnabled, currentFlowSegment, effectiveMulticamLayoutMode, selectedSingleCamSegment]);
   const directorHeroNarrative = useMemo(() => {
     if (isSingleSourceWorkflow) {
-      return "Solo lens edit with guided reframing.";
+      return selectedSingleCamSegment?.reason || "Solo lens edit with guided reframing.";
+    }
+    if (autoDirectorEnabled && autoDirectorSummary?.momentCount) {
+      return `Auto Director is staging ${autoDirectorSummary.magicSummary} right now instead of just switching angles mechanically.`;
     }
     if (effectiveMulticamLayoutMode === "split-vertical") {
       return "Two angles stay open because both are active.";
@@ -1240,16 +1820,20 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       return "The lead holds frame while a reaction stays alive in orbit.";
     }
     return "The director is holding one hero angle.";
-  }, [isSingleSourceWorkflow, effectiveMulticamLayoutMode]);
+  }, [isSingleSourceWorkflow, effectiveMulticamLayoutMode, autoDirectorEnabled, autoDirectorSummary, selectedSingleCamSegment]);
   const stageCommandSummary = useMemo(() => {
     if (isSingleSourceWorkflow) {
-      return "Split, trim, and reframe this one recording.";
+      return selectedSingleCamSegment?.reason || "Split, trim, and reframe this one recording.";
     }
     if (flowEditEnabled && flowEditPlan?.segments?.length) {
-      return flowEditInsight || "Flow Edit is driving cut timing, motion, and pace from the selected audio.";
+      return (
+        currentFlowSegment?.reason ||
+        flowEditInsight ||
+        "Flow Edit is driving cut timing, motion, and pace from the selected audio."
+      );
     }
     return multicamLayoutInsight;
-  }, [isSingleSourceWorkflow, flowEditEnabled, flowEditPlan, flowEditInsight, multicamLayoutInsight]);
+  }, [isSingleSourceWorkflow, flowEditEnabled, flowEditPlan, currentFlowSegment, flowEditInsight, multicamLayoutInsight, selectedSingleCamSegment]);
   const workflowModeLabel = isSingleSourceWorkflow ? "Single-Cam Edit" : "Multicam Director";
   const workflowTitle = isSingleSourceWorkflow ? "Single-Camera Workflow" : "Angle Timeline";
   const workflowDescription = isSingleSourceWorkflow
@@ -1259,6 +1843,36 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const cameraPanelDescription = isSingleSourceWorkflow
     ? "This recording is your source canvas. Split it into beats, trim dead air, and punch into the speaker without leaving the single-cam workflow."
     : "Every recording lines up against the same timeline. Offsets move the source start, not your edit points.";
+  const visibleCameraSources = useMemo(() => {
+    const loadedSources = sources.filter(source => getSourceMediaUrl(source));
+    return loadedSources.length ? loadedSources : sources.slice(0, 1);
+  }, [sources]);
+  const getCameraMonitorFrameStyle = source => {
+    const width = Number(source.videoWidth) || 0;
+    const height = Number(source.videoHeight) || 0;
+    if (!width || !height) return {};
+
+    const ratio = width / height;
+    const style = {
+      aspectRatio: `${width} / ${height}`,
+      height: "clamp(230px, 30vh, 330px)",
+      minHeight: "clamp(230px, 30vh, 330px)",
+      maxHeight: "330px",
+    };
+
+    if (ratio < 0.82) {
+      style.width = "min(100%, 230px)";
+      style.maxWidth = "100%";
+      style.justifySelf = "center";
+    } else if (ratio > 1.35) {
+      style.width = "100%";
+    } else {
+      style.width = "min(100%, 330px)";
+      style.justifySelf = "center";
+    }
+
+    return style;
+  };
   const deckPrimaryLabel = isSingleSourceWorkflow ? "Edit Mode" : "Sources Live";
   const deckPrimaryValue = isSingleSourceWorkflow
     ? "Single Lens"
@@ -1266,7 +1880,21 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const deckPrimaryNote = isSingleSourceWorkflow
     ? "Guided split, trim, and reframe workflow"
     : "Angles aligned at current playhead";
-  const deckAudioLabel = isSingleSourceWorkflow ? "Primary Audio" : "Voice Bed";
+  const deckAudioLabel = hasExternalCleanAudio
+    ? "Clean Audio"
+    : isSingleSourceWorkflow
+      ? "Primary Audio"
+      : "Voice Bed";
+  const deckAudioValue = hasExternalCleanAudio
+    ? externalAudioTrack?.name || "External clean audio"
+    : masterAudioSource?.label || "Not set";
+  const deckAudioNote = hasExternalCleanAudio
+    ? externalAudioMixMode === "low_camera"
+      ? "Clean mic leads; camera audio stays low underneath"
+      : externalAudioMixMode === "mute_camera"
+        ? "Clean mic audio is solo; camera audio is muted"
+      : "External mic audio is the main render track"
+    : "Audio anchor for the whole render";
   const deckTimelineLabel = isSingleSourceWorkflow ? "Edit Span" : "Timeline Span";
   const stageKickerLabel = isSingleSourceWorkflow ? "Single-Cam Edit" : "Stage Intelligence";
   const timelinePanelTitle = isSingleSourceWorkflow ? "Segment Editor" : workflowTitle;
@@ -1333,6 +1961,12 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         caption: "Hold two speakers together",
         isActive: multicamLayoutMode === "split-vertical",
       },
+      {
+        id: "multi-hit",
+        label: "Hit Harder",
+        caption: "Turn up pace and visual pressure",
+        isActive: flowIntensityMode === "harder",
+      },
     ];
   }, [
     isSingleSourceWorkflow,
@@ -1364,14 +1998,18 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   }, [outputAspectRatio]);
   const flowBeatCount = flowEditPlan?.beatMarkers?.length || 0;
   const flowEnergyZoneCount = flowEditPlan?.energyZones?.length || 0;
-  const isFlowWorkspace = !isSingleSourceWorkflow && studioMode === "flow";
+  const isFlowWorkspace = studioMode === "flow";
   const headerTitle = isSingleSourceWorkflow
-    ? "Combine Multi-Camera Angles"
+    ? isFlowWorkspace
+      ? "Flow Edit / Mood Match"
+      : "Combine Multi-Camera Angles"
     : isFlowWorkspace
       ? "Flow Edit / Sync to Sound"
       : "Combine Multi-Camera Angles";
   const headerDescription = isSingleSourceWorkflow
-    ? "Load one full recording to edit it on a shared timeline, or add extra camera angles and switch between them while keeping one audio source locked in."
+    ? isFlowWorkspace
+      ? "Use one full video as the source, then let Flow Edit pull stronger moments, shape motion, and blend uploaded audio into a more emotional edit."
+      : "Load one full recording to edit it on a shared timeline, or add extra camera angles and switch between them while keeping one audio source locked in."
     : isFlowWorkspace
       ? "Use Cam Combiner footage as your visual pool, then optionally drive pacing, camera switches, and speed ramps from uploaded audio or a master source."
       : "Stay in manual Cam Combiner mode to sync cameras, switch angles, and build the edit yourself. Flow Edit is optional and can be opened only when you want rhythm-driven automation.";
@@ -1384,7 +2022,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   // Attach the active camera's video for timed effects
   useEffect(() => {
     const el = previewVideoRefs.current[activeCameraId];
-    if (el) attachVideo(el);
+    if (el && typeof el.play === "function") attachVideo(el);
   }, [activeCameraId, attachVideo]);
 
   useEffect(() => {
@@ -1394,7 +2032,16 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   useEffect(() => {
     if (!readySources.length) return;
     if (!readySources.some(source => source.id === masterAudioCameraId)) {
-      setMasterAudioCameraId(readySources[0].id);
+      const fallbackAudioSource = readySources.find(isVideoSource) || readySources[0];
+      setMasterAudioCameraId(fallbackAudioSource.id);
+      return;
+    }
+    const currentMasterSource = readySources.find(source => source.id === masterAudioCameraId);
+    if (currentMasterSource && !isVideoSource(currentMasterSource)) {
+      const fallbackAudioSource = readySources.find(isVideoSource);
+      if (fallbackAudioSource) {
+        setMasterAudioCameraId(fallbackAudioSource.id);
+      }
     }
   }, [readySources, masterAudioCameraId]);
 
@@ -1413,6 +2060,16 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       scrollContainerRef.current.scrollTop = 0;
     }
   }, [primaryFile, readySources.length]);
+
+  const scrollPreviewPanel = direction => {
+    const panel = previewPanelRef.current;
+    if (!panel) return;
+
+    panel.scrollBy({
+      top: direction * Math.max(240, panel.clientHeight * 0.72),
+      behavior: "smooth",
+    });
+  };
 
   useEffect(() => {
     if (!isSingleSourceWorkflow || !singleCamSource) {
@@ -1448,7 +2105,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   }, [isSingleSourceWorkflow, selectedSingleCamSegmentId]);
 
   useEffect(() => {
-    if (!isSingleSourceWorkflow) return;
+    if (!isSingleSourceWorkflow || flowEditEnabled) return;
     const activeId = activeSegment?.id || normalizedSingleCamSegments[0]?.id || null;
     setSelectedSingleCamSegmentId(current => {
       if (current && normalizedSingleCamSegments.some(segment => segment.id === current)) {
@@ -1456,10 +2113,10 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       }
       return activeId;
     });
-  }, [isSingleSourceWorkflow, activeSegment, normalizedSingleCamSegments]);
+  }, [isSingleSourceWorkflow, flowEditEnabled, activeSegment, normalizedSingleCamSegments]);
 
   useEffect(() => {
-    if (isSingleSourceWorkflow || !flowEditEnabled || !activeFlowSegments.length) {
+    if (!flowEditEnabled || !activeFlowSegments.length) {
       setSelectedFlowSegmentId(null);
       return;
     }
@@ -1470,7 +2127,6 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       return currentFlowSegment?.id || activeFlowSegments[0]?.id || null;
     });
   }, [
-    isSingleSourceWorkflow,
     flowEditEnabled,
     activeFlowSegments,
     currentFlowSegment,
@@ -1482,6 +2138,35 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     const warmAudioAnalysis = async source => {
       const mediaUrl = getSourceMediaUrl(source);
       if (!mediaUrl) return;
+      // SKIP if worker already provided voice activity — browser can't decode ProRes
+      if (source.backendVoiceActivity && Array.isArray(source.backendVoiceActivity) && source.backendVoiceActivity.length > 0) {
+        return; // Worker data is authoritative
+      }
+      if (!isVideoSource(source)) {
+        if (!isCancelled) {
+          setAudioAnalysisByCameraId(current => ({
+            ...current,
+            [source.id]: { mediaUrl, bars: [], isImage: true },
+          }));
+        }
+        return;
+      }
+      const browserBlockReason = getBrowserSyncBlockReason([source], null);
+      if (browserBlockReason) {
+        if (!isCancelled) {
+          setAudioAnalysisByCameraId(current => ({
+            ...current,
+            [source.id]: {
+              mediaUrl,
+              bars: [],
+              skipped: true,
+              backendRecommended: true,
+              message: browserBlockReason,
+            },
+          }));
+        }
+        return;
+      }
 
       const cached = audioAnalysisCacheRef.current.get(source.id);
       if (cached?.mediaUrl === mediaUrl) {
@@ -1560,13 +2245,18 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
 
   useEffect(() => {
     const unresolvedSources = sources.filter(
-      source => getSourceMediaUrl(source) && Number(source.duration) <= 0.05
+      source =>
+        getSourceMediaUrl(source) &&
+        (isImageSource(source)
+          ? Number(source.videoWidth) <= 0 || Number(source.videoHeight) <= 0
+          : Number(source.duration) <= 0.05)
     );
     if (!unresolvedSources.length) return;
 
     let isCancelled = false;
     unresolvedSources.forEach(source => {
-      loadVideoMetadata(getSourceMediaUrl(source))
+      const metadataLoader = isImageSource(source) ? loadImageMetadata : loadVideoMetadata;
+      metadataLoader(getSourceMediaUrl(source))
         .then(metadata => {
           if (isCancelled) return;
           setSources(currentSources =>
@@ -1574,7 +2264,10 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
               currentSource.id === source.id
                 ? {
                     ...currentSource,
-                    duration: metadata.duration,
+                    duration:
+                      isImageSource(currentSource) && Number(currentSource.duration) > 0.05
+                        ? currentSource.duration
+                        : metadata.duration,
                     videoWidth: metadata.videoWidth,
                     videoHeight: metadata.videoHeight,
                   }
@@ -1611,7 +2304,9 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     if (flowEditEnabled && flowAudioUrl && flowAudioRef.current) {
       const tick = () => {
         const audioTime = Math.min(timelineDuration, Number(flowAudioRef.current?.currentTime) || 0);
-        setPlayhead(audioTime);
+        if (Math.abs((Number(playheadRef.current) || 0) - audioTime) > 0.016) {
+          setPlayhead(audioTime);
+        }
         if (audioTime >= timelineDuration) {
           setIsPlaying(false);
           animationFrameRef.current = null;
@@ -1651,23 +2346,29 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   }, [isPlaying, timelineDuration, flowEditEnabled, flowAudioUrl]);
 
   useEffect(() => {
-    readySources.forEach(source => {
+    readySources.filter(isVideoSource).forEach(source => {
       applySafeMediaSource(audioVideoRefs.current[source.id], getSourceMediaUrl(source));
     });
   }, [readySources]);
 
   useEffect(() => {
     applySafeMediaSource(flowAudioRef.current, flowAudioUrl);
+    forceMediaAudible(flowAudioRef.current);
   }, [flowAudioUrl]);
 
   useEffect(() => {
+    applySafeMediaSource(externalAudioRef.current, externalAudioUrl);
+    forceMediaAudible(externalAudioRef.current);
+  }, [externalAudioUrl]);
+
+  useEffect(() => {
     readySources.forEach(source => {
-      const mappedTime = isSingleSourceWorkflow
-        ? source.id === activeCameraId
-          ? mapTimelineTimeToSourceTime(activeSegment, playhead)
-          : null
-        : currentFlowSegment
-          ? getFlowSourceTimeAtPlayhead(source, currentFlowSegment, playhead, timelineBounds.timelineStart)
+      const mappedTime = currentFlowSegment
+        ? getFlowSourceTimeAtPlayhead(source, currentFlowSegment, playhead, timelineBounds.timelineStart)
+        : isSingleSourceWorkflow
+          ? source.id === activeCameraId
+            ? mapTimelineTimeToSourceTime(activeSegment, playhead)
+            : null
           : getSourceTimelineTime(source, playhead, timelineBounds.timelineStart);
       const isInRange = isSourceAvailableAtTime(source, mappedTime);
       const isActivePreview = source.id === activeCameraId || source.id === secondaryCameraId;
@@ -1691,20 +2392,54 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       syncMediaElement(
         audioVideoRefs.current[source.id],
         mappedTime,
-        !flowAudioUrl && isPlaying && isInRange && source.id === masterAudioCameraId,
+        !flowAudioUrl &&
+          !hasExternalCleanAudio &&
+          isPlaying &&
+          isInRange &&
+          source.id === masterAudioCameraId,
         {
-          muted: !!flowAudioUrl || source.id !== masterAudioCameraId,
-          volume: !!flowAudioUrl ? 0 : source.id === masterAudioCameraId ? 1 : 0,
+          muted: !!flowAudioUrl || hasExternalCleanAudio || source.id !== masterAudioCameraId,
+          volume: !!flowAudioUrl || hasExternalCleanAudio ? 0 : source.id === masterAudioCameraId ? 1 : 0,
           playbackRate,
         }
       );
+
+      if (hasExternalCleanAudio && externalAudioMixMode === "low_camera") {
+        syncMediaElement(
+          audioVideoRefs.current[source.id],
+          mappedTime,
+          isPlaying && isInRange && source.id === activeCameraId,
+          {
+            muted: false,
+            volume: 0.16,
+            playbackRate,
+            driftThreshold: 0.24,
+          }
+        );
+      }
     });
 
     if (flowAudioRef.current) {
+      forceMediaAudible(flowAudioRef.current);
       syncMediaElement(
         flowAudioRef.current,
         playhead,
         !!flowAudioUrl && isPlaying,
+        {
+          muted: false,
+          volume: 1,
+          playbackRate: 1,
+          driftThreshold: 0.22,
+        }
+      );
+    }
+
+    if (!flowAudioUrl && externalAudioRef.current && externalAudioSourceProxy) {
+      forceMediaAudible(externalAudioRef.current);
+      syncMediaElement(
+        externalAudioRef.current,
+        getSourceTimelineTime(externalAudioSourceProxy, playhead, timelineBounds.timelineStart),
+        hasExternalCleanAudio && isPlaying,
         {
           muted: false,
           volume: 1,
@@ -1725,6 +2460,9 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     activeSegment,
     currentFlowSegment,
     flowAudioUrl,
+    hasExternalCleanAudio,
+    externalAudioMixMode,
+    externalAudioSourceProxy,
   ]);
 
   useEffect(() => {
@@ -1737,28 +2475,175 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     };
   }, [exportResult]);
 
+  useEffect(() => {
+    const jobId = cleanAudioSyncJob?.jobId;
+    const status = cleanAudioSyncJob?.status;
+    if (!jobId || ["ready_for_review", "completed", "failed", "cancelled"].includes(status)) {
+      return undefined;
+    }
+
+    let isCancelled = false;
+    const pollJob = async () => {
+      try {
+        const user = getAuth().currentUser;
+        if (!user) return;
+        const token = await user.getIdToken();
+        const response = await fetch(`${API_BASE_URL}/api/media/status/${jobId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || !data.success || isCancelled) return;
+
+        const nextJob = {
+          jobId,
+          status: data.status || data.stage || "processing",
+          stage: data.stage || data.status || "processing",
+          progress: Number(data.progress || 0),
+          detail: data.detail || data.message || data.stage || data.status || "Processing",
+          error: data.error || "",
+        };
+        setCleanAudioSyncJob(nextJob);
+
+        if (data.detail || data.stage) {
+          setStatusMessage(data.detail || `Clean-audio sync: ${data.stage}`);
+        }
+
+        const offsets = Array.isArray(data.offsets)
+          ? data.offsets
+          : Array.isArray(data.result?.offsets)
+            ? data.result.offsets
+            : [];
+        if (offsets.length && ["ready_for_review", "completed", "sync_complete", "sync_low_confidence"].includes(nextJob.status)) {
+          setSources(currentSources =>
+            currentSources.map(source => {
+              const match = offsets.find(item => item.sourceId === source.id || item.id === source.id);
+              if (!match) return source;
+              // NEVER override manually locked offsets
+              if (source.manualOffsetLocked) {
+                console.log(`Offset locked for ${source.label}: keeping ${source.offsetSeconds}s, ignoring backend ${match.offsetSeconds}s`);
+                return source;
+              }
+              const isBad = match.status === "needs_review" || match.debug?.rejected;
+              const voiceActivity = match.voiceActivity;
+              return {
+                ...source,
+                offsetSeconds: isBad ? Number(source.offsetSeconds || 0) : (Number(match.offsetSeconds ?? match.offset_seconds ?? source.offsetSeconds) || 0),
+                backendSyncConfidence: Number(match.confidence || 0),
+                backendSyncMethod: match.method || "worker",
+                backendSyncStatus: match.status || "",
+                backendSyncWarning: match.warning || match.message || "",
+                backendSyncDebug: match.debug || null,
+                backendVoiceActivity: voiceActivity || null,
+              };
+            })
+          );
+          // Feed worker-computed voice activity into the audio analysis state
+          // so the auto-director can use real ProRes-extracted audio data
+          offsets.forEach(match => {
+            if (match.voiceActivity && Array.isArray(match.voiceActivity) && match.voiceActivity.length > 0) {
+              setAudioAnalysisByCameraId(current => ({
+                ...current,
+                [match.sourceId]: {
+                  ...(current[match.sourceId] || {}),
+                  envelope: match.voiceActivity,
+                  secondsPerBin: match.voiceActivitySecondsPerBin || 0.5,
+                  duration: (match.voiceActivity?.length || 0) * (match.voiceActivitySecondsPerBin || 0.5),
+                  source: "worker",
+                },
+              }));
+            }
+          });
+          // Feed backend director timeline into auto-director
+          const directorTimeline = data.directorTimeline || data.result?.directorTimeline || [];
+          const directorStatus = data.directorStatus || data.result?.directorStatus || "unknown";
+
+          if (directorStatus === "blocked_by_low_sync_confidence") {
+            setStatusMessage("Director blocked — sync confidence too low. Review offsets manually.");
+          } else if (directorTimeline.length > 0) {
+            // Convert backend director timeline to Auto Director switches format
+            const directorSwitches = [];
+            directorTimeline.forEach(seg => {
+              if (seg.selectedCameraId && seg.startTime != null) {
+                directorSwitches.push({
+                  id: `dir-${seg.startTime}`,
+                  cameraId: seg.selectedCameraId,
+                  startTime: seg.startTime,
+                });
+              }
+            });
+            if (directorSwitches.length > 0) {
+              setSwitches(directorSwitches);
+              setSelectedSwitchId(directorSwitches[0]?.id || null);
+              setMulticamLayoutMode(
+                directorTimeline.some(s => s.layoutMode === "show_everyone") ? "scene-grid" : "smart"
+              );
+              setStatusMessage(
+                `Director timeline loaded: ${directorTimeline.length} segments, ${directorSwitches.length} camera switches.`
+              );
+            }
+          }
+
+          setUseExternalCleanAudio(true);
+          const needsReview = offsets.filter(o => o.status === "needs_review" || o.confidence < 0.45);
+          const rejected = offsets.filter(o => o.debug?.rejected);
+          const hasDrift = offsets.some(o => o.drift?.hasDrift);
+
+          if (rejected.length > 0) {
+            const names = rejected.map(o => o.label).join(", ");
+            setStatusMessage(
+              `Bad offsets rejected for ${names} — place cameras manually.`
+            );
+            toast(`Offsets rejected for ${names} — click camera to nudge`, { icon: "⚠️", duration: 10000 });
+          } else if (needsReview.length > 0) {
+            setStatusMessage(
+              `${needsReview.length} camera(s) need manual review — sync confidence is low.`
+            );
+            toast(`${needsReview.length} camera(s) need review — check offsets`, { icon: "⚠️", duration: 8000 });
+          } else if (hasDrift) {
+            setStatusMessage("Sync complete, but possible audio drift detected. Verify alignment.");
+            toast("Possible audio drift — verify sync", { icon: "⚠️", duration: 6000 });
+          } else {
+            setStatusMessage("All cameras synced with high confidence. Play preview to verify.");
+          }
+        }
+      } catch (error) {
+        console.warn("Clean-audio sync status poll failed", error);
+      }
+    };
+
+    pollJob();
+    const intervalId = window.setInterval(pollJob, 3500);
+    return () => {
+      isCancelled = true;
+      window.clearInterval(intervalId);
+    };
+  }, [cleanAudioSyncJob?.jobId, cleanAudioSyncJob?.status]);
+
   const appendFiles = files => {
     const available = MULTICAM_MAX_SOURCES - sources.length;
     if (available <= 0) {
       toast.error(`Maximum ${MULTICAM_MAX_SOURCES} camera sources allowed.`);
       return;
     }
-    const filesToAdd = Array.from(files || []).slice(0, available);
+    const acceptedFiles = Array.from(files || []);
+    const filesToAdd = acceptedFiles.slice(0, available);
     const nextSources = filesToAdd.map(file => {
       const previewUrl = URL.createObjectURL(file);
       objectUrlsRef.current.add(previewUrl);
       const cameraNumber = nextCameraIndexRef.current;
       nextCameraIndexRef.current += 1;
+      const mediaKind = String(file?.type || "").startsWith("image/") ? "image" : "video";
       return {
         id: `cam-${cameraNumber}`,
         label: `Camera ${cameraNumber}`,
         name: file.name,
         file,
+        mediaKind,
         previewUrl,
         url: "",
         uploadedUrl: "",
         offsetSeconds: 0,
-        duration: 0,
+        duration: mediaKind === "image" ? DEFAULT_IMAGE_SEGMENT_DURATION : 0,
         videoWidth: 0,
         videoHeight: 0,
       };
@@ -1766,8 +2651,11 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
 
     setSources(currentSources => [...currentSources, ...nextSources]);
     if (nextSources.length) {
+      const largeVideoAdded = nextSources.some(source => getSourceFileSize(source) > BROWSER_SYNC_MAX_SINGLE_VISUAL_BYTES);
       setStatusMessage(
-        `${nextSources.length} camera source${nextSources.length > 1 ? "s" : ""} added.`
+        largeVideoAdded
+          ? `${nextSources.length} visual source${nextSources.length > 1 ? "s" : ""} added. This is a large project, so clean-audio sync will run in the background for stability.`
+          : `${nextSources.length} visual source${nextSources.length > 1 ? "s" : ""} added.`
       );
     }
     if (filesToAdd.length < Array.from(files || []).length) {
@@ -1779,7 +2667,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     const removedSource = sources.find(s => s.id === cameraId);
     const removedSourceHasMedia = !!getSourceMediaUrl(removedSource);
     if (removedSourceHasMedia && readySources.length <= 1) {
-      toast.error("Keep at least one loaded video source in the project.");
+      toast.error("Keep at least one loaded visual source in the project.");
       return;
     }
     if (sources.length <= 1) {
@@ -1820,11 +2708,13 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const handleOffsetChange = (cameraId, nextValue) => {
     const numericOffset = Number(nextValue);
     setSources(currentSources =>
-      currentSources.map(source =>
-        source.id === cameraId
-          ? { ...source, offsetSeconds: Number.isFinite(numericOffset) ? numericOffset : 0 }
-          : source
-        )
+      currentSources.map(source => {
+        if (source.id !== cameraId) return source;
+        const newOffset = Number.isFinite(numericOffset) ? numericOffset : 0;
+        console.log(
+          `Offset manual change: ${source.label}: ${source.offsetSeconds}s → ${newOffset}s (locked)`);
+        return { ...source, offsetSeconds: newOffset, manualOffsetLocked: true };
+      })
     );
   };
 
@@ -1841,6 +2731,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     const nextPlan = buildAutoDirectorPlan(readySources, timelineDuration, {
       timelineStart: timelineBounds.timelineStart,
       directorStyleId,
+      intensityMode: flowIntensityMode,
       audioActivityBySource: audioAnalysisByCameraId,
       qualityBySource: flowFrameQualityByCameraId,
     });
@@ -1857,12 +2748,12 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         setStatusMessage(
           `Auto Director built ${nextPlan.summary.switchesCount} cuts with ${Math.round(
             nextPlan.summary.confidence * 100
-          )}% confidence.`
+          )}% confidence${flowIntensityMode === "harder" ? " in impact mode" : ""}${nextPlan.summary.momentCount ? ` and staged ${nextPlan.summary.magicSummary}` : ""}.`
         );
       }
     } else if (forceStatus) {
       setStatusMessage(
-        `Auto Director is active in ${nextPlan.summary.modeLabel.toLowerCase()}.`
+        `Auto Director is active in ${nextPlan.summary.modeLabel.toLowerCase()}${flowIntensityMode === "harder" ? " with impact mode engaged" : ""}${nextPlan.summary.momentCount ? ` and is watching for ${nextPlan.summary.magicSummary}` : ""}.`
       );
     }
   };
@@ -1892,7 +2783,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     const sourceScope = readySources.length ? readySources : sources;
     const targetSource = sourceScope.find(source => source.id === cameraId);
     if (!targetSource || !getSourceMediaUrl(targetSource)) {
-      toast.error("Load a video into this camera slot before switching to it.");
+      toast.error("Load a visual into this slot before switching to it.");
       return;
     }
 
@@ -1959,7 +2850,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     setSources(currentSources =>
       currentSources.map(currentSource =>
         currentSource.id === cameraId
-          ? { ...currentSource, offsetSeconds: nextOffset }
+          ? { ...currentSource, offsetSeconds: nextOffset, manualOffsetLocked: true }
           : currentSource
       )
     );
@@ -2120,6 +3011,10 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     if (actionId === "multi-duet") {
       setMulticamLayoutMode("split-vertical");
       setStatusMessage("Shared-moment split is active.");
+      return;
+    }
+    if (actionId === "multi-hit") {
+      toggleFlowIntensityMode();
     }
   };
 
@@ -2154,6 +3049,9 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   };
 
   const getOrCreateAudioAnalysis = async source => {
+    if (!isVideoSource(source)) {
+      throw new Error("Choose a video source when you want audio-driven analysis.");
+    }
     const mediaUrl = getSourceMediaUrl(source);
     if (!mediaUrl) {
       throw new Error("No media loaded for this source.");
@@ -2175,7 +3073,745 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     return normalizedAnalysis;
   };
 
-  const handleAutoShapeSingleLens = async () => {
+  const getOrCreateExternalAudioAnalysis = async () => {
+    if (!externalAudioUrl) {
+      throw new Error("Upload an external clean audio file first.");
+    }
+
+    const cacheKey = "external-clean-audio";
+    const cached = audioAnalysisCacheRef.current.get(cacheKey);
+    if (cached?.mediaUrl === externalAudioUrl && !cached.error) {
+      return cached;
+    }
+
+    const analysis = await analyzeAudioTrack(externalAudioUrl);
+    const normalizedAnalysis = {
+      ...analysis,
+      mediaUrl: externalAudioUrl,
+      bars: buildWaveformBars(analysis.envelope),
+    };
+    audioAnalysisCacheRef.current.set(cacheKey, normalizedAnalysis);
+    setAudioAnalysisByCameraId(current => ({ ...current, [cacheKey]: normalizedAnalysis }));
+    setExternalAudioTrack(current =>
+      current
+        ? {
+            ...current,
+            duration: Number(analysis.duration) || Number(current.duration) || 0,
+          }
+        : current
+    );
+    return normalizedAnalysis;
+  };
+
+  const handleLoadExternalAudioFile = async file => {
+    if (!file) return;
+    const previewUrl = URL.createObjectURL(file);
+    objectUrlsRef.current.add(previewUrl);
+    setUseExternalCleanAudio(true);
+    setExternalAudioTrack({
+      file,
+      previewUrl,
+      name: file.name || "External clean audio",
+      offsetSeconds: 0,
+      duration: 0,
+    });
+    setExternalAudioMixMode("external_only");
+    setCleanAudioSyncJob(null);
+    const externalAudioTooLarge = Number(file.size || 0) > BROWSER_SYNC_MAX_EXTERNAL_AUDIO_BYTES;
+    if (externalAudioTooLarge) {
+      const message = `${file.name || "External audio"} loaded. This clean audio is ${formatMediaBytes(
+        file.size
+      )}, so AutoPromote will sync it in the background instead of decoding the whole waveform in the browser.`;
+      setStatusMessage(message);
+      toast(message, { duration: 9000 });
+      return;
+    }
+    setStatusMessage("External clean audio loaded. Reading waveform for sync...");
+
+    try {
+      const analysis = await analyzeAudioTrack(previewUrl);
+      const normalizedAnalysis = {
+        ...analysis,
+        mediaUrl: previewUrl,
+        bars: buildWaveformBars(analysis.envelope),
+      };
+      audioAnalysisCacheRef.current.set("external-clean-audio", normalizedAnalysis);
+      setAudioAnalysisByCameraId(current => ({
+        ...current,
+        "external-clean-audio": normalizedAnalysis,
+      }));
+      setExternalAudioTrack(current =>
+        current
+          ? {
+              ...current,
+              duration: Number(analysis.duration) || 0,
+            }
+          : current
+      );
+      setStatusMessage(
+        "Clean audio is ready. Tip: clap once at the start next time for an easier waveform lock."
+      );
+    } catch (error) {
+      setStatusMessage(
+        "Clean audio loaded, but waveform analysis failed. You can still adjust the alignment manually."
+      );
+    }
+  };
+
+  const handleClearExternalAudio = () => {
+    externalAudioRef.current?.pause?.();
+    if (externalAudioTrack?.previewUrl && objectUrlsRef.current.has(externalAudioTrack.previewUrl)) {
+      URL.revokeObjectURL(externalAudioTrack.previewUrl);
+      objectUrlsRef.current.delete(externalAudioTrack.previewUrl);
+    }
+    audioAnalysisCacheRef.current.delete("external-clean-audio");
+    setAudioAnalysisByCameraId(current => {
+      const next = { ...current };
+      delete next["external-clean-audio"];
+      return next;
+    });
+    setUseExternalCleanAudio(false);
+    setExternalAudioTrack(null);
+    setExternalAudioMixMode("external_only");
+    setStatusMessage("External clean audio removed. Camera audio is back in control.");
+  };
+
+  const handleExternalAudioOffsetChange = nextValue => {
+    const numericOffset = Number(nextValue);
+    setExternalAudioTrack(current =>
+      current
+        ? {
+            ...current,
+            offsetSeconds: Number.isFinite(numericOffset) ? numericOffset : 0,
+          }
+        : current
+    );
+  };
+
+  const handleNudgeExternalAudio = delta => {
+    setExternalAudioTrack(current =>
+      current
+        ? {
+            ...current,
+            offsetSeconds: Number(((Number(current.offsetSeconds) || 0) + delta).toFixed(3)),
+          }
+        : current
+    );
+  };
+
+  /**
+   * Compress large WAV audio to 16 kHz mono for fast sync upload.
+   * Returns { file, originalSize, compressedSize } or null if unsupported.
+   */
+  const AUDIO_SYNC_COMPRESSION_THRESHOLD = 20 * 1024 * 1024; // 20 MB
+
+  const compressAudioForSync = async (file, label) => {
+    const isAudio = file.type.startsWith("audio/") || /\.(wav|mp3|aac|ogg|flac|m4a|wma|aiff)$/i.test(file.name || "");
+    if (!isAudio) return null;
+    if (file.size <= AUDIO_SYNC_COMPRESSION_THRESHOLD) return null;
+
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return null;
+
+    setStatusMessage(`Large audio detected (${formatMediaBytes(file.size)}). Creating smaller sync copy...`);
+    const arrayBuffer = await file.arrayBuffer();
+
+    return new Promise(resolve => {
+      const audioCtx = new AudioContextClass();
+      audioCtx.decodeAudioData(arrayBuffer, audioBuffer => {
+        try {
+          const sampleRate = 16000;
+          const channels = 1;
+          const duration = audioBuffer.duration;
+          const offlineCtx = new OfflineAudioContext(channels, Math.ceil(sampleRate * duration), sampleRate);
+          const source = offlineCtx.createBufferSource();
+          source.buffer = audioBuffer;
+          source.connect(offlineCtx.destination);
+          source.start(0);
+
+          offlineCtx.startRendering().then(rendered => {
+            audioCtx.close().catch(() => {});
+            // Convert rendered AudioBuffer to WAV blob
+            const numSamples = rendered.length;
+            const wavBuffer = new ArrayBuffer(44 + numSamples * 2);
+            const view = new DataView(wavBuffer);
+            // RIFF header
+            writeString(view, 0, "RIFF");
+            view.setUint32(4, 36 + numSamples * 2, true);
+            writeString(view, 8, "WAVE");
+            writeString(view, 12, "fmt ");
+            view.setUint32(16, 16, true);        // chunk size
+            view.setUint16(20, 1, true);          // PCM
+            view.setUint16(22, channels, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * channels * 2, true);
+            view.setUint16(32, channels * 2, true);
+            view.setUint16(34, 16, true);
+            writeString(view, 36, "data");
+            view.setUint32(40, numSamples * 2, true);
+            // PCM samples
+            const channelData = rendered.getChannelData(0);
+            for (let i = 0; i < numSamples; i++) {
+              const sample = Math.max(-1, Math.min(1, channelData[i]));
+              view.setInt16(44 + i * 2, sample < 0 ? sample * 32768 : sample * 32767, true);
+            }
+            const blob = new Blob([wavBuffer], { type: "audio/wav" });
+            const compressedFile = new File([blob], file.name.replace(/\.\w+$/, "_sync.wav"), {
+              type: "audio/wav",
+              lastModified: Date.now(),
+            });
+            const pctSaved = Math.round((1 - blob.size / file.size) * 100);
+            setStatusMessage(`${label}: ${formatMediaBytes(file.size)} → ${formatMediaBytes(blob.size)} sync copy (${pctSaved}% smaller).`);
+            resolve({ file: compressedFile, originalSize: file.size, compressedSize: blob.size });
+          }).catch(() => {
+            audioCtx.close().catch(() => {});
+            resolve(null);
+          });
+        } catch (_) {
+          audioCtx.close().catch(() => {});
+          resolve(null);
+        }
+      }, () => {
+        audioCtx.close().catch(() => {});
+        resolve(null);
+      });
+    });
+  };
+
+  function writeString(view, offset, str) {
+    for (let i = 0; i < str.length; i++) {
+      view.setUint8(offset + i, str.charCodeAt(i));
+    }
+  }
+
+  /**
+   * Compress a video file client-side before upload using MediaRecorder.
+   * Returns { file: Blob (renamed), originalSize, compressedSize } or null if unsupported.
+   */
+  const compressVideoFile = async (file, label, onProgress) => {
+    const isVideo = String(file?.type || "").startsWith("video/") || /\.(mov|mp4|avi|mkv|webm|m4v|3gp)$/i.test(file.name || "");
+    if (!isVideo) return null;
+    if (file.size <= UPLOAD_COMPRESSION_THRESHOLD_BYTES) return null;
+
+    // Check MediaRecorder support
+    if (typeof MediaRecorder === "undefined") return null;
+
+    const mimeTypes = [
+      "video/webm;codecs=vp8,opus",
+      "video/webm;codecs=vp9,opus",
+      "video/webm;codecs=vp8",
+      "video/webm",
+    ];
+    let mimeType = "";
+    for (const mt of mimeTypes) {
+      if (MediaRecorder.isTypeSupported(mt)) { mimeType = mt; break; }
+    }
+    if (!mimeType) return null;
+
+    return new Promise(resolve => {
+      const video = document.createElement("video");
+      video.preload = "auto";
+      video.muted = false;
+      video.playsInline = true;
+      const objectUrl = URL.createObjectURL(file);
+      video.src = objectUrl;
+
+      let resolved = false;
+      const cleanup = () => {
+        if (!resolved) { resolved = true; URL.revokeObjectURL(objectUrl); }
+      };
+      const fail = () => { cleanup(); resolve(null); };
+
+      video.onloadedmetadata = () => {
+        try {
+          const stream = video.captureStream();
+          if (!stream) { fail(); return; }
+
+          const recorder = new MediaRecorder(stream, {
+            mimeType,
+            videoBitsPerSecond: UPLOAD_COMPRESSION_TARGET_BPS,
+            audioBitsPerSecond: UPLOAD_COMPRESSION_AUDIO_BPS,
+          });
+
+          const chunks = [];
+          recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+
+          recorder.onstop = () => {
+            const blob = new Blob(chunks, { type: mimeType });
+            const compressedFile = new File([blob], file.name.replace(/\.[^.]+$/, ".webm"), {
+              type: mimeType,
+              lastModified: Date.now(),
+            });
+            cleanup();
+            onProgress(1);
+            resolve({ file: compressedFile, originalSize: file.size, compressedSize: blob.size });
+          };
+
+          recorder.onerror = () => { fail(); };
+
+          recorder.start(1000);
+          let lastPct = 0;
+          const duration = video.duration || 1;
+          // Accurate estimate: target bitrate × duration (plus audio overhead)
+          const estimatedBytes = Math.round(
+            ((UPLOAD_COMPRESSION_TARGET_BPS + UPLOAD_COMPRESSION_AUDIO_BPS) / 8) * duration * 1.05
+          );
+          video.ontimeupdate = () => {
+            const pct = Math.min(1, video.currentTime / duration);
+            if (pct - lastPct > 0.02) {
+              lastPct = pct;
+              onProgress(pct);
+              setStatusMessage(
+                `Compressing ${label} (${Math.round(pct * 100)}%) — target ~${formatMediaBytes(estimatedBytes)} at 8 Mbps...`
+              );
+            }
+          };
+
+          video.onended = () => { recorder.stop(); };
+          video.play().catch(() => fail());
+        } catch (_) { fail(); }
+      };
+
+      video.onerror = () => fail();
+      // Timeout: if metadata doesn't load, codec is likely unsupported (ProRes, etc.)
+      // Firefox may need extra time for large local files
+      setTimeout(() => { if (!resolved) fail(); }, 25000);
+    });
+  };
+
+  /**
+   * Upload a file to the local Python worker for transcoding (handles ProRes, etc.)
+   * Worker transcodes to H.264, uploads to Firebase, returns the Firebase URL.
+   * Much faster than uploading raw files to Firebase directly.
+   */
+  const LOCAL_WORKER_URL = "http://127.0.0.1:8000";
+
+  const uploadViaLocalWorker = async (file, label, uid) => {
+    const formData = new FormData();
+    formData.append("file", file, file.name);
+    formData.append("uid", uid);
+    formData.append("label", label);
+
+    // Step 1: send file (fast — just saves to disk)
+    const xhr = new XMLHttpRequest();
+    const startTime = Date.now();
+
+    const postResult = await new Promise((resolve, reject) => {
+      xhr.upload.addEventListener("progress", evt => {
+        if (evt.lengthComputable) {
+          const pct = evt.loaded / evt.total;
+          const elapsed = Math.max(1, (Date.now() - startTime) / 1000);
+          const speedBps = evt.loaded / elapsed;
+          const speedStr = speedBps > 1024 * 1024
+            ? `${(speedBps / (1024 * 1024)).toFixed(0)} MB/s`
+            : `${Math.round(speedBps / 1024)} KB/s`;
+          setStatusMessage(
+            `Sending ${label} to local worker (${Math.round(pct * 100)}%, ${speedStr})...`
+          );
+        }
+      });
+
+      xhr.addEventListener("load", () => {
+        try {
+          const data = JSON.parse(xhr.responseText);
+          if (xhr.status >= 200 && xhr.status < 300 && data.success) {
+            resolve(data);
+          } else {
+            reject(new Error(data.detail || `Worker returned ${xhr.status}`));
+          }
+        } catch (e) {
+          reject(new Error(`Invalid worker response: ${xhr.responseText?.slice(0, 200)}`));
+        }
+      });
+
+      xhr.addEventListener("error", () => reject(new Error("Cannot reach local worker at :8000. Is it running?")));
+      xhr.addEventListener("abort", () => reject(new Error("Upload aborted")));
+
+      xhr.open("POST", `${LOCAL_WORKER_URL}/api/media/ingest-local`);
+      xhr.send(formData);
+    });
+
+    // Step 2: if already done (cache hit), return immediately
+    if (postResult.status === "done" && postResult.url) {
+      return postResult;
+    }
+
+    // Step 3: poll until transcode completes
+    if (postResult.status === "processing" && postResult.job_id) {
+      const jobId = postResult.job_id;
+      const originalSize = postResult.original_size || file.size;
+      setStatusMessage(`Worker is transcoding ${label} (${formatMediaBytes(originalSize)}) — this may take 10-30 min...`);
+
+      for (let attempt = 0; attempt < 800; attempt++) {
+        await new Promise(r => setTimeout(r, 3000)); // poll every 3s
+        try {
+          const pollRes = await fetch(`${LOCAL_WORKER_URL}/api/media/ingest-local/${jobId}`);
+          const pollData = await pollRes.json();
+          if (!pollData.success) continue;
+
+          if (pollData.status === "done" && pollData.url) {
+            setStatusMessage(`${label} processed by worker (${pollData.size_saved_pct}% smaller).`);
+            return pollData;
+          }
+          // Return sync audio early — don't wait for full video transcode
+          if (pollData.syncAudioUrl) {
+            setStatusMessage(`${label}: sync audio ready, video still processing...`);
+            return { ...pollData, url: pollData.syncAudioUrl, status: "done", earlySyncAudio: true };
+          }
+          if (pollData.status === "failed") {
+            throw new Error(pollData.error || "Worker transcode failed");
+          }
+          // Still processing — update status
+          if (pollData.status === "transcoding") {
+            setStatusMessage(`Worker transcoding ${label} — please wait...`);
+          } else if (pollData.status === "uploading") {
+            setStatusMessage(`Worker uploading ${label} to Firebase...`);
+          }
+        } catch (e) {
+          if (attempt > 10) throw e; // Give up after ~30s of failed polls
+        }
+      }
+      throw new Error("Timed out waiting for worker to finish transcode");
+    }
+
+    throw new Error("Unexpected worker response");
+  };
+
+  const uploadMediaForBackendSync = async ({ user, storage, file, fallbackUrl, folder, label }) => {
+    if (fallbackUrl) return fallbackUrl;
+    if (!file) throw new Error(`${label || "Media"} is not available for background sync.`);
+
+    // --- FAST PATH: try local worker first ---
+    const isAudioOnly = file.type.startsWith("audio/") || /\.(wav|mp3|aac|ogg|flac|m4a|wma)$/i.test(file.name || "");
+    const useLocalWorker = file.size > 200 * 1024 * 1024 || (isAudioOnly && file.size > 20 * 1024 * 1024);
+    if (useLocalWorker && user?.uid) {
+      try {
+        setStatusMessage(`Sending ${label} to local worker for ingest (${formatMediaBytes(file.size)})...`);
+        const workerResult = await uploadViaLocalWorker(file, label, user.uid);
+        if (workerResult?.url) {
+          // Use sync audio URL if available (tiny 19MB WAV instead of 1.8GB video)
+          const effectiveUrl = workerResult.syncAudioUrl || workerResult.url;
+          const summary = workerResult.size_saved_pct > 10
+            ? `${label} ingested — sync via ${workerResult.syncAudioUrl ? "audio (fast)" : "video"}`
+            : `${label} ingested by worker.`;
+          toast.success(summary, { duration: 5000 });
+          setStatusMessage(
+            workerResult.syncAudioUrl
+              ? `${label}: sync audio ready (${formatMediaBytes(workerResult.transcoded_size || 0)} video for export)`
+              : summary
+          );
+          return effectiveUrl;
+        }
+      } catch (workerError) {
+        console.warn("Local worker ingest failed, falling back to direct upload:", workerError.message);
+        setStatusMessage(
+          `Local worker unavailable (${workerError.message}). Uploading ${label} directly to Firebase...`
+        );
+      }
+    }
+
+    // --- FALLBACK: direct browser upload to Firebase ---
+    // Compress large audio files for sync (WAV → 16kHz mono WAV, ~90% smaller)
+    let uploadFile = file;
+    if (isAudioOnly && file.size > AUDIO_SYNC_COMPRESSION_THRESHOLD) {
+      const audioCompressed = await compressAudioForSync(file, label);
+      if (audioCompressed) {
+        toast.success(
+          `${label} sync copy: ${formatMediaBytes(audioCompressed.originalSize)} → ${formatMediaBytes(audioCompressed.compressedSize)}`,
+          { duration: 5000 }
+        );
+        uploadFile = audioCompressed.file;
+      }
+    }
+
+    // Compress large video files before upload (turns 8GB raw → ~600MB web-friendly)
+    if (!isAudioOnly && file.size > UPLOAD_COMPRESSION_THRESHOLD_BYTES) {
+      setStatusMessage(`Checking if ${label} can be compressed to save upload time...`);
+      const compressed = await compressVideoFile(file, label, () => {});
+      if (compressed) {
+        const pctSaved = Math.round((1 - compressed.compressedSize / compressed.originalSize) * 100);
+        const summary = `${label} compressed: ${formatMediaBytes(compressed.originalSize)} → ${formatMediaBytes(compressed.compressedSize)} (${pctSaved}% smaller)`;
+        toast.success(summary, { duration: 6000 });
+        setStatusMessage(`${summary}. Uploading now...`);
+        uploadFile = compressed.file;
+      } else {
+        setStatusMessage(
+          `Cannot compress ${label} in browser (unsupported codec like ProRes). Uploading original ${formatMediaBytes(file.size)}...`
+        );
+      }
+    }
+
+    const safeName = (uploadFile.name || `${label || "media"}.bin`).replace(/[^a-zA-Z0-9._-]/g, "_");
+    const mediaRef = ref(storage, `${folder}/${user.uid}/${Date.now()}_${safeName}`);
+    const startTime = Date.now();
+    await new Promise((resolve, reject) => {
+      const task = uploadBytesResumable(mediaRef, uploadFile, {
+        contentType: uploadFile.type || "application/octet-stream",
+      });
+      task.on(
+        "state_changed",
+        snapshot => {
+          const transferred = snapshot.bytesTransferred || 0;
+          const total = snapshot.totalBytes || uploadFile.size || 0;
+          const pct = total ? (transferred / total) * 100 : 0;
+          const elapsedSec = Math.max(1, (Date.now() - startTime) / 1000);
+          const speedBps = transferred / elapsedSec;
+          const speedStr = speedBps > 1024 * 1024
+            ? `${(speedBps / (1024 * 1024)).toFixed(1)} MB/s`
+            : `${Math.round(speedBps / 1024)} KB/s`;
+          const remainingSec = speedBps > 0 ? (total - transferred) / speedBps : 0;
+          const eta = remainingSec > 120
+            ? `~${Math.round(remainingSec / 60)} min left`
+            : remainingSec > 30
+              ? `~${Math.round(remainingSec)} sec left`
+              : "";
+          setStatusMessage(
+            `Uploading ${label || file.name || "media"} for background sync — ${formatMediaBytes(transferred)} / ${formatMediaBytes(total)} (${pct.toFixed(1)}%, ${speedStr}${eta ? `, ${eta}` : ""})...`
+          );
+        },
+        reject,
+        resolve
+      );
+    });
+    return getDownloadURL(mediaRef);
+  };
+
+  const buildBackendMediaCacheKey = file =>
+    file
+      ? `${file.name || "media"}:${file.size || 0}:${file.lastModified || 0}`
+      : "";
+
+  const handleStartBackendCleanAudioSync = async () => {
+    if (!externalAudioTrack) {
+      toast.error("Upload external clean audio first.");
+      return;
+    }
+    const candidates = readySources.filter(isVideoSource);
+    if (!candidates.length) {
+      toast.error("Load at least one video source with camera audio.");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      [
+        "This project is large, so AutoPromote will process syncing in the background for better stability.",
+        "",
+        `Camera files: ${candidates.length}`,
+        `Timeline: ${formatDurationLabel(timelineDuration || Math.max(...candidates.map(source => Number(source.duration || 0))))}`,
+        `Estimated credits: ${cleanAudioSyncCreditEstimate}`,
+        "",
+        "Continue with External Clean Audio Sync?",
+      ].join("\n")
+    );
+    if (!confirmed) return;
+
+    setSyncingCameraId("external-clean-audio");
+    setCleanAudioSyncJob({
+      status: "uploading",
+      progress: 0,
+      detail: "Uploading media",
+    });
+    setStatusMessage(
+      "Uploading media for background clean-audio sync. You can leave waveform matching to the worker now."
+    );
+
+    try {
+      const auth = getAuth();
+      const user = auth.currentUser;
+      if (!user) throw new Error("Sign in before starting background sync.");
+      const token = await user.getIdToken();
+      const storage = getStorage();
+
+      const sourcesPayload = [];
+      for (let index = 0; index < candidates.length; index += 1) {
+        const source = candidates[index];
+        // eslint-disable-next-line no-await-in-loop
+        const url = await uploadMediaForBackendSync({
+          user,
+          storage,
+          file: source.file,
+          fallbackUrl: source.url || source.uploadedUrl,
+          folder: "temp/multicam-clean-sync",
+          label: `${source.label || `Camera ${index + 1}`} (${index + 1}/${candidates.length})`,
+        });
+        sourcesPayload.push({
+          id: source.id,
+          label: source.label || `Camera ${index + 1}`,
+          name: source.name || source.file?.name || source.label,
+          url,
+          size: getSourceFileSize(source),
+          duration: Number(source.duration || 0),
+          offset_seconds: Number(source.offsetSeconds) || 0,
+          cache_key: buildBackendMediaCacheKey(source.file) || `${source.id}:${source.name || source.label}`,
+        });
+      }
+
+      const externalAudioRemoteUrl = await uploadMediaForBackendSync({
+        user,
+        storage,
+        file: externalAudioTrack.file,
+        fallbackUrl: externalAudioTrack.url,
+        folder: "temp/multicam-clean-sync-audio",
+        label: "External clean audio",
+      });
+
+      setSources(currentSources =>
+        currentSources.map(source => {
+          const uploaded = sourcesPayload.find(item => item.id === source.id);
+          return uploaded ? { ...source, uploadedUrl: uploaded.url } : source;
+        })
+      );
+      setExternalAudioTrack(current =>
+        current
+          ? {
+              ...current,
+              url: externalAudioRemoteUrl,
+              cacheKey: buildBackendMediaCacheKey(current.file),
+            }
+          : current
+      );
+
+      setStatusMessage("Media uploaded. Asking the worker to extract audio and calculate offsets...");
+      const response = await fetch(`${API_BASE_URL}/api/media/multicam/clean-audio-sync`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          sources: sourcesPayload,
+          externalAudio: {
+            url: externalAudioRemoteUrl,
+            name: externalAudioTrack.name || externalAudioTrack.file?.name || "External clean audio",
+            size: Number(externalAudioTrack.file?.size || 0),
+            duration: Number(externalAudioTrack.duration || 0),
+            offset_seconds: Number(externalAudioTrack.offsetSeconds || 0),
+            cache_key: buildBackendMediaCacheKey(externalAudioTrack.file) || externalAudioTrack.name,
+          },
+          mixMode: externalAudioMixMode,
+          outputAspectRatio,
+          estimatedCredits: cleanAudioSyncCreditEstimate,
+        }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || data.error || `Background sync failed with ${response.status}`);
+      }
+
+      setUseExternalCleanAudio(true);
+      setCleanAudioSyncJob({
+        jobId: data.jobId,
+        status: "queued",
+        progress: 1,
+        detail: data.message || "Background sync queued",
+      });
+      setStatusMessage(`Background clean-audio sync started. Job ${data.jobId}`);
+    } catch (error) {
+      console.error(error);
+      setCleanAudioSyncJob({
+        status: "failed",
+        progress: 0,
+        detail: error.message || "Background clean-audio sync failed",
+      });
+      setStatusMessage(error.message || "Background clean-audio sync failed.");
+      toast.error(error.message || "Background clean-audio sync failed.");
+    } finally {
+      setSyncingCameraId(null);
+    }
+  };
+
+  const handleSyncCameraToExternalAudio = async cameraId => {
+    const source = sources.find(item => item.id === cameraId);
+    if (!source || !getSourceMediaUrl(source)) return false;
+    if (!isVideoSource(source)) {
+      toast.error("Only video sources can waveform-sync to clean audio.");
+      return false;
+    }
+    if (!externalAudioUrl) {
+      toast.error("Upload external clean audio first.");
+      return false;
+    }
+    if (getBrowserSyncBlockReason([source], externalAudioTrack)) {
+      setStatusMessage(
+        "This camera/clean-audio pair is too large for browser waveform matching. Use Auto-Sync All Cameras to run background sync."
+      );
+      return false;
+    }
+
+    setSyncingCameraId(cameraId);
+    setStatusMessage(`Matching ${source.label} to the clean audio waveform...`);
+
+    try {
+      const [cleanAnalysis, sourceAnalysis] = await Promise.all([
+        getOrCreateExternalAudioAnalysis(),
+        getOrCreateAudioAnalysis(source),
+      ]);
+      const estimatedDelta = estimateAudioOffsetSeconds(
+        cleanAnalysis,
+        sourceAnalysis,
+        Math.min(240, Math.max(cleanAnalysis.duration || 0, sourceAnalysis.duration || 0, 30))
+      );
+      const nextOffset = Number(
+        ((Number(externalAudioTrack?.offsetSeconds) || 0) + estimatedDelta).toFixed(3)
+      );
+      setSources(currentSources =>
+        currentSources.map(currentSource =>
+          currentSource.id === cameraId
+            ? { ...currentSource, offsetSeconds: nextOffset }
+            : currentSource
+        )
+      );
+      setStatusMessage(
+        `${source.label} locked to clean audio at ${estimatedDelta >= 0 ? "+" : ""}${estimatedDelta.toFixed(2)}s.`
+      );
+      return true;
+    } catch (error) {
+      setStatusMessage(
+        "We could not sync automatically. Please adjust the audio alignment manually."
+      );
+      return false;
+    } finally {
+      setSyncingCameraId(null);
+    }
+  };
+
+  const handleSyncAllCamerasToExternalAudio = async () => {
+    if (!externalAudioUrl) {
+      toast.error("Upload external clean audio first.");
+      return;
+    }
+    const candidates = readySources.filter(isVideoSource);
+    if (!candidates.length) {
+      toast.error("Load at least one video source with camera audio.");
+      return;
+    }
+    if (shouldUseBackendCleanAudioSync) {
+      await handleStartBackendCleanAudioSync();
+      return;
+    }
+
+    let syncedCount = 0;
+    for (const source of candidates) {
+      // Sequential keeps the browser responsive and avoids decoding every file at once.
+      // eslint-disable-next-line no-await-in-loop
+      const synced = await handleSyncCameraToExternalAudio(source.id);
+      if (synced) syncedCount += 1;
+    }
+
+    if (syncedCount) {
+      setUseExternalCleanAudio(true);
+      setStatusMessage(
+        `${syncedCount} camera${syncedCount === 1 ? "" : "s"} synced to clean audio. Preview the result and nudge if needed.`
+      );
+    } else {
+      setStatusMessage(
+        "We could not sync automatically. Please adjust the audio alignment manually."
+      );
+    }
+  };
+
+  const handleAutoShapeSingleLens = async (auraOverrideId = flowAuraTemplateId) => {
     if (!isSingleSourceWorkflow || !singleCamSource) return;
 
     try {
@@ -2185,6 +3821,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         source: singleCamSource,
         audioAnalysis: analysis,
         timelineDuration: Number(singleCamSource.duration) || timelineDuration,
+        auraTemplateId: auraOverrideId,
       });
       if (!plan.segments.length) {
         toast.error("Auto Shape could not build a single-lens plan from this take.");
@@ -2206,6 +3843,10 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     const source = sources.find(item => item.id === cameraId);
     const masterSource = sources.find(item => item.id === masterAudioCameraId);
     if (!source || !masterSource) return;
+    if (!isVideoSource(source) || !isVideoSource(masterSource)) {
+      toast.error("Audio sync only works with video sources that contain sound.");
+      return;
+    }
     if (cameraId === masterAudioCameraId) {
       toast("This source is already the audio source.");
       return;
@@ -2245,10 +3886,34 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     }
   };
 
+  const handleSyncSourceToFlowSound = async sourceId => {
+    const source = sources.find(item => item.id === sourceId);
+    if (!source || !getSourceMediaUrl(source)) {
+      toast.error("Load a visual first.");
+      return;
+    }
+
+    const hasFlowSoundtrack = Boolean(flowAudioUrl || masterAudioSource);
+    if (!hasFlowSoundtrack) {
+      toast.error("Upload a Flow soundtrack or choose master audio first.");
+      return;
+    }
+
+    setSyncingCameraId(sourceId);
+    setStatusMessage(`${source.label} is syncing to the Flow soundtrack...`);
+    try {
+      await handleGenerateFlowEdit();
+      setStatusMessage(`${source.label} is now timed against the Flow soundtrack.`);
+    } finally {
+      setSyncingCameraId(null);
+    }
+  };
+
   const persistFlowPlan = nextPlan => {
     setFlowEditPlan(nextPlan);
     setFlowEditEnabled(Boolean(nextPlan?.segments?.length));
     setSelectedFlowSegmentId(nextPlan?.segments?.[0]?.id || null);
+    setFlowSegmentFraming(nextPlan?.framingMap || {});
     if (nextPlan?.switches?.length) {
       setSwitches(nextPlan.switches);
       setSelectedSwitchId(nextPlan.switches[0]?.id || null);
@@ -2256,7 +3921,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   };
 
   const handleUseMasterAudioForFlow = () => {
-    if (!masterAudioSource) {
+    if (!masterAudioSource || !isVideoSource(masterAudioSource)) {
       toast.error("Pick a master audio source first.");
       return;
     }
@@ -2291,6 +3956,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     setFlowEditVariants([]);
     setFlowEditEnabled(false);
     setSelectedFlowSegmentId(null);
+    setFlowSegmentFraming({});
     setFlowEditWarning("");
     setFlowEditStatusStep("");
     setFlowEditInsight("");
@@ -2325,6 +3991,21 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       const nextPlan = {
         ...currentPlan,
         segments: normalizedSegments,
+        framingMap:
+          currentPlan.visualMode === "image_story"
+            ? buildImageStoryFramingMap(
+                normalizedSegments,
+                currentPlan.audioType,
+                currentPlan.imageStoryTemplateId || flowImageStoryTemplateId,
+                currentPlan.auraTemplateId || flowAuraTemplateId
+              )
+            : buildVideoFlowFramingMap(
+                normalizedSegments,
+                currentPlan.audioType,
+                flowEditStyleId,
+                currentPlan.intensityMode || flowIntensityMode,
+                currentPlan.auraTemplateId || flowAuraTemplateId
+              ),
         switches: normalizeSwitches(
           normalizedSegments.map(segment => ({
             id: segment.id,
@@ -2335,15 +4016,26 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           currentPlan.duration || timelineDuration
         ),
       };
+      setFlowSegmentFraming(nextPlan.framingMap || {});
       setSwitches(nextPlan.switches);
       return nextPlan;
     });
   };
 
-  const handleGenerateFlowEdit = async (styleOverride = null) => {
+  const handleGenerateFlowEdit = async (overrides = null) => {
+    const resolvedOverrides =
+      typeof overrides === "string" ? { styleId: overrides } : overrides || {};
+    const activeStyleId = resolvedOverrides.styleId || flowEditStyleId;
+    const activeImageStoryTemplateId =
+      resolvedOverrides.imageStoryTemplateId || flowImageStoryTemplateId;
+    const activeIntensityMode = resolvedOverrides.intensityMode || flowIntensityMode;
+    const activeAuraTemplateId = resolvedOverrides.auraTemplateId || flowAuraTemplateId;
+    const activeAuraPreset = getFlowAuraPreset(activeAuraTemplateId);
     const analysisUrl = flowAudioUrl || getSourceMediaUrl(masterAudioSource);
-    if (isSingleSourceWorkflow || readySources.length < 2) {
-      toast.error("Flow Edit needs at least two synced camera sources.");
+    const isImageStoryFlow = readySources.length >= 2 && readySources.every(isImageSource);
+    const isSingleSourceFlow = readySources.length === 1 && isVideoSource(readySources[0]);
+    if (!isSingleSourceFlow && (isSingleSourceWorkflow || readySources.length < 2)) {
+      toast.error("Flow Edit needs at least two synced camera sources, or one long video for highlight pull.");
       return;
     }
     if (!analysisUrl) {
@@ -2358,22 +4050,53 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
 
     try {
       const analysis = await analyzeAudioTrack(analysisUrl);
+      const alignedTimelineDuration = Number(
+        Math.max(baseTimelineDuration, Number(analysis.duration) || 0, DEFAULT_IMAGE_SEGMENT_DURATION).toFixed(3)
+      );
+      const flowPlanSources = isImageStoryFlow
+        ? readySources.map(source => ({
+            ...source,
+            offsetSeconds: 0,
+            duration: alignedTimelineDuration,
+          }))
+        : readySources;
+
+      if (isImageStoryFlow) {
+        setSources(currentSources =>
+          currentSources.map(currentSource =>
+            readySources.some(source => source.id === currentSource.id)
+              ? {
+                  ...currentSource,
+                  offsetSeconds: 0,
+                  duration: alignedTimelineDuration,
+                }
+              : currentSource
+          )
+        );
+      }
+
       setFlowEditStatusStep(FLOW_EDIT_STATUS_STEPS[1]);
       const variants = FLOW_EDIT_STYLE_PRESETS.map(style => ({
         ...style,
         plan: buildFlowEditPlan({
-          sources: readySources,
-          timelineDuration: baseTimelineDuration,
-          timelineStart: timelineBounds.timelineStart,
+          sources: flowPlanSources,
+          timelineDuration:
+            isImageStoryFlow || isSingleSourceFlow
+              ? alignedTimelineDuration
+              : baseTimelineDuration,
+          timelineStart: isImageStoryFlow ? 0 : timelineBounds.timelineStart,
           audioAnalysis: analysis,
           sourceActivityByCameraId: audioAnalysisByCameraId,
           styleId: style.id,
           frameQualityByCameraId: flowFrameQualityByCameraId,
+          imageStoryTemplateId: activeImageStoryTemplateId,
+          intensityMode: activeIntensityMode,
+          auraTemplateId: activeAuraTemplateId,
         }),
       }));
       setFlowEditStatusStep(FLOW_EDIT_STATUS_STEPS[2]);
       const preferred =
-        variants.find(variant => variant.id === (styleOverride || flowEditStyleId)) || variants[0];
+        variants.find(variant => variant.id === activeStyleId) || variants[0];
       persistFlowPlan(preferred.plan);
       setFlowEditVariants(
         variants.map(variant => ({
@@ -2384,14 +4107,29 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           clipCount: variant.plan.segments.length,
           audioType: variant.plan.audioType,
           rescueMode: variant.plan.rescueMode,
+          rescueFinishMode: variant.plan.rescueFinishMode,
           warning: variant.plan.warning,
         }))
       );
       setSelectedFlowSegmentId(preferred.plan.segments[0]?.id || null);
       setFlowEditWarning(preferred.plan.warning || "");
-      setFlowEditInsight(preferred.plan.rescueSummary || preferred.plan.audioExplanation || "");
+      setFlowEditInsight(
+        isImageStoryFlow
+          ? `Image story mode is active. ${activeAuraPreset.label} is driving the ${IMAGE_STORY_TEMPLATE_PRESETS.find(template => template.id === activeImageStoryTemplateId)?.label || "selected template"} so the story cards feel intentionally directed.${preferred.plan.loopsAudio ? " The soundtrack will loop smoothly until the edit finishes." : ""}`
+          : preferred.plan.highlightPullMode
+            ? `${activeAuraPreset.label} is shaping the highlight pull. ${preferred.plan.highlightSummary}${preferred.plan.loopsAudio ? " The soundtrack will loop smoothly until the full edit lands." : ""}`
+            : preferred.plan.rescuePolishSummary ||
+              preferred.plan.rescueSummary ||
+              `${activeAuraPreset.label} is shaping the motion, polish, and transitions for this pass.`
+      );
       setFlowEditStatusStep(FLOW_EDIT_STATUS_STEPS[3]);
-      setStatusMessage("Flow Edit preview is ready.");
+      setStatusMessage(
+        isImageStoryFlow
+          ? "Flow Edit story sequence is ready."
+          : preferred.plan.highlightPullMode
+            ? "Flow Edit highlight pull is ready."
+            : "Flow Edit preview is ready."
+      );
     } catch (error) {
       toast.error(error.message || "Flow Edit analysis failed.");
       setFlowEditStatusStep("");
@@ -2407,8 +4145,78 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       return;
     }
     setFlowEditStyleId(styleId);
-    handleGenerateFlowEdit(styleId);
+    handleGenerateFlowEdit({ styleId });
   };
+
+  const handleApplyImageStoryTemplate = templateId => {
+    setFlowImageStoryTemplateId(templateId);
+    if (!isImageStoryEligible) return;
+    if (!flowAudioUrl && !masterAudioSource) {
+      return;
+    }
+    handleGenerateFlowEdit({
+      styleId: flowEditStyleId,
+      imageStoryTemplateId: templateId,
+    });
+  };
+
+  const handleApplyFlowAuraTemplate = templateId => {
+    const auraPreset = getFlowAuraPreset(templateId);
+    setFlowAuraTemplateId(templateId);
+    setFlowEditStyleId(auraPreset.defaultStyleId);
+    setFlowImageStoryTemplateId(auraPreset.defaultImageStoryTemplateId);
+    setFlowIntensityMode(auraPreset.defaultIntensityMode);
+    setStatusMessage(
+      `${auraPreset.label} is loaded. Flow Edit will lean into ${auraPreset.summary.toLowerCase()}`
+    );
+
+    if (isSingleSourceWorkflow && singleCamSource) {
+      handleAutoShapeSingleLens(templateId);
+    }
+
+    if (flowAudioUrl || masterAudioSource) {
+      handleGenerateFlowEdit({
+        styleId: auraPreset.defaultStyleId,
+        imageStoryTemplateId: auraPreset.defaultImageStoryTemplateId,
+        intensityMode: auraPreset.defaultIntensityMode,
+        auraTemplateId: templateId,
+      });
+    }
+  };
+
+  const toggleFlowIntensityMode = () => {
+    flowIntensityRefreshRef.current = true;
+    setFlowIntensityMode(current => {
+      const next = current === "harder" ? "standard" : "harder";
+      setStatusMessage(
+        next === "harder"
+          ? "Impact mode armed. Flow Edit and Auto Director will hit harder."
+          : "Impact mode eased off. Back to a more balanced cut feel."
+      );
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    if (autoDirectorEnabled && !isSingleSourceWorkflow && !flowEditEnabled && readySources.length >= 2) {
+      applyAutoDirectorPlan();
+    }
+  }, [
+    flowIntensityMode,
+    autoDirectorEnabled,
+    isSingleSourceWorkflow,
+    flowEditEnabled,
+    readySources.length,
+    directorStyleId,
+  ]);
+
+  useEffect(() => {
+    if (!flowIntensityRefreshRef.current) return;
+    flowIntensityRefreshRef.current = false;
+    if (flowEditEnabled && (flowAudioUrl || masterAudioSource)) {
+      handleGenerateFlowEdit(flowEditStyleId);
+    }
+  }, [flowIntensityMode]);
 
   const handleDisableFlowEdit = () => {
     setFlowEditEnabled(false);
@@ -2530,8 +4338,72 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     });
   };
 
+  const getDiagnosticAudioContext = () => {
+    const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextCtor) return null;
+    if (!diagnosticAudioContextRef.current) {
+      diagnosticAudioContextRef.current = new AudioContextCtor();
+    }
+    return diagnosticAudioContextRef.current;
+  };
+
+  const handleTestBrowserAudio = async () => {
+    const audioContext = getDiagnosticAudioContext();
+    if (!audioContext) {
+      setStatusMessage("This browser does not expose Web Audio for diagnostics.");
+      return;
+    }
+    try {
+      await audioContext.resume();
+      const oscillator = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      oscillator.type = "sine";
+      oscillator.frequency.value = 880;
+      gain.gain.setValueAtTime(0.0001, audioContext.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.18, audioContext.currentTime + 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.38);
+      oscillator.connect(gain);
+      gain.connect(audioContext.destination);
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + 0.42);
+      setStatusMessage("Browser speaker test played. If you did not hear it, the issue is outside the editor pipeline.");
+    } catch (error) {
+      setStatusMessage(`Browser audio test failed: ${error?.name || "audio blocked"}.`);
+    }
+  };
+
+  const handleForcePlayFlowSound = async () => {
+    if (!flowAudioUrl) {
+      setStatusMessage("Upload or choose a Flow soundtrack first.");
+      return;
+    }
+    try {
+      const tagName = flowAudioIsVideoSoundtrack ? "video" : "audio";
+      let media = diagnosticMediaRef.current;
+      if (!media || media.tagName.toLowerCase() !== tagName || media.dataset.sourceUrl !== flowAudioUrl) {
+        media?.pause?.();
+        media = document.createElement(tagName);
+        diagnosticMediaRef.current = media;
+        media.preload = "auto";
+        media.playsInline = true;
+        media.loop = shouldLoopFlowAudio;
+        media.dataset.sourceUrl = flowAudioUrl;
+        applySafeMediaSource(media, flowAudioUrl);
+      }
+      forceMediaAudible(media);
+      media.playbackRate = 1;
+      media.currentTime = Math.max(0, Number(playheadRef.current) || 0);
+      await media.play();
+      setStatusMessage("Forced Flow soundtrack playback started. This bypasses timeline sync for media diagnostics.");
+    } catch (error) {
+      setStatusMessage(`Forced soundtrack playback failed: ${error?.name || "media playback blocked"}.`);
+    }
+  };
+
   const handlePlayPause = () => {
     if (!timelineDuration) return;
+    const isRestarting = playhead >= timelineDuration;
+    const shouldPlay = !isPlaying;
     if (playhead >= timelineDuration) {
       setPlayhead(0);
       if (flowAudioRef.current) {
@@ -2539,8 +4411,61 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           flowAudioRef.current.currentTime = 0;
         } catch {}
       }
+      if (externalAudioRef.current) {
+        try {
+          externalAudioRef.current.currentTime = 0;
+        } catch {}
+      }
     }
-    setIsPlaying(currentValue => !currentValue);
+
+    if (flowAudioUrl && flowAudioRef.current) {
+      if (shouldPlay) {
+        applySafeMediaSource(flowAudioRef.current, flowAudioUrl);
+        forceMediaAudible(flowAudioRef.current);
+        flowAudioRef.current.playbackRate = 1;
+        try {
+          flowAudioRef.current.currentTime = isRestarting
+            ? 0
+            : Math.max(0, Number(playheadRef.current) || 0);
+        } catch {}
+        flowAudioRef.current.play?.().catch(error => {
+          setIsPlaying(false);
+          setStatusMessage(
+            `Flow soundtrack could not start: ${error?.name || "playback blocked"}. Click Play again.`
+          );
+        });
+      } else {
+        flowAudioRef.current.pause?.();
+      }
+    } else if (hasExternalCleanAudio && externalAudioRef.current && externalAudioSourceProxy) {
+      if (shouldPlay) {
+        applySafeMediaSource(externalAudioRef.current, externalAudioUrl);
+        forceMediaAudible(externalAudioRef.current);
+        externalAudioRef.current.playbackRate = 1;
+        try {
+          externalAudioRef.current.currentTime = isRestarting
+            ? 0
+            : Math.max(
+                0,
+                getSourceTimelineTime(
+                  externalAudioSourceProxy,
+                  playheadRef.current,
+                  timelineBounds.timelineStart
+                )
+              );
+        } catch {}
+        externalAudioRef.current.play?.().catch(error => {
+          setIsPlaying(false);
+          setStatusMessage(
+            `Clean audio could not start: ${error?.name || "playback blocked"}. Click Play again.`
+          );
+        });
+      } else {
+        externalAudioRef.current.pause?.();
+      }
+    }
+
+    setIsPlaying(shouldPlay);
   };
 
   const handleSeek = nextValue => {
@@ -2552,7 +4477,6 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     if (!exportResult || !onComplete) return;
     onComplete({
       file: exportResult.file,
-      url: exportResult.url,
       duration: exportResult.duration,
       workflowAction: "refine-full-video",
     });
@@ -2562,10 +4486,22 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     if (!file) return;
     const previewUrl = URL.createObjectURL(file);
     objectUrlsRef.current.add(previewUrl);
+    const mediaKind = String(file?.type || "").startsWith("image/") ? "image" : "video";
     setSources(current =>
       current.map(s =>
         s.id === cameraId
-          ? { ...s, file, name: file.name, previewUrl, url: "", uploadedUrl: "", duration: 0 }
+          ? {
+              ...s,
+              file,
+              mediaKind,
+              name: file.name,
+              previewUrl,
+              url: "",
+              uploadedUrl: "",
+              duration: mediaKind === "image" ? DEFAULT_IMAGE_SEGMENT_DURATION : 0,
+              videoWidth: 0,
+              videoHeight: 0,
+            }
           : s
       )
     );
@@ -2606,7 +4542,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
 
   const handleExport = async () => {
     if (!readySources.length) {
-      setStatusMessage("Load at least one video source before exporting.");
+      setStatusMessage("Load at least one visual source before exporting.");
       return;
     }
     if (!timelineDuration || !activeCameraId || (!masterAudioSource && !flowAudioUrl)) {
@@ -2623,26 +4559,45 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     setExportProgress(0);
     setStatusMessage("Rendering browser-based multicam master (runs in real-time)...");
 
-    const exportVideos = new Map();
+    const exportVisuals = new Map();
     let recorder;
     let recorderStream;
     let audioContext;
     let audioDestination;
     let externalFlowAudio;
+    let externalCleanAudio;
+    let cameraRoomAudio;
 
     try {
       await Promise.all(
         readySources.map(async source => {
+          if (isImageSource(source)) {
+            const image = new Image();
+            image.decoding = "async";
+            image.draggable = false;
+            await new Promise((resolve, reject) => {
+              image.onload = resolve;
+              image.onerror = () => reject(new Error(`Unable to load ${source.label} for export.`));
+              if (!applySafeMediaSource(image, getSourceMediaUrl(source))) {
+                reject(new Error(`Unable to load ${source.label} for export.`));
+              }
+            });
+            exportVisuals.set(source.id, image);
+            return;
+          }
+
           const video = document.createElement("video");
-          video.src = getSourceMediaUrl(source);
           video.preload = "auto";
           video.muted = true;
           video.playsInline = true;
+          if (!applySafeMediaSource(video, getSourceMediaUrl(source))) {
+            throw new Error(`Unable to load ${source.label} for export.`);
+          }
           await new Promise((resolve, reject) => {
             video.onloadeddata = resolve;
             video.onerror = () => reject(new Error(`Unable to load ${source.label} for export.`));
           });
-          exportVideos.set(source.id, video);
+          exportVisuals.set(source.id, video);
         })
       );
 
@@ -2656,7 +4611,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       }
 
       const canvasStream = canvas.captureStream(EXPORT_FRAME_RATE);
-      const masterVideo = exportVideos.get(masterAudioCameraId);
+      const masterVideo = isVideoSource(masterAudioSource) ? exportVisuals.get(masterAudioCameraId) : null;
       audioContext = new AudioContext();
       await audioContext.resume();
       audioDestination = audioContext.createMediaStreamDestination();
@@ -2664,6 +4619,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       if (flowAudioUrl) {
         externalFlowAudio = document.createElement("audio");
         externalFlowAudio.preload = "auto";
+        externalFlowAudio.loop = shouldLoopFlowAudio;
+        externalFlowAudio.playsInline = true;
         if (!applySafeMediaSource(externalFlowAudio, flowAudioUrl)) {
           throw new Error("Unable to load Flow Edit audio.");
         }
@@ -2676,6 +4633,39 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         gainNode.gain.value = 1;
         audioSource.connect(gainNode);
         gainNode.connect(audioDestination);
+      } else if (hasExternalCleanAudio) {
+        externalCleanAudio = document.createElement("audio");
+        externalCleanAudio.preload = "auto";
+        externalCleanAudio.playsInline = true;
+        if (!applySafeMediaSource(externalCleanAudio, externalAudioUrl)) {
+          throw new Error("Unable to load external clean audio.");
+        }
+        await new Promise((resolve, reject) => {
+          externalCleanAudio.onloadeddata = resolve;
+          externalCleanAudio.onerror = () => reject(new Error("Unable to load external clean audio."));
+        });
+        const cleanAudioSource = audioContext.createMediaElementSource(externalCleanAudio);
+        const cleanGainNode = audioContext.createGain();
+        cleanGainNode.gain.value = 1;
+        cleanAudioSource.connect(cleanGainNode);
+        cleanGainNode.connect(audioDestination);
+
+        if (externalAudioMixMode === "low_camera" && isVideoSource(masterAudioSource)) {
+          cameraRoomAudio = document.createElement("audio");
+          cameraRoomAudio.preload = "auto";
+          cameraRoomAudio.playsInline = true;
+          if (applySafeMediaSource(cameraRoomAudio, getSourceMediaUrl(masterAudioSource))) {
+            await new Promise(resolve => {
+              cameraRoomAudio.onloadeddata = resolve;
+              cameraRoomAudio.onerror = resolve;
+            });
+            const roomAudioSource = audioContext.createMediaElementSource(cameraRoomAudio);
+            const roomGainNode = audioContext.createGain();
+            roomGainNode.gain.value = 0.16;
+            roomAudioSource.connect(roomGainNode);
+            roomGainNode.connect(audioDestination);
+          }
+        }
       } else if (masterVideo) {
         const audioSource = audioContext.createMediaElementSource(masterVideo);
         const gainNode = audioContext.createGain();
@@ -2715,7 +4705,38 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           setExportProgress(exportPlayhead / timelineDuration);
 
           if (externalFlowAudio) {
-            syncMediaElement(externalFlowAudio, exportPlayhead, true, {
+            syncMediaElement(
+              externalFlowAudio,
+              getLoopedTrackTime(exportPlayhead, flowEditPlan?.audioDuration, shouldLoopFlowAudio),
+              true,
+              {
+                muted: false,
+                volume: 1,
+                playbackRate: 1,
+                driftThreshold: 0.24,
+              }
+            );
+          }
+          if (externalCleanAudio && externalAudioSourceProxy) {
+            syncMediaElement(
+              externalCleanAudio,
+              getSourceTimelineTime(externalAudioSourceProxy, exportPlayhead, timelineBounds.timelineStart),
+              true,
+              {
+                muted: false,
+                volume: 1,
+                playbackRate: 1,
+                driftThreshold: 0.24,
+              }
+            );
+          }
+          if (cameraRoomAudio && masterAudioSource) {
+            const roomTime = getSourceTimelineTime(
+              masterAudioSource,
+              exportPlayhead,
+              timelineBounds.timelineStart
+            );
+            syncMediaElement(cameraRoomAudio, roomTime, isSourceAvailableAtTime(masterAudioSource, roomTime), {
               muted: false,
               volume: 1,
               playbackRate: 1,
@@ -2724,28 +4745,39 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           }
 
           if (isSingleSourceWorkflow) {
-            const currentSegment = getActiveSegmentAtTime(
-              normalizedSingleCamSegments,
-              exportPlayhead
-            );
-            const sourceTime = mapTimelineTimeToSourceTime(currentSegment, exportPlayhead);
-            const sourceVideo = exportVideos.get(currentSegment?.cameraId || singleCamSource?.id);
+            const currentSegment =
+              flowEditEnabled && activeFlowSegments.length
+                ? getFlowSegmentAtTime(activeFlowSegments, exportPlayhead)
+                : getActiveSegmentAtTime(normalizedSingleCamSegments, exportPlayhead);
+            const sourceVideo = exportVisuals.get(currentSegment?.cameraId || singleCamSource?.id);
+            const sourceTime =
+              flowEditEnabled && currentSegment?.sourceTimeByCameraId
+                ? getFlowSourceTimeAtPlayhead(
+                    singleCamSource,
+                    currentSegment,
+                    exportPlayhead,
+                    timelineBounds.timelineStart
+                  )
+                : mapTimelineTimeToSourceTime(currentSegment, exportPlayhead);
             const isInRange = Number.isFinite(sourceTime);
             syncMediaElement(sourceVideo, sourceTime, isInRange, {
               muted: true,
               volume: 0,
               driftThreshold: 0.24,
+              playbackRate: currentSegment?.playbackRate || 1,
             });
-            drawVideoToCanvas(
+            drawVisualToCanvas(
               context,
               canvas,
               sourceVideo,
               singleCamSource?.label,
-              singleCamSegmentFraming[currentSegment?.id] || { zoom: 1, zoomAnchor: "center" }
+              (flowEditEnabled
+                ? flowSegmentFraming[currentSegment?.id]
+                : singleCamSegmentFraming[currentSegment?.id]) || { zoom: 1, zoomAnchor: "center" }
             );
           } else {
             readySources.forEach(source => {
-              const video = exportVideos.get(source.id);
+              const video = exportVisuals.get(source.id);
               const exportFlowSegment = flowEditEnabled
                 ? getFlowSegmentAtTime(activeFlowSegments, exportPlayhead)
                 : null;
@@ -2789,19 +4821,24 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
               .filter(Boolean)
               .slice(0, 6)
               .map((cameraId, index) => ({
-                video: exportVideos.get(cameraId),
+                video: exportVisuals.get(cameraId),
                 label: readySources.find(source => source.id === cameraId)?.label || cameraId,
                 framing: index === 0 ? activeSingleCamFraming : {},
               }))
               .filter(feed => feed.video);
-            drawCompositeVideoToCanvas(context, canvas, {
+            drawCompositeVisualToCanvas(context, canvas, {
               layoutMode: exportLayout.layoutMode,
-              primaryVideo: exportVideos.get(currentSegment?.cameraId),
-              secondaryVideo: exportVideos.get(exportLayout.secondaryCameraId),
+              primaryVideo: exportVisuals.get(currentSegment?.cameraId),
+              secondaryVideo: exportVisuals.get(exportLayout.secondaryCameraId),
               primaryLabel: currentCameraLabel,
+              primaryFraming:
+                flowEditEnabled && currentSegment?.id
+                  ? normalizeSegmentFraming(flowSegmentFraming[currentSegment?.id])
+                  : activeSingleCamFraming,
               secondaryLabel: readySources.find(
                 source => source.id === exportLayout.secondaryCameraId
               )?.label,
+              transitionState: getFlowTransitionState(currentSegment, exportPlayhead),
               visibleFeeds,
             });
           }
@@ -2847,10 +4884,16 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     } finally {
       setIsExporting(false);
       setExportProgress(0);
-      exportVideos.forEach(video => {
-        video.pause();
-        video.removeAttribute("src");
-        video.load();
+      exportVisuals.forEach(video => {
+        if (typeof video.pause === "function") {
+          video.pause();
+        }
+        if (typeof video.removeAttribute === "function") {
+          video.removeAttribute("src");
+        }
+        if (typeof video.load === "function") {
+          video.load();
+        }
       });
       if (recorderStream) {
         recorderStream.getTracks().forEach(track => track.stop());
@@ -2863,6 +4906,16 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         externalFlowAudio.removeAttribute("src");
         externalFlowAudio.load();
       }
+      if (externalCleanAudio) {
+        externalCleanAudio.pause();
+        externalCleanAudio.removeAttribute("src");
+        externalCleanAudio.load();
+      }
+      if (cameraRoomAudio) {
+        cameraRoomAudio.pause();
+        cameraRoomAudio.removeAttribute("src");
+        cameraRoomAudio.load();
+      }
     }
   };
 
@@ -2873,8 +4926,14 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       );
       return;
     }
+    if (readySources.some(isImageSource)) {
+      setStatusMessage(
+        "Story slides with images currently export in-browser so motion treatment and timing stay accurate."
+      );
+      return;
+    }
     if (!readySources.length) {
-      setStatusMessage("Load at least one video source before exporting.");
+      setStatusMessage("Load at least one visual source before exporting.");
       return;
     }
     if (!timelineDuration) {
@@ -2898,14 +4957,84 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       for (let i = 0; i < readySources.length; i++) {
         const source = readySources[i];
         setExportProgress((i / readySources.length) * 0.5);
-        setStatusMessage(`Uploading ${source.label || `source ${i + 1}`}...`);
+        const sourceLabel = source.label || `source ${i + 1}`;
+        setStatusMessage(`Uploading ${sourceLabel} (${i + 1}/${readySources.length})...`);
 
         let remoteUrl = source.url || source.uploadedUrl;
         if (!remoteUrl && source.file) {
-          const safeName = source.file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+          // --- FAST PATH: try local worker for large files ---
+          const useLocalWorker = source.file.size > 200 * 1024 * 1024 && user?.uid;
+          if (useLocalWorker) {
+            try {
+              setStatusMessage(`Sending ${sourceLabel} to local worker...`);
+              const workerResult = await uploadViaLocalWorker(source.file, sourceLabel, user.uid);
+              if (workerResult?.url) {
+                remoteUrl = workerResult.url;
+                setStatusMessage(
+                  workerResult.size_saved_pct > 10
+                    ? `${sourceLabel} ingested (${formatMediaBytes(workerResult.transcoded_size)}, ${workerResult.size_saved_pct}% smaller)`
+                    : `${sourceLabel} ingested by worker`
+                );
+              }
+            } catch (workerError) {
+              console.warn("Local worker failed for server render, using direct upload:", workerError.message);
+              setStatusMessage(`Worker unavailable — uploading ${sourceLabel} directly...`);
+            }
+          }
+
+          if (!remoteUrl) {
+          // Compress large video files before upload
+          let uploadFile = source.file;
+          if (source.file.size > UPLOAD_COMPRESSION_THRESHOLD_BYTES) {
+            setStatusMessage(`Checking if ${sourceLabel} can be compressed...`);
+            const compressed = await compressVideoFile(source.file, sourceLabel, () => {});
+            if (compressed) {
+              const pctSaved = Math.round((1 - compressed.compressedSize / compressed.originalSize) * 100);
+              const summary = `${sourceLabel} compressed: ${formatMediaBytes(compressed.originalSize)} → ${formatMediaBytes(compressed.compressedSize)} (${pctSaved}% smaller)`;
+              toast.success(summary, { duration: 5000 });
+              setStatusMessage(`${summary}. Uploading...`);
+              uploadFile = compressed.file;
+            } else {
+              setStatusMessage(
+                `Cannot compress ${sourceLabel} in browser. Uploading original ${formatMediaBytes(source.file.size)}...`
+              );
+            }
+          }
+
+          const safeName = uploadFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
           const tempRef = ref(storage, `temp/multicam/${user.uid}/${Date.now()}_${safeName}`);
-          await uploadBytes(tempRef, source.file);
+          const uploadStartTime = Date.now();
+          await new Promise((resolve, reject) => {
+            const task = uploadBytesResumable(tempRef, uploadFile, {
+              contentType: uploadFile.type || "video/mp4",
+            });
+            task.on(
+              "state_changed",
+              snapshot => {
+                const transferred = snapshot.bytesTransferred || 0;
+                const total = snapshot.totalBytes || uploadFile.size || 0;
+                const pct = total ? (transferred / total) * 100 : 0;
+                const elapsedSec = Math.max(1, (Date.now() - uploadStartTime) / 1000);
+                const speedBps = transferred / elapsedSec;
+                const speedStr = speedBps > 1024 * 1024
+                  ? `${(speedBps / (1024 * 1024)).toFixed(1)} MB/s`
+                  : `${Math.round(speedBps / 1024)} KB/s`;
+                const remainingSec = speedBps > 0 ? (total - transferred) / speedBps : 0;
+                const eta = remainingSec > 120
+                  ? `~${Math.round(remainingSec / 60)} min left`
+                  : remainingSec > 30
+                    ? `~${Math.round(remainingSec)} sec left`
+                    : "";
+                setStatusMessage(
+                  `Uploading ${sourceLabel} (${i + 1}/${readySources.length}) — ${formatMediaBytes(transferred)} / ${formatMediaBytes(total)} (${pct.toFixed(1)}%, ${speedStr}${eta ? `, ${eta}` : ""})...`
+                );
+              },
+              reject,
+              resolve
+            );
+          });
           remoteUrl = await getDownloadURL(tempRef);
+        }
         }
         if (!remoteUrl) throw new Error(`No video file for ${source.label}.`);
 
@@ -2915,6 +5044,40 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           label: source.label || `Camera ${i + 1}`,
           offset_seconds: Number(source.offsetSeconds) || 0,
         });
+      }
+      setSources(currentSources =>
+        currentSources.map(source => {
+          const uploaded = sourcesPayload.find(item => item.id === source.id);
+          return uploaded ? { ...source, uploadedUrl: uploaded.url } : source;
+        })
+      );
+
+      let externalAudioPayload = null;
+      if (hasExternalCleanAudio && externalAudioTrack) {
+        setStatusMessage("Uploading external clean audio for server render...");
+        const externalAudioRemoteUrl = await uploadMediaForBackendSync({
+          user,
+          storage,
+          file: externalAudioTrack.file,
+          fallbackUrl: externalAudioTrack.url,
+          folder: "temp/multicam-clean-sync-audio",
+          label: "External clean audio",
+        });
+        externalAudioPayload = {
+          url: externalAudioRemoteUrl,
+          offset_seconds: Number(externalAudioTrack.offsetSeconds || 0),
+          mix_mode: externalAudioMixMode,
+          cache_key: buildBackendMediaCacheKey(externalAudioTrack.file) || externalAudioTrack.name,
+        };
+        setExternalAudioTrack(current =>
+          current
+            ? {
+                ...current,
+                url: externalAudioRemoteUrl,
+                cacheKey: externalAudioPayload.cache_key,
+              }
+            : current
+        );
       }
 
       setExportProgress(0.6);
@@ -2939,6 +5102,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           overlapDuration:
             readySources.length > 1 ? overlapBounds.overlapDuration || 0 : timelineDuration,
           outputAspectRatio: outputAspectRatio,
+          externalAudio: externalAudioPayload,
         }),
       });
 
@@ -2995,27 +5159,25 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
             <span className="nle-eyebrow">Multicam Studio</span>
             <h3>{headerTitle}</h3>
             <p>{headerDescription}</p>
-            {!isSingleSourceWorkflow && (
-              <div className="nle-mode-switcher">
-                <button
-                  type="button"
-                  className={`nle-mode-btn ${studioMode === "combine" ? "is-active" : ""}`}
-                  onClick={() => setStudioMode("combine")}
-                >
-                  Cam Combiner
-                </button>
-                <button
-                  type="button"
-                  className={`nle-mode-btn ${studioMode === "flow" ? "is-active" : ""}`}
-                  onClick={() => setStudioMode("flow")}
-                >
-                  Flow Edit
-                </button>
-                {flowEditEnabled && (
-                  <span className="nle-chip nle-chip-secondary">Flow edit active</span>
-                )}
-              </div>
-            )}
+            <div className="nle-mode-switcher">
+              <button
+                type="button"
+                className={`nle-mode-btn ${studioMode === "combine" ? "is-active" : ""}`}
+                onClick={() => setStudioMode("combine")}
+              >
+                {isSingleSourceWorkflow ? "Single Lens" : "Cam Combiner"}
+              </button>
+              <button
+                type="button"
+                className={`nle-mode-btn ${studioMode === "flow" ? "is-active" : ""}`}
+                onClick={() => setStudioMode("flow")}
+              >
+                Flow Edit
+              </button>
+              {flowEditEnabled && (
+                <span className="nle-chip nle-chip-secondary">Flow edit active</span>
+              )}
+            </div>
             <div className="nle-billing-strip">
               <span className="nle-billing-pill is-included">Included workflow</span>
               <span className="nle-billing-pill">{billingMessage}</span>
@@ -3051,6 +5213,11 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                 Confidence: {Math.round(directorConfidence * 100)}%
               </span>
               <span className="nle-chip nle-chip-secondary">Focus: {activeFocusSummary}</span>
+              {!isSingleSourceWorkflow && autoDirectorSummary?.momentCount ? (
+                <span className="nle-chip nle-chip-secondary">
+                  Magic: {autoDirectorSummary.magicSummary}
+                </span>
+              ) : null}
             </div>
           </div>
 
@@ -3062,8 +5229,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
             </div>
             <div className="nle-director-stat-card">
               <span>{deckAudioLabel}</span>
-              <strong>{masterAudioSource?.label || "Not set"}</strong>
-              <small>Audio anchor for the whole render</small>
+              <strong>{deckAudioValue}</strong>
+              <small>{deckAudioNote}</small>
             </div>
             <div className="nle-director-stat-card">
               <span>{deckTimelineLabel}</span>
@@ -3072,7 +5239,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                 {autoDirectorSummary?.switchesCount
                   ? `${autoDirectorSummary.switchesCount} auto cuts · ${autoDirectorSummary.averageHold.toFixed(
                       1
-                    )}s avg hold`
+                    )}s avg hold${autoDirectorSummary.momentCount ? ` · ${autoDirectorSummary.momentCount} magic moment${autoDirectorSummary.momentCount === 1 ? "" : "s"}` : ""}`
                   : workflowTitle}
               </small>
             </div>
@@ -3124,16 +5291,22 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           </div>
         </div>
 
-        {!isSingleSourceWorkflow && isFlowWorkspace && (
+        {isFlowWorkspace && (
           <div className="nle-flow-shell">
             <div className="nle-flow-topline">
               <div className="nle-flow-copy">
-                <span className="nle-eyebrow">Flow Edit / Sync to Sound</span>
-                <strong>Auto-switch cameras and shape motion to the rhythm, energy, and emotion of audio.</strong>
+                <span className="nle-eyebrow">
+                  {isSingleSourceWorkflow ? "Flow Edit / Highlight Pull" : "Flow Edit / Sync to Sound"}
+                </span>
+                <strong>
+                  {isSingleSourceWorkflow
+                    ? "Find the best moments inside one full video and mood-match them to the selected audio."
+                    : "Auto-switch cameras and shape motion to the rhythm, energy, and emotion of audio."}
+                </strong>
                 <p>
-                  Everything stays local during preview. Bring your boring audio if you want to.
-                  We will still shape the mood, pace, and contrast so the edit feels smarter than
-                  the source material had any right to feel.
+                  {isSingleSourceWorkflow
+                    ? "Everything stays local during preview. Upload a soundtrack or use the original voice bed; Flow Edit will build contrast, breathing room, punch-ins, and release moments instead of dragging one continuous take."
+                    : "Everything stays local during preview. Bring your boring audio if you want to. We will still shape the mood, pace, and contrast so the edit feels smarter than the source material had any right to feel."}
                 </p>
               </div>
               <div className="nle-flow-status-stack">
@@ -3174,7 +5347,12 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                       event.target.value = "";
                     }}
                   />
-                  <button className="nle-btn secondary" type="button" onClick={handleUseMasterAudioForFlow}>
+                  <button
+                    className="nle-btn secondary"
+                    type="button"
+                    onClick={handleUseMasterAudioForFlow}
+                    disabled={!masterAudioSource || !isVideoSource(masterAudioSource)}
+                  >
                     Use Master Audio
                   </button>
                   <button className="nle-btn secondary" type="button" onClick={() => flowAudioInputRef.current?.click()}>
@@ -3189,9 +5367,47 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                     Clear
                   </button>
                 </div>
+                {flowAudioUrl && (
+                  <div className="nle-flow-sound-check">
+                    <div>
+                      <strong>Sound Check</strong>
+                      <span>
+                        This plays the exact Flow Edit soundtrack with native browser controls. If captions move but this is silent, check tab/site/system output.
+                      </span>
+                    </div>
+                    {flowAudioIsVideoSoundtrack ? (
+                      <video
+                        controls
+                        playsInline
+                        preload="metadata"
+                        src={getSafeMediaSource(flowAudioUrl)}
+                        onLoadedMetadata={event => forceMediaAudible(event.currentTarget)}
+                        onPlay={event => forceMediaAudible(event.currentTarget)}
+                        onVolumeChange={event => forceMediaAudible(event.currentTarget)}
+                      />
+                    ) : (
+                      <audio
+                        controls
+                        preload="metadata"
+                        src={getSafeMediaSource(flowAudioUrl)}
+                        onLoadedMetadata={event => forceMediaAudible(event.currentTarget)}
+                        onPlay={event => forceMediaAudible(event.currentTarget)}
+                        onVolumeChange={event => forceMediaAudible(event.currentTarget)}
+                      />
+                    )}
+                    <div className="nle-flow-sound-check-actions">
+                      <button className="nle-btn secondary" type="button" onClick={handleTestBrowserAudio}>
+                        Test Browser Sound
+                      </button>
+                      <button className="nle-btn secondary" type="button" onClick={handleForcePlayFlowSound}>
+                        Force Play Soundtrack
+                      </button>
+                    </div>
+                  </div>
+                )}
                 <div className="nle-flow-source-note">
                   {flowEditInsight ||
-                    "Music, speech, choir, and ambient beds each trigger different pacing logic."}
+                    "Music, speech, choir, and ambient beds each trigger different pacing logic. Image slides can ride the same soundtrack with story-style motion."}
                 </div>
               </div>
 
@@ -3204,6 +5420,25 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                   <span className="nle-chip nle-chip-secondary">
                     {flowEditEnabled ? "Preview live" : "Optional layer"}
                   </span>
+                </div>
+                <div className="nle-flow-template-block">
+                  <div className="nle-flow-template-copy">
+                    <strong>AI Aura Template</strong>
+                    <span>Pick the creative director vibe first. It shapes motion, polish, transitions, and overall pressure.</span>
+                  </div>
+                  <div className="nle-flow-style-row nle-flow-template-row">
+                    {FLOW_AURA_TEMPLATE_PRESETS.map(template => (
+                      <button
+                        key={template.id}
+                        type="button"
+                        className={`nle-flow-style-card ${flowAuraTemplateId === template.id ? "is-active" : ""}`}
+                        onClick={() => handleApplyFlowAuraTemplate(template.id)}
+                      >
+                        <strong>{template.label}</strong>
+                        <span>{template.summary}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 <div className="nle-flow-style-row">
                   {FLOW_EDIT_STYLE_PRESETS.map(style => (
@@ -3218,6 +5453,27 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                     </button>
                   ))}
                 </div>
+                {(isImageStoryEligible || isImageStoryFlow) && (
+                  <div className="nle-flow-template-block">
+                    <div className="nle-flow-template-copy">
+                      <strong>Image Story Template</strong>
+                      <span>Choose the kind of magic you want the soundtrack to pull out of your images.</span>
+                    </div>
+                    <div className="nle-flow-style-row nle-flow-template-row">
+                      {IMAGE_STORY_TEMPLATE_PRESETS.map(template => (
+                        <button
+                          key={template.id}
+                          type="button"
+                          className={`nle-flow-style-card ${flowImageStoryTemplateId === template.id ? "is-active" : ""}`}
+                          onClick={() => handleApplyImageStoryTemplate(template.id)}
+                        >
+                          <strong>{template.label}</strong>
+                          <span>{template.summary}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 {flowEditVariants.length > 0 && (
                   <div className="nle-flow-variant-row">
                     {flowEditVariants.map(variant => (
@@ -3225,7 +5481,9 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                         <strong>{variant.label}</strong>
                         <span>
                           {variant.clipCount} cuts · {variant.audioType}
-                          {variant.rescueMode ? " · rescue" : ""}
+                          {variant.rescueMode
+                            ? ` · ${variant.rescueFinishMode === "premium rescue" ? "premium rescue" : "rescue"}`
+                            : ""}
                         </span>
                       </div>
                     ))}
@@ -3236,7 +5494,13 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                     className="nle-btn"
                     type="button"
                     onClick={handleGenerateFlowEdit}
-                    disabled={isGeneratingFlowEdit || readySources.length < 2}
+                    disabled={
+                      isGeneratingFlowEdit ||
+                      (!(
+                        readySources.length >= 2 ||
+                        (readySources.length === 1 && isVideoSource(readySources[0]))
+                      ))
+                    }
                   >
                     {isGeneratingFlowEdit ? "Generating..." : "Flow Edit"}
                   </button>
@@ -3256,6 +5520,13 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                   >
                     Add Cut at Playhead
                   </button>
+                  <button
+                    className={`nle-btn secondary ${flowIntensityMode === "harder" ? "is-hot" : ""}`}
+                    type="button"
+                    onClick={toggleFlowIntensityMode}
+                  >
+                    {flowIntensityMode === "harder" ? "Impact On" : "Hit Harder"}
+                  </button>
                 </div>
               </div>
 
@@ -3269,7 +5540,9 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                     <span className="nle-chip">{flowEditPlan.audioType}</span>
                   )}
                   {flowEditPlan?.rescueMode && (
-                    <span className="nle-chip nle-chip-secondary">Mismatch rescue</span>
+                    <span className="nle-chip nle-chip-secondary">
+                      {flowEditPlan?.rescueFinishMode === "premium rescue" ? "Premium rescue" : "Mismatch rescue"}
+                    </span>
                   )}
                 </div>
                 <div className="nle-flow-metric-grid">
@@ -3287,10 +5560,18 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                     <span>Generated Cuts</span>
                     <strong>{flowEditPlan?.segments?.length || 0}</strong>
                     <small>
-                      {flowEditPlan?.rescueSummary ||
+                      {flowEditPlan?.rescuePolishSummary ||
+                        flowEditPlan?.rescueSummary ||
                         "Every segment keeps manual override available after generation."}
                     </small>
                   </div>
+                  {flowEditPlan?.loopsAudio && (
+                    <div className="nle-director-stat-card">
+                      <span>Audio Bed</span>
+                      <strong>Looping</strong>
+                      <small>Short soundtrack will repeat smoothly until the full edit finishes.</small>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -3298,7 +5579,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         )}
 
         <div className="nle-container" ref={scrollContainerRef}>
-          <div className="nle-preview-panel">
+          <div className="nle-preview-panel" ref={previewPanelRef}>
             <div className="nle-stage-command-bar">
               <div className="nle-stage-command-copy">
                 <span className="nle-stage-kicker">{stageKickerLabel}</span>
@@ -3333,7 +5614,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                     <span className="nle-stage-overlay-text">{directorSnapshot.modeTitle}</span>
                     {flowEditEnabled && flowEditPlan?.audioType && (
                       <span className="nle-stage-overlay-text">
-                        Flow {flowEditPlan.audioType} · {flowEditStyleId}
+                        Flow {flowEditPlan.audioType} · {activeFlowAuraPreset.label}
                       </span>
                     )}
                   </div>
@@ -3349,30 +5630,60 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                     )}
                   </div>
                 </div>
-                {readySources.map(source => (
-                  <video
-                    key={`preview-${source.id}`}
-                    ref={node => {
-                      previewVideoRefs.current[source.id] = node;
-                    }}
-                    className={`nle-preview-video ${source.id === activeCameraId ? "is-active" : ""} ${source.id === secondaryCameraId ? "is-secondary" : ""}`}
-                    src={getSourceMediaUrl(source)}
-                    playsInline
-                    muted
-                    style={previewVideoStylesByCameraId[source.id]}
-                  />
-                ))}
+                {readySources.map(source => {
+                  const previewClassName = `nle-preview-video ${source.id === activeCameraId ? "is-active" : ""} ${
+                    source.id === secondaryCameraId ? "is-secondary" : ""
+                  }`;
+                  if (isImageSource(source)) {
+                    return (
+                      <img
+                        key={`preview-${source.id}`}
+                        ref={node => {
+                          previewVideoRefs.current[source.id] = node;
+                          if (node) {
+                            applySafeMediaSource(node, getSourceMediaUrl(source));
+                          }
+                        }}
+                        className={previewClassName}
+                        alt={source.label || source.name || "Story visual"}
+                        draggable="false"
+                        style={previewVideoStylesByCameraId[source.id]}
+                      />
+                    );
+                  }
+                  return (
+                    <video
+                      key={`preview-${source.id}`}
+                      ref={node => {
+                        previewVideoRefs.current[source.id] = node;
+                        if (node) {
+                          applySafeMediaSource(node, getSourceMediaUrl(source));
+                        }
+                      }}
+                      className={previewClassName}
+                      playsInline
+                      muted
+                      style={previewVideoStylesByCameraId[source.id]}
+                    />
+                  );
+                })}
                 {!readySources.length ? (
                   <div className="nle-empty-state">
-                    <strong>Load your first recording to start editing.</strong>
+                    <strong>Load your first visual to start editing.</strong>
                     <span>
-                      You can keep this as a single-camera edit, or add more angles below when you
-                      want multicam switching.
+                      Start with a full recording, a stack of image slides, or mix both when you
+                      want story-style pacing.
                     </span>
                   </div>
                 ) : null}
                 {edgeBlurStyle && <div style={edgeBlurStyle} />}
                 {vignetteStyle && <div style={vignetteStyle} />}
+                {flowTransitionOverlayStyle && (
+                  <div
+                    className="nle-preview-transition-overlay"
+                    style={flowTransitionOverlayStyle}
+                  />
+                )}
                 {overlayStyle && <div style={overlayStyle} />}
                 {grainStyle && <div style={grainStyle} />}
                 {letterboxStyle && (
@@ -3601,19 +5912,238 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                 />
               </div>
             )}
+            <div className="nle-preview-scroll-rail" aria-label="Preview panel scroll controls">
+              <button
+                type="button"
+                className="nle-preview-scroll-btn"
+                onClick={() => scrollPreviewPanel(-1)}
+                aria-label="Scroll preview controls up"
+              >
+                ↑
+              </button>
+              <button
+                type="button"
+                className="nle-preview-scroll-btn"
+                onClick={() => scrollPreviewPanel(1)}
+                aria-label="Scroll preview controls down"
+              >
+                ↓
+              </button>
+            </div>
           </div>
 
-          <div className="nle-panel nle-camera-panel">
+          <div className="nle-right-stack">
+            {!isSingleSourceWorkflow && !isFlowWorkspace && (
+              <div className={`nle-panel nle-clean-audio-panel ${hasExternalCleanAudio ? "is-active" : ""}`}>
+                <div className="nle-panel-header">
+                  <div>
+                    <h4>External Clean Audio</h4>
+                    <p>
+                      Upload a Behringer/Audacity mic recording, sync it to the cameras, then let
+                      the final edit use that clean sound instead of rough phone audio.
+                    </p>
+                  </div>
+                  <div className="nle-panel-actions">
+                    <input
+                      ref={externalAudioInputRef}
+                      type="file"
+                      accept="audio/*,video/*"
+                      onChange={event => {
+                        handleLoadExternalAudioFile(event.target.files?.[0]);
+                        event.target.value = "";
+                      }}
+                      className="nle-hidden-input"
+                    />
+                    <button
+                      className="nle-btn secondary"
+                      type="button"
+                      onClick={() => externalAudioInputRef.current?.click()}
+                    >
+                      {externalAudioTrack ? "Replace Clean Audio" : "Upload Clean Audio"}
+                    </button>
+                  </div>
+                </div>
+
+                <label className="nle-clean-audio-toggle">
+                  <input
+                    type="checkbox"
+                    checked={useExternalCleanAudio}
+                    disabled={!externalAudioTrack}
+                    onChange={event => {
+                      if (event.target.checked && !externalAudioTrack) {
+                        toast.error("Upload external clean audio first.");
+                        return;
+                      }
+                      setUseExternalCleanAudio(event.target.checked);
+                      setStatusMessage(
+                        event.target.checked
+                          ? "Clean audio is now the main audio bed. Sync cameras or nudge manually."
+                          : "Clean audio is parked. Camera audio is back in control."
+                      );
+                    }}
+                  />
+                  <span>Use external clean audio</span>
+                </label>
+
+                <p className="nle-clean-audio-tip">
+                  For best syncing, clap once at the start of recording so AutoPromote can lock the
+                  waveform spike quickly.
+                </p>
+                {shouldUseBackendCleanAudioSync && (
+                  <p className="nle-clean-audio-tip is-warning">
+                    This project is large, so AutoPromote will process syncing in the background for
+                    better stability. Browser waveform matching stays off to avoid freezing Chrome or Firefox.
+                  </p>
+                )}
+                {cleanAudioSyncJob && (
+                  <div className="nle-clean-audio-job">
+                    <strong>
+                      {cleanAudioSyncJob.status === "ready_for_review"
+                        ? "Ready for review"
+                        : cleanAudioSyncJob.status === "failed"
+                          ? "Sync needs attention"
+                          : "Background sync running"}
+                    </strong>
+                    <span>{cleanAudioSyncJob.detail || cleanAudioSyncJob.stage || cleanAudioSyncJob.status}</span>
+                    <div className="nle-clean-audio-progress">
+                      <span style={{ width: `${Math.max(4, Math.min(100, Number(cleanAudioSyncJob.progress || 0)))}%` }} />
+                    </div>
+                  </div>
+                )}
+
+                {externalAudioTrack ? (
+                  <>
+                    <div className="nle-clean-audio-track">
+                      <div>
+                        <strong>{externalAudioTrack.name || "External clean audio"}</strong>
+                        <span>
+                          {formatDurationLabel(externalAudioTrack.duration || 0)} · offset{" "}
+                          {(Number(externalAudioTrack.offsetSeconds) || 0).toFixed(2)}s
+                        </span>
+                      </div>
+                      <div className="nle-waveform-strip nle-clean-audio-meter">
+                        {audioAnalysisByCameraId["external-clean-audio"]?.bars?.length ? (
+                          audioAnalysisByCameraId["external-clean-audio"].bars.map((height, index) => (
+                            <span
+                              key={`external-wave-${index}`}
+                              className="nle-waveform-bar"
+                              style={{ height: `${height}%` }}
+                            />
+                          ))
+                        ) : (
+                          <span className="nle-waveform-placeholder">
+                            Waveform loading or manual sync mode
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="nle-clean-audio-offset-row">
+                      <label className="nle-field-block">
+                        <span>Clean Audio Offset Seconds</span>
+                        <input
+                          className="nle-input"
+                          type="number"
+                          step="0.01"
+                          value={Number(externalAudioTrack.offsetSeconds) || 0}
+                          onChange={event => handleExternalAudioOffsetChange(event.target.value)}
+                        />
+                      </label>
+                      <div className="nle-clean-audio-nudges">
+                        {[-1, -0.1, 0.1, 1].map(delta => (
+                          <button
+                            key={`clean-nudge-${delta}`}
+                            className="nle-mini-btn"
+                            type="button"
+                            onClick={() => handleNudgeExternalAudio(delta)}
+                          >
+                            {delta > 0 ? "+" : ""}
+                            {delta}s
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="nle-clean-audio-mix-grid">
+                      {[
+                        {
+                          id: "external_only",
+                          label: "External Only",
+                          copy: "Clean mic becomes the final voice bed.",
+                        },
+                        {
+                          id: "low_camera",
+                          label: "Low Camera Bed",
+                          copy: "Keep camera room tone quietly underneath.",
+                        },
+                        {
+                          id: "mute_camera",
+                          label: "Mute Cameras",
+                          copy: "Silence all phone/camera audio.",
+                        },
+                      ].map(option => (
+                        <button
+                          key={option.id}
+                          type="button"
+                          className={`nle-mix-option ${externalAudioMixMode === option.id ? "is-active" : ""}`}
+                          onClick={() => setExternalAudioMixMode(option.id)}
+                        >
+                          <strong>{option.label}</strong>
+                          <span>{option.copy}</span>
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="nle-sync-actions">
+                      <button
+                        className="nle-btn"
+                        type="button"
+                        onClick={handleSyncAllCamerasToExternalAudio}
+                        disabled={!externalAudioUrl || syncingCameraId}
+                      >
+                        {syncingCameraId
+                          ? "Syncing..."
+                          : shouldUseBackendCleanAudioSync
+                            ? `Background Sync (${cleanAudioSyncCreditEstimate} cr)`
+                            : "Auto-Sync All Cameras"}
+                      </button>
+                      <button
+                        className="nle-btn secondary"
+                        type="button"
+                        onClick={handleClearExternalAudio}
+                      >
+                        Clear Clean Audio
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="nle-clean-audio-empty">
+                    <strong>Podcast-ready audio lane</strong>
+                    <span>
+                      Upload WAV, MP3, M4A, or a video file with the clean sound. If waveform sync
+                      cannot lock, the manual offset controls stay available.
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {!isSingleSourceWorkflow && (
+              <div className="nle-panel nle-camera-panel">
             <div className="nle-panel-header">
               <div>
-                <h4>{cameraPanelTitle}</h4>
-                <p>{cameraPanelDescription}</p>
+                <h4>{isFlowWorkspace ? "Flow Visuals" : cameraPanelTitle}</h4>
+                <p>
+                  {isFlowWorkspace
+                    ? "Images and videos become the visual pool. Flow Edit times them to the uploaded soundtrack, not camera audio."
+                    : cameraPanelDescription}
+                </p>
               </div>
               <div className="nle-panel-actions">
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="video/*"
+                  accept="video/*,image/*"
                   multiple
                   onChange={event => {
                     appendFiles(event.target.files);
@@ -3626,21 +6156,69 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                 >
-                  Add Camera Files
+                  Add Visual Files
                 </button>
               </div>
             </div>
 
             <div className="nle-camera-grid">
-              {sources.map((source, index) => {
+              {visibleCameraSources.map((source, index) => {
                 const mediaUrl = getSourceMediaUrl(source);
                 const mappedTime = getSourceTimelineTime(
                   source,
                   playhead,
                   timelineBounds.timelineStart
                 );
-                const isAvailable =
+                const timelineAvailable =
                   mappedTime >= 0 && mappedTime <= Number(source.duration || 0) - 0.01;
+                const isAvailable = isFlowWorkspace ? Boolean(mediaUrl) : timelineAvailable;
+                const isExpanded = expandedCameraId === source.id;
+                const sourceDisplayLabel = isFlowWorkspace
+                  ? `Visual ${index + 1}`
+                  : normalizeSourceLabel(source.label, index);
+                const sourceStatusLabel = isFlowWorkspace
+                  ? flowEditEnabled
+                    ? "Timed to sound"
+                    : mediaUrl
+                      ? "Ready for sound"
+                      : "Needs visual"
+                  : isAvailable
+                    ? "In sync"
+                    : "Off timeline";
+                const syncUsesCleanAudio = !isFlowWorkspace && hasExternalCleanAudio;
+                const syncButtonDisabled = isFlowWorkspace
+                  ? !mediaUrl ||
+                    isGeneratingFlowEdit ||
+                    syncingCameraId === source.id ||
+                    (!flowAudioUrl && !masterAudioSource)
+                  : !mediaUrl ||
+                    !isVideoSource(source) ||
+                    syncingCameraId === source.id ||
+                    (syncUsesCleanAudio ? !externalAudioUrl : source.id === masterAudioCameraId);
+                const syncButtonTitle = isFlowWorkspace
+                  ? !mediaUrl
+                    ? "Load an image or video first"
+                    : !flowAudioUrl && !masterAudioSource
+                      ? "Upload a Flow soundtrack or choose master audio first"
+                      : "Time this visual against the uploaded Flow soundtrack"
+                  : !mediaUrl
+                    ? "Load a video source before syncing by audio"
+                    : !isVideoSource(source)
+                      ? "Images do not contain audio to sync in Cam Combiner mode"
+                      : syncUsesCleanAudio
+                        ? externalAudioUrl
+                          ? "Match this camera to the external clean audio waveform"
+                          : "Upload external clean audio first"
+                        : source.id === masterAudioCameraId
+                          ? "This source is already the selected audio source"
+                          : "Match this camera to the selected audio source automatically";
+                const syncButtonLabel = syncingCameraId === source.id
+                  ? "Syncing..."
+                  : isFlowWorkspace
+                    ? "Sync to Sound"
+                    : syncUsesCleanAudio
+                      ? "Sync to Clean Audio"
+                      : "Sync by Audio";
                 return (
                   <article
                     key={source.id}
@@ -3652,7 +6230,10 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                     onDrop={e => {
                       e.preventDefault();
                       const droppedFile = e.dataTransfer.files?.[0];
-                      if (droppedFile?.type?.startsWith("video/")) {
+                      if (
+                        droppedFile?.type?.startsWith("video/") ||
+                        droppedFile?.type?.startsWith("image/")
+                      ) {
                         handleLoadFileForCamera(source.id, droppedFile);
                       }
                     }}
@@ -3664,25 +6245,41 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                             className="nle-camera-color-dot"
                             style={{ background: getCameraColor(source.id, sources) }}
                           />
-                          {normalizeSourceLabel(source.label, index)}
+                          {sourceDisplayLabel}
                         </strong>
-                        <span>{source.name || normalizeSourceLabel(source.label, index)}</span>
+                        <span>{source.name || sourceDisplayLabel}</span>
                       </div>
                       <span className={`nle-camera-badge ${isAvailable ? "is-live" : ""}`}>
-                        {isAvailable ? "In sync" : "Off timeline"}
+                        {sourceStatusLabel}
                       </span>
                     </div>
-                    <div className="nle-thumbnail-shell">
+                    <div className="nle-thumbnail-shell" style={getCameraMonitorFrameStyle(source)}>
                       {mediaUrl ? (
-                        <video
-                          ref={node => {
-                            thumbnailVideoRefs.current[source.id] = node;
-                          }}
-                          className="nle-thumbnail-video"
-                          src={mediaUrl}
-                          playsInline
-                          muted
-                        />
+                        isImageSource(source) ? (
+                          <img
+                            ref={node => {
+                              thumbnailVideoRefs.current[source.id] = node;
+                              if (node) {
+                                applySafeMediaSource(node, mediaUrl);
+                              }
+                            }}
+                            className="nle-thumbnail-video"
+                            alt={source.label || source.name || "Source visual"}
+                            draggable="false"
+                          />
+                        ) : (
+                          <video
+                            ref={node => {
+                              thumbnailVideoRefs.current[source.id] = node;
+                              if (node) {
+                                applySafeMediaSource(node, mediaUrl);
+                              }
+                            }}
+                            className="nle-thumbnail-video"
+                            playsInline
+                            muted
+                          />
+                        )
                       ) : (
                         <button
                           type="button"
@@ -3690,7 +6287,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                           onClick={() => {
                             const input = document.createElement("input");
                             input.type = "file";
-                            input.accept = "video/*";
+                            input.accept = "video/*,image/*";
                             input.onchange = evt => {
                               if (evt.target.files?.[0])
                                 handleLoadFileForCamera(source.id, evt.target.files[0]);
@@ -3698,112 +6295,197 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                             input.click();
                           }}
                         >
-                          Click or drop video here
+                          Click or drop image/video here
                         </button>
                       )}
                     </div>
-                    <div className="nle-waveform-strip">
-                      {audioAnalysisByCameraId[source.id]?.bars?.length ? (
-                        audioAnalysisByCameraId[source.id].bars.map((barHeight, barIndex) => (
-                          <span
-                            key={`${source.id}-wave-${barIndex}`}
-                            className="nle-waveform-bar"
-                            style={{ height: `${Math.round(barHeight * 100)}%` }}
+                    {isFlowWorkspace ? (
+                      <div className="nle-camera-quick-controls">
+                        <div className="nle-field-block">
+                          <span>Flow Role</span>
+                          <strong>{isImageSource(source) ? "Story image" : "Motion visual"}</strong>
+                        </div>
+                        <div className="nle-field-block">
+                          <span>Soundtrack</span>
+                          <strong>{flowAudioUrl ? "Uploaded sound" : masterAudioSource?.label || "Choose sound"}</strong>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="nle-camera-quick-controls">
+                        <label className="nle-field-block">
+                          <span>Offset Seconds</span>
+                          <input
+                            className="nle-input"
+                            type="number"
+                            step="0.05"
+                            value={Number(source.offsetSeconds) || 0}
+                            onChange={event => handleOffsetChange(source.id, event.target.value)}
                           />
-                        ))
-                      ) : mediaUrl ? (
-                        <span className="nle-waveform-placeholder">
-                          {audioAnalysisByCameraId[source.id]?.error
-                            ? "Waveform unavailable"
-                            : "Analyzing waveform..."}
-                        </span>
-                      ) : (
-                        <span className="nle-waveform-placeholder">
-                          Load a source to see sync hints
-                        </span>
-                      )}
-                    </div>
-                    <div className="nle-field-grid">
-                      <label className="nle-field-block">
-                        <span>Offset Seconds</span>
-                        <input
-                          className="nle-input"
-                          type="number"
-                          step="0.05"
-                          value={Number(source.offsetSeconds) || 0}
-                          onChange={event => handleOffsetChange(source.id, event.target.value)}
-                        />
-                      </label>
-                      <label className="nle-field-block nle-radio-block">
-                        <span>Use Audio</span>
-                        <input
-                          type="radio"
-                          checked={masterAudioCameraId === source.id}
-                          onChange={() => setMasterAudioCameraId(source.id)}
-                          disabled={!mediaUrl}
-                        />
-                      </label>
-                    </div>
-                    <div className="nle-source-meta-row">
-                      <span>Duration: {formatDurationLabel(source.duration || 0)}</span>
-                      <span>
-                        Source Time: {isAvailable ? formatDurationLabel(mappedTime) : "--"}
-                      </span>
-                    </div>
-                    <div className="nle-sync-actions">
-                      <button
-                        className="nle-mini-btn"
-                        type="button"
-                        onClick={() => handleNudgeOffset(source.id, -0.1)}
-                        disabled={!mediaUrl}
-                      >
-                        -0.1s
-                      </button>
-                      <button
-                        className="nle-mini-btn"
-                        type="button"
-                        onClick={() => handleNudgeOffset(source.id, 0.1)}
-                        disabled={!mediaUrl}
-                      >
-                        +0.1s
-                      </button>
-                      <button
-                        className="nle-mini-btn nle-mini-btn-accent"
-                        type="button"
-                        onClick={() => handleAlignSourceStartToPlayhead(source.id)}
-                        disabled={!mediaUrl}
-                        title="Align this source so its start begins at the current playhead"
-                      >
-                        Start Here
-                      </button>
-                      <button
-                        className="nle-mini-btn nle-mini-btn-accent"
-                        type="button"
-                        onClick={() => handleAutoSyncToMasterAudio(source.id)}
-                        disabled={
-                          !mediaUrl ||
-                          source.id === masterAudioCameraId ||
-                          syncingCameraId === source.id
-                        }
-                        title="Match this source to the selected audio source automatically"
-                      >
-                        {syncingCameraId === source.id ? "Syncing..." : "Sync by Audio"}
-                      </button>
-                    </div>
+                        </label>
+                        <label className="nle-field-block nle-radio-block">
+                          <span>Use Audio</span>
+                          <input
+                            type="radio"
+                            checked={masterAudioCameraId === source.id}
+                            onChange={() => setMasterAudioCameraId(source.id)}
+                            disabled={!mediaUrl || !isVideoSource(source)}
+                          />
+                        </label>
+                      </div>
+                    )}
+                    {isExpanded && (
+                      <div className="nle-camera-advanced-controls">
+                        <div className="nle-waveform-strip">
+                          {audioAnalysisByCameraId[source.id]?.bars?.length ? (
+                            audioAnalysisByCameraId[source.id].bars.map((barHeight, barIndex) => (
+                              <span
+                                key={`${source.id}-wave-${barIndex}`}
+                                className="nle-waveform-bar"
+                                style={{ height: `${Math.round(barHeight * 100)}%` }}
+                              />
+                            ))
+                          ) : mediaUrl ? (
+                            <span className="nle-waveform-placeholder">
+                              {isImageSource(source)
+                                ? "Image slide ready"
+                                : audioAnalysisByCameraId[source.id]?.error
+                                  ? "Waveform unavailable"
+                                  : "Analyzing waveform..."}
+                            </span>
+                          ) : (
+                            <span className="nle-waveform-placeholder">
+                              Load a visual to see sync hints
+                            </span>
+                          )}
+                        </div>
+                        <div className="nle-source-meta-row">
+                          <span>Duration: {formatDurationLabel(source.duration || 0)}</span>
+                          <span>
+                            {isFlowWorkspace ? "Flow Status" : "Source Time"}:{" "}
+                            {isFlowWorkspace
+                              ? sourceStatusLabel
+                              : isAvailable
+                                ? formatDurationLabel(mappedTime)
+                                : "--"}
+                          </span>
+                        </div>
+                        {isImageSource(source) && (
+                          <label className="nle-field-block">
+                            <span>Slide Duration</span>
+                            <input
+                              className="nle-input"
+                              type="number"
+                              step="0.25"
+                              min={IMAGE_SOURCE_DURATION_MIN}
+                              max={IMAGE_SOURCE_DURATION_MAX}
+                              value={Number(source.duration || DEFAULT_IMAGE_SEGMENT_DURATION)}
+                              onChange={event =>
+                                setSources(currentSources =>
+                                  currentSources.map(currentSource =>
+                                    currentSource.id === source.id
+                                      ? {
+                                          ...currentSource,
+                                          duration: normalizeImageSourceDuration(
+                                            event.target.value
+                                          ),
+                                        }
+                                      : currentSource
+                                  )
+                                )
+                              }
+                            />
+                          </label>
+                        )}
+                        <div className="nle-sync-actions">
+                          {!isFlowWorkspace && (
+                            <>
+                              <button
+                                className="nle-mini-btn"
+                                type="button"
+                                onClick={() => handleNudgeOffset(source.id, -0.1)}
+                                disabled={!mediaUrl}
+                              >
+                                -0.1s
+                              </button>
+                              <button
+                                className="nle-mini-btn"
+                                type="button"
+                                onClick={() => handleNudgeOffset(source.id, 0.1)}
+                                disabled={!mediaUrl}
+                              >
+                                +0.1s
+                              </button>
+                              <button
+                                className="nle-mini-btn nle-mini-btn-accent"
+                                type="button"
+                                onClick={() => handleAlignSourceStartToPlayhead(source.id)}
+                                disabled={!mediaUrl}
+                                title="Align this source so its start begins at the current playhead"
+                              >
+                                Start Here
+                              </button>
+                            </>
+                          )}
+                          <button
+                            className="nle-mini-btn nle-mini-btn-accent"
+                            type="button"
+                            onClick={() =>
+                              isFlowWorkspace
+                                ? handleSyncSourceToFlowSound(source.id)
+                                : syncUsesCleanAudio
+                                  ? handleSyncCameraToExternalAudio(source.id)
+                                  : handleAutoSyncToMasterAudio(source.id)
+                            }
+                            disabled={syncButtonDisabled}
+                            title={syncButtonTitle}
+                          >
+                            {syncButtonLabel}
+                          </button>
+                        </div>
+                      </div>
+                    )}
                     <div className="nle-camera-actions">
+                      {!isFlowWorkspace && (
+                        <button
+                          className="nle-btn secondary"
+                          type="button"
+                          onClick={() => handleRecordSwitch(source.id)}
+                          disabled={!timelineDuration || !mediaUrl || !isAvailable}
+                          title={
+                            isAvailable
+                              ? "Show this visual from the current playhead"
+                              : "This visual is off timeline at the current playhead"
+                          }
+                        >
+                          Show {sourceDisplayLabel}
+                          <kbd className="nle-hotkey-hint">{index + 1}</kbd>
+                        </button>
+                      )}
                       <button
                         className="nle-btn secondary"
                         type="button"
-                        onClick={() => handleRecordSwitch(source.id)}
-                        disabled={!timelineDuration || !mediaUrl || !isAvailable}
-                        title={
-                          isAvailable
-                            ? "Show this angle from the current playhead"
-                            : "This angle is off timeline at the current playhead"
+                        onClick={() =>
+                          isFlowWorkspace
+                            ? handleSyncSourceToFlowSound(source.id)
+                            : syncUsesCleanAudio
+                              ? handleSyncCameraToExternalAudio(source.id)
+                              : handleAutoSyncToMasterAudio(source.id)
+                        }
+                        disabled={syncButtonDisabled}
+                        title={syncButtonTitle}
+                      >
+                        {syncButtonLabel}
+                      </button>
+                      <button
+                        className="nle-btn secondary"
+                        type="button"
+                        onClick={() =>
+                          setExpandedCameraId(currentId =>
+                            currentId === source.id ? null : source.id
+                          )
                         }
                       >
-                        Show {normalizeSourceLabel(source.label, index)}
-                        <kbd className="nle-hotkey-hint">{index + 1}</kbd>
+                        {isExpanded ? "Hide Tune" : "Tune"}
                       </button>
                       {index > 0 && (
                         <button
@@ -3825,15 +6507,38 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                 );
               })}
             </div>
-          </div>
+              </div>
+            )}
 
-          <div className="nle-panel nle-switch-panel">
+            <div className="nle-panel nle-switch-panel">
             <div className="nle-panel-header">
               <div>
                 <h4>{timelinePanelTitle}</h4>
                 <p>{timelinePanelDescription}</p>
               </div>
               <div className="nle-panel-actions nle-switch-buttons">
+                {isSingleSourceWorkflow && (
+                  <>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="video/*,image/*"
+                      multiple
+                      onChange={event => {
+                        appendFiles(event.target.files);
+                        event.target.value = "";
+                      }}
+                      className="nle-hidden-input"
+                    />
+                    <button
+                      className="nle-btn"
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      Add Visual Files
+                    </button>
+                  </>
+                )}
                 {readySources.map((source, index) => (
                   <button
                     key={`switch-btn-${source.id}`}
@@ -3941,6 +6646,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                         {selectedFlowSegment.label || selectedFlowSegment.cameraId} ·{" "}
                         {selectedFlowSegment.energyZone} ·{" "}
                         {Number(selectedFlowSegment.playbackRate || 1).toFixed(2)}x
+                        {selectedFlowSegment.heroLabel ? ` · ${selectedFlowSegment.heroLabel}` : ""}
                       </strong>
                       <span>{selectedFlowSegment.reason}</span>
                     </div>
@@ -4099,9 +6805,12 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                   <strong>Selected segment</strong>
                   <span>
                     {selectedSingleCamSegment
-                      ? `${formatDurationLabel(selectedSingleCamSegment.timelineStart)} to ${formatDurationLabel(selectedSingleCamSegment.timelineEnd)}`
+                      ? `${formatDurationLabel(selectedSingleCamSegment.timelineStart)} to ${formatDurationLabel(selectedSingleCamSegment.timelineEnd)}${selectedSingleCamSegment.role ? ` · ${selectedSingleCamSegment.role.replace(/_/g, " ")}` : ""}`
                       : "Move the playhead or click a part to edit it."}
                   </span>
+                  {selectedSingleCamSegment?.reason ? (
+                    <small className="nle-single-cam-reason">{selectedSingleCamSegment.reason}</small>
+                  ) : null}
                 </div>
 
                 <div className="nle-single-cam-tools">
@@ -4273,22 +6982,31 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                   className="nle-btn"
                   type="button"
                   onClick={handleServerExport}
-                  disabled={isExporting || !canExportProject || isSingleSourceWorkflow || flowEditEnabled}
-                  title={
-                    flowEditEnabled
-                      ? "Flow Edit uses local soundtrack analysis and speed ramps, so export it in-browser."
-                      : isSingleSourceWorkflow
-                      ? "Server render is disabled for single-camera segment edits. Use browser export."
-                      : "Server render produces MP4 (15 credits)"
-                  }
-                >
-                  {serverExportPending
-                    ? "Server Rendering..."
-                    : flowEditEnabled
-                      ? "Server MP4 Disabled for Flow Edit"
-                      : isSingleSourceWorkflow
-                      ? "MP4 Server Export Unavailable"
-                      : "Render MP4 on Server (15 cr)"}
+	                  disabled={
+	                    isExporting ||
+	                    !canExportProject ||
+	                    isSingleSourceWorkflow ||
+	                    flowEditEnabled
+	                  }
+	                  title={
+	                    flowEditEnabled
+	                      ? "Flow Edit uses local soundtrack analysis and speed ramps, so export it in-browser."
+	                      : isSingleSourceWorkflow
+	                      ? "Server render is disabled for single-camera segment edits. Use browser export."
+	                      : hasExternalCleanAudio
+	                        ? "Server render produces MP4 with external clean audio as the master track."
+	                        : "Server render produces MP4 (15 credits)"
+	                  }
+	                >
+	                  {serverExportPending
+	                    ? "Server Rendering..."
+	                    : flowEditEnabled
+	                      ? "Server MP4 Disabled for Flow Edit"
+	                      : isSingleSourceWorkflow
+	                      ? "MP4 Server Export Unavailable"
+	                      : hasExternalCleanAudio
+	                        ? "Render Clean Audio MP4"
+	                        : "Render MP4 on Server (15 cr)"}
                 </button>
                 <button
                   className="nle-btn secondary"
@@ -4348,11 +7066,12 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
             ) : null}
 
             {statusMessage ? <div className="nle-status-banner">{statusMessage}</div> : null}
+            </div>
           </div>
         </div>
 
         <div className="nle-hidden-audio-rack" aria-hidden="true">
-          {readySources.map(source => (
+          {readySources.filter(isVideoSource).map(source => (
             <video
               key={`audio-${source.id}`}
               ref={node => {
@@ -4364,7 +7083,34 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
               playsInline
             />
           ))}
-          <audio ref={flowAudioRef} preload="auto" />
+          {flowAudioIsVideoSoundtrack ? (
+            <video
+              ref={node => {
+                flowAudioRef.current = node;
+                forceMediaAudible(node);
+              }}
+              preload="auto"
+              playsInline
+            />
+          ) : (
+            <audio
+              ref={node => {
+                flowAudioRef.current = node;
+                forceMediaAudible(node);
+              }}
+              preload="auto"
+            />
+          )}
+          <audio
+            ref={node => {
+              externalAudioRef.current = node;
+              forceMediaAudible(node);
+              if (node) {
+                applySafeMediaSource(node, externalAudioUrl);
+              }
+            }}
+            preload="auto"
+          />
         </div>
       </div>
     </div>

@@ -64,6 +64,54 @@ what did /* UnifiedPublisher.css */
   min-width: 0;
 }
 
+.selected-promo-visual-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(250, 204, 21, 0.38);
+  background:
+    radial-gradient(circle at top right, rgba(250, 204, 21, 0.2), transparent 40%),
+    linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(30, 41, 59, 0.76));
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.28);
+}
+
+.selected-promo-visual-copy span {
+  display: block;
+  color: #fde68a;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.selected-promo-visual-copy strong {
+  display: block;
+  margin-top: 5px;
+  color: #f8fafc;
+  font-size: 1.15rem;
+  line-height: 1.08;
+}
+
+.selected-promo-visual-copy small {
+  display: block;
+  margin-top: 6px;
+  color: #cbd5e1;
+  line-height: 1.35;
+}
+
+.selected-promo-visual-panel img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  display: block;
+  border-radius: 14px;
+  border: 2px solid rgba(250, 204, 21, 0.72);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.34);
+}
+
 /* --- Responsive Mobile Tweaks --- */
 @media (max-width: 1024px) {
   .publisher-layout {

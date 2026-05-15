@@ -1,56 +1,6 @@
 import React, { useState, useCallback } from "react";
 import Cropper from "react-easy-crop";
 
-function getCroppedImg(imageSrc, pixelCrop) {
-  const createImage = url =>
-    new Promise((resolve, reject) => {
-      const image = new Image();
-      image.addEventListener("load", () => resolve(image));
-      image.addEventListener("error", error => reject(error));
-      image.setAttribute("crossOrigin", "anonymous");
-      image.src = url;
-    });
-
-  return new Promise(async (resolve, reject) => {
-    try {
-      const image = await createImage(imageSrc);
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
-
-      if (!ctx) {
-        return reject(new Error("No 2d context"));
-      }
-
-      // set canvas size to match the bounding box
-      canvas.width = pixelCrop.width;
-      canvas.height = pixelCrop.height;
-
-      // draw the image
-      ctx.drawImage(
-        image,
-        pixelCrop.x,
-        pixelCrop.y,
-        pixelCrop.width,
-        pixelCrop.height,
-        0,
-        0,
-        pixelCrop.width,
-        pixelCrop.height
-      );
-
-      // As Base64 string
-      // resolve(canvas.toDataURL('image/jpeg'));
-
-      // As Blob (better for larger images)
-      canvas.toBlob(blob => {
-        resolve(blob);
-      }, "image/jpeg");
-    } catch (e) {
-      reject(e);
-    }
-  });
-}
-
 function ImageCropper({ imageUrl, onChangeCrop, onClose }) {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);

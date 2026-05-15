@@ -75,6 +75,7 @@ class PromotionService {
         startTime: normalized.startTime,
         endTime: normalized.endTime,
         frequency: normalized.frequency,
+        status: "pending",
         isActive: normalized.isActive,
         budget: normalized.budget || 0,
         targetMetrics: normalized.targetMetrics || {},
@@ -447,35 +448,35 @@ class PromotionService {
     try {
       // Recover locks older than 10 minutes
       const staleThreshold = new Date(Date.now() - 10 * 60 * 1000).toISOString();
-      // Note: This query might need an index on status + updatedAt.
-      // If index is missing, this might fail, so we wrap in try/catch and log.
       const stuck = await db
         .collection("promotion_schedules")
         .where("status", "==", "processing")
-        .where("updatedAt", "<", staleThreshold)
-        .limit(50)
+        .limit(100)
         .get();
 
-      if (!stuck.empty) {
-        console.log(`[Scheduler] ⚠️ Recovering ${stuck.size} stale processing locks...`);
+      const staleDocs = stuck.docs.filter(doc => {
+        const data = doc.data() || {};
+        const checkpoint = data.updatedAt || data.createdAt || data.startTime || null;
+        return !checkpoint || checkpoint < staleThreshold;
+      });
+
+      if (staleDocs.length > 0) {
+        console.log(`[Scheduler] ⚠️ Closing ${staleDocs.length} stale processing locks...`);
         const batch = db.batch();
-        stuck.docs.forEach(doc => {
+        staleDocs.forEach(doc => {
           batch.update(doc.ref, {
-            status: admin.firestore.FieldValue.delete(),
+            status: "failed",
+            isActive: false,
+            error: "Recovered stale processing lock before it could block newer schedules.",
             lastRecoveryAt: new Date().toISOString(),
             previousStatus: "processing",
           });
         });
         await batch.commit();
-        console.log(`[Scheduler] ✅ Recovered ${stuck.size} locks.`);
+        console.log(`[Scheduler] ✅ Closed ${staleDocs.length} stale locks.`);
       }
     } catch (err) {
-      // If generic index error, warn but don't crash
-      if (err.code === 9 || err.message.includes("indexes")) {
-        console.warn("[Scheduler] Index missing for lock recovery (status + updatedAt). Skipping.");
-      } else {
-        console.error("Error in recoverStaleLocks:", err);
-      }
+      console.error("Error in recoverStaleLocks:", err);
     }
   }
 
@@ -489,21 +490,27 @@ class PromotionService {
       await this.recoverStaleLocks();
 
       const now = new Date().toISOString();
-      // Find schedules that are active, due, and not yet processing/executed
-      // Note: Firestore composite index required: isActive ASC, startTime ASC
-      const snapshot = await db
+      // Fetch pending jobs without a startTime range query so stale legacy records cannot block
+      // fresh due schedules and local/dev does not require extra Firestore composite indexes.
+      const pendingSnapshot = await db
         .collection("promotion_schedules")
         .where("isActive", "==", true)
-        .where("startTime", "<=", now)
-        .orderBy("startTime")
-        .limit(10) // Process in batches to avoid timeouts
+        .where("status", "==", "pending")
+        .limit(100)
         .get();
+      const dueDocs = pendingSnapshot.docs
+        .filter(doc => {
+          const data = doc.data() || {};
+          return !data.startTime || data.startTime <= now;
+        })
+        .sort((a, b) => String(a.data().startTime || "").localeCompare(String(b.data().startTime || "")))
+        .slice(0, 10);
 
-      if (snapshot.empty) return 0;
+      if (dueDocs.length === 0) return 0;
 
       let processedCount = 0;
 
-      for (const doc of snapshot.docs) {
+      for (const doc of dueDocs) {
         // Attempt to acquire a lock atomically to avoid duplicate execution in concurrent scheduler runs.
         const schedule = await db.runTransaction(async t => {
           const snap = await t.get(doc.ref);
@@ -527,10 +534,21 @@ class PromotionService {
         try {
           // 2. Dispatch to Platform Poster (Real API Call)
           // We map the schedule data to the payload expected by platformPoster
+          const platformSettings = schedule.platformSpecificSettings || {};
+          const platformText = String(
+            schedule.message ||
+              schedule.caption ||
+              platformSettings.text ||
+              platformSettings.commentary ||
+              platformSettings.message ||
+              platformSettings.caption ||
+              platformSettings.description ||
+              platformSettings.title ||
+              ""
+          ).trim();
           const payload = {
-            ...schedule.platformSpecificSettings, // platform options like pageId
-            // If message/text not in platformSpecificSettings, check other fields
-            message: schedule.message || schedule.caption || undefined,
+            ...platformSettings, // platform options like pageId, commentary, title, media preferences
+            ...(platformText ? { message: platformText, text: platformText } : {}),
             // Hashtags might be in optimization data
             hashtagString: schedule.viral_optimization?.hashtags?.join(" ") || "",
           };

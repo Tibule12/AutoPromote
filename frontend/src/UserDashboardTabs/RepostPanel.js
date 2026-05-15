@@ -413,7 +413,7 @@ export default function RepostPanel() {
                           {preview.hookText && (
                             <div style={{ fontSize: "0.82rem" }}>
                               <span style={{ fontWeight: 600, color: "#a5b4fc" }}>Hook:</span>{" "}
-                              <span style={{ opacity: 0.9 }}>"{preview.hookText}"</span>
+                            <span style={{ opacity: 0.9 }}>{`"${preview.hookText}"`}</span>
                             </div>
                           )}
                           {preview.caption && (

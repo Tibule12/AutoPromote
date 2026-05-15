@@ -3,7 +3,8 @@ import React, { useState, useEffect } from "react";
 import EmojiPicker from "../EmojiPicker";
 import HashtagSuggestions from "../HashtagSuggestions";
 import { OPTIMAL_TIMES } from "../BestTimeToPost";
-import { sanitizeUrl } from "../../utils/security";
+import AdaptiveMediaPreview from "./AdaptiveMediaPreview";
+import { revokeObjectUrlLater } from "../../utils/objectUrl";
 
 const TwitterForm = ({
   onChange,
@@ -25,7 +26,7 @@ const TwitterForm = ({
     if (currentFile) {
       const url = URL.createObjectURL(currentFile);
       setPreviewUrl(url);
-      return () => URL.revokeObjectURL(url);
+      return () => revokeObjectUrlLater(url);
     } else {
       setPreviewUrl(null);
     }
@@ -95,21 +96,11 @@ const TwitterForm = ({
 
       {/* Preview Section */}
       {previewUrl && (
-        <div className="preview-container" style={{ marginBottom: "15px", textAlign: "center" }}>
-          {currentFile?.type?.startsWith("video") ? (
-            <video
-              src={sanitizeUrl(previewUrl)}
-              controls
-              style={{ maxWidth: "100%", maxHeight: "200px", borderRadius: "8px" }}
-            />
-          ) : (
-            <img
-              src={sanitizeUrl(previewUrl)}
-              alt="Preview"
-              style={{ maxWidth: "100%", maxHeight: "200px", borderRadius: "8px" }}
-            />
-          )}
-        </div>
+        <AdaptiveMediaPreview
+          src={previewUrl}
+          mediaType={currentFile?.type?.startsWith("video") ? "video" : "image"}
+          label="X media preview"
+        />
       )}
 
       <div className="form-group-modern">

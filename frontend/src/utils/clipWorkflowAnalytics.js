@@ -3,12 +3,16 @@ import { API_BASE_URL } from "../config";
 
 const MAX_EVENT_NAME_LENGTH = 64;
 const MAX_WORKFLOW_LENGTH = 64;
+const CONTROL_TEXT_PATTERN = new RegExp(
+  `[${String.fromCharCode(0)}-${String.fromCharCode(31)}${String.fromCharCode(127)}]`,
+  "g"
+);
 let workflowTrackingUnavailable = false;
 
 const normalizeString = (value, fallback = "") =>
   String(value ?? fallback)
     .trim()
-    .replace(/[\u0000-\u001f\u007f]/g, " ")
+    .replace(CONTROL_TEXT_PATTERN, " ")
     .slice(0, 200);
 
 const sanitizeProperties = properties => {

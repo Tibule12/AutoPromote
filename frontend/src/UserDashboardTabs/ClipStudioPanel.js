@@ -3,10 +3,10 @@
 // Analyze videos and generate viral short clips
 
 import React, { useState, useEffect, useRef } from "react";
-import { auth, db, storage } from "../firebaseClient";
-import { doc, setDoc, getDoc } from "firebase/firestore"; // Import Firestore functions
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { auth, db } from "../firebaseClient";
+import { doc, setDoc } from "firebase/firestore"; // Import Firestore functions
 import { API_BASE_URL } from "../config";
+import { uploadSourceFileViaBackend } from "../utils/sourceUpload";
 import toast from "react-hot-toast";
 import "./ClipStudioPanel.css";
 import MemeticComposerPanel from "./MemeticComposerPanel";
@@ -40,14 +40,13 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
 
   // Montage Feature
   const [selectedClipIds, setSelectedClipIds] = useState([]); // Array of selected clip IDs
-  const [isMontageMode, setIsMontageMode] = useState(false); // To toggle button text/state
 
   // Auto-Generate & Template state
   const [selectedTemplate, setSelectedTemplate] = useState("");
   const [captionStyle, setCaptionStyle] = useState("bold_pop");
   const [smartCropMode, setSmartCropMode] = useState("center");
   const [autoGenerating, setAutoGenerating] = useState(false);
-  const [autoGenJobId, setAutoGenJobId] = useState(null);
+  const [, setAutoGenJobId] = useState(null);
   const [autoGenProgress, setAutoGenProgress] = useState("");
   const autoGenPollRef = useRef(null);
 
@@ -238,17 +237,19 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
     try {
       const user = auth.currentUser;
       if (!user) throw new Error("You must be logged in to upload.");
+      const token = await getAuthToken();
+      if (!token) throw new Error("You must be logged in to upload.");
 
-      // 1. Upload to Storage (Temporary folder for cleanup)
+      // 1. Upload through the backend so browser CORS never depends on Firebase bucket rules.
       if (file.size < 100) throw new Error("File too small/corrupted.");
-
-      const storagePath = `temp_sources/${user.uid}/${Date.now()}_${file.name}`;
-      const storageRef = ref(storage, storagePath);
-
-      const uploadResult = await uploadBytes(storageRef, file);
-      if (uploadResult.metadata.size < 100) throw new Error("Upload corrupted.");
-
-      const url = await getDownloadURL(storageRef);
+      const uploadResult = await uploadSourceFileViaBackend({
+        file,
+        token,
+        mediaType: "video",
+        fileName: file.name,
+      });
+      const url = uploadResult?.url;
+      if (!url) throw new Error("Upload did not return a valid source URL.");
 
       // 2. Create Content Document
       const contentId = `upload-${Date.now()}`; // Generate a temporary ID (or let Firestore auto-gen)
@@ -260,11 +261,15 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
         title: file.name,
         type: "video",
         url: url,
+        file_url: url,
         userId: user.uid,
         user_id: user.uid, // Required for backend query compatibility
         created_at: new Date().toISOString(), // Match backend schema expectations
         createdAt: new Date().toISOString(),
         description: "Uploaded via Clip Studio",
+        mimeType: file.type || "video/mp4",
+        size: Number(uploadResult?.size || file.size || 0),
+        sourceStoragePath: uploadResult?.storagePath || null,
         platform_options: {}, // Initialize empty
         sourceContext: "clip_studio", // TAG: Mark as Clip Studio Source
       };

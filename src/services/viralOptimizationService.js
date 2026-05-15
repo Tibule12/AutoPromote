@@ -71,6 +71,8 @@ async function performViralOptimization(contentId, userId, contentData, options 
       share_boost = false,
       target_platforms = [],
       scheduled_promotion_time,
+      promotion_frequency = "once",
+      schedule_hint = {},
       platform_options = {},
     } = options;
 
@@ -197,23 +199,31 @@ async function performViralOptimization(contentId, userId, contentData, options 
 
     if (shouldCreateInitialSchedule && schedulePlatforms.length > 0) {
       await Promise.all(
-        schedulePlatforms.map(platform =>
-          db.collection("promotion_schedules").add({
+        schedulePlatforms.map(platform => {
+          const platformSettings = (platform_options && platform_options[platform]) || {};
+          return db.collection("promotion_schedules").add({
             contentId,
             user_id: userId,
             platform,
+            title: platformSettings.title || content.title || "Queued Upload",
+            scheduleType: "specific",
             startTime: scheduled_promotion_time,
+            frequency: promotion_frequency || schedule_hint.frequency || "once",
+            timezone: schedule_hint.timezone || "UTC",
             status: "pending",
             isActive: true,
+            source: "new_upload_queue",
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
             repost_boost,
             share_boost,
             platformSpecificSettings: {
-              ...((platform_options && platform_options[platform]) || {}),
+              ...platformSettings,
               repost_boost,
               share_boost,
             },
-          })
-        )
+          });
+        })
       );
     }
 

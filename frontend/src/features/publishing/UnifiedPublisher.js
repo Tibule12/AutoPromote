@@ -17,6 +17,7 @@ import { usePublishingState } from "./hooks/usePublishingState";
 import { useMediaProcessor } from "./hooks/useMediaProcessor";
 import { useSubscription } from "../../hooks/useSubscription";
 import { sanitizeUrl } from "../../utils/security";
+import { revokeObjectUrlLater } from "../../utils/objectUrl";
 import {
   buildBackendUploadError,
   STORAGE_UPLOAD_LIMIT_MB,
@@ -77,6 +78,47 @@ const buildMediaMeta = ({
 
 const hasMeaningfulMediaMeta = meta =>
   !!(meta && Object.values(meta).some(value => value !== undefined && value !== null && value !== ""));
+
+const formatFileSize = bytes => {
+  const size = Number(bytes) || 0;
+  if (size <= 0) return "unknown size";
+  if (size >= 1024 * 1024 * 1024) return `${(size / (1024 * 1024 * 1024)).toFixed(2)}GB`;
+  if (size >= 1024 * 1024) return `${(size / (1024 * 1024)).toFixed(1)}MB`;
+  return `${Math.max(1, Math.round(size / 1024))}KB`;
+};
+
+const getBrowserPreviewFailureMessage = (file, mediaElement) => {
+  const fileName = file?.name || "This video";
+  const fileType = file?.type || "";
+  const extension = String(fileName).split(".").pop()?.toLowerCase() || "";
+  const sizeText = file?.size ? formatFileSize(file.size) : "";
+  const sizePrefix = sizeText ? `${fileName} is ${sizeText}. ` : "";
+  const isOverUploadLimit = file?.size > STORAGE_UPLOAD_LIMIT_MB * 1024 * 1024;
+  const isMov = extension === "mov" || fileType === "video/quicktime";
+  const canPlayDeclaredType =
+    typeof document !== "undefined" && fileType
+      ? document.createElement("video").canPlayType(fileType)
+      : "";
+  const mediaErrorCode = mediaElement?.error?.code;
+
+  if (isOverUploadLimit) {
+    const uploadLimitNote = `It is above the current ${STORAGE_UPLOAD_LIMIT_MB}MB upload limit, so publishing will be blocked until it is compressed, trimmed, or uploaded through a large-file/resumable pipeline. `;
+    if (isMov || canPlayDeclaredType === "" || mediaErrorCode === 3 || mediaErrorCode === 4) {
+      return `${sizePrefix}${uploadLimitNote}Chrome also cannot preview this MOV/codec locally. Firefox may preview it, but for AutoPromote upload today use H.264 MP4 + AAC audio under ${STORAGE_UPLOAD_LIMIT_MB}MB.`;
+    }
+    return `${sizePrefix}${uploadLimitNote}`;
+  }
+
+  if (isMov || canPlayDeclaredType === "" || mediaErrorCode === 4) {
+    return `${sizePrefix}The file was selected, but this browser cannot preview its video codec/container. iPhone .MOV files often use HEVC/H.265, which Chrome/Linux may reject even though the backend can still upload or process it. Convert/export to H.264 MP4 for reliable local preview, or try Firefox/VLC to confirm the file.`;
+  }
+
+  if (file?.size > STORAGE_UPLOAD_LIMIT_MB * 1024 * 1024) {
+    return `${sizePrefix}This is above the current ${STORAGE_UPLOAD_LIMIT_MB}MB upload limit, so it may not publish until it is compressed or trimmed.`;
+  }
+
+  return `${sizePrefix}The browser could not decode this preview. The upload may still be possible, but for reliable preview/export use H.264 MP4 with AAC audio.`;
+};
 
 const normalizeEditedAsset = (result, fallbackName = "edited-media") => {
   if (!result) return null;
@@ -355,35 +397,57 @@ const PlatformPreview = ({
   // Correctly resolve the file to preview: Platform specific > Global
   const fileToPreview = data.file || globalFile;
 
-  // Use useMemo to create the preview URL efficiently
-  const effectivePreviewUrl = React.useMemo(() => {
-    if (!fileToPreview) return null;
+  const localPreviewObjectUrlRef = React.useRef(null);
+  const [effectivePreviewUrl, setEffectivePreviewUrl] = React.useState(null);
 
-    // If it's the global file, use the provided previewUrl (which is managed by useMediaProcessor)
+  React.useEffect(() => {
+    if (localPreviewObjectUrlRef.current) {
+      revokeObjectUrlLater(localPreviewObjectUrlRef.current);
+      localPreviewObjectUrlRef.current = null;
+    }
+
+    if (!fileToPreview) {
+      setEffectivePreviewUrl(null);
+      return undefined;
+    }
+
     if (fileToPreview === globalFile && previewUrl) {
-      return previewUrl;
+      setEffectivePreviewUrl(previewUrl);
+      return undefined;
     }
 
-    // If it's a file override (different from globalFile), create a URL
     if (fileToPreview instanceof File || fileToPreview instanceof Blob) {
-      return URL.createObjectURL(fileToPreview);
+      const objectUrl = URL.createObjectURL(fileToPreview);
+      localPreviewObjectUrlRef.current = objectUrl;
+      setEffectivePreviewUrl(objectUrl);
+      return () => {
+        revokeObjectUrlLater(objectUrl);
+        if (localPreviewObjectUrlRef.current === objectUrl) {
+          localPreviewObjectUrlRef.current = null;
+        }
+      };
     }
 
-    // If it's a string (URL), return it
     if (typeof fileToPreview === "string") {
-      return fileToPreview;
+      setEffectivePreviewUrl(fileToPreview);
+      return undefined;
     }
 
-    return null;
+    setEffectivePreviewUrl(null);
+    return undefined;
   }, [fileToPreview, globalFile, previewUrl]);
 
   // RENDER HELPERS
   const [previewError, setPreviewError] = React.useState(null);
+  const [mediaAspectRatio, setMediaAspectRatio] = React.useState(null);
+  const [overlayPlaybackRequested, setOverlayPlaybackRequested] = React.useState(false);
 
   React.useEffect(() => {
     // Clear preview error when the preview source changes.
     setPreviewError(null);
-  }, [effectivePreviewUrl]);
+    setMediaAspectRatio(null);
+    setOverlayPlaybackRequested(false);
+  }, [effectivePreviewUrl, thumbnailUrl]);
 
   const renderMedia = (style = {}) => {
     if (previewError) {
@@ -432,63 +496,185 @@ const PlatformPreview = ({
       (fileToPreview &&
         typeof fileToPreview === "object" &&
         fileToPreview.type?.startsWith("video"));
+    const isOverlayFrame = Boolean(style.position);
+    const resolvedAspectRatio =
+      !isOverlayFrame && mediaAspectRatio ? `${mediaAspectRatio}` : style.aspectRatio;
+    const wrapperStyle = {
+      ...style,
+      overflow: "hidden",
+      position: style.position || "relative",
+      background: "#000",
+      ...(resolvedAspectRatio ? { aspectRatio: resolvedAspectRatio } : {}),
+      ...(!isOverlayFrame && resolvedAspectRatio ? { height: "auto" } : {}),
+    };
+    const mediaStyle = {
+      width: "100%",
+      height: "100%",
+      objectFit: "contain",
+      background: "#000",
+      display: "block",
+    };
 
     if (isVideo) {
       // Check if controls should be hidden (for overlay styles)
       // If absolute-positioned, we assume overlays exist and hide controls.
       // But we allow click-to-play/pause logic via ref if needed.
       const showControls = !style.position;
+      const showPosterOnly = isOverlayFrame && safeThumbUrl && !overlayPlaybackRequested;
+
+      if (showPosterOnly) {
+        return (
+          <div style={wrapperStyle}>
+            <img
+              src={sanitizeUrl(safeThumbUrl)}
+              alt="Selected cover preview"
+              style={mediaStyle}
+              onLoad={event => {
+                const { naturalWidth, naturalHeight } = event.currentTarget;
+                if (naturalWidth && naturalHeight) {
+                  setMediaAspectRatio(naturalWidth / naturalHeight);
+                }
+              }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                left: 10,
+                top: 10,
+                background: "rgba(2,6,23,0.76)",
+                border: "1px solid rgba(148,163,184,0.4)",
+                color: "#e2e8f0",
+                borderRadius: 999,
+                padding: "5px 10px",
+                fontSize: "0.72rem",
+                fontWeight: 700,
+                letterSpacing: "0.02em",
+                pointerEvents: "none",
+              }}
+            >
+              Cover selected
+            </div>
+            <button
+              type="button"
+              onClick={() => setOverlayPlaybackRequested(true)}
+              style={{
+                position: "absolute",
+                left: "50%",
+                top: "50%",
+                transform: "translate(-50%, -50%)",
+                border: "1px solid rgba(255,255,255,0.22)",
+                background: "rgba(15,23,42,0.82)",
+                color: "#fff",
+                borderRadius: 999,
+                padding: "12px 18px",
+                fontSize: "0.92rem",
+                fontWeight: 700,
+                cursor: "pointer",
+                boxShadow: "0 12px 32px rgba(0,0,0,0.35)",
+              }}
+            >
+              Play Preview
+            </button>
+          </div>
+        );
+      }
 
       return (
-        <div style={{ ...style, overflow: "hidden", position: style.position || "relative" }}>
+        <div style={wrapperStyle}>
           <video
             key={effectivePreviewUrl} // Force reload on URL change
             src={sanitizeUrl(effectivePreviewUrl)}
-            poster={safeThumbUrl}
+            poster={safeThumbUrl || undefined}
             controls={showControls}
             playsInline
             loop
-            autoPlay={!thumbnailUrl}
+            preload={showControls || overlayPlaybackRequested ? "metadata" : "none"}
+            autoPlay={!showControls ? overlayPlaybackRequested : !thumbnailUrl}
             muted // Start muted for autoplay policy
-            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            style={mediaStyle}
+            onLoadedMetadata={event => {
+              const { videoWidth, videoHeight } = event.currentTarget;
+              if (videoWidth && videoHeight) {
+                setMediaAspectRatio(videoWidth / videoHeight);
+              }
+            }}
             onError={e => {
-              console.warn("Preview video failed to load", e);
-              setPreviewError(
-                "This file cannot be previewed. Please select a video or image file (e.g., MP4, MOV, JPG, PNG)."
-              );
+              const message = getBrowserPreviewFailureMessage(fileToPreview, e.currentTarget);
+              console.warn("Preview video failed to load", {
+                fileName: fileToPreview?.name,
+                fileType: fileToPreview?.type,
+                fileSize: fileToPreview?.size,
+                mediaErrorCode: e.currentTarget?.error?.code,
+                canPlayType:
+                  fileToPreview?.type && typeof document !== "undefined"
+                    ? document.createElement("video").canPlayType(fileToPreview.type)
+                    : "",
+              });
+              setPreviewError(message);
             }}
             onClick={e => {
-              // Simple toggle mute/play for non-controlled videos (like TikTok style)
+              // Simple toggle play/pause for non-controlled mockups.
               if (!showControls) {
                 if (e.target.paused) e.target.play();
-                else e.target.muted = !e.target.muted;
+                else e.target.pause();
               }
             }}
           />
+          {safeThumbUrl && (
+            <div
+              style={{
+                position: "absolute",
+                left: 10,
+                top: 10,
+                background: "rgba(2,6,23,0.76)",
+                border: "1px solid rgba(148,163,184,0.4)",
+                color: "#e2e8f0",
+                borderRadius: 999,
+                padding: "5px 10px",
+                fontSize: "0.72rem",
+                fontWeight: 700,
+                letterSpacing: "0.02em",
+                pointerEvents: "none",
+              }}
+            >
+              Cover selected
+            </div>
+          )}
           {!showControls && (
             <div
               style={{
                 position: "absolute",
                 top: "10px",
                 right: "10px",
-                background: "rgba(0,0,0,0.5)",
-                padding: "5px",
-                borderRadius: "50%",
+                background: "rgba(2,6,23,0.7)",
+                padding: "6px 10px",
+                borderRadius: "999px",
                 pointerEvents: "none",
+                color: "#e2e8f0",
+                fontSize: "0.72rem",
+                fontWeight: 700,
               }}
             >
-              🔊 {/* Visual indicator */}
+              Tap video to pause/play
             </div>
           )}
         </div>
       );
     }
     return (
-      <img
-        src={sanitizeUrl(effectivePreviewUrl)}
-        alt="Preview"
-        style={{ ...style, objectFit: "cover" }}
-      />
+      <div style={wrapperStyle}>
+        <img
+          src={sanitizeUrl(effectivePreviewUrl)}
+          alt="Preview"
+          style={mediaStyle}
+          onLoad={event => {
+            const { naturalWidth, naturalHeight } = event.currentTarget;
+            if (naturalWidth && naturalHeight) {
+              setMediaAspectRatio(naturalWidth / naturalHeight);
+            }
+          }}
+        />
+      </div>
     );
   };
 
@@ -505,13 +691,14 @@ const PlatformPreview = ({
       <div
         className="platform-preview-mockup tiktok-mockup"
         style={{
-          width: "300px",
+          width: "100%",
+          maxWidth: "300px",
           margin: "0 auto",
           background: "#000",
           borderRadius: "12px",
           overflow: "hidden",
           position: "relative",
-          height: "530px",
+          aspectRatio: "9 / 16",
           border: "1px solid #333",
         }}
       >
@@ -546,9 +733,18 @@ const PlatformPreview = ({
           </div>
           <div style={{ display: "flex", alignItems: "center", fontSize: "0.8rem" }}>
             <span>🎵</span>{" "}
-            <marquee style={{ marginLeft: "5px", width: "150px" }}>
+            <span
+              className="sound-label"
+              style={{
+                marginLeft: "5px",
+                width: "150px",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
               Original Sound - @your_username
-            </marquee>
+            </span>
           </div>
         </div>
 
@@ -592,18 +788,19 @@ const PlatformPreview = ({
   if (platformId === "youtube") {
     const isShorts = data.shortsMode;
     if (isShorts) {
-      // YouTube Shorts (Similar to TikTok)
+      // YouTube Shorts (flexible for horizontal videos)
+      const isHorizontal = mediaAspectRatio && mediaAspectRatio > 1.2;
       return (
         <div
           className="platform-preview-mockup youtube-shorts-mockup"
           style={{
-            width: "300px",
+            width: isHorizontal ? "460px" : "300px",
             margin: "0 auto",
             background: "#000",
             borderRadius: "12px",
             overflow: "hidden",
             position: "relative",
-            height: "530px",
+            height: isHorizontal ? "340px" : "530px",
             border: "1px solid #333",
           }}
         >
@@ -846,18 +1043,19 @@ const PlatformPreview = ({
   if (platformId === "instagram") {
     const isReel = data.isReel !== false; // Default to true if undefined
     if (isReel) {
-      // Instagram Reel (Similar to TikTok)
+      // Instagram Reels stay in a portrait phone frame even when the source is wide.
       return (
         <div
           className="platform-preview-mockup instagram-reel-mockup"
           style={{
-            width: "300px",
+            width: "100%",
+            maxWidth: "300px",
             margin: "0 auto",
             background: "#000",
             borderRadius: "12px",
             overflow: "hidden",
             position: "relative",
-            height: "530px",
+            aspectRatio: "9 / 16",
             border: "1px solid #333",
           }}
         >
@@ -947,7 +1145,7 @@ const PlatformPreview = ({
             {data.username || "username"}
           </div>
         </div>
-        {renderMedia({ width: "100%", height: "auto", aspectRatio: "1/1" })}
+        {renderMedia({ width: "100%", height: "auto" })}
         <div style={{ padding: "10px" }}>
           <div
             style={{
@@ -1437,7 +1635,6 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
     setSelectedFilter,
     duration,
     setDuration,
-    setPreviewUrl, // Expose manually
     resetMediaState,
   } = useMediaProcessor(globalFile);
 
@@ -1454,6 +1651,14 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
   // --- Viral Scanner State ---
   const [showViralScanner, setShowViralScanner] = useState(false);
   const [viralScannerFile, setViralScannerFile] = useState(null);
+  const [videoEditorFileOverride, setVideoEditorFileOverride] = useState(null);
+  const [selectedPromoVisual, setSelectedPromoVisual] = useState(null);
+  const effectiveThumbnailUrl = thumbnailUrl || "";
+  const safeThumbUrl = effectiveThumbnailUrl ? sanitizeUrl(effectiveThumbnailUrl) : "";
+
+  useEffect(() => {
+    setSelectedPromoVisual(null);
+  }, [globalFile]);
 
   const restoreMasterPreview = () => {
     if (globalFile) {
@@ -1645,6 +1850,12 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
       // 2. Update Global State
       setGlobalFile(file);
       console.log("Global file selected:", file.name);
+      const extension = String(file.name || "").split(".").pop()?.toLowerCase();
+      if (extension === "mov" || file.type === "video/quicktime") {
+        setFeedbackMessage(
+          "MOV selected. If the preview stays black or fails, the browser may not support this MOV codec. H.264 MP4 is safest for local preview."
+        );
+      }
     }
   };
 
@@ -1736,6 +1947,36 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
 
     // Per-Platform PREVIEW Component (Moved outside)
     // To ensure PlatformPreview receives all necessary props
+    const renderSelectedPromoVisualPanel = () => {
+      if (!selectedPromoVisual?.url) return null;
+      return (
+        <div className="selected-promo-visual-panel">
+          <div className="selected-promo-visual-copy">
+            <span>Selected thumbnail/poster</span>
+            <strong>
+              {selectedPromoVisual.hookText ||
+                selectedPromoVisual.label ||
+                selectedPromoVisual.type ||
+                "Promo visual"}
+            </strong>
+            <small>This stays separate from the live video preview so your frame is not cropped.</small>
+          </div>
+          <img
+            src={sanitizeUrl(selectedPromoVisual.url)}
+            alt="Selected promo thumbnail/poster"
+            style={{
+              width: "100%",
+              maxWidth: 220,
+              maxHeight: 220,
+              objectFit: "contain",
+              background: "#020617",
+              borderRadius: 10,
+              padding: 8,
+            }}
+          />
+        </div>
+      );
+    };
 
     switch (platformId) {
       case "tiktok":
@@ -1757,12 +1998,13 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                 </div>
               </div>
               <div className="platform-preview-column">
+                {renderSelectedPromoVisualPanel()}
                 <PlatformPreview
                   label="TikTok Preview"
                   data={data}
                   globalFile={globalFile}
                   previewUrl={previewUrl}
-                  thumbnailUrl={thumbnailUrl}
+                  thumbnailUrl={effectiveThumbnailUrl}
                   mediaType={mediaType}
                   platformId={platformId}
                   creatorInfo={tiktokCreator}
@@ -1805,8 +2047,9 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                 </div>
               </div>
               <div className="platform-preview-column">
+                {renderSelectedPromoVisualPanel()}
                 <PlatformPreview
-                  thumbnailUrl={thumbnailUrl}
+                  thumbnailUrl={effectiveThumbnailUrl}
                   label="YouTube Preview"
                   data={data}
                   globalFile={globalFile}
@@ -1853,8 +2096,9 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                 </div>
               </div>
               <div className="platform-preview-column">
+                {renderSelectedPromoVisualPanel()}
                 <PlatformPreview
-                  thumbnailUrl={thumbnailUrl}
+                  thumbnailUrl={effectiveThumbnailUrl}
                   label="Instagram Preview"
                   data={data}
                   globalFile={globalFile}
@@ -1900,8 +2144,9 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                 </div>
               </div>
               <div className="platform-preview-column">
+                {renderSelectedPromoVisualPanel()}
                 <PlatformPreview
-                  thumbnailUrl={thumbnailUrl}
+                  thumbnailUrl={effectiveThumbnailUrl}
                   label="Facebook Preview"
                   data={data}
                   globalFile={globalFile}
@@ -1947,8 +2192,9 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                 </div>
               </div>
               <div className="platform-preview-column">
+                {renderSelectedPromoVisualPanel()}
                 <PlatformPreview
-                  thumbnailUrl={thumbnailUrl}
+                  thumbnailUrl={effectiveThumbnailUrl}
                   label="LinkedIn Preview"
                   data={data}
                   globalFile={globalFile}
@@ -1995,8 +2241,9 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                 </div>
               </div>
               <div className="platform-preview-column">
+                {renderSelectedPromoVisualPanel()}
                 <PlatformPreview
-                  thumbnailUrl={thumbnailUrl}
+                  thumbnailUrl={effectiveThumbnailUrl}
                   label="Reddit Preview"
                   data={data}
                   globalFile={globalFile}
@@ -2063,6 +2310,15 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
     if (!platforms || platforms.length === 0) {
       setFeedbackMessage("Please select at least one platform.");
       return;
+    }
+
+    if (scheduledTime) {
+      const scheduledAtMs = Date.parse(scheduledTime);
+      if (!Number.isFinite(scheduledAtMs) || scheduledAtMs <= Date.now() + 30000) {
+        setFeedbackMessage("Choose a queue time at least 30 seconds in the future.");
+        toast.error("Choose a queue time at least 30 seconds in the future.");
+        return;
+      }
     }
 
     setIsPublishing(true);
@@ -2204,10 +2460,23 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
 
       const primaryPlatformData =
         platforms.length === 1 ? getPlatformEffectiveData(platforms[0]) : null;
+      const firstPlatformWithTitle = platforms
+        .map(platform => getPlatformEffectiveData(platform))
+        .find(data => String(data?.title || "").trim());
+      const firstPlatformWithDescription = platforms
+        .map(platform => getPlatformEffectiveData(platform))
+        .find(data => String(data?.description || data?.caption || data?.message || data?.commentary || "").trim());
       const resolvedTitle =
-        String(primaryPlatformData?.title || globalTitle || "").trim() || "Untitled Post";
+        String(primaryPlatformData?.title || globalTitle || firstPlatformWithTitle?.title || "").trim() ||
+        "Untitled Post";
       const resolvedDescription = String(
-        primaryPlatformData?.description || globalDescription || ""
+        primaryPlatformData?.description ||
+          globalDescription ||
+          firstPlatformWithDescription?.description ||
+          firstPlatformWithDescription?.caption ||
+          firstPlatformWithDescription?.message ||
+          firstPlatformWithDescription?.commentary ||
+          ""
       ).trim();
 
       if (!globalTitle || !globalTitle.trim()) {
@@ -2295,6 +2564,12 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
   };
 
   const modalOpen = showVideoEditor || showViralScanner || showCropper || showUpgradeModal;
+  const isQueuedPublish = Boolean(scheduledTime);
+  const selectedMediaName =
+    (globalFile && typeof globalFile === "object" && globalFile.name) ||
+    (typeof globalFile === "string" ? "Selected media URL" : "No media selected yet");
+  const queueActionLabel = isQueuedPublish ? "Queue new post" : "Publish now";
+  const queuePlatformCount = selectedPlatforms.length;
 
   return (
     <div className={`unified-publisher-container${modalOpen ? " modal-open" : ""}`}>
@@ -2401,14 +2676,24 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                       >
                         Preview:
                       </label>
-                      {thumbnailUrl && (
+                      {effectiveThumbnailUrl && (
                         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
                           <img
                             src={safeThumbUrl}
                             alt="Thumbnail"
-                            style={{ width: 120, height: 68, objectFit: "cover", borderRadius: 6, border: "2px solid #a78bfa" }}
+                            style={{
+                              width: 120,
+                              height: 68,
+                              objectFit: "contain",
+                              borderRadius: 6,
+                              border: "2px solid #a78bfa",
+                              background: "#020617",
+                              padding: 4,
+                            }}
                           />
-                          <span style={{ color: "#a78bfa", fontSize: 11 }}>📸 Your Thumbnail</span>
+                          <span style={{ color: "#a78bfa", fontSize: 11 }}>
+                            {"Your cover frame"}
+                          </span>
                         </div>
                       )}
                       <video
@@ -2416,7 +2701,18 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                         src={sanitizeUrl(previewUrl)}
                         controls
                         className="preview-media"
+                        preload="metadata"
                         onLoadedMetadata={e => setDuration(e.target.duration)}
+                        onError={e => {
+                          const message = getBrowserPreviewFailureMessage(globalFile, e.currentTarget);
+                          console.warn("Master preview video failed to load", {
+                            fileName: globalFile?.name,
+                            fileType: globalFile?.type,
+                            fileSize: globalFile?.size,
+                            mediaErrorCode: e.currentTarget?.error?.code,
+                          });
+                          setFeedbackMessage(message);
+                        }}
                         style={{
                           width: "100%",
                           maxHeight: "300px",
@@ -2639,21 +2935,89 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
               </div>
             </div>
 
-            {/* --- SCHEDULING --- */}
+            {/* --- PUBLISH QUEUE --- */}
             <div
               className="scheduling-tools"
               style={{
                 marginTop: "15px",
-                padding: "10px",
-                border: "1px solid #ddd",
-                borderRadius: "4px",
+                padding: "14px",
+                border: "1px solid rgba(125, 92, 255, 0.28)",
+                borderRadius: "14px",
+                background:
+                  "linear-gradient(135deg, rgba(20, 18, 44, 0.96), rgba(10, 18, 35, 0.92))",
+                color: "#f8fafc",
+                boxShadow: "0 14px 34px rgba(15, 23, 42, 0.22)",
               }}
             >
-              <h4 style={{ margin: "0 0 10px 0", fontSize: "14px" }}>📅 Scheduling</h4>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: "12px" }}>
+                <div>
+                  <h4 style={{ margin: "0 0 6px 0", fontSize: "15px" }}>Publish Queue</h4>
+                  <p style={{ margin: 0, color: "#cbd5e1", fontSize: "12px", lineHeight: 1.5 }}>
+                    Queue the new media selected here for the platforms you choose. This does not
+                    re-queue old uploads from your library.
+                  </p>
+                </div>
+                <span
+                  style={{
+                    alignSelf: "flex-start",
+                    padding: "6px 10px",
+                    borderRadius: "999px",
+                    background: isQueuedPublish
+                      ? "rgba(37, 99, 235, 0.22)"
+                      : "rgba(16, 185, 129, 0.18)",
+                    color: isQueuedPublish ? "#bfdbfe" : "#bbf7d0",
+                    fontSize: "11px",
+                    fontWeight: 800,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {queueActionLabel}
+                </span>
+              </div>
 
               <BestTimeToPost selectedPlatforms={selectedPlatforms} />
 
-              <div style={{ marginTop: "10px" }}>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+                  gap: "10px",
+                  marginTop: "12px",
+                }}
+              >
+                <div
+                  style={{
+                    border: "1px solid rgba(148, 163, 184, 0.18)",
+                    borderRadius: "12px",
+                    padding: "10px",
+                    background: "rgba(15, 23, 42, 0.62)",
+                  }}
+                >
+                  <div style={{ color: "#94a3b8", fontSize: "10px", letterSpacing: "0.08em" }}>
+                    NEW MEDIA
+                  </div>
+                  <strong style={{ display: "block", marginTop: "4px", fontSize: "12px" }}>
+                    {selectedMediaName}
+                  </strong>
+                </div>
+                <div
+                  style={{
+                    border: "1px solid rgba(148, 163, 184, 0.18)",
+                    borderRadius: "12px",
+                    padding: "10px",
+                    background: "rgba(15, 23, 42, 0.62)",
+                  }}
+                >
+                  <div style={{ color: "#94a3b8", fontSize: "10px", letterSpacing: "0.08em" }}>
+                    PLATFORMS
+                  </div>
+                  <strong style={{ display: "block", marginTop: "4px", fontSize: "12px" }}>
+                    {queuePlatformCount} selected
+                  </strong>
+                </div>
+              </div>
+
+              <div style={{ marginTop: "12px" }}>
                 <label style={{ display: "block", fontSize: "12px", fontWeight: "bold" }}>
                   Publish Time
                 </label>
@@ -2661,12 +3025,20 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                   type="datetime-local"
                   value={scheduledTime}
                   onChange={e => setScheduledTime(e.target.value)}
-                  style={{ width: "100%", padding: "5px", marginTop: "5px" }}
+                  style={{
+                    width: "100%",
+                    padding: "9px 10px",
+                    marginTop: "6px",
+                    borderRadius: "10px",
+                    border: "1px solid rgba(148, 163, 184, 0.32)",
+                    background: "rgba(2, 6, 23, 0.74)",
+                    color: "#f8fafc",
+                  }}
                 />
-                <small style={{ color: "#666", fontSize: "11px" }}>
+                <small style={{ color: "#cbd5e1", fontSize: "11px", lineHeight: 1.5 }}>
                   {scheduledTime
-                    ? "Will be added to queue."
-                    : "Leave empty to publish immediately."}
+                    ? "This new upload will be queued for the selected platforms. Plan limits are checked before anything is uploaded."
+                    : "Leave empty to publish immediately after upload."}
                 </small>
               </div>
 
@@ -2679,13 +3051,23 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                     value={frequency}
                     onChange={e => setFrequency(e.target.value)}
                     className="form-control"
-                    style={{ width: "100%" }}
+                    style={{
+                      width: "100%",
+                      borderRadius: "10px",
+                      background: "rgba(2, 6, 23, 0.74)",
+                      color: "#f8fafc",
+                      border: "1px solid rgba(148, 163, 184, 0.32)",
+                    }}
                   >
                     <option value="once">Once</option>
                     <option value="daily">Daily</option>
                     <option value="weekly">Weekly</option>
                     <option value="monthly">Monthly</option>
                   </select>
+                  <small style={{ color: "#cbd5e1", fontSize: "11px", lineHeight: 1.5 }}>
+                    Each platform in the queue uses one automated distribution task from the
+                    current plan allowance.
+                  </small>
                 </div>
               )}
             </div>
@@ -2833,7 +3215,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
               ×
             </button>
             <VideoEditor
-              file={mediaFile}
+              file={videoEditorFileOverride || mediaFile}
               onSave={async result => {
                 try {
                   const target = editingTarget || "global";
@@ -2868,10 +3250,12 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                   setFeedbackMessage("Error loading clip.");
                 }
                 setShowVideoEditor(false);
+                setVideoEditorFileOverride(null);
                 setEditingTarget(null);
               }}
               onCancel={() => {
                 setShowVideoEditor(false);
+                setVideoEditorFileOverride(null);
                 if (editingTarget && editingTarget !== "global") {
                   restoreMasterPreview();
                 }
@@ -2893,19 +3277,79 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
               setEditingTarget(null);
             }}
             onSelectClip={clip => {
+              if (clip?.openStudio) {
+                const sourceFile = viralScannerFile || mediaFile;
+                const studioClip = {
+                  ...clip,
+                  id: clip.id || `viral-${Date.now()}`,
+                  start: Number(clip.start || 0),
+                  end: Number(clip.end || clip.start || 0),
+                  duration: Math.max(0, Number(clip.end || 0) - Number(clip.start || 0)),
+                  reason: clip.reason || "AI-detected viral moment",
+                  viralScore: clip.score || clip.viralScore,
+                };
+                let editorFile = sourceFile;
+                if (sourceFile instanceof File || sourceFile instanceof Blob) {
+                  try {
+                    editorFile = Object.assign(sourceFile, {
+                      openStudio: true,
+                      clips: [studioClip],
+                    });
+                  } catch (_) {
+                    editorFile = sourceFile;
+                  }
+                } else if (sourceFile && typeof sourceFile === "object") {
+                  editorFile = {
+                    ...sourceFile,
+                    openStudio: true,
+                    clips: [studioClip],
+                  };
+                } else {
+                  editorFile = {
+                    name: "viral-source.mp4",
+                    url: sourceFile || "",
+                    isRemote: true,
+                    openStudio: true,
+                    clips: [studioClip],
+                  };
+                }
+                setVideoEditorFileOverride(editorFile);
+                setShowViralScanner(false);
+                setViralScannerFile(null);
+                setShowVideoEditor(true);
+                setFeedbackMessage("Opened the selected viral clip window in Studio.");
+                return;
+              }
+
+              if (clip?.selectedVisual?.url || clip?.selectedThumbnailUrl) {
+                setSelectedPromoVisual(
+                  clip.selectedVisual || {
+                    url: clip.selectedThumbnailUrl,
+                    label: "Selected promo thumbnail",
+                    type: "thumbnail",
+                  }
+                );
+              }
+
               if (editingTarget && editingTarget !== "global") {
                 updatePlatformData(editingTarget, {
                   trimStart: clip.start,
                   trimEnd: clip.end,
+                  selectedThumbnailUrl: clip.selectedThumbnailUrl || clip.selectedVisual?.url || null,
+                  selectedVisual: clip.selectedVisual || null,
                 });
                 setFeedbackMessage(
-                  `Saved a clip window (${clip.start}s-${clip.end}s) for ${getPlatformName(editingTarget)}. Publish that platform on its own to apply the trim.`
+                  `Saved clip + thumbnail package (${clip.start}s-${clip.end}s) for ${getPlatformName(editingTarget)}.`
                 );
               } else {
                 // Apply globally if no specific target
                 setTrimStart(clip.start);
                 setTrimEnd(clip.end);
-                setFeedbackMessage(`Global trim applied: ${clip.start}s - ${clip.end}s`);
+                setFeedbackMessage(
+                  clip?.selectedVisual?.url || clip?.selectedThumbnailUrl
+                    ? `Global clip + thumbnail package applied: ${clip.start}s - ${clip.end}s`
+                    : `Global trim applied: ${clip.start}s - ${clip.end}s`
+                );
               }
               setShowViralScanner(false);
               setViralScannerFile(null);

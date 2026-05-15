@@ -77,6 +77,42 @@
   line-height: 1.55;
 }
 
+.promo-summary-director-brief {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.8fr);
+  gap: 18px;
+  margin: 16px 24px 0;
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background:
+    radial-gradient(circle at 8% 0%, rgba(255, 207, 92, 0.14), transparent 34%),
+    radial-gradient(circle at 100% 100%, rgba(59, 130, 246, 0.12), transparent 36%),
+    rgba(255, 255, 255, 0.04);
+}
+
+.promo-summary-director-brief strong {
+  display: block;
+  margin-top: 8px;
+  color: #fff8ec;
+  font-size: 1.08rem;
+}
+
+.promo-summary-director-brief p,
+.promo-summary-director-brief li {
+  color: rgba(255, 255, 255, 0.72);
+  line-height: 1.5;
+}
+
+.promo-summary-director-brief p {
+  margin: 8px 0 0;
+}
+
+.promo-summary-director-brief ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
 .promo-summary-pill {
   display: inline-flex;
   align-items: center;
@@ -107,6 +143,10 @@
     radial-gradient(circle at top left, rgba(249, 115, 22, 0.12), transparent 36%),
     radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.1), transparent 34%),
     rgba(255, 255, 255, 0.04);
+}
+
+.promo-summary-card-wide {
+  grid-column: 1 / -1;
 }
 
 .promo-summary-card-label {
@@ -159,6 +199,18 @@
 .promo-summary-style-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.promo-summary-mode-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.promo-summary-angle-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -278,6 +330,31 @@
   gap: 14px;
 }
 
+.promo-summary-campaign-map {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.promo-summary-campaign-map span {
+  color: rgba(255, 255, 255, 0.56);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.promo-summary-campaign-map strong {
+  color: #fff4e6;
+  font-size: 0.88rem;
+  text-align: right;
+}
+
 .promo-summary-result-card {
   display: grid;
   gap: 12px;
@@ -287,6 +364,71 @@
   background:
     radial-gradient(circle at top left, rgba(249, 115, 22, 0.1), transparent 34%),
     rgba(255, 255, 255, 0.04);
+}
+
+.promo-summary-selected-package {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(125, 211, 252, 0.18);
+  background:
+    radial-gradient(circle at top right, rgba(59, 130, 246, 0.16), transparent 32%),
+    linear-gradient(135deg, rgba(15, 23, 42, 0.88), rgba(30, 41, 59, 0.66));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.promo-summary-selected-package-copy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+}
+
+.promo-summary-selected-package-copy span {
+  width: fit-content;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.24);
+  color: #bfdbfe;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.promo-summary-selected-package-copy strong {
+  color: #fff8ec;
+  flex: 1 1 220px;
+  font-size: clamp(0.98rem, 1.4vw, 1.18rem);
+  line-height: 1.08;
+}
+
+.promo-summary-selected-package-copy small {
+  flex-basis: 100%;
+  color: rgba(255, 255, 255, 0.66);
+  line-height: 1.4;
+}
+
+.promo-summary-selected-package-frame {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 16 / 9;
+  min-height: 260px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background:
+    linear-gradient(45deg, rgba(255, 255, 255, 0.04) 25%, transparent 25% 50%, rgba(255, 255, 255, 0.04) 50% 75%, transparent 75%),
+    #020617;
+  background-size: 18px 18px;
+}
+
+.promo-summary-selected-package-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
 }
 
 .promo-summary-video-shell {
@@ -300,8 +442,9 @@
 .promo-summary-video-shell video {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
+  background: #000;
 }
 
 .promo-summary-result-copy {
@@ -309,9 +452,155 @@
   gap: 4px;
 }
 
+.promo-summary-role-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  min-height: 28px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at top left, rgba(249, 115, 22, 0.26), transparent 38%),
+    rgba(59, 130, 246, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #fff4e6;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .promo-summary-result-copy strong {
   color: #fff8ec;
   font-size: 0.98rem;
+}
+
+.promo-summary-confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(2, 6, 23, 0.72);
+  backdrop-filter: blur(12px);
+}
+
+.promo-summary-confirm {
+  width: min(520px, 100%);
+  display: grid;
+  gap: 16px;
+  padding: 22px;
+  border-radius: 24px;
+  border: 1px solid rgba(125, 211, 252, 0.22);
+  background:
+    radial-gradient(circle at top left, rgba(249, 115, 22, 0.2), transparent 32%),
+    linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.96));
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.44);
+}
+
+.promo-summary-confirm > strong {
+  color: #fff8ec;
+  font-size: 1.45rem;
+}
+
+.promo-summary-confirm p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.72);
+  line-height: 1.5;
+}
+
+.promo-summary-confirm-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px 16px;
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.promo-summary-confirm-grid span {
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.promo-summary-confirm-grid strong {
+  color: #f8fafc;
+}
+
+.promo-summary-assets {
+  display: grid;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 16px;
+  border: 1px solid rgba(125, 211, 252, 0.16);
+  background: rgba(15, 23, 42, 0.42);
+}
+
+.promo-summary-assets-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+}
+
+.promo-summary-assets-head strong {
+  color: #f8fafc;
+  font-size: 0.82rem;
+}
+
+.promo-summary-assets-head span {
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 0.72rem;
+}
+
+.promo-summary-asset-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.promo-summary-asset-card {
+  display: grid;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-decoration: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.promo-summary-asset-card img {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: contain;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #020617;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.promo-summary-asset-card:first-child img {
+  aspect-ratio: 16 / 9;
+}
+
+.promo-summary-asset-card.is-selected img {
+  border-color: rgba(96, 165, 250, 0.92);
+  box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.28), 0 18px 34px rgba(37, 99, 235, 0.22);
+  transform: translateY(-1px);
+}
+
+.promo-summary-asset-card span {
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 @media (max-width: 1080px) {
@@ -324,14 +613,26 @@
   }
 
   .promo-summary-grid,
+  .promo-summary-director-brief,
+  .promo-summary-mode-grid,
   .promo-summary-style-grid,
+  .promo-summary-angle-grid,
   .promo-summary-results-grid {
     grid-template-columns: 1fr;
   }
 
   .promo-summary-header,
-  .promo-summary-results-head {
+  .promo-summary-results-head,
+  .promo-summary-campaign-map {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .promo-summary-campaign-map strong {
+    text-align: left;
+  }
+
+  .promo-summary-selected-package {
+    grid-template-columns: 1fr;
   }
 }

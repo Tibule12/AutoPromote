@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars, no-control-regex */
 import {
   applySafeMediaSource,
   createSecureId,
@@ -608,6 +609,9 @@ const buildClipGuidance = clip => {
   if (normalizedReason && reasons.length < 5) {
     reasons.push(normalizedReason);
   }
+  if (clip?.strategyIntent && reasons.length < 5) {
+    reasons.push(normalizePlainText(clip.strategyIntent));
+  }
 
   while (reasons.length < 3) {
     reasons.push(
@@ -639,6 +643,9 @@ const buildClipGuidance = clip => {
         ? "Extend the clip toward the payoff if a stronger ending is nearby"
         : "Trim the clip closer to the 10-25 second sweet spot"
     );
+  }
+  if (clip?.studioMove) {
+    improvements.unshift(normalizePlainText(clip.studioMove));
   }
 
   const categories = CATEGORY_TAG_RULES.filter(rule => rule.pattern.test(descriptorText)).slice(
@@ -732,6 +739,7 @@ const buildClipGuidance = clip => {
       backendScore * 0.16
   );
   const bestFor = [];
+  if (clip?.bestFor) bestFor.push(`Best for ${clip.bestFor}`);
   if (retentionPotential >= 72) bestFor.push("Best for retention");
   if (thumbnailPotential >= 68) bestFor.push("Best for thumbnail-led packaging");
   if (conversionPotential >= 68) bestFor.push("Best for conversion");
@@ -739,7 +747,9 @@ const buildClipGuidance = clip => {
   if (!bestFor.length) bestFor.push("Best for balanced publishing");
 
   const openingMove =
-    retentionPotential >= 74
+    clip?.hookText
+      ? `Open with "${normalizePlainText(clip.hookText)}" and make the first beat impossible to ignore.`
+      : retentionPotential >= 74
       ? "Open on the strongest beat and hit it with a fast curiosity hook."
       : thumbnailPotential >= 72
         ? "Lead with the clearest face or object frame and let the visual promise carry the intro."
@@ -783,14 +793,16 @@ const buildClipGuidance = clip => {
     openingMove,
     recutVariants,
     scoreBreakdown: [
-      { label: "Hook", value: clampNumber(Math.round((signals.hook ? 70 : 34) + retentionPotential * 0.3), 0, 100, 0) },
+      { label: "Hook", value: clampNumber(Number(clip?.scoreBreakdown?.hook) || Math.round((signals.hook ? 70 : 34) + retentionPotential * 0.3), 0, 100, 0) },
       { label: "Retention", value: retentionPotential },
       { label: "Thumbnail", value: thumbnailPotential },
-      { label: "Captions", value: captionReadiness },
+      { label: "Captions", value: clampNumber(Number(clip?.scoreBreakdown?.speech) || captionReadiness, 0, 100, 0) },
       { label: "Conversion", value: conversionPotential },
       { label: "Story", value: semanticArcScore },
     ],
-    hookText: getHookCopySuggestions(clip)[0] || DEFAULT_HOOK_TEXT,
+    hookText: clip?.hookText || getHookCopySuggestions(clip)[0] || DEFAULT_HOOK_TEXT,
+    strategyLabel: clip?.strategyLabel || null,
+    campaignRole: clip?.campaignRole || null,
   };
 };
 
@@ -2302,13 +2314,28 @@ const ViralClipStudio = ({
 
   const safePlayMediaElement = mediaElement => {
     if (!mediaElement || typeof mediaElement.play !== "function") return;
+    const rawSource =
+      (typeof mediaElement.currentSrc === "string" && mediaElement.currentSrc) ||
+      (typeof mediaElement.src === "string" && mediaElement.src) ||
+      "";
+    if (!rawSource.trim()) return;
+    if (
+      typeof HTMLMediaElement !== "undefined" &&
+      mediaElement.networkState === HTMLMediaElement.NETWORK_NO_SOURCE
+    ) {
+      return;
+    }
 
     try {
       const playResult = mediaElement.play();
       if (playResult && typeof playResult.catch === "function") {
-        playResult.catch(error => console.log("Auto-play prevented", error));
+        playResult.catch(error => {
+          if (error?.name === "NotSupportedError") return;
+          console.log("Auto-play prevented", error);
+        });
       }
     } catch (error) {
+      if (error?.name === "NotSupportedError") return;
       console.log("Auto-play prevented", error);
     }
   };
@@ -5777,8 +5804,8 @@ const ViralClipStudio = ({
                         title="Auto-Generate Captions"
                         onClick={async e => {
                           e.stopPropagation();
-                          if (
-                            !confirm(
+    if (
+      !window.confirm(
                               `Generate captions for ${clip.name || "this clip"}?\n(This uses AI to detect speech and may need manual cleanup, especially for mixed South African languages. It might take 10-30s.)`
                             )
                           )

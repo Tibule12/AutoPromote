@@ -53,7 +53,9 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
   const effectivePackages = topUpPacks.length > 0 ? topUpPacks : CREDIT_PACKAGES;
 
   const [processedFile, setProcessedFile] = useState(null);
-  const [clipSuggestions, setClipSuggestions] = useState(null); // Store detected clips or manual studio entry
+  const [clipSuggestions, setClipSuggestions] = useState(() =>
+    file?.openStudio && Array.isArray(file?.clips) ? file.clips : null
+  ); // Store detected clips or manual studio entry
   const [showMultiCamCombiner, setShowMultiCamCombiner] = useState(false);
   const autoOpenedStudioRef = useRef(false);
   const analyzeCost = editing?.features?.findViralClips?.creditCost || creditCosts?.analyze || 8;
@@ -158,7 +160,9 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
               ? ` (${data.monthly.remaining} monthly + ${data.topUp || 0} top-up)`
               : "";
             setStatusMessage(
-              `You have ${formatBalance(data.balance)} editing credits available${monthlyInfo}.`
+              data.localCreditBypass
+                ? "Local testing mode: backend editing credits are bypassed on this machine. Production billing stays enabled."
+                : `You have ${formatBalance(data.balance)} editing credits available${monthlyInfo}.`
             );
           } catch (jsonErr) {
             const snippet = (text || "").slice(0, 400).replace(/\s+/g, " ");
@@ -491,6 +495,12 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
       } else if (typeof file === "string") {
         setVideoSrc(file);
       }
+
+      if (file.openStudio && Array.isArray(file.clips) && file.clips.length) {
+        autoOpenedStudioRef.current = true;
+        setClipSuggestions(file.clips);
+        setStatusMessage("Opened the detected viral clip window in Studio.");
+      }
     }
   }, [file]);
 
@@ -809,27 +819,82 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
     setShowThumbnailGenerator(false);
   };
 
-  const handlePromoClipUse = clip => {
+  const handlePromoClipUse = async clip => {
     if (!clip?.url) {
       setStatusMessage("Promo clip is missing a usable URL.");
       return;
     }
 
-    const refreshedUrl = clip.url.includes("?")
-      ? `${clip.url}&t=${Date.now()}`
-      : `${clip.url}?t=${Date.now()}`;
-    setProcessedFile({
-      name: `${(clip.promoCaption || clip.title || "promo-clip").replace(/[^a-zA-Z0-9._-]+/g, "-")}.mp4`,
-      type: "video/mp4",
-      url: clip.url,
-      isRemote: true,
-      expiresAt: clip.expiresAt || null,
-      promoCaption: clip.promoCaption || clip.title || "",
-      sourceType: "promo_summary_clip",
-    });
-    setVideoSrc(refreshedUrl);
+    const safeName = `${(clip.promoCaption || clip.title || "promo-clip")
+      .replace(/[^a-zA-Z0-9._-]+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "") || "promo-clip"}.mp4`;
+
+    try {
+      setStatusMessage("Loading promo clip into the editor...");
+      const response = await fetch(clip.url, { mode: "cors" });
+      if (!response.ok) throw new Error(`Promo clip fetch failed with ${response.status}`);
+      const blob = await response.blob();
+      const promoFile = new File([blob], safeName, { type: blob.type || "video/mp4" });
+      if (blobUrlRef.current) {
+        URL.revokeObjectURL(blobUrlRef.current);
+        blobUrlRef.current = null;
+      }
+      const objectUrl = URL.createObjectURL(promoFile);
+      blobUrlRef.current = objectUrl;
+      promoFile.expiresAt = clip.expiresAt || null;
+      promoFile.promoCaption = clip.promoCaption || clip.title || "";
+      promoFile.sourceType = "promo_summary_clip";
+      promoFile.remoteUrl = clip.url;
+      promoFile.promoVisualAssets = clip.visualAssets || [];
+      promoFile.selectedPromoVisual = clip.selectedVisual || null;
+      setProcessedFile(promoFile);
+      setVideoSrc(objectUrl);
+      if (clip.selectedVisual?.url) {
+        setThumbnailData({
+          dataUrl: clip.selectedVisual.url,
+          storageUrl: clip.selectedVisual.url,
+          text: clip.selectedVisual.hookText || clip.titleSuggestion || clip.hookText || "",
+          time: 0,
+          source: "smart_promo_visual",
+          asset: clip.selectedVisual,
+        });
+      }
+    } catch (error) {
+      console.warn("Could not hydrate promo clip locally; using remote URL fallback.", error);
+      const refreshedUrl = clip.url.includes("?")
+        ? `${clip.url}&t=${Date.now()}`
+        : `${clip.url}?t=${Date.now()}`;
+      setProcessedFile({
+        name: safeName,
+        type: "video/mp4",
+        url: clip.url,
+        isRemote: true,
+        expiresAt: clip.expiresAt || null,
+        promoCaption: clip.promoCaption || clip.title || "",
+        sourceType: "promo_summary_clip",
+        promoVisualAssets: clip.visualAssets || [],
+        selectedPromoVisual: clip.selectedVisual || null,
+      });
+      setVideoSrc(refreshedUrl);
+      if (clip.selectedVisual?.url) {
+        setThumbnailData({
+          dataUrl: clip.selectedVisual.url,
+          storageUrl: clip.selectedVisual.url,
+          text: clip.selectedVisual.hookText || clip.titleSuggestion || clip.hookText || "",
+          time: 0,
+          source: "smart_promo_visual",
+          asset: clip.selectedVisual,
+        });
+      }
+    }
+
     setShowSmartPromoSummary(false);
-    setStatusMessage(`Loaded promo clip: ${clip.promoCaption || clip.title || "Promo cut"}`);
+    setStatusMessage(
+      `Loaded promo clip${clip.selectedVisual?.url ? " with selected promo visual" : ""}: ${
+        clip.promoCaption || clip.title || "Promo cut"
+      }`
+    );
   };
 
   const handleSave = () => {
@@ -1103,8 +1168,17 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
   };
 
   const handleMultiCamComplete = async multiCamFile => {
-    const finalUrl =
-      multiCamFile?.url || (multiCamFile?.file ? URL.createObjectURL(multiCamFile.file) : "");
+    let finalUrl = "";
+    if (multiCamFile?.file instanceof File || multiCamFile?.file instanceof Blob) {
+      if (blobUrlRef.current) {
+        URL.revokeObjectURL(blobUrlRef.current);
+        blobUrlRef.current = null;
+      }
+      finalUrl = URL.createObjectURL(multiCamFile.file);
+      blobUrlRef.current = finalUrl;
+    } else {
+      finalUrl = multiCamFile?.url || "";
+    }
 
     if (!finalUrl) {
       setStatusMessage("Multi-camera render finished without a usable output URL.");
@@ -1129,27 +1203,22 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
     setShowMultiCamCombiner(false);
 
     if (workflowAction === "generate-clips") {
-      setStatusMessage("Preparing AI clip analysis from the preview master...");
-      await handleProcess(multiCamFile.file || multiCamFile, {
-        smartCrop: false,
-        silenceRemoval: false,
-        captions: false,
-        muteAudio: false,
-        addMusic: false,
-        removeWatermark: false,
-        analyzeClips: true,
-        addHook: false,
-      });
+      setStatusMessage(
+        "Multicam master is ready. Open Viral Clip Studio yourself if you want to generate clips."
+      );
       return;
     }
 
     if (workflowAction === "refine-full-video") {
-      setStatusMessage("Opening Viral Clip Studio with the preview master...");
-      handleLaunchStudio(multiCamFile.duration || 30);
+      setStatusMessage(
+        "Multicam master is ready in the editor. Open Viral Clip Studio only if you want to use it."
+      );
       return;
     }
 
-    handleLaunchStudio(multiCamFile.duration || 30);
+    setStatusMessage(
+      "Multicam master is ready in the editor. Continue editing here, or open another tool when you choose."
+    );
   };
 
   if (clipSuggestions) {
@@ -1440,10 +1509,10 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                       <img
                         src={thumbnailData.dataUrl}
                         alt="Thumbnail preview"
-                        style={{ width: 80, height: 45, objectFit: "cover", borderRadius: 4, display: "block" }}
+                        style={{ width: 120, height: 72, objectFit: "contain", borderRadius: 4, display: "block", background: "#050816" }}
                       />
                       <div style={{ color: "#a78bfa", fontSize: 9, textAlign: "center", marginTop: 2 }}>
-                        Thumbnail
+                        {thumbnailData.source === "smart_promo_visual" ? "Selected Promo Visual" : "Thumbnail"}
                       </div>
                     </div>
                   )}
