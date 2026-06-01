@@ -18,9 +18,17 @@ const {
 } = require("./config/subscriptionPlans");
 const { getEffectiveTierSnapshot } = require("./services/billingService");
 const MEDIA_WORKER_URL =
-  process.env.MEDIA_WORKER_URL || "https://media-worker-v1-jddzncgt2a-uc.a.run.app";
+  process.env.MEDIA_WORKER_URL || "https://media-worker-v1-341498038874.us-central1.run.app";
 const LOCAL_MEDIA_WORKER_URL = process.env.LOCAL_MEDIA_WORKER_URL || "http://127.0.0.1:8000";
+const CAM_COMBINER_WORKER_URL =
+  process.env.CAM_COMBINER_WORKER_URL || process.env.MULTICAM_WORKER_URL || MEDIA_WORKER_URL;
+const LOCAL_CAM_COMBINER_WORKER_URL =
+  process.env.LOCAL_CAM_COMBINER_WORKER_URL || LOCAL_MEDIA_WORKER_URL;
 const VIDEO_EDITOR_CREDITS_DISABLED = process.env.DISABLE_VIDEO_EDITOR_CREDITS === "true";
+const MULTICAM_MAX_RENDER_SECONDS = parseInt(
+  process.env.MULTICAM_MAX_RENDER_SECONDS || String(20 * 60),
+  10
+) || 20 * 60;
 
 const normalizeMulticamRenderTier = value => {
   const tier = String(value || "premium").trim().toLowerCase().replace(/-/g, "_");
@@ -61,23 +69,41 @@ const shouldRetryWithLocalWorker = error => {
   );
 };
 
-const postToMediaWorker = async (endpoint, payload, timeout = 120000) => {
+const postToWorker = async (
+  endpoint,
+  payload,
+  timeout = 120000,
+  primaryWorkerUrl = MEDIA_WORKER_URL,
+  localWorkerUrl = LOCAL_MEDIA_WORKER_URL
+) => {
   try {
-    return await axios.post(`${MEDIA_WORKER_URL}${endpoint}`, payload, { timeout });
+    return await axios.post(`${primaryWorkerUrl}${endpoint}`, payload, { timeout });
   } catch (error) {
     const canFallback =
-      LOCAL_MEDIA_WORKER_URL &&
-      LOCAL_MEDIA_WORKER_URL !== MEDIA_WORKER_URL &&
+      localWorkerUrl &&
+      localWorkerUrl !== primaryWorkerUrl &&
       shouldRetryWithLocalWorker(error);
 
     if (!canFallback) throw error;
 
     console.warn(
-      `[MediaRoute] Falling back to local worker for ${endpoint}. Primary worker: ${MEDIA_WORKER_URL}`
+      `[MediaRoute] Falling back to local worker for ${endpoint}. Primary worker: ${primaryWorkerUrl}`
     );
-    return axios.post(`${LOCAL_MEDIA_WORKER_URL}${endpoint}`, payload, { timeout });
+    return axios.post(`${localWorkerUrl}${endpoint}`, payload, { timeout });
   }
 };
+
+const postToMediaWorker = async (endpoint, payload, timeout = 120000) =>
+  postToWorker(endpoint, payload, timeout);
+
+const postToCamCombinerWorker = async (endpoint, payload, timeout = 120000) =>
+  postToWorker(
+    endpoint,
+    payload,
+    timeout,
+    CAM_COMBINER_WORKER_URL,
+    LOCAL_CAM_COMBINER_WORKER_URL
+  );
 
 const getFromMediaWorker = async (endpoint, timeout = 15000) => {
   try {
@@ -106,6 +132,53 @@ const chargeVideoEditorCredits = async (userId, amount, routeName) => {
   }
 
   return deductCredits(userId, amount, routeName);
+};
+
+const toIsoString = value => {
+  if (!value) return null;
+  if (typeof value?.toDate === "function") return value.toDate().toISOString();
+  if (value instanceof Date) return value.toISOString();
+  if (typeof value === "string") return value;
+  const parsed = Date.parse(value);
+  return Number.isNaN(parsed) ? null : new Date(parsed).toISOString();
+};
+
+const normalizeRenderJob = (doc, data = {}) => {
+  const result = data.result || {};
+  const outputUrl =
+    data.outputUrl || data.output_url || result.url || result.output_url || result.firebase_output_url || null;
+  const thumbnailUrl =
+    data.thumbnailUrl || data.thumbnail_url || result.thumbnailUrl || result.thumbnail_url || null;
+  return {
+    jobId: data.jobId || doc.id,
+    type: data.type || data.feature || "media_job",
+    status: data.status || "queued",
+    stage: data.stage || null,
+    progress: Number(data.progress || 0),
+    outputUrl,
+    output_url: outputUrl,
+    thumbnailUrl,
+    thumbnail_url: thumbnailUrl,
+    duration: data.duration || result.duration || 0,
+    renderTier: data.renderTier || result.renderTier || result.render_tier || null,
+    expiresAt: toIsoString(data.expiresAt || result.expiresAt || result.expires_at),
+    retentionDays: data.retentionDays || result.retention_days || null,
+    createdAt: toIsoString(data.createdAt || data.created_at),
+    completedAt: toIsoString(data.completedAt || data.completed_at),
+    detail: data.detail || data.message || null,
+    error: data.error || null,
+  };
+};
+
+const getRequestedMulticamDuration = body => {
+  const candidates = [
+    body?.overlapDuration,
+    body?.overlap_duration,
+    body?.timelineDuration,
+    body?.timeline_duration,
+    body?.duration,
+  ];
+  return Math.max(0, ...candidates.map(value => Number(value || 0)).filter(Number.isFinite));
 };
 
 // Configure Multer (Buffer storage)
@@ -364,6 +437,15 @@ router.post("/render-multicam", async (req, res) => {
     return res.status(400).json({ message: "At least two camera sources are required" });
   }
 
+  const requestedDuration = getRequestedMulticamDuration(req.body);
+  if (requestedDuration > MULTICAM_MAX_RENDER_SECONDS + 0.5) {
+    return res.status(400).json({
+      message: "Cam Combiner renders are capped at 20 minutes. Please select a shorter range.",
+      code: "MULTICAM_DURATION_LIMIT",
+      maxDurationSeconds: MULTICAM_MAX_RENDER_SECONDS,
+    });
+  }
+
   try {
     const tierSnapshot = await getEffectiveTierSnapshot(userId);
     const capabilities = getPlanCapabilities(tierSnapshot.tierId);
@@ -495,7 +577,7 @@ router.post("/multicam/clean-audio-sync", async (req, res) => {
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
-    await postToMediaWorker(
+    await postToCamCombinerWorker(
       "/multicam/clean-audio-sync",
       {
         job_id: jobId,
@@ -628,6 +710,39 @@ router.post("/preview-music", async (req, res) => {
   }
 });
 
+router.get("/renders", async (req, res) => {
+  try {
+    const userId = req.user.uid;
+    const limit = Math.min(50, Math.max(1, Number(req.query.limit || 20)));
+
+    const snapshot = await admin
+      .firestore()
+      .collection("video_edits")
+      .where("userId", "==", userId)
+      .limit(Math.max(limit * 3, 50))
+      .get();
+
+    const renders = snapshot.docs
+      .map(doc => normalizeRenderJob(doc, doc.data() || {}))
+      .filter(job => job.type === "multicam_render")
+      .sort((a, b) => {
+        const aTime = Date.parse(a.completedAt || a.createdAt || "") || 0;
+        const bTime = Date.parse(b.completedAt || b.createdAt || "") || 0;
+        return bTime - aTime;
+      })
+      .slice(0, limit);
+
+    res.json({
+      success: true,
+      renders,
+      retentionDays: parseInt(process.env.MULTICAM_MASTER_RETENTION_DAYS || "4", 10) || 4,
+    });
+  } catch (error) {
+    console.error("[MediaRoute] Failed to list renders:", error.message);
+    res.status(500).json({ success: false, message: "Could not load recent renders" });
+  }
+});
+
 // Route: GET /api/media/status/:jobId
 // Check status of async video processing
 router.get("/status/:jobId", async (req, res) => {
@@ -676,6 +791,9 @@ router.get("/status/:jobId", async (req, res) => {
       output_url: data.output_url, // Python worker result (Async)
       audio_url: data.audio_url,
       outputUrl: data.outputUrl, // Legacy Node worker result
+      thumbnailUrl: data.thumbnailUrl || data.thumbnail_url || data.result?.thumbnailUrl || data.result?.thumbnail_url,
+      expiresAt: data.expiresAt || data.result?.expiresAt || data.result?.expires_at || null,
+      retentionDays: data.retentionDays || data.result?.retention_days || null,
       clipSuggestions: data.clipSuggestions, // Viral clips
       detail: data.detail,
       message: data.message,

@@ -12,8 +12,16 @@ const { refundCredits } = require("../creditSystem");
 // Point to the Python service (default to Cloud Run in production, localhost in dev)
 // Use the deployed URL for stability if env var is missing
 const MEDIA_WORKER_URL =
-  process.env.MEDIA_WORKER_URL || "https://media-worker-v1-jddzncgt2a-uc.a.run.app";
+  process.env.MEDIA_WORKER_URL || "https://media-worker-v1-341498038874.us-central1.run.app";
 const LOCAL_MEDIA_WORKER_URL = process.env.LOCAL_MEDIA_WORKER_URL || "http://127.0.0.1:8000";
+const CAM_COMBINER_WORKER_URL =
+  process.env.CAM_COMBINER_WORKER_URL || process.env.MULTICAM_WORKER_URL || MEDIA_WORKER_URL;
+const LOCAL_CAM_COMBINER_WORKER_URL =
+  process.env.LOCAL_CAM_COMBINER_WORKER_URL || LOCAL_MEDIA_WORKER_URL;
+const MULTICAM_MASTER_RETENTION_DAYS = Math.max(
+  1,
+  parseInt(process.env.MULTICAM_MASTER_RETENTION_DAYS || "4", 10) || 4
+);
 
 function getWorkerErrorDetail(error) {
   const status = error.response?.status;
@@ -41,6 +49,27 @@ function shouldTryLocalWorker(error) {
     error.code === "ETIMEDOUT" ||
     error.code === "ECONNABORTED"
   );
+}
+
+function shouldTryLocalCamCombinerWorker(error) {
+  if (!LOCAL_CAM_COMBINER_WORKER_URL || LOCAL_CAM_COMBINER_WORKER_URL === CAM_COMBINER_WORKER_URL) {
+    return false;
+  }
+  const status = error.response?.status;
+  return (
+    status === 404 ||
+    status === 500 ||
+    status === 502 ||
+    status === 503 ||
+    error.code === "ECONNREFUSED" ||
+    error.code === "ENOTFOUND" ||
+    error.code === "ETIMEDOUT" ||
+    error.code === "ECONNABORTED"
+  );
+}
+
+function getMulticamExpiryIso(fromMs = Date.now()) {
+  return new Date(fromMs + MULTICAM_MASTER_RETENTION_DAYS * 24 * 60 * 60 * 1000).toISOString();
 }
 
 const { v4: uuidv4 } = require("uuid");
@@ -155,6 +184,7 @@ class VideoEditingService {
         type: "multicam_render",
         multicamRequest,
         creditReceipt: multicamRequest?.creditReceipt || null,
+        retentionDays: MULTICAM_MASTER_RETENTION_DAYS,
         status: "queued",
         progress: 0,
         createdAt: new Date().toISOString(),
@@ -246,6 +276,11 @@ class VideoEditingService {
         result,
         outputUrl: result.url,
         thumbnailUrl: result.thumbnailUrl || null,
+        storagePath: result.outputStoragePath || result.output_storage_path || null,
+        outputStoragePath: result.outputStoragePath || result.output_storage_path || null,
+        thumbnailStoragePath: result.thumbnailStoragePath || result.thumbnail_storage_path || null,
+        expiresAt: result.expiresAt || result.expires_at || getMulticamExpiryIso(),
+        retentionDays: MULTICAM_MASTER_RETENTION_DAYS,
         completedAt: new Date().toISOString(),
       });
     } catch (error) {
@@ -839,11 +874,11 @@ class VideoEditingService {
       hasExternalAudio: !!external_audio_url,
     });
 
-    let workerUrl = MEDIA_WORKER_URL;
-    if (LOCAL_MEDIA_WORKER_URL) {
+    let workerUrl = CAM_COMBINER_WORKER_URL;
+    if (LOCAL_CAM_COMBINER_WORKER_URL) {
       try {
-        await axios.get(`${LOCAL_MEDIA_WORKER_URL}/health`, { timeout: 2000 });
-        workerUrl = LOCAL_MEDIA_WORKER_URL;
+        await axios.get(`${LOCAL_CAM_COMBINER_WORKER_URL}/health`, { timeout: 2000 });
+        workerUrl = LOCAL_CAM_COMBINER_WORKER_URL;
       } catch {
         // fall through to cloud worker
       }
@@ -926,9 +961,20 @@ class VideoEditingService {
       async_mode: !!jobId,
     };
 
-    const response = await axios.post(`${MEDIA_WORKER_URL}/render-multicam`, payload, {
-      timeout: 1800000,
-    });
+    let response;
+    try {
+      response = await axios.post(`${CAM_COMBINER_WORKER_URL}/render-multicam`, payload, {
+        timeout: 1800000,
+      });
+    } catch (error) {
+      if (!shouldTryLocalCamCombinerWorker(error)) throw error;
+      console.warn(
+        `[VideoEditing] Falling back to local Cam Combiner worker. Primary worker: ${CAM_COMBINER_WORKER_URL}`
+      );
+      response = await axios.post(`${LOCAL_CAM_COMBINER_WORKER_URL}/render-multicam`, payload, {
+        timeout: 1800000,
+      });
+    }
 
     const result = response.data;
     if (result.status === "processing" && result.mode === "async") {
@@ -943,6 +989,9 @@ class VideoEditingService {
         thumbnailUrl: result.thumbnail_url || result.thumbnailUrl || null,
         localThumbnailUrl: result.local_thumbnail_url || result.localThumbnailUrl || null,
         firebaseThumbnailUrl: result.firebase_thumbnail_url || result.firebaseThumbnailUrl || null,
+        outputStoragePath: result.output_storage_path || result.outputStoragePath || null,
+        thumbnailStoragePath: result.thumbnail_storage_path || result.thumbnailStoragePath || null,
+        expiresAt: result.expires_at || result.expiresAt || getMulticamExpiryIso(),
         renderTier: result.render_tier || multicamRequest?.renderTier || multicamRequest?.render_tier || "premium",
         renderReceipt: result.render_receipt || null,
         syncPreflight: result.sync_preflight || null,

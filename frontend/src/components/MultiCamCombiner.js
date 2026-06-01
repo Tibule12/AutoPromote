@@ -63,6 +63,17 @@ const getCameraColor = (cameraId, sources) => {
 
 const DRIFT_THRESHOLD_SECONDS = 0.18;
 const EXPORT_FRAME_RATE = 30;
+const SERVER_MULTICAM_MAX_DURATION_SECONDS = 20 * 60;
+
+const formatRenderExpiry = expiresAt => {
+  const expiryMs = Date.parse(expiresAt || "");
+  if (!expiryMs) return "Expires after 4 days";
+  const remainingMs = expiryMs - Date.now();
+  if (remainingMs <= 0) return "Expired";
+  const remainingHours = Math.ceil(remainingMs / (60 * 60 * 1000));
+  if (remainingHours < 48) return `Expires in ${remainingHours}h`;
+  return `Expires in ${Math.ceil(remainingHours / 24)} days`;
+};
 const FRAME_STEP_SECONDS = 1 / 30;
 const AUDIO_SYNC_BINS_PER_SECOND = 20;
 const WAVEFORM_BAR_COUNT = 24;
@@ -1341,6 +1352,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const [exportProgress, setExportProgress] = useState(0);
   const [outputAspectRatio, setOutputAspectRatio] = useState("9:16");
   const [exportResult, setExportResult] = useState(null);
+  const [recentRenders, setRecentRenders] = useState([]);
+  const [recentRendersStatus, setRecentRendersStatus] = useState("");
   const [serverExportPending, setServerExportPending] = useState(false);
   const [singleCamSegments, setSingleCamSegments] = useState([]);
   const [selectedSingleCamSegmentId, setSelectedSingleCamSegmentId] = useState(null);
@@ -1383,6 +1396,27 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const nextCameraIndexRef = useRef(3);
   const objectUrlsRef = useRef(new Set());
   const animationFrameRef = useRef(null);
+
+  const loadRecentRenders = useCallback(async () => {
+    try {
+      const user = getAuth().currentUser;
+      if (!user) return;
+      setRecentRendersStatus("Loading saved masters...");
+      const token = await user.getIdToken();
+      const response = await fetch(`${API_BASE_URL}/api/media/renders?limit=8`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Could not load saved masters");
+      }
+      setRecentRenders(Array.isArray(data.renders) ? data.renders : []);
+      setRecentRendersStatus("");
+    } catch (error) {
+      console.warn("Could not load Cam Combiner renders", error);
+      setRecentRendersStatus("Saved masters could not be loaded right now.");
+    }
+  }, []);
   const playheadRef = useRef(0);
   const scrollContainerRef = useRef(null);
   const previewPanelRef = useRef(null);
@@ -3182,6 +3216,10 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       }
     };
   }, [exportResult]);
+
+  useEffect(() => {
+    loadRecentRenders();
+  }, [loadRecentRenders]);
 
   useEffect(() => {
     const jobId = cleanAudioSyncJob?.jobId;
@@ -6117,6 +6155,13 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       setStatusMessage("Set up synced sources before exporting.");
       return;
     }
+    if (timelineDuration > SERVER_MULTICAM_MAX_DURATION_SECONDS + 0.5) {
+      setStatusMessage(
+        "Cam Combiner cloud renders are capped at 20 minutes for now. Trim/select a 20-minute window before rendering."
+      );
+      toast.error("Cam Combiner cloud renders are capped at 20 minutes.");
+      return;
+    }
 
     setServerExportPending(true);
     setIsExporting(true);
@@ -6532,6 +6577,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                   isServerRender: true,
                 });
                 setStatusMessage("Multi-camera render complete. Download ready.");
+                loadRecentRenders();
               } else {
                 setStatusMessage("Render completed but no output URL was returned.");
               }
@@ -6564,6 +6610,51 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       setIsExporting(false);
       setExportProgress(0);
     }
+  };
+
+  const renderRecentRendersPanel = () => {
+    if (!recentRenders.length && !recentRendersStatus) return null;
+    return (
+      <div className="nle-saved-renders">
+        <div className="nle-saved-renders-head">
+          <strong>Saved Cam Combiner masters</strong>
+          <button type="button" className="nle-mini-btn" onClick={loadRecentRenders}>
+            Refresh
+          </button>
+        </div>
+        {recentRendersStatus ? <span>{recentRendersStatus}</span> : null}
+        {recentRenders.slice(0, 4).map(render => {
+          const downloadUrl = render.outputUrl || render.output_url;
+          const isReady = render.status === "completed" && downloadUrl;
+          return (
+            <div className="nle-saved-render-card" key={render.jobId}>
+              {render.thumbnailUrl ? (
+                <img src={render.thumbnailUrl} alt="" loading="lazy" />
+              ) : (
+                <div className="nle-saved-render-thumb">MP4</div>
+              )}
+              <div>
+                <strong>{isReady ? "Master ready" : `Render ${render.status}`}</strong>
+                <span>
+                  {formatDurationLabel(Number(render.duration || 0))} ·{" "}
+                  {formatRenderExpiry(render.expiresAt)}
+                </span>
+              </div>
+              {isReady ? (
+                <a
+                  className="nle-mini-btn"
+                  href={downloadUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Download
+                </a>
+              ) : null}
+            </div>
+          );
+        })}
+      </div>
+    );
   };
 
   return (
@@ -7296,6 +7387,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                     </div>
                   </div>
                 ) : null}
+
+                {renderRecentRendersPanel()}
 
                 {statusMessage ? <div className="nle-status-banner">{statusMessage}</div> : null}
               </div>
@@ -9626,6 +9719,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                 </div>
               </div>
             ) : null}
+
+            {renderRecentRendersPanel()}
 
             {statusMessage ? <div className="nle-status-banner">{statusMessage}</div> : null}
             </div>

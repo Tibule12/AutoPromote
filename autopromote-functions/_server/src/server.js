@@ -3522,9 +3522,20 @@ if (process.env.SCHEDULER_ENABLED !== "false" && !isTestEnv) {
           const {
             cleanupTempUploads,
             cleanupExpiredSourceUploads,
+            cleanupExpiredMulticamRenders,
           } = require("./services/storageCleanupService");
           await cleanupTempUploads();
           await cleanupExpiredSourceUploads();
+          await cleanupExpiredMulticamRenders();
+
+          try {
+            const {
+              notifyCompletedMulticamRenders,
+            } = require("./services/renderNotificationService");
+            await notifyCompletedMulticamRenders();
+          } catch (notifyErr) {
+            console.error("[Scheduler] ⚠️ Render completion emails failed:", notifyErr.message);
+          }
 
           // Cleanup expired generated clips (older than 5 days)
           try {
