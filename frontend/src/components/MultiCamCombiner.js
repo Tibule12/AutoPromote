@@ -2708,6 +2708,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
               ...source,
               uploadedUrl: upload.uploadedUrl || source.uploadedUrl || "",
               uploadedSyncUrl: upload.uploadedSyncUrl || source.uploadedSyncUrl || "",
+              uploadedRenderTrimStart: Number(upload.uploadedRenderTrimStart || 0) || 0,
+              uploadedRenderTrimDuration: Number(upload.uploadedRenderTrimDuration || 0) || 0,
             };
           })
         );
@@ -2751,6 +2753,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           uploadedSyncUrl: String(source.uploadedSyncUrl || "").startsWith("http")
             ? source.uploadedSyncUrl
             : "",
+          uploadedRenderTrimStart: Number(source.uploadedRenderTrimStart || 0) || 0,
+          uploadedRenderTrimDuration: Number(source.uploadedRenderTrimDuration || 0) || 0,
         };
         return accumulator;
       }, {});
@@ -4283,10 +4287,9 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
    * Compress a video file client-side before upload using MediaRecorder.
    * Returns { file: Blob (renamed), originalSize, compressedSize } or null if unsupported.
    */
-  const compressVideoFile = async (file, label, onProgress) => {
+  const compressVideoFile = async (file, label, onProgress, options = {}) => {
     const isVideo = String(file?.type || "").startsWith("video/") || /\.(mov|mp4|avi|mkv|webm|m4v|3gp)$/i.test(file.name || "");
     if (!isVideo) return null;
-    if (file.size <= UPLOAD_COMPRESSION_THRESHOLD_BYTES) return null;
 
     // Check MediaRecorder support
     if (typeof MediaRecorder === "undefined") return null;
@@ -4321,8 +4324,13 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       };
       const fail = () => { cleanup(); resolve(null); };
 
-      video.onloadedmetadata = () => {
+      const startRecording = () => {
         try {
+          const rawDuration = Number(video.duration) || 1;
+          const trimStart = clampNumber(Number(options.trimStart) || 0, 0, Math.max(0, rawDuration - 0.2), 0);
+          const trimDuration = Number(options.trimDuration) || rawDuration;
+          const trimEnd = clampNumber(trimStart + trimDuration, trimStart + 0.2, rawDuration, rawDuration);
+          const recordingDuration = Math.max(0.2, trimEnd - trimStart);
           const stream = video.captureStream();
           if (!stream) { fail(); return; }
 
@@ -4343,32 +4351,55 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
             });
             cleanup();
             onProgress(1);
-            resolve({ file: compressedFile, originalSize: file.size, compressedSize: blob.size });
+            resolve({
+              file: compressedFile,
+              originalSize: file.size,
+              compressedSize: blob.size,
+              trimStart,
+              trimDuration: recordingDuration,
+            });
           };
 
           recorder.onerror = () => { fail(); };
 
           recorder.start(1000);
           let lastPct = 0;
-          const duration = video.duration || 1;
           // Accurate estimate: target bitrate × duration (plus audio overhead)
           const estimatedBytes = Math.round(
-            ((UPLOAD_COMPRESSION_TARGET_BPS + UPLOAD_COMPRESSION_AUDIO_BPS) / 8) * duration * 1.05
+            ((UPLOAD_COMPRESSION_TARGET_BPS + UPLOAD_COMPRESSION_AUDIO_BPS) / 8) * recordingDuration * 1.05
           );
           video.ontimeupdate = () => {
-            const pct = Math.min(1, video.currentTime / duration);
+            if (video.currentTime >= trimEnd - 0.05) {
+              video.pause();
+              if (recorder.state !== "inactive") recorder.stop();
+              return;
+            }
+            const pct = Math.min(1, Math.max(0, (video.currentTime - trimStart) / recordingDuration));
             if (pct - lastPct > 0.02) {
               lastPct = pct;
               onProgress(pct);
               setStatusMessage(
-                `Compressing ${label} (${Math.round(pct * 100)}%) — target ~${formatMediaBytes(estimatedBytes)} at 8 Mbps...`
+                `${options.trimDuration ? "Preparing fast upload proxy" : "Compressing"} ${label} (${Math.round(pct * 100)}%) — target ~${formatMediaBytes(estimatedBytes)} at 8 Mbps...`
               );
             }
           };
 
-          video.onended = () => { recorder.stop(); };
+          video.onended = () => {
+            if (recorder.state !== "inactive") recorder.stop();
+          };
           video.play().catch(() => fail());
         } catch (_) { fail(); }
+      };
+
+      video.onloadedmetadata = () => {
+        const rawDuration = Number(video.duration) || 0;
+        const trimStart = clampNumber(Number(options.trimStart) || 0, 0, Math.max(0, rawDuration - 0.2), 0);
+        if (trimStart > 0.05) {
+          video.onseeked = () => startRecording();
+          video.currentTime = trimStart;
+        } else {
+          startRecording();
+        }
       };
 
       video.onerror = () => fail();
@@ -4567,7 +4598,16 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     );
   };
 
-  const uploadMediaForBackendSync = async ({ user, storage, file, fallbackUrl, folder, label, mode = "auto" }) => {
+  const uploadMediaForBackendSync = async ({
+    user,
+    storage,
+    file,
+    fallbackUrl,
+    folder,
+    label,
+    mode = "auto",
+    trimWindow = null,
+  }) => {
     const reusableFallbackUrl = isBackendReadableMediaUrl(fallbackUrl) ? fallbackUrl : "";
     if (reusableFallbackUrl) {
       const syncOnly = mode === "audio_only";
@@ -4655,12 +4695,24 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     }
 
     // Compress large video files before upload (turns 8GB raw → ~600MB web-friendly)
-    if (!isAudioOnly && file.size > UPLOAD_COMPRESSION_THRESHOLD_BYTES) {
-      setStatusMessage(`Checking if ${label} can be compressed to save upload time...`);
-      const compressed = await compressVideoFile(file, label, () => {});
+    const shouldCreateVideoProxy =
+      !isAudioOnly &&
+      (file.size > UPLOAD_COMPRESSION_THRESHOLD_BYTES || Number(trimWindow?.duration || 0) > 0);
+    if (shouldCreateVideoProxy) {
+      setStatusMessage(
+        trimWindow
+          ? `Creating fast upload proxy for ${label} (${formatDurationLabel(trimWindow.duration)})...`
+          : `Checking if ${label} can be compressed to save upload time...`
+      );
+      const compressed = await compressVideoFile(file, label, () => {}, {
+        trimStart: trimWindow?.start || 0,
+        trimDuration: trimWindow?.duration || 0,
+      });
       if (compressed) {
         const pctSaved = Math.round((1 - compressed.compressedSize / compressed.originalSize) * 100);
-        const summary = `${label} compressed: ${formatMediaBytes(compressed.originalSize)} → ${formatMediaBytes(compressed.compressedSize)} (${pctSaved}% smaller)`;
+        const summary = trimWindow
+          ? `${label} fast proxy: ${formatDurationLabel(compressed.trimDuration)} · ${formatMediaBytes(compressed.compressedSize)} (${pctSaved}% smaller than original)`
+          : `${label} compressed: ${formatMediaBytes(compressed.originalSize)} → ${formatMediaBytes(compressed.compressedSize)} (${pctSaved}% smaller)`;
         toast.success(summary, { duration: 6000 });
         setStatusMessage(`${summary}. Uploading now...`);
         uploadFile = compressed.file;
@@ -4708,6 +4760,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       url: directUrl,
       videoUrl: directUrl,
       syncAudioUrl: "",
+      trimStart: Number(trimWindow?.start || 0) || 0,
+      trimDuration: Number(trimWindow?.duration || 0) || 0,
     };
   };
 
@@ -6267,9 +6321,37 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         setStatusMessage(
           `Preparing ${sourceLabel} for cloud render (${i + 1}/${readySources.length})...`
         );
+        const sourceDuration = Number(source.duration || 0);
+        const sourceTrimStartForWindow = clampNumber(
+          getSourceTimelineTime(source, renderWindowStart, timelineBounds.timelineStart) - 2,
+          0,
+          Math.max(0, sourceDuration - 0.2),
+          0
+        );
+        const sourceTrimEndForWindow = clampNumber(
+          getSourceTimelineTime(source, renderWindowEnd, timelineBounds.timelineStart) + 2,
+          sourceTrimStartForWindow + 0.2,
+          sourceDuration || sourceTrimStartForWindow + renderWindowDuration,
+          sourceTrimStartForWindow + renderWindowDuration
+        );
+        const sourceTrimDurationForWindow = Math.max(
+          0.2,
+          sourceTrimEndForWindow - sourceTrimStartForWindow
+        );
+        const uploadedTrimStart = Number(source.uploadedRenderTrimStart || 0) || 0;
+        const uploadedTrimDuration = Number(source.uploadedRenderTrimDuration || 0) || 0;
+        const hasMatchingRenderProxy =
+          String(source.uploadedUrl || "").startsWith("http") &&
+          uploadedTrimDuration > 0 &&
+          Math.abs(uploadedTrimStart - sourceTrimStartForWindow) <= 1 &&
+          Math.abs(
+            (uploadedTrimStart + uploadedTrimDuration) -
+              (sourceTrimStartForWindow + sourceTrimDurationForWindow)
+          ) <= 2;
 
+        let usingRenderProxy = hasMatchingRenderProxy;
         let remoteUrl =
-          String(source.uploadedUrl || "").startsWith("http")
+          hasMatchingRenderProxy
             ? source.uploadedUrl
             : String(source.url || "").startsWith("http")
               ? source.url
@@ -6283,8 +6365,13 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
             folder: "temp/multicam-clean-sync",
             label: sourceLabel,
             mode: "auto",
+            trimWindow: {
+              start: sourceTrimStartForWindow,
+              duration: sourceTrimDurationForWindow,
+            },
           });
           remoteUrl = uploadResult.videoUrl || uploadResult.url;
+          usingRenderProxy = true;
           setStatusMessage(`${sourceLabel} ready for cloud render.`);
         }
         if (!remoteUrl) {
@@ -6299,15 +6386,25 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           offset_seconds: Number(source.offsetSeconds) || 0,
           sync_rate: getSourceSyncRate(source),
           syncRate: getSourceSyncRate(source),
+          upload_trim_start: usingRenderProxy ? sourceTrimStartForWindow : 0,
+          upload_trim_duration: usingRenderProxy ? sourceTrimDurationForWindow : 0,
         });
       }
+      const usingFastUploadProxies = sourcesPayload.some(
+        source => Number(source.upload_trim_duration || 0) > 0
+      );
       setSources(currentSources =>
         currentSources.map(source => {
           const uploaded = sourcesPayload.find(item => item.id === source.id);
           return uploaded && String(uploaded.url || "").startsWith("/")
             ? { ...source, serverRenderLocalPath: uploaded.url, localRenderPath: uploaded.url }
             : uploaded
-              ? { ...source, uploadedUrl: uploaded.url }
+              ? {
+                  ...source,
+                  uploadedUrl: uploaded.url,
+                  uploadedRenderTrimStart: Number(uploaded.upload_trim_start || 0) || 0,
+                  uploadedRenderTrimDuration: Number(uploaded.upload_trim_duration || 0) || 0,
+                }
               : source;
         })
       );
@@ -6342,7 +6439,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         );
       }
 
-      if (externalAudioPayload?.url && sourcesPayload.length) {
+      if (externalAudioPayload?.url && sourcesPayload.length && !usingFastUploadProxies) {
         setStatusMessage("Preflight: calculating corrected camera offsets and drift rates...");
         try {
           const preflightBody = {
@@ -6404,6 +6501,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
               offsetSeconds: Number(payload.offset_seconds) || 0,
               syncRate: getSourceSyncRate(payload),
               sync_rate: getSourceSyncRate(payload),
+              uploadTrimStart: Number(payload.upload_trim_start || 0) || 0,
+              uploadTrimDuration: Number(payload.upload_trim_duration || 0) || 0,
             }
           : source;
       });
@@ -6442,8 +6541,17 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
               camera_id: seg.cameraId,
               timeline_start: Number((clippedTimelineStart - renderWindowStart).toFixed(3)),
               timeline_end: Number((clippedTimelineStart - renderWindowStart + clampedDuration).toFixed(3)),
-              source_start: Number(clampedSourceStart.toFixed(3)),
-              source_end: Number((clampedSourceStart + clampedSourceDuration).toFixed(3)),
+              source_start: Number(
+                Math.max(0, clampedSourceStart - (Number(source.uploadTrimStart) || 0)).toFixed(3)
+              ),
+              source_end: Number(
+                Math.max(
+                  0.02,
+                  clampedSourceStart +
+                    clampedSourceDuration -
+                    (Number(source.uploadTrimStart) || 0)
+                ).toFixed(3)
+              ),
               layout_mode: normalizeMulticamLayoutMode(seg.layoutMode || seg.layout_mode || multicamLayoutMode || "cut"),
             };
           })
@@ -6482,8 +6590,17 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
               camera_id: sw.cameraId,
               timeline_start: Number((clippedTimelineStart - renderWindowStart).toFixed(3)),
               timeline_end: Number((clippedTimelineStart - renderWindowStart + clampedDuration).toFixed(3)),
-              source_start: Number(clampedSourceStart.toFixed(3)),
-              source_end: Number((clampedSourceStart + clampedSourceDuration).toFixed(3)),
+              source_start: Number(
+                Math.max(0, clampedSourceStart - (Number(source.uploadTrimStart) || 0)).toFixed(3)
+              ),
+              source_end: Number(
+                Math.max(
+                  0.02,
+                  clampedSourceStart +
+                    clampedSourceDuration -
+                    (Number(source.uploadTrimStart) || 0)
+                ).toFixed(3)
+              ),
               layout_mode: normalizeMulticamLayoutMode(sw.layoutMode || sw.layout_mode || multicamLayoutMode || "cut"),
             };
           })
@@ -6516,7 +6633,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       // ===== END TRACE =====
 
       // -------- Preflight sync check (when external audio is available) --------
-      if (externalAudioPayload?.url) {
+      if (externalAudioPayload?.url && !usingFastUploadProxies) {
         setStatusMessage("Preflight: checking camera sync against clean audio...");
         const preflightBody = {
           sources: sourcesPayload.map(s => ({
