@@ -257,7 +257,7 @@ describe("multicam utils", () => {
     expect(getAutoSwitchIntervalForAggressiveness(3, "high")).toBeCloseTo(2.16);
   });
 
-  test("averages envelope-based audio activity across the requested window", () => {
+  test("uses the median envelope activity across the requested window", () => {
     expect(
       getAudioActivityScoreForSourceTime(
         {
@@ -267,7 +267,7 @@ describe("multicam utils", () => {
         1.5,
         0.25
       )
-    ).toBeCloseTo(0.6833, 4);
+    ).toBeCloseTo(0.85, 4);
   });
 
   test("selects the strongest in-range companion camera for a shared moment", () => {
@@ -285,7 +285,7 @@ describe("multicam utils", () => {
     );
   });
 
-  test("smart layout chooses split when both cameras are lively", () => {
+  test("smart layout chooses scene-grid when speaker coverage is ambiguous", () => {
     const layout = resolveSmartMulticamLayoutAtTime(
       sources,
       "cam-1",
@@ -300,11 +300,12 @@ describe("multicam utils", () => {
 
     expect(layout).toEqual(
       expect.objectContaining({
-        layoutMode: "split-vertical",
+        layoutMode: "scene-grid",
         secondaryCameraId: "cam-2",
-        reason: "shared_energy",
+        reason: "uncertain_speaker_coverage",
       })
     );
+    expect(layout.visibleCameraIds).toEqual(expect.arrayContaining(["cam-1", "cam-2"]));
   });
 
   test("smart layout chooses scene-grid when several cameras are active together", () => {
@@ -345,7 +346,7 @@ describe("multicam utils", () => {
     expect(layout.visibleCameraIds.length).toBeGreaterThanOrEqual(3);
   });
 
-  test("smart layout chooses pip when a companion surges harder than the lead", () => {
+  test("smart layout chooses scene-grid when the companion surge leaves speaker coverage uncertain", () => {
     const layout = resolveSmartMulticamLayoutAtTime(
       sources,
       "cam-1",
@@ -360,11 +361,12 @@ describe("multicam utils", () => {
 
     expect(layout).toEqual(
       expect.objectContaining({
-        layoutMode: "pip",
+        layoutMode: "scene-grid",
         secondaryCameraId: "cam-2",
-        reason: "reaction_insert",
+        reason: "uncertain_speaker_coverage",
       })
     );
+    expect(layout.visibleCameraIds).toEqual(expect.arrayContaining(["cam-1", "cam-2"]));
   });
 
   test("formats long durations using hours minutes and seconds", () => {

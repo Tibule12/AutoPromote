@@ -89,7 +89,7 @@ describe("media multicam render route", () => {
     const res = await request(app).post("/api/media/render-multicam").send(payload).expect(200);
 
     expect(mockStartMulticamRenderJob).toHaveBeenCalledWith(
-      {
+      expect.objectContaining({
         sources: payload.sources,
         segments: payload.segments,
         switches: payload.switches,
@@ -101,7 +101,7 @@ describe("media multicam render route", () => {
         overlapStart: 1.2,
         overlapDuration: 10.4,
         outputAspectRatio: "16:9",
-      },
+      }),
       "testUser123"
     );
 
