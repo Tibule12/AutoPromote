@@ -64,6 +64,14 @@ const getCameraColor = (cameraId, sources) => {
 const DRIFT_THRESHOLD_SECONDS = 0.18;
 const EXPORT_FRAME_RATE = 30;
 const SERVER_MULTICAM_MAX_DURATION_SECONDS = 20 * 60;
+const LOCAL_MEDIA_WORKER_HOSTS = new Set(["localhost", "127.0.0.1", "0.0.0.0"]);
+
+const canUseLocalMediaWorker = () => {
+  if (process.env.REACT_APP_ENABLE_LOCAL_MEDIA_WORKER === "true") return true;
+  if (process.env.NODE_ENV !== "development") return false;
+  const hostname = typeof window !== "undefined" ? window.location?.hostname : "";
+  return LOCAL_MEDIA_WORKER_HOSTS.has(hostname);
+};
 
 const formatRenderExpiry = expiresAt => {
   const expiryMs = Date.parse(expiresAt || "");
@@ -4578,7 +4586,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
 
     // --- FAST PATH: try local worker first ---
     const isAudioOnly = file.type.startsWith("audio/") || /\.(wav|mp3|aac|ogg|flac|m4a|wma)$/i.test(file.name || "");
-    if (mode === "audio_only" && !isAudioOnly && file.size > 200 * 1024 * 1024 && user?.uid) {
+    const localMediaWorkerEnabled = canUseLocalMediaWorker();
+    if (localMediaWorkerEnabled && mode === "audio_only" && !isAudioOnly && file.size > 200 * 1024 * 1024 && user?.uid) {
       try {
         setStatusMessage(
           `Staging ${label} locally for sync (${formatMediaBytes(file.size)}). This avoids Firebase upload.`
@@ -4597,7 +4606,9 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       }
     }
 
-    const useLocalWorker = file.size > 200 * 1024 * 1024 || (isAudioOnly && file.size > 20 * 1024 * 1024);
+    const useLocalWorker =
+      localMediaWorkerEnabled &&
+      (file.size > 200 * 1024 * 1024 || (isAudioOnly && file.size > 20 * 1024 * 1024));
     if (useLocalWorker && user?.uid) {
       try {
         setStatusMessage(`Sending ${label} to local worker for ingest (${formatMediaBytes(file.size)})...`);
