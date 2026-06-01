@@ -121,6 +121,84 @@ const UPLOAD_COMPRESSION_THRESHOLD_BYTES = 250 * BYTES_PER_MB; // Compress files
 const UPLOAD_COMPRESSION_TARGET_BPS = 8_000_000;               // 8 Mbps video
 const UPLOAD_COMPRESSION_AUDIO_BPS = 128_000;                  // 128 Kbps audio
 const VIDEO_SYNC_AUDIO_BPS = 96_000;
+const SYNC_AUDIO_CACHE_DB = "autopromote_multicam_sync_audio";
+const SYNC_AUDIO_CACHE_STORE = "cameraSyncAudio";
+const SYNC_AUDIO_CACHE_TTL_MS = 2 * 24 * 60 * 60 * 1000;
+
+const openSyncAudioCacheDb = () =>
+  new Promise(resolve => {
+    if (typeof indexedDB === "undefined") {
+      resolve(null);
+      return;
+    }
+    const request = indexedDB.open(SYNC_AUDIO_CACHE_DB, 1);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(SYNC_AUDIO_CACHE_STORE)) {
+        db.createObjectStore(SYNC_AUDIO_CACHE_STORE, { keyPath: "key" });
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => resolve(null);
+  });
+
+const readCachedSyncAudioFile = async cacheKey => {
+  if (!cacheKey) return null;
+  const db = await openSyncAudioCacheDb();
+  if (!db) return null;
+  return new Promise(resolve => {
+    const tx = db.transaction(SYNC_AUDIO_CACHE_STORE, "readwrite");
+    const store = tx.objectStore(SYNC_AUDIO_CACHE_STORE);
+    const request = store.get(cacheKey);
+    request.onsuccess = () => {
+      const entry = request.result;
+      if (!entry?.blob) {
+        resolve(null);
+        return;
+      }
+      if (entry.expiresAt && entry.expiresAt < Date.now()) {
+        store.delete(cacheKey);
+        resolve(null);
+        return;
+      }
+      resolve(
+        new File([entry.blob], entry.name || "camera_sync_audio.webm", {
+          type: entry.type || entry.blob.type || "audio/webm",
+          lastModified: entry.lastModified || Date.now(),
+        })
+      );
+    };
+    request.onerror = () => resolve(null);
+    tx.oncomplete = () => db.close();
+    tx.onerror = () => db.close();
+  });
+};
+
+const writeCachedSyncAudioFile = async (cacheKey, file) => {
+  if (!cacheKey || !file) return;
+  const db = await openSyncAudioCacheDb();
+  if (!db) return;
+  await new Promise(resolve => {
+    const tx = db.transaction(SYNC_AUDIO_CACHE_STORE, "readwrite");
+    tx.objectStore(SYNC_AUDIO_CACHE_STORE).put({
+      key: cacheKey,
+      blob: file,
+      name: file.name,
+      type: file.type,
+      size: file.size,
+      lastModified: file.lastModified || Date.now(),
+      expiresAt: Date.now() + SYNC_AUDIO_CACHE_TTL_MS,
+    });
+    tx.oncomplete = () => {
+      db.close();
+      resolve();
+    };
+    tx.onerror = () => {
+      db.close();
+      resolve();
+    };
+  });
+};
 
 const SINGLE_CAM_FOCUS_PRESETS = [
   { id: "two-shot", label: "Two Shot", zoom: 1 },
@@ -4863,21 +4941,31 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     // Compress large audio files for sync (WAV → 16kHz mono WAV, ~90% smaller)
     let uploadFile = file;
     if (mode === "audio_only" && !isAudioOnly) {
-      setStatusMessage(
-        `Creating audio-only sync upload for ${label}. This avoids uploading the full ${formatMediaBytes(file.size)} camera file.`
-      );
-      const videoAudio = await extractVideoAudioForSync(file, label);
-      if (!videoAudio?.file) {
-        throw new Error(
-          `${label} camera audio could not be extracted in the browser. Please try Chrome/Edge or use a shorter camera file.`
+      const syncCacheKey = buildSyncAudioCacheKey(file);
+      const cachedSyncAudioFile = await readCachedSyncAudioFile(syncCacheKey);
+      if (cachedSyncAudioFile) {
+        setStatusMessage(
+          `Reusing cached camera sync audio for ${label}. No repeat extraction needed.`
         );
+        uploadFile = cachedSyncAudioFile;
+      } else {
+        setStatusMessage(
+          `Creating audio-only sync upload for ${label}. This avoids uploading the full ${formatMediaBytes(file.size)} camera file.`
+        );
+        const videoAudio = await extractVideoAudioForSync(file, label);
+        if (!videoAudio?.file) {
+          throw new Error(
+            `${label} camera audio could not be extracted in the browser. Please try Chrome/Edge or use a shorter camera file.`
+          );
+        }
+        await writeCachedSyncAudioFile(syncCacheKey, videoAudio.file);
+        const pctSaved = Math.round((1 - videoAudio.compressedSize / videoAudio.originalSize) * 100);
+        toast.success(
+          `${label} sync audio: ${formatMediaBytes(videoAudio.originalSize)} → ${formatMediaBytes(videoAudio.compressedSize)} (${pctSaved}% smaller)`,
+          { duration: 6000 }
+        );
+        uploadFile = videoAudio.file;
       }
-      const pctSaved = Math.round((1 - videoAudio.compressedSize / videoAudio.originalSize) * 100);
-      toast.success(
-        `${label} sync audio: ${formatMediaBytes(videoAudio.originalSize)} → ${formatMediaBytes(videoAudio.compressedSize)} (${pctSaved}% smaller)`,
-        { duration: 6000 }
-      );
-      uploadFile = videoAudio.file;
     } else if (isAudioOnly && file.size > AUDIO_SYNC_COMPRESSION_THRESHOLD) {
       const audioCompressed = await compressAudioForSync(file, label);
       if (audioCompressed) {
@@ -4966,6 +5054,9 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       ? `${file.name || "media"}:${file.size || 0}:${file.lastModified || 0}`
       : "";
 
+  const buildSyncAudioCacheKey = file =>
+    file ? `sync-audio:${buildBackendMediaCacheKey(file)}` : "";
+
   const handleStartBackendCleanAudioSync = async ({ confirmBeforeStart = true, reason = "" } = {}) => {
     if (!externalAudioTrack) {
       toast.error("Upload external clean audio first.");
@@ -5009,7 +5100,6 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       const auth = getAuth();
       const user = auth.currentUser;
       if (!user) throw new Error("Sign in before starting background sync.");
-      const token = await user.getIdToken();
       const storage = getStorage();
 
       const sourcesPayload = [];
@@ -5077,11 +5167,12 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       );
 
       setStatusMessage("Media uploaded. Asking the worker to extract audio and calculate offsets...");
+      const freshToken = await user.getIdToken(true);
       const response = await fetch(`${API_BASE_URL}/api/media/multicam/clean-audio-sync`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${freshToken}`,
         },
         body: JSON.stringify({
           sources: sourcesPayload,
