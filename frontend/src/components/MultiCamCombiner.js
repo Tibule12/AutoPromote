@@ -1386,6 +1386,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const [externalAudioMixMode, setExternalAudioMixMode] = useState("external_only");
   const [cleanAudioSyncJob, setCleanAudioSyncJob] = useState(null);
   const [multicamRenderTier, setMulticamRenderTier] = useState("premium");
+  const [cloudRenderWindowStart, setCloudRenderWindowStart] = useState(0);
   const [billingPanelOpen, setBillingPanelOpen] = useState(false);
 
   const cancelExportRef = useRef(false);
@@ -1550,6 +1551,22 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           ? Math.min(baseTimelineDuration, Number(flowEditPlan.duration) || baseTimelineDuration)
           : baseTimelineDuration
       : baseTimelineDuration;
+  const cloudRenderWindowMaxStart = Math.max(
+    0,
+    (Number(timelineDuration) || 0) - SERVER_MULTICAM_MAX_DURATION_SECONDS
+  );
+  const cloudRenderWindowStartSafe = clampNumber(
+    Number(cloudRenderWindowStart) || 0,
+    0,
+    cloudRenderWindowMaxStart,
+    0
+  );
+  const cloudRenderWindowDuration = Math.min(
+    SERVER_MULTICAM_MAX_DURATION_SECONDS,
+    Math.max(0, (Number(timelineDuration) || 0) - cloudRenderWindowStartSafe)
+  );
+  const cloudRenderWindowEnd = cloudRenderWindowStartSafe + cloudRenderWindowDuration;
+  const isLongCloudRenderSource = (Number(timelineDuration) || 0) > SERVER_MULTICAM_MAX_DURATION_SECONDS + 0.5;
   const shouldLoopFlowAudio =
     !!flowAudioUrl &&
     !!flowEditEnabled &&
@@ -2671,6 +2688,33 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       if (draft.useExternalCleanAudio !== undefined) {
         setUseExternalCleanAudio(Boolean(draft.useExternalCleanAudio));
       }
+      if (Number.isFinite(Number(draft.cloudRenderWindowStart))) {
+        setCloudRenderWindowStart(Math.max(0, Number(draft.cloudRenderWindowStart) || 0));
+      }
+      if (draft.sourceUploads && typeof draft.sourceUploads === "object") {
+        setSources(currentSources =>
+          currentSources.map(source => {
+            const upload = draft.sourceUploads[source.id];
+            if (!upload || typeof upload !== "object") return source;
+            return {
+              ...source,
+              uploadedUrl: upload.uploadedUrl || source.uploadedUrl || "",
+              uploadedSyncUrl: upload.uploadedSyncUrl || source.uploadedSyncUrl || "",
+            };
+          })
+        );
+      }
+      if (draft.externalAudioUpload && typeof draft.externalAudioUpload === "object") {
+        setExternalAudioTrack(current =>
+          current
+            ? {
+                ...current,
+                url: draft.externalAudioUpload.url || current.url || "",
+                cacheKey: draft.externalAudioUpload.cacheKey || current.cacheKey || "",
+              }
+            : current
+        );
+      }
       if (draft.flowEditPlan && typeof draft.flowEditPlan === "object") {
         setFlowEditPlan(draft.flowEditPlan);
         setFlowEditEnabled(Boolean(draft.flowEditPlan?.segments?.length));
@@ -2691,6 +2735,17 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         accumulator[source.id] = Number(source.offsetSeconds) || 0;
         return accumulator;
       }, {});
+      const sourceUploads = sources.reduce((accumulator, source) => {
+        accumulator[source.id] = {
+          uploadedUrl: String(source.uploadedUrl || "").startsWith("http")
+            ? source.uploadedUrl
+            : "",
+          uploadedSyncUrl: String(source.uploadedSyncUrl || "").startsWith("http")
+            ? source.uploadedSyncUrl
+            : "",
+        };
+        return accumulator;
+      }, {});
 
       window.localStorage.setItem(
         multicamDraftKey,
@@ -2702,6 +2757,14 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           masterAudioCameraId,
           outputAspectRatio,
           useExternalCleanAudio,
+          cloudRenderWindowStart,
+          sourceUploads,
+          externalAudioUpload: {
+            url: String(externalAudioTrack?.url || "").startsWith("http")
+              ? externalAudioTrack.url
+              : "",
+            cacheKey: externalAudioTrack?.cacheKey || "",
+          },
           flowEditPlan,
         })
       );
@@ -2717,6 +2780,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     masterAudioCameraId,
     outputAspectRatio,
     useExternalCleanAudio,
+    cloudRenderWindowStart,
+    externalAudioTrack,
     flowEditPlan,
   ]);
 
@@ -2933,6 +2998,12 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       setPlayhead(timelineDuration);
     }
   }, [playhead, timelineDuration, isPlaying]);
+
+  useEffect(() => {
+    if (Math.abs((Number(cloudRenderWindowStart) || 0) - cloudRenderWindowStartSafe) > 0.05) {
+      setCloudRenderWindowStart(cloudRenderWindowStartSafe);
+    }
+  }, [cloudRenderWindowStart, cloudRenderWindowStartSafe]);
 
   useEffect(() => {
     const unresolvedSources = sources.filter(
@@ -6155,11 +6226,9 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       setStatusMessage("Set up synced sources before exporting.");
       return;
     }
-    if (timelineDuration > SERVER_MULTICAM_MAX_DURATION_SECONDS + 0.5) {
-      setStatusMessage(
-        "Cam Combiner cloud renders are capped at 20 minutes for now. Trim/select a 20-minute window before rendering."
-      );
-      toast.error("Cam Combiner cloud renders are capped at 20 minutes.");
+    if (cloudRenderWindowDuration <= 0.5) {
+      setStatusMessage("Pick a valid render window before starting the cloud export.");
+      toast.error("Pick a valid render window first.");
       return;
     }
 
@@ -6173,22 +6242,42 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       const user = auth.currentUser;
       if (!user) throw new Error("You must be signed in to use server rendering.");
       const token = await user.getIdToken();
+      const storage = getStorage();
+      const renderWindowStart = cloudRenderWindowStartSafe;
+      const renderWindowEnd = cloudRenderWindowEnd;
+      const renderWindowDuration = cloudRenderWindowDuration;
+      const renderTimelineStart = (Number(timelineBounds.timelineStart) || 0) + renderWindowStart;
 
       const sourcesPayload = [];
       for (let i = 0; i < readySources.length; i++) {
         const source = readySources[i];
         setExportProgress((i / readySources.length) * 0.5);
         const sourceLabel = source.label || `source ${i + 1}`;
-        setStatusMessage(`Preparing ${sourceLabel} for local render (${i + 1}/${readySources.length})...`);
+        setStatusMessage(
+          `Preparing ${sourceLabel} for cloud render (${i + 1}/${readySources.length})...`
+        );
 
-        let remoteUrl = source.serverRenderLocalPath || source.localRenderPath;
+        let remoteUrl =
+          String(source.uploadedUrl || "").startsWith("http")
+            ? source.uploadedUrl
+            : String(source.url || "").startsWith("http")
+              ? source.url
+              : "";
         if (!remoteUrl && source.file) {
-          const localResult = await uploadSourceForLocalRender(source.file, sourceLabel);
-          remoteUrl = localResult.localPath;
-          setStatusMessage(`${sourceLabel} ready locally for server render.`);
+          const uploadResult = await uploadMediaForBackendSync({
+            user,
+            storage,
+            file: source.file,
+            fallbackUrl: "",
+            folder: "temp/multicam-clean-sync",
+            label: sourceLabel,
+            mode: "auto",
+          });
+          remoteUrl = uploadResult.videoUrl || uploadResult.url;
+          setStatusMessage(`${sourceLabel} ready for cloud render.`);
         }
         if (!remoteUrl) {
-          remoteUrl = source.uploadedUrl || source.url || "";
+          remoteUrl = source.serverRenderLocalPath || source.localRenderPath || "";
         }
         if (!remoteUrl) throw new Error(`No video file for ${source.label}.`);
 
@@ -6215,7 +6304,6 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       let externalAudioPayload = null;
       if (hasExternalCleanAudio && externalAudioTrack) {
         setStatusMessage("Uploading external clean audio for server render...");
-        const storage = getStorage();
         const externalAudioUpload = await uploadMediaForBackendSync({
           user,
           storage,
@@ -6293,23 +6381,10 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       }
 
       setExportProgress(0.6);
-      setStatusMessage("Sources uploaded. Rendering on server...");
+      setStatusMessage(
+        `Sources ready. Rendering ${formatDurationLabel(renderWindowStart)} to ${formatDurationLabel(renderWindowEnd)} on server...`
+      );
 
-      // --- Use manual flow segments when flow edit is active, otherwise auto switches ---
-      const effectiveSwitches =
-        flowEditEnabled && activeFlowSegments.length > 0
-          ? activeFlowSegments.map(seg => ({
-              cameraId: seg.cameraId,
-              startTime: seg.startTime,
-              layoutMode: seg.layoutMode || "cut",
-            }))
-          : normalizedSwitches;
-
-      const switchesPayload = effectiveSwitches.map(sw => ({
-        camera_id: sw.cameraId,
-        start_time: Number(sw.startTime) || 0,
-        layout_mode: normalizeMulticamLayoutMode(sw.layoutMode || sw.layout_mode || "cut"),
-      }));
       const renderSourceScope = readySources.map(source => {
         const payload = sourcesPayload.find(item => item.id === source.id);
         return payload
@@ -6332,10 +6407,12 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
             if (!source) return null;
             const timelineStart = Number(seg.startTime) || 0;
             const timelineEnd = Number(seg.endTime) || 0;
-            const duration = Math.max(0, timelineEnd - timelineStart);
+            const clippedTimelineStart = Math.max(timelineStart, renderWindowStart);
+            const clippedTimelineEnd = Math.min(timelineEnd, renderWindowEnd);
+            const duration = Math.max(0, clippedTimelineEnd - clippedTimelineStart);
             if (duration <= 0.02) return null;
-            const sourceStart = getSourceTimelineTime(source, timelineStart, timelineBounds.timelineStart);
-            const sourceEnd = getSourceTimelineTime(source, timelineEnd, timelineBounds.timelineStart);
+            const sourceStart = getSourceTimelineTime(source, clippedTimelineStart, timelineBounds.timelineStart);
+            const sourceEnd = getSourceTimelineTime(source, clippedTimelineEnd, timelineBounds.timelineStart);
             const sourceDuration = Number(source.duration || 0);
             const rawSourceDuration = Math.max(0, sourceEnd - sourceStart);
             if (sourceEnd < 0.02 || sourceStart > sourceDuration - 0.02 || rawSourceDuration <= 0.02) return null;
@@ -6352,8 +6429,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
             );
             return {
               camera_id: seg.cameraId,
-              timeline_start: Number(timelineStart.toFixed(3)),
-              timeline_end: Number((timelineStart + clampedDuration).toFixed(3)),
+              timeline_start: Number((clippedTimelineStart - renderWindowStart).toFixed(3)),
+              timeline_end: Number((clippedTimelineStart - renderWindowStart + clampedDuration).toFixed(3)),
               source_start: Number(clampedSourceStart.toFixed(3)),
               source_end: Number((clampedSourceStart + clampedSourceDuration).toFixed(3)),
               layout_mode: normalizeMulticamLayoutMode(seg.layoutMode || seg.layout_mode || multicamLayoutMode || "cut"),
@@ -6368,11 +6445,13 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
             const timelineEnd = nextSwitch
               ? Number(nextSwitch.startTime) || timelineStart
               : Number(timelineDuration) || timelineStart;
-            const duration = Math.max(0, timelineEnd - timelineStart);
+            const clippedTimelineStart = Math.max(timelineStart, renderWindowStart);
+            const clippedTimelineEnd = Math.min(timelineEnd, renderWindowEnd);
+            const duration = Math.max(0, clippedTimelineEnd - clippedTimelineStart);
             const source = sourceMapForRender.get(sw.cameraId);
             if (!source || duration <= 0.02) return null;
-            const sourceStart = getSourceTimelineTime(source, timelineStart, timelineBounds.timelineStart);
-            const sourceEnd = getSourceTimelineTime(source, timelineEnd, timelineBounds.timelineStart);
+            const sourceStart = getSourceTimelineTime(source, clippedTimelineStart, timelineBounds.timelineStart);
+            const sourceEnd = getSourceTimelineTime(source, clippedTimelineEnd, timelineBounds.timelineStart);
             const sourceDuration = Number(source.duration || 0);
             const rawSourceDuration = Math.max(0, sourceEnd - sourceStart);
             if (sourceEnd < 0.02 || sourceStart > sourceDuration - 0.02 || rawSourceDuration <= 0.02) return null;
@@ -6390,8 +6469,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
             );
             return {
               camera_id: sw.cameraId,
-              timeline_start: Number(timelineStart.toFixed(3)),
-              timeline_end: Number((timelineStart + clampedDuration).toFixed(3)),
+              timeline_start: Number((clippedTimelineStart - renderWindowStart).toFixed(3)),
+              timeline_end: Number((clippedTimelineStart - renderWindowStart + clampedDuration).toFixed(3)),
               source_start: Number(clampedSourceStart.toFixed(3)),
               source_end: Number((clampedSourceStart + clampedSourceDuration).toFixed(3)),
               layout_mode: normalizeMulticamLayoutMode(sw.layoutMode || sw.layout_mode || multicamLayoutMode || "cut"),
@@ -6399,6 +6478,18 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           })
           .filter(Boolean);
       }
+
+      if (!renderSegmentsPayload?.length) {
+        throw new Error(
+          "No valid camera segments inside this 20-minute window. Move the render window to where your synced cameras overlap."
+        );
+      }
+
+      const switchesPayload = renderSegmentsPayload.map(seg => ({
+        camera_id: seg.camera_id,
+        start_time: Number(seg.timeline_start) || 0,
+        layout_mode: normalizeMulticamLayoutMode(seg.layout_mode || "cut"),
+      }));
 
       // ===== TRACE: frontend payload =====
       console.group("TRACE renderSegmentsPayload (first 8)");
@@ -6488,14 +6579,12 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           switches: switchesPayload,
           primaryAudioCameraId: masterAudioCameraId,
           primary_audio_camera_id: masterAudioCameraId,
-          timelineStart: timelineBounds.timelineStart || 0,
-          timeline_start: timelineBounds.timelineStart || 0,
-          overlapStart: readySources.length > 1 ? overlapBounds.overlapStart || 0 : 0,
-          overlap_start: readySources.length > 1 ? overlapBounds.overlapStart || 0 : 0,
-          overlapDuration:
-            timelineDuration,
-          overlap_duration:
-            timelineDuration,
+          timelineStart: renderTimelineStart,
+          timeline_start: renderTimelineStart,
+          overlapStart: renderTimelineStart,
+          overlap_start: renderTimelineStart,
+          overlapDuration: renderWindowDuration,
+          overlap_duration: renderWindowDuration,
           outputAspectRatio: outputAspectRatio,
           output_aspect_ratio: outputAspectRatio,
           renderTier: multicamRenderTier,
@@ -6524,7 +6613,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         setExportResult({
           url: outputUrl,
           file: { name: `multicam-master-${Date.now()}.mp4` },
-          duration: data.duration || timelineDuration,
+          duration: data.duration || renderWindowDuration,
           isServerRender: true,
         });
         setStatusMessage("Local MP4 render complete. Download it to your laptop.");
@@ -6573,7 +6662,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                 setExportResult({
                   url: completedUrl,
                   file: { name: `multicam-master-${Date.now()}.mp4` },
-                  duration: statusData.result?.duration || timelineDuration,
+                  duration: statusData.result?.duration || renderWindowDuration,
                   isServerRender: true,
                 });
                 setStatusMessage("Multi-camera render complete. Download ready.");
@@ -6610,6 +6699,57 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       setIsExporting(false);
       setExportProgress(0);
     }
+  };
+
+  const renderCloudRenderWindowPanel = () => {
+    if (!isLongCloudRenderSource) return null;
+    return (
+      <div className="nle-cloud-render-window">
+        <div className="nle-cloud-render-window-copy">
+          <strong>Cloud render window</strong>
+          <span>
+            Long source detected. Upload the full cameras once, then render any 20-minute section.
+          </span>
+        </div>
+        <div className="nle-cloud-render-window-range">
+          <input
+            type="range"
+            min="0"
+            max={Math.max(1, Math.round(cloudRenderWindowMaxStart))}
+            step="1"
+            value={Math.round(cloudRenderWindowStartSafe)}
+            onChange={event => setCloudRenderWindowStart(Number(event.target.value) || 0)}
+            disabled={isExporting}
+            aria-label="Cloud render window start time"
+          />
+          <div className="nle-cloud-render-window-times">
+            <span>
+              Rendering {formatDurationLabel(cloudRenderWindowStartSafe)} to{" "}
+              {formatDurationLabel(cloudRenderWindowEnd)}
+            </span>
+            <strong>{formatDurationLabel(cloudRenderWindowDuration)} max</strong>
+          </div>
+        </div>
+        <div className="nle-cloud-render-window-actions">
+          <button
+            type="button"
+            className="nle-mini-btn"
+            onClick={() => setCloudRenderWindowStart(0)}
+            disabled={isExporting || cloudRenderWindowStartSafe <= 0.5}
+          >
+            First 20 min
+          </button>
+          <button
+            type="button"
+            className="nle-mini-btn"
+            onClick={() => setCloudRenderWindowStart(cloudRenderWindowMaxStart)}
+            disabled={isExporting || cloudRenderWindowMaxStart <= 0.5}
+          >
+            Final 20 min
+          </button>
+        </div>
+      </div>
+    );
   };
 
   const renderRecentRendersPanel = () => {
@@ -7310,6 +7450,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                     </div>
                   </div>
                 )}
+
+                {renderCloudRenderWindowPanel()}
 
                 <div className="nle-footer-grid is-studio-footer">
                   <div className="nle-footer-note">
@@ -9596,6 +9738,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                 </div>
               </>
             )}
+
+            {renderCloudRenderWindowPanel()}
 
             <div className="nle-footer-grid">
               <div className="nle-footer-note">

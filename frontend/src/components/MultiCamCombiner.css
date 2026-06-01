@@ -3180,6 +3180,63 @@
   flex-wrap: wrap;
 }
 
+.nle-cloud-render-window {
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid rgba(250, 204, 21, 0.22);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at top left, rgba(250, 204, 21, 0.16), transparent 40%),
+    linear-gradient(135deg, rgba(15, 23, 42, 0.86), rgba(120, 53, 15, 0.26));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.nle-cloud-render-window-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.nle-cloud-render-window-copy strong {
+  color: #fff8ec;
+}
+
+.nle-cloud-render-window-copy span,
+.nle-cloud-render-window-times span {
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.82rem;
+}
+
+.nle-cloud-render-window-range {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.nle-cloud-render-window-range input[type="range"] {
+  width: 100%;
+  accent-color: #facc15;
+}
+
+.nle-cloud-render-window-times {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.nle-cloud-render-window-times strong {
+  color: #fef08a;
+  font-size: 0.82rem;
+}
+
+.nle-cloud-render-window-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
 .nle-saved-renders {
   margin-top: 14px;
   padding: 14px;
