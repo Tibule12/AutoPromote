@@ -1356,6 +1356,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const [playhead, setPlayhead] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [selectedSwitchId, setSelectedSwitchId] = useState("switch-1");
+  const [previewProgramOverride, setPreviewProgramOverride] = useState(null);
+  const [manualRenderEditsEnabled, setManualRenderEditsEnabled] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
@@ -1650,6 +1652,15 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     sources,
   ]);
   const activeSegment = useMemo(() => {
+    if (previewProgramOverride?.cameraId && !flowEditEnabled && !isSingleSourceWorkflow) {
+      return {
+        cameraId: previewProgramOverride.cameraId,
+        layoutMode: previewProgramOverride.layoutMode || "cut",
+        startTime: playhead,
+        previewOnly: true,
+      };
+    }
+
     if (currentFlowSegment) {
       return currentFlowSegment;
     }
@@ -1673,6 +1684,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     readySources,
     sources,
     timelineDuration,
+    previewProgramOverride,
+    flowEditEnabled,
   ]);
 
   const activeCameraId = activeSegment?.cameraId || readySources[0]?.id || sources[0]?.id || null;
@@ -3640,8 +3653,55 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     }
   };
 
+  const handlePreviewProgramSwitch = (cameraId, layoutModeOverride = "cut", reason = "") => {
+    if (!cameraId || !timelineDuration) return;
+    const sourceScope = readySources.length ? readySources : sources;
+    const targetSource = sourceScope.find(source => source.id === cameraId);
+    if (!targetSource || !getSourceMediaUrl(targetSource)) {
+      toast.error("Load a visual into this slot before previewing it.");
+      return;
+    }
+
+    const mappedTime = getSourceTimelineTime(targetSource, playhead, timelineBounds.timelineStart);
+    const isInRange = mappedTime >= 0 && mappedTime <= Number(targetSource.duration || 0) - 0.01;
+    if (!isInRange) {
+      const sourceStartAtTimeline = Number(
+        ((Number(targetSource.offsetSeconds) || 0) - (Number(timelineBounds.timelineStart) || 0)).toFixed(3)
+      );
+      const sourceEndAtTimeline = Number(
+        (
+          sourceStartAtTimeline +
+          Math.max(0, Number(targetSource.duration || 0) - 0.01)
+        ).toFixed(3)
+      );
+      setPlayhead(
+        Math.max(0, Math.min(timelineDuration, Math.max(sourceStartAtTimeline, Math.min(playhead, sourceEndAtTimeline))))
+      );
+    }
+
+    const normalizedLayoutMode = normalizeMulticamLayoutMode(layoutModeOverride);
+    setPreviewProgramOverride({
+      cameraId,
+      layoutMode: normalizedLayoutMode,
+      updatedAt: Date.now(),
+    });
+    setStatusMessage(
+      reason ||
+        `Preview-only sync check: ${targetSource.label || cameraId}. Render plan is unchanged.`
+    );
+  };
+
   const activateManualLayoutMode = (layoutMode, reason) => {
     const normalizedLayoutMode = normalizeMulticamLayoutMode(layoutMode);
+    if (!manualRenderEditsEnabled) {
+      handlePreviewProgramSwitch(
+        activeCameraId || readySources[0]?.id || sources[0]?.id,
+        normalizedLayoutMode,
+        `${MANUAL_TIMELINE_LAYOUT_LABELS[normalizedLayoutMode] || "Layout"} preview only. Render plan is unchanged.`
+      );
+      return;
+    }
+
     if (autoDirectorEnabled) {
       disableAutoDirectorForManualControl(reason);
     } else if (reason) {
@@ -3656,6 +3716,11 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const handleRecordSwitch = (cameraId, layoutModeOverride = "cut") => {
     if (!cameraId || !timelineDuration) return;
     const normalizedLayoutMode = normalizeMulticamLayoutMode(layoutModeOverride);
+
+    if (!manualRenderEditsEnabled && !flowEditEnabled) {
+      handlePreviewProgramSwitch(cameraId, normalizedLayoutMode);
+      return;
+    }
 
     if (!isSingleSourceWorkflow && flowEditEnabled && selectedFlowSegmentId) {
       handleApplyCameraToFlowSegment(cameraId);
@@ -7569,8 +7634,41 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
 
               <div className="nle-studio-card nle-studio-deck-card">
                 <div className="nle-studio-card-header">
-                  <strong>Manual Switch Deck</strong>
-                  <span>AI assists. You direct.</span>
+                  <strong>Program Check Deck</strong>
+                  <span>
+                    {manualRenderEditsEnabled
+                      ? "Manual render edits are ON."
+                      : "Preview-only. Render plan stays unchanged."}
+                  </span>
+                </div>
+                <div className="nle-render-safety-toggle">
+                  <button
+                    type="button"
+                    className={`nle-mini-btn ${manualRenderEditsEnabled ? "nle-mini-btn-accent" : ""}`}
+                    onClick={() => {
+                      setManualRenderEditsEnabled(value => !value);
+                      setPreviewProgramOverride(null);
+                      setStatusMessage(
+                        manualRenderEditsEnabled
+                          ? "Manual render edits off. Camera/layout buttons are preview-only again."
+                          : "Manual render edits on. Camera/layout buttons will change the final render plan."
+                      );
+                    }}
+                  >
+                    {manualRenderEditsEnabled ? "Manual edits affect render" : "Preview only"}
+                  </button>
+                  {previewProgramOverride ? (
+                    <button
+                      type="button"
+                      className="nle-mini-btn"
+                      onClick={() => {
+                        setPreviewProgramOverride(null);
+                        setStatusMessage("Preview override cleared. Program Output follows the render plan again.");
+                      }}
+                    >
+                      Follow render plan
+                    </button>
+                  ) : null}
                 </div>
                 <div className="nle-live-switch-deck is-studio-deck">
                   {studioMonitorSlots.map((source, index) => (
@@ -7651,7 +7749,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                   </button>
                 </div>
 
-                {selectedManualSwitch && (
+                {selectedManualSwitch && manualRenderEditsEnabled && (
                   <div className="nle-manual-cut-panel is-studio-panel">
                     <div className="nle-manual-cut-header">
                       <div>
@@ -9549,6 +9647,40 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
 
                 {!isSingleSourceWorkflow && !flowEditEnabled && (
                   <>
+                    <div className="nle-render-safety-toggle">
+                      <button
+                        type="button"
+                        className={`nle-mini-btn ${manualRenderEditsEnabled ? "nle-mini-btn-accent" : ""}`}
+                        onClick={() => {
+                          setManualRenderEditsEnabled(value => !value);
+                          setPreviewProgramOverride(null);
+                          setStatusMessage(
+                            manualRenderEditsEnabled
+                              ? "Manual render edits off. Camera/layout buttons are preview-only again."
+                              : "Manual render edits on. Camera/layout buttons will change the final render plan."
+                          );
+                        }}
+                      >
+                        {manualRenderEditsEnabled ? "Manual edits affect render" : "Preview only"}
+                      </button>
+                      <span>
+                        {manualRenderEditsEnabled
+                          ? "Careful: these cuts will render."
+                          : "Safe sync check: camera/layout buttons do not render."}
+                      </span>
+                      {previewProgramOverride ? (
+                        <button
+                          type="button"
+                          className="nle-mini-btn"
+                          onClick={() => {
+                            setPreviewProgramOverride(null);
+                            setStatusMessage("Preview override cleared. Program Output follows the render plan again.");
+                          }}
+                        >
+                          Follow render plan
+                        </button>
+                      ) : null}
+                    </div>
                     <div className="nle-live-switch-deck">
                       {readySources.map((source, index) => (
                         <button
@@ -9619,7 +9751,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                       </button>
                     </div>
 
-                    {selectedManualSwitch && (
+                    {selectedManualSwitch && manualRenderEditsEnabled && (
                       <div className="nle-manual-cut-panel">
                         <div className="nle-manual-cut-header">
                           <div>

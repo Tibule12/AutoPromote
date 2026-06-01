@@ -2011,6 +2011,25 @@
   margin-top: 16px;
 }
 
+.nle-render-safety-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  padding: 9px;
+  border-radius: 14px;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  background:
+    radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 42%),
+    rgba(15, 23, 42, 0.58);
+}
+
+.nle-render-safety-toggle span {
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 0.76rem;
+}
+
 .nle-live-switch-btn {
   display: grid;
   gap: 6px;
