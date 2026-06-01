@@ -51,7 +51,14 @@ async function recordPlatformPost({
   const ref = db.collection("platform_posts").doc();
   const success = outcome.success !== false; // treat missing flag as success (unless explicitly false)
   const externalId =
-    outcome.postId || outcome.tweetId || outcome.mediaId || outcome.externalId || null;
+    outcome.externalId ||
+    outcome.postId ||
+    outcome.tweetId ||
+    outcome.mediaId ||
+    outcome.shareId ||
+    outcome.videoId ||
+    outcome.url ||
+    null;
   const usedVariant = outcome.usedVariant || null;
   const variantIndex = typeof outcome.variantIndex === "number" ? outcome.variantIndex : null;
   const repostMetadata = payload && payload.repostMetadata ? payload.repostMetadata : null;
@@ -232,6 +239,9 @@ async function finalizePlatformPostById(
       outcome.postId ||
       outcome.tweetId ||
       outcome.mediaId ||
+      outcome.shareId ||
+      outcome.videoId ||
+      outcome.url ||
       null,
     usedVariant: usedVariant || (outcome && outcome.usedVariant) || null,
     variantIndex:

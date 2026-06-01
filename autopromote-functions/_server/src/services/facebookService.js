@@ -259,12 +259,8 @@ async function postToFacebookPage({
       errorText.includes("permission")
     ) {
       console.warn(
-        `[Facebook] Soft fail for post ${postId || "?"}: ${errorText.substring(0, 100)}...`
+        `[Facebook] Soft fail while publishing page post: ${errorText.substring(0, 100)}...`
       );
-      // attempt to flag the owning user if we have uid in scope
-      if (uid) {
-        flagFacebookReauth(uid);
-      }
       // throw so calling code can treat as partial/soft error
       const ex = new Error(errorText);
       ex.soft = true;
@@ -273,6 +269,12 @@ async function postToFacebookPage({
 
     throw new Error(errorText);
   }
+
+  const result = await response.json().catch(() => ({}));
+  if (!result || !result.id) {
+    throw new Error("Facebook accepted the request but did not return a post id");
+  }
+  return result;
 }
 
 /**

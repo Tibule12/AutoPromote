@@ -327,6 +327,11 @@ async function uploadVideo({ uid, videoUrl }) {
 async function postToLinkedIn({
   uid,
   text,
+  message,
+  commentary,
+  caption,
+  description,
+  title,
   imageUrl,
   videoUrl,
   mediaUrl,
@@ -344,13 +349,33 @@ async function postToLinkedIn({
 }) {
   if (!uid) throw new Error("uid required");
 
+  const resolvedText = String(
+    text || commentary || message || caption || description || title || ""
+  ).trim();
+  const isVideoUrl = value => {
+    if (!value || typeof value !== "string") return false;
+    try {
+      return /\.(mp4|mov|avi|webm|m4v)$/i.test(new URL(value).pathname);
+    } catch (_) {
+      return /\.(mp4|mov|avi|webm|m4v)(?:$|[?#])/i.test(value);
+    }
+  };
+  const isImageUrl = value => {
+    if (!value || typeof value !== "string") return false;
+    try {
+      return /\.(jpg|jpeg|png|gif|webp)$/i.test(new URL(value).pathname);
+    } catch (_) {
+      return /\.(jpg|jpeg|png|gif|webp)(?:$|[?#])/i.test(value);
+    }
+  };
+
   // Auto-detect media types from generic 'mediaUrl' if specific ones not provided
   let useVideo = videoUrl;
   let useImage = imageUrl;
   if (mediaUrl && !useVideo && !useImage) {
-    if (/\.(mp4|mov|avi|webm)$/i.test(mediaUrl)) {
+    if (isVideoUrl(mediaUrl)) {
       useVideo = mediaUrl;
-    } else {
+    } else if (isImageUrl(mediaUrl)) {
       useImage = mediaUrl;
     }
   }
@@ -362,7 +387,7 @@ async function postToLinkedIn({
   // we might want to ignore the link as an attachment and just put it in text.
   // But if we have NO media, we should definitely use the link as an attachment (Article).
 
-  if (!text && !useArticleUrl && !useImage && !useVideo) throw new Error("content required");
+  if (!resolvedText && !useArticleUrl && !useImage && !useVideo) throw new Error("content required");
   if (!fetchFn) throw new Error("Fetch not available");
 
   const accessToken = await getValidAccessToken(uid);
@@ -383,7 +408,7 @@ async function postToLinkedIn({
     specificContent: {
       "com.linkedin.ugc.ShareContent": {
         shareCommentary: {
-          text: (text || "") + (hashtagString ? ` ${hashtagString}` : ""),
+          text: resolvedText + (hashtagString ? ` ${hashtagString}` : ""),
         },
         shareMediaCategory: "NONE",
       },
@@ -406,8 +431,7 @@ async function postToLinkedIn({
         },
       ];
     } catch (e) {
-      console.warn("[LinkedIn] Video upload failed, posting as text/link:", e.message);
-      // Fallback logic could go here
+      throw new Error(`LinkedIn video upload failed: ${e.message}`);
     }
   }
   // Add image if provided & no video
@@ -503,7 +527,7 @@ async function postToLinkedIn({
           linkedin: {
             ...existingData,
             shareId,
-            text: text || "",
+            text: resolvedText,
             postedAt: new Date().toISOString(),
             createdAt: existingData.createdAt || admin.firestore.FieldValue.serverTimestamp(),
             lastUpdatedAt: admin.firestore.FieldValue.serverTimestamp(),

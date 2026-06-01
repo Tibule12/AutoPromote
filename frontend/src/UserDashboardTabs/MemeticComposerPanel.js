@@ -19,15 +19,12 @@ const defaultParams = {
 };
 
 const MemeticComposerPanel = ({ onClose, initialVideoUrl = null }) => {
-  const [seedVideo, setSeedVideo] = useState(null);
+  const [, setSeedVideo] = useState(null);
   const [videoUrl, setVideoUrl] = useState(initialVideoUrl);
   const [params, setParams] = useState(defaultParams);
   const [loadingPlan, setLoadingPlan] = useState(false);
   const [plan, setPlan] = useState(null);
   const [uploading, setUploading] = useState(false);
-
-  // Audio Playback Refs (repurposed for preview)
-  const videoPreviewRef = useRef(null);
 
   // Simulation State
   const canvasRef = useRef(null);
@@ -184,7 +181,6 @@ const MemeticComposerPanel = ({ onClose, initialVideoUrl = null }) => {
     }
 
     // Virality Curve Logic
-    const points = [];
     const steps = 100;
 
     // Base Curve

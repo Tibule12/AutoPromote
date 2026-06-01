@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import EmojiPicker from "../EmojiPicker";
-import { sanitizeUrl } from "../../utils/security";
+import AdaptiveMediaPreview from "./AdaptiveMediaPreview";
+import { revokeObjectUrlLater } from "../../utils/objectUrl";
 
 const LinkedInForm = ({
   onChange,
@@ -26,7 +27,7 @@ const LinkedInForm = ({
     if (currentFile && currentFile instanceof File) {
       const url = URL.createObjectURL(currentFile);
       setVideoPreviewUrl(url);
-      return () => URL.revokeObjectURL(url);
+      return () => revokeObjectUrlLater(url);
     } else {
       setVideoPreviewUrl(null);
     }
@@ -42,7 +43,6 @@ const LinkedInForm = ({
   const [showEmojiPicker, setShowEmojiPicker] = useState({ field: null, visible: false });
 
   const [companyId, setCompanyId] = useState(initialData.companyId || "");
-  const [isPromotional, setIsPromotional] = useState(initialData.isPromotional || false);
   const [postingTarget, setPostingTarget] = useState(initialData.companyId ? "company" : "profile");
 
   // Sync global descriptions if not manually edited
@@ -65,9 +65,9 @@ const LinkedInForm = ({
       commentary,
       title,
       companyId: postingTarget === "company" ? companyId : "",
-      isPromotional,
+      isPromotional: false,
     });
-  }, [visibility, commentary, title, companyId, isPromotional, postingTarget]);
+  }, [visibility, commentary, title, companyId, postingTarget]);
 
   const handleCommentaryChange = e => {
     setCommentary(e.target.value);
@@ -247,18 +247,11 @@ const LinkedInForm = ({
 
         {/* SIMPLE INLINE VIDEO PREVIEW */}
         {videoPreviewUrl && (currentFile?.type?.startsWith("video/") || !currentFile) && (
-          <div style={{ marginTop: "10px" }}>
-            <video
-              src={sanitizeUrl(videoPreviewUrl)}
-              controls
-              style={{
-                width: "100%",
-                maxHeight: "300px",
-                borderRadius: "8px",
-                border: "1px solid #334155",
-              }}
-            />
-          </div>
+          <AdaptiveMediaPreview
+            src={videoPreviewUrl}
+            mediaType="video"
+            label="LinkedIn media preview"
+          />
         )}
       </div>
 
@@ -347,18 +340,6 @@ const LinkedInForm = ({
             </div>
           )}
         </div>
-      </div>
-
-      <div className="commercial-section">
-        <label className="checkbox-modern">
-          <input
-            type="checkbox"
-            checked={isPromotional}
-            onChange={e => setIsPromotional(e.target.checked)}
-          />
-          <span className="checkmark"></span>
-          <span className="label-text">Promotional Content (Sponsored)</span>
-        </label>
       </div>
 
       <div className="form-group-modern">

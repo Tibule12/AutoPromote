@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { sanitizeUrl } from "../../utils/security";
 import EmojiPicker from "../EmojiPicker";
 import HashtagSuggestions from "../HashtagSuggestions";
 import { OPTIMAL_TIMES } from "../BestTimeToPost";
+import AdaptiveMediaPreview from "./AdaptiveMediaPreview";
+import { revokeObjectUrlLater } from "../../utils/objectUrl";
 
 const categories = [
   { id: "1", name: "Film & Animation" },
@@ -50,7 +51,7 @@ const YouTubeForm = ({
     if (currentFile && currentFile instanceof File) {
       const url = URL.createObjectURL(currentFile);
       setVideoPreviewUrl(url);
-      return () => URL.revokeObjectURL(url);
+      return () => revokeObjectUrlLater(url);
     } else {
       setVideoPreviewUrl(null);
     }
@@ -358,18 +359,11 @@ const YouTubeForm = ({
 
         {/* SIMPLE INLINE VIDEO PREVIEW */}
         {videoPreviewUrl && (
-          <div style={{ marginTop: "10px" }}>
-            <video
-              src={sanitizeUrl(videoPreviewUrl)}
-              controls
-              style={{
-                width: "100%",
-                maxHeight: "300px",
-                borderRadius: "8px",
-                border: "1px solid #334155",
-              }}
-            />
-          </div>
+          <AdaptiveMediaPreview
+            src={videoPreviewUrl}
+            mediaType="video"
+            label="YouTube media preview"
+          />
         )}
       </div>
 

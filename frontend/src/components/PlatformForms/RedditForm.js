@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo } from "react";
 import EmojiPicker from "../EmojiPicker";
 import { sanitizeUrl } from "../../utils/security";
 import { API_BASE_URL } from "../../config";
+import AdaptiveMediaPreview from "./AdaptiveMediaPreview";
+import { revokeObjectUrlLater } from "../../utils/objectUrl";
 
 const RedditForm = ({
   onChange,
@@ -24,7 +26,7 @@ const RedditForm = ({
     if (currentFile && currentFile instanceof File) {
       const url = URL.createObjectURL(currentFile);
       setVideoPreviewUrl(url);
-      return () => URL.revokeObjectURL(url);
+      return () => revokeObjectUrlLater(url);
     } else {
       setVideoPreviewUrl(null);
     }
@@ -37,7 +39,7 @@ const RedditForm = ({
   const [subredditFetchError, setSubredditFetchError] = useState("");
   const [title, setTitle] = useState(initialData.title || globalTitle || "");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [flairId, setFlairId] = useState(initialData.flairId || "");
+  const [flairId] = useState(initialData.flairId || "");
   const [isNSFW, setIsNSFW] = useState(initialData.isNSFW || false);
   const [isSpoiler, setIsSpoiler] = useState(initialData.isSpoiler || false);
   const [isPromotional, setIsPromotional] = useState(initialData.isPromotional || false);
@@ -51,8 +53,6 @@ const RedditForm = ({
     }
   }, [globalTitle, isDirtyTitle]);
 
-  // Mock flairs for now, in real app would fetch based on subreddit
-  const [availableFlairs, setAvailableFlairs] = useState([]);
   const normalizedAvailableSubreddits = useMemo(
     () =>
       (availableSubreddits || [])
@@ -279,18 +279,11 @@ const RedditForm = ({
 
         {/* SIMPLE INLINE VIDEO PREVIEW */}
         {videoPreviewUrl && (currentFile?.type?.startsWith("video/") || !currentFile) && (
-          <div style={{ marginTop: "10px" }}>
-            <video
-              src={sanitizeUrl(videoPreviewUrl)}
-              controls
-              style={{
-                width: "100%",
-                maxHeight: "300px",
-                borderRadius: "8px",
-                border: "1px solid #334155",
-              }}
-            />
-          </div>
+          <AdaptiveMediaPreview
+            src={videoPreviewUrl}
+            mediaType="video"
+            label="Reddit media preview"
+          />
         )}
       </div>
 

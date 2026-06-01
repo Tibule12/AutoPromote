@@ -2,7 +2,7 @@ const { storage, db } = require("../firebaseAdmin");
 const { cleanupSourceFile, extractOwnedStoragePathFromUrl } = require("../utils/cleanupSource");
 
 const SOURCE_UPLOAD_RETENTION_DAYS = parseInt(process.env.SOURCE_UPLOAD_RETENTION_DAYS || "14", 10);
-const TEMP_SCAN_RETENTION_DAYS = parseInt(process.env.TEMP_SCAN_RETENTION_DAYS || "3", 10);
+const TEMP_SCAN_RETENTION_MINUTES = parseInt(process.env.TEMP_SCAN_RETENTION_MINUTES || "20", 10);
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 const DEFAULT_SCAN_LIMIT = parseInt(process.env.SOURCE_UPLOAD_RETENTION_SCAN_LIMIT || "200", 10);
 
@@ -90,7 +90,7 @@ async function reconcileRetentionState(docRef, data, sourceState, cleanupResult)
 }
 
 /**
- * Cleanup temporary uploads older than 24 hours.
+ * Cleanup temporary uploads. Find Viral Clips scan uploads are deliberately short-lived.
  * This runs periodically on the server to prevent storage bloat.
  */
 async function cleanupTempUploads() {
@@ -110,7 +110,7 @@ async function cleanupTempUploads() {
     },
     {
       prefix: "temp_scans/",
-      retentionMs: TEMP_SCAN_RETENTION_DAYS * ONE_DAY_MS,
+      retentionMs: TEMP_SCAN_RETENTION_MINUTES * 60 * 1000,
       label: "scanner upload",
     },
   ];
@@ -132,8 +132,13 @@ async function cleanupTempUploads() {
 
         const [metadata] = await file.getMetadata();
         const createdTime = new Date(metadata.timeCreated).getTime();
+        const metadataExpiry = toMillis(metadata.metadata?.expiresAt || metadata.metadata?.deleteAfter);
+        const fileNameExpiryMatch = file.name.match(/\/(\d{12,})_/);
+        const fileNameExpiry = fileNameExpiryMatch ? Number(fileNameExpiryMatch[1]) : 0;
+        const explicitExpiry = metadataExpiry || fileNameExpiry;
+        const shouldDelete = explicitExpiry > 0 ? now >= explicitExpiry : now - createdTime > config.retentionMs;
 
-        if (now - createdTime > config.retentionMs) {
+        if (shouldDelete) {
           console.log(`[StorageCleanup] Deleting old ${config.label} file: ${file.name}`);
           try {
             await file.delete();

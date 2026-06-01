@@ -1447,7 +1447,14 @@ async function processNextPlatformTask() {
           outcome: simulatedResult,
           success: simulatedResult && simulatedResult.success !== false,
           externalId:
-            simulatedResult.externalId || simulatedResult.postId || simulatedResult.tweetId || null,
+            simulatedResult.externalId ||
+            simulatedResult.postId ||
+            simulatedResult.tweetId ||
+            simulatedResult.mediaId ||
+            simulatedResult.shareId ||
+            simulatedResult.videoId ||
+            simulatedResult.url ||
+            null,
           usedVariant: simulatedResult.usedVariant || selectedVariant || null,
           variantIndex:
             typeof simulatedResult.variantIndex === "number"
@@ -1465,7 +1472,11 @@ async function processNextPlatformTask() {
         try {
           const communityEngine = require("./communityEngine");
           const targetUrl =
-            simulatedResult.videoUrl || simulatedResult.externalId || simulatedResult.permlink;
+            simulatedResult.videoUrl ||
+            simulatedResult.externalId ||
+            simulatedResult.url ||
+            simulatedResult.permlink ||
+            simulatedResult.shareId;
           if (targetUrl && (task.platform === "tiktok" || task.platform === "youtube")) {
             // 1. Default Mission: "Operation First Contact"
             // 2,000 views target via community swarm.
@@ -1503,7 +1514,12 @@ async function processNextPlatformTask() {
                 contentId: task.contentId,
                 platform: task.platform,
                 taskId: task.id,
-                link: simulatedResult.externalId || null,
+                link:
+                  simulatedResult.url ||
+                  simulatedResult.externalId ||
+                  simulatedResult.shareId ||
+                  simulatedResult.postId ||
+                  null,
               }
             )
             .catch(console.warn);

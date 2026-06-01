@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import MetaConnectionRequirementsNotice from "../MetaConnectionRequirementsNotice";
 import EmojiPicker from "../EmojiPicker";
-import { sanitizeUrl } from "../../utils/security";
+import AdaptiveMediaPreview from "./AdaptiveMediaPreview";
+import { revokeObjectUrlLater } from "../../utils/objectUrl";
 
 const FacebookForm = ({
   onChange,
@@ -20,7 +21,7 @@ const FacebookForm = ({
     if (currentFile && currentFile instanceof File) {
       const url = URL.createObjectURL(currentFile);
       setVideoPreviewUrl(url);
-      return () => URL.revokeObjectURL(url);
+      return () => revokeObjectUrlLater(url);
     } else {
       setVideoPreviewUrl(null);
     }
@@ -38,10 +39,6 @@ const FacebookForm = ({
   const [isDirtyMessage, setIsDirtyMessage] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [postType, setPostType] = useState(initialData.postType || "feed"); // feed, story, reel
-  const [isPaidPartnership, setIsPaidPartnership] = useState(
-    initialData.isPaidPartnership || false
-  );
-  const [sponsorUser, setSponsorUser] = useState(initialData.sponsorUser || "");
 
   // Smart Sync: Update message when globalDescription changes, unless user has edited it
   useEffect(() => {
@@ -61,10 +58,10 @@ const FacebookForm = ({
       pageName, // Pass the name so UnifiedPublisher can show it in preview
       message,
       postType,
-      isPaidPartnership,
-      sponsorUser,
+      isPaidPartnership: false,
+      sponsorUser: "",
     });
-  }, [pageId, message, postType, isPaidPartnership, sponsorUser, pages]);
+  }, [pageId, message, postType, pages]);
 
   const handleInsertEmoji = emoji => {
     const emojiChar = typeof emoji === "object" && emoji.native ? emoji.native : emoji;
@@ -173,18 +170,11 @@ const FacebookForm = ({
 
         {/* SIMPLE INLINE VIDEO PREVIEW */}
         {videoPreviewUrl && (currentFile?.type?.startsWith("video/") || !currentFile) && (
-          <div style={{ marginTop: "10px" }}>
-            <video
-              src={sanitizeUrl(videoPreviewUrl)}
-              controls
-              style={{
-                width: "100%",
-                maxHeight: "300px",
-                borderRadius: "8px",
-                border: "1px solid #334155",
-              }}
-            />
-          </div>
+          <AdaptiveMediaPreview
+            src={videoPreviewUrl}
+            mediaType="video"
+            label="Facebook media preview"
+          />
         )}
       </div>
 
@@ -305,8 +295,8 @@ const FacebookForm = ({
                 paddingTop: "6px",
               }}
             >
-              <strong>User Privacy:</strong> We do not access your personal profile's private
-              messages or modify your Page's admin settings.
+              <strong>User Privacy:</strong> We do not access your personal profile&apos;s private
+              messages or modify your Page&apos;s admin settings.
             </p>
           </div>
         </div>
@@ -378,37 +368,6 @@ const FacebookForm = ({
         >
           {message.length}/63,206
         </div>
-      </div>
-
-      <div className="commercial-section">
-        <label className="checkbox-modern">
-          <input
-            type="checkbox"
-            checked={isPaidPartnership}
-            onChange={e => setIsPaidPartnership(e.target.checked)}
-          />
-          <span className="checkmark"></span>
-          <span className="label-text">Tag Sponsor (Branded Content)</span>
-        </label>
-
-        {isPaidPartnership && (
-          <div className="sub-settings fade-in">
-            <div className="form-group-modern" style={{ marginTop: "10px" }}>
-              <label>Sponsor Name / Page URL</label>
-              <input
-                type="text"
-                className="modern-input"
-                placeholder="e.g. Nike"
-                value={sponsorUser}
-                onChange={e => setSponsorUser(e.target.value)}
-              />
-            </div>
-          </div>
-        )}
-
-        <p className="legal-hint">
-          Required for paid partnerships. Handshake tool must be enabled on your Page.
-        </p>
       </div>
 
       <div

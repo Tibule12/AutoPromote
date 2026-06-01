@@ -21,6 +21,64 @@ const SORT_OPTIONS = [
   { key: "time", label: "Timeline Order" },
 ];
 
+const getScenePrescription = scene => {
+  if (scene?.strategyLabel || scene?.strategyIntent || scene?.studioMove) {
+    return {
+      label: scene.strategyLabel || "Smart Pick",
+      hook: scene.strategyIntent || "AI found a strong clip opportunity here.",
+      move: scene.studioMove || "Open in Studio to package the hook and render the strongest version.",
+    };
+  }
+
+  const score = Number(scene?.viralScore || 0);
+  const duration = Number(scene?.duration || (scene?.end || 0) - (scene?.start || 0));
+  const reason = String(scene?.reason || "").toLowerCase();
+  const isProof = /(proof|result|feature|show|demo|value|works|before|after|money|growth)/i.test(reason);
+  const isEmotion = /(emotion|reaction|laugh|shock|surprise|pain|story|personal|confession)/i.test(reason);
+  const isEducation = /(teach|learn|tip|how|why|explain|step|mistake|secret)/i.test(reason);
+
+  if (score >= 88) {
+    return {
+      label: "Hero Clip",
+      hook: "Open with this first in a campaign set.",
+      move: "Render, then polish in Studio with a bold hook caption.",
+    };
+  }
+  if (isProof) {
+    return {
+      label: "Proof Clip",
+      hook: "Use this where viewers need evidence.",
+      move: "Keep the visual clean and let the result breathe.",
+    };
+  }
+  if (isEmotion) {
+    return {
+      label: "Reaction Clip",
+      hook: "Lead with the human moment.",
+      move: "Trim tight before the reaction, then add a caption that names the feeling.",
+    };
+  }
+  if (isEducation) {
+    return {
+      label: "Teach Clip",
+      hook: "Use this as a value-first short.",
+      move: "Start on the clearest sentence and avoid over-styling the caption.",
+    };
+  }
+  if (duration > 38) {
+    return {
+      label: "Trim Candidate",
+      hook: "Strong but needs tightening.",
+      move: "Cut 2-4 seconds from the slowest edge before rendering.",
+    };
+  }
+  return {
+    label: "Support Clip",
+    hook: "Useful as a second or third post.",
+    move: "Pair with a sharper title or thumbnail-style opening.",
+  };
+};
+
 function ViralClipFinder({ file, onSave, onCancel }) {
   const [analyzing, setAnalyzing] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -37,7 +95,6 @@ function ViralClipFinder({ file, onSave, onCancel }) {
   const [sortBy, setSortBy] = useState("score");
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [trimAdjustments, setTrimAdjustments] = useState({}); // { [sceneId]: { start, end } }
-  const [expandedScene, setExpandedScene] = useState(null);
   const [clipResults, setClipResults] = useState({}); // { [sceneId]: { url, file } }
   const videoRef = useRef(null);
   const localBlobRef = useRef(null);
@@ -176,11 +233,27 @@ function ViralClipFinder({ file, onSave, onCancel }) {
     setSelectedScene(null);
     setClipResults({});
     setSelectedIds(new Set());
-    setStatusMessage("AI is watching your video to find viral moments...");
 
-    const interval = setInterval(() => {
-      setProgress(p => Math.min(p + 3, 92));
-    }, 2500);
+    const analysisStages = [
+      { label: "Loading AI pipeline...", pct: 8 },
+      { label: "Detecting scenes & shot boundaries...", pct: 22 },
+      { label: "Transcribing audio with Whisper AI...", pct: 38 },
+      { label: "Scanning for viral keywords...", pct: 52 },
+      { label: "Analyzing motion & energy peaks...", pct: 66 },
+      { label: "Ranking moments by viral potential...", pct: 80 },
+      { label: "Packaging clip results...", pct: 92 },
+    ];
+
+    let stageIndex = 0;
+    setProgress(0);
+    const stageInterval = setInterval(() => {
+      if (stageIndex < analysisStages.length) {
+        const stage = analysisStages[stageIndex];
+        setStatusMessage(stage.label);
+        setProgress(stage.pct);
+        stageIndex++;
+      }
+    }, 4000);
 
     try {
       const auth = getAuth();
@@ -228,7 +301,7 @@ function ViralClipFinder({ file, onSave, onCancel }) {
       setStatusMessage("Error: " + error.message);
       toast.error(error.message);
     } finally {
-      clearInterval(interval);
+      clearInterval(stageInterval);
       setAnalyzing(false);
     }
   };
@@ -337,27 +410,6 @@ function ViralClipFinder({ file, onSave, onCancel }) {
     }
   };
 
-  const handleOpenInStudio = scene => {
-    // Pass the scene as clip suggestion so VideoEditor will open VCS
-    const timing = getEffectiveTiming(scene);
-    onSave({
-      name: `viral_clip_${scene.id}.mp4`,
-      url: sourceUrl?.url || sourceUrl,
-      isRemote: true,
-      openStudio: true,
-      clips: [
-        {
-          id: scene.id,
-          start: timing.start,
-          end: timing.end,
-          duration: timing.end - timing.start,
-          reason: scene.reason || "AI-detected viral moment",
-          viralScore: scene.viralScore,
-        },
-      ],
-    });
-  };
-
   const videoPreviewSrc = sourceUrl
     ? sanitizeUrl(typeof sourceUrl === "string" ? sourceUrl : sourceUrl.url || sourceUrl)
     : localBlobRef.current || "";
@@ -370,6 +422,13 @@ function ViralClipFinder({ file, onSave, onCancel }) {
     const t = getEffectiveTiming(s);
     return sum + (t.end - t.start);
   }, 0);
+  const finderStrategy = scenes.length
+    ? {
+        heroes: scenes.filter(scene => Number(scene.viralScore || 0) >= 85).length,
+        proof: scenes.filter(scene => getScenePrescription(scene).label === "Proof Clip").length,
+        trims: scenes.filter(scene => getScenePrescription(scene).label === "Trim Candidate").length,
+      }
+    : null;
 
   return (
     <div className="viral-finder-container">
@@ -546,6 +605,22 @@ function ViralClipFinder({ file, onSave, onCancel }) {
 
             {statusMessage && <div className="finder-status-bar">{statusMessage}</div>}
 
+            {finderStrategy && (
+              <div className="finder-strategy-board">
+                <div>
+                  <span>Clip Strategy</span>
+                  <strong>
+                    Build a campaign from the best moment, proof moment, and replayable support clips.
+                  </strong>
+                </div>
+                <div className="finder-strategy-stats">
+                  <span>{finderStrategy.heroes} hero</span>
+                  <span>{finderStrategy.proof} proof</span>
+                  <span>{finderStrategy.trims} tighten</span>
+                </div>
+              </div>
+            )}
+
             <div className="results-wrapper">
               {/* Left Side: Video Player */}
               <div className="video-player-section">
@@ -616,6 +691,10 @@ function ViralClipFinder({ file, onSave, onCancel }) {
                   const isSelected = selectedIds.has(scene.id);
                   const timing = getEffectiveTiming(scene);
                   const clipDuration = Math.round(timing.end - timing.start);
+                  const prescription = getScenePrescription({
+                    ...scene,
+                    duration: timing.end - timing.start,
+                  });
 
                   return (
                     <div
@@ -644,6 +723,40 @@ function ViralClipFinder({ file, onSave, onCancel }) {
                       </div>
 
                       {scene.reason && <div className="scene-reason">{scene.reason}</div>}
+                      <div className="scene-prescription">
+                        <strong>{prescription.label}</strong>
+                        <span>{prescription.hook}</span>
+                        <small>{prescription.move}</small>
+                      </div>
+                      {(scene.campaignRole || scene.bestFor || scene.hookText) && (
+                        <div className="scene-intel-grid">
+                          {scene.campaignRole && (
+                            <span>
+                              <strong>{scene.campaignRole}</strong>
+                              Campaign role
+                            </span>
+                          )}
+                          {scene.bestFor && (
+                            <span>
+                              <strong>{scene.bestFor}</strong>
+                              Best channel fit
+                            </span>
+                          )}
+                          {scene.hookText && (
+                            <span>
+                              <strong>{scene.hookText}</strong>
+                              Suggested hook
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      {scene.retentionNotes?.length > 0 && (
+                        <div className="scene-retention-notes">
+                          {scene.retentionNotes.slice(0, 4).map(note => (
+                            <span key={note}>{note}</span>
+                          ))}
+                        </div>
+                      )}
 
                       {/* Viral score bar */}
                       <div className="score-bar-container">
@@ -690,16 +803,6 @@ function ViralClipFinder({ file, onSave, onCancel }) {
                             </button>
                           </>
                         )}
-                        <button
-                          className="scene-action-btn studio"
-                          onClick={e => {
-                            e.stopPropagation();
-                            handleOpenInStudio(scene);
-                          }}
-                          title="Open in Viral Clip Studio for advanced editing"
-                        >
-                          🎛️ Studio
-                        </button>
                       </div>
 
                       {isRendered && <div className="rendered-badge">✓ Ready</div>}

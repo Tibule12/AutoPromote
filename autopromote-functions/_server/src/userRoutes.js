@@ -2,14 +2,6 @@ const express = require("express");
 const { db } = require("./firebaseAdmin");
 const authMiddleware = require("./authMiddleware");
 const { rateLimiter } = require("./middlewares/globalRateLimiter");
-const { getCreditBreakdown } = require("./creditSystem");
-const { getEffectiveTierSnapshot } = require("./services/billingService");
-const {
-  SUBSCRIPTION_PLANS,
-  normalizePlanId,
-  getPlanCapabilities,
-  CREDIT_TOP_UP_PACKS,
-} = require("./config/subscriptionPlans");
 // Import usage stats helper to auto-unblock users when new month starts
 const { getUserUsageStats } = require("./middlewares/usageLimitMiddleware");
 
@@ -152,12 +144,6 @@ router.put("/me", authMiddleware, writeLimiter, async (req, res) => {
 // Get user profile
 router.get("/profile", authMiddleware, publicLimiter, async (req, res) => {
   try {
-    const credits = await getCreditBreakdown(req.userId);
-    const tierSnapshot = await getEffectiveTierSnapshot(req.userId);
-    const normalizedPlanId = normalizePlanId(tierSnapshot.tierId);
-    const plan = SUBSCRIPTION_PLANS[normalizedPlanId] || SUBSCRIPTION_PLANS.free;
-    const capabilities = getPlanCapabilities(normalizedPlanId);
-
     // Try to get user from users collection
     const userDoc = await db.collection("users").doc(req.userId).get();
     let user = null;
@@ -200,31 +186,7 @@ router.get("/profile", authMiddleware, publicLimiter, async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-    res.json({
-      success: true,
-      user,
-      userId: req.userId,
-      planId: normalizedPlanId,
-      planName: plan.name,
-      subscriptionStatus: tierSnapshot.status || user.subscriptionStatus || "inactive",
-      monthlyCredits: {
-        allocation: credits.monthlyAllocation,
-        used: credits.monthlyUsed,
-        remaining: credits.monthlyRemaining,
-      },
-      topUpBalance: credits.topUpBalance,
-      totalCredits: credits.totalAvailable,
-      topUpPacks: CREDIT_TOP_UP_PACKS,
-      features: {
-        multicam: capabilities.multicam,
-        teamSeats: capabilities.teamSeats,
-        analyticsExport: capabilities.analytics?.canExport || false,
-      },
-      editing: capabilities.editing,
-      entitlements: capabilities,
-      balance: credits.totalAvailable,
-      tier: normalizedPlanId,
-    });
+    res.json({ user });
   } catch (error) {
     console.error("Error getting user profile:", error);
     res.status(500).json({ error: "Internal server error" });

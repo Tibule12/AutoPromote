@@ -1,0 +1,20 @@
+{
+  "venvPath": "python_media_worker",
+  "venv": ".venv",
+  "typeCheckingMode": "basic",
+  "include": [
+    "python_media_worker"
+  ],
+  "extraPaths": [
+    "python_media_worker"
+  ],
+  "reportAttributeAccessIssue": "none",
+  "reportArgumentType": "none",
+  "reportCallIssue": "none",
+  "reportGeneralTypeIssues": "none",
+  "reportOperatorIssue": "none",
+  "reportOptionalIterable": "none",
+  "reportOptionalMemberAccess": "none",
+  "reportOptionalSubscript": "none",
+  "reportPossiblyUnboundVariable": "none"
+}

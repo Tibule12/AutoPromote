@@ -3,20 +3,32 @@
     "origin": [
       "https://autopromote.org",
       "https://www.autopromote.org",
-      "https://Tibule12.github.io"
+      "https://Tibule12.github.io",
+      "http://localhost:3000",
+      "http://localhost:3001",
+      "http://localhost:5000",
+      "http://127.0.0.1:3000",
+      "http://127.0.0.1:3001"
     ],
     "method": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],
     "maxAgeSeconds": 3600,
     "responseHeader": [
       "Content-Type",
+      "Content-Range",
+      "Content-Disposition",
       "Authorization",
-      "x-goog-meta-*",
-      "x-firebase-storage-version",
-      "x-goog-date",
-      "x-goog-credential",
-      "x-goog-algorithm",
-      "x-goog-signature",
-      "x-goog-signedheaders"
+      "X-Goog-Meta-*",
+      "X-Goog-Upload-*",
+      "X-Firebase-*",
+      "X-Goog-Date",
+      "X-Goog-Credential",
+      "X-Goog-Algorithm",
+      "X-Goog-Signature",
+      "X-Goog-SignedHeaders",
+      "Access-Control-Allow-Origin",
+      "Access-Control-Allow-Methods",
+      "Access-Control-Allow-Headers",
+      "Access-Control-Max-Age"
     ]
   }
 ]

@@ -157,6 +157,36 @@ const DIRECTION_PRESETS = [
       "Technology should sharpen the hook, not hide it.",
     ],
   },
+  {
+    id: "cure",
+    name: "Pain Cure",
+    badge: "RELIEF POINT",
+    summary: "Problem-solution packaging that makes the viewer feel the pain, then believe the cure is inside.",
+    strategy: "Sell the emotional relief, not just the feature. Make the before-state obvious and the after-state desirable.",
+    palette: ["#22c55e", "#f97316", "#0ea5e9", "#f8fafc"],
+    hooks: [
+      "THIS FIXES THE PAIN",
+      "STOP DOING IT THE HARD WAY",
+      "THE RELIEF IS OBVIOUS",
+      "THIS SOLVES THE MESS",
+      "YOU NEEDED THIS EARLIER",
+    ],
+    faceHooks: [
+      "THE RELIEF IS REAL",
+      "THIS MOMENT FIXED IT",
+      "YOU CAN FEEL THE SWITCH",
+    ],
+    objectHooks: [
+      "THE FIX IS RIGHT HERE",
+      "THIS MAKES IT SIMPLE",
+      "THE TOOL DOES THE HEAVY LIFT",
+    ],
+    subtexts: [
+      "Pain first. Cure second. Clear click promise.",
+      "Make the viewer feel rescued before they even watch.",
+      "Turn complexity into visible relief.",
+    ],
+  },
 ];
 
 const STYLE_PRESETS = [

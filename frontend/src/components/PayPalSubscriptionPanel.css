@@ -36,15 +36,35 @@
 }
 
 .subscription-panel-close {
-  border: none;
+  border: 1px solid rgba(15, 23, 42, 0.12);
   background: rgba(15, 23, 42, 0.08);
   color: #0f172a;
-  width: 40px;
-  height: 40px;
+  min-height: 40px;
   border-radius: 999px;
   cursor: pointer;
-  font-size: 24px;
+  font-size: 14px;
+  font-weight: 800;
   line-height: 1;
+  white-space: nowrap;
+  padding: 0 16px;
+  transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+}
+
+.subscription-panel-close:hover {
+  background: rgba(15, 23, 42, 0.13);
+  border-color: rgba(15, 23, 42, 0.2);
+  transform: translateY(-1px);
+}
+
+.subscription-panel-close.is-compact {
+  width: 40px;
+  padding: 0;
+  font-size: 24px;
+}
+
+.subscription-panel-close.is-return::before {
+  content: "←";
+  margin-right: 8px;
 }
 
 .paypal-sdk-notice {
@@ -567,6 +587,11 @@
   margin-top: 6px;
   font-size: 13px;
   color: #475569;
+}
+
+.topup-paypal-button-shell {
+  min-height: 38px;
+  margin-top: 12px;
 }
 
 .secure-payment-badge img {

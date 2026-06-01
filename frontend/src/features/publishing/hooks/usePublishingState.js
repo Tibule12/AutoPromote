@@ -145,6 +145,7 @@ export const usePublishingState = (initialPlatforms = []) => {
     // Actions
     togglePlatform,
     updatePlatformData,
+    clearPlatformOverride,
     getPlatformEffectiveData,
     resetPublishingState,
   };

@@ -187,7 +187,7 @@ const RewardsPanel = ({ badges }) => {
         >
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "10px" }}>
             <span style={{ fontWeight: "bold", color: "#4338ca" }}>🔥 Viral Status</span>
-            <span style={{ fontWeight: "bold", color: "#4f46e5" }}>Unlock "Viral" Badge</span>
+                    <span style={{ fontWeight: "bold", color: "#4f46e5" }}>Unlock &quot;Viral&quot; Badge</span>
           </div>
           <div style={{ fontSize: "0.9rem", marginBottom: "10px", color: "#3730a3" }}>
             Get a video to {viralityTracker.nextGoal.toLocaleString()} views

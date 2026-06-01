@@ -191,6 +191,7 @@ function summarizeSchedule(doc) {
     frequency: data.frequency || "once",
     isActive: typeof data.isActive === "boolean" ? data.isActive : true,
     status: data.status || null,
+    title: data.title || data.platformSpecificSettings?.title || data.platformSpecificSettings?.caption || null,
     createdAt: data.createdAt || data.created_at || null,
     updatedAt: data.updatedAt || data.updated_at || null,
   };
@@ -363,8 +364,10 @@ async function evaluateUploadReadiness(userId, options = {}) {
     : [];
   const platformCount = targetPlatforms.length;
   const scheduledPromotionTime = options.scheduled_promotion_time || null;
-  const requiredDistributionTasks =
-    platformCount > 0 && !hasExplicitFutureSchedule(scheduledPromotionTime) ? platformCount : 0;
+  const requiredDistributionTasks = platformCount > 0 ? platformCount : 0;
+  const publishMode = hasExplicitFutureSchedule(scheduledPromotionTime)
+    ? "queued_new_upload"
+    : "publish_now";
 
   const [{ tierId, tier }, usageStats] = await Promise.all([
     billingService.getEffectiveTierSnapshot(userId),
@@ -380,6 +383,7 @@ async function evaluateUploadReadiness(userId, options = {}) {
     platformLimit: tier.platform_limit,
     promotionQuota,
     requiredDistributionTasks,
+    publishMode,
   };
 
   if (usageStats.limit !== Infinity && usageStats.remaining <= 0) {
@@ -429,7 +433,7 @@ async function evaluateUploadReadiness(userId, options = {}) {
       ...base,
       allowed: false,
       code: "PROMOTION_TASK_QUOTA_EXCEEDED",
-      message: `Your ${tier.name} plan has ${promotionQuota.remaining} automated distribution task(s) remaining this month. Publishing to ${platformCount} platform(s) needs ${requiredDistributionTasks}.`,
+      message: `Your ${tier.name} plan has ${promotionQuota.remaining} automated distribution task(s) remaining this month. ${publishMode === "queued_new_upload" ? "Queuing" : "Publishing"} to ${platformCount} platform(s) needs ${requiredDistributionTasks}.`,
       context: {
         tier: tierId,
         required: requiredDistributionTasks,
@@ -591,7 +595,7 @@ const contentUploadSchema = Joi.object({
   platform_options: Joi.object().pattern(Joi.string(), Joi.object()).optional(),
   meta: Joi.object().optional(),
   scheduled_promotion_time: Joi.string().isoDate().optional(),
-  promotion_frequency: Joi.string().valid("once", "hourly", "daily", "weekly").optional(),
+  promotion_frequency: Joi.string().valid("once", "hourly", "daily", "weekly", "monthly").optional(),
   schedule_hint: Joi.object().optional(),
   auto_promote: Joi.object().optional(),
   quality_score: Joi.number().optional(),
@@ -880,11 +884,21 @@ router.post(
         });
       }
 
+      const firstPlatformText = (fields = []) =>
+        Object.values(platform_options || {})
+          .map(options => fields.map(field => options?.[field]).find(value => String(value || "").trim()))
+          .find(value => String(value || "").trim());
+      const resolvedTitle =
+        String(title || firstPlatformText(["title"]) || "").trim() || "Untitled Post";
+      const resolvedDescription = String(
+        description || firstPlatformText(["description", "caption", "message", "commentary"]) || ""
+      ).trim();
+
       const contentData = {
-        title,
+        title: resolvedTitle,
         type,
         url,
-        description,
+        description: resolvedDescription,
         target_platforms,
         platform_options,
         intent: detectedIntent, // Persist the calculated intent
@@ -1123,6 +1137,8 @@ router.post(
             target_platforms:
               detectedIntent === "commercial" ? target_platforms : content.target_platforms || [],
             scheduled_promotion_time,
+            promotion_frequency,
+            schedule_hint,
             platform_options,
           });
         } catch (err) {
@@ -1536,12 +1552,14 @@ router.delete("/promotion-schedules/:id", authMiddleware, async (req, res) => {
 
     const { id } = req.params;
     const scheduleDoc = await db.collection("promotion_schedules").doc(id).get();
-    if (!scheduleDoc.exists) return res.status(404).json({ error: "Schedule not found" });
+    if (!scheduleDoc.exists) {
+      return res.json({ success: true, deleted: false, alreadyDeleted: true });
+    }
     if (scheduleDoc.data().user_id !== userId) return res.status(403).json({ error: "Forbidden" });
 
     const promotionService = require("./promotionService");
     await promotionService.deletePromotionSchedule(id);
-    res.json({ success: true });
+    res.json({ success: true, deleted: true });
   } catch (error) {
     console.error("[DELETE /promotion-schedules/:id] Error:", error);
     res.status(500).json({ error: "Internal server error" });

@@ -20,11 +20,268 @@ const PROMO_SUMMARY_RETENTION_HOURS = parseInt(
   process.env.SMART_PROMO_SUMMARY_RETENTION_HOURS || "24",
   10
 );
+const PROMO_SUMMARY_MAX_DURATION_SECONDS = parseInt(
+  process.env.SMART_PROMO_MAX_VIDEO_DURATION_SECONDS || "1800",
+  10
+);
+const PROMO_VISUALS_PER_CLIP = parseInt(process.env.SMART_PROMO_VISUALS_PER_CLIP || "3", 10);
+
+function estimatePromoSummaryCredits({
+  videoDurationSeconds = 0,
+  clipCount = PROMO_SUMMARY_CLIP_COUNT,
+  outputMode = "campaign_set",
+  includeCaptions = true,
+  includeVisuals = true,
+} = {}) {
+  const duration = Math.max(0, Number(videoDurationSeconds || 0) || 0);
+  const safeClipCount = Math.max(1, Math.min(10, Number(clipCount || PROMO_SUMMARY_CLIP_COUNT) || 1));
+  const visualCount = includeVisuals ? safeClipCount * PROMO_VISUALS_PER_CLIP : 0;
+  const durationBuckets = Math.max(1, Math.ceil(Math.max(duration, 60) / 180));
+  const storyModeBoost = String(outputMode).toLowerCase() === "story_edit" ? 8 : 0;
+  const captionCost = includeCaptions ? Math.ceil(safeClipCount * 1.5) : 0;
+  const visualCost = includeVisuals ? Math.ceil(visualCount * 0.5) : 0;
+  const durationCost = durationBuckets * 4;
+  const clipCost = safeClipCount * 3;
+  const estimated = PROMO_SUMMARY_COST + durationCost + clipCost + captionCost + visualCost + storyModeBoost;
+  return {
+    credits: Math.max(PROMO_SUMMARY_COST, estimated),
+    videoDurationSeconds: duration,
+    clipCount: safeClipCount,
+    visualCount,
+    maxDurationSeconds: PROMO_SUMMARY_MAX_DURATION_SECONDS,
+    breakdown: {
+      baseAnalysis: PROMO_SUMMARY_COST,
+      duration: durationCost,
+      clips: clipCost,
+      captions: captionCost,
+      visuals: visualCost,
+      storyMode: storyModeBoost,
+    },
+  };
+}
 
 const PROMO_STYLE_MAP = {
-  clean: { captionStyle: "minimal", smartCropMode: "speaker_track" },
-  hype: { captionStyle: "bold_pop", smartCropMode: "speaker_track" },
-  minimal: { captionStyle: "minimal", smartCropMode: "center" },
+  clean: {
+    label: "Clean",
+    captionStyle: "minimal",
+    smartCropMode: "speaker_track",
+    defaultTemplate: "story",
+  },
+  hype: {
+    label: "Hype",
+    captionStyle: "bold_pop",
+    smartCropMode: "speaker_track",
+    defaultTemplate: "reaction",
+  },
+  minimal: {
+    label: "Minimal",
+    captionStyle: "minimal",
+    smartCropMode: "center",
+    defaultTemplate: "tutorial",
+  },
+};
+
+const PROMO_ANGLE_MAP = {
+  stop_scroll: {
+    label: "Stop Scroll",
+    workerTemplate: "reaction",
+    hookReason: "Lead with the sharpest attention spike so the clip earns the thumb stop fast.",
+    travelReason: "Optimized for interruption and early retention.",
+    roleBlueprints: [
+      {
+        id: "hook_slap",
+        label: "Stop Scroll",
+        bestFor: "Reels, Shorts, TikTok",
+        captionFallback: "Wait For This",
+        hookReason: "Opens on the most interruptive moment.",
+        travelReason: "Built to win the first second.",
+      },
+      {
+        id: "proof_snap",
+        label: "Proof Snap",
+        bestFor: "Shorts, product promos",
+        captionFallback: "Here Is Proof",
+        hookReason: "Shows the payoff quickly so attention converts into trust.",
+        travelReason: "Pairs curiosity with visible proof.",
+      },
+      {
+        id: "replay_angle",
+        label: "Replay Angle",
+        bestFor: "TikTok, repost sets",
+        captionFallback: "Watch That Again",
+        hookReason: "Frames the strongest moment so it feels replayable.",
+        travelReason: "Leans into rewatch energy and repeat value.",
+      },
+      {
+        id: "last_hit",
+        label: "Last Hit",
+        bestFor: "Story promos, ad retargeting",
+        captionFallback: "Stay For This",
+        hookReason: "Holds one final payoff so the promo lands with punch.",
+        travelReason: "Ends with enough contrast to stay memorable.",
+      },
+    ],
+  },
+  proof_angle: {
+    label: "Proof Angle",
+    workerTemplate: "podcast",
+    hookReason: "Favor moments that sound credible and visibly back up the point.",
+    travelReason: "Optimized for trust, clarity, and receipt-heavy promos.",
+    roleBlueprints: [
+      {
+        id: "receipt_open",
+        label: "Receipt Open",
+        bestFor: "LinkedIn, authority reels",
+        captionFallback: "It Actually Works",
+        hookReason: "Starts with the strongest receipt or confident statement.",
+        travelReason: "Makes the pitch feel earned instead of exaggerated.",
+      },
+      {
+        id: "proof_stack",
+        label: "Proof Stack",
+        bestFor: "Case studies, product demos",
+        captionFallback: "Watch The Proof",
+        hookReason: "Builds the clip around cumulative evidence.",
+        travelReason: "Useful when conviction beats hype.",
+      },
+      {
+        id: "result_glimpse",
+        label: "Result Glimpse",
+        bestFor: "Creator offers, launches",
+        captionFallback: "Results On Screen",
+        hookReason: "Highlights the before/after or visible result moment.",
+        travelReason: "Turns interest into belief quickly.",
+      },
+      {
+        id: "trust_close",
+        label: "Trust Close",
+        bestFor: "Long-form promo followups",
+        captionFallback: "Why It Lands",
+        hookReason: "Finishes with a reason the viewer can trust.",
+        travelReason: "Closes the promo with confidence, not noise.",
+      },
+    ],
+  },
+  problem_solution: {
+    label: "Problem / Solution",
+    workerTemplate: "tutorial",
+    hookReason: "Frame the pain first, then pivot into the useful shift or fix.",
+    travelReason: "Optimized for clarity and teachable promos.",
+    roleBlueprints: [
+      {
+        id: "pain_first",
+        label: "Pain First",
+        bestFor: "Educational reels, B2B promos",
+        captionFallback: "Here Is The Problem",
+        hookReason: "Names the tension before offering relief.",
+        travelReason: "Makes the next beat feel necessary.",
+      },
+      {
+        id: "turning_point",
+        label: "Turning Point",
+        bestFor: "How-to, solution clips",
+        captionFallback: "Now Watch The Shift",
+        hookReason: "Centers the exact moment the story changes.",
+        travelReason: "Gives the promo shape instead of random highlights.",
+      },
+      {
+        id: "clean_fix",
+        label: "Clean Fix",
+        bestFor: "Tutorial teasers, product explainers",
+        captionFallback: "Here Is The Fix",
+        hookReason: "Leans into a concise, useful payoff.",
+        travelReason: "Useful for viewers who respond to fast value.",
+      },
+      {
+        id: "after_state",
+        label: "After State",
+        bestFor: "Follow-up promos, reels",
+        captionFallback: "That Changes Everything",
+        hookReason: "Shows the calmer after-state after the solution lands.",
+        travelReason: "Creates satisfying closure instead of abrupt cutoffs.",
+      },
+    ],
+  },
+  emotional_pull: {
+    label: "Emotional Pull",
+    workerTemplate: "story",
+    hookReason: "Let the strongest human feeling carry the promo instead of over-cutting it.",
+    travelReason: "Optimized for resonance, replay, and performance emotion.",
+    roleBlueprints: [
+      {
+        id: "feel_this",
+        label: "Feel This",
+        bestFor: "Music, choir, testimony, stories",
+        captionFallback: "Feel This Moment",
+        hookReason: "Opens on a line or look that already carries emotion.",
+        travelReason: "Makes the promo felt before it is processed.",
+      },
+      {
+        id: "breathing_space",
+        label: "Breathing Space",
+        bestFor: "Performance highlights, reels",
+        captionFallback: "Let It Breathe",
+        hookReason: "Allows the emotional note to hang a little longer.",
+        travelReason: "Creates contrast against more frantic social edits.",
+      },
+      {
+        id: "crescendo_pull",
+        label: "Crescendo Pull",
+        bestFor: "Choir, singer, stage builds",
+        captionFallback: "Then It Hits",
+        hookReason: "Climbs toward the emotional peak instead of cutting away too early.",
+        travelReason: "Turns buildup into payoff.",
+      },
+      {
+        id: "stay_close",
+        label: "Stay Close",
+        bestFor: "Story-led promos, community clips",
+        captionFallback: "Stay To The End",
+        hookReason: "Closes on a line or visual that lingers.",
+        travelReason: "Finishes soft but memorable.",
+      },
+    ],
+  },
+  authority_burst: {
+    label: "Authority Burst",
+    workerTemplate: "podcast",
+    hookReason: "Package the source like it came from someone who knows exactly what matters.",
+    travelReason: "Optimized for conviction, clarity, and expert feel.",
+    roleBlueprints: [
+      {
+        id: "sharp_claim",
+        label: "Sharp Claim",
+        bestFor: "Authority clips, Shorts, LinkedIn",
+        captionFallback: "Listen To This",
+        hookReason: "Starts on the strongest confident statement.",
+        travelReason: "Gives the promo instant stance.",
+      },
+      {
+        id: "edge_clip",
+        label: "Edge Clip",
+        bestFor: "Thought leadership, explainers",
+        captionFallback: "Here Is The Edge",
+        hookReason: "Highlights what makes the insight sharper than average.",
+        travelReason: "Useful when distinctiveness matters more than hype.",
+      },
+      {
+        id: "why_it_matters",
+        label: "Why It Matters",
+        bestFor: "Product pitch, conversion reels",
+        captionFallback: "Why It Matters",
+        hookReason: "Connects the claim to relevance fast.",
+        travelReason: "Turns expertise into actual user value.",
+      },
+      {
+        id: "final_move",
+        label: "Final Move",
+        bestFor: "Closing promos, campaign sets",
+        captionFallback: "This Is The Move",
+        hookReason: "Ends on a crisp takeaway or decisive line.",
+        travelReason: "Leaves viewers with a clear next thought.",
+      },
+    ],
+  },
 };
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -32,6 +289,77 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 const getPromoStyleConfig = style => {
   const key = String(style || "clean").trim().toLowerCase();
   return PROMO_STYLE_MAP[key] || PROMO_STYLE_MAP.clean;
+};
+
+const getPromoAngleConfig = angle => {
+  const key = String(angle || "stop_scroll").trim().toLowerCase();
+  return PROMO_ANGLE_MAP[key] || PROMO_ANGLE_MAP.stop_scroll;
+};
+
+const buildPromoCampaignRoles = (angle, durationSeconds, style) => {
+  const angleConfig = getPromoAngleConfig(angle);
+  const styleConfig = getPromoStyleConfig(style);
+  return angleConfig.roleBlueprints.map((role, index) => ({
+    ...role,
+    index,
+    promoAngle: angle,
+    promoAngleLabel: angleConfig.label,
+    preferredDurationSeconds: durationSeconds,
+    visualStyle: style,
+    styleLabel: styleConfig.label,
+  }));
+};
+
+const _buildStoryEditCampaignRoles = (angle, durationSeconds, style) => {
+  const angleConfig = getPromoAngleConfig(angle);
+  const styleConfig = getPromoStyleConfig(style);
+  const shortRoles = angleConfig.roleBlueprints.slice(0, Math.max(1, PROMO_SUMMARY_CLIP_COUNT - 1));
+  return [
+    {
+      id: "story_master",
+      label: "Story Master",
+      bestFor: "Product demos, founder videos, feature walkthroughs",
+      captionFallback: "The Full Story",
+      hookReason: "Builds one complete edited story from the strongest chapters.",
+      travelReason: "For users who need the platform to turn a raw full video into a polished promo.",
+      storyMaster: true,
+      preferredDurationSeconds: durationSeconds,
+      promoAngle: angle,
+      promoAngleLabel: angleConfig.label,
+      visualStyle: style,
+      styleLabel: styleConfig.label,
+      index: 0,
+    },
+    ...shortRoles.map((role, index) => ({
+      ...role,
+      index: index + 1,
+      promoAngle: angle,
+      promoAngleLabel: angleConfig.label,
+      preferredDurationSeconds: Math.min(60, Math.max(15, Math.round(Number(durationSeconds || 120) / 3))),
+      visualStyle: style,
+      styleLabel: styleConfig.label,
+    })),
+  ];
+};
+
+const getPromoWorkerProfile = (style, angle, durationSeconds) => {
+  const styleConfig = getPromoStyleConfig(style);
+  const angleConfig = getPromoAngleConfig(angle);
+  const isShort = Number(durationSeconds || 30) <= 20;
+
+  let template = angleConfig.workerTemplate || styleConfig.defaultTemplate || "story";
+  if (style === "hype" && !isShort) template = "reaction";
+  if (style === "minimal") template = "tutorial";
+  if (angle === "emotional_pull" && style === "clean") template = "story";
+
+  return {
+    captionStyle: styleConfig.captionStyle,
+    smartCropMode: styleConfig.smartCropMode,
+    template,
+    promoAngleLabel: angleConfig.label,
+    angleHookReason: angleConfig.hookReason,
+    angleTravelReason: angleConfig.travelReason,
+  };
 };
 
 const normalizePromoCaption = (value, fallback) => {
@@ -53,12 +381,17 @@ const normalizePromoCaption = (value, fallback) => {
     .join(" ");
 };
 
-const buildPromoCaption = (clip, index) => {
+const buildPromoCaption = (clip, index, role) => {
   const text = String(clip?.text || "").trim();
   const reason = String(clip?.reason || "").trim();
-  const fallback = `Promo Cut ${index + 1}`;
-  if (text) return normalizePromoCaption(text, fallback);
-  if (reason) return normalizePromoCaption(reason, fallback);
+  const fallback = role?.captionFallback || `Promo Cut ${index + 1}`;
+  const normalizedText = text ? normalizePromoCaption(text, fallback) : "";
+  const normalizedReason = reason ? normalizePromoCaption(reason, fallback) : "";
+
+  if (normalizedText && normalizedText.split(" ").length <= 5) return normalizedText;
+  if (normalizedReason && normalizedReason.split(" ").length <= 5) return normalizedReason;
+  if (normalizedText && normalizedText.length >= 8) return normalizedText;
+  if (normalizedReason && normalizedReason.length >= 8) return normalizedReason;
   return fallback;
 };
 
@@ -87,18 +420,47 @@ async function persistPromoSummaryOutputs(docRef, data) {
   const batch = db.batch();
   const generatedClipIds = [];
   const promoClips = [];
+  const campaignRoles = Array.isArray(data.campaignRoles) && data.campaignRoles.length
+    ? data.campaignRoles
+    : buildPromoCampaignRoles(data.promoAngle, data.targetDurationSeconds, data.style);
 
   renderedClips.forEach((clip, index) => {
     const clipId = `promo-${docRef.id}-${index + 1}`;
-    const promoCaption = buildPromoCaption(clip, index);
+    const campaignRole = campaignRoles[index % campaignRoles.length] || null;
+    const promoCaption = buildPromoCaption(clip, index, campaignRole);
+    const visualAssets = (Array.isArray(clip.visualAssets) ? clip.visualAssets : [])
+      .filter(asset => asset?.url)
+      .slice(0, 4)
+      .map(asset => ({
+        ...asset,
+        expiresAt,
+        sourceClipId: clipId,
+      }));
+    const thumbnailOptions = visualAssets.filter(asset => asset.type === "thumbnail");
+    const posterOptions = visualAssets.filter(asset => ["poster", "story"].includes(asset.type));
     const payload = {
       id: clipId,
       userId: data.userId,
       url: clip.url,
       storagePath: clip.storagePath || null,
-      title: promoCaption,
+      title: clip.titleSuggestion || clip.hookText || promoCaption,
       description: clip.reason || "AI-generated promotional clip",
-      promoCaption,
+      promoCaption: clip.promoCaption || promoCaption,
+      hookText: clip.hookText || clip.titleSuggestion || promoCaption,
+      titleSuggestion: clip.titleSuggestion || clip.hookText || promoCaption,
+      subtitleText: clip.subtitleText || promoCaption,
+      captions: Array.isArray(clip.captions) ? clip.captions.slice(0, 24) : [],
+      visualAssets,
+      thumbnailOptions,
+      posterOptions,
+      promoPackage: {
+        ...(clip.promoPackage || {}),
+        hook: clip.hookText || clip.titleSuggestion || promoCaption,
+        title: clip.titleSuggestion || clip.hookText || promoCaption,
+        subtitle: clip.subtitleText || promoCaption,
+        assets: visualAssets,
+        assetCount: visualAssets.length,
+      },
       createdAt: nowIso,
       expiresAt,
       sourceType: "promo_summary_clip",
@@ -109,6 +471,15 @@ async function persistPromoSummaryOutputs(docRef, data) {
       viralScore: clip.viralScore || null,
       duration: clip.duration || data.targetDurationSeconds || null,
       promoStyle: data.style || "clean",
+      promoStyleLabel: getPromoStyleConfig(data.style).label,
+      promoAngle: data.promoAngle || "stop_scroll",
+      promoAngleLabel: getPromoAngleConfig(data.promoAngle).label,
+      outputMode: data.outputMode || "campaign_set",
+      campaignRole: campaignRole?.id || null,
+      campaignRoleLabel: campaignRole?.label || null,
+      bestFor: campaignRole?.bestFor || null,
+      hookReason: campaignRole?.hookReason || getPromoAngleConfig(data.promoAngle).hookReason,
+      travelReason: campaignRole?.travelReason || getPromoAngleConfig(data.promoAngle).travelReason,
       promoDurationSeconds: data.targetDurationSeconds || null,
       downloadAvailable: true,
       type: "video",
@@ -211,6 +582,58 @@ async function refundPromoSummaryJob(docRef, data, reason = "processing_failed")
   };
 }
 
+async function cleanupPromoSummarySource(data, platformTag) {
+  if (data?.cleanupTempSourceOnComplete && data?.videoUrl) {
+    await cleanupSourceFile(data.videoUrl, {
+      currentPlatform: platformTag,
+    }).catch(() => {});
+  }
+}
+
+function hasPromoSummaryConsumedCompute(data) {
+  const status = String(data?.status || "").trim().toLowerCase();
+  const phase = String(data?.phase || data?.stage || "").trim().toLowerCase();
+  const progress = Number(data?.progress || 0);
+  const clipSuggestions = Array.isArray(data?.clipSuggestions) ? data.clipSuggestions.length : 0;
+  const clips = Array.isArray(data?.clips) ? data.clips.length : 0;
+
+  return (
+    status === "analyzing" ||
+    status === "rendering" ||
+    status === "completed" ||
+    phase === "analyzing" ||
+    phase === "rendering" ||
+    progress > 0 ||
+    clipSuggestions > 0 ||
+    clips > 0
+  );
+}
+
+async function markPromoSummaryNonRefundable(docRef, data, reason = "compute_consumed") {
+  const noRefundAt = new Date().toISOString();
+  await docRef.set(
+    {
+      billing: {
+        ...(data?.billing || {}),
+        noRefundAt,
+        noRefundReason: reason,
+      },
+    },
+    { merge: true }
+  );
+
+  await cleanupPromoSummarySource(data, "smart_promo_summary_failed");
+
+  return {
+    ...data,
+    billing: {
+      ...(data?.billing || {}),
+      noRefundAt,
+      noRefundReason: reason,
+    },
+  };
+}
+
 async function reconcilePromoSummaryJob(docRef, data) {
   if (!data || data.type !== "promo_summary") {
     return data;
@@ -233,12 +656,19 @@ async function reconcilePromoSummaryJob(docRef, data) {
         status: "failed",
         error: error.message,
       };
-      return refundPromoSummaryJob(docRef, failedData, "persist_failed");
+      return markPromoSummaryNonRefundable(docRef, failedData, "persist_failed_after_compute");
     }
   }
 
   if (data.status === "failed") {
-    return refundPromoSummaryJob(docRef, data, data.error || "worker_failed");
+    if (hasPromoSummaryConsumedCompute(data)) {
+      return markPromoSummaryNonRefundable(
+        docRef,
+        data,
+        data.error || "worker_failed_after_compute"
+      );
+    }
+    return refundPromoSummaryJob(docRef, data, data.error || "worker_failed_before_compute");
   }
 
   return data;
@@ -277,15 +707,16 @@ async function monitorPromoSummaryJob(jobId) {
     },
     { merge: true }
   );
-  await refundPromoSummaryJob(
-    jobRef,
-    {
-      ...timeoutData,
-      status: "failed",
-      error: "Promo summary timed out while waiting for worker completion.",
-    },
-    "timeout"
-  );
+  const failedTimeoutData = {
+    ...timeoutData,
+    status: "failed",
+    error: "Promo summary timed out while waiting for worker completion.",
+  };
+  if (hasPromoSummaryConsumedCompute(failedTimeoutData)) {
+    await markPromoSummaryNonRefundable(jobRef, failedTimeoutData, "timeout_after_compute");
+  } else {
+    await refundPromoSummaryJob(jobRef, failedTimeoutData, "timeout_before_compute");
+  }
 }
 
 /**
@@ -484,6 +915,38 @@ router.get("/analysis/:id", authMiddleware, async (req, res) => {
 });
 
 /**
+ * @route POST /promo-summary/estimate
+ * @desc Estimate Smart Promo Summary credits before processing
+ * @access Private
+ */
+router.post("/promo-summary/estimate", authMiddleware, async (req, res) => {
+  const estimate = estimatePromoSummaryCredits({
+    videoDurationSeconds: req.body?.videoDurationSeconds,
+    clipCount: req.body?.clipCount || PROMO_SUMMARY_CLIP_COUNT,
+    outputMode: req.body?.outputMode,
+    includeCaptions: req.body?.includeCaptions !== false,
+    includeVisuals: req.body?.includeVisuals !== false,
+  });
+
+  if (
+    estimate.videoDurationSeconds > 0 &&
+    estimate.videoDurationSeconds > PROMO_SUMMARY_MAX_DURATION_SECONDS
+  ) {
+    return res.status(413).json({
+      success: false,
+      error: "Video too long",
+      message: `Smart Promo currently supports videos up to ${Math.round(PROMO_SUMMARY_MAX_DURATION_SECONDS / 60)} minutes for one job.`,
+      estimate,
+    });
+  }
+
+  res.json({
+    success: true,
+    estimate,
+  });
+});
+
+/**
  * @route POST /promo-summary
  * @desc Generate multiple short promo clips with auto story captions
  * @access Private
@@ -494,28 +957,76 @@ router.post("/promo-summary", authMiddleware, async (req, res) => {
     contentId = null,
     durationSeconds = 30,
     style = "clean",
+    promoAngle = "stop_scroll",
+    outputMode = "campaign_set",
     sourceStoragePath = null,
+    sourceFingerprint = null,
+    videoDurationSeconds = 0,
   } = req.body || {};
   const userId = req.user.uid;
 
-  const targetDurationSeconds = [15, 30, 60].includes(Number(durationSeconds))
+  const requestedOutputMode = String(outputMode || "visual_edit").trim().toLowerCase();
+  const normalizedOutputMode =
+    requestedOutputMode === "visual_edit" || requestedOutputMode === "story_edit"
+      ? "visual_edit"
+      : "campaign_set";
+  const allowedDurations =
+    normalizedOutputMode === "visual_edit" ? [60, 120, 180, 300] : [15, 30, 60];
+  const targetDurationSeconds = allowedDurations.includes(Number(durationSeconds))
     ? Number(durationSeconds)
-    : 30;
+    : normalizedOutputMode === "visual_edit"
+      ? 120
+      : 30;
   const normalizedStyle = String(style || "clean").trim().toLowerCase();
-  const styleConfig = getPromoStyleConfig(normalizedStyle);
+  const normalizedPromoAngle = String(promoAngle || "stop_scroll").trim().toLowerCase();
+  const workerProfile = getPromoWorkerProfile(
+    normalizedStyle,
+    normalizedPromoAngle,
+    targetDurationSeconds
+  );
+  const campaignRoles =
+    normalizedOutputMode === "visual_edit"
+      ? []
+      : buildPromoCampaignRoles(normalizedPromoAngle, targetDurationSeconds, normalizedStyle);
+  const workflowType =
+    normalizedOutputMode === "visual_edit" ? "smart_promo_visual_v1" : "campaign_set_v1";
+  const analysisCacheKey =
+    sourceFingerprint ||
+    sourceStoragePath ||
+    contentId ||
+    `${videoUrl}|${Math.round(Number(videoDurationSeconds || 0))}`;
 
   if (!videoUrl) {
     return res.status(400).json({ error: "Missing videoUrl" });
   }
 
   try {
-    const credits = await deductCredits(userId, PROMO_SUMMARY_COST, "promo-summary");
+    const estimate = estimatePromoSummaryCredits({
+      videoDurationSeconds,
+      clipCount: PROMO_SUMMARY_CLIP_COUNT,
+      outputMode: normalizedOutputMode,
+      includeCaptions: normalizedOutputMode !== "visual_edit",
+      includeVisuals: true,
+    });
+    if (
+      estimate.videoDurationSeconds > 0 &&
+      estimate.videoDurationSeconds > PROMO_SUMMARY_MAX_DURATION_SECONDS
+    ) {
+      return res.status(413).json({
+        error: "Video too long",
+        message: `Smart Promo currently supports videos up to ${Math.round(PROMO_SUMMARY_MAX_DURATION_SECONDS / 60)} minutes for one job.`,
+        estimate,
+      });
+    }
+
+    const credits = await deductCredits(userId, estimate.credits, "promo-summary");
     if (!credits.success) {
       return res.status(402).json({
         error: "Insufficient credits",
         message: "Smart Promo Summary is a premium feature and requires credits.",
-        required: PROMO_SUMMARY_COST,
+        required: estimate.credits,
         remaining: credits.remaining || 0,
+        estimate,
       });
     }
 
@@ -534,8 +1045,14 @@ router.post("/promo-summary", authMiddleware, async (req, res) => {
         requestedClipCount: PROMO_SUMMARY_CLIP_COUNT,
         targetDurationSeconds,
         style: normalizedStyle,
-        captionStyle: styleConfig.captionStyle,
-        smartCropMode: styleConfig.smartCropMode,
+        promoAngle: normalizedPromoAngle,
+        promoAngleLabel: getPromoAngleConfig(normalizedPromoAngle).label,
+        outputMode: normalizedOutputMode,
+        workflowType,
+        captionStyle: workerProfile.captionStyle,
+        smartCropMode: workerProfile.smartCropMode,
+        template: workerProfile.template,
+        campaignRoles,
         clips: [],
         createdAt: new Date().toISOString(),
         cleanupTempSourceOnComplete: Boolean(
@@ -543,9 +1060,12 @@ router.post("/promo-summary", authMiddleware, async (req, res) => {
             /^(temp_uploads|temp_sources)\//.test(String(sourceStoragePath))
         ),
         sourceStoragePath: sourceStoragePath || null,
+        sourceFingerprint: sourceFingerprint || null,
+        analysisCacheKey,
         billing: {
           charged: true,
-          cost: PROMO_SUMMARY_COST,
+          cost: estimate.credits,
+          estimate,
           chargedAt: new Date().toISOString(),
           fromMonthly: credits.fromMonthly || 0,
           fromTopUp: credits.fromTopUp || 0,
@@ -561,10 +1081,23 @@ router.post("/promo-summary", authMiddleware, async (req, res) => {
           job_id: jobId,
           max_clips: PROMO_SUMMARY_CLIP_COUNT,
           target_duration: targetDurationSeconds,
-          caption_style: styleConfig.captionStyle,
-          smart_crop_mode: styleConfig.smartCropMode,
+          caption_style: workerProfile.captionStyle,
+          smart_crop_mode: workerProfile.smartCropMode,
           target_aspect_ratio: "9:16",
-          template: normalizedStyle === "hype" ? "reaction" : normalizedStyle === "minimal" ? "tutorial" : "story",
+          template: workerProfile.template,
+          style: normalizedStyle,
+          promo_angle: normalizedPromoAngle,
+          output_mode: normalizedOutputMode,
+          workflow_type: workflowType,
+          analysis_cache_key: analysisCacheKey,
+          campaign_roles: campaignRoles,
+          creative_brief: {
+            promo_angle: normalizedPromoAngle,
+            promo_angle_label: getPromoAngleConfig(normalizedPromoAngle).label,
+            hook_reason: workerProfile.angleHookReason,
+            travel_reason: workerProfile.angleTravelReason,
+            style: normalizedStyle,
+          },
         },
         { timeout: 600000 }
       )
@@ -598,9 +1131,12 @@ router.post("/promo-summary", authMiddleware, async (req, res) => {
     res.json({
       success: true,
       jobId,
-      cost: PROMO_SUMMARY_COST,
+      cost: estimate.credits,
+      estimate,
       creditsRemaining: credits.remaining,
       clipCount: PROMO_SUMMARY_CLIP_COUNT,
+      promoAngle: normalizedPromoAngle,
+      outputMode: normalizedOutputMode,
       message: "Smart Promo Summary started.",
     });
   } catch (error) {

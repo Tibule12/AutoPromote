@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import "./EngagementMarketplace.css";
 import { API_BASE_URL, API_ENDPOINTS } from "./config";
 import { auth, storage } from "./firebaseClient";
@@ -6,11 +6,6 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import WolfPackFeed from "./WolfPackFeed";
 
 // --- ICONS (SVG) ---
-const WolfIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M12 2L2 12h3v8h6v-6h2v6h6v-8h3L12 2z" />
-  </svg>
-);
 const ClockIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <circle cx="12" cy="12" r="10" />
@@ -246,13 +241,13 @@ const WolfHuntDashboard = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
 
   // LEADERBOARD STATE
-  const [leaderboard, setLeaderboard] = useState([
+  const leaderboard = [
     { name: "SarahScale", rank: "👑 Alpha", credits: 42500, avatar: "S" },
     { name: "CryptoKing", rank: "🩸 Predator", credits: 38200, avatar: "C" },
     { name: "HustleGPT", rank: "🩸 Predator", credits: 29150, avatar: "H" },
     { name: "ViralVixen", rank: "🏹 Hunter", credits: 15400, avatar: "V" },
     { name: "You", rank: "🐶 Pup", credits: userCredits, avatar: "Y", isMe: true },
-  ]);
+  ];
 
   // Determine User Rank
   const getRank = credits => {
@@ -272,9 +267,6 @@ const WolfHuntDashboard = () => {
     actionType: "like",
     quantity: 10,
   });
-
-  // MOCK DATA REMOVED FOR PRODUCTION
-  const MOCK_TASKS = [];
 
   useEffect(() => {
     fetchFeedingGrounds();
@@ -566,7 +558,7 @@ const WolfHuntDashboard = () => {
       <header className="hunt-header">
         <div className="brand-title">
           <h1>WOLF HUNT</h1>
-          <span className="tagline">The Billionaire's Playground</span>
+          <span className="tagline">The Billionaire&apos;s Playground</span>
         </div>
         <div className="status-bar">
           {/* VOICE TOGGLE */}
@@ -845,7 +837,7 @@ const WolfHuntDashboard = () => {
                       fontFamily: "monospace",
                     }}
                   >
-                    "Target identified. Confirm you are ready to engage."
+                    &quot;Target identified. Confirm you are ready to engage.&quot;
                   </p>
 
                   {/* VOICE CHECK WARNING */}

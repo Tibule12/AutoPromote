@@ -6,7 +6,7 @@ import { auth } from "../firebaseClient";
 const LiveLogViewer = () => {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [, setError] = useState(null);
   const [active, setActive] = useState(true);
   const logsEndRef = useRef(null);
 

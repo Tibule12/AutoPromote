@@ -3507,9 +3507,13 @@ if (process.env.SCHEDULER_ENABLED !== "false" && !isTestEnv) {
     ).unref();
   }
 
-  // 3. Storage Cleanup (Daily)
+  // 3. Storage Cleanup
   // Replaces the paid Firebase Cloud Function 'cleanupTempUploads'
   if (process.env.ENABLE_BACKGROUND_JOBS === "true") {
+    const storageCleanupIntervalMs = parseInt(
+      process.env.STORAGE_CLEANUP_INTERVAL_MS || String(10 * 60 * 1000),
+      10
+    );
     setInterval(
       async () => {
         const isLeader = (global.__bgLeader && global.__bgLeader.isLeader()) || false;
@@ -3533,8 +3537,8 @@ if (process.env.SCHEDULER_ENABLED !== "false" && !isTestEnv) {
           console.error("[Scheduler] ⚠️ Storage cleanup failed:", e.message);
         }
       },
-      24 * 60 * 60 * 1000
-    ).unref(); // Every 24 hours
+      storageCleanupIntervalMs
+    ).unref();
   }
 }
 

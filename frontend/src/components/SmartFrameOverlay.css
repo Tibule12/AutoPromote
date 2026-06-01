@@ -15,13 +15,14 @@
 .smart-content {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   z-index: 1;
+  background: #000;
 }
 
 /* --- TikTok Style --- */
 .frame-tiktok .smart-content {
-  object-fit: cover; /* TikTok fills screen */
+  object-fit: contain;
 }
 
 /* TikTok UI Simulation (Safe Zones & UI) */
@@ -84,7 +85,7 @@
 
 /* --- Instagram Reel Style --- */
 .frame-instagram .smart-content {
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .instagram-ui-overlay {
@@ -125,7 +126,7 @@
 
 /* --- YouTube Shorts Style --- */
 .frame-youtube-shorts .smart-content {
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .yt-shorts-overlay {

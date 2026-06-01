@@ -247,8 +247,10 @@ function checkEnvironmentVariables() {
     OPENAI_API_KEY: "AI features disabled",
     PAYPAL_CLIENT_ID: "Payments disabled",
     PAYPAL_CLIENT_SECRET: "Payments disabled",
-    RESEND_API_KEY: "Email service may not work",
-    SENDGRID_API_KEY: "Email service may not work",
+    ZEPTOMAIL_API_KEY: "Email service may not work",
+    ZEPTOMAIL_API_URL: "Email service may not work",
+    ZEPTOMAIL_FROM_EMAIL: "Email service may not work",
+    ZEPTOMAIL_FROM_NAME: "Email service may not work",
   };
 
   Object.entries(importantVars).forEach(([varName, impact]) => {
@@ -592,19 +594,20 @@ async function checkStorageAccess() {
  * Check Email Service
  */
 function checkEmailService() {
-  const resendKey = process.env.RESEND_API_KEY;
-  const sendgridKey = process.env.SENDGRID_API_KEY;
+  const zeptoKey = process.env.ZEPTOMAIL_API_KEY;
+  const zeptoUrl = process.env.ZEPTOMAIL_API_URL;
+  const zeptoFromEmail = process.env.ZEPTOMAIL_FROM_EMAIL;
+  const zeptoFromName = process.env.ZEPTOMAIL_FROM_NAME;
   const mode = process.env.EMAIL_SENDER_MODE;
 
-  const configured = !!(resendKey || sendgridKey);
+  const configured = !!(zeptoKey && zeptoUrl && zeptoFromEmail && zeptoFromName);
 
   return {
     status: configured ? "ok" : "warning",
     critical: false,
     message: configured ? "Email service configured" : "No email service configured",
-    provider: mode || (resendKey ? "resend" : sendgridKey ? "sendgrid" : "none"),
-    resend_configured: !!resendKey,
-    sendgrid_configured: !!sendgridKey,
+    provider: mode || (configured ? "zeptomail" : "none"),
+    zeptomail_configured: configured,
   };
 }
 

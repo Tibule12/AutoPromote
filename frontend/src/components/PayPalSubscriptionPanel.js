@@ -33,12 +33,15 @@ function normalizeSuggestedPlanId(planId) {
 
 const PAYPAL_SUBSCRIPTION_NAMESPACE = "paypalSubscriptionsSdk";
 const PAYPAL_SUBSCRIPTION_SCRIPT_ID = "paypal-sdk-subscriptions";
+const PAYPAL_TOPUP_NAMESPACE = "paypalTopupSdk";
+const PAYPAL_TOPUP_SCRIPT_ID = "paypal-sdk-topups";
 
 const PayPalSubscriptionPanel = ({
   compact = false,
   highlightPlanId = null,
   onUpgradeSuccess,
   onClose,
+  closeLabel,
   title,
   subtitle,
 }) => {
@@ -51,11 +54,15 @@ const PayPalSubscriptionPanel = ({
   const [paypalLoaded, setPaypalLoaded] = useState(false);
   const [paypalSdkError, setPaypalSdkError] = useState("");
   const [paypalConfig, setPaypalConfig] = useState(null);
+  const [topUpPaypalLoaded, setTopUpPaypalLoaded] = useState(false);
+  const [topUpPaypalError, setTopUpPaypalError] = useState("");
   const [activatingPlanId, setActivatingPlanId] = useState(null);
   const [authUser, setAuthUser] = useState(() => auth.currentUser);
   const [authResolved, setAuthResolved] = useState(() => Boolean(auth.currentUser));
   const buttonContainerRefs = useRef({});
   const buttonInstancesRef = useRef({});
+  const topUpButtonContainerRefs = useRef({});
+  const topUpButtonInstancesRef = useRef({});
   const handledReturnRef = useRef(false);
 
   const normalizedHighlightPlanId = normalizeSuggestedPlanId(highlightPlanId);
@@ -552,6 +559,177 @@ const PayPalSubscriptionPanel = ({
     };
   }, [authUser, compact, currentSubscription?.planId, onClose, paypalLoaded, plans, processing]);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadTopUpPaypalSdk = async () => {
+      if (!creditTopUpPacks.length) return;
+
+      try {
+        const res = await fetch(API_ENDPOINTS.PAYMENTS_PAYPAL_CONFIG);
+        const text = await res.text();
+        let data = {};
+        try {
+          data = text ? JSON.parse(text) : {};
+        } catch (e) {
+          console.warn("PayPal top-up config endpoint returned invalid JSON", {
+            status: res.status,
+            text,
+          });
+        }
+
+        const clientId = data?.clientId || "";
+        const currency = data?.currency || "USD";
+        if (!clientId) {
+          setTopUpPaypalError("PayPal credit top-ups are not configured yet.");
+          return;
+        }
+
+        setPaypalConfig(current => current || { clientId, currency });
+
+        if (window[PAYPAL_TOPUP_NAMESPACE]?.Buttons) {
+          if (!cancelled) setTopUpPaypalLoaded(true);
+          return;
+        }
+
+        const existing = document.getElementById(PAYPAL_TOPUP_SCRIPT_ID);
+        if (existing) {
+          existing.addEventListener("load", () => {
+            if (!cancelled) setTopUpPaypalLoaded(true);
+          });
+          existing.addEventListener("error", () => {
+            if (!cancelled) setTopUpPaypalError("Unable to load PayPal credit top-ups.");
+          });
+          return;
+        }
+
+        const script = document.createElement("script");
+        script.id = PAYPAL_TOPUP_SCRIPT_ID;
+        script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(
+          clientId
+        )}&currency=${encodeURIComponent(currency)}&intent=capture&components=buttons`;
+        script.async = true;
+        script.setAttribute("data-namespace", PAYPAL_TOPUP_NAMESPACE);
+        script.onload = () => {
+          if (!cancelled) setTopUpPaypalLoaded(true);
+        };
+        script.onerror = () => {
+          if (!cancelled) setTopUpPaypalError("Unable to load PayPal credit top-ups.");
+        };
+        document.body.appendChild(script);
+      } catch (error) {
+        console.warn("Failed to load PayPal top-up SDK:", error);
+        if (!cancelled) setTopUpPaypalError("Unable to load PayPal credit top-ups.");
+      }
+    };
+
+    loadTopUpPaypalSdk();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [creditTopUpPacks]);
+
+  useEffect(() => {
+    const paypalSdk = window[PAYPAL_TOPUP_NAMESPACE];
+    if (!topUpPaypalLoaded || !paypalSdk?.Buttons || !creditTopUpPacks.length) return undefined;
+
+    const cleanupInstances = [];
+
+    creditTopUpPacks.forEach(pack => {
+      const container = topUpButtonContainerRefs.current[pack.id];
+      if (!container) return;
+
+      if (topUpButtonInstancesRef.current[pack.id]?.close) {
+        try {
+          topUpButtonInstancesRef.current[pack.id].close();
+        } catch (_) {
+          // ignore SDK cleanup failures
+        }
+      }
+
+      container.innerHTML = "";
+
+      if (processing || !authUser) {
+        return;
+      }
+
+      const buttons = paypalSdk.Buttons({
+        style: {
+          layout: "vertical",
+          shape: "rect",
+          color: "gold",
+          label: "pay",
+          height: 36,
+        },
+        createOrder: async () => {
+          const token = await getAuthToken(true);
+          if (!token) {
+            toast.error("Please sign in to buy credits");
+            throw new Error("not_signed_in");
+          }
+
+          const res = await fetch(resolveApi("/api/payments/credits/create-order"), {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ packageId: pack.id }),
+          });
+          const parsed = await parseJsonSafe(res);
+          if (!res.ok) {
+            throw new Error(parsed?.json?.error || parsed?.error || "Could not create PayPal order");
+          }
+          return parsed.json?.id || parsed.json?.orderID || parsed.json?.orderId;
+        },
+        onApprove: async data => {
+          const token = await getAuthToken(true);
+          const orderID = data?.orderID || data?.orderId;
+          const res = await fetch(resolveApi("/api/payments/credits/capture-order"), {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+            body: JSON.stringify({ orderID, packageId: pack.id }),
+          });
+          const parsed = await parseJsonSafe(res);
+          if (!res.ok || !parsed?.json?.success) {
+            throw new Error(parsed?.json?.error || parsed?.error || "Could not capture PayPal order");
+          }
+          await fetchUsage();
+          toast.success(`${pack.credits} credits added.`);
+        },
+        onCancel: () => {
+          toast("Credit top-up cancelled", { icon: "⚠️" });
+        },
+        onError: err => {
+          console.error("PayPal top-up button error", err);
+          toast.error("PayPal credit top-up failed. Please try again.");
+        },
+      });
+
+      topUpButtonInstancesRef.current[pack.id] = buttons;
+      cleanupInstances.push(buttons);
+      buttons.render(container).catch(err => {
+        console.error("Failed to render PayPal top-up buttons", err);
+      });
+    });
+
+    return () => {
+      cleanupInstances.forEach(instance => {
+        if (instance?.close) {
+          try {
+            instance.close();
+          } catch (_) {
+            // ignore SDK cleanup failures
+          }
+        }
+      });
+    };
+  }, [authUser, creditTopUpPacks, processing, topUpPaypalLoaded]);
+
   const getFeatureIcon = feature => {
     const icons = {
       uploads: "📤",
@@ -699,9 +877,13 @@ const PayPalSubscriptionPanel = ({
           <h2>{effectiveTitle}</h2>
           <p className="paypal-subscription-panel-subtitle">{effectiveSubtitle}</p>
         </div>
-        {compact && onClose && (
-          <button type="button" className="subscription-panel-close" onClick={onClose}>
-            ×
+        {onClose && (
+          <button
+            type="button"
+            className={`subscription-panel-close${compact ? " is-compact" : " is-return"}`}
+            onClick={onClose}
+          >
+            {closeLabel || (compact ? "×" : "Back")}
           </button>
         )}
       </div>
@@ -709,6 +891,11 @@ const PayPalSubscriptionPanel = ({
       {paypalSdkError && (
         <div className="paypal-sdk-notice warning">
           {paypalSdkError} You can still use the fallback checkout link below.
+        </div>
+      )}
+      {topUpPaypalError && (
+        <div className="paypal-sdk-notice warning">
+          {topUpPaypalError} Credit packs will appear again once PayPal is available.
         </div>
       )}
 
@@ -939,6 +1126,15 @@ const PayPalSubscriptionPanel = ({
                     <div className="topup-price">${pack.price}</div>
                     <div className="topup-name">{pack.name}</div>
                     {pack.savings && <div className="topup-savings">Save {pack.savings}</div>}
+                    <div
+                      className="topup-paypal-button-shell"
+                      ref={node => {
+                        topUpButtonContainerRefs.current[pack.id] = node;
+                      }}
+                    />
+                    {!auth.currentUser && (
+                      <p className="checkout-helper-text">Sign in first to buy credits.</p>
+                    )}
                   </div>
                 ))}
               </div>

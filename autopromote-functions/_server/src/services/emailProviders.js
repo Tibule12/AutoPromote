@@ -113,9 +113,9 @@ const providers = {
     const user = process.env.SMTP_USER;
     const pass = process.env.SMTP_PASS;
     const secure = process.env.SMTP_SECURE === "true" || port === 465;
-    
+
     if (!host || !user || !pass) {
-       throw new Error("missing SMTP_HOST/SMTP_USER/SMTP_PASS for smtp provider");
+      throw new Error("missing SMTP_HOST/SMTP_USER/SMTP_PASS for smtp provider");
     }
 
     let nodemailer;
@@ -151,8 +151,8 @@ const providers = {
       },
     };
   },
-  
-  // Zoho alias for ZeptoMail API
+
+  // Zoho alias for smtp (backward compatibility if enviroment uses 'zoho')
   zoho: () => {
     return providers.zeptomail();
   },

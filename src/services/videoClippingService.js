@@ -114,7 +114,18 @@ class VideoClippingService {
         end: s.end,
         duration: s.end - s.start,
         viralScore: s.viralScore || 60,
+        reason: s.reason || "High engagement potential detected",
         text: s.text || `Segment ${index + 1}`,
+        strategyLabel: s.strategyLabel || null,
+        strategyIntent: s.strategyIntent || null,
+        hookText: s.hookText || null,
+        captionSuggestion: s.captionSuggestion || "Watch till the end! 😱 #viral",
+        bestFor: s.bestFor || null,
+        retentionNotes: Array.isArray(s.retentionNotes) ? s.retentionNotes : [],
+        scoreBreakdown: s.scoreBreakdown || null,
+        studioMove: s.studioMove || null,
+        campaignRole: s.campaignRole || null,
+        campaignOrder: s.campaignOrder || index + 1,
         status: "suggested",
       }));
 
@@ -195,9 +206,18 @@ class VideoClippingService {
         viralScore: s.viralScore || 60,
         reason: s.reason || "High engagement potential detected",
         text: s.text || `Segment ${index + 1}`,
+        strategyLabel: s.strategyLabel || null,
+        strategyIntent: s.strategyIntent || null,
+        hookText: s.hookText || null,
+        captionSuggestion: s.captionSuggestion || null,
+        bestFor: s.bestFor || null,
+        retentionNotes: Array.isArray(s.retentionNotes) ? s.retentionNotes : [],
+        scoreBreakdown: s.scoreBreakdown || null,
+        studioMove: s.studioMove || null,
+        campaignRole: s.campaignRole || null,
+        campaignOrder: s.campaignOrder || index + 1,
         status: "suggested",
         platforms: ["TikTok", "YouTube Shorts", "Instagram Reels"], // Phase 1 defaults
-        captionSuggestion: "Watch till the end! 😱 #viral",
       }));
 
       // 3. Store results in Firestore for persistence/history
@@ -411,9 +431,21 @@ class VideoClippingService {
     const now = new Date();
     try {
       console.log("[VideoClipping] Running Cleanup Task...");
+      let firestore;
+      let storageBucket;
+      try {
+        firestore = getDb();
+        storageBucket = getStorage();
+      } catch (initError) {
+        console.warn(
+          "[VideoClipping] Cleanup skipped: Firestore/Storage service not available.",
+          initError.message
+        );
+        return;
+      }
 
       // 1. Get expired clips from generated_clips
-      const snapshot = await db
+      const snapshot = await firestore
         .collection("generated_clips")
         .where("expiresAt", "<", now.toISOString())
         .limit(50) // Batch processing
@@ -425,8 +457,7 @@ class VideoClippingService {
       }
 
       console.log(`[VideoClipping] Found ${snapshot.size} expired clips.`);
-      const batch = db.batch();
-      const bucket = admin.storage().bucket();
+      const batch = firestore.batch();
 
       for (const doc of snapshot.docs) {
         const data = doc.data();
@@ -437,7 +468,7 @@ class VideoClippingService {
           try {
             const storedPath = typeof data.storagePath === "string" ? data.storagePath : "";
             if (storedPath) {
-              await bucket
+              await storageBucket
                 .file(storedPath)
                 .delete()
                 .catch(err => {
@@ -445,10 +476,10 @@ class VideoClippingService {
                     console.error(`Failed to delete storage file ${storedPath}:`, err);
                 });
             } else {
-              const urlParts = data.url.split(`https://storage.googleapis.com/${bucket.name}/`);
+              const urlParts = data.url.split(`https://storage.googleapis.com/${storageBucket.name}/`);
               if (urlParts.length === 2) {
                 const filePath = decodeURIComponent(urlParts[1]);
-                await bucket
+                await storageBucket
                   .file(filePath)
                   .delete()
                   .catch(err => {
@@ -475,7 +506,7 @@ class VideoClippingService {
         // await db.collection("generated_clips").doc(newContentId).set(...)
         // await db.collection("content").doc(newContentId).set(...)
         // So IDs match.
-        const contentRef = db.collection("content").doc(clipId);
+        const contentRef = firestore.collection("content").doc(clipId);
         batch.delete(contentRef);
       }
 

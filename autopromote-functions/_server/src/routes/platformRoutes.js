@@ -466,6 +466,55 @@ router.get(
         } catch (e) {
           /* non-fatal */
         }
+      } else if (platform === "reddit") {
+        // Fetch subreddit subscriptions so UI can provide a dropdown instead of manual typing.
+        try {
+          const subRes = await safeFetch(
+            "https://oauth.reddit.com/subreddits/mine/subscriber?limit=100",
+            fetchFn,
+            {
+              fetchOptions: {
+                method: "GET",
+                headers: {
+                  Authorization: `Bearer ${accessToken}`,
+                  "User-Agent": "AutoPromote/1.0",
+                },
+              },
+              requireHttps: true,
+              allowHosts: ["oauth.reddit.com"],
+            }
+          );
+          if (subRes.ok) {
+            const subJson = await subRes.json();
+            const subs = ((subJson && subJson.data && subJson.data.children) || [])
+              .map(c => c && c.data)
+              .filter(Boolean)
+              .map(s => ({
+                name: s.display_name || "",
+                title: s.title || s.display_name || "",
+                subscribers: s.subscribers || 0,
+                over18: !!s.over18,
+              }))
+              .filter(s => !!s.name);
+
+            result.meta.subreddits = subs;
+
+            await db
+              .collection("users")
+              .doc(uid)
+              .collection("connections")
+              .doc("reddit")
+              .set(
+                {
+                  meta: { ...(conn.meta || {}), subreddits: subs },
+                  updatedAt: new Date().toISOString(),
+                },
+                { merge: true }
+              );
+          }
+        } catch (e) {
+          /* non-fatal */
+        }
       } else if (platform === "telegram") {
         // Telegram webhook callback persists a chatId; include that if present
         try {

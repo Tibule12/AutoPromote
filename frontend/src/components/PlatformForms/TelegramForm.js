@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { sanitizeUrl } from "../../utils/security";
+import AdaptiveMediaPreview from "./AdaptiveMediaPreview";
 // import "../../ContentUploadForm.css";
 
 const TelegramForm = ({
@@ -139,24 +139,11 @@ const TelegramForm = ({
               alignItems: "center",
             }}
           >
-            {currentFile.type?.startsWith("video/") ? (
-              <video
-                src={sanitizeUrl(currentFile.preview)}
-                controls
-                style={{ maxWidth: "100%", maxHeight: "200px", borderRadius: "4px" }}
-              />
-            ) : (
-              <img
-                src={sanitizeUrl(currentFile.preview)}
-                alt="Preview"
-                style={{
-                  maxWidth: "100%",
-                  maxHeight: "200px",
-                  borderRadius: "4px",
-                  objectFit: "contain",
-                }}
-              />
-            )}
+            <AdaptiveMediaPreview
+              src={currentFile.preview}
+              mediaType={currentFile.type?.startsWith("video/") ? "video" : "image"}
+              label="Telegram media preview"
+            />
             <div
               className="file-info"
               style={{ marginTop: "8px", fontSize: "12px", color: "#64748b" }}

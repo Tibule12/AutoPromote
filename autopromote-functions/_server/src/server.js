@@ -1593,6 +1593,15 @@ try {
     console.warn("Media routes failed:", e.message);
   }
 
+  // Team Workspaces (plan seat enforcement)
+  try {
+    const workspaceRoutes = require("./routes/workspaceRoutes");
+    app.use("/api/workspaces", workspaceRoutes);
+    console.log("👥 Workspace routes mounted at /api/workspaces");
+  } catch (e) {
+    console.warn("Workspace routes failed:", e.message);
+  }
+
   // AfterDark (adult) area removed from codebase per repository policy.
 
   // Register optional routes
@@ -1944,7 +1953,7 @@ try {
   // ADDED: HEADERS FOR FFmpeg WASM / SHARED ARRAY BUFFER
   app.use(
     express.static(path.join(__dirname, "../frontend/build"), {
-      setHeaders: (res, path) => {
+      setHeaders: (res, _path) => {
         res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
         res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
       },
@@ -3498,9 +3507,13 @@ if (process.env.SCHEDULER_ENABLED !== "false" && !isTestEnv) {
     ).unref();
   }
 
-  // 3. Storage Cleanup (Daily)
+  // 3. Storage Cleanup
   // Replaces the paid Firebase Cloud Function 'cleanupTempUploads'
   if (process.env.ENABLE_BACKGROUND_JOBS === "true") {
+    const storageCleanupIntervalMs = parseInt(
+      process.env.STORAGE_CLEANUP_INTERVAL_MS || String(10 * 60 * 1000),
+      10
+    );
     setInterval(
       async () => {
         const isLeader = (global.__bgLeader && global.__bgLeader.isLeader()) || false;
@@ -3524,8 +3537,8 @@ if (process.env.SCHEDULER_ENABLED !== "false" && !isTestEnv) {
           console.error("[Scheduler] ⚠️ Storage cleanup failed:", e.message);
         }
       },
-      24 * 60 * 60 * 1000
-    ).unref(); // Every 24 hours
+      storageCleanupIntervalMs
+    ).unref();
   }
 }
 
