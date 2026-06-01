@@ -59,6 +59,15 @@ describe("ViralScanner guided clip selection", () => {
         });
       }
 
+      if (requestUrl.includes("/api/media/worker-health")) {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({ ok: true }),
+          text: async () => JSON.stringify({ ok: true }),
+        });
+      }
+
       if (requestUrl.includes("/api/media/analyze")) {
         return Promise.resolve({
           ok: true,
@@ -120,6 +129,10 @@ describe("ViralScanner guided clip selection", () => {
       />
     );
 
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: /Start AI Scan/i })).not.toBeDisabled()
+    );
+
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /Start AI Scan/i }));
     });
@@ -155,6 +168,10 @@ describe("ViralScanner guided clip selection", () => {
       />
     );
 
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: /Start AI Scan/i })).not.toBeDisabled()
+    );
+
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /Start AI Scan/i }));
     });
@@ -163,7 +180,7 @@ describe("ViralScanner guided clip selection", () => {
     expect(guidanceCard.textContent).toContain("This clip can perform better");
 
     await act(async () => {
-      fireEvent.click(within(guidanceCard).getByRole("button", { name: /Improve Clip/i }));
+      fireEvent.click(within(guidanceCard).getByRole("button", { name: /Use with fixes/i }));
     });
 
     await waitFor(() => {
