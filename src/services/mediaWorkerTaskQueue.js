@@ -3,7 +3,7 @@ const admin = require("firebase-admin");
 const { CloudTasksClient } = require("@google-cloud/tasks");
 
 const MEDIA_WORKER_URL =
-  process.env.MEDIA_WORKER_URL || "https://media-worker-v1-jddzncgt2a-uc.a.run.app";
+  process.env.MEDIA_WORKER_URL || "https://media-worker-v1-341498038874.us-central1.run.app";
 const MEDIA_WORKER_TASK_URL =
   process.env.MEDIA_WORKER_TASK_URL || `${MEDIA_WORKER_URL}/extract-audio-task`;
 const MEDIA_WORKER_TASK_QUEUE =

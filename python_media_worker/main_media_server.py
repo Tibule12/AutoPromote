@@ -16084,15 +16084,29 @@ async def render_multicam_impl(request: RenderMultiCamRequest, provided_job_id: 
 
         public_url = ""
         public_thumbnail_url = ""
+        output_storage_path = ""
+        thumbnail_storage_path = ""
         if os.getenv("MULTICAM_UPLOAD_FIREBASE", "").strip().lower() in {"1", "true", "yes"}:
             if request.async_mode:
                 update_firestore_job(job_id, {"progress": 94, "detail": "Uploading master"})
-            public_url = upload_file_to_firebase(output_path, f"processed/multicam_{job_id}.mp4") or ""
+            output_storage_path = f"processed/multicam_{job_id}.mp4"
+            public_url = upload_file_to_firebase(output_path, output_storage_path) or ""
             if thumbnail_receipt and thumbnail_receipt.get("status") == "created" and thumbnail_receipt.get("path"):
+                thumbnail_storage_path = f"processed/thumbnails/multicam_{job_id}.jpg"
                 public_thumbnail_url = (
-                    upload_file_to_firebase(thumbnail_receipt["path"], f"processed/thumbnails/multicam_{job_id}.jpg")
+                    upload_file_to_firebase(thumbnail_receipt["path"], thumbnail_storage_path)
                     or ""
                 )
+
+        try:
+            retention_days = max(1, int(os.getenv("MULTICAM_MASTER_RETENTION_DAYS", "4") or "4"))
+        except Exception:
+            retention_days = 4
+        import datetime
+        expires_at = (
+            datetime.datetime.now(datetime.timezone.utc)
+            + datetime.timedelta(days=retention_days)
+        ).isoformat()
 
         result_data = {
             "status": "completed",
@@ -16102,10 +16116,15 @@ async def render_multicam_impl(request: RenderMultiCamRequest, provided_job_id: 
             "output_url": public_url or local_output_url,
             "local_output_url": local_output_url,
             "firebase_output_url": public_url,
+            "output_storage_path": output_storage_path,
             "thumbnail_path": os.path.abspath(local_thumbnail_path) if local_thumbnail_path else "",
             "thumbnail_url": public_thumbnail_url or local_thumbnail_url,
             "local_thumbnail_url": local_thumbnail_url,
             "firebase_thumbnail_url": public_thumbnail_url,
+            "thumbnail_storage_path": thumbnail_storage_path,
+            "expires_at": expires_at,
+            "expiresAt": expires_at,
+            "retention_days": retention_days,
             "duration": round(master_duration, 3),
             "segments": segments,
             "switches": switches,
