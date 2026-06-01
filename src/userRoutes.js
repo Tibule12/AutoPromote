@@ -4,6 +4,14 @@ const authMiddleware = require("./authMiddleware");
 const { rateLimiter } = require("./middlewares/globalRateLimiter");
 // Import usage stats helper to auto-unblock users when new month starts
 const { getUserUsageStats } = require("./middlewares/usageLimitMiddleware");
+const { getCreditBreakdown } = require("./creditSystem");
+const { getEffectiveTierSnapshot } = require("./services/billingService");
+const {
+  SUBSCRIPTION_PLANS,
+  getPlanCapabilities,
+  normalizePlanId,
+  CREDIT_TOP_UP_PACKS,
+} = require("./config/subscriptionPlans");
 
 const router = express.Router();
 let codeqlLimiter;
@@ -64,6 +72,45 @@ function buildUserDefaultsPayload(snap) {
       role: data.role || "user",
       isAdmin: data.isAdmin || false,
     },
+  };
+}
+
+async function buildSubscriptionProfilePayload(userId, user) {
+  const [credits, tierSnapshot] = await Promise.all([
+    getCreditBreakdown(userId),
+    getEffectiveTierSnapshot(userId),
+  ]);
+  const normalizedPlanId = normalizePlanId(tierSnapshot.tierId);
+  const plan = SUBSCRIPTION_PLANS[normalizedPlanId] || SUBSCRIPTION_PLANS.free;
+  const capabilities = getPlanCapabilities(normalizedPlanId);
+
+  return {
+    success: true,
+    user,
+    userId,
+    planId: normalizedPlanId,
+    planName: plan.name,
+    tierName: capabilities.planName || plan.name,
+    price: plan.price,
+    monthlyCredits: {
+      allocation: credits.monthlyAllocation,
+      used: credits.monthlyUsed,
+      remaining: credits.monthlyRemaining,
+    },
+    topUpBalance: credits.topUpBalance,
+    totalCredits: credits.totalAvailable,
+    features: {
+      multicam: capabilities.multicam,
+      teamSeats: capabilities.teamSeats,
+      analyticsExport: capabilities.analytics?.canExport || false,
+    },
+    editing: capabilities.editing,
+    entitlements: capabilities,
+    topUpPacks: CREDIT_TOP_UP_PACKS,
+    subscriptionStatus: tierSnapshot.status || "inactive",
+    email: user?.email || "",
+    tier: normalizedPlanId,
+    balance: credits.totalAvailable,
   };
 }
 
@@ -186,7 +233,12 @@ router.get("/profile", authMiddleware, publicLimiter, async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-    res.json({ user });
+    try {
+      return res.json(await buildSubscriptionProfilePayload(req.userId, user));
+    } catch (profileError) {
+      console.error("[Profile] Subscription profile enrichment failed:", profileError);
+      return res.json({ success: true, user });
+    }
   } catch (error) {
     console.error("Error getting user profile:", error);
     res.status(500).json({ error: "Internal server error" });
