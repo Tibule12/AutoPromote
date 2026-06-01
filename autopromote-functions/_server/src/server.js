@@ -1953,7 +1953,7 @@ try {
   // ADDED: HEADERS FOR FFmpeg WASM / SHARED ARRAY BUFFER
   app.use(
     express.static(path.join(__dirname, "../frontend/build"), {
-      setHeaders: (res, path) => {
+      setHeaders: (res, _path) => {
         res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
         res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
       },

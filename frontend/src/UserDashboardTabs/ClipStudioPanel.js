@@ -656,7 +656,7 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
         open={gpOpen}
         contentItem={selectedContent || {}}
         onClose={() => setGpOpen(false)}
-        onStarted={jobId => {
+        onStarted={() => {
           setGpOpen(false);
           toast.success("Generation started");
         }}

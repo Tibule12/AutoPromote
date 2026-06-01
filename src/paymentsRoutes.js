@@ -245,7 +245,7 @@ router.post(
             (evt.resource.id || evt.resource.order_id || evt.resource.parent_payment);
           await db
             .collection("paypal_webhook_events")
-            .add({ event: evt, receivedAt: new Date().toISOString() });
+            .add({ event: evt, orderId: orderId || null, receivedAt: new Date().toISOString() });
         } catch (e) {
           console.warn("Failed to persist paypal webhook event", e && e.message);
         }

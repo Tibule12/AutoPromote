@@ -754,7 +754,7 @@ router.post("/render-clip", async (req, res) => {
 // Phase 3: Memetic Composer (Viral Engineering)
 router.post("/memetic/plan", async (req, res) => {
   const userId = req.user.uid;
-  const { baseVariant, options, soundId } = req.body;
+  const { baseVariant } = req.body;
 
   // Safe logging
   console.log("[Memetic] Planning mutations", { userId, baseVariant });
@@ -811,7 +811,7 @@ router.post("/memetic/plan", async (req, res) => {
 router.post("/memetic/preview", async (req, res) => {
   // Check user auth or use fallback for testing
   const userId = req.user && req.user.uid ? req.user.uid : "test_user";
-  const { videoUrl, variantId, style } = req.body;
+  const { videoUrl, style } = req.body;
 
   console.log(`[Memetic] Generating PREVIEW for user ${userId}, style=${style}`);
 

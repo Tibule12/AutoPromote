@@ -2,7 +2,7 @@ const express = require("express");
 const admin = require("firebase-admin");
 const { db } = require("../firebaseAdmin");
 const authMiddleware = require("../authMiddleware");
-const { getPlanCapabilities, normalizePlanId, resolvePlan } = require("../config/subscriptionPlans");
+const { normalizePlanId, resolvePlan } = require("../config/subscriptionPlans");
 
 const router = express.Router();
 

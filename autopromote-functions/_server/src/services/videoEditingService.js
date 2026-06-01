@@ -288,8 +288,6 @@ class VideoEditingService {
 
     // Track the resulting file path from Python
     let resultPath = null;
-    let operation = "";
-
     try {
       // 1. Determine which operation to run
       // NEW: Use the Pipeline Endpoint for everything except Analysis/Render

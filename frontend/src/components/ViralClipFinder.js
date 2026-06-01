@@ -95,7 +95,6 @@ function ViralClipFinder({ file, onSave, onCancel }) {
   const [sortBy, setSortBy] = useState("score");
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [trimAdjustments, setTrimAdjustments] = useState({}); // { [sceneId]: { start, end } }
-  const [expandedScene, setExpandedScene] = useState(null);
   const [clipResults, setClipResults] = useState({}); // { [sceneId]: { url, file } }
   const videoRef = useRef(null);
   const localBlobRef = useRef(null);

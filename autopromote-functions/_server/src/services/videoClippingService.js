@@ -72,10 +72,8 @@ class VideoClippingService {
   /**
    * Background processor for analysis
    */
-  async processAnalysisBackground(jobId, videoUrl, contentId, userId) {
+  async processAnalysisBackground(jobId, videoUrl, _contentId, _userId) {
     console.log(`[VideoClipping] Starting Analysis Job ${jobId}`);
-    const db = getDb();
-
     try {
       await db.collection("clip_analyses").doc(jobId).update({
         status: "processing",
@@ -159,7 +157,6 @@ class VideoClippingService {
    */
   async analyzeVideo(videoUrl, contentId, userId) {
     console.log(`[VideoClipping] STARTING analysis for Content: ${contentId}, User: ${userId}`);
-    const db = getDb();
 
     try {
       // 0. Ensure worker is not stuck or forcefully reset previous job from this user (Phase 1 Fix)

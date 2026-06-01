@@ -16,7 +16,13 @@ module.exports = [
     rules: {
       // allow console in server code for now (temporary)
       "no-console": "off",
-      "no-unused-vars": "warn"
+      "no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_|^React$|^[A-Z]"
+        }
+      ]
     }
   }
 ];

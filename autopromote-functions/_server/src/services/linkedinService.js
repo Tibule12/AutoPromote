@@ -338,7 +338,7 @@ async function postToLinkedIn({
   articleUrl,
   link,
   url,
-  postType,
+  postType: _postType,
   articleTitle,
   articleDescription,
   contentId,

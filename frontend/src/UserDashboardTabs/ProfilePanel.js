@@ -20,8 +20,6 @@ const ProfilePanel = ({
   tz,
   defaultsPlatforms,
   defaultsFrequency,
-  paypalEmail,
-  setPaypalEmail,
   toggleDefaultPlatform,
   setDefaultsFrequency,
   setTz,

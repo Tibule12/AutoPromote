@@ -310,7 +310,7 @@ const buildPromoCampaignRoles = (angle, durationSeconds, style) => {
   }));
 };
 
-const buildStoryEditCampaignRoles = (angle, durationSeconds, style) => {
+const _buildStoryEditCampaignRoles = (angle, durationSeconds, style) => {
   const angleConfig = getPromoAngleConfig(angle);
   const styleConfig = getPromoStyleConfig(style);
   const shortRoles = angleConfig.roleBlueprints.slice(0, Math.max(1, PROMO_SUMMARY_CLIP_COUNT - 1));
