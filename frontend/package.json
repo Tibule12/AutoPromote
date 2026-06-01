@@ -9,6 +9,7 @@
     "hono": "$hono",
     "@hono/node-server": "^1.19.14",
     "protobufjs": "7.5.8",
+    "@babel/plugin-transform-modules-systemjs": "7.29.7",
     "follow-redirects": "^1.16.0",
     "@xmldom/xmldom": "0.9.10",
     "nth-check": "2.1.1",
@@ -27,6 +28,9 @@
     "socket.io-parser": "4.2.6",
     "flatted": "3.4.2",
     "@tootallnate/once": "3.0.1",
+    "qs": "6.15.2",
+    "uuid": "^14.0.0",
+    "ws": "8.21.0",
     "router": {
       "path-to-regexp": "8.4.0"
     },
@@ -55,7 +59,7 @@
       "brace-expansion": "2.0.3"
     },
     "minimatch@10": {
-      "brace-expansion": "5.0.5"
+      "brace-expansion": "5.0.6"
     },
     "cosmiconfig@6": {
       "yaml": "1.10.3"
@@ -75,7 +79,7 @@
     "dompurify": "^3.4.0",
     "fast-xml-parser": "^5.8.0",
     "firebase": "^12.2.1",
-    "hono": "^4.12.18",
+    "hono": "^4.12.23",
     "html2canvas": "^1.4.1",
     "idb": "^8.0.3",
     "multer": "^2.1.1",

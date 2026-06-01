@@ -4,6 +4,7 @@ import { auth } from "../firebaseClient";
 import { API_BASE_URL, API_ENDPOINTS } from "../config";
 import { applySafeMediaSource, createSecureId } from "../utils/security";
 import { trackClipWorkflowEvent } from "../utils/clipWorkflowAnalytics";
+import { SafeImage, SafeVideo } from "./SafeMedia";
 
 const CLIP_SCANNER_CACHE_TTL_MS = 3 * 24 * 60 * 60 * 1000;
 const CONTROL_TEXT_PATTERN = new RegExp(
@@ -337,9 +338,9 @@ const ClipResultThumbnail = ({ videoSrc, clip, isActive }) => {
   return (
     <div className={`scanner-clip-thumbnail ${isActive ? "active" : ""}`}>
       {visualUrl ? (
-        <img src={visualUrl} alt={clip?.hookText || "Generated clip visual"} />
+        <SafeImage src={visualUrl} alt={clip?.hookText || "Generated clip visual"} />
       ) : videoSrc ? (
-        <video ref={previewRef} src={videoSrc} muted playsInline preload="metadata" />
+        <SafeVideo ref={previewRef} src={videoSrc} muted playsInline preload="metadata" />
       ) : (
         <span>No preview</span>
       )}

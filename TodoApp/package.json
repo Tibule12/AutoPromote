@@ -16,7 +16,7 @@
     "expo": "~53.0.22",
     "expo-constants": "~17.1.8",
     "expo-status-bar": "~2.2.3",
-    "hono": "^4.12.18",
+    "hono": "^4.12.23",
     "react": "19.0.0",
     "react-native": "0.79.6",
     "react-native-webview": "13.16.1",
@@ -27,7 +27,7 @@
   },
   "private": true,
   "overrides": {
-    "axios": "^1.15.0",
+    "axios": "^1.16.1",
     "hono": "$hono",
     "@hono/node-server": "^1.19.14",
     "basic-ftp": "^5.3.1",
@@ -39,6 +39,8 @@
     "js-yaml": "^4.1.1",
     "node-forge": "1.4.0",
     "tar": "^7.5.7",
+    "uuid": "^14.0.0",
+    "ws": "8.21.0",
     "router": {
       "path-to-regexp": "8.4.0"
     },
@@ -73,7 +75,7 @@
       "brace-expansion": "2.0.3"
     },
     "minimatch@10": {
-      "brace-expansion": "5.0.5"
+      "brace-expansion": "5.0.6"
     }
   }
 }

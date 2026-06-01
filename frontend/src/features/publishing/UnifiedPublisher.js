@@ -36,6 +36,7 @@ import VideoEditor from "../../components/VideoEditor";
 import ViralScanner from "../../components/ViralScanner";
 import ImageCropper from "../../components/ImageCropper";
 import PayPalSubscriptionPanel from "../../components/PayPalSubscriptionPanel";
+import { SafeImage, SafeVideo } from "../../components/SafeMedia";
 
 // --- New Features ---
 
@@ -581,7 +582,7 @@ const PlatformPreview = ({
 
       return (
         <div style={wrapperStyle}>
-          <video
+          <SafeVideo
             key={effectivePreviewUrl} // Force reload on URL change
             src={sanitizeUrl(effectivePreviewUrl)}
             poster={safeThumbUrl || undefined}
@@ -663,10 +664,10 @@ const PlatformPreview = ({
     }
     return (
       <div style={wrapperStyle}>
-        <img
-          src={sanitizeUrl(effectivePreviewUrl)}
-          alt="Preview"
-          style={mediaStyle}
+          <SafeImage
+            src={sanitizeUrl(effectivePreviewUrl)}
+            alt="Preview"
+            style={mediaStyle}
           onLoad={event => {
             const { naturalWidth, naturalHeight } = event.currentTarget;
             if (naturalWidth && naturalHeight) {
@@ -2678,7 +2679,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                       </label>
                       {effectiveThumbnailUrl && (
                         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                          <img
+                          <SafeImage
                             src={safeThumbUrl}
                             alt="Thumbnail"
                             style={{
@@ -2696,7 +2697,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                           </span>
                         </div>
                       )}
-                      <video
+                      <SafeVideo
                         key={previewUrl}
                         src={sanitizeUrl(previewUrl)}
                         controls

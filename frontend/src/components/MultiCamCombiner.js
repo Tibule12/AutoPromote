@@ -50,6 +50,7 @@ import useCinematicEffects from "../hooks/useCinematicEffects";
 import CinematicEffectsPanel from "./CinematicEffectsPanel";
 import { useSubscription } from "../hooks/useSubscription";
 import PayPalSubscriptionPanel from "./PayPalSubscriptionPanel";
+import { SafeAudio, SafeVideo } from "./SafeMedia";
 
 const MULTICAM_MAX_SOURCES = 6;
 
@@ -4191,7 +4192,11 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       video.muted = false;
       video.playsInline = true;
       const objectUrl = URL.createObjectURL(file);
-      video.src = objectUrl;
+      if (!applySafeMediaSource(video, objectUrl)) {
+        URL.revokeObjectURL(objectUrl);
+        resolve(null);
+        return;
+      }
 
       let resolved = false;
       const cleanup = () => {
@@ -7737,7 +7742,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                       </span>
                     </div>
                     {flowAudioIsVideoSoundtrack ? (
-                      <video
+                      <SafeVideo
                         controls
                         playsInline
                         preload="metadata"
@@ -7747,7 +7752,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                         onVolumeChange={event => forceMediaAudible(event.currentTarget)}
                       />
                     ) : (
-                      <audio
+                      <SafeAudio
                         controls
                         preload="metadata"
                         src={getSafeMediaSource(flowAudioUrl)}
