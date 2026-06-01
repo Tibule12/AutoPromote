@@ -152,8 +152,10 @@
 .studio-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(360px, 0.95fr);
+  grid-template-rows: minmax(0, 1fr);
   flex: 1;
   min-height: 0;
+  overflow: hidden;
   background: linear-gradient(180deg, rgba(17, 21, 33, 0.96) 0%, rgba(11, 14, 23, 0.98) 100%);
 }
 
@@ -161,6 +163,7 @@
 .studio-sidebar {
   min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 24px;
 }
 
@@ -169,6 +172,7 @@
   flex-direction: column;
   gap: 18px;
   border-right: 1px solid rgba(255, 255, 255, 0.06);
+  padding-bottom: 32px;
 }
 
 .studio-sidebar {
@@ -176,6 +180,8 @@
   flex-direction: column;
   gap: 18px;
   background: rgba(7, 10, 18, 0.55);
+  /* ensure last panel has breathing room when scrolled to bottom */
+  padding-bottom: 32px;
 }
 
 .studio-panel {
@@ -2344,6 +2350,22 @@
   box-shadow: 0 20px 40px rgba(251, 113, 133, 0.3);
 }
 
+.local-export-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  box-shadow: 0 16px 36px rgba(16, 185, 129, 0.24) !important;
+  font-size: 0.92rem !important;
+  min-height: 48px !important;
+}
+
+.local-export-btn:hover {
+  box-shadow: 0 20px 40px rgba(16, 185, 129, 0.3) !important;
+}
+
+.local-export-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .clips-scroller::-webkit-scrollbar,
 .phone-preview-container::-webkit-scrollbar,
 .studio-sidebar::-webkit-scrollbar,
@@ -2468,4 +2490,411 @@
   .clips-scroller {
     max-height: none;
   }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   B-Roll / Overlay Timeline Track
+   ══════════════════════════════════════════════════════════════ */
+
+.broll-timeline-panel {
+  margin: 0 20px 16px 20px;
+}
+
+.broll-timeline-tracks {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 8px 0 12px 0;
+}
+
+.broll-track-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 28px;
+}
+
+.broll-track-label {
+  width: 80px;
+  min-width: 80px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-align: right;
+  user-select: none;
+}
+
+.broll-track-bar {
+  flex: 1;
+  height: 22px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.broll-main-block {
+  height: 100%;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  border-radius: 0;
+  opacity: 0.55;
+}
+
+.broll-captions-block {
+  height: 100%;
+  background: linear-gradient(135deg, #a78bfa, #7c3aed);
+  border-radius: 0;
+  opacity: 0.45;
+}
+
+.broll-audio-block {
+  height: 100%;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border-radius: 0;
+  transition: width 0.25s ease, opacity 0.25s ease;
+}
+
+.broll-playhead {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #ef4444;
+  z-index: 5;
+  pointer-events: none;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
+}
+
+.broll-overlay-block {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+  transition: box-shadow 0.15s ease, filter 0.15s ease;
+  min-width: 16px;
+  overflow: hidden;
+}
+
+.broll-overlay-block:hover {
+  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.5);
+  filter: brightness(1.15);
+}
+
+.broll-overlay-block.active {
+  box-shadow: 0 0 0 3px #fff;
+  filter: brightness(1.25);
+  z-index: 6;
+}
+
+.broll-overlay-block.fullscreen {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.broll-overlay-block-label {
+  font-size: 0.6rem;
+  font-weight: 800;
+  color: #fff;
+  white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+}
+
+.broll-empty-hint {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.25);
+  font-style: italic;
+  pointer-events: none;
+}
+
+.broll-timeline-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.broll-upload-btn {
+  background: linear-gradient(135deg, #7c3aed, #a78bfa) !important;
+  color: #fff !important;
+  border-color: rgba(167, 139, 250, 0.4) !important;
+  font-weight: 700 !important;
+}
+
+.broll-upload-btn:hover {
+  background: linear-gradient(135deg, #8b5cf6, #c4b5fd) !important;
+}
+
+.broll-suggestions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+  padding: 10px;
+  background: rgba(16, 185, 129, 0.08);
+  border-radius: 10px;
+  border: 1px solid rgba(16, 185, 129, 0.18);
+}
+
+.broll-suggestions-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #34d399;
+  margin-bottom: 4px;
+}
+
+.broll-suggestion-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.22);
+  border-radius: 8px;
+  cursor: pointer;
+  color: #d1fae5;
+  font-size: 0.75rem;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+
+.broll-suggestion-chip:hover {
+  background: rgba(16, 185, 129, 0.22);
+}
+
+.broll-suggestion-reason {
+  font-size: 0.65rem;
+  color: #6ee7b7;
+  opacity: 0.7;
+  margin-left: auto;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   B-Roll Preview Overlay Styles
+   ══════════════════════════════════════════════════════════════ */
+
+.draggable-overlay.broll-fullscreen {
+  inset: 0 auto auto 0 !important;
+  max-width: none !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background-color: #000; /* solid backdrop blocks blur/hook layers */
+  box-shadow: none !important;
+  pointer-events: auto;
+  overflow: hidden;
+  transform: none !important;
+  transition: opacity 0.12s ease !important;
+}
+
+.draggable-overlay.broll-fullscreen.active {
+  box-shadow: inset 0 0 0 2px rgba(251, 113, 133, 0.9) !important;
+}
+
+.draggable-overlay.broll-fullscreen:active {
+  transform: none !important;
+}
+
+.draggable-overlay.broll-fullscreen video,
+.draggable-overlay.broll-fullscreen img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.broll-badge {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  background: rgba(239, 68, 68, 0.85);
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 4px;
+  z-index: 10;
+  pointer-events: none;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.broll-shot-card {
+  position: absolute;
+  left: 12%;
+  top: 39%;
+  width: 76%;
+  padding: 0;
+  background: transparent;
+  text-align: left;
+  white-space: normal;
+}
+
+.broll-shot-card span {
+  display: block;
+  color: #facc15;
+  font-size: 0.68rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  margin-bottom: 8px;
+}
+
+.broll-shot-card strong {
+  display: block;
+  color: #fff;
+  font-size: clamp(1.35rem, 6vw, 2.15rem);
+  line-height: 0.95;
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: 0;
+  text-shadow: 0 3px 18px rgba(0, 0, 0, 0.52);
+}
+
+.broll-shot-card small {
+  display: block;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.82rem;
+  line-height: 1.28;
+  font-weight: 700;
+  margin-top: 18px;
+}
+
+.broll-shot-card.tone-proof {
+  border-color: #38bdf8;
+}
+
+.broll-shot-card.tone-detail {
+  border-color: #facc15;
+}
+
+.broll-shot-card.tone-reaction {
+  border-color: #fb7185;
+}
+
+.broll-shot-card.tone-payoff {
+  border-color: #f97316;
+}
+
+/* ── B-Roll animation keyframes ── */
+
+@keyframes brollFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes brollFadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes brollSlideLeftIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes brollSlideLeftOut {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(-100%); opacity: 0; }
+}
+
+@keyframes brollSlideRightIn {
+  from { transform: translateX(-100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes brollSlideRightOut {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(100%); opacity: 0; }
+}
+
+@keyframes brollSlideUpIn {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes brollSlideUpOut {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(-100%); opacity: 0; }
+}
+
+@keyframes brollSlideDownIn {
+  from { transform: translateY(-100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes brollSlideDownOut {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(100%); opacity: 0; }
+}
+
+@keyframes brollZoomIn {
+  from { transform: scale(0.3); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes brollZoomOut {
+  from { transform: scale(1); opacity: 1; }
+  to { transform: scale(0.3); opacity: 0; }
+}
+
+/* Enter animations — triggered when overlay appears */
+.draggable-overlay.broll-anim-fade {
+  animation: brollFadeIn 0.3s ease forwards;
+}
+
+.draggable-overlay.broll-anim-slideLeft {
+  animation: brollSlideLeftIn 0.35s ease forwards;
+}
+
+.draggable-overlay.broll-anim-slideRight {
+  animation: brollSlideRightIn 0.35s ease forwards;
+}
+
+.draggable-overlay.broll-anim-slideUp {
+  animation: brollSlideUpIn 0.35s ease forwards;
+}
+
+.draggable-overlay.broll-anim-slideDown {
+  animation: brollSlideDownIn 0.35s ease forwards;
+}
+
+.draggable-overlay.broll-anim-zoom {
+  animation: brollZoomIn 0.35s ease forwards;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Music / Audio Track Styles
+   ══════════════════════════════════════════════════════════════ */
+
+.broll-music-block {
+  position: absolute;
+  left: 0;
+  border-radius: 4px;
+  transition: opacity 0.3s ease, height 0.25s ease;
+}
+
+/* Music library scrollbar */
+.ai-settings-card div[style*="overflow-y: auto"]::-webkit-scrollbar {
+  width: 4px;
+}
+
+.ai-settings-card div[style*="overflow-y: auto"]::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
 }

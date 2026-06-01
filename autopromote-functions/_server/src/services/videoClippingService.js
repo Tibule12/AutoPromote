@@ -209,6 +209,7 @@ class VideoClippingService {
         strategyLabel: s.strategyLabel || null,
         strategyIntent: s.strategyIntent || null,
         hookText: s.hookText || null,
+        captionSuggestion: s.captionSuggestion || null,
         bestFor: s.bestFor || null,
         retentionNotes: Array.isArray(s.retentionNotes) ? s.retentionNotes : [],
         scoreBreakdown: s.scoreBreakdown || null,
@@ -217,7 +218,6 @@ class VideoClippingService {
         campaignOrder: s.campaignOrder || index + 1,
         status: "suggested",
         platforms: ["TikTok", "YouTube Shorts", "Instagram Reels"], // Phase 1 defaults
-        captionSuggestion: s.captionSuggestion || "Watch till the end! 😱 #viral",
       }));
 
       // 3. Store results in Firestore for persistence/history

@@ -18,7 +18,6 @@ import WolfHuntDashboard from "./EngagementMarketplace";
 import ClipStudioPanel from "./UserDashboardTabs/ClipStudioPanel";
 import IdeaVideoPanel from "./UserDashboardTabs/IdeaVideoPanel";
 import MissionControlPanel from "./UserDashboardTabs/MissionControlPanel";
-import RepostPanel from "./UserDashboardTabs/RepostPanel";
 // LiveWatch import removed
 // LiveHub import removed
 import FloatingActions from "./components/FloatingActions";
@@ -118,9 +117,6 @@ const UserDashboard = ({
   const [paypalEmail, setPaypalEmail] = useState(
     userDefaults?.paypalEmail || user?.paypalEmail || ""
   );
-  const [autoRepostEnabled, setAutoRepostEnabled] = useState(
-    typeof userDefaults?.autoRepostEnabled === "boolean" ? userDefaults.autoRepostEnabled : true
-  );
 
   const [scheduleContentMap, setScheduleContentMap] = useState({});
 
@@ -185,9 +181,6 @@ const UserDashboard = ({
     );
     setDefaultsFrequency(userDefaults?.defaultFrequency || "once");
     setPaypalEmail(userDefaults?.paypalEmail || user?.paypalEmail || "");
-    setAutoRepostEnabled(
-      typeof userDefaults?.autoRepostEnabled === "boolean" ? userDefaults.autoRepostEnabled : true
-    );
   }, [userDefaults, user?.paypalEmail]);
 
   useEffect(() => {
@@ -741,7 +734,6 @@ const UserDashboard = ({
         timezone: tz,
         defaultPlatforms: defaultsPlatforms,
         defaultFrequency: defaultsFrequency,
-        autoRepostEnabled,
         paypalEmail,
       });
       if (!saved) throw new Error("save_failed");
@@ -1121,12 +1113,6 @@ const UserDashboard = ({
                 Analytics
               </li>
               <li
-                className={activeTab === "reposts" ? "active" : ""}
-                onClick={() => handleNav("reposts")}
-              >
-                Reposts
-              </li>
-              <li
                 className={activeTab === "billing" ? "active" : ""}
                 onClick={() => handleNav("billing")}
               >
@@ -1386,8 +1372,6 @@ const UserDashboard = ({
             toggleDefaultPlatform={toggleDefaultPlatform}
             setDefaultsFrequency={setDefaultsFrequency}
             setTz={setTz}
-            autoRepostEnabled={autoRepostEnabled}
-            setAutoRepostEnabled={setAutoRepostEnabled}
             handleSaveDefaults={handleSaveDefaults}
             handleConnectTikTok={handleConnectTikTok}
             handleConnectFacebook={handleConnectFacebook}
@@ -1438,8 +1422,6 @@ const UserDashboard = ({
         )}
 
         {activeTab === "analytics" && <AnalyticsPanel />}
-
-        {activeTab === "reposts" && <RepostPanel />}
 
         {activeTab === "rewards" && <RewardsPanel badges={badges} />}
 

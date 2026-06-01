@@ -74,7 +74,6 @@ const CREDIT_COSTS = {
   "clean-audio-sync": 18,
   analyze: 8,
   "render-clip": 5,
-  "promo-summary": 18,
   transcribe: 3,
   hook: 3,
   music: 1,

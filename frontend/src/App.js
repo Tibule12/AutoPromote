@@ -75,6 +75,7 @@ const LiveWatch = lazy(() => import("./LiveWatch"));
 const StreamerDashboard = lazy(() => import("./StreamerDashboard"));
 const EngagementMarketplace = lazy(() => import("./EngagementMarketplace"));
 const AdminDashboard = lazy(() => import("./AdminDashboard"));
+const InternalDemoEditorPage = lazy(() => import("./InternalDemoEditorPage"));
 
 const PageLoader = () => (
   <div
@@ -204,7 +205,6 @@ function App() {
     timezone: "UTC",
     defaultPlatforms: [],
     defaultFrequency: "once",
-    autoRepostEnabled: true,
   });
 
   // MFA State
@@ -792,7 +792,6 @@ function App() {
         defaultPlatforms: sched.platforms || [],
         defaultFrequency: sched.frequency || "once",
         paypalEmail: u.paypalEmail || "",
-        autoRepostEnabled: typeof u.autoRepostEnabled === "boolean" ? u.autoRepostEnabled : true,
       });
     } catch (_) {}
   };
@@ -807,7 +806,6 @@ function App() {
     timezone,
     defaultPlatforms,
     defaultFrequency,
-    autoRepostEnabled,
     paypalEmail,
   }) => {
     try {
@@ -825,7 +823,6 @@ function App() {
           timezone,
           defaultPlatforms,
           defaultFrequency,
-          autoRepostEnabled,
           paypalEmail,
         }),
       });
@@ -842,12 +839,6 @@ function App() {
         defaultPlatforms: sched.platforms || defaultPlatforms || [],
         defaultFrequency: sched.frequency || defaultFrequency || "once",
         paypalEmail: u.paypalEmail || paypalEmail || "",
-        autoRepostEnabled:
-          typeof u.autoRepostEnabled === "boolean"
-            ? u.autoRepostEnabled
-            : typeof autoRepostEnabled === "boolean"
-              ? autoRepostEnabled
-              : true,
       });
       return true;
     } catch (e) {
@@ -1466,6 +1457,7 @@ function App() {
           <Route path="/live/watch" element={<LiveWatch />} />
           <Route path="/streamer" element={<StreamerDashboard />} />
           <Route path="/marketplace" element={<EngagementMarketplace />} />
+          <Route path="/internal/demo-editor" element={<InternalDemoEditorPage />} />
 
           {/* Main Application Logic (Welcome / Auth / Dashboard) */}
           <Route

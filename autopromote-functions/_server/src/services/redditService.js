@@ -269,15 +269,13 @@ async function postToReddit({
       throw new Error(`Failed to upload video to Reddit: ${e.message}`);
     }
 
-    // 2. Upload Thumbnail (if provided, else default)
+    // 2. Upload Thumbnail (required by Reddit video submit API)
     let posterSource = thumbnailUrl;
+
+    // Fallback to local static icon route to avoid external-host SSRF blocks.
     if (!posterSource) {
-      // Use a default thumbnail if none provided (Reddit requires video_poster_url)
-      posterSource =
-        "https://raw.githubusercontent.com/reddit/reddit/master/r2/r2/static/images/snoo-placeholder.png";
-      // Or any public reliable image.
-      // Better: https://www.redditstatic.com/desktop2x/img/favicon/apple-icon-120x120.png or similar.
-      posterSource = "https://www.redditstatic.com/icon.png";
+      // Use localhost static endpoint to avoid outbound SSRF allowlist rejection for external hosts.
+      posterSource = "http://127.0.0.1:5000/tiktok-demo";
     }
 
     if (posterSource) {
@@ -285,8 +283,15 @@ async function postToReddit({
         const tResult = await uploadRedditMedia(uid, posterSource, "image/png");
         finalPosterUrl = tResult.url;
       } catch (e) {
-        console.warn("Failed to upload thumbnail:", e.message);
+        console.warn("[Reddit] Failed to upload thumbnail:", e.message);
       }
+    }
+
+    // Hard fail early with actionable message instead of opaque Reddit API error.
+    if (!finalPosterUrl) {
+      throw new Error(
+        "Reddit video submission requires a valid poster image (video_poster_url). Thumbnail upload failed."
+      );
     }
   }
 
@@ -351,6 +356,16 @@ async function postToReddit({
 
   if (responseData.json && responseData.json.errors && responseData.json.errors.length > 0) {
     const errs = responseData.json.errors.map(e => e[1]).join(", ");
+    console.error(
+      "[Reddit] Submit API errors:",
+      JSON.stringify({
+        errors: responseData.json.errors,
+        kind,
+        subreddit,
+        hasVideo: !!finalVideoUrl,
+        hasPoster: !!finalPosterUrl,
+      })
+    );
     throw new Error(`Reddit API Error: ${errs}`);
   }
 

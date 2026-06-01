@@ -22,6 +22,19 @@ const MEDIA_WORKER_URL =
 const LOCAL_MEDIA_WORKER_URL = process.env.LOCAL_MEDIA_WORKER_URL || "http://127.0.0.1:8000";
 const VIDEO_EDITOR_CREDITS_DISABLED = process.env.DISABLE_VIDEO_EDITOR_CREDITS === "true";
 
+const normalizeMulticamRenderTier = value => {
+  const tier = String(value || "premium").trim().toLowerCase().replace(/-/g, "_");
+  return ["simple", "premium", "studio"].includes(tier) ? tier : "premium";
+};
+
+const estimateMulticamRenderCredits = ({ renderTier, baseCost }) => {
+  const safeBase = Number(baseCost || 15);
+  const tier = normalizeMulticamRenderTier(renderTier);
+  if (tier === "simple") return Math.max(8, Math.round(safeBase * 0.67));
+  if (tier === "studio") return Math.max(safeBase + 8, Math.ceil(safeBase * 1.6));
+  return safeBase;
+};
+
 const estimateCleanAudioSyncCredits = ({ sources = [], externalAudio = {} }) => {
   const videoSources = Array.isArray(sources) ? sources : [];
   const longestDuration = Math.max(
@@ -308,9 +321,39 @@ router.post("/extract-audio", async (req, res) => {
   }
 });
 
+router.post("/multicam/preflight-sync", async (req, res) => {
+  const userId = req.user?.uid || req.userId;
+  const sources = Array.isArray(req.body?.sources) ? req.body.sources : [];
+  const externalAudioUrl = req.body?.external_audio_url || req.body?.externalAudio?.url || null;
+
+  if (!userId) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  if (!sources.length) {
+    return res.status(400).json({ message: "At least one camera source is required" });
+  }
+
+  if (!externalAudioUrl) {
+    return res.status(400).json({ message: "External clean audio is required for preflight" });
+  }
+
+  try {
+    const result = await videoEditingService.preflightMulticamSync({ sources, external_audio_url: externalAudioUrl });
+    res.json(result);
+  } catch (error) {
+    console.error("[MediaRoute] Multicam preflight sync error:", error.message);
+    res.status(500).json({ message: "Preflight sync check failed", details: error.message });
+  }
+});
+
 router.post("/render-multicam", async (req, res) => {
   const userId = req.user?.uid || req.userId;
-  const cost = CREDIT_COSTS["render-multicam"] || 15;
+  const renderTier = normalizeMulticamRenderTier(req.body?.renderTier || req.body?.render_tier);
+  const cost = estimateMulticamRenderCredits({
+    renderTier,
+    baseCost: CREDIT_COSTS["render-multicam"] || 15,
+  });
   const sources = Array.isArray(req.body?.sources) ? req.body.sources : [];
 
   if (!userId) {
@@ -351,11 +394,13 @@ router.post("/render-multicam", async (req, res) => {
         switches: Array.isArray(req.body?.switches) ? req.body.switches : [],
         autoSwitch: !!req.body?.autoSwitch,
         audioBasedAutoSwitch: req.body?.audioBasedAutoSwitch !== false,
-        autoSwitchInterval: Number(req.body?.autoSwitchInterval ?? 3),
+        autoSwitchInterval: Number(req.body?.autoSwitchInterval ?? 5),
         autoSwitchAggressiveness:
           typeof req.body?.autoSwitchAggressiveness === "string"
             ? req.body.autoSwitchAggressiveness
             : "balanced",
+        renderTier,
+        render_tier: renderTier,
         primaryAudioCameraId:
           typeof req.body?.primaryAudioCameraId === "string" ? req.body.primaryAudioCameraId : null,
         overlapStart: Number(req.body?.overlapStart ?? 0),
@@ -363,6 +408,13 @@ router.post("/render-multicam", async (req, res) => {
         outputAspectRatio:
           typeof req.body?.outputAspectRatio === "string" ? req.body.outputAspectRatio : "9:16",
         externalAudio: req.body?.externalAudio || null,
+        brandWatermark: req.body?.brandWatermark !== false,
+        watermarkText:
+          typeof req.body?.watermarkText === "string" && req.body.watermarkText.trim()
+            ? req.body.watermarkText.trim()
+            : "AutoPromote Cam Combiner",
+        generateThumbnail: req.body?.generateThumbnail !== false,
+        creditReceipt: result,
       },
       userId
     );
@@ -371,6 +423,8 @@ router.post("/render-multicam", async (req, res) => {
       success: true,
       jobId: job.jobId,
       message: "Multi-camera render started",
+      renderTier,
+      chargedCredits: cost,
       remainingCredits: result.remaining,
       billingDisabled: !!result.skipped,
     });
@@ -637,7 +691,7 @@ router.get("/status/:jobId", async (req, res) => {
 // Phase 2: Viral Clip Analysis
 router.post("/analyze", async (req, res) => {
   const userId = req.user.uid;
-  const { fileUrl, forceFresh = false, scanNonce = "" } = req.body;
+  const { fileUrl, localPath = null, forceFresh = false, scanNonce = "" } = req.body;
   const cost = CREDIT_COSTS.analyze || 8;
 
   try {
@@ -659,9 +713,10 @@ router.post("/analyze", async (req, res) => {
     }
 
     console.log(`[MediaRoute] Credits OK. Starting analysis...`);
-    const scenes = await videoEditingService.analyzeVideo(fileUrl, userId, {
+    const scenes = await videoEditingService.analyzeVideo(fileUrl || localPath, userId, {
       forceFresh: Boolean(forceFresh),
       scanNonce: typeof scanNonce === "string" ? scanNonce : "",
+      localPath: localPath || null,
     });
     res.json({
       success: true,

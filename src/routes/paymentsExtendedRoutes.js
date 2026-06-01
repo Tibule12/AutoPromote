@@ -22,6 +22,9 @@ const payfastProvider = new PayFastProvider();
 
 // Packages definition - mirroring frontend
 const PACKAGES = {
+  pack_boost: { credits: 50, price: "4.99" },
+  pack_pro: { credits: 200, price: "14.99" },
+  pack_studio: { credits: 500, price: "29.99" },
   pack_small: { credits: 50, price: "4.99" },
   pack_medium: { credits: 150, price: "12.99" },
   pack_large: { credits: 500, price: "39.99" },

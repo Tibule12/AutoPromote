@@ -234,11 +234,27 @@ function ViralClipFinder({ file, onSave, onCancel }) {
     setSelectedScene(null);
     setClipResults({});
     setSelectedIds(new Set());
-    setStatusMessage("AI is watching your video to find viral moments...");
 
-    const interval = setInterval(() => {
-      setProgress(p => Math.min(p + 3, 92));
-    }, 2500);
+    const analysisStages = [
+      { label: "Loading AI pipeline...", pct: 8 },
+      { label: "Detecting scenes & shot boundaries...", pct: 22 },
+      { label: "Transcribing audio with Whisper AI...", pct: 38 },
+      { label: "Scanning for viral keywords...", pct: 52 },
+      { label: "Analyzing motion & energy peaks...", pct: 66 },
+      { label: "Ranking moments by viral potential...", pct: 80 },
+      { label: "Packaging clip results...", pct: 92 },
+    ];
+
+    let stageIndex = 0;
+    setProgress(0);
+    const stageInterval = setInterval(() => {
+      if (stageIndex < analysisStages.length) {
+        const stage = analysisStages[stageIndex];
+        setStatusMessage(stage.label);
+        setProgress(stage.pct);
+        stageIndex++;
+      }
+    }, 4000);
 
     try {
       const auth = getAuth();
@@ -286,7 +302,7 @@ function ViralClipFinder({ file, onSave, onCancel }) {
       setStatusMessage("Error: " + error.message);
       toast.error(error.message);
     } finally {
-      clearInterval(interval);
+      clearInterval(stageInterval);
       setAnalyzing(false);
     }
   };

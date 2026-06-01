@@ -65,10 +65,11 @@ function checkPlatformCompliance(platform, options, intent) {
 
   // 4. LinkedIn Compliance
   if (platform === "linkedin") {
-    // Similarly, only enforce Organization requirement if this specific post is marked promotional/commercial
-    if (options.isPromotional) {
-      // Commercial posts usually attach to a Company Page, not a personal profile
-      if (!options.companyId) {
+    // Promotional LinkedIn posts can be published from profile or organization.
+    // Only enforce org ID validity when a company target is explicitly supplied.
+    if (options.isPromotional && options.companyId) {
+      const normalizedCompanyId = String(options.companyId).trim();
+      if (!/^\d+$/.test(normalizedCompanyId)) {
         throw new Error(VALIDATION_ERRORS.LINKEDIN_ORG);
       }
     }

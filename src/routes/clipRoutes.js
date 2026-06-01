@@ -954,6 +954,7 @@ router.post("/promo-summary/estimate", authMiddleware, async (req, res) => {
 router.post("/promo-summary", authMiddleware, async (req, res) => {
   const {
     videoUrl,
+    localPath = null,
     contentId = null,
     durationSeconds = 30,
     style = "clean",
@@ -965,15 +966,16 @@ router.post("/promo-summary", authMiddleware, async (req, res) => {
   } = req.body || {};
   const userId = req.user.uid;
 
+  const requestedOutputMode = String(outputMode || "visual_edit").trim().toLowerCase();
   const normalizedOutputMode =
-    String(outputMode || "campaign_set").trim().toLowerCase() === "story_edit"
-      ? "story_edit"
+    requestedOutputMode === "visual_edit" || requestedOutputMode === "story_edit"
+      ? "visual_edit"
       : "campaign_set";
   const allowedDurations =
-    normalizedOutputMode === "story_edit" ? [60, 120, 180, 300] : [15, 30, 60];
+    normalizedOutputMode === "visual_edit" ? [60, 120, 180, 300] : [15, 30, 60];
   const targetDurationSeconds = allowedDurations.includes(Number(durationSeconds))
     ? Number(durationSeconds)
-    : normalizedOutputMode === "story_edit"
+    : normalizedOutputMode === "visual_edit"
       ? 120
       : 30;
   const normalizedStyle = String(style || "clean").trim().toLowerCase();
@@ -984,19 +986,19 @@ router.post("/promo-summary", authMiddleware, async (req, res) => {
     targetDurationSeconds
   );
   const campaignRoles =
-    normalizedOutputMode === "story_edit"
-      ? buildStoryEditCampaignRoles(normalizedPromoAngle, targetDurationSeconds, normalizedStyle)
+    normalizedOutputMode === "visual_edit"
+      ? []
       : buildPromoCampaignRoles(normalizedPromoAngle, targetDurationSeconds, normalizedStyle);
   const workflowType =
-    normalizedOutputMode === "story_edit" ? "podcast_v1" : "campaign_set_v1";
+    normalizedOutputMode === "visual_edit" ? "smart_promo_visual_v1" : "campaign_set_v1";
   const analysisCacheKey =
     sourceFingerprint ||
     sourceStoragePath ||
     contentId ||
     `${videoUrl}|${Math.round(Number(videoDurationSeconds || 0))}`;
 
-  if (!videoUrl) {
-    return res.status(400).json({ error: "Missing videoUrl" });
+  if (!videoUrl && !localPath) {
+    return res.status(400).json({ error: "Missing videoUrl or localPath" });
   }
 
   try {
@@ -1004,7 +1006,7 @@ router.post("/promo-summary", authMiddleware, async (req, res) => {
       videoDurationSeconds,
       clipCount: PROMO_SUMMARY_CLIP_COUNT,
       outputMode: normalizedOutputMode,
-      includeCaptions: true,
+      includeCaptions: normalizedOutputMode !== "visual_edit",
       includeVisuals: true,
     });
     if (
@@ -1076,7 +1078,8 @@ router.post("/promo-summary", authMiddleware, async (req, res) => {
       .post(
         `${MEDIA_WORKER_URL}/auto-generate-clips`,
         {
-          video_url: videoUrl,
+          video_url: videoUrl || "",
+          local_path: localPath || "",
           job_id: jobId,
           max_clips: PROMO_SUMMARY_CLIP_COUNT,
           target_duration: targetDurationSeconds,
@@ -1084,6 +1087,7 @@ router.post("/promo-summary", authMiddleware, async (req, res) => {
           smart_crop_mode: workerProfile.smartCropMode,
           target_aspect_ratio: "9:16",
           template: workerProfile.template,
+          style: normalizedStyle,
           promo_angle: normalizedPromoAngle,
           output_mode: normalizedOutputMode,
           workflow_type: workflowType,

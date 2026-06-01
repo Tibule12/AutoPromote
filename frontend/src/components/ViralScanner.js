@@ -1,15 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./ViralScanner.css";
-import { storage, auth } from "../firebaseClient";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { auth } from "../firebaseClient";
 import { API_BASE_URL, API_ENDPOINTS } from "../config";
 import { applySafeMediaSource, createSecureId } from "../utils/security";
 import { trackClipWorkflowEvent } from "../utils/clipWorkflowAnalytics";
 
 const CLIP_SCANNER_CACHE_TTL_MS = 3 * 24 * 60 * 60 * 1000;
-const CLIP_SCANNER_TEMP_SCAN_TTL_MS = 20 * 60 * 1000;
-const CLIP_SCANNER_UPLOAD_CACHE_TTL_MS = CLIP_SCANNER_TEMP_SCAN_TTL_MS;
-const CLIP_SCANNER_UPLOAD_CACHE_PREFIX = "autopromote:viralScannerUpload:";
 const CONTROL_TEXT_PATTERN = new RegExp(
   `[${String.fromCharCode(0)}-${String.fromCharCode(31)}${String.fromCharCode(127)}]`,
   "g"
@@ -310,48 +306,6 @@ const saveClipScannerCache = async ({ token, sourceFingerprint, sourceLabel, res
       results,
     }),
   });
-};
-
-const getUploadCacheKey = fingerprint =>
-  `${CLIP_SCANNER_UPLOAD_CACHE_PREFIX}${encodeURIComponent(fingerprint || "unknown")}`;
-
-const readCachedUploadUrl = fingerprint => {
-  if (!fingerprint) return "";
-  try {
-    const rawValue = window.localStorage.getItem(getUploadCacheKey(fingerprint));
-    if (!rawValue) return "";
-    const parsedValue = JSON.parse(rawValue);
-    if (Number(parsedValue.expiresAt || 0) <= Date.now()) {
-      window.localStorage.removeItem(getUploadCacheKey(fingerprint));
-      return "";
-    }
-    return typeof parsedValue.url === "string" ? parsedValue.url : "";
-  } catch (_error) {
-    return "";
-  }
-};
-
-const writeCachedUploadUrl = (fingerprints, url) => {
-  if (!url || !Array.isArray(fingerprints)) return;
-  try {
-    const payload = JSON.stringify({
-      url,
-      createdAt: Date.now(),
-      expiresAt: Date.now() + CLIP_SCANNER_UPLOAD_CACHE_TTL_MS,
-    });
-    fingerprints.filter(Boolean).forEach(fingerprint => {
-      window.localStorage.setItem(getUploadCacheKey(fingerprint), payload);
-    });
-  } catch (_error) {}
-};
-
-const clearCachedUploadUrls = fingerprints => {
-  if (!Array.isArray(fingerprints)) return;
-  try {
-    fingerprints.filter(Boolean).forEach(fingerprint => {
-      window.localStorage.removeItem(getUploadCacheKey(fingerprint));
-    });
-  } catch (_error) {}
 };
 
 const ClipResultThumbnail = ({ videoSrc, clip, isActive }) => {
@@ -707,6 +661,8 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
       sourceType: typeof file === "string" ? "remote_url" : "local_file",
     });
 
+    let stageInterval = null;
+
     try {
       const user = auth.currentUser;
       if (!user) throw new Error("Please log in.");
@@ -714,9 +670,6 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
 
       let fileUrl = "";
       const sourceFingerprints = getSourceFingerprints(file);
-      if (forceFresh) {
-        clearCachedUploadUrls(sourceFingerprints);
-      }
 
       setStatusMessage("Checking AI worker availability...");
       const workerHealth = await fetch(API_ENDPOINTS.MEDIA_WORKER_HEALTH, {
@@ -730,51 +683,31 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
         );
       }
 
-      // 1. Upload if necessary
+      // 1. Upload if necessary — directly to Python worker (no Firebase roundtrip)
+      let localPath = null;
       if (file instanceof File || file instanceof Blob) {
-        fileUrl = forceFresh ? "" : sourceFingerprints.map(readCachedUploadUrl).find(Boolean) || "";
+        const safeName = normalizePlainText(file.name || "scan.mp4").replace(/[^a-zA-Z0-9._-]+/g, "-");
+        setStatusMessage("Uploading directly to AI worker...");
+        setScanProgress(5);
 
-        if (fileUrl) {
-          setStatusMessage("Reusing the temporary upload for this video. No duplicate storage upload.");
+        const formData = new FormData();
+        formData.append("file", file, safeName);
+
+        try {
+          const uploadResponse = await fetch("http://127.0.0.1:8000/api/media/upload-source", {
+            method: "POST",
+            body: formData,
+          });
+          const uploadResult = await uploadResponse.json().catch(() => ({}));
+          if (!uploadResponse.ok || !uploadResult?.localPath) {
+            throw new Error(uploadResult?.detail || "Upload to worker failed");
+          }
+          localPath = uploadResult.localPath;
+          fileUrl = uploadResult.localPath; // Worker reads directly from disk
+          setStatusMessage(`Source ready (${(uploadResult.size / (1024 * 1024)).toFixed(1)}MB, ${(uploadResult.duration || 0).toFixed(1)}s)`);
           setScanProgress(50);
-        } else {
-          setStatusMessage(
-            forceFresh
-              ? "Uploading a fresh temporary scan copy. This forces a brand-new analysis pass."
-              : "Uploading temporary scan copy. AutoPromote marks it for 20-minute cleanup."
-          );
-          const safeName = normalizePlainText(file.name || "scan.mp4").replace(/[^a-zA-Z0-9._-]+/g, "-");
-          const expiresAt = Date.now() + CLIP_SCANNER_TEMP_SCAN_TTL_MS;
-          const storagePath = `temp_scans/${user.uid}/${expiresAt}_${Date.now()}_${scanNonce || "scan"}_${safeName}`;
-          const storageRef = ref(storage, storagePath);
-          const uploadTask = uploadBytesResumable(storageRef, file, {
-            customMetadata: {
-              temporary: "true",
-              feature: "find_viral_clips",
-              forceFresh: String(forceFresh),
-              scanNonce: scanNonce || "",
-              deleteAfter: new Date(expiresAt).toISOString(),
-              expiresAt: String(expiresAt),
-            },
-          });
-
-          await new Promise((resolve, reject) => {
-            uploadTask.on(
-              "state_changed",
-              snapshot => {
-                const prog = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                setScanProgress(Math.round(prog / 2)); // First 50% is upload
-              },
-              error => reject(error),
-              async () => {
-                fileUrl = await getDownloadURL(uploadTask.snapshot.ref);
-                if (!forceFresh) {
-                  writeCachedUploadUrl(sourceFingerprints, fileUrl);
-                }
-                resolve();
-              }
-            );
-          });
+        } catch (uploadError) {
+          throw new Error(`Cannot reach media worker: ${uploadError.message}. Make sure python_media_worker is running on port 8000.`);
         }
       } else if (typeof file === "string") {
         fileUrl = file;
@@ -782,7 +715,25 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
       }
 
       // 2. Call Node.js Backend (proxies to Python + Deducts Credits)
-      setStatusMessage("AI Agent watching video...");
+      const analysisStages = [
+        { label: "Loading Whisper AI model...", pct: 52 },
+        { label: "Detecting scenes & shot boundaries...", pct: 58 },
+        { label: "Transcribing audio with Whisper...", pct: 64 },
+        { label: "Scanning for viral keywords & hooks...", pct: 72 },
+        { label: "Analyzing motion & energy patterns...", pct: 80 },
+        { label: "Ranking moments by viral potential...", pct: 88 },
+        { label: "Packaging results...", pct: 95 },
+      ];
+
+      let stageIndex = 0;
+      stageInterval = setInterval(() => {
+        if (stageIndex < analysisStages.length) {
+          const stage = analysisStages[stageIndex];
+          setStatusMessage(stage.label);
+          setScanProgress(stage.pct);
+          stageIndex++;
+        }
+      }, 4000);
 
       const response = await fetch(`${API_BASE_URL}/api/media/analyze`, {
         method: "POST",
@@ -791,11 +742,14 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          fileUrl,
+          fileUrl: fileUrl || "",
+          localPath: localPath || null,
           forceFresh,
           scanNonce,
         }),
       });
+
+      clearInterval(stageInterval);
 
       if (response.status === 403 || response.status === 402) {
         void trackClipWorkflowEvent("scan_blocked_insufficient_credits", {
@@ -804,6 +758,7 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
         setNeedsCredits(true);
         setShowCreditShop(true);
         setStatusMessage("Insufficient credits. Please top up to continue.");
+        clearInterval(stageInterval);
         setIsScanning(false);
         setScanProgress(0);
         return;
@@ -876,6 +831,7 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
       });
       setStatusMessage("Error: " + err.message);
     } finally {
+      clearInterval(stageInterval);
       scanInFlightRef.current = false;
       setIsScanning(false);
       setScanProgress(100);
@@ -1117,7 +1073,7 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
           <div ref={videoSectionRef} className="scanner-video-column">
             {videoSrc ? (
               <div className="scanner-video-frame">
-                <video ref={videoRef} controls={!selectedClip} style={{ borderRadius: "8px" }} />
+                <video ref={videoRef} controls={!selectedClip} />
                 {activeSelectedVisual?.url ? (
                   <div className="scanner-selected-visual-preview">
                     <div>
@@ -1162,6 +1118,29 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
               </div>
             ) : (
               <div style={{ color: "#fff" }}>No video loaded</div>
+            )}
+
+            {/* Live scan status bar */}
+            {isScanning && (
+              <div className="scanner-live-bar">
+                <div className="scanner-live-dot" />
+                <span className="scanner-live-text">
+                  {statusMessage || `Scanning frames... ${Math.round(scanProgress)}%`}
+                </span>
+                <div className="scanner-live-waveform">
+                  {Array.from({ length: 48 }, (_, i) => (
+                    <span
+                      key={`live-wave-${i}`}
+                      style={{
+                        height: `${Math.max(6, Math.min(100, 18 + Math.sin(i * 0.4 + scanProgress * 0.05) * 14 + Math.random() * 10))}%`,
+                      }}
+                    />
+                  ))}
+                </div>
+                <span className="scanner-live-text" style={{ color: "#93c5fd", fontSize: "0.7rem" }}>
+                  {Math.round(scanProgress)}%
+                </span>
+              </div>
             )}
           </div>
 

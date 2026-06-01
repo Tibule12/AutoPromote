@@ -59,6 +59,38 @@ export const normalizeSourceLabel = (label, index) => {
   return text || `Camera ${index + 1}`;
 };
 
+export const normalizeMulticamLayoutMode = layoutMode => {
+  const raw = String(layoutMode || "cut").trim().toLowerCase().replace(/[_\s]+/g, "-");
+  const aliases = {
+    auto: "cut",
+    hero: "cut",
+    single: "cut",
+    "single-speaker": "cut",
+    cut: "cut",
+    wide: "scene-grid",
+    "wide-view": "scene-grid",
+    "show-everyone": "scene-grid",
+    "show-all": "scene-grid",
+    grid: "scene-grid",
+    "scene-grid": "scene-grid",
+    "scene-matrix": "scene-grid",
+    shared: "split-vertical",
+    "shared-moment": "split-vertical",
+    dual: "split-vertical",
+    duet: "split-vertical",
+    split: "split-vertical",
+    "split-vertical": "split-vertical",
+    reaction: "pip",
+    "catch-reaction": "pip",
+    "catch-reactions": "pip",
+    "reaction-window": "pip",
+    "reaction-cut": "pip",
+    pip: "pip",
+    "picture-in-picture": "pip",
+  };
+  return aliases[raw] || (["cut", "scene-grid", "split-vertical", "pip"].includes(raw) ? raw : "cut");
+};
+
 const getAnchorTargetX = zoomAnchor => {
   if (zoomAnchor === "left") return 0.32;
   if (zoomAnchor === "right") return 0.68;
@@ -258,6 +290,7 @@ const buildSafeSegment = (segment, source, index, timelineCursor) => {
     sourceEnd,
     timelineStart,
     timelineEnd,
+    layoutMode: normalizeMulticamLayoutMode(segment?.layoutMode || segment?.layout_mode || "cut"),
   };
 };
 
@@ -301,6 +334,7 @@ export const normalizeSegments = (segments, sources, timelineDuration = null) =>
           timelineStart: 0,
           timelineEnd: duration,
           isLockedStart: true,
+          layoutMode: "cut",
         },
       ];
     }
@@ -404,6 +438,7 @@ export const buildSegmentsFromSwitches = (
       sourceEnd: Number(sourceEnd.toFixed(3)),
       timelineStart: Number((timelineStart + segmentStart).toFixed(3)),
       timelineEnd: Number((timelineStart + segmentEnd).toFixed(3)),
+      layoutMode: normalizeMulticamLayoutMode(current.layoutMode),
     });
   }
 
@@ -528,6 +563,7 @@ export const normalizeSwitches = (switches, sources, overlapDuration) => {
       id: item?.id || `switch-${index + 1}`,
       cameraId: validIds.has(item?.cameraId) ? item.cameraId : sources[0]?.id || "cam-1",
       startTime: clampNumber(item?.startTime, 0, safeDuration, 0),
+      layoutMode: normalizeMulticamLayoutMode(item?.layoutMode || item?.layout_mode || "cut"),
     }))
     .sort((left, right) => left.startTime - right.startTime);
 
@@ -536,6 +572,7 @@ export const normalizeSwitches = (switches, sources, overlapDuration) => {
       id: normalized[0]?.id === "switch-1" ? "switch-0" : "switch-1",
       cameraId: sources[0]?.id || "cam-1",
       startTime: 0,
+      layoutMode: "cut",
     });
   }
 
@@ -583,7 +620,15 @@ export const buildSwitchDisplaySegments = (switches, sources, overlapDuration) =
     return {
       id: item.id,
       cameraId: item.cameraId,
-      label: sources.find(source => source.id === item.cameraId)?.label || item.cameraId,
+      layoutMode: item.layoutMode || "cut",
+      label:
+        item.layoutMode === "scene-grid"
+          ? "Show Everyone"
+          : item.layoutMode === "split-vertical"
+            ? "Shared Moment"
+            : item.layoutMode === "pip"
+              ? "Reaction"
+              : sources.find(source => source.id === item.cameraId)?.label || item.cameraId,
       startTime: item.startTime,
       endTime,
       duration,
@@ -605,8 +650,9 @@ export const getActiveCameraAtTime = (switches, sources, previewTime, overlapDur
 
 export const getSourceTimelineTimeAtPlayhead = (source, playhead, timelineStart = 0) => {
   const offsetSeconds = Number(source?.offsetSeconds) || 0;
+  const syncRate = clampNumber(source?.syncRate ?? source?.sync_rate, 0.95, 1.05, 1);
   return Number(
-    ((Number(playhead) || 0) + (Number(timelineStart) || 0) - offsetSeconds).toFixed(3)
+    (((Number(playhead) || 0) + (Number(timelineStart) || 0) - offsetSeconds) * syncRate).toFixed(3)
   );
 };
 
@@ -685,14 +731,14 @@ const getEnvelopeAudioActivityScoreAtTime = (analysis, sourceTime, windowSeconds
   const startIndex = Math.max(0, centerIndex - windowBins);
   const endIndex = Math.min(analysis.envelope.length - 1, centerIndex + windowBins);
 
-  let total = 0;
-  let count = 0;
+  const values = [];
   for (let index = startIndex; index <= endIndex; index += 1) {
-    total += clampNumber(analysis.envelope[index], 0, 1, 0);
-    count += 1;
+    values.push(clampNumber(analysis.envelope[index], 0, 1, 0));
   }
 
-  return count ? total / count : 0;
+  if (!values.length) return 0;
+  const sorted = [...values].sort((left, right) => left - right);
+  return sorted[Math.floor(sorted.length / 2)] || 0;
 };
 
 export const getAudioActivityScoreForSourceTime = (
@@ -817,45 +863,59 @@ export const resolveSmartMulticamLayoutAtTime = (
     reason: companion ? "primary_focus" : "no_companion",
   };
 
-  if (!companion) {
-    return base;
-  }
+  const fallbackCompanion =
+    companion || validSources.find(source => source.id && source.id !== base.primaryCameraId) || null;
 
   if (normalizedMode === "split" || normalizedMode === "split-vertical") {
+    if (!fallbackCompanion) return base;
     return {
       ...base,
       layoutMode: "split-vertical",
-      secondaryCameraId: companion.cameraId,
-      secondaryScore: companion.score,
+      secondaryCameraId: fallbackCompanion.cameraId || fallbackCompanion.id,
+      visibleCameraIds: [base.primaryCameraId, fallbackCompanion.cameraId || fallbackCompanion.id].filter(Boolean),
+      secondaryScore: companion?.score || 0,
       reason: "manual_split",
     };
   }
 
   if (normalizedMode === "pip") {
+    if (!fallbackCompanion) return base;
     return {
       ...base,
       layoutMode: "pip",
-      secondaryCameraId: companion.cameraId,
-      secondaryScore: companion.score,
+      secondaryCameraId: fallbackCompanion.cameraId || fallbackCompanion.id,
+      visibleCameraIds: [base.primaryCameraId, fallbackCompanion.cameraId || fallbackCompanion.id].filter(Boolean),
+      secondaryScore: companion?.score || 0,
       reason: "manual_pip",
     };
   }
 
   if (normalizedMode === "scene-grid" || normalizedMode === "grid" || normalizedMode === "matrix") {
-    const visibleCameraIds = rankedAvailableSources.slice(0, 6).map(source => source.cameraId);
-    if (visibleCameraIds.length >= 3) {
+    const rankedIds = rankedAvailableSources.slice(0, 6).map(source => source.cameraId);
+    const visibleCameraIds = [
+      ...rankedIds,
+      ...validSources.map(source => source.id),
+    ]
+      .filter(Boolean)
+      .filter((cameraId, index, allIds) => allIds.indexOf(cameraId) === index)
+      .slice(0, 6);
+    if (visibleCameraIds.length >= 2) {
       return {
         ...base,
         layoutMode: "scene-grid",
         secondaryCameraId: visibleCameraIds[1] || null,
         visibleCameraIds,
-        secondaryScore: rankedAvailableSources[1]?.score || 0,
+        secondaryScore: rankedAvailableSources[1]?.score || companion?.score || 0,
         reason: "manual_ensemble",
       };
     }
   }
 
   if (normalizedMode === "cut") {
+    return base;
+  }
+
+  if (!companion) {
     return base;
   }
 
@@ -880,18 +940,46 @@ export const resolveSmartMulticamLayoutAtTime = (
     };
   }
 
-  if (activeScore >= 0.35 && companion.score >= 0.35) {
+  if (
+    rankedAvailableSources.length >= 2 &&
+    (
+      (activeScore >= 0.14 && companion.score >= 0.12 && Math.abs(activeScore - companion.score) <= 0.12) ||
+      (activeScore < 0.22 && companion.score >= 0.16)
+    )
+  ) {
+    const visibleCameraIds = [
+      base.primaryCameraId,
+      companion.cameraId,
+      ...rankedAvailableSources.map(source => source.cameraId),
+    ]
+      .filter(Boolean)
+      .filter((cameraId, index, allIds) => allIds.indexOf(cameraId) === index)
+      .slice(0, 6);
     return {
       ...base,
-      layoutMode: "split-vertical",
+      layoutMode: "scene-grid",
       secondaryCameraId: companion.cameraId,
-      visibleCameraIds: [base.primaryCameraId, companion.cameraId].filter(Boolean),
+      visibleCameraIds,
       secondaryScore: companion.score,
-      reason: "shared_energy",
+      reason: "uncertain_speaker_coverage",
     };
   }
 
-  if (companion.score >= 0.48) {
+  if (activeScore >= 0.46 && companion.score >= 0.42 && Math.abs(activeScore - companion.score) <= 0.14) {
+    return {
+      ...base,
+      layoutMode: "pip",
+      secondaryCameraId: companion.cameraId,
+      visibleCameraIds: [base.primaryCameraId, companion.cameraId].filter(Boolean),
+      secondaryScore: companion.score,
+      reason: "shared_reaction_accent",
+    };
+  }
+
+  if (
+    companion.score >= 0.48 ||
+    (activeScore >= 0.32 && companion.score >= 0.18 && companion.score <= activeScore + 0.16)
+  ) {
     return {
       ...base,
       layoutMode: "pip",
@@ -983,19 +1071,19 @@ const getAutoDirectorProfile = (directorStyleId, intensityMode = "standard") => 
   switch (String(directorStyleId || "interview").trim().toLowerCase()) {
     case "podcast":
       profile = {
-        minHold: 2.8,
-        maxHold: 5.4,
-        switchThreshold: 0.24,
-        continuityBonus: 0.3,
+        minHold: 2.4,
+        maxHold: 6.2,
+        switchThreshold: 0.2,
+        continuityBonus: 0.16,
         reactionBias: 0.08,
         ensembleBias: 0.04,
-        confirmationSamples: 4,
-        graceBonus: 0.32,
-        listenerHoldBias: 0.22,
-        overlapTolerance: 0.06,
-        quietHoldBias: 0.26,
+        confirmationSamples: 2,
+        graceBonus: 0.12,
+        listenerHoldBias: 0.08,
+        overlapTolerance: 0.05,
+        quietHoldBias: 0.12,
         handoffBias: 0.18,
-        interruptionBias: 0.08,
+        interruptionBias: 0.12,
       };
       break;
     case "reaction":
@@ -1035,18 +1123,18 @@ const getAutoDirectorProfile = (directorStyleId, intensityMode = "standard") => 
     case "interview":
     default:
       profile = {
-        minHold: 1.9,
-        maxHold: 3.7,
-        switchThreshold: 0.16,
-        continuityBonus: 0.16,
+        minHold: 2.0,
+        maxHold: 5.0,
+        switchThreshold: 0.18,
+        continuityBonus: 0.14,
         reactionBias: 0.16,
         ensembleBias: 0.06,
-        confirmationSamples: 3,
-        graceBonus: 0.18,
-        listenerHoldBias: 0.16,
+        confirmationSamples: 2,
+        graceBonus: 0.1,
+        listenerHoldBias: 0.08,
         overlapTolerance: 0.05,
         quietHoldBias: 0.16,
-        handoffBias: 0.12,
+        handoffBias: 0.1,
         interruptionBias: 0.12,
       };
       break;
@@ -1083,6 +1171,19 @@ const getSourceQualityScore = (source, qualityBySource = {}) => {
   const resolutionScore = clampNumber(resolutionPixels / (1920 * 1080), 0.18, 1, 0.58);
   const durationScore = clampNumber((Number(source?.duration) || 0) / 20, 0.2, 1, 0.7);
   return resolutionScore * 0.55 + durationScore * 0.45;
+};
+
+const getConversationAudioScore = (activity, loudestActivity, secondActivity) => {
+  const safeActivity = clampNumber(activity, 0, 1, 0);
+  const safeLoudest = clampNumber(loudestActivity, 0, 1, 0);
+  const safeSecond = clampNumber(secondActivity, 0, 1, 0);
+  const gap = safeActivity >= safeLoudest - 0.0001
+    ? safeActivity - safeSecond
+    : safeActivity - safeLoudest;
+  const dominance = clampNumber((gap + 0.04) / 0.28, 0, 1, 0);
+  const floorPenalty = safeActivity < 0.12 ? 0.18 : 0;
+
+  return clampNumber((safeActivity * 0.68) + (dominance * 0.42) - floorPenalty, 0, 1, 0);
 };
 
 const getSwitchCadenceFromScene = ({
@@ -1293,40 +1394,79 @@ export const buildAutoDirectorPlan = (
     };
   }
 
-  const rankSourcesAtMoment = (targetTime, previousCameraId, holdAgeSeconds) =>
-    validSources
+  const isConversationStyle =
+    directorStyleId === "podcast" || directorStyleId === "interview";
+
+  const rankSourcesAtMoment = (targetTime, previousCameraId, holdAgeSeconds) => {
+    const candidates = validSources
       .map(source => {
         const sourceTime = getSourceTimelineTimeAtPlayhead(source, targetTime, timelineStart);
         if (!isSourceAvailableAtTime(source, sourceTime)) return null;
 
-        const activity = getAudioActivityScoreForSourceTime(
+        const currentActivity = getAudioActivityScoreForSourceTime(
           audioActivityBySource?.[source.id],
           sourceTime,
-          0.45
+          0.7
         );
+        const upcomingActivity = getAudioActivityScoreForSourceTime(
+          audioActivityBySource?.[source.id],
+          sourceTime + 0.45,
+          0.55
+        );
+        const activity = isConversationStyle
+          ? Math.max(currentActivity, upcomingActivity * 0.92)
+          : currentActivity;
         const quality = getSourceQualityScore(source, qualityBySource);
-        const isConversationStyle =
-          directorStyleId === "podcast" || directorStyleId === "interview";
         const continuity =
           source.id === previousCameraId
             ? profile.continuityBonus * clampNumber(1 - holdAgeSeconds / profile.maxHold, 0, 1, 0.4)
             : 0;
         const comfortBias =
           isConversationStyle && source.id === previousCameraId && quality >= 0.62
-            ? 0.06 + profile.quietHoldBias * 0.18
+            ? 0.035 + profile.quietHoldBias * 0.12
             : 0;
-        const totalScore = activity * 0.55 + quality * 0.3 + continuity + comfortBias;
 
         return {
           source,
           sourceTime,
           activity,
+          currentActivity,
+          upcomingActivity,
+          onsetLift: Math.max(0, upcomingActivity - currentActivity),
           quality,
+          continuity,
+          comfortBias,
+        };
+      })
+      .filter(Boolean);
+
+    const orderedByActivity = [...candidates].sort((left, right) => right.activity - left.activity);
+    const loudestActivity = orderedByActivity[0]?.activity || 0;
+    const secondActivity = orderedByActivity[1]?.activity || 0;
+
+    return candidates
+      .map(candidate => {
+        const conversationAudioScore = getConversationAudioScore(
+          candidate.activity,
+          loudestActivity,
+          secondActivity
+        );
+        const totalScore = isConversationStyle
+          ? (conversationAudioScore * 0.9) +
+            (candidate.onsetLift * 0.1) +
+            (candidate.quality * 0.05) +
+            candidate.continuity +
+            candidate.comfortBias
+          : (candidate.activity * 0.55) + (candidate.quality * 0.3) + candidate.continuity + candidate.comfortBias;
+
+        return {
+          ...candidate,
+          audioDominance: conversationAudioScore,
           totalScore,
         };
       })
-      .filter(Boolean)
       .sort((left, right) => right.totalScore - left.totalScore);
+  };
 
   const switches = [];
   let currentTime = 0;
@@ -1362,9 +1502,11 @@ export const buildAutoDirectorPlan = (
     const activeCameraId = currentCameraId;
     const currentRank = ranked.find(item => item.source.id === activeCameraId) || leader;
     const leadMargin = clampNumber(leader.totalScore - challenger.totalScore, -1, 1, 0);
+    const audioMargin = clampNumber((leader.activity || 0) - (challenger.activity || 0), -1, 1, 0);
     const challengerWins =
       leader.source.id !== currentCameraId &&
-      leadMargin >= Math.max(profile.switchThreshold * 0.55, 0.03);
+      leadMargin >= Math.max(profile.switchThreshold * 0.55, isConversationStyle ? 0.06 : 0.03) &&
+      (!isConversationStyle || (leader.activity >= 0.22 && audioMargin >= 0.1));
     if (challengerWins) {
       if (challengerCameraId === leader.source.id) {
         challengerStreak += 1;
@@ -1410,7 +1552,12 @@ export const buildAutoDirectorPlan = (
       leadMargin <= Math.max(profile.interruptionBias, 0.1);
     const confirmedSwitch =
       challengerWins &&
-      challengerStreak >= Math.max(1, profile.confirmationSamples);
+      challengerStreak >= Math.max(
+        1,
+        isConversationStyle && leader.onsetLift >= 0.16 && audioMargin >= 0.18
+          ? profile.confirmationSamples - 1
+          : profile.confirmationSamples
+      );
     const shouldBoot =
       !currentCameraId ||
       (currentHoldAge >=
@@ -1451,12 +1598,14 @@ export const buildAutoDirectorPlan = (
         leadMargin,
       });
       const nextCameraId =
-        currentCameraId &&
-        leader.source.id === currentCameraId &&
-        ranked[1] &&
-        ranked[1].totalScore >= leader.totalScore + profile.reactionBias
-          ? ranked[1].source.id
-          : leader.source.id;
+        isConversationStyle
+          ? leader.source.id
+          : currentCameraId &&
+              leader.source.id === currentCameraId &&
+              ranked[1] &&
+              ranked[1].totalScore >= leader.totalScore + profile.reactionBias
+            ? ranked[1].source.id
+            : leader.source.id;
 
       if (!switches.length || switches[switches.length - 1].cameraId !== nextCameraId) {
         switches.push({

@@ -7,6 +7,7 @@ const admin = require("firebase-admin");
 const db = admin.firestore();
 const fs = require("fs");
 const { queueAudioExtractionTask } = require("./mediaWorkerTaskQueue");
+const { refundCredits } = require("../creditSystem");
 
 // Point to the Python service (default to Cloud Run in production, localhost in dev)
 // Use the deployed URL for stability if env var is missing
@@ -153,6 +154,7 @@ class VideoEditingService {
         userId,
         type: "multicam_render",
         multicamRequest,
+        creditReceipt: multicamRequest?.creditReceipt || null,
         status: "queued",
         progress: 0,
         createdAt: new Date().toISOString(),
@@ -243,13 +245,28 @@ class VideoEditingService {
         progress: 100,
         result,
         outputUrl: result.url,
+        thumbnailUrl: result.thumbnailUrl || null,
         completedAt: new Date().toISOString(),
       });
     } catch (error) {
       console.error(`[VideoEditing] Multicam Job ${jobId} Failed:`, error.message);
+      let creditRefund = null;
+      if (multicamRequest?.creditReceipt && !multicamRequest.creditReceipt.skipped) {
+        try {
+          creditRefund = await refundCredits(userId, multicamRequest.creditReceipt, "render-multicam-refund", {
+            jobId,
+            reason: error.message,
+            renderTier: multicamRequest.renderTier || multicamRequest.render_tier || "premium",
+          });
+        } catch (refundError) {
+          creditRefund = { success: false, message: refundError.message };
+          console.error(`[VideoEditing] Multicam Job ${jobId} refund failed:`, refundError.message);
+        }
+      }
       await docRef.update({
         status: "failed",
         error: error.message,
+        creditRefund,
         progress: 0,
         failedAt: new Date().toISOString(),
       });
@@ -398,11 +415,98 @@ class VideoEditingService {
           end_time: endTime,
           auto_captions:
             viralData.auto_captions !== undefined ? !!viralData.auto_captions : options.captions,
+          caption_style:
+            viralData.caption_style ||
+            viralData.captionStyle ||
+            viralData.renderDefaults?.caption_style ||
+            payload.caption_style,
+          smart_crop:
+            viralData.smart_crop !== undefined
+              ? !!viralData.smart_crop
+              : viralData.smartCrop !== undefined
+                ? !!viralData.smartCrop
+                : viralData.renderDefaults?.smart_crop !== undefined
+                  ? !!viralData.renderDefaults.smart_crop
+                  : payload.smart_crop,
+          smart_crop_mode:
+            viralData.smart_crop_mode ||
+            viralData.smartCropMode ||
+            viralData.renderDefaults?.smart_crop_mode ||
+            payload.smart_crop_mode,
+          visual_enhance:
+            viralData.visual_enhance !== undefined
+              ? !!viralData.visual_enhance
+              : viralData.visualEnhance !== undefined
+                ? !!viralData.visualEnhance
+                : viralData.renderDefaults?.visual_enhance !== undefined
+                  ? !!viralData.renderDefaults.visual_enhance
+                  : payload.visual_enhance,
+          add_hook:
+            viralData.add_hook !== undefined
+              ? !!viralData.add_hook
+              : viralData.addHook !== undefined
+                ? !!viralData.addHook
+                : viralData.renderDefaults?.add_hook !== undefined
+                  ? !!viralData.renderDefaults.add_hook
+                  : !!(viralData.hook_text || viralData.hookText || viralData.titleSuggestion),
+          hook_text:
+            viralData.hook_text ||
+            viralData.hookText ||
+            viralData.renderDefaults?.hook_text ||
+            viralData.titleSuggestion ||
+            viralData.captionSuggestion ||
+            payload.hook_text,
+          hook_intro_seconds: Number(
+            viralData.hook_intro_seconds ??
+              viralData.hookIntroSeconds ??
+              viralData.renderDefaults?.hook_intro_seconds ??
+              payload.hook_intro_seconds
+          ),
+          hook_template:
+            viralData.hook_template ||
+            viralData.hookTemplate ||
+            viralData.hookTreatment?.hook_template ||
+            viralData.renderDefaults?.hook_template ||
+            payload.hook_template,
+          hook_text_animation:
+            viralData.hook_text_animation ||
+            viralData.hookTextAnimation ||
+            viralData.hookTreatment?.hook_text_animation ||
+            viralData.renderDefaults?.hook_text_animation ||
+            payload.hook_text_animation,
+          hook_zoom_scale: Number(
+            viralData.hook_zoom_scale ??
+              viralData.hookZoomScale ??
+              viralData.hookTreatment?.hook_zoom_scale ??
+              viralData.renderDefaults?.hook_zoom_scale ??
+              payload.hook_zoom_scale
+          ),
+          hook_blur_background:
+            viralData.hook_blur_background !== undefined
+              ? !!viralData.hook_blur_background
+              : viralData.hookBlurBackground !== undefined
+                ? !!viralData.hookBlurBackground
+                : viralData.renderDefaults?.hook_blur_background !== undefined
+                  ? !!viralData.renderDefaults.hook_blur_background
+                  : payload.hook_blur_background,
+          hook_dark_overlay:
+            viralData.hook_dark_overlay !== undefined
+              ? !!viralData.hook_dark_overlay
+              : viralData.hookDarkOverlay !== undefined
+                ? !!viralData.hookDarkOverlay
+                : viralData.renderDefaults?.hook_dark_overlay !== undefined
+                  ? !!viralData.renderDefaults.hook_dark_overlay
+                  : payload.hook_dark_overlay,
+          template: viralData.template || viralData.renderDefaults?.template || payload.template,
           timeline_segments: timelineSegments,
           background_audio: viralData.background_audio || null,
           hook_focus_point: viralData.hook_focus_point || null,
           cover_frame: viralData.cover_frame || null,
           thumbnail_frame: viralData.thumbnail_frame || viralData.cover_frame || null,
+          brand_watermark: viralData.brand_watermark !== false && viralData.brandWatermark !== false,
+          brandWatermark: viralData.brand_watermark !== false && viralData.brandWatermark !== false,
+          watermark_text: viralData.watermark_text || viralData.watermarkText || "AUTOPROMOTE",
+          watermarkText: viralData.watermark_text || viralData.watermarkText || "AUTOPROMOTE",
           overlays: (viralData.overlays || []).map(o => ({
             ...o,
             start_time:
@@ -730,6 +834,42 @@ class VideoEditingService {
       throw new Error("Transcription failed");
     }
   }
+
+  async preflightMulticamSync({ sources, external_audio_url }) {
+    console.log("[VideoEditing] Running multicam preflight sync", {
+      sourceCount: sources.length,
+      hasExternalAudio: !!external_audio_url,
+    });
+
+    let workerUrl = MEDIA_WORKER_URL;
+    if (LOCAL_MEDIA_WORKER_URL) {
+      try {
+        await axios.get(`${LOCAL_MEDIA_WORKER_URL}/health`, { timeout: 2000 });
+        workerUrl = LOCAL_MEDIA_WORKER_URL;
+      } catch {
+        // fall through to cloud worker
+      }
+    }
+
+    const payload = {
+      sources: sources.map(s => ({
+        id: s.id,
+        label: s.label || "",
+        url: s.url,
+        offset_seconds: Number(s.offset_seconds || 0),
+        sync_rate: Number(s.sync_rate ?? s.syncRate ?? 1),
+        syncRate: Number(s.syncRate ?? s.sync_rate ?? 1),
+      })),
+      external_audio_url,
+    };
+
+    const response = await axios.post(`${workerUrl}/multicam/preflight-sync`, payload, {
+      timeout: 120000,
+    });
+
+    return response.data;
+  }
+
   async renderMulticam(multicamRequest, userId, jobId = null) {
     console.log("[VideoEditing] Rendering multicam request", {
       userId,
@@ -744,6 +884,8 @@ class VideoEditingService {
             label: source.label || "",
             url: source.url,
             offset_seconds: Number(source.offsetSeconds ?? source.offset_seconds ?? 0),
+            sync_rate: Number(source.syncRate ?? source.sync_rate ?? 1),
+            syncRate: Number(source.syncRate ?? source.sync_rate ?? 1),
           }))
         : [],
       segments: Array.isArray(multicamRequest?.segments)
@@ -753,6 +895,7 @@ class VideoEditingService {
             timeline_end: Number(segment.timelineEnd ?? segment.timeline_end ?? 0),
             source_start: Number(segment.sourceStart ?? segment.source_start ?? 0),
             source_end: Number(segment.sourceEnd ?? segment.source_end ?? 0),
+            layout_mode: segment.layoutMode || segment.layout_mode || "cut",
           }))
         : [],
       switches: Array.isArray(multicamRequest?.switches)
@@ -765,6 +908,8 @@ class VideoEditingService {
       audio_based_auto_switch: multicamRequest?.audioBasedAutoSwitch !== false,
       auto_switch_interval: Number(multicamRequest?.autoSwitchInterval ?? 3),
       auto_switch_aggressiveness: multicamRequest?.autoSwitchAggressiveness || "balanced",
+      render_tier: multicamRequest?.renderTier || multicamRequest?.render_tier || "premium",
+      renderTier: multicamRequest?.renderTier || multicamRequest?.render_tier || "premium",
       primary_audio_camera_id: multicamRequest?.primaryAudioCameraId || null,
       overlap_start: Number(multicamRequest?.overlapStart ?? 0),
       overlap_duration: Number(multicamRequest?.overlapDuration ?? 0),
@@ -773,6 +918,12 @@ class VideoEditingService {
       external_audio_offset_seconds: Number(multicamRequest?.externalAudio?.offset_seconds ?? 0),
       external_audio_mix_mode: multicamRequest?.externalAudio?.mix_mode || "external_only",
       external_audio_cache_key: multicamRequest?.externalAudio?.cache_key || null,
+      brand_watermark: multicamRequest?.brandWatermark !== false,
+      brandWatermark: multicamRequest?.brandWatermark !== false,
+      watermark_text: multicamRequest?.watermarkText || "AutoPromote Cam Combiner",
+      watermarkText: multicamRequest?.watermarkText || "AutoPromote Cam Combiner",
+      generate_thumbnail: multicamRequest?.generateThumbnail !== false,
+      generateThumbnail: multicamRequest?.generateThumbnail !== false,
       job_id: jobId,
       async_mode: !!jobId,
     };
@@ -791,6 +942,14 @@ class VideoEditingService {
         success: true,
         url: result.output_url,
         duration: result.duration || 0,
+        thumbnailUrl: result.thumbnail_url || result.thumbnailUrl || null,
+        localThumbnailUrl: result.local_thumbnail_url || result.localThumbnailUrl || null,
+        firebaseThumbnailUrl: result.firebase_thumbnail_url || result.firebaseThumbnailUrl || null,
+        renderTier: result.render_tier || multicamRequest?.renderTier || multicamRequest?.render_tier || "premium",
+        renderReceipt: result.render_receipt || null,
+        syncPreflight: result.sync_preflight || null,
+        brandWatermark: result.brand_watermark || result.brandWatermark || result.render_receipt?.brand_watermark || null,
+        thumbnail: result.thumbnail || result.render_receipt?.thumbnail || null,
         message: "Multi-camera render completed",
       };
     }

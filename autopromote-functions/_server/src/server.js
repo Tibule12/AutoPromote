@@ -1593,6 +1593,15 @@ try {
     console.warn("Media routes failed:", e.message);
   }
 
+  // Team Workspaces (plan seat enforcement)
+  try {
+    const workspaceRoutes = require("./routes/workspaceRoutes");
+    app.use("/api/workspaces", workspaceRoutes);
+    console.log("👥 Workspace routes mounted at /api/workspaces");
+  } catch (e) {
+    console.warn("Workspace routes failed:", e.message);
+  }
+
   // AfterDark (adult) area removed from codebase per repository policy.
 
   // Register optional routes

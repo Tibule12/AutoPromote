@@ -1,74 +1,121 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { getAuth } from "firebase/auth";
 import { API_ENDPOINTS } from "../config";
-import { uploadSourceFileViaBackend } from "../utils/sourceUpload";
 import "./SmartPromoSummaryPanel.css";
 
-const PROMO_DURATIONS = [15, 30, 60];
 const STORY_EDIT_DURATIONS = [60, 120, 180, 300];
 const PROMO_OUTPUT_MODES = [
   {
-    id: "campaign_set",
-    label: "4 Promo Clips",
-    summary: "Four different short cuts for hook, proof, replay, and close.",
-    pill: "Campaign Set",
-  },
-  {
-    id: "story_edit",
-    label: "Full Story Edit + Clips",
+    id: "visual_edit",
+    label: "Dynamic Visual Edit",
     summary:
-      "One polished 60s-5min story edit from the full video, plus shorter promo clips for posting.",
-    pill: "Story Master",
+      "One continuous visual edit with original audio preserved, plus three preview cuts from the same timeline.",
+    pill: "Visual Master",
   },
 ];
 const PROMO_STYLES = [
   {
     id: "clean",
     label: "Clean",
-    summary: "Readable, polished, and platform-safe for clear promo storytelling.",
+    summary: "Balanced reframing, confident pacing, and steady visual polish.",
   },
   {
     id: "hype",
     label: "Hype",
-    summary: "Higher energy structure for punchy social cuts and attention spikes.",
+    summary: "Faster shot changes, tighter punch-ins, and more aggressive visual energy.",
   },
   {
     id: "minimal",
     label: "Minimal",
-    summary: "Tight and understated when the footage should do most of the work.",
-  },
-];
-const PROMO_ANGLES = [
-  {
-    id: "stop_scroll",
-    label: "Stop Scroll",
-    summary: "Built to interrupt attention fast with punchier openings and sharper social pressure.",
-  },
-  {
-    id: "proof_angle",
-    label: "Proof Angle",
-    summary: "Leans into receipts, real outcomes, and clips that feel convincing on first watch.",
-  },
-  {
-    id: "problem_solution",
-    label: "Problem / Solution",
-    summary: "Frames the promo around tension first, then shows the shift or the fix cleanly.",
-  },
-  {
-    id: "emotional_pull",
-    label: "Emotional Pull",
-    summary: "Lets strong human moments breathe so the clip feels felt, not just watched.",
-  },
-  {
-    id: "authority_burst",
-    label: "Authority Burst",
-    summary: "Turns the source into fast, confident clips that feel expert and worth trusting.",
+    summary: "Longer holds and gentler movement when the performance should stay in control.",
   },
 ];
 
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 const getSelectedPreset = (items, id) => items.find(item => item.id === id) || items[0];
+
+// Client-side compression before upload — turns raw 4K/ProRes into web-friendly bitrates
+const BYTES_PER_MB = 1024 * 1024;
+const UPLOAD_COMPRESSION_THRESHOLD_BYTES = 80 * BYTES_PER_MB; // Compress files > 80 MB
+const UPLOAD_COMPRESSION_TARGET_BPS = 6_000_000;              // 6 Mbps video
+const UPLOAD_COMPRESSION_AUDIO_BPS = 128_000;                 // 128 Kbps audio
+
+const formatMediaBytes = bytes => {
+  if (!bytes || bytes < 1024) return "0 KB";
+  if (bytes < BYTES_PER_MB) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / BYTES_PER_MB).toFixed(1)} MB`;
+};
+
+const compressVideoBeforeUpload = async (file, onProgress) => {
+  const isVideo = String(file?.type || "").startsWith("video/") || /\.(mov|mp4|avi|mkv|webm|m4v|3gp)$/i.test(file.name || "");
+  if (!isVideo || file.size <= UPLOAD_COMPRESSION_THRESHOLD_BYTES) return null;
+  if (typeof MediaRecorder === "undefined") return null;
+
+  const mimeTypes = ["video/webm;codecs=vp8,opus", "video/webm;codecs=vp9,opus", "video/webm;codecs=vp8", "video/webm"];
+  let mimeType = "";
+  for (const mt of mimeTypes) {
+    if (MediaRecorder.isTypeSupported(mt)) { mimeType = mt; break; }
+  }
+  if (!mimeType) return null;
+
+  return new Promise(resolve => {
+    const video = document.createElement("video");
+    video.preload = "auto";
+    video.muted = false;
+    video.playsInline = true;
+    const objectUrl = URL.createObjectURL(file);
+    video.src = objectUrl;
+
+    let resolved = false;
+    const cleanup = () => { if (!resolved) { resolved = true; URL.revokeObjectURL(objectUrl); } };
+    const fail = () => { cleanup(); resolve(null); };
+
+    video.onloadedmetadata = () => {
+      try {
+        const stream = video.captureStream();
+        if (!stream) { fail(); return; }
+
+        const recorder = new MediaRecorder(stream, {
+          mimeType,
+          videoBitsPerSecond: UPLOAD_COMPRESSION_TARGET_BPS,
+          audioBitsPerSecond: UPLOAD_COMPRESSION_AUDIO_BPS,
+        });
+
+        const chunks = [];
+        recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+
+        recorder.onstop = () => {
+          const blob = new Blob(chunks, { type: mimeType });
+          const compressedFile = new File([blob], file.name.replace(/\.[^.]+$/, ".webm"), {
+            type: mimeType,
+            lastModified: Date.now(),
+          });
+          cleanup();
+          if (typeof onProgress === "function") onProgress(1);
+          resolve({ file: compressedFile, originalSize: file.size, compressedSize: blob.size });
+        };
+
+        recorder.onerror = () => { fail(); };
+        recorder.start(1000);
+        let lastPct = 0;
+        const duration = video.duration || 1;
+        video.ontimeupdate = () => {
+          const pct = Math.min(1, video.currentTime / duration);
+          if (pct - lastPct > 0.03) {
+            lastPct = pct;
+            if (typeof onProgress === "function") onProgress(pct);
+          }
+        };
+        video.onended = () => { recorder.stop(); };
+        video.play().catch(() => fail());
+      } catch (_) { fail(); }
+    };
+
+    video.onerror = () => fail();
+    setTimeout(() => { if (!resolved) fail(); }, 30000);
+  });
+};
 
 const readLocalVideoDuration = file =>
   new Promise(resolve => {
@@ -88,52 +135,34 @@ const readLocalVideoDuration = file =>
     video.src = objectUrl;
   });
 
-const buildPromoDirectorBrief = ({ durationSeconds, style, angle, outputMode }) => {
-  const isStoryEdit = outputMode === "story_edit";
+const buildPromoDirectorBrief = ({ durationSeconds, style }) => {
   const durationIntent =
-    isStoryEdit
-      ? durationSeconds >= 180
-        ? "full five-minute story edit"
-        : "polished short-form story edit"
-      : durationSeconds <= 15
-      ? "fastest proof window"
-      : durationSeconds >= 60
-        ? "deeper demo story"
-        : "balanced social pitch";
+    durationSeconds >= 180
+      ? "longer-form visual treatment"
+      : durationSeconds >= 120
+        ? "balanced visual edit"
+        : "faster attention-retention edit";
   const styleIntent = {
-    clean: "clean structure, readable captions, and safe brand polish",
-    hype: "harder openings, sharper pacing, and more social pressure",
-    minimal: "less noise, calmer proof, and cleaner product focus",
+    clean: "balanced reframes, polished movement, and measured pacing",
+    hype: "harder punch-ins, faster switches, and more visual pressure",
+    minimal: "longer holds, quieter movement, and cleaner presentation",
   }[style.id] || style.summary;
-  const angleIntent = {
-    stop_scroll: "open with the most interruptive visual or promise",
-    proof_angle: "lead with receipts, outcomes, or believable evidence",
-    problem_solution: "show pain first, then make the solution feel obvious",
-    emotional_pull: "protect the human moment so the promo feels felt",
-    authority_burst: "make the brand or creator feel trusted fast",
-  }[angle.id] || angle.summary;
 
   return {
-    title: `${angle.label} · ${durationSeconds}s ${style.label}`,
-    summary: `Director is aiming for ${durationIntent}: ${styleIntent}, then ${angleIntent}.`,
-    bullets: isStoryEdit
-      ? [
-          "First output is a full story master, capped at 5 minutes, built from the best chapters.",
-          "Extra clips still give the user quick promo options after the full edit.",
-          "Audio, speech, and story captions should flow smoothly instead of feeling randomly chopped.",
-        ]
-      : [
-          "Four clips should cover different story chapters, not repeat one highlight.",
-          "Captions should explain the moment quickly for silent scrolling.",
-          "Each clip should earn a different job: hook, proof, replay, or final push.",
-        ],
+    title: `${durationSeconds}s ${style.label} Visual Edit`,
+    summary: `Director is aiming for a ${durationIntent}: ${styleIntent}.`,
+    bullets: [
+      "The uploaded audio stays in its original continuous order with no dialogue rewriting or rearrangement.",
+      "The system only changes the visual presentation through reframing, punch-ins, and pacing changes.",
+      "You get one master visual edit first, then three preview cuts derived from the same continuous timeline.",
+    ],
   };
 };
 
 const getFreshAuthToken = async forceRefresh => {
   const auth = getAuth();
   const user = auth.currentUser;
-  if (!user) throw new Error("Please log in to use Smart Promo Summary.");
+  if (!user) throw new Error("Please log in to use Smart Promo.");
   return user.getIdToken(Boolean(forceRefresh));
 };
 
@@ -143,12 +172,179 @@ const buildStatusLabel = analysis => {
 
   if (status === "queued") return "Queued for promo generation...";
   if (status === "failed") return analysis?.error || "Promo generation failed.";
-  if (status === "completed") return "Promo clips are ready.";
+  if (status === "completed") return "Smart Promo edit is ready.";
 
-  if (progress < 25) return "Analyzing video...";
-  if (progress < 50) return "Selecting highlights...";
-  if (progress < 75) return "Generating captions...";
-  return "Rendering clips...";
+  if (progress < 25) return "Analyzing audio, motion, and framing...";
+  if (progress < 50) return "Planning visual pacing...";
+  if (progress < 75) return "Rendering dynamic reframes...";
+  return "Packaging edit outputs...";
+};
+
+const VISUAL_PROGRESS_STEPS = [
+  {
+    id: "analyzing_original_video",
+    label: "Analyzing Original Video",
+    summary: "Reading video, audio, and motion",
+  },
+  {
+    id: "detecting_subjects",
+    label: "Detecting Subjects",
+    summary: "Finding faces, speaker focus, and subjects",
+  },
+  {
+    id: "reading_audio_energy",
+    label: "Reading Audio Energy",
+    summary: "Tracking energy peaks and movement changes",
+  },
+  {
+    id: "building_virtual_camera_moves",
+    label: "Building Virtual Camera Moves",
+    summary: "Creating punch-ins, crop shifts, and returns to wide",
+  },
+  {
+    id: "creating_visual_edit_timeline",
+    label: "Creating Edit Timeline",
+    summary: "Planning the final visual pacing",
+  },
+  {
+    id: "rendering_final_output",
+    label: "Rendering Final Output",
+    summary: "Rendering the final visual edit",
+  },
+];
+
+const formatTimelineTime = seconds => {
+  const safeSeconds = Math.max(0, Math.round(Number(seconds || 0)));
+  const minutes = Math.floor(safeSeconds / 60);
+  const secs = safeSeconds % 60;
+  return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+};
+
+const inferVisualStageFromProgress = analysis => {
+  const explicitStage = String(analysis?.stage || "").trim();
+  if (explicitStage) return explicitStage;
+  const progress = Number(analysis?.progress || 0);
+  if (progress < 20) return "analyzing_original_video";
+  if (progress < 30) return "detecting_subjects";
+  if (progress < 40) return "reading_audio_energy";
+  if (progress < 50) return "building_virtual_camera_moves";
+  if (progress < 60) return "creating_visual_edit_timeline";
+  return "rendering_final_output";
+};
+
+const extractPlannedTimeline = analysis => {
+  const rawTimeline =
+    (Array.isArray(analysis?.plannedEditTimeline) && analysis.plannedEditTimeline) ||
+    (Array.isArray(analysis?.storyMasterClip?.segments) && analysis.storyMasterClip.segments) ||
+    (Array.isArray(analysis?.clipSuggestions?.[0]?.segments) && analysis.clipSuggestions[0].segments) ||
+    [];
+
+  return rawTimeline
+    .filter(segment => Number(segment?.end) > Number(segment?.start))
+    .map((segment, index) => ({
+      id: segment.id || `${segment.editLabel || segment.visualMode || "edit"}-${index}`,
+      start: Number(segment.start || 0),
+      end: Number(segment.end || 0),
+      duration: Number(segment.duration || Math.max(0.2, Number(segment.end || 0) - Number(segment.start || 0))),
+      editLabel:
+        segment.editLabel ||
+        {
+          wide: "Wide Shot",
+          tight: "Punch-In",
+          focus: "Subject Focus",
+        }[segment.visualMode] ||
+        "Visual Reframe",
+      reason: segment.reason || "Visual pacing adjustment",
+      visualMode: segment.visualMode || "focus",
+      audioEnergyDb: Number(segment.audioEnergyDb ?? -34),
+      motionScore: Number(segment.motionScore ?? 0.18),
+      focusX: Number(segment.focusX ?? 0.5),
+      focusY: Number(segment.focusY ?? 0.5),
+      startFocusX: Number(segment.startFocusX ?? segment.focusX ?? 0.5),
+      startFocusY: Number(segment.startFocusY ?? segment.focusY ?? 0.5),
+      endFocusX: Number(segment.endFocusX ?? segment.focusX ?? 0.5),
+      endFocusY: Number(segment.endFocusY ?? segment.focusY ?? 0.5),
+      zoom: Number(segment.zoom ?? 1),
+      zoomStart: Number(segment.zoomStart ?? segment.zoom ?? 1),
+      zoomEnd: Number(segment.zoomEnd ?? segment.zoom ?? 1),
+      faceCount: Number(segment.faceCount ?? 0),
+      framingVariant: segment.framingVariant || "center",
+    }));
+};
+
+const buildVisualProgressSteps = analysis => {
+  const activeStage = inferVisualStageFromProgress(analysis);
+  const activeIndex = Math.max(
+    0,
+    VISUAL_PROGRESS_STEPS.findIndex(step => step.id === activeStage)
+  );
+  return VISUAL_PROGRESS_STEPS.map((step, index) => ({
+    ...step,
+    state:
+      index < activeIndex
+        ? "complete"
+        : index === activeIndex
+          ? "active"
+          : "pending",
+  }));
+};
+
+const buildWaveformBars = timeline => {
+  const segments = Array.isArray(timeline) ? timeline : [];
+  if (!segments.length) {
+    return Array.from({ length: 24 }, (_, index) => ({
+      id: `idle-${index}`,
+      height: 0.24 + ((index % 5) * 0.08),
+      segmentId: null,
+    }));
+  }
+
+  const bars = [];
+  segments.forEach((segment, segmentIndex) => {
+    const energy = Number(segment.audioEnergyDb ?? -34);
+    const motion = Number(segment.motionScore ?? 0.18);
+    const duration = Number(segment.duration || Math.max(0.5, Number(segment.end || 0) - Number(segment.start || 0)));
+    const sampleCount = Math.max(1, Math.min(4, Math.round(duration / 1.6)));
+    const baseHeight = Math.max(0.16, Math.min(1, (energy + 50) / 28));
+    const motionLift = Math.max(0, Math.min(0.18, motion * 0.35));
+    for (let sampleIndex = 0; sampleIndex < sampleCount; sampleIndex += 1) {
+      bars.push({
+        id: `${segment.id || `segment-${segmentIndex}`}-${sampleIndex}`,
+        height: Math.max(0.16, Math.min(1, baseHeight + motionLift - (sampleIndex % 2 === 0 ? 0.03 : -0.02))),
+        segmentId: segment.id || `segment-${segmentIndex}`,
+      });
+    }
+  });
+  return bars.slice(0, 72);
+};
+
+const buildPreviewViewportStyle = segment => {
+  if (!segment) {
+    return {
+      transform: "scale(1)",
+      transformOrigin: "50% 50%",
+    };
+  }
+
+  const focusX = Math.max(0.18, Math.min(0.82, Number(segment.endFocusX ?? segment.focusX ?? 0.5)));
+  const focusY = Math.max(0.22, Math.min(0.78, Number(segment.endFocusY ?? segment.focusY ?? 0.5)));
+  const zoomEnd = Math.max(0.82, Math.min(1, Number(segment.zoomEnd ?? segment.zoom ?? 1)));
+  const visualMode = String(segment.visualMode || "focus").toLowerCase();
+  const framingVariant = String(segment.framingVariant || "center").toLowerCase();
+
+  let scale = 1;
+  if (visualMode === "tight") scale = Math.min(1.34, 1 + (1 - zoomEnd) * 2.15);
+  else if (visualMode === "focus") scale = Math.min(1.22, 1 + (1 - zoomEnd) * 1.55);
+  else scale = framingVariant === "slow_movement" ? 1.03 : 1.01;
+
+  let translateX = 0;
+  if (framingVariant === "asymmetric") translateX = focusX < 0.5 ? 2.5 : -2.5;
+  if (framingVariant === "slow_movement") translateX += focusX < 0.5 ? 1.3 : -1.3;
+
+  return {
+    transform: `translateX(${translateX}%) scale(${scale.toFixed(3)})`,
+    transformOrigin: `${Math.round(focusX * 100)}% ${Math.round(focusY * 100)}%`,
+  };
 };
 
 const normalizePromoAssets = clip => {
@@ -231,7 +427,7 @@ const normalizePromoAnalysisResults = analysis => {
     url: clip.url,
     title: clip.titleSuggestion || clip.hookText || clip.title || clip.promoCaption || "Smart Promo Clip",
     promoCaption: clip.promoCaption || clip.title || "Smart Promo Clip",
-    campaignRoleLabel: clip.campaignRoleLabel || (clip.storyMaster ? "Story Master" : null),
+    campaignRoleLabel: clip.campaignRoleLabel || (clip.storyMaster ? "Master Visual Edit" : null),
     storyMaster: Boolean(clip.storyMaster),
     bestFor: clip.bestFor || null,
     hookReason: clip.hookReason || null,
@@ -272,10 +468,9 @@ function SmartPromoSummaryPanel({
   onUseClip,
   onStatusChange,
 }) {
-  const [durationSeconds, setDurationSeconds] = useState(30);
+  const [durationSeconds, setDurationSeconds] = useState(120);
   const [styleId, setStyleId] = useState("clean");
-  const [promoAngle, setPromoAngle] = useState("stop_scroll");
-  const [outputMode, setOutputMode] = useState("campaign_set");
+  const [outputMode, setOutputMode] = useState("visual_edit");
   const [isGenerating, setIsGenerating] = useState(false);
   const [statusText, setStatusText] = useState("");
   const [jobId, setJobId] = useState("");
@@ -284,8 +479,14 @@ function SmartPromoSummaryPanel({
   const [errorText, setErrorText] = useState("");
   const [restoringClips, setRestoringClips] = useState(false);
   const [pendingEstimate, setPendingEstimate] = useState(null);
+  const [segmentFrames, setSegmentFrames] = useState({});
+  const [activeSegmentFrameIndex, setActiveSegmentFrameIndex] = useState(0);
+  const captureVideoRef = useRef(null);
+  const captureCanvasRef = useRef(null);
+  const [activePreviewIndex, setActivePreviewIndex] = useState(0);
   const [isEstimating, setIsEstimating] = useState(false);
   const [selectedVisualByClipId, setSelectedVisualByClipId] = useState({});
+  const [sourcePreviewUrl, setSourcePreviewUrl] = useState("");
   const pollingActiveRef = useRef(true);
 
   const promoCost = Number(creditCosts?.["promo-summary"] || 18);
@@ -299,36 +500,29 @@ function SmartPromoSummaryPanel({
   }, []);
 
   const canAfford = creditBalance === null || Number(creditBalance) >= displayedPromoCost;
-  const activeDurations = outputMode === "story_edit" ? STORY_EDIT_DURATIONS : PROMO_DURATIONS;
+  const activeDurations = STORY_EDIT_DURATIONS;
   const selectedOutputMode = useMemo(
     () => getSelectedPreset(PROMO_OUTPUT_MODES, outputMode),
     [outputMode]
   );
   const waitEstimate =
-    outputMode === "story_edit"
-      ? "about 20-40 minutes"
-      : durationSeconds <= 15
-        ? "about 10-20 minutes"
-        : "about 15-30 minutes";
+    durationSeconds >= 180 ? "about 20-40 minutes" : "about 12-25 minutes";
   const selectedStyle = useMemo(() => getSelectedPreset(PROMO_STYLES, styleId), [styleId]);
-  const selectedAngle = useMemo(() => getSelectedPreset(PROMO_ANGLES, promoAngle), [promoAngle]);
   const promoDirectorBrief = useMemo(
     () =>
       buildPromoDirectorBrief({
         durationSeconds,
         style: selectedStyle,
-        angle: selectedAngle,
-        outputMode,
       }),
-    [durationSeconds, selectedStyle, selectedAngle, outputMode]
+    [durationSeconds, selectedStyle]
   );
 
   useEffect(() => {
-    const nextDurations = outputMode === "story_edit" ? STORY_EDIT_DURATIONS : PROMO_DURATIONS;
+    const nextDurations = STORY_EDIT_DURATIONS;
     if (!nextDurations.includes(durationSeconds)) {
-      setDurationSeconds(outputMode === "story_edit" ? 120 : 30);
+      setDurationSeconds(120);
     }
-  }, [outputMode, durationSeconds]);
+  }, [durationSeconds]);
 
   const sourceSummary = useMemo(() => {
     if (sourceFile?.name) return sourceFile.name;
@@ -336,25 +530,70 @@ function SmartPromoSummaryPanel({
     return "Current source";
   }, [sourceFile, sourceUrl]);
 
+  useEffect(() => {
+    if (sourceFile instanceof File || sourceFile instanceof Blob) {
+      const objectUrl = URL.createObjectURL(sourceFile);
+      setSourcePreviewUrl(objectUrl);
+      return () => URL.revokeObjectURL(objectUrl);
+    }
+    if (sourceFile?.url) {
+      setSourcePreviewUrl(String(sourceFile.url));
+      return undefined;
+    }
+    if (typeof sourceUrl === "string" && sourceUrl) {
+      setSourcePreviewUrl(sourceUrl);
+      return undefined;
+    }
+    setSourcePreviewUrl("");
+    return undefined;
+  }, [sourceFile, sourceUrl]);
+
   const resolveVideoSource = async () => {
     if (sourceFile instanceof File || sourceFile instanceof Blob) {
-      const auth = getAuth();
-      const user = auth.currentUser;
-      if (!user) throw new Error("Please log in to generate promo clips.");
-      const token = await user.getIdToken(true);
-      const safeName =
-        typeof sourceFile.name === "string" && sourceFile.name
-          ? sourceFile.name.replace(/[^a-zA-Z0-9._-]+/g, "_")
-          : `promo-source-${Date.now()}.mp4`;
-      const uploadResult = await uploadSourceFileViaBackend({
-        file: sourceFile,
-        token,
-        mediaType: "video",
-        fileName: safeName,
+      setStatusText("Preparing source file...");
+
+      // Compress large files before upload
+      let uploadFile = sourceFile;
+      const compressResult = await compressVideoBeforeUpload(sourceFile, pct => {
+        if (pct < 1) setStatusText(`Compressing source (${Math.round(pct * 100)}%)...`);
       });
+      if (compressResult) {
+        uploadFile = compressResult.file;
+        setStatusText(
+          `Compressed ${formatMediaBytes(compressResult.originalSize)} → ${formatMediaBytes(compressResult.compressedSize)}`
+        );
+        await wait(800);
+      }
+
+      // Upload directly to Python media worker — no Firebase roundtrip
+      setStatusText("Uploading to media worker...");
+      const formData = new FormData();
+      formData.append("file", uploadFile, uploadFile.name || "source.mp4");
+
+      let response;
+      try {
+        response = await fetch("http://127.0.0.1:8000/api/media/upload-source", {
+          method: "POST",
+          body: formData,
+        });
+      } catch {
+        throw new Error("Cannot reach media worker. Make sure python_media_worker is running on port 8000.");
+      }
+
+      const uploadResult = await response.json().catch(() => ({}));
+      if (!response.ok || !uploadResult?.localPath) {
+        throw new Error(uploadResult?.detail || "Failed to upload source to media worker");
+      }
+
+      setStatusText(
+        `Source ready (${formatMediaBytes(uploadResult.size || 0)}, ${(uploadResult.duration || 0).toFixed(1)}s)`
+      );
+      await wait(500);
+
       return {
-        videoUrl: uploadResult?.url,
-        sourceStoragePath: uploadResult?.storagePath || null,
+        videoUrl: uploadResult.localPath,   // local filesystem path — worker reads directly
+        localPath: uploadResult.localPath,
+        sourceStoragePath: null,
       };
     }
 
@@ -388,7 +627,7 @@ function SmartPromoSummaryPanel({
           .map(normalizePromoLibraryClip);
         if (!cancelled && clips.length) {
           setPromoClips(clips);
-          setStatusText("Restored your available promo clips.");
+          setStatusText("Restored your available Smart Promo outputs.");
         }
       } catch (error) {
         console.warn("Could not restore promo clips.", error);
@@ -430,18 +669,23 @@ function SmartPromoSummaryPanel({
       activeToken = result.token;
       const nextStatus = buildStatusLabel(analysis);
       setStatusText(nextStatus);
+      setAnalysisDetails({
+        analysisReused: Boolean(analysis.analysisReused),
+        workflowType: analysis.workflowType || null,
+        confidenceSummary: analysis.confidenceSummary || null,
+        progress: Number(analysis.progress || 0),
+        status: analysis.status || "",
+        detail: analysis.detail || "",
+        stage: inferVisualStageFromProgress(analysis),
+        plannedTimeline: extractPlannedTimeline(analysis),
+      });
       if (onStatusChange) onStatusChange(nextStatus);
 
       if (analysis.status === "completed") {
         const clips = normalizePromoAnalysisResults(analysis);
         setPromoClips(clips);
-        setAnalysisDetails({
-          analysisReused: Boolean(analysis.analysisReused),
-          workflowType: analysis.workflowType || null,
-          confidenceSummary: analysis.confidenceSummary || null,
-        });
         if (analysis.analysisReused) {
-          setStatusText("Promo clips are ready. Reused saved analysis.");
+          setStatusText("Smart Promo edit is ready. Reused saved analysis.");
         }
         return;
       }
@@ -464,9 +708,9 @@ function SmartPromoSummaryPanel({
       },
       body: JSON.stringify({
         videoDurationSeconds,
-        clipCount: outputMode === "story_edit" ? 4 : 4,
+        clipCount: 4,
         outputMode,
-        includeCaptions: true,
+        includeCaptions: false,
         includeVisuals: true,
       }),
     });
@@ -484,12 +728,12 @@ function SmartPromoSummaryPanel({
     setJobId("");
     setPendingEstimate(null);
     setAnalysisDetails(null);
-    setStatusText("Uploading and preparing Smart Promo Summary...");
+    setStatusText("Uploading and preparing Smart Promo...");
 
     try {
       let token = await getFreshAuthToken(true);
       setStatusText("Uploading source video...");
-      const { videoUrl, sourceStoragePath } = await resolveVideoSource();
+      const { videoUrl, localPath, sourceStoragePath } = await resolveVideoSource();
       const sourceFingerprint = buildSourceFingerprint({ sourceFile, sourceUrl });
       setStatusText("Creating Smart Promo job...");
 
@@ -504,9 +748,9 @@ function SmartPromoSummaryPanel({
           },
           body: JSON.stringify({
             videoUrl,
+            localPath: localPath || null,
             durationSeconds,
             style: styleId,
-            promoAngle,
             outputMode,
             sourceStoragePath,
             sourceFingerprint,
@@ -528,7 +772,7 @@ function SmartPromoSummaryPanel({
       setStatusText("Analyzing video...");
       if (onStatusChange) {
         onStatusChange(
-          `Smart Promo Summary started. ${payload.creditsRemaining ?? "?"} credits remaining.`
+          `Smart Promo started. ${payload.creditsRemaining ?? "?"} credits remaining.`
         );
       }
 
@@ -574,8 +818,153 @@ function SmartPromoSummaryPanel({
     return `Expires in ${minutes}m`;
   };
 
-  const handleDownload = clip => {
-    window.open(clip.url, "_blank", "noopener,noreferrer");
+  const visualProgressSteps = useMemo(
+    () => buildVisualProgressSteps(analysisDetails),
+    [analysisDetails]
+  );
+  const plannedTimeline = useMemo(
+    () => analysisDetails?.plannedTimeline || [],
+    [analysisDetails]
+  );
+  const progressPercent = Math.max(0, Math.min(100, Number(analysisDetails?.progress || 0)));
+  const activePreviewSegment = plannedTimeline[activePreviewIndex] || plannedTimeline[0] || null;
+  const waveformBars = useMemo(() => buildWaveformBars(plannedTimeline), [plannedTimeline]);
+  const previewViewportStyle = useMemo(
+    () => buildPreviewViewportStyle(activePreviewSegment),
+    [activePreviewSegment]
+  );
+
+  useEffect(() => {
+    if (!plannedTimeline.length) {
+      setActivePreviewIndex(0);
+      return undefined;
+    }
+
+    let cancelled = false;
+    let timeoutId;
+    let cursor = 0;
+
+    const cycle = () => {
+      if (cancelled) return;
+      setActivePreviewIndex(cursor);
+      const activeSegment = plannedTimeline[cursor] || plannedTimeline[0];
+      cursor = (cursor + 1) % plannedTimeline.length;
+      const nextDelay = Math.max(1200, Math.min(3600, Number(activeSegment?.duration || 3) * 480));
+      timeoutId = window.setTimeout(cycle, nextDelay);
+    };
+
+    cycle();
+    return () => {
+      cancelled = true;
+      if (timeoutId) window.clearTimeout(timeoutId);
+    };
+  }, [plannedTimeline]);
+
+  // Capture video frames for each timeline segment
+  useEffect(() => {
+    if (!plannedTimeline.length || !sourcePreviewUrl) {
+      setSegmentFrames({});
+      return;
+    }
+
+    const video = captureVideoRef.current;
+    const canvas = captureCanvasRef.current;
+    if (!video || !canvas) return;
+
+    let cancelled = false;
+    const frames = {};
+    const ctx = canvas.getContext("2d");
+
+    const captureSegments = async () => {
+      // Ensure video is ready
+      if (video.readyState < 2) {
+        await new Promise((resolve, reject) => {
+          const onReady = () => {
+            video.removeEventListener("loadeddata", onReady);
+            video.removeEventListener("error", onError);
+            resolve();
+          };
+          const onError = () => {
+            video.removeEventListener("loadeddata", onReady);
+            video.removeEventListener("error", onError);
+            reject(new Error("Video failed to load"));
+          };
+          video.addEventListener("loadeddata", onReady);
+          video.addEventListener("error", onError);
+          if (video.readyState >= 2) {
+            video.removeEventListener("loadeddata", onReady);
+            video.removeEventListener("error", onError);
+            resolve();
+          }
+        }).catch(() => {});
+      }
+
+      if (cancelled) return;
+
+      canvas.width = 320;
+      canvas.height = 180;
+
+      for (const segment of plannedTimeline) {
+        if (cancelled) break;
+        const seekTime = segment.start + Math.min(0.5, Number(segment.duration || 0) * 0.3);
+        try {
+          video.currentTime = seekTime;
+          await new Promise(resolve => {
+            const onSeeked = () => {
+              video.removeEventListener("seeked", onSeeked);
+              resolve();
+            };
+            video.addEventListener("seeked", onSeeked);
+            // Timeout safety
+            setTimeout(() => {
+              video.removeEventListener("seeked", onSeeked);
+              resolve();
+            }, 3000);
+          });
+          if (!cancelled) {
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            frames[segment.id] = canvas.toDataURL("image/jpeg", 0.8);
+          }
+        } catch {
+          frames[segment.id] = null;
+        }
+      }
+
+      if (!cancelled) {
+        setSegmentFrames(frames);
+        setActiveSegmentFrameIndex(0);
+      }
+    };
+
+    captureSegments().catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, [plannedTimeline, sourcePreviewUrl]);
+
+  const handleDownload = async clip => {
+    if (!clip?.url) return;
+    try {
+      const response = await fetch(clip.url);
+      if (!response.ok) throw new Error(`Download failed (${response.status})`);
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      const safeName = (clip.titleSuggestion || clip.hookText || clip.promoCaption || "smart-promo-clip")
+        .replace(/[^a-zA-Z0-9._-]+/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "") || "smart-promo-clip";
+      link.download = `${safeName}.mp4`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 2000);
+    } catch {
+      // Fallback: open in new tab if fetch fails (CORS, etc.)
+      window.open(clip.url, "_blank", "noopener,noreferrer");
+    }
   };
 
   const getSelectedVisualForClip = (clip, index = 0) =>
@@ -627,15 +1016,15 @@ function SmartPromoSummaryPanel({
   };
 
   return (
-    <div className="promo-summary-overlay" role="dialog" aria-modal="true" aria-label="Smart Promo Summary">
+    <div className="promo-summary-overlay" role="dialog" aria-modal="true" aria-label="Smart Promo">
       <div className="promo-summary-shell">
         <div className="promo-summary-header">
           <div>
-            <span className="promo-summary-eyebrow">Premium Promo Engine</span>
-            <h3>Smart Promo Summary</h3>
+            <span className="promo-summary-eyebrow">Visual Editing Engine</span>
+            <h3>Smart Promo</h3>
             <p>
-              Turn one long video into either four short promo cuts or a polished story edit plus
-              clips, with auto story captions and social pacing.
+              Turn one static recording into a dynamic visual edit with original audio preserved,
+              then generate three preview cuts from that same continuous timeline.
             </p>
           </div>
           <button type="button" className="promo-summary-close" onClick={onClose} aria-label="Close promo summary">
@@ -648,16 +1037,16 @@ function SmartPromoSummaryPanel({
           <div className="promo-summary-pill">Estimate: {displayedPromoCost} credits</div>
           <div className="promo-summary-pill">Balance: {creditBalance ?? "..."}</div>
           <div className="promo-summary-pill">
-            Output: {outputMode === "story_edit" ? "1 story edit + clips" : "4 clips"}
+            Output: 1 master edit + 3 previews
           </div>
           <div className="promo-summary-pill">Mode: {selectedOutputMode.pill}</div>
         </div>
         <div className="promo-summary-billing-note">
-          Smart Promo Summary is a credit-based generation. Your monthly editing credits are used
+          Smart Promo is a credit-based generation. Your monthly editing credits are used
           first, and you can top up anytime if you want more promo runs before renewal.
         </div>
         <div className="promo-summary-billing-note promo-summary-time-note">
-          Promo rendering can take {waitEstimate} depending on source length, captions, and upload speed.
+          Smart Promo rendering can take {waitEstimate} depending on source length, visual complexity, and upload speed.
           Keep this tab open while the job is running.
         </div>
         <div className="promo-summary-director-brief">
@@ -672,6 +1061,141 @@ function SmartPromoSummaryPanel({
             ))}
           </ul>
         </div>
+
+        {(isGenerating || jobId || plannedTimeline.length > 0) && (
+          <div className="promo-summary-live-shell">
+            <div className="promo-summary-live-sidebar">
+              <span className="promo-summary-card-label">Processing Steps</span>
+              <div className="promo-summary-live-steps">
+                {visualProgressSteps.map(step => (
+                  <div
+                    key={step.id}
+                    className={`promo-summary-live-step is-${step.state}`}
+                  >
+                    <div className="promo-summary-live-step-marker" />
+                    <div>
+                      <strong>{step.label}</strong>
+                      <span>{step.summary}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="promo-summary-live-progress">
+                <div className="promo-summary-live-progress-head">
+                  <strong>Overall Progress</strong>
+                  <span>{progressPercent}%</span>
+                </div>
+                <div className="promo-summary-live-progress-bar">
+                  <span style={{ width: `${progressPercent}%` }} />
+                </div>
+                <small>{analysisDetails?.detail || statusText || "Preparing Smart Promo..."}</small>
+              </div>
+              <div className="promo-summary-live-audio">
+                <strong>Audio Status</strong>
+                <span>Original audio preserved</span>
+                <small>Audio will remain untouched and continuous.</small>
+              </div>
+            </div>
+
+            <div className="promo-summary-live-main">
+              <div className="promo-summary-live-head">
+                <div>
+                  <span className="promo-summary-card-label">Planned Edit Timeline</span>
+                  <strong>Smart Promo is acting like a visual director while the audio stays intact.</strong>
+                </div>
+                <small>{analysisDetails?.detail || "Waiting for the edit timeline..."}</small>
+              </div>
+
+              <div className="promo-summary-live-preview-grid">
+                <article className="promo-summary-live-preview-card">
+                  <span className="promo-summary-card-label">Original Video</span>
+                  <strong>Uploaded Source</strong>
+                  <div className="promo-summary-live-preview-stage is-original">
+                    {sourcePreviewUrl ? (
+                      <video src={sourcePreviewUrl} muted autoPlay loop playsInline preload="metadata" />
+                    ) : (
+                      <div className="promo-summary-live-preview-empty">Waiting for source preview...</div>
+                    )}
+                  </div>
+                </article>
+
+                <article className="promo-summary-live-preview-card">
+                  <span className="promo-summary-card-label">Smart Promo Preview</span>
+                  <strong>{activePreviewSegment?.editLabel || "Building virtual camera moves"}</strong>
+                  <div className="promo-summary-live-preview-stage is-smart-promo">
+                    {sourcePreviewUrl ? (
+                      <div className="promo-summary-live-preview-viewport">
+                        <video
+                          src={sourcePreviewUrl}
+                          muted
+                          autoPlay
+                          loop
+                          playsInline
+                          preload="metadata"
+                          style={previewViewportStyle}
+                        />
+                      </div>
+                    ) : (
+                      <div className="promo-summary-live-preview-empty">Preview camera moves will appear here.</div>
+                    )}
+                    <div className="promo-summary-live-preview-overlay">
+                      <span>{activePreviewSegment?.reason || "Animated low-res preview while the final render completes."}</span>
+                    </div>
+                  </div>
+                </article>
+              </div>
+
+              <div className="promo-summary-live-waveform">
+                <div className="promo-summary-live-waveform-head">
+                  <span className="promo-summary-card-label">Waveform</span>
+                  <small>Temporary low-res visual preview while the full render finishes.</small>
+                </div>
+                <div className="promo-summary-live-waveform-bars">
+                  {waveformBars.map(bar => (
+                    <span
+                      key={bar.id}
+                      className={bar.segmentId && bar.segmentId === activePreviewSegment?.id ? "is-active" : ""}
+                      style={{ "--wave-height": String(bar.height) }}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {plannedTimeline.length ? (
+                <div className="promo-summary-live-timeline">
+                  {plannedTimeline.map((segment, segIdx) => (
+                    <article key={segment.id} className={`promo-summary-live-segment is-${segment.visualMode}${segIdx === activeSegmentFrameIndex ? " is-active" : ""}`}>
+                      <div className="promo-summary-live-segment-frame">
+                        {segmentFrames[segment.id] ? (
+                          <img
+                            src={segmentFrames[segment.id]}
+                            alt={`Frame at ${formatTimelineTime(segment.start)}`}
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="promo-summary-live-segment-frame-empty">
+                            <span>{formatTimelineTime(segment.start)}</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="promo-summary-live-segment-meta">
+                        <span className="promo-summary-live-segment-time">
+                          {formatTimelineTime(segment.start)} &rarr; {formatTimelineTime(segment.end)}
+                        </span>
+                        <strong>{segment.editLabel}</strong>
+                        <small>{segment.reason}</small>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <div className="promo-summary-live-placeholder">
+                  Planned edits will appear here as soon as Smart Promo finishes analyzing motion, subjects, and audio energy.
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         <div className="promo-summary-grid">
           <section className="promo-summary-card promo-summary-card-wide">
@@ -724,29 +1248,12 @@ function SmartPromoSummaryPanel({
             </div>
           </section>
 
-          <section className="promo-summary-card promo-summary-card-wide">
-            <span className="promo-summary-card-label">Promo Angle</span>
-            <div className="promo-summary-angle-grid">
-              {PROMO_ANGLES.map(angle => (
-                <button
-                  key={angle.id}
-                  type="button"
-                  className={`promo-summary-style-card ${promoAngle === angle.id ? "is-active" : ""}`}
-                  onClick={() => setPromoAngle(angle.id)}
-                >
-                  <strong>{angle.label}</strong>
-                  <span>{angle.summary}</span>
-                </button>
-              ))}
-            </div>
-          </section>
-
           <section className="promo-summary-card">
             <span className="promo-summary-card-label">Status</span>
             <div className="promo-summary-status">
               <strong>{statusText || "Ready to generate."}</strong>
               <span>
-                Credits are deducted before processing. Early platform failures are refunded; completed promo clips stay available until they expire.
+                Credits are deducted before processing. Early platform failures are refunded; completed Smart Promo outputs stay available until they expire.
               </span>
             </div>
             {errorText && <div className="promo-summary-error">{errorText}</div>}
@@ -762,7 +1269,7 @@ function SmartPromoSummaryPanel({
                 onClick={handleGenerate}
                 disabled={isGenerating || isEstimating || !canAfford}
               >
-                {isGenerating ? "Generating Promo..." : isEstimating ? "Estimating..." : "Generate Promo"}
+                {isGenerating ? "Generating Edit..." : isEstimating ? "Estimating..." : "Generate Smart Promo"}
               </button>
               <button type="button" className="promo-summary-secondary" onClick={onClose}>
                 Close
@@ -774,10 +1281,10 @@ function SmartPromoSummaryPanel({
         {pendingEstimate && (
           <div className="promo-summary-confirm-backdrop" role="presentation">
             <div className="promo-summary-confirm" role="dialog" aria-modal="true" aria-label="Confirm Smart Promo credits">
-              <span className="promo-summary-card-label">Confirm Promo Package</span>
+              <span className="promo-summary-card-label">Confirm Smart Promo Package</span>
               <strong>{pendingEstimate.credits} credits required</strong>
               <p>
-                Credits cover video analysis, clip generation, captions, thumbnail/poster rendering,
+                Credits cover video analysis, visual edit planning, output rendering, thumbnail/poster rendering,
                 and temporary processing/storage.
               </p>
               <div className="promo-summary-confirm-grid">
@@ -821,45 +1328,39 @@ function SmartPromoSummaryPanel({
 
         <div className="promo-summary-results">
           <div className="promo-summary-results-head">
-            <strong>Promo Results</strong>
+            <strong>Smart Promo Results</strong>
             <span>
               {jobId
                 ? `Job ${jobId}`
-                : outputMode === "story_edit"
-                  ? "You will get a full story master first, then extra promo clips from different chapters."
-                  : "You will get a 4-clip campaign set with different hook angles, not four copies of the same cut."}
+                : "You will get one continuous visual master edit first, then three previews cut from that same timeline."}
             </span>
           </div>
           {promoClips.length > 0 && (
             <div className="promo-summary-campaign-map">
-              <span>Campaign set map</span>
+              <span>Visual edit map</span>
               <strong>
-                {outputMode === "story_edit"
-                  ? "Full story master -> hook cut -> proof cut -> close cut"
-                  : "Hook the scroll -> prove the value -> create replay -> push the next action"}
+                Master visual edit &rarr; opening preview &rarr; middle preview &rarr; closing preview
               </strong>
             </div>
           )}
-          {outputMode === "story_edit" && analysisDetails?.confidenceSummary ? (
+          {analysisDetails?.confidenceSummary ? (
             <div className="promo-summary-campaign-map">
-              <span>Story confidence</span>
+              <span>Edit confidence</span>
               <strong>
                 {analysisDetails.confidenceSummary.confidenceLabel || "Confidence pending"}
                 {analysisDetails.analysisReused ? " · Reused analysis" : " · Fresh analysis"}
               </strong>
               <small>
                 {analysisDetails.confidenceSummary.summary ||
-                  "Story master confidence is based on ordered speech chapters and transcript reliability."}
+                  "Confidence is based on stable visual pacing, reframing coverage, and preserved audio continuity."}
               </small>
             </div>
           ) : null}
           {promoClips.length === 0 ? (
             <div className="promo-summary-empty">
               {restoringClips
-                ? "Checking for available promo clips..."
-                : outputMode === "story_edit"
-                  ? "We will generate one coherent story master first, then three derived shorts from the same narrative flow."
-                  : "We will generate four different promo cuts with distinct campaign roles, short story captions, and a 24-hour download window."}
+                ? "Checking for available Smart Promo outputs..."
+                : "We will generate one continuous visual edit first, then three previews from the same untouched audio timeline."}
             </div>
           ) : (
             <div className="promo-summary-results-grid">
@@ -891,10 +1392,9 @@ function SmartPromoSummaryPanel({
                     {clip.campaignRoleLabel ? (
                       <div className="promo-summary-role-badge">{clip.campaignRoleLabel}</div>
                     ) : null}
-                    <strong>{clip.promoCaption || clip.title || `Promo Cut ${index + 1}`}</strong>
+                    <strong>{clip.promoCaption || clip.title || `Smart Promo Output ${index + 1}`}</strong>
                     <span>
                       {(clip.duration || durationSeconds) ? `${Math.round(Number(clip.duration || durationSeconds))}s` : ""}
-                      {clip.viralScore ? ` · Score ${Math.round(Number(clip.viralScore))}` : ""}
                       {clip.confidenceLabel ? ` · ${clip.confidenceLabel}` : ""}
                     </span>
                     {clip.hookReason ? <small>{clip.hookReason}</small> : null}
@@ -964,6 +1464,19 @@ function SmartPromoSummaryPanel({
           )}
         </div>
       </div>
+      {/* Hidden elements for frame capture */}
+      <video
+        ref={captureVideoRef}
+        src={sourcePreviewUrl}
+        crossOrigin="anonymous"
+        preload="auto"
+        muted
+        style={{ display: "none" }}
+      />
+      <canvas
+        ref={captureCanvasRef}
+        style={{ display: "none" }}
+      />
     </div>
   );
 }

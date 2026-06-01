@@ -696,15 +696,8 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
       )}
 
       {activeTab === "gallery" ? (
-        <div className="gallery-view" style={{ padding: "20px" }}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: "20px",
-            }}
-          >
+        <div className="gallery-view">
+          <div className="gallery-view-header">
             <h3>Your Generated Clips Library</h3>
             <button className="btn-secondary" onClick={() => setActiveTab("studio")}>
               Create New Clips
@@ -719,132 +712,47 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
               </button>
             </div>
           ) : (
-            <div
-              className="generated-clips-grid"
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-                gap: "20px",
-              }}
-            >
+            <div className="generated-clips-grid">
               {generatedClips.map(clip => (
-                <div
-                  key={clip.id}
-                  className="generated-clip-card"
-                  style={{
-                    background: "var(--viral-bg-card)",
-                    padding: "15px",
-                    borderRadius: "8px",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                  }}
-                >
-                  <div
-                    style={{
-                      position: "relative",
-                      paddingBottom: "177.78%",
-                      marginBottom: "15px",
-                      background: "#000",
-                      borderRadius: "6px",
-                      overflow: "hidden",
-                    }}
-                  >
+                <div key={clip.id} className="generated-clip-card">
+                  <div className="generated-clip-thumb">
                     <video
                       src={clip.url}
                       controls
-                      style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                      }}
+                      preload="metadata"
                     />
                   </div>
                   <div className="generated-clip-info">
-                    <h4
-                      style={{
-                        margin: "0 0 8px 0",
-                        fontSize: "16px",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                      title={clip.title}
-                    >
+                    <h4 title={clip.title}>
                       {clip.title}
                     </h4>
-                    <p
-                      style={{
-                        fontSize: "12px",
-                        color: "var(--viral-text-muted)",
-                        margin: "0 0 10px 0",
-                      }}
-                    >
-                      Created: {new Date(clip.createdAt).toLocaleDateString()}
-                    </p>
-                    {clip.expiresAt && (
-                      <p
-                        style={{
-                          fontSize: "12px",
-                          color: clip.sourceType === "promo_summary_clip" ? "#fbbf24" : "#94a3b8",
-                          margin: "0 0 10px 0",
-                        }}
-                      >
-                        {formatExpiry(clip)}
-                      </p>
-                    )}
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        marginBottom: "12px",
-                      }}
-                    >
-                      <span
-                        className="viral-chip"
-                        style={{
-                          fontSize: "12px",
-                          background: "rgba(0,255,136,0.1)",
-                          color: "#00ff88",
-                          padding: "2px 8px",
-                          borderRadius: "4px",
-                        }}
-                      >
-                        ⚡ Score: {clip.viralScore || "—"}
+                    <div className="generated-clip-meta">
+                      <span className="generated-clip-date">
+                        {new Date(clip.createdAt).toLocaleDateString()}
+                      </span>
+                      <span className="viral-chip score">
+                        ⚡ {clip.viralScore || "—"}
                       </span>
                       {clip.sourceType === "promo_summary_clip" && (
-                        <span
-                          className="viral-chip"
-                          style={{
-                            fontSize: "12px",
-                            background: "rgba(59,130,246,0.14)",
-                            color: "#93c5fd",
-                            padding: "2px 8px",
-                            borderRadius: "4px",
-                          }}
-                        >
-                          Promo
-                        </span>
+                        <span className="viral-chip promo">Promo</span>
                       )}
                       <span style={{ fontSize: "12px", color: "#aaa" }}>
                         {formatDuration(clip.duration)}
                       </span>
                     </div>
-
+                    {clip.expiresAt && (
+                      <p
+                        className={`generated-clip-expiry ${clip.sourceType === "promo_summary_clip" ? "warning" : ""}`}
+                      >
+                        {formatExpiry(clip)}
+                      </p>
+                    )}
                     <a
                       href={clip.url}
                       download
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="btn-primary"
-                      style={{
-                        display: "block",
-                        textAlign: "center",
-                        textDecoration: "none",
-                        width: "100%",
-                      }}
+                      className="btn-primary clip-download-btn"
                     >
                       Download Video
                     </a>
@@ -871,61 +779,27 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
               </div>
 
               {/* Template Picker */}
-              <div style={{ marginTop: "2rem", padding: "0 20px" }}>
-                <h4 style={{ marginBottom: "12px", color: "#e2e8f0" }}>🎬 Quick Templates</h4>
-                <p style={{ fontSize: "13px", color: "#888", marginBottom: "16px" }}>
-                  Pick a template to pre-configure caption style and crop mode for your clips.
-                </p>
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
-                    gap: "12px",
-                  }}
-                >
+              <div className="template-section">
+                <h4>🎬 Quick Templates</h4>
+                <p>Pick a template to pre-configure caption style and crop mode for your clips.</p>
+                <div className="template-grid">
                   {Object.entries(TEMPLATES).map(([key, t]) => (
                     <button
                       key={key}
                       onClick={() => applyTemplate(key)}
-                      style={{
-                        padding: "14px 12px",
-                        borderRadius: "10px",
-                        border:
-                          selectedTemplate === key
-                            ? "2px solid #00ff88"
-                            : "1px solid rgba(255,255,255,0.1)",
-                        background:
-                          selectedTemplate === key
-                            ? "rgba(0,255,136,0.1)"
-                            : "rgba(255,255,255,0.03)",
-                        color: "#fff",
-                        cursor: "pointer",
-                        textAlign: "left",
-                        transition: "all 0.2s",
-                      }}
+                      className={`template-btn ${selectedTemplate === key ? "active" : ""}`}
                     >
-                      <div style={{ fontSize: "18px", marginBottom: "6px" }}>{t.label}</div>
-                      <div style={{ fontSize: "11px", color: "#aaa" }}>{t.desc}</div>
+                      <div className="template-btn-icon">{t.label}</div>
+                      <div className="template-btn-desc">{t.desc}</div>
                     </button>
                   ))}
                 </div>
 
                 {/* Caption Style + Smart Crop selectors */}
-                <div style={{ display: "flex", gap: "16px", marginTop: "16px", flexWrap: "wrap" }}>
-                  <label style={{ color: "#e2e8f0", fontSize: "13px" }}>
+                <div className="template-selectors">
+                  <label>
                     Caption Style:
-                    <select
-                      value={captionStyle}
-                      onChange={e => setCaptionStyle(e.target.value)}
-                      style={{
-                        marginLeft: "8px",
-                        padding: "6px 10px",
-                        borderRadius: "6px",
-                        background: "#1a1a2e",
-                        color: "#fff",
-                        border: "1px solid rgba(255,255,255,0.1)",
-                      }}
-                    >
+                    <select value={captionStyle} onChange={e => setCaptionStyle(e.target.value)}>
                       <option value="bold_pop">Bold Pop</option>
                       <option value="karaoke">Karaoke Fill</option>
                       <option value="glow">Neon Glow</option>
@@ -934,20 +808,9 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
                       <option value="">Classic (no animation)</option>
                     </select>
                   </label>
-                  <label style={{ color: "#e2e8f0", fontSize: "13px" }}>
+                  <label>
                     Smart Crop:
-                    <select
-                      value={smartCropMode}
-                      onChange={e => setSmartCropMode(e.target.value)}
-                      style={{
-                        marginLeft: "8px",
-                        padding: "6px 10px",
-                        borderRadius: "6px",
-                        background: "#1a1a2e",
-                        color: "#fff",
-                        border: "1px solid rgba(255,255,255,0.1)",
-                      }}
-                    >
+                    <select value={smartCropMode} onChange={e => setSmartCropMode(e.target.value)}>
                       <option value="center">🎯 Center Crop</option>
                       <option value="speaker_track">👤 Follow Speaker</option>
                     </select>
@@ -980,17 +843,7 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
             </div>
           ) : (
             <div className="video-selection-section">
-              <div
-                className="selection-header-row"
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "16px",
-                  flexWrap: "wrap",
-                  gap: "10px",
-                }}
-              >
+              <div className="selection-header-row">
                 <h3>Select a Video to Analyze</h3>
                 <div>
                   <input
@@ -1117,95 +970,26 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
 
             {/* Auto-Generate Progress */}
             {autoGenerating && (
-              <div
-                style={{
-                  margin: "1rem 0",
-                  padding: "16px 20px",
-                  background: "linear-gradient(135deg, rgba(0,255,136,0.08), rgba(0,204,255,0.08))",
-                  borderRadius: "10px",
-                  border: "1px solid rgba(0,255,136,0.2)",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "12px",
-                }}
-              >
-                <div
-                  style={{
-                    width: "20px",
-                    height: "20px",
-                    border: "3px solid rgba(0,255,136,0.3)",
-                    borderTop: "3px solid #00ff88",
-                    borderRadius: "50%",
-                    animation: "spin 1s linear infinite",
-                  }}
-                />
+              <div className="auto-gen-progress">
+                <div className="auto-gen-spinner" />
                 <div>
-                  <div style={{ fontWeight: "bold", color: "#00ff88", fontSize: "14px" }}>
-                    ⚡ Auto-Generating Clips
-                  </div>
-                  <div style={{ color: "#aaa", fontSize: "12px", marginTop: "2px" }}>
-                    {autoGenProgress}
-                  </div>
+                  <div className="auto-gen-progress-title">⚡ Auto-Generating Clips</div>
+                  <div className="auto-gen-progress-text">{autoGenProgress}</div>
                 </div>
               </div>
             )}
 
             {/* Generated Clips (Ready to Download) */}
             {generatedClips.filter(c => c.sourceAnalysisId === currentAnalysis.id).length > 0 && (
-              <div
-                className="generated-clips-preview-section"
-                style={{
-                  marginBottom: "2rem",
-                  padding: "1rem",
-                  background: "rgba(0, 255, 136, 0.05)",
-                  borderRadius: "8px",
-                  border: "1px solid rgba(0, 255, 136, 0.2)",
-                }}
-              >
-                <h4 style={{ color: "#00ff88", marginTop: 0 }}>✅ Generated Clips (Ready)</h4>
-                <div
-                  className="generated-clips-grid"
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
-                    gap: "1rem",
-                    marginTop: "1rem",
-                  }}
-                >
+              <div className="generated-clips-preview-section">
+                <h4>✅ Generated Clips (Ready)</h4>
+                <div className="generated-clips-grid" style={{ marginTop: "1rem" }}>
                   {generatedClips
                     .filter(c => c.sourceAnalysisId === currentAnalysis.id)
                     .map(clip => (
-                      <div
-                        key={clip.id}
-                        className="generated-clip-card"
-                        style={{
-                          background: "rgba(0,0,0,0.3)",
-                          padding: "10px",
-                          borderRadius: "6px",
-                        }}
-                      >
-                        <div
-                          style={{
-                            position: "relative",
-                            paddingBottom: "177.78%",
-                            marginBottom: "10px",
-                            background: "#000",
-                            borderRadius: "4px",
-                            overflow: "hidden",
-                          }}
-                        >
-                          <video
-                            src={clip.url}
-                            controls
-                            style={{
-                              position: "absolute",
-                              top: 0,
-                              left: 0,
-                              width: "100%",
-                              height: "100%",
-                              objectFit: "cover",
-                            }}
-                          />
+                      <div key={clip.id} className="generated-clip-card generated-clip-card-compact">
+                        <div className="generated-clip-thumb">
+                          <video src={clip.url} controls preload="metadata" />
                         </div>
                         <div className="generated-clip-info">
                           <h5
@@ -1236,15 +1020,8 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
                             download
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="btn-primary"
-                            style={{
-                              display: "block",
-                              textAlign: "center",
-                              marginTop: "10px",
-                              padding: "6px",
-                              fontSize: "12px",
-                              textDecoration: "none",
-                            }}
+                            className="btn-primary clip-download-btn"
+                            style={{ marginTop: "10px", padding: "6px", fontSize: "12px" }}
                           >
                             Download Video
                           </a>
@@ -1323,32 +1100,23 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
               </div>
 
               {/* Platform Presets */}
-              <div style={{ marginTop: "12px" }}>
-                <span style={{ fontSize: "13px", color: "#aaa", marginRight: "10px" }}>
-                  Platform preset:
-                </span>
+              <div style={{ marginTop: "14px", display: "flex", alignItems: "center", flexWrap: "wrap", gap: "6px" }}>
+                <span style={{ fontSize: "13px", color: "#aaa" }}>Platform preset:</span>
                 {Object.entries(PLATFORM_PRESETS).map(([key, p]) => (
                   <button
                     key={key}
                     onClick={() =>
                       setExportOptions({ ...exportOptions, aspectRatio: p.aspectRatio })
                     }
+                    className={`ratio-btn small ${exportOptions.aspectRatio === p.aspectRatio ? "active" : ""}`}
                     style={{
-                      padding: "4px 10px",
-                      marginRight: "6px",
-                      marginBottom: "6px",
-                      borderRadius: "4px",
-                      border:
-                        exportOptions.aspectRatio === p.aspectRatio
-                          ? "1px solid #00ff88"
-                          : "1px solid rgba(255,255,255,0.1)",
+                      border: exportOptions.aspectRatio === p.aspectRatio
+                        ? "1px solid #00ff88"
+                        : "1px solid rgba(255,255,255,0.08)",
                       background:
                         exportOptions.aspectRatio === p.aspectRatio
                           ? "rgba(0,255,136,0.1)"
                           : "transparent",
-                      color: "#ccc",
-                      fontSize: "12px",
-                      cursor: "pointer",
                     }}
                   >
                     {p.label}
@@ -1359,27 +1127,13 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
 
             {/* Clip Suggestions */}
             <div className="clip-suggestions">
-              <div
-                style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
-              >
+              <div className="clip-suggestions-header">
                 <h4>Suggested Clips (sorted by viral potential)</h4>
                 {selectedClipIds.length > 1 && (
                   <button
-                    className="btn-viral-lab"
+                    className="montage-btn"
                     onClick={generateMontage}
                     disabled={generatingMontage}
-                    style={{
-                      background: "linear-gradient(45deg, #FF0080, #7928CA)",
-                      border: "none",
-                      color: "white",
-                      padding: "8px 16px",
-                      borderRadius: "4px",
-                      cursor: "pointer",
-                      fontWeight: "bold",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                    }}
                   >
                     {generatingMontage
                       ? "Stitching..."
@@ -1394,26 +1148,12 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
                     <div
                       key={clip.id || index}
                       className={`clip-suggestion ${selectedClipIds.includes(clip.id) ? "selected-for-montage" : ""}`}
-                      style={{
-                        border: selectedClipIds.includes(clip.id)
-                          ? "2px solid #7928CA"
-                          : "1px solid #333",
-                        background: selectedClipIds.includes(clip.id)
-                          ? "rgba(121, 40, 202, 0.1)"
-                          : "transparent",
-                      }}
                     >
-                      <div style={{ display: "flex", alignItems: "center", marginRight: "10px" }}>
+                      <div className="clip-suggestion-checkbox">
                         <input
                           type="checkbox"
                           checked={selectedClipIds.includes(clip.id)}
                           onChange={() => toggleClipSelection(clip.id)}
-                          style={{
-                            width: "18px",
-                            height: "18px",
-                            cursor: "pointer",
-                            accentColor: "#7928CA",
-                          }}
                         />
                       </div>
                       <div className="clip-rank">#{index + 1}</div>
@@ -1444,35 +1184,19 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
                                 }
                                 controls
                                 autoPlay
-                                style={{
-                                  width: "100%",
-                                  maxHeight: "300px",
-                                  borderRadius: "8px",
-                                  marginBottom: "10px",
-                                }}
                                 onLoadedMetadata={e => {
                                   e.target.currentTime = clip.start;
                                 }}
                                 onTimeUpdate={e => {
                                   if (e.target.currentTime >= clip.end) {
                                     e.target.pause();
-                                    setPreviewClipId(null); // Close preview or just pause
+                                    setPreviewClipId(null);
                                   }
                                 }}
                               />
                               <button
                                 className="close-preview-btn"
                                 onClick={() => setPreviewClipId(null)}
-                                style={{
-                                  marginTop: "5px",
-                                  padding: "4px 8px",
-                                  background: "#444",
-                                  color: "#fff",
-                                  border: "none",
-                                  borderRadius: "4px",
-                                  cursor: "pointer",
-                                  fontSize: "12px",
-                                }}
                               >
                                 Close Output Preview
                               </button>
@@ -1486,17 +1210,6 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
                               <button
                                 className="preview-clip-btn"
                                 onClick={() => setPreviewClipId(clip.id || index)}
-                                style={{
-                                  marginTop: "8px",
-                                  padding: "6px 12px",
-                                  background: "rgba(0, 255, 255, 0.1)",
-                                  border: "1px solid cyan",
-                                  color: "cyan",
-                                  borderRadius: "4px",
-                                  cursor: "pointer",
-                                  fontSize: "12px",
-                                  fontWeight: "bold",
-                                }}
                               >
                                 ▶ Preview
                               </button>
@@ -1551,41 +1264,15 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
       )}
       {/* Export Confirmation Modal */}
       {confirmExport.open && (
-        <div
-          className="export-modal-overlay"
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: "rgba(0,0,0,0.6)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 2000,
-          }}
-        >
-          <div
-            style={{
-              background: "var(--viral-bg-panel)",
-              padding: 30,
-              borderRadius: 16,
-              width: "min(640px,95%)",
-              border: "var(--glass-border)",
-              boxShadow: "0 20px 50px rgba(0,0,0,0.5)",
-              backdropFilter: "blur(12px)",
-            }}
-          >
-            <h3 style={{ marginTop: 0, color: "#fff", fontSize: "1.5rem" }}>Confirm Export</h3>
-            <p style={{ color: "var(--viral-text-muted)" }}>
+        <div className="export-modal-overlay">
+          <div className="export-modal">
+            <h3>Confirm Export</h3>
+            <p>
               You&apos;re about to schedule this clip for export to:{" "}
-              <strong style={{ color: "var(--viral-accent-primary)" }}>
-                {(confirmExport.platforms || []).join(", ")}
-              </strong>
+              <strong>{(confirmExport.platforms || []).join(", ")}</strong>
             </p>
-            <div style={{ display: "grid", gap: 12, marginTop: 20 }}>
-              <label style={{ color: "#e2e8f0" }}>Scheduled time</label>
+            <div className="form-group">
+              <label>Scheduled time</label>
               <input
                 type="datetime-local"
                 className="cyber-input"
@@ -1596,16 +1283,8 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
                     scheduledTime: new Date(e.target.value).toISOString(),
                   }))
                 }
-                style={{
-                  padding: 12,
-                  borderRadius: 6,
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  background: "#05050a",
-                  color: "#fff",
-                  fontFamily: "monospace",
-                }}
               />
-              <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <label className="checkbox-row">
                 <input
                   type="checkbox"
                   checked={exportImmediate}
@@ -1615,15 +1294,7 @@ const ClipStudioPanel = ({ content = [], onRefresh }) => {
               </label>
             </div>
 
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "flex-end",
-                gap: 8,
-                marginTop: 16,
-                flexWrap: "wrap",
-              }}
-            >
+            <div className="export-modal-actions">
               <button
                 className="btn-secondary"
                 onClick={() => {
