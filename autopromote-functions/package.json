@@ -44,13 +44,13 @@
     "firebase-functions-test": "^3.1.0"
   },
   "overrides": {
-    "axios": "^1.15.0",
-    "hono": "4.12.18",
+    "axios": "^1.16.1",
+    "hono": "4.12.23",
     "@hono/node-server": "^1.19.14",
     "protobufjs": "7.5.8",
     "basic-ftp": "^5.3.1",
     "follow-redirects": "^1.16.0",
-    "brace-expansion": "5.0.5",
+    "brace-expansion": "5.0.6",
     "js-yaml": "^4.1.1",
     "glob": "^11.1.0",
     "minimatch": "^10.2.3",
@@ -59,7 +59,9 @@
     "@grpc/grpc-js": "1.14.3",
     "flatted": "3.4.2",
     "fast-uri": "3.1.2",
-    "qs": "6.14.2",
+    "qs": "6.15.2",
+    "uuid": "^14.0.0",
+    "ws": "8.21.0",
     "lodash": "^4.18.1",
     "router": {
       "path-to-regexp": "8.4.0"
@@ -92,7 +94,7 @@
       "brace-expansion": "2.0.3"
     },
     "minimatch@10": {
-      "brace-expansion": "5.0.5"
+      "brace-expansion": "5.0.6"
     }
   },
   "private": true

@@ -610,7 +610,7 @@ module.exports = router;
 
 // Plan endpoints (after exports intentionally for clarity if imported earlier)
 // Get available plans (public)
-router.get("/plans", async (req, res) => {
+router.get("/plans", publicLimiter, async (req, res) => {
   try {
     const { getPlans } = require("./services/planService");
     return res.json({ ok: true, plans: getPlans() });
@@ -620,7 +620,7 @@ router.get("/plans", async (req, res) => {
 });
 
 // Get my plan
-router.get("/me/plan", authMiddleware, async (req, res) => {
+router.get("/me/plan", authMiddleware, publicLimiter, async (req, res) => {
   try {
     const snap = await db.collection("users").doc(req.userId).get();
     const plan =
@@ -632,7 +632,7 @@ router.get("/me/plan", authMiddleware, async (req, res) => {
 });
 
 // Assign / change my plan (temporary pseudo billing)
-router.post("/me/plan", authMiddleware, async (req, res) => {
+router.post("/me/plan", authMiddleware, writeLimiter, async (req, res) => {
   try {
     const { tier } = req.body || {};
     if (!tier) return res.status(400).json({ ok: false, error: "tier required" });
