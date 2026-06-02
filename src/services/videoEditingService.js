@@ -18,6 +18,11 @@ const CAM_COMBINER_WORKER_URL =
   process.env.CAM_COMBINER_WORKER_URL || process.env.MULTICAM_WORKER_URL || MEDIA_WORKER_URL;
 const LOCAL_CAM_COMBINER_WORKER_URL =
   process.env.LOCAL_CAM_COMBINER_WORKER_URL || LOCAL_MEDIA_WORKER_URL;
+const IS_PRODUCTION_RUNTIME =
+  process.env.NODE_ENV === "production" || !!process.env.RENDER || !!process.env.K_SERVICE;
+const ALLOW_LOCAL_WORKER_FALLBACK =
+  process.env.ALLOW_LOCAL_WORKER_FALLBACK === "true" ||
+  (!IS_PRODUCTION_RUNTIME && process.env.ALLOW_LOCAL_WORKER_FALLBACK !== "false");
 const MULTICAM_MASTER_RETENTION_DAYS = Math.max(
   1,
   parseInt(process.env.MULTICAM_MASTER_RETENTION_DAYS || "4", 10) || 4
@@ -37,6 +42,7 @@ function getWorkerErrorDetail(error) {
 }
 
 function shouldTryLocalWorker(error) {
+  if (!ALLOW_LOCAL_WORKER_FALLBACK) return false;
   if (!LOCAL_MEDIA_WORKER_URL || LOCAL_MEDIA_WORKER_URL === MEDIA_WORKER_URL) return false;
   const status = error.response?.status;
   return (
@@ -52,6 +58,7 @@ function shouldTryLocalWorker(error) {
 }
 
 function shouldTryLocalCamCombinerWorker(error) {
+  if (!ALLOW_LOCAL_WORKER_FALLBACK) return false;
   if (!LOCAL_CAM_COMBINER_WORKER_URL || LOCAL_CAM_COMBINER_WORKER_URL === CAM_COMBINER_WORKER_URL) {
     return false;
   }
@@ -875,7 +882,7 @@ class VideoEditingService {
     });
 
     let workerUrl = CAM_COMBINER_WORKER_URL;
-    if (LOCAL_CAM_COMBINER_WORKER_URL) {
+    if (ALLOW_LOCAL_WORKER_FALLBACK && LOCAL_CAM_COMBINER_WORKER_URL) {
       try {
         await axios.get(`${LOCAL_CAM_COMBINER_WORKER_URL}/health`, { timeout: 2000 });
         workerUrl = LOCAL_CAM_COMBINER_WORKER_URL;

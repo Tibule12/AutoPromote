@@ -24,6 +24,11 @@ const CAM_COMBINER_WORKER_URL =
   process.env.CAM_COMBINER_WORKER_URL || process.env.MULTICAM_WORKER_URL || MEDIA_WORKER_URL;
 const LOCAL_CAM_COMBINER_WORKER_URL =
   process.env.LOCAL_CAM_COMBINER_WORKER_URL || LOCAL_MEDIA_WORKER_URL;
+const IS_PRODUCTION_RUNTIME =
+  process.env.NODE_ENV === "production" || !!process.env.RENDER || !!process.env.K_SERVICE;
+const ALLOW_LOCAL_WORKER_FALLBACK =
+  process.env.ALLOW_LOCAL_WORKER_FALLBACK === "true" ||
+  (!IS_PRODUCTION_RUNTIME && process.env.ALLOW_LOCAL_WORKER_FALLBACK !== "false");
 const VIDEO_EDITOR_CREDITS_DISABLED = process.env.DISABLE_VIDEO_EDITOR_CREDITS === "true";
 const MULTICAM_MAX_RENDER_SECONDS = parseInt(
   process.env.MULTICAM_MAX_RENDER_SECONDS || String(20 * 60),
@@ -80,6 +85,7 @@ const postToWorker = async (
     return await axios.post(`${primaryWorkerUrl}${endpoint}`, payload, { timeout });
   } catch (error) {
     const canFallback =
+      ALLOW_LOCAL_WORKER_FALLBACK &&
       localWorkerUrl &&
       localWorkerUrl !== primaryWorkerUrl &&
       shouldRetryWithLocalWorker(error);
@@ -110,6 +116,7 @@ const getFromMediaWorker = async (endpoint, timeout = 15000) => {
     return await axios.get(`${MEDIA_WORKER_URL}${endpoint}`, { timeout });
   } catch (error) {
     const canFallback =
+      ALLOW_LOCAL_WORKER_FALLBACK &&
       LOCAL_MEDIA_WORKER_URL &&
       LOCAL_MEDIA_WORKER_URL !== MEDIA_WORKER_URL &&
       shouldRetryWithLocalWorker(error);
@@ -120,6 +127,25 @@ const getFromMediaWorker = async (endpoint, timeout = 15000) => {
       `[MediaRoute] Falling back to local worker for ${endpoint}. Primary worker: ${MEDIA_WORKER_URL}`
     );
     return axios.get(`${LOCAL_MEDIA_WORKER_URL}${endpoint}`, { timeout });
+  }
+};
+
+const getFromCamCombinerWorker = async (endpoint, timeout = 15000) => {
+  try {
+    return await axios.get(`${CAM_COMBINER_WORKER_URL}${endpoint}`, { timeout });
+  } catch (error) {
+    const canFallback =
+      ALLOW_LOCAL_WORKER_FALLBACK &&
+      LOCAL_CAM_COMBINER_WORKER_URL &&
+      LOCAL_CAM_COMBINER_WORKER_URL !== CAM_COMBINER_WORKER_URL &&
+      shouldRetryWithLocalWorker(error);
+
+    if (!canFallback) throw error;
+
+    console.warn(
+      `[MediaRoute] Falling back to local Cam Combiner worker for ${endpoint}. Primary worker: ${CAM_COMBINER_WORKER_URL}`
+    );
+    return axios.get(`${LOCAL_CAM_COMBINER_WORKER_URL}${endpoint}`, { timeout });
   }
 };
 
@@ -394,6 +420,33 @@ router.post("/extract-audio", async (req, res) => {
   }
 });
 
+router.get("/multicam/worker-readiness", async (req, res) => {
+  const userId = req.user?.uid || req.userId;
+  if (!userId) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  try {
+    const response = await getFromCamCombinerWorker("/health", 120000);
+    res.json({
+      success: true,
+      workerUrl: CAM_COMBINER_WORKER_URL,
+      localFallbackEnabled: ALLOW_LOCAL_WORKER_FALLBACK,
+      worker: response.data || {},
+    });
+  } catch (error) {
+    const detail = error.response?.data?.detail || error.response?.data?.message || error.message;
+    console.error("[MediaRoute] Cam Combiner worker readiness failed:", detail);
+    res.status(503).json({
+      success: false,
+      message: "Cam Combiner worker is not ready. Please retry later; no credits were charged.",
+      details: detail,
+      workerUrl: CAM_COMBINER_WORKER_URL,
+      localFallbackEnabled: ALLOW_LOCAL_WORKER_FALLBACK,
+    });
+  }
+});
+
 router.post("/multicam/preflight-sync", async (req, res) => {
   const userId = req.user?.uid || req.userId;
   const sources = Array.isArray(req.body?.sources) ? req.body.sources : [];
@@ -587,7 +640,7 @@ router.post("/multicam/clean-audio-sync", async (req, res) => {
         mix_mode: req.body?.mixMode || "external_only",
         output_aspect_ratio: req.body?.outputAspectRatio || "9:16",
       },
-      30000
+      180000
     );
 
     res.json({

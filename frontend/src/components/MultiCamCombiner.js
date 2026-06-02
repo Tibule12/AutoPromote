@@ -5100,6 +5100,21 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       const auth = getAuth();
       const user = auth.currentUser;
       if (!user) throw new Error("Sign in before starting background sync.");
+      setStatusMessage("Checking Cam Combiner worker before extracting camera audio...");
+      const readinessToken = await user.getIdToken(true);
+      const readinessResponse = await fetch(`${API_BASE_URL}/api/media/multicam/worker-readiness`, {
+        headers: {
+          Authorization: `Bearer ${readinessToken}`,
+        },
+      });
+      const readinessData = await readinessResponse.json().catch(() => ({}));
+      if (!readinessResponse.ok || !readinessData.success) {
+        throw new Error(
+          readinessData.message ||
+            readinessData.details ||
+            `Cam Combiner worker readiness check failed with ${readinessResponse.status}`
+        );
+      }
       const storage = getStorage();
 
       const sourcesPayload = [];
