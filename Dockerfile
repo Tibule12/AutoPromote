@@ -17,8 +17,8 @@ RUN npm ci --only=production
 COPY . .
 
 # Build frontend static assets (React)
-# Installs frontend deps, builds, then cleans up to save space
-RUN npm run build:frontend && rm -rf frontend/node_modules
+# Installs frontend deps, builds, then cleans up to save space.
+RUN npm --prefix frontend ci && npm --prefix frontend run build && rm -rf frontend/node_modules
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs
