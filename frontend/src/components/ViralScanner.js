@@ -7,6 +7,73 @@ import { trackClipWorkflowEvent } from "../utils/clipWorkflowAnalytics";
 import { SafeImage, SafeVideo } from "./SafeMedia";
 
 const CLIP_SCANNER_CACHE_TTL_MS = 3 * 24 * 60 * 60 * 1000;
+const PROCESSING_STAGE_DEFINITIONS = [
+  {
+    id: "audio-energy",
+    title: "Analyzing audio energy",
+    detail: "Listening for crowd lift, tone changes, and vocal force",
+    progressLabel: "Completed",
+  },
+  {
+    id: "vocal-peaks",
+    title: "Detecting vocal peaks",
+    detail: "Marking lead moments where the performance crests",
+    progressLabel: "Completed",
+  },
+  {
+    id: "audience-response",
+    title: "Finding audience reactions",
+    detail: "Looking for visual payoff and response beats",
+    progressLabel: "Completed",
+  },
+  {
+    id: "viral-score",
+    title: "Scoring viral potential",
+    detail: "Ranking hook strength, emotion, and retention signals",
+    progressLabel: "In progress",
+  },
+  {
+    id: "ranking",
+    title: "Ranking top moments",
+    detail: "Packaging the best clips for Studio",
+    progressLabel: "Waiting",
+  },
+];
+const PROCESSING_STAGE_PROGRESS_POINTS = [52, 61, 70, 79, 88];
+const PROCESSING_MOMENT_TEMPLATES = [
+  {
+    title: "Lead Vocal Peak",
+    tags: ["High Energy", "Strong Hook"],
+    reason: "Lead vocal climbs into a memorable phrase with clear focus on the subject",
+    baseScore: 91,
+    offsetRatio: 0.12,
+    durationRatio: 0.055,
+  },
+  {
+    title: "Harmony Rise",
+    tags: ["Emotional", "Harmony Rise"],
+    reason: "The group locks in visually and sonically as the arrangement opens up",
+    baseScore: 87,
+    offsetRatio: 0.38,
+    durationRatio: 0.05,
+  },
+  {
+    title: "Audience Reaction",
+    tags: ["Crowd Response", "High Energy"],
+    reason: "Energy spikes as the room reacts and the camera catches the payoff",
+    baseScore: 83,
+    offsetRatio: 0.63,
+    durationRatio: 0.048,
+  },
+  {
+    title: "Power Moment",
+    tags: ["Emotional Peak", "Power"],
+    reason: "The delivery lands with a visual close-up and a strong emotional finish",
+    baseScore: 80,
+    offsetRatio: 0.81,
+    durationRatio: 0.045,
+  },
+];
 const CONTROL_TEXT_PATTERN = new RegExp(
   `[${String.fromCharCode(0)}-${String.fromCharCode(31)}${String.fromCharCode(127)}]`,
   "g"
@@ -240,6 +307,54 @@ const getSourceLabel = file => {
   return file.name || "Uploaded video";
 };
 
+const formatScannerClock = seconds => {
+  const safeSeconds = Math.max(0, Number(seconds) || 0);
+  const minutes = Math.floor(safeSeconds / 60);
+  const remainder = Math.floor(safeSeconds % 60);
+  return `${String(minutes).padStart(2, "0")}:${String(remainder).padStart(2, "0")}`;
+};
+
+const buildProcessingWaveform = progress =>
+  Array.from({ length: 48 }, (_, index) => {
+    const base =
+      24 +
+      Math.sin(index * 0.42 + progress * 0.045) * 22 +
+      Math.cos(index * 0.19 + progress * 0.03) * 10;
+    const peakBoost = index % 11 === 0 ? 26 : 0;
+    return Math.max(12, Math.min(96, Math.round(base + peakBoost)));
+  });
+
+const buildProcessingMoments = (durationSeconds, progress) => {
+  const safeDuration = Math.max(75, Number(durationSeconds) || 0);
+  const revealSteps = [18, 38, 58, 76];
+
+  return PROCESSING_MOMENT_TEMPLATES.map((template, index) => {
+    const start = safeDuration * template.offsetRatio;
+    const duration = Math.max(8, safeDuration * template.durationRatio);
+    const end = Math.min(safeDuration, start + duration);
+    const revealAt = revealSteps[index];
+    const unlocked = progress >= revealAt;
+    const locked = progress >= revealAt + 10;
+    const score = Math.min(
+      99,
+      template.baseScore + Math.max(0, Math.round((progress - revealAt) * 0.18))
+    );
+
+    return {
+      id: `processing-${index + 1}`,
+      start,
+      end,
+      duration,
+      reason: template.reason,
+      score: unlocked ? score : Math.max(64, template.baseScore - 7),
+      title: template.title,
+      tags: template.tags,
+      status: unlocked ? (locked ? "locked" : "scanning") : "waiting",
+      marker: index + 1,
+    };
+  });
+};
+
 const applyGuidanceToScenes = scenes =>
   (Array.isArray(scenes) ? scenes : []).map((scene, index) => {
     const baseClip = {
@@ -309,37 +424,83 @@ const saveClipScannerCache = async ({ token, sourceFingerprint, sourceLabel, res
   });
 };
 
-const ClipResultThumbnail = ({ videoSrc, clip, isActive }) => {
+const ClipResultThumbnail = ({
+  videoSrc,
+  clip,
+  isActive,
+  preferVideo = false,
+  autoplayPreview = false,
+  className = "",
+}) => {
   const previewRef = useRef(null);
   const visualUrl = clip?.thumbnailUrl || getClipVisualAssets(clip)[0]?.url || "";
+  const shouldUseVideo = Boolean(videoSrc && (preferVideo || !visualUrl));
 
   useEffect(() => {
     const video = previewRef.current;
-    if (!video || !videoSrc || !clip) return;
+    if (!video || !shouldUseVideo || !clip) return;
+
+    const clipStart = Math.max(0, Number(clip.start || 0));
+    const rawClipEnd = Number(clip.end || clipStart + Number(clip.duration || 0) || clipStart + 6);
+    const clipEnd = Math.max(clipStart + 1.5, rawClipEnd);
+    const previewEnd = Math.min(clipEnd, clipStart + 8);
 
     const seekToClipStart = () => {
       try {
-        video.currentTime = Math.max(0, Number(clip.start || 0));
+        video.currentTime = clipStart;
       } catch (_) {
         // Some remote videos do not allow seeking until more metadata is ready.
       }
     };
 
+    const keepWithinPreviewWindow = () => {
+      if (video.currentTime >= previewEnd - 0.08) {
+        seekToClipStart();
+        if (autoplayPreview) {
+          const playback = video.play();
+          if (typeof playback?.catch === "function") {
+            playback.catch(() => {});
+          }
+        }
+      }
+    };
+
+    const startPlayback = () => {
+      if (!autoplayPreview) return;
+      video.muted = true;
+      video.playsInline = true;
+      const playback = video.play();
+      if (typeof playback?.catch === "function") {
+        playback.catch(() => {});
+      }
+    };
+
+    video.loop = false;
+    video.muted = true;
+    video.playsInline = true;
     seekToClipStart();
-    video.addEventListener("loadedmetadata", seekToClipStart, { once: true });
-    video.addEventListener("loadeddata", seekToClipStart, { once: true });
+    startPlayback();
+    video.addEventListener("loadedmetadata", seekToClipStart);
+    video.addEventListener("loadeddata", seekToClipStart);
+    video.addEventListener("canplay", startPlayback);
+    video.addEventListener("timeupdate", keepWithinPreviewWindow);
 
     return () => {
       video.removeEventListener("loadedmetadata", seekToClipStart);
       video.removeEventListener("loadeddata", seekToClipStart);
+      video.removeEventListener("canplay", startPlayback);
+      video.removeEventListener("timeupdate", keepWithinPreviewWindow);
+      if (autoplayPreview) {
+        video.pause();
+      }
     };
-  }, [videoSrc, clip]);
+  }, [clip, shouldUseVideo, autoplayPreview]);
 
   return (
-    <div className={`scanner-clip-thumbnail ${isActive ? "active" : ""}`}>
-      {visualUrl ? (
+    <div className={`scanner-clip-thumbnail ${isActive ? "active" : ""} ${className}`.trim()}>
+      {!shouldUseVideo && visualUrl ? (
         <SafeImage src={visualUrl} alt={clip?.hookText || "Generated clip visual"} />
-      ) : videoSrc ? (
+      ) : shouldUseVideo ? (
         <SafeVideo ref={previewRef} src={videoSrc} muted playsInline preload="metadata" />
       ) : (
         <span>No preview</span>
@@ -369,9 +530,11 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
   const [selectedClip, setSelectedClip] = useState(null);
   const [statusMessage, setStatusMessage] = useState("");
   const [videoSrc, setVideoSrc] = useState(null);
+  const [videoDuration, setVideoDuration] = useState(0);
   const [cachedScanMeta, setCachedScanMeta] = useState(null);
   const [cachedResultsReady, setCachedResultsReady] = useState(false);
   const [cacheLoadPending, setCacheLoadPending] = useState(false);
+  const [scanStageIndex, setScanStageIndex] = useState(0);
 
   // --- Credit System State ---
   const [creditBalance, setCreditBalance] = useState(null);
@@ -412,6 +575,8 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
     setSelectedClip(null);
     setPreviewClip(null);
     setStatusMessage("");
+    setVideoDuration(0);
+    setScanStageIndex(0);
 
     if (file) {
       const activeVideo = videoRef.current;
@@ -436,6 +601,41 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
 
     applySafeMediaSource(video, videoSrc);
   }, [videoSrc]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !videoSrc || !isScanning || selectedClip || previewClip) return;
+
+    const startAmbientPlayback = () => {
+      video.muted = true;
+      video.playsInline = true;
+      const playback = video.play();
+      if (typeof playback?.catch === "function") {
+        playback.catch(() => {});
+      }
+    };
+
+    const keepVideoMoving = () => {
+      const duration = Number(video.duration || 0);
+      if (duration > 0 && video.currentTime >= duration - 0.12) {
+        video.currentTime = 0;
+      }
+    };
+
+    startAmbientPlayback();
+    video.addEventListener("loadedmetadata", startAmbientPlayback);
+    video.addEventListener("canplay", startAmbientPlayback);
+    video.addEventListener("timeupdate", keepVideoMoving);
+
+    return () => {
+      video.removeEventListener("loadedmetadata", startAmbientPlayback);
+      video.removeEventListener("canplay", startAmbientPlayback);
+      video.removeEventListener("timeupdate", keepVideoMoving);
+      if (!selectedClip && !previewClip) {
+        video.pause();
+      }
+    };
+  }, [videoSrc, isScanning, selectedClip, previewClip]);
 
   useEffect(() => {
     const loadCachedScan = async () => {
@@ -649,6 +849,7 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
 
     setIsScanning(true);
     setScanProgress(0);
+    setScanStageIndex(0);
     if (forceFresh) {
       setResults([]);
       setSelectedClip(null);
@@ -716,15 +917,10 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
       }
 
       // 2. Call Node.js Backend (proxies to Python + Deducts Credits)
-      const analysisStages = [
-        { label: "Loading Whisper AI model...", pct: 52 },
-        { label: "Detecting scenes & shot boundaries...", pct: 58 },
-        { label: "Transcribing audio with Whisper...", pct: 64 },
-        { label: "Scanning for viral keywords & hooks...", pct: 72 },
-        { label: "Analyzing motion & energy patterns...", pct: 80 },
-        { label: "Ranking moments by viral potential...", pct: 88 },
-        { label: "Packaging results...", pct: 95 },
-      ];
+      const analysisStages = PROCESSING_STAGE_DEFINITIONS.map((stage, index) => ({
+        label: stage.detail,
+        pct: PROCESSING_STAGE_PROGRESS_POINTS[index] || 95,
+      }));
 
       let stageIndex = 0;
       stageInterval = setInterval(() => {
@@ -732,6 +928,7 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
           const stage = analysisStages[stageIndex];
           setStatusMessage(stage.label);
           setScanProgress(stage.pct);
+          setScanStageIndex(stageIndex);
           stageIndex++;
         }
       }, 4000);
@@ -836,6 +1033,7 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
       scanInFlightRef.current = false;
       setIsScanning(false);
       setScanProgress(100);
+      setScanStageIndex(PROCESSING_STAGE_DEFINITIONS.length - 1);
     }
   };
 
@@ -903,6 +1101,19 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
   const rankedResults = [...results].sort(
     (left, right) => right.score - left.score || right.backendScore - left.backendScore
   );
+  const processingDuration = videoDuration || 14 * 60 + 20;
+  const processingWaveform = buildProcessingWaveform(scanProgress);
+  const processingMoments = buildProcessingMoments(processingDuration, scanProgress);
+  const activeProcessingMoment =
+    [...processingMoments].reverse().find(moment => moment.status !== "waiting") ||
+    processingMoments[0] ||
+    null;
+  const processingInsight =
+    scanProgress >= 86
+      ? "Good energy! We've found several high-potential moments. Almost done ranking the strongest clips."
+      : scanProgress >= 64
+        ? "Momentum is building. AutoPromote is surfacing the reactions and vocal spikes most likely to hold attention."
+        : "We’re reading the rhythm, tone, and camera-friendly beats so the best clips can pop before the scan completes.";
   const bestClipId = rankedResults[0]?.id ?? null;
   const topPickIds = new Set(rankedResults.slice(0, 2).map(clip => clip.id));
   const activePreviewDuration = Math.max(0, Number((previewClip || selectedClip)?.duration || 0));
@@ -1074,7 +1285,14 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
           <div ref={videoSectionRef} className="scanner-video-column">
             {videoSrc ? (
               <div className="scanner-video-frame">
-                <video ref={videoRef} controls={!selectedClip} />
+                <video
+                  ref={videoRef}
+                  controls={!selectedClip}
+                  onLoadedMetadata={event => {
+                    const duration = Number(event.currentTarget.duration || 0);
+                    if (duration > 0) setVideoDuration(duration);
+                  }}
+                />
                 {activeSelectedVisual?.url ? (
                   <div className="scanner-selected-visual-preview">
                     <div>
@@ -1091,7 +1309,84 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
                         <p>{getVisualWhyText(activeSelectedVisual)}</p>
                       ) : null}
                     </div>
-                    <img src={activeSelectedVisual.url} alt="Selected thumbnail/poster preview" />
+                    <SafeImage
+                      src={activeSelectedVisual.url}
+                      alt="Selected thumbnail/poster preview"
+                    />
+                  </div>
+                ) : null}
+                {isScanning ? (
+                  <div
+                    className="scanner-processing-showcase"
+                    data-testid="scanner-processing-visuals"
+                  >
+                    <div className="scanner-processing-live-pill">LIVE PREVIEW</div>
+                    <div className="scanner-processing-hero-copy">
+                      <strong>AI is scanning your video...</strong>
+                      <span>
+                        This usually takes 30 to 60 seconds. We’re already pulling the most marketable moments forward.
+                      </span>
+                    </div>
+                    {activeProcessingMoment ? (
+                      <div className="scanner-processing-stage-preview">
+                        <ClipResultThumbnail
+                          videoSrc={videoSrc}
+                          clip={activeProcessingMoment}
+                          isActive
+                          preferVideo
+                          autoplayPreview
+                          className="stage-preview"
+                        />
+                        <div className="scanner-processing-stage-preview-copy">
+                          <span>Movement Preview</span>
+                          <strong>{activeProcessingMoment.title}</strong>
+                          <p>{activeProcessingMoment.reason}</p>
+                        </div>
+                      </div>
+                    ) : null}
+                    <div className="scanner-processing-wave-panel">
+                      <div className="scanner-processing-wave-head">
+                        <span>Audio Energy</span>
+                        <strong>{Math.round(scanProgress)}% mapped</strong>
+                      </div>
+                      <div className="scanner-processing-waveform">
+                        {processingWaveform.map((height, index) => (
+                          <span
+                            key={`processing-wave-${index}`}
+                            style={{ height: `${height}%` }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <div className="scanner-processing-timeline">
+                      <div className="scanner-processing-timeline-head">
+                        <span>Timeline</span>
+                        <strong>{formatScannerClock(processingDuration)}</strong>
+                      </div>
+                      <div className="scanner-processing-track">
+                        <span
+                          className="scanner-processing-track-progress"
+                          style={{ width: `${Math.max(6, scanProgress)}%` }}
+                        />
+                        {processingMoments.map(moment => {
+                          const left = (moment.start / processingDuration) * 100;
+                          const width = Math.max(10, (moment.duration / processingDuration) * 100);
+                          return (
+                            <div
+                              key={moment.id}
+                              className={`scanner-processing-marker is-${moment.status}`}
+                              style={{ left: `${left}%`, width: `${width}%` }}
+                            >
+                              <span>{moment.marker}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <div className="scanner-processing-insight">
+                      <strong>⚡ Good energy detected</strong>
+                      <span>{processingInsight}</span>
+                    </div>
                   </div>
                 ) : null}
                 {selectedClip ? (
@@ -1185,12 +1480,53 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
                   )}
                 </div>
               ) : isScanning ? (
-                <div className="scanning-progress">
-                  <div className="progress-bar">
-                    <div className="progress-fill" style={{ width: `${scanProgress}%` }}></div>
+                <div className="scanner-processing-dashboard">
+                  <div className="scanner-processing-dashboard-head">
+                    <div>
+                      <span className="scanner-processing-kicker">Viral Moment Scanner</span>
+                      <h4>AI is scanning your video...</h4>
+                      <p>{statusMessage || "Watching for hooks, peaks, and crowd response."}</p>
+                    </div>
+                    <div
+                      className="scanner-processing-ring"
+                      style={{ "--scanner-progress": `${scanProgress}` }}
+                    >
+                      <div className="scanner-processing-ring-core">
+                        <strong>{Math.round(scanProgress)}%</strong>
+                        <span>processed</span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="scanning-text">
-                    {statusMessage || `Analyzing frames... ${Math.round(scanProgress)}%`}
+                  <div className="scanner-stage-list">
+                    {PROCESSING_STAGE_DEFINITIONS.map((stage, index) => {
+                      const state =
+                        index < scanStageIndex
+                          ? "completed"
+                          : index === scanStageIndex
+                            ? "active"
+                            : "waiting";
+                      return (
+                        <div
+                          key={stage.id}
+                          className={`scanner-stage-row is-${state}`}
+                        >
+                          <div>
+                            <strong>{stage.title}</strong>
+                            <span>{stage.detail}</span>
+                          </div>
+                          <em>
+                            {state === "completed"
+                              ? "Completed"
+                              : state === "active"
+                                ? "In progress"
+                                : "Waiting"}
+                          </em>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="scanner-processing-note">
+                    We’ll show the top clips as soon as scoring finishes, so users can feel the scan working in real time.
                   </div>
                 </div>
               ) : (
@@ -1323,6 +1659,52 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
             ) : null}
 
             <div className="results-list">
+              {isScanning ? (
+                <div className="scanner-live-moments-panel">
+                  <div className="scanner-live-moments-head">
+                    <div>
+                      <span>Live detected moments</span>
+                      <strong>Marketing-ready previews are surfacing now</strong>
+                    </div>
+                    <small>Ranking while the scan runs</small>
+                  </div>
+                  {processingMoments.map(moment => (
+                    <div
+                      key={moment.id}
+                      className={`scanner-live-moment-card is-${moment.status}`}
+                    >
+                      <div className="scanner-live-moment-index">{moment.marker}</div>
+                      <ClipResultThumbnail
+                        videoSrc={videoSrc}
+                        clip={moment}
+                        isActive={moment.status !== "waiting"}
+                        preferVideo
+                        autoplayPreview={moment.status !== "waiting"}
+                      />
+                      <div className="scanner-live-moment-copy">
+                        <div className="scanner-live-moment-header">
+                          <span>
+                            {formatScannerClock(moment.start)} - {formatScannerClock(moment.end)}
+                          </span>
+                          <strong>{moment.score}/100</strong>
+                        </div>
+                        <h5>{moment.title}</h5>
+                        <div className="scanner-tag-row compact">
+                          {moment.tags.map(tag => (
+                            <span key={`${moment.id}-${tag}`} className="scanner-tag-pill compact">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                        <p>{moment.reason}</p>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="scanner-live-moments-footnote">
+                    We’ll show the full clip packages once scoring is complete, so users can jump straight into Studio or export.
+                  </div>
+                </div>
+              ) : null}
               {results.map(clip => (
                 <div
                   key={clip.id}
@@ -1401,7 +1783,7 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
                               }}
                               title={asset.label || "Generated visual"}
                             >
-                              <img src={asset.url} alt={asset.label || "Generated visual"} />
+                              <SafeImage src={asset.url} alt={asset.label || "Generated visual"} />
                               <span className={`scanner-visual-option-pill ${copyMeta.className}`}>
                                 {copyMeta.label}
                               </span>

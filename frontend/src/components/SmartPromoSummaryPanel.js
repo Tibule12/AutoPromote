@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { getAuth } from "firebase/auth";
 import { API_ENDPOINTS } from "../config";
+import { SafeImage } from "./SafeMedia";
 import "./SmartPromoSummaryPanel.css";
 
 const STORY_EDIT_DURATIONS = [60, 120, 180, 300];
@@ -318,11 +319,15 @@ const buildWaveformBars = timeline => {
   return bars.slice(0, 72);
 };
 
-const buildPreviewViewportStyle = segment => {
+const getPreviewViewportMeta = segment => {
   if (!segment) {
     return {
-      transform: "scale(1)",
-      transformOrigin: "50% 50%",
+      focusX: 0.5,
+      focusY: 0.5,
+      scale: 1,
+      translateX: 0,
+      visualMode: "focus",
+      framingVariant: "center",
     };
   }
 
@@ -342,8 +347,60 @@ const buildPreviewViewportStyle = segment => {
   if (framingVariant === "slow_movement") translateX += focusX < 0.5 ? 1.3 : -1.3;
 
   return {
-    transform: `translateX(${translateX}%) scale(${scale.toFixed(3)})`,
-    transformOrigin: `${Math.round(focusX * 100)}% ${Math.round(focusY * 100)}%`,
+    focusX,
+    focusY,
+    scale,
+    translateX,
+    visualMode,
+    framingVariant,
+  };
+};
+
+const buildPreviewViewportStyle = segment => {
+  const meta = getPreviewViewportMeta(segment);
+  return {
+    transform: `translateX(${meta.translateX}%) scale(${meta.scale.toFixed(3)})`,
+    transformOrigin: `${Math.round(meta.focusX * 100)}% ${Math.round(meta.focusY * 100)}%`,
+  };
+};
+
+const buildPreviewFocusBoxStyle = segment => {
+  const meta = getPreviewViewportMeta(segment);
+  const width = Math.max(52, Math.min(100, 100 / meta.scale));
+  const height = Math.max(52, Math.min(100, 100 / meta.scale));
+  const left = Math.max(0, Math.min(100 - width, meta.focusX * 100 - width / 2));
+  const top = Math.max(0, Math.min(100 - height, meta.focusY * 100 - height / 2));
+  return {
+    width: `${width}%`,
+    height: `${height}%`,
+    left: `${left}%`,
+    top: `${top}%`,
+  };
+};
+
+const describePreviewSegment = segment => {
+  const meta = getPreviewViewportMeta(segment);
+  const shotLabel =
+    {
+      wide: "Wide Shot",
+      tight: "Punch In",
+      focus: "Close Focus",
+    }[meta.visualMode] || "Visual Reframe";
+  const focusHorizontal =
+    meta.focusX < 0.38 ? "left" : meta.focusX > 0.62 ? "right" : "center";
+  const focusVertical =
+    meta.focusY < 0.38 ? "upper frame" : meta.focusY > 0.62 ? "lower frame" : "mid frame";
+  const movementLabel =
+    meta.framingVariant === "slow_movement"
+      ? "Drifting camera move"
+      : meta.framingVariant === "asymmetric"
+        ? "Off-center reframing"
+        : "Locked camera move";
+  return {
+    shotLabel,
+    zoomLabel: `${Math.max(0, Math.round((meta.scale - 1) * 100))}% zoom`,
+    focusLabel: `Targeting ${focusHorizontal} ${focusVertical}`,
+    movementLabel,
   };
 };
 
@@ -833,6 +890,14 @@ function SmartPromoSummaryPanel({
     () => buildPreviewViewportStyle(activePreviewSegment),
     [activePreviewSegment]
   );
+  const previewFocusBoxStyle = useMemo(
+    () => buildPreviewFocusBoxStyle(activePreviewSegment),
+    [activePreviewSegment]
+  );
+  const activePreviewMeta = useMemo(
+    () => (activePreviewSegment ? describePreviewSegment(activePreviewSegment) : null),
+    [activePreviewSegment]
+  );
 
   useEffect(() => {
     if (!plannedTimeline.length) {
@@ -1112,7 +1177,18 @@ function SmartPromoSummaryPanel({
                   <strong>Uploaded Source</strong>
                   <div className="promo-summary-live-preview-stage is-original">
                     {sourcePreviewUrl ? (
-                      <video src={sourcePreviewUrl} muted autoPlay loop playsInline preload="metadata" />
+                      <>
+                        <video src={sourcePreviewUrl} muted autoPlay loop playsInline preload="metadata" />
+                        {activePreviewSegment ? (
+                          <>
+                            <div className="promo-summary-live-focus-box" style={previewFocusBoxStyle} />
+                            <div className="promo-summary-live-original-overlay">
+                              <strong>{activePreviewMeta.shotLabel}</strong>
+                              <span>{activePreviewMeta.focusLabel}</span>
+                            </div>
+                          </>
+                        ) : null}
+                      </>
                     ) : (
                       <div className="promo-summary-live-preview-empty">Waiting for source preview...</div>
                     )}
@@ -1139,7 +1215,16 @@ function SmartPromoSummaryPanel({
                       <div className="promo-summary-live-preview-empty">Preview camera moves will appear here.</div>
                     )}
                     <div className="promo-summary-live-preview-overlay">
-                      <span>{activePreviewSegment?.reason || "Animated low-res preview while the final render completes."}</span>
+                      <div className="promo-summary-live-preview-overlay-copy">
+                        <strong>{activePreviewMeta?.shotLabel || "Smart Promo Preview"}</strong>
+                        <span>{activePreviewSegment?.reason || "Animated low-res preview while the final render completes."}</span>
+                      </div>
+                      {activePreviewMeta ? (
+                        <div className="promo-summary-live-preview-overlay-metrics">
+                          <span>{activePreviewMeta.zoomLabel}</span>
+                          <span>{activePreviewMeta.movementLabel}</span>
+                        </div>
+                      ) : null}
                     </div>
                   </div>
                 </article>
@@ -1381,7 +1466,7 @@ function SmartPromoSummaryPanel({
                         </small>
                       </div>
                       <div className="promo-summary-selected-package-frame">
-                        <img src={selectedVisual.url} alt="Selected promo visual preview" />
+                        <SafeImage src={selectedVisual.url} alt="Selected promo visual preview" />
                       </div>
                     </div>
                   ) : null}
@@ -1422,7 +1507,7 @@ function SmartPromoSummaryPanel({
                             }`}
                             onClick={() => handleSelectVisual(clip, index, asset)}
                           >
-                            <img src={asset.url} alt={asset.label || asset.type || "Promo visual"} />
+                            <SafeImage src={asset.url} alt={asset.label || asset.type || "Promo visual"} />
                             <span>{selectedVisual?.url === asset.url ? "Selected" : asset.label || asset.type || "Visual"}</span>
                           </button>
                         ))}
