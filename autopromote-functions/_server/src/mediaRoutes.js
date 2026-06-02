@@ -196,6 +196,47 @@ const normalizeRenderJob = (doc, data = {}) => {
   };
 };
 
+const isFailedJobStatus = status => {
+  const normalized = String(status || "").toLowerCase();
+  return normalized === "failed" || normalized.endsWith("_failed") || normalized.includes("failed");
+};
+
+const isRefundableCleanAudioSyncStatus = status => {
+  const normalized = String(status || "").toLowerCase();
+  return isFailedJobStatus(normalized) || normalized === "sync_low_confidence";
+};
+
+const refundCleanAudioSyncJobIfNeeded = async (userId, jobId, data, reason = "worker_failed") => {
+  if (
+    !userId ||
+    !jobId ||
+    data?.feature !== "clean-audio-sync" ||
+    !isRefundableCleanAudioSyncStatus(data?.status) ||
+    !data?.creditRefund ||
+    data?.creditsRefunded
+  ) {
+    return null;
+  }
+
+  const refundResult = await refundCredits(userId, data.creditRefund, "clean-audio-sync-refund", {
+    jobId,
+    reason,
+  });
+
+  if (refundResult.success) {
+    await admin.firestore().collection("video_edits").doc(jobId).set(
+      {
+        creditsRefunded: true,
+        creditRefundedAt: admin.firestore.FieldValue.serverTimestamp(),
+        refundReason: reason,
+      },
+      { merge: true }
+    );
+  }
+
+  return refundResult;
+};
+
 const getRequestedMulticamDuration = body => {
   const candidates = [
     body?.overlapDuration,
@@ -654,12 +695,24 @@ router.post("/multicam/clean-audio-sync", async (req, res) => {
   } catch (error) {
     console.error("[MediaRoute] Clean-audio sync error:", error.message);
     if (creditResult?.success && !creditResult.skipped) {
-      await refundCredits(userId, creditResult, "clean-audio-sync-refund", {
+      const refundResult = await refundCredits(userId, creditResult, "clean-audio-sync-refund", {
         jobId,
         reason: "worker_start_failed",
       }).catch(refundError => {
         console.error("[MediaRoute] Clean-audio sync refund failed:", refundError.message);
+        return null;
       });
+
+      if (refundResult?.success) {
+        await admin.firestore().collection("video_edits").doc(jobId).set(
+          {
+            creditsRefunded: true,
+            creditRefundedAt: admin.firestore.FieldValue.serverTimestamp(),
+            refundReason: "worker_start_failed",
+          },
+          { merge: true }
+        ).catch(() => {});
+      }
     }
     await admin.firestore().collection("video_edits").doc(jobId).set(
       {
@@ -817,26 +870,7 @@ router.get("/status/:jobId", async (req, res) => {
       return res.status(403).json({ success: false, message: "Unauthorized access to job" });
     }
 
-    if (
-      data.status === "failed" &&
-      data.feature === "clean-audio-sync" &&
-      data.creditRefund &&
-      !data.creditsRefunded
-    ) {
-      const refundResult = await refundCredits(userId, data.creditRefund, "clean-audio-sync-refund", {
-        jobId,
-        reason: "worker_failed",
-      });
-      if (refundResult.success) {
-        await admin.firestore().collection("video_edits").doc(jobId).set(
-          {
-            creditsRefunded: true,
-            creditRefundedAt: admin.firestore.FieldValue.serverTimestamp(),
-          },
-          { merge: true }
-        );
-      }
-    }
+    await refundCleanAudioSyncJobIfNeeded(userId, jobId, data, "worker_failed");
 
     res.json({
       success: true,
