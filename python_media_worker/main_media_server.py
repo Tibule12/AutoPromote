@@ -849,6 +849,117 @@ async def materialize_cached_media_input(source_url, local_path, cache_key=None,
     return resolved_local_path
 
 
+async def materialize_audio_input(source_url, local_path, sample_rate=None):
+    """Materialize any URL/local media as mono WAV for sync-only analysis."""
+    source = str(source_url or "").strip()
+    if not source:
+        raise HTTPException(status_code=400, detail="source_url is required")
+
+    resolved_local_path = local_path if local_path.lower().endswith(".wav") else f"{local_path}.wav"
+    os.makedirs(os.path.dirname(os.path.abspath(resolved_local_path)), exist_ok=True)
+
+    if source.startswith("http://") or source.startswith("https://"):
+        input_source = source
+    else:
+        if IS_PRODUCTION_ENV:
+            raise HTTPException(status_code=400, detail="Only http/https URLs are accepted for audio source_url")
+        absolute_source = os.path.abspath(source)
+        allowed_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "tmp"))
+        if not absolute_source.startswith(allowed_dir + os.sep):
+            raise HTTPException(status_code=400, detail="Local paths must be within the tmp directory")
+        if not os.path.exists(absolute_source):
+            raise HTTPException(status_code=404, detail=f"Input audio not found: {absolute_source}")
+        input_source = absolute_source
+
+    part_path = f"{resolved_local_path}.part.wav"
+    try:
+        if os.path.exists(part_path):
+            os.remove(part_path)
+    except OSError:
+        pass
+
+    cmd = ["ffmpeg", "-nostdin"]
+    if input_source.startswith("http://") or input_source.startswith("https://"):
+        cmd.extend(["-user_agent", "Mozilla/5.0", "-timeout", "30000000"])
+    cmd.extend([
+        "-i",
+        input_source,
+        "-vn",
+        "-ac",
+        "1",
+        "-ar",
+        str(sample_rate or MULTICAM_SYNC_SAMPLE_RATE),
+        "-acodec",
+        "pcm_s16le",
+        "-y",
+        part_path,
+    ])
+
+    try:
+        await run_subprocess_async(
+            cmd,
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        os.replace(part_path, resolved_local_path)
+        if not os.path.exists(resolved_local_path) or os.path.getsize(resolved_local_path) < 1024:
+            raise ValueError("audio materialization produced an empty or tiny file")
+        if not has_audio_stream(resolved_local_path):
+            raise ValueError("audio materialization produced a file without an audio stream")
+        duration = get_media_duration(resolved_local_path)
+        if duration <= 0.0:
+            raise ValueError("audio materialization produced a zero-duration file")
+        logger.info(
+            "Materialized sync audio %.1fs (%.1fMB): %s",
+            duration,
+            os.path.getsize(resolved_local_path) / 1024 / 1024,
+            resolved_local_path,
+        )
+        return resolved_local_path
+    except Exception as audio_error:
+        try:
+            if os.path.exists(part_path):
+                os.remove(part_path)
+        except OSError:
+            pass
+        raise HTTPException(status_code=422, detail=f"Could not materialize audio for sync: {audio_error}")
+
+
+async def materialize_cached_audio_input(source_url, local_path, cache_key=None, sample_rate=None):
+    source = str(source_url or "").strip()
+    if not source:
+        raise HTTPException(status_code=400, detail="source_url is required")
+
+    cache_key_text = str(cache_key or source)
+    cache_mode_key = f"{cache_key_text}:sync-audio:{sample_rate or MULTICAM_SYNC_SAMPLE_RATE}"
+    cache_path = os.path.join(
+        get_local_media_cache_dir(),
+        f"{build_media_cache_key(source, cache_mode_key)}.wav",
+    )
+
+    if not IS_PRODUCTION_ENV and os.path.exists(cache_path) and os.path.getsize(cache_path) > 1024:
+        if has_audio_stream(cache_path):
+            logger.info(f"Using cached local sync audio: {cache_path}")
+            return link_or_copy_cached_media(cache_path, local_path if local_path.endswith(".wav") else f"{local_path}.wav")
+        try:
+            os.remove(cache_path)
+        except OSError:
+            pass
+
+    resolved_local_path = await materialize_audio_input(source, local_path, sample_rate=sample_rate)
+
+    if not IS_PRODUCTION_ENV and os.path.exists(resolved_local_path) and os.path.getsize(resolved_local_path) > 1024:
+        try:
+            shutil.copy2(resolved_local_path, cache_path)
+            logger.info(f"Cached local sync audio for repeat dev tests: {cache_path}")
+        except Exception as cache_error:
+            logger.warning(f"Could not cache local sync audio input: {cache_error}")
+
+    return resolved_local_path
+
+
 def get_cfr_cache_dir():
     """Persistent cache directory for normalized CFR sources — survives across renders."""
     cache_dir = os.path.join(
@@ -13894,8 +14005,8 @@ async def clean_audio_sync_impl(request: CleanAudioSyncRequest, job_id: str):
             "status": "extracting_clean_audio", "stage": "extracting_clean_audio",
             "progress": 5, "detail": "Downloading external clean audio",
         })
-        external_path = os.path.join(shared_tmp_dir, "external_audio_input")
-        await materialize_cached_media_input(
+        external_path = os.path.join(shared_tmp_dir, "external_audio_input.wav")
+        external_path = await materialize_cached_audio_input(
             request.external_audio.url, external_path,
             request.external_audio.cache_key or f"{request.user_id}:{request.external_audio.name}:{request.external_audio.size}",
         )
@@ -13923,8 +14034,8 @@ async def clean_audio_sync_impl(request: CleanAudioSyncRequest, job_id: str):
                 "progress": base_pct - 8,
                 "detail": f"Downloading {cam_label}",
             })
-            local_path = os.path.join(shared_tmp_dir, f"camera_{index}_input")
-            await materialize_cached_media_input(
+            local_path = os.path.join(shared_tmp_dir, f"camera_{index}_input.wav")
+            local_path = await materialize_cached_audio_input(
                 source.url, local_path,
                 source.cache_key or f"{request.user_id}:{source.name or source.label}:{source.size}:{source.duration}",
             )
@@ -14273,8 +14384,8 @@ async def multicam_preflight_sync(request: RenderMultiCamRequest):
         source_paths.append(local)
         source_offsets.append(float(source.offset_seconds or 0.0))
 
-    ext_local = os.path.join(shared_tmp, f"{job_id}_preflight_ext.mp4")
-    ext_local = await materialize_video_input(request.external_audio_url, ext_local, keep_audio=True)
+    ext_local = os.path.join(shared_tmp, f"{job_id}_preflight_ext.wav")
+    ext_local = await materialize_audio_input(request.external_audio_url, ext_local)
 
     try:
         source_sync_rates = []
