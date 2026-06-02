@@ -27,7 +27,13 @@ describe("ViralScanner guided clip selection", () => {
   const originalPlay = window.HTMLMediaElement.prototype.play;
   const originalPause = window.HTMLMediaElement.prototype.pause;
 
-  function mockScannerFetch({ scenes = [], cache = null, balance = 120, remainingCredits = 100 }) {
+  function mockScannerFetch({
+    scenes = [],
+    cache = null,
+    balance = 120,
+    remainingCredits = 100,
+    analyzeResponse,
+  }) {
     global.fetch = jest.fn((url, options = {}) => {
       const requestUrl = String(url);
       const method = String(options.method || "GET").toUpperCase();
@@ -69,6 +75,10 @@ describe("ViralScanner guided clip selection", () => {
       }
 
       if (requestUrl.includes("/api/media/analyze")) {
+        if (typeof analyzeResponse === "function") {
+          return analyzeResponse();
+        }
+
         return Promise.resolve({
           ok: true,
           status: 200,
@@ -102,6 +112,65 @@ describe("ViralScanner guided clip selection", () => {
     window.HTMLMediaElement.prototype.play = originalPlay;
     window.HTMLMediaElement.prototype.pause = originalPause;
     jest.clearAllMocks();
+  });
+
+  test("shows live scan visuals while the AI analysis is still processing", async () => {
+    let resolveAnalyze;
+    const analyzePromise = new Promise(resolve => {
+      resolveAnalyze = resolve;
+    });
+
+    mockScannerFetch({
+      analyzeResponse: () => analyzePromise,
+      scenes: [
+        {
+          start_time: 6.2,
+          end_time: 20.4,
+          reason: "Lead vocal rises and audience energy follows immediately",
+        },
+      ],
+    });
+
+    render(
+      <ViralScanner
+        file="https://example.com/source.mp4"
+        onSelectClip={jest.fn()}
+        onClose={jest.fn()}
+      />
+    );
+
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: /Start AI Scan/i })).not.toBeDisabled()
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /Start AI Scan/i }));
+    });
+
+    const processingVisuals = await screen.findByTestId("scanner-processing-visuals");
+    expect(processingVisuals.textContent).toContain("AI is scanning your video");
+    expect(screen.getByText(/Live detected moments/i)).toBeInTheDocument();
+    expect(screen.getByText(/Marketing-ready previews are surfacing now/i)).toBeInTheDocument();
+
+    await act(async () => {
+      resolveAnalyze({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          remainingCredits: 100,
+          scenes: [
+            {
+              start_time: 6.2,
+              end_time: 20.4,
+              reason: "Lead vocal rises and audience energy follows immediately",
+            },
+          ],
+        }),
+      });
+      await analyzePromise;
+    });
+
+    await screen.findByTestId("scanner-guidance-card");
   });
 
   test("highlights the best clip with score, reasons, and tags after scanning", async () => {
