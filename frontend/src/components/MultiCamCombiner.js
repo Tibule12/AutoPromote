@@ -4440,7 +4440,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       const video = document.createElement("video");
       video.preload = "auto";
       video.playsInline = true;
-      video.volume = 0;
+      video.muted = false;
+      video.volume = 1;
       const objectUrl = URL.createObjectURL(file);
       if (!applySafeMediaSource(video, objectUrl)) {
         URL.revokeObjectURL(objectUrl);
@@ -4483,10 +4484,41 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
             if (event.data.size > 0) chunks.push(event.data);
           };
           recorder.onerror = () => fail();
-          recorder.onstop = () => {
+          recorder.onstop = async () => {
             if (resolved) return;
             const extension = mimeType.includes("mp4") ? "m4a" : "webm";
             const blob = new Blob(chunks, { type: mimeType });
+            if (blob.size < 1024) {
+              fail();
+              return;
+            }
+            try {
+              const decoded = await audioCtx.decodeAudioData(await blob.arrayBuffer());
+              const channel = decoded.getChannelData(0);
+              let sumSquares = 0;
+              let maxAbs = 0;
+              const stride = Math.max(1, Math.floor(channel.length / 120000));
+              let samplesChecked = 0;
+              for (let i = 0; i < channel.length; i += stride) {
+                const value = Math.abs(channel[i] || 0);
+                sumSquares += value * value;
+                maxAbs = Math.max(maxAbs, value);
+                samplesChecked += 1;
+              }
+              const rms = Math.sqrt(sumSquares / Math.max(1, samplesChecked));
+              if (maxAbs < 0.002 || rms < 0.0002) {
+                console.warn("Browser camera sync extraction produced silent audio", {
+                  label,
+                  rms,
+                  maxAbs,
+                  blobSize: blob.size,
+                });
+                fail();
+                return;
+              }
+            } catch (decodeError) {
+              console.warn("Could not verify browser camera sync audio before upload:", decodeError.message);
+            }
             const audioFile = new File(
               [blob],
               (file.name || `${label || "camera"}.mov`).replace(/\.[^.]+$/, `_sync.${extension}`),

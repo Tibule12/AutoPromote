@@ -13263,6 +13263,18 @@ def estimate_envelope_offset(clean_envelope, camera_envelope, bins_per_second):
     if clean_envelope.size < bins_per_second or camera_envelope.size < bins_per_second:
         return 0.0, 0.0, "manual"
 
+    clean_signal = float(np.max(np.abs(clean_envelope))) if clean_envelope.size else 0.0
+    camera_signal = float(np.max(np.abs(camera_envelope))) if camera_envelope.size else 0.0
+    clean_variance = float(np.std(clean_envelope)) if clean_envelope.size else 0.0
+    camera_variance = float(np.std(camera_envelope)) if camera_envelope.size else 0.0
+    if clean_signal < 0.001 or camera_signal < 0.001 or clean_variance < 0.0001 or camera_variance < 0.0001:
+        logger.warning(
+            "Sync rejected: unusable audio signal "
+            f"(clean_signal={clean_signal:.6f}, camera_signal={camera_signal:.6f}, "
+            f"clean_std={clean_variance:.6f}, camera_std={camera_variance:.6f})"
+        )
+        return 0.0, 0.0, "silent_audio"
+
     method = "vad"
     best_offset = 0.0
     best_confidence = 0.0
@@ -13337,7 +13349,13 @@ def estimate_envelope_offset(clean_envelope, camera_envelope, bins_per_second):
                 best_idx = int(np.argmax(search_region))
                 best_offset = (best_idx - search_bins) / bins_ds
                 best_score = float(search_region[best_idx])
-                norm = float(np.linalg.norm(clean) * np.linalg.norm(camera)) or 1.0
+                norm = float(np.linalg.norm(clean) * np.linalg.norm(camera))
+                if norm < 1e-9 or abs(best_score) < 1e-9:
+                    logger.warning(
+                        "Sync rejected: waveform correlation has no usable peak "
+                        f"(score={best_score:.9f}, norm={norm:.9f})"
+                    )
+                    return round(best_offset, 3), 0.0, "no_correlation"
                 best_confidence = clamp_float((best_score / norm + 1) / 2, 0.05, 0.7)
 
     # === STAGE 4: Fine refinement ===
@@ -14126,9 +14144,13 @@ async def clean_audio_sync_impl(request: CleanAudioSyncRequest, job_id: str):
             external_audio_base_offset = float(request.external_audio.offset_seconds or 0.0)
 
             if confidence < 0.25 or offset_rejected:
-                warning = "Low confidence — review and nudge manually" if not offset_rejected else f"Offset rejected ({abs_delta:.1f}s > {max_reasonable_offset:.1f}s max) — place manually"
+                if method == "silent_audio":
+                    warning = "Camera sync audio is silent — re-extract camera audio before Auto Director"
+                elif method == "no_correlation":
+                    warning = "Camera sync audio has no usable match — verify the uploaded sync audio"
+                else:
+                    warning = "Low confidence — review and nudge manually" if not offset_rejected else f"Offset rejected ({abs_delta:.1f}s >= {max_reasonable_offset:.1f}s max) — place manually"
                 status_label = "needs_review"
-                method = "manual"
                 applied_offset = 0.0  # Do NOT apply bad offsets
             elif confidence < 0.55:
                 warning = "Moderate confidence — verify alignment"

@@ -658,6 +658,17 @@ router.post("/multicam/clean-audio-sync", async (req, res) => {
       });
     }
 
+    const syncReplayPayload = JSON.parse(JSON.stringify({
+      job_id: jobId,
+      user_id: userId,
+      sources,
+      external_audio: externalAudio,
+      mix_mode: req.body?.mixMode || "external_only",
+      output_aspect_ratio: req.body?.outputAspectRatio || "9:16",
+      estimated_credits: estimatedCredits,
+      requested_estimate: requestedEstimate,
+    }));
+
     await admin.firestore().collection("video_edits").doc(jobId).set({
       userId,
       feature: "clean-audio-sync",
@@ -667,20 +678,14 @@ router.post("/multicam/clean-audio-sync", async (req, res) => {
       progress: 1,
       creditsCharged: estimatedCredits,
       creditRefund: creditResult,
+      debugReplayPayload: syncReplayPayload,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
     await postToCamCombinerWorker(
       "/multicam/clean-audio-sync",
-      {
-        job_id: jobId,
-        user_id: userId,
-        sources,
-        external_audio: externalAudio,
-        mix_mode: req.body?.mixMode || "external_only",
-        output_aspect_ratio: req.body?.outputAspectRatio || "9:16",
-      },
+      syncReplayPayload,
       180000
     );
 
