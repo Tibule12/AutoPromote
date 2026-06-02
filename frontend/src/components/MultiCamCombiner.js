@@ -3630,7 +3630,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
             setStatusMessage("Sync complete, but possible audio drift detected. Verify alignment.");
             toast("Possible audio drift — verify sync", { icon: "⚠️", duration: 6000 });
           } else {
-            setStatusMessage("All cameras synced with high confidence. Play preview to verify.");
+            setStatusMessage("Sync window matched with high confidence. Play Program Output to verify lips before export.");
           }
         }
       } catch (error) {
@@ -5331,10 +5331,20 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           size: getSourceFileSize(source),
           duration: Number(source.duration || 0),
           offset_seconds: Number(source.offsetSeconds) || 0,
+          sync_trim_start: Number(sourceSyncTrimStart || 0) || 0,
+          sync_trim_duration: Number(sourceSyncTrimDuration || 0) || 0,
           cache_key: buildBackendMediaCacheKey(source.file) || `${source.id}:${source.name || source.label}`,
         });
       }
 
+      const externalSyncTrimStart = Math.max(
+        0,
+        cloudRenderWindowStartSafe - (Number(externalAudioTrack.offsetSeconds) || 0)
+      );
+      const externalSyncTrimDuration = Math.min(
+        VIDEO_SYNC_MAX_EXTRACT_SECONDS,
+        cloudRenderWindowDuration || Number(externalAudioTrack.duration || 0) || VIDEO_SYNC_MAX_EXTRACT_SECONDS
+      );
       const externalAudioUpload = await uploadMediaForBackendSync({
         user,
         storage,
@@ -5344,11 +5354,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         label: "External clean audio",
         mode: "audio_only",
         trimWindow: {
-          start: Math.max(0, cloudRenderWindowStartSafe - (Number(externalAudioTrack.offsetSeconds) || 0)),
-          duration: Math.min(
-            VIDEO_SYNC_MAX_EXTRACT_SECONDS,
-            cloudRenderWindowDuration || Number(externalAudioTrack.duration || 0) || VIDEO_SYNC_MAX_EXTRACT_SECONDS
-          ),
+          start: externalSyncTrimStart,
+          duration: externalSyncTrimDuration,
         },
       });
       const externalAudioRemoteUrl = externalAudioUpload.url;
@@ -5394,6 +5401,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
             size: Number(externalAudioTrack.file?.size || 0),
             duration: Number(externalAudioTrack.duration || 0),
             offset_seconds: Number(externalAudioTrack.offsetSeconds || 0),
+            sync_trim_start: Number(externalSyncTrimStart || 0) || 0,
+            sync_trim_duration: Number(externalSyncTrimDuration || 0) || 0,
             cache_key: buildBackendMediaCacheKey(externalAudioTrack.file) || externalAudioTrack.name,
           },
           mixMode: externalAudioMixMode,

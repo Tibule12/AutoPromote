@@ -10425,6 +10425,8 @@ class MultiCamSource(BaseModel):
     size: Optional[float] = None
     duration: Optional[float] = None
     cache_key: Optional[str] = None
+    sync_trim_start: Optional[float] = 0.0
+    sync_trim_duration: Optional[float] = None
 
 class ExternalCleanAudioInput(BaseModel):
     url: str
@@ -10433,6 +10435,8 @@ class ExternalCleanAudioInput(BaseModel):
     duration: Optional[float] = None
     offset_seconds: float = 0.0
     cache_key: Optional[str] = None
+    sync_trim_start: Optional[float] = 0.0
+    sync_trim_duration: Optional[float] = None
 
 class RenderExternalAudioInput(BaseModel):
     url: str
@@ -14094,6 +14098,12 @@ async def clean_audio_sync_impl(request: CleanAudioSyncRequest, job_id: str):
             })
             camera_envelope, _ = build_sync_envelope(camera_wav)
             delta, confidence, method = estimate_envelope_offset(clean_envelope, camera_envelope, bins_per_second)
+            camera_sync_trim_start = float(getattr(source, "sync_trim_start", 0.0) or 0.0)
+            external_sync_trim_start = float(getattr(request.external_audio, "sync_trim_start", 0.0) or 0.0)
+            # When the browser uploads a trimmed sync snippet, the correlation delta is
+            # relative to that snippet. Convert it back to original-media time before
+            # applying the offset to preview/render mapping.
+            full_media_delta = (camera_sync_trim_start - external_sync_trim_start) + float(delta or 0.0)
 
             # --- Voice activity envelope for auto-director (browser can't decode ProRes) ---
             voice_activity = None
@@ -14136,10 +14146,14 @@ async def clean_audio_sync_impl(request: CleanAudioSyncRequest, job_id: str):
                 float(MULTICAM_SYNC_MAX_SHIFT_SECONDS),
                 max(12.0, min(camera_duration, clean_duration) * 0.03),
             )
-            abs_delta = abs(delta)
+            abs_delta = abs(full_media_delta)
+            abs_trim_delta = abs(delta)
             # A match that lands exactly on the search boundary usually means
             # correlation ran out of room, not that the true offset is safe.
-            offset_rejected = abs_delta >= max_reasonable_offset > 1.0
+            offset_rejected = (
+                abs_delta >= max_reasonable_offset > 1.0
+                or abs_trim_delta >= max_reasonable_offset > 1.0
+            )
 
             external_audio_base_offset = float(request.external_audio.offset_seconds or 0.0)
 
@@ -14155,15 +14169,15 @@ async def clean_audio_sync_impl(request: CleanAudioSyncRequest, job_id: str):
             elif confidence < 0.55:
                 warning = "Moderate confidence — verify alignment"
                 status_label = "needs_review"
-                applied_offset = round(external_audio_base_offset - delta, 3)
+                applied_offset = round(external_audio_base_offset - full_media_delta, 3)
             elif drift and drift.get("hasDrift"):
                 warning = drift.get("warning", "Possible drift detected")
                 status_label = "synced_with_warning"
-                applied_offset = round(external_audio_base_offset - delta, 3)
+                applied_offset = round(external_audio_base_offset - full_media_delta, 3)
             else:
                 warning = None
                 status_label = "synced"
-                applied_offset = round(external_audio_base_offset - delta, 3)
+                applied_offset = round(external_audio_base_offset - full_media_delta, 3)
 
             message = "Synced with high confidence." if status_label == "synced" else (warning or "Synced.")
 
@@ -14171,7 +14185,9 @@ async def clean_audio_sync_impl(request: CleanAudioSyncRequest, job_id: str):
             logger.info(
                 f"SYNC_DEBUG {cam_label}: "
                 f"cam_dur={camera_duration:.1f}s clean_dur={clean_duration:.1f}s "
-                f"delta={delta:.3f}s abs_delta={abs_delta:.1f}s max_ok={max_reasonable_offset:.1f}s "
+                f"trim_delta={delta:.3f}s full_delta={full_media_delta:.3f}s "
+                f"cam_trim={camera_sync_trim_start:.3f}s clean_trim={external_sync_trim_start:.3f}s "
+                f"abs_delta={abs_delta:.1f}s max_ok={max_reasonable_offset:.1f}s "
                 f"rejected={offset_rejected} conf={confidence:.3f} method={method} "
                 f"applied_offset={applied_offset:.3f}s"
             )
@@ -14179,7 +14195,8 @@ async def clean_audio_sync_impl(request: CleanAudioSyncRequest, job_id: str):
             offsets.append({
                 "sourceId": source.id, "label": cam_label,
                 "offsetSeconds": applied_offset,
-                "delta": round(delta, 3),
+                "delta": round(full_media_delta, 3),
+                "trimDelta": round(float(delta or 0.0), 3),
                 "confidence": confidence,
                 "method": method,
                 "status": status_label,
@@ -14191,7 +14208,10 @@ async def clean_audio_sync_impl(request: CleanAudioSyncRequest, job_id: str):
                 "debug": {
                     "cameraDuration": round(camera_duration, 1),
                     "cleanDuration": round(clean_duration, 1),
-                    "rawDelta": round(delta, 3),
+                    "rawDelta": round(full_media_delta, 3),
+                    "trimDelta": round(float(delta or 0.0), 3),
+                    "cameraSyncTrimStart": round(camera_sync_trim_start, 3),
+                    "externalSyncTrimStart": round(external_sync_trim_start, 3),
                     "rejected": offset_rejected,
                     "maxReasonableOffset": round(max_reasonable_offset, 1),
                 },
@@ -14275,9 +14295,15 @@ async def clean_audio_sync_impl(request: CleanAudioSyncRequest, job_id: str):
                     if match and os.path.exists(match):
                         cam_env, _ = build_sync_envelope(match)
                         delta, conf, method = estimate_envelope_offset(ref_env, cam_env, bps)
+                        ref_source = next((s for s in request.sources if s.id == ref_id), None)
+                        cam_source = next((s for s in request.sources if s.id == o.get("sourceId")), None)
+                        ref_trim_start = float(getattr(ref_source, "sync_trim_start", 0.0) or 0.0) if ref_source else 0.0
+                        cam_trim_start = float(getattr(cam_source, "sync_trim_start", 0.0) or 0.0) if cam_source else 0.0
+                        full_intercam_delta = (cam_trim_start - ref_trim_start) + float(delta or 0.0)
                         if conf > 0.2:
-                            o["intercamOffsetSeconds"] = round(delta, 3)
-                            o["offsetSeconds"] = round(reference_absolute_offset - delta, 3)
+                            o["intercamOffsetSeconds"] = round(full_intercam_delta, 3)
+                            o["intercamTrimDelta"] = round(float(delta or 0.0), 3)
+                            o["offsetSeconds"] = round(reference_absolute_offset - full_intercam_delta, 3)
                             o["confidence"] = max(float(o.get("confidence") or 0.0), conf)
                             o["method"] = f"intercam_{method}"
                             o["status"] = "synced_with_warning" if conf < 0.45 else "synced"
