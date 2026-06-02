@@ -17,4 +17,11 @@ describe("security media URLs", () => {
     expect(applySafeMediaSource(image, "javascript:alert(1)")).toBe(false);
     expect(image.hasAttribute("src")).toBe(false);
   });
+
+  test("does not write media URLs onto non-media elements", () => {
+    const div = document.createElement("div");
+
+    expect(applySafeMediaSource(div, "https://example.com/clip.mp4")).toBe(false);
+    expect(div.hasAttribute("src")).toBe(false);
+  });
 });

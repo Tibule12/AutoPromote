@@ -1,5 +1,6 @@
 const SAFE_DATA_URL_PATTERN = /^data:(image|video|audio)\/[a-z0-9.+-]+;base64,[a-z0-9+/=]+$/i;
 const SAFE_PROTOCOLS = new Set(["http:", "https:"]);
+const MEDIA_SOURCE_TAGS = new Set(["AUDIO", "IMG", "SOURCE", "TRACK", "VIDEO"]);
 const UNSAFE_URL_TEXT_PATTERN = /[<>"'`\\]/;
 const CONTROL_OR_SPACE_PATTERN = new RegExp(
   `[${String.fromCharCode(0)}-${String.fromCharCode(31)}${String.fromCharCode(127)}\\s]+`,
@@ -56,17 +57,26 @@ export function getSafeMediaSource(url) {
   return sanitizeMediaUrl(url) || undefined;
 }
 
+function encodeSafeAttributeUrl(url) {
+  try {
+    return encodeURI(String(url || "")).replace(/%25([0-9a-f]{2})/gi, "%$1");
+  } catch {
+    return "";
+  }
+}
+
 export function applySafeMediaSource(element, url) {
-  if (!element) return false;
+  if (!element || !MEDIA_SOURCE_TAGS.has(element.tagName)) return false;
 
   const safeUrl = sanitizeMediaUrl(url);
-  if (!safeUrl) {
+  const safeAttributeUrl = safeUrl ? encodeSafeAttributeUrl(safeUrl) : "";
+  if (!safeAttributeUrl) {
     element.removeAttribute("src");
     return false;
   }
 
-  if (element.src !== safeUrl) {
-    element.src = safeUrl;
+  if (element.getAttribute("src") !== safeAttributeUrl) {
+    element.setAttribute("src", safeAttributeUrl);
   }
 
   return true;

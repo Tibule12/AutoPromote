@@ -1,8 +1,9 @@
 const express = require("express");
+const expressRateLimit = require("express-rate-limit");
 const router = express.Router();
 
 const authMiddleware = require("../authMiddleware");
-const { apiLimiter } = require("../validationMiddleware");
+const { apiLimiter } = require("../middleware/rateLimiter");
 const { getCreditBreakdown } = require("../creditSystem");
 const { getEffectiveTierSnapshot } = require("../services/billingService");
 const {
@@ -12,7 +13,17 @@ const {
   CREDIT_TOP_UP_PACKS,
 } = require("../config/subscriptionPlans");
 
+// Tool-recognizable route limiter for CodeQL and defense in depth. The
+// validation middleware limiter remains in place for the profile endpoint.
+const userProfileLimiter = expressRateLimit({
+  windowMs: parseInt(process.env.USER_PROFILE_LIMIT_WINDOW_MS || String(15 * 60 * 1000), 10),
+  max: parseInt(process.env.USER_PROFILE_LIMIT_MAX || "120", 10),
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // Apply auth middleware to all routes
+router.use(userProfileLimiter);
 router.use(authMiddleware);
 
 // GET /api/user/profile - User subscription/credits profile

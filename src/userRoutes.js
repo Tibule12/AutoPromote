@@ -1,4 +1,5 @@
 const express = require("express");
+const expressRateLimit = require("express-rate-limit");
 const { db } = require("./firebaseAdmin");
 const authMiddleware = require("./authMiddleware");
 const { rateLimiter } = require("./middlewares/globalRateLimiter");
@@ -14,6 +15,18 @@ const {
 } = require("./config/subscriptionPlans");
 
 const router = express.Router();
+
+// Analyzer-visible router-wide limiter for user profile routes. This is
+// additive to the distributed limiter below and keeps CodeQL from missing
+// protection on authenticated reads/writes.
+const routerLimiter = expressRateLimit({
+  windowMs: parseInt(process.env.USER_ROUTE_LIMIT_WINDOW_MS || String(15 * 60 * 1000), 10),
+  max: parseInt(process.env.USER_ROUTE_LIMIT_MAX || "300", 10),
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+router.use(routerLimiter);
+
 let codeqlLimiter;
 try {
   codeqlLimiter = require("./middlewares/codeqlRateLimit");
