@@ -7168,7 +7168,11 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   };
 
   const renderRecentRendersPanel = () => {
-    if (!recentRenders.length && !recentRendersStatus) return null;
+    const savedMasters = recentRenders.filter(render => {
+      const downloadUrl = render.outputUrl || render.output_url;
+      return render.status === "completed" && !!downloadUrl;
+    });
+    if (!savedMasters.length && !recentRendersStatus) return null;
     return (
       <div className="nle-saved-renders">
         <div className="nle-saved-renders-head">
@@ -7178,9 +7182,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           </button>
         </div>
         {recentRendersStatus ? <span>{recentRendersStatus}</span> : null}
-        {recentRenders.slice(0, 4).map(render => {
+        {savedMasters.slice(0, 4).map(render => {
           const downloadUrl = render.outputUrl || render.output_url;
-          const isReady = render.status === "completed" && downloadUrl;
           return (
             <div className="nle-saved-render-card" key={render.jobId}>
               {render.thumbnailUrl ? (
@@ -7189,22 +7192,20 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                 <div className="nle-saved-render-thumb">MP4</div>
               )}
               <div>
-                <strong>{isReady ? "Master ready" : `Render ${render.status}`}</strong>
+                <strong>Master ready</strong>
                 <span>
                   {formatDurationLabel(Number(render.duration || 0))} ·{" "}
                   {formatRenderExpiry(render.expiresAt)}
                 </span>
               </div>
-              {isReady ? (
-                <a
-                  className="nle-mini-btn"
-                  href={downloadUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Download
-                </a>
-              ) : null}
+              <a
+                className="nle-mini-btn"
+                href={downloadUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Download
+              </a>
             </div>
           );
         })}

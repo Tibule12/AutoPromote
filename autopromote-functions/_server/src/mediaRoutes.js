@@ -724,7 +724,10 @@ router.get("/renders", async (req, res) => {
 
     const renders = snapshot.docs
       .map(doc => normalizeRenderJob(doc, doc.data() || {}))
-      .filter(job => job.type === "multicam_render")
+      .filter(job => {
+        const outputUrl = job.outputUrl || job.output_url;
+        return job.type === "multicam_render" && job.status === "completed" && !!outputUrl;
+      })
       .sort((a, b) => {
         const aTime = Date.parse(a.completedAt || a.createdAt || "") || 0;
         const bTime = Date.parse(b.completedAt || b.createdAt || "") || 0;
