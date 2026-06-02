@@ -121,6 +121,7 @@ const UPLOAD_COMPRESSION_THRESHOLD_BYTES = 250 * BYTES_PER_MB; // Compress files
 const UPLOAD_COMPRESSION_TARGET_BPS = 8_000_000;               // 8 Mbps video
 const UPLOAD_COMPRESSION_AUDIO_BPS = 128_000;                  // 128 Kbps audio
 const VIDEO_SYNC_AUDIO_BPS = 96_000;
+const VIDEO_SYNC_MAX_EXTRACT_SECONDS = 15 * 60;
 const SYNC_AUDIO_CACHE_DB = "autopromote_multicam_sync_audio";
 const SYNC_AUDIO_CACHE_STORE = "cameraSyncAudio";
 const SYNC_AUDIO_CACHE_TTL_MS = 2 * 24 * 60 * 60 * 1000;
@@ -4428,7 +4429,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
    */
   const AUDIO_SYNC_COMPRESSION_THRESHOLD = 20 * 1024 * 1024; // 20 MB
 
-  const compressAudioForSync = async (file, label) => {
+  const compressAudioForSync = async (file, label, options = {}) => {
     const isAudio = file.type.startsWith("audio/") || /\.(wav|mp3|aac|ogg|flac|m4a|wma|aiff)$/i.test(file.name || "");
     if (!isAudio) return null;
     if (file.size <= AUDIO_SYNC_COMPRESSION_THRESHOLD) return null;
@@ -4445,12 +4446,21 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         try {
           const sampleRate = 16000;
           const channels = 1;
-          const duration = audioBuffer.duration;
+          const rawDuration = Number(audioBuffer.duration) || 0;
+          const trimStart = clampNumber(Number(options.trimStart) || 0, 0, Math.max(0, rawDuration - 0.2), 0);
+          const requestedDuration = Number(options.trimDuration) || rawDuration;
+          const cappedDuration = Math.min(requestedDuration, VIDEO_SYNC_MAX_EXTRACT_SECONDS);
+          const duration = clampNumber(
+            cappedDuration,
+            0.2,
+            Math.max(0.2, rawDuration - trimStart),
+            Math.min(rawDuration, VIDEO_SYNC_MAX_EXTRACT_SECONDS)
+          );
           const offlineCtx = new OfflineAudioContext(channels, Math.ceil(sampleRate * duration), sampleRate);
           const source = offlineCtx.createBufferSource();
           source.buffer = audioBuffer;
           source.connect(offlineCtx.destination);
-          source.start(0);
+          source.start(0, trimStart, duration);
 
           offlineCtx.startRendering().then(rendered => {
             audioCtx.close().catch(() => {});
@@ -4485,7 +4495,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
             });
             const pctSaved = Math.round((1 - blob.size / file.size) * 100);
             setStatusMessage(`${label}: ${formatMediaBytes(file.size)} → ${formatMediaBytes(blob.size)} sync copy (${pctSaved}% smaller).`);
-            resolve({ file: compressedFile, originalSize: file.size, compressedSize: blob.size });
+            resolve({ file: compressedFile, originalSize: file.size, compressedSize: blob.size, trimStart, trimDuration: duration });
           }).catch(() => {
             audioCtx.close().catch(() => {});
             resolve(null);
@@ -4501,7 +4511,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     });
   };
 
-  const extractVideoAudioForSync = async (file, label) => {
+  const extractVideoAudioForSync = async (file, label, options = {}) => {
     const isVideo = String(file?.type || "").startsWith("video/") || /\.(mov|mp4|avi|mkv|webm|m4v|3gp)$/i.test(file.name || "");
     if (!isVideo || typeof MediaRecorder === "undefined") return null;
 
@@ -4544,7 +4554,16 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
 
       video.onloadedmetadata = async () => {
         try {
-          const duration = Math.max(0.2, Number(video.duration) || 0);
+          const rawDuration = Math.max(0.2, Number(video.duration) || 0);
+          const trimStart = clampNumber(Number(options.trimStart) || 0, 0, Math.max(0, rawDuration - 0.2), 0);
+          const requestedDuration = Number(options.trimDuration) || rawDuration;
+          const duration = clampNumber(
+            Math.min(requestedDuration, VIDEO_SYNC_MAX_EXTRACT_SECONDS),
+            0.2,
+            Math.max(0.2, rawDuration - trimStart),
+            Math.min(rawDuration, VIDEO_SYNC_MAX_EXTRACT_SECONDS)
+          );
+          const trimEnd = Math.min(rawDuration, trimStart + duration);
           audioCtx = new AudioContextClass();
           await audioCtx.resume?.();
           const sourceNode = audioCtx.createMediaElementSource(video);
@@ -4610,29 +4629,45 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
               originalSize: file.size,
               compressedSize: blob.size,
               duration,
+              trimStart,
+              trimDuration: duration,
             });
           };
 
           let lastPct = 0;
           const estimatedBytes = Math.round((VIDEO_SYNC_AUDIO_BPS / 8) * duration * 1.1);
+          let captureStarted = false;
           video.ontimeupdate = () => {
-            const pct = Math.min(1, Math.max(0, video.currentTime / duration));
+            const pct = Math.min(1, Math.max(0, (video.currentTime - trimStart) / duration));
             if (pct - lastPct > 0.02) {
               lastPct = pct;
               setStatusMessage(
                 `Extracting camera sync audio for ${label} (${Math.round(pct * 100)}%) — upload target ~${formatMediaBytes(estimatedBytes)}...`
               );
             }
+            if (captureStarted && video.currentTime >= trimEnd - 0.05 && recorder.state !== "inactive") {
+              recorder.stop();
+            }
           };
           video.onended = () => {
             if (recorder.state !== "inactive") recorder.stop();
           };
 
-          recorder.start(1000);
-          video.play().catch(() => {
-            if (recorder.state !== "inactive") recorder.stop();
-            fail();
-          });
+          const startCapture = () => {
+            if (captureStarted || resolved) return;
+            captureStarted = true;
+            recorder.start(1000);
+            video.play().catch(() => {
+              if (recorder.state !== "inactive") recorder.stop();
+              fail();
+            });
+          };
+          if (trimStart > 0.05) {
+            video.onseeked = () => startCapture();
+            video.currentTime = trimStart;
+          } else {
+            startCapture();
+          }
         } catch (error) {
           console.warn("Browser video audio extraction failed:", error);
           fail();
@@ -4977,7 +5012,9 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     mode = "auto",
     trimWindow = null,
   }) => {
-    const reusableFallbackUrl = isBackendReadableMediaUrl(fallbackUrl) ? fallbackUrl : "";
+    const hasTrimWindow =
+      Number(trimWindow?.duration || 0) > 0.05 || Number(trimWindow?.start || 0) > 0.05;
+    const reusableFallbackUrl = !hasTrimWindow && isBackendReadableMediaUrl(fallbackUrl) ? fallbackUrl : "";
     if (reusableFallbackUrl) {
       const syncOnly = mode === "audio_only";
       setStatusMessage(
@@ -5053,7 +5090,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     // Compress large audio files for sync (WAV → 16kHz mono WAV, ~90% smaller)
     let uploadFile = file;
     if (mode === "audio_only" && !isAudioOnly) {
-      const syncCacheKey = buildSyncAudioCacheKey(file);
+      const syncCacheKey = buildSyncAudioCacheKey(file, trimWindow);
       const cachedSyncAudioFile = await readCachedSyncAudioFile(syncCacheKey);
       if (cachedSyncAudioFile) {
         const cachedStats = await getAudioFileSignalStats(cachedSyncAudioFile);
@@ -5076,7 +5113,10 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         setStatusMessage(
           `Creating audio-only sync upload for ${label}. This avoids uploading the full ${formatMediaBytes(file.size)} camera file.`
         );
-        const videoAudio = await extractVideoAudioForSync(file, label);
+        const videoAudio = await extractVideoAudioForSync(file, label, {
+          trimStart: trimWindow?.start || 0,
+          trimDuration: trimWindow?.duration || 0,
+        });
         if (!videoAudio?.file) {
           throw new Error(
             `${label} camera audio could not be extracted in the browser. Please try Chrome/Edge or use a shorter camera file.`
@@ -5091,7 +5131,10 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         uploadFile = videoAudio.file;
       }
     } else if (isAudioOnly && file.size > AUDIO_SYNC_COMPRESSION_THRESHOLD) {
-      const audioCompressed = await compressAudioForSync(file, label);
+      const audioCompressed = await compressAudioForSync(file, label, {
+        trimStart: trimWindow?.start || 0,
+        trimDuration: trimWindow?.duration || 0,
+      });
       if (audioCompressed) {
         toast.success(
           `${label} sync copy: ${formatMediaBytes(audioCompressed.originalSize)} → ${formatMediaBytes(audioCompressed.compressedSize)}`,
@@ -5178,8 +5221,15 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       ? `${file.name || "media"}:${file.size || 0}:${file.lastModified || 0}`
       : "";
 
-  const buildSyncAudioCacheKey = file =>
-    file ? `sync-audio:${buildBackendMediaCacheKey(file)}` : "";
+  const buildSyncAudioCacheKey = (file, trimWindow = null) => {
+    if (!file) return "";
+    const trimStart = Math.max(0, Number(trimWindow?.start || 0) || 0);
+    const trimDuration = Math.max(0, Number(trimWindow?.duration || 0) || 0);
+    const trimSuffix = trimDuration > 0.05
+      ? `:trim:${trimStart.toFixed(3)}:${trimDuration.toFixed(3)}`
+      : "";
+    return `sync-audio:${buildBackendMediaCacheKey(file)}${trimSuffix}`;
+  };
 
   const handleStartBackendCleanAudioSync = async ({ confirmBeforeStart = true, reason = "" } = {}) => {
     if (!externalAudioTrack) {
@@ -5248,6 +5298,14 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           source.backendSyncStatus === "needs_review" ||
           source.backendSyncMethod === "silent_audio" ||
           /silent|re-extract|no correlation/i.test(String(source.backendSyncWarning || ""));
+        const sourceSyncTrimStart = Math.max(
+          0,
+          cloudRenderWindowStartSafe - (Number(source.offsetSeconds) || 0)
+        );
+        const sourceSyncTrimDuration = Math.min(
+          VIDEO_SYNC_MAX_EXTRACT_SECONDS,
+          cloudRenderWindowDuration || Number(source.duration || 0) || VIDEO_SYNC_MAX_EXTRACT_SECONDS
+        );
         // eslint-disable-next-line no-await-in-loop
         const uploadResult = await uploadMediaForBackendSync({
           user,
@@ -5257,6 +5315,10 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           folder: "temp/multicam-clean-sync",
           label: `${source.label || `Camera ${index + 1}`} (${index + 1}/${candidates.length})`,
           mode: "audio_only",
+          trimWindow: {
+            start: sourceSyncTrimStart,
+            duration: sourceSyncTrimDuration,
+          },
         });
         const reusableSyncUrl = uploadResult.syncAudioUrl || uploadResult.url;
         sourcesPayload.push({
@@ -5281,6 +5343,13 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         folder: "temp/multicam-clean-sync-audio",
         label: "External clean audio",
         mode: "audio_only",
+        trimWindow: {
+          start: Math.max(0, cloudRenderWindowStartSafe - (Number(externalAudioTrack.offsetSeconds) || 0)),
+          duration: Math.min(
+            VIDEO_SYNC_MAX_EXTRACT_SECONDS,
+            cloudRenderWindowDuration || Number(externalAudioTrack.duration || 0) || VIDEO_SYNC_MAX_EXTRACT_SECONDS
+          ),
+        },
       });
       const externalAudioRemoteUrl = externalAudioUpload.url;
 
