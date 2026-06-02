@@ -174,6 +174,24 @@ const readCachedSyncAudioFile = async cacheKey => {
   });
 };
 
+const deleteCachedSyncAudioFile = async cacheKey => {
+  if (!cacheKey) return;
+  const db = await openSyncAudioCacheDb();
+  if (!db) return;
+  await new Promise(resolve => {
+    const tx = db.transaction(SYNC_AUDIO_CACHE_STORE, "readwrite");
+    tx.objectStore(SYNC_AUDIO_CACHE_STORE).delete(cacheKey);
+    tx.oncomplete = () => {
+      db.close();
+      resolve();
+    };
+    tx.onerror = () => {
+      db.close();
+      resolve();
+    };
+  });
+};
+
 const writeCachedSyncAudioFile = async (cacheKey, file) => {
   if (!cacheKey || !file) return;
   const db = await openSyncAudioCacheDb();
@@ -199,6 +217,39 @@ const writeCachedSyncAudioFile = async (cacheKey, file) => {
     };
   });
 };
+
+const getAudioFileSignalStats = async file => {
+  if (!file) return null;
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextClass) return null;
+  const audioCtx = new AudioContextClass();
+  try {
+    const decoded = await audioCtx.decodeAudioData(await file.arrayBuffer());
+    const channel = decoded.getChannelData(0);
+    let sumSquares = 0;
+    let maxAbs = 0;
+    const stride = Math.max(1, Math.floor(channel.length / 120000));
+    let samplesChecked = 0;
+    for (let i = 0; i < channel.length; i += stride) {
+      const value = Math.abs(channel[i] || 0);
+      sumSquares += value * value;
+      maxAbs = Math.max(maxAbs, value);
+      samplesChecked += 1;
+    }
+    return {
+      rms: Math.sqrt(sumSquares / Math.max(1, samplesChecked)),
+      maxAbs,
+      duration: Number(decoded.duration || 0),
+    };
+  } catch (_) {
+    return null;
+  } finally {
+    audioCtx.close().catch(() => {});
+  }
+};
+
+const hasUsableAudioSignal = stats =>
+  !stats || (Number(stats.maxAbs || 0) >= 0.002 && Number(stats.rms || 0) >= 0.0002);
 
 const SINGLE_CAM_FOCUS_PRESETS = [
   { id: "two-shot", label: "Two Shot", zoom: 1 },
@@ -1429,6 +1480,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       videoHeight: 0,
     }))
   );
+  const currentSourcesRef = useRef(sources);
   const [switches, setSwitches] = useState([{ id: "switch-1", cameraId: "cam-1", startTime: 0 }]);
   const [masterAudioCameraId, setMasterAudioCameraId] = useState("cam-1");
   const [playhead, setPlayhead] = useState(0);
@@ -2755,6 +2807,10 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   }, [playhead]);
 
   useEffect(() => {
+    currentSourcesRef.current = sources;
+  }, [sources]);
+
+  useEffect(() => {
     draftHydratedRef.current = false;
     if (typeof window === "undefined" || !multicamDraftKey) {
       draftHydratedRef.current = true;
@@ -3439,13 +3495,33 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           const rejected = offsets.filter(o => o.debug?.rejected);
           const hasDrift = offsets.some(o => o.drift?.hasDrift);
           const syncUnsafe = rejected.length > 0 || needsReview.length > 0;
+          const unusableAudioMethods = new Set(["silent_audio", "no_correlation"]);
+          const badSyncMatches = offsets.filter(
+            o =>
+              o.status === "needs_review" ||
+              o.debug?.rejected ||
+              unusableAudioMethods.has(String(o.method || "")) ||
+              /silent|re-extract|no correlation/i.test(String(o.warning || o.message || ""))
+          );
+          const badSyncSourceIds = new Set(badSyncMatches.map(o => o.sourceId || o.id).filter(Boolean));
+          if (badSyncSourceIds.size) {
+            currentSourcesRef.current.forEach(source => {
+              if (badSyncSourceIds.has(source.id)) {
+                deleteCachedSyncAudioFile(buildSyncAudioCacheKey(source.file));
+              }
+            });
+          }
 
           setSources(currentSources =>
             currentSources.map(source => {
               const match = offsets.find(item => item.sourceId === source.id || item.id === source.id);
               if (!match) return source;
               // Preserve manually locked offsets but still apply worker-computed sync rate
-              const isBad = match.status === "needs_review" || match.debug?.rejected;
+              const isBad =
+                match.status === "needs_review" ||
+                match.debug?.rejected ||
+                unusableAudioMethods.has(String(match.method || "")) ||
+                /silent|re-extract|no correlation/i.test(String(match.warning || match.message || ""));
               const voiceActivity = match.voiceActivity;
               const workerSyncRate = isBad
                 ? getSourceSyncRate(source)
@@ -3463,6 +3539,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                   backendSyncDebug: match.debug || source.backendSyncDebug || null,
                   backendSyncDrift: match.drift || source.backendSyncDrift || null,
                   backendVoiceActivity: voiceActivity || source.backendVoiceActivity || null,
+                  uploadedSyncUrl: isBad ? "" : source.uploadedSyncUrl,
+                  syncAudioUrl: isBad ? "" : source.syncAudioUrl,
                 };
               }
               return {
@@ -3477,6 +3555,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                 backendSyncDebug: match.debug || null,
                 backendSyncDrift: match.drift || null,
                 backendVoiceActivity: voiceActivity || null,
+                uploadedSyncUrl: isBad ? "" : source.uploadedSyncUrl,
+                syncAudioUrl: isBad ? "" : source.syncAudioUrl,
               };
             })
           );
@@ -4976,11 +5056,23 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       const syncCacheKey = buildSyncAudioCacheKey(file);
       const cachedSyncAudioFile = await readCachedSyncAudioFile(syncCacheKey);
       if (cachedSyncAudioFile) {
-        setStatusMessage(
-          `Reusing cached camera sync audio for ${label}. No repeat extraction needed.`
-        );
-        uploadFile = cachedSyncAudioFile;
-      } else {
+        const cachedStats = await getAudioFileSignalStats(cachedSyncAudioFile);
+        if (hasUsableAudioSignal(cachedStats)) {
+          setStatusMessage(
+            `Reusing cached camera sync audio for ${label}. No repeat extraction needed.`
+          );
+          uploadFile = cachedSyncAudioFile;
+        } else {
+          await deleteCachedSyncAudioFile(syncCacheKey);
+          console.warn("Discarded silent cached camera sync audio", {
+            label,
+            rms: cachedStats?.rms,
+            maxAbs: cachedStats?.maxAbs,
+          });
+          setStatusMessage(`Discarded bad cached sync audio for ${label}. Re-extracting...`);
+        }
+      }
+      if (uploadFile === file) {
         setStatusMessage(
           `Creating audio-only sync upload for ${label}. This avoids uploading the full ${formatMediaBytes(file.size)} camera file.`
         );
@@ -5152,12 +5244,16 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       const sourcesPayload = [];
       for (let index = 0; index < candidates.length; index += 1) {
         const source = candidates[index];
+        const previousSyncUnsafe =
+          source.backendSyncStatus === "needs_review" ||
+          source.backendSyncMethod === "silent_audio" ||
+          /silent|re-extract|no correlation/i.test(String(source.backendSyncWarning || ""));
         // eslint-disable-next-line no-await-in-loop
         const uploadResult = await uploadMediaForBackendSync({
           user,
           storage,
           file: source.file,
-          fallbackUrl: source.uploadedSyncUrl || source.syncAudioUrl || "",
+          fallbackUrl: previousSyncUnsafe ? "" : source.uploadedSyncUrl || source.syncAudioUrl || "",
           folder: "temp/multicam-clean-sync",
           label: `${source.label || `Camera ${index + 1}`} (${index + 1}/${candidates.length})`,
           mode: "audio_only",
