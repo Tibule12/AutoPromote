@@ -14119,7 +14119,9 @@ async def clean_audio_sync_impl(request: CleanAudioSyncRequest, job_id: str):
                 max(12.0, min(camera_duration, clean_duration) * 0.03),
             )
             abs_delta = abs(delta)
-            offset_rejected = abs_delta > max_reasonable_offset > 1.0
+            # A match that lands exactly on the search boundary usually means
+            # correlation ran out of room, not that the true offset is safe.
+            offset_rejected = abs_delta >= max_reasonable_offset > 1.0
 
             external_audio_base_offset = float(request.external_audio.offset_seconds or 0.0)
 
