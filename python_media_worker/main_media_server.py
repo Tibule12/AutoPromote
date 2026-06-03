@@ -14232,15 +14232,15 @@ async def clean_audio_sync_impl(request: CleanAudioSyncRequest, job_id: str):
             elif confidence < 0.55:
                 warning = "Moderate confidence — verify alignment"
                 status_label = "needs_review"
-                applied_offset = round(external_audio_base_offset - full_media_delta, 3)
+                applied_offset = round(external_audio_base_offset + full_media_delta, 3)
             elif drift and drift.get("hasDrift"):
                 warning = drift.get("warning", "Possible drift detected")
                 status_label = "synced_with_warning"
-                applied_offset = round(external_audio_base_offset - full_media_delta, 3)
+                applied_offset = round(external_audio_base_offset + full_media_delta, 3)
             else:
                 warning = None
                 status_label = "synced"
-                applied_offset = round(external_audio_base_offset - full_media_delta, 3)
+                applied_offset = round(external_audio_base_offset + full_media_delta, 3)
 
             message = "Synced with high confidence." if status_label == "synced" else (warning or "Synced.")
 
@@ -14366,7 +14366,7 @@ async def clean_audio_sync_impl(request: CleanAudioSyncRequest, job_id: str):
                         if conf > 0.2:
                             o["intercamOffsetSeconds"] = round(full_intercam_delta, 3)
                             o["intercamTrimDelta"] = round(float(delta or 0.0), 3)
-                            o["offsetSeconds"] = round(reference_absolute_offset - full_intercam_delta, 3)
+                            o["offsetSeconds"] = round(reference_absolute_offset + full_intercam_delta, 3)
                             o["confidence"] = max(float(o.get("confidence") or 0.0), conf)
                             o["method"] = f"intercam_{method}"
                             o["status"] = "synced_with_warning" if conf < 0.45 else "synced"

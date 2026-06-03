@@ -506,7 +506,16 @@ router.post("/multicam/preflight-sync", async (req, res) => {
   }
 
   try {
-    const result = await videoEditingService.preflightMulticamSync({ sources, external_audio_url: externalAudioUrl });
+    const externalAudioOffsetSeconds = Number(
+      req.body?.external_audio_offset_seconds ??
+        req.body?.externalAudio?.offset_seconds ??
+        0
+    ) || 0;
+    const result = await videoEditingService.preflightMulticamSync({
+      sources,
+      external_audio_url: externalAudioUrl,
+      external_audio_offset_seconds: externalAudioOffsetSeconds,
+    });
     res.json(result);
   } catch (error) {
     console.error("[MediaRoute] Multicam preflight sync error:", error.message);

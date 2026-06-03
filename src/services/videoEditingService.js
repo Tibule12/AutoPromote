@@ -875,7 +875,7 @@ class VideoEditingService {
       throw new Error("Transcription failed");
     }
   }
-  async preflightMulticamSync({ sources, external_audio_url }) {
+  async preflightMulticamSync({ sources, external_audio_url, external_audio_offset_seconds = 0 }) {
     console.log("[VideoEditing] Running multicam preflight sync", {
       sourceCount: sources.length,
       hasExternalAudio: !!external_audio_url,
@@ -901,6 +901,7 @@ class VideoEditingService {
         syncRate: Number(s.syncRate ?? s.sync_rate ?? 1),
       })),
       external_audio_url,
+      external_audio_offset_seconds: Number(external_audio_offset_seconds || 0),
     };
 
     const response = await axios.post(`${workerUrl}/multicam/preflight-sync`, payload, {
