@@ -3486,7 +3486,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   useEffect(() => {
     const jobId = cleanAudioSyncJob?.jobId;
     const status = cleanAudioSyncJob?.status;
-    if (!jobId || ["ready_for_review", "completed", "failed", "cancelled"].includes(status)) {
+    if (!jobId || cleanAudioSyncTerminalStatuses.has(status)) {
       return undefined;
     }
 
@@ -3512,7 +3512,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         };
         setCleanAudioSyncJob(nextJob);
 
-        if (data.detail || data.stage) {
+        const exportStatusActive = isExporting || serverExportPending;
+        if (!exportStatusActive && (data.detail || data.stage)) {
           setStatusMessage(data.detail || `Clean-audio sync: ${data.stage}`);
         }
 
@@ -3615,7 +3616,9 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
             setAutoDirectorEnabled(false);
             setAutoDirectorSummary(null);
             setMulticamLayoutMode(currentMode => (currentMode === "smart" ? "cut" : currentMode));
-            setStatusMessage("Auto Director paused until sync is reviewed.");
+            if (!exportStatusActive) {
+              setStatusMessage("Auto Director paused until sync needs stronger automatic proof.");
+            }
           } else if (directorTimeline.length > 0 && autoDirectorEnabled) {
             // Convert backend director timeline to Auto Director switches format
             const directorSwitches = [];
@@ -3635,9 +3638,11 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
               setMulticamLayoutMode(
                 directorTimeline.some(s => s.layoutMode === "show_everyone") ? "scene-grid" : "smart"
               );
-              setStatusMessage(
-                `Director timeline loaded: ${directorTimeline.length} segments, ${directorSwitches.length} camera switches.`
-              );
+              if (!exportStatusActive) {
+                setStatusMessage(
+                  `Director timeline loaded: ${directorTimeline.length} segments, ${directorSwitches.length} camera switches.`
+                );
+              }
             }
           } else if (directorTimeline.length > 0) {
             setAutoDirectorSummary(null);
@@ -3647,26 +3652,36 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
 
           if (rejected.length > 0) {
             const names = rejected.map(o => o.label).join(", ");
-            setStatusMessage(
-              `Bad offsets rejected for ${names} — review sync before Auto Director resumes.`
-            );
+            if (!exportStatusActive) {
+              setStatusMessage(
+                `Bad offsets rejected for ${names} — automatic sync proof is still required.`
+              );
+            }
             toast(`Offsets rejected for ${names}. Export will stay blocked until automatic sync is proven.`, { icon: "⚠️", duration: 10000 });
           } else if (needsReview.length > 0) {
-            setStatusMessage(
-              `${needsReview.length} camera(s) need stronger automatic sync proof — Auto Director is paused.`
-            );
+            if (!exportStatusActive) {
+              setStatusMessage(
+                `${needsReview.length} camera(s) need stronger automatic sync proof — Auto Director is paused.`
+              );
+            }
             toast(`${needsReview.length} camera(s) need stronger automatic sync proof before export.`, { icon: "⚠️", duration: 8000 });
           } else if (hasDrift) {
-            setStatusMessage("Sync complete, but possible audio drift detected. Verify alignment.");
+            if (!exportStatusActive) {
+              setStatusMessage("Sync complete, but possible audio drift detected. Export preflight will verify before render.");
+            }
             toast("Possible audio drift — verify sync", { icon: "⚠️", duration: 6000 });
           } else if (shouldUseBackendCleanAudioSync) {
             setAutoDirectorEnabled(false);
-            setStatusMessage(
-              "Machine sync calculated. Export will automatically verify start/middle/end sync before any render starts."
-            );
+            if (!exportStatusActive) {
+              setStatusMessage(
+                "Machine sync calculated. Export will automatically verify start/middle/end sync before any render starts."
+              );
+            }
             toast("Automatic start/middle/end sync verification will run before export.", { icon: "✅", duration: 8000 });
           } else {
-            setStatusMessage("Sync window matched with high confidence. Export will still prove start/middle/end sync before rendering.");
+            if (!exportStatusActive) {
+              setStatusMessage("Sync window matched with high confidence. Export will still prove start/middle/end sync before rendering.");
+            }
           }
         }
       } catch (error) {
@@ -3680,7 +3695,15 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       isCancelled = true;
       window.clearInterval(intervalId);
     };
-  }, [cleanAudioSyncJob?.jobId, cleanAudioSyncJob?.status, shouldUseBackendCleanAudioSync]);
+  }, [
+    cleanAudioSyncJob?.jobId,
+    cleanAudioSyncJob?.status,
+    cleanAudioSyncTerminalStatuses,
+    isExporting,
+    serverExportPending,
+    shouldUseBackendCleanAudioSync,
+    autoDirectorEnabled,
+  ]);
 
   // Cleanup multicam render export poll interval on unmount
   useEffect(() => {
