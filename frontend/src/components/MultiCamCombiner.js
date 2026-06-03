@@ -2706,7 +2706,6 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const cleanAudioSyncIsRunning = Boolean(
     cleanAudioSyncJob?.status && !cleanAudioSyncTerminalStatuses.has(cleanAudioSyncJob.status)
   );
-  const cleanAudioSyncFailed = cleanAudioSyncJob?.status === "failed";
   const cleanAudioSyncIsComplete = Boolean(
     cleanAudioSyncJob?.status && cleanAudioSyncTerminalStatuses.has(cleanAudioSyncJob.status)
   );
@@ -5751,13 +5750,10 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     }
 
     if (shouldUseBackendCleanAudioSync) {
-      setStatusMessage("Program Output needs a safe clean-audio sync check before preview playback.");
-      await handleStartBackendCleanAudioSync({
-        confirmBeforeStart: true,
-        reason:
-          "Program Output should preview the same synced timing the final render will use. This project needs worker clean-audio sync before playback.",
-      });
-      return false;
+      setStatusMessage(
+        "Program Output is preview-only with provisional timing. Export will upload bounded proxies and prove start/middle/end sync before any paid render."
+      );
+      return true;
     }
 
     const approvedBrowserSync = window.confirm(
@@ -6917,35 +6913,6 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         setStatusMessage(message);
         toast.error(message);
         return;
-      }
-
-      if (cleanAudioSyncFailed) {
-        const message =
-          "Server render blocked: clean-audio sync failed, so start/middle/end sync cannot be proven before render.";
-        setStatusMessage(message);
-        toast.error(message);
-        return;
-      }
-
-      if (shouldUseBackendCleanAudioSync) {
-        const videoSources = readySources.filter(isVideoSource);
-        const missingMachineSync = videoSources.filter(
-          source => !source.autoSyncApplied && !sourceHasMachineCleanAudioSyncResult(source)
-        );
-        if (missingMachineSync.length) {
-          const message =
-            "Server render blocked: this large project needs worker clean-audio sync before export preflight can prove start/middle/end alignment.";
-          setStatusMessage(message);
-          toast.error(message);
-          if (!cleanAudioSyncJob?.jobId) {
-            await handleStartBackendCleanAudioSync({
-              confirmBeforeStart: true,
-              reason:
-                "Server MP4 export needs worker clean-audio sync first so the final preflight can verify start/middle/end alignment before any paid render.",
-            });
-          }
-          return;
-        }
       }
     }
 
