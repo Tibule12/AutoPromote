@@ -7198,7 +7198,6 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       const auth = getAuth();
       const user = auth.currentUser;
       if (!user) throw new Error("You must be signed in to use server rendering.");
-      const token = await user.getIdToken();
       const storage = getStorage();
       const renderWindowStart = cloudRenderWindowStartSafe;
       const renderWindowEnd = cloudRenderWindowEnd;
@@ -7361,16 +7360,25 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
             external_audio_url: externalAudioPayload.url,
             external_audio_offset_seconds: externalAudioPayload.offset_seconds,
           };
+          const preflightToken = await user.getIdToken(true);
           const preflightRes = await fetch(`${API_BASE_URL}/api/media/multicam/preflight-sync`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${preflightToken}`,
             },
             body: JSON.stringify(preflightBody),
           });
           const preflight = await preflightRes.json();
           console.log("PREFLIGHT AUTO-ALIGN RESULT:", preflight);
+          if (!preflightRes.ok || preflight?.error) {
+            const preflightErrorMessage =
+              preflight?.error ||
+              preflight?.message ||
+              preflight?.detail ||
+              `Preflight returned ${preflightRes.status}`;
+            throw new Error(preflightErrorMessage);
+          }
           preflightStatusForRender = String(preflight.status || "");
           const adjustments = applyPreflightSyncSuggestions(sourcesPayload, preflight);
           const verifiedIds = getPreflightVerifiedSourceIds(sourcesPayload, preflight);
@@ -7413,6 +7421,12 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           }
         } catch (preflightErr) {
           console.warn("Preflight auto-align failed before render:", preflightErr);
+          const preflightErrorText = String(preflightErr?.message || "");
+          if (/token expired|auth|session/i.test(preflightErrorText)) {
+            throw new Error(
+              "Session refreshed too late during sync preflight. Render cancelled before credits are spent. Retry now; completed upload proxies should be reused."
+            );
+          }
           throw new Error("Automatic start/middle/end sync preflight failed. Render cancelled before credits are spent.");
         }
         const missingVerified = sourcesPayload.filter(source => !preflightVerifiedIds.has(source.id));
@@ -7567,11 +7581,12 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       console.log("TRACE layout summary:", (renderSegmentsPayload || []).reduce((acc, s) => { acc[s.layout_mode] = (acc[s.layout_mode] || 0) + 1; return acc; }, {}));
       // ===== END TRACE =====
 
+      const renderToken = await user.getIdToken(true);
       const response = await fetch(`${API_BASE_URL}/api/media/render-multicam`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${renderToken}`,
         },
         body: JSON.stringify({
           sources: sourcesPayload,
