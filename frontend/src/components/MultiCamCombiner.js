@@ -2718,6 +2718,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const cleanAudioSyncIsRunning = Boolean(
     cleanAudioSyncJob?.status && !cleanAudioSyncTerminalStatuses.has(cleanAudioSyncJob.status)
   );
+  const cleanAudioSyncFailed = cleanAudioSyncJob?.status === "failed";
   const cleanAudioSyncIsComplete = Boolean(
     cleanAudioSyncJob?.status && cleanAudioSyncTerminalStatuses.has(cleanAudioSyncJob.status)
   );
@@ -3661,12 +3662,12 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
             setStatusMessage(
               `Bad offsets rejected for ${names} — review sync before Auto Director resumes.`
             );
-            toast(`Offsets rejected for ${names} — click camera to nudge`, { icon: "⚠️", duration: 10000 });
+            toast(`Offsets rejected for ${names}. Export will stay blocked until automatic sync is proven.`, { icon: "⚠️", duration: 10000 });
           } else if (needsReview.length > 0) {
             setStatusMessage(
-              `${needsReview.length} camera(s) need manual review — Auto Director is paused.`
+              `${needsReview.length} camera(s) need stronger automatic sync proof — Auto Director is paused.`
             );
-            toast(`${needsReview.length} camera(s) need review — check offsets`, { icon: "⚠️", duration: 8000 });
+            toast(`${needsReview.length} camera(s) need stronger automatic sync proof before export.`, { icon: "⚠️", duration: 8000 });
           } else if (hasDrift) {
             setStatusMessage("Sync complete, but possible audio drift detected. Verify alignment.");
             toast("Possible audio drift — verify sync", { icon: "⚠️", duration: 6000 });
@@ -3677,7 +3678,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
             );
             toast("Automatic start/middle/end sync verification will run before export.", { icon: "✅", duration: 8000 });
           } else {
-            setStatusMessage("Sync window matched with high confidence. Play Program Output to verify lips before export.");
+            setStatusMessage("Sync window matched with high confidence. Export will still prove start/middle/end sync before rendering.");
           }
         }
       } catch (error) {
@@ -5243,14 +5244,36 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         uploadFile = compressed.file;
       } else {
         setStatusMessage(
-          `Cannot compress ${label} in browser (unsupported codec like ProRes). Uploading original ${formatMediaBytes(file.size)}...`
+          `Cannot create a fast upload proxy for ${label} in this browser. Full original upload is blocked.`
         );
       }
+    }
+
+    if (mode === "audio_only" && !isAudioOnly && uploadFile === file) {
+      throw new Error(
+        `${label || "Camera"} sync needs a small extracted audio proxy, but the browser could not create one. Refusing to upload the full ${formatMediaBytes(file.size)} camera file for sync.`
+      );
+    }
+    if (mode === "audio_only" && isAudioOnly && uploadFile === file && file.size > AUDIO_SYNC_COMPRESSION_THRESHOLD) {
+      throw new Error(
+        `${label || "Clean audio"} sync needs a compressed audio proxy, but the browser could not create one. Refusing to upload the full ${formatMediaBytes(file.size)} audio file for sync.`
+      );
+    }
+    if (shouldCreateVideoProxy && uploadFile === file) {
+      throw new Error(
+        `${label || "Camera"} render needs a trimmed/compressed video proxy, but the browser could not create one. Refusing to upload the full ${formatMediaBytes(file.size)} camera file.`
+      );
     }
 
     const safeName = (uploadFile.name || `${label || "media"}.bin`).replace(/[^a-zA-Z0-9._-]/g, "_");
     const mediaRef = ref(storage, `${folder}/${user.uid}/${Date.now()}_${safeName}`);
     const startTime = Date.now();
+    const uploadPurpose =
+      mode === "audio_only"
+        ? "sync proxy"
+        : trimWindow
+          ? "render-window proxy"
+          : "media";
     await new Promise((resolve, reject) => {
       const task = uploadBytesResumable(mediaRef, uploadFile, {
         contentType: uploadFile.type || "application/octet-stream",
@@ -5273,7 +5296,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
               ? `~${Math.round(remainingSec)} sec left`
               : "";
           setStatusMessage(
-            `Uploading ${label || file.name || "media"} for background sync — ${formatMediaBytes(transferred)} / ${formatMediaBytes(total)} (${pct.toFixed(1)}%, ${speedStr}${eta ? `, ${eta}` : ""})...`
+            `Uploading ${label || file.name || "media"} ${uploadPurpose} — ${formatMediaBytes(transferred)} / ${formatMediaBytes(total)} (${pct.toFixed(1)}%, ${speedStr}${eta ? `, ${eta}` : ""})...`
           );
         },
         reject,
@@ -5562,7 +5585,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       return true;
     } catch (error) {
       setStatusMessage(
-        "We could not sync automatically. Please adjust the audio alignment manually."
+        "We could not prove automatic sync. Export will stay blocked until sync is rerun and verified."
       );
       return false;
     } finally {
@@ -5596,11 +5619,11 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     if (syncedCount) {
       setUseExternalCleanAudio(true);
       setStatusMessage(
-        `${syncedCount} camera${syncedCount === 1 ? "" : "s"} synced to clean audio. Preview the result and nudge if needed.`
+        `${syncedCount} camera${syncedCount === 1 ? "" : "s"} synced to clean audio. Export will still prove start/middle/end sync before rendering.`
       );
     } else {
       setStatusMessage(
-        "We could not sync automatically. Please adjust the audio alignment manually."
+        "We could not prove automatic sync. Export will stay blocked until sync is rerun and verified."
       );
     }
   };
@@ -6876,6 +6899,45 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   };
 
   const handleServerExport = async () => {
+    if (hasExternalCleanAudio) {
+      if (cleanAudioSyncIsRunning || syncingCameraId === "external-clean-audio") {
+        const message =
+          "Server render blocked: clean-audio sync is still uploading or processing. Export preflight will run only after automatic sync finishes.";
+        setStatusMessage(message);
+        toast.error(message);
+        return;
+      }
+
+      if (cleanAudioSyncFailed) {
+        const message =
+          "Server render blocked: clean-audio sync failed, so start/middle/end sync cannot be proven before render.";
+        setStatusMessage(message);
+        toast.error(message);
+        return;
+      }
+
+      if (shouldUseBackendCleanAudioSync) {
+        const videoSources = readySources.filter(isVideoSource);
+        const missingMachineSync = videoSources.filter(
+          source => !source.autoSyncApplied && !sourceHasMachineCleanAudioSyncResult(source)
+        );
+        if (missingMachineSync.length) {
+          const message =
+            "Server render blocked: this large project needs worker clean-audio sync before export preflight can prove start/middle/end alignment.";
+          setStatusMessage(message);
+          toast.error(message);
+          if (!cleanAudioSyncJob?.jobId) {
+            await handleStartBackendCleanAudioSync({
+              confirmBeforeStart: true,
+              reason:
+                "Server MP4 export needs worker clean-audio sync first so the final preflight can verify start/middle/end alignment before any paid render.",
+            });
+          }
+          return;
+        }
+      }
+    }
+
     if (flowEditEnabled) {
       setStatusMessage(
         "Flow Edit currently exports in-browser so your local soundtrack and speed ramps stay intact."
@@ -6904,7 +6966,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     setServerExportPending(true);
     setIsExporting(true);
     setExportProgress(0);
-    setStatusMessage("Preparing local server render (MP4)...");
+    setStatusMessage("Preparing verified MP4 export. Automatic preflight will run before render starts...");
 
     try {
       const auth = getAuth();
@@ -7420,7 +7482,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         <div className="nle-cloud-render-window-copy">
           <strong>Cloud render window</strong>
           <span>
-            Long source detected. Upload the full cameras once, then render any 20-minute section.
+            Long source detected. AutoPromote will create trimmed upload proxies for the selected
+            20-minute section instead of uploading full camera files.
           </span>
         </div>
         <div className="nle-cloud-render-window-range">
@@ -8203,8 +8266,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                   <div className="nle-footer-note">
                     <strong>Cam Combiner</strong>
                     <span>
-                      Original audio stays continuous. Add more camera angles, lock offsets, then
-                      cut manually while AI only assists.
+                      Original audio stays continuous. Add camera angles, then let automatic
+                      preflight prove start/middle/end sync before paid render.
                     </span>
                   </div>
                   <div className="nle-footer-actions">
@@ -8220,10 +8283,18 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                       className="nle-btn"
                       type="button"
                       onClick={handleServerExport}
-                      disabled={isExporting || !canExportProject || isSingleSourceWorkflow}
+                      disabled={
+                        isExporting ||
+                        cleanAudioSyncIsRunning ||
+                        syncingCameraId === "external-clean-audio" ||
+                        !canExportProject ||
+                        isSingleSourceWorkflow
+                      }
                     >
-                      {serverExportPending
-                        ? "Server Rendering..."
+                      {cleanAudioSyncIsRunning || syncingCameraId === "external-clean-audio"
+                        ? "Sync Check Running..."
+                        : serverExportPending
+                        ? "Preparing Verified MP4..."
                         : hasExternalCleanAudio
                           ? `Render Clean Audio MP4 (${multicamRenderCreditEstimate} cr)`
                           : `Render MP4 on Server (${multicamRenderCreditEstimate} cr)`}
@@ -9337,7 +9408,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                       setUseExternalCleanAudio(event.target.checked);
                       setStatusMessage(
                         event.target.checked
-                          ? "Clean audio is now the main audio bed. Sync cameras or nudge manually."
+                          ? "Clean audio is now the main audio bed. Export will prove camera sync before rendering."
                           : "Clean audio is parked. Camera audio is back in control."
                       );
                     }}
@@ -9392,7 +9463,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                           ))
                         ) : (
                           <span className="nle-waveform-placeholder">
-                            Waveform loading or manual sync mode
+                            Waveform loading or automatic sync pending
                           </span>
                         )}
                       </div>
@@ -10547,6 +10618,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                   onClick={handleServerExport}
 	                  disabled={
 	                    isExporting ||
+	                    cleanAudioSyncIsRunning ||
+	                    syncingCameraId === "external-clean-audio" ||
 	                    !canExportProject ||
 	                    isSingleSourceWorkflow ||
 	                    flowEditEnabled
@@ -10561,8 +10634,10 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                           : `Server render produces MP4 (${multicamRenderCreditEstimate} credits).`
 	                  }
 	                >
-	                  {serverExportPending
-	                    ? "Server Rendering..."
+	                  {cleanAudioSyncIsRunning || syncingCameraId === "external-clean-audio"
+	                    ? "Sync Check Running..."
+	                    : serverExportPending
+	                    ? "Preparing Verified MP4..."
 	                    : flowEditEnabled
 	                      ? "Server MP4 Disabled for Flow Edit"
 	                      : isSingleSourceWorkflow
