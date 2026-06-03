@@ -40,12 +40,15 @@ const normalizeMulticamRenderTier = value => {
   return ["simple", "premium", "studio"].includes(tier) ? tier : "premium";
 };
 
-const estimateMulticamRenderCredits = ({ renderTier, baseCost }) => {
-  const safeBase = Number(baseCost || 15);
+const MULTICAM_RENDER_CREDITS_BY_TIER = {
+  simple: 75,
+  premium: 150,
+  studio: 300,
+};
+
+const estimateMulticamRenderCredits = ({ renderTier }) => {
   const tier = normalizeMulticamRenderTier(renderTier);
-  if (tier === "simple") return Math.max(8, Math.round(safeBase * 0.67));
-  if (tier === "studio") return Math.max(safeBase + 8, Math.ceil(safeBase * 1.6));
-  return safeBase;
+  return MULTICAM_RENDER_CREDITS_BY_TIER[tier] || MULTICAM_RENDER_CREDITS_BY_TIER.premium;
 };
 
 const estimateCleanAudioSyncCredits = () => CREDIT_COSTS["clean-audio-sync"] || 18;

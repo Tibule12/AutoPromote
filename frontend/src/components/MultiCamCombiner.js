@@ -93,8 +93,12 @@ const BROWSER_SYNC_MAX_SINGLE_VISUAL_BYTES = 1.25 * BYTES_PER_GB;
 const BROWSER_SYNC_MAX_TOTAL_VISUAL_BYTES = 2.5 * BYTES_PER_GB;
 const BROWSER_SYNC_MAX_EXTERNAL_AUDIO_BYTES = 250 * BYTES_PER_MB;
 const BROWSER_SYNC_MAX_DURATION_SECONDS = 30 * 60;
-const MULTICAM_RENDER_BASE_CREDITS = 15;
 const CLEAN_AUDIO_SYNC_CREDITS = 18;
+const MULTICAM_RENDER_CREDITS_BY_TIER = {
+  simple: 75,
+  premium: 150,
+  studio: 300,
+};
 
 const MULTICAM_RENDER_TIERS = [
   {
@@ -125,7 +129,9 @@ const VIDEO_SYNC_AUDIO_BPS = 96_000;
 const VIDEO_SYNC_MAX_EXTRACT_SECONDS = 15 * 60;
 const SYNC_AUDIO_CACHE_DB = "autopromote_multicam_sync_audio";
 const SYNC_AUDIO_CACHE_STORE = "cameraSyncAudio";
+const RENDER_PROXY_CACHE_STORE = "renderWindowProxies";
 const SYNC_AUDIO_CACHE_TTL_MS = 2 * 24 * 60 * 60 * 1000;
+const RENDER_PROXY_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
 const openSyncAudioCacheDb = () =>
   new Promise(resolve => {
@@ -133,11 +139,14 @@ const openSyncAudioCacheDb = () =>
       resolve(null);
       return;
     }
-    const request = indexedDB.open(SYNC_AUDIO_CACHE_DB, 1);
+    const request = indexedDB.open(SYNC_AUDIO_CACHE_DB, 2);
     request.onupgradeneeded = () => {
       const db = request.result;
       if (!db.objectStoreNames.contains(SYNC_AUDIO_CACHE_STORE)) {
         db.createObjectStore(SYNC_AUDIO_CACHE_STORE, { keyPath: "key" });
+      }
+      if (!db.objectStoreNames.contains(RENDER_PROXY_CACHE_STORE)) {
+        db.createObjectStore(RENDER_PROXY_CACHE_STORE, { keyPath: "key" });
       }
     };
     request.onsuccess = () => resolve(request.result);
@@ -213,6 +222,72 @@ const writeCachedSyncAudioFile = async (cacheKey, file, metadata = {}) => {
       trimStart: Number(metadata.trimStart || 0) || 0,
       trimDuration: Number(metadata.trimDuration || 0) || 0,
       expiresAt: Date.now() + SYNC_AUDIO_CACHE_TTL_MS,
+    });
+    tx.oncomplete = () => {
+      db.close();
+      resolve();
+    };
+    tx.onerror = () => {
+      db.close();
+      resolve();
+    };
+  });
+};
+
+const readCachedRenderProxyFile = async cacheKey => {
+  if (!cacheKey) return null;
+  const db = await openSyncAudioCacheDb();
+  if (!db) return null;
+  return new Promise(resolve => {
+    const tx = db.transaction(RENDER_PROXY_CACHE_STORE, "readwrite");
+    const store = tx.objectStore(RENDER_PROXY_CACHE_STORE);
+    const request = store.get(cacheKey);
+    request.onsuccess = () => {
+      const entry = request.result;
+      if (!entry?.blob) {
+        resolve(null);
+        return;
+      }
+      if (entry.expiresAt && entry.expiresAt < Date.now()) {
+        store.delete(cacheKey);
+        resolve(null);
+        return;
+      }
+      const file = new File([entry.blob], entry.name || "render_window_proxy.webm", {
+        type: entry.type || entry.blob.type || "video/webm",
+        lastModified: entry.lastModified || Date.now(),
+      });
+      resolve({
+        file,
+        originalSize: Number(entry.originalSize || 0) || 0,
+        compressedSize: Number(entry.size || file.size || 0) || 0,
+        trimStart: Number(entry.trimStart || 0) || 0,
+        trimDuration: Number(entry.trimDuration || 0) || 0,
+      });
+    };
+    request.onerror = () => resolve(null);
+    tx.oncomplete = () => db.close();
+    tx.onerror = () => db.close();
+  });
+};
+
+const writeCachedRenderProxyFile = async (cacheKey, file, metadata = {}) => {
+  if (!cacheKey || !file) return;
+  const db = await openSyncAudioCacheDb();
+  if (!db) return;
+  await new Promise(resolve => {
+    const tx = db.transaction(RENDER_PROXY_CACHE_STORE, "readwrite");
+    tx.objectStore(RENDER_PROXY_CACHE_STORE).put({
+      key: cacheKey,
+      blob: file,
+      name: file.name,
+      type: file.type,
+      size: file.size,
+      originalSize: Number(metadata.originalSize || 0) || 0,
+      lastModified: file.lastModified || Date.now(),
+      trimStart: Number(metadata.trimStart || 0) || 0,
+      trimDuration: Number(metadata.trimDuration || 0) || 0,
+      expiresAt: Date.now() + RENDER_PROXY_CACHE_TTL_MS,
     });
     tx.oncomplete = () => {
       db.close();
@@ -523,11 +598,25 @@ const estimateCleanAudioSyncCredits = () => {
 
 const estimateMulticamRenderCredits = renderTier => {
   const tier = String(renderTier || "premium").trim().toLowerCase().replace(/-/g, "_");
-  if (tier === "simple") return Math.max(8, Math.round(MULTICAM_RENDER_BASE_CREDITS * 0.67));
-  if (tier === "studio") {
-    return Math.max(MULTICAM_RENDER_BASE_CREDITS + 8, Math.ceil(MULTICAM_RENDER_BASE_CREDITS * 1.6));
-  }
-  return MULTICAM_RENDER_BASE_CREDITS;
+  return MULTICAM_RENDER_CREDITS_BY_TIER[tier] || MULTICAM_RENDER_CREDITS_BY_TIER.premium;
+};
+
+const estimateVideoProxyBytes = durationSeconds =>
+  Math.round(
+    ((UPLOAD_COMPRESSION_TARGET_BPS + UPLOAD_COMPRESSION_AUDIO_BPS) / 8) *
+      Math.max(0.2, Number(durationSeconds || 0)) *
+      1.05
+  );
+
+const estimateCleanAudioProxyBytes = (externalTrack, durationSeconds) => {
+  const fileSize = Number(externalTrack?.file?.size || 0) || 0;
+  if (!fileSize) return 0;
+  if (fileSize <= 20 * BYTES_PER_MB) return fileSize;
+  const proxyDuration = Math.min(
+    Math.max(0.2, Number(durationSeconds || 0) || 0),
+    VIDEO_SYNC_MAX_EXTRACT_SECONDS
+  );
+  return Math.round(16000 * 2 * proxyDuration);
 };
 
 const getSourceTimelineTime = (source, playhead, timelineStart) =>
@@ -4793,7 +4882,25 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       }
 
       let resolved = false;
+      let metadataLoaded = false;
+      let recordingStarted = false;
+      let stopRequested = false;
+      let progressWatchdogId = null;
+      let finalizingTimeoutId = null;
       const cleanup = () => {
+        if (progressWatchdogId) {
+          window.clearInterval(progressWatchdogId);
+          progressWatchdogId = null;
+        }
+        if (finalizingTimeoutId) {
+          window.clearTimeout(finalizingTimeoutId);
+          finalizingTimeoutId = null;
+        }
+        try {
+          video.pause();
+        } catch (_) {
+          // Ignore cleanup failures from detached media elements.
+        }
         if (!resolved) { resolved = true; URL.revokeObjectURL(objectUrl); }
       };
       const fail = () => { cleanup(); resolve(null); };
@@ -4818,6 +4925,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
 
           recorder.onstop = () => {
+            if (resolved) return;
             const blob = new Blob(chunks, { type: mimeType });
             const compressedFile = new File([blob], file.name.replace(/\.[^.]+$/, ".webm"), {
               type: mimeType,
@@ -4836,36 +4944,67 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
 
           recorder.onerror = () => { fail(); };
 
+          const stopRecording = () => {
+            if (stopRequested || recorder.state === "inactive") return;
+            stopRequested = true;
+            setStatusMessage(`Finalizing local upload proxy for ${label}. This should only take a moment...`);
+            video.pause();
+            recorder.stop();
+            finalizingTimeoutId = window.setTimeout(() => {
+              if (!resolved) {
+                console.warn("Browser video proxy finalization timed out.");
+                fail();
+              }
+            }, 120000);
+          };
+
           recorder.start(1000);
+          recordingStarted = true;
           let lastPct = 0;
+          let lastProgressAt = Date.now();
+          let lastVideoTime = Number(video.currentTime) || trimStart;
           // Accurate estimate: target bitrate × duration (plus audio overhead)
           const estimatedBytes = Math.round(
             ((UPLOAD_COMPRESSION_TARGET_BPS + UPLOAD_COMPRESSION_AUDIO_BPS) / 8) * recordingDuration * 1.05
           );
-          video.ontimeupdate = () => {
+          const updateProgress = () => {
             if (video.currentTime >= trimEnd - 0.05) {
-              video.pause();
-              if (recorder.state !== "inactive") recorder.stop();
+              stopRecording();
               return;
             }
             const pct = Math.min(1, Math.max(0, (video.currentTime - trimStart) / recordingDuration));
+            if (Math.abs(video.currentTime - lastVideoTime) > 0.05) {
+              lastVideoTime = video.currentTime;
+              lastProgressAt = Date.now();
+            }
             if (pct - lastPct > 0.02) {
               lastPct = pct;
               onProgress(pct);
               setStatusMessage(
-                `${options.trimDuration ? "Preparing fast upload proxy" : "Compressing"} ${label} (${Math.round(pct * 100)}%) — target ~${formatMediaBytes(estimatedBytes)} at 3 Mbps...`
+                `${options.trimDuration ? "Preparing local upload proxy" : "Compressing"} ${label} (${Math.round(pct * 100)}%) — target ~${formatMediaBytes(estimatedBytes)} at 3 Mbps...`
               );
             }
           };
+          video.ontimeupdate = updateProgress;
+          progressWatchdogId = window.setInterval(() => {
+            if (resolved || stopRequested) return;
+            updateProgress();
+            if (Date.now() - lastProgressAt > 90000) {
+              console.warn("Browser video proxy preparation stalled.");
+              setStatusMessage(`Local upload proxy for ${label} stalled before finishing. Please retry.`);
+              fail();
+            }
+          }, 1000);
 
           video.onended = () => {
-            if (recorder.state !== "inactive") recorder.stop();
+            stopRecording();
           };
           video.play().catch(() => fail());
         } catch (_) { fail(); }
       };
 
       video.onloadedmetadata = () => {
+        metadataLoaded = true;
         const rawDuration = Number(video.duration) || 0;
         const trimStart = clampNumber(Number(options.trimStart) || 0, 0, Math.max(0, rawDuration - 0.2), 0);
         if (trimStart > 0.05) {
@@ -4879,7 +5018,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       video.onerror = () => fail();
       // Timeout: if metadata doesn't load, codec is likely unsupported (ProRes, etc.)
       // Firefox may need extra time for large local files
-      setTimeout(() => { if (!resolved) fail(); }, 25000);
+      setTimeout(() => { if (!resolved && !metadataLoaded && !recordingStarted) fail(); }, 25000);
     });
   };
 
@@ -5233,29 +5372,50 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       !isAudioOnly &&
       (file.size > UPLOAD_COMPRESSION_THRESHOLD_BYTES || Number(trimWindow?.duration || 0) > 0);
     if (shouldCreateVideoProxy) {
-      setStatusMessage(
-        trimWindow
-          ? `Creating fast upload proxy for ${label} (${formatDurationLabel(trimWindow.duration)})...`
-          : `Checking if ${label} can be compressed to save upload time...`
-      );
-      const compressed = await compressVideoFile(file, label, () => {}, {
-        trimStart: trimWindow?.start || 0,
-        trimDuration: trimWindow?.duration || 0,
-      });
-      if (compressed) {
-        actualTrimStart = Number(compressed.trimStart ?? actualTrimStart) || 0;
-        actualTrimDuration = Number(compressed.trimDuration ?? actualTrimDuration) || 0;
-        const pctSaved = Math.round((1 - compressed.compressedSize / compressed.originalSize) * 100);
-        const summary = trimWindow
-          ? `${label} fast proxy: ${formatDurationLabel(compressed.trimDuration)} · ${formatMediaBytes(compressed.compressedSize)} (${pctSaved}% smaller than original)`
-          : `${label} compressed: ${formatMediaBytes(compressed.originalSize)} → ${formatMediaBytes(compressed.compressedSize)} (${pctSaved}% smaller)`;
-        toast.success(summary, { duration: 6000 });
+      const renderProxyCacheKey = buildRenderProxyCacheKey(file, trimWindow);
+      const cachedRenderProxy = renderProxyCacheKey
+        ? await readCachedRenderProxyFile(renderProxyCacheKey)
+        : null;
+
+      if (cachedRenderProxy?.file) {
+        actualTrimStart = Number(cachedRenderProxy.trimStart ?? actualTrimStart) || 0;
+        actualTrimDuration = Number(cachedRenderProxy.trimDuration ?? actualTrimDuration) || 0;
+        uploadFile = cachedRenderProxy.file;
+        const summary = `${label} local proxy cache reused: ${formatDurationLabel(actualTrimDuration)} · ${formatMediaBytes(uploadFile.size)}`;
+        toast.success(summary, { duration: 5000 });
         setStatusMessage(`${summary}. Uploading now...`);
-        uploadFile = compressed.file;
       } else {
         setStatusMessage(
-          `Cannot create a fast upload proxy for ${label} in this browser. Full original upload is blocked.`
+          trimWindow
+            ? `Creating local upload proxy for ${label} (${formatDurationLabel(trimWindow.duration)})...`
+            : `Checking if ${label} can be compressed to save upload time...`
         );
+        const compressed = await compressVideoFile(file, label, () => {}, {
+          trimStart: trimWindow?.start || 0,
+          trimDuration: trimWindow?.duration || 0,
+        });
+        if (compressed) {
+          actualTrimStart = Number(compressed.trimStart ?? actualTrimStart) || 0;
+          actualTrimDuration = Number(compressed.trimDuration ?? actualTrimDuration) || 0;
+          if (renderProxyCacheKey) {
+            await writeCachedRenderProxyFile(renderProxyCacheKey, compressed.file, {
+              originalSize: compressed.originalSize,
+              trimStart: actualTrimStart,
+              trimDuration: actualTrimDuration,
+            });
+          }
+          const pctSaved = Math.round((1 - compressed.compressedSize / compressed.originalSize) * 100);
+          const summary = trimWindow
+            ? `${label} local proxy: ${formatDurationLabel(compressed.trimDuration)} · ${formatMediaBytes(compressed.compressedSize)} (${pctSaved}% smaller than original)`
+            : `${label} compressed: ${formatMediaBytes(compressed.originalSize)} → ${formatMediaBytes(compressed.compressedSize)} (${pctSaved}% smaller)`;
+          toast.success(summary, { duration: 6000 });
+          setStatusMessage(`${summary}. Uploading now...`);
+          uploadFile = compressed.file;
+        } else {
+          setStatusMessage(
+            `Cannot create a local upload proxy for ${label} in this browser. Full original upload is blocked.`
+          );
+        }
       }
     }
 
@@ -5337,6 +5497,15 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       ? `:trim:${trimStart.toFixed(3)}:${trimDuration.toFixed(3)}`
       : "";
     return `sync-audio:${extractorVersion}:${buildBackendMediaCacheKey(file)}${trimSuffix}`;
+  };
+
+  const buildRenderProxyCacheKey = (file, trimWindow = null) => {
+    if (!file || !trimWindow) return "";
+    const proxyVersion = `v1-webm-${UPLOAD_COMPRESSION_TARGET_BPS}-${UPLOAD_COMPRESSION_AUDIO_BPS}`;
+    const trimStart = Math.max(0, Number(trimWindow?.start || 0) || 0);
+    const trimDuration = Math.max(0, Number(trimWindow?.duration || 0) || 0);
+    if (trimDuration <= 0.05) return "";
+    return `render-proxy:${proxyVersion}:${buildBackendMediaCacheKey(file)}:trim:${trimStart.toFixed(3)}:${trimDuration.toFixed(3)}`;
   };
 
   const handleStartBackendCleanAudioSync = async ({ confirmBeforeStart = true, reason = "" } = {}) => {
@@ -6939,6 +7108,85 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     if (cloudRenderWindowDuration <= 0.5) {
       setStatusMessage("Pick a valid render window before starting the cloud export.");
       toast.error("Pick a valid render window first.");
+      return;
+    }
+    const plannedRenderWindowStart = cloudRenderWindowStartSafe;
+    const plannedRenderWindowEnd = cloudRenderWindowEnd;
+    const plannedRenderWindowDuration = cloudRenderWindowDuration;
+    const plannedProxyItems = readySources.filter(isVideoSource).map(source => {
+      const sourceDuration = Number(source.duration || 0);
+      const sourceTrimStartForWindow = clampNumber(
+        getSourceTimelineTime(source, plannedRenderWindowStart, timelineBounds.timelineStart) - 2,
+        0,
+        Math.max(0, sourceDuration - 0.2),
+        0
+      );
+      const sourceTrimEndForWindow = clampNumber(
+        getSourceTimelineTime(source, plannedRenderWindowEnd, timelineBounds.timelineStart) + 2,
+        sourceTrimStartForWindow + 0.2,
+        sourceDuration || sourceTrimStartForWindow + plannedRenderWindowDuration,
+        sourceTrimStartForWindow + plannedRenderWindowDuration
+      );
+      const sourceTrimDurationForWindow = Math.max(
+        0.2,
+        sourceTrimEndForWindow - sourceTrimStartForWindow
+      );
+      const uploadedTrimStart = Number(source.uploadedRenderTrimStart || 0) || 0;
+      const uploadedTrimDuration = Number(source.uploadedRenderTrimDuration || 0) || 0;
+      const hasMatchingRenderProxy =
+        String(source.uploadedUrl || "").startsWith("http") &&
+        uploadedTrimDuration > 0 &&
+        Math.abs(uploadedTrimStart - sourceTrimStartForWindow) <= 1 &&
+        Math.abs(
+          (uploadedTrimStart + uploadedTrimDuration) -
+            (sourceTrimStartForWindow + sourceTrimDurationForWindow)
+        ) <= 2;
+      return {
+        label: source.label || source.name || "Camera",
+        estimatedBytes: hasMatchingRenderProxy ? 0 : estimateVideoProxyBytes(sourceTrimDurationForWindow),
+        hasMatchingRenderProxy,
+      };
+    });
+    const estimatedVideoUploadBytes = plannedProxyItems.reduce(
+      (sum, item) => sum + item.estimatedBytes,
+      0
+    );
+    const estimatedCleanAudioUploadBytes = hasExternalCleanAudio
+      ? estimateCleanAudioProxyBytes(externalAudioTrack, plannedRenderWindowDuration + 4)
+      : 0;
+    const estimatedTotalUploadBytes = estimatedVideoUploadBytes + estimatedCleanAudioUploadBytes;
+    const proxyLines = plannedProxyItems.map(
+      item =>
+        `${item.label}: ${
+          item.hasMatchingRenderProxy
+            ? "existing proxy reused"
+            : `~${formatMediaBytes(item.estimatedBytes)} proxy`
+        }`
+    );
+    const approvedRender = window.confirm(
+      [
+        "Start verified MP4 render preparation?",
+        "",
+        `Render window: ${formatDurationLabel(plannedRenderWindowStart)} to ${formatDurationLabel(plannedRenderWindowEnd)} (${formatDurationLabel(plannedRenderWindowDuration)})`,
+        `Render credits: ${multicamRenderCreditEstimate} credits`,
+        "Proxy upload + automatic preflight: 0 credits",
+        hasExternalCleanAudio ? "Separate clean-audio sync charge: 0 credits in this export flow" : null,
+        "",
+        "Estimated upload before render:",
+        ...proxyLines,
+        hasExternalCleanAudio
+          ? `Clean audio proxy: ~${formatMediaBytes(estimatedCleanAudioUploadBytes)}`
+          : null,
+        `Estimated total upload: ~${formatMediaBytes(estimatedTotalUploadBytes)}`,
+        "",
+        "Credits are charged only if automatic start/middle/end preflight passes and the server render starts.",
+        "If preflight cannot prove sync, render blocks before credits are charged.",
+      ]
+        .filter(Boolean)
+        .join("\n")
+    );
+    if (!approvedRender) {
+      setStatusMessage("MP4 render cancelled before proxy upload or credits.");
       return;
     }
     setServerExportPending(true);
