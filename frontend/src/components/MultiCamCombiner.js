@@ -130,8 +130,10 @@ const VIDEO_SYNC_MAX_EXTRACT_SECONDS = 15 * 60;
 const SYNC_AUDIO_CACHE_DB = "autopromote_multicam_sync_audio";
 const SYNC_AUDIO_CACHE_STORE = "cameraSyncAudio";
 const RENDER_PROXY_CACHE_STORE = "renderWindowProxies";
+const RENDER_PROXY_UPLOAD_CACHE_STORE = "renderWindowProxyUploads";
 const SYNC_AUDIO_CACHE_TTL_MS = 2 * 24 * 60 * 60 * 1000;
 const RENDER_PROXY_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+const RENDER_PROXY_UPLOAD_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
 const openSyncAudioCacheDb = () =>
   new Promise(resolve => {
@@ -139,7 +141,7 @@ const openSyncAudioCacheDb = () =>
       resolve(null);
       return;
     }
-    const request = indexedDB.open(SYNC_AUDIO_CACHE_DB, 2);
+    const request = indexedDB.open(SYNC_AUDIO_CACHE_DB, 3);
     request.onupgradeneeded = () => {
       const db = request.result;
       if (!db.objectStoreNames.contains(SYNC_AUDIO_CACHE_STORE)) {
@@ -147,6 +149,9 @@ const openSyncAudioCacheDb = () =>
       }
       if (!db.objectStoreNames.contains(RENDER_PROXY_CACHE_STORE)) {
         db.createObjectStore(RENDER_PROXY_CACHE_STORE, { keyPath: "key" });
+      }
+      if (!db.objectStoreNames.contains(RENDER_PROXY_UPLOAD_CACHE_STORE)) {
+        db.createObjectStore(RENDER_PROXY_UPLOAD_CACHE_STORE, { keyPath: "key" });
       }
     };
     request.onsuccess = () => resolve(request.result);
@@ -288,6 +293,66 @@ const writeCachedRenderProxyFile = async (cacheKey, file, metadata = {}) => {
       trimStart: Number(metadata.trimStart || 0) || 0,
       trimDuration: Number(metadata.trimDuration || 0) || 0,
       expiresAt: Date.now() + RENDER_PROXY_CACHE_TTL_MS,
+    });
+    tx.oncomplete = () => {
+      db.close();
+      resolve();
+    };
+    tx.onerror = () => {
+      db.close();
+      resolve();
+    };
+  });
+};
+
+const readCachedRenderProxyUpload = async cacheKey => {
+  if (!cacheKey) return null;
+  const db = await openSyncAudioCacheDb();
+  if (!db) return null;
+  return new Promise(resolve => {
+    const tx = db.transaction(RENDER_PROXY_UPLOAD_CACHE_STORE, "readwrite");
+    const store = tx.objectStore(RENDER_PROXY_UPLOAD_CACHE_STORE);
+    const request = store.get(cacheKey);
+    request.onsuccess = () => {
+      const entry = request.result;
+      if (!entry?.url || !String(entry.url).startsWith("http")) {
+        resolve(null);
+        return;
+      }
+      if (entry.expiresAt && entry.expiresAt < Date.now()) {
+        store.delete(cacheKey);
+        resolve(null);
+        return;
+      }
+      resolve({
+        url: entry.url,
+        videoUrl: entry.videoUrl || entry.url,
+        trimStart: Number(entry.trimStart || 0) || 0,
+        trimDuration: Number(entry.trimDuration || 0) || 0,
+        size: Number(entry.size || 0) || 0,
+      });
+    };
+    request.onerror = () => resolve(null);
+    tx.oncomplete = () => db.close();
+    tx.onerror = () => db.close();
+  });
+};
+
+const writeCachedRenderProxyUpload = async (cacheKey, upload = {}) => {
+  const url = upload.videoUrl || upload.url;
+  if (!cacheKey || !String(url || "").startsWith("http")) return;
+  const db = await openSyncAudioCacheDb();
+  if (!db) return;
+  await new Promise(resolve => {
+    const tx = db.transaction(RENDER_PROXY_UPLOAD_CACHE_STORE, "readwrite");
+    tx.objectStore(RENDER_PROXY_UPLOAD_CACHE_STORE).put({
+      key: cacheKey,
+      url,
+      videoUrl: upload.videoUrl || url,
+      size: Number(upload.size || 0) || 0,
+      trimStart: Number(upload.trimStart || 0) || 0,
+      trimDuration: Number(upload.trimDuration || 0) || 0,
+      expiresAt: Date.now() + RENDER_PROXY_UPLOAD_CACHE_TTL_MS,
     });
     tx.oncomplete = () => {
       db.close();
@@ -5371,8 +5436,26 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       mode !== "audio_only" &&
       !isAudioOnly &&
       (file.size > UPLOAD_COMPRESSION_THRESHOLD_BYTES || Number(trimWindow?.duration || 0) > 0);
+    let renderProxyCacheKey = "";
     if (shouldCreateVideoProxy) {
-      const renderProxyCacheKey = buildRenderProxyCacheKey(file, trimWindow);
+      renderProxyCacheKey = buildRenderProxyCacheKey(file, trimWindow);
+      const cachedRenderProxyUpload = renderProxyCacheKey
+        ? await readCachedRenderProxyUpload(renderProxyCacheKey)
+        : null;
+      if (cachedRenderProxyUpload?.url) {
+        actualTrimStart = Number(cachedRenderProxyUpload.trimStart ?? actualTrimStart) || 0;
+        actualTrimDuration = Number(cachedRenderProxyUpload.trimDuration ?? actualTrimDuration) || 0;
+        setStatusMessage(
+          `Reusing uploaded render-window proxy for ${label}. No repeat upload needed.`
+        );
+        return {
+          url: cachedRenderProxyUpload.url,
+          videoUrl: cachedRenderProxyUpload.videoUrl || cachedRenderProxyUpload.url,
+          syncAudioUrl: "",
+          trimStart: actualTrimStart,
+          trimDuration: actualTrimDuration,
+        };
+      }
       const cachedRenderProxy = renderProxyCacheKey
         ? await readCachedRenderProxyFile(renderProxyCacheKey)
         : null;
@@ -5474,6 +5557,15 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       );
     });
     const directUrl = await getDownloadURL(mediaRef);
+    if (shouldCreateVideoProxy && renderProxyCacheKey) {
+      await writeCachedRenderProxyUpload(renderProxyCacheKey, {
+        url: directUrl,
+        videoUrl: directUrl,
+        size: uploadFile.size,
+        trimStart: actualTrimStart,
+        trimDuration: actualTrimDuration,
+      });
+    }
     return {
       url: directUrl,
       videoUrl: mode === "audio_only" ? "" : directUrl,
@@ -7113,7 +7205,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     const plannedRenderWindowStart = cloudRenderWindowStartSafe;
     const plannedRenderWindowEnd = cloudRenderWindowEnd;
     const plannedRenderWindowDuration = cloudRenderWindowDuration;
-    const plannedProxyItems = readySources.filter(isVideoSource).map(source => {
+    const plannedProxyItems = await Promise.all(readySources.filter(isVideoSource).map(async source => {
       const sourceDuration = Number(source.duration || 0);
       const sourceTrimStartForWindow = clampNumber(
         getSourceTimelineTime(source, plannedRenderWindowStart, timelineBounds.timelineStart) - 2,
@@ -7141,12 +7233,21 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           (uploadedTrimStart + uploadedTrimDuration) -
             (sourceTrimStartForWindow + sourceTrimDurationForWindow)
         ) <= 2;
+      const cachedUpload = !hasMatchingRenderProxy && source.file
+        ? await readCachedRenderProxyUpload(
+            buildRenderProxyCacheKey(source.file, {
+              start: sourceTrimStartForWindow,
+              duration: sourceTrimDurationForWindow,
+            })
+          )
+        : null;
+      const canReuseRenderProxy = hasMatchingRenderProxy || Boolean(cachedUpload?.url);
       return {
         label: source.label || source.name || "Camera",
-        estimatedBytes: hasMatchingRenderProxy ? 0 : estimateVideoProxyBytes(sourceTrimDurationForWindow),
-        hasMatchingRenderProxy,
+        estimatedBytes: canReuseRenderProxy ? 0 : estimateVideoProxyBytes(sourceTrimDurationForWindow),
+        hasMatchingRenderProxy: canReuseRenderProxy,
       };
-    });
+    }));
     const estimatedVideoUploadBytes = plannedProxyItems.reduce(
       (sum, item) => sum + item.estimatedBytes,
       0
@@ -7239,14 +7340,21 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
             (uploadedTrimStart + uploadedTrimDuration) -
               (sourceTrimStartForWindow + sourceTrimDurationForWindow)
           ) <= 2;
+        const cachedRenderProxyUpload = !hasMatchingRenderProxy && source.file
+          ? await readCachedRenderProxyUpload(
+              buildRenderProxyCacheKey(source.file, {
+                start: sourceTrimStartForWindow,
+                duration: sourceTrimDurationForWindow,
+              })
+            )
+          : null;
 
-        let usingRenderProxy = hasMatchingRenderProxy;
+        let usingRenderProxy = hasMatchingRenderProxy || Boolean(cachedRenderProxyUpload?.url);
         let remoteUrl =
           hasMatchingRenderProxy
             ? source.uploadedUrl
-            : String(source.url || "").startsWith("http")
-              ? source.url
-              : "";
+            : cachedRenderProxyUpload?.url ||
+              (String(source.url || "").startsWith("http") ? source.url : "");
         if (!remoteUrl && source.file) {
           const uploadResult = await uploadMediaForBackendSync({
             user,
@@ -7264,6 +7372,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           remoteUrl = uploadResult.videoUrl || uploadResult.url;
           usingRenderProxy = true;
           setStatusMessage(`${sourceLabel} ready for cloud render.`);
+        } else if (cachedRenderProxyUpload?.url) {
+          setStatusMessage(`${sourceLabel} uploaded proxy reused for cloud render.`);
         }
         if (!remoteUrl) {
           remoteUrl = source.serverRenderLocalPath || source.localRenderPath || "";
