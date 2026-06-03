@@ -7305,9 +7305,217 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       const renderWindowDuration = cloudRenderWindowDuration;
       const renderTimelineStart = (Number(timelineBounds.timelineStart) || 0) + renderWindowStart;
 
+      let externalAudioPayload = null;
+      const verifiedSyncBySourceId = new Map();
+
+      const runExportPreflight = async (preflightSourcesPayload, preflightExternalAudioPayload) => {
+        setStatusMessage("Preflight: proving start/middle/end sync before video proxy upload...");
+        try {
+          const preflightBody = {
+            sources: preflightSourcesPayload.map(source => ({
+              url: source.url,
+              offset_seconds: getPreflightProxyOffsetSeconds(source),
+              sync_rate: source.sync_rate,
+              syncRate: source.syncRate,
+            })),
+            external_audio_url: preflightExternalAudioPayload.url,
+            external_audio_offset_seconds: preflightExternalAudioPayload.offset_seconds,
+          };
+          const preflightToken = await user.getIdToken(true);
+          const preflightRes = await fetch(`${API_BASE_URL}/api/media/multicam/preflight-sync`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${preflightToken}`,
+            },
+            body: JSON.stringify(preflightBody),
+          });
+          const preflight = await preflightRes.json();
+          console.log("PREFLIGHT AUTO-ALIGN RESULT:", preflight);
+          if (!preflightRes.ok || preflight?.error) {
+            const preflightErrorMessage =
+              preflight?.error ||
+              preflight?.message ||
+              preflight?.detail ||
+              `Preflight returned ${preflightRes.status}`;
+            throw new Error(preflightErrorMessage);
+          }
+
+          const preflightStatus = String(preflight.status || "");
+          const adjustments = applyPreflightSyncSuggestions(preflightSourcesPayload, preflight);
+          const verifiedIds = getPreflightVerifiedSourceIds(preflightSourcesPayload, preflight);
+          preflightSourcesPayload.forEach(source => {
+            if (verifiedIds.has(source.id)) {
+              verifiedSyncBySourceId.set(source.id, {
+                offsetSeconds: Number(source.offset_seconds) || 0,
+                syncRate: getSourceSyncRate(source),
+              });
+            }
+          });
+          if (adjustments.length) {
+            setSources(currentSources =>
+              currentSources.map(source => {
+                const adjustment = adjustments.find(item => item.id === source.id);
+                return adjustment
+                  ? {
+                      ...source,
+                      offsetSeconds: adjustment.offsetSeconds,
+                      syncRate: adjustment.syncRate,
+                      sync_rate: adjustment.syncRate,
+                      autoSyncApplied: true,
+                      autoSyncVerifiedAt: new Date().toISOString(),
+                      manualOffsetLocked: false,
+                    }
+                  : source;
+              })
+            );
+            setStatusMessage(
+              `Preflight corrected and verified ${adjustments.length} camera${adjustments.length === 1 ? "" : "s"}. Preparing render proxies now.`
+            );
+          } else if (verifiedIds.size) {
+            setSources(currentSources =>
+              currentSources.map(source =>
+                verifiedIds.has(source.id)
+                  ? {
+                      ...source,
+                      autoSyncApplied: true,
+                      autoSyncVerifiedAt: new Date().toISOString(),
+                    }
+                  : source
+              )
+            );
+            setStatusMessage("Preflight proved start/middle/end sync. Preparing render proxies now.");
+          } else if (preflight.status === "unsafe") {
+            setStatusMessage("⚠️ Sync preflight could not find a safe automatic correction.");
+          }
+
+          const missingVerified = preflightSourcesPayload.filter(source => !verifiedIds.has(source.id));
+          if (preflightStatus === "unsafe" || missingVerified.length) {
+            throw new Error(
+              `Automatic start/middle/end sync could not verify ${missingVerified.length || preflightSourcesPayload.length} camera${(missingVerified.length || preflightSourcesPayload.length) === 1 ? "" : "s"}. Render-window video upload cancelled before credits are spent.`
+            );
+          }
+        } catch (preflightErr) {
+          console.warn("Preflight auto-align failed before render:", preflightErr);
+          const preflightErrorText = String(preflightErr?.message || "");
+          if (/token expired|auth|session/i.test(preflightErrorText)) {
+            throw new Error(
+              "Session refreshed too late during sync preflight. Render-window video upload cancelled before credits are spent. Retry now; small sync proxies should be reused."
+            );
+          }
+          throw preflightErr instanceof Error
+            ? preflightErr
+            : new Error("Automatic start/middle/end sync preflight failed. Render-window video upload cancelled before credits are spent.");
+        }
+      };
+
+      if (hasExternalCleanAudio && externalAudioTrack) {
+        setStatusMessage("Uploading small audio proxies for sync preflight before video render uploads...");
+        const preflightSourcesPayload = [];
+        for (let i = 0; i < readySources.length; i++) {
+          const source = readySources[i];
+          const sourceLabel = source.label || `Camera ${i + 1}`;
+          const sourceDuration = Number(source.duration || 0);
+          const sourceTrimStartForWindow = clampNumber(
+            getSourceTimelineTime(source, renderWindowStart, timelineBounds.timelineStart) - 2,
+            0,
+            Math.max(0, sourceDuration - 0.2),
+            0
+          );
+          const sourceTrimEndForWindow = clampNumber(
+            getSourceTimelineTime(source, renderWindowEnd, timelineBounds.timelineStart) + 2,
+            sourceTrimStartForWindow + 0.2,
+            sourceDuration || sourceTrimStartForWindow + renderWindowDuration,
+            sourceTrimStartForWindow + renderWindowDuration
+          );
+          const sourceTrimDurationForWindow = Math.max(
+            0.2,
+            sourceTrimEndForWindow - sourceTrimStartForWindow
+          );
+          // eslint-disable-next-line no-await-in-loop
+          const syncUpload = await uploadMediaForBackendSync({
+            user,
+            storage,
+            file: source.file,
+            fallbackUrl: "",
+            folder: "temp/multicam-clean-sync",
+            label: `${sourceLabel} preflight audio`,
+            mode: "audio_only",
+            trimWindow: {
+              start: sourceTrimStartForWindow,
+              duration: sourceTrimDurationForWindow,
+            },
+          });
+          preflightSourcesPayload.push({
+            id: source.id,
+            url: syncUpload.syncAudioUrl || syncUpload.url,
+            label: source.label || `Camera ${i + 1}`,
+            offset_seconds: Number(source.offsetSeconds) || 0,
+            sync_rate: getSourceSyncRate(source),
+            syncRate: getSourceSyncRate(source),
+            upload_trim_start: Number(syncUpload.trimStart ?? sourceTrimStartForWindow) || 0,
+            upload_trim_duration: Number(syncUpload.trimDuration ?? sourceTrimDurationForWindow) || 0,
+          });
+        }
+
+        const externalOriginalOffset = Number(externalAudioTrack.offsetSeconds || 0) || 0;
+        const externalTrimStartForWindow = Math.max(
+          0,
+          renderTimelineStart - externalOriginalOffset - 2
+        );
+        const externalTrimDurationForWindow = Math.min(
+          Number(externalAudioTrack.duration || 0) || renderWindowDuration + 4,
+          renderWindowDuration + 4
+        );
+        const externalAudioUpload = await uploadMediaForBackendSync({
+          user,
+          storage,
+          file: externalAudioTrack.file,
+          fallbackUrl: "",
+          folder: "temp/multicam-clean-sync-audio",
+          label: "External clean audio",
+          mode: "audio_only",
+          trimWindow: {
+            start: externalTrimStartForWindow,
+            duration: externalTrimDurationForWindow,
+          },
+        });
+        const externalAudioRemoteUrl = externalAudioUpload.url;
+        const externalUploadTrimStart = Number(externalAudioUpload.trimStart ?? externalTrimStartForWindow) || 0;
+        externalAudioPayload = {
+          url: externalAudioRemoteUrl,
+          offset_seconds: externalOriginalOffset + externalUploadTrimStart,
+          mix_mode: externalAudioMixMode,
+          cache_key: buildBackendMediaCacheKey(externalAudioTrack.file) || externalAudioTrack.name,
+          upload_trim_start: externalUploadTrimStart,
+          upload_trim_duration: Number(externalAudioUpload.trimDuration ?? externalTrimDurationForWindow) || 0,
+        };
+        setExternalAudioTrack(current =>
+          current
+            ? {
+                ...current,
+                url: externalAudioRemoteUrl,
+                cacheKey: externalAudioPayload.cache_key,
+                uploadedRenderTrimStart: externalUploadTrimStart,
+                uploadedRenderTrimDuration: externalAudioPayload.upload_trim_duration,
+              }
+            : current
+        );
+        await runExportPreflight(preflightSourcesPayload, externalAudioPayload);
+      }
+
       const sourcesPayload = [];
       for (let i = 0; i < readySources.length; i++) {
         const source = readySources[i];
+        const verifiedSync = verifiedSyncBySourceId.get(source.id);
+        const sourceForRender = verifiedSync
+          ? {
+              ...source,
+              offsetSeconds: verifiedSync.offsetSeconds,
+              syncRate: verifiedSync.syncRate,
+              sync_rate: verifiedSync.syncRate,
+            }
+          : source;
         setExportProgress((i / readySources.length) * 0.5);
         const sourceLabel = source.label || `source ${i + 1}`;
         setStatusMessage(
@@ -7315,13 +7523,13 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         );
         const sourceDuration = Number(source.duration || 0);
         const sourceTrimStartForWindow = clampNumber(
-          getSourceTimelineTime(source, renderWindowStart, timelineBounds.timelineStart) - 2,
+          getSourceTimelineTime(sourceForRender, renderWindowStart, timelineBounds.timelineStart) - 2,
           0,
           Math.max(0, sourceDuration - 0.2),
           0
         );
         const sourceTrimEndForWindow = clampNumber(
-          getSourceTimelineTime(source, renderWindowEnd, timelineBounds.timelineStart) + 2,
+          getSourceTimelineTime(sourceForRender, renderWindowEnd, timelineBounds.timelineStart) + 2,
           sourceTrimStartForWindow + 0.2,
           sourceDuration || sourceTrimStartForWindow + renderWindowDuration,
           sourceTrimStartForWindow + renderWindowDuration
@@ -7384,9 +7592,9 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           id: source.id,
           url: remoteUrl,
           label: source.label || `Camera ${i + 1}`,
-          offset_seconds: Number(source.offsetSeconds) || 0,
-          sync_rate: getSourceSyncRate(source),
-          syncRate: getSourceSyncRate(source),
+          offset_seconds: Number(sourceForRender.offsetSeconds) || 0,
+          sync_rate: getSourceSyncRate(sourceForRender),
+          syncRate: getSourceSyncRate(sourceForRender),
           upload_trim_start: usingRenderProxy ? sourceTrimStartForWindow : 0,
           upload_trim_duration: usingRenderProxy ? sourceTrimDurationForWindow : 0,
         });
@@ -7406,146 +7614,6 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
               : source;
         })
       );
-
-      let externalAudioPayload = null;
-      if (hasExternalCleanAudio && externalAudioTrack) {
-        setStatusMessage("Uploading external clean audio for server render...");
-        const externalOriginalOffset = Number(externalAudioTrack.offsetSeconds || 0) || 0;
-        const externalTrimStartForWindow = Math.max(
-          0,
-          renderTimelineStart - externalOriginalOffset - 2
-        );
-        const externalTrimDurationForWindow = Math.min(
-          Number(externalAudioTrack.duration || 0) || renderWindowDuration + 4,
-          renderWindowDuration + 4
-        );
-        const externalAudioUpload = await uploadMediaForBackendSync({
-          user,
-          storage,
-          file: externalAudioTrack.file,
-          fallbackUrl: "",
-          folder: "temp/multicam-clean-sync-audio",
-          label: "External clean audio",
-          mode: "audio_only",
-          trimWindow: {
-            start: externalTrimStartForWindow,
-            duration: externalTrimDurationForWindow,
-          },
-        });
-        const externalAudioRemoteUrl = externalAudioUpload.url;
-        const externalUploadTrimStart = Number(externalAudioUpload.trimStart ?? externalTrimStartForWindow) || 0;
-        externalAudioPayload = {
-          url: externalAudioRemoteUrl,
-          offset_seconds: externalOriginalOffset + externalUploadTrimStart,
-          mix_mode: externalAudioMixMode,
-          cache_key: buildBackendMediaCacheKey(externalAudioTrack.file) || externalAudioTrack.name,
-          upload_trim_start: externalUploadTrimStart,
-          upload_trim_duration: Number(externalAudioUpload.trimDuration ?? externalTrimDurationForWindow) || 0,
-        };
-        setExternalAudioTrack(current =>
-          current
-            ? {
-                ...current,
-                url: externalAudioRemoteUrl,
-                cacheKey: externalAudioPayload.cache_key,
-                uploadedRenderTrimStart: externalUploadTrimStart,
-                uploadedRenderTrimDuration: externalAudioPayload.upload_trim_duration,
-              }
-            : current
-        );
-      }
-
-      let preflightVerifiedIds = new Set();
-      let preflightStatusForRender = "";
-      if (externalAudioPayload?.url && sourcesPayload.length) {
-        setStatusMessage("Preflight: calculating corrected camera offsets and drift rates...");
-        try {
-          const preflightBody = {
-            sources: sourcesPayload.map(source => ({
-              url: source.url,
-              offset_seconds: getPreflightProxyOffsetSeconds(source),
-              sync_rate: source.sync_rate,
-              syncRate: source.syncRate,
-            })),
-            external_audio_url: externalAudioPayload.url,
-            external_audio_offset_seconds: externalAudioPayload.offset_seconds,
-          };
-          const preflightToken = await user.getIdToken(true);
-          const preflightRes = await fetch(`${API_BASE_URL}/api/media/multicam/preflight-sync`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${preflightToken}`,
-            },
-            body: JSON.stringify(preflightBody),
-          });
-          const preflight = await preflightRes.json();
-          console.log("PREFLIGHT AUTO-ALIGN RESULT:", preflight);
-          if (!preflightRes.ok || preflight?.error) {
-            const preflightErrorMessage =
-              preflight?.error ||
-              preflight?.message ||
-              preflight?.detail ||
-              `Preflight returned ${preflightRes.status}`;
-            throw new Error(preflightErrorMessage);
-          }
-          preflightStatusForRender = String(preflight.status || "");
-          const adjustments = applyPreflightSyncSuggestions(sourcesPayload, preflight);
-          const verifiedIds = getPreflightVerifiedSourceIds(sourcesPayload, preflight);
-          preflightVerifiedIds = verifiedIds;
-          if (adjustments.length) {
-            setSources(currentSources =>
-              currentSources.map(source => {
-                const adjustment = adjustments.find(item => item.id === source.id);
-                return adjustment
-                  ? {
-                      ...source,
-                      offsetSeconds: adjustment.offsetSeconds,
-                      syncRate: adjustment.syncRate,
-                      sync_rate: adjustment.syncRate,
-                      autoSyncApplied: true,
-                      autoSyncVerifiedAt: new Date().toISOString(),
-                      manualOffsetLocked: false,
-                    }
-                  : source;
-              })
-            );
-            setStatusMessage(
-              `Applied safe sync correction to ${adjustments.length} camera${adjustments.length === 1 ? "" : "s"}. Rendering with corrected offsets.`
-            );
-          } else if (verifiedIds.size) {
-            setSources(currentSources =>
-              currentSources.map(source =>
-                verifiedIds.has(source.id)
-                  ? {
-                      ...source,
-                      autoSyncApplied: true,
-                      autoSyncVerifiedAt: new Date().toISOString(),
-                    }
-                  : source
-              )
-            );
-            setStatusMessage("Preflight proved start/middle/end sync. Rendering with verified offsets.");
-          } else if (preflight.status === "unsafe") {
-            setStatusMessage("⚠️ Sync preflight could not find a safe automatic correction.");
-          }
-        } catch (preflightErr) {
-          console.warn("Preflight auto-align failed before render:", preflightErr);
-          const preflightErrorText = String(preflightErr?.message || "");
-          if (/token expired|auth|session/i.test(preflightErrorText)) {
-            throw new Error(
-              "Session refreshed too late during sync preflight. Render cancelled before credits are spent. Retry now; completed upload proxies should be reused."
-            );
-          }
-          throw new Error("Automatic start/middle/end sync preflight failed. Render cancelled before credits are spent.");
-        }
-        const missingVerified = sourcesPayload.filter(source => !preflightVerifiedIds.has(source.id));
-        if (preflightStatusForRender === "unsafe" || missingVerified.length) {
-          throw new Error(
-            `Automatic start/middle/end sync could not verify ${missingVerified.length || sourcesPayload.length} camera${(missingVerified.length || sourcesPayload.length) === 1 ? "" : "s"}. Render cancelled before credits are spent.`
-          );
-        }
-      }
 
       setExportProgress(0.6);
       setStatusMessage(
