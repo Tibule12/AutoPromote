@@ -904,9 +904,21 @@ class VideoEditingService {
       external_audio_offset_seconds: Number(external_audio_offset_seconds || 0),
     };
 
-    const response = await axios.post(`${workerUrl}/multicam/preflight-sync`, payload, {
-      timeout: 120000,
-    });
+    let response;
+    try {
+      response = await axios.post(`${workerUrl}/multicam/preflight-sync`, payload, {
+        timeout: 120000,
+      });
+    } catch (error) {
+      const workerDetail = error.response?.data?.detail || error.response?.data?.message || error.message;
+      const message = typeof workerDetail === "string"
+        ? workerDetail
+        : JSON.stringify(workerDetail);
+      const wrappedError = new Error(message || "Multicam preflight worker failed");
+      wrappedError.statusCode = error.response?.status;
+      wrappedError.workerDetail = workerDetail;
+      throw wrappedError;
+    }
 
     return response.data;
   }

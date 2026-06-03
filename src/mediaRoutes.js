@@ -509,8 +509,14 @@ router.post("/multicam/preflight-sync", async (req, res) => {
     });
     res.json(result);
   } catch (error) {
-    console.error("[MediaRoute] Multicam preflight sync error:", error.message);
-    res.status(500).json({ message: "Preflight sync check failed", details: error.message });
+    const statusCode = Number(error.statusCode || error.response?.status || 500);
+    const safeStatus = statusCode >= 400 && statusCode < 500 ? statusCode : 500;
+    const details = error.workerDetail || error.response?.data?.detail || error.response?.data?.message || error.message;
+    console.error("[MediaRoute] Multicam preflight sync error:", details);
+    res.status(safeStatus).json({
+      message: "Preflight sync check failed",
+      details,
+    });
   }
 });
 

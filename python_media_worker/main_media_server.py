@@ -14492,8 +14492,8 @@ async def multicam_preflight_sync(request: RenderMultiCamRequest):
     source_offsets = []
 
     for idx, source in enumerate(request.sources or []):
-        local = os.path.join(shared_tmp, f"{job_id}_preflight_src_{idx}.mp4")
-        local = await materialize_video_input(source.url, local, keep_audio=True)
+        local = os.path.join(shared_tmp, f"{job_id}_preflight_src_{idx}.wav")
+        local = await materialize_audio_input(source.url, local)
         source_paths.append(local)
         source_offsets.append(float(source.offset_seconds or 0.0))
 
