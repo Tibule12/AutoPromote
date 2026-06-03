@@ -13282,21 +13282,72 @@ def estimate_envelope_offset(clean_envelope, camera_envelope, bins_per_second):
     method = "vad"
     best_offset = 0.0
     best_confidence = 0.0
+    clap_offset = None
+    clap_confidence = 0.0
+
+    def finish(candidate_offset, candidate_confidence, candidate_method):
+        """
+        Clap is a useful hint, but it is not enough to green-light sync.
+        Random room transients can look like a clap, so only trust it when
+        VAD/waveform correlation lands in the same place.
+        """
+        nonlocal clap_offset, clap_confidence
+        candidate_offset = float(candidate_offset or 0.0)
+        candidate_confidence = float(candidate_confidence or 0.0)
+        candidate_method = candidate_method or "fallback"
+        if clap_offset is None:
+            return round(candidate_offset, 3), round(candidate_confidence, 3), candidate_method
+
+        clap_gap = abs(candidate_offset - clap_offset)
+        if candidate_confidence >= 0.2 and clap_gap <= 1.25:
+            validated_confidence = max(candidate_confidence, min(clap_confidence, 0.9))
+            logger.info(
+                f"Clap validated by {candidate_method}: clap_offset={clap_offset:.3f}s "
+                f"candidate_offset={candidate_offset:.3f}s gap={clap_gap:.3f}s "
+                f"conf={validated_confidence:.3f}"
+            )
+            return (
+                round(candidate_offset, 3),
+                round(validated_confidence, 3),
+                f"clap_validated_{candidate_method}",
+            )
+
+        if candidate_confidence >= 0.2:
+            capped_confidence = min(candidate_confidence, 0.5)
+            logger.warning(
+                f"Clap disagrees with {candidate_method}: clap_offset={clap_offset:.3f}s "
+                f"candidate_offset={candidate_offset:.3f}s gap={clap_gap:.3f}s; "
+                f"capping confidence at {capped_confidence:.3f}"
+            )
+            return (
+                round(candidate_offset, 3),
+                round(capped_confidence, 3),
+                f"{candidate_method}_clap_disagreed",
+            )
+
+        capped_clap_confidence = min(clap_confidence, 0.42)
+        logger.warning(
+            f"Clap candidate was not validated by VAD/waveform: "
+            f"clap_offset={clap_offset:.3f}s candidate={candidate_offset:.3f}s "
+            f"candidate_conf={candidate_confidence:.3f}; returning review-only clap"
+        )
+        return round(clap_offset, 3), round(capped_clap_confidence, 3), "clap_unverified"
 
     # === STAGE 1: Clap/spike ===
     clean_peak = detect_sync_peak(clean_envelope, bins_per_second)
     camera_peak = detect_sync_peak(camera_envelope, bins_per_second)
     if clean_peak and camera_peak:
-        # Clap exists in both — align to it
-        offset = camera_peak["seconds"] - clean_peak["seconds"]
-        # Confidence based on both peaks being clear
-        confidence = min(0.98, 0.55 + (clean_peak["strength"] + camera_peak["strength"]) / 4)
-        logger.info(
-            f"CLAP DETECTED: clean@{clean_peak['seconds']}s (str={clean_peak['strength']:.3f}), "
-            f"camera@{camera_peak['seconds']}s (str={camera_peak['strength']:.3f}), "
-            f"offset={offset:.3f}s, conf={confidence:.3f}"
+        clap_offset = float(camera_peak["seconds"] - clean_peak["seconds"])
+        clap_confidence = min(
+            0.98,
+            0.55
+            + (float(clean_peak.get("confidence") or 0.0) + float(camera_peak.get("confidence") or 0.0)) / 4,
         )
-        return round(offset, 3), round(confidence, 3), "clap"
+        logger.info(
+            f"CLAP CANDIDATE: clean@{clean_peak['seconds']}s (str={clean_peak['strength']:.3f}), "
+            f"camera@{camera_peak['seconds']}s (str={camera_peak['strength']:.3f}), "
+            f"offset={clap_offset:.3f}s, conf={clap_confidence:.3f}; validating with waveform"
+        )
     else:
         if not clean_peak:
             logger.info("No clap found in clean audio envelope")
@@ -13364,7 +13415,7 @@ def estimate_envelope_offset(clean_envelope, camera_envelope, bins_per_second):
 
     # === STAGE 4: Fine refinement ===
     if best_confidence < 0.12:
-        return round(best_offset, 3), round(best_confidence, 3), "fallback"
+        return finish(best_offset, best_confidence, "fallback")
 
     refine_window = 2.0
     coarse_bin = int(best_offset * bins_per_second)
@@ -13389,9 +13440,9 @@ def estimate_envelope_offset(clean_envelope, camera_envelope, bins_per_second):
                 fine_norm = float(np.linalg.norm(cam_n) * np.linalg.norm(clean_n)) or 1.0
                 fine_confidence = clamp_float((fine_score / fine_norm + 1) / 2, 0.1, 0.92)
                 method = f"fine_{method}"
-                return round(fine_offset, 3), round(fine_confidence, 3), method
+                return finish(fine_offset, fine_confidence, method)
 
-    return round(best_offset, 3), round(best_confidence, 3), method
+    return finish(best_offset, best_confidence, method)
 
 
 async def extract_presync_clap_wav(input_path, output_wav_path, job_id):
