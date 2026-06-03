@@ -119,7 +119,7 @@ const MULTICAM_RENDER_TIERS = [
 
 // Client-side compression before upload — turns raw 4K/ProRes into web-friendly bitrates
 const UPLOAD_COMPRESSION_THRESHOLD_BYTES = 250 * BYTES_PER_MB; // Compress files > 250 MB
-const UPLOAD_COMPRESSION_TARGET_BPS = 8_000_000;               // 8 Mbps video
+const UPLOAD_COMPRESSION_TARGET_BPS = 3_000_000;               // 3 Mbps video
 const UPLOAD_COMPRESSION_AUDIO_BPS = 128_000;                  // 128 Kbps audio
 const VIDEO_SYNC_AUDIO_BPS = 96_000;
 const VIDEO_SYNC_MAX_EXTRACT_SECONDS = 15 * 60;
@@ -4853,7 +4853,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
               lastPct = pct;
               onProgress(pct);
               setStatusMessage(
-                `${options.trimDuration ? "Preparing fast upload proxy" : "Compressing"} ${label} (${Math.round(pct * 100)}%) — target ~${formatMediaBytes(estimatedBytes)} at 8 Mbps...`
+                `${options.trimDuration ? "Preparing fast upload proxy" : "Compressing"} ${label} (${Math.round(pct * 100)}%) — target ~${formatMediaBytes(estimatedBytes)} at 3 Mbps...`
               );
             }
           };
