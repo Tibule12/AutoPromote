@@ -2676,7 +2676,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     };
   }, [multicamLayoutMode, studioUpcomingSpeaker, activeCamera, studioMonitorSources.length]);
   const cleanAudioSyncTerminalStatuses = useMemo(
-    () => new Set(["ready_for_review", "completed", "failed", "cancelled"]),
+    () => new Set(["ready_for_review", "completed", "failed", "cancelled", "sync_complete", "sync_low_confidence"]),
     []
   );
   const cleanAudioSyncIsRunning = Boolean(
@@ -3634,6 +3634,12 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           } else if (hasDrift) {
             setStatusMessage("Sync complete, but possible audio drift detected. Verify alignment.");
             toast("Possible audio drift — verify sync", { icon: "⚠️", duration: 6000 });
+          } else if (shouldUseBackendCleanAudioSync) {
+            setAutoDirectorEnabled(false);
+            setStatusMessage(
+              "Machine sync calculated. Play Program Output, nudge any lip mismatch, then Lock Offset on each camera before export."
+            );
+            toast("Visual sync review required before export.", { icon: "⚠️", duration: 8000 });
           } else {
             setStatusMessage("Sync window matched with high confidence. Play Program Output to verify lips before export.");
           }
@@ -3649,7 +3655,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       isCancelled = true;
       window.clearInterval(intervalId);
     };
-  }, [cleanAudioSyncJob?.jobId, cleanAudioSyncJob?.status]);
+  }, [cleanAudioSyncJob?.jobId, cleanAudioSyncJob?.status, shouldUseBackendCleanAudioSync]);
 
   // Cleanup multicam render export poll interval on unmount
   useEffect(() => {
@@ -5563,11 +5569,24 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     }
   };
 
+  const sourceHasMachineCleanAudioSyncResult = source =>
+    Boolean(
+      source?.backendSyncMethod ||
+        source?.backendSyncStatus ||
+        Number(source?.backendSyncConfidence || 0) > 0 ||
+        source?.backendSyncDebug ||
+        source?.backendSyncDrift
+    );
+
   const sourceHasPreviewSyncCorrection = source => {
     if (!isVideoSource(source)) return true;
     const offsetSeconds = Number(source.offsetSeconds || 0);
     const syncRate = getSourceSyncRate(source);
     const backendStatus = String(source.backendSyncStatus || "").toLowerCase();
+    const hasWorkerCleanAudioResult = sourceHasMachineCleanAudioSyncResult(source);
+    if (hasExternalCleanAudio && shouldUseBackendCleanAudioSync && hasWorkerCleanAudioResult) {
+      return Boolean(source.manualOffsetLocked);
+    }
     return Boolean(
       source.autoSyncApplied ||
         source.manualOffsetLocked ||
@@ -5616,8 +5635,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     if (unsyncedSources.length) {
       return {
         tone: "warning",
-        title: "Sync not verified",
-        detail: `${unsyncedSources.length} camera${unsyncedSources.length === 1 ? "" : "s"} still need clean-audio sync or manual offset lock.`,
+        title: "Visual sync review required",
+        detail: `${unsyncedSources.length} camera${unsyncedSources.length === 1 ? "" : "s"} have machine-calculated offsets. Play Program Output, nudge if needed, then Lock Offset before export.`,
       };
     }
 
@@ -5631,6 +5650,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     hasExternalCleanAudio,
     cleanAudioSyncIsRunning,
     cleanAudioSyncJob,
+    shouldUseBackendCleanAudioSync,
   ]);
 
   const ensureProgramOutputCleanAudioSync = async () => {
@@ -5640,6 +5660,13 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     if (!candidates.length) return true;
 
     if (candidates.every(sourceHasPreviewSyncCorrection)) {
+      return true;
+    }
+
+    if (
+      shouldUseBackendCleanAudioSync &&
+      candidates.every(source => source.manualOffsetLocked || sourceHasMachineCleanAudioSyncResult(source))
+    ) {
       return true;
     }
 
@@ -6836,6 +6863,18 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       setStatusMessage("Pick a valid render window before starting the cloud export.");
       toast.error("Pick a valid render window first.");
       return;
+    }
+    if (hasExternalCleanAudio) {
+      const reviewRequiredSources = readySources
+        .filter(isVideoSource)
+        .filter(source => !sourceHasPreviewSyncCorrection(source));
+      if (reviewRequiredSources.length) {
+        setStatusMessage(
+          `Export blocked: ${reviewRequiredSources.length} camera${reviewRequiredSources.length === 1 ? "" : "s"} still need visual sync review. Play Program Output, nudge offsets, then Lock Offset.`
+        );
+        toast.error("Lock verified offsets before spending render credits.");
+        return;
+      }
     }
 
     setServerExportPending(true);
@@ -8392,11 +8431,11 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                     <div key={`offset-${source.id}`} className="nle-studio-offset-card">
                       <div className="nle-studio-offset-head">
                         <strong>{getStudioSlotLabel(index)}</strong>
-                        <span className={`nle-camera-badge ${source.backendSyncStatus === "synced" ? "is-live" : ""}`}>
-                          {source.backendSyncStatus
-                            ? String(source.backendSyncStatus).replace(/_/g, " ")
-                            : source.manualOffsetLocked
-                              ? "manual lock"
+                        <span className={`nle-camera-badge ${source.manualOffsetLocked ? "is-live" : ""}`}>
+                          {source.manualOffsetLocked
+                            ? "visual lock"
+                            : source.backendSyncStatus
+                              ? "machine sync"
                               : "review"}
                         </span>
                       </div>
@@ -8439,15 +8478,16 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                         <button
                           className="nle-mini-btn nle-mini-btn-accent"
                           type="button"
-                          onClick={() =>
+                          onClick={() => {
                             setSources(currentSources =>
                               currentSources.map(currentSource =>
                                 currentSource.id === source.id
                                   ? { ...currentSource, manualOffsetLocked: true }
                                   : currentSource
                               )
-                            )
-                          }
+                            );
+                            setStatusMessage(`${source.label || getStudioSlotLabel(index)} offset locked after visual review.`);
+                          }}
                         >
                           Lock Offset
                         </button>
@@ -9689,10 +9729,10 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                           <div className="nle-source-meta-row">
                             <span>
                               Sync:{" "}
-                              {source.backendSyncStatus
-                                ? String(source.backendSyncStatus).replace(/_/g, " ")
-                                : source.manualOffsetLocked
-                                  ? "manual lock"
+                              {source.manualOffsetLocked
+                                ? "visual lock"
+                                : source.backendSyncStatus
+                                  ? "machine sync"
                                   : "not solved"}
                             </span>
                             <span>
