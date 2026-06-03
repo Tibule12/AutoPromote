@@ -3673,9 +3673,9 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           } else if (shouldUseBackendCleanAudioSync) {
             setAutoDirectorEnabled(false);
             setStatusMessage(
-              "Machine sync calculated. Play Program Output, nudge any lip mismatch, then Lock Offset on each camera before export."
+              "Machine sync calculated. Export will automatically verify start/middle/end sync before any render starts."
             );
-            toast("Visual sync review required before export.", { icon: "⚠️", duration: 8000 });
+            toast("Automatic start/middle/end sync verification will run before export.", { icon: "✅", duration: 8000 });
           } else {
             setStatusMessage("Sync window matched with high confidence. Play Program Output to verify lips before export.");
           }
@@ -5671,9 +5671,9 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     const unsyncedSources = videoSources.filter(source => !sourceHasPreviewSyncCorrection(source));
     if (unsyncedSources.length) {
       return {
-        tone: "warning",
-        title: "Visual sync review required",
-        detail: `${unsyncedSources.length} camera${unsyncedSources.length === 1 ? "" : "s"} have machine-calculated offsets. Play Program Output, nudge if needed, then Lock Offset before export.`,
+        tone: "processing",
+        title: "Automatic export proof pending",
+        detail: `${unsyncedSources.length} camera${unsyncedSources.length === 1 ? "" : "s"} have provisional machine offsets. Export will prove start/middle/end sync automatically before rendering.`,
       };
     }
 
@@ -8490,10 +8490,10 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                                   : currentSource
                               )
                             );
-                            setStatusMessage(`${source.label || getStudioSlotLabel(index)} offset locked after visual review.`);
+                            setStatusMessage(`${source.label || getStudioSlotLabel(index)} offset marked as reviewed for this session.`);
                           }}
                         >
-                          Lock Offset
+                          Mark Reviewed
                         </button>
                         <button
                           className="nle-mini-btn"
