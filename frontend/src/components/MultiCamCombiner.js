@@ -94,6 +94,7 @@ const BROWSER_SYNC_MAX_TOTAL_VISUAL_BYTES = 2.5 * BYTES_PER_GB;
 const BROWSER_SYNC_MAX_EXTERNAL_AUDIO_BYTES = 250 * BYTES_PER_MB;
 const BROWSER_SYNC_MAX_DURATION_SECONDS = 30 * 60;
 const MULTICAM_RENDER_BASE_CREDITS = 15;
+const CLEAN_AUDIO_SYNC_CREDITS = 18;
 
 const MULTICAM_RENDER_TIERS = [
   {
@@ -516,21 +517,8 @@ const getBrowserSyncBlockReason = (visualSources = [], externalTrack = null) => 
 
   return "";
 };
-const estimateCleanAudioSyncCredits = (visualSources = [], externalTrack = null) => {
-  const videoSources = visualSources.filter(isVideoSource);
-  const longestDuration = Math.max(
-    0,
-    ...videoSources.map(source => Number(source.duration || 0)),
-    Number(externalTrack?.duration || 0)
-  );
-  const durationMinutes = Math.max(1, longestDuration / 60);
-  const totalBytes =
-    videoSources.reduce((sum, source) => sum + getSourceFileSize(source), 0) +
-    Number(externalTrack?.file?.size || 0);
-  return Math.max(
-    18,
-    Math.ceil(10 + videoSources.length * 6 + durationMinutes * 1.25 + totalBytes / BYTES_PER_GB * 4)
-  );
+const estimateCleanAudioSyncCredits = () => {
+  return CLEAN_AUDIO_SYNC_CREDITS;
 };
 
 const estimateMulticamRenderCredits = renderTier => {

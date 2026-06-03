@@ -48,19 +48,7 @@ const estimateMulticamRenderCredits = ({ renderTier, baseCost }) => {
   return safeBase;
 };
 
-const estimateCleanAudioSyncCredits = ({ sources = [], externalAudio = {} }) => {
-  const videoSources = Array.isArray(sources) ? sources : [];
-  const longestDuration = Math.max(
-    0,
-    ...videoSources.map(source => Number(source.duration || source.duration_seconds || 0)),
-    Number(externalAudio.duration || externalAudio.duration_seconds || 0)
-  );
-  const totalBytes =
-    videoSources.reduce((sum, source) => sum + Math.max(0, Number(source.size || 0)), 0) +
-    Math.max(0, Number(externalAudio.size || 0));
-  const durationMinutes = Math.max(1, longestDuration / 60);
-  return Math.max(18, Math.ceil(10 + videoSources.length * 6 + durationMinutes * 1.25 + totalBytes / (1024 * 1024 * 1024) * 4));
-};
+const estimateCleanAudioSyncCredits = () => CREDIT_COSTS["clean-audio-sync"] || 18;
 
 const shouldRetryWithLocalWorker = error => {
   const status = error.response?.status;
@@ -637,10 +625,7 @@ router.post("/multicam/clean-audio-sync", async (req, res) => {
   }
 
   const requestedEstimate = Number(req.body?.estimatedCredits || 0);
-  const estimatedCredits = Math.max(
-    CREDIT_COSTS["clean-audio-sync"] || 18,
-    requestedEstimate > 0 ? requestedEstimate : estimateCleanAudioSyncCredits({ sources, externalAudio })
-  );
+  const estimatedCredits = estimateCleanAudioSyncCredits();
   const jobId = `clean-audio-sync-${Date.now()}-${uuidv4().slice(0, 8)}`;
   let creditResult = null;
 
