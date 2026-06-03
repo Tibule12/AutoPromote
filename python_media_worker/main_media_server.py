@@ -13312,6 +13312,18 @@ def estimate_envelope_offset(clean_envelope, camera_envelope, bins_per_second):
                 f"clap_validated_{candidate_method}",
             )
 
+        if candidate_confidence >= 0.65 and "waveform" in candidate_method:
+            logger.warning(
+                f"Strong {candidate_method} match overrides clap disagreement: "
+                f"clap_offset={clap_offset:.3f}s candidate_offset={candidate_offset:.3f}s "
+                f"gap={clap_gap:.3f}s candidate_conf={candidate_confidence:.3f}"
+            )
+            return (
+                round(candidate_offset, 3),
+                round(candidate_confidence, 3),
+                f"{candidate_method}_clap_ignored",
+            )
+
         if candidate_confidence >= 0.2:
             capped_confidence = min(candidate_confidence, 0.5)
             logger.warning(
