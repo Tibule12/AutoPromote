@@ -708,6 +708,8 @@ const getPreflightProxyOffsetSeconds = payload => {
 const getPreflightVerifiedSourceIds = (sourcesPayload, preflight) => {
   const cameraResults = getPreflightCameraResults(preflight);
   const verified = new Set();
+  const preflightStatus = String(preflight?.status || "").toLowerCase();
+  if (preflightStatus !== "good") return verified;
   cameraResults.forEach((cameraResult, index) => {
     const payload = sourcesPayload[index];
     if (!payload) return;
@@ -720,7 +722,7 @@ const getPreflightVerifiedSourceIds = (sourcesPayload, preflight) => {
       (!Number.isFinite(maxFitError) || maxFitError <= 0.2) &&
       (!Number.isFinite(driftSeconds) || Math.abs(driftSeconds) <= 0.25) &&
       (!Number.isFinite(avgCorrelation) || avgCorrelation >= 0.25) &&
-      cameraResult.confidence !== "unsafe";
+      cameraResult.confidence === "good";
     if (hasStableFit) {
       verified.add(payload.id);
     }
@@ -7360,7 +7362,9 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
               });
             }
           });
-          if (adjustments.length) {
+          if (preflightStatus !== "good") {
+            setStatusMessage("Sync preflight was not proven safe. Render-window video upload cancelled before credits are spent.");
+          } else if (adjustments.length) {
             setSources(currentSources =>
               currentSources.map(source => {
                 const adjustment = adjustments.find(item => item.id === source.id);
@@ -7398,9 +7402,9 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           }
 
           const missingVerified = preflightSourcesPayload.filter(source => !verifiedIds.has(source.id));
-          if (preflightStatus === "unsafe" || missingVerified.length) {
+          if (preflightStatus !== "good" || missingVerified.length) {
             throw new Error(
-              `Automatic start/middle/end sync could not verify ${missingVerified.length || preflightSourcesPayload.length} camera${(missingVerified.length || preflightSourcesPayload.length) === 1 ? "" : "s"}. Render-window video upload cancelled before credits are spent.`
+              `Automatic start/middle/end sync returned ${preflightStatus || "unknown"} and could not prove ${missingVerified.length || preflightSourcesPayload.length} camera${(missingVerified.length || preflightSourcesPayload.length) === 1 ? "" : "s"}. Render-window video upload cancelled before credits are spent.`
             );
           }
         } catch (preflightErr) {
