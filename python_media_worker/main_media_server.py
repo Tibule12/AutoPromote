@@ -14947,6 +14947,24 @@ async def preflight_multicam_sync(
             },
         }
 
+    def get_fit_correction(receipt, current_offset, current_sync_rate):
+        fit = receipt.get("sync_fit") or {}
+        if fit.get("status") != "fit":
+            return None
+        try:
+            suggested_offset = float(fit.get("suggested_offset_seconds"))
+            suggested_sync_rate = clamp_float(float(fit.get("suggested_sync_rate") or current_sync_rate), 0.95, 1.05)
+        except (TypeError, ValueError):
+            return None
+
+        raw_max_fit_error = fit.get("max_fit_error_seconds")
+        max_fit_error = 999.0 if raw_max_fit_error is None else float(raw_max_fit_error)
+        avg_corr = float(receipt.get("avg_correlation", 0.0) or 0.0)
+        offset_delta = abs(suggested_offset - float(current_offset or 0.0))
+        if max_fit_error > 0.2 or avg_corr < 0.25 or offset_delta > MULTICAM_PREFLIGHT_BOOTSTRAP_MAX_SHIFT_SECONDS:
+            return None
+        return suggested_offset, suggested_sync_rate
+
     for cam_idx, (path, offset) in enumerate(zip(source_paths, source_offsets)):
         sync_rate = max(0.001, float(source_sync_rates[cam_idx] if cam_idx < len(source_sync_rates) else 1.0))
         current_measurement = await measure_source_windows(path, cam_idx, offset, sync_rate, "current")
@@ -14969,6 +14987,19 @@ async def preflight_multicam_sync(
                     receipt = boot_receipt
                 else:
                     receipt["bootstrap_attempt"] = boot_receipt
+
+        if receipt.get("confidence") != "good":
+            receipt_offset = float(receipt.get("current_offset", offset) or 0.0)
+            receipt_sync_rate = float(receipt.get("current_sync_rate", sync_rate) or sync_rate)
+            fit_correction = get_fit_correction(receipt, receipt_offset, receipt_sync_rate)
+            if fit_correction:
+                fit_offset, fit_sync_rate = fit_correction
+                fit_measurement = await measure_source_windows(path, cam_idx, fit_offset, fit_sync_rate, "fit")
+                fit_receipt = fit_measurement["receipt"]
+                receipt["fit_correction_attempt"] = fit_receipt
+                if fit_receipt.get("confidence") == "good":
+                    fit_receipt["corrected_from"] = receipt
+                    receipt = fit_receipt
 
         if bootstrap:
             receipt["bootstrap_sync"] = bootstrap
