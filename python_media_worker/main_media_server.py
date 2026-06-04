@@ -14902,6 +14902,13 @@ async def preflight_multicam_sync(
         return {"window_results": window_results, "receipt": summarize_preflight_windows(window_results, offset, sync_rate)}
 
     def summarize_preflight_windows(window_results, offset, sync_rate):
+        required_window_labels = ["start", "middle", "end"]
+        missing_required_windows = [
+            label
+            for label in required_window_labels
+            if label not in window_results or "estimated_offset_seconds" not in (window_results.get(label) or {})
+        ] if has_timeline_window else []
+
         # Detect drift: compare start vs end offset estimates
         offsets = [
             w.get("estimated_offset_seconds", 0)
@@ -14923,13 +14930,18 @@ async def preflight_multicam_sync(
                 sum(w.get("correlation", 0) for w in window_results.values() if "correlation" in w)
                 / max(1, sum(1 for w in window_results.values() if "correlation" in w))
             )
-            confidence = "good" if avg_corr > 0.25 and drift < 0.15 and max_residual_offset < 0.15 else (
-                "questionable" if avg_corr > 0.25 and drift < 1.0 and max_residual_offset < 0.5 else "unsafe"
-            )
+            if missing_required_windows:
+                confidence = "unsafe"
+            else:
+                confidence = "good" if avg_corr > 0.25 and drift < 0.15 and max_residual_offset < 0.15 else (
+                    "questionable" if avg_corr > 0.25 and drift < 1.0 and max_residual_offset < 0.5 else "unsafe"
+                )
 
         return {
             "windows": {k: v for k, v in window_results.items() if "status" not in v},
             "errors": {k: v for k, v in window_results.items() if "status" in v},
+            "required_windows": required_window_labels if has_timeline_window else [],
+            "missing_required_windows": missing_required_windows,
             "drift_seconds": round(drift, 3),
             "max_residual_offset_seconds": round(max_residual_offset, 3),
             "avg_correlation": round(avg_corr, 4),

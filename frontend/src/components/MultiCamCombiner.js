@@ -677,10 +677,7 @@ const estimateCleanAudioProxyBytes = (externalTrack, durationSeconds) => {
   const fileSize = Number(externalTrack?.file?.size || 0) || 0;
   if (!fileSize) return 0;
   if (fileSize <= 20 * BYTES_PER_MB) return fileSize;
-  const proxyDuration = Math.min(
-    Math.max(0.2, Number(durationSeconds || 0) || 0),
-    VIDEO_SYNC_MAX_EXTRACT_SECONDS
-  );
+  const proxyDuration = Math.max(0.2, Number(durationSeconds || 0) || VIDEO_SYNC_MAX_EXTRACT_SECONDS);
   return Math.round(16000 * 2 * proxyDuration);
 };
 
@@ -717,8 +714,16 @@ const getPreflightVerifiedSourceIds = (sourcesPayload, preflight) => {
     const maxFitError = Number(fit.max_fit_error_seconds ?? cameraResult.max_residual_offset_seconds);
     const avgCorrelation = Number(cameraResult.avg_correlation);
     const driftSeconds = Number(cameraResult.drift_seconds);
+    const requiredWindows = Array.isArray(cameraResult.required_windows) && cameraResult.required_windows.length
+      ? cameraResult.required_windows
+      : ["start", "middle", "end"];
+    const windows = cameraResult.windows || {};
+    const hasRequiredWindows = requiredWindows.every(label => windows[label]);
+    const hasMissingRequiredWindows = Array.isArray(cameraResult.missing_required_windows) && cameraResult.missing_required_windows.length > 0;
     const hasStableFit =
       fit.status === "fit" &&
+      hasRequiredWindows &&
+      !hasMissingRequiredWindows &&
       (!Number.isFinite(maxFitError) || maxFitError <= 0.2) &&
       (!Number.isFinite(driftSeconds) || Math.abs(driftSeconds) <= 0.25) &&
       (!Number.isFinite(avgCorrelation) || avgCorrelation >= 0.25) &&
@@ -4663,12 +4668,13 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           const rawDuration = Number(audioBuffer.duration) || 0;
           const trimStart = clampNumber(Number(options.trimStart) || 0, 0, Math.max(0, rawDuration - 0.2), 0);
           const requestedDuration = Number(options.trimDuration) || rawDuration;
-          const cappedDuration = Math.min(requestedDuration, VIDEO_SYNC_MAX_EXTRACT_SECONDS);
+          const maxExtractDuration = Math.max(0.2, Number(options.maxDurationSeconds) || VIDEO_SYNC_MAX_EXTRACT_SECONDS);
+          const cappedDuration = Math.min(requestedDuration, maxExtractDuration);
           const duration = clampNumber(
             cappedDuration,
             0.2,
             Math.max(0.2, rawDuration - trimStart),
-            Math.min(rawDuration, VIDEO_SYNC_MAX_EXTRACT_SECONDS)
+            Math.min(rawDuration, maxExtractDuration)
           );
           const offlineCtx = new OfflineAudioContext(channels, Math.ceil(sampleRate * duration), sampleRate);
           const source = offlineCtx.createBufferSource();
@@ -4771,11 +4777,12 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           const rawDuration = Math.max(0.2, Number(video.duration) || 0);
           const trimStart = clampNumber(Number(options.trimStart) || 0, 0, Math.max(0, rawDuration - 0.2), 0);
           const requestedDuration = Number(options.trimDuration) || rawDuration;
+          const maxExtractDuration = Math.max(0.2, Number(options.maxDurationSeconds) || VIDEO_SYNC_MAX_EXTRACT_SECONDS);
           const duration = clampNumber(
-            Math.min(requestedDuration, VIDEO_SYNC_MAX_EXTRACT_SECONDS),
+            Math.min(requestedDuration, maxExtractDuration),
             0.2,
             Math.max(0.2, rawDuration - trimStart),
-            Math.min(rawDuration, VIDEO_SYNC_MAX_EXTRACT_SECONDS)
+            Math.min(rawDuration, maxExtractDuration)
           );
           let captureStartTime = trimStart;
           let captureDuration = duration;
@@ -5398,6 +5405,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         const videoAudio = await extractVideoAudioForSync(file, label, {
           trimStart: trimWindow?.start || 0,
           trimDuration: trimWindow?.duration || 0,
+          maxDurationSeconds: trimWindow?.duration || VIDEO_SYNC_MAX_EXTRACT_SECONDS,
         });
         if (!videoAudio?.file) {
           throw new Error(
@@ -5421,6 +5429,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       const audioCompressed = await compressAudioForSync(file, label, {
         trimStart: trimWindow?.start || 0,
         trimDuration: trimWindow?.duration || 0,
+        maxDurationSeconds: trimWindow?.duration || VIDEO_SYNC_MAX_EXTRACT_SECONDS,
       });
       if (audioCompressed) {
         actualTrimStart = Number(audioCompressed.trimStart ?? actualTrimStart) || 0;
@@ -5584,7 +5593,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
 
   const buildSyncAudioCacheKey = (file, trimWindow = null) => {
     if (!file) return "";
-    const extractorVersion = "v2-playing-start";
+    const extractorVersion = "v3-full-preflight-window";
     const trimStart = Math.max(0, Number(trimWindow?.start || 0) || 0);
     const trimDuration = Math.max(0, Number(trimWindow?.duration || 0) || 0);
     const trimSuffix = trimDuration > 0.05
