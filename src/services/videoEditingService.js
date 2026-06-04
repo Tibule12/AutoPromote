@@ -892,8 +892,8 @@ class VideoEditingService {
     }
 
     const payload = {
-      sources: sources.map(s => ({
-        id: s.id,
+      sources: sources.map((s, index) => ({
+        id: s.id || `camera_${index + 1}`,
         label: s.label || "",
         url: s.url,
         offset_seconds: Number(s.offset_seconds || 0),

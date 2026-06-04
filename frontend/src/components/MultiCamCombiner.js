@@ -7313,6 +7313,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         try {
           const preflightBody = {
             sources: preflightSourcesPayload.map(source => ({
+              id: source.id,
+              label: source.label || "",
               url: source.url,
               offset_seconds: getPreflightProxyOffsetSeconds(source),
               sync_rate: source.sync_rate,
