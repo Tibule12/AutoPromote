@@ -875,7 +875,13 @@ class VideoEditingService {
       throw new Error("Transcription failed");
     }
   }
-  async preflightMulticamSync({ sources, external_audio_url, external_audio_offset_seconds = 0 }) {
+  async preflightMulticamSync({
+    sources,
+    external_audio_url,
+    external_audio_offset_seconds = 0,
+    timeline_start = 0,
+    overlap_duration = 0,
+  }) {
     console.log("[VideoEditing] Running multicam preflight sync", {
       sourceCount: sources.length,
       hasExternalAudio: !!external_audio_url,
@@ -902,6 +908,12 @@ class VideoEditingService {
       })),
       external_audio_url,
       external_audio_offset_seconds: Number(external_audio_offset_seconds || 0),
+      timeline_start: Number(timeline_start || 0),
+      timelineStart: Number(timeline_start || 0),
+      overlap_start: Number(timeline_start || 0),
+      overlapStart: Number(timeline_start || 0),
+      overlap_duration: Number(overlap_duration || 0),
+      overlapDuration: Number(overlap_duration || 0),
     };
 
     let response;

@@ -7322,6 +7322,12 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
             })),
             external_audio_url: preflightExternalAudioPayload.url,
             external_audio_offset_seconds: preflightExternalAudioPayload.offset_seconds,
+            timelineStart: renderTimelineStart,
+            timeline_start: renderTimelineStart,
+            overlapStart: renderTimelineStart,
+            overlap_start: renderTimelineStart,
+            overlapDuration: renderWindowDuration,
+            overlap_duration: renderWindowDuration,
           };
           const preflightToken = await user.getIdToken(true);
           const preflightRes = await fetch(`${API_BASE_URL}/api/media/multicam/preflight-sync`, {

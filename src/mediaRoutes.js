@@ -506,6 +506,20 @@ router.post("/multicam/preflight-sync", async (req, res) => {
       sources,
       external_audio_url: externalAudioUrl,
       external_audio_offset_seconds: externalAudioOffsetSeconds,
+      timeline_start: Number(
+        req.body?.timeline_start ??
+          req.body?.timelineStart ??
+          req.body?.overlap_start ??
+          req.body?.overlapStart ??
+          0
+      ) || 0,
+      overlap_duration: Number(
+        req.body?.overlap_duration ??
+          req.body?.overlapDuration ??
+          req.body?.timeline_duration ??
+          req.body?.timelineDuration ??
+          0
+      ) || 0,
     });
     res.json(result);
   } catch (error) {

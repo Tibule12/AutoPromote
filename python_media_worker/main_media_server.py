@@ -13080,6 +13080,15 @@ async def render_multicam_layout_segment(
 MULTICAM_SYNC_SAMPLE_RATE = max(4000, int(os.getenv("MULTICAM_SYNC_SAMPLE_RATE", "16000")))
 MULTICAM_SYNC_ANALYSIS_SECONDS = max(60, int(os.getenv("MULTICAM_SYNC_ANALYSIS_SECONDS", "900")))
 MULTICAM_SYNC_MAX_SHIFT_SECONDS = max(5, int(os.getenv("MULTICAM_SYNC_MAX_SHIFT_SECONDS", "45")))
+MULTICAM_PREFLIGHT_BOOTSTRAP_MAX_SHIFT_SECONDS = max(
+    30.0,
+    float(os.getenv("MULTICAM_PREFLIGHT_BOOTSTRAP_MAX_SHIFT_SECONDS", "900") or 900),
+)
+MULTICAM_PREFLIGHT_BOOTSTRAP_MIN_CORRELATION = clamp_float(
+    float(os.getenv("MULTICAM_PREFLIGHT_BOOTSTRAP_MIN_CORRELATION", "0.25") or 0.25),
+    0.05,
+    0.95,
+)
 MULTICAM_SYNC_CLAP_WINDOW_SECONDS = max(5, int(os.getenv("MULTICAM_SYNC_CLAP_WINDOW_SECONDS", "18")))
 MULTICAM_SYNC_CHUNK_SECONDS = max(30, int(os.getenv("MULTICAM_SYNC_CHUNK_SECONDS", "120")))
 
@@ -14519,6 +14528,34 @@ async def multicam_preflight_sync(request: RenderMultiCamRequest):
             job_id,
             source_sync_rates,
             external_audio_offset_seconds=external_audio_offset_seconds,
+            timeline_start_seconds=(
+                request.timeline_start
+                if request.timeline_start is not None
+                else (request.timelineStart if request.timelineStart is not None else request.overlap_start)
+            ),
+            timeline_duration_seconds=(
+                request.overlap_duration
+                if request.overlap_duration
+                else (request.overlapDuration if request.overlapDuration else None)
+            ),
+        )
+        logger.info(
+            "PREFLIGHT_SYNC_RESULT job=%s status=%s cameras=%s",
+            job_id,
+            result.get("status"),
+            json.dumps(
+                {
+                    key: {
+                        "confidence": value.get("confidence"),
+                        "avg_correlation": value.get("avg_correlation"),
+                        "max_residual_offset_seconds": value.get("max_residual_offset_seconds"),
+                        "suggested_offset_seconds": value.get("suggested_offset_seconds"),
+                        "bootstrap_sync": value.get("bootstrap_sync"),
+                    }
+                    for key, value in (result.get("cameras") or {}).items()
+                },
+                default=str,
+            ),
         )
         return result
     finally:
@@ -14631,6 +14668,83 @@ def estimate_sync_fit(window_results, current_offset, current_sync_rate):
     }
 
 
+def estimate_broad_proxy_sync_offset(
+    source_path,
+    external_audio_path,
+    current_offset,
+    sync_rate,
+    external_audio_offset_seconds=0.0,
+    max_shift_seconds=None,
+):
+    """
+    Bootstrap a camera-to-clean-audio offset from the full audio proxy.
+
+    The strict preflight windows need a reasonable starting offset. For the
+    common podcast case, cameras may start well before Audacity/Behringer clean
+    audio, so a 0s seed can be minutes wrong. This broad pass finds the proxy
+    time delta first, then the strict start/middle/end pass proves it.
+    """
+    try:
+        camera_envelope, bins_per_second = build_sync_envelope(source_path, bins_per_second=20)
+        clean_envelope, clean_bins = build_sync_envelope(external_audio_path, bins_per_second=20)
+    except Exception as exc:
+        return {"status": "error", "detail": str(exc), "confidence": 0.0}
+
+    if (
+        camera_envelope.size < bins_per_second * 10
+        or clean_envelope.size < clean_bins * 10
+        or bins_per_second <= 0
+    ):
+        return {"status": "too_short", "confidence": 0.0}
+
+    downsample = max(1, int(bins_per_second / 5))
+    camera = camera_envelope[::downsample].astype(np.float64)
+    clean = clean_envelope[::downsample].astype(np.float64)
+    bins = float(bins_per_second) / float(downsample)
+    min_len = min(camera.size, clean.size)
+    if min_len < bins * 10:
+        return {"status": "too_short", "confidence": 0.0}
+
+    camera = camera[:min_len] - np.mean(camera[:min_len])
+    clean = clean[:min_len] - np.mean(clean[:min_len])
+    norm = float(np.linalg.norm(camera) * np.linalg.norm(clean))
+    if norm < 1e-9:
+        return {"status": "silent_audio", "confidence": 0.0}
+
+    max_shift = float(max_shift_seconds or MULTICAM_PREFLIGHT_BOOTSTRAP_MAX_SHIFT_SECONDS)
+    max_shift_bins = min(int(max_shift * bins), max(camera.size, clean.size) - 1)
+    if max_shift_bins <= 0:
+        return {"status": "too_short", "confidence": 0.0}
+
+    correlation = np.correlate(camera, clean, mode="full")
+    mid = correlation.size // 2
+    search = min(max_shift_bins, mid - 1)
+    if search <= 0:
+        return {"status": "too_short", "confidence": 0.0}
+
+    region = correlation[mid - search : mid + search + 1]
+    best_idx = int(np.argmax(region))
+    best_score = float(region[best_idx])
+    camera_minus_external_seconds = (best_idx - search) / bins
+    confidence = clamp_float((best_score / norm + 1.0) / 2.0, 0.0, 1.0)
+    safe_sync_rate = max(0.001, float(sync_rate or 1.0))
+    suggested_offset = float(external_audio_offset_seconds or 0.0) - (
+        float(camera_minus_external_seconds) / safe_sync_rate
+    )
+
+    return {
+        "status": "usable" if confidence >= MULTICAM_PREFLIGHT_BOOTSTRAP_MIN_CORRELATION else "low_confidence",
+        "camera_minus_external_seconds": round(float(camera_minus_external_seconds), 3),
+        "suggested_offset_seconds": round(float(suggested_offset), 6),
+        "current_offset_seconds": round(float(current_offset or 0.0), 6),
+        "offset_delta_seconds": round(float(suggested_offset) - float(current_offset or 0.0), 6),
+        "correlation": round(float(confidence), 4),
+        "confidence": round(float(confidence), 4),
+        "max_shift_seconds": round(float(max_shift), 3),
+        "method": "broad_audio_proxy_envelope_correlation",
+    }
+
+
 async def preflight_multicam_sync(
     source_paths,
     source_offsets,
@@ -14638,6 +14752,8 @@ async def preflight_multicam_sync(
     job_id,
     source_sync_rates=None,
     external_audio_offset_seconds=0.0,
+    timeline_start_seconds=None,
+    timeline_duration_seconds=None,
 ):
     """
     Fast sync preflight: sample short audio windows at start/mid/end of each camera,
@@ -14650,25 +14766,72 @@ async def preflight_multicam_sync(
     results = {}
     source_sync_rates = source_sync_rates or [1.0] * len(source_paths)
     external_offset = float(external_audio_offset_seconds or 0.0)
-    for cam_idx, (path, offset) in enumerate(zip(source_paths, source_offsets)):
-        sync_rate = max(0.001, float(source_sync_rates[cam_idx] if cam_idx < len(source_sync_rates) else 1.0))
-        dur = get_media_duration(path)
-        if dur <= SAMPLE_SECONDS * 2:
-            results[f"cam_{cam_idx}"] = {"status": "skip", "reason": "source too short"}
-            continue
+    has_timeline_window = (
+        timeline_duration_seconds is not None
+        and float(timeline_duration_seconds or 0.0) > SAMPLE_SECONDS + 1.0
+    )
+    timeline_start = float(timeline_start_seconds or 0.0)
+    timeline_duration = float(timeline_duration_seconds or 0.0)
 
-        windows = {
-            "start": 5.0,
-            "middle": max(5.0, (dur - SAMPLE_SECONDS) / 2.0),
-            "end": max(5.0, dur - SAMPLE_SECONDS - 5.0),
+    def build_window_positions(source_duration, offset, sync_rate):
+        if has_timeline_window:
+            timeline_windows = {
+                "start": timeline_start + 5.0,
+                "middle": timeline_start + max(5.0, (timeline_duration - SAMPLE_SECONDS) / 2.0),
+                "end": timeline_start + max(5.0, timeline_duration - SAMPLE_SECONDS - 5.0),
+            }
+            return {
+                label: {
+                    "source_pos": (timeline_pos - float(offset)) * sync_rate,
+                    "timeline_pos": timeline_pos,
+                    "rendered_external_pos": timeline_pos - external_offset,
+                }
+                for label, timeline_pos in timeline_windows.items()
+            }
+
+        return {
+            "start": {
+                "source_pos": 5.0,
+                "timeline_pos": (5.0 / sync_rate) + float(offset),
+                "rendered_external_pos": ((5.0 / sync_rate) + float(offset)) - external_offset,
+            },
+            "middle": {
+                "source_pos": max(5.0, (source_duration - SAMPLE_SECONDS) / 2.0),
+                "timeline_pos": (max(5.0, (source_duration - SAMPLE_SECONDS) / 2.0) / sync_rate) + float(offset),
+                "rendered_external_pos": (
+                    (max(5.0, (source_duration - SAMPLE_SECONDS) / 2.0) / sync_rate) + float(offset)
+                ) - external_offset,
+            },
+            "end": {
+                "source_pos": max(5.0, source_duration - SAMPLE_SECONDS - 5.0),
+                "timeline_pos": (max(5.0, source_duration - SAMPLE_SECONDS - 5.0) / sync_rate) + float(offset),
+                "rendered_external_pos": (
+                    (max(5.0, source_duration - SAMPLE_SECONDS - 5.0) / sync_rate) + float(offset)
+                ) - external_offset,
+            },
         }
 
+    async def measure_source_windows(path, cam_idx, offset, sync_rate, mode_label):
+        dur = get_media_duration(path)
+        if dur <= SAMPLE_SECONDS * 2:
+            return {
+                "window_results": {},
+                "receipt": {"status": "skip", "reason": "source too short"},
+            }
+
         window_results = {}
-        for label, source_pos in windows.items():
-            timeline_pos = (float(source_pos) / sync_rate) + float(offset)
-            rendered_external_pos = timeline_pos - external_offset
+        windows = build_window_positions(dur, offset, sync_rate)
+        for label, positions in windows.items():
+            source_pos = float(positions["source_pos"])
+            timeline_pos = float(positions["timeline_pos"])
+            rendered_external_pos = float(positions["rendered_external_pos"])
             if source_pos < 0 or source_pos + SAMPLE_SECONDS > dur:
-                window_results[label] = {"status": "out_of_bounds"}
+                window_results[label] = {
+                    "status": "source_out_of_bounds",
+                    "camera_source_position_seconds": round(source_pos, 1),
+                    "timeline_position_seconds": round(timeline_pos, 1),
+                    "mode": mode_label,
+                }
                 continue
             if rendered_external_pos < 0 or rendered_external_pos + SAMPLE_SECONDS > external_duration:
                 window_results[label] = {
@@ -14680,10 +14843,12 @@ async def preflight_multicam_sync(
                 }
                 continue
 
+            src_clip = None
+            ref_clip = None
             try:
                 # Extract source audio clip — skip if source has no audio track
                 src_clip = os.path.join(
-                    os.path.dirname(path), f"{job_id}_preflight_src_{cam_idx}_{label}.wav"
+                    os.path.dirname(path), f"{job_id}_preflight_src_{cam_idx}_{mode_label}_{label}.wav"
                 )
                 try:
                     await run_subprocess_async(
@@ -14698,7 +14863,7 @@ async def preflight_multicam_sync(
 
                 # Extract clean audio clip at same timeline position
                 ref_clip = os.path.join(
-                    os.path.dirname(path), f"{job_id}_preflight_ref_{cam_idx}_{label}.wav"
+                    os.path.dirname(path), f"{job_id}_preflight_ref_{cam_idx}_{mode_label}_{label}.wav"
                 )
                 await run_subprocess_async(
                     ["ffmpeg", "-nostdin", "-ss", str(rendered_external_pos), "-t", str(SAMPLE_SECONDS),
@@ -14721,6 +14886,7 @@ async def preflight_multicam_sync(
                     "timeline_position_seconds": round(timeline_pos, 1),
                     "rendered_external_audio_position_seconds": round(rendered_external_pos, 1),
                     "external_audio_offset_seconds": round(external_offset, 3),
+                    "mode": mode_label,
                 }
             except Exception as e:
                 window_results[label] = {"status": "error", "detail": str(e)}
@@ -14733,6 +14899,9 @@ async def preflight_multicam_sync(
                         except OSError:
                             pass
 
+        return {"window_results": window_results, "receipt": summarize_preflight_windows(window_results, offset, sync_rate)}
+
+    def summarize_preflight_windows(window_results, offset, sync_rate):
         # Detect drift: compare start vs end offset estimates
         offsets = [
             w.get("estimated_offset_seconds", 0)
@@ -14758,7 +14927,7 @@ async def preflight_multicam_sync(
                 "questionable" if avg_corr > 0.25 and drift < 1.0 and max_residual_offset < 0.5 else "unsafe"
             )
 
-        results[f"cam_{cam_idx}"] = {
+        return {
             "windows": {k: v for k, v in window_results.items() if "status" not in v},
             "errors": {k: v for k, v in window_results.items() if "status" in v},
             "drift_seconds": round(drift, 3),
@@ -14771,6 +14940,41 @@ async def preflight_multicam_sync(
             "suggested_offset_seconds": sync_fit.get("suggested_offset_seconds"),
             "suggested_sync_rate": sync_fit.get("suggested_sync_rate"),
             "sync_fit": sync_fit,
+            "timeline_window": {
+                "active": bool(has_timeline_window),
+                "timeline_start_seconds": round(timeline_start, 3),
+                "timeline_duration_seconds": round(timeline_duration, 3),
+            },
+        }
+
+    for cam_idx, (path, offset) in enumerate(zip(source_paths, source_offsets)):
+        sync_rate = max(0.001, float(source_sync_rates[cam_idx] if cam_idx < len(source_sync_rates) else 1.0))
+        current_measurement = await measure_source_windows(path, cam_idx, offset, sync_rate, "current")
+        receipt = current_measurement["receipt"]
+        bootstrap = None
+
+        if receipt.get("confidence") == "unsafe":
+            bootstrap = estimate_broad_proxy_sync_offset(
+                path,
+                external_audio_path,
+                offset,
+                sync_rate,
+                external_audio_offset_seconds=external_offset,
+            )
+            if bootstrap.get("status") == "usable":
+                boot_offset = float(bootstrap.get("suggested_offset_seconds") or offset)
+                boot_measurement = await measure_source_windows(path, cam_idx, boot_offset, sync_rate, "bootstrap")
+                boot_receipt = boot_measurement["receipt"]
+                if boot_receipt.get("confidence") != "unsafe":
+                    receipt = boot_receipt
+                else:
+                    receipt["bootstrap_attempt"] = boot_receipt
+
+        if bootstrap:
+            receipt["bootstrap_sync"] = bootstrap
+        receipt["initial_preflight"] = current_measurement["receipt"] if receipt is not current_measurement["receipt"] else None
+        results[f"cam_{cam_idx}"] = {
+            k: v for k, v in receipt.items() if v is not None
         }
 
     # Overall verdict
