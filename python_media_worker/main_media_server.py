@@ -14996,10 +14996,12 @@ async def preflight_multicam_sync(
                 fit_offset, fit_sync_rate = fit_correction
                 fit_measurement = await measure_source_windows(path, cam_idx, fit_offset, fit_sync_rate, "fit")
                 fit_receipt = fit_measurement["receipt"]
-                receipt["fit_correction_attempt"] = fit_receipt
+                previous_receipt = dict(receipt)
                 if fit_receipt.get("confidence") == "good":
-                    fit_receipt["corrected_from"] = receipt
+                    fit_receipt["corrected_from"] = previous_receipt
                     receipt = fit_receipt
+                else:
+                    receipt["fit_correction_attempt"] = fit_receipt
 
         if bootstrap:
             receipt["bootstrap_sync"] = bootstrap
