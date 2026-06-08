@@ -22,6 +22,10 @@ from pathlib import Path
 
 
 os.environ.setdefault("MULTICAM_UPLOAD_FIREBASE", "false")
+# Local proof renders should fail like production when the clean-audio
+# director cannot prove speaker/channel ownership. Otherwise we generate
+# misleading videos where fallback guesses look like product behavior.
+os.environ.setdefault("MULTICAM_ALLOW_UNPROVEN_DIRECTOR_AUDIO", "false")
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
@@ -150,16 +154,38 @@ def parse_args():
     )
     parser.add_argument("--dry-run", action="store_true", help="Print plan only; do not render")
     parser.add_argument(
+        "--director-plan-only",
+        action="store_true",
+        help="Run the production auto-director and layout contract, then return the segment receipt before rendering.",
+    )
+    parser.add_argument(
         "--auto-switch",
         action="store_true",
         help="Let the production backend choose camera cuts from per-camera audio/visual scores instead of using a fixed test plan.",
     )
-    parser.add_argument("--auto-switch-interval", type=float, default=5.0, help="Backend auto-switch scoring interval seconds")
+    parser.add_argument("--auto-switch-interval", type=float, default=2.0, help="Backend auto-switch scoring interval seconds")
     parser.add_argument(
         "--auto-switch-aggressiveness",
         default="balanced",
         choices=["steady", "balanced", "dynamic"],
         help="Backend auto-switch aggressiveness for --auto-switch tests",
+    )
+    parser.add_argument(
+        "--director-channel-camera-map",
+        default="",
+        help="Comma-separated camera ids for external clean-audio channels, for example cam2,cam1.",
+    )
+    parser.add_argument(
+        "--camera1-reaction-side",
+        default="auto",
+        choices=["auto", "left", "right"],
+        help="Force the reaction PiP side when camera 1 is primary.",
+    )
+    parser.add_argument(
+        "--camera2-reaction-side",
+        default="auto",
+        choices=["auto", "left", "right"],
+        help="Force the reaction PiP side when camera 2 is primary.",
     )
     parser.add_argument(
         "--skip-audio",
@@ -182,10 +208,17 @@ def parse_args():
     parser.add_argument(
         "--use-cfr-cache",
         action="store_true",
+        default=True,
         help=(
-            "Force local camera sources through the production CFR mezzanine cache instead of "
-            "directly reading the original local MP4/MOV. First run is slower; repeat renders are faster."
+            "Use the production CFR/downscaled mezzanine cache for local camera sources. "
+            "Enabled by default so proof renders exercise the faster repeat-render path."
         ),
+    )
+    parser.add_argument(
+        "--direct-local-source",
+        dest="use_cfr_cache",
+        action="store_false",
+        help="Bypass the CFR cache and read original local MP4/MOV files directly.",
     )
     parser.add_argument(
         "--no-stable-input-cache",
@@ -214,6 +247,12 @@ def local_input_cache_path(source, label):
     cache_dir = TMP_ROOT / "local-multicam-input-cache"
     cache_dir.mkdir(parents=True, exist_ok=True)
     return cache_dir / f"{safe_name(label)}_{digest}{suffix}"
+
+
+def local_input_cache_key(path_text, label):
+    source = resolve_path(path_text)
+    fingerprint = f"{source}:{source.stat().st_size}:{source.stat().st_mtime_ns}"
+    return f"local:{safe_name(label)}:{hashlib.sha256(fingerprint.encode('utf-8')).hexdigest()[:24]}"
 
 
 def link_or_copy_local_input(source, destination):
@@ -756,16 +795,29 @@ def build_qa_report(results, args, output_dir, run_id, duration_probe):
 def build_segments(plan, window_start, window_duration, offsets, sync_rates):
     segments = []
     debug_rows = []
+    window_start = float(window_start)
+    window_duration = float(window_duration)
+    window_end = window_start + window_duration
+    max_plan_end = max([float(item.get("timeline_end") or 0.0) for item in plan] or [0.0])
+    plan_uses_absolute_timeline = window_start > 0.001 or max_plan_end > window_duration + 0.5
     for index, item in enumerate(plan):
-        relative_start = max(0.0, float(item["timeline_start"]))
-        relative_end = min(float(window_duration), float(item["timeline_end"]))
+        item_start = float(item["timeline_start"])
+        item_end = float(item["timeline_end"])
+        if plan_uses_absolute_timeline:
+            clipped_start = max(window_start, item_start)
+            clipped_end = min(window_end, item_end)
+            relative_start = clipped_start - window_start
+            relative_end = clipped_end - window_start
+        else:
+            relative_start = max(0.0, item_start)
+            relative_end = min(window_duration, item_end)
         if relative_end <= relative_start + 0.02:
             continue
 
         camera_id = normalize_camera_id(item["camera_id"])
         layout_mode = normalize_layout(item["layout_mode"])
-        timeline_absolute_start = float(window_start) + relative_start
-        timeline_absolute_end = float(window_start) + relative_end
+        timeline_absolute_start = window_start + relative_start
+        timeline_absolute_end = window_start + relative_end
         source_start = source_start_for(camera_id, timeline_absolute_start, offsets, sync_rates)
         source_end = source_start + ((relative_end - relative_start) * float(sync_rates[camera_id]))
         secondary_camera_id = "cam2" if camera_id == "cam1" else "cam1"
@@ -1014,7 +1066,9 @@ async def render_window(args, name, window_start, window_duration, paths, output
                 label="Camera 1",
                 offset_seconds=args.camera1_offset,
                 sync_rate=args.camera1_sync_rate,
+                reaction_side=None if args.camera1_reaction_side == "auto" else args.camera1_reaction_side,
                 rotation_degrees=args.camera1_rotate,
+                cache_key=local_input_cache_key(args.camera1, "camera1"),
             ),
             worker.MultiCamSource(
                 id="cam2",
@@ -1022,7 +1076,9 @@ async def render_window(args, name, window_start, window_duration, paths, output
                 label="Camera 2",
                 offset_seconds=args.camera2_offset,
                 sync_rate=args.camera2_sync_rate,
+                reaction_side=None if args.camera2_reaction_side == "auto" else args.camera2_reaction_side,
                 rotation_degrees=args.camera2_rotate,
+                cache_key=local_input_cache_key(args.camera2, "camera2"),
             ),
         ],
         segments=segments if not args.auto_switch else None,
@@ -1031,6 +1087,11 @@ async def render_window(args, name, window_start, window_duration, paths, output
         auto_switch_interval=args.auto_switch_interval,
         auto_switch_aggressiveness=args.auto_switch_aggressiveness,
         primary_audio_camera_id="cam1",
+        director_channel_camera_ids=[
+            item.strip()
+            for item in str(args.director_channel_camera_map or "").split(",")
+            if item.strip()
+        ] or None,
         external_audio_url=paths.get("audio") if paths.get("audio") and not args.skip_audio else None,
         external_audio_offset_seconds=args.external_audio_offset,
         external_audio_mix_mode="external_only",
@@ -1040,11 +1101,12 @@ async def render_window(args, name, window_start, window_duration, paths, output
         output_aspect_ratio=args.aspect,
         render_tier=args.render_tier,
         renderTier=args.render_tier,
-        pre_sync_clap_alignment=(not args.skip_presync_clap and (not args.qa_proof or args.qa_presync_clap)),
+        pre_sync_clap_alignment=(not args.skip_presync_clap and args.qa_presync_clap),
         brandWatermark=True,
         watermarkText="AutoPromote Cam Combiner",
         generateThumbnail=(not args.no_thumbnails),
         async_mode=False,
+        plan_only=bool(args.director_plan_only),
     )
 
     job_id = f"{safe_name(args.job_prefix)}-{safe_name(name)}-{int(time.time())}"
@@ -1075,6 +1137,20 @@ async def render_window(args, name, window_start, window_duration, paths, output
     if result.get("render_receipt"):
         print("RENDER RECEIPT:")
         print(json.dumps(result["render_receipt"], indent=2, default=str))
+    if result.get("plan_only"):
+        plan_path = output_dir / f"{run_id}_{name}_director_plan_result.json"
+        plan_path.write_text(json.dumps(result, indent=2, default=str), encoding="utf-8")
+        print(f"Director plan result: {plan_path}")
+        return {
+            "window": name,
+            "output": None,
+            "thumbnail": None,
+            "debug_plan": str(debug_path),
+            "has_audio": False,
+            "audio_streams": [],
+            "worker_result": result,
+            "director_plan_result": str(plan_path),
+        }
     source_output = Path(result["output_path"])
     if not source_output.exists():
         local_url = str(result.get("local_output_url") or "")

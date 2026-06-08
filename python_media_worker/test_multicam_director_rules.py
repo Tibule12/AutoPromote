@@ -1,0 +1,2173 @@
+import os
+import tempfile
+import types
+import unittest
+
+import python_media_worker.main_media_server as worker
+
+
+class MulticamDirectorRuleTests(unittest.TestCase):
+    def setUp(self):
+        self.prepared_sources = [
+            {"id": "cam1", "label": "Camera 1"},
+            {"id": "cam2", "label": "Camera 2"},
+        ]
+
+    def test_reaction_side_uses_explicit_source_hint_before_measured_focus(self):
+        self.assertEqual(
+            worker.multicam_reaction_side_for_primary(
+                {"id": "cam1", "label": "Camera 1", "focus_x": 0.24, "reaction_side": "right"}
+            ),
+            "right",
+        )
+        self.assertEqual(
+            worker.multicam_reaction_side_for_primary(
+                {"id": "cam2", "label": "Camera 2", "focus_x": 0.86, "reactionSide": "left"}
+            ),
+            "left",
+        )
+
+    def test_reaction_side_uses_measured_focus_not_camera_name(self):
+        self.assertEqual(
+            worker.multicam_reaction_side_for_primary(
+                {"id": "cam1", "label": "Camera 1", "focus_x": 0.82}
+            ),
+            "left",
+        )
+        self.assertEqual(
+            worker.multicam_reaction_side_for_primary(
+                {"id": "cam2", "label": "Camera 2", "focus_x": 0.18}
+            ),
+            "right",
+        )
+        self.assertEqual(
+            worker.multicam_source_focus_x({"id": "cam1", "label": "Camera 1"}),
+            0.5,
+        )
+
+    def test_hdr_normalization_preserves_pixels_by_default(self):
+        previous = os.environ.pop("MULTICAM_HDR_NORMALIZATION_MODE", None)
+        try:
+            self.assertEqual(
+                worker.build_multicam_base_color_filter(
+                    {
+                        "color_transfer": "arib-std-b67",
+                        "color_primaries": "bt2020",
+                        "color_space": "bt2020nc",
+                        "pix_fmt": "yuv420p10le",
+                    }
+                ),
+                "format=yuv420p",
+            )
+            self.assertEqual(
+                worker.multicam_hdr_normalization_method(),
+                "preserve_pixel_bt709_tagging",
+            )
+        finally:
+            if previous is not None:
+                os.environ["MULTICAM_HDR_NORMALIZATION_MODE"] = previous
+
+    def test_hdr_normalization_legacy_tonemap_is_opt_in(self):
+        previous = os.environ.get("MULTICAM_HDR_NORMALIZATION_MODE")
+        os.environ["MULTICAM_HDR_NORMALIZATION_MODE"] = "tonemap"
+        try:
+            color_filter = worker.build_multicam_base_color_filter(
+                {
+                    "color_transfer": "arib-std-b67",
+                    "color_primaries": "bt2020",
+                    "color_space": "bt2020nc",
+                    "pix_fmt": "yuv420p10le",
+                }
+            )
+            self.assertIn("tonemap=tonemap=hable", color_filter)
+            self.assertEqual(
+                worker.multicam_hdr_normalization_method(),
+                "zscale_linear_hable_tonemap",
+            )
+        finally:
+            if previous is None:
+                os.environ.pop("MULTICAM_HDR_NORMALIZATION_MODE", None)
+            else:
+                os.environ["MULTICAM_HDR_NORMALIZATION_MODE"] = previous
+
+    def test_layout_contract_blocks_active_speaker_in_reaction(self):
+        audit = worker.audit_multicam_layout_contract(
+            [
+                {
+                    "camera_id": "cam2",
+                    "secondary_camera_id": "cam1",
+                    "layout_mode": "pip",
+                    "timeline_start": 0.0,
+                    "timeline_end": 4.0,
+                    "audio_decision_reliable": True,
+                    "audio_leader_camera_id": "cam1",
+                }
+            ],
+            self.prepared_sources,
+            output_width=1920,
+            output_height=1080,
+        )
+
+        self.assertEqual(audit["status"], "failed")
+        self.assertIn(
+            "active_speaker_not_primary",
+            {issue["type"] for issue in audit["issues"]},
+        )
+        self.assertIn(
+            "active_speaker_in_reaction",
+            {issue["type"] for issue in audit["issues"]},
+        )
+
+    def test_layout_contract_passes_active_speaker_with_mandatory_reaction(self):
+        audit = worker.audit_multicam_layout_contract(
+            [
+                {
+                    "camera_id": "cam1",
+                    "secondary_camera_id": "cam2",
+                    "layout_mode": "pip",
+                    "timeline_start": 0.0,
+                    "timeline_end": 4.0,
+                    "audio_decision_reliable": True,
+                    "audio_leader_camera_id": "cam1",
+                }
+            ],
+            [
+                {"id": "cam1", "label": "Camera 1", "focus_x": 0.82},
+                {"id": "cam2", "label": "Camera 2", "focus_x": 0.2},
+            ],
+            output_width=1920,
+            output_height=1080,
+        )
+
+        self.assertEqual(audit["status"], "passed")
+        self.assertEqual(audit["pip_geometry_samples"][0]["reaction_side"], "left")
+
+    def test_layout_contract_blocks_unknown_reaction_placement(self):
+        audit = worker.audit_multicam_layout_contract(
+            [
+                {
+                    "camera_id": "cam1",
+                    "secondary_camera_id": "cam2",
+                    "layout_mode": "pip",
+                    "timeline_start": 0.0,
+                    "timeline_end": 4.0,
+                    "audio_decision_reliable": True,
+                    "audio_leader_camera_id": "cam1",
+                }
+            ],
+            [
+                {"id": "cam1", "label": "Camera 1"},
+                {"id": "cam2", "label": "Camera 2"},
+            ],
+            output_width=1920,
+            output_height=1080,
+        )
+
+        self.assertEqual(audit["status"], "failed")
+        self.assertIn(
+            "unknown_reaction_placement",
+            {issue["type"] for issue in audit["issues"]},
+        )
+
+    def test_layout_contract_respects_explicit_reaction_side_override(self):
+        audit = worker.audit_multicam_layout_contract(
+            [
+                {
+                    "camera_id": "cam1",
+                    "secondary_camera_id": "cam2",
+                    "layout_mode": "pip",
+                    "timeline_start": 0.0,
+                    "timeline_end": 4.0,
+                    "audio_decision_reliable": True,
+                    "audio_leader_camera_id": "cam1",
+                }
+            ],
+            [
+                {"id": "cam1", "label": "Camera 1", "focus_x": 0.82, "reaction_side": "right"},
+                {"id": "cam2", "label": "Camera 2", "focus_x": 0.2},
+            ],
+            output_width=1920,
+            output_height=1080,
+        )
+
+        self.assertEqual(audit["status"], "passed")
+        self.assertEqual(audit["pip_geometry_samples"][0]["reaction_side"], "right")
+
+    def test_director_truth_audit_blocks_raw_active_speaker_in_reaction(self):
+        audit = worker.audit_multicam_director_active_speaker_truth(
+            [
+                {
+                    "camera_id": "cam1",
+                    "secondary_camera_id": "cam2",
+                    "layout_mode": "pip",
+                    "layout_reason": "active_speaker_run_hold:strong_isolated_audio_owner",
+                    "timeline_start": 88.0,
+                    "timeline_end": 93.59,
+                    "audio_decision_reliable": True,
+                    "raw_audio_leader_camera_id": "cam2",
+                    "audio_leader_camera_id": "cam1",
+                    "audio_decision_reason": "strong_isolated_audio_owner",
+                    "audio_leader_activity": 0.9309,
+                    "audio_second_activity": 0.6032,
+                    "audio_leader_gap": 0.3277,
+                }
+            ],
+            self.prepared_sources,
+        )
+
+        self.assertEqual(audit["status"], "failed")
+        issue_types = {issue["type"] for issue in audit["issues"]}
+        self.assertIn("raw_active_speaker_not_primary", issue_types)
+        self.assertIn("raw_active_speaker_in_reaction", issue_types)
+
+    def test_director_truth_repair_reclaims_raw_active_speaker_from_reaction(self):
+        prepared_sources = [
+            {
+                "id": "cam1",
+                "label": "Camera 1",
+                "duration": 90.0,
+                "offset_seconds": 0.0,
+                "sync_rate": 1.0,
+            },
+            {
+                "id": "cam2",
+                "label": "Camera 2",
+                "duration": 90.0,
+                "offset_seconds": 0.0,
+                "sync_rate": 1.0,
+            },
+        ]
+        segments = [
+            {
+                "camera_id": "cam2",
+                "secondary_camera_id": "cam1",
+                "layout_mode": "pip",
+                "layout_reason": "active_speaker_with_reaction",
+                "timeline_start": 52.25,
+                "timeline_end": 60.0,
+                "source_start": 52.25,
+                "source_end": 60.0,
+                "audio_decision_reliable": True,
+                "raw_audio_leader_camera_id": "cam1",
+                "audio_leader_camera_id": "cam2",
+                "audio_decision_reason": "visual_speaker_owner",
+                "audio_leader_activity": 0.742,
+                "audio_second_activity": 0.725,
+                "audio_leader_gap": 0.017,
+            }
+        ]
+
+        repaired, receipt = worker.repair_multicam_director_truth_segments(
+            segments,
+            prepared_sources,
+            overlap_start=0.0,
+        )
+
+        self.assertTrue(receipt["applied"])
+        self.assertEqual(receipt["repair_count"], 1)
+        self.assertEqual(receipt["final_audit"]["status"], "passed")
+        self.assertEqual(repaired[0]["camera_id"], "cam1")
+        self.assertEqual(repaired[0]["secondary_camera_id"], "cam2")
+        self.assertEqual(repaired[0]["layout_mode"], "pip")
+        self.assertEqual(repaired[0]["audio_leader_camera_id"], "cam1")
+        self.assertEqual(repaired[0]["raw_audio_leader_camera_id"], "cam1")
+        self.assertTrue(repaired[0]["layout_reason"].startswith("director_truth_repaired_raw_active_speaker:"))
+
+    def test_director_truth_audit_allows_earned_shared_moment_with_raw_leader_visible(self):
+        audit = worker.audit_multicam_director_active_speaker_truth(
+            [
+                {
+                    "camera_id": "cam1",
+                    "secondary_camera_id": "cam2",
+                    "layout_mode": "split-vertical",
+                    "layout_reason": "earned_shared_reaction",
+                    "timeline_start": 102.0,
+                    "timeline_end": 106.0,
+                    "audio_decision_reliable": True,
+                    "raw_audio_leader_camera_id": "cam2",
+                    "audio_leader_camera_id": "cam2",
+                    "audio_decision_reason": "clean_audio_owner",
+                    "audio_leader_activity": 0.82,
+                    "audio_second_activity": 0.74,
+                    "audio_leader_gap": 0.08,
+                }
+            ],
+            self.prepared_sources,
+        )
+
+        self.assertEqual(audit["status"], "passed")
+        self.assertEqual(audit["checked_segments"], 1)
+
+    def test_director_latency_audit_blocks_seconds_late_active_speaker_join(self):
+        prepared_sources = [
+            {
+                "id": "cam1",
+                "label": "Camera 1",
+                "timeline_audio_activity_windows": [
+                    {"time": float(t), "activity": 0.76 if t < 88 else 0.18}
+                    for t in range(84, 94)
+                ],
+            },
+            {
+                "id": "cam2",
+                "label": "Camera 2",
+                "timeline_audio_activity_windows": [
+                    {"time": float(t), "activity": 0.08 if t < 88 else 0.94}
+                    for t in range(84, 94)
+                ],
+            },
+        ]
+        segments = [
+            {
+                "camera_id": "cam1",
+                "secondary_camera_id": "cam2",
+                "layout_mode": "pip",
+                "timeline_start": 84.0,
+                "timeline_end": 90.0,
+            },
+            {
+                "camera_id": "cam2",
+                "secondary_camera_id": "cam1",
+                "layout_mode": "pip",
+                "timeline_start": 90.0,
+                "timeline_end": 94.0,
+            },
+        ]
+
+        audit = worker.audit_multicam_director_switch_latency(
+            segments,
+            prepared_sources,
+        )
+
+        self.assertEqual(audit["status"], "failed")
+        [issue] = audit["issues"]
+        self.assertEqual(issue["type"], "late_active_speaker_switch")
+        self.assertEqual(issue["owner_camera_id"], "cam2")
+        self.assertEqual(issue["run_start"], 88.0)
+        self.assertGreater(issue["observed_latency_seconds"], issue["max_allowed_latency_seconds"])
+
+    def test_director_latency_audit_allows_immediate_or_shared_active_speaker_coverage(self):
+        prepared_sources = [
+            {
+                "id": "cam1",
+                "label": "Camera 1",
+                "duration": 120.0,
+                "offset_seconds": 0.0,
+                "sync_rate": 1.0,
+                "timeline_audio_activity_windows": [
+                    {"time": float(t), "activity": 0.76 if t < 88 else 0.18}
+                    for t in range(84, 94)
+                ],
+            },
+            {
+                "id": "cam2",
+                "label": "Camera 2",
+                "duration": 120.0,
+                "offset_seconds": 0.0,
+                "sync_rate": 1.0,
+                "timeline_audio_activity_windows": [
+                    {"time": float(t), "activity": 0.08 if t < 88 else 0.94}
+                    for t in range(84, 94)
+                ],
+            },
+        ]
+        segments = [
+            {
+                "camera_id": "cam1",
+                "secondary_camera_id": "cam2",
+                "layout_mode": "pip",
+                "timeline_start": 84.0,
+                "timeline_end": 88.0,
+            },
+            {
+                "camera_id": "cam1",
+                "secondary_camera_id": "cam2",
+                "layout_mode": "split-vertical",
+                "layout_reason": "shared_reaction_accent",
+                "timeline_start": 88.0,
+                "timeline_end": 90.0,
+            },
+            {
+                "camera_id": "cam2",
+                "secondary_camera_id": "cam1",
+                "layout_mode": "pip",
+                "timeline_start": 90.0,
+                "timeline_end": 94.0,
+            },
+        ]
+
+        audit = worker.audit_multicam_director_switch_latency(
+            segments,
+            prepared_sources,
+        )
+
+        self.assertEqual(audit["status"], "passed")
+        self.assertGreaterEqual(audit["checked_runs"], 1)
+
+    def test_late_active_speaker_repair_splits_segment_at_raw_onset(self):
+        prepared_sources = [
+            {
+                "id": "cam1",
+                "label": "Camera 1",
+                "duration": 120.0,
+                "offset_seconds": 0.0,
+                "sync_rate": 1.0,
+                "timeline_audio_activity_windows": [
+                    {"time": float(t), "activity": 0.76 if t < 88 else 0.18}
+                    for t in range(84, 94)
+                ],
+            },
+            {
+                "id": "cam2",
+                "label": "Camera 2",
+                "duration": 120.0,
+                "offset_seconds": 0.0,
+                "sync_rate": 1.0,
+                "timeline_audio_activity_windows": [
+                    {"time": float(t), "activity": 0.08 if t < 88 else 0.94}
+                    for t in range(84, 94)
+                ],
+            },
+        ]
+        segments = [
+            {
+                "camera_id": "cam1",
+                "secondary_camera_id": "cam2",
+                "layout_mode": "pip",
+                "layout_reason": "active_speaker_run_hold",
+                "timeline_start": 84.0,
+                "timeline_end": 90.0,
+                "source_start": 84.0,
+                "source_end": 90.0,
+            },
+            {
+                "camera_id": "cam2",
+                "secondary_camera_id": "cam1",
+                "layout_mode": "pip",
+                "layout_reason": "active_speaker_with_reaction",
+                "timeline_start": 90.0,
+                "timeline_end": 94.0,
+                "source_start": 90.0,
+                "source_end": 94.0,
+            },
+        ]
+
+        repaired, receipt = worker.repair_multicam_late_active_speaker_segments(
+            segments,
+            prepared_sources,
+            overlap_start=0.0,
+        )
+
+        self.assertTrue(receipt["applied"])
+        self.assertEqual(receipt["final_audit"]["status"], "passed")
+        repaired_slice = next(
+            item for item in repaired
+            if item["camera_id"] == "cam2"
+            and item["timeline_start"] <= 88.0
+            and item["timeline_end"] >= 89.0
+        )
+        self.assertEqual(repaired_slice["secondary_camera_id"], "cam1")
+        self.assertTrue(repaired_slice["layout_reason"].startswith("latency_repaired_active_speaker"))
+
+    def test_late_active_speaker_repair_holds_owner_for_full_dominant_run(self):
+        prepared_sources = [
+            {
+                "id": "cam1",
+                "label": "Camera 1",
+                "duration": 120.0,
+                "offset_seconds": 0.0,
+                "sync_rate": 1.0,
+                "timeline_audio_activity_windows": [
+                    {"time": 108.0, "activity": 0.7},
+                    {"time": 109.0, "activity": 0.1},
+                    {"time": 110.0, "activity": 0.1},
+                    {"time": 110.25, "activity": 0.1},
+                ],
+            },
+            {
+                "id": "cam2",
+                "label": "Camera 2",
+                "duration": 120.0,
+                "offset_seconds": 0.0,
+                "sync_rate": 1.0,
+                "timeline_audio_activity_windows": [
+                    {"time": 108.0, "activity": 0.1},
+                    {"time": 109.0, "activity": 1.0},
+                    {"time": 110.0, "activity": 1.0},
+                    {"time": 110.25, "activity": 1.0},
+                ],
+            },
+        ]
+        segments = [
+            {
+                "camera_id": "cam2",
+                "secondary_camera_id": "cam1",
+                "layout_mode": "pip",
+                "layout_reason": "strong_isolated_audio_owner",
+                "timeline_start": 108.0,
+                "timeline_end": 110.0,
+                "source_start": 108.0,
+                "source_end": 110.0,
+            },
+            {
+                "camera_id": "cam1",
+                "secondary_camera_id": "cam2",
+                "layout_mode": "pip",
+                "layout_reason": "active_speaker_run_hold",
+                "timeline_start": 110.0,
+                "timeline_end": 112.0,
+                "source_start": 110.0,
+                "source_end": 112.0,
+            },
+        ]
+
+        repaired, receipt = worker.repair_multicam_late_active_speaker_segments(
+            segments,
+            prepared_sources,
+            overlap_start=0.0,
+        )
+
+        self.assertTrue(receipt["applied"])
+        self.assertEqual(receipt["final_audit"]["status"], "passed")
+        repaired_slice = next(
+            item for item in repaired
+            if item["timeline_start"] <= 110.0
+            and item["timeline_end"] >= 110.25
+        )
+        self.assertEqual(repaired_slice["camera_id"], "cam2")
+        self.assertEqual(repaired_slice["secondary_camera_id"], "cam1")
+
+    def test_late_active_speaker_repair_resolves_overlaps_by_current_activity(self):
+        prepared_sources = [
+            {
+                "id": "cam1",
+                "label": "Camera 1",
+                "duration": 120.0,
+                "offset_seconds": 0.0,
+                "sync_rate": 1.0,
+                "timeline_audio_activity_windows": [
+                    {"time": 10.0, "activity": 0.8},
+                    {"time": 12.0, "activity": 0.1},
+                    {"time": 13.0, "activity": 0.8},
+                ],
+            },
+            {
+                "id": "cam2",
+                "label": "Camera 2",
+                "duration": 120.0,
+                "offset_seconds": 0.0,
+                "sync_rate": 1.0,
+                "timeline_audio_activity_windows": [
+                    {"time": 10.0, "activity": 0.1},
+                    {"time": 12.0, "activity": 1.0},
+                    {"time": 13.0, "activity": 0.1},
+                ],
+            },
+        ]
+        segments = [
+            {
+                "camera_id": "cam1",
+                "secondary_camera_id": "cam2",
+                "layout_mode": "pip",
+                "timeline_start": 10.0,
+                "timeline_end": 14.0,
+                "source_start": 10.0,
+                "source_end": 14.0,
+            }
+        ]
+        original_audit = worker.audit_multicam_director_switch_latency
+        call_count = {"value": 0}
+
+        def fake_audit(_segments, _prepared_sources):
+            call_count["value"] += 1
+            if call_count["value"] == 1:
+                return {
+                    "status": "failed",
+                    "issues": [
+                        {
+                            "type": "late_active_speaker_switch",
+                            "owner_camera_id": "cam1",
+                            "run_start": 10.0,
+                            "run_end": 14.0,
+                            "first_compliant_time": None,
+                            "activity": 0.8,
+                            "gap": 0.4,
+                        },
+                        {
+                            "type": "late_active_speaker_switch",
+                            "owner_camera_id": "cam2",
+                            "run_start": 12.0,
+                            "run_end": 13.0,
+                            "first_compliant_time": None,
+                            "activity": 1.0,
+                            "gap": 0.6,
+                        },
+                    ],
+                }
+            return {"status": "passed", "issues": []}
+
+        worker.audit_multicam_director_switch_latency = fake_audit
+        try:
+            repaired, receipt = worker.repair_multicam_late_active_speaker_segments(
+                segments,
+                prepared_sources,
+                overlap_start=0.0,
+            )
+        finally:
+            worker.audit_multicam_director_switch_latency = original_audit
+
+        self.assertTrue(receipt["applied"])
+        overlap_slice = next(
+            item for item in repaired
+            if item["timeline_start"] == 12.0 and item["timeline_end"] == 13.0
+        )
+        self.assertEqual(overlap_slice["camera_id"], "cam2")
+        self.assertEqual(overlap_slice["secondary_camera_id"], "cam1")
+
+    def test_layout_contract_repair_flips_reliable_audio_leader_to_hero(self):
+        prepared_sources = [
+            {
+                "id": "cam1",
+                "label": "Camera 1",
+                "duration": 60.0,
+                "offset_seconds": 0.0,
+                "sync_rate": 1.0,
+                "focus_x": 0.25,
+            },
+            {
+                "id": "cam2",
+                "label": "Camera 2",
+                "duration": 60.0,
+                "offset_seconds": 0.0,
+                "sync_rate": 1.0,
+                "focus_x": 0.75,
+            },
+        ]
+        segments = [
+            {
+                "camera_id": "cam1",
+                "secondary_camera_id": "cam2",
+                "layout_mode": "pip",
+                "layout_reason": "active_speaker_with_reaction:clean_audio_owner",
+                "timeline_start": 20.0,
+                "timeline_end": 26.0,
+                "source_start": 20.0,
+                "source_end": 26.0,
+                "audio_decision_reliable": True,
+                "audio_leader_camera_id": "cam2",
+                "audio_decision_reason": "clean_audio_owner",
+            }
+        ]
+
+        repaired, receipt = worker.repair_multicam_layout_contract_segments(
+            segments,
+            prepared_sources,
+            overlap_start=0.0,
+            output_width=1920,
+            output_height=1080,
+        )
+
+        self.assertTrue(receipt["applied"])
+        self.assertEqual(receipt["repair_count"], 1)
+        self.assertEqual(receipt["final_audit"]["status"], "passed")
+        self.assertEqual(repaired[0]["camera_id"], "cam2")
+        self.assertEqual(repaired[0]["secondary_camera_id"], "cam1")
+        self.assertEqual(repaired[0]["layout_mode"], "pip")
+        self.assertEqual(repaired[0]["audio_leader_camera_id"], "cam2")
+        self.assertTrue(repaired[0]["layout_reason"].startswith("layout_contract_repaired_active_speaker:"))
+
+    def test_post_layout_latency_repair_reclaims_raw_active_speaker(self):
+        prepared_sources = [
+            {
+                "id": "cam1",
+                "label": "Camera 1",
+                "duration": 30.0,
+                "offset_seconds": 0.0,
+                "sync_rate": 1.0,
+                "timeline_audio_activity_windows": [
+                    {"time": 10.0, "activity": 1.0},
+                    {"time": 10.25, "activity": 1.0},
+                    {"time": 11.0, "activity": 1.0},
+                    {"time": 11.75, "activity": 0.9},
+                    {"time": 12.5, "activity": 0.2},
+                ],
+            },
+            {
+                "id": "cam2",
+                "label": "Camera 2",
+                "duration": 30.0,
+                "offset_seconds": 0.0,
+                "sync_rate": 1.0,
+                "timeline_audio_activity_windows": [
+                    {"time": 10.0, "activity": 0.4},
+                    {"time": 10.25, "activity": 0.4},
+                    {"time": 11.0, "activity": 0.4},
+                    {"time": 11.75, "activity": 0.3},
+                    {"time": 12.5, "activity": 0.2},
+                ],
+            },
+        ]
+        segments = [
+            {
+                "camera_id": "cam1",
+                "secondary_camera_id": "cam2",
+                "layout_mode": "pip",
+                "layout_reason": "active_speaker_with_reaction",
+                "timeline_start": 10.0,
+                "timeline_end": 12.5,
+                "source_start": 10.0,
+                "source_end": 12.5,
+                "audio_decision_reliable": True,
+                "audio_leader_camera_id": "cam2",
+                "audio_decision_reason": "clean_audio_owner",
+            }
+        ]
+
+        initial_latency = worker.audit_multicam_director_switch_latency(
+            segments,
+            prepared_sources,
+        )
+        self.assertEqual(initial_latency["status"], "passed")
+
+        layout_repaired, layout_receipt = worker.repair_multicam_layout_contract_segments(
+            segments,
+            prepared_sources,
+            overlap_start=0.0,
+            output_width=1920,
+            output_height=1080,
+        )
+        self.assertTrue(layout_receipt["applied"])
+        self.assertEqual(layout_repaired[0]["camera_id"], "cam2")
+        self.assertEqual(
+            worker.audit_multicam_director_switch_latency(layout_repaired, prepared_sources)["status"],
+            "failed",
+        )
+
+        latency_repaired, latency_receipt = worker.repair_multicam_late_active_speaker_segments(
+            layout_repaired,
+            prepared_sources,
+            overlap_start=0.0,
+        )
+
+        self.assertTrue(latency_receipt["applied"])
+        self.assertEqual(latency_receipt["final_audit"]["status"], "passed")
+        self.assertEqual(latency_repaired[0]["camera_id"], "cam1")
+        self.assertEqual(latency_repaired[0]["secondary_camera_id"], "cam2")
+
+    def test_reclaims_proven_active_speaker_from_reaction_window(self):
+        segments = [
+            {
+                "camera_id": "cam2",
+                "layout_mode": "pip",
+                "layout_reason": "reaction_attached_to_cut:clean_audio_owner",
+                "secondary_camera_id": "cam1",
+                "audio_decision_reliable": True,
+                "audio_leader_camera_id": "cam1",
+                "audio_decision_reason": "clean_audio_owner",
+                "layout_confidence": 0.25,
+            }
+        ]
+
+        [segment] = worker.enforce_reaction_overlay_on_multicam_segments(
+            segments,
+            self.prepared_sources,
+        )
+
+        self.assertEqual(segment["camera_id"], "cam1")
+        self.assertEqual(segment["secondary_camera_id"], "cam2")
+        self.assertEqual(segment["layout_mode"], "pip")
+        self.assertTrue(segment["layout_reason"].startswith("active_speaker_primary_reclaimed:"))
+        self.assertGreaterEqual(segment["layout_confidence"], 0.5)
+
+    def test_uncertain_opening_backfills_to_first_reliable_audio_owner(self):
+        switches = [
+            {
+                "camera_id": "cam1",
+                "start_time": 0.0,
+                "layout_mode": "pip",
+                "layout_reason": "active_speaker_with_reaction:unproven_speaker_hold:low_audio_activity",
+                "secondary_camera_id": "cam2",
+                "layout_confidence": 0.25,
+                "audio_decision_reliable": False,
+                "audio_decision_reason": "low_audio_activity",
+            },
+            {
+                "camera_id": "cam2",
+                "start_time": 4.09,
+                "layout_mode": "pip",
+                "layout_reason": "active_speaker_with_reaction:strong_isolated_audio_owner",
+                "secondary_camera_id": "cam1",
+                "layout_confidence": 0.92,
+                "audio_decision_reliable": True,
+                "audio_leader_camera_id": "cam2",
+                "raw_audio_leader_camera_id": "cam2",
+                "audio_decision_reason": "strong_isolated_audio_owner",
+                "audio_leader_activity": 0.78,
+                "audio_second_activity": 0.42,
+                "audio_leader_gap": 0.36,
+            },
+        ]
+
+        [switch] = worker.backfill_uncertain_opening_to_first_reliable_owner(
+            switches,
+            ["cam1", "cam2"],
+            max_backfill_seconds=8.0,
+        )
+
+        self.assertEqual(switch["start_time"], 0.0)
+        self.assertEqual(switch["camera_id"], "cam2")
+        self.assertEqual(switch["secondary_camera_id"], "cam1")
+        self.assertEqual(switch["layout_mode"], "pip")
+        self.assertTrue(switch["audio_decision_reliable"])
+        self.assertTrue(switch["layout_reason"].startswith("active_speaker_with_reaction:opening_backfilled"))
+
+    def test_strong_isolated_mic_handoff_is_not_blocked_by_run_hold_gate(self):
+        def source(camera_id, before_activity, after_activity, visual_after):
+            timeline_windows = [
+                {"time": float(t), "activity": before_activity if t < 88 else after_activity}
+                for t in range(0, 98, 2)
+            ]
+            window_scores = []
+            for t in range(0, 98, 2):
+                after = t >= 88
+                window_scores.append(
+                    {
+                        "face_score": 0.35,
+                        "motion_score": 0.35,
+                        "visual_speaking_score": visual_after if after else (0.72 if camera_id == "cam1" else 0.12),
+                        "visual_speaking_confidence": 0.65,
+                        "placeholder_penalty": 0.0,
+                    }
+                )
+            return {
+                "id": camera_id,
+                "label": camera_id,
+                "duration": 100.0,
+                "offset_seconds": 0.0,
+                "sync_rate": 1.0,
+                "has_audio": True,
+                "silence_intervals": [],
+                "window_scores": window_scores,
+                "timeline_audio_activity_windows": timeline_windows,
+                "audio_activity_source": "external_isolated_channel",
+            }
+
+        request = types.SimpleNamespace(
+            auto_switch=True,
+            audio_based_auto_switch=True,
+            auto_switch_aggressiveness="balanced",
+            auto_switch_interval=2.0,
+            primary_audio_camera_id="cam1",
+            overlap_start=0.0,
+            switches=[],
+        )
+        switches = worker.normalize_multicam_switches(
+            request,
+            [
+                source("cam1", before_activity=0.76, after_activity=0.6032, visual_after=1.0),
+                source("cam2", before_activity=0.08, after_activity=0.9309, visual_after=0.8498),
+            ],
+            96.0,
+        )
+
+        handoffs = [
+            item for item in switches
+            if item["camera_id"] == "cam2" and float(item["start_time"]) >= 80.0
+        ]
+        self.assertTrue(handoffs)
+        self.assertLessEqual(handoffs[0]["start_time"], 88.1)
+        self.assertIn(
+            handoffs[0]["audio_decision_reason"],
+            {"strong_isolated_audio_owner", "sustained_isolated_handoff"},
+        )
+
+    def test_cut_reclaim_keeps_active_speaker_primary_with_mandatory_reaction(self):
+        segments = [
+            {
+                "camera_id": "cam2",
+                "layout_mode": "cut",
+                "layout_reason": "clean_audio_owner",
+                "secondary_camera_id": None,
+                "audio_decision_reliable": True,
+                "audio_leader_camera_id": "cam1",
+                "audio_decision_reason": "clean_audio_owner",
+                "ranked_sources": [
+                    {"camera_id": "cam1", "score": 0.91},
+                    {"camera_id": "cam2", "score": 0.2},
+                ],
+            }
+        ]
+
+        [segment] = worker.enforce_reaction_overlay_on_multicam_segments(
+            segments,
+            self.prepared_sources,
+        )
+
+        self.assertEqual(segment["camera_id"], "cam1")
+        self.assertEqual(segment["secondary_camera_id"], "cam2")
+        self.assertEqual(segment["layout_mode"], "pip")
+        self.assertTrue(segment["layout_reason"].startswith("active_speaker_with_reaction:"))
+
+    def test_keeps_valid_active_speaker_hero_reaction_layout(self):
+        segments = [
+            {
+                "camera_id": "cam1",
+                "layout_mode": "pip",
+                "layout_reason": "earned_reaction_accent",
+                "secondary_camera_id": "cam2",
+                "audio_decision_reliable": True,
+                "audio_leader_camera_id": "cam1",
+                "audio_decision_reason": "clean_audio_owner",
+                "layout_confidence": 0.62,
+            }
+        ]
+
+        [segment] = worker.enforce_reaction_overlay_on_multicam_segments(
+            segments,
+            self.prepared_sources,
+        )
+
+        self.assertEqual(segment["camera_id"], "cam1")
+        self.assertEqual(segment["secondary_camera_id"], "cam2")
+        self.assertEqual(segment["layout_reason"], "earned_reaction_accent")
+
+    def test_plain_speaker_cut_gets_mandatory_reaction_pip(self):
+        segments = [
+            {
+                "camera_id": "cam1",
+                "layout_mode": "cut",
+                "layout_reason": "speaker_owned_cut",
+                "secondary_camera_id": None,
+                "audio_decision_reliable": True,
+                "audio_leader_camera_id": "cam1",
+                "audio_decision_reason": "strong_isolated_audio_owner",
+                "ranked_sources": [
+                    {"camera_id": "cam1", "score": 0.91},
+                    {"camera_id": "cam2", "score": 0.2},
+                ],
+            }
+        ]
+
+        [segment] = worker.enforce_reaction_overlay_on_multicam_segments(
+            segments,
+            self.prepared_sources,
+        )
+
+        self.assertEqual(segment["camera_id"], "cam1")
+        self.assertEqual(segment["layout_mode"], "pip")
+        self.assertEqual(segment["secondary_camera_id"], "cam2")
+        self.assertEqual(segment["layout_reason"], "active_speaker_with_reaction:speaker_owned_cut")
+
+    def test_explicit_reaction_cut_can_attach_secondary_without_stealing_primary(self):
+        segments = [
+            {
+                "camera_id": "cam1",
+                "layout_mode": "cut",
+                "layout_reason": "earned_reaction_accent",
+                "secondary_camera_id": None,
+                "audio_decision_reliable": True,
+                "audio_leader_camera_id": "cam1",
+                "audio_decision_reason": "strong_isolated_audio_owner",
+                "ranked_sources": [
+                    {"camera_id": "cam1", "score": 0.91},
+                    {"camera_id": "cam2", "score": 0.42},
+                ],
+            }
+        ]
+
+        [segment] = worker.enforce_reaction_overlay_on_multicam_segments(
+            segments,
+            self.prepared_sources,
+        )
+
+        self.assertEqual(segment["camera_id"], "cam1")
+        self.assertEqual(segment["layout_mode"], "pip")
+        self.assertEqual(segment["secondary_camera_id"], "cam2")
+        self.assertEqual(segment["layout_reason"], "earned_reaction_accent")
+
+    def test_strong_isolated_audio_overrides_editorial_hold(self):
+        switches = [
+            {
+                "camera_id": "cam1",
+                "start_time": 0.0,
+                "layout_mode": "cut",
+                "layout_reason": "speaker_owned_cut",
+                "secondary_camera_id": None,
+                "audio_decision_reliable": True,
+                "audio_leader_camera_id": "cam2",
+                "audio_decision_reason": "strong_isolated_audio_owner",
+                "editorial_switch_allowed": False,
+                "editorial_decision_reason": "opening_anchor_hold:unearned_primary_change",
+            }
+        ]
+
+        [switch] = worker.reconcile_multicam_speaker_owner_switches(
+            switches,
+            ["cam1", "cam2"],
+        )
+
+        self.assertEqual(switch["camera_id"], "cam2")
+        self.assertEqual(switch["secondary_camera_id"], "cam1")
+        self.assertTrue(switch["layout_reason"].startswith("speaker_owner_reconciled:"))
+
+    def test_earned_active_speaker_handoff_overrides_opening_anchor(self):
+        switches = [
+            {
+                "camera_id": "cam1",
+                "start_time": 0.0,
+                "layout_mode": "cut",
+                "layout_reason": "speaker_owned_cut",
+                "secondary_camera_id": None,
+                "audio_decision_reliable": True,
+                "audio_leader_camera_id": "cam2",
+                "audio_decision_reason": "clean_audio_owner",
+                "editorial_switch_allowed": False,
+                "editorial_decision_reason": "opening_anchor_hold:earned_active_speaker_handoff",
+            }
+        ]
+
+        [switch] = worker.reconcile_multicam_speaker_owner_switches(
+            switches,
+            ["cam1", "cam2"],
+        )
+
+        self.assertEqual(switch["camera_id"], "cam2")
+        self.assertEqual(switch["secondary_camera_id"], "cam1")
+        self.assertTrue(switch["layout_reason"].startswith("speaker_owner_reconciled:"))
+
+    def test_strong_isolated_audio_reclaim_keeps_reaction_with_active_speaker(self):
+        segments = [
+            {
+                "camera_id": "cam1",
+                "layout_mode": "cut",
+                "layout_reason": "speaker_owned_cut",
+                "secondary_camera_id": None,
+                "audio_decision_reliable": True,
+                "audio_leader_camera_id": "cam2",
+                "audio_decision_reason": "strong_isolated_audio_owner",
+                "editorial_switch_allowed": False,
+                "editorial_decision_reason": "opening_anchor_hold:unearned_primary_change",
+            }
+        ]
+
+        [segment] = worker.enforce_reaction_overlay_on_multicam_segments(
+            segments,
+            self.prepared_sources,
+        )
+
+        self.assertEqual(segment["camera_id"], "cam2")
+        self.assertEqual(segment["secondary_camera_id"], "cam1")
+        self.assertEqual(segment["layout_mode"], "pip")
+        self.assertTrue(segment["layout_reason"].startswith("active_speaker_with_reaction:"))
+
+    def test_weak_clean_audio_spike_is_not_earned_handoff(self):
+        self.assertFalse(
+            worker.is_multicam_active_speaker_handoff_earned(
+                "clean_audio_owner",
+                leader_activity=0.2,
+                leader_gap=0.03,
+                candidate_duration_seconds=4.0,
+            )
+        )
+        self.assertFalse(
+            worker.is_multicam_active_speaker_handoff_earned(
+                "visual_speaker_owner",
+                leader_activity=1.0,
+                leader_gap=0.0023,
+                candidate_duration_seconds=10.0,
+            )
+        )
+
+    def test_strong_isolated_audio_owner_is_earned_handoff(self):
+        self.assertTrue(
+            worker.is_multicam_active_speaker_handoff_earned(
+                "strong_isolated_audio_owner",
+                leader_activity=0.5903,
+                leader_gap=0.5704,
+                candidate_duration_seconds=0.0,
+            )
+        )
+        self.assertTrue(
+            worker.is_multicam_active_speaker_handoff_earned(
+                "strong_isolated_audio_owner",
+                leader_activity=1.0,
+                leader_gap=0.774,
+                candidate_duration_seconds=22.0,
+                visual_agrees=False,
+                visual_leader_score=0.6082,
+                visual_leader_gap=0.1636,
+                current_active_visual_score=0.6374,
+            )
+        )
+        self.assertTrue(
+            worker.is_multicam_active_speaker_handoff_earned(
+                "strong_isolated_audio_owner",
+                leader_activity=0.9422,
+                leader_gap=0.8289,
+                candidate_duration_seconds=52.0,
+                visual_agrees=True,
+                visual_leader_score=0.8083,
+                visual_leader_gap=0.1092,
+                current_active_visual_score=0.6991,
+            )
+        )
+        self.assertTrue(
+            worker.is_multicam_active_speaker_handoff_earned(
+                "strong_isolated_audio_owner",
+                leader_activity=1.0,
+                leader_gap=0.7271,
+                candidate_duration_seconds=50.0,
+                visual_agrees=True,
+                visual_leader_score=0.85,
+                visual_leader_gap=0.2126,
+                current_active_visual_score=0.6374,
+            )
+        )
+        self.assertTrue(
+            worker.is_multicam_active_speaker_handoff_earned(
+                "strong_isolated_audio_owner",
+                leader_activity=1.0,
+                leader_gap=1.0,
+                candidate_duration_seconds=0.0,
+                current_active_visual_score=0.0,
+            )
+        )
+
+    def test_sustained_reaction_evidence_becomes_active_speaker_handoff(self):
+        self.assertTrue(
+            worker.is_multicam_active_speaker_handoff_earned(
+                "strong_isolated_audio_owner",
+                leader_activity=1.0,
+                leader_gap=0.7271,
+                candidate_duration_seconds=50.0,
+                visual_agrees=True,
+                visual_leader_score=0.85,
+                visual_leader_gap=0.2126,
+                current_active_visual_score=0.6374,
+            )
+        )
+        self.assertFalse(
+            worker.is_multicam_reaction_hero_accent_earned(
+                "strong_isolated_audio_owner",
+                leader_activity=1.0,
+                leader_gap=0.7271,
+                candidate_duration_seconds=50.0,
+                visual_agrees=True,
+                visual_leader_score=0.85,
+                visual_leader_gap=0.2126,
+                current_active_visual_score=0.6374,
+            )
+        )
+
+    def test_fresh_isolated_speaker_spike_is_handoff_not_reaction_hero(self):
+        self.assertTrue(
+            worker.is_multicam_active_speaker_handoff_earned(
+                "strong_isolated_audio_owner",
+                leader_activity=0.78,
+                leader_gap=0.42,
+                candidate_duration_seconds=2.0,
+                visual_agrees=True,
+                visual_leader_score=0.85,
+                visual_leader_gap=0.2126,
+                current_active_visual_score=0.6374,
+            )
+        )
+        self.assertFalse(
+            worker.is_multicam_reaction_hero_accent_earned(
+                "strong_isolated_audio_owner",
+                leader_activity=0.78,
+                leader_gap=0.42,
+                candidate_duration_seconds=2.0,
+                visual_agrees=True,
+                visual_leader_score=0.85,
+                visual_leader_gap=0.2126,
+                current_active_visual_score=0.6374,
+            )
+        )
+
+    def test_reaction_hero_accent_needs_visual_confirmation(self):
+        self.assertFalse(
+            worker.is_multicam_reaction_hero_accent_earned(
+                "strong_isolated_audio_owner",
+                leader_activity=1.0,
+                leader_gap=0.7271,
+                visual_agrees=False,
+                visual_leader_score=0.85,
+                visual_leader_gap=0.2126,
+                current_active_visual_score=0.6374,
+            )
+        )
+        self.assertFalse(
+            worker.is_multicam_reaction_hero_accent_earned(
+                "strong_isolated_audio_owner",
+                leader_activity=1.0,
+                leader_gap=0.7271,
+                visual_agrees=True,
+                visual_leader_score=0.85,
+                visual_leader_gap=0.12,
+                current_active_visual_score=0.6374,
+            )
+        )
+
+    def test_multicam_caption_disable_is_respected(self):
+        request = worker.RenderMultiCamRequest(
+            sources=[],
+            burn_captions=False,
+            burnCaptions=False,
+        )
+
+        enabled, _style = worker.resolve_multicam_caption_request(request)
+
+        self.assertFalse(enabled)
+
+    def test_skipped_camera_audio_sync_audit_blocks_by_default(self):
+        with self.assertRaises(worker.HTTPException):
+            worker.enforce_multicam_post_render_sync_audit(
+                {
+                    "status": "skipped_no_camera_audio",
+                    "message": "No audible camera scratch-audio samples were available",
+                }
+            )
+
+    def test_mute_visual_proxy_blocks_external_audio_render(self):
+        original = worker.MULTICAM_ALLOW_UNAUDITABLE_VISUAL_PROXY
+        original_has_audio = worker.has_audio_stream
+        worker.MULTICAM_ALLOW_UNAUDITABLE_VISUAL_PROXY = False
+        worker.has_audio_stream = lambda _path: False
+        try:
+            with self.assertRaises(worker.HTTPException):
+                worker.enforce_multicam_visual_source_auditability(
+                    [
+                        {
+                            "id": "cam1",
+                            "label": "Camera 1",
+                            "path": "/tmp/raw-cam1.mp4",
+                            "render_path": "/tmp/mute-proxy-cam1.mp4",
+                            "render_time_shift_seconds": 3.0,
+                        }
+                    ],
+                    external_audio_url="/tmp/clean.wav",
+                )
+        finally:
+            worker.MULTICAM_ALLOW_UNAUDITABLE_VISUAL_PROXY = original
+            worker.has_audio_stream = original_has_audio
+
+    def test_audio_audit_start_accounts_for_mezzanine_shift(self):
+        self.assertEqual(
+            worker.get_source_audio_audit_start(
+                {"audio_audit_time_shift_seconds": 12.5},
+                17.25,
+            ),
+            4.75,
+        )
+        self.assertEqual(
+            worker.get_source_audio_audit_start(
+                {"audio_audit_time_shift_seconds": 12.5},
+                6.0,
+            ),
+            0.0,
+        )
+
+    def test_confident_external_channel_owner_takes_opening_primary(self):
+        def source(camera_id, activity):
+            return {
+                "id": camera_id,
+                "label": camera_id,
+                "duration": 60.0,
+                "offset_seconds": 0.0,
+                "sync_rate": 1.0,
+                "has_audio": True,
+                "audio_activity_source": "external_isolated_channel",
+                "window_scores": [
+                    {
+                        "face_score": 0.0,
+                        "motion_score": 0.0,
+                        "visual_speaking_score": 0.0,
+                        "visual_speaking_confidence": 0.0,
+                    }
+                    for _ in range(30)
+                ],
+                "timeline_audio_activity_windows": [
+                    {"time": float(second), "activity": activity}
+                    for second in range(60)
+                ],
+            }
+
+        request = worker.RenderMultiCamRequest(
+            sources=[
+                worker.MultiCamSource(id="cam1", url="cam1.mp4", label="Camera 1"),
+                worker.MultiCamSource(id="cam2", url="cam2.mp4", label="Camera 2"),
+            ],
+            auto_switch=True,
+            audio_based_auto_switch=True,
+            auto_switch_interval=2.0,
+            auto_switch_aggressiveness="balanced",
+            primary_audio_camera_id="cam1",
+            overlap_start=0.0,
+            overlap_duration=20.0,
+        )
+
+        switches = worker.normalize_multicam_switches(
+            request,
+            [
+                source("cam1", 0.0692),
+                source("cam2", 0.715),
+            ],
+            20.0,
+        )
+
+        self.assertTrue(switches)
+        self.assertEqual(switches[0]["camera_id"], "cam2")
+        self.assertNotIn("cam1", {switch["camera_id"] for switch in switches})
+        self.assertTrue(
+            all(
+                switch.get("audio_leader_camera_id") == switch.get("camera_id")
+                for switch in switches
+                if switch.get("audio_decision_reliable")
+            )
+        )
+
+    def test_isolated_channel_owner_switches_both_directions_with_reaction(self):
+        def source(camera_id, activities):
+            return {
+                "id": camera_id,
+                "label": camera_id,
+                "duration": 60.0,
+                "offset_seconds": 0.0,
+                "sync_rate": 1.0,
+                "has_audio": True,
+                "audio_activity_source": "external_isolated_channel",
+                "audio_activity_channel_index": 0 if camera_id == "cam1" else 1,
+                "window_scores": [
+                    {
+                        "face_score": 0.0,
+                        "motion_score": 0.0,
+                        "visual_speaking_score": 0.0,
+                        "visual_speaking_confidence": 0.0,
+                    }
+                    for _ in range(40)
+                ],
+                "timeline_audio_activity_windows": [
+                    {"time": float(second), "activity": float(activity)}
+                    for second, activity in enumerate(activities)
+                ],
+            }
+
+        cam1_activity = [0.06] * 20 + [0.68] * 20
+        cam2_activity = [0.72] * 20 + [0.05] * 20
+        request = worker.RenderMultiCamRequest(
+            sources=[
+                worker.MultiCamSource(id="cam1", url="cam1.mp4", label="Camera 1"),
+                worker.MultiCamSource(id="cam2", url="cam2.mp4", label="Camera 2"),
+            ],
+            auto_switch=True,
+            audio_based_auto_switch=True,
+            auto_switch_interval=2.0,
+            auto_switch_aggressiveness="balanced",
+            primary_audio_camera_id="cam1",
+            overlap_start=0.0,
+            overlap_duration=40.0,
+        )
+
+        segments = worker.build_multicam_segments_from_switches(
+            request,
+            [
+                source("cam1", cam1_activity),
+                source("cam2", cam2_activity),
+            ],
+            0.0,
+            40.0,
+        )
+
+        self.assertTrue(segments)
+        self.assertEqual(segments[0]["camera_id"], "cam2")
+        self.assertTrue(any(segment["camera_id"] == "cam1" for segment in segments))
+        self.assertTrue(
+            all(
+                segment.get("audio_leader_camera_id") == segment.get("camera_id")
+                for segment in segments
+                if segment.get("audio_decision_reliable")
+            )
+        )
+        self.assertTrue(
+            all(
+                segment.get("layout_mode") == "pip"
+                and segment.get("secondary_camera_id")
+                and segment.get("secondary_camera_id") != segment.get("camera_id")
+                for segment in segments
+            )
+        )
+
+    def test_opening_handoff_backdates_to_clean_audio_onset(self):
+        def source(camera_id, activity_by_time):
+            return {
+                "id": camera_id,
+                "label": camera_id,
+                "duration": 90.0,
+                "offset_seconds": 0.0,
+                "sync_rate": 1.0,
+                "has_audio": True,
+                "audio_activity_source": "external_isolated_channel",
+                "audio_activity_channel_index": 0 if camera_id == "cam1" else 1,
+                "window_scores": [
+                    {
+                        "face_score": 0.0,
+                        "motion_score": 0.0,
+                        "visual_speaking_score": 0.0,
+                        "visual_speaking_confidence": 0.0,
+                    }
+                    for _ in range(45)
+                ],
+                "timeline_audio_activity_windows": [
+                    {"time": float(t), "activity": float(activity)}
+                    for t, activity in activity_by_time
+                ],
+            }
+
+        sample_times = [index * 0.5 for index in range(180)]
+        cam1_activity = []
+        cam2_activity = []
+        for timestamp in sample_times:
+            if timestamp < 55.0:
+                cam1 = 0.0
+                cam2 = 0.78
+            elif timestamp < 55.5:
+                cam1 = 0.08
+                cam2 = 0.25
+            else:
+                cam1 = 0.92
+                cam2 = 0.28
+            cam1_activity.append((timestamp, cam1))
+            cam2_activity.append((timestamp, cam2))
+
+        request = worker.RenderMultiCamRequest(
+            sources=[
+                worker.MultiCamSource(id="cam1", url="cam1.mp4", label="Camera 1"),
+                worker.MultiCamSource(id="cam2", url="cam2.mp4", label="Camera 2"),
+            ],
+            auto_switch=True,
+            audio_based_auto_switch=True,
+            auto_switch_interval=2.0,
+            auto_switch_aggressiveness="balanced",
+            primary_audio_camera_id="cam1",
+            overlap_start=0.0,
+            overlap_duration=90.0,
+        )
+
+        segments = worker.build_multicam_segments_from_switches(
+            request,
+            [
+                source("cam1", cam1_activity),
+                source("cam2", cam2_activity),
+            ],
+            0.0,
+            90.0,
+        )
+
+        cam1_segments = [segment for segment in segments if segment["camera_id"] == "cam1"]
+        self.assertTrue(cam1_segments)
+        self.assertLessEqual(cam1_segments[0]["timeline_start"], 55.5)
+        self.assertGreaterEqual(cam1_segments[0]["timeline_start"], 55.0)
+        self.assertEqual(cam1_segments[0]["secondary_camera_id"], "cam2")
+        self.assertTrue(
+            all(
+                segment.get("layout_mode") == "pip"
+                and segment.get("secondary_camera_id")
+                and segment.get("secondary_camera_id") != segment.get("camera_id")
+                for segment in segments
+            )
+        )
+
+    def test_unproven_speaker_coverage_keeps_pip_not_split(self):
+        prepared_sources = [
+            {
+                "id": "cam1",
+                "label": "cam1",
+                "duration": 20.0,
+                "offset_seconds": 0.0,
+                "sync_rate": 1.0,
+                "has_audio": True,
+                "audio_activity_source": "external_isolated_channel",
+                "audio_activity_channel_index": 0,
+                "window_scores": [
+                    {
+                        "face_score": 0.0,
+                        "motion_score": 0.0,
+                        "visual_speaking_score": 0.0,
+                        "visual_speaking_confidence": 0.0,
+                    }
+                    for _ in range(10)
+                ],
+                "timeline_audio_activity_windows": [
+                    {"time": float(second), "activity": 0.22}
+                    for second in range(20)
+                ],
+            },
+            {
+                "id": "cam2",
+                "label": "cam2",
+                "duration": 20.0,
+                "offset_seconds": 0.0,
+                "sync_rate": 1.0,
+                "has_audio": True,
+                "audio_activity_source": "external_isolated_channel",
+                "audio_activity_channel_index": 1,
+                "window_scores": [
+                    {
+                        "face_score": 0.0,
+                        "motion_score": 0.0,
+                        "visual_speaking_score": 0.0,
+                        "visual_speaking_confidence": 0.0,
+                    }
+                    for _ in range(10)
+                ],
+                "timeline_audio_activity_windows": [
+                    {"time": float(second), "activity": 0.24}
+                    for second in range(20)
+                ],
+            },
+        ]
+        request = worker.RenderMultiCamRequest(
+            sources=[
+                worker.MultiCamSource(id="cam1", url="cam1.mp4", label="Camera 1"),
+                worker.MultiCamSource(id="cam2", url="cam2.mp4", label="Camera 2"),
+            ],
+            auto_switch=True,
+            audio_based_auto_switch=True,
+            auto_switch_interval=2.0,
+            auto_switch_aggressiveness="balanced",
+            overlap_start=0.0,
+            overlap_duration=20.0,
+        )
+
+        segments = worker.build_multicam_segments_from_switches(
+            request,
+            prepared_sources,
+            0.0,
+            20.0,
+        )
+
+        self.assertTrue(segments)
+        self.assertTrue(all(segment["layout_mode"] == "pip" for segment in segments))
+        self.assertFalse(
+            any("unproven_speaker_coverage" in str(segment.get("layout_reason")) for segment in segments)
+        )
+
+    def test_visual_proxy_cache_uses_stable_identity_not_job_path(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            source_a = os.path.join(tmpdir, "job_a_src.mp4")
+            source_b = os.path.join(tmpdir, "job_b_src.mp4")
+            with open(source_a, "wb") as handle:
+                handle.write(b"fake-media" * 2048)
+            os.link(source_a, source_b)
+
+            cache_a = worker.multicam_visual_proxy_cache_path(
+                source_a,
+                "scale=1920:1080:start=0.000:duration=20.000",
+                1920,
+                1080,
+                cache_identity="stable-camera-fingerprint",
+            )
+            cache_b = worker.multicam_visual_proxy_cache_path(
+                source_b,
+                "scale=1920:1080:start=0.000:duration=20.000",
+                1920,
+                1080,
+                cache_identity="stable-camera-fingerprint",
+            )
+
+        self.assertEqual(cache_a, cache_b)
+
+    def test_source_activity_cache_uses_stable_source_identity_not_temp_analysis_path(self):
+        source = {
+            "id": "cam1",
+            "visual_cache_key": "stable-camera-fingerprint",
+            "audio_activity_source": "trusted_director_channel",
+            "audio_activity_channel_index": 0,
+            "offset_seconds": -3.346685,
+            "sync_rate": 1.000263039,
+        }
+
+        payload_a = worker.build_multicam_source_activity_receipt_cache_payload(
+            source,
+            "/tmp/job_a_multicam_src_0.mp4",
+            2.355701,
+            22.505261,
+            1.0,
+        )
+        payload_b = worker.build_multicam_source_activity_receipt_cache_payload(
+            source,
+            "/tmp/job_b_multicam_src_0.mp4",
+            2.355701,
+            22.505261,
+            1.0,
+        )
+
+        self.assertEqual(payload_a, payload_b)
+        self.assertEqual(
+            worker.multicam_receipt_cache_path("source_activity", payload_a),
+            worker.multicam_receipt_cache_path("source_activity", payload_b),
+        )
+
+    def test_video_only_post_render_sync_audit_reuse_marks_receipt(self):
+        original = {
+            "status": "good",
+            "path": "/tmp/pre.mp4",
+            "sample_count": 2,
+            "max_abs_residual_seconds": 0.004,
+            "samples": [{"camera_id": "cam1", "status": "ok"}],
+        }
+
+        reused = worker.reuse_multicam_video_only_sync_audit(
+            original,
+            "/tmp/final.mp4",
+            "caption_and_branding_filters_copy_audio",
+            job_id="unit",
+        )
+
+        self.assertEqual(reused["status"], "good")
+        self.assertEqual(reused["path"], "/tmp/final.mp4")
+        self.assertEqual(reused["reused_from"], "pre_caption_sync_audit")
+        self.assertTrue(reused["audio_timing_preserved"])
+        self.assertTrue(reused["samples"][0]["reused"])
+        self.assertNotIn("reused_from", original)
+
+    def test_render_equivalent_segments_merge_reason_only_boundaries(self):
+        segments = [
+            {
+                "camera_id": "cam2",
+                "secondary_camera_id": "cam1",
+                "layout_mode": "pip",
+                "layout_reason": "earned_reaction_accent",
+                "timeline_start": 38.0,
+                "timeline_end": 42.0,
+                "source_start": 39.94,
+                "source_end": 43.94,
+                "layout_confidence": 0.7,
+            },
+            {
+                "camera_id": "cam2",
+                "secondary_camera_id": "cam1",
+                "layout_mode": "pip",
+                "layout_reason": "active_speaker_with_reaction:accent_release",
+                "timeline_start": 42.0,
+                "timeline_end": 72.0,
+                "source_start": 43.94,
+                "source_end": 73.94,
+                "layout_confidence": 0.9,
+            },
+        ]
+
+        merged, receipt = worker.merge_render_equivalent_multicam_segments(segments)
+
+        self.assertEqual(receipt["input_segment_count"], 2)
+        self.assertEqual(receipt["render_segment_count"], 1)
+        self.assertEqual(receipt["merge_count"], 1)
+        self.assertEqual(len(merged), 1)
+        self.assertEqual(merged[0]["timeline_start"], 38.0)
+        self.assertEqual(merged[0]["timeline_end"], 72.0)
+        self.assertEqual(merged[0]["source_start"], 39.94)
+        self.assertEqual(merged[0]["source_end"], 73.94)
+        self.assertEqual(merged[0]["render_merged_segment_count"], 2)
+        self.assertIn("earned_reaction_accent", merged[0]["layout_reason"])
+        self.assertIn("active_speaker_with_reaction:accent_release", merged[0]["layout_reason"])
+
+    def test_render_equivalent_segments_do_not_merge_camera_or_layout_changes(self):
+        segments = [
+            {
+                "camera_id": "cam2",
+                "secondary_camera_id": "cam1",
+                "layout_mode": "pip",
+                "timeline_start": 0.0,
+                "timeline_end": 10.0,
+                "source_start": 1.0,
+                "source_end": 11.0,
+            },
+            {
+                "camera_id": "cam1",
+                "secondary_camera_id": "cam2",
+                "layout_mode": "pip",
+                "timeline_start": 10.0,
+                "timeline_end": 20.0,
+                "source_start": 11.0,
+                "source_end": 21.0,
+            },
+            {
+                "camera_id": "cam1",
+                "secondary_camera_id": "cam2",
+                "layout_mode": "split-vertical",
+                "timeline_start": 20.0,
+                "timeline_end": 24.0,
+                "source_start": 21.0,
+                "source_end": 25.0,
+            },
+        ]
+
+        merged, receipt = worker.merge_render_equivalent_multicam_segments(segments)
+
+        self.assertEqual(receipt["render_segment_count"], 3)
+        self.assertEqual(receipt["merge_count"], 0)
+        self.assertEqual([item["camera_id"] for item in merged], ["cam2", "cam1", "cam1"])
+        self.assertEqual([item["layout_mode"] for item in merged], ["pip", "pip", "split-vertical"])
+
+    def test_final_quality_gate_passes_only_after_sync_and_director_audits(self):
+        gate = worker.build_multicam_final_quality_gate(
+            output_validation={"has_video_stream": True, "has_audio_stream": True},
+            post_render_sync_audit={
+                "status": "good",
+                "sample_count": 12,
+                "usable_sample_count": 12,
+                "max_abs_residual_seconds": 0.022,
+            },
+            layout_contract_audit={"status": "passed", "issue_count": 0},
+            director_truth_audit={"status": "passed", "issue_count": 0},
+            director_latency_audit={"status": "passed", "issue_count": 0},
+            director_audio={"status": "active", "mapping_method": "request_override"},
+            continuous_sync_anchors={"status": "active", "active_camera_count": 2},
+            segment_duration_receipts=[
+                {"ok": True, "delta_seconds": 0.0},
+                {"ok": True, "delta_seconds": 0.017},
+            ],
+        )
+
+        self.assertEqual(gate["status"], "passed")
+        self.assertTrue(gate["passed"])
+        worker.enforce_multicam_final_quality_gate(gate)
+
+    def test_final_quality_gate_blocks_bad_sync_even_if_output_exists(self):
+        gate = worker.build_multicam_final_quality_gate(
+            output_validation={"has_video_stream": True, "has_audio_stream": True},
+            post_render_sync_audit={
+                "status": "unsafe",
+                "sample_count": 12,
+                "usable_sample_count": 12,
+                "max_abs_residual_seconds": 0.42,
+            },
+            layout_contract_audit={"status": "passed", "issue_count": 0},
+            director_truth_audit={"status": "passed", "issue_count": 0},
+            director_latency_audit={"status": "passed", "issue_count": 0},
+            director_audio={"status": "active"},
+            continuous_sync_anchors={"status": "active", "active_camera_count": 2},
+            segment_duration_receipts=[{"ok": True, "delta_seconds": 0.0}],
+        )
+
+        self.assertEqual(gate["status"], "failed")
+        self.assertFalse(gate["passed"])
+        self.assertIn(
+            "post_render_sync",
+            {check["name"] for check in gate["checks"] if not check["passed"]},
+        )
+        with self.assertRaises(worker.HTTPException):
+            worker.enforce_multicam_final_quality_gate(gate)
+
+    def test_final_quality_gate_blocks_continuous_anchor_drift_risk(self):
+        unsafe_anchor_residual = worker.MULTICAM_POST_RENDER_SYNC_UNSAFE_SECONDS + 0.01
+        gate = worker.build_multicam_final_quality_gate(
+            output_validation={"has_video_stream": True, "has_audio_stream": True},
+            post_render_sync_audit={
+                "status": "good",
+                "sample_count": 78,
+                "candidate_sample_count": 78,
+                "sample_coverage_ratio": 1.0,
+                "max_sample_gap_seconds": 61.0,
+                "usable_sample_count": 75,
+                "max_abs_residual_seconds": 0.052,
+            },
+            layout_contract_audit={"status": "passed", "issue_count": 0},
+            director_truth_audit={"status": "passed", "issue_count": 0},
+            director_latency_audit={"status": "passed", "issue_count": 0},
+            director_audio={"status": "active"},
+            continuous_sync_anchors={
+                "status": "active",
+                "active_camera_count": 2,
+                "cameras": {
+                    "cam1": {
+                        "camera_label": "Camera 1",
+                        "anchors": [
+                            {
+                                "checkpoint_index": 1,
+                                "timeline_absolute_seconds": 1680.0,
+                                "status": "accepted",
+                                "abs_residual_seconds": 0.024,
+                                "correlation": 0.55,
+                            }
+                        ],
+                    },
+                    "cam2": {
+                        "camera_label": "Camera 2",
+                        "anchors": [
+                            {
+                                "checkpoint_index": 7,
+                                "timeline_absolute_seconds": 1500.0,
+                                "status": "accepted",
+                                "abs_residual_seconds": unsafe_anchor_residual,
+                                "correlation": 0.62,
+                            }
+                        ],
+                    },
+                },
+            },
+            segment_duration_receipts=[{"ok": True, "delta_seconds": 0.0}],
+        )
+
+        self.assertEqual(gate["status"], "failed")
+        anchor_check = next(
+            check for check in gate["checks"] if check["name"] == "continuous_sync_anchors"
+        )
+        self.assertFalse(anchor_check["passed"])
+        self.assertEqual(anchor_check["details"]["high_residual_anchor_count"], 1)
+        self.assertEqual(anchor_check["details"]["worst_anchor"]["camera_id"], "cam2")
+        with self.assertRaises(worker.HTTPException):
+            worker.enforce_multicam_final_quality_gate(gate)
+
+    def test_final_quality_gate_blocks_rejected_high_anchor_residual_after_dense_sync_passes(self):
+        soft_anchor_residual = worker.MULTICAM_POST_RENDER_SYNC_GOOD_SECONDS + 0.01
+        gate = worker.build_multicam_final_quality_gate(
+            output_validation={"has_video_stream": True, "has_audio_stream": True},
+            post_render_sync_audit={
+                "status": "good",
+                "sample_count": 186,
+                "candidate_sample_count": 186,
+                "sample_coverage_ratio": 1.0,
+                "max_sample_gap_seconds": 52.0,
+                "usable_sample_count": 178,
+                "max_abs_residual_seconds": 0.059,
+            },
+            layout_contract_audit={"status": "passed", "issue_count": 0},
+            director_truth_audit={"status": "passed", "issue_count": 0},
+            director_latency_audit={"status": "passed", "issue_count": 0},
+            director_audio={"status": "active"},
+            continuous_sync_anchors={
+                "status": "active",
+                "active_camera_count": 2,
+                "cameras": {
+                    "cam2": {
+                        "camera_label": "Camera 2",
+                        "anchors": [
+                            {
+                                "checkpoint_index": 3,
+                                "timeline_absolute_seconds": 1920.0,
+                                "status": "rejected_low_confidence",
+                                "abs_residual_seconds": soft_anchor_residual,
+                                "correlation": 0.41,
+                            }
+                        ],
+                    }
+                },
+            },
+            segment_duration_receipts=[{"ok": True, "delta_seconds": 0.0}],
+        )
+
+        self.assertEqual(gate["status"], "failed")
+        anchor_check = next(
+            check for check in gate["checks"] if check["name"] == "continuous_sync_anchors"
+        )
+        self.assertFalse(anchor_check["passed"])
+        self.assertEqual(anchor_check["severity"], "error")
+        self.assertEqual(anchor_check["details"]["high_residual_anchor_count"], 1)
+        self.assertEqual(anchor_check["details"]["uncorrected_high_residual_anchor_count"], 1)
+        self.assertEqual(anchor_check["details"]["unsafe_residual_anchor_count"], 0)
+        with self.assertRaises(worker.HTTPException):
+            worker.enforce_multicam_final_quality_gate(gate)
+
+    def test_final_quality_gate_allows_accepted_high_anchor_after_dense_sync_passes(self):
+        accepted_anchor_residual = worker.MULTICAM_POST_RENDER_SYNC_GOOD_SECONDS + 0.01
+        gate = worker.build_multicam_final_quality_gate(
+            output_validation={"has_video_stream": True, "has_audio_stream": True},
+            post_render_sync_audit={
+                "status": "good",
+                "sample_count": 186,
+                "candidate_sample_count": 186,
+                "sample_coverage_ratio": 1.0,
+                "max_sample_gap_seconds": 52.0,
+                "usable_sample_count": 178,
+                "max_abs_residual_seconds": 0.059,
+            },
+            layout_contract_audit={"status": "passed", "issue_count": 0},
+            director_truth_audit={"status": "passed", "issue_count": 0},
+            director_latency_audit={"status": "passed", "issue_count": 0},
+            director_audio={"status": "active"},
+            continuous_sync_anchors={
+                "status": "active",
+                "active_camera_count": 2,
+                "cameras": {
+                    "cam2": {
+                        "camera_label": "Camera 2",
+                        "anchors": [
+                            {
+                                "checkpoint_index": 3,
+                                "timeline_absolute_seconds": 1920.0,
+                                "status": "accepted",
+                                "abs_residual_seconds": accepted_anchor_residual,
+                                "correlation": 0.41,
+                            }
+                        ],
+                    }
+                },
+            },
+            segment_duration_receipts=[{"ok": True, "delta_seconds": 0.0}],
+        )
+
+        self.assertEqual(gate["status"], "passed")
+        anchor_check = next(
+            check for check in gate["checks"] if check["name"] == "continuous_sync_anchors"
+        )
+        self.assertTrue(anchor_check["passed"])
+        self.assertEqual(anchor_check["details"]["high_residual_anchor_count"], 1)
+        self.assertEqual(anchor_check["details"]["uncorrected_high_residual_anchor_count"], 0)
+        worker.enforce_multicam_final_quality_gate(gate)
+
+    def test_final_quality_gate_blocks_sparse_sync_proof(self):
+        gate = worker.build_multicam_final_quality_gate(
+            output_validation={"has_video_stream": True, "has_audio_stream": True},
+            post_render_sync_audit={
+                "status": "questionable",
+                "sample_count": 45,
+                "candidate_sample_count": 318,
+                "sample_coverage_ratio": 0.14,
+                "max_sample_gap_seconds": 240.0,
+                "usable_sample_count": 45,
+                "max_abs_residual_seconds": 0.044,
+            },
+            layout_contract_audit={"status": "passed", "issue_count": 0},
+            director_truth_audit={"status": "passed", "issue_count": 0},
+            director_latency_audit={"status": "passed", "issue_count": 0},
+            director_audio={"status": "active"},
+            continuous_sync_anchors={"status": "active", "active_camera_count": 2},
+            segment_duration_receipts=[{"ok": True, "delta_seconds": 0.0}],
+        )
+
+        self.assertEqual(gate["status"], "failed")
+        sync_check = next(check for check in gate["checks"] if check["name"] == "post_render_sync")
+        self.assertEqual(sync_check["details"]["sample_coverage_ratio"], 0.14)
+        self.assertEqual(sync_check["details"]["max_sample_gap_seconds"], 240.0)
+        with self.assertRaises(worker.HTTPException):
+            worker.enforce_multicam_final_quality_gate(gate)
+
+    def test_trusted_director_channel_map_decodes_only_render_window(self):
+        decoded_seconds = 6
+        stereo_silence = b"\0\0" * 2 * 8000 * decoded_seconds
+        captured_commands = []
+
+        def fake_run(cmd, *args, **kwargs):
+            captured_commands.append(cmd)
+            return types.SimpleNamespace(returncode=0, stdout=stereo_silence, stderr=b"")
+
+        prepared_sources = [
+            {"id": "cam1", "label": "Camera 1", "duration": 30.0, "offset": 0.0},
+            {"id": "cam2", "label": "Camera 2", "duration": 30.0, "offset": 0.0},
+        ]
+
+        with tempfile.NamedTemporaryFile(suffix=".wav") as external_audio:
+            external_audio.write(b"fake")
+            external_audio.flush()
+            with unittest.mock.patch.dict(
+                os.environ,
+                {
+                    "MULTICAM_DIRECTOR_CHANNEL_AUTOMAP_SECONDS": "180",
+                    "MULTICAM_TRUST_DIRECTOR_CHANNEL_OVERRIDE": "1",
+                },
+            ), unittest.mock.patch.object(worker.subprocess, "run", side_effect=fake_run), unittest.mock.patch.object(
+                worker, "get_media_duration", return_value=30.0
+            ):
+                receipt = worker.apply_external_director_channel_activity(
+                    prepared_sources,
+                    external_audio.name,
+                    overlap_start=0.0,
+                    overlap_duration=5.0,
+                    segment_duration=0.5,
+                    channel_camera_ids_override=["cam1", "cam2"],
+                )
+
+        self.assertEqual(receipt["status"], "active")
+        self.assertLessEqual(receipt["decode_duration_seconds"], 6.01)
+        self.assertIn("-t", captured_commands[0])
+        t_index = captured_commands[0].index("-t") + 1
+        self.assertLessEqual(float(captured_commands[0][t_index]), 6.01)
+
+    def test_director_channel_override_rejects_confident_auto_conflict_by_default(self):
+        decoded_seconds = 6
+        stereo_silence = b"\0\0" * 2 * 8000 * decoded_seconds
+
+        def fake_run(cmd, *args, **kwargs):
+            return types.SimpleNamespace(returncode=0, stdout=stereo_silence, stderr=b"")
+
+        prepared_sources = [
+            {"id": "cam1", "label": "Camera 1", "duration": 30.0, "offset": 0.0},
+            {"id": "cam2", "label": "Camera 2", "duration": 30.0, "offset": 0.0},
+        ]
+        auto_receipt = {
+            "mapping_confident": True,
+            "mapped_camera_ids": ["cam2", "cam1"],
+            "method": "auto_unit",
+            "score_margin": 0.20,
+        }
+
+        with tempfile.NamedTemporaryFile(suffix=".wav") as external_audio:
+            external_audio.write(b"fake")
+            external_audio.flush()
+            with unittest.mock.patch.dict(
+                os.environ,
+                {},
+                clear=False,
+            ), unittest.mock.patch.object(worker.subprocess, "run", side_effect=fake_run), unittest.mock.patch.object(
+                worker, "get_media_duration", return_value=30.0
+            ), unittest.mock.patch.object(
+                worker, "auto_map_multicam_director_channels", return_value=auto_receipt
+            ):
+                receipt = worker.apply_external_director_channel_activity(
+                    prepared_sources,
+                    external_audio.name,
+                    overlap_start=0.0,
+                    overlap_duration=5.0,
+                    segment_duration=0.5,
+                    channel_camera_ids_override=["cam1", "cam2"],
+                )
+
+        self.assertEqual(receipt["status"], "unproven_channel_mapping")
+        self.assertEqual(receipt["mapping_method"], "override_conflicted_with_audio_evidence")
+        self.assertEqual(receipt["channel_camera_ids"], ["cam1", "cam2"])
+        self.assertEqual(receipt["auto_mapping"]["requested_camera_ids"], ["cam1", "cam2"])
+        self.assertEqual(receipt["auto_mapping"]["override_conflict"]["status"], "rejected")
+        self.assertNotIn("audio_activity_channel_index", prepared_sources[0])
+        self.assertNotIn("audio_activity_channel_index", prepared_sources[1])
+
+    def test_director_channel_override_keeps_request_when_automap_is_ambiguous(self):
+        decoded_seconds = 6
+        stereo_silence = b"\0\0" * 2 * 8000 * decoded_seconds
+
+        def fake_run(cmd, *args, **kwargs):
+            return types.SimpleNamespace(returncode=0, stdout=stereo_silence, stderr=b"")
+
+        prepared_sources = [
+            {"id": "cam1", "label": "Camera 1", "duration": 30.0, "offset": 0.0},
+            {"id": "cam2", "label": "Camera 2", "duration": 30.0, "offset": 0.0},
+        ]
+        auto_receipt = {
+            "mapping_confident": False,
+            "mapped_camera_ids": ["cam2", "cam1"],
+            "method": "auto_unit",
+            "score_margin": 0.02,
+        }
+
+        with tempfile.NamedTemporaryFile(suffix=".wav") as external_audio:
+            external_audio.write(b"fake")
+            external_audio.flush()
+            with unittest.mock.patch.dict(
+                os.environ,
+                {},
+                clear=False,
+            ), unittest.mock.patch.object(worker.subprocess, "run", side_effect=fake_run), unittest.mock.patch.object(
+                worker, "get_media_duration", return_value=30.0
+            ), unittest.mock.patch.object(
+                worker, "auto_map_multicam_director_channels", return_value=auto_receipt
+            ):
+                receipt = worker.apply_external_director_channel_activity(
+                    prepared_sources,
+                    external_audio.name,
+                    overlap_start=0.0,
+                    overlap_duration=5.0,
+                    segment_duration=0.5,
+                    channel_camera_ids_override=["cam1", "cam2"],
+                )
+
+        self.assertEqual(receipt["status"], "active")
+        self.assertEqual(receipt["mapping_method"], "request_override_kept_after_ambiguous_auto")
+        self.assertEqual(receipt["channel_camera_ids"], ["cam1", "cam2"])
+        self.assertEqual(receipt["auto_mapping"]["override_validation"]["status"], "ambiguous_auto_kept_request")
+        self.assertEqual(prepared_sources[0]["audio_activity_channel_index"], 0)
+        self.assertEqual(prepared_sources[1]["audio_activity_channel_index"], 1)
+
+    def test_director_channel_override_can_be_trusted_when_automap_is_ambiguous(self):
+        decoded_seconds = 6
+        stereo_silence = b"\0\0" * 2 * 8000 * decoded_seconds
+
+        def fake_run(cmd, *args, **kwargs):
+            return types.SimpleNamespace(returncode=0, stdout=stereo_silence, stderr=b"")
+
+        prepared_sources = [
+            {"id": "cam1", "label": "Camera 1", "duration": 30.0, "offset": 0.0},
+            {"id": "cam2", "label": "Camera 2", "duration": 30.0, "offset": 0.0},
+        ]
+        auto_receipt = {
+            "mapping_confident": False,
+            "mapped_camera_ids": ["cam2", "cam1"],
+            "method": "auto_unit",
+            "score_margin": 0.02,
+        }
+
+        with tempfile.NamedTemporaryFile(suffix=".wav") as external_audio:
+            external_audio.write(b"fake")
+            external_audio.flush()
+            with unittest.mock.patch.dict(
+                os.environ,
+                {"MULTICAM_TRUST_DIRECTOR_CHANNEL_OVERRIDE": "1"},
+            ), unittest.mock.patch.object(worker.subprocess, "run", side_effect=fake_run), unittest.mock.patch.object(
+                worker, "get_media_duration", return_value=30.0
+            ), unittest.mock.patch.object(
+                worker, "auto_map_multicam_director_channels", return_value=auto_receipt
+            ):
+                receipt = worker.apply_external_director_channel_activity(
+                    prepared_sources,
+                    external_audio.name,
+                    overlap_start=0.0,
+                    overlap_duration=5.0,
+                    segment_duration=0.5,
+                    channel_camera_ids_override=["cam1", "cam2"],
+                )
+
+        self.assertEqual(receipt["status"], "active")
+        self.assertEqual(receipt["mapping_method"], "request_override_trusted_without_audio_proof")
+        self.assertEqual(receipt["channel_camera_ids"], ["cam1", "cam2"])
+        self.assertEqual(receipt["auto_mapping"]["override_trust"]["status"], "trusted_without_audio_proof")
+        self.assertEqual(prepared_sources[0]["audio_activity_channel_index"], 0)
+        self.assertEqual(prepared_sources[1]["audio_activity_channel_index"], 1)
+
+    def test_director_channel_override_can_be_explicitly_corrected(self):
+        decoded_seconds = 6
+        stereo_silence = b"\0\0" * 2 * 8000 * decoded_seconds
+
+        def fake_run(cmd, *args, **kwargs):
+            return types.SimpleNamespace(returncode=0, stdout=stereo_silence, stderr=b"")
+
+        prepared_sources = [
+            {"id": "cam1", "label": "Camera 1", "duration": 30.0, "offset": 0.0},
+            {"id": "cam2", "label": "Camera 2", "duration": 30.0, "offset": 0.0},
+        ]
+        auto_receipt = {
+            "mapping_confident": True,
+            "mapped_camera_ids": ["cam2", "cam1"],
+            "method": "auto_unit",
+            "score_margin": 0.20,
+        }
+
+        with tempfile.NamedTemporaryFile(suffix=".wav") as external_audio:
+            external_audio.write(b"fake")
+            external_audio.flush()
+            with unittest.mock.patch.dict(
+                os.environ,
+                {"MULTICAM_DIRECTOR_CHANNEL_OVERRIDE_CONFLICT": "correct"},
+            ), unittest.mock.patch.object(worker.subprocess, "run", side_effect=fake_run), unittest.mock.patch.object(
+                worker, "get_media_duration", return_value=30.0
+            ), unittest.mock.patch.object(
+                worker, "auto_map_multicam_director_channels", return_value=auto_receipt
+            ):
+                receipt = worker.apply_external_director_channel_activity(
+                    prepared_sources,
+                    external_audio.name,
+                    overlap_start=0.0,
+                    overlap_duration=5.0,
+                    segment_duration=0.5,
+                    channel_camera_ids_override=["cam1", "cam2"],
+                )
+
+        self.assertEqual(receipt["status"], "active")
+        self.assertEqual(receipt["mapping_method"], "request_override_corrected_by_auto")
+        self.assertEqual(receipt["channel_camera_ids"], ["cam2", "cam1"])
+        self.assertEqual(receipt["auto_mapping"]["override_conflict"]["status"], "corrected")
+        self.assertEqual(prepared_sources[0]["audio_activity_channel_index"], 1)
+        self.assertEqual(prepared_sources[1]["audio_activity_channel_index"], 0)
+
+
+if __name__ == "__main__":
+    unittest.main()

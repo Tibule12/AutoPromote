@@ -31,10 +31,8 @@ import {
   FLOW_EDIT_STYLE_PRESETS,
   FLOW_AURA_TEMPLATE_PRESETS,
   IMAGE_STORY_TEMPLATE_PRESETS,
-  buildImageStoryFramingMap,
   buildFlowEditPlan,
   buildFlowTimelineDisplaySegments,
-  buildVideoFlowFramingMap,
   buildSingleLensAutoPlan,
   getFlowAuraPreset,
   getFlowSegmentAtTime,
@@ -125,6 +123,7 @@ const MULTICAM_RENDER_TIERS = [
 const UPLOAD_COMPRESSION_THRESHOLD_BYTES = 250 * BYTES_PER_MB; // Compress files > 250 MB
 const UPLOAD_COMPRESSION_TARGET_BPS = 3_000_000;               // 3 Mbps video
 const UPLOAD_COMPRESSION_AUDIO_BPS = 128_000;                  // 128 Kbps audio
+const UPLOAD_PROXY_MAX_LONG_EDGE = 1280;
 const VIDEO_SYNC_AUDIO_BPS = 96_000;
 const VIDEO_SYNC_MAX_EXTRACT_SECONDS = 15 * 60;
 const SYNC_AUDIO_CACHE_DB = "autopromote_multicam_sync_audio";
@@ -407,7 +406,6 @@ const SINGLE_CAM_FOCUS_PRESETS = [
 const MULTICAM_LAYOUT_OPTIONS = [
   { id: "smart", label: "Pulse Director" },
   { id: "split-vertical", label: "Dual Pulse" },
-  { id: "pip", label: "Orbit Echo" },
   { id: "scene-grid", label: "Scene Matrix" },
   { id: "cut", label: "Hero Angle / Single Speaker" },
 ];
@@ -415,7 +413,7 @@ const MULTICAM_LAYOUT_OPTIONS = [
 const MULTICAM_LAYOUT_TITLES = {
   smart: "Pulse Director",
   "split-vertical": "Dual Pulse",
-  pip: "Orbit Echo",
+  pip: "Reaction always on",
   "scene-grid": "Scene Matrix",
   cut: "Hero Angle",
 };
@@ -425,14 +423,14 @@ const MULTICAM_REASON_TITLES = {
   shared_energy: "Shared voltage",
   reaction_insert: "Reaction bloom",
   primary_focus: "Hero lock",
-  manual_split: "Manual duet",
-  manual_pip: "Manual orbit",
+  manual_split: "Preview duet",
+  manual_pip: "Preview orbit",
   ensemble_peak: "Ensemble bloom",
-  manual_ensemble: "Manual matrix",
-  manual_cut: "Manual hero",
+  manual_ensemble: "Preview matrix",
+  manual_cut: "Preview hero",
 };
 
-const MANUAL_TIMELINE_LAYOUT_LABELS = {
+const PREVIEW_LAYOUT_LABELS = {
   cut: "Camera cut",
   pip: "Reaction",
   "scene-grid": "Show Everyone",
@@ -1487,6 +1485,22 @@ const getPipPreviewViewports = (width, height) => {
   ];
 };
 
+const getReactionStackPreviewViewports = (width, height, reactionCount, side = "right") => {
+  const count = Math.max(1, Math.min(2, Number(reactionCount) || 1));
+  const stackWidth = width * (count > 1 ? 0.24 : 0.31);
+  const stackHeight = stackWidth * (9 / 16);
+  const gap = height * 0.024;
+  const x = side === "left" ? width * 0.052 : width - stackWidth - width * 0.052;
+  const totalHeight = stackHeight * count + gap * (count - 1);
+  const startY = Math.min(height - totalHeight - height * 0.16, Math.max(height * 0.1, height * 0.3));
+  return Array.from({ length: count }, (_, index) => ({
+    x,
+    y: startY + index * (stackHeight + gap),
+    width: stackWidth,
+    height: stackHeight,
+  }));
+};
+
 const drawVisualToCanvas = (
   context,
   canvas,
@@ -1678,7 +1692,6 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const [isPlaying, setIsPlaying] = useState(false);
   const [selectedSwitchId, setSelectedSwitchId] = useState("switch-1");
   const [previewProgramOverride, setPreviewProgramOverride] = useState(null);
-  const [manualRenderEditsEnabled, setManualRenderEditsEnabled] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
@@ -1716,8 +1729,12 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const [useExternalCleanAudio, setUseExternalCleanAudio] = useState(false);
   const [externalAudioTrack, setExternalAudioTrack] = useState(null);
   const [externalAudioMixMode, setExternalAudioMixMode] = useState("external_only");
+  const [externalAudioSpeakerChannelsSwapped, setExternalAudioSpeakerChannelsSwapped] = useState(false);
   const [cleanAudioSyncJob, setCleanAudioSyncJob] = useState(null);
   const [multicamRenderTier, setMulticamRenderTier] = useState("premium");
+  const [multicamBurnCaptions, setMulticamBurnCaptions] = useState(false);
+  const [multicamBrandWatermark, setMulticamBrandWatermark] = useState(false);
+  const [multicamGenerateThumbnail, setMulticamGenerateThumbnail] = useState(false);
   const [cloudRenderWindowStart, setCloudRenderWindowStart] = useState(0);
   const [billingPanelOpen, setBillingPanelOpen] = useState(false);
 
@@ -1770,8 +1787,6 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const [audioAnalysisByCameraId, setAudioAnalysisByCameraId] = useState({});
   const [syncingCameraId, setSyncingCameraId] = useState(null);
   const [expandedCameraId, setExpandedCameraId] = useState(null);
-  const [leftStudioRailCollapsed, setLeftStudioRailCollapsed] = useState(false);
-  const [rightStudioRailCollapsed, setRightStudioRailCollapsed] = useState(false);
 
   // Cinematic Effects — CSS-based real-time preview effects
   const {
@@ -1795,6 +1810,13 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     () => sources.filter(source => getSourceMediaUrl(source) && Number(source.duration) > 0.05),
     [sources]
   );
+  const getExportSourceLabel = useCallback((source, index) => {
+    const label = String(source?.label || source?.name || "").trim();
+    if (!label || /^(camera|source)\s+\d+$/i.test(label)) {
+      return `Camera ${index + 1}`;
+    }
+    return label;
+  }, []);
   const loadedVisualSources = useMemo(
     () => sources.filter(source => Boolean(getSourceMediaUrl(source))),
     [sources]
@@ -1925,14 +1947,6 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         : [],
     [flowEditEnabled, flowEditPlan]
   );
-  const selectedManualSwitch = useMemo(() => {
-    if (isSingleSourceWorkflow || flowEditEnabled) return null;
-    return (
-      normalizedSwitches.find(segment => segment.id === selectedSwitchId) ||
-      normalizedSwitches[0] ||
-      null
-    );
-  }, [isSingleSourceWorkflow, flowEditEnabled, normalizedSwitches, selectedSwitchId]);
   const currentFlowSegment = useMemo(
     () => getFlowSegmentAtTime(activeFlowSegments, playhead),
     [activeFlowSegments, playhead]
@@ -2070,7 +2084,36 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   ]);
   const effectiveMulticamLayoutMode = resolvedMulticamLayout.layoutMode || "cut";
   const secondaryCameraId = resolvedMulticamLayout.secondaryCameraId || null;
-  const secondaryCamera = readySources.find(source => source.id === secondaryCameraId) || null;
+  const reactionOverlayCameraId = useMemo(() => {
+    if (isSingleSourceWorkflow || readySources.length < 2 || !activeCameraId) return null;
+    if (secondaryCameraId && secondaryCameraId !== activeCameraId) return secondaryCameraId;
+    return readySources.find(source => source.id !== activeCameraId)?.id || null;
+  }, [isSingleSourceWorkflow, readySources, activeCameraId, secondaryCameraId]);
+  const previewMulticamLayoutMode =
+    !isSingleSourceWorkflow && effectiveMulticamLayoutMode === "cut" && reactionOverlayCameraId
+      ? "pip"
+      : effectiveMulticamLayoutMode;
+  const previewSecondaryCameraId =
+    previewMulticamLayoutMode === "pip" && reactionOverlayCameraId
+      ? reactionOverlayCameraId
+      : secondaryCameraId;
+  const previewSecondaryCamera =
+    readySources.find(source => source.id === previewSecondaryCameraId) || null;
+  const previewReactionCameraIds = useMemo(() => {
+    if (isSingleSourceWorkflow || previewMulticamLayoutMode !== "pip" || readySources.length < 2) {
+      return [];
+    }
+    return readySources
+      .map(source => source.id)
+      .filter(cameraId => cameraId && cameraId !== activeCameraId)
+      .slice(0, 2);
+  }, [isSingleSourceWorkflow, previewMulticamLayoutMode, readySources, activeCameraId]);
+  const previewReactionSide = useMemo(() => {
+    const activeIndex = readySources.findIndex(source => source.id === activeCameraId);
+    // In the podcast setup Camera 1 is framed screen-right and Camera 2 screen-left.
+    // Place the reaction opposite the visible speaker, not merely opposite source order.
+    return activeIndex <= 0 ? "left" : "right";
+  }, [readySources, activeCameraId]);
   const visibleLayoutCameraIds = useMemo(() => {
     const candidateIds = Array.isArray(resolvedMulticamLayout.visibleCameraIds)
       ? resolvedMulticamLayout.visibleCameraIds
@@ -2088,12 +2131,33 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     secondaryCameraId,
     effectiveMulticamLayoutMode,
   ]);
-  const visibleLayoutCameras = useMemo(
+  const previewVisibleLayoutCameraIds = useMemo(() => {
+    const candidateIds =
+      previewMulticamLayoutMode === "scene-grid" && Array.isArray(resolvedMulticamLayout.visibleCameraIds)
+        ? resolvedMulticamLayout.visibleCameraIds
+        : previewMulticamLayoutMode === "pip"
+          ? [activeCameraId, ...previewReactionCameraIds]
+        : [activeCameraId, previewSecondaryCameraId].filter(Boolean);
+    const maxVisible =
+      previewMulticamLayoutMode === "scene-grid"
+        ? 3
+        : previewMulticamLayoutMode === "split-vertical" || previewMulticamLayoutMode === "pip"
+          ? 3
+          : 6;
+    return candidateIds.filter(Boolean).slice(0, maxVisible);
+  }, [
+    previewMulticamLayoutMode,
+    resolvedMulticamLayout.visibleCameraIds,
+    activeCameraId,
+    previewSecondaryCameraId,
+    previewReactionCameraIds,
+  ]);
+  const previewVisibleLayoutCameras = useMemo(
     () =>
-      visibleLayoutCameraIds
+      previewVisibleLayoutCameraIds
         .map(cameraId => readySources.find(source => source.id === cameraId))
         .filter(Boolean),
-    [visibleLayoutCameraIds, readySources]
+    [previewVisibleLayoutCameraIds, readySources]
   );
   const activeSingleCamFraming = useMemo(() => {
     if (!isSingleSourceWorkflow || !activeSegment?.id) {
@@ -2116,10 +2180,6 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       normalizedSingleCamSegments.find(segment => segment.id === selectedSingleCamSegmentId) ||
       null,
     [normalizedSingleCamSegments, selectedSingleCamSegmentId]
-  );
-  const selectedFlowSegment = useMemo(
-    () => activeFlowSegments.find(segment => segment.id === selectedFlowSegmentId) || null,
-    [activeFlowSegments, selectedFlowSegmentId]
   );
   const selectedSingleCamFraming = useMemo(() => {
     if (!selectedSingleCamSegmentId) return DEFAULT_SEGMENT_FRAMING;
@@ -2318,9 +2378,9 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       ...previewActiveVideoStyle,
     };
 
-    if (effectiveMulticamLayoutMode === "scene-grid") {
-      const viewports = getSceneGridViewports(100, 100, visibleLayoutCameraIds.length);
-      visibleLayoutCameraIds.forEach((cameraId, index) => {
+    if (previewMulticamLayoutMode === "scene-grid") {
+      const viewports = getSceneGridViewports(100, 100, previewVisibleLayoutCameraIds.length);
+      previewVisibleLayoutCameraIds.forEach((cameraId, index) => {
         const viewport = viewports[index];
         assignCardStyle(cameraId, viewport, {
           padding: "0",
@@ -2332,15 +2392,15 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       return styles;
     }
 
-    if (effectiveMulticamLayoutMode === "cut") {
+    if (previewMulticamLayoutMode === "cut") {
       return styles;
     }
 
-    if (!secondaryCameraId) {
+    if (!previewSecondaryCameraId) {
       return styles;
     }
 
-    if (effectiveMulticamLayoutMode === "split-vertical") {
+    if (previewMulticamLayoutMode === "split-vertical") {
       const [primaryViewport, secondaryViewport] = getSharedMomentPreviewViewports(100, 100);
       assignCardStyle(activeCameraId, primaryViewport, {
         padding: "0",
@@ -2349,7 +2409,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         borderColor: "rgba(255, 255, 255, 0.12)",
         ...previewActiveVideoStyle,
       });
-      assignCardStyle(secondaryCameraId, secondaryViewport, {
+      assignCardStyle(previewSecondaryCameraId, secondaryViewport, {
         padding: "0",
         objectFit: "contain",
         objectPosition: "center center",
@@ -2358,29 +2418,35 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       return styles;
     }
 
-    const [heroViewport, pipViewport] = getPipPreviewViewports(100, 100);
-    assignCardStyle(activeCameraId, heroViewport, {
-      padding: "0",
-      objectFit: "contain",
-      borderColor: "rgba(255, 255, 255, 0.12)",
-      ...previewActiveVideoStyle,
-    });
-    assignCardStyle(secondaryCameraId, pipViewport, {
-      zIndex: 3,
-      padding: "0",
-      objectFit: "contain",
-      borderRadius: "18px",
-      borderColor: "rgba(255, 255, 255, 0.12)",
-      boxShadow:
-        "0 18px 34px rgba(0, 0, 0, 0.26), inset 0 0 0 1px rgba(255, 255, 255, 0.055)",
+    const reactionCameraIds = previewReactionCameraIds.length
+      ? previewReactionCameraIds
+      : [previewSecondaryCameraId].filter(Boolean);
+    const reactionViewports = getReactionStackPreviewViewports(
+      100,
+      100,
+      reactionCameraIds.length,
+      previewReactionSide
+    );
+    reactionCameraIds.forEach((cameraId, index) => {
+      assignCardStyle(cameraId, reactionViewports[index], {
+        zIndex: 3 + index,
+        padding: "0",
+        objectFit: "cover",
+        borderRadius: "16px",
+        border: "2px solid rgba(56, 189, 248, 0.72)",
+        boxShadow:
+          "0 18px 34px rgba(0, 0, 0, 0.32), 0 0 0 1px rgba(56, 189, 248, 0.18)",
+      });
     });
     return styles;
   }, [
     readySources,
     activeCameraId,
-    secondaryCameraId,
-    visibleLayoutCameraIds,
-    effectiveMulticamLayoutMode,
+    previewSecondaryCameraId,
+    previewReactionCameraIds,
+    previewReactionSide,
+    previewVisibleLayoutCameraIds,
+    previewMulticamLayoutMode,
     previewActiveVideoStyle,
   ]);
   const multicamLayoutInsight = useMemo(() => {
@@ -2473,11 +2539,11 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   ]);
   const previewStageMoodClass = useMemo(() => {
     if (isSingleSourceWorkflow) return "is-mood-solo";
-    if (effectiveMulticamLayoutMode === "scene-grid") return "is-mood-ensemble";
-    if (effectiveMulticamLayoutMode === "split-vertical") return "is-mood-dual";
-    if (effectiveMulticamLayoutMode === "pip") return "is-mood-orbit";
+    if (previewMulticamLayoutMode === "scene-grid") return "is-mood-ensemble";
+    if (previewMulticamLayoutMode === "split-vertical") return "is-mood-dual";
+    if (previewMulticamLayoutMode === "pip") return "is-mood-orbit";
     return "is-mood-focus";
-  }, [isSingleSourceWorkflow, effectiveMulticamLayoutMode]);
+  }, [isSingleSourceWorkflow, previewMulticamLayoutMode]);
   const inSyncSourceCount = useMemo(
     () =>
       readySources.filter(source => {
@@ -2527,8 +2593,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       return "Wide two-shot framing";
     }
 
-    if (secondaryCamera && effectiveMulticamLayoutMode !== "cut") {
-      return `${activeCamera?.label || "Lead"} with ${secondaryCamera.label || "companion"}`;
+    if (previewSecondaryCamera && previewMulticamLayoutMode !== "cut") {
+      return `${activeCamera?.label || "Lead"} with ${previewSecondaryCamera.label || "companion"}`;
     }
 
     return `${activeCamera?.label || "Lead"} owns the frame`;
@@ -2538,8 +2604,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     singleLensAutoSummary,
     selectedSingleCamSegment,
     selectedSingleCamFraming.zoom,
-    secondaryCamera,
-    effectiveMulticamLayoutMode,
+    previewSecondaryCamera,
+    previewMulticamLayoutMode,
     activeCamera,
   ]);
   const liveMomentLabel = useMemo(() => {
@@ -2554,11 +2620,11 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       return currentFlowSegment.heroLabel === "premium hero" ? "Premium hero moment" : "Hero moment live";
     }
 
-    if (effectiveMulticamLayoutMode === "scene-grid") return "Conversation matrix live";
-    if (effectiveMulticamLayoutMode === "split-vertical") return "Shared reaction moment";
-    if (effectiveMulticamLayoutMode === "pip") return "Reaction orbit live";
+    if (previewMulticamLayoutMode === "scene-grid") return "Conversation matrix live";
+    if (previewMulticamLayoutMode === "split-vertical") return "Shared reaction moment";
+    if (previewMulticamLayoutMode === "pip") return "Reaction always on";
     return "Hero angle locked";
-  }, [isSingleSourceWorkflow, flowEditEnabled, currentFlowSegment, effectiveMulticamLayoutMode, selectedSingleCamSegment]);
+  }, [isSingleSourceWorkflow, flowEditEnabled, currentFlowSegment, previewMulticamLayoutMode, selectedSingleCamSegment]);
   const directorHeroNarrative = useMemo(() => {
     if (isSingleSourceWorkflow) {
       return selectedSingleCamSegment?.reason || "Solo lens edit with guided reframing.";
@@ -2566,17 +2632,17 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     if (autoDirectorEnabled && autoDirectorSummary?.momentCount) {
       return `Auto Director is staging ${autoDirectorSummary.magicSummary} right now instead of just switching angles mechanically.`;
     }
-    if (effectiveMulticamLayoutMode === "split-vertical") {
+    if (previewMulticamLayoutMode === "split-vertical") {
       return "Two angles stay open because both are active.";
     }
-    if (effectiveMulticamLayoutMode === "scene-grid") {
+    if (previewMulticamLayoutMode === "scene-grid") {
       return "The whole conversation stays open in a living vertical matrix.";
     }
-    if (effectiveMulticamLayoutMode === "pip") {
+    if (previewMulticamLayoutMode === "pip") {
       return "The lead holds frame while a reaction stays alive in orbit.";
     }
     return "The director is holding one hero angle.";
-  }, [isSingleSourceWorkflow, effectiveMulticamLayoutMode, autoDirectorEnabled, autoDirectorSummary, selectedSingleCamSegment]);
+  }, [isSingleSourceWorkflow, previewMulticamLayoutMode, autoDirectorEnabled, autoDirectorSummary, selectedSingleCamSegment]);
   const stageCommandSummary = useMemo(() => {
     if (isSingleSourceWorkflow) {
       return selectedSingleCamSegment?.reason || "Split, trim, and reframe this one recording.";
@@ -2690,12 +2756,6 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         isActive: multicamLayoutMode === "scene-grid",
       },
       {
-        id: "multi-reaction",
-        label: "Catch Reactions",
-        caption: "Keep a live reaction window up",
-        isActive: multicamLayoutMode === "pip",
-      },
-      {
         id: "multi-duet",
         label: "Shared Moment",
         caption: "Hold two speakers together",
@@ -2762,7 +2822,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       : "Load one full recording to edit it on a shared timeline, or add extra camera angles and switch between them while keeping one audio source locked in."
     : isFlowWorkspace
       ? "Use Cam Combiner footage as your visual pool, then optionally drive pacing, camera switches, and speed ramps from uploaded audio or a master source."
-      : "Stay in manual Cam Combiner mode to sync cameras, switch angles, and build the edit yourself. Flow Edit is optional and can be opened only when you want rhythm-driven automation.";
+      : "Load camera angles and clean audio, then let AutoPromote prove sync and direct the MP4 automatically before paid render.";
   const billingMessage = !canUseFeature("multicam")
     ? "Upgrade to a paid plan to unlock Cam Combiner, Auto Director, and Flow Edit."
     : isFlowWorkspace
@@ -2810,56 +2870,6 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     activeCameraId,
     getStudioSlotLabel,
   ]);
-  const studioUpcomingSpeaker = useMemo(
-    () =>
-      studioSpeakerRows.find(row => !row.isCurrent) ||
-      studioSpeakerRows[1] ||
-      studioSpeakerRows[0] ||
-      null,
-    [studioSpeakerRows]
-  );
-  const studioSuggestedAction = useMemo(() => {
-    if (studioMonitorSources.length <= 1) {
-      return {
-        label: "Add Camera 2",
-        detail: "Load more angles to unlock real multicam switching and speaker handoffs.",
-        actionId: null,
-      };
-    }
-    if (multicamLayoutMode === "scene-grid") {
-      return {
-        label: "Show Everyone",
-        detail: "Keep the whole conversation visible while you judge the next cut.",
-        actionId: "multi-grid",
-      };
-    }
-    if (multicamLayoutMode === "pip") {
-      return {
-        label: "Catch Reaction",
-        detail: "Hold the lead, but leave a live reaction window open.",
-        actionId: "multi-reaction",
-      };
-    }
-    if (multicamLayoutMode === "split-vertical") {
-      return {
-        label: "Shared Moment",
-        detail: "Both speakers are active. Hold them together on screen.",
-        actionId: "multi-duet",
-      };
-    }
-    if (studioUpcomingSpeaker) {
-      return {
-        label: `Switch to ${studioUpcomingSpeaker.label}`,
-        detail: "Upcoming speaker energy is climbing. Prepare the next manual cut.",
-        actionId: null,
-      };
-    }
-    return {
-      label: `Stay on ${activeCamera?.label || "Program"}`,
-      detail: "The current angle is still the cleanest hold right now.",
-      actionId: null,
-    };
-  }, [multicamLayoutMode, studioUpcomingSpeaker, activeCamera, studioMonitorSources.length]);
   const cleanAudioSyncTerminalStatuses = useMemo(
     () => new Set(["ready_for_review", "completed", "failed", "cancelled", "sync_complete", "sync_low_confidence"]),
     []
@@ -2867,126 +2877,12 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const cleanAudioSyncIsRunning = Boolean(
     cleanAudioSyncJob?.status && !cleanAudioSyncTerminalStatuses.has(cleanAudioSyncJob.status)
   );
-  const cleanAudioSyncIsComplete = Boolean(
-    cleanAudioSyncJob?.status && cleanAudioSyncTerminalStatuses.has(cleanAudioSyncJob.status)
-  );
-  const backendTimelineStatus = cleanAudioSyncIsRunning
-    ? {
-        title: "Safe sync check is processing",
-        detail:
-          cleanAudioSyncJob?.detail ||
-          cleanAudioSyncJob?.stage ||
-          "AutoPromote is calculating camera offsets, drift correction, and speaker energy.",
-      }
-    : cleanAudioSyncIsComplete
-      ? {
-          title: "Sync corrections loaded",
-          detail: "Timeline cuts remain editable. Use the switch deck to replace or refine any segment.",
-        }
-      : externalAudioTrack
-        ? {
-            title: "Auto sync ready",
-            detail: "Program Output and export will verify clean-audio sync before committing the render.",
-          }
-        : {
-            title: "Manual edit timeline",
-            detail: "Load clean audio to let AutoPromote calculate camera offsets automatically.",
-          };
-  const studioPipelineSteps = useMemo(
-    () => [
-      {
-        id: "analyze",
-        label: "Analyze Video",
-        detail: readySources.length ? "Footage loaded" : "Waiting for footage",
-        state: readySources.length ? "done" : "waiting",
-      },
-      {
-        id: "subjects",
-        label: "Detect Subjects",
-        detail: readySources.every(source => Number(source.videoWidth || 0) > 0)
-          ? "Subjects mapped"
-          : "Scanning frames",
-        state: readySources.every(source => Number(source.videoWidth || 0) > 0) ? "done" : "active",
-      },
-      {
-        id: "speaker",
-        label: "Detect Active Speaker",
-        detail: cleanAudioSyncIsRunning
-          ? "Worker reading speaker energy"
-          : studioSpeakerRows.length
-            ? "Live speaker confidence"
-            : "Waiting for analysis",
-        state: cleanAudioSyncIsRunning ? "active" : studioSpeakerRows.length ? "done" : "active",
-      },
-      {
-        id: "energy",
-        label: "Read Audio Energy",
-        detail: cleanAudioSyncIsRunning
-          ? cleanAudioSyncJob?.detail || "Safe sync check running"
-          : hasExternalCleanAudio
-            ? "Master audio locked"
-            : "Camera bed active",
-        state: cleanAudioSyncIsRunning
-          ? "active"
-          : hasExternalCleanAudio || masterAudioSource
-            ? "done"
-            : "waiting",
-      },
-      {
-        id: "moves",
-        label: "Build Camera Moves",
-        detail: cleanAudioSyncIsRunning
-          ? "Waiting for sync results"
-          : autoDirectorEnabled
-            ? "AI assist armed"
-            : "Manual director live",
-        state: cleanAudioSyncIsRunning ? "waiting" : autoDirectorEnabled ? "active" : "done",
-      },
-      {
-        id: "render",
-        label: "Render Final Output",
-        detail: exportResult ? "Master ready" : isExporting ? "Rendering now" : "Standing by",
-        state: exportResult ? "done" : isExporting ? "active" : "waiting",
-      },
-    ],
-    [
-      readySources,
-      studioSpeakerRows.length,
-      hasExternalCleanAudio,
-      masterAudioSource,
-      autoDirectorEnabled,
-      exportResult,
-      isExporting,
-      cleanAudioSyncIsRunning,
-      cleanAudioSyncJob?.detail,
-    ]
-  );
   const studioMasterWaveformBars = useMemo(() => {
     const bars =
       audioAnalysisByCameraId[hasExternalCleanAudio ? "external-clean-audio" : masterAudioCameraId]
         ?.bars || [];
     return bars.slice(0, 72);
   }, [audioAnalysisByCameraId, hasExternalCleanAudio, masterAudioCameraId]);
-  const studioTimelineEventLabels = [
-    "Punch In",
-    "Wide Shot",
-    "Reaction Cut",
-    "Emotional Lock",
-    "Audience Lift",
-    "Cross Stage",
-    "Shared Moment",
-    "Lead Focus",
-  ];
-  const studioEventChips = useMemo(
-    () =>
-      displaySegments.slice(0, 8).map((segment, index) => ({
-        id: segment.id,
-        label: studioTimelineEventLabels[index % studioTimelineEventLabels.length],
-        time: formatDurationLabel(segment.startTime || segment.timelineStart || 0),
-      })),
-    [displaySegments]
-  );
-
   // Attach the active camera's video for timed effects
   useEffect(() => {
     const el = previewVideoRefs.current[activeCameraId];
@@ -3524,7 +3420,10 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
             : null
           : getSourceTimelineTime(source, playhead, timelineBounds.timelineStart);
       const isInRange = isSourceAvailableAtTime(source, mappedTime);
-      const isActivePreview = source.id === activeCameraId || source.id === secondaryCameraId;
+      const isActivePreview =
+        source.id === activeCameraId ||
+        source.id === previewSecondaryCameraId ||
+        previewReactionCameraIds.includes(source.id);
       const playbackRate = currentFlowSegment?.playbackRate || 1;
 
       syncMediaElement(
@@ -3619,7 +3518,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     timelineBounds.timelineStart,
     masterAudioCameraId,
     activeCameraId,
-    secondaryCameraId,
+    previewSecondaryCameraId,
+    previewReactionCameraIds,
     isSingleSourceWorkflow,
     activeSegment,
     currentFlowSegment,
@@ -3969,19 +3869,6 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     setStatusMessage("Export cancelled.");
   };
 
-  const handleOffsetChange = (cameraId, nextValue) => {
-    const numericOffset = Number(nextValue);
-    setSources(currentSources =>
-      currentSources.map(source => {
-        if (source.id !== cameraId) return source;
-        const newOffset = Number.isFinite(numericOffset) ? numericOffset : 0;
-        console.log(
-          `Offset manual change: ${source.label}: ${source.offsetSeconds}s → ${newOffset}s (locked)`);
-        return { ...source, offsetSeconds: newOffset, manualOffsetLocked: true };
-      })
-    );
-  };
-
   const applyAutoDirectorPlan = (forceStatus = false) => {
     if (
       isSingleSourceWorkflow ||
@@ -4019,15 +3906,6 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       setStatusMessage(
         `Auto Director is active in ${nextPlan.summary.modeLabel.toLowerCase()}${flowIntensityMode === "harder" ? " with impact mode engaged" : ""}${nextPlan.summary.momentCount ? ` and is watching for ${nextPlan.summary.magicSummary}` : ""}.`
       );
-    }
-  };
-
-  const disableAutoDirectorForManualControl = reason => {
-    setAutoDirectorEnabled(false);
-    setAutoDirectorSummary(null);
-    setMulticamLayoutMode(currentMode => (currentMode === "smart" ? "cut" : currentMode));
-    if (reason) {
-      setStatusMessage(reason);
     }
   };
 
@@ -4071,225 +3949,27 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
 
   const activateManualLayoutMode = (layoutMode, reason) => {
     const normalizedLayoutMode = normalizeMulticamLayoutMode(layoutMode);
-    if (!manualRenderEditsEnabled) {
-      handlePreviewProgramSwitch(
-        activeCameraId || readySources[0]?.id || sources[0]?.id,
-        normalizedLayoutMode,
-        `${MANUAL_TIMELINE_LAYOUT_LABELS[normalizedLayoutMode] || "Layout"} preview only. Render plan is unchanged.`
-      );
-      return;
-    }
-
-    if (autoDirectorEnabled) {
-      disableAutoDirectorForManualControl(reason);
-    } else if (reason) {
-      setStatusMessage(reason);
-    }
-    setMulticamLayoutMode(normalizedLayoutMode);
-    if (!isSingleSourceWorkflow && !flowEditEnabled && activeCameraId && timelineDuration) {
-      handleRecordSwitch(activeCameraId, normalizedLayoutMode);
-    }
+    handlePreviewProgramSwitch(
+      activeCameraId || readySources[0]?.id || sources[0]?.id,
+      normalizedLayoutMode,
+      reason ||
+        `${PREVIEW_LAYOUT_LABELS[normalizedLayoutMode] || "Layout"} preview only. Paid render stays automatic.`
+    );
   };
 
   const handleRecordSwitch = (cameraId, layoutModeOverride = "cut") => {
     if (!cameraId || !timelineDuration) return;
     const normalizedLayoutMode = normalizeMulticamLayoutMode(layoutModeOverride);
-
-    if (!manualRenderEditsEnabled && !flowEditEnabled) {
-      handlePreviewProgramSwitch(cameraId, normalizedLayoutMode);
-      return;
-    }
-
-    if (!isSingleSourceWorkflow && flowEditEnabled && selectedFlowSegmentId) {
-      handleApplyCameraToFlowSegment(cameraId);
-      setStatusMessage(`Flow segment switched to ${cameraId}.`);
-      return;
-    }
-
-    if (!isSingleSourceWorkflow && autoDirectorEnabled) {
-      disableAutoDirectorForManualControl(
-        "Manual cut override engaged. Auto Director is paused until you re-arm it."
-      );
-    }
-
-    const sourceScope = readySources.length ? readySources : sources;
-    const targetSource = sourceScope.find(source => source.id === cameraId);
-    if (!targetSource || !getSourceMediaUrl(targetSource)) {
-      toast.error("Load a visual into this slot before switching to it.");
-      return;
-    }
-
-    const mappedTime = getSourceTimelineTime(targetSource, playhead, timelineBounds.timelineStart);
-    const isInRange = mappedTime >= 0 && mappedTime <= Number(targetSource.duration || 0) - 0.01;
-    const sourceStartAtTimeline = Number(
-      ((Number(targetSource.offsetSeconds) || 0) - (Number(timelineBounds.timelineStart) || 0)).toFixed(3)
-    );
-    const sourceEndAtTimeline = Number(
-      (
-        sourceStartAtTimeline +
-        Math.max(0, Number(targetSource.duration || 0) - 0.01)
-      ).toFixed(3)
-    );
-    const switchTime = Number(
-      (
-        isInRange
-          ? playhead
-          : Math.max(0, Math.min(timelineDuration, Math.max(sourceStartAtTimeline, Math.min(playhead, sourceEndAtTimeline))))
-      ).toFixed(3)
-    );
-
-    if (!isInRange) {
-      setPlayhead(switchTime);
-      setStatusMessage(
-        `${targetSource.label} is not live at the old playhead, so the cut jumped to its first valid frame.`
-      );
-    }
-
-    setSwitches(currentSwitches => {
-      const nextSwitches = [...currentSwitches];
-      const existingIndex = nextSwitches.findIndex(
-        item => Math.abs(Number(item.startTime) - switchTime) < 0.08
-      );
-      const nextSwitch = {
-        id: existingIndex >= 0 ? nextSwitches[existingIndex].id : `switch-${Date.now()}`,
-        cameraId,
-        layoutMode: normalizedLayoutMode,
-        startTime: switchTime,
-      };
-
-      if (existingIndex >= 0) {
-        nextSwitches[existingIndex] = nextSwitch;
-      } else {
-        nextSwitches.push(nextSwitch);
-      }
-
-      const normalized = normalizeSwitches(nextSwitches, sourceScope, timelineDuration);
-      const selected = normalized.find(
-        item => Math.abs(Number(item.startTime) - switchTime) < 0.08 && item.cameraId === cameraId
-      );
-      if (selected) {
-        setSelectedSwitchId(selected.id);
-      }
-      return normalized;
-    });
-
-    setStatusMessage(
-      `${MANUAL_TIMELINE_LAYOUT_LABELS[normalizedLayoutMode] || "Manual cut"} saved at ${formatDurationLabel(
-        switchTime
-      )}. Program Output will replay this edit.`
+    handlePreviewProgramSwitch(
+      cameraId,
+      normalizedLayoutMode,
+      "Preview-only camera check. Paid render stays automatic."
     );
   };
 
   const handleResetManualSwitchPlan = () => {
-    if (isSingleSourceWorkflow || flowEditEnabled) return;
-
-    const sourceScope = readySources.length ? readySources : sources;
-    if (!sourceScope.length || !timelineDuration) return;
-
-    if (autoDirectorEnabled) {
-      disableAutoDirectorForManualControl(
-        "Manual cut mode engaged. Auto Director is paused so you can place your own switches."
-      );
-    } else {
-      setStatusMessage("Manual cut mode engaged. Build the switch timeline your way.");
-    }
-
-    const anchorCameraId = activeCameraId || sourceScope[0]?.id || null;
-    if (!anchorCameraId) return;
-
-    const resetSwitches = normalizeSwitches(
-      [{ id: "switch-1", cameraId: anchorCameraId, startTime: 0 }],
-      sourceScope,
-      timelineDuration || 0
-    );
-    setSwitches(resetSwitches);
-    setSelectedSwitchId(resetSwitches[0]?.id || null);
-  };
-
-  const handleNudgeSelectedSwitch = deltaSeconds => {
-    if (!selectedManualSwitch || !timelineDuration) return;
-    const sourceScope = readySources.length ? readySources : sources;
-    const switchIndex = normalizedSwitches.findIndex(item => item.id === selectedManualSwitch.id);
-    if (switchIndex <= 0) return;
-
-    const previousSwitch = normalizedSwitches[switchIndex - 1];
-    const nextSwitch = normalizedSwitches[switchIndex + 1];
-    const minTime = Number(previousSwitch?.startTime || 0) + 0.08;
-    const maxTime = nextSwitch
-      ? Number(nextSwitch.startTime) - 0.08
-      : Math.max(minTime, timelineDuration - 0.01);
-    const nextTime = clampNumber(
-      Number(selectedManualSwitch.startTime || 0) + deltaSeconds,
-      minTime,
-      maxTime,
-      Number(selectedManualSwitch.startTime || 0)
-    );
-
-    if (Math.abs(nextTime - Number(selectedManualSwitch.startTime || 0)) < 0.001) return;
-
-    const nextSwitches = normalizedSwitches.map(item =>
-      item.id === selectedManualSwitch.id
-        ? { ...item, startTime: Number(nextTime.toFixed(3)) }
-        : item
-    );
-    const normalized = normalizeSwitches(nextSwitches, sourceScope, timelineDuration || 0);
-    setSwitches(normalized);
-    setSelectedSwitchId(selectedManualSwitch.id);
-    setPlayhead(Number(nextTime.toFixed(3)));
-    setStatusMessage(
-      `Moved cut for ${selectedManualSwitch.cameraId} to ${formatDurationLabel(nextTime)}.`
-    );
-  };
-
-  const handleAssignSelectedSwitchCamera = cameraId => {
-    if (!selectedManualSwitch || !cameraId || !timelineDuration) return;
-    const sourceScope = readySources.length ? readySources : sources;
-    const normalized = normalizeSwitches(
-      normalizedSwitches.map(item =>
-        item.id === selectedManualSwitch.id ? { ...item, cameraId } : item
-      ),
-      sourceScope,
-      timelineDuration || 0
-    );
-    setSwitches(normalized);
-    setSelectedSwitchId(selectedManualSwitch.id);
-    const label = sourceScope.find(source => source.id === cameraId)?.label || cameraId;
-    setStatusMessage(
-      `Selected cut now switches to ${label} at ${formatDurationLabel(
-        Number(selectedManualSwitch.startTime || 0)
-      )}.`
-    );
-  };
-
-  const handleAlignSourceStartToPlayhead = cameraId => {
-    const source = sources.find(item => item.id === cameraId);
-    if (!source || !getSourceMediaUrl(source)) return;
-
-    const nextOffset = Number((playhead + timelineBounds.timelineStart).toFixed(3));
-    setSources(currentSources =>
-      currentSources.map(currentSource =>
-        currentSource.id === cameraId
-          ? { ...currentSource, offsetSeconds: nextOffset, manualOffsetLocked: true }
-          : currentSource
-      )
-    );
-    setStatusMessage(
-      `${source.label} start aligned to the current playhead at ${formatDurationLabel(playhead)}.`
-    );
-  };
-
-  const handleNudgeOffset = (cameraId, delta) => {
-    const source = sources.find(item => item.id === cameraId);
-    if (!source) return;
-
-    const nextOffset = Number(((Number(source.offsetSeconds) || 0) + delta).toFixed(3));
-    setSources(currentSources =>
-      currentSources.map(currentSource =>
-        currentSource.id === cameraId
-          ? { ...currentSource, offsetSeconds: nextOffset, manualOffsetLocked: true }
-          : currentSource
-      )
-    );
+    setPreviewProgramOverride(null);
+    setStatusMessage("Preview reset. Paid render stays automatic.");
   };
 
   const handleSplitSingleCamSegment = () => {
@@ -4431,28 +4111,21 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     if (actionId === "multi-smart") {
       setMulticamLayoutMode("smart");
       setAutoDirectorEnabled(true);
-      setStatusMessage("Auto Director re-armed. Manual layouts pause until you take control again.");
+      setStatusMessage("Auto Director armed. Paid render stays automatic.");
       applyAutoDirectorPlan(true);
       return;
     }
     if (actionId === "multi-grid") {
       activateManualLayoutMode(
         "scene-grid",
-        "Show Everyone is now manual. Auto Director is paused until you re-arm it."
-      );
-      return;
-    }
-    if (actionId === "multi-reaction") {
-      activateManualLayoutMode(
-        "pip",
-        "Reaction window is now manual. Auto Director is paused until you re-arm it."
+        "Show Everyone preview only. Paid render stays automatic."
       );
       return;
     }
     if (actionId === "multi-duet") {
       activateManualLayoutMode(
         "split-vertical",
-        "Shared-moment split is now manual. Auto Director is paused until you re-arm it."
+        "Shared Moment preview only. Paid render stays automatic."
       );
       return;
     }
@@ -4596,7 +4269,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       );
     } catch (error) {
       setStatusMessage(
-        "Clean audio loaded, but waveform analysis failed. You can still adjust the alignment manually."
+        "Clean audio loaded, but waveform analysis failed. Export will still require automatic sync proof."
       );
     }
   };
@@ -4616,6 +4289,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     setUseExternalCleanAudio(false);
     setExternalAudioTrack(null);
     setExternalAudioMixMode("external_only");
+    setExternalAudioSpeakerChannelsSwapped(false);
     setStatusMessage("External clean audio removed. Camera audio is back in control.");
   };
 
@@ -4946,7 +4620,10 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     return new Promise(resolve => {
       const video = document.createElement("video");
       video.preload = "auto";
-      video.muted = false;
+      // Hidden proxy generation should never leak audio over Program Output.
+      // The verified external clean audio is provided separately during render.
+      video.muted = options.mutePlayback !== false;
+      video.volume = options.mutePlayback === false ? 1 : 0;
       video.playsInline = true;
       const objectUrl = URL.createObjectURL(file);
       if (!applySafeMediaSource(video, objectUrl)) {
@@ -4986,8 +4663,23 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           const trimDuration = Number(options.trimDuration) || rawDuration;
           const trimEnd = clampNumber(trimStart + trimDuration, trimStart + 0.2, rawDuration, rawDuration);
           const recordingDuration = Math.max(0.2, trimEnd - trimStart);
-          const stream = video.captureStream();
-          if (!stream) { fail(); return; }
+          const sourceWidth = Math.max(1, Number(video.videoWidth) || 1280);
+          const sourceHeight = Math.max(1, Number(video.videoHeight) || 720);
+          const scale = Math.min(1, UPLOAD_PROXY_MAX_LONG_EDGE / Math.max(sourceWidth, sourceHeight));
+          const proxyWidth = Math.max(2, Math.round(sourceWidth * scale / 2) * 2);
+          const proxyHeight = Math.max(2, Math.round(sourceHeight * scale / 2) * 2);
+          const canvas = document.createElement("canvas");
+          canvas.width = proxyWidth;
+          canvas.height = proxyHeight;
+          const context = canvas.getContext("2d");
+          if (!context || typeof canvas.captureStream !== "function") { fail(); return; }
+          const canvasStream = canvas.captureStream(EXPORT_FRAME_RATE);
+          const mediaStream = typeof video.captureStream === "function" ? video.captureStream() : null;
+          const stream = new MediaStream([
+            ...canvasStream.getVideoTracks(),
+            ...((mediaStream && mediaStream.getAudioTracks()) || []),
+          ]);
+          if (!stream.getVideoTracks().length) { fail(); return; }
 
           const recorder = new MediaRecorder(stream, {
             mimeType,
@@ -5018,10 +4710,25 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
 
           recorder.onerror = () => { fail(); };
 
+          let drawFrameId = null;
+          const drawFrame = () => {
+            if (resolved || stopRequested) return;
+            try {
+              context.drawImage(video, 0, 0, proxyWidth, proxyHeight);
+            } catch (_) {
+              // A decode hiccup should not kill the whole export; the next frame can recover.
+            }
+            drawFrameId = window.requestAnimationFrame(drawFrame);
+          };
+
           const stopRecording = () => {
             if (stopRequested || recorder.state === "inactive") return;
             stopRequested = true;
             setStatusMessage(`Finalizing local upload proxy for ${label}. This should only take a moment...`);
+            if (drawFrameId) {
+              window.cancelAnimationFrame(drawFrameId);
+              drawFrameId = null;
+            }
             video.pause();
             recorder.stop();
             finalizingTimeoutId = window.setTimeout(() => {
@@ -5034,6 +4741,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
 
           recorder.start(1000);
           recordingStarted = true;
+          drawFrame();
           let lastPct = 0;
           let lastProgressAt = Date.now();
           let lastVideoTime = Number(video.currentTime) || trimStart;
@@ -6200,66 +5908,6 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     setFlowEditInsight("");
   };
 
-  const updateFlowPlanSegments = updater => {
-    setFlowEditPlan(currentPlan => {
-      if (!currentPlan?.segments?.length) return currentPlan;
-      const updatedSegments = updater(currentPlan.segments.map(segment => ({ ...segment })));
-      if (!Array.isArray(updatedSegments) || !updatedSegments.length) return currentPlan;
-      const normalizedSegments = updatedSegments.map((segment, index) => ({
-        ...segment,
-        id: segment.id || `flow-segment-${index + 1}`,
-        startTime: Number(segment.startTime.toFixed(3)),
-        endTime: Number(segment.endTime.toFixed(3)),
-        duration: Number((segment.endTime - segment.startTime).toFixed(3)),
-        sourceTimeByCameraId: (readySources.length ? readySources : sources).reduce(
-          (accumulator, source) => {
-            accumulator[source.id] = {
-              sourceStart: getSourceTimelineTime(
-                source,
-                Number(segment.startTime.toFixed(3)),
-                timelineBounds.timelineStart
-              ),
-              playbackRate: segment.playbackRate || 1,
-            };
-            return accumulator;
-          },
-          {}
-        ),
-      }));
-      const nextPlan = {
-        ...currentPlan,
-        segments: normalizedSegments,
-        framingMap:
-          currentPlan.visualMode === "image_story"
-            ? buildImageStoryFramingMap(
-                normalizedSegments,
-                currentPlan.audioType,
-                currentPlan.imageStoryTemplateId || flowImageStoryTemplateId,
-                currentPlan.auraTemplateId || flowAuraTemplateId
-              )
-            : buildVideoFlowFramingMap(
-                normalizedSegments,
-                currentPlan.audioType,
-                flowEditStyleId,
-                currentPlan.intensityMode || flowIntensityMode,
-                currentPlan.auraTemplateId || flowAuraTemplateId
-              ),
-        switches: normalizeSwitches(
-          normalizedSegments.map(segment => ({
-            id: segment.id,
-            cameraId: segment.cameraId,
-            startTime: segment.startTime,
-          })),
-          readySources.length ? readySources : sources,
-          currentPlan.duration || timelineDuration
-        ),
-      };
-      setFlowSegmentFraming(nextPlan.framingMap || {});
-      setSwitches(nextPlan.switches);
-      return nextPlan;
-    });
-  };
-
   const handleGenerateFlowEdit = async (overrides = null) => {
     const resolvedOverrides =
       typeof overrides === "string" ? { styleId: overrides } : overrides || {};
@@ -6460,89 +6108,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     setFlowEditEnabled(false);
     setFlowEditStatusStep("");
     setFlowEditWarning("");
-    setFlowEditInsight("Flow Edit is off. Manual multicam control is back in charge.");
-  };
-
-  const handleMoveFlowCut = deltaSeconds => {
-    if (!selectedFlowSegmentId) return;
-    updateFlowPlanSegments(segments => {
-      const targetIndex = segments.findIndex(segment => segment.id === selectedFlowSegmentId);
-      if (targetIndex <= 0) return segments;
-      const previous = segments[targetIndex - 1];
-      const current = segments[targetIndex];
-      const nextStart = clampNumber(
-        current.startTime + deltaSeconds,
-        previous.startTime + 0.35,
-        current.endTime - 0.35,
-        current.startTime
-      );
-      previous.endTime = Number(nextStart.toFixed(3));
-      current.startTime = Number(nextStart.toFixed(3));
-      previous.duration = Number((previous.endTime - previous.startTime).toFixed(3));
-      current.duration = Number((current.endTime - current.startTime).toFixed(3));
-      return segments;
-    });
-  };
-
-  const handleDeleteFlowSegment = (segmentId = selectedFlowSegmentId) => {
-    if (!segmentId) return;
-    updateFlowPlanSegments(segments => {
-      if (segments.length <= 1) return segments;
-      const targetIndex = segments.findIndex(segment => segment.id === segmentId);
-      if (targetIndex < 0) return segments;
-      if (targetIndex === 0) {
-        segments[1].startTime = 0;
-        return segments.slice(1);
-      }
-      const previous = segments[targetIndex - 1];
-      previous.endTime = segments[targetIndex].endTime;
-      previous.duration = Number((previous.endTime - previous.startTime).toFixed(3));
-      return segments.filter(segment => segment.id !== segmentId);
-    });
-    setSelectedFlowSegmentId(currentFlowSegment?.id || null);
-  };
-
-  const handleSplitFlowAtPlayhead = () => {
-    if (!currentFlowSegment) return;
-    const splitTime = clampNumber(
-      playhead,
-      currentFlowSegment.startTime + 0.35,
-      currentFlowSegment.endTime - 0.35,
-      currentFlowSegment.startTime
-    );
-    if (splitTime <= currentFlowSegment.startTime + 0.2 || splitTime >= currentFlowSegment.endTime - 0.2) {
-      return;
-    }
-    updateFlowPlanSegments(segments => {
-      const index = segments.findIndex(segment => segment.id === currentFlowSegment.id);
-      if (index < 0) return segments;
-      const current = segments[index];
-      const alternate =
-        readySources.find(source => source.id !== current.cameraId)?.id || current.cameraId;
-      const left = {
-        ...current,
-        id: `${current.id}-a`,
-        endTime: Number(splitTime.toFixed(3)),
-      };
-      left.duration = Number((left.endTime - left.startTime).toFixed(3));
-      const right = {
-        ...current,
-        id: `${current.id}-b`,
-        cameraId: alternate,
-        startTime: Number(splitTime.toFixed(3)),
-      };
-      right.duration = Number((right.endTime - right.startTime).toFixed(3));
-      return [...segments.slice(0, index), left, right, ...segments.slice(index + 1)];
-    });
-  };
-
-  const handleApplyCameraToFlowSegment = cameraId => {
-    if (!selectedFlowSegmentId || !cameraId) return;
-    updateFlowPlanSegments(segments =>
-      segments.map(segment =>
-        segment.id === selectedFlowSegmentId ? { ...segment, cameraId } : segment
-      )
-    );
+    setFlowEditInsight("Flow Edit is off. Cam Combiner stays in automatic preview mode.");
   };
 
   handleRecordSwitchRef.current = handleRecordSwitch;
@@ -6550,14 +6116,12 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const handleRemoveSwitch = switchId => {
     if (!switchId) return;
     if (!isSingleSourceWorkflow && flowEditEnabled) {
-      setSelectedFlowSegmentId(switchId);
-      handleDeleteFlowSegment(switchId);
+      setStatusMessage("Flow cut removal is disabled for Cam Combiner export. Paid render stays automatic.");
       return;
     }
-    if (!isSingleSourceWorkflow && autoDirectorEnabled) {
-      disableAutoDirectorForManualControl(
-        "Manual timeline editing paused Auto Director. Re-enable Auto Direct when you want it back in control."
-      );
+    if (!isSingleSourceWorkflow) {
+      setStatusMessage("Timeline editing is disabled. Paid render stays automatic.");
+      return;
     }
     setSwitches(currentSwitches => {
       const sourceScope = readySources.length ? readySources : sources;
@@ -6753,7 +6317,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     setStatusMessage(`Loaded ${file.name} into ${cameraId}.`);
   };
 
-  // Keyboard shortcuts: 1-6 switch cameras, W wide, R reaction, Space play/pause
+  // Keyboard shortcuts: 1-6 switch cameras, W wide, Space play/pause
   useEffect(() => {
     const onKeyDown = e => {
       if (
@@ -6777,11 +6341,6 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         if (e.code === "KeyW") {
           e.preventDefault();
           activateManualLayoutMode("scene-grid", "Wide view is live in Program Output.");
-          return;
-        }
-        if (e.code === "KeyR") {
-          e.preventDefault();
-          activateManualLayoutMode("pip", "Reaction window mode enabled.");
           return;
         }
       }
@@ -7254,7 +6813,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         : null;
       const canReuseRenderProxy = hasMatchingRenderProxy || Boolean(cachedUpload?.url);
       return {
-        label: source.label || source.name || "Camera",
+        label: getExportSourceLabel(source, readySources.findIndex(item => item.id === source.id)),
         estimatedBytes: canReuseRenderProxy ? 0 : estimateVideoProxyBytes(sourceTrimDurationForWindow),
         hasMatchingRenderProxy: canReuseRenderProxy,
       };
@@ -7306,6 +6865,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     setExportProgress(0);
     setStatusMessage("Preparing verified MP4 export. Automatic preflight will run before render starts...");
 
+    let asyncRenderStarted = false;
     try {
       const auth = getAuth();
       const user = auth.currentUser;
@@ -7407,7 +6967,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
             );
             setStatusMessage("Preflight proved start/middle/end sync. Preparing render proxies now.");
           } else if (preflight.status === "unsafe") {
-            setStatusMessage("⚠️ Sync preflight could not find a safe automatic correction.");
+            setStatusMessage("Warning: Sync preflight could not find a safe automatic correction.");
           }
 
           const missingVerified = preflightSourcesPayload.filter(source => !verifiedIds.has(source.id));
@@ -7435,7 +6995,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         const preflightSourcesPayload = [];
         for (let i = 0; i < readySources.length; i++) {
           const source = readySources[i];
-          const sourceLabel = source.label || `Camera ${i + 1}`;
+          const sourceLabel = getExportSourceLabel(source, i);
           const sourceDuration = Number(source.duration || 0);
           const sourceTrimStartForWindow = clampNumber(
             getSourceTimelineTime(source, renderWindowStart, timelineBounds.timelineStart) - 2,
@@ -7470,7 +7030,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           preflightSourcesPayload.push({
             id: source.id,
             url: syncUpload.syncAudioUrl || syncUpload.url,
-            label: source.label || `Camera ${i + 1}`,
+            label: sourceLabel,
             offset_seconds: Number(source.offsetSeconds) || 0,
             sync_rate: getSourceSyncRate(source),
             syncRate: getSourceSyncRate(source),
@@ -7538,7 +7098,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
             }
           : source;
         setExportProgress((i / readySources.length) * 0.5);
-        const sourceLabel = source.label || `source ${i + 1}`;
+        const sourceLabel = getExportSourceLabel(source, i);
         setStatusMessage(
           `Preparing ${sourceLabel} for cloud render (${i + 1}/${readySources.length})...`
         );
@@ -7609,13 +7169,17 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         }
         if (!remoteUrl) throw new Error(`No video file for ${source.label}.`);
 
+        const renderSyncRate = getSourceSyncRate(sourceForRender);
+        const renderOffsetSeconds =
+          (Number(sourceForRender.offsetSeconds) || 0) +
+          (usingRenderProxy ? sourceTrimStartForWindow / Math.max(0.001, renderSyncRate) : 0);
         sourcesPayload.push({
           id: source.id,
           url: remoteUrl,
-          label: source.label || `Camera ${i + 1}`,
-          offset_seconds: Number(sourceForRender.offsetSeconds) || 0,
-          sync_rate: getSourceSyncRate(sourceForRender),
-          syncRate: getSourceSyncRate(sourceForRender),
+          label: sourceLabel,
+          offset_seconds: renderOffsetSeconds,
+          sync_rate: renderSyncRate,
+          syncRate: renderSyncRate,
           upload_trim_start: usingRenderProxy ? sourceTrimStartForWindow : 0,
           upload_trim_duration: usingRenderProxy ? sourceTrimDurationForWindow : 0,
         });
@@ -7780,6 +7344,13 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       console.log("TRACE layout summary:", (renderSegmentsPayload || []).reduce((acc, s) => { acc[s.layout_mode] = (acc[s.layout_mode] || 0) + 1; return acc; }, {}));
       // ===== END TRACE =====
 
+      const useServerAutoDirector = readySources.length >= 2;
+      const directorChannelCameraIds =
+        useServerAutoDirector && externalAudioPayload && sourcesPayload.length >= 2
+          ? externalAudioSpeakerChannelsSwapped
+            ? [sourcesPayload[1].id, sourcesPayload[0].id]
+            : [sourcesPayload[0].id, sourcesPayload[1].id]
+          : null;
       const renderToken = await user.getIdToken(true);
       const response = await fetch(`${API_BASE_URL}/api/media/render-multicam`, {
         method: "POST",
@@ -7789,10 +7360,12 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         },
         body: JSON.stringify({
           sources: sourcesPayload,
-          segments: renderSegmentsPayload,
-          switches: switchesPayload,
+          segments: useServerAutoDirector ? [] : renderSegmentsPayload,
+          switches: useServerAutoDirector ? [] : switchesPayload,
           primaryAudioCameraId: masterAudioCameraId,
           primary_audio_camera_id: masterAudioCameraId,
+          directorChannelCameraIds,
+          director_channel_camera_ids: directorChannelCameraIds,
           timelineStart: renderTimelineStart,
           timeline_start: renderTimelineStart,
           overlapStart: renderTimelineStart,
@@ -7803,6 +7376,22 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           output_aspect_ratio: outputAspectRatio,
           renderTier: multicamRenderTier,
           render_tier: multicamRenderTier,
+          autoSwitch: useServerAutoDirector,
+          auto_switch: useServerAutoDirector,
+          audioBasedAutoSwitch: true,
+          audio_based_auto_switch: true,
+          autoSwitchInterval: 2,
+          auto_switch_interval: 2,
+          autoSwitchAggressiveness: flowIntensityMode === "harder" ? "aggressive" : "balanced",
+          auto_switch_aggressiveness: flowIntensityMode === "harder" ? "aggressive" : "balanced",
+          burnCaptions: multicamBurnCaptions,
+          burn_captions: multicamBurnCaptions,
+          captionStyle: "podcast_clean",
+          caption_style: "podcast_clean",
+          brandWatermark: multicamBrandWatermark,
+          brand_watermark: multicamBrandWatermark,
+          generateThumbnail: multicamGenerateThumbnail,
+          generate_thumbnail: multicamGenerateThumbnail,
           externalAudio: externalAudioPayload,
           external_audio_url: externalAudioPayload?.url || null,
           external_audio_offset_seconds: Number(externalAudioPayload?.offset_seconds || 0),
@@ -7839,6 +7428,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         setStatusMessage(
           `Server render started (Job: ${renderJobId}). Waiting for completion...`
         );
+        asyncRenderStarted = true;
 
         // Poll for render completion
         const pollInterval = window.setInterval(async () => {
@@ -7909,10 +7499,74 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       setStatusMessage(error.message || "Server export failed.");
       toast.error(error.message || "Server export failed.");
     } finally {
-      setServerExportPending(false);
-      setIsExporting(false);
-      setExportProgress(0);
+      if (!asyncRenderStarted) {
+        setServerExportPending(false);
+        setIsExporting(false);
+        setExportProgress(0);
+      }
     }
+  };
+
+  const renderExportStageTracker = () => {
+    if (!isExporting && !serverExportPending) return null;
+    const progressPct = Math.round((Number(exportProgress) || 0) * 100);
+    const detail = String(statusMessage || "").toLowerCase();
+    const stages = [
+      {
+        id: "sync",
+        label: "Prove sync",
+        hint: "Clean audio, channel owner, start/middle/end",
+        doneAt: 35,
+        active: /preflight|sync|channel|audio owner|verified/.test(detail) || progressPct < 35,
+      },
+      {
+        id: "visuals",
+        label: "Prepare visuals",
+        hint: "Trimmed proxies, HDR to SDR, color match",
+        doneAt: 55,
+        active: /visual|proxy|color|source|face|motion|speech/.test(detail),
+      },
+      {
+        id: "render",
+        label: "Render edit",
+        hint: "Active speaker, earned reaction, layouts",
+        doneAt: 88,
+        active: /rendering switched|segments|concatenating|master/.test(detail),
+      },
+      {
+        id: "polish",
+        label: "Polish",
+        hint: "Clean audio bed, captions, branding",
+        doneAt: 93,
+        active: /external clean audio|caption|branding|word-level/.test(detail),
+      },
+      {
+        id: "thumbnail",
+        label: "Thumbnail",
+        hint: "Content-aware poster frame",
+        doneAt: 98,
+        active: /thumbnail|uploading|local master|download/.test(detail),
+      },
+    ];
+
+    return (
+      <div className="nle-export-stage-tracker" aria-label="Render stages">
+        {stages.map(stage => {
+          const complete = progressPct >= stage.doneAt;
+          const active = !complete && stage.active;
+          return (
+            <div
+              key={stage.id}
+              className={`nle-export-stage ${complete ? "is-complete" : ""} ${active ? "is-active" : ""}`}
+            >
+              <span>{complete ? "OK" : active ? "..." : ""}</span>
+              <strong>{stage.label}</strong>
+              <small>{stage.hint}</small>
+            </div>
+          );
+        })}
+      </div>
+    );
   };
 
   const renderCloudRenderWindowPanel = () => {
@@ -8023,8 +7677,6 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       <div
         className={`nle-shell ${isSingleSourceWorkflow ? "is-single-cam" : "is-multicam"} ${
           isFlowWorkspace ? "is-flow-workspace" : "is-combine-workspace"
-        } ${leftStudioRailCollapsed ? "is-left-rail-collapsed" : ""} ${
-          rightStudioRailCollapsed ? "is-right-rail-collapsed" : ""
         }`}
       >
         <div className="nle-header">
@@ -8067,58 +7719,25 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         </div>
 
         {!isFlowWorkspace && (
-          <div className="nle-studio-shell" ref={scrollContainerRef}>
-            <aside className={`nle-studio-sidebar nle-studio-sidebar-left ${leftStudioRailCollapsed ? "is-collapsed" : ""}`}>
-              <button
-                type="button"
-                className="nle-studio-rail-toggle"
-                onClick={() => setLeftStudioRailCollapsed(value => !value)}
-                aria-label={leftStudioRailCollapsed ? "Expand left sidebar" : "Collapse left sidebar"}
-              >
-                {leftStudioRailCollapsed ? "›" : "‹"}
-              </button>
-              {!leftStudioRailCollapsed && (
-                <>
-                  <div className="nle-studio-card nle-studio-brand-card">
-                    <div className="nle-studio-brand-mark">
-                      <span className="nle-studio-brand-icon">▶</span>
-                      <div>
-                        <strong>Cam Combiner</strong>
-                        <span>AI Multicam Director Studio</span>
-                      </div>
-                    </div>
-                    <div className="nle-studio-status-line">
-                      <span className="nle-studio-dot is-good" />
-                      Sync status: {hasExternalCleanAudio ? "Audio locked" : "Camera audio master"}
-                    </div>
+          <div className="nle-studio-shell is-simplified" ref={scrollContainerRef}>
+            <section className="nle-studio-main is-simplified" ref={previewPanelRef}>
+              <div className="nle-studio-steps" aria-label="Cam Combiner workflow">
+                {[
+                  { id: "sources", number: 1, label: "Sources", done: readySources.length >= 2 },
+                  { id: "audio", number: 2, label: "Clean Audio", done: hasExternalCleanAudio },
+                  { id: "proof", number: 3, label: "Auto sync proof", done: previewSyncState.tone === "good" },
+                  { id: "render", number: 4, label: "Render", done: Boolean(exportResult) },
+                ].map(step => (
+                  <div key={step.id} className={`nle-studio-step ${step.done ? "is-done" : ""}`}>
+                    <span>{step.number}</span>
+                    <strong>{step.label}</strong>
                   </div>
+                ))}
+              </div>
 
-                  <div className="nle-studio-card nle-studio-pipeline-card">
-                    <div className="nle-studio-card-header">
-                      <strong>Processing Pipeline</strong>
-                      <span>{Math.round((studioPipelineSteps.filter(step => step.state === "done").length / studioPipelineSteps.length) * 100)}%</span>
-                    </div>
-                    <div className="nle-studio-pipeline">
-                      {studioPipelineSteps.map((step, index) => (
-                        <div key={step.id} className={`nle-studio-pipeline-row is-${step.state}`}>
-                          <span className="nle-studio-pipeline-index">{index + 1}</span>
-                          <div>
-                            <strong>{step.label}</strong>
-                            <span>{step.detail}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                </>
-              )}
-            </aside>
-
-            <section className="nle-studio-main" ref={previewPanelRef}>
-              <div className="nle-studio-topbar">
+              <div className="nle-studio-topbar is-simple">
                 <div className={`nle-studio-topbar-pill is-sync-${previewSyncState.tone}`}>
-                  <span>Sync Status</span>
+                  <span>Auto sync proof</span>
                   <strong>{previewSyncState.title}</strong>
                 </div>
                 <div className="nle-studio-topbar-pill">
@@ -8128,10 +7747,6 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                 <div className="nle-studio-topbar-pill">
                   <span>Clean Audio</span>
                   <strong>{externalAudioTrack?.name || "None loaded"}</strong>
-                </div>
-                <div className="nle-studio-topbar-pill">
-                  <span>Render Cost</span>
-                  <strong>{multicamRenderCreditEstimate} cr · {multicamRenderTier}</strong>
                 </div>
                 <button
                   className="nle-btn secondary nle-studio-clean-audio-btn"
@@ -8170,124 +7785,23 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                 />
               </div>
 
-              <div className={`nle-studio-commerce-strip is-sync-${previewSyncState.tone}`}>
-                <div className="nle-studio-sync-proof">
-                  <strong>{previewSyncState.title}</strong>
-                  <span>{previewSyncState.detail}</span>
-                </div>
-                <div className="nle-render-tier-group" aria-label="Cam Combiner render pricing">
-                  {MULTICAM_RENDER_TIERS.map(tier => (
-                    <button
-                      key={tier.id}
-                      type="button"
-                      className={`nle-render-tier ${multicamRenderTier === tier.id ? "is-active" : ""}`}
-                      onClick={() => setMulticamRenderTier(tier.id)}
-                    >
-                      <span>{tier.eyebrow}</span>
-                      <strong>{tier.label} · {estimateMulticamRenderCredits(tier.id)} cr</strong>
-                    </button>
-                  ))}
-                </div>
-                <div className="nle-studio-credit-note">
-                  <strong>Credits</strong>
-                  <span>
-                    Balance: {Number(credits?.remaining ?? 0).toFixed(0)} cr. Preview is included.
-                    Clean-audio sync is {cleanAudioSyncCreditEstimate} cr when needed; server MP4 render is {multicamRenderCreditEstimate} cr.
-                  </span>
-                  <button
-                    className="nle-mini-paypal-btn"
-                    type="button"
-                    onClick={() => setBillingPanelOpen(true)}
-                  >
-                    Buy credits with PayPal
-                  </button>
-                </div>
-              </div>
-
-              <div className="nle-studio-stage-grid">
-                {studioMonitorSlots.map((source, index) => {
-                  if (!source) {
-                    return (
-                      <article
-                        key={`studio-monitor-empty-${index}`}
-                        className="nle-studio-monitor-card is-empty"
-                      >
-                        <div className="nle-studio-monitor-head">
-                          <span className="nle-studio-monitor-label">{getStudioSlotLabel(index)}</span>
-                          <span className="nle-studio-monitor-badge">Empty</span>
-                        </div>
-                        <button
-                          type="button"
-                          className="nle-studio-monitor-frame nle-drop-target"
-                          onClick={() => fileInputRef.current?.click()}
-                        >
-                          Load Camera {index + 1}
-                        </button>
-                        <div className="nle-studio-monitor-meta">
-                          <span>Offset 0.00s</span>
-                          <span>Awaiting source</span>
-                        </div>
-                      </article>
-                    );
-                  }
-                  const mediaUrl = getSourceMediaUrl(source);
-                  const mappedTime = getSourceTimelineTime(
-                    source,
-                    playhead,
-                    timelineBounds.timelineStart
-                  );
-                  const confidence = studioSpeakerRows.find(row => row.id === source.id)?.confidence || 0;
-                  const isLive = source.id === activeCameraId;
-                  return (
-                    <article
-                      key={`studio-monitor-${source.id}`}
-                      className={`nle-studio-monitor-card ${isLive ? "is-live" : ""}`}
-                    >
-                      <div className="nle-studio-monitor-head">
-                        <span className="nle-studio-monitor-label">{getStudioSlotLabel(index)}</span>
-                        <span className={`nle-studio-monitor-badge ${isLive ? "is-live" : ""}`}>
-                          {isLive ? "Current" : `${Math.round(confidence * 100)}%`}
-                        </span>
-                      </div>
-                      <div className="nle-studio-monitor-frame" style={getCameraMonitorFrameStyle(source)}>
-                        {mediaUrl ? (
-                          <video
-                            ref={node => {
-                              thumbnailVideoRefs.current[source.id] = node;
-                              if (node) {
-                                applySafeMediaSource(node, mediaUrl);
-                              }
-                            }}
-                            className="nle-thumbnail-video"
-                            playsInline
-                            muted
-                          />
-                        ) : (
-                          <div className="nle-thumbnail-placeholder">Load visual</div>
-                        )}
-                      </div>
-                      <div className="nle-studio-monitor-meta">
-                        <span>Offset {Number(source.offsetSeconds || 0).toFixed(2)}s</span>
-                        <span>{mappedTime >= 0 ? formatDurationLabel(mappedTime) : "Off timeline"}</span>
-                      </div>
-                    </article>
-                  );
-                })}
-
-                <article className="nle-studio-program-card">
+              <div className="nle-studio-hero-grid">
+                <article className="nle-studio-program-card is-hero">
                   <div className="nle-studio-monitor-head">
                     <span className="nle-studio-monitor-label">Program Output</span>
-                    <span className="nle-studio-rec-pill">REC</span>
+                    <span className="nle-studio-preview-pill">Preview only</span>
                   </div>
                   <div className="nle-preview-shell nle-studio-program-shell">
                     <div
                       ref={previewStageRef}
-                      className={`nle-preview-stage is-layout-${effectiveMulticamLayoutMode} ${focusPickerActive ? "is-focus-picking" : ""} ${previewStageMoodClass}`}
+                      className={`nle-preview-stage is-layout-${previewMulticamLayoutMode} is-reaction-${previewReactionSide} ${focusPickerActive ? "is-focus-picking" : ""} ${previewStageMoodClass}`}
                       style={studioProgramStageStyle}
                     >
                       {readySources.map(source => {
                         const previewClassName = `nle-preview-video ${source.id === activeCameraId ? "is-active" : ""} ${
-                          source.id === secondaryCameraId ? "is-secondary" : ""
+                          source.id === previewSecondaryCameraId || previewReactionCameraIds.includes(source.id)
+                            ? "is-secondary"
+                            : ""
                         }`;
                         if (isImageSource(source)) {
                           return (
@@ -8324,14 +7838,76 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                       })}
                       {!readySources.length ? (
                         <div className="nle-empty-state">
-                          <strong>Load your first visual to start editing.</strong>
-                          <span>Program output appears here once visuals are ready.</span>
+                          <strong>Load your first visual to start.</strong>
+                          <span>Program Output appears here once cameras are ready.</span>
                         </div>
                       ) : null}
                       {!isSingleSourceWorkflow &&
-                        effectiveMulticamLayoutMode === "split-vertical" &&
-                        secondaryCamera && <div className="nle-preview-split-divider" />}
+                        previewMulticamLayoutMode === "split-vertical" &&
+                        previewSecondaryCamera && <div className="nle-preview-split-divider" />}
                     </div>
+                  </div>
+                  <div className="nle-layout-preview-strip">
+                    <button
+                      type="button"
+                      className={`nle-live-switch-btn is-accent ${autoDirectorEnabled ? "is-live" : ""}`}
+                      onClick={() => handleRunQuickAction("multi-smart")}
+                    >
+                      <strong>Auto Direct</strong>
+                      <span>Preview only</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`nle-live-switch-btn ${multicamLayoutMode === "cut" ? "is-live" : ""}`}
+                      onClick={() => handleRecordSwitch(activeCameraId || readySources[0]?.id)}
+                      disabled={!timelineDuration || !readySources.length}
+                    >
+                      <strong>Speaker</strong>
+                      <span>Preview only</span>
+                    </button>
+                    <div className="nle-reaction-always-chip">
+                      <strong>Reaction</strong>
+                      <span>{readySources.length >= 2 ? "Always on" : "Needs 2 cams"}</span>
+                    </div>
+                    <button
+                      type="button"
+                      className={`nle-live-switch-btn ${multicamLayoutMode === "split-vertical" ? "is-live" : ""}`}
+                      onClick={() =>
+                        activateManualLayoutMode(
+                          "split-vertical",
+                          "Split preview only. Paid render stays automatic."
+                        )
+                      }
+                    >
+                      <strong>Split</strong>
+                      <span>Preview only</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={`nle-live-switch-btn ${multicamLayoutMode === "scene-grid" ? "is-live" : ""}`}
+                      onClick={() =>
+                        activateManualLayoutMode(
+                          "scene-grid",
+                          "Grid preview only. Paid render stays automatic."
+                        )
+                      }
+                    >
+                      <strong>Grid</strong>
+                      <span>Preview only</span>
+                    </button>
+                    {previewProgramOverride ? (
+                      <button
+                        type="button"
+                        className="nle-live-switch-btn"
+                        onClick={() => {
+                          setPreviewProgramOverride(null);
+                          setStatusMessage("Preview override cleared. Program Output follows automatic director preview again.");
+                        }}
+                      >
+                        <strong>Clear</strong>
+                        <span>Preview</span>
+                      </button>
+                    ) : null}
                   </div>
                   <div className="nle-preview-toolbar nle-studio-transport">
                     <div className="nle-transport-controls">
@@ -8374,679 +7950,243 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                         <span>{formatDurationLabel(timelineDuration || 0)}</span>
                       </div>
                     </div>
-                    <div className="nle-preview-badges">
-                      <span className="nle-chip">Lead: {activeCamera?.label || "None"}</span>
-                      <span className="nle-chip nle-chip-secondary">
-                        Voice bed: {deckAudioValue}
+                  </div>
+                </article>
+
+                <aside className="nle-render-ready-card">
+                  <span className="nle-eyebrow">Render Ready</span>
+                  <strong>{multicamRenderCreditEstimate} cr</strong>
+                  <div className="nle-render-tier-group is-compact" aria-label="Cam Combiner render pricing">
+                    {MULTICAM_RENDER_TIERS.map(tier => (
+                      <button
+                        key={tier.id}
+                        type="button"
+                        className={`nle-render-tier ${multicamRenderTier === tier.id ? "is-active" : ""}`}
+                        onClick={() => setMulticamRenderTier(tier.id)}
+                      >
+                        <span>{tier.eyebrow}</span>
+                        <strong>{tier.label}</strong>
+                      </button>
+                    ))}
+                  </div>
+                  <div className="nle-render-finishing" aria-label="Final finishing passes">
+                    <label className="nle-render-finish-toggle">
+                      <input
+                        type="checkbox"
+                        checked={multicamBurnCaptions}
+                        onChange={event => setMulticamBurnCaptions(event.target.checked)}
+                      />
+                      <span>
+                        <strong>Burn captions</strong>
+                        <small>Full Whisper + video pass</small>
                       </span>
-                      <span className="nle-chip nle-chip-secondary">
-                        {isSingleSourceWorkflow ? "Cam Combiner Manual" : directorSnapshot.modeTitle}
+                    </label>
+                    <label className="nle-render-finish-toggle">
+                      <input
+                        type="checkbox"
+                        checked={multicamBrandWatermark}
+                        onChange={event => setMulticamBrandWatermark(event.target.checked)}
+                      />
+                      <span>
+                        <strong>Brand watermark</strong>
+                        <small>Final overlay pass</small>
                       </span>
+                    </label>
+                    <label className="nle-render-finish-toggle">
+                      <input
+                        type="checkbox"
+                        checked={multicamGenerateThumbnail}
+                        onChange={event => setMulticamGenerateThumbnail(event.target.checked)}
+                      />
+                      <span>
+                        <strong>Thumbnail</strong>
+                        <small>Poster frame only</small>
+                      </span>
+                    </label>
+                  </div>
+                  <button
+                    className="nle-btn nle-render-primary-btn"
+                    type="button"
+                    onClick={handleServerExport}
+                    disabled={
+                      isExporting ||
+                      cleanAudioSyncIsRunning ||
+                      syncingCameraId === "external-clean-audio" ||
+                      !canExportProject ||
+                      isSingleSourceWorkflow
+                    }
+                  >
+                    {cleanAudioSyncIsRunning || syncingCameraId === "external-clean-audio"
+                      ? "Sync Check Running..."
+                      : serverExportPending
+                        ? "Preparing Verified MP4..."
+                        : "Render Polished MP4"}
+                  </button>
+                  <div className="nle-render-proof-list">
+                    <div className={`nle-proof-item ${hasExternalCleanAudio ? "is-done" : ""}`}>
+                      <span>{hasExternalCleanAudio ? "✓" : "1"}</span>
+                      <strong>{hasExternalCleanAudio ? "External clean audio locked" : "Upload external clean audio"}</strong>
                     </div>
+                    <div className={`nle-proof-item ${previewSyncState.tone === "good" ? "is-done" : ""}`}>
+                      <span>{previewSyncState.tone === "good" ? "✓" : "2"}</span>
+                      <strong>Auto sync proof</strong>
+                    </div>
+                    <div className={`nle-proof-item ${previewSyncState.tone === "good" ? "is-done" : ""}`}>
+                      <span>{previewSyncState.tone === "good" ? "✓" : "3"}</span>
+                      <strong>Start · Middle · End verified</strong>
+                    </div>
+                    <div className={`nle-proof-item ${readySources.length >= 2 ? "is-done" : ""}`}>
+                      <span>{readySources.length >= 2 ? "✓" : "4"}</span>
+                      <strong>Reaction layer always on</strong>
+                    </div>
+                  </div>
+                  <div className="nle-studio-credit-note is-simple">
+                    <span>
+                      Balance: {Number(credits?.remaining ?? 0).toFixed(0)} cr. Preview included.
+                      Clean-audio sync is {cleanAudioSyncCreditEstimate} cr when needed.
+                    </span>
+                    <button
+                      className="nle-mini-paypal-btn"
+                      type="button"
+                      onClick={() => setBillingPanelOpen(true)}
+                    >
+                      Buy credits
+                    </button>
+                  </div>
+                </aside>
+              </div>
+
+              {renderCloudRenderWindowPanel()}
+
+              <div className="nle-source-card-grid">
+                {studioMonitorSlots.map((source, index) => {
+                  if (!source) {
+                    return (
+                      <article key={`studio-source-empty-${index}`} className="nle-studio-monitor-card is-empty">
+                        <div className="nle-studio-monitor-head">
+                          <span className="nle-studio-monitor-label">Camera {index + 1}</span>
+                          <span className="nle-studio-monitor-badge">Empty</span>
+                        </div>
+                        <button
+                          type="button"
+                          className="nle-studio-monitor-frame nle-drop-target"
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          Add Camera
+                        </button>
+                        <div className="nle-studio-monitor-meta">
+                          <span>Up to 3 cameras</span>
+                        </div>
+                      </article>
+                    );
+                  }
+                  const mediaUrl = getSourceMediaUrl(source);
+                  const confidence = studioSpeakerRows.find(row => row.id === source.id)?.confidence || 0;
+                  const isLive = source.id === activeCameraId;
+                  return (
+                    <article key={`studio-source-${source.id}`} className={`nle-studio-monitor-card ${isLive ? "is-live" : ""}`}>
+                      <div className="nle-studio-monitor-head">
+                        <span className="nle-studio-monitor-label">{getStudioSlotLabel(index)}</span>
+                        <span className={`nle-studio-monitor-badge ${isLive ? "is-live" : ""}`}>
+                          {isLive ? "Ready" : `${Math.round(confidence * 100)}%`}
+                        </span>
+                      </div>
+                      <div className="nle-studio-monitor-frame" style={getCameraMonitorFrameStyle(source)}>
+                        {mediaUrl ? (
+                          <video
+                            ref={node => {
+                              thumbnailVideoRefs.current[source.id] = node;
+                              if (node) {
+                                applySafeMediaSource(node, mediaUrl);
+                              }
+                            }}
+                            className="nle-thumbnail-video"
+                            playsInline
+                            muted
+                          />
+                        ) : (
+                          <div className="nle-thumbnail-placeholder">Load visual</div>
+                        )}
+                      </div>
+                      <div className="nle-studio-monitor-meta">
+                        <span>{source.backendSyncStatus ? "Machine sync ready" : "Needs sync proof"}</span>
+                        <span>{source.name || source.label}</span>
+                      </div>
+                    </article>
+                  );
+                })}
+
+                <article className={`nle-studio-monitor-card nle-clean-audio-card ${hasExternalCleanAudio ? "is-live" : "is-empty"}`}>
+                  <div className="nle-studio-monitor-head">
+                    <span className="nle-studio-monitor-label">External clean audio</span>
+                    <span className={`nle-studio-monitor-badge ${hasExternalCleanAudio ? "is-live" : ""}`}>
+                      {hasExternalCleanAudio ? "Locked" : "Missing"}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    className="nle-studio-audio-wave-card"
+                    onClick={() => externalAudioInputRef.current?.click()}
+                  >
+                    {studioMasterWaveformBars.length ? (
+                      studioMasterWaveformBars.map((barHeight, index) => (
+                        <span
+                          key={`simple-master-wave-${index}`}
+                          style={{ height: `${Math.max(12, barHeight)}%` }}
+                        />
+                      ))
+                    ) : (
+                      <strong>{externalAudioTrack ? "Analyzing waveform" : "Upload Clean Audio"}</strong>
+                    )}
+                  </button>
+                  <div className="nle-studio-monitor-meta">
+                    <span>{externalAudioTrack?.name || "WAV, MP3, M4A, or video audio"}</span>
+                    <span>{hasExternalCleanAudio ? "External clean audio locked" : "Required for automatic proof"}</span>
                   </div>
                 </article>
               </div>
 
-              <div className="nle-studio-card nle-studio-timeline-card">
-                <div className="nle-studio-card-header">
-                  <strong>Timeline</strong>
-                  <span>{formatDurationLabel(playhead)} / {formatDurationLabel(timelineDuration || 0)}</span>
-                </div>
-                <div className="nle-studio-timeline-legend">
-                  <span>Multicam Edit</span>
-                  <span>Audio locked as master</span>
-                </div>
-                <div className={`nle-studio-timeline-status ${cleanAudioSyncIsRunning ? "is-processing" : ""}`}>
-                  <strong>{backendTimelineStatus.title}</strong>
-                  <span>{backendTimelineStatus.detail}</span>
-                  {cleanAudioSyncJob?.progress != null && (
-                    <span className="nle-studio-timeline-progress">
-                      <span
-                        style={{
-                          width: `${Math.max(4, Math.min(100, Number(cleanAudioSyncJob.progress || 0)))}%`,
-                        }}
-                      />
-                    </span>
-                  )}
-                </div>
-                <div className="nle-studio-track-grid">
-                  <div className="nle-studio-track-row is-master">
-                    <label>Clean Audio (Master)</label>
-                    <div className="nle-studio-wave-row">
-                      {studioMasterWaveformBars.length ? (
-                        studioMasterWaveformBars.map((barHeight, index) => (
-                          <span
-                            key={`master-wave-${index}`}
-                            className="nle-studio-wave-bar"
-                            style={{ height: `${Math.max(10, barHeight)}%` }}
-                          />
-                        ))
-                      ) : (
-                        <span className="nle-waveform-placeholder">Master waveform waiting</span>
-                      )}
-                      <div
-                        className="nle-playhead-marker-inline"
-                        style={{
-                          left: `${timelineDuration ? (playhead / timelineDuration) * 100 : 0}%`,
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  {studioMonitorSlots.map((source, index) => (
-                    <div
-                      key={source ? `track-${source.id}` : `track-empty-${index}`}
-                      className={`nle-studio-track-row ${source ? "" : "is-empty"}`}
-                    >
-                      <label>
-                        {source ? getStudioSlotLabel(index) : getStudioSlotLabel(index)}
-                        <span>
-                          {source
-                            ? `Offset ${Number(source.offsetSeconds || 0).toFixed(2)}s`
-                            : "Waiting for source"}
-                        </span>
-                      </label>
-                      <div className="nle-switch-track nle-studio-track-shell">
-                        {source ? (
-                          displaySegments
-                            .filter(segment => segment.cameraId === source.id)
-                            .map(segment => (
-                              <button
-                                key={`track-segment-${segment.id}`}
-                                type="button"
-                                className={`nle-switch-segment ${
-                                  selectedSwitchId === segment.id ? "is-selected" : ""
-                                }`}
-                                style={{
-                                  left: `${segment.startPercent}%`,
-                                  width: `${segment.widthPercent}%`,
-                                  background: `${getCameraColor(source.id, readySources.length ? readySources : sources)}cc`,
-                                }}
-                                onClick={() => {
-                                  setSelectedSwitchId(segment.id);
-                                  handleSeek(segment.startTime || segment.timelineStart);
-                                }}
-                              >
-                                <span>{segment.label}</span>
-                              </button>
-                            ))
-                        ) : (
-                          <div className="nle-studio-track-placeholder">No cuts yet</div>
-                        )}
-                        <div
-                          className="nle-playhead-marker-inline"
-                          style={{
-                            left: `${timelineDuration ? (playhead / timelineDuration) * 100 : 0}%`,
-                          }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-
-                  <div className="nle-studio-track-row is-program">
-                    <label>Program Output</label>
-                    <div className="nle-switch-track nle-studio-track-shell">
-                      {displaySegments.map(segment => (
-                        <button
-                          key={`program-segment-${segment.id}`}
-                          type="button"
-                          className={`nle-switch-segment ${
-                            selectedSwitchId === segment.id ? "is-selected" : ""
-                          }`}
-                          style={{
-                            left: `${segment.startPercent}%`,
-                            width: `${segment.widthPercent}%`,
-                          }}
-                          onClick={() => {
-                            setSelectedSwitchId(segment.id);
-                            handleSeek(segment.startTime || segment.timelineStart);
-                          }}
-                        >
-                          <span>{segment.label}</span>
-                        </button>
-                      ))}
-                      <div
-                        className="nle-playhead-marker-inline"
-                        style={{
-                          left: `${timelineDuration ? (playhead / timelineDuration) * 100 : 0}%`,
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div className="nle-studio-event-row">
-                  {studioEventChips.map(chip => (
-                    <span key={chip.id} className="nle-studio-event-chip">
-                      <strong>{chip.label}</strong>
-                      <span>{chip.time}</span>
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div className="nle-studio-card nle-studio-deck-card">
-                <div className="nle-studio-card-header">
-                  <strong>Program Check Deck</strong>
-                  <span>
-                    {manualRenderEditsEnabled
-                      ? "Manual render edits are ON."
-                      : "Preview-only. Render plan stays unchanged."}
+              {isExporting ? (
+                <div className="nle-export-progress">
+                  <div
+                    className="nle-export-progress-bar"
+                    style={{ width: `${Math.round(exportProgress * 100)}%` }}
+                  />
+                  <span className="nle-export-progress-label">
+                    {Math.round(exportProgress * 100)}%
                   </span>
                 </div>
-                <div className="nle-render-safety-toggle">
-                  <button
-                    type="button"
-                    className={`nle-mini-btn ${manualRenderEditsEnabled ? "nle-mini-btn-accent" : ""}`}
-                    onClick={() => {
-                      setManualRenderEditsEnabled(value => !value);
-                      setPreviewProgramOverride(null);
-                      setStatusMessage(
-                        manualRenderEditsEnabled
-                          ? "Manual render edits off. Camera/layout buttons are preview-only again."
-                          : "Manual render edits on. Camera/layout buttons will change the final render plan."
-                      );
-                    }}
-                  >
-                    {manualRenderEditsEnabled ? "Manual edits affect render" : "Preview only"}
-                  </button>
-                  {previewProgramOverride ? (
-                    <button
-                      type="button"
-                      className="nle-mini-btn"
-                      onClick={() => {
-                        setPreviewProgramOverride(null);
-                        setStatusMessage("Preview override cleared. Program Output follows the render plan again.");
-                      }}
-                    >
-                      Follow render plan
-                    </button>
-                  ) : null}
-                </div>
-                <div className="nle-live-switch-deck is-studio-deck">
-                  {studioMonitorSlots.map((source, index) => (
-                    <button
-                      key={source ? `deck-main-${source.id}` : `deck-empty-${index}`}
-                      type="button"
-                      className={`nle-live-switch-btn ${
-                        source?.id === activeCameraId ? "is-live" : ""
-                      } ${source ? "" : "is-disabled"}`}
-                      onClick={() => {
-                        if (source) {
-                          handleRecordSwitch(source.id);
-                        } else {
-                          fileInputRef.current?.click();
-                        }
-                      }}
-                    >
-                      <strong>
-                        {source ? getStudioSlotLabel(index) : getStudioSlotLabel(index)}
-                      </strong>
-                      <span>{index + 1}</span>
-                    </button>
-                  ))}
-                  <button
-                    type="button"
-                    className={`nle-live-switch-btn ${multicamLayoutMode === "scene-grid" ? "is-live" : ""}`}
-                    onClick={() => activateManualLayoutMode("scene-grid", "Wide view is live in Program Output.")}
-                  >
-                    <strong>Wide</strong>
-                    <span>W</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`nle-live-switch-btn ${multicamLayoutMode === "pip" ? "is-live" : ""}`}
-                    onClick={() =>
-                      activateManualLayoutMode(
-                        "pip",
-                        "Reaction window is now manual. Auto Director is paused until you re-arm it."
-                      )
-                    }
-                  >
-                    <strong>Reaction</strong>
-                    <span>R</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`nle-live-switch-btn ${multicamLayoutMode === "scene-grid" ? "is-live" : ""}`}
-                    onClick={() =>
-                      activateManualLayoutMode(
-                        "scene-grid",
-                        "Show Everyone is now manual. Auto Director is paused until you re-arm it."
-                      )
-                    }
-                  >
-                    <strong>Show Everyone</strong>
-                    <span>Grid</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`nle-live-switch-btn ${multicamLayoutMode === "split-vertical" ? "is-live" : ""}`}
-                    onClick={() =>
-                      activateManualLayoutMode(
-                        "split-vertical",
-                        "Shared-moment split is now manual. Auto Director is paused until you re-arm it."
-                      )
-                    }
-                  >
-                    <strong>Shared Moment</strong>
-                    <span>Dual</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`nle-live-switch-btn is-accent ${autoDirectorEnabled ? "is-live" : ""}`}
-                    onClick={() => handleRunQuickAction("multi-smart")}
-                  >
-                    <strong>Auto Direct</strong>
-                    <span>AI</span>
-                  </button>
-                </div>
+              ) : null}
+              {renderExportStageTracker()}
 
-                {selectedManualSwitch && manualRenderEditsEnabled && (
-                  <div className="nle-manual-cut-panel is-studio-panel">
-                    <div className="nle-manual-cut-header">
-                      <div>
-                        <strong>
-                          Selected cut:{" "}
-                          {selectedManualSwitch.layoutMode && selectedManualSwitch.layoutMode !== "cut"
-                            ? MANUAL_TIMELINE_LAYOUT_LABELS[selectedManualSwitch.layoutMode]
-                            : readySources.find(source => source.id === selectedManualSwitch.cameraId)?.label ||
-                              selectedManualSwitch.cameraId}
-                        </strong>
-                        <span>
-                          Starts at {formatDurationLabel(Number(selectedManualSwitch.startTime || 0))}
-                        </span>
-                      </div>
-                      <div className="nle-sync-actions">
-                        <button
-                          className="nle-mini-btn"
-                          type="button"
-                          onClick={() => handleNudgeSelectedSwitch(-0.1)}
-                          disabled={Number(selectedManualSwitch.startTime || 0) <= 0.001}
-                        >
-                          -0.1s
-                        </button>
-                        <button
-                          className="nle-mini-btn"
-                          type="button"
-                          onClick={() => handleNudgeSelectedSwitch(0.1)}
-                          disabled={Number(selectedManualSwitch.startTime || 0) <= 0.001}
-                        >
-                          +0.1s
-                        </button>
-                        <button
-                          className="nle-mini-btn nle-mini-btn-accent"
-                          type="button"
-                          onClick={() => handleRemoveSwitch(selectedManualSwitch.id)}
-                          disabled={Number(selectedManualSwitch.startTime || 0) <= 0.001}
-                        >
-                          Delete Cut
-                        </button>
-                      </div>
-                    </div>
-                    <div className="nle-manual-cut-camera-row">
-                      {studioMonitorSlots.filter(Boolean).map((source, index) => (
-                        <button
-                          key={`studio-selected-cut-camera-${source.id}`}
-                          type="button"
-                          className={`nle-mini-btn ${
-                            selectedManualSwitch.cameraId === source.id ? "nle-mini-btn-accent" : ""
-                          }`}
-                          onClick={() => handleAssignSelectedSwitchCamera(source.id)}
-                        >
-                          {getStudioSlotLabel(index)}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {renderCloudRenderWindowPanel()}
-
-                <div className="nle-footer-grid is-studio-footer">
-                  <div className="nle-footer-note">
-                    <strong>Cam Combiner</strong>
-                    <span>
-                      Original audio stays continuous. Add camera angles, then let automatic
-                      preflight prove start/middle/end sync before paid render.
-                    </span>
-                  </div>
-                  <div className="nle-footer-actions">
-                    <button
+              {exportResult ? (
+                <div className="nle-export-result">
+                  <strong>Multicam master ready</strong>
+                  <span>
+                    {exportResult.isServerRender
+                      ? "Server render is available as MP4. Download it or continue into the editor."
+                      : "The browser render is available as WebM. Download it or continue into the editor."}
+                  </span>
+                  <div className="nle-export-actions">
+                    <a
                       className="nle-btn secondary"
-                      type="button"
-                      onClick={handleResetManualSwitchPlan}
-                      disabled={!timelineDuration}
+                      href={exportResult.url}
+                      download={exportResult.file?.name || exportResult.file}
+                      target={exportResult.isServerRender ? "_blank" : undefined}
+                      rel={exportResult.isServerRender ? "noopener noreferrer" : undefined}
                     >
-                      Reset Cuts
-                    </button>
-                    <button
-                      className="nle-btn"
-                      type="button"
-                      onClick={handleServerExport}
-                      disabled={
-                        isExporting ||
-                        cleanAudioSyncIsRunning ||
-                        syncingCameraId === "external-clean-audio" ||
-                        !canExportProject ||
-                        isSingleSourceWorkflow
-                      }
-                    >
-                      {cleanAudioSyncIsRunning || syncingCameraId === "external-clean-audio"
-                        ? "Sync Check Running..."
-                        : serverExportPending
-                        ? "Preparing Verified MP4..."
-                        : hasExternalCleanAudio
-                          ? `Render Clean Audio MP4 (${multicamRenderCreditEstimate} cr)`
-                          : `Render MP4 on Server (${multicamRenderCreditEstimate} cr)`}
-                    </button>
-                    <button
-                      className="nle-btn secondary"
-                      type="button"
-                      onClick={handleExport}
-                      disabled={isExporting || !canExportProject}
-                    >
-                      Render WebM in Browser
+                      Download Master
+                    </a>
+                    <button className="nle-btn" type="button" onClick={handleUseExportInEditor}>
+                      Use This Master
                     </button>
                   </div>
                 </div>
+              ) : null}
 
-                {isExporting ? (
-                  <div className="nle-export-progress">
-                    <div
-                      className="nle-export-progress-bar"
-                      style={{ width: `${Math.round(exportProgress * 100)}%` }}
-                    />
-                    <span className="nle-export-progress-label">
-                      {Math.round(exportProgress * 100)}%
-                    </span>
-                  </div>
-                ) : null}
-
-                {exportResult ? (
-                  <div className="nle-export-result">
-                    <strong>Multicam master ready</strong>
-                    <span>
-                      {exportResult.isServerRender
-                        ? "Server render is available as MP4. Download it or continue into the editor."
-                        : "The browser render is available as WebM. Download it or continue into the editor."}
-                    </span>
-                    <div className="nle-export-actions">
-                      <a
-                        className="nle-btn secondary"
-                        href={exportResult.url}
-                        download={exportResult.file?.name || exportResult.file}
-                        target={exportResult.isServerRender ? "_blank" : undefined}
-                        rel={exportResult.isServerRender ? "noopener noreferrer" : undefined}
-                      >
-                        Download Master
-                      </a>
-                      <button className="nle-btn" type="button" onClick={handleUseExportInEditor}>
-                        Use This Master
-                      </button>
-                    </div>
-                  </div>
-                ) : null}
-
-                {renderRecentRendersPanel()}
-
-                {statusMessage ? <div className="nle-status-banner">{statusMessage}</div> : null}
-              </div>
+              {renderRecentRendersPanel()}
+              {statusMessage ? <div className="nle-status-banner">{statusMessage}</div> : null}
             </section>
-
-            <aside className={`nle-studio-sidebar nle-studio-sidebar-right ${rightStudioRailCollapsed ? "is-collapsed" : ""}`}>
-              <button
-                type="button"
-                className="nle-studio-rail-toggle is-right"
-                onClick={() => setRightStudioRailCollapsed(value => !value)}
-                aria-label={rightStudioRailCollapsed ? "Expand right sidebar" : "Collapse right sidebar"}
-              >
-                {rightStudioRailCollapsed ? "‹" : "›"}
-              </button>
-              {!rightStudioRailCollapsed && (
-                <>
-                  <div className="nle-studio-card nle-studio-assist-card">
-                    <div className="nle-studio-card-header">
-                      <strong>AI Director Assist</strong>
-                      <span>{autoDirectorEnabled ? "Live" : "Manual"}</span>
-                    </div>
-                    <div className="nle-studio-ai-section">
-                      <label>Speaker Analysis</label>
-                      {studioSpeakerRows.map(row => (
-                        <div key={`speaker-${row.id}`} className="nle-studio-speaker-row">
-                          <div className="nle-studio-speaker-copy">
-                            <strong>
-                              {row.label}
-                              {row.isCurrent ? " (Current)" : ""}
-                            </strong>
-                            <span>{Math.round(row.confidence * 100)}%</span>
-                          </div>
-                          <div className="nle-director-meter-track">
-                            <div
-                              className={`nle-director-meter-fill ${row.isCurrent ? "is-lead" : "is-companion"}`}
-                              style={{ width: `${Math.round(row.confidence * 100)}%` }}
-                            />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="nle-studio-ai-section">
-                      <label>Suggested Action</label>
-                      <strong>{studioSuggestedAction.label}</strong>
-                      <span>{studioSuggestedAction.detail}</span>
-                    </div>
-                    <div className="nle-studio-ai-actions">
-                      <button
-                        className="nle-btn"
-                        type="button"
-                        onClick={() => {
-                          if (studioSuggestedAction.actionId) {
-                            handleRunQuickAction(studioSuggestedAction.actionId);
-                          } else if (studioUpcomingSpeaker) {
-                            handleRecordSwitch(studioUpcomingSpeaker.id);
-                          }
-                        }}
-                      >
-                        Accept
-                      </button>
-                      <button
-                        className="nle-btn secondary"
-                        type="button"
-                        onClick={() => {
-                          setAutoDirectorEnabled(false);
-                          setMulticamLayoutMode(currentMode => (currentMode === "smart" ? "cut" : currentMode));
-                          setStatusMessage("AI suggestion ignored. Manual director still has control.");
-                        }}
-                      >
-                        Ignore
-                      </button>
-                    </div>
-                    <label className="nle-clean-audio-toggle is-studio-toggle">
-                      <input
-                        type="checkbox"
-                        checked={autoDirectorEnabled}
-                        onChange={event => {
-                          setAutoDirectorEnabled(event.target.checked);
-                          setMulticamLayoutMode(currentMode =>
-                            event.target.checked ? "smart" : currentMode === "smart" ? "cut" : currentMode
-                          );
-                        }}
-                      />
-                      <span>Auto Follow Suggestions</span>
-                    </label>
-                  </div>
-
-                  <div className="nle-studio-card nle-studio-sync-card">
-                    <div className="nle-studio-card-header">
-                      <strong>Sync + Offset</strong>
-                      <span>{hasExternalCleanAudio ? "Clean audio master" : "Manual sync"}</span>
-                    </div>
-                <div className="nle-panel-actions">
-                  <button
-                    className="nle-btn secondary"
-                    type="button"
-                    onClick={() => externalAudioInputRef.current?.click()}
-                  >
-                    {externalAudioTrack ? "Replace Clean Audio" : "Upload Clean Audio"}
-                  </button>
-                  <button
-                    className="nle-btn secondary"
-                    type="button"
-                    onClick={handleSyncAllCamerasToExternalAudio}
-                    disabled={!externalAudioUrl || syncingCameraId}
-                  >
-                    Sync to Clean Audio
-                  </button>
-                </div>
-                <label className="nle-clean-audio-toggle is-studio-toggle">
-                  <input
-                    type="checkbox"
-                    checked={useExternalCleanAudio}
-                    disabled={!externalAudioTrack}
-                    onChange={event => {
-                      if (event.target.checked && !externalAudioTrack) {
-                        toast.error("Upload external clean audio first.");
-                        return;
-                      }
-                      setUseExternalCleanAudio(event.target.checked);
-                    }}
-                  />
-                  <span>Audio locked as master</span>
-                </label>
-                {shouldUseBackendCleanAudioSync && (
-                  <p className="nle-clean-audio-tip is-warning">
-                    Large project: AutoPromote will use the safer server-side sync path when preview or export needs it.
-                  </p>
-                )}
-                {studioMonitorSlots.map((source, index) => {
-                  if (!source) {
-                    return (
-                      <div key={`offset-empty-${index}`} className="nle-studio-offset-card is-empty">
-                        <div className="nle-studio-offset-head">
-                          <strong>Camera {index + 1}</strong>
-                          <span className="nle-camera-badge">Empty</span>
-                        </div>
-                        <button
-                          className="nle-btn secondary"
-                          type="button"
-                          onClick={() => fileInputRef.current?.click()}
-                        >
-                          Load Visual
-                        </button>
-                      </div>
-                    );
-                  }
-                  const mediaUrl = getSourceMediaUrl(source);
-                  const syncUsesCleanAudio = hasExternalCleanAudio;
-                  const syncDisabled =
-                    !mediaUrl ||
-                    !isVideoSource(source) ||
-                    syncingCameraId === source.id ||
-                    (syncUsesCleanAudio ? !externalAudioUrl : source.id === masterAudioCameraId);
-                  return (
-                    <div key={`offset-${source.id}`} className="nle-studio-offset-card">
-                      <div className="nle-studio-offset-head">
-                        <strong>{getStudioSlotLabel(index)}</strong>
-                        <span className={`nle-camera-badge ${source.manualOffsetLocked ? "is-live" : ""}`}>
-                          {source.manualOffsetLocked
-                            ? "visual lock"
-                            : source.backendSyncStatus
-                              ? "machine sync"
-                              : "review"}
-                        </span>
-                      </div>
-                      <div className="nle-field-grid">
-                        <label className="nle-field-block">
-                          <span>Offset Seconds</span>
-                          <input
-                            className="nle-input"
-                            type="number"
-                            step="0.05"
-                            value={Number(source.offsetSeconds) || 0}
-                            onChange={event => handleOffsetChange(source.id, event.target.value)}
-                          />
-                        </label>
-                        <label className="nle-field-block nle-radio-block">
-                          <span>Use Audio</span>
-                          <input
-                            type="radio"
-                            checked={masterAudioCameraId === source.id}
-                            onChange={() => setMasterAudioCameraId(source.id)}
-                            disabled={!mediaUrl || !isVideoSource(source)}
-                          />
-                        </label>
-                      </div>
-                      <div className="nle-sync-actions">
-                        <button className="nle-mini-btn" type="button" onClick={() => handleNudgeOffset(source.id, -1)}>
-                          -1
-                        </button>
-                        <button className="nle-mini-btn" type="button" onClick={() => handleNudgeOffset(source.id, -0.1)}>
-                          -0.1
-                        </button>
-                        <button className="nle-mini-btn" type="button" onClick={() => handleNudgeOffset(source.id, 0.1)}>
-                          +0.1
-                        </button>
-                        <button className="nle-mini-btn" type="button" onClick={() => handleNudgeOffset(source.id, 1)}>
-                          +1
-                        </button>
-                      </div>
-                      <div className="nle-sync-actions">
-                        <button
-                          className="nle-mini-btn nle-mini-btn-accent"
-                          type="button"
-                          onClick={() => {
-                            setSources(currentSources =>
-                              currentSources.map(currentSource =>
-                                currentSource.id === source.id
-                                  ? { ...currentSource, manualOffsetLocked: true }
-                                  : currentSource
-                              )
-                            );
-                            setStatusMessage(`${source.label || getStudioSlotLabel(index)} offset marked as reviewed for this session.`);
-                          }}
-                        >
-                          Mark Reviewed
-                        </button>
-                        <button
-                          className="nle-mini-btn"
-                          type="button"
-                          onClick={() =>
-                            setSources(currentSources =>
-                              currentSources.map(currentSource =>
-                                currentSource.id === source.id
-                                  ? {
-                                      ...currentSource,
-                                      offsetSeconds: 0,
-                                      manualOffsetLocked: false,
-                                      backendSyncStatus: null,
-                                      backendSyncWarning: null,
-                                    }
-                                  : currentSource
-                              )
-                            )
-                          }
-                        >
-                          Reset Offset
-                        </button>
-                        <button
-                          className="nle-mini-btn nle-mini-btn-accent"
-                          type="button"
-                          onClick={() =>
-                            syncUsesCleanAudio
-                              ? handleSyncCameraToExternalAudio(source.id)
-                              : handleAutoSyncToMasterAudio(source.id)
-                          }
-                          disabled={syncDisabled}
-                        >
-                          {syncUsesCleanAudio ? "Check Sync" : "Sync by Audio"}
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-                  </div>
-                </>
-              )}
-            </aside>
           </div>
         )}
 
@@ -9064,7 +8204,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
               <span className="nle-chip nle-chip-secondary">Mode: {workflowModeLabel}</span>
               {!isSingleSourceWorkflow && (
                 <span className={`nle-chip ${autoDirectorEnabled ? "" : "nle-chip-secondary"}`}>
-                  {autoDirectorEnabled ? "Auto Director armed" : "Manual override live"}
+                  {autoDirectorEnabled ? "Auto Director armed" : "Automatic render"}
                 </span>
               )}
               <span className="nle-chip">Reason: {directorSnapshot.reasonTitle}</span>
@@ -9372,14 +8512,6 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                     Disable Flow
                   </button>
                   <button
-                    className="nle-btn secondary"
-                    type="button"
-                    onClick={handleSplitFlowAtPlayhead}
-                    disabled={!flowEditEnabled || !currentFlowSegment}
-                  >
-                    Add Cut at Playhead
-                  </button>
-                  <button
                     className={`nle-btn secondary ${flowIntensityMode === "harder" ? "is-hot" : ""}`}
                     type="button"
                     onClick={toggleFlowIntensityMode}
@@ -9421,7 +8553,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                     <small>
                       {flowEditPlan?.rescuePolishSummary ||
                         flowEditPlan?.rescueSummary ||
-                        "Every segment keeps manual override available after generation."}
+                        "Automatic segments are previewed here; paid render stays automatic."}
                     </small>
                   </div>
                   {flowEditPlan?.loopsAudio && (
@@ -9453,17 +8585,10 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                       type="button"
                       className={`nle-layout-mode-btn ${multicamLayoutMode === option.id ? "is-active" : ""}`}
                       onClick={() => {
-                        setMulticamLayoutMode(option.id);
-                        // Also apply to the currently selected flow segment
-                        if (selectedFlowSegmentId) {
-                          updateFlowPlanSegments(segments =>
-                            segments.map(seg =>
-                              seg.id === selectedFlowSegmentId
-                                ? { ...seg, layoutMode: option.id }
-                                : seg
-                            )
-                          );
-                        }
+                        activateManualLayoutMode(
+                          option.id,
+                          `${option.label} preview only. Paid render stays automatic.`
+                        );
                       }}
                     >
                       {option.label}
@@ -9475,7 +8600,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
             <div className="nle-preview-shell">
               <div
                 ref={previewStageRef}
-                className={`nle-preview-stage is-layout-${effectiveMulticamLayoutMode} ${focusPickerActive ? "is-focus-picking" : ""} ${previewStageMoodClass}`}
+                className={`nle-preview-stage is-layout-${previewMulticamLayoutMode} is-reaction-${previewReactionSide} ${focusPickerActive ? "is-focus-picking" : ""} ${previewStageMoodClass}`}
                 style={previewStageStyle}
                 onClick={handlePreviewStageFocusPick}
               >
@@ -9503,7 +8628,9 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                 </div>
                 {readySources.map(source => {
                   const previewClassName = `nle-preview-video ${source.id === activeCameraId ? "is-active" : ""} ${
-                    source.id === secondaryCameraId ? "is-secondary" : ""
+                    source.id === previewSecondaryCameraId || previewReactionCameraIds.includes(source.id)
+                      ? "is-secondary"
+                      : ""
                   }`;
                   if (isImageSource(source)) {
                     return (
@@ -9565,17 +8692,17 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                 )}
                 {fadeStyle && <div style={fadeStyle} />}
                 {!isSingleSourceWorkflow &&
-                  effectiveMulticamLayoutMode === "split-vertical" &&
-                  secondaryCamera && <div className="nle-preview-split-divider" />}
+                  previewMulticamLayoutMode === "split-vertical" &&
+                  previewSecondaryCamera && <div className="nle-preview-split-divider" />}
                 {!isSingleSourceWorkflow &&
-                  effectiveMulticamLayoutMode === "scene-grid" &&
-                  visibleLayoutCameras.length > 0 && (
+                  previewMulticamLayoutMode === "scene-grid" &&
+                  previewVisibleLayoutCameras.length > 0 && (
                     <>
-                      {visibleLayoutCameras.map((camera, index) => {
+                      {previewVisibleLayoutCameras.map((camera, index) => {
                         const viewport = getSceneGridViewports(
                           100,
                           100,
-                          visibleLayoutCameras.length
+                          previewVisibleLayoutCameras.length
                         )[index];
                         if (!viewport) return null;
                         return (
@@ -9592,19 +8719,19 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                         );
                       })}
                     </>
-                  )}
+                )}
                 {!isSingleSourceWorkflow &&
-                  effectiveMulticamLayoutMode !== "scene-grid" &&
+                  previewMulticamLayoutMode !== "scene-grid" &&
                   activeCamera && (
                     <>
                       <div className="nle-preview-label nle-preview-label-primary">
                         {activeCamera.label || "Primary"}
                       </div>
-                      {secondaryCamera && effectiveMulticamLayoutMode !== "cut" && (
+                      {previewSecondaryCamera && previewMulticamLayoutMode !== "cut" && (
                         <div
-                          className={`nle-preview-label nle-preview-label-secondary ${effectiveMulticamLayoutMode === "pip" ? "is-pip" : "is-split"}`}
+                          className={`nle-preview-label nle-preview-label-secondary ${previewMulticamLayoutMode === "pip" ? "is-pip" : "is-split"}`}
                         >
-                          {secondaryCamera.label || "Secondary"}
+                          {previewSecondaryCamera.label || "Secondary"}
                         </div>
                       )}
                     </>
@@ -9965,6 +9092,17 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                       ))}
                     </div>
 
+                    {readySources.length >= 2 && (
+                      <label className="nle-clean-audio-toggle is-studio-toggle">
+                        <input
+                          type="checkbox"
+                          checked={externalAudioSpeakerChannelsSwapped}
+                          onChange={event => setExternalAudioSpeakerChannelsSwapped(event.target.checked)}
+                        />
+                        <span>Swap clean-audio speaker channels</span>
+                      </label>
+                    )}
+
                     <div className="nle-sync-actions">
                       <button
                         className="nle-btn"
@@ -9988,11 +9126,11 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                     </div>
                   </>
                 ) : (
-                  <div className="nle-clean-audio-empty">
+                      <div className="nle-clean-audio-empty">
                     <strong>Podcast-ready audio lane</strong>
                     <span>
-                      Upload WAV, MP3, M4A, or a video file with the clean sound. If waveform sync
-                      cannot lock, the manual offset controls stay available.
+                      Upload WAV, MP3, M4A, or a video file with the clean sound. If automatic sync
+                      cannot prove timing, paid render stays blocked.
                     </span>
                   </div>
                 )}
@@ -10183,25 +9321,24 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                       </div>
                     ) : (
                       <div className="nle-camera-quick-controls">
-                        <label className="nle-field-block">
-                          <span>Offset Seconds</span>
-                          <input
-                            className="nle-input"
-                            type="number"
-                            step="0.05"
-                            value={Number(source.offsetSeconds) || 0}
-                            onChange={event => handleOffsetChange(source.id, event.target.value)}
-                          />
-                        </label>
-                        <label className="nle-field-block nle-radio-block">
-                          <span>Use Audio</span>
-                          <input
-                            type="radio"
-                            checked={masterAudioCameraId === source.id}
-                            onChange={() => setMasterAudioCameraId(source.id)}
-                            disabled={!mediaUrl || !isVideoSource(source)}
-                          />
-                        </label>
+                        <div className="nle-field-block">
+                          <span>Computed Sync</span>
+                          <strong>
+                            {source.backendSyncStatus
+                              ? `${Number(source.offsetSeconds || 0).toFixed(2)}s`
+                              : "Needs proof"}
+                          </strong>
+                        </div>
+                        <div className="nle-field-block">
+                          <span>Audio Role</span>
+                          <strong>
+                            {hasExternalCleanAudio
+                              ? "External clean master"
+                              : masterAudioCameraId === source.id
+                                ? "Camera master"
+                                : "Camera reference"}
+                          </strong>
+                        </div>
                       </div>
                     )}
                     {isExpanded && (
@@ -10244,11 +9381,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                           <div className="nle-source-meta-row">
                             <span>
                               Sync:{" "}
-                              {source.manualOffsetLocked
-                                ? "visual lock"
-                                : source.backendSyncStatus
-                                  ? "machine sync"
-                                  : "not solved"}
+                              {source.backendSyncStatus ? "machine sync" : "not solved"}
                             </span>
                             <span>
                               Confidence:{" "}
@@ -10261,7 +9394,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                         {!isFlowWorkspace && (source.backendSyncMethod || source.backendSyncWarning) && (
                           <div className="nle-source-meta-row">
                             <span>
-                              Method: {source.backendSyncMethod || "manual"}
+                              Method: {source.backendSyncMethod || "automatic"}
                             </span>
                             <span>
                               {source.backendSyncWarning || "Locked to shared timeline"}
@@ -10296,35 +9429,6 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                           </label>
                         )}
                         <div className="nle-sync-actions">
-                          {!isFlowWorkspace && (
-                            <>
-                              <button
-                                className="nle-mini-btn"
-                                type="button"
-                                onClick={() => handleNudgeOffset(source.id, -0.1)}
-                                disabled={!mediaUrl}
-                              >
-                                -0.1s
-                              </button>
-                              <button
-                                className="nle-mini-btn"
-                                type="button"
-                                onClick={() => handleNudgeOffset(source.id, 0.1)}
-                                disabled={!mediaUrl}
-                              >
-                                +0.1s
-                              </button>
-                              <button
-                                className="nle-mini-btn nle-mini-btn-accent"
-                                type="button"
-                                onClick={() => handleAlignSourceStartToPlayhead(source.id)}
-                                disabled={!mediaUrl}
-                                title="Align this source so its start begins at the current playhead"
-                              >
-                                Start Here
-                              </button>
-                            </>
-                          )}
                           <button
                             className="nle-mini-btn nle-mini-btn-accent"
                             type="button"
@@ -10444,9 +9548,9 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                     type="button"
                     onClick={handleResetManualSwitchPlan}
                     disabled={!timelineDuration}
-                    title="Clear the auto cut list and hold one camera until you place your own switches."
+                    title="Clear the preview override. Paid render stays automatic."
                   >
-                    Reset Cuts
+                    Clear Preview
                   </button>
                 )}
                 {readySources.map((source, index) => (
@@ -10549,36 +9653,17 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                 {!isSingleSourceWorkflow && !flowEditEnabled && (
                   <>
                     <div className="nle-render-safety-toggle">
-                      <button
-                        type="button"
-                        className={`nle-mini-btn ${manualRenderEditsEnabled ? "nle-mini-btn-accent" : ""}`}
-                        onClick={() => {
-                          setManualRenderEditsEnabled(value => !value);
-                          setPreviewProgramOverride(null);
-                          setStatusMessage(
-                            manualRenderEditsEnabled
-                              ? "Manual render edits off. Camera/layout buttons are preview-only again."
-                              : "Manual render edits on. Camera/layout buttons will change the final render plan."
-                          );
-                        }}
-                      >
-                        {manualRenderEditsEnabled ? "Manual edits affect render" : "Preview only"}
-                      </button>
-                      <span>
-                        {manualRenderEditsEnabled
-                          ? "Careful: these cuts will render."
-                          : "Safe sync check: camera/layout buttons do not render."}
-                      </span>
+                      <span>Safe preview: camera/layout buttons do not render. Paid MP4 is automatic.</span>
                       {previewProgramOverride ? (
                         <button
                           type="button"
                           className="nle-mini-btn"
                           onClick={() => {
                             setPreviewProgramOverride(null);
-                            setStatusMessage("Preview override cleared. Program Output follows the render plan again.");
+                            setStatusMessage("Preview override cleared. Program Output follows automatic director preview again.");
                           }}
                         >
-                          Follow render plan
+                          Clear preview
                         </button>
                       ) : null}
                     </div>
@@ -10603,26 +9688,17 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                         <strong>Wide</strong>
                         <span>W</span>
                       </button>
-                      <button
-                        type="button"
-                        className={`nle-live-switch-btn ${multicamLayoutMode === "pip" ? "is-live" : ""}`}
-                        onClick={() =>
-                          activateManualLayoutMode(
-                            "pip",
-                            "Reaction window is now manual. Auto Director is paused until you re-arm it."
-                          )
-                        }
-                      >
+                      <div className="nle-reaction-always-chip">
                         <strong>Reaction</strong>
-                        <span>R</span>
-                      </button>
+                        <span>{readySources.length >= 2 ? "Always on" : "Needs 2 cams"}</span>
+                      </div>
                       <button
                         type="button"
                         className={`nle-live-switch-btn ${multicamLayoutMode === "scene-grid" ? "is-live" : ""}`}
                         onClick={() =>
                           activateManualLayoutMode(
                             "scene-grid",
-                            "Show Everyone is now manual. Auto Director is paused until you re-arm it."
+                            "Show Everyone preview only. Paid render stays automatic."
                           )
                         }
                       >
@@ -10635,7 +9711,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                         onClick={() =>
                           activateManualLayoutMode(
                             "split-vertical",
-                            "Shared-moment split is now manual. Auto Director is paused until you re-arm it."
+                            "Shared Moment preview only. Paid render stays automatic."
                           )
                         }
                       >
@@ -10652,135 +9728,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                       </button>
                     </div>
 
-                    {selectedManualSwitch && manualRenderEditsEnabled && (
-                      <div className="nle-manual-cut-panel">
-                        <div className="nle-manual-cut-header">
-                          <div>
-                            <strong>
-                              Selected cut:{" "}
-                              {readySources.find(source => source.id === selectedManualSwitch.cameraId)?.label ||
-                                selectedManualSwitch.cameraId}
-                            </strong>
-                            <span>
-                              Starts at {formatDurationLabel(Number(selectedManualSwitch.startTime || 0))}
-                            </span>
-                          </div>
-                          <div className="nle-sync-actions">
-                            <button
-                              className="nle-mini-btn"
-                              type="button"
-                              onClick={() => handleNudgeSelectedSwitch(-0.1)}
-                              disabled={Number(selectedManualSwitch.startTime || 0) <= 0.001}
-                            >
-                              -0.1s
-                            </button>
-                            <button
-                              className="nle-mini-btn"
-                              type="button"
-                              onClick={() => handleNudgeSelectedSwitch(0.1)}
-                              disabled={Number(selectedManualSwitch.startTime || 0) <= 0.001}
-                            >
-                              +0.1s
-                            </button>
-                            <button
-                              className="nle-mini-btn nle-mini-btn-accent"
-                              type="button"
-                              onClick={() => handleRemoveSwitch(selectedManualSwitch.id)}
-                              disabled={Number(selectedManualSwitch.startTime || 0) <= 0.001}
-                            >
-                              Delete Cut
-                            </button>
-                          </div>
-                        </div>
-                        <div className="nle-manual-cut-camera-row">
-                          {readySources.map((source, index) => (
-                            <button
-                              key={`selected-cut-camera-${source.id}`}
-                              type="button"
-                              className={`nle-mini-btn ${
-                                selectedManualSwitch.cameraId === source.id ? "nle-mini-btn-accent" : ""
-                              }`}
-                              onClick={() => handleAssignSelectedSwitchCamera(source.id)}
-                            >
-                              {normalizeSourceLabel(source.label, index)}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
                   </>
-                )}
-
-                {flowEditEnabled && selectedFlowSegment && (
-                  <div className="nle-flow-manual-panel">
-                    <div className="nle-single-cam-note">
-                      <strong>
-                        {selectedFlowSegment.label || selectedFlowSegment.cameraId} ·{" "}
-                        {selectedFlowSegment.energyZone} ·{" "}
-                        {Number(selectedFlowSegment.playbackRate || 1).toFixed(2)}x
-                        {selectedFlowSegment.heroLabel ? ` · ${selectedFlowSegment.heroLabel}` : ""}
-                      </strong>
-                      <span>{selectedFlowSegment.reason}</span>
-                    </div>
-                    <div className="nle-flow-manual-grid">
-                      <div className="nle-single-cam-tool-group">
-                        <span>Move Cut Point</span>
-                        <div className="nle-sync-actions">
-                          <button
-                            className="nle-mini-btn"
-                            type="button"
-                            onClick={() => handleMoveFlowCut(-0.1)}
-                            disabled={!selectedFlowSegment}
-                          >
-                            -0.1s
-                          </button>
-                          <button
-                            className="nle-mini-btn"
-                            type="button"
-                            onClick={() => handleMoveFlowCut(0.1)}
-                            disabled={!selectedFlowSegment}
-                          >
-                            +0.1s
-                          </button>
-                        </div>
-                      </div>
-                      <div className="nle-single-cam-tool-group">
-                        <span>Switch Camera</span>
-                        <div className="nle-sync-actions">
-                          {readySources.map(source => (
-                            <button
-                              key={`flow-segment-camera-${source.id}`}
-                              className={`nle-mini-btn ${
-                                selectedFlowSegment.cameraId === source.id
-                                  ? "nle-mini-btn-accent"
-                                  : ""
-                              }`}
-                              type="button"
-                              onClick={() => handleApplyCameraToFlowSegment(source.id)}
-                            >
-                              {source.label}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="nle-single-cam-tool-group">
-                        <span>Segment Actions</span>
-                        <div className="nle-sync-actions">
-                          <button className="nle-mini-btn" type="button" onClick={handleSplitFlowAtPlayhead}>
-                            Add Cut
-                          </button>
-                          <button
-                            className="nle-mini-btn nle-mini-btn-accent"
-                            type="button"
-                            onClick={() => handleDeleteFlowSegment(selectedFlowSegment.id)}
-                            disabled={!selectedFlowSegment}
-                          >
-                            Delete Cut
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
                 )}
 
                 <div className="nle-switch-list">
@@ -11117,6 +10065,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                 </span>
               </div>
             ) : null}
+            {renderExportStageTracker()}
 
             {exportResult ? (
               <div className="nle-export-result">

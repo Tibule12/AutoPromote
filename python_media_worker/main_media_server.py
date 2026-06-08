@@ -14,6 +14,7 @@ import logging
 import base64
 import mimetypes
 import json
+import math
 import re  # Added for parsing silence output
 import hashlib
 import itertools
@@ -161,6 +162,11 @@ except ImportError:
         whisper = None
 
 try:
+    from faster_whisper import WhisperModel as FasterWhisperModel
+except ImportError:
+    FasterWhisperModel = None
+
+try:
     import yt_dlp
 except ImportError:
     import logging
@@ -198,12 +204,27 @@ if IS_PRODUCTION_ENV and not MEDIA_WORKER_TASK_SECRET:
 # 'tiny' is fast but less accurate. 'base' or 'small' are better for production.
 # We will load it on first request to avoid slow startup.
 model_whisper = {}
+model_faster_whisper = {}
 AI_RERANK_BACKOFF_UNTIL = 0.0
 
 
 def get_whisper_device():
     configured = str(os.getenv("WHISPER_DEVICE", "cpu")).strip().lower()
     return configured or "cpu"
+
+
+def get_transcription_engine():
+    configured = str(
+        os.getenv("MULTICAM_CAPTION_WHISPER_ENGINE")
+        or os.getenv("WHISPER_ENGINE")
+        or "faster"
+    ).strip().lower()
+    if configured in {"faster", "faster-whisper", "ctranslate2"} and FasterWhisperModel is not None:
+        return "faster"
+    if configured in {"openai", "openai-whisper", "whisper"}:
+        return "openai"
+    return "faster" if FasterWhisperModel is not None else "openai"
+
 
 def get_whisper_model(model_name=None):
     global model_whisper
@@ -220,6 +241,97 @@ def get_whisper_model(model_name=None):
     logger.info(f"Loading Whisper model ({resolved_model_name}) on {device}...")
     loaded = whisper.load_model(resolved_model_name, device=device)
     model_whisper[cache_key] = loaded
+    return loaded
+
+
+def get_faster_whisper_device():
+    configured = str(
+        os.getenv("FASTER_WHISPER_DEVICE")
+        or os.getenv("WHISPER_DEVICE")
+        or "auto"
+    ).strip().lower()
+    if configured and configured != "auto":
+        return configured
+    try:
+        import torch
+        if torch.cuda.is_available():
+            return "cuda"
+    except Exception:
+        pass
+    return "cpu"
+
+
+def get_faster_whisper_compute_type(device):
+    configured = str(os.getenv("FASTER_WHISPER_COMPUTE_TYPE") or "").strip()
+    if configured:
+        return configured
+    # int8 is the safest default across CPU and consumer CUDA installs. Some local
+    # CUDA backends report available, then reject float16 at model load time.
+    return "int8"
+
+
+def get_faster_whisper_model(model_name=None):
+    global model_faster_whisper
+    if FasterWhisperModel is None:
+        return None
+
+    resolved_model_name = str(
+        model_name
+        or os.getenv("FASTER_WHISPER_MODEL")
+        or os.getenv("WHISPER_MODEL")
+        or "small"
+    ).strip().lower() or "small"
+    device = get_faster_whisper_device()
+    compute_type = get_faster_whisper_compute_type(device)
+    cache_key = f"{device}::{compute_type}::{resolved_model_name}"
+    cached = model_faster_whisper.get(cache_key)
+    if cached is not None:
+        return cached
+
+    def load_faster_whisper_model(load_device, load_compute_type):
+        logger.info(
+            "Loading faster-whisper model (%s) on %s compute_type=%s...",
+            resolved_model_name,
+            load_device,
+            load_compute_type,
+        )
+        return FasterWhisperModel(
+            resolved_model_name,
+            device=load_device,
+            compute_type=load_compute_type,
+        )
+
+    try:
+        loaded = load_faster_whisper_model(device, compute_type)
+    except ValueError as exc:
+        fallback_device = "cpu"
+        fallback_compute_type = "int8"
+        fallback_cache_key = f"{fallback_device}::{fallback_compute_type}::{resolved_model_name}"
+        fallback_cached = model_faster_whisper.get(fallback_cache_key)
+        if fallback_cached is not None:
+            logger.warning(
+                "faster-whisper load failed on %s/%s (%s); using cached %s/%s model.",
+                device,
+                compute_type,
+                exc,
+                fallback_device,
+                fallback_compute_type,
+            )
+            return fallback_cached
+        if device == fallback_device and compute_type == fallback_compute_type:
+            raise
+        logger.warning(
+            "faster-whisper load failed on %s/%s (%s); retrying on %s/%s.",
+            device,
+            compute_type,
+            exc,
+            fallback_device,
+            fallback_compute_type,
+        )
+        loaded = load_faster_whisper_model(fallback_device, fallback_compute_type)
+        model_faster_whisper[fallback_cache_key] = loaded
+        return loaded
+    model_faster_whisper[cache_key] = loaded
     return loaded
 
 
@@ -261,7 +373,16 @@ logger.info(f"Video encoder: {GPU_VIDEO_ENCODER} (preset={GPU_PRESET})")
 
 def build_multicam_segment_encode_args():
     """Encode short multicam segments quickly while keeping concat-safe output."""
+    color_args = [
+        "-color_primaries",
+        "bt709",
+        "-color_trc",
+        "bt709",
+        "-colorspace",
+        "bt709",
+    ]
     if GPU_VIDEO_ENCODER == "h264_nvenc":
+        fast_composite = multicam_fast_composite_enabled()
         return [
             "-c:v",
             "h264_nvenc",
@@ -270,15 +391,16 @@ def build_multicam_segment_encode_args():
             "-rc",
             "vbr",
             "-cq",
-            os.getenv("MULTICAM_NVENC_CQ", "21"),
+            os.getenv("MULTICAM_NVENC_CQ", "24" if fast_composite else "21"),
             "-b:v",
-            os.getenv("MULTICAM_NVENC_BITRATE", "7000k"),
+            os.getenv("MULTICAM_NVENC_BITRATE", "5000k" if fast_composite else "7000k"),
             "-maxrate:v",
-            os.getenv("MULTICAM_NVENC_MAXRATE", "10000k"),
+            os.getenv("MULTICAM_NVENC_MAXRATE", "7000k" if fast_composite else "10000k"),
             "-bufsize:v",
-            os.getenv("MULTICAM_NVENC_BUFSIZE", "14000k"),
+            os.getenv("MULTICAM_NVENC_BUFSIZE", "10000k" if fast_composite else "14000k"),
             "-pix_fmt",
             "yuv420p",
+            *color_args,
         ]
     return [
         "-c:v",
@@ -287,6 +409,7 @@ def build_multicam_segment_encode_args():
         "ultrafast",
         "-pix_fmt",
         "yuv420p",
+        *color_args,
     ]
 
 
@@ -588,7 +711,23 @@ CONTENT_CAPTION_STYLES = {
     "general": {"mode": "creative_social", "tone": "engaging", "emoji": "✨"},
 }
 
-async def materialize_video_input(video_url, local_path, keep_audio=False):
+def build_cfr_video_filter(max_long_edge=None):
+    filters = []
+    try:
+        max_edge = int(float(max_long_edge or 0))
+    except Exception:
+        max_edge = 0
+    if max_edge > 0:
+        filters.append(
+            "scale="
+            f"'if(gt(iw,ih),min({max_edge},iw),-2)':"
+            f"'if(gt(iw,ih),-2,min({max_edge},ih))'"
+        )
+    filters.append("fps=30")
+    return ",".join(filters)
+
+
+async def materialize_video_input(video_url, local_path, keep_audio=False, max_long_edge=None):
     source = str(video_url or "").strip()
     if not source:
         raise HTTPException(status_code=400, detail="video_url is required")
@@ -656,7 +795,7 @@ async def materialize_video_input(video_url, local_path, keep_audio=False):
                     "-c:v", "libx264",
                     "-preset", "ultrafast",
                     "-crf", "23",
-                    "-vf", "fps=30",
+                    "-vf", build_cfr_video_filter(max_long_edge),
                     *([] if keep_audio else ["-an"]),
                     "-vsync", "cfr",
                     "-movflags", "+faststart",
@@ -725,7 +864,7 @@ async def materialize_video_input(video_url, local_path, keep_audio=False):
                         "-c:v", "libx264",
                         "-preset", "ultrafast",
                         "-crf", "23",
-                        "-vf", "fps=30",
+                        "-vf", build_cfr_video_filter(max_long_edge),
                         *([] if keep_audio else ["-an"]),
                         "-vsync", "cfr",
                         "-movflags", "+faststart",
@@ -771,7 +910,7 @@ async def materialize_video_input(video_url, local_path, keep_audio=False):
                 "-c:v", "libx264",
                 "-preset", "ultrafast",
                 "-crf", "23",
-                "-vf", "fps=30",
+                "-vf", build_cfr_video_filter(max_long_edge),
                 *([] if keep_audio else ["-an"]),
                 "-vsync", "cfr",
                 "-movflags", "+faststart",
@@ -980,6 +1119,29 @@ def cfr_cache_path_for(source_url, keep_audio=False):
     return os.path.join(get_cfr_cache_dir(), f"{cfr_cache_key(source_url)}{suffix}.mp4")
 
 
+def windowed_cfr_cache_path_for(source_url, source_start, duration, keep_audio=False, max_long_edge=None):
+    """Persistent CFR cache path for an explicit source-time window."""
+    source = str(source_url or "").strip()
+    try:
+        stat = os.stat(source) if source and not source.startswith(("http://", "https://")) else None
+    except OSError:
+        stat = None
+    identity = {
+        "source": source,
+        "start": round(max(0.0, float(source_start or 0.0)), 3),
+        "duration": round(max(0.02, float(duration or 0.0)), 3),
+        "keep_audio": bool(keep_audio),
+        "max_long_edge": int(float(max_long_edge or 0)),
+        "version": 1,
+    }
+    if stat is not None:
+        identity["size"] = int(stat.st_size)
+        identity["mtime_ns"] = int(getattr(stat, "st_mtime_ns", int(stat.st_mtime * 1_000_000_000)))
+    key = hashlib.sha256(json.dumps(identity, sort_keys=True).encode("utf-8")).hexdigest()[:32]
+    suffix = "_av" if keep_audio else ""
+    return os.path.join(get_cfr_cache_dir(), f"{key}_win{suffix}.mp4")
+
+
 def get_multicam_audio_analysis_cache_dir():
     """Persistent lightweight audio cache used by Cam Combiner active-speaker scoring."""
     cache_dir = os.getenv(
@@ -1066,11 +1228,110 @@ async def materialize_to_cfr_cache(source_url, keep_audio=False):
     logger.info(f"CFR cache miss — transcoding: {source[:120]}...")
 
     # Transcode directly to the cache .part file
-    await materialize_video_input(source, part_path, keep_audio=keep_audio)
+    max_long_edge = int(os.getenv("MULTICAM_CFR_MAX_LONG_EDGE", "1280") or 1280)
+    await materialize_video_input(
+        source,
+        part_path,
+        keep_audio=keep_audio,
+        max_long_edge=max_long_edge,
+    )
 
     # Atomically promote on success
     os.rename(part_path, cache_path)
     logger.info(f"CFR cache stored ({os.path.getsize(cache_path) / 1024 / 1024:.1f}MB): {cache_path}")
+    return cache_path
+
+
+async def materialize_to_windowed_cfr_cache(source_url, source_start, duration, keep_audio=False):
+    """
+    CFR-transcode only the requested source-time window.
+
+    This is used for explicit proof/full-window renders so local and production
+    jobs do not prebuild a full-episode mezzanine before rendering a short range.
+    The caller must adjust the prepared source offset by source_start/sync_rate.
+    """
+    source = str(source_url or "").strip()
+    if not source:
+        raise HTTPException(status_code=400, detail="source_url is required")
+    start = max(0.0, float(source_start or 0.0))
+    window_duration = max(0.25, float(duration or 0.0))
+    max_long_edge = int(os.getenv("MULTICAM_CFR_MAX_LONG_EDGE", "1280") or 1280)
+    cache_path = windowed_cfr_cache_path_for(
+        source,
+        start,
+        window_duration,
+        keep_audio=keep_audio,
+        max_long_edge=max_long_edge,
+    )
+    part_path = cache_path + ".tmp.mp4"
+
+    if os.path.exists(cache_path) and os.path.getsize(cache_path) > 1024:
+        try:
+            if get_media_duration(cache_path) > 0.1 and (not keep_audio or has_audio_stream(cache_path)):
+                return cache_path
+        except Exception:
+            pass
+
+    if os.path.exists(part_path):
+        try:
+            os.remove(part_path)
+        except OSError:
+            pass
+
+    logger.info(
+        "Windowed CFR cache miss — transcoding %.2fs..%.2fs from %s",
+        start,
+        start + window_duration,
+        source[:120],
+    )
+    cmd = ["ffmpeg", "-y", "-nostdin"]
+    if source.startswith("http://") or source.startswith("https://"):
+        cmd.extend(["-user_agent", "Mozilla/5.0", "-timeout", "30000000"])
+    cmd.extend([
+        "-ss",
+        f"{start:.6f}",
+        "-t",
+        f"{window_duration:.6f}",
+        "-fflags",
+        "+genpts",
+        "-i",
+        source,
+        "-c:v",
+        "libx264",
+        "-preset",
+        "ultrafast",
+        "-crf",
+        "23",
+        "-vf",
+        build_cfr_video_filter(max_long_edge),
+        *([] if keep_audio else ["-an"]),
+        "-vsync",
+        "cfr",
+        "-movflags",
+        "+faststart",
+        part_path,
+    ])
+    await run_subprocess_async(cmd, check=True)
+    if keep_audio and not has_audio_stream(part_path):
+        try:
+            os.remove(part_path)
+        except OSError:
+            pass
+        raise HTTPException(status_code=422, detail="Windowed CFR source has no audio stream after materialization")
+    materialized_duration = get_media_duration(part_path)
+    if materialized_duration <= 0.1:
+        try:
+            os.remove(part_path)
+        except OSError:
+            pass
+        raise HTTPException(status_code=422, detail="Windowed CFR source has no readable duration")
+    os.rename(part_path, cache_path)
+    logger.info(
+        "Windowed CFR cache stored (%.1fMB, %.2fs): %s",
+        os.path.getsize(cache_path) / 1024 / 1024,
+        materialized_duration,
+        cache_path,
+    )
     return cache_path
 
 
@@ -1126,6 +1387,59 @@ def build_transcription_prompt(extra_hint=""):
     return f"{base} {hint}".strip()
 
 def transcribe_with_hints(file_path, *, word_timestamps=False, language=None, prompt_hint="", task=None, model_name=None):
+    normalized_language = normalize_transcription_language(language)
+    engine = get_transcription_engine()
+    prompt = build_transcription_prompt(prompt_hint)
+
+    if engine == "faster":
+        model = get_faster_whisper_model(model_name=model_name)
+        if not model:
+            raise HTTPException(status_code=500, detail="faster-whisper model not allocated")
+        transcription_options = {
+            "word_timestamps": word_timestamps,
+            "temperature": 0,
+            "condition_on_previous_text": False,
+            "compression_ratio_threshold": 2.2,
+            "log_prob_threshold": -0.8,
+            "no_speech_threshold": 0.45,
+            "initial_prompt": prompt,
+            "vad_filter": env_flag("FASTER_WHISPER_VAD_FILTER", default=False),
+        }
+        if normalized_language:
+            transcription_options["language"] = normalized_language
+        if task:
+            transcription_options["task"] = task
+
+        faster_segments, info = model.transcribe(file_path, **transcription_options)
+        segments = []
+        for segment in faster_segments:
+            words = []
+            for word in (getattr(segment, "words", None) or []):
+                words.append(
+                    {
+                        "start": float(getattr(word, "start", 0.0) or 0.0),
+                        "end": float(getattr(word, "end", 0.0) or 0.0),
+                        "word": str(getattr(word, "word", "") or ""),
+                        "probability": float(getattr(word, "probability", 0.0) or 0.0),
+                    }
+                )
+            segments.append(
+                {
+                    "id": int(getattr(segment, "id", len(segments)) or len(segments)),
+                    "start": float(getattr(segment, "start", 0.0) or 0.0),
+                    "end": float(getattr(segment, "end", 0.0) or 0.0),
+                    "text": str(getattr(segment, "text", "") or ""),
+                    "words": words,
+                }
+            )
+        return {
+            "text": " ".join(segment.get("text", "").strip() for segment in segments).strip(),
+            "segments": segments,
+            "language": getattr(info, "language", None),
+            "duration": getattr(info, "duration", None),
+            "engine": "faster-whisper",
+        }
+
     model = get_whisper_model(model_name=model_name)
     if not model:
         raise HTTPException(status_code=500, detail="Whisper model not allocated")
@@ -1138,15 +1452,17 @@ def transcribe_with_hints(file_path, *, word_timestamps=False, language=None, pr
         "compression_ratio_threshold": 2.2,
         "logprob_threshold": -0.8,
         "no_speech_threshold": 0.45,
-        "initial_prompt": build_transcription_prompt(prompt_hint),
+        "initial_prompt": prompt,
     }
-    normalized_language = normalize_transcription_language(language)
     if normalized_language:
         transcription_options["language"] = normalized_language
     if task:
         transcription_options["task"] = task
 
-    return model.transcribe(file_path, **transcription_options)
+    result = model.transcribe(file_path, **transcription_options)
+    if isinstance(result, dict):
+        result["engine"] = "openai-whisper"
+    return result
 
 
 LOW_SIGNAL_TRANSCRIPT_TOKENS = {
@@ -3879,18 +4195,29 @@ def extract_multicam_source_activity_for_mapping(source, overlap_start, duration
         return []
 
 
-def auto_map_multicam_director_channels(prepared_sources, channel_windows, overlap_start, overlap_duration, segment_duration, job_id=None):
+def auto_map_multicam_director_channels(
+    prepared_sources,
+    channel_windows,
+    overlap_start,
+    overlap_duration,
+    segment_duration,
+    job_id=None,
+    analysis_duration_override=None,
+):
     source_candidates = [source for source in prepared_sources or [] if source.get("id")]
     channel_count = min(len(channel_windows or []), len(source_candidates))
     if channel_count < 2:
         return None
-    analysis_duration = max(
-        20.0,
-        min(
-            float(overlap_duration or 0.0),
-            float(os.getenv("MULTICAM_DIRECTOR_CHANNEL_AUTOMAP_SECONDS", "180") or 180),
-        ),
-    )
+    if analysis_duration_override is not None:
+        analysis_duration = max(20.0, float(analysis_duration_override or 0.0))
+    else:
+        analysis_duration = max(
+            20.0,
+            min(
+                float(overlap_duration or 0.0),
+                float(os.getenv("MULTICAM_DIRECTOR_CHANNEL_AUTOMAP_SECONDS", "180") or 180),
+            ),
+        )
     channel_series = [
         multicam_activity_series(channel_windows[index], analysis_duration, segment_duration=segment_duration)
         for index in range(channel_count)
@@ -3927,11 +4254,29 @@ def auto_map_multicam_director_channels(prepared_sources, channel_windows, overl
             best = candidate
     if not best:
         return None
+    alternatives = []
+    for permutation in itertools.permutations(range(channel_count), channel_count):
+        score = 0.0
+        pair_details = []
+        for source_index, channel_index in enumerate(permutation):
+            source_id = source_series[source_index][0]
+            detail = pair_scores.get(source_id, {}).get(channel_index, {"score": -1.0})
+            score += float(detail.get("score", -1.0))
+            pair_details.append({"camera_id": source_id, "channel_index": channel_index, **detail})
+        alternatives.append({"score": round(score, 5), "channel_for_source": permutation, "pairs": pair_details})
+    alternatives.sort(key=lambda item: float(item.get("score", -1.0)), reverse=True)
+    runner_up = alternatives[1] if len(alternatives) > 1 else None
     ordered_pairs = sorted(best["pairs"], key=lambda item: int(item.get("channel_index", 0)))
     mapped_camera_ids = [item.get("camera_id") for item in ordered_pairs if item.get("camera_id")]
     default_camera_ids = [source.get("id") for source in source_candidates[:channel_count]]
+    margin = float(best.get("score", -1.0)) - float(runner_up.get("score", -1.0) if runner_up else -1.0)
     best["mapped_camera_ids"] = mapped_camera_ids
     best["default_camera_ids"] = default_camera_ids
+    best["runner_up_score"] = round(float(runner_up.get("score", -1.0) if runner_up else -1.0), 5)
+    best["score_margin"] = round(margin, 5)
+    min_margin = float(os.getenv("MULTICAM_DIRECTOR_CHANNEL_AUTOMAP_MIN_MARGIN", "0.12") or 0.12)
+    best["mapping_confident"] = bool(margin >= min_margin)
+    best["mapping_confidence_margin_required"] = round(min_margin, 5)
     best["method"] = "auto_correlate_external_channels_to_camera_scratch_audio"
     return best
 
@@ -3944,14 +4289,22 @@ def apply_external_director_channel_activity(
     external_audio_offset_seconds=0.0,
     segment_duration=0.5,
     job_id=None,
+    channel_camera_ids_override=None,
 ):
     if len(prepared_sources or []) < 2 or not external_audio_path or not os.path.exists(external_audio_path):
         return {"status": "skipped", "reason": "missing_external_audio_or_sources"}
 
+    override_ids = [
+        str(item or "").strip()
+        for item in (channel_camera_ids_override or [])
+        if str(item or "").strip()
+    ]
     channel_camera_ids = (os.getenv("MULTICAM_DIRECTOR_CHANNEL_CAMERA_MAP") or "").strip()
-    mapping_method = "env_override" if channel_camera_ids else "source_order"
+    mapping_method = "request_override" if override_ids else "env_override" if channel_camera_ids else "source_order"
     auto_mapping_receipt = None
-    if channel_camera_ids:
+    if override_ids:
+        mapped_camera_ids = override_ids
+    elif channel_camera_ids:
         mapped_camera_ids = [item.strip() for item in channel_camera_ids.split(",") if item.strip()]
     else:
         mapped_camera_ids = [source.get("id") for source in prepared_sources if source.get("id")]
@@ -3960,6 +4313,40 @@ def apply_external_director_channel_activity(
         return {"status": "skipped", "reason": "not_enough_channel_camera_ids"}
 
     external_anchor = max(0.0, float(overlap_start or 0.0) - float(external_audio_offset_seconds or 0.0))
+    analysis_limit = float(os.getenv("MULTICAM_DIRECTOR_CHANNEL_AUTOMAP_SECONDS", "180") or 180)
+    source_available_durations = []
+    for source in prepared_sources or []:
+        try:
+            source_start = max(0.0, float(get_source_start_for_timeline(source, overlap_start, 0.0) or 0.0))
+            source_available_durations.append(max(0.0, float(source.get("duration") or 0.0) - source_start))
+        except Exception:
+            continue
+    try:
+        external_available_duration = max(0.0, float(get_media_duration(external_audio_path) or 0.0) - external_anchor)
+    except Exception:
+        external_available_duration = 0.0
+    available_analysis_duration = min(
+        [value for value in [external_available_duration, *source_available_durations] if value > 0.0] or [0.0]
+    )
+    requested_decode_duration = max(0.25, float(overlap_duration or 0.0) + 1.0)
+    trusted_channel_mapping = bool(override_ids or channel_camera_ids)
+    if trusted_channel_mapping:
+        channel_analysis_duration = min(
+            requested_decode_duration,
+            available_analysis_duration or requested_decode_duration,
+        )
+    else:
+        channel_analysis_duration = max(
+            20.0,
+            min(
+                analysis_limit,
+                available_analysis_duration or float(overlap_duration or 0.0),
+            ),
+        )
+    decode_duration = max(
+        requested_decode_duration,
+        channel_analysis_duration,
+    )
     try:
         cmd = [
             "ffmpeg",
@@ -3970,7 +4357,7 @@ def apply_external_director_channel_activity(
             "-ss",
             f"{external_anchor:.6f}",
             "-t",
-            f"{max(0.25, float(overlap_duration or 0.0) + 1.0):.6f}",
+            f"{decode_duration:.6f}",
             "-i",
             external_audio_path,
             "-vn",
@@ -3992,10 +4379,20 @@ def apply_external_director_channel_activity(
             return {"status": "skipped_decode_empty"}
         samples = raw[:usable].reshape((-1, 2)).astype(np.float32) / 32768.0
         channel_windows = build_multicam_channel_activity_windows(samples, 8000, segment_duration=segment_duration)
-        # Behringer isolated channels are already ordered by speaker/camera in the upload.
-        # Scratch-audio automap can falsely flip channels when a room mic bleeds across cams,
-        # which puts the real active speaker into the reaction PiP. Keep automap opt-in only.
-        if not channel_camera_ids and os.getenv("MULTICAM_DIRECTOR_CHANNEL_AUTOMAP", "0").strip().lower() not in {"0", "false", "no", "off"}:
+        automap_enabled = os.getenv("MULTICAM_DIRECTOR_CHANNEL_AUTOMAP", "1").strip().lower() not in {"0", "false", "no", "off"}
+        validate_override = (
+            bool(override_ids or channel_camera_ids)
+            and os.getenv("MULTICAM_VALIDATE_DIRECTOR_CHANNEL_OVERRIDE", "1").strip().lower() not in {"0", "false", "no", "off"}
+        )
+        trust_override_without_audio_proof = (
+            bool(override_ids or channel_camera_ids)
+            and os.getenv("MULTICAM_TRUST_DIRECTOR_CHANNEL_OVERRIDE", "0").strip().lower() in {"1", "true", "yes", "on"}
+        )
+        # Never blindly assume Audacity/Behringer export order equals camera order.
+        # Auto-map by correlation first; only adopt/correct it when the winning
+        # mapping is clearly better than the runner-up. Ambiguous mappings remain
+        # visible in the receipt instead of silently driving the wrong hero camera.
+        if automap_enabled and (validate_override or (not override_ids and not channel_camera_ids)):
             auto_mapping_receipt = auto_map_multicam_director_channels(
                 prepared_sources,
                 channel_windows,
@@ -4003,10 +4400,110 @@ def apply_external_director_channel_activity(
                 overlap_duration,
                 segment_duration,
                 job_id=job_id,
+                analysis_duration_override=channel_analysis_duration,
             )
-            if auto_mapping_receipt and len(auto_mapping_receipt.get("mapped_camera_ids") or []) >= 2:
-                mapped_camera_ids = list(auto_mapping_receipt["mapped_camera_ids"])[:2]
-                mapping_method = auto_mapping_receipt.get("method") or "auto"
+            override_conflict_margin = float(os.getenv("MULTICAM_DIRECTOR_CHANNEL_OVERRIDE_MIN_MARGIN", "0.12") or 0.12)
+            auto_mapping_confident = bool((auto_mapping_receipt or {}).get("mapping_confident"))
+            if (
+                auto_mapping_receipt
+                and validate_override
+                and len(auto_mapping_receipt.get("mapped_camera_ids") or []) >= 2
+                and list(auto_mapping_receipt.get("mapped_camera_ids") or [])[:2] != list(mapped_camera_ids)
+                and float(auto_mapping_receipt.get("score_margin") or 0.0) >= override_conflict_margin
+            ):
+                auto_mapping_confident = True
+                auto_mapping_receipt["override_conflict_margin_required"] = round(override_conflict_margin, 5)
+                auto_mapping_receipt["override_conflict_validation"] = "accepted_by_override_threshold"
+            if (
+                auto_mapping_receipt
+                and auto_mapping_confident
+                and len(auto_mapping_receipt.get("mapped_camera_ids") or []) >= 2
+            ):
+                auto_mapped_ids = list(auto_mapping_receipt["mapped_camera_ids"])[:2]
+                if override_ids or channel_camera_ids:
+                    auto_mapping_receipt["requested_camera_ids"] = list(mapped_camera_ids)
+                    if auto_mapped_ids != mapped_camera_ids:
+                        correction_mode = os.getenv("MULTICAM_DIRECTOR_CHANNEL_OVERRIDE_CONFLICT", "reject").strip().lower()
+                        conflict_status = (
+                            "corrected"
+                            if correction_mode == "correct"
+                            else "rejected"
+                            if correction_mode == "reject"
+                            else "kept_request"
+                        )
+                        auto_mapping_receipt["override_conflict"] = {
+                            "status": conflict_status,
+                            "requested_camera_ids": list(mapped_camera_ids),
+                            "auto_mapped_camera_ids": list(auto_mapped_ids),
+                            "mode": correction_mode,
+                        }
+                        if correction_mode == "reject":
+                            return {
+                                "status": "unproven_channel_mapping",
+                                "method": "external_stereo_channel_rms",
+                                "mapping_method": "override_conflicted_with_audio_evidence",
+                                "channel_camera_ids": mapped_camera_ids,
+                                "auto_mapping": auto_mapping_receipt,
+                                "assigned_source_count": 0,
+                                "external_anchor_seconds": round(external_anchor, 3),
+                                "segment_duration_seconds": round(max(0.25, float(segment_duration or 0.5)), 3),
+                                "analysis_duration_seconds": round(channel_analysis_duration, 3),
+                                "decode_duration_seconds": round(decode_duration, 3),
+                            }
+                        if correction_mode == "correct":
+                            mapped_camera_ids = auto_mapped_ids
+                            mapping_method = f"{mapping_method}_corrected_by_auto"
+                        else:
+                            mapping_method = f"{mapping_method}_kept_after_auto_conflict"
+                    else:
+                        auto_mapping_receipt["override_conflict"] = {"status": "none"}
+                else:
+                    mapped_camera_ids = auto_mapped_ids
+                    mapping_method = auto_mapping_receipt.get("method") or "auto"
+            else:
+                if override_ids or channel_camera_ids:
+                    if trust_override_without_audio_proof:
+                        mapping_method = f"{mapping_method}_trusted_without_audio_proof"
+                        if auto_mapping_receipt is not None:
+                            auto_mapping_receipt["override_trust"] = {
+                                "status": "trusted_without_audio_proof",
+                                "reason": "MULTICAM_TRUST_DIRECTOR_CHANNEL_OVERRIDE",
+                                "requested_camera_ids": list(mapped_camera_ids),
+                            }
+                    elif auto_mapping_receipt is not None:
+                        mapping_method = f"{mapping_method}_kept_after_ambiguous_auto"
+                        auto_mapping_receipt["override_validation"] = {
+                            "status": "ambiguous_auto_kept_request",
+                            "reason": "auto mapping did not meet confidence margin and did not prove a conflicting map",
+                            "requested_camera_ids": list(mapped_camera_ids),
+                            "mapped_camera_ids": list(auto_mapping_receipt.get("mapped_camera_ids") or []),
+                        }
+                    else:
+                        return {
+                            "status": "unproven_channel_mapping",
+                            "method": "external_stereo_channel_rms",
+                            "mapping_method": "override_not_proven_by_audio_evidence",
+                            "channel_camera_ids": mapped_camera_ids,
+                            "auto_mapping": auto_mapping_receipt,
+                            "assigned_source_count": 0,
+                            "external_anchor_seconds": round(external_anchor, 3),
+                            "segment_duration_seconds": round(max(0.25, float(segment_duration or 0.5)), 3),
+                            "analysis_duration_seconds": round(channel_analysis_duration, 3),
+                            "decode_duration_seconds": round(decode_duration, 3),
+                        }
+                if not (override_ids or channel_camera_ids):
+                    return {
+                        "status": "unproven_channel_mapping",
+                        "method": "external_stereo_channel_rms",
+                        "mapping_method": "not_trusted",
+                        "channel_camera_ids": mapped_camera_ids,
+                        "auto_mapping": auto_mapping_receipt,
+                        "assigned_source_count": 0,
+                        "external_anchor_seconds": round(external_anchor, 3),
+                        "segment_duration_seconds": round(max(0.25, float(segment_duration or 0.5)), 3),
+                        "analysis_duration_seconds": round(channel_analysis_duration, 3),
+                        "decode_duration_seconds": round(decode_duration, 3),
+                    }
     except Exception as exc:
         logger.warning("External director channel analysis skipped for %s: %s", job_id or "multicam", exc)
         return {"status": "skipped_exception", "error": str(exc)}
@@ -4030,6 +4527,8 @@ def apply_external_director_channel_activity(
         "assigned_source_count": assigned,
         "external_anchor_seconds": round(external_anchor, 3),
         "segment_duration_seconds": round(max(0.25, float(segment_duration or 0.5)), 3),
+        "analysis_duration_seconds": round(channel_analysis_duration, 3),
+        "decode_duration_seconds": round(decode_duration, 3),
     }
 
 
@@ -4271,8 +4770,13 @@ def escape_ffmpeg_filter_path(path):
 
 def resolve_multicam_caption_request(request):
     raw = request.burn_captions if request.burn_captions is not None else request.burnCaptions
-    allow_disable = env_flag("MULTICAM_ALLOW_CAPTION_DISABLE", default=False)
-    enabled = MULTICAM_BURN_CAPTIONS_DEFAULT if raw is None else (bool(raw) or not allow_disable)
+    allow_disable = env_flag("MULTICAM_ALLOW_CAPTION_DISABLE", default=True)
+    if raw is None:
+        enabled = MULTICAM_BURN_CAPTIONS_DEFAULT
+    elif allow_disable:
+        enabled = bool(raw)
+    else:
+        enabled = True
     style = str(request.captionStyle or request.caption_style or "podcast_clean").strip() or "podcast_clean"
     return enabled, style
 
@@ -4296,6 +4800,32 @@ def resolve_multicam_branding_request(request):
 def resolve_multicam_thumbnail_request(request):
     raw = request.generate_thumbnail if request.generate_thumbnail is not None else request.generateThumbnail
     return MULTICAM_GENERATE_THUMBNAIL_DEFAULT if raw is None else bool(raw)
+
+
+def resolve_multicam_thumbnail_copy(request):
+    title = (
+        getattr(request, "thumbnail_title", None)
+        or getattr(request, "thumbnailTitle", None)
+        or os.getenv("MULTICAM_THUMBNAIL_TITLE")
+        or "AUTO MULTICAM"
+    )
+    subtitle = (
+        getattr(request, "thumbnail_subtitle", None)
+        or getattr(request, "thumbnailSubtitle", None)
+        or os.getenv("MULTICAM_THUMBNAIL_SUBTITLE")
+        or "No editor needed"
+    )
+    badge = (
+        getattr(request, "thumbnail_badge", None)
+        or getattr(request, "thumbnailBadge", None)
+        or os.getenv("MULTICAM_THUMBNAIL_BADGE")
+        or "PODCAST FEATURE"
+    )
+    return {
+        "title": choose_thumbnail_text([title], "Auto Multicam", max_words=4),
+        "subtitle": choose_thumbnail_text([subtitle], "No editor needed", max_words=5),
+        "badge": choose_thumbnail_text([badge], "Podcast Feature", max_words=2),
+    }
 
 
 def build_multicam_brand_watermark_filter(output_width, output_height, text="AutoPromote Cam Combiner"):
@@ -4365,58 +4895,172 @@ def pick_multicam_thumbnail_time(segments, duration):
     safe_duration = max(0.0, float(duration or 0.0))
     ordered = sorted(segments or [], key=lambda item: float(item.get("timeline_start", 0.0) or 0.0))
     preferred_modes = {"split-vertical", "scene-grid", "pip"}
+    min_start = 15.0 if safe_duration >= 60.0 else max(2.0, safe_duration * 0.28)
     for mode in ["split-vertical", "scene-grid", "pip"]:
         for segment in ordered:
             layout_mode = normalize_multicam_layout_mode(segment.get("layout_mode") or "cut")
             start = float(segment.get("timeline_start", 0.0) or 0.0)
             end = float(segment.get("timeline_end", start) or start)
-            if layout_mode == mode and end - start >= 4.0 and start >= 15.0:
+            if layout_mode == mode and end - start >= 4.0 and start >= min_start:
                 return round(min(max(start + (end - start) * 0.5, 0.0), max(0.0, safe_duration - 0.5)), 3)
     return round(min(max(safe_duration * 0.18, 8.0), max(0.0, safe_duration - 0.5)), 3)
 
 
-async def generate_multicam_thumbnail_asset(output_path, job_id, duration, segments=None):
+def multicam_thumbnail_font(size, bold=True):
+    candidates = [
+        os.getenv("MULTICAM_THUMBNAIL_FONT_FILE"),
+        "/usr/share/fonts/truetype/noto/NotoSansDisplay-Bold.ttf" if bold else "/usr/share/fonts/truetype/noto/NotoSansDisplay-Regular.ttf",
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        "/usr/share/fonts/truetype/liberation2/LiberationSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/liberation2/LiberationSans-Regular.ttf",
+    ]
+    for path in candidates:
+        if not path:
+            continue
+        try:
+            if os.path.exists(path):
+                return ImageFont.truetype(path, size=size)
+        except Exception:
+            continue
+    return ImageFont.load_default()
+
+
+def multicam_thumbnail_cover(image, size, focus_x=0.5):
+    target_width, target_height = size
+    source = image.convert("RGB")
+    scale = max(target_width / max(1, source.width), target_height / max(1, source.height))
+    resample = getattr(getattr(Image, "Resampling", Image), "LANCZOS", Image.LANCZOS)
+    resized = source.resize((int(source.width * scale), int(source.height * scale)), resample)
+    max_left = max(0, resized.width - target_width)
+    left = int(clamp_float(float(focus_x or 0.5), 0.15, 0.85) * max_left)
+    top = max(0, (resized.height - target_height) // 2)
+    return resized.crop((left, top, left + target_width, top + target_height))
+
+
+def draw_multicam_thumbnail_text(draw, xy, text, font, fill, stroke_fill=(0, 0, 0), stroke_width=4, max_width=560):
+    words = str(text or "").upper().split()
+    if not words:
+        return xy[1]
+    lines = []
+    current = ""
+    for word in words:
+        candidate = f"{current} {word}".strip()
+        bbox = draw.textbbox((0, 0), candidate, font=font, stroke_width=stroke_width)
+        if current and (bbox[2] - bbox[0]) > max_width:
+            lines.append(current)
+            current = word
+        else:
+            current = candidate
+    if current:
+        lines.append(current)
+    x, y = xy
+    line_gap = max(4, int(getattr(font, "size", 52) * 0.08))
+    for line in lines[:3]:
+        draw.text(
+            (x, y),
+            line,
+            font=font,
+            fill=fill,
+            stroke_fill=stroke_fill,
+            stroke_width=stroke_width,
+        )
+        bbox = draw.textbbox((x, y), line, font=font, stroke_width=stroke_width)
+        y = bbox[3] + line_gap
+    return y
+
+
+def compose_multicam_thumbnail(frame_path, thumbnail_path, copy):
+    source = Image.open(frame_path).convert("RGB")
+    background = multicam_thumbnail_cover(source, (1280, 720), focus_x=0.54)
+    background = ImageEnhance.Color(background).enhance(1.16)
+    background = ImageEnhance.Contrast(background).enhance(1.14)
+    background = ImageEnhance.Brightness(background).enhance(0.72)
+    blurred = background.filter(ImageFilter.GaussianBlur(radius=18))
+    hero = multicam_thumbnail_cover(source, (1168, 626), focus_x=0.54)
+    hero = ImageEnhance.Color(hero).enhance(1.12)
+    hero = ImageEnhance.Contrast(hero).enhance(1.12)
+    hero = ImageEnhance.Sharpness(hero).enhance(1.24)
+
+    canvas = blurred.convert("RGBA")
+    hero_mask = Image.new("L", hero.size, 0)
+    hero_mask_draw = ImageDraw.Draw(hero_mask)
+    hero_mask_draw.rounded_rectangle((0, 0, hero.width - 1, hero.height - 1), radius=34, fill=255)
+    canvas.paste(hero.convert("RGBA"), (56, 64), hero_mask)
+
+    overlay = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
+    overlay_draw = ImageDraw.Draw(overlay)
+    overlay_draw.rounded_rectangle(
+        (44, 52, 1236, 696),
+        radius=42,
+        fill=(0, 0, 0, 0),
+        outline=(255, 226, 37, 236),
+        width=7,
+    )
+    # Keep the people visible: text sits in the lower band instead of covering faces.
+    overlay_draw.rectangle((56, 444, 1224, 686), fill=(0, 0, 0, 142))
+    overlay_draw.rectangle((56, 560, 1224, 686), fill=(0, 0, 0, 196))
+    overlay_draw.rounded_rectangle((84, 90, 324, 140), radius=18, fill=(239, 18, 18, 248))
+    overlay_draw.rounded_rectangle((930, 90, 1206, 140), radius=18, fill=(5, 5, 8, 224), outline=(255, 255, 255, 72), width=2)
+    overlay_draw.rounded_rectangle((650, 556, 1038, 624), radius=24, fill=(239, 18, 18, 240))
+    canvas = Image.alpha_composite(canvas, overlay)
+
+    draw = ImageDraw.Draw(canvas)
+    brand_font = multicam_thumbnail_font(29)
+    badge_font = multicam_thumbnail_font(28)
+    title_font = multicam_thumbnail_font(70)
+    subtitle_font = multicam_thumbnail_font(34)
+    footer_font = multicam_thumbnail_font(30)
+
+    draw.text((108, 98), "AUTOPROMOTE", font=brand_font, fill=(255, 255, 255), stroke_fill=(0, 0, 0), stroke_width=1)
+    badge_text = str((copy or {}).get("badge") or "PODCAST FEATURE").upper()
+    badge_bbox = draw.textbbox((0, 0), badge_text, font=badge_font)
+    draw.text((1068 - ((badge_bbox[2] - badge_bbox[0]) // 2), 99), badge_text, font=badge_font, fill=(255, 255, 255), stroke_fill=(0, 0, 0), stroke_width=2)
+
+    title = str((copy or {}).get("title") or "AUTO MULTICAM").upper()
+    subtitle = str((copy or {}).get("subtitle") or "NO EDITOR NEEDED").upper()
+    y = draw_multicam_thumbnail_text(
+        draw,
+        (88, 462),
+        title,
+        title_font,
+        fill=(255, 255, 255),
+        stroke_fill=(0, 0, 0),
+        stroke_width=5,
+        max_width=560,
+    )
+    draw_multicam_thumbnail_text(
+        draw,
+        (88, min(max(y + 4, 604), 636)),
+        subtitle,
+        subtitle_font,
+        fill=(255, 209, 47),
+        stroke_fill=(0, 0, 0),
+        stroke_width=3,
+        max_width=520,
+    )
+    draw.text((708, 572), "2 CAMS  ->  1 MASTER", font=footer_font, fill=(255, 255, 255), stroke_fill=(0, 0, 0), stroke_width=3)
+    draw.text(
+        (708, 620),
+        "Automatic camera switching",
+        font=footer_font,
+        fill=(255, 255, 255, 232),
+        stroke_fill=(0, 0, 0),
+        stroke_width=3,
+    )
+    canvas.convert("RGB").save(thumbnail_path, quality=92, optimize=True)
+
+
+async def generate_multicam_thumbnail_asset(output_path, job_id, duration, segments=None, thumbnail_copy=None):
     thumbnail_time = pick_multicam_thumbnail_time(segments or [], duration)
     thumbnail_path = os.path.join(os.path.dirname(output_path), f"{job_id}_multicam_thumbnail.jpg")
+    frame_path = os.path.join(os.path.dirname(output_path), f"{job_id}_multicam_thumbnail_frame.jpg")
     receipt = {
         "enabled": True,
         "status": "pending",
         "time_seconds": thumbnail_time,
-        "type": "branded_multicam_thumbnail",
+        "type": "content_aware_multicam_thumbnail",
         "path": thumbnail_path,
+        "copy": thumbnail_copy or {},
     }
-    font_file = os.getenv("MULTICAM_THUMBNAIL_FONT_FILE") or "/usr/share/fonts/truetype/noto/NotoSansDisplay-Bold.ttf"
-    font_arg = f"fontfile='{escape_ffmpeg_filter_path(font_file)}':" if os.path.exists(font_file) else ""
-    raw_title = os.getenv("MULTICAM_THUMBNAIL_TITLE") or "PODCAST|EDITED|ITSELF"
-    title_lines = [line.strip() for line in str(raw_title).split("|") if line.strip()][:3]
-    while len(title_lines) < 3:
-        title_lines.append("")
-    title_1, title_2, title_3 = [_escape_drawtext_text(line) for line in title_lines]
-    badge_text = _escape_drawtext_text(os.getenv("MULTICAM_THUMBNAIL_BADGE") or "AUTOPROMOTE")
-    feature_text = _escape_drawtext_text(os.getenv("MULTICAM_THUMBNAIL_FEATURE") or "AUTO MULTICAM")
-    footer_text = _escape_drawtext_text(os.getenv("MULTICAM_THUMBNAIL_FOOTER") or "NO MANUAL CUTS")
-    vf = (
-        "scale=1280:720:force_original_aspect_ratio=increase,crop=1280:720,"
-        "eq=contrast=1.12:saturation=1.07:brightness=0.015,"
-        "unsharp=5:5:0.45:3:3:0.20,"
-        "drawbox=x=0:y=0:w=590:h=720:color=black@0.56:t=fill,"
-        "drawbox=x=0:y=0:w=1280:h=720:color=0xffd12f@0.95:t=8,"
-        f"drawtext={font_arg}text='{badge_text}':x=54:y=40:fontsize=30:fontcolor=white:"
-        "box=1:boxcolor=0xff2a26@0.95:boxborderw=10:borderw=2:bordercolor=black@0.65,"
-        f"drawtext={font_arg}text='{title_1}':x=50:y=88:fontsize=78:fontcolor=white:"
-        "borderw=6:bordercolor=black@0.86,"
-        f"drawtext={font_arg}text='{title_2}':x=50:y=172:fontsize=84:fontcolor=0xffd12f:"
-        "borderw=6:bordercolor=black@0.86,"
-        f"drawtext={font_arg}text='{title_3}':x=50:y=264:fontsize=86:fontcolor=white:"
-        "borderw=6:bordercolor=black@0.86,"
-        "drawbox=x=54:y=384:w=470:h=74:color=0xff2a26@0.95:t=fill,"
-        f"drawtext={font_arg}text='{feature_text}':x=78:y=391:fontsize=48:fontcolor=white:"
-        "borderw=3:bordercolor=black@0.70,"
-        f"drawtext={font_arg}text='{footer_text}':x=70:y=520:fontsize=42:fontcolor=white:"
-        "borderw=4:bordercolor=black@0.82,"
-        f"drawtext={font_arg}text='AutoPromote Cam Combiner':x=w-tw-38:y=32:fontsize=24:fontcolor=white@0.92:"
-        "box=1:boxcolor=0x05070c@0.62:boxborderw=10:shadowcolor=black@0.55:shadowx=1:shadowy=1"
-    )
     try:
         await run_subprocess_async(
             [
@@ -4428,17 +5072,18 @@ async def generate_multicam_thumbnail_asset(output_path, job_id, duration, segme
                 output_path,
                 "-frames:v",
                 "1",
-                "-vf",
-                vf,
                 "-q:v",
                 "2",
                 "-y",
-                thumbnail_path,
+                frame_path,
             ],
             check=True,
             job_context=job_id,
             timeout_seconds=120,
         )
+        if not os.path.exists(frame_path) or os.path.getsize(frame_path) <= 1024:
+            raise RuntimeError("Thumbnail source frame was not created")
+        compose_multicam_thumbnail(frame_path, thumbnail_path, thumbnail_copy or {})
         if not os.path.exists(thumbnail_path) or os.path.getsize(thumbnail_path) <= 1024:
             raise RuntimeError("Thumbnail file was not created")
         receipt["status"] = "created"
@@ -4446,6 +5091,12 @@ async def generate_multicam_thumbnail_asset(output_path, job_id, duration, segme
     except Exception as exc:
         receipt["status"] = "failed"
         receipt["error"] = str(exc)
+    finally:
+        try:
+            if os.path.exists(frame_path):
+                os.remove(frame_path)
+        except OSError:
+            pass
     return receipt
 
 
@@ -5437,6 +6088,30 @@ def get_audio_activity_score_near_source_time(audio_windows, source_time, window
         return get_audio_activity_score_at_source_time(audio_windows, source_time)
     return clamp_float(float(np.median(values)), 0.0, 1.0)
 
+def get_audio_db_near_source_time(audio_windows, source_time, window_seconds=0.8):
+    if not audio_windows:
+        return -80.0
+    safe_time = max(0.0, float(source_time or 0.0))
+    half_window = max(0.05, float(window_seconds or 0.8) / 2.0)
+    values = []
+    for item in audio_windows:
+        timestamp = float(item[0] if isinstance(item, (list, tuple)) else item.get("time", 0.0))
+        if abs(timestamp - safe_time) <= half_window:
+            try:
+                values.append(float(item[1] if isinstance(item, (list, tuple)) and len(item) > 1 else item.get("db", -80.0)))
+            except Exception:
+                continue
+    if values:
+        return float(np.median(values))
+    nearest = min(
+        audio_windows,
+        key=lambda item: abs(float(item[0] if isinstance(item, (list, tuple)) else item.get("time", 0.0)) - safe_time),
+    )
+    try:
+        return float(nearest[1] if isinstance(nearest, (list, tuple)) and len(nearest) > 1 else nearest.get("db", -80.0))
+    except Exception:
+        return -80.0
+
 def get_conversation_audio_score(activity, loudest_activity, second_activity):
     safe_activity = clamp_float(float(activity or 0.0), 0.0, 1.0)
     safe_loudest = clamp_float(float(loudest_activity or 0.0), 0.0, 1.0)
@@ -5485,13 +6160,31 @@ def estimate_multicam_isolated_handoff_start(
 
     best_start = safe_decision
     sustained = 0
+    future_window = min(1.8, max(1.0, safe_interval))
     for timestamp in candidate_times:
         leader_activity = get_audio_activity_score_near_source_time(leader_windows, timestamp, window_seconds=0.7)
         previous_activity = get_audio_activity_score_near_source_time(previous_windows, timestamp, window_seconds=0.7)
-        if leader_activity >= 0.26 and (leader_activity - previous_activity) >= 0.08:
+        leader_future = get_audio_activity_score_near_source_time(
+            leader_windows,
+            timestamp + (future_window * 0.35),
+            window_seconds=future_window,
+        )
+        previous_future = get_audio_activity_score_near_source_time(
+            previous_windows,
+            timestamp + (future_window * 0.35),
+            window_seconds=future_window,
+        )
+        onset_now = bool(leader_activity >= 0.26 and (leader_activity - previous_activity) >= 0.08)
+        onset_about_to_own = bool(
+            leader_future >= 0.42
+            and previous_future <= 0.50
+            and (leader_future - previous_future) >= 0.12
+        )
+        if onset_now or onset_about_to_own:
             sustained += 1
             if sustained >= 2:
-                best_start = timestamp - min(0.35, safe_interval * 0.08)
+                first_owned_timestamp = timestamp if onset_now else timestamp + min(0.25, future_window * 0.15)
+                best_start = first_owned_timestamp - (min(0.35, safe_interval * 0.08) if onset_now else 0.0)
                 break
         else:
             sustained = 0
@@ -10419,6 +11112,8 @@ class MultiCamSource(BaseModel):
     offset_seconds: float = 0.0
     sync_rate: Optional[float] = None
     syncRate: Optional[float] = None
+    reaction_side: Optional[str] = None
+    reactionSide: Optional[str] = None
     rotation_degrees: Optional[float] = 0.0
     rotationDegrees: Optional[float] = None
     name: Optional[str] = None
@@ -10475,10 +11170,12 @@ class RenderMultiCamRequest(BaseModel):
     renderTier: Optional[str] = None
     auto_switch: bool = False
     audio_based_auto_switch: bool = True
-    auto_switch_interval: float = 5.0
+    auto_switch_interval: float = 2.0
     auto_switch_aggressiveness: str = "balanced"
     primary_audio_camera_id: Optional[str] = None
     primaryAudioCameraId: Optional[str] = None
+    director_channel_camera_ids: Optional[List[str]] = None
+    directorChannelCameraIds: Optional[List[str]] = None
     external_audio_url: Optional[str] = None
     external_audio_offset_seconds: float = 0.0
     external_audio_mix_mode: str = "external_only"
@@ -10506,21 +11203,36 @@ class RenderMultiCamRequest(BaseModel):
     watermarkText: Optional[str] = None
     generate_thumbnail: Optional[bool] = None
     generateThumbnail: Optional[bool] = None
+    thumbnail_title: Optional[str] = None
+    thumbnailTitle: Optional[str] = None
+    thumbnail_subtitle: Optional[str] = None
+    thumbnailSubtitle: Optional[str] = None
+    thumbnail_badge: Optional[str] = None
+    thumbnailBadge: Optional[str] = None
     job_id: Optional[str] = None
     async_mode: bool = False
+    plan_only: bool = False
+    planOnly: Optional[bool] = None
 
 MULTICAM_ENFORCE_PROD_LIMITS = env_flag("MULTICAM_ENFORCE_PROD_LIMITS", default=IS_PRODUCTION_ENV)
 MULTICAM_BETA_MAX_CAMERAS = max(2, int(os.getenv("MULTICAM_BETA_MAX_CAMERAS", "3") or 3))
 MULTICAM_BETA_MAX_SECONDS = max(60, int(os.getenv("MULTICAM_BETA_MAX_SECONDS", "1200") or 1200))
 MULTICAM_BETA_MAX_SEGMENTS = max(20, int(os.getenv("MULTICAM_BETA_MAX_SEGMENTS", "450") or 450))
 MULTICAM_STRICT_SEGMENT_DURATIONS = env_flag("MULTICAM_STRICT_SEGMENT_DURATIONS", default=IS_PRODUCTION_ENV)
-MULTICAM_ALLOW_QUESTIONABLE_SYNC = env_flag("MULTICAM_ALLOW_QUESTIONABLE_SYNC", default=not IS_PRODUCTION_ENV)
-MULTICAM_ALLOW_SKIPPED_SYNC_NO_AUDIO = env_flag("MULTICAM_ALLOW_SKIPPED_SYNC_NO_AUDIO", default=not IS_PRODUCTION_ENV)
+MULTICAM_ALLOW_QUESTIONABLE_SYNC = env_flag("MULTICAM_ALLOW_QUESTIONABLE_SYNC", default=False)
+MULTICAM_ALLOW_SKIPPED_SYNC_NO_AUDIO = env_flag("MULTICAM_ALLOW_SKIPPED_SYNC_NO_AUDIO", default=False)
+MULTICAM_ALLOW_UNPROVEN_DIRECTOR_AUDIO = env_flag(
+    "MULTICAM_ALLOW_UNPROVEN_DIRECTOR_AUDIO",
+    default=False,
+)
 MULTICAM_POST_RENDER_SYNC_AUDIT = env_flag("MULTICAM_POST_RENDER_SYNC_AUDIT", default=True)
-MULTICAM_STRICT_POST_RENDER_SYNC = env_flag("MULTICAM_STRICT_POST_RENDER_SYNC", default=IS_PRODUCTION_ENV)
+MULTICAM_STRICT_POST_RENDER_SYNC = env_flag("MULTICAM_STRICT_POST_RENDER_SYNC", default=True)
+MULTICAM_PRE_CAPTION_SYNC_AUDIT = env_flag("MULTICAM_PRE_CAPTION_SYNC_AUDIT", default=True)
+MULTICAM_ALLOW_UNAUDITABLE_VISUAL_PROXY = env_flag("MULTICAM_ALLOW_UNAUDITABLE_VISUAL_PROXY", default=False)
+MULTICAM_FAST_COMPOSITE_DEFAULT = env_flag("MULTICAM_FAST_COMPOSITE_DEFAULT", default=False)
 MULTICAM_POST_RENDER_SYNC_MAX_SAMPLES = max(
     3,
-    int(os.getenv("MULTICAM_POST_RENDER_SYNC_MAX_SAMPLES", "21") or 21),
+    int(os.getenv("MULTICAM_POST_RENDER_SYNC_MAX_SAMPLES", "320") or 320),
 )
 MULTICAM_POST_RENDER_SYNC_GOOD_SECONDS = max(
     0.03,
@@ -10531,9 +11243,23 @@ MULTICAM_POST_RENDER_SYNC_UNSAFE_SECONDS = max(
     float(os.getenv("MULTICAM_POST_RENDER_SYNC_UNSAFE_SECONDS", "0.20") or 0.20),
 )
 MULTICAM_POST_RENDER_SYNC_MIN_CORRELATION = clamp_float(
-    float(os.getenv("MULTICAM_POST_RENDER_SYNC_MIN_CORRELATION", "0.45") or 0.45),
+    float(os.getenv("MULTICAM_POST_RENDER_SYNC_MIN_CORRELATION", "0.25") or 0.25),
     0.1,
     0.95,
+)
+MULTICAM_POST_RENDER_SYNC_MIN_USABLE_RATIO = clamp_float(
+    float(os.getenv("MULTICAM_POST_RENDER_SYNC_MIN_USABLE_RATIO", "0.75") or 0.75),
+    0.1,
+    1.0,
+)
+MULTICAM_POST_RENDER_SYNC_MIN_COVERAGE_RATIO = clamp_float(
+    float(os.getenv("MULTICAM_POST_RENDER_SYNC_MIN_COVERAGE_RATIO", "0.60") or 0.60),
+    0.1,
+    1.0,
+)
+MULTICAM_POST_RENDER_SYNC_MAX_SAMPLE_GAP_SECONDS = max(
+    15.0,
+    float(os.getenv("MULTICAM_POST_RENDER_SYNC_MAX_SAMPLE_GAP_SECONDS", "90.0") or 90.0),
 )
 MULTICAM_POST_RENDER_SYNC_SAMPLE_SECONDS = clamp_float(
     float(os.getenv("MULTICAM_POST_RENDER_SYNC_SAMPLE_SECONDS", "8.0") or 8.0),
@@ -10546,7 +11272,7 @@ VIRAL_BRAND_WATERMARK_DEFAULT = env_flag("VIRAL_BRAND_WATERMARK_DEFAULT", defaul
 MULTICAM_CONTINUOUS_SYNC_ANCHORS = env_flag("MULTICAM_CONTINUOUS_SYNC_ANCHORS", default=True)
 MULTICAM_CONTINUOUS_SYNC_INTERVAL_SECONDS = max(
     60.0,
-    float(os.getenv("MULTICAM_CONTINUOUS_SYNC_INTERVAL_SECONDS", "300") or 300),
+    float(os.getenv("MULTICAM_CONTINUOUS_SYNC_INTERVAL_SECONDS", "120") or 120),
 )
 MULTICAM_CONTINUOUS_SYNC_SAMPLE_SECONDS = clamp_float(
     float(os.getenv("MULTICAM_CONTINUOUS_SYNC_SAMPLE_SECONDS", "8.0") or 8.0),
@@ -10559,7 +11285,7 @@ MULTICAM_CONTINUOUS_SYNC_MAX_SHIFT_SECONDS = clamp_float(
     5.0,
 )
 MULTICAM_CONTINUOUS_SYNC_MAX_ACCEPTED_RESIDUAL_SECONDS = clamp_float(
-    float(os.getenv("MULTICAM_CONTINUOUS_SYNC_MAX_ACCEPTED_RESIDUAL_SECONDS", "0.50") or 0.50),
+    float(os.getenv("MULTICAM_CONTINUOUS_SYNC_MAX_ACCEPTED_RESIDUAL_SECONDS", "0.08") or 0.08),
     0.05,
     2.0,
 )
@@ -10610,7 +11336,7 @@ def normalize_multicam_aggressiveness(value):
     normalized = str(value or "balanced").strip().lower()
     if normalized == "low":
         return "steady"
-    if normalized == "high":
+    if normalized in {"high", "harder", "aggressive", "fast"}:
         return "dynamic"
     if normalized in {"steady", "balanced", "dynamic"}:
         return normalized
@@ -10647,16 +11373,16 @@ def get_multicam_switch_tuning(aggressiveness, interval_seconds):
             "primary_bonus": 0.03,
             "switch_threshold": 0.13,
             "low_confidence_threshold": 0.22,
-            "low_confidence_hold": max(5.0, safe_interval * 1.0),
+            "low_confidence_hold": max(4.0, safe_interval * 1.0),
             "low_confidence_proximity": 0.12,
-            "min_hold_factor": 1.15,
-            "min_hold_floor": 4.0,
-            "min_hold_cap": 8.0,
-            "min_primary_hold_seconds": 5.0,
+            "min_hold_factor": 1.0,
+            "min_hold_floor": 1.8,
+            "min_hold_cap": 4.0,
+            "min_primary_hold_seconds": 1.8,
             "decisive_audio_gap": 0.15,
             "decisive_visual_gap": 0.045,
-            "opening_primary_hold_seconds": 12.0,
-            "uncertain_primary_hold": 7.0,
+            "opening_primary_hold_seconds": 4.0,
+            "uncertain_primary_hold": 5.0,
             "uncertain_switch_gap": 0.1,
             "placeholder_penalty_weight": 0.52,
             "placeholder_source_penalty_weight": 0.26,
@@ -10667,16 +11393,16 @@ def get_multicam_switch_tuning(aggressiveness, interval_seconds):
             "primary_bonus": 0.0,
             "switch_threshold": 0.2,
             "low_confidence_threshold": 0.18,
-            "low_confidence_hold": max(13.0, safe_interval * 2.0),
+            "low_confidence_hold": max(8.0, safe_interval * 2.0),
             "low_confidence_proximity": 0.08,
-            "min_hold_factor": 1.65,
-            "min_hold_floor": 8.0,
-            "min_hold_cap": 15.0,
-            "min_primary_hold_seconds": 11.0,
+            "min_hold_factor": 1.15,
+            "min_hold_floor": 2.0,
+            "min_hold_cap": 5.0,
+            "min_primary_hold_seconds": 2.5,
             "decisive_audio_gap": 0.19,
             "decisive_visual_gap": 0.055,
-            "opening_primary_hold_seconds": 18.0,
-            "uncertain_primary_hold": 15.0,
+            "opening_primary_hold_seconds": 5.5,
+            "uncertain_primary_hold": 8.0,
             "uncertain_switch_gap": 0.14,
             "placeholder_penalty_weight": 0.58,
             "placeholder_source_penalty_weight": 0.34,
@@ -10684,6 +11410,108 @@ def get_multicam_switch_tuning(aggressiveness, interval_seconds):
     }
 
     return tuning[normalized]
+
+
+def is_multicam_active_speaker_handoff_earned(
+    reason,
+    leader_activity,
+    leader_gap,
+    candidate_duration_seconds=0.0,
+    visual_agrees=False,
+    visual_leader_score=0.0,
+    visual_leader_gap=0.0,
+    current_active_visual_score=0.0,
+):
+    safe_reason = str(reason or "")
+    safe_activity = float(leader_activity or 0.0)
+    safe_gap = float(leader_gap or 0.0)
+    safe_duration = max(0.0, float(candidate_duration_seconds or 0.0))
+    safe_visual_score = float(visual_leader_score or 0.0)
+    safe_visual_gap = float(visual_leader_gap or 0.0)
+    safe_current_visual_score = float(current_active_visual_score or 0.0)
+    active_still_visually_engaged = safe_current_visual_score >= 0.5
+    active_yielded_or_candidate_overwhelms = bool(
+        not active_still_visually_engaged
+        or safe_visual_gap >= 0.36
+    )
+    visual_confirmed = bool(
+        visual_agrees
+        and safe_visual_score >= 0.18
+        and safe_visual_gap >= 0.12
+        and active_yielded_or_candidate_overwhelms
+    )
+
+    if safe_reason in {"strong_isolated_audio_owner", "strong_audio_owner_no_visual", "db_dominant_isolated_audio_owner"}:
+        # A proven isolated external channel is the active speaker signal. Do
+        # not require a visual confirmation delay here; that is what caused the
+        # real speaker to be held in the reaction window.
+        immediate_isolated_owner = safe_activity >= 0.34 and safe_gap >= 0.16
+        audio_extreme = safe_activity >= 0.985 and safe_gap >= 0.9
+        unmistakable = (
+            visual_confirmed
+            and safe_activity >= 0.92
+            and safe_gap >= 0.72
+            and safe_visual_gap >= 0.18
+        )
+        sustained_speaker_takeover = (
+            visual_agrees
+            and safe_duration >= float(os.getenv("MULTICAM_ACTIVE_SPEAKER_STRONG_HANDOFF_MIN_SECONDS", "6.0") or 6.0)
+            and safe_activity >= 0.95
+            and safe_gap >= 0.70
+            and safe_visual_score >= 0.78
+            and safe_visual_gap >= 0.16
+        )
+        sustained = (
+            visual_confirmed
+            and safe_duration >= 8.0
+            and safe_activity >= 0.82
+            and safe_gap >= 0.68
+        )
+        return immediate_isolated_owner or audio_extreme or unmistakable or sustained_speaker_takeover or sustained
+    if safe_reason == "question_onset_audio_owner":
+        return safe_activity >= 0.38 and safe_gap >= 0.18
+    if safe_reason in {"clean_audio_owner", "audio_visual_agree", "db_dominant_isolated_audio_owner"}:
+        return safe_activity >= 0.22 and safe_gap >= 0.035
+    return False
+
+
+def is_multicam_reaction_hero_accent_earned(
+    reason,
+    leader_activity,
+    leader_gap,
+    candidate_duration_seconds=0.0,
+    visual_agrees=False,
+    visual_leader_score=0.0,
+    visual_leader_gap=0.0,
+    current_active_visual_score=0.0,
+):
+    # Reactions can earn companion coverage, but they must never become the
+    # primary speaker decision. Active speaker ownership is handled separately.
+    return False
+    safe_reason = str(reason or "")
+    safe_activity = float(leader_activity or 0.0)
+    safe_gap = float(leader_gap or 0.0)
+    safe_duration = max(0.0, float(candidate_duration_seconds or 0.0))
+    safe_visual_score = float(visual_leader_score or 0.0)
+    safe_visual_gap = float(visual_leader_gap or 0.0)
+    safe_current_visual_score = float(current_active_visual_score or 0.0)
+    max_reaction_duration = float(os.getenv("MULTICAM_REACTION_HERO_CANDIDATE_MAX_SECONDS", "4.0") or 4.0)
+    if not visual_agrees:
+        return False
+    if safe_reason.startswith("active_speaker_run_hold:"):
+        return False
+    if safe_duration > max_reaction_duration:
+        return False
+    if safe_visual_score < 0.62 or safe_visual_gap < 0.16:
+        return False
+    if safe_current_visual_score >= 0.72 and safe_visual_gap < 0.24:
+        return False
+    if safe_reason in {"strong_isolated_audio_owner", "strong_audio_owner_no_visual"}:
+        return safe_activity >= 0.62 and safe_gap >= 0.28
+    if safe_reason in {"visual_speaker_owner", "audio_visual_agree"}:
+        return safe_activity >= 0.28 and safe_visual_gap >= 0.18
+    return False
+
 
 def estimate_multicam_placeholder_penalty(frame):
     if frame is None or getattr(frame, "size", 0) == 0:
@@ -10785,6 +11613,7 @@ def analyze_multicam_visual_windows(video_path, source_offset, overlap_start, ov
             visual_speaking_score = 0.0
             visual_speaking_confidence = 0.0
             face_area_ratio = 0.0
+            face_center_x = None
             if success and frame is not None:
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                 placeholder_penalty = estimate_multicam_placeholder_penalty(frame)
@@ -10804,6 +11633,8 @@ def analyze_multicam_visual_windows(video_path, source_offset, overlap_start, ov
                         face_area_ratio = clamp_float(face_area / frame_area, 0.0, 1.0)
                         face_score = min(1.0, (face_count * 0.22) + ((face_area / frame_area) * 8.0))
                         primary_face = max(faces, key=lambda item: item[2] * item[3])
+                        px, _py, pw, _ph = [float(v) for v in primary_face]
+                        face_center_x = clamp_float((px + (pw / 2.0)) / max(1.0, float(gray.shape[1])), 0.0, 1.0)
 
                 if previous_gray is not None and previous_gray.shape == gray.shape:
                     motion_delta = cv2.absdiff(gray, previous_gray)
@@ -10858,6 +11689,7 @@ def analyze_multicam_visual_windows(video_path, source_offset, overlap_start, ov
                     "visual_speaking_score": round(visual_speaking_score, 4),
                     "visual_speaking_confidence": round(visual_speaking_confidence, 4),
                     "face_area_ratio": round(face_area_ratio, 4),
+                    "face_center_x": round(face_center_x, 4) if face_center_x is not None else None,
                     "placeholder_penalty": placeholder_penalty,
                     "face_count": face_count,
                 }
@@ -10867,6 +11699,60 @@ def analyze_multicam_visual_windows(video_path, source_offset, overlap_start, ov
         capture.release()
 
     return windows
+
+
+def estimate_multicam_layout_focus_x(video_path, source_offset, overlap_start, overlap_duration, sample_count=18):
+    """
+    Cheap placement-only pass for the audio-first director path.
+
+    Audio-first scoring is the right speed optimization, but PiP placement still
+    needs visual body-side evidence. Without this pass both cameras default to
+    center and the reaction card can land on top of the active speaker.
+    """
+    safe_duration = max(0.0, float(overlap_duration or 0.0))
+    safe_sample_count = max(3, min(36, int(sample_count or 18)))
+    if safe_duration <= 0.0:
+        return None
+
+    detector = get_multicam_face_detector()
+    if detector is None:
+        return None
+
+    capture = cv2.VideoCapture(video_path)
+    if not capture.isOpened():
+        return None
+
+    centers = []
+    try:
+        for index in range(safe_sample_count):
+            timeline_time = float(overlap_start or 0.0) + (
+                (float(index) + 0.5) * safe_duration / float(safe_sample_count)
+            )
+            relative_time = max(0.0, timeline_time - float(source_offset or 0.0))
+            capture.set(cv2.CAP_PROP_POS_MSEC, relative_time * 1000.0)
+            success, frame = capture.read()
+            if not success or frame is None:
+                continue
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            min_face = max(24, min(gray.shape[0], gray.shape[1]) // 8)
+            faces = detector.detectMultiScale(
+                gray,
+                scaleFactor=1.1,
+                minNeighbors=4,
+                minSize=(min_face, min_face),
+            )
+            if len(faces) <= 0:
+                continue
+            primary_face = max(faces, key=lambda item: item[2] * item[3])
+            px, _py, pw, _ph = [float(v) for v in primary_face]
+            centers.append(clamp_float((px + (pw / 2.0)) / max(1.0, float(gray.shape[1])), 0.0, 1.0))
+    finally:
+        capture.release()
+
+    if not centers:
+        return None
+    return round(float(np.median(centers)), 4)
+
 
 def dedupe_multicam_switches(switches):
     ordered = sorted(switches, key=lambda item: float(item.get("start_time", 0.0)))
@@ -10984,6 +11870,12 @@ def smooth_multicam_switches(switches, overlap_duration, interval_seconds, aggre
                     "audio_leader_gap",
                     "audio_decision_reliable",
                     "audio_decision_reason",
+                    "editorial_decision_score",
+                    "editorial_decision_reason",
+                    "editorial_decision_threshold",
+                    "editorial_switch_allowed",
+                    "editorial_active_speaker_value",
+                    "editorial_reaction_story_value",
                     "ranked_sources",
                 ):
                     current[index][metadata_key] = previous_item.get(metadata_key)
@@ -11011,13 +11903,21 @@ def cap_multicam_auto_layout_accents(switches, overlap_duration, max_accent_seco
     for index, item in enumerate(ordered):
         capped.append(item)
         layout_mode = normalize_multicam_layout_mode(item.get("layout_mode", "cut"))
-        if layout_mode in {"cut", "pip"}:
-            # PiP is the permanent reaction safety net on single-speaker cuts.
-            # Do not "release" it back to a plain cut, because that creates
-            # nervous layout churn and removes the other speaker.
+        if layout_mode == "cut":
             continue
         layout_reason = str(item.get("layout_reason", "") or "")
-        if layout_reason in {"uncertain_speaker_coverage", "safe_shared_coverage", "shared_reaction_accent", "shared_moment_safety"}:
+        if layout_mode == "pip" and layout_reason not in {
+            "reaction_accent",
+            "earned_reaction_accent",
+            "earned_shared_reaction",
+        }:
+            continue
+        if layout_reason in {
+            "uncertain_speaker_coverage",
+            "safe_shared_coverage",
+            "shared_reaction_accent",
+            "shared_moment_safety",
+        } or layout_reason.startswith("unproven_speaker_coverage"):
             # These are safety coverage layouts, not decorative overlays. Releasing
             # them back to a cut can strand the viewer on a guessed inactive camera.
             continue
@@ -11043,12 +11943,231 @@ def cap_multicam_auto_layout_accents(switches, overlap_duration, max_accent_seco
 
     return dedupe_multicam_switches(capped)
 
+def reconcile_multicam_speaker_owner_switches(switches, source_ids):
+    valid_source_ids = {str(source_id or "") for source_id in (source_ids or []) if source_id}
+    reconciled = []
+    for item in switches or []:
+        updated = dict(item)
+        speaker_id = str(updated.get("audio_leader_camera_id") or "")
+        current_id = str(updated.get("camera_id") or "")
+        if (
+            updated.get("audio_decision_reliable")
+            and speaker_id
+            and speaker_id in valid_source_ids
+            and speaker_id != current_id
+            and not editorial_decision_blocks_active_speaker_reclaim(updated)
+        ):
+            # Post-processing can merge/cap switches after the director decision.
+            # A reliable speaker owner must remain the primary camera.
+            previous_secondary_id = str(updated.get("secondary_camera_id") or "")
+            if not previous_secondary_id or previous_secondary_id == speaker_id:
+                updated["secondary_camera_id"] = current_id if current_id in valid_source_ids else None
+            updated["camera_id"] = speaker_id
+            prior_reason = str(updated.get("layout_reason", "") or "")
+            updated["layout_reason"] = (
+                f"speaker_owner_reconciled:{prior_reason}"
+                if prior_reason and not prior_reason.startswith("speaker_owner_reconciled:")
+                else prior_reason or "speaker_owner_reconciled"
+            )
+        reconciled.append(updated)
+    return dedupe_multicam_switches(reconciled)
+
+
+def backfill_uncertain_opening_to_first_reliable_owner(switches, source_ids, max_backfill_seconds=None):
+    """
+    If the opening window has no trustworthy speaker evidence, inherit the first
+    reliable isolated-audio owner instead of defaulting to the first camera.
+    """
+    ordered = dedupe_multicam_switches(list(switches or []))
+    valid_source_ids = {str(source_id or "") for source_id in (source_ids or []) if source_id}
+    if len(ordered) < 2 or not valid_source_ids:
+        return ordered
+
+    first = ordered[0]
+    first_start = float(first.get("start_time", 0.0) or 0.0)
+    first_end = float(ordered[1].get("start_time", 0.0) or 0.0)
+    if first_start > 0.01 or first_end <= first_start:
+        return ordered
+
+    max_seconds = clamp_float(
+        float(
+            max_backfill_seconds
+            if max_backfill_seconds is not None
+            else os.getenv("MULTICAM_OPENING_RELIABLE_OWNER_BACKFILL_SECONDS", "8.0")
+            or 8.0
+        ),
+        0.0,
+        20.0,
+    )
+    if first_end > max_seconds:
+        return ordered
+
+    first_reason = str(first.get("layout_reason", "") or "")
+    first_audio_reason = str(first.get("audio_decision_reason", "") or "")
+    first_uncertain = bool(
+        not first.get("audio_decision_reliable")
+        and (
+            "unproven_speaker_hold" in first_reason
+            or first_audio_reason in {"low_audio_activity", "no_audio_scores", "close_audio_gap"}
+            or float(first.get("layout_confidence", 0.0) or 0.0) <= 0.35
+        )
+    )
+    if not first_uncertain:
+        return ordered
+
+    reliable_owner = None
+    for candidate in ordered[1:]:
+        candidate_start = float(candidate.get("start_time", 0.0) or 0.0)
+        if candidate_start > max_seconds + 0.01:
+            break
+        candidate_id = str(candidate.get("camera_id") or "")
+        speaker_id = str(candidate.get("audio_leader_camera_id") or "")
+        audio_reason = str(candidate.get("audio_decision_reason") or "")
+        if (
+            candidate.get("audio_decision_reliable")
+            and candidate_id
+            and candidate_id in valid_source_ids
+            and speaker_id == candidate_id
+            and audio_reason in {
+                "strong_isolated_audio_owner",
+                "db_dominant_isolated_audio_owner",
+                "clean_audio_owner",
+                "audio_visual_agree",
+                "sustained_isolated_handoff",
+                "strong_audio_owner_no_visual",
+            }
+        ):
+            reliable_owner = candidate
+            break
+
+    if not reliable_owner:
+        return ordered
+
+    previous_opening_id = str(first.get("camera_id") or "")
+    owner_id = str(reliable_owner.get("camera_id") or "")
+    if not owner_id or owner_id == previous_opening_id:
+        return ordered
+
+    updated = dict(first)
+    for metadata_key in (
+        "score",
+        "audio_leader_camera_id",
+        "raw_audio_leader_camera_id",
+        "audio_leader_activity",
+        "audio_second_activity",
+        "audio_leader_gap",
+        "audio_decision_reliable",
+        "audio_decision_reason",
+        "editorial_decision_score",
+        "editorial_decision_reason",
+        "editorial_decision_threshold",
+        "editorial_switch_allowed",
+        "editorial_active_speaker_value",
+        "editorial_reaction_story_value",
+        "ranked_sources",
+    ):
+        updated[metadata_key] = reliable_owner.get(metadata_key)
+    updated["camera_id"] = owner_id
+    updated["start_time"] = 0.0
+    updated["layout_mode"] = normalize_multicam_layout_mode(reliable_owner.get("layout_mode", first.get("layout_mode", "pip")))
+    updated["layout_reason"] = (
+        "active_speaker_with_reaction:opening_backfilled_to_first_reliable_owner:"
+        f"{reliable_owner.get('audio_decision_reason') or reliable_owner.get('layout_reason') or 'reliable_owner'}"
+    )
+    updated["secondary_camera_id"] = (
+        previous_opening_id
+        if previous_opening_id in valid_source_ids and previous_opening_id != owner_id
+        else reliable_owner.get("secondary_camera_id")
+    )
+    updated["layout_confidence"] = max(
+        float(first.get("layout_confidence", 0.0) or 0.0),
+        float(reliable_owner.get("layout_confidence", 0.0) or 0.0),
+    )
+    return dedupe_multicam_switches([updated, *ordered[1:]])
+
+
+def editorial_decision_blocks_active_speaker_reclaim(item):
+    if (item or {}).get("editorial_switch_allowed") is not False:
+        return False
+    audio_reason = str((item or {}).get("audio_decision_reason") or "")
+    if audio_reason in {"strong_isolated_audio_owner", "strong_audio_owner_no_visual", "db_dominant_isolated_audio_owner"}:
+        return False
+    editorial_reason = str((item or {}).get("editorial_decision_reason") or "")
+    return "earned_active_speaker_handoff" not in editorial_reason
+
+
+def get_multicam_proven_active_speaker_id(item, valid_source_ids):
+    if editorial_decision_blocks_active_speaker_reclaim(item):
+        return None
+    speaker_id = str((item or {}).get("audio_leader_camera_id") or "")
+    if (
+        (item or {}).get("audio_decision_reliable")
+        and speaker_id
+        and speaker_id in valid_source_ids
+    ):
+        return speaker_id
+    return None
+
+
+def reclaim_multicam_active_speaker_primary(item, valid_source_ids):
+    updated = dict(item or {})
+    active_speaker_id = get_multicam_proven_active_speaker_id(updated, valid_source_ids)
+    primary_id = str(updated.get("camera_id") or "")
+    if not active_speaker_id or not primary_id or primary_id == active_speaker_id:
+        return updated
+
+    previous_primary_id = primary_id if primary_id in valid_source_ids else None
+    previous_secondary_id = str(updated.get("secondary_camera_id") or "")
+    layout_mode = normalize_multicam_layout_mode(updated.get("layout_mode", "cut") or "cut")
+    if layout_mode in {"pip", "split-vertical"}:
+        updated["secondary_camera_id"] = previous_primary_id
+    elif previous_secondary_id == active_speaker_id:
+        updated["secondary_camera_id"] = previous_primary_id
+        updated["layout_mode"] = "pip"
+    else:
+        updated["secondary_camera_id"] = previous_secondary_id or None
+
+    updated["camera_id"] = active_speaker_id
+    prior_reason = str(updated.get("layout_reason", "") or "")
+    updated["layout_reason"] = (
+        f"active_speaker_primary_reclaimed:{prior_reason}"
+        if prior_reason and not prior_reason.startswith("active_speaker_primary_reclaimed:")
+        else prior_reason or "active_speaker_primary_reclaimed"
+    )
+    updated["layout_confidence"] = round(
+        max(0.5, float(updated.get("layout_confidence", 0.0) or 0.0)),
+        4,
+    )
+    return updated
+
 def is_time_in_silence(target_time, intervals):
     safe_time = float(target_time or 0.0)
     for start_time, end_time in intervals or []:
         if safe_time >= float(start_time) and safe_time < float(end_time):
             return True
     return False
+
+def get_multicam_timeline_activity_average(prepared_sources, camera_id, start_time, duration):
+    source = next(
+        (
+            item for item in (prepared_sources or [])
+            if str(item.get("id") or "") == str(camera_id or "")
+        ),
+        None,
+    )
+    windows = (source or {}).get("timeline_audio_activity_windows") or []
+    if not windows:
+        return None
+    safe_start = float(start_time or 0.0)
+    safe_end = safe_start + max(0.0, float(duration or 0.0))
+    values = [
+        float(item.get("activity", 0.0) or 0.0)
+        for item in windows
+        if safe_start <= float(item.get("time", 0.0) or 0.0) < safe_end
+    ]
+    if not values:
+        return None
+    return float(sum(values) / len(values))
 
 def choose_multicam_attention_layout(primary_camera_id, ranked_sources, source_count=0):
     """
@@ -11136,15 +12255,10 @@ def choose_multicam_attention_layout(primary_camera_id, ranked_sources, source_c
 
     companion_signal = max(companion_activity, companion_visual_speaking, companion_visual * 0.65)
 
-    if (
-        clear_speaker_owner
-        and source_total == 2
-        and companion_signal >= 0.18
-        and speaker_ownership_confidence < 0.72
-    ):
+    if clear_speaker_owner and source_total == 2 and companion_signal >= 0.18 and companion_visual >= 0.12:
         return {
             "layout_mode": "pip",
-            "reason": "reaction_safety_net",
+            "reason": "active_speaker_with_reaction",
             "secondary_camera_id": companion.get("camera_id"),
             "confidence": round(max(reaction_confidence, companion_signal), 4),
         }
@@ -11160,7 +12274,7 @@ def choose_multicam_attention_layout(primary_camera_id, ranked_sources, source_c
     if (
         source_total >= 2
         and primary_activity >= 0.3
-        and companion_activity >= max(0.2, MULTICAM_REACTION_MIN_COMPANION_ACTIVITY)
+        and companion_activity >= max(0.26, MULTICAM_REACTION_MIN_COMPANION_ACTIVITY)
         and abs(audio_gap) <= 0.09
         and shared_confidence >= 0.4
         and max(primary_visual_speaking, companion_visual_speaking) >= 0.035
@@ -11188,7 +12302,7 @@ def choose_multicam_attention_layout(primary_camera_id, ranked_sources, source_c
     if (
         source_total >= 2
         and primary_activity >= 0.22
-        and companion_activity >= 0.2
+        and companion_activity >= 0.26
         and abs(audio_gap) <= 0.075
         and shared_confidence >= 0.35
     ):
@@ -11205,11 +12319,11 @@ def choose_multicam_attention_layout(primary_camera_id, ranked_sources, source_c
         and audio_gap <= 0.14
         and companion_placeholder <= 0.45
         and (
-            companion_activity >= 0.18
-            or companion_visual >= 0.2
-            or float(companion.get("onset_lift", 0.0)) >= 0.08
+            companion_activity >= 0.24
+            or companion_visual >= 0.28
+            or float(companion.get("onset_lift", 0.0)) >= 0.11
         )
-        and reaction_confidence >= 0.24
+        and reaction_confidence >= 0.31
     ):
         return {
             "layout_mode": "pip",
@@ -11247,6 +12361,188 @@ def choose_multicam_attention_layout(primary_camera_id, ranked_sources, source_c
         "confidence": round(max(shared_confidence, reaction_confidence, speaker_ownership_confidence), 4),
     }
 
+def score_multicam_editorial_primary_change(
+    current_camera_id,
+    next_camera_id,
+    ranked_sources,
+    *,
+    audio_decision_reliable=False,
+    audio_decision_reason="",
+    audio_leader=None,
+    audio_leader_activity=0.0,
+    audio_leader_gap=0.0,
+    visual_leader=None,
+    visual_leader_score=0.0,
+    visual_leader_gap=0.0,
+    time_since_last_switch=0.0,
+    min_primary_hold_seconds=0.0,
+    current_time=0.0,
+    opening_camera_id=None,
+    opening_primary_hold_seconds=0.0,
+):
+    """
+    Score whether a primary-camera handoff adds story value.
+
+    The active-speaker shot remains the default. A cut has to prove it helps the
+    viewer: clear speaker ownership, a meaningful reaction, or a shared moment.
+    """
+    if not next_camera_id:
+        return {
+            "score": 0.0,
+            "reason": "no_candidate",
+            "threshold": 1.0,
+            "allow_switch": False,
+            "active_speaker_value": 0.0,
+            "reaction_story_value": 0.0,
+        }
+
+    if not current_camera_id or current_camera_id == next_camera_id:
+        return {
+            "score": 1.0,
+            "reason": "initial_or_stay",
+            "threshold": 0.0,
+            "allow_switch": True,
+            "active_speaker_value": 1.0,
+            "reaction_story_value": 0.0,
+        }
+
+    ranked_sources = ranked_sources or []
+    current_choice = next((item for item in ranked_sources if item.get("camera_id") == current_camera_id), None)
+    next_choice = next((item for item in ranked_sources if item.get("camera_id") == next_camera_id), None)
+    if not next_choice:
+        return {
+            "score": 0.0,
+            "reason": "candidate_missing",
+            "threshold": 1.0,
+            "allow_switch": False,
+            "active_speaker_value": 0.0,
+            "reaction_story_value": 0.0,
+        }
+
+    reason = str(audio_decision_reason or "")
+    next_is_audio_owner = bool(audio_leader and audio_leader.get("camera_id") == next_camera_id)
+    next_is_visual_owner = bool(visual_leader and visual_leader.get("camera_id") == next_camera_id)
+    current_audio = float(current_choice.get("audio_activity", 0.0)) if current_choice else 0.0
+    next_audio = float(next_choice.get("audio_activity", 0.0))
+    current_visual = float(current_choice.get("visual_speaking_score", 0.0)) if current_choice else 0.0
+    next_visual = float(next_choice.get("visual_speaking_score", 0.0))
+    next_onset = float(next_choice.get("onset_lift", 0.0))
+    placeholder_penalty = float(next_choice.get("source_placeholder_penalty", 0.0)) * 0.18
+
+    active_speaker_value = 0.0
+    # A primary cut must prove active-speaker ownership. Visual motion is useful,
+    # but weak mouth/body motion is not enough to put a possibly silent camera
+    # in the hero shot.
+    if (
+        next_is_visual_owner
+        and visual_leader_score >= 0.18
+        and visual_leader_gap >= 0.075
+        and next_audio >= max(0.18, current_audio - 0.08)
+    ):
+        active_speaker_value = max(
+            active_speaker_value,
+            0.58 + clamp_float(visual_leader_gap / 0.16, 0.0, 0.24),
+        )
+    if (
+        next_is_audio_owner
+        and audio_decision_reliable
+        and audio_leader_activity >= 0.38
+        and audio_leader_gap >= 0.17
+    ):
+        active_speaker_value = max(
+            active_speaker_value,
+            0.62 + clamp_float(audio_leader_gap / 0.42, 0.0, 0.3),
+        )
+    if (
+        reason.startswith("active_speaker_run_hold:")
+        and next_is_audio_owner
+        and audio_decision_reliable
+    ):
+        active_speaker_value = max(active_speaker_value, 0.9)
+    if (
+        reason in {"clean_audio_owner", "db_dominant_isolated_audio_owner"}
+        and next_is_audio_owner
+        and audio_decision_reliable
+        and audio_leader_activity >= 0.22
+        and audio_leader_gap >= 0.035
+    ):
+        active_speaker_value = max(
+            active_speaker_value,
+            0.66 + clamp_float(audio_leader_gap / 0.20, 0.0, 0.18),
+        )
+    if (
+        reason == "audio_visual_agree"
+        and next_is_audio_owner
+        and next_is_visual_owner
+        and audio_leader_gap >= 0.10
+        and visual_leader_gap >= 0.035
+    ):
+        active_speaker_value = max(
+            active_speaker_value,
+            0.78 + clamp_float((audio_leader_gap - 0.10) / 0.28, 0.0, 0.12),
+        )
+    if (
+        reason == "visual_speaker_owner"
+        and next_is_visual_owner
+        and visual_leader_score >= 0.20
+        and visual_leader_gap >= 0.09
+        and next_audio >= max(0.22, current_audio - 0.05)
+    ):
+        active_speaker_value = max(active_speaker_value, 0.74)
+
+    reaction_story_value = 0.0
+    if next_audio >= 0.32 and current_audio >= 0.28 and abs(next_audio - current_audio) <= 0.11:
+        reaction_story_value = max(reaction_story_value, 0.38)
+    if next_visual >= 0.12 and next_visual >= current_visual + 0.045:
+        reaction_story_value = max(
+            reaction_story_value,
+            0.42 + clamp_float((next_visual - current_visual) / 0.18, 0.0, 0.18),
+        )
+    if next_onset >= 0.12 and next_audio >= 0.28:
+        reaction_story_value = max(reaction_story_value, 0.48)
+
+    # Reactions can earn an accent layout, not a hero-camera takeover. Without a
+    # reliable active-speaker handoff, keep the current primary shot.
+    score = clamp_float(active_speaker_value - placeholder_penalty, 0.0, 1.0)
+    hold_required = time_since_last_switch < max(0.0, float(min_primary_hold_seconds or 0.0))
+    close_or_weak_reason = reason in {"close_audio_gap", "low_audio_activity", "no_audio_scores"}
+
+    threshold = 0.58
+    if reason == "clean_audio_owner":
+        threshold = 0.62
+    if reason in {"strong_isolated_audio_owner", "strong_audio_owner_no_visual", "db_dominant_isolated_audio_owner"}:
+        threshold = 0.66
+    if reason == "question_onset_audio_owner":
+        threshold = 0.70
+    if close_or_weak_reason:
+        threshold = 0.82
+    if hold_required:
+        threshold = max(threshold, 0.74)
+    if (
+        opening_camera_id
+        and current_camera_id == opening_camera_id
+        and current_time < max(0.0, float(opening_primary_hold_seconds or 0.0))
+    ):
+        opening_threshold = 0.82 if reason in {"strong_isolated_audio_owner", "db_dominant_isolated_audio_owner", "audio_visual_agree"} else 0.86
+        threshold = max(threshold, opening_threshold)
+
+    allow_switch = bool(score >= threshold and not (close_or_weak_reason and score < 0.9))
+    if active_speaker_value > 0:
+        editorial_reason = "earned_active_speaker_handoff"
+    elif reaction_story_value > 0:
+        editorial_reason = "reaction_accent_not_primary"
+    else:
+        editorial_reason = "unearned_primary_change"
+
+    return {
+        "score": round(score, 4),
+        "reason": editorial_reason,
+        "threshold": round(threshold, 4),
+        "allow_switch": allow_switch,
+        "active_speaker_value": round(active_speaker_value, 4),
+        "reaction_story_value": round(reaction_story_value, 4),
+    }
+
 def normalize_multicam_switches(request, prepared_sources, overlap_duration):
     safe_duration = max(0.0, float(overlap_duration or 0.0))
     source_ids = [source["id"] for source in prepared_sources]
@@ -11259,9 +12555,9 @@ def normalize_multicam_switches(request, prepared_sources, overlap_duration):
     aggressiveness = normalize_multicam_aggressiveness(request.auto_switch_aggressiveness)
     requested_interval = clamp_float(request.auto_switch_interval, 1.0, 10.0)
     interval_floor = {
-        "steady": 5.0,
-        "balanced": 4.0,
-        "dynamic": 2.5,
+        "steady": 3.0,
+        "balanced": 1.0,
+        "dynamic": 1.25,
     }.get(aggressiveness, 4.0)
     interval = max(requested_interval, interval_floor)
     tuning = get_multicam_switch_tuning(aggressiveness, interval)
@@ -11270,9 +12566,15 @@ def normalize_multicam_switches(request, prepared_sources, overlap_duration):
     if request.auto_switch:
         current_time = 0.0
         current_camera_id = None
+        # Do not treat source order as editorial truth. Only an explicit primary
+        # camera may anchor the opening shot; otherwise the first shot must be
+        # earned by visual/clean-audio evidence.
         opening_camera_id = None
         source_cursor = 0
         last_switch_time = 0.0
+        active_speaker_run_id = None
+        pending_handoff_id = None
+        pending_handoff_started_at = None
         min_layout_hold_seconds = max(tuning["min_primary_hold_seconds"], interval * 2.5)
         opening_primary_hold_seconds = max(
             0.0,
@@ -11297,6 +12599,7 @@ def normalize_multicam_switches(request, prepared_sources, overlap_duration):
                 visual_leader_score = 0.0
                 visual_second_score = 0.0
                 visual_leader_gap = 0.0
+                has_isolated_director_audio = False
                 audio_decision_reason = "no_audio_scores"
                 for source in prepared_sources:
                     relative_time = get_source_start_for_timeline(
@@ -11338,6 +12641,16 @@ def normalize_multicam_switches(request, prepared_sources, overlap_duration):
                             current_time + 0.45,
                             window_seconds=0.8,
                         )
+                        current_audio_db = get_audio_db_near_source_time(
+                            timeline_audio_windows,
+                            current_time,
+                            window_seconds=1.1,
+                        )
+                        upcoming_audio_db = get_audio_db_near_source_time(
+                            timeline_audio_windows,
+                            current_time + 0.45,
+                            window_seconds=0.8,
+                        )
                     else:
                         current_audio_activity = get_audio_activity_score_near_source_time(
                             source.get("audio_activity_windows") or [],
@@ -11349,7 +12662,18 @@ def normalize_multicam_switches(request, prepared_sources, overlap_duration):
                             relative_time + 0.45,
                             window_seconds=0.8,
                         )
+                        current_audio_db = get_audio_db_near_source_time(
+                            source.get("audio_activity_windows") or [],
+                            relative_time,
+                            window_seconds=1.1,
+                        )
+                        upcoming_audio_db = get_audio_db_near_source_time(
+                            source.get("audio_activity_windows") or [],
+                            relative_time + 0.45,
+                            window_seconds=0.8,
+                        )
                     audio_activity = max(current_audio_activity, upcoming_audio_activity * 0.92)
+                    audio_db = max(current_audio_db, upcoming_audio_db)
                     speaking = (
                         audio_activity >= 0.12
                         if timeline_audio_windows
@@ -11374,6 +12698,9 @@ def normalize_multicam_switches(request, prepared_sources, overlap_duration):
                             "source_placeholder_penalty": source_placeholder_penalty,
                             "speaking": speaking,
                             "audio_activity": audio_activity,
+                            "audio_db": audio_db,
+                            "current_audio_db": current_audio_db,
+                            "upcoming_audio_db": upcoming_audio_db,
                             "current_audio_activity": current_audio_activity,
                             "upcoming_audio_activity": upcoming_audio_activity,
                             "onset_lift": max(0.0, upcoming_audio_activity - current_audio_activity),
@@ -11401,6 +12728,37 @@ def normalize_multicam_switches(request, prepared_sources, overlap_duration):
                     audio_leader_activity = float(raw_audio_leader.get("audio_activity", 0.0))
                     audio_second_activity = float(ordered_by_audio[1].get("audio_activity", 0.0)) if len(ordered_by_audio) > 1 else 0.0
                     audio_leader_gap = audio_leader_activity - audio_second_activity
+                    has_isolated_director_audio = any(
+                        source.get("audio_activity_source") == "external_isolated_channel"
+                        for source in prepared_sources
+                    )
+                    ordered_by_db = sorted(
+                        ranked_sources,
+                        key=lambda item: float(item.get("audio_db", -80.0)),
+                        reverse=True,
+                    )
+                    raw_db_leader = ordered_by_db[0] if ordered_by_db else raw_audio_leader
+                    db_leader_level = float(raw_db_leader.get("audio_db", -80.0)) if raw_db_leader else -80.0
+                    db_second_level = float(ordered_by_db[1].get("audio_db", -80.0)) if len(ordered_by_db) > 1 else -80.0
+                    db_leader_gap = db_leader_level - db_second_level
+                    db_dominant_isolated_owner = bool(
+                        has_isolated_director_audio
+                        and raw_db_leader
+                        and db_leader_level >= float(os.getenv("MULTICAM_DIRECTOR_DB_OWNER_MIN_LEVEL", "-38.0") or -38.0)
+                        and db_leader_gap >= float(os.getenv("MULTICAM_DIRECTOR_DB_OWNER_MIN_GAP_DB", "4.5") or 4.5)
+                    )
+                    if db_dominant_isolated_owner:
+                        raw_audio_leader = raw_db_leader
+                        audio_leader_activity = float(raw_audio_leader.get("audio_activity", 0.0))
+                        audio_second_activity = max(
+                            [
+                                float(item.get("audio_activity", 0.0))
+                                for item in ranked_sources
+                                if item.get("camera_id") != raw_audio_leader.get("camera_id")
+                            ]
+                            or [0.0]
+                        )
+                        audio_leader_gap = max(audio_leader_activity - audio_second_activity, db_leader_gap / 18.0)
                     visual_leader = ordered_by_visual_speaking[0]
                     visual_leader_score = float(visual_leader.get("visual_speaking_score", 0.0))
                     visual_second_score = float(ordered_by_visual_speaking[1].get("visual_speaking_score", 0.0)) if len(ordered_by_visual_speaking) > 1 else 0.0
@@ -11410,39 +12768,60 @@ def normalize_multicam_switches(request, prepared_sources, overlap_duration):
                         and raw_audio_leader
                         and visual_leader.get("camera_id") == raw_audio_leader.get("camera_id")
                     )
+                    clear_isolated_audio_owner = bool(
+                        has_isolated_director_audio
+                        and audio_leader_activity >= 0.22
+                        and audio_leader_gap >= 0.035
+                    )
                     strong_isolated_audio_owner = bool(
-                        any(source.get("audio_activity_source") == "external_isolated_channel" for source in prepared_sources)
+                        has_isolated_director_audio
                         and audio_leader_activity >= 0.34
                         and audio_leader_gap >= 0.16
                     )
-                    if strong_isolated_audio_owner:
-                        # Isolated Behringer channels are more trustworthy than
-                        # visual mouth/motion heuristics. When one mic clearly
-                        # owns the moment, do not let visual noise create a
-                        # favorite-camera cut.
+                    if clear_isolated_audio_owner or db_dominant_isolated_owner:
+                        # When the clean external audio has channel ownership,
+                        # it owns the hero camera. Visual motion can decorate the
+                        # edit, but it must not put a listening/reaction camera in
+                        # primary while the real speaker is trapped in PiP.
                         audio_leader = raw_audio_leader
                         audio_decision_reliable = True
-                        audio_decision_reason = "strong_isolated_audio_owner"
+                        audio_decision_reason = (
+                            "db_dominant_isolated_audio_owner"
+                            if db_dominant_isolated_owner and not strong_isolated_audio_owner
+                            else
+                            "strong_isolated_audio_owner"
+                            if strong_isolated_audio_owner
+                            else "clean_audio_owner"
+                        )
                     elif (
-                        visual_leader_score >= 0.105
-                        and visual_leader_gap >= 0.028
-                        and float(visual_leader.get("visual_speaking_confidence", 0.0)) >= 0.16
+                        visual_leader_score >= 0.18
+                        and visual_leader_gap >= 0.075
+                        and float(visual_leader.get("visual_speaking_confidence", 0.0)) >= 0.24
+                        and float(visual_leader.get("audio_activity", 0.0)) >= max(
+                            0.18,
+                            audio_second_activity - 0.08,
+                        )
                     ):
+                        # Active speaker must feel like a director with eyes, not
+                        # only a loudness meter. Weak face/body motion is not enough
+                        # to steal the hero shot from the current speaker.
                         audio_leader = visual_leader
                         audio_decision_reliable = True
                         audio_decision_reason = "visual_speaker_owner"
                     elif (
                         audio_visual_agree
-                        and audio_leader_activity >= 0.145
-                        and audio_leader_gap >= 0.045
-                        and visual_leader_score >= 0.055
+                        and audio_leader_activity >= 0.24
+                        and audio_leader_gap >= 0.105
+                        and visual_leader_score >= 0.085
                     ):
                         audio_leader = raw_audio_leader
                         audio_decision_reliable = True
                         audio_decision_reason = "audio_visual_agree"
                     elif (
-                        audio_leader_activity >= 0.24
-                        and audio_leader_gap >= 0.11
+                        has_isolated_director_audio
+                        and
+                        audio_leader_activity >= 0.32
+                        and audio_leader_gap >= 0.18
                         and float(raw_audio_leader.get("onset_lift", 0.0)) >= 0.045
                         and visual_leader_score < 0.11
                     ):
@@ -11450,8 +12829,10 @@ def normalize_multicam_switches(request, prepared_sources, overlap_duration):
                         audio_decision_reliable = True
                         audio_decision_reason = "question_onset_audio_owner"
                     elif (
-                        audio_leader_activity >= 0.34
-                        and audio_leader_gap >= 0.16
+                        has_isolated_director_audio
+                        and
+                        audio_leader_activity >= 0.46
+                        and audio_leader_gap >= 0.24
                         and visual_leader_score < 0.055
                     ):
                         audio_leader = raw_audio_leader
@@ -11496,6 +12877,135 @@ def normalize_multicam_switches(request, prepared_sources, overlap_duration):
 
                 ranked_sources.sort(key=lambda item: item["score"], reverse=True)
                 best_choice = ranked_sources[0]["camera_id"] if ranked_sources else current_camera_id
+                time_since_last_switch = current_time - float(last_switch_time or 0.0)
+                if request.audio_based_auto_switch and ranked_sources and has_isolated_director_audio:
+                    candidate_owner_id = (
+                        audio_leader.get("camera_id")
+                        if audio_decision_reliable and audio_leader
+                        else None
+                    )
+                    if candidate_owner_id and candidate_owner_id in source_ids:
+                        if active_speaker_run_id is None:
+                            active_speaker_run_id = candidate_owner_id
+                            pending_handoff_id = None
+                            pending_handoff_started_at = None
+                        elif candidate_owner_id == active_speaker_run_id:
+                            pending_handoff_id = None
+                            pending_handoff_started_at = None
+                        else:
+                            if pending_handoff_id != candidate_owner_id:
+                                pending_handoff_id = candidate_owner_id
+                                pending_handoff_started_at = current_time
+                            candidate_duration = current_time - float(pending_handoff_started_at or current_time)
+                            active_run_choice = next(
+                                (item for item in ranked_sources if item.get("camera_id") == active_speaker_run_id),
+                                None,
+                            )
+                            active_run_visual_score = (
+                                float(active_run_choice.get("visual_speaking_score", 0.0))
+                                if active_run_choice
+                                else 0.0
+                            )
+                            visual_confirms_candidate = bool(
+                                visual_leader
+                                and visual_leader.get("camera_id") == candidate_owner_id
+                            )
+                            handoff_earned = is_multicam_active_speaker_handoff_earned(
+                                audio_decision_reason,
+                                audio_leader_activity,
+                                audio_leader_gap,
+                                candidate_duration,
+                                visual_agrees=visual_confirms_candidate,
+                                visual_leader_score=visual_leader_score,
+                                visual_leader_gap=visual_leader_gap,
+                                current_active_visual_score=active_run_visual_score,
+                            )
+                            if has_isolated_director_audio and candidate_owner_id != active_speaker_run_id:
+                                lookahead_seconds = float(os.getenv("MULTICAM_ACTIVE_SPEAKER_HANDOFF_LOOKAHEAD_SECONDS", "1.8") or 1.8)
+                                min_candidate_avg = float(os.getenv("MULTICAM_ACTIVE_SPEAKER_HANDOFF_MIN_CANDIDATE_AVG", "0.40") or 0.40)
+                                max_current_avg = float(os.getenv("MULTICAM_ACTIVE_SPEAKER_HANDOFF_MAX_CURRENT_AVG", "0.50") or 0.50)
+                                min_future_gap = float(os.getenv("MULTICAM_ACTIVE_SPEAKER_HANDOFF_MIN_FUTURE_GAP", "0.12") or 0.12)
+                                candidate_future_avg = get_multicam_timeline_activity_average(
+                                    prepared_sources,
+                                    candidate_owner_id,
+                                    current_time,
+                                    lookahead_seconds,
+                                )
+                                active_future_avg = get_multicam_timeline_activity_average(
+                                    prepared_sources,
+                                    active_speaker_run_id,
+                                    current_time,
+                                    lookahead_seconds,
+                                )
+                                future_handoff_earned = bool(
+                                    candidate_future_avg is not None
+                                    and active_future_avg is not None
+                                    and candidate_future_avg >= min_candidate_avg
+                                    and active_future_avg <= max_current_avg
+                                    and (candidate_future_avg - active_future_avg) >= min_future_gap
+                                )
+                                if future_handoff_earned:
+                                    handoff_earned = True
+                                    audio_decision_reason = "sustained_isolated_handoff"
+                                elif (
+                                    not handoff_earned
+                                    and audio_decision_reason in {
+                                        "strong_isolated_audio_owner",
+                                        "db_dominant_isolated_audio_owner",
+                                        "strong_audio_owner_no_visual",
+                                        "clean_audio_owner",
+                                    }
+                                ):
+                                    handoff_earned = False
+                                decision_context["isolated_handoff_gate"] = {
+                                    "candidate_camera_id": candidate_owner_id,
+                                    "current_active_camera_id": active_speaker_run_id,
+                                    "lookahead_seconds": round(lookahead_seconds, 3),
+                                    "candidate_future_avg": round(candidate_future_avg, 4)
+                                    if candidate_future_avg is not None else None,
+                                    "current_future_avg": round(active_future_avg, 4)
+                                    if active_future_avg is not None else None,
+                                    "future_handoff_earned": future_handoff_earned,
+                                    "min_candidate_avg": round(min_candidate_avg, 4),
+                                    "max_current_avg": round(max_current_avg, 4),
+                                    "min_future_gap": round(min_future_gap, 4),
+                                }
+                            if handoff_earned:
+                                active_speaker_run_id = candidate_owner_id
+                                pending_handoff_id = None
+                                pending_handoff_started_at = None
+                            else:
+                                run_owner = active_run_choice
+                                if run_owner:
+                                    previous_reason = audio_decision_reason or "handoff_not_sustained"
+                                    previous_activity = audio_leader_activity
+                                    previous_gap = audio_leader_gap
+                                    audio_leader = run_owner
+                                    audio_decision_reliable = True
+                                    audio_decision_reason = f"active_speaker_run_hold:{previous_reason}"
+                                    audio_leader_activity = float(run_owner.get("audio_activity", 0.0))
+                                    audio_second_activity = max(
+                                        [
+                                            float(item.get("audio_activity", 0.0))
+                                            for item in ranked_sources
+                                            if item.get("camera_id") != active_speaker_run_id
+                                        ]
+                                        or [0.0]
+                                    )
+                                    audio_leader_gap = audio_leader_activity - audio_second_activity
+                                    run_owner["score"] = max(
+                                        float(run_owner.get("score", 0.0)),
+                                        float(ranked_sources[0].get("score", 0.0)) + 0.001,
+                                    )
+                                    run_owner["active_speaker_run_hold"] = {
+                                        "blocked_camera_id": candidate_owner_id,
+                                        "blocked_reason": previous_reason,
+                                        "blocked_activity": round(float(previous_activity or 0.0), 4),
+                                        "blocked_gap": round(float(previous_gap or 0.0), 4),
+                                        "candidate_duration_seconds": round(candidate_duration, 3),
+                                    }
+                                    ranked_sources.sort(key=lambda item: item["score"], reverse=True)
+                                    best_choice = ranked_sources[0]["camera_id"] if ranked_sources else current_camera_id
                 current_choice = next(
                     (item for item in ranked_sources if item["camera_id"] == current_camera_id),
                     None,
@@ -11503,7 +13013,6 @@ def normalize_multicam_switches(request, prepared_sources, overlap_duration):
                 low_confidence_mode = bool(ranked_sources) and max(
                     item["visual_score"] + (0.22 * float(item.get("audio_activity", 0.0))) for item in ranked_sources
                 ) < tuning["low_confidence_threshold"]
-                time_since_last_switch = current_time - float(last_switch_time or 0.0)
                 alternate_choice = next(
                     (item for item in ranked_sources if item["camera_id"] != current_camera_id),
                     None,
@@ -11531,7 +13040,10 @@ def normalize_multicam_switches(request, prepared_sources, overlap_duration):
                     else:
                         next_camera_id = current_camera_id if score_gap < tuning["switch_threshold"] else best_choice
                 else:
-                    next_camera_id = best_choice
+                    if audio_decision_reliable and audio_leader and audio_leader.get("camera_id"):
+                        next_camera_id = audio_leader["camera_id"]
+                    else:
+                        next_camera_id = best_choice
                 winning_score = float(ranked_sources[0]["score"]) if ranked_sources else 0.0
                 if (
                     request.audio_based_auto_switch
@@ -11546,20 +13058,57 @@ def normalize_multicam_switches(request, prepared_sources, overlap_duration):
                     # the viewer while confidence is still low.
                     raw_leader_id = raw_audio_leader["camera_id"]
                     raw_leader_can_take_over = bool(
-                        not current_camera_id
-                        or raw_leader_id == current_camera_id
+                        current_camera_id
+                        and (
+                            raw_leader_id == current_camera_id
                         or (
                             time_since_last_switch >= tuning["uncertain_primary_hold"]
                             and audio_leader_gap >= tuning["uncertain_switch_gap"]
+                        )
                         )
                     )
                     if raw_leader_can_take_over:
                         next_camera_id = raw_leader_id
                         winning_score = float(raw_audio_leader.get("score", winning_score))
+                    elif (
+                        not current_camera_id
+                        and visual_leader
+                        and visual_leader.get("camera_id")
+                        and visual_leader_score >= 0.075
+                        and (
+                            float(visual_leader.get("visual_speaking_confidence", 0.0)) >= 0.18
+                            or visual_leader_gap >= 0.035
+                        )
+                    ):
+                        next_camera_id = visual_leader["camera_id"]
+                        winning_score = float(visual_leader.get("score", winning_score))
+                        audio_decision_reason = "visual_opening_owner"
                     else:
-                        next_camera_id = current_camera_id
-                        if current_choice:
-                            winning_score = float(current_choice.get("score", winning_score))
+                        next_camera_id = current_camera_id or default_camera_id
+                        fallback_choice = current_choice or next(
+                            (item for item in ranked_sources if item.get("camera_id") == next_camera_id),
+                            None,
+                        )
+                        if fallback_choice:
+                            winning_score = float(fallback_choice.get("score", winning_score))
+
+                if (
+                    not switches
+                    and opening_camera_id
+                    and current_time < opening_primary_hold_seconds
+                    and not audio_decision_reliable
+                ):
+                    # The first visible shot is the user's trust anchor. Do not
+                    # open on another camera because of a close/uncertain audio
+                    # reading; keep the declared/default opener as primary and
+                    # let reaction PiP carry the other angle.
+                    next_camera_id = opening_camera_id
+                    opening_choice = next(
+                        (item for item in ranked_sources if item.get("camera_id") == opening_camera_id),
+                        None,
+                    )
+                    if opening_choice:
+                        winning_score = float(opening_choice.get("score", winning_score))
 
                 if current_camera_id and next_camera_id and next_camera_id != current_camera_id:
                     decisive_handoff = bool(
@@ -11587,11 +13136,37 @@ def normalize_multicam_switches(request, prepared_sources, overlap_duration):
                             and visual_leader_gap >= 0.34
                         )
                     )
+                    opening_handoff_is_clear = bool(
+                        decisive_handoff
+                        and current_time >= max(6.0, opening_primary_hold_seconds * 0.45)
+                        and (
+                            (
+                                audio_decision_reason == "visual_speaker_owner"
+                                and visual_leader
+                                and visual_leader.get("camera_id") == next_camera_id
+                                and visual_leader_score >= 0.14
+                                and visual_leader_gap >= 0.045
+                            )
+                            or (
+                                audio_leader_activity >= 0.42
+                                and audio_leader_gap >= 0.13
+                                and (
+                                    audio_visual_agree
+                                    or audio_decision_reason in {
+                                        "strong_isolated_audio_owner",
+                                        "db_dominant_isolated_audio_owner",
+                                        "audio_visual_agree",
+                                        "question_onset_audio_owner",
+                                    }
+                                )
+                            )
+                        )
+                    )
                     if (
                         opening_camera_id
                         and current_camera_id == opening_camera_id
                         and current_time < opening_primary_hold_seconds
-                        and not opening_handoff_is_unmistakable
+                        and not (opening_handoff_is_unmistakable or opening_handoff_is_clear)
                     ):
                         next_camera_id = opening_camera_id
                         if current_choice:
@@ -11604,6 +13179,80 @@ def normalize_multicam_switches(request, prepared_sources, overlap_duration):
                         if current_choice:
                             winning_score = float(current_choice.get("score", winning_score))
 
+                editorial_decision = {
+                    "score": 1.0,
+                    "reason": "initial_or_stay",
+                    "threshold": 0.0,
+                    "allow_switch": True,
+                    "active_speaker_value": 1.0,
+                    "reaction_story_value": 0.0,
+                }
+                if (
+                    ranked_sources
+                    and not switches
+                    and opening_camera_id
+                    and next_camera_id
+                    and next_camera_id != opening_camera_id
+                    and current_time < opening_primary_hold_seconds
+                    and not (
+                        audio_decision_reliable
+                        and audio_leader
+                        and audio_leader.get("camera_id") == next_camera_id
+                    )
+                ):
+                    editorial_decision = score_multicam_editorial_primary_change(
+                        opening_camera_id,
+                        next_camera_id,
+                        ranked_sources,
+                        audio_decision_reliable=audio_decision_reliable,
+                        audio_decision_reason=audio_decision_reason,
+                        audio_leader=audio_leader,
+                        audio_leader_activity=audio_leader_activity,
+                        audio_leader_gap=audio_leader_gap,
+                        visual_leader=visual_leader,
+                        visual_leader_score=visual_leader_score,
+                        visual_leader_gap=visual_leader_gap,
+                        time_since_last_switch=time_since_last_switch,
+                        min_primary_hold_seconds=tuning["min_primary_hold_seconds"],
+                        current_time=current_time,
+                        opening_camera_id=opening_camera_id,
+                        opening_primary_hold_seconds=opening_primary_hold_seconds,
+                    )
+                    if not editorial_decision.get("allow_switch"):
+                        next_camera_id = opening_camera_id
+                        editorial_decision["reason"] = f"opening_anchor_hold:{editorial_decision.get('reason')}"
+                        opening_choice = next(
+                            (item for item in ranked_sources if item.get("camera_id") == opening_camera_id),
+                            None,
+                        )
+                        if opening_choice:
+                            winning_score = float(opening_choice.get("score", winning_score))
+
+                if ranked_sources and current_camera_id and next_camera_id and next_camera_id != current_camera_id:
+                    editorial_decision = score_multicam_editorial_primary_change(
+                        current_camera_id,
+                        next_camera_id,
+                        ranked_sources,
+                        audio_decision_reliable=audio_decision_reliable,
+                        audio_decision_reason=audio_decision_reason,
+                        audio_leader=audio_leader,
+                        audio_leader_activity=audio_leader_activity,
+                        audio_leader_gap=audio_leader_gap,
+                        visual_leader=visual_leader,
+                        visual_leader_score=visual_leader_score,
+                        visual_leader_gap=visual_leader_gap,
+                        time_since_last_switch=time_since_last_switch,
+                        min_primary_hold_seconds=tuning["min_primary_hold_seconds"],
+                        current_time=current_time,
+                        opening_camera_id=opening_camera_id,
+                        opening_primary_hold_seconds=opening_primary_hold_seconds,
+                    )
+                    if not editorial_decision.get("allow_switch"):
+                        next_camera_id = current_camera_id
+                        editorial_decision["reason"] = f"editorial_hold:{editorial_decision.get('reason')}"
+                        if current_choice:
+                            winning_score = float(current_choice.get("score", winning_score))
+
                 if True:
                     if (
                         audio_decision_reliable
@@ -11611,7 +13260,7 @@ def normalize_multicam_switches(request, prepared_sources, overlap_duration):
                         and audio_leader.get("camera_id") == next_camera_id
                         and (
                             audio_leader_gap >= 0.12
-                            or audio_decision_reason in {"visual_speaker_owner", "audio_visual_agree"}
+                            or audio_decision_reason in {"clean_audio_owner", "audio_visual_agree", "db_dominant_isolated_audio_owner"}
                         )
                     ):
                         companion = next(
@@ -11644,7 +13293,7 @@ def normalize_multicam_switches(request, prepared_sources, overlap_duration):
                         shared_safety_due = bool(
                             len(prepared_sources) == 2
                             and companion
-                            and companion_signal >= 0.18
+                            and companion_signal >= 0.24
                             and (
                                 audio_leader_gap < 0.075
                                 or (visual_disagreement and owner_certainty < 0.82)
@@ -11652,20 +13301,20 @@ def normalize_multicam_switches(request, prepared_sources, overlap_duration):
                         )
                         reaction_safety_due = bool(
                             companion
-                            and companion_signal >= 0.20
+                            and companion_signal >= 0.28
                             and time_since_last_switch >= max(28.0, interval * 6.0)
                         )
                         if shared_safety_due:
                             attention_layout = {
-                                "layout_mode": "split-vertical",
-                                "reason": "shared_moment_safety",
+                                "layout_mode": "pip",
+                                "reason": "earned_shared_reaction",
                                 "secondary_camera_id": companion.get("camera_id"),
                                 "confidence": round(clamp_float(max(companion_signal, 1.0 - owner_certainty), 0.0, 1.0), 4),
                             }
                         elif reaction_safety_due:
                             attention_layout = {
                                 "layout_mode": "pip",
-                                "reason": "reaction_safety_net",
+                                "reason": "earned_reaction_accent",
                                 "secondary_camera_id": companion.get("camera_id"),
                                 "confidence": round(clamp_float(max(companion_signal, 0.25), 0.0, 1.0), 4),
                             }
@@ -11682,6 +13331,47 @@ def normalize_multicam_switches(request, prepared_sources, overlap_duration):
                             ranked_sources,
                             len(prepared_sources),
                         )
+                    if (
+                        request.audio_based_auto_switch
+                        and ranked_sources
+                        and not audio_decision_reliable
+                        and len(prepared_sources) >= 2
+                    ):
+                        next_layout = normalize_multicam_layout_mode(attention_layout.get("layout_mode", "cut"))
+                        next_reason = str(attention_layout.get("reason", "") or "")
+                        unproven_coverage_layout = bool(
+                            next_layout in {"split-vertical", "scene-grid"}
+                            and (
+                                "unproven_speaker_coverage" in next_reason
+                                or "uncertain_speaker_coverage" in next_reason
+                                or "safe_shared_coverage" in next_reason
+                            )
+                        )
+                        guessed_fullscreen_owner = bool(
+                            next_layout == "cut"
+                            and next_reason in {"dominant_speaker_cut", "speaker_owned_cut", "single_owner", "no_companion"}
+                        )
+                        if guessed_fullscreen_owner or unproven_coverage_layout:
+                            companion = next(
+                                (item for item in ranked_sources if item.get("camera_id") != next_camera_id),
+                                None,
+                            )
+                            if companion:
+                                shared_confidence = clamp_float(
+                                    max(
+                                        float(companion.get("audio_activity", 0.0)),
+                                        float(companion.get("visual_speaking_score", 0.0)),
+                                        float(companion.get("visual_score", 0.0)) * 0.65,
+                                    ),
+                                    0.0,
+                                    1.0,
+                                )
+                                attention_layout = {
+                                    "layout_mode": "pip",
+                                    "reason": f"active_speaker_with_reaction:unproven_speaker_hold:{audio_decision_reason or 'unknown'}",
+                                    "secondary_camera_id": companion.get("camera_id"),
+                                    "confidence": round(max(shared_confidence, 0.25), 4),
+                                }
                 decision_context = {
                     "audio_leader_camera_id": audio_leader.get("camera_id") if audio_leader else None,
                     "raw_audio_leader_camera_id": raw_audio_leader.get("camera_id") if raw_audio_leader else None,
@@ -11694,11 +13384,18 @@ def normalize_multicam_switches(request, prepared_sources, overlap_duration):
                     "visual_leader_gap": round(visual_leader_gap, 4),
                     "audio_decision_reliable": audio_decision_reliable,
                     "audio_decision_reason": audio_decision_reason,
+                    "editorial_decision_score": editorial_decision.get("score"),
+                    "editorial_decision_reason": editorial_decision.get("reason"),
+                    "editorial_decision_threshold": editorial_decision.get("threshold"),
+                    "editorial_switch_allowed": editorial_decision.get("allow_switch"),
+                    "editorial_active_speaker_value": editorial_decision.get("active_speaker_value"),
+                    "editorial_reaction_story_value": editorial_decision.get("reaction_story_value"),
                     "ranked_sources": [
                         {
                             "camera_id": item.get("camera_id"),
                             "score": round(float(item.get("score", 0.0)), 4),
                             "audio_activity": round(float(item.get("audio_activity", 0.0)), 4),
+                            "audio_db": round(float(item.get("audio_db", -80.0)), 3),
                             "current_audio_activity": round(float(item.get("current_audio_activity", 0.0)), 4),
                             "upcoming_audio_activity": round(float(item.get("upcoming_audio_activity", 0.0)), 4),
                             "visual_score": round(float(item.get("visual_score", 0.0)), 4),
@@ -11730,22 +13427,34 @@ def normalize_multicam_switches(request, prepared_sources, overlap_duration):
                 current_time += interval
                 continue
             switch_start_time = current_time
+            handoff_or_reaction_backdate_reason = (
+                    audio_decision_reason in {
+                        "strong_isolated_audio_owner",
+                        "db_dominant_isolated_audio_owner",
+                        "audio_visual_agree",
+                        "question_onset_audio_owner",
+                        "strong_audio_owner_no_visual",
+                        "sustained_isolated_handoff",
+                    }
+                )
             if (
                 switches
                 and switches[-1].get("camera_id") != next_camera_id
                 and audio_decision_reliable
                 and audio_leader
                 and audio_leader.get("camera_id") == next_camera_id
-                and audio_decision_reason in {
-                    "strong_isolated_audio_owner",
-                    "audio_visual_agree",
-                    "question_onset_audio_owner",
-                    "strong_audio_owner_no_visual",
-                }
+                and handoff_or_reaction_backdate_reason
                 and any(source.get("audio_activity_source") == "external_isolated_channel" for source in prepared_sources)
             ):
                 previous_switch_start = float(switches[-1].get("start_time", last_switch_time or 0.0))
-                minimum_backdated_start = previous_switch_start + max(4.0, min(float(interval or 5.0), 6.0))
+                # A layout-only reaction/PiP change must not reset the active
+                # speaker handoff clock. The isolated channel can backdate close
+                # to the detected mic takeover instead of joining several seconds
+                # late because the previous segment changed layout.
+                minimum_backdated_start = previous_switch_start + max(
+                    0.5,
+                    min(float(interval or 1.0) * 0.5, 1.0),
+                )
                 switch_start_time = estimate_multicam_isolated_handoff_start(
                     prepared_sources,
                     next_camera_id,
@@ -11810,6 +13519,8 @@ def normalize_multicam_switches(request, prepared_sources, overlap_duration):
 	            aggressiveness,
         )
         deduped = cap_multicam_auto_layout_accents(deduped, safe_duration, max_accent_seconds=4.0)
+        deduped = reconcile_multicam_speaker_owner_switches(deduped, source_ids)
+        deduped = backfill_uncertain_opening_to_first_reliable_owner(deduped, source_ids)
 
     return [
         {
@@ -11827,6 +13538,12 @@ def normalize_multicam_switches(request, prepared_sources, overlap_duration):
             "audio_leader_gap": item.get("audio_leader_gap"),
             "audio_decision_reliable": item.get("audio_decision_reliable"),
             "audio_decision_reason": item.get("audio_decision_reason"),
+            "editorial_decision_score": item.get("editorial_decision_score"),
+            "editorial_decision_reason": item.get("editorial_decision_reason"),
+            "editorial_decision_threshold": item.get("editorial_decision_threshold"),
+            "editorial_switch_allowed": item.get("editorial_switch_allowed"),
+            "editorial_active_speaker_value": item.get("editorial_active_speaker_value"),
+            "editorial_reaction_story_value": item.get("editorial_reaction_story_value"),
             "ranked_sources": item.get("ranked_sources"),
         }
         for item in deduped
@@ -11891,6 +13608,12 @@ def build_multicam_segments_from_switches(request, prepared_sources, overlap_sta
                 "audio_leader_gap": switch.get("audio_leader_gap"),
                 "audio_decision_reliable": switch.get("audio_decision_reliable"),
                 "audio_decision_reason": switch.get("audio_decision_reason"),
+                "editorial_decision_score": switch.get("editorial_decision_score"),
+                "editorial_decision_reason": switch.get("editorial_decision_reason"),
+                "editorial_decision_threshold": switch.get("editorial_decision_threshold"),
+                "editorial_switch_allowed": switch.get("editorial_switch_allowed"),
+                "editorial_active_speaker_value": switch.get("editorial_active_speaker_value"),
+                "editorial_reaction_story_value": switch.get("editorial_reaction_story_value"),
                 "ranked_sources": switch.get("ranked_sources"),
                 "director_channel_camera_ids": director_channel_camera_ids,
             }
@@ -11928,13 +13651,34 @@ def pick_multicam_reaction_secondary_camera_id(
 
 
 def enforce_reaction_overlay_on_multicam_segments(segments, prepared_sources):
-    if len(prepared_sources or []) < 2:
-        return list(segments or [])
+    valid_source_ids = {
+        str(source.get("id") or "")
+        for source in (prepared_sources or [])
+        if source.get("id")
+    }
+    if len(valid_source_ids) < 2:
+        return [
+            reclaim_multicam_active_speaker_primary(segment, valid_source_ids)
+            for segment in (segments or [])
+        ]
 
     enforced = []
+    reaction_overlay_reasons = {
+        "active_speaker_with_reaction",
+        "earned_reaction_accent",
+        "earned_shared_reaction",
+        "reaction_accent",
+        "shared_reaction_accent",
+    }
     for segment in segments or []:
-        updated = dict(segment)
+        updated = reclaim_multicam_active_speaker_primary(segment, valid_source_ids)
         layout_mode = normalize_multicam_layout_mode(updated.get("layout_mode", "cut") or "cut")
+        layout_reason = str(updated.get("layout_reason", "") or "")
+        reason_parts = {
+            part.strip()
+            for part in layout_reason.replace(":", ";").split(";")
+            if part.strip()
+        }
         if layout_mode == "cut":
             secondary_camera_id = pick_multicam_reaction_secondary_camera_id(
                 updated.get("camera_id"),
@@ -11943,14 +13687,28 @@ def enforce_reaction_overlay_on_multicam_segments(segments, prepared_sources):
                 preferred_secondary_camera_id=updated.get("secondary_camera_id"),
             )
             if secondary_camera_id:
-                prior_reason = str(updated.get("layout_reason", "") or "")
                 updated["layout_mode"] = "pip"
+                if not reason_parts.intersection(reaction_overlay_reasons):
+                    updated["layout_reason"] = (
+                        f"active_speaker_with_reaction:{layout_reason}"
+                        if layout_reason and not layout_reason.startswith("active_speaker_with_reaction:")
+                        else layout_reason or "active_speaker_with_reaction"
+                    )
                 updated["secondary_camera_id"] = secondary_camera_id
-                updated["layout_reason"] = (
-                    f"reaction_attached_to_cut:{prior_reason}"
-                    if prior_reason
-                    else "reaction_attached_to_cut"
+                updated["layout_confidence"] = round(
+                    max(0.25, float(updated.get("layout_confidence", 0.0) or 0.0)),
+                    4,
                 )
+                layout_mode = "pip"
+        if layout_mode == "pip" and not updated.get("secondary_camera_id"):
+            secondary_camera_id = pick_multicam_reaction_secondary_camera_id(
+                updated.get("camera_id"),
+                prepared_sources,
+                ranked_sources=updated.get("ranked_sources"),
+                preferred_secondary_camera_id=updated.get("secondary_camera_id"),
+            )
+            if secondary_camera_id:
+                updated["secondary_camera_id"] = secondary_camera_id
                 updated["layout_confidence"] = round(
                     max(0.25, float(updated.get("layout_confidence", 0.0) or 0.0)),
                     4,
@@ -11958,12 +13716,1005 @@ def enforce_reaction_overlay_on_multicam_segments(segments, prepared_sources):
         enforced.append(updated)
     return enforced
 
+def audit_multicam_layout_contract(segments, prepared_sources, output_width=None, output_height=None):
+    source_map = {
+        str(source.get("id") or ""): source
+        for source in (prepared_sources or [])
+        if source.get("id")
+    }
+    valid_source_ids = set(source_map.keys())
+    issues = []
+    pip_geometry_samples = []
+
+    for index, segment in enumerate(segments or []):
+        camera_id = str((segment or {}).get("camera_id") or "")
+        secondary_camera_id = str((segment or {}).get("secondary_camera_id") or "")
+        layout_mode = normalize_multicam_layout_mode((segment or {}).get("layout_mode", "cut") or "cut")
+        audio_leader_id = str((segment or {}).get("audio_leader_camera_id") or "")
+        audio_reliable = bool((segment or {}).get("audio_decision_reliable"))
+
+        if audio_reliable and audio_leader_id:
+            if camera_id != audio_leader_id:
+                issues.append(
+                    {
+                        "type": "active_speaker_not_primary",
+                        "segment_index": index,
+                        "timeline_start": (segment or {}).get("timeline_start"),
+                        "timeline_end": (segment or {}).get("timeline_end"),
+                        "camera_id": camera_id,
+                        "audio_leader_camera_id": audio_leader_id,
+                    }
+                )
+            if layout_mode == "pip" and secondary_camera_id == audio_leader_id:
+                issues.append(
+                    {
+                        "type": "active_speaker_in_reaction",
+                        "segment_index": index,
+                        "timeline_start": (segment or {}).get("timeline_start"),
+                        "timeline_end": (segment or {}).get("timeline_end"),
+                        "camera_id": camera_id,
+                        "secondary_camera_id": secondary_camera_id,
+                        "audio_leader_camera_id": audio_leader_id,
+                    }
+                )
+
+        if len(valid_source_ids) >= 2:
+            if layout_mode == "cut":
+                issues.append(
+                    {
+                        "type": "missing_mandatory_reaction",
+                        "segment_index": index,
+                        "timeline_start": (segment or {}).get("timeline_start"),
+                        "timeline_end": (segment or {}).get("timeline_end"),
+                        "camera_id": camera_id,
+                    }
+                )
+            if layout_mode == "pip":
+                if not secondary_camera_id or secondary_camera_id == camera_id:
+                    issues.append(
+                        {
+                            "type": "invalid_reaction_camera",
+                            "segment_index": index,
+                            "timeline_start": (segment or {}).get("timeline_start"),
+                            "timeline_end": (segment or {}).get("timeline_end"),
+                            "camera_id": camera_id,
+                            "secondary_camera_id": secondary_camera_id,
+                        }
+                    )
+                primary_source = source_map.get(camera_id) or {}
+                primary_focus_x = multicam_source_focus_x(primary_source, fallback=0.5)
+                reaction_side = multicam_reaction_side_for_primary(primary_source)
+                explicit_side = normalize_multicam_reaction_side(
+                    primary_source.get("reaction_side") or primary_source.get("reactionSide")
+                )
+                has_measured_focus = primary_source.get("focus_x") is not None
+                if not explicit_side and not has_measured_focus:
+                    issues.append(
+                        {
+                            "type": "unknown_reaction_placement",
+                            "segment_index": index,
+                            "timeline_start": (segment or {}).get("timeline_start"),
+                            "timeline_end": (segment or {}).get("timeline_end"),
+                            "camera_id": camera_id,
+                            "secondary_camera_id": secondary_camera_id,
+                            "reaction_side": reaction_side,
+                            "reason": "Reaction side was chosen without measured speaker position or explicit source hint",
+                        }
+                    )
+                # Explicit per-source placement comes from a human/episode setup
+                # hint. Do not reject it using crop focus: focus_x is a crop target,
+                # not a reliable body-position detector.
+                expected_side = explicit_side or ("left" if primary_focus_x >= 0.5 else "right")
+                if reaction_side != expected_side:
+                    issues.append(
+                        {
+                            "type": "reaction_side_over_active_speaker",
+                            "segment_index": index,
+                            "timeline_start": (segment or {}).get("timeline_start"),
+                            "timeline_end": (segment or {}).get("timeline_end"),
+                            "camera_id": camera_id,
+                            "focus_x": round(primary_focus_x, 4),
+                            "reaction_side": reaction_side,
+                            "expected_side": expected_side,
+                        }
+                    )
+                if output_width and output_height and len(pip_geometry_samples) < 10:
+                    pip_geometry_samples.append(
+                        {
+                            "segment_index": index,
+                            "camera_id": camera_id,
+                            "secondary_camera_id": secondary_camera_id,
+                            "focus_x": round(primary_focus_x, 4),
+                            **multicam_pip_geometry(
+                                output_width,
+                                output_height,
+                                primary_source,
+                                reaction_count=1,
+                            ),
+                        }
+                    )
+
+    return {
+        "status": "failed" if issues else "passed",
+        "checked_segments": len(segments or []),
+        "issue_count": len(issues),
+        "issues": issues[:50],
+        "pip_geometry_samples": pip_geometry_samples,
+    }
+
+
+def audit_multicam_director_active_speaker_truth(segments, prepared_sources):
+    """
+    Pre-render director truth gate.
+
+    Layout contract checks the final segment owner. This audit checks the raw
+    trusted director channel too, so a hold/reaction decision cannot hide the
+    active speaker in the small reaction window and still report "passed".
+    """
+    valid_source_ids = {
+        str(source.get("id") or "")
+        for source in (prepared_sources or [])
+        if source.get("id")
+    }
+    issues = []
+    checked = 0
+    shared_layouts = {"split", "split-vertical", "scene-grid", "grid"}
+    trusted_reasons = {
+        "strong_isolated_audio_owner",
+        "strong_audio_owner_no_visual",
+        "db_dominant_isolated_audio_owner",
+        "clean_audio_owner",
+        "audio_visual_agree",
+        "sustained_isolated_handoff",
+        "visual_speaker_owner",
+    }
+
+    for index, segment in enumerate(segments or []):
+        item = segment or {}
+        layout_mode = normalize_multicam_layout_mode(item.get("layout_mode", "cut") or "cut")
+        reason = str(item.get("layout_reason") or "")
+        audio_reason = str(item.get("audio_decision_reason") or "")
+        raw_leader_id = str(item.get("raw_audio_leader_camera_id") or "")
+        final_leader_id = str(item.get("audio_leader_camera_id") or "")
+        camera_id = str(item.get("camera_id") or "")
+        secondary_camera_id = str(item.get("secondary_camera_id") or "")
+        audio_reliable = bool(item.get("audio_decision_reliable"))
+        try:
+            duration = max(0.0, float(item.get("timeline_end", 0.0) or 0.0) - float(item.get("timeline_start", 0.0) or 0.0))
+            leader_activity = float(item.get("audio_leader_activity", 0.0) or 0.0)
+            second_activity = float(item.get("audio_second_activity", 0.0) or 0.0)
+            leader_gap = float(item.get("audio_leader_gap", leader_activity - second_activity) or 0.0)
+        except Exception:
+            duration = 0.0
+            leader_activity = 0.0
+            second_activity = 0.0
+            leader_gap = 0.0
+
+        if not (
+            audio_reliable
+            and raw_leader_id
+            and raw_leader_id in valid_source_ids
+            and duration >= 0.75
+            and (
+                audio_reason in trusted_reasons
+                or leader_activity >= 0.34
+                or abs(leader_gap) >= 0.14
+            )
+        ):
+            continue
+
+        checked += 1
+        shared_moment = (
+            layout_mode in shared_layouts
+            or "shared" in reason
+            or "show_everyone" in reason
+        )
+
+        if shared_moment and raw_leader_id in {camera_id, secondary_camera_id}:
+            continue
+
+        if camera_id != raw_leader_id:
+            issues.append(
+                {
+                    "type": "raw_active_speaker_not_primary",
+                    "segment_index": index,
+                    "timeline_start": item.get("timeline_start"),
+                    "timeline_end": item.get("timeline_end"),
+                    "duration_seconds": round(duration, 3),
+                    "camera_id": camera_id,
+                    "secondary_camera_id": secondary_camera_id,
+                    "raw_audio_leader_camera_id": raw_leader_id,
+                    "final_audio_leader_camera_id": final_leader_id,
+                    "layout_mode": layout_mode,
+                    "layout_reason": reason,
+                    "audio_decision_reason": audio_reason,
+                    "audio_leader_activity": round(leader_activity, 4),
+                    "audio_second_activity": round(second_activity, 4),
+                    "audio_leader_gap": round(leader_gap, 4),
+                }
+            )
+        if layout_mode == "pip" and secondary_camera_id == raw_leader_id:
+            issues.append(
+                {
+                    "type": "raw_active_speaker_in_reaction",
+                    "segment_index": index,
+                    "timeline_start": item.get("timeline_start"),
+                    "timeline_end": item.get("timeline_end"),
+                    "duration_seconds": round(duration, 3),
+                    "camera_id": camera_id,
+                    "secondary_camera_id": secondary_camera_id,
+                    "raw_audio_leader_camera_id": raw_leader_id,
+                    "final_audio_leader_camera_id": final_leader_id,
+                    "layout_reason": reason,
+                    "audio_decision_reason": audio_reason,
+                }
+            )
+
+    return {
+        "status": "failed" if issues else "passed",
+        "checked_segments": checked,
+        "issue_count": len(issues),
+        "issues": issues[:50],
+    }
+
+
+def audit_multicam_director_switch_latency(segments, prepared_sources):
+    """
+    Pre-render timing gate for active-speaker changes.
+
+    The director can be technically correct on final segments while still
+    joining a speaker late. This audit reads the raw trusted source activity
+    timeline and verifies that a dominant speaker run gets hero/shared coverage
+    within a short latency budget.
+    """
+    source_ids = [
+        str(source.get("id") or "")
+        for source in (prepared_sources or [])
+        if source.get("id")
+    ]
+    if len(source_ids) < 2:
+        return {"status": "passed", "checked_runs": 0, "issue_count": 0, "issues": []}
+
+    max_latency = float(os.getenv("MULTICAM_DIRECTOR_MAX_SWITCH_LATENCY_SECONDS", "1.0") or 1.0)
+    min_run_duration = float(os.getenv("MULTICAM_DIRECTOR_MIN_DOMINANT_RUN_SECONDS", "0.75") or 0.75)
+    min_activity = float(os.getenv("MULTICAM_DIRECTOR_SWITCH_LATENCY_MIN_ACTIVITY", "0.34") or 0.34)
+    min_gap = float(os.getenv("MULTICAM_DIRECTOR_SWITCH_LATENCY_MIN_GAP", "0.14") or 0.14)
+    shared_layouts = {"split", "split-vertical", "scene-grid", "grid"}
+
+    source_windows = {}
+    all_times = set()
+    for source in prepared_sources or []:
+        source_id = str(source.get("id") or "")
+        if not source_id:
+            continue
+        windows = sorted(
+            [
+                {
+                    "time": float(item.get("time", 0.0) or 0.0),
+                    "activity": float(item.get("activity", 0.0) or 0.0),
+                }
+                for item in (source.get("timeline_audio_activity_windows") or [])
+                if item is not None
+            ],
+            key=lambda item: item["time"],
+        )
+        if not windows:
+            continue
+        source_windows[source_id] = windows
+        all_times.update(item["time"] for item in windows)
+
+    if len(source_windows) < 2 or not all_times:
+        return {"status": "passed", "checked_runs": 0, "issue_count": 0, "issues": []}
+
+    def activity_at(source_id, target_time):
+        windows = source_windows.get(source_id) or []
+        value = 0.0
+        for item in windows:
+            if item["time"] > target_time + 1e-6:
+                break
+            value = item["activity"]
+        return value
+
+    def segment_at(target_time):
+        for segment in segments or []:
+            start = float((segment or {}).get("timeline_start", 0.0) or 0.0)
+            end = float((segment or {}).get("timeline_end", start) or start)
+            if start <= target_time < end:
+                return segment or {}
+        return {}
+
+    def segment_covers_owner(segment, owner_id):
+        camera_id = str((segment or {}).get("camera_id") or "")
+        secondary_id = str((segment or {}).get("secondary_camera_id") or "")
+        layout = normalize_multicam_layout_mode((segment or {}).get("layout_mode", "cut") or "cut")
+        reason = str((segment or {}).get("layout_reason") or "")
+        shared = layout in shared_layouts or "shared" in reason or "show_everyone" in reason
+        if camera_id == owner_id:
+            return True
+        return bool(shared and owner_id in {camera_id, secondary_id})
+
+    leaders = []
+    for target_time in sorted(all_times):
+        ranked = sorted(
+            [
+                {"camera_id": source_id, "activity": activity_at(source_id, target_time)}
+                for source_id in source_ids
+            ],
+            key=lambda item: item["activity"],
+            reverse=True,
+        )
+        if len(ranked) < 2:
+            continue
+        leader = ranked[0]
+        gap = leader["activity"] - ranked[1]["activity"]
+        owner_id = leader["camera_id"] if leader["activity"] >= min_activity and gap >= min_gap else None
+        leaders.append(
+            {
+                "time": target_time,
+                "owner_id": owner_id,
+                "activity": leader["activity"],
+                "second_activity": ranked[1]["activity"],
+                "gap": gap,
+            }
+        )
+
+    runs = []
+    current = None
+    for item in leaders:
+        owner_id = item.get("owner_id")
+        if not owner_id:
+            if current:
+                current["end"] = item["time"]
+                runs.append(current)
+                current = None
+            continue
+        if current and current["owner_id"] == owner_id:
+            current["end"] = item["time"]
+            current["activity"] = max(current["activity"], item["activity"])
+            current["gap"] = max(current["gap"], item["gap"])
+            continue
+        if current:
+            current["end"] = item["time"]
+            runs.append(current)
+        current = {
+            "owner_id": owner_id,
+            "start": item["time"],
+            "end": item["time"],
+            "activity": item["activity"],
+            "second_activity": item["second_activity"],
+            "gap": item["gap"],
+        }
+    if current:
+        runs.append(current)
+
+    issues = []
+    checked = 0
+    ordered_segments = sorted(segments or [], key=lambda item: float((item or {}).get("timeline_start", 0.0) or 0.0))
+    max_segment_end = max(
+        [
+            float((segment or {}).get("timeline_end", 0.0) or 0.0)
+            for segment in ordered_segments
+        ]
+        or [0.0]
+    )
+    for run in runs:
+        run_start = float(run["start"])
+        run_end = min(float(run["end"]), max_segment_end)
+        if run_end <= run_start:
+            continue
+        if (run_end - run_start) < min_run_duration:
+            continue
+        checked += 1
+        owner_id = run["owner_id"]
+        deadline = run_start + max_latency
+        checkpoint_time = min(deadline, max(run_start, run_end - 0.001))
+        deadline_segment = segment_at(checkpoint_time)
+        if segment_covers_owner(deadline_segment, owner_id):
+            continue
+
+        first_compliant_time = None
+        for segment in ordered_segments:
+            seg_start = float((segment or {}).get("timeline_start", 0.0) or 0.0)
+            seg_end = float((segment or {}).get("timeline_end", seg_start) or seg_start)
+            if seg_end <= run_start:
+                continue
+            if seg_start >= run_end:
+                break
+            if segment_covers_owner(segment, owner_id):
+                first_compliant_time = max(seg_start, run_start)
+                break
+
+        issues.append(
+            {
+                "type": "late_active_speaker_switch",
+                "owner_camera_id": owner_id,
+                "run_start": round(run_start, 3),
+                "run_end": round(run_end, 3),
+                "deadline": round(deadline, 3),
+                "checkpoint_time": round(checkpoint_time, 3),
+                "first_compliant_time": round(first_compliant_time, 3) if first_compliant_time is not None else None,
+                "observed_latency_seconds": round((first_compliant_time - run_start), 3)
+                if first_compliant_time is not None else None,
+                "max_allowed_latency_seconds": round(max_latency, 3),
+                "deadline_segment_camera_id": str((deadline_segment or {}).get("camera_id") or ""),
+                "deadline_segment_secondary_camera_id": str((deadline_segment or {}).get("secondary_camera_id") or ""),
+                "deadline_segment_layout": normalize_multicam_layout_mode((deadline_segment or {}).get("layout_mode", "cut") or "cut"),
+                "activity": round(float(run.get("activity", 0.0) or 0.0), 4),
+                "gap": round(float(run.get("gap", 0.0) or 0.0), 4),
+            }
+        )
+
+    issue_report_limit = int(os.getenv("MULTICAM_DIRECTOR_AUDIT_ISSUE_REPORT_LIMIT", "50") or 50)
+    return {
+        "status": "failed" if issues else "passed",
+        "checked_runs": checked,
+        "issue_count": len(issues),
+        "issues": issues[:issue_report_limit],
+        "all_issues": issues,
+        "issues_truncated": len(issues) > issue_report_limit,
+        "issue_report_limit": issue_report_limit,
+        "thresholds": {
+            "max_latency_seconds": round(max_latency, 3),
+            "min_run_duration_seconds": round(min_run_duration, 3),
+            "min_activity": round(min_activity, 3),
+            "min_gap": round(min_gap, 3),
+        },
+    }
+
+
+def merge_adjacent_multicam_segments(segments):
+    merged = []
+    for segment in sorted(segments or [], key=lambda item: float((item or {}).get("timeline_start", 0.0) or 0.0)):
+        item = dict(segment or {})
+        if not merged:
+            merged.append(item)
+            continue
+        previous = merged[-1]
+        try:
+            contiguous = abs(float(previous.get("timeline_end", 0.0) or 0.0) - float(item.get("timeline_start", 0.0) or 0.0)) <= 0.002
+        except Exception:
+            contiguous = False
+        same_layout = all(
+            previous.get(key) == item.get(key)
+            for key in (
+                "camera_id",
+                "secondary_camera_id",
+                "layout_mode",
+                "layout_reason",
+                "audio_leader_camera_id",
+                "raw_audio_leader_camera_id",
+            )
+        )
+        if contiguous and same_layout:
+            previous["timeline_end"] = item.get("timeline_end")
+            previous["source_end"] = item.get("source_end", previous.get("source_end"))
+            continue
+        merged.append(item)
+    return merged
+
+
+def merge_render_equivalent_multicam_segments(segments):
+    """
+    Coalesce adjacent director segments that produce the same visible layout.
+    This keeps director metadata intact elsewhere, but lets the renderer avoid
+    restarting ffmpeg for reason-only boundaries such as accent_release.
+    """
+    merged = []
+    merge_count = 0
+    for segment in sorted(segments or [], key=lambda item: float((item or {}).get("timeline_start", 0.0) or 0.0)):
+        item = dict(segment or {})
+        if not merged:
+            merged.append(item)
+            continue
+
+        previous = merged[-1]
+        try:
+            timeline_contiguous = (
+                abs(float(previous.get("timeline_end", 0.0) or 0.0) - float(item.get("timeline_start", 0.0) or 0.0))
+                <= 0.02
+            )
+            source_contiguous = (
+                abs(float(previous.get("source_end", 0.0) or 0.0) - float(item.get("source_start", 0.0) or 0.0))
+                <= 0.08
+            )
+        except Exception:
+            timeline_contiguous = False
+            source_contiguous = False
+
+        same_render_layout = all(
+            previous.get(key) == item.get(key)
+            for key in (
+                "camera_id",
+                "secondary_camera_id",
+                "layout_mode",
+            )
+        )
+        if timeline_contiguous and source_contiguous and same_render_layout:
+            previous["timeline_end"] = item.get("timeline_end")
+            previous["source_end"] = item.get("source_end", previous.get("source_end"))
+            previous["layout_reason"] = merge_multicam_layout_reasons(
+                previous.get("layout_reason"),
+                item.get("layout_reason"),
+            )
+            previous["layout_confidence"] = round(
+                max(
+                    float(previous.get("layout_confidence", 0.0) or 0.0),
+                    float(item.get("layout_confidence", 0.0) or 0.0),
+                ),
+                4,
+            )
+            previous["render_merged_segment_count"] = int(previous.get("render_merged_segment_count", 1) or 1) + int(
+                item.get("render_merged_segment_count", 1) or 1
+            )
+            merge_count += 1
+            continue
+
+        merged.append(item)
+
+    return merged, {
+        "status": "active",
+        "input_segment_count": len(segments or []),
+        "render_segment_count": len(merged),
+        "merge_count": merge_count,
+    }
+
+
+def merge_multicam_layout_reasons(*reasons):
+    ordered = []
+    for reason in reasons:
+        for part in str(reason or "").split("|"):
+            cleaned = part.strip()
+            if cleaned and cleaned not in ordered:
+                ordered.append(cleaned)
+    return "|".join(ordered[:6])
+
+
+def combine_multicam_repair_receipts(receipts):
+    receipts = [receipt for receipt in (receipts or []) if receipt]
+    if not receipts:
+        return None
+    if len(receipts) == 1:
+        return receipts[0]
+    return {
+        "status": receipts[-1].get("status"),
+        "applied": any(bool(receipt.get("applied")) for receipt in receipts),
+        "repair_count": sum(int(receipt.get("repair_count", 0) or 0) for receipt in receipts),
+        "pass_count": len(receipts),
+        "passes": receipts,
+    }
+
+
+def repair_multicam_late_active_speaker_segments(segments, prepared_sources, overlap_start):
+    audit = audit_multicam_director_switch_latency(segments, prepared_sources)
+    if audit.get("status") == "passed":
+        return list(segments or []), {
+            "status": "passed",
+            "applied": False,
+            "initial_audit": audit,
+            "final_audit": audit,
+            "repair_count": 0,
+        }
+
+    source_map = {
+        str(source.get("id") or ""): source
+        for source in (prepared_sources or [])
+        if source.get("id")
+    }
+    valid_source_ids = set(source_map.keys())
+    if len(valid_source_ids) < 2:
+        return list(segments or []), {
+            "status": "skipped",
+            "applied": False,
+            "reason": "not_enough_sources",
+            "initial_audit": audit,
+            "final_audit": audit,
+            "repair_count": 0,
+        }
+
+    repairs = []
+    for issue in (audit.get("all_issues") or audit.get("issues") or []):
+        if issue.get("type") != "late_active_speaker_switch":
+            continue
+        owner_id = str(issue.get("owner_camera_id") or "")
+        if owner_id not in valid_source_ids:
+            continue
+        try:
+            start = float(issue.get("run_start", 0.0) or 0.0)
+            run_end = float(issue.get("run_end", start) or start)
+        except Exception:
+            continue
+        if run_end - start <= 0.2:
+            continue
+        repairs.append(
+            {
+                "start": round(start, 3),
+                "end": round(run_end, 3),
+                "owner_id": owner_id,
+                "issue_first_compliant_time": issue.get("first_compliant_time"),
+                "activity": issue.get("activity"),
+                "gap": issue.get("gap"),
+            }
+        )
+
+    if not repairs:
+        return list(segments or []), {
+            "status": "failed",
+            "applied": False,
+            "reason": "no_repairable_intervals",
+            "initial_audit": audit,
+            "final_audit": audit,
+            "repair_count": 0,
+        }
+
+    ordered_segments = sorted(segments or [], key=lambda item: float((item or {}).get("timeline_start", 0.0) or 0.0))
+    boundaries = set()
+    for segment in ordered_segments:
+        boundaries.add(round(float((segment or {}).get("timeline_start", 0.0) or 0.0), 3))
+        boundaries.add(round(float((segment or {}).get("timeline_end", 0.0) or 0.0), 3))
+    for repair in repairs:
+        boundaries.add(repair["start"])
+        boundaries.add(repair["end"])
+    timeline_points = sorted(boundary for boundary in boundaries if boundary >= 0.0)
+
+    def source_for_interval(segment, camera_id, start, end):
+        source = source_map.get(camera_id) or {}
+        if not source:
+            return None, None
+        source_start, source_end, _source_duration = get_source_range_for_timeline(
+            source,
+            overlap_start,
+            start,
+            max(0.02, end - start),
+        )
+        return round(max(0.0, source_start), 3), round(min(float(source.get("duration") or source_end), source_end), 3)
+
+    source_windows = {}
+    for source_id, source in source_map.items():
+        source_windows[source_id] = sorted(
+            [
+                {
+                    "time": float(item.get("time", 0.0) or 0.0),
+                    "activity": float(item.get("activity", 0.0) or 0.0),
+                }
+                for item in (source.get("timeline_audio_activity_windows") or [])
+                if item is not None
+            ],
+            key=lambda item: item["time"],
+        )
+
+    def activity_at_repair_time(source_id, target_time):
+        windows = source_windows.get(source_id) or []
+        value = 0.0
+        for item in windows:
+            if item["time"] > target_time + 1e-6:
+                break
+            value = item["activity"]
+        return value
+
+    repaired_segments = []
+    for index in range(len(timeline_points) - 1):
+        start = timeline_points[index]
+        end = timeline_points[index + 1]
+        if end - start <= 0.02:
+            continue
+        midpoint = start + ((end - start) / 2.0)
+        base_segment = next(
+            (
+                segment for segment in ordered_segments
+                if float((segment or {}).get("timeline_start", 0.0) or 0.0) <= midpoint
+                and midpoint < float((segment or {}).get("timeline_end", 0.0) or 0.0)
+            ),
+            None,
+        )
+        if not base_segment:
+            continue
+        covering_repairs = [
+            repair for repair in repairs
+            if repair["start"] <= midpoint < repair["end"]
+        ]
+        active_repair = max(
+            covering_repairs,
+            key=lambda repair: (
+                activity_at_repair_time(repair["owner_id"], midpoint),
+                float(repair.get("gap", 0.0) or 0.0),
+                float(repair.get("activity", 0.0) or 0.0),
+                float(repair.get("start", 0.0) or 0.0),
+            ),
+            default=None,
+        )
+        updated = dict(base_segment)
+        updated["timeline_start"] = round(start, 3)
+        updated["timeline_end"] = round(end, 3)
+        if active_repair:
+            owner_id = active_repair["owner_id"]
+            previous_camera_id = str(updated.get("camera_id") or "")
+            updated["camera_id"] = owner_id
+            updated["secondary_camera_id"] = (
+                previous_camera_id
+                if previous_camera_id in valid_source_ids and previous_camera_id != owner_id
+                else next((source_id for source_id in valid_source_ids if source_id != owner_id), None)
+            )
+            updated["layout_mode"] = "pip"
+            updated["layout_reason"] = f"latency_repaired_active_speaker:{updated.get('layout_reason') or 'raw_active_speaker'}"
+            updated["audio_leader_camera_id"] = owner_id
+            updated["raw_audio_leader_camera_id"] = owner_id
+            updated["audio_decision_reliable"] = True
+            updated["audio_decision_reason"] = updated.get("audio_decision_reason") or "latency_repaired_raw_owner"
+            updated["editorial_decision_reason"] = "latency_repaired_active_speaker"
+            updated["editorial_switch_allowed"] = True
+        source_start, source_end = source_for_interval(updated, str(updated.get("camera_id") or ""), start, end)
+        if source_start is None or source_end is None:
+            continue
+        updated["source_start"] = source_start
+        updated["source_end"] = source_end
+        repaired_segments.append(updated)
+
+    repaired_segments = merge_adjacent_multicam_segments(repaired_segments)
+    final_audit = audit_multicam_director_switch_latency(repaired_segments, prepared_sources)
+    return repaired_segments, {
+        "status": final_audit.get("status"),
+        "applied": True,
+        "repair_count": len(repairs),
+        "repairs": repairs[:50],
+        "initial_audit": audit,
+        "final_audit": final_audit,
+    }
+
+
+def repair_multicam_layout_contract_segments(segments, prepared_sources, overlap_start, output_width=None, output_height=None):
+    audit = audit_multicam_layout_contract(
+        segments,
+        prepared_sources,
+        output_width=output_width,
+        output_height=output_height,
+    )
+    if audit.get("status") == "passed":
+        return list(segments or []), {
+            "status": "passed",
+            "applied": False,
+            "initial_audit": audit,
+            "final_audit": audit,
+            "repair_count": 0,
+        }
+
+    source_map = {
+        str(source.get("id") or ""): source
+        for source in (prepared_sources or [])
+        if source.get("id")
+    }
+    valid_source_ids = set(source_map.keys())
+    if len(valid_source_ids) < 2:
+        return list(segments or []), {
+            "status": "skipped",
+            "applied": False,
+            "reason": "not_enough_sources",
+            "initial_audit": audit,
+            "final_audit": audit,
+            "repair_count": 0,
+        }
+
+    repairs_by_index = {}
+    for issue in audit.get("issues") or []:
+        if issue.get("type") not in {"active_speaker_not_primary", "active_speaker_in_reaction"}:
+            continue
+        try:
+            segment_index = int(issue.get("segment_index"))
+        except Exception:
+            continue
+        leader_id = str(issue.get("audio_leader_camera_id") or "")
+        if leader_id not in valid_source_ids:
+            continue
+        repairs_by_index[segment_index] = {
+            "segment_index": segment_index,
+            "leader_id": leader_id,
+            "issue_type": issue.get("type"),
+            "timeline_start": issue.get("timeline_start"),
+            "timeline_end": issue.get("timeline_end"),
+        }
+
+    if not repairs_by_index:
+        return list(segments or []), {
+            "status": "failed",
+            "applied": False,
+            "reason": "no_repairable_layout_issues",
+            "initial_audit": audit,
+            "final_audit": audit,
+            "repair_count": 0,
+        }
+
+    def source_for_interval(segment, camera_id):
+        source = source_map.get(camera_id) or {}
+        if not source:
+            return None, None
+        start = float((segment or {}).get("timeline_start", 0.0) or 0.0)
+        end = float((segment or {}).get("timeline_end", start) or start)
+        source_start, source_end, _source_duration = get_source_range_for_timeline(
+            source,
+            overlap_start,
+            start,
+            max(0.02, end - start),
+        )
+        return round(max(0.0, source_start), 3), round(min(float(source.get("duration") or source_end), source_end), 3)
+
+    repaired_segments = []
+    applied_repairs = []
+    for index, segment in enumerate(segments or []):
+        repair = repairs_by_index.get(index)
+        if not repair:
+            repaired_segments.append(dict(segment or {}))
+            continue
+
+        updated = dict(segment or {})
+        leader_id = repair["leader_id"]
+        previous_camera_id = str(updated.get("camera_id") or "")
+        previous_secondary_id = str(updated.get("secondary_camera_id") or "")
+        fallback_secondary_id = next((source_id for source_id in sorted(valid_source_ids) if source_id != leader_id), None)
+        secondary_id = (
+            previous_camera_id
+            if previous_camera_id in valid_source_ids and previous_camera_id != leader_id
+            else previous_secondary_id
+            if previous_secondary_id in valid_source_ids and previous_secondary_id != leader_id
+            else fallback_secondary_id
+        )
+        updated["camera_id"] = leader_id
+        updated["secondary_camera_id"] = secondary_id
+        updated["layout_mode"] = "pip"
+        updated["layout_reason"] = f"layout_contract_repaired_active_speaker:{updated.get('layout_reason') or repair.get('issue_type')}"
+        updated["audio_leader_camera_id"] = leader_id
+        updated["raw_audio_leader_camera_id"] = leader_id
+        updated["audio_decision_reliable"] = True
+        updated["audio_decision_reason"] = updated.get("audio_decision_reason") or "layout_contract_repaired_audio_leader"
+        updated["editorial_decision_reason"] = "layout_contract_repaired_active_speaker"
+        updated["editorial_switch_allowed"] = True
+        source_start, source_end = source_for_interval(updated, leader_id)
+        if source_start is not None and source_end is not None:
+            updated["source_start"] = source_start
+            updated["source_end"] = source_end
+        repaired_segments.append(updated)
+        applied_repairs.append(repair)
+
+    repaired_segments = merge_adjacent_multicam_segments(repaired_segments)
+    final_audit = audit_multicam_layout_contract(
+        repaired_segments,
+        prepared_sources,
+        output_width=output_width,
+        output_height=output_height,
+    )
+    return repaired_segments, {
+        "status": final_audit.get("status"),
+        "applied": True,
+        "repair_count": len(applied_repairs),
+        "repairs": applied_repairs[:50],
+        "initial_audit": audit,
+        "final_audit": final_audit,
+    }
+
+
+def repair_multicam_director_truth_segments(segments, prepared_sources, overlap_start):
+    audit = audit_multicam_director_active_speaker_truth(segments, prepared_sources)
+    if audit.get("status") == "passed":
+        return list(segments or []), {
+            "status": "passed",
+            "applied": False,
+            "initial_audit": audit,
+            "final_audit": audit,
+            "repair_count": 0,
+        }
+
+    source_map = {
+        str(source.get("id") or ""): source
+        for source in (prepared_sources or [])
+        if source.get("id")
+    }
+    valid_source_ids = set(source_map.keys())
+    if len(valid_source_ids) < 2:
+        return list(segments or []), {
+            "status": "skipped",
+            "applied": False,
+            "reason": "not_enough_sources",
+            "initial_audit": audit,
+            "final_audit": audit,
+            "repair_count": 0,
+        }
+
+    repairs_by_index = {}
+    for issue in audit.get("issues") or []:
+        if issue.get("type") not in {"raw_active_speaker_not_primary", "raw_active_speaker_in_reaction"}:
+            continue
+        try:
+            segment_index = int(issue.get("segment_index"))
+        except Exception:
+            continue
+        leader_id = str(issue.get("raw_audio_leader_camera_id") or "")
+        if leader_id not in valid_source_ids:
+            continue
+        repairs_by_index[segment_index] = {
+            "segment_index": segment_index,
+            "leader_id": leader_id,
+            "issue_type": issue.get("type"),
+            "timeline_start": issue.get("timeline_start"),
+            "timeline_end": issue.get("timeline_end"),
+        }
+
+    if not repairs_by_index:
+        return list(segments or []), {
+            "status": "failed",
+            "applied": False,
+            "reason": "no_repairable_truth_issues",
+            "initial_audit": audit,
+            "final_audit": audit,
+            "repair_count": 0,
+        }
+
+    def source_for_interval(segment, camera_id):
+        source = source_map.get(camera_id) or {}
+        if not source:
+            return None, None
+        start = float((segment or {}).get("timeline_start", 0.0) or 0.0)
+        end = float((segment or {}).get("timeline_end", start) or start)
+        source_start, source_end, _source_duration = get_source_range_for_timeline(
+            source,
+            overlap_start,
+            start,
+            max(0.02, end - start),
+        )
+        return round(max(0.0, source_start), 3), round(min(float(source.get("duration") or source_end), source_end), 3)
+
+    repaired_segments = []
+    applied_repairs = []
+    for index, segment in enumerate(segments or []):
+        repair = repairs_by_index.get(index)
+        if not repair:
+            repaired_segments.append(dict(segment or {}))
+            continue
+
+        updated = dict(segment or {})
+        leader_id = repair["leader_id"]
+        previous_camera_id = str(updated.get("camera_id") or "")
+        previous_secondary_id = str(updated.get("secondary_camera_id") or "")
+        fallback_secondary_id = next((source_id for source_id in sorted(valid_source_ids) if source_id != leader_id), None)
+        secondary_id = (
+            previous_camera_id
+            if previous_camera_id in valid_source_ids and previous_camera_id != leader_id
+            else previous_secondary_id
+            if previous_secondary_id in valid_source_ids and previous_secondary_id != leader_id
+            else fallback_secondary_id
+        )
+        updated["camera_id"] = leader_id
+        updated["secondary_camera_id"] = secondary_id
+        updated["layout_mode"] = "pip"
+        updated["layout_reason"] = f"director_truth_repaired_raw_active_speaker:{updated.get('layout_reason') or repair.get('issue_type')}"
+        updated["audio_leader_camera_id"] = leader_id
+        updated["raw_audio_leader_camera_id"] = leader_id
+        updated["audio_decision_reliable"] = True
+        updated["audio_decision_reason"] = "director_truth_repaired_raw_active_speaker"
+        updated["editorial_decision_reason"] = "director_truth_repaired_raw_active_speaker"
+        updated["editorial_switch_allowed"] = True
+        source_start, source_end = source_for_interval(updated, leader_id)
+        if source_start is not None and source_end is not None:
+            updated["source_start"] = source_start
+            updated["source_end"] = source_end
+        repaired_segments.append(updated)
+        applied_repairs.append(repair)
+
+    repaired_segments = merge_adjacent_multicam_segments(repaired_segments)
+    final_audit = audit_multicam_director_active_speaker_truth(repaired_segments, prepared_sources)
+    return repaired_segments, {
+        "status": final_audit.get("status"),
+        "applied": True,
+        "repair_count": len(applied_repairs),
+        "repairs": applied_repairs[:50],
+        "initial_audit": audit,
+        "final_audit": final_audit,
+    }
+
+
 def normalize_multicam_segments(request, prepared_sources, overlap_start, overlap_duration):
     source_map = {source["id"]: source for source in prepared_sources}
     safe_duration = max(0.0, float(overlap_duration or 0.0))
     raw_segments = request.segments or []
 
-    if not raw_segments:
+    if request.auto_switch or not raw_segments:
         return build_multicam_segments_from_switches(
             request,
             prepared_sources,
@@ -12135,6 +14886,51 @@ def normalize_multicam_render_tier(request):
     tier = raw_tier.strip().lower().replace("-", "_")
     return tier if tier in {"simple", "premium", "studio"} else "premium"
 
+def get_multicam_render_tier_profile(tier):
+    safe_tier = str(tier or "premium").strip().lower().replace("-", "_")
+    profiles = {
+        "simple": {
+            "tier": "simple",
+            "label": "Clean Cuts",
+            "visual_proxy": False,
+            "color_match": False,
+            "cinematic_polish": False,
+            "burn_captions": False,
+            "brand_watermark": False,
+            "generate_thumbnail": False,
+            "max_layout_sources": 2,
+            "audio_bitrate": "160k",
+        },
+        "premium": {
+            "tier": "premium",
+            "label": "Podcast Polish",
+            "visual_proxy": True,
+            "color_match": True,
+            "cinematic_polish": True,
+            "burn_captions": True,
+            "brand_watermark": True,
+            "generate_thumbnail": True,
+            "max_layout_sources": 3,
+            "audio_bitrate": "192k",
+        },
+        "studio": {
+            "tier": "studio",
+            "label": "Studio Heavy Render",
+            "visual_proxy": True,
+            "color_match": True,
+            "cinematic_polish": True,
+            "burn_captions": True,
+            "brand_watermark": True,
+            "generate_thumbnail": True,
+            "max_layout_sources": 3,
+            "audio_bitrate": "256k",
+        },
+    }
+    return profiles.get(safe_tier) or profiles["premium"]
+
+def multicam_fast_composite_enabled():
+    return env_flag("MULTICAM_FAST_COMPOSITE", default=MULTICAM_FAST_COMPOSITE_DEFAULT)
+
 def enforce_multicam_production_limits(request, overlap_duration, segment_count=None):
     tier = normalize_multicam_render_tier(request)
     limits = {
@@ -12227,6 +15023,232 @@ def validate_multicam_output_streams(output_path, expected_duration, job_id):
         raise HTTPException(status_code=500, detail={"message": "Multicam output duration does not match timeline", "validation": receipt})
     return receipt
 
+def build_multicam_final_quality_gate(
+    *,
+    output_validation=None,
+    post_render_sync_audit=None,
+    layout_contract_audit=None,
+    director_truth_audit=None,
+    director_latency_audit=None,
+    director_audio=None,
+    continuous_sync_anchors=None,
+    segment_duration_receipts=None,
+):
+    checks = []
+
+    def add_check(name, passed, status=None, reason=None, severity="error", details=None):
+        checks.append({
+            "name": name,
+            "passed": bool(passed),
+            "status": status,
+            "severity": severity,
+            "reason": reason,
+            "details": details or {},
+        })
+
+    def summarize_continuous_sync_anchor_residuals(receipt):
+        camera_summaries = []
+        worst_residual = None
+        worst_anchor = None
+        high_residual_anchors = []
+        uncorrected_high_residual_anchors = []
+        unsafe_residual_anchors = []
+        for camera_id, camera in ((receipt or {}).get("cameras") or {}).items():
+            anchors = [
+                anchor
+                for anchor in (camera or {}).get("anchors") or []
+                if anchor.get("abs_residual_seconds") is not None
+                and float(anchor.get("correlation", 0.0) or 0.0) >= MULTICAM_CONTINUOUS_SYNC_MIN_CORRELATION
+            ]
+            camera_worst = max(
+                [float(anchor.get("abs_residual_seconds") or 0.0) for anchor in anchors] or [0.0]
+            )
+            camera_summaries.append({
+                "camera_id": camera_id,
+                "camera_label": camera.get("camera_label"),
+                "anchor_count": len(anchors),
+                "max_abs_residual_seconds": round(camera_worst, 4),
+            })
+            for anchor in anchors:
+                residual = float(anchor.get("abs_residual_seconds") or 0.0)
+                if worst_residual is None or residual > worst_residual:
+                    worst_residual = residual
+                    worst_anchor = {
+                        "camera_id": camera_id,
+                        "camera_label": camera.get("camera_label"),
+                        "checkpoint_index": anchor.get("checkpoint_index"),
+                        "timeline_absolute_seconds": anchor.get("timeline_absolute_seconds"),
+                        "abs_residual_seconds": round(residual, 4),
+                        "correlation": anchor.get("correlation"),
+                        "status": anchor.get("status"),
+                    }
+                if residual > MULTICAM_POST_RENDER_SYNC_GOOD_SECONDS:
+                    high_anchor = {
+                        "camera_id": camera_id,
+                        "camera_label": camera.get("camera_label"),
+                        "checkpoint_index": anchor.get("checkpoint_index"),
+                        "timeline_absolute_seconds": anchor.get("timeline_absolute_seconds"),
+                        "abs_residual_seconds": round(residual, 4),
+                        "correlation": anchor.get("correlation"),
+                        "status": anchor.get("status"),
+                    }
+                    high_residual_anchors.append(high_anchor)
+                    if anchor.get("status") != "accepted":
+                        uncorrected_high_residual_anchors.append(high_anchor)
+                    if residual >= MULTICAM_POST_RENDER_SYNC_UNSAFE_SECONDS:
+                        unsafe_residual_anchors.append(high_anchor)
+        return {
+            "max_abs_residual_seconds": round(float(worst_residual or 0.0), 4),
+            "worst_anchor": worst_anchor,
+            "high_residual_anchor_count": len(high_residual_anchors),
+            "high_residual_anchors": high_residual_anchors[:12],
+            "uncorrected_high_residual_anchor_count": len(uncorrected_high_residual_anchors),
+            "uncorrected_high_residual_anchors": uncorrected_high_residual_anchors[:12],
+            "unsafe_residual_anchor_count": len(unsafe_residual_anchors),
+            "unsafe_residual_anchors": unsafe_residual_anchors[:12],
+            "camera_summaries": camera_summaries,
+            "safe_limit_seconds": round(float(MULTICAM_POST_RENDER_SYNC_GOOD_SECONDS), 4),
+            "unsafe_limit_seconds": round(float(MULTICAM_POST_RENDER_SYNC_UNSAFE_SECONDS), 4),
+        }
+
+    output_validation = output_validation or {}
+    add_check(
+        "output_has_video",
+        bool(output_validation.get("has_video_stream")),
+        status="passed" if output_validation.get("has_video_stream") else "failed",
+        reason=None if output_validation.get("has_video_stream") else "Final output has no video stream",
+    )
+    add_check(
+        "output_has_audio",
+        bool(output_validation.get("has_audio_stream")),
+        status="passed" if output_validation.get("has_audio_stream") else "failed",
+        reason=None if output_validation.get("has_audio_stream") else "Final output has no audio stream",
+    )
+
+    sync_status = (post_render_sync_audit or {}).get("status")
+    add_check(
+        "post_render_sync",
+        sync_status == "good",
+        status=sync_status,
+        reason=None if sync_status == "good" else "Post-render sync did not pass with good status",
+        details={
+            "sample_count": (post_render_sync_audit or {}).get("sample_count"),
+            "candidate_sample_count": (post_render_sync_audit or {}).get("candidate_sample_count"),
+            "sample_coverage_ratio": (post_render_sync_audit or {}).get("sample_coverage_ratio"),
+            "max_sample_gap_seconds": (post_render_sync_audit or {}).get("max_sample_gap_seconds"),
+            "usable_sample_count": (post_render_sync_audit or {}).get("usable_sample_count"),
+            "max_abs_residual_seconds": (post_render_sync_audit or {}).get("max_abs_residual_seconds"),
+        },
+    )
+
+    for name, audit in [
+        ("active_speaker_layout_contract", layout_contract_audit),
+        ("director_active_speaker_truth", director_truth_audit),
+        ("director_switch_latency", director_latency_audit),
+    ]:
+        status = (audit or {}).get("status")
+        add_check(
+            name,
+            status == "passed",
+            status=status,
+            reason=None if status == "passed" else f"{name} audit did not pass",
+            details={
+                "issue_count": (audit or {}).get("issue_count"),
+                "checked_segments": (audit or {}).get("checked_segments"),
+                "checked_runs": (audit or {}).get("checked_runs"),
+            },
+        )
+
+    segment_duration_receipts = segment_duration_receipts or []
+    failed_segment_durations = [item for item in segment_duration_receipts if not item.get("ok")]
+    add_check(
+        "segment_durations",
+        not failed_segment_durations,
+        status="passed" if not failed_segment_durations else "failed",
+        reason=None if not failed_segment_durations else "One or more rendered segment durations do not match the director timeline",
+        details={
+            "checked": len(segment_duration_receipts),
+            "failed": len(failed_segment_durations),
+            "max_abs_delta_seconds": round(
+                max([abs(float(item.get("delta_seconds", 0.0))) for item in segment_duration_receipts] or [0.0]),
+                3,
+            ),
+        },
+    )
+
+    director_audio_status = (director_audio or {}).get("status")
+    add_check(
+        "director_audio_mapping",
+        director_audio_status not in {"unproven_channel_mapping", "skipped_channel_analysis_failed", "skipped_decode_failed"},
+        status=director_audio_status,
+        reason=(
+            None
+            if director_audio_status not in {"unproven_channel_mapping", "skipped_channel_analysis_failed", "skipped_decode_failed"}
+            else "Director audio channel ownership is not safe enough to trust"
+        ),
+        details={
+            "mapping_method": (director_audio or {}).get("mapping_method"),
+            "channel_camera_ids": (director_audio or {}).get("channel_camera_ids"),
+        },
+    )
+
+    continuous_sync_status = (continuous_sync_anchors or {}).get("status")
+    continuous_sync_residuals = summarize_continuous_sync_anchor_residuals(continuous_sync_anchors)
+    continuous_sync_residual_safe = (
+        continuous_sync_status != "active"
+        or continuous_sync_residuals["unsafe_residual_anchor_count"] == 0
+        and continuous_sync_residuals["uncorrected_high_residual_anchor_count"] == 0
+    )
+    add_check(
+        "continuous_sync_anchors",
+        continuous_sync_status in {"active", "skipped_no_active_camera_maps", "skipped_disabled", None}
+        and continuous_sync_residual_safe,
+        status=continuous_sync_status,
+        severity=(
+            "warning"
+            if continuous_sync_status in {"skipped_no_active_camera_maps", "skipped_disabled", None}
+            else "error"
+        ),
+        reason=(
+            None
+            if continuous_sync_status == "active" and continuous_sync_residual_safe
+            else "Continuous sync anchors were not active; post-render sync audit remains the delivery authority"
+            if continuous_sync_status != "active"
+            else "Continuous sync anchors found visible-level drift risk"
+        ),
+        details={
+            "active_camera_count": (continuous_sync_anchors or {}).get("active_camera_count"),
+            **continuous_sync_residuals,
+        },
+    )
+
+    failed = [check for check in checks if not check["passed"] and check.get("severity") != "warning"]
+    warnings = [check for check in checks if not check["passed"] and check.get("severity") == "warning"]
+    gate = {
+        "status": "passed" if not failed else "failed",
+        "passed": not failed,
+        "failed_count": len(failed),
+        "warning_count": len(warnings),
+        "checks": checks,
+    }
+    if failed:
+        gate["message"] = "Cam Combiner final quality gate failed; refusing to mark output ready for users"
+    else:
+        gate["message"] = "Cam Combiner final quality gate passed"
+    return gate
+
+
+def enforce_multicam_final_quality_gate(gate_receipt):
+    if gate_receipt and gate_receipt.get("passed"):
+        return
+    raise HTTPException(
+        status_code=422,
+        detail={
+            "message": "Cam Combiner final quality gate failed; output is not safe to deliver",
+            "final_quality_gate": gate_receipt,
+        },
+    )
+
 def multicam_source_has_auditable_audio(source):
     if not source:
         return False
@@ -12298,12 +15320,18 @@ def pick_multicam_post_render_sync_samples(segments, source_map, overlap_start, 
 
 
 async def audit_multicam_render_sync(output_path, segments, source_map, overlap_start, job_id):
+    timeline_duration = max(
+        [float(segment.get("timeline_end", 0.0) or 0.0) for segment in (segments or [])] or [0.0]
+    )
     receipt = {
         "enabled": bool(MULTICAM_POST_RENDER_SYNC_AUDIT),
         "path": output_path,
         "status": "skipped_disabled" if not MULTICAM_POST_RENDER_SYNC_AUDIT else "pending",
         "samples": [],
         "sample_count": 0,
+        "candidate_sample_count": 0,
+        "sample_coverage_ratio": 0.0,
+        "max_sample_gap_seconds": None,
         "usable_sample_count": 0,
         "max_abs_residual_seconds": None,
         "avg_correlation": 0.0,
@@ -12311,6 +15339,8 @@ async def audit_multicam_render_sync(output_path, segments, source_map, overlap_
             "good_seconds": MULTICAM_POST_RENDER_SYNC_GOOD_SECONDS,
             "unsafe_seconds": MULTICAM_POST_RENDER_SYNC_UNSAFE_SECONDS,
             "min_correlation": MULTICAM_POST_RENDER_SYNC_MIN_CORRELATION,
+            "min_coverage_ratio": MULTICAM_POST_RENDER_SYNC_MIN_COVERAGE_RATIO,
+            "max_sample_gap_seconds": MULTICAM_POST_RENDER_SYNC_MAX_SAMPLE_GAP_SECONDS,
             "sample_seconds": MULTICAM_POST_RENDER_SYNC_SAMPLE_SECONDS,
         },
     }
@@ -12321,13 +15351,34 @@ async def audit_multicam_render_sync(output_path, segments, source_map, overlap_
         receipt["message"] = "Final output has no audio stream to audit"
         return receipt
 
+    all_candidate_samples = pick_multicam_post_render_sync_samples(
+        segments,
+        source_map,
+        overlap_start,
+        max_samples=1_000_000,
+    )
     samples = pick_multicam_post_render_sync_samples(
         segments,
         source_map,
         overlap_start,
         max_samples=MULTICAM_POST_RENDER_SYNC_MAX_SAMPLES,
     )
+    receipt["candidate_sample_count"] = len(all_candidate_samples)
     receipt["sample_count"] = len(samples)
+    if all_candidate_samples:
+        receipt["sample_coverage_ratio"] = round(
+            min(1.0, float(len(samples)) / max(1.0, float(len(all_candidate_samples)))),
+            4,
+        )
+    if samples:
+        positions = sorted(float(sample.get("output_start_seconds", 0.0) or 0.0) for sample in samples)
+        gaps = []
+        if positions:
+            gaps.append(max(0.0, positions[0]))
+            gaps.extend(max(0.0, positions[index] - positions[index - 1]) for index in range(1, len(positions)))
+            if timeline_duration > 0.0:
+                gaps.append(max(0.0, timeline_duration - positions[-1]))
+        receipt["max_sample_gap_seconds"] = round(max(gaps or [0.0]), 3)
     if not samples:
         receipt["status"] = "skipped_no_camera_audio"
         receipt["message"] = "No audible camera scratch-audio samples were available for post-render sync audit"
@@ -12360,10 +15411,12 @@ async def audit_multicam_render_sync(output_path, segments, source_map, overlap_
             "status": "pending",
         }
         try:
+            audit_source_start = get_source_audio_audit_start(source, sample["source_start_seconds"])
+            sample_receipt["audio_audit_source_start_seconds"] = round(audit_source_start, 6)
             await run_subprocess_async(
                 [
                     "ffmpeg", "-nostdin",
-                    "-ss", f"{float(sample['source_start_seconds']):.6f}",
+                    "-ss", f"{audit_source_start:.6f}",
                     "-t", f"{duration:.6f}",
                     "-i", source_audio_path,
                     "-vn", "-ac", "1", "-ar", "8000",
@@ -12421,9 +15474,23 @@ async def audit_multicam_render_sync(output_path, segments, source_map, overlap_
         if float(item.get("correlation", 0.0) or 0.0) >= MULTICAM_POST_RENDER_SYNC_MIN_CORRELATION
     ]
     receipt["usable_sample_count"] = len(usable)
+    min_usable_count = max(1, int(math.ceil(float(receipt["sample_count"] or 0) * MULTICAM_POST_RENDER_SYNC_MIN_USABLE_RATIO)))
+    receipt["min_usable_sample_count"] = min_usable_count
     if not usable:
         receipt["status"] = "questionable"
         receipt["message"] = "Post-render sync audit could not find strong camera/output audio correlation"
+        logger.warning("MULTICAM POST-RENDER SYNC AUDIT %s: %s", job_id, json.dumps(receipt, default=str))
+        return receipt
+    if len(usable) < min_usable_count:
+        receipt["status"] = "questionable"
+        receipt["message"] = (
+            f"Post-render sync audit only had {len(usable)}/{receipt['sample_count']} usable samples; "
+            "final output needs more reliable sync proof"
+        )
+        receipt["max_abs_residual_seconds"] = max(
+            (float(item.get("abs_residual_seconds", 0.0) or 0.0) for item in usable),
+            default=None,
+        )
         logger.warning("MULTICAM POST-RENDER SYNC AUDIT %s: %s", job_id, json.dumps(receipt, default=str))
         return receipt
 
@@ -12431,7 +15498,21 @@ async def audit_multicam_render_sync(output_path, segments, source_map, overlap_
     avg_corr = sum(float(item.get("correlation", 0.0) or 0.0) for item in usable) / max(1, len(usable))
     receipt["max_abs_residual_seconds"] = round(max_residual, 3)
     receipt["avg_correlation"] = round(avg_corr, 4)
-    if max_residual <= MULTICAM_POST_RENDER_SYNC_GOOD_SECONDS:
+    coverage_ratio = float(receipt.get("sample_coverage_ratio", 0.0) or 0.0)
+    max_sample_gap = float(receipt.get("max_sample_gap_seconds", 999999.0) or 999999.0)
+    if coverage_ratio < MULTICAM_POST_RENDER_SYNC_MIN_COVERAGE_RATIO:
+        receipt["status"] = "questionable"
+        receipt["message"] = (
+            f"Post-render sync audit coverage is too sparse "
+            f"({coverage_ratio:.2f} of candidate samples checked)"
+        )
+    elif max_sample_gap > MULTICAM_POST_RENDER_SYNC_MAX_SAMPLE_GAP_SECONDS:
+        receipt["status"] = "questionable"
+        receipt["message"] = (
+            f"Post-render sync audit has a {max_sample_gap:.1f}s proof gap; "
+            "drift could hide between samples"
+        )
+    elif max_residual <= MULTICAM_POST_RENDER_SYNC_GOOD_SECONDS:
         receipt["status"] = "good"
     elif max_residual >= MULTICAM_POST_RENDER_SYNC_UNSAFE_SECONDS:
         receipt["status"] = "unsafe"
@@ -12453,6 +15534,14 @@ def enforce_multicam_post_render_sync_audit(audit_receipt):
     if status == "skipped_no_camera_audio" and MULTICAM_ALLOW_SKIPPED_SYNC_NO_AUDIO:
         logger.warning("Post-render sync audit skipped because camera audio is unavailable: %s", json.dumps(audit_receipt, default=str))
         return
+    if status == "skipped_no_camera_audio":
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "message": "Post-render sync audit could not verify camera audio; refusing Cam Combiner output",
+                "post_render_sync_audit": audit_receipt,
+            },
+        )
     if MULTICAM_STRICT_POST_RENDER_SYNC:
         raise HTTPException(
             status_code=422,
@@ -12462,6 +15551,91 @@ def enforce_multicam_post_render_sync_audit(audit_receipt):
             },
         )
     logger.warning("Post-render sync audit did not pass but strict mode is off: %s", json.dumps(audit_receipt, default=str))
+
+
+def reuse_multicam_video_only_sync_audit(audit_receipt, output_path, reason, job_id=None):
+    if not audit_receipt or audit_receipt.get("status") != "good":
+        return None
+    receipt = json.loads(json.dumps(audit_receipt, default=str))
+    receipt["path"] = output_path
+    receipt["reused_from"] = "pre_caption_sync_audit"
+    receipt["reused_reason"] = reason
+    receipt["audio_timing_preserved"] = True
+    receipt["status"] = "good"
+    for sample in receipt.get("samples") or []:
+        sample["reused"] = True
+    logger.info("MULTICAM POST-RENDER SYNC AUDIT REUSED %s: %s", job_id, json.dumps({
+        "status": receipt.get("status"),
+        "reused_from": receipt.get("reused_from"),
+        "reason": reason,
+        "max_abs_residual_seconds": receipt.get("max_abs_residual_seconds"),
+        "sample_count": receipt.get("sample_count"),
+    }, default=str))
+    return receipt
+
+
+def apply_proven_multicam_preflight_sync(preflight_receipt, prepared_sources):
+    """Use the sync fit that preflight actually proved for the final render."""
+    if not preflight_receipt or preflight_receipt.get("status") != "good":
+        return []
+    cameras = preflight_receipt.get("cameras") or {}
+    applied = []
+    for index, source in enumerate(prepared_sources or []):
+        camera_receipt = cameras.get(f"cam_{index}") or cameras.get(str(source.get("id") or ""))
+        if not camera_receipt or camera_receipt.get("confidence") != "good":
+            continue
+        max_residual = float(camera_receipt.get("max_residual_offset_seconds") or 999.0)
+        sync_fit = camera_receipt.get("sync_fit") if isinstance(camera_receipt.get("sync_fit"), dict) else {}
+        fit_error = float(sync_fit.get("max_fit_error_seconds") or 999.0)
+        has_fit_correction = (
+            sync_fit.get("status") == "fit"
+            and camera_receipt.get("suggested_offset_seconds") is not None
+            and camera_receipt.get("suggested_sync_rate") is not None
+            and fit_error <= MULTICAM_POST_RENDER_SYNC_GOOD_SECONDS
+        )
+        if max_residual > MULTICAM_POST_RENDER_SYNC_GOOD_SECONDS and not has_fit_correction:
+            continue
+        proven_offset = (
+            camera_receipt.get("suggested_offset_seconds")
+            if has_fit_correction
+            else camera_receipt.get("current_offset")
+        )
+        proven_sync_rate = (
+            camera_receipt.get("suggested_sync_rate")
+            if has_fit_correction
+            else camera_receipt.get("current_sync_rate")
+        )
+        try:
+            proven_offset = float(proven_offset)
+            proven_sync_rate = clamp_float(float(proven_sync_rate or source.get("sync_rate") or 1.0), 0.95, 1.05)
+        except Exception:
+            continue
+        if not np.isfinite(proven_offset) or not np.isfinite(proven_sync_rate):
+            continue
+        previous_offset = float(source.get("offset_seconds") or 0.0)
+        previous_sync_rate = float(source.get("sync_rate") or 1.0)
+        if abs(previous_offset - proven_offset) < 0.001 and abs(previous_sync_rate - proven_sync_rate) < 0.000001:
+            continue
+        source["offset_seconds"] = proven_offset
+        source["sync_rate"] = proven_sync_rate
+        # These depend on timeline-to-source mapping and must be recomputed after
+        # automatic sync corrections are promoted into the render plan.
+        source.pop("continuous_sync_map", None)
+        applied.append({
+            "camera_id": source.get("id"),
+            "camera_label": source.get("label"),
+            "previous_offset_seconds": round(previous_offset, 6),
+            "proven_offset_seconds": round(proven_offset, 6),
+            "previous_sync_rate": round(previous_sync_rate, 9),
+            "proven_sync_rate": round(proven_sync_rate, 9),
+            "max_residual_offset_seconds": round(max_residual, 6),
+            "sync_fit_error_seconds": round(fit_error, 6) if np.isfinite(fit_error) else None,
+            "correction_source": "suggested_sync_fit" if has_fit_correction else "current_preflight",
+        })
+    if applied:
+        preflight_receipt["applied_render_corrections"] = applied
+        logger.info("PREFLIGHT RENDER SYNC CORRECTIONS APPLIED: %s", json.dumps(applied, default=str))
+    return applied
 
 
 def get_multicam_output_dimensions(output_aspect_ratio):
@@ -12624,14 +15798,21 @@ def multicam_rounded_mask_path(width, height, radius):
     return mask_path
 
 def multicam_source_focus_x(source, fallback=0.5):
-    source_id = str((source or {}).get("id") or "").lower()
-    source_label = str((source or {}).get("label") or "").lower()
-    source_key = f"{source_id} {source_label}"
-    if "cam1" in source_key or "camera 1" in source_key:
-        return 0.88
-    if "cam2" in source_key or "camera 2" in source_key:
-        return 0.3
-    return fallback
+    measured_focus_x = (source or {}).get("focus_x")
+    if measured_focus_x is not None:
+        return clamp_float(float(measured_focus_x), 0.08, 0.92)
+    explicit_reaction_side = normalize_multicam_reaction_side(
+        (source or {}).get("reaction_side") or (source or {}).get("reactionSide")
+    )
+    if explicit_reaction_side == "right":
+        return 0.25
+    if explicit_reaction_side == "left":
+        return 0.75
+    return clamp_float(float(fallback or 0.5), 0.08, 0.92)
+
+def normalize_multicam_reaction_side(value):
+    side = str(value or "").strip().lower()
+    return side if side in {"left", "right"} else None
 
 def multicam_shared_moment_focus_x(source, fallback=0.5):
     source_id = str((source or {}).get("id") or "").lower()
@@ -12644,6 +15825,65 @@ def multicam_shared_moment_focus_x(source, fallback=0.5):
     if "cam2" in source_key or "camera 2" in source_key:
         return 0.06
     return multicam_source_focus_x(source, fallback)
+
+def multicam_reaction_side_for_primary(source):
+    """
+    Place reaction cards away from the visible active speaker. Episode-specific
+    source placement wins because cam1/cam2 identity is not a reliable proxy for
+    physical side across shoots.
+    """
+    explicit_side = normalize_multicam_reaction_side(
+        (source or {}).get("reaction_side") or (source or {}).get("reactionSide")
+    )
+    if explicit_side:
+        return explicit_side
+    focus_x = multicam_source_focus_x(source, fallback=0.5)
+    return "left" if focus_x >= 0.5 else "right"
+
+def multicam_pip_geometry(output_width, output_height, primary_source=None, reaction_count=1):
+    safe_width = int(output_width or 0)
+    safe_height = int(output_height or 0)
+    safe_reaction_count = max(1, int(reaction_count or 1))
+    is_vertical_output = safe_height > safe_width
+    reaction_side = multicam_reaction_side_for_primary(primary_source or {})
+
+    if is_vertical_output:
+        hero_width = safe_width - 64
+        hero_height = int(hero_width * 9 / 16)
+        hero_x = 32
+        hero_y = 128
+        pip_width = int(safe_width * 0.52)
+        pip_height = int(pip_width * 9 / 16)
+        pip_gap = max(18, int(safe_height * 0.018))
+        pip_x = 34 if reaction_side == "left" else safe_width - pip_width - 34
+        pip_stack_height = pip_height * safe_reaction_count + pip_gap * (safe_reaction_count - 1)
+        pip_y = min(safe_height - pip_stack_height - 72, hero_y + hero_height + 34)
+        return {
+            "reaction_side": reaction_side,
+            "hero": {"x": hero_x, "y": hero_y, "width": hero_width, "height": hero_height},
+            "pip": {"x": pip_x, "y": pip_y, "width": pip_width, "height": pip_height},
+            "pip_gap": pip_gap,
+        }
+
+    base_margin_x = max(44, int(safe_width * 0.035))
+    base_margin_y = max(34, int(safe_height * 0.045))
+    base_width = safe_width - (base_margin_x * 2)
+    base_height = safe_height - (base_margin_y * 2)
+    pip_width = max(340, int(safe_width * (0.205 if safe_reaction_count == 1 else 0.18)))
+    pip_height = max(135, int(pip_width * 9 / 16))
+    pip_gap = max(16, int(safe_height * 0.024))
+    pip_x = base_margin_x + 28 if reaction_side == "left" else safe_width - pip_width - base_margin_x - 28
+    pip_stack_height = pip_height * safe_reaction_count + pip_gap * (safe_reaction_count - 1)
+    # Landscape podcast framing often puts hands and bodies in the lower third.
+    # Keep the reaction card up in the cleaner wall/TV zone instead of covering
+    # the active person.
+    pip_y = base_margin_y + max(54, int(safe_height * 0.105))
+    return {
+        "reaction_side": reaction_side,
+        "hero": {"x": base_margin_x, "y": base_margin_y, "width": base_width, "height": base_height},
+        "pip": {"x": pip_x, "y": pip_y, "width": pip_width, "height": pip_height},
+        "pip_gap": pip_gap,
+    }
 
 def multicam_overlay_card_filters(base_label, card_label, x, y, width, height, output_label, border_color="white@0.10", radius=None):
     rounded = f"{output_label}rounded"
@@ -12762,6 +16002,12 @@ def get_source_range_for_timeline(source, overlap_start, timeline_start, duratio
     if source_end <= source_start:
         source_end = source_start + (float(duration) * float(source.get("sync_rate") or 1.0))
     return source_start, source_end, max(0.02, source_end - source_start)
+
+
+def get_source_audio_audit_start(source, source_start_seconds):
+    """Map original source time to the camera file used for sync auditing."""
+    audit_shift = float(source.get("audio_audit_time_shift_seconds") or 0.0)
+    return max(0.0, float(source_start_seconds or 0.0) - audit_shift)
 
 def pick_layout_sources(
     primary_source,
@@ -12903,20 +16149,24 @@ async def render_multicam_layout_segment(
     filters = []
     is_vertical_output = output_height > output_width
     if layout_mode == "pip" and is_vertical_output:
-        hero_width = output_width - 64
-        hero_height = int(hero_width * 9 / 16)
-        hero_x = 32
-        hero_y = 128
-        pip_width = int(output_width * 0.54)
-        pip_height = int(pip_width * 9 / 16)
-        pip_x = output_width - pip_width - 38
-        pip_y = hero_y + hero_height + 42
+        reaction_source_count = min(3, len(layout_sources))
+        reaction_count = max(1, reaction_source_count - 1)
+        pip_geometry = multicam_pip_geometry(output_width, output_height, layout_sources[0], reaction_count)
+        hero_width = pip_geometry["hero"]["width"]
+        hero_height = pip_geometry["hero"]["height"]
+        hero_x = pip_geometry["hero"]["x"]
+        hero_y = pip_geometry["hero"]["y"]
+        pip_width = pip_geometry["pip"]["width"]
+        pip_height = pip_geometry["pip"]["height"]
+        pip_gap = pip_geometry["pip_gap"]
+        pip_x = pip_geometry["pip"]["x"]
+        pip_y = pip_geometry["pip"]["y"]
 
         filters.extend(multicam_prepare_video_branches(0, "p0", setpts_factors[0], branches=2, trim_start=fine_seek_values[0], trim_duration=trim_duration_values[0], rotation_degrees=rotation_values[0], color_filter=color_filter_values[0]))
-        filters.extend(multicam_prepare_video_branches(1, "p1", setpts_factors[1], branches=1, trim_start=fine_seek_values[1], trim_duration=trim_duration_values[1], rotation_degrees=rotation_values[1], color_filter=color_filter_values[1]))
+        for reaction_index in range(1, reaction_source_count):
+            filters.extend(multicam_prepare_video_branches(reaction_index, f"p{reaction_index}", setpts_factors[reaction_index], branches=1, trim_start=fine_seek_values[reaction_index], trim_duration=trim_duration_values[reaction_index], rotation_degrees=rotation_values[reaction_index], color_filter=color_filter_values[reaction_index]))
         filters.append(multicam_blurred_canvas_filter("p00", output_width, output_height, "canvas", blur=26))
         filters.append(multicam_modern_card_filter("p01", hero_width, hero_height, "hero", margin=8, blur=18, focus_x=multicam_source_focus_x(layout_sources[0])))
-        filters.append(multicam_modern_card_filter("p10", pip_width, pip_height, "pip", margin=8, blur=14, focus_x=multicam_source_focus_x(layout_sources[1])))
         filters.extend(
             multicam_overlay_card_filters(
                 "canvas",
@@ -12930,19 +16180,25 @@ async def render_multicam_layout_segment(
                 radius=118,
             )
         )
-        filters.extend(
-            multicam_overlay_card_filters(
-                "pip_base",
-                "pip",
-                pip_x,
-                pip_y,
-                pip_width,
-                pip_height,
-                "v",
-                border_color="0xF8FAFC@0.42",
-                radius=58,
+        current_base_label = "pip_base"
+        for reaction_index in range(1, reaction_source_count):
+            card_label = f"pip{reaction_index}"
+            output_label = "v" if reaction_index == reaction_source_count - 1 else f"pip_stack_{reaction_index}"
+            filters.append(multicam_modern_card_filter(f"p{reaction_index}0", pip_width, pip_height, card_label, margin=8, blur=14, focus_x=multicam_source_focus_x(layout_sources[reaction_index])))
+            filters.extend(
+                multicam_overlay_card_filters(
+                    current_base_label,
+                    card_label,
+                    pip_x,
+                    pip_y + (reaction_index - 1) * (pip_height + pip_gap),
+                    pip_width,
+                    pip_height,
+                    output_label,
+                    border_color="0x38BDF8@0.72",
+                    radius=66,
+                )
             )
-        )
+            current_base_label = output_label
     elif layout_mode == "scene-grid" and is_vertical_output:
         filters.extend(multicam_prepare_video_branches(0, "g0", setpts_factors[0], branches=2, trim_start=fine_seek_values[0], trim_duration=trim_duration_values[0], rotation_degrees=rotation_values[0], color_filter=color_filter_values[0]))
         for index in range(1, min(3, len(layout_sources))):
@@ -12995,21 +16251,43 @@ async def render_multicam_layout_segment(
         filters.extend(multicam_overlay_card_filters("canvas", "shared_left", side_margin, top_margin, card_width, card_height, "split_a", radius=card_radius))
         filters.extend(multicam_overlay_card_filters("split_a", "shared_right", right_x, top_margin, card_width, card_height, "v", radius=card_radius))
     elif layout_mode == "pip":
+        reaction_source_count = min(3, len(layout_sources))
+        reaction_count = max(1, reaction_source_count - 1)
+        pip_geometry = multicam_pip_geometry(output_width, output_height, layout_sources[0], reaction_count)
         filters.extend(multicam_prepare_video_branches(0, "p0", setpts_factors[0], branches=2, trim_start=fine_seek_values[0], trim_duration=trim_duration_values[0], rotation_degrees=rotation_values[0], color_filter=color_filter_values[0]))
-        filters.extend(multicam_prepare_video_branches(1, "p1", setpts_factors[1], branches=1, trim_start=fine_seek_values[1], trim_duration=trim_duration_values[1], rotation_degrees=rotation_values[1], color_filter=color_filter_values[1]))
-        base_margin_x = max(44, int(output_width * 0.035))
-        base_margin_y = max(34, int(output_height * 0.045))
-        base_width = output_width - (base_margin_x * 2)
-        base_height = output_height - (base_margin_y * 2)
-        pip_width = max(260, int(output_width * 0.32))
-        pip_height = max(160, int(output_height * 0.28))
-        pip_x = output_width - pip_width - base_margin_x - 22
-        pip_y = output_height - pip_height - base_margin_y - 22
+        for reaction_index in range(1, reaction_source_count):
+            filters.extend(multicam_prepare_video_branches(reaction_index, f"p{reaction_index}", setpts_factors[reaction_index], branches=1, trim_start=fine_seek_values[reaction_index], trim_duration=trim_duration_values[reaction_index], rotation_degrees=rotation_values[reaction_index], color_filter=color_filter_values[reaction_index]))
+        base_margin_x = pip_geometry["hero"]["x"]
+        base_margin_y = pip_geometry["hero"]["y"]
+        base_width = pip_geometry["hero"]["width"]
+        base_height = pip_geometry["hero"]["height"]
+        pip_width = pip_geometry["pip"]["width"]
+        pip_height = pip_geometry["pip"]["height"]
+        pip_gap = pip_geometry["pip_gap"]
+        pip_x = pip_geometry["pip"]["x"]
+        pip_y = pip_geometry["pip"]["y"]
         filters.append(multicam_blurred_canvas_filter("p00", output_width, output_height, "canvas", blur=20))
         filters.append(multicam_modern_card_filter("p01", base_width, base_height, "basecard", margin=0, blur=12, focus_x=multicam_source_focus_x(layout_sources[0])))
-        filters.append(multicam_modern_card_filter("p10", pip_width, pip_height, "pipcard", margin=4, blur=12, focus_x=multicam_source_focus_x(layout_sources[1])))
         filters.extend(multicam_overlay_card_filters("canvas", "basecard", base_margin_x, base_margin_y, base_width, base_height, "pip_a", radius=72))
-        filters.extend(multicam_overlay_card_filters("pip_a", "pipcard", pip_x, pip_y, pip_width, pip_height, "v", radius=44))
+        current_base_label = "pip_a"
+        for reaction_index in range(1, reaction_source_count):
+            card_label = f"pipcard{reaction_index}"
+            output_label = "v" if reaction_index == reaction_source_count - 1 else f"pip_stack_{reaction_index}"
+            filters.append(multicam_modern_card_filter(f"p{reaction_index}0", pip_width, pip_height, card_label, margin=4, blur=12, focus_x=multicam_source_focus_x(layout_sources[reaction_index])))
+            filters.extend(
+                multicam_overlay_card_filters(
+                    current_base_label,
+                    card_label,
+                    pip_x,
+                    pip_y + (reaction_index - 1) * (pip_height + pip_gap),
+                    pip_width,
+                    pip_height,
+                    output_label,
+                    border_color="0x38BDF8@0.76",
+                    radius=54,
+                )
+            )
+            current_base_label = output_label
     elif layout_mode == "scene-grid":
         filters.extend(multicam_prepare_video_branches(0, "g0", setpts_factors[0], branches=2, trim_start=fine_seek_values[0], trim_duration=trim_duration_values[0], rotation_degrees=rotation_values[0], color_filter=color_filter_values[0]))
         filters.extend(multicam_prepare_video_branches(1, "g1", setpts_factors[1], branches=1, trim_start=fine_seek_values[1], trim_duration=trim_duration_values[1], rotation_degrees=rotation_values[1], color_filter=color_filter_values[1]))
@@ -15148,6 +18426,28 @@ async def build_continuous_sync_anchor_maps(
         receipt["status"] = "skipped_too_short"
         return receipt
 
+    cache_payload = build_multicam_continuous_sync_receipt_cache_payload(
+        prepared_sources,
+        external_audio_path,
+        overlap_start,
+        overlap_duration,
+        checkpoints,
+        external_audio_offset_seconds=external_audio_offset_seconds,
+    )
+    cache_path = multicam_receipt_cache_path("continuous_sync", cache_payload)
+    cache_max_age = float(os.getenv("MULTICAM_CONTINUOUS_SYNC_RECEIPT_CACHE_MAX_AGE_SECONDS", "1209600") or 1209600)
+    cached_receipt = read_multicam_receipt_cache(cache_path, max_age_seconds=cache_max_age)
+    if cached_receipt and cached_receipt.get("status") in {"active", "skipped_no_active_camera_maps"}:
+        cached_receipt["cache_hit"] = True
+        cached_receipt["cache_path"] = cache_path
+        for source in prepared_sources or []:
+            camera_receipt = (cached_receipt.get("cameras") or {}).get(source.get("id")) or {}
+            activate_continuous_sync_map(source, camera_receipt.get("anchors") or [])
+        logger.info("CONTINUOUS SYNC ANCHORS CACHE HIT %s: %s", job_id, cache_path)
+        return cached_receipt
+    receipt["cache_hit"] = False
+    receipt["cache_path"] = cache_path
+
     external_duration = get_media_duration(external_audio_path)
     accepted_camera_count = 0
     for cam_idx, source in enumerate(prepared_sources or []):
@@ -15168,7 +18468,7 @@ async def build_continuous_sync_anchor_maps(
             camera_receipt["status"] = "skipped_no_camera_audio"
             continue
 
-        source_duration = float(source.get("duration") or get_media_duration(source_audio_path) or 0.0)
+        source_duration = float(get_media_duration(source_audio_path) or source.get("duration") or 0.0)
         sync_rate = max(0.001, float(source.get("sync_rate") or 1.0))
         offset = float(source.get("offset_seconds") or 0.0)
         external_offset = float(external_audio_offset_seconds or 0.0)
@@ -15176,17 +18476,19 @@ async def build_continuous_sync_anchor_maps(
         for anchor_index, relative_timeline in enumerate(checkpoints):
             absolute_timeline = float(overlap_start) + float(relative_timeline)
             source_pos = (absolute_timeline - offset) * sync_rate
+            audit_source_pos = get_source_audio_audit_start(source, source_pos)
             external_pos = absolute_timeline - external_offset
             anchor_receipt = {
                 "checkpoint_index": anchor_index,
                 "timeline_relative_seconds": round(relative_timeline, 3),
                 "timeline_absolute_seconds": round(absolute_timeline, 3),
                 "source_position_seconds": round(source_pos, 3),
+                "audio_audit_source_position_seconds": round(audit_source_pos, 3),
                 "external_audio_position_seconds": round(external_pos, 3),
                 "status": "pending",
             }
 
-            if source_pos < 0 or source_pos + sample_seconds > source_duration:
+            if audit_source_pos < 0 or audit_source_pos + sample_seconds > source_duration:
                 anchor_receipt["status"] = "source_out_of_bounds"
                 anchors.append(anchor_receipt)
                 continue
@@ -15207,7 +18509,7 @@ async def build_continuous_sync_anchor_maps(
                 await run_subprocess_async(
                     [
                         "ffmpeg", "-nostdin",
-                        "-ss", f"{source_pos:.6f}",
+                        "-ss", f"{audit_source_pos:.6f}",
                         "-t", f"{sample_seconds:.6f}",
                         "-i", source_audio_path,
                         "-vn", "-ac", "1", "-ar", "8000",
@@ -15280,6 +18582,8 @@ async def build_continuous_sync_anchor_maps(
 
     receipt["active_camera_count"] = accepted_camera_count
     receipt["status"] = "active" if accepted_camera_count > 0 else "skipped_no_active_camera_maps"
+    if receipt["status"] in {"active", "skipped_no_active_camera_maps"}:
+        write_multicam_receipt_cache(cache_path, receipt)
     logger.info("CONTINUOUS SYNC ANCHORS %s: %s", job_id, json.dumps(receipt, default=str))
     return receipt
 
@@ -15381,24 +18685,188 @@ def is_multicam_hdr_source(color_metadata):
 
 def build_multicam_base_color_filter(color_metadata):
     if is_multicam_hdr_source(color_metadata):
-        return (
-            "zscale=t=linear:npl=100,"
-            "format=gbrpf32le,"
-            "tonemap=tonemap=hable:desat=0.35,"
-            "zscale=p=bt709:t=bt709:m=bt709:r=tv,"
-            "format=yuv420p"
-        )
+        mode = str(os.getenv("MULTICAM_HDR_NORMALIZATION_MODE", "preserve") or "preserve").strip().lower()
+        if mode in {"tonemap", "hable", "legacy"}:
+            return (
+                "zscale=t=linear:npl=100,"
+                "format=gbrpf32le,"
+                "tonemap=tonemap=hable:desat=0.35,"
+                "zscale=p=bt709:t=bt709:m=bt709:r=tv,"
+                "format=yuv420p"
+            )
+        return "format=yuv420p"
     return ""
 
 
+def multicam_hdr_normalization_method():
+    mode = str(os.getenv("MULTICAM_HDR_NORMALIZATION_MODE", "preserve") or "preserve").strip().lower()
+    if mode in {"tonemap", "hable", "legacy"}:
+        return "zscale_linear_hable_tonemap"
+    return "preserve_pixel_bt709_tagging"
+
+
 def build_multicam_cinematic_polish_filter():
+    polish_mode = str(os.getenv("MULTICAM_CINEMATIC_POLISH_MODE", "fast") or "fast").strip().lower()
+    if polish_mode in {"heavy", "studio", "slow"}:
+        return (
+            "hqdn3d=1.35:1.10:3.80:2.90,"
+            "gradfun=radius=14:strength=0.82,"
+            "eq=contrast=1.055:brightness=-0.002:saturation=1.055:gamma=0.995,"
+            "colorbalance=rs=0.00320:bs=-0.00180:rm=0.00380:bm=-0.00230:rh=0.00160:bh=-0.00110,"
+            "unsharp=3:3:0.16:3:3:0.035,"
+            "vignette=angle=PI/16:eval=init"
+        )
     return (
-        "hqdn3d=0.30:0.24:0.70:0.52,"
-        "eq=contrast=1.018:brightness=-0.002:saturation=1.005:gamma=1.000,"
-        "colorbalance=rs=0.00150:bs=-0.00100:rm=0.00200:bm=-0.00150:rh=0.00100:bh=-0.00080,"
-        "unsharp=3:3:0.16:3:3:0.04,"
-        "vignette=angle=PI/16:eval=init"
+        "eq=contrast=1.050:brightness=-0.001:saturation=1.045:gamma=0.995,"
+        "colorbalance=rs=0.00320:bs=-0.00180:rm=0.00380:bm=-0.00230:rh=0.00160:bh=-0.00110,"
+        "unsharp=3:3:0.10:3:3:0.025"
     )
+
+
+def multicam_file_cache_identity(path):
+    try:
+        stat = os.stat(path)
+        return f"{os.path.abspath(path)}:{stat.st_size}:{stat.st_mtime_ns}"
+    except Exception:
+        return str(path or "")
+
+
+def build_multicam_color_receipt_cache_payload(prepared_sources, overlap_start, overlap_duration, reference_index, cinematic_polish_filter):
+    return {
+        "version": 2,
+        "overlap_start": round(float(overlap_start or 0.0), 3),
+        "overlap_duration": round(float(overlap_duration or 0.0), 3),
+        "reference_index": int(reference_index or 0),
+        "cinematic_polish_filter": str(cinematic_polish_filter or ""),
+        "sources": [
+            {
+                "id": source.get("id"),
+                "visual_cache_key": source.get("visual_cache_key") or source.get("path"),
+                "offset_seconds": round(float(source.get("offset_seconds") or 0.0), 6),
+                "sync_rate": round(float(source.get("sync_rate") or 1.0), 9),
+                "duration": round(float(source.get("duration") or 0.0), 3),
+                "color_metadata": source.get("color_metadata") or {},
+            }
+            for source in prepared_sources or []
+        ],
+    }
+
+
+def build_multicam_continuous_sync_receipt_cache_payload(
+    prepared_sources,
+    external_audio_path,
+    overlap_start,
+    overlap_duration,
+    checkpoints,
+    external_audio_offset_seconds=0.0,
+):
+    return {
+        "version": 1,
+        "external_audio_identity": multicam_file_cache_identity(external_audio_path),
+        "external_audio_offset_seconds": round(float(external_audio_offset_seconds or 0.0), 6),
+        "overlap_start": round(float(overlap_start or 0.0), 3),
+        "overlap_duration": round(float(overlap_duration or 0.0), 3),
+        "checkpoints_relative_seconds": [round(float(value or 0.0), 3) for value in checkpoints or []],
+        "sample_seconds": round(float(MULTICAM_CONTINUOUS_SYNC_SAMPLE_SECONDS), 3),
+        "anchor_interval_seconds": round(float(MULTICAM_CONTINUOUS_SYNC_INTERVAL_SECONDS), 3),
+        "min_correlation": round(float(MULTICAM_CONTINUOUS_SYNC_MIN_CORRELATION), 3),
+        "max_shift_seconds": round(float(MULTICAM_CONTINUOUS_SYNC_MAX_SHIFT_SECONDS), 3),
+        "max_accepted_residual_seconds": round(float(MULTICAM_CONTINUOUS_SYNC_MAX_ACCEPTED_RESIDUAL_SECONDS), 3),
+        "sources": [
+            {
+                "id": source.get("id"),
+                "visual_cache_key": source.get("visual_cache_key") or source.get("path"),
+                "audio_identity": multicam_file_cache_identity(source.get("audio_audit_path") or source.get("path")),
+                "audio_audit_time_shift_seconds": round(float(source.get("audio_audit_time_shift_seconds") or 0.0), 6),
+                "duration": round(float(source.get("duration") or 0.0), 3),
+                "offset_seconds": round(float(source.get("offset_seconds") or 0.0), 6),
+                "sync_rate": round(float(source.get("sync_rate") or 1.0), 9),
+                "has_audio": bool(source.get("audio_audit_has_audio") if source.get("audio_audit_has_audio") is not None else source.get("has_audio")),
+            }
+            for source in prepared_sources or []
+        ],
+    }
+
+
+def build_multicam_source_activity_receipt_cache_payload(
+    source,
+    audio_analysis_path,
+    audio_window_start,
+    audio_window_duration,
+    segment_duration,
+):
+    stable_audio_identity = (
+        source.get("audio_cache_key")
+        or source.get("visual_cache_key")
+        or source.get("cache_key")
+        or source.get("original_path")
+        or source.get("audio_audit_path")
+        or source.get("render_path")
+        or source.get("path")
+    )
+    return {
+        "version": 2,
+        "camera_id": source.get("id"),
+        "visual_cache_key": source.get("visual_cache_key") or source.get("path"),
+        "audio_identity": multicam_file_cache_identity(stable_audio_identity),
+        "analysis_path_kind": "camera_source_window",
+        "audio_activity_source": source.get("audio_activity_source") or "camera_scratch_audio",
+        "audio_activity_channel_index": source.get("audio_activity_channel_index"),
+        "audio_audit_time_shift_seconds": round(float(source.get("audio_audit_time_shift_seconds") or 0.0), 6),
+        "audio_window_start": round(float(audio_window_start or 0.0), 6),
+        "audio_window_duration": round(float(audio_window_duration or 0.0), 6),
+        "segment_duration": round(float(segment_duration or 0.5), 6),
+        "offset_seconds": round(float(source.get("offset_seconds") or 0.0), 6),
+        "sync_rate": round(float(source.get("sync_rate") or 1.0), 9),
+    }
+
+
+def apply_multicam_color_receipt_to_sources(receipt, prepared_sources):
+    source_receipts = {
+        item.get("id"): item
+        for item in (receipt or {}).get("sources") or []
+        if item.get("id")
+    }
+    for source in prepared_sources or []:
+        item = source_receipts.get(source.get("id")) or {}
+        color_metadata = item.get("color_metadata") or source.get("color_metadata") or {}
+        source["color_metadata"] = color_metadata
+        source["base_color_filter"] = item.get("base_color_filter") or build_multicam_base_color_filter(color_metadata)
+        source["color_match_filter"] = item.get("filter") or ""
+        source["cinematic_polish_filter"] = item.get("cinematic_polish_filter") or build_multicam_cinematic_polish_filter()
+        source["source_visual_filter"] = item.get("source_visual_filter") or combine_multicam_filter_chains(
+            source.get("base_color_filter"),
+            source.get("color_match_filter"),
+            source.get("cinematic_polish_filter"),
+        )
+        source["color_profile"] = item.get("profile")
+        source["color_match_reference_id"] = (receipt or {}).get("reference_source_id")
+        source["color_match_applied"] = bool(item.get("applied"))
+
+
+def build_multicam_preflight_receipt_cache_payload(
+    prepared_sources,
+    source_offsets,
+    source_sync_rates,
+    external_audio_identity,
+    external_audio_offset_seconds=0.0,
+):
+    return {
+        "version": 2,
+        "external_audio_identity": str(external_audio_identity or ""),
+        "external_audio_offset_seconds": round(float(external_audio_offset_seconds or 0.0), 6),
+        "sources": [
+            {
+                "id": source.get("id"),
+                "visual_cache_key": source.get("visual_cache_key") or source.get("path"),
+                "duration": round(float(source.get("duration") or 0.0), 3),
+                "offset_seconds": round(float(source_offsets[index] if index < len(source_offsets or []) else source.get("offset_seconds") or 0.0), 6),
+                "sync_rate": round(float(source_sync_rates[index] if index < len(source_sync_rates or []) else source.get("sync_rate") or 1.0), 9),
+                "has_audio": bool(source.get("audio_audit_has_audio") if source.get("audio_audit_has_audio") is not None else source.get("has_audio")),
+            }
+            for index, source in enumerate(prepared_sources or [])
+        ],
+    }
 
 
 def combine_multicam_filter_chains(*chains):
@@ -15410,20 +18878,54 @@ def combine_multicam_filter_chains(*chains):
     return ",".join(parts)
 
 
-def multicam_visual_proxy_cache_path(source_path, visual_filter, width=1920, height=1080):
+def multicam_receipt_cache_path(namespace, payload):
+    cache_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../tmp/multicam-receipt-cache"))
+    os.makedirs(cache_dir, exist_ok=True)
+    safe_namespace = re.sub(r"[^A-Za-z0-9_.-]+", "_", str(namespace or "receipt")).strip("._") or "receipt"
+    key = json.dumps(payload or {}, sort_keys=True, default=str)
+    digest = hashlib.sha256(key.encode("utf-8")).hexdigest()[:32]
+    return os.path.join(cache_dir, f"{safe_namespace}_{digest}.json")
+
+
+def read_multicam_receipt_cache(cache_path, max_age_seconds=None):
+    if not cache_path or not os.path.exists(cache_path):
+        return None
+    try:
+        if max_age_seconds is not None:
+            age_seconds = max(0.0, time.time() - os.path.getmtime(cache_path))
+            if age_seconds > float(max_age_seconds):
+                return None
+        with open(cache_path, "r", encoding="utf-8") as handle:
+            return json.load(handle)
+    except Exception:
+        return None
+
+
+def write_multicam_receipt_cache(cache_path, receipt):
+    try:
+        os.makedirs(os.path.dirname(cache_path), exist_ok=True)
+        tmp_path = f"{cache_path}.part"
+        with open(tmp_path, "w", encoding="utf-8") as handle:
+            json.dump(receipt or {}, handle, indent=2, sort_keys=True, default=str)
+        os.replace(tmp_path, cache_path)
+    except Exception as exc:
+        logger.debug("Could not write multicam receipt cache %s: %s", cache_path, exc)
+
+
+def multicam_visual_proxy_cache_path(source_path, visual_filter, width=1920, height=1080, cache_identity=None):
     cache_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../tmp/multicam-visual-cache"))
     os.makedirs(cache_dir, exist_ok=True)
     stat = os.stat(source_path)
     key = json.dumps(
         {
-            "path": os.path.abspath(source_path),
+            "source_identity": str(cache_identity or os.path.abspath(source_path)),
             "mtime": round(stat.st_mtime, 3),
             "size": stat.st_size,
             "filter": str(visual_filter or ""),
             "width": int(width),
             "height": int(height),
             "encoder": GPU_VIDEO_ENCODER,
-            "version": 5,
+            "version": 8,
         },
         sort_keys=True,
     )
@@ -15431,14 +18933,78 @@ def multicam_visual_proxy_cache_path(source_path, visual_filter, width=1920, hei
     return os.path.join(cache_dir, f"{digest}_{int(width)}x{int(height)}.mp4")
 
 
-def is_valid_multicam_visual_proxy(cache_path, minimum_duration=0.0):
+def is_valid_multicam_visual_proxy(cache_path, minimum_duration=0.0, require_audio=False):
     if not cache_path or not os.path.exists(cache_path) or os.path.getsize(cache_path) <= 1024 * 1024:
         return False
     try:
         duration = get_media_duration(cache_path)
-        return duration >= max(0.5, float(minimum_duration or 0.0) * 0.80)
+        if duration < max(0.5, float(minimum_duration or 0.0) * 0.80):
+            return False
+        if require_audio and not has_audio_stream(cache_path):
+            return False
+        return True
     except Exception:
         return False
+
+
+def get_multicam_visual_proxy_dimensions(output_width, output_height):
+    max_long_edge = int(os.getenv("MULTICAM_VISUAL_PROXY_MAX_LONG_EDGE", "1280") or 1280)
+    max_long_edge = max(360, min(1920, max_long_edge))
+    output_width = max(2, int(output_width or 1920))
+    output_height = max(2, int(output_height or 1080))
+    if output_width >= output_height:
+        proxy_width = min(output_width, max_long_edge)
+        proxy_height = int(round(proxy_width * (output_height / max(1, output_width))))
+    else:
+        proxy_height = min(output_height, max_long_edge)
+        proxy_width = int(round(proxy_height * (output_width / max(1, output_height))))
+    proxy_width = max(2, proxy_width - (proxy_width % 2))
+    proxy_height = max(2, proxy_height - (proxy_height % 2))
+    return proxy_width, proxy_height
+
+
+def unauditable_multicam_visual_proxy_sources(prepared_sources):
+    unsafe = []
+    for source in prepared_sources or []:
+        render_path = source.get("render_path")
+        source_path = source.get("path")
+        if not render_path or not source_path:
+            continue
+        try:
+            if os.path.abspath(render_path) == os.path.abspath(source_path):
+                continue
+        except Exception:
+            continue
+        if not has_audio_stream(render_path):
+            unsafe.append({
+                "camera_id": source.get("id"),
+                "camera_label": source.get("label"),
+                "render_path": render_path,
+                "source_path": source_path,
+                "render_time_shift_seconds": round(float(source.get("render_time_shift_seconds") or 0.0), 6),
+            })
+    return unsafe
+
+
+def enforce_multicam_visual_source_auditability(prepared_sources, external_audio_url):
+    if not external_audio_url or MULTICAM_ALLOW_UNAUDITABLE_VISUAL_PROXY:
+        return {"status": "not_required" if not external_audio_url else "allowed_by_env", "unsafe_sources": []}
+    unsafe = unauditable_multicam_visual_proxy_sources(prepared_sources)
+    receipt = {
+        "status": "safe" if not unsafe else "unsafe",
+        "mode": "rendered_visual_must_match_auditable_camera_timeline",
+        "allow_unauditable_visual_proxy": bool(MULTICAM_ALLOW_UNAUDITABLE_VISUAL_PROXY),
+        "unsafe_sources": unsafe,
+    }
+    if unsafe:
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "message": "Cam Combiner render is using mute visual proxy sources that cannot be sync-audited",
+                "visual_source_auditability": receipt,
+            },
+        )
+    return receipt
 
 
 def build_multicam_proxy_visual_filter(source, proxy_width, proxy_height):
@@ -15460,8 +19026,7 @@ async def prepare_multicam_visual_proxy_sources(prepared_sources, overlap_start,
     if os.getenv("MULTICAM_VISUAL_PROXY_CACHE", "1").strip().lower() in {"0", "false", "no", "off"}:
         return {"status": "disabled"}
 
-    proxy_width = 1920 if int(output_width or 0) >= int(output_height or 0) else 1080
-    proxy_height = 1080 if int(output_width or 0) >= int(output_height or 0) else 1920
+    proxy_width, proxy_height = get_multicam_visual_proxy_dimensions(output_width, output_height)
     receipts = []
     for source in prepared_sources or []:
         proxy_start = max(0.0, get_source_start_for_timeline(source, overlap_start, 0.0) - 2.0)
@@ -15477,8 +19042,9 @@ async def prepare_multicam_visual_proxy_sources(prepared_sources, overlap_start,
             f"{render_filter}:start={proxy_start:.3f}:duration={proxy_duration:.3f}",
             proxy_width,
             proxy_height,
+            cache_identity=source.get("visual_cache_key"),
         )
-        cache_hit = is_valid_multicam_visual_proxy(cache_path, proxy_duration)
+        cache_hit = is_valid_multicam_visual_proxy(cache_path, proxy_duration, require_audio=True)
         if not cache_hit:
             await run_subprocess_async(
                 [
@@ -15495,10 +19061,15 @@ async def prepare_multicam_visual_proxy_sources(prepared_sources, overlap_start,
                     source["path"],
                     "-map",
                     "0:v:0",
+                    "-map",
+                    "0:a?",
                     "-vf",
                     render_filter,
                     *build_multicam_segment_encode_args(),
-                    "-an",
+                    "-c:a",
+                    "aac",
+                    "-b:a",
+                    "96k",
                     "-movflags",
                     "+faststart",
                     "-vsync",
@@ -15513,12 +19084,17 @@ async def prepare_multicam_visual_proxy_sources(prepared_sources, overlap_start,
         source["render_time_shift_seconds"] = proxy_start
         source["render_rotation_degrees"] = 0
         source["render_visual_filter"] = ""
+        source["audio_audit_path"] = cache_path
+        source["audio_audit_has_audio"] = has_audio_stream(cache_path)
+        source["audio_audit_time_shift_seconds"] = proxy_start
         receipts.append(
             {
                 "camera_id": source.get("id"),
                 "camera_label": source.get("label"),
                 "path": cache_path,
                 "cache_hit": cache_hit,
+                "cache_identity": source.get("visual_cache_key"),
+                "has_audio": bool(source.get("audio_audit_has_audio")),
                 "source_start_seconds": round(proxy_start, 3),
                 "duration_seconds": round(proxy_duration, 3),
                 "width": proxy_width,
@@ -15528,7 +19104,8 @@ async def prepare_multicam_visual_proxy_sources(prepared_sources, overlap_start,
 
     return {
         "status": "active",
-        "mode": "per_camera_polished_1080p_proxy",
+        "mode": "per_camera_polished_window_proxy",
+        "max_long_edge": max(proxy_width, proxy_height),
         "source_count": len(receipts),
         "sources": receipts,
     }
@@ -15536,19 +19113,45 @@ async def prepare_multicam_visual_proxy_sources(prepared_sources, overlap_start,
 
 async def apply_multicam_color_matching(prepared_sources, overlap_start, overlap_duration, job_id, reference_index=0):
     cinematic_polish_filter = build_multicam_cinematic_polish_filter()
+    cache_payload = build_multicam_color_receipt_cache_payload(
+        prepared_sources,
+        overlap_start,
+        overlap_duration,
+        reference_index,
+        cinematic_polish_filter,
+    )
+    cache_path = multicam_receipt_cache_path("color", cache_payload)
+    cached_receipt = read_multicam_receipt_cache(
+        cache_path,
+        max_age_seconds=float(os.getenv("MULTICAM_COLOR_RECEIPT_CACHE_MAX_AGE_SECONDS", "1209600") or 1209600),
+    )
+    if cached_receipt and cached_receipt.get("status") in {"active", "skipped_no_matchable_sources"}:
+        apply_multicam_color_receipt_to_sources(cached_receipt, prepared_sources)
+        cached_receipt["cache_hit"] = True
+        cached_receipt["cache_path"] = cache_path
+        logger.info("MULTICAM COLOR MATCH CACHE HIT %s: %s", job_id, cache_path)
+        return cached_receipt
+
     receipt = {
         "status": "skipped",
         "reference_source_id": None,
         "reference_source_label": None,
+        "cache_hit": False,
+        "cache_path": cache_path,
         "base_normalization": {
             "status": "active",
             "target": "bt709_sdr",
-            "hdr_method": "zscale_linear_hable_tonemap",
+            "hdr_method": multicam_hdr_normalization_method(),
         },
         "cinematic_polish": {
             "status": "active",
             "filter": cinematic_polish_filter,
-            "stages": ["noise_reduction", "contrast_lift", "warm_grade", "saturation_balance", "sharpening", "vignette"],
+            "mode": str(os.getenv("MULTICAM_CINEMATIC_POLISH_MODE", "fast") or "fast").strip().lower(),
+            "stages": (
+                ["noise_reduction", "contrast_lift", "warm_grade", "saturation_balance", "sharpening", "vignette"]
+                if any(token in cinematic_polish_filter for token in ("hqdn3d", "gradfun", "vignette"))
+                else ["contrast_lift", "warm_grade", "saturation_balance", "light_sharpening"]
+            ),
         },
         "sources": [],
     }
@@ -15650,6 +19253,7 @@ async def apply_multicam_color_matching(prepared_sources, overlap_start, overlap
 
     receipt["matched_source_count"] = applied_count
     receipt["status"] = "active" if applied_count else "skipped_no_matchable_sources"
+    write_multicam_receipt_cache(cache_path, receipt)
     logger.info("MULTICAM COLOR MATCH %s: %s", job_id, json.dumps(receipt, default=str))
     return receipt
 
@@ -15658,8 +19262,25 @@ async def render_multicam_impl(request: RenderMultiCamRequest, provided_job_id: 
     if len(request.sources or []) < 2:
         raise HTTPException(status_code=400, detail="At least two camera sources are required")
 
+    render_wall_started_at = time.time()
+    render_perf_started_at = time.perf_counter()
+    performance_stages = []
+
+    def record_performance_stage(name, started_at, **metadata):
+        elapsed = max(0.0, time.perf_counter() - float(started_at or time.perf_counter()))
+        entry = {
+            "stage": name,
+            "elapsed_seconds": round(elapsed, 3),
+        }
+        for key, value in metadata.items():
+            if value is not None:
+                entry[key] = value
+        performance_stages.append(entry)
+        return entry
+
     job_id = provided_job_id or str(uuid.uuid4())
     render_tier = normalize_multicam_render_tier(request)
+    render_tier_profile = get_multicam_render_tier_profile(render_tier)
     primary_audio_camera_id = request.primary_audio_camera_id or request.primaryAudioCameraId
     has_explicit_segments = bool(request.segments)
     has_requested_overlap_start = request.overlap_start is not None or request.overlapStart is not None
@@ -15686,6 +19307,13 @@ async def render_multicam_impl(request: RenderMultiCamRequest, provided_job_id: 
     output_aspect_ratio = request.output_aspect_ratio or request.outputAspectRatio or "9:16"
     nested_external_audio = request.externalAudio
     external_audio_url = request.external_audio_url or (nested_external_audio.url if nested_external_audio else None)
+    director_channel_camera_ids = (
+        request.director_channel_camera_ids
+        if request.director_channel_camera_ids is not None
+        else request.directorChannelCameraIds
+        if request.directorChannelCameraIds is not None
+        else None
+    )
     external_audio_offset_seconds = float(
         request.external_audio_offset_seconds
         if request.external_audio_offset_seconds not in (None, 0.0)
@@ -15725,17 +19353,27 @@ async def render_multicam_impl(request: RenderMultiCamRequest, provided_job_id: 
     continuous_sync_receipt = None
     color_match_receipt = None
     visual_proxy_receipt = None
+    visual_source_auditability_receipt = None
     director_audio_receipt = None
     audio_bed_receipt = None
     caption_receipt = None
     brand_watermark_receipt = None
     thumbnail_receipt = None
     output_validation = None
+    pre_caption_sync_audit = None
     post_render_sync_audit = None
     source_url_overrides = {}
     source_offset_overrides = {}
     effective_external_audio_url = external_audio_url
     effective_external_audio_offset_seconds = external_audio_offset_seconds
+    plan_only_requested = bool(request.planOnly if request.planOnly is not None else request.plan_only)
+    plan_only_audio_first_requested = bool(
+        plan_only_requested
+        and request.auto_switch
+        and effective_external_audio_url
+        and director_channel_camera_ids
+        and env_flag("MULTICAM_PLAN_ONLY_AUDIO_FIRST", default=True)
+    )
 
     if request.async_mode:
         try:
@@ -15744,6 +19382,7 @@ async def render_multicam_impl(request: RenderMultiCamRequest, provided_job_id: 
             pass
 
     try:
+        stage_started_at = time.perf_counter()
         if external_audio_url and pre_sync_clap_alignment:
             if request.async_mode:
                 update_firestore_job(job_id, {"progress": 5, "detail": "Detecting clap alignment"})
@@ -15775,60 +19414,148 @@ async def render_multicam_impl(request: RenderMultiCamRequest, provided_job_id: 
                     f"{pre_sync_result.get('message') or pre_sync_result.get('warnings')}"
                 )
 
-        for index, source in enumerate(request.sources):
-            local_path = os.path.join(shared_tmp_dir, f"{job_id}_multicam_src_{index}.mp4")
-            source_url = source_url_overrides.get(source.id, source.url)
-            audio_analysis_path = None
-            if source.id in source_url_overrides:
-                local_path = os.path.abspath(source_url)
-                audio_analysis_path = local_path
-                logger.info(f"Pre-sync aligned source ready for {source.label or source.id}: {local_path}")
-            else:
-                cfr_cache_path = await materialize_to_cfr_cache(source_url, keep_audio=True)
-                logger.info(f"CFR source ready for {source.label or source.id}: {cfr_cache_path}")
-                local_path = link_or_copy_cached_media(cfr_cache_path, local_path)
-                if request.auto_switch:
-                    # Use the same CFR timeline that video rendering cuts from. Using
-                    # original-camera audio here can hide drift introduced while
-                    # normalizing VFR phone footage to CFR.
-                    audio_analysis_path = local_path
-            source_duration = get_media_duration(local_path)
-            if source_duration <= 0.1:
-                raise HTTPException(status_code=400, detail=f"Source {source.label or source.id} has no readable duration")
-            raw_sync_rate = source.sync_rate if source.sync_rate is not None else source.syncRate
-            sync_rate = clamp_float(float(raw_sync_rate or 1.0), 0.95, 1.05)
-            raw_rotation = source.rotation_degrees if source.rotation_degrees is not None else source.rotationDegrees
-            rotation_degrees = normalize_multicam_rotation_degrees(raw_rotation)
-            metadata_rotation_degrees = get_video_rotation_degrees(local_path)
-            if metadata_rotation_degrees:
-                logger.info(
-                    "Cam Combiner source %s has display rotation metadata: %s degrees; "
-                    "leaving FFmpeg autorotation in charge",
-                    source.label or source.id,
-                    metadata_rotation_degrees,
-                )
-            color_metadata = probe_video_color_metadata(local_path)
+        source_prepare_concurrency = max(
+            1,
+            min(
+                len(request.sources or []) or 1,
+                int(os.getenv("MULTICAM_SOURCE_PREP_CONCURRENCY", "3") or 3),
+            ),
+        )
+        source_prepare_semaphore = asyncio.Semaphore(source_prepare_concurrency)
 
-            prepared_sources.append(
-                {
+        async def prepare_multicam_source(index, source):
+            async with source_prepare_semaphore:
+                local_path = os.path.join(shared_tmp_dir, f"{job_id}_multicam_src_{index}.mp4")
+                source_url = source_url_overrides.get(source.id, source.url)
+                audio_analysis_path = None
+                visual_cache_key = str(source.cache_key or source_url or "").strip()
+                raw_sync_rate = source.sync_rate if source.sync_rate is not None else source.syncRate
+                sync_rate = clamp_float(float(raw_sync_rate or 1.0), 0.95, 1.05)
+                original_offset_seconds = float(source_offset_overrides.get(source.id, source.offset_seconds or 0.0))
+                effective_offset_seconds = original_offset_seconds
+                if source.id in source_url_overrides:
+                    local_path = os.path.abspath(source_url)
+                    audio_analysis_path = local_path
+                    visual_cache_key = f"pre-sync:{visual_cache_key}:{local_path}"
+                    logger.info(f"Pre-sync aligned source ready for {source.label or source.id}: {local_path}")
+                elif plan_only_audio_first_requested and os.path.exists(str(source_url or "")):
+                    local_path = os.path.abspath(str(source_url))
+                    audio_analysis_path = local_path
+                    visual_cache_key = f"plan-only-direct:{visual_cache_key}:{local_path}"
+                    logger.info(
+                        "Plan-only audio-first source ready for %s without CFR/video proxy prep: %s",
+                        source.label or source.id,
+                        local_path,
+                    )
+                else:
+                    use_windowed_cfr = (
+                        env_flag("MULTICAM_WINDOWED_CFR_CACHE", default=True)
+                        and float(requested_overlap_duration or 0.0) > 0.25
+                        and (has_requested_overlap_start or has_requested_timeline_start or has_explicit_segments)
+                    )
+                    if use_windowed_cfr:
+                        proof_anchor = (
+                            float(requested_timeline_start or 0.0)
+                            if has_explicit_segments
+                            else float(requested_overlap_start if has_requested_overlap_start else requested_timeline_start)
+                        )
+                        window_handle = clamp_float(
+                            float(os.getenv("MULTICAM_WINDOWED_CFR_HANDLE_SECONDS", "2.0") or 2.0),
+                            0.0,
+                            10.0,
+                        )
+                        source_window_start = max(
+                            0.0,
+                            ((proof_anchor - original_offset_seconds) * sync_rate) - window_handle,
+                        )
+                        source_window_duration = (
+                            float(requested_overlap_duration or 0.0) * sync_rate
+                        ) + (window_handle * 2.0)
+                        cfr_cache_path = await materialize_to_windowed_cfr_cache(
+                            source_url,
+                            source_window_start,
+                            source_window_duration,
+                            keep_audio=True,
+                        )
+                        effective_offset_seconds = original_offset_seconds + (source_window_start / max(0.001, sync_rate))
+                        logger.info(
+                            "Windowed CFR source ready for %s: %s "
+                            "(timeline_anchor=%.2fs source_window_start=%.2fs effective_offset=%.3fs original_offset=%.3fs)",
+                            source.label or source.id,
+                            cfr_cache_path,
+                            proof_anchor,
+                            source_window_start,
+                            effective_offset_seconds,
+                            original_offset_seconds,
+                        )
+                        visual_cache_key = (
+                            f"window-cfr:{visual_cache_key}:{os.path.abspath(cfr_cache_path)}:"
+                            f"{source_window_start:.3f}:{source_window_duration:.3f}:{effective_offset_seconds:.6f}"
+                        )
+                    else:
+                        cfr_cache_path = await materialize_to_cfr_cache(source_url, keep_audio=True)
+                        logger.info(f"CFR source ready for {source.label or source.id}: {cfr_cache_path}")
+                        visual_cache_key = f"cfr:{visual_cache_key}:{os.path.abspath(cfr_cache_path)}"
+                    local_path = link_or_copy_cached_media(cfr_cache_path, local_path)
+                    if request.auto_switch:
+                        # Use the same CFR timeline that video rendering cuts from. Using
+                        # original-camera audio here can hide drift introduced while
+                        # normalizing VFR phone footage to CFR.
+                        audio_analysis_path = local_path
+                source_duration = get_media_duration(local_path)
+                if source_duration <= 0.1:
+                    raise HTTPException(status_code=400, detail=f"Source {source.label or source.id} has no readable duration")
+                reaction_side = normalize_multicam_reaction_side(
+                    source.reaction_side if source.reaction_side is not None else source.reactionSide
+                )
+                raw_rotation = source.rotation_degrees if source.rotation_degrees is not None else source.rotationDegrees
+                rotation_degrees = normalize_multicam_rotation_degrees(raw_rotation)
+                metadata_rotation_degrees = get_video_rotation_degrees(local_path)
+                if metadata_rotation_degrees:
+                    logger.info(
+                        "Cam Combiner source %s has display rotation metadata: %s degrees; "
+                        "leaving FFmpeg autorotation in charge",
+                        source.label or source.id,
+                        metadata_rotation_degrees,
+                    )
+                color_metadata = probe_video_color_metadata(local_path)
+
+                return {
                     "id": source.id,
                     "label": source.label or source.id,
+                    "source_index": index,
                     "path": local_path,
                     "audio_analysis_path": audio_analysis_path or local_path,
                     "duration": source_duration,
-                    "offset_seconds": float(source_offset_overrides.get(source.id, source.offset_seconds or 0.0)),
+                    "offset_seconds": effective_offset_seconds,
+                    "original_offset_seconds": original_offset_seconds,
                     "sync_rate": sync_rate,
+                    "reaction_side": reaction_side,
                     "rotation_degrees": rotation_degrees,
                     "metadata_rotation_degrees": metadata_rotation_degrees,
                     "color_metadata": color_metadata,
+                    "visual_cache_key": visual_cache_key,
                     "has_audio": has_audio_stream(audio_analysis_path or local_path),
                     "silence_intervals": [],
                     "pre_sync_aligned": bool(source.id in source_url_overrides),
                 }
-            )
+
+        prepared_sources = await asyncio.gather(
+            *[
+                prepare_multicam_source(index, source)
+                for index, source in enumerate(request.sources)
+            ]
+        )
 
         if request.async_mode:
             update_firestore_job(job_id, {"progress": 20, "detail": "Sources ready"})
+        record_performance_stage(
+            "prepare_sources",
+            stage_started_at,
+            source_count=len(prepared_sources),
+            source_prepare_concurrency=source_prepare_concurrency,
+            pre_sync_clap_status=(pre_sync_result or {}).get("status") if pre_sync_result else "not_requested",
+        )
 
         calculated_overlap_start = max(source["offset_seconds"] for source in prepared_sources)
         calculated_overlap_end = min(
@@ -15864,8 +19591,13 @@ async def render_multicam_impl(request: RenderMultiCamRequest, provided_job_id: 
         production_limits = enforce_multicam_production_limits(request, overlap_duration)
         output_width, output_height = get_multicam_output_dimensions(output_aspect_ratio)
         skip_visual_proxy = (
-            render_tier == "simple"
+            not bool(render_tier_profile.get("visual_proxy"))
             or env_flag("MULTICAM_SKIP_VISUAL_PROXY", default=False)
+            or plan_only_audio_first_requested
+        )
+        require_direct_auditable_visual_sources = env_flag(
+            "MULTICAM_FORCE_DIRECT_AUDITABLE_SOURCE_VIDEO",
+            default=False,
         )
         if skip_visual_proxy:
             color_match_receipt = {
@@ -15894,27 +19626,10 @@ async def render_multicam_impl(request: RenderMultiCamRequest, provided_job_id: 
                 source["cinematic_polish_filter"] = ""
                 source["source_visual_filter"] = ""
                 source["render_visual_filter"] = ""
-        else:
-            color_match_receipt = await apply_multicam_color_matching(
-                prepared_sources,
-                overlap_start,
-                overlap_duration,
-                job_id,
-                reference_index=0,
-            )
-            if request.async_mode:
-                update_firestore_job(job_id, {"progress": 28, "detail": "Preparing fast visual proxies"})
-            visual_proxy_receipt = await prepare_multicam_visual_proxy_sources(
-                prepared_sources,
-                overlap_start,
-                overlap_duration,
-                output_width,
-                output_height,
-                job_id,
-            )
 
         # -------- Preflight sync check (when external audio is available) --------
         if external_audio_url:
+            stage_started_at = time.perf_counter()
             source_paths = []
             cleanup_paths = []
             source_offsets = [s["offset_seconds"] for s in prepared_sources]
@@ -15947,14 +19662,35 @@ async def render_multicam_impl(request: RenderMultiCamRequest, provided_job_id: 
                 if os.path.abspath(ext_local).startswith(os.path.abspath(shared_tmp_dir) + os.sep) and os.path.basename(ext_local).startswith(f"{job_id}_preflight"):
                     cleanup_paths.append(ext_local)
             try:
-                preflight = await preflight_multicam_sync(
-                    source_paths,
+                preflight_cache_payload = build_multicam_preflight_receipt_cache_payload(
+                    prepared_sources,
                     source_offsets,
-                    ext_local,
-                    job_id,
                     source_sync_rates,
+                    external_audio_cache_key or effective_external_audio_url or ext_local,
                     external_audio_offset_seconds=effective_external_audio_offset_seconds,
                 )
+                preflight_cache_path = multicam_receipt_cache_path("preflight", preflight_cache_payload)
+                preflight = read_multicam_receipt_cache(
+                    preflight_cache_path,
+                    max_age_seconds=float(os.getenv("MULTICAM_PREFLIGHT_RECEIPT_CACHE_MAX_AGE_SECONDS", "1209600") or 1209600),
+                )
+                if preflight and preflight.get("status") in {"good", "questionable", "unsafe"}:
+                    preflight["cache_hit"] = True
+                    preflight["cache_path"] = preflight_cache_path
+                    logger.info("PREFLIGHT CACHE HIT %s: %s", job_id, preflight_cache_path)
+                else:
+                    preflight = await preflight_multicam_sync(
+                        source_paths,
+                        source_offsets,
+                        ext_local,
+                        job_id,
+                        source_sync_rates,
+                        external_audio_offset_seconds=effective_external_audio_offset_seconds,
+                    )
+                    preflight["cache_hit"] = False
+                    preflight["cache_path"] = preflight_cache_path
+                    if preflight.get("status") in {"good", "questionable", "unsafe"}:
+                        write_multicam_receipt_cache(preflight_cache_path, preflight)
                 logger.info(f"PREFLIGHT: {preflight['status']} — {preflight}")
                 if preflight["status"] == "unsafe":
                     raise HTTPException(
@@ -15990,6 +19726,59 @@ async def render_multicam_impl(request: RenderMultiCamRequest, provided_job_id: 
                         f"PREFLIGHT WARNING: questionable sync — preflight={preflight}. "
                         "Render will proceed but result may have sync issues."
                     )
+                preflight_sync_corrections = apply_proven_multicam_preflight_sync(preflight, prepared_sources)
+                if preflight_sync_corrections and not skip_visual_proxy:
+                    visual_proxy_stage_started_at = time.perf_counter()
+                    if request.async_mode:
+                        update_firestore_job(job_id, {"progress": 31, "detail": "Rebuilding visual proxies with proven sync"})
+                    color_match_receipt = await apply_multicam_color_matching(
+                        prepared_sources,
+                        overlap_start,
+                        overlap_duration,
+                        job_id,
+                        reference_index=0,
+                    )
+                    visual_proxy_receipt = await prepare_multicam_visual_proxy_sources(
+                        prepared_sources,
+                        overlap_start,
+                        overlap_duration,
+                        output_width,
+                        output_height,
+                        job_id,
+                    )
+                    record_performance_stage(
+                        "visual_proxy",
+                        visual_proxy_stage_started_at,
+                        status=(visual_proxy_receipt or {}).get("status"),
+                        source_count=len(prepared_sources),
+                        sync_corrections_applied=True,
+                    )
+                if not skip_visual_proxy and not require_direct_auditable_visual_sources and visual_proxy_receipt is None:
+                    visual_proxy_stage_started_at = time.perf_counter()
+                    if request.async_mode:
+                        update_firestore_job(job_id, {"progress": 31, "detail": "Preparing auditable fast camera mezzanines"})
+                    color_match_receipt = await apply_multicam_color_matching(
+                        prepared_sources,
+                        overlap_start,
+                        overlap_duration,
+                        job_id,
+                        reference_index=0,
+                    )
+                    visual_proxy_receipt = await prepare_multicam_visual_proxy_sources(
+                        prepared_sources,
+                        overlap_start,
+                        overlap_duration,
+                        output_width,
+                        output_height,
+                        job_id,
+                    )
+                    record_performance_stage(
+                        "visual_proxy",
+                        visual_proxy_stage_started_at,
+                        status=(visual_proxy_receipt or {}).get("status"),
+                        source_count=len(prepared_sources),
+                        auditable_audio=True,
+                    )
                 continuous_sync_receipt = await build_continuous_sync_anchor_maps(
                     prepared_sources,
                     ext_local,
@@ -16004,10 +19793,31 @@ async def render_multicam_impl(request: RenderMultiCamRequest, provided_job_id: 
                     overlap_start,
                     overlap_duration,
                     external_audio_offset_seconds=effective_external_audio_offset_seconds,
-                    segment_duration=max(0.25, min(1.0, float(request.auto_switch_interval or 1.0) / 2.0)),
+                    segment_duration=clamp_float(
+                        float(os.getenv("MULTICAM_DIRECTOR_CHANNEL_SEGMENT_SECONDS", "0.25") or 0.25),
+                        0.25,
+                        1.0,
+                    ),
                     job_id=job_id,
+                    channel_camera_ids_override=director_channel_camera_ids,
                 )
                 logger.info("MULTICAM DIRECTOR AUDIO %s: %s", job_id, json.dumps(director_audio_receipt, default=str))
+                if (
+                    request.auto_switch
+                    and director_audio_receipt
+                    and director_audio_receipt.get("status") == "unproven_channel_mapping"
+                    and not MULTICAM_ALLOW_UNPROVEN_DIRECTOR_AUDIO
+                ):
+                    raise HTTPException(
+                        status_code=422,
+                        detail={
+                            "message": (
+                                "Auto Director could not prove which clean-audio channel belongs to each camera; "
+                                "refusing render before credits are spent"
+                            ),
+                            "director_audio": director_audio_receipt,
+                        },
+                    )
             finally:
                 # Keep camera scratch-audio files available until the post-render sync audit runs.
                 protected_audio_paths = {
@@ -16021,19 +19831,120 @@ async def render_multicam_impl(request: RenderMultiCamRequest, provided_job_id: 
                             os.remove(cleanup_path)
                     except OSError:
                         pass
+            record_performance_stage(
+                "preflight_sync",
+                stage_started_at,
+                status=(preflight or {}).get("status"),
+                correction_count=len((preflight or {}).get("applied_render_corrections") or []),
+            )
         # -----------------------------------------------------------------
 
-        if request.auto_switch:
+        if not skip_visual_proxy and visual_proxy_receipt is None:
+            stage_started_at = time.perf_counter()
+            color_match_receipt = await apply_multicam_color_matching(
+                prepared_sources,
+                overlap_start,
+                overlap_duration,
+                job_id,
+                reference_index=0,
+            )
             if request.async_mode:
-                update_firestore_job(job_id, {"progress": 35, "detail": "Scoring faces, motion, and speech"})
-            for source in prepared_sources:
-                source["window_scores"] = analyze_multicam_visual_windows(
-                    source.get("render_path") or source["path"],
-                    source["offset_seconds"],
+                update_firestore_job(
+                    job_id,
+                    {
+                        "progress": 28,
+                        "detail": (
+                            "Using auditable source video"
+                            if require_direct_auditable_visual_sources
+                            else "Preparing fast visual proxies"
+                        ),
+                    },
+                )
+            if require_direct_auditable_visual_sources:
+                visual_proxy_receipt = {
+                    "status": "skipped_requires_auditable_source_video",
+                    "mode": "direct_source_render",
+                    "reason": "external clean-audio renders must cut from sources whose camera audio can prove sync",
+                    "source_count": len(prepared_sources),
+                    "allow_unauditable_visual_proxy": bool(MULTICAM_ALLOW_UNAUDITABLE_VISUAL_PROXY),
+                }
+            else:
+                visual_proxy_receipt = await prepare_multicam_visual_proxy_sources(
+                    prepared_sources,
                     overlap_start,
                     overlap_duration,
-                    request.auto_switch_interval,
+                    output_width,
+                    output_height,
+                    job_id,
                 )
+            record_performance_stage(
+                "visual_proxy",
+                stage_started_at,
+                status=(visual_proxy_receipt or {}).get("status"),
+                source_count=len(prepared_sources),
+            )
+
+        visual_source_auditability_receipt = enforce_multicam_visual_source_auditability(
+            prepared_sources,
+            external_audio_url,
+        )
+
+        if request.auto_switch:
+            stage_started_at = time.perf_counter()
+            if request.async_mode:
+                update_firestore_job(job_id, {"progress": 35, "detail": "Scoring faces, motion, and speech"})
+            audio_first_director_scoring = bool(
+                env_flag("MULTICAM_AUDIO_FIRST_DIRECTOR_SCORING", default=True)
+                and all(
+                    source.get("timeline_audio_activity_windows")
+                    and source.get("audio_activity_source") == "external_isolated_channel"
+                    for source in prepared_sources
+                )
+            )
+            for source in prepared_sources:
+                if audio_first_director_scoring:
+                    score_count = max(
+                        1,
+                        int(math.ceil(float(overlap_duration or 0.0) / max(0.25, float(request.auto_switch_interval or 1.0)))),
+                    )
+                    source["window_scores"] = [
+                        {
+                            "face_score": 0.0,
+                            "motion_score": 0.0,
+                            "visual_speaking_score": 0.0,
+                            "visual_speaking_confidence": 0.0,
+                            "lower_face_motion": 0.0,
+                            "upper_body_motion": 0.0,
+                            "placeholder_penalty": 0.0,
+                        }
+                        for _ in range(score_count)
+                    ]
+                else:
+                    source["window_scores"] = analyze_multicam_visual_windows(
+                        source.get("render_path") or source["path"],
+                        source["offset_seconds"],
+                        overlap_start,
+                        overlap_duration,
+                        request.auto_switch_interval,
+                    )
+                face_center_values = [
+                    float(slot.get("face_center_x"))
+                    for slot in source["window_scores"]
+                    if slot is not None and slot.get("face_center_x") is not None
+                ]
+                if face_center_values:
+                    source["focus_x"] = round(float(np.median(face_center_values)), 4)
+                    source["layout_focus_source"] = "visual_window_scores"
+                elif audio_first_director_scoring:
+                    layout_focus_x = estimate_multicam_layout_focus_x(
+                        source.get("render_path") or source["path"],
+                        source["offset_seconds"],
+                        overlap_start,
+                        overlap_duration,
+                    )
+                    if layout_focus_x is not None:
+                        source["focus_x"] = layout_focus_x
+                        source["layout_focus_source"] = "audio_first_visual_placement_sample"
                 placeholder_penalties = [
                     float(slot.get("placeholder_penalty", 0.0))
                     for slot in source["window_scores"]
@@ -16044,6 +19955,19 @@ async def render_multicam_impl(request: RenderMultiCamRequest, provided_job_id: 
                     4,
                 )
                 if source["has_audio"]:
+                    if (
+                        source.get("timeline_audio_activity_windows")
+                        and source.get("audio_activity_source") == "external_isolated_channel"
+                    ):
+                        # The clean external stereo channels are already mapped to
+                        # cameras and live on the master timeline. Re-reading the
+                        # camera scratch audio here is slow and can reintroduce
+                        # bleed into active-speaker decisions.
+                        source["silence_intervals"] = []
+                        source["audio_activity_windows"] = []
+                        source["source_activity_cache_hit"] = True
+                        source["source_activity_cache_path"] = None
+                        continue
                     audio_analysis_path = source.get("audio_analysis_path") or source["path"]
                     audio_window_start = max(
                         0.0,
@@ -16054,23 +19978,65 @@ async def render_multicam_impl(request: RenderMultiCamRequest, provided_job_id: 
                         max(1.0, float(overlap_duration or 0.0) * float(source.get("sync_rate") or 1.0) + 2.5),
                     )
                     audio_window_duration = max(0.25, audio_window_duration)
-                    source["silence_intervals"] = await detect_silence_intervals(
+                    activity_segment_duration = max(0.25, min(1.0, float(request.auto_switch_interval or 1.0) / 2.0))
+                    activity_cache_payload = build_multicam_source_activity_receipt_cache_payload(
+                        source,
                         audio_analysis_path,
-                        threshold="-32dB",
-                        duration=0.45,
-                        start_time=audio_window_start,
-                        analysis_duration=audio_window_duration,
+                        audio_window_start,
+                        audio_window_duration,
+                        activity_segment_duration,
                     )
-                    if request.audio_based_auto_switch:
-                        raw_audio_windows = analyze_audio_energy(
+                    activity_cache_path = multicam_receipt_cache_path("source_activity", activity_cache_payload)
+                    activity_cache_max_age = float(os.getenv("MULTICAM_SOURCE_ACTIVITY_RECEIPT_CACHE_MAX_AGE_SECONDS", "1209600") or 1209600)
+                    activity_receipt = read_multicam_receipt_cache(activity_cache_path, max_age_seconds=activity_cache_max_age)
+                    if activity_receipt and activity_receipt.get("status") == "active":
+                        source["silence_intervals"] = activity_receipt.get("silence_intervals") or []
+                        source["audio_activity_windows"] = activity_receipt.get("audio_activity_windows") or []
+                        source["source_activity_cache_hit"] = True
+                        source["source_activity_cache_path"] = activity_cache_path
+                        logger.info(f"MULTICAM SOURCE ACTIVITY CACHE HIT {job_id}: {source.get('id')} {activity_cache_path}")
+                    else:
+                        source["silence_intervals"] = await detect_silence_intervals(
                             audio_analysis_path,
-                            segment_duration=max(0.25, min(1.0, float(request.auto_switch_interval or 1.0) / 2.0)),
+                            threshold="-32dB",
+                            duration=0.45,
                             start_time=audio_window_start,
                             analysis_duration=audio_window_duration,
                         )
-                        source["audio_activity_windows"] = normalize_audio_energy_windows(raw_audio_windows)
+                        source["source_activity_cache_hit"] = False
+                        source["source_activity_cache_path"] = activity_cache_path
+                    if request.audio_based_auto_switch:
+                        if not source.get("source_activity_cache_hit"):
+                            raw_audio_windows = analyze_audio_energy(
+                                audio_analysis_path,
+                                segment_duration=activity_segment_duration,
+                                start_time=audio_window_start,
+                                analysis_duration=audio_window_duration,
+                            )
+                            source["audio_activity_windows"] = normalize_audio_energy_windows(raw_audio_windows)
+                        write_multicam_receipt_cache(
+                            activity_cache_path,
+                            {
+                                "status": "active",
+                                "camera_id": source.get("id"),
+                                "silence_intervals": source.get("silence_intervals") or [],
+                                "audio_activity_windows": source.get("audio_activity_windows") or [],
+                                "audio_window_start": round(float(audio_window_start), 6),
+                                "audio_window_duration": round(float(audio_window_duration), 6),
+                                "segment_duration": round(float(activity_segment_duration), 6),
+                            },
+                        )
                 else:
                     source["audio_activity_windows"] = []
+            record_performance_stage(
+                "director_scoring",
+                stage_started_at,
+                source_count=len(prepared_sources),
+                mode="audio_first_external_channels" if audio_first_director_scoring else "audio_visual",
+                director_audio_status=(director_audio_receipt or {}).get("status") if director_audio_receipt else None,
+                source_activity_cache_hits=sum(1 for source in prepared_sources if source.get("source_activity_cache_hit")),
+                source_activity_cache_misses=sum(1 for source in prepared_sources if source.get("has_audio") and not source.get("source_activity_cache_hit")),
+            )
 
         render_request = request
         if pre_sync_result and pre_sync_result.get("status") == "aligned" and request.segments:
@@ -16121,7 +20087,131 @@ async def render_multicam_impl(request: RenderMultiCamRequest, provided_job_id: 
         segments = normalize_multicam_segments(render_request, prepared_sources, overlap_start, overlap_duration)
         if not segments:
             raise HTTPException(status_code=400, detail="No valid multicam segment plan could be generated")
+        output_width, output_height = get_multicam_output_dimensions(output_aspect_ratio)
+        director_latency_repair_receipt = None
+        director_latency_repair_receipts = []
+        latency_repair_enabled = os.getenv("MULTICAM_DIRECTOR_LATENCY_REPAIR", "1").strip().lower() not in {"0", "false", "no"}
+        if latency_repair_enabled:
+            segments, latency_receipt = repair_multicam_late_active_speaker_segments(
+                segments,
+                prepared_sources,
+                overlap_start,
+            )
+            if latency_receipt:
+                latency_receipt["repair_pass"] = "pre_layout"
+            director_latency_repair_receipts.append(latency_receipt)
+        director_layout_repair_receipt = None
+        if os.getenv("MULTICAM_DIRECTOR_LAYOUT_REPAIR", "1").strip().lower() not in {"0", "false", "no"}:
+            segments, director_layout_repair_receipt = repair_multicam_layout_contract_segments(
+                segments,
+                prepared_sources,
+                overlap_start,
+                output_width=output_width,
+                output_height=output_height,
+            )
+        if latency_repair_enabled:
+            post_layout_latency_audit = audit_multicam_director_switch_latency(
+                segments,
+                prepared_sources,
+            )
+            if post_layout_latency_audit.get("status") != "passed":
+                segments, latency_receipt = repair_multicam_late_active_speaker_segments(
+                    segments,
+                    prepared_sources,
+                    overlap_start,
+                )
+                if latency_receipt:
+                    latency_receipt["repair_pass"] = "post_layout"
+                director_latency_repair_receipts.append(latency_receipt)
+        director_latency_repair_receipt = combine_multicam_repair_receipts(director_latency_repair_receipts)
+        director_truth_repair_receipt = None
+        if os.getenv("MULTICAM_DIRECTOR_TRUTH_REPAIR", "1").strip().lower() not in {"0", "false", "no"}:
+            segments, director_truth_repair_receipt = repair_multicam_director_truth_segments(
+                segments,
+                prepared_sources,
+                overlap_start,
+            )
+        if latency_repair_enabled:
+            post_truth_latency_audit = audit_multicam_director_switch_latency(
+                segments,
+                prepared_sources,
+            )
+            if post_truth_latency_audit.get("status") != "passed":
+                segments, latency_receipt = repair_multicam_late_active_speaker_segments(
+                    segments,
+                    prepared_sources,
+                    overlap_start,
+                )
+                if latency_receipt:
+                    latency_receipt["repair_pass"] = "post_truth"
+                director_latency_repair_receipts.append(latency_receipt)
+                director_latency_repair_receipt = combine_multicam_repair_receipts(director_latency_repair_receipts)
+                if os.getenv("MULTICAM_DIRECTOR_TRUTH_REPAIR", "1").strip().lower() not in {"0", "false", "no"}:
+                    segments, director_truth_repair_receipt = repair_multicam_director_truth_segments(
+                        segments,
+                        prepared_sources,
+                        overlap_start,
+                    )
         production_limits = enforce_multicam_production_limits(request, overlap_duration, segment_count=len(segments))
+        layout_contract_audit = audit_multicam_layout_contract(
+            segments,
+            prepared_sources,
+            output_width=output_width,
+            output_height=output_height,
+        )
+        director_truth_audit = audit_multicam_director_active_speaker_truth(
+            segments,
+            prepared_sources,
+        )
+        director_latency_audit = audit_multicam_director_switch_latency(
+            segments,
+            prepared_sources,
+        )
+        if layout_contract_audit.get("status") != "passed":
+            logger.error(
+                "MULTICAM_LAYOUT_CONTRACT_FAILED %s: %s",
+                job_id,
+                json.dumps(layout_contract_audit, default=str),
+            )
+            if os.getenv("MULTICAM_STRICT_ACTIVE_SPEAKER_LAYOUT", "1").strip().lower() not in {"0", "false", "no"}:
+                raise HTTPException(
+                    status_code=422,
+                    detail={
+                        "message": "Multicam director produced an unsafe active-speaker/reaction layout",
+                        "layout_contract_audit": layout_contract_audit,
+                    },
+                )
+        if director_truth_audit.get("status") != "passed":
+            logger.error(
+                "MULTICAM_DIRECTOR_TRUTH_FAILED %s: %s",
+                job_id,
+                json.dumps(director_truth_audit, default=str),
+            )
+            if os.getenv("MULTICAM_STRICT_DIRECTOR_TRUTH_AUDIT", "1").strip().lower() not in {"0", "false", "no"}:
+                raise HTTPException(
+                    status_code=422,
+                    detail={
+                        "message": "Multicam director would hide the raw active speaker before render",
+                        "director_truth_audit": director_truth_audit,
+                    },
+                )
+        if director_latency_audit.get("status") != "passed":
+            logger.error(
+                "MULTICAM_DIRECTOR_LATENCY_FAILED %s: %s",
+                job_id,
+                json.dumps(director_latency_audit, default=str),
+            )
+            if os.getenv("MULTICAM_STRICT_DIRECTOR_LATENCY_AUDIT", "1").strip().lower() not in {"0", "false", "no"}:
+                raise HTTPException(
+                    status_code=422,
+                    detail={
+                        "message": "Multicam director would join an active speaker too late before render",
+                        "director_latency_audit": director_latency_audit,
+                    },
+                )
+
+        director_segments = [dict(segment) for segment in segments]
+        render_segments, render_segment_merge_receipt = merge_render_equivalent_multicam_segments(segments)
 
         # Write segment plan to a FILE so terminal scroll doesn't lose it
         debug_log_path = os.path.join(shared_tmp_dir, f"{job_id}_debug_segment_plan.json")
@@ -16132,19 +20222,28 @@ async def render_multicam_impl(request: RenderMultiCamRequest, provided_job_id: 
         with open(debug_log_path, "w") as df:
             json.dump({
                 "segment_count": len(segments),
+                "render_segment_count": len(render_segments),
                 "render_tier": render_tier,
+                "fast_composite": multicam_fast_composite_enabled(),
                 "production_limits": production_limits,
                 "layout_summary": layout_summary,
                 "all_layout_modes": [seg.get("layout_mode", "cut") for seg in segments],
+                "render_segment_merge": render_segment_merge_receipt,
                 "sources": [
                     {
+                        "id": s["id"],
                         "label": s["label"],
                         "offset": round(s["offset_seconds"], 1),
                         "sync_rate": round(s["sync_rate"], 4),
                         "has_audio": bool(s.get("has_audio")),
+                        "focus_x": s.get("focus_x"),
+                        "layout_focus_source": s.get("layout_focus_source"),
+                        "reaction_side": s.get("reaction_side"),
                         "audio_analysis_path": s.get("audio_analysis_path"),
                         "audio_activity_source": s.get("audio_activity_source") or "camera_scratch_audio",
                         "audio_activity_channel_index": s.get("audio_activity_channel_index"),
+                        "source_activity_cache_hit": bool(s.get("source_activity_cache_hit")),
+                        "source_activity_cache_path": s.get("source_activity_cache_path"),
                         "pre_sync_aligned": bool(s.get("pre_sync_aligned")),
                         "render_path": s.get("render_path") or s.get("path"),
                         "visual_proxy_active": bool(s.get("render_path")),
@@ -16161,21 +20260,78 @@ async def render_multicam_impl(request: RenderMultiCamRequest, provided_job_id: 
                     for s in prepared_sources
                 ],
                 "segments": segments,
+                "render_segments": render_segments,
                 "first_5_segments": segments[:5],
                 "pre_sync_clap": pre_sync_result,
                 "sync_preflight": preflight,
                 "continuous_sync_anchors": continuous_sync_receipt,
                 "color_match": color_match_receipt,
                 "visual_proxy": visual_proxy_receipt,
+                "visual_source_auditability": visual_source_auditability_receipt,
                 "director_audio": director_audio_receipt,
+                "layout_contract_audit": layout_contract_audit,
+                "director_truth_audit": director_truth_audit,
+                "director_latency_audit": director_latency_audit,
+                "director_latency_repair": director_latency_repair_receipt,
+                "director_layout_repair": director_layout_repair_receipt,
+                "director_truth_repair": director_truth_repair_receipt,
+                "render_segment_merge": render_segment_merge_receipt,
                 "has_flow_segments": bool(render_request.segments),
                 "flow_segment_count": len(render_request.segments or []),
             }, df, indent=2)
         logger.info(f"SEGMENT_PLAN written to {debug_log_path} — layout_modes={layout_summary}")
+        if bool(request.planOnly if request.planOnly is not None else request.plan_only):
+            master_duration = float(segments[-1]["timeline_end"])
+            record_performance_stage(
+                "director_plan_only",
+                render_perf_started_at,
+                segment_count=len(segments),
+                layout_contract_status=layout_contract_audit.get("status"),
+            )
+            return {
+                "status": "planned",
+                "plan_only": True,
+                "job_id": job_id,
+                "duration_seconds": round(master_duration, 3),
+                "render_tier": render_tier,
+                "output_aspect_ratio": output_aspect_ratio,
+                "debug_segment_plan_path": debug_log_path,
+                "layout_summary": layout_summary,
+                "segments": segments,
+                "render_segments": render_segments,
+                "first_5_segments": segments[:5],
+                "sync_preflight": preflight,
+                "continuous_sync_anchors": continuous_sync_receipt,
+                "pre_sync_clap": pre_sync_result,
+                "director_audio": director_audio_receipt,
+                "layout_contract_audit": layout_contract_audit,
+                "director_truth_audit": director_truth_audit,
+                "director_latency_audit": director_latency_audit,
+                "director_latency_repair": director_latency_repair_receipt,
+                "director_layout_repair": director_layout_repair_receipt,
+                "director_truth_repair": director_truth_repair_receipt,
+                "render_segment_merge": render_segment_merge_receipt,
+                "color_match": color_match_receipt,
+                "visual_proxy": visual_proxy_receipt,
+                "visual_source_auditability": visual_source_auditability_receipt,
+                "performance_stages": performance_stages,
+                "render_receipt": {
+                    "status": "planned",
+                    "plan_only": True,
+                    "debug_segment_plan_path": debug_log_path,
+                    "layout_summary": layout_summary,
+                    "render_segment_merge": render_segment_merge_receipt,
+                    "layout_contract_audit": layout_contract_audit,
+                    "director_truth_audit": director_truth_audit,
+                    "director_latency_audit": director_latency_audit,
+                    "director_latency_repair": director_latency_repair_receipt,
+                    "director_layout_repair": director_layout_repair_receipt,
+                    "director_truth_repair": director_truth_repair_receipt,
+                },
+            }
         switches = build_multicam_switches_from_segments(segments)
         master_duration = float(segments[-1]["timeline_end"])
 
-        output_width, output_height = get_multicam_output_dimensions(output_aspect_ratio)
         normalize_vf = (
             f"scale={output_width}:{output_height}:force_original_aspect_ratio=decrease,"
             f"pad={output_width}:{output_height}:(ow-iw)/2:(oh-ih)/2"
@@ -16184,8 +20340,9 @@ async def render_multicam_impl(request: RenderMultiCamRequest, provided_job_id: 
         if request.async_mode:
             update_firestore_job(job_id, {"progress": 55, "detail": "Rendering switched segments"})
 
+        stage_started_at = time.perf_counter()
         source_map = {source["id"]: source for source in prepared_sources}
-        for index, segment in enumerate(segments):
+        for index, segment in enumerate(render_segments):
             segment_start = float(segment["timeline_start"])
             segment_end = float(segment["timeline_end"])
             segment_duration = max(0.0, segment_end - segment_start)
@@ -16208,7 +20365,7 @@ async def render_multicam_impl(request: RenderMultiCamRequest, provided_job_id: 
                 overlap_start,
                 segment_start,
             segment_duration,
-            max_sources=3,
+            max_sources=int(render_tier_profile.get("max_layout_sources") or 3),
             preferred_secondary_camera_id=segment.get("secondary_camera_id"),
         )
             logger.info(
@@ -16298,10 +20455,20 @@ async def render_multicam_impl(request: RenderMultiCamRequest, provided_job_id: 
 
         if not segment_paths:
             raise HTTPException(status_code=400, detail="No multicam segments were produced")
+        record_performance_stage(
+            "render_video_segments",
+            stage_started_at,
+            segment_count=len(segment_paths),
+            director_segment_count=len(director_segments),
+            render_segment_merge=render_segment_merge_receipt,
+            fast_composite=multicam_fast_composite_enabled(),
+            layout_summary=layout_summary,
+        )
 
         if request.async_mode:
             update_firestore_job(job_id, {"progress": 82, "detail": "Concatenating master"})
 
+        stage_started_at = time.perf_counter()
         with open(concat_list_path, "w", encoding="utf-8") as concat_file:
             for segment_path in segment_paths:
                 concat_file.write(f"file '{segment_path}'\n")
@@ -16367,7 +20534,7 @@ async def render_multicam_impl(request: RenderMultiCamRequest, provided_job_id: 
                 external_audio_anchor,
                 master_duration,
                 job_id,
-                bitrate="192k",
+                bitrate=str(render_tier_profile.get("audio_bitrate") or "192k"),
             )
             audio_bed_receipt.update({
                 "source": "external_clean_audio",
@@ -16420,7 +20587,7 @@ async def render_multicam_impl(request: RenderMultiCamRequest, provided_job_id: 
                     audio_anchor,
                     master_duration,
                     job_id,
-                    bitrate="128k",
+                    bitrate=str(render_tier_profile.get("audio_bitrate") or "128k"),
                 )
                 audio_bed_receipt.update({
                     "source": "camera_audio",
@@ -16458,8 +20625,31 @@ async def render_multicam_impl(request: RenderMultiCamRequest, provided_job_id: 
                 )
             else:
                 shutil.copy2(video_only_output_path, output_path)
+        record_performance_stage(
+            "mux_audio_master",
+            stage_started_at,
+            audio_source=(audio_bed_receipt or {}).get("source") if audio_bed_receipt else "none",
+        )
+
+        if MULTICAM_PRE_CAPTION_SYNC_AUDIT:
+            stage_started_at = time.perf_counter()
+            pre_caption_sync_audit = await audit_multicam_render_sync(
+                output_path,
+                render_segments,
+                source_map,
+                overlap_start,
+                job_id,
+            )
+            enforce_multicam_post_render_sync_audit(pre_caption_sync_audit)
+            record_performance_stage(
+                "pre_caption_sync_audit",
+                stage_started_at,
+                sync_status=(pre_caption_sync_audit or {}).get("status"),
+                max_abs_residual_seconds=(pre_caption_sync_audit or {}).get("max_abs_residual_seconds"),
+            )
 
         brand_watermark_enabled, brand_watermark_text = resolve_multicam_branding_request(request)
+        brand_watermark_enabled = bool(brand_watermark_enabled and render_tier_profile.get("brand_watermark"))
         brand_watermark_filter = (
             build_multicam_brand_watermark_filter(output_width, output_height, brand_watermark_text)
             if brand_watermark_enabled
@@ -16467,6 +20657,8 @@ async def render_multicam_impl(request: RenderMultiCamRequest, provided_job_id: 
         )
 
         burn_captions, caption_style = resolve_multicam_caption_request(request)
+        burn_captions = bool(burn_captions and render_tier_profile.get("burn_captions"))
+        stage_started_at = time.perf_counter()
         if burn_captions:
             if request.async_mode:
                 update_firestore_job(job_id, {"progress": 91, "detail": "Burning word-level captions"})
@@ -16511,18 +20703,53 @@ async def render_multicam_impl(request: RenderMultiCamRequest, provided_job_id: 
                 "status": "disabled_by_request",
                 "message": "AutoPromote watermark disabled for this render.",
             }
-
-        output_validation = validate_multicam_output_streams(output_path, master_duration, job_id)
-        post_render_sync_audit = await audit_multicam_render_sync(
-            output_path,
-            segments,
-            source_map,
-            overlap_start,
-            job_id,
+        record_performance_stage(
+            "captions_branding",
+            stage_started_at,
+            captions_status=(caption_receipt or {}).get("status"),
+            branding_status=(brand_watermark_receipt or {}).get("status"),
         )
-        enforce_multicam_post_render_sync_audit(post_render_sync_audit)
 
-        generate_thumbnail = resolve_multicam_thumbnail_request(request)
+        stage_started_at = time.perf_counter()
+        output_validation = validate_multicam_output_streams(output_path, master_duration, job_id)
+        reuse_pre_caption_audit = (
+            os.getenv("MULTICAM_REUSE_VIDEO_ONLY_SYNC_AUDIT", "0").strip().lower() not in {"0", "false", "no", "off"}
+            and pre_caption_sync_audit
+            and pre_caption_sync_audit.get("status") == "good"
+            and (caption_receipt or {}).get("status") in {"disabled_by_request", "burned_in"}
+            and (brand_watermark_receipt or {}).get("status") in {"disabled_by_request", "burned_in", "burned_in_with_captions"}
+        )
+        if reuse_pre_caption_audit:
+            post_render_sync_audit = reuse_multicam_video_only_sync_audit(
+                pre_caption_sync_audit,
+                output_path,
+                reason="caption_and_branding_filters_copy_audio",
+                job_id=job_id,
+            )
+        else:
+            post_render_sync_audit = await audit_multicam_render_sync(
+                output_path,
+                render_segments,
+                source_map,
+                overlap_start,
+                job_id,
+            )
+        enforce_multicam_post_render_sync_audit(post_render_sync_audit)
+        record_performance_stage(
+            "post_render_audit",
+            stage_started_at,
+            sync_status=(post_render_sync_audit or {}).get("status"),
+            max_abs_residual_seconds=(post_render_sync_audit or {}).get("max_abs_residual_seconds"),
+            reused_from=(post_render_sync_audit or {}).get("reused_from"),
+            audio_timing_preserved=bool((post_render_sync_audit or {}).get("audio_timing_preserved")),
+        )
+
+        generate_thumbnail = bool(
+            resolve_multicam_thumbnail_request(request)
+            and render_tier_profile.get("generate_thumbnail")
+        )
+        thumbnail_copy = resolve_multicam_thumbnail_copy(request)
+        stage_started_at = time.perf_counter()
         if generate_thumbnail:
             if request.async_mode:
                 update_firestore_job(job_id, {"progress": 93, "detail": "Generating AutoPromote thumbnail"})
@@ -16531,6 +20758,7 @@ async def render_multicam_impl(request: RenderMultiCamRequest, provided_job_id: 
                 job_id,
                 master_duration,
                 segments=segments,
+                thumbnail_copy=thumbnail_copy,
             )
         else:
             thumbnail_receipt = {
@@ -16538,10 +20766,16 @@ async def render_multicam_impl(request: RenderMultiCamRequest, provided_job_id: 
                 "status": "disabled_by_request",
                 "message": "AutoPromote thumbnail generation disabled for this render.",
             }
+        record_performance_stage(
+            "thumbnail",
+            stage_started_at,
+            status=(thumbnail_receipt or {}).get("status"),
+        )
 
         if request.async_mode:
             update_firestore_job(job_id, {"progress": 94, "detail": "Preparing local master"})
 
+        stage_started_at = time.perf_counter()
         os.makedirs(LOCAL_MEDIA_OUTPUT_DIR, exist_ok=True)
         local_output_name = f"multicam_{job_id}.mp4"
         local_output_path = os.path.join(LOCAL_MEDIA_OUTPUT_DIR, local_output_name)
@@ -16570,6 +20804,12 @@ async def render_multicam_impl(request: RenderMultiCamRequest, provided_job_id: 
                     upload_file_to_firebase(thumbnail_receipt["path"], thumbnail_storage_path)
                     or ""
                 )
+        record_performance_stage(
+            "publish_outputs",
+            stage_started_at,
+            firebase_upload_enabled=os.getenv("MULTICAM_UPLOAD_FIREBASE", "").strip().lower() in {"1", "true", "yes"},
+            output_size_bytes=os.path.getsize(output_path) if os.path.exists(output_path) else None,
+        )
 
         try:
             retention_days = max(1, int(os.getenv("MULTICAM_MASTER_RETENTION_DAYS", "4") or "4"))
@@ -16580,11 +20820,36 @@ async def render_multicam_impl(request: RenderMultiCamRequest, provided_job_id: 
             datetime.datetime.now(datetime.timezone.utc)
             + datetime.timedelta(days=retention_days)
         ).isoformat()
+        performance_timing = {
+            "started_at_epoch_seconds": round(render_wall_started_at, 3),
+            "elapsed_seconds": round(max(0.0, time.perf_counter() - render_perf_started_at), 3),
+            "duration_seconds": round(master_duration, 3),
+            "render_tier": render_tier,
+            "fast_composite": multicam_fast_composite_enabled(),
+            "source_count": len(prepared_sources),
+            "segment_count": len(segments),
+            "render_segment_count": len(render_segments),
+            "render_segment_merge": render_segment_merge_receipt,
+            "stages": performance_stages,
+        }
+        final_quality_gate = build_multicam_final_quality_gate(
+            output_validation=output_validation,
+            post_render_sync_audit=post_render_sync_audit,
+            layout_contract_audit=layout_contract_audit,
+            director_truth_audit=director_truth_audit,
+            director_latency_audit=director_latency_audit,
+            director_audio=director_audio_receipt,
+            continuous_sync_anchors=continuous_sync_receipt,
+            segment_duration_receipts=segment_duration_receipts,
+        )
+        enforce_multicam_final_quality_gate(final_quality_gate)
 
         result_data = {
             "status": "completed",
             "job_id": job_id,
             "render_tier": render_tier,
+            "render_tier_profile": render_tier_profile,
+            "fast_composite": multicam_fast_composite_enabled(),
             "output_path": os.path.abspath(output_path),
             "output_url": public_url or local_output_url,
             "local_output_url": local_output_url,
@@ -16599,27 +20864,53 @@ async def render_multicam_impl(request: RenderMultiCamRequest, provided_job_id: 
             "expiresAt": expires_at,
             "retention_days": retention_days,
             "duration": round(master_duration, 3),
-            "segments": segments,
+            "segments": director_segments,
+            "render_segments": render_segments,
             "switches": switches,
             "pre_sync_clap": pre_sync_result,
             "sync_preflight": preflight,
             "continuous_sync_anchors": continuous_sync_receipt,
             "color_match": color_match_receipt,
             "visual_proxy": visual_proxy_receipt,
+            "visual_source_auditability": visual_source_auditability_receipt,
             "director_audio": director_audio_receipt,
+            "layout_contract_audit": layout_contract_audit,
+            "director_truth_audit": director_truth_audit,
+            "director_latency_audit": director_latency_audit,
+            "director_latency_repair": director_latency_repair_receipt,
+            "director_layout_repair": director_layout_repair_receipt,
+            "director_truth_repair": director_truth_repair_receipt,
+            "render_segment_merge": render_segment_merge_receipt,
             "captions": caption_receipt,
             "brand_watermark": brand_watermark_receipt,
             "thumbnail": thumbnail_receipt,
+            "pre_caption_sync_audit": pre_caption_sync_audit,
+            "post_render_sync_audit": post_render_sync_audit,
+            "final_quality_gate": final_quality_gate,
+            "performance_timing": performance_timing,
             "render_receipt": {
                 "production_limits": production_limits,
+                "tier_profile": render_tier_profile,
+                "fast_composite": multicam_fast_composite_enabled(),
+                "performance_timing": performance_timing,
+                "render_segment_merge": render_segment_merge_receipt,
+                "final_quality_gate": final_quality_gate,
                 "color_match": color_match_receipt,
                 "visual_proxy": visual_proxy_receipt,
+                "visual_source_auditability": visual_source_auditability_receipt,
                 "director_audio": director_audio_receipt,
+                "layout_contract_audit": layout_contract_audit,
+                "director_truth_audit": director_truth_audit,
+                "director_latency_audit": director_latency_audit,
+                "director_latency_repair": director_latency_repair_receipt,
+                "director_layout_repair": director_layout_repair_receipt,
+                "director_truth_repair": director_truth_repair_receipt,
                 "captions": caption_receipt,
                 "brand_watermark": brand_watermark_receipt,
                 "thumbnail": thumbnail_receipt,
                 "audio_bed": audio_bed_receipt,
                 "output_validation": output_validation,
+                "pre_caption_sync_audit": pre_caption_sync_audit,
                 "post_render_sync_audit": post_render_sync_audit,
                 "continuous_sync_anchors": continuous_sync_receipt,
                 "segment_duration_summary": {
