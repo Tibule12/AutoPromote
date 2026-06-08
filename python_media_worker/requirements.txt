@@ -23,5 +23,5 @@ imageio[ffmpeg]
 # Production Tools (Heavy but necessary)
 firebase-admin
 openai-whisper
+faster-whisper
 yt-dlp
-
