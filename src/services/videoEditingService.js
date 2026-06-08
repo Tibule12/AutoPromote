@@ -333,9 +333,21 @@ class VideoEditingService {
     } catch (error) {
       console.error(`[VideoEditing] Multicam Job ${jobId} Failed:`, error.message);
       let creditRefund = null;
-      if (multicamRequest?.creditReceipt && !multicamRequest.creditReceipt.skipped) {
+      let refundableReceipt = multicamRequest?.creditReceipt || null;
+      if (!refundableReceipt) {
         try {
-          creditRefund = await refundCredits(userId, multicamRequest.creditReceipt, "render-multicam-refund", {
+          const latestJob = await docRef.get();
+          refundableReceipt = latestJob.exists ? latestJob.data()?.creditReceipt || null : null;
+        } catch (receiptError) {
+          console.error(
+            `[VideoEditing] Multicam Job ${jobId} could not reload credit receipt for refund:`,
+            receiptError.message
+          );
+        }
+      }
+      if (refundableReceipt && !refundableReceipt.skipped) {
+        try {
+          creditRefund = await refundCredits(userId, refundableReceipt, "render-multicam-refund", {
             jobId,
             reason: error.message,
             renderTier: multicamRequest.renderTier || multicamRequest.render_tier || "premium",

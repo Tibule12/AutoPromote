@@ -63,8 +63,22 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
     editing?.features?.clipRender?.creditCost || creditCosts?.["render-clip"] || 5;
   const promoSummaryCost =
     editing?.features?.smartPromoSummary?.creditCost || creditCosts?.["promo-summary"] || 18;
-  const monthlyCreditsRemaining =
-    subscriptionCredits?.monthlyRemaining ?? creditBreakdown?.remaining ?? creditBalance;
+  const totalCreditsAvailable =
+    subscriptionCredits?.remaining ?? creditBalance ?? creditBreakdown?.remaining ?? null;
+  const monthlyIncludedRemaining =
+    subscriptionCredits?.monthlyRemaining ?? creditBreakdown?.remaining ?? null;
+  const topUpCreditsAvailable =
+    subscriptionCredits?.topUpBalance ??
+    (totalCreditsAvailable !== null && monthlyIncludedRemaining !== null
+      ? Math.max(0, Number(totalCreditsAvailable) - Number(monthlyIncludedRemaining))
+      : null);
+  const billingDetailParts = [];
+  if (monthlyIncludedRemaining !== null) {
+    billingDetailParts.push(`${formatBalance(monthlyIncludedRemaining)} included monthly`);
+  }
+  if (topUpCreditsAvailable !== null && Number(topUpCreditsAvailable) > 0) {
+    billingDetailParts.push(`${formatBalance(topUpCreditsAvailable)} top-up`);
+  }
 
   const getDownloadFileName = () => {
     const candidateName = processedFile?.name || file?.name || "edited-video.mp4";
@@ -1626,9 +1640,10 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
               </span>
             </div>
             <div className="studio-launch-billing-note">
-              <strong>{monthlyCreditsRemaining ?? "..."}</strong> monthly credits remaining.
-              Credit-based runs draw from your allowance first, and you can top up anytime without
-              losing access to the included editing tools.
+              <strong>{totalCreditsAvailable ?? "..."}</strong> editing credits available
+              {billingDetailParts.length ? ` (${billingDetailParts.join(" + ")})` : ""}.
+              Credit-based runs draw from included monthly credits first, then top-up credits.
+              Included editing tools stay available on paid plans.
             </div>
             <div className="studio-launch-actions">
               <button
