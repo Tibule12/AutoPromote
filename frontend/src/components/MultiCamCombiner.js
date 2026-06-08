@@ -1487,18 +1487,27 @@ const getPipPreviewViewports = (width, height) => {
 
 const getReactionStackPreviewViewports = (width, height, reactionCount, side = "right") => {
   const count = Math.max(1, Math.min(2, Number(reactionCount) || 1));
-  const stackWidth = width * (count > 1 ? 0.24 : 0.31);
+  const stackWidth = width * (count > 1 ? 0.21 : 0.27);
   const stackHeight = stackWidth * (9 / 16);
   const gap = height * 0.024;
-  const x = side === "left" ? width * 0.052 : width - stackWidth - width * 0.052;
-  const totalHeight = stackHeight * count + gap * (count - 1);
-  const startY = Math.max(height * 0.08, height - totalHeight - height * 0.06);
+  const x = side === "left" ? width * 0.035 : width - stackWidth - width * 0.035;
+  const startY = height * 0.055;
   return Array.from({ length: count }, (_, index) => ({
     x,
     y: startY + index * (stackHeight + gap),
     width: stackWidth,
     height: stackHeight,
   }));
+};
+
+const getPreviewReactionSideForSource = (source, _sourceIndex = -1, sideOverride = null) => {
+  const normalizedOverride = String(sideOverride || "").toLowerCase();
+  if (normalizedOverride === "left" || normalizedOverride === "right") return normalizedOverride;
+  const focusX = Number(source?.focusX ?? source?.focus_x);
+  if (Number.isFinite(focusX)) return focusX > 0.58 ? "left" : "right";
+  const explicitSide = String(source?.reactionSide || source?.reaction_side || "").toLowerCase();
+  if (explicitSide === "left" || explicitSide === "right") return explicitSide;
+  return "right";
 };
 
 const drawVisualToCanvas = (
@@ -1692,6 +1701,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const [isPlaying, setIsPlaying] = useState(false);
   const [selectedSwitchId, setSelectedSwitchId] = useState("switch-1");
   const [previewProgramOverride, setPreviewProgramOverride] = useState(null);
+  const [reactionSideOverridesByCameraId, setReactionSideOverridesByCameraId] = useState({});
   const [statusMessage, setStatusMessage] = useState("");
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
@@ -2110,10 +2120,12 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   }, [isSingleSourceWorkflow, previewMulticamLayoutMode, readySources, activeCameraId]);
   const previewReactionSide = useMemo(() => {
     const activeIndex = readySources.findIndex(source => source.id === activeCameraId);
-    // In the podcast setup Camera 1 is framed screen-right and Camera 2 screen-left.
-    // Place the reaction opposite the visible speaker, not merely opposite source order.
-    return activeIndex <= 0 ? "left" : "right";
-  }, [readySources, activeCameraId]);
+    return getPreviewReactionSideForSource(
+      readySources[activeIndex],
+      activeIndex,
+      reactionSideOverridesByCameraId[activeCameraId]
+    );
+  }, [readySources, activeCameraId, reactionSideOverridesByCameraId]);
   const visibleLayoutCameraIds = useMemo(() => {
     const candidateIds = Array.isArray(resolvedMulticamLayout.visibleCameraIds)
       ? resolvedMulticamLayout.visibleCameraIds
@@ -3965,6 +3977,15 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       normalizedLayoutMode,
       "Preview-only camera check. Paid render stays automatic."
     );
+  };
+
+  const handleSetActiveReactionSide = side => {
+    if (!activeCameraId) return;
+    setReactionSideOverridesByCameraId(current => ({
+      ...current,
+      [activeCameraId]: side,
+    }));
+    setStatusMessage(`Reaction preview moved ${side}. This side will be sent with the render request.`);
   };
 
   const handleResetManualSwitchPlan = () => {
@@ -7180,6 +7201,16 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           offset_seconds: renderOffsetSeconds,
           sync_rate: renderSyncRate,
           syncRate: renderSyncRate,
+          reaction_side: getPreviewReactionSideForSource(
+            source,
+            i,
+            reactionSideOverridesByCameraId[source.id]
+          ),
+          reactionSide: getPreviewReactionSideForSource(
+            source,
+            i,
+            reactionSideOverridesByCameraId[source.id]
+          ),
           upload_trim_start: usingRenderProxy ? sourceTrimStartForWindow : 0,
           upload_trim_duration: usingRenderProxy ? sourceTrimDurationForWindow : 0,
         });
@@ -7865,9 +7896,40 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                       <strong>Speaker</strong>
                       <span>Preview only</span>
                     </button>
-                    <div className="nle-reaction-always-chip">
+                    {readySources.map((source, index) => (
+                      <button
+                        key={`show-${source.id}`}
+                        type="button"
+                        className={`nle-live-switch-btn nle-camera-switch-btn ${
+                          activeCameraId === source.id ? "is-live" : ""
+                        }`}
+                        onClick={() => handleRecordSwitch(source.id, "pip")}
+                        disabled={!timelineDuration}
+                      >
+                        <strong>Show {source.label || `Cam ${index + 1}`}</strong>
+                        <span>{activeCameraId === source.id ? "Full screen" : "Switch preview"}</span>
+                      </button>
+                    ))}
+                    <div className="nle-reaction-always-chip nle-reaction-side-control">
                       <strong>Reaction</strong>
-                      <span>{readySources.length >= 2 ? "Always on" : "Needs 2 cams"}</span>
+                      <div className="nle-reaction-side-buttons">
+                        <button
+                          type="button"
+                          className={previewReactionSide === "left" ? "is-active" : ""}
+                          onClick={() => handleSetActiveReactionSide("left")}
+                          disabled={!activeCameraId || readySources.length < 2}
+                        >
+                          Left
+                        </button>
+                        <button
+                          type="button"
+                          className={previewReactionSide === "right" ? "is-active" : ""}
+                          onClick={() => handleSetActiveReactionSide("right")}
+                          disabled={!activeCameraId || readySources.length < 2}
+                        >
+                          Right
+                        </button>
+                      </div>
                     </div>
                     <button
                       type="button"
