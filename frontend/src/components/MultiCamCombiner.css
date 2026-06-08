@@ -991,10 +991,9 @@
 }
 
 .nle-studio-topbar.is-simple {
-  grid-template-columns: minmax(220px, 1.2fr) minmax(140px, 0.62fr) minmax(200px, 0.9fr) minmax(
-      160px,
-      0.7fr
-    ) minmax(170px, 0.72fr);
+  grid-template-columns:
+    minmax(220px, 1.2fr) minmax(140px, 0.62fr) minmax(200px, 0.9fr) minmax(160px, 0.7fr)
+    minmax(170px, 0.72fr);
   gap: 10px;
 }
 
@@ -2832,7 +2831,8 @@
 
 .nle-preview-stage.is-layout-pip .nle-preview-label-secondary.is-pip {
   right: calc(5.2% + 14px);
-  top: calc(30% + 14px);
+  top: auto;
+  bottom: calc(6% + 14px);
   max-width: min(46%, 280px);
 }
 

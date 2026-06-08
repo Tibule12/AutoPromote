@@ -1492,7 +1492,7 @@ const getReactionStackPreviewViewports = (width, height, reactionCount, side = "
   const gap = height * 0.024;
   const x = side === "left" ? width * 0.052 : width - stackWidth - width * 0.052;
   const totalHeight = stackHeight * count + gap * (count - 1);
-  const startY = Math.min(height - totalHeight - height * 0.16, Math.max(height * 0.1, height * 0.3));
+  const startY = Math.max(height * 0.08, height - totalHeight - height * 0.06);
   return Array.from({ length: count }, (_, index) => ({
     x,
     y: startY + index * (stackHeight + gap),
