@@ -44,31 +44,19 @@ export const workflowSteps = [
   },
 ];
 
-export const testimonials = [
+export const proofChecklist = [
   {
-    creator: "Sana K.",
-    role: "Podcast Host",
-    quote: "I used to cut 6 clips manually. Now AutoPromote does the heavy pass first.",
-    platform: "YouTube • TikTok",
+    label: "Clips identified",
+    text: "Every upload is scored and split into hook-ready segments.",
   },
   {
-    creator: "Manny R.",
-    role: "Course Creator",
-    quote: "Our republish cycle is now two hours. We launch 5 posts in the same window.",
-    platform: "Instagram • X",
+    label: "Caption quality",
+    text: "Captions are generated per clip format and platform readability checks.",
   },
   {
-    creator: "Priya V.",
-    role: "Creator Agency",
-    quote: "The workflow became visible. We finally see what copy and hooks are working.",
-    platform: "LinkedIn • Reels",
+    label: "Promotion copy",
+    text: "Hooks and metadata are optimized for each connected destination.",
   },
-];
-
-export const usageStats = [
-  { value: "47,200+", label: "clips generated" },
-  { value: "6,400+", label: "publish sessions" },
-  { value: "92%", label: "users cut workflow time" },
 ];
 
 export const exampleContent = [
