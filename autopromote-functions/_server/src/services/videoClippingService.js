@@ -27,6 +27,109 @@ const GENERATED_CLIP_RETENTION_DAYS = parseInt(
   process.env.GENERATED_CLIP_RETENTION_DAYS || "3",
   10
 );
+const MIN_FIND_VIRAL_DURATION_SECONDS = 0.75;
+const MAX_FIND_VIRAL_CLIPS = 200;
+
+const normalizeNumber = (value, fallback = 0) => {
+  const valueNumber = Number(value);
+  return Number.isFinite(valueNumber) ? valueNumber : fallback;
+};
+
+const normalizeString = (value, fallback = "") => {
+  if (typeof value === "string") return value.trim() || fallback;
+  if (value == null) return fallback;
+  return String(value).trim() || fallback;
+};
+
+const normalizeClipSuggestion = (raw, index, maxDurationSeconds = 0) => {
+  const start = Math.max(0, normalizeNumber(raw?.start, 0));
+  const proposedEnd = normalizeNumber(raw?.end, start + 0.5);
+  const end = maxDurationSeconds > 0 ? Math.min(proposedEnd, maxDurationSeconds) : proposedEnd;
+  const duration = Math.max(0, end - start);
+
+  if (duration < MIN_FIND_VIRAL_DURATION_SECONDS) return null;
+
+  return {
+    id: normalizeString(raw?.id, null) || `clip_${index}_${crypto.randomBytes(4).toString("hex")}`,
+    start: Number(start.toFixed(3)),
+    end: Number(end.toFixed(3)),
+    duration: Number(duration.toFixed(3)),
+    viralScore: Math.max(0, Math.min(100, Math.round(normalizeNumber(raw?.viralScore, 60)))),
+    reason: normalizeString(raw?.reason, "High engagement potential detected"),
+    text: normalizeString(raw?.text, `Segment ${index + 1}`),
+    strategyLabel: normalizeString(raw?.strategyLabel, null),
+    strategyIntent: normalizeString(raw?.strategyIntent, null),
+    hookText: normalizeString(raw?.hookText, null),
+    captionSuggestion: normalizeString(raw?.captionSuggestion, "Watch till the end! 😱 #viral"),
+    bestFor: normalizeString(raw?.bestFor, null),
+    retentionNotes: Array.isArray(raw?.retentionNotes) ? raw.retentionNotes : [],
+    scoreBreakdown: raw?.scoreBreakdown || null,
+    studioMove: raw?.studioMove || null,
+    campaignRole: raw?.campaignRole || null,
+    campaignOrder: Number.isFinite(Number(raw?.campaignOrder)) ? Number(raw.campaignOrder) : index + 1,
+    status: "suggested",
+    sourceConfidence: normalizeNumber(raw?.sourceConfidence, null),
+    platforms: ["TikTok", "YouTube Shorts", "Instagram Reels"],
+  };
+};
+
+const overlapRatio = (a, b) => {
+  if (!a || !b) return 0;
+  const overlapStart = Math.max(a.start, b.start);
+  const overlapEnd = Math.min(a.end, b.end);
+  const overlap = Math.max(0, overlapEnd - overlapStart);
+  if (overlap <= 0) return 0;
+  const base = Math.max(0.1, Math.min(a.duration, b.duration));
+  return overlap / base;
+};
+
+const prioritizeAndNormalizeSuggestions = (rawSuggestions, maxDurationSeconds = 0) => {
+  const candidates = [];
+  const sourceList = Array.isArray(rawSuggestions) ? rawSuggestions : [];
+
+  for (let index = 0; index < sourceList.length; index += 1) {
+    const normalized = normalizeClipSuggestion(sourceList[index], index, maxDurationSeconds);
+    if (normalized) candidates.push(normalized);
+  }
+
+  candidates.sort((a, b) => {
+    if (b.viralScore !== a.viralScore) return b.viralScore - a.viralScore;
+    if (b.duration !== a.duration) return b.duration - a.duration;
+    return a.start - b.start;
+  });
+
+  const selected = [];
+  candidates.forEach(candidate => {
+    const overlapIdx = selected.findIndex(existing => overlapRatio(candidate, existing) >= 0.8);
+    if (overlapIdx === -1) {
+      selected.push(candidate);
+      return;
+    }
+
+    if (candidate.viralScore <= (selected[overlapIdx]?.viralScore || 0)) return;
+    selected[overlapIdx] = candidate;
+  });
+
+  return selected.slice(0, MAX_FIND_VIRAL_CLIPS).map((clip, index) => ({
+    ...clip,
+    campaignOrder: index + 1,
+  }));
+};
+
+const buildFindViralQualitySummary = (rawSuggestions, normalizedSuggestions) => ({
+  totalCandidates: Array.isArray(rawSuggestions) ? rawSuggestions.length : 0,
+  validCandidates: Array.isArray(normalizedSuggestions) ? normalizedSuggestions.length : 0,
+  minDurationSeconds: MIN_FIND_VIRAL_DURATION_SECONDS,
+  avgViralScore: Array.isArray(normalizedSuggestions) && normalizedSuggestions.length
+    ? Math.round(
+        normalizedSuggestions.reduce((acc, item) => acc + Number(item.viralScore || 0), 0) /
+          normalizedSuggestions.length
+      )
+    : 0,
+  maxViralScore: Array.isArray(normalizedSuggestions) && normalizedSuggestions.length
+    ? Math.max(...normalizedSuggestions.map(item => Number(item.viralScore || 0)))
+    : null,
+});
 
 class VideoClippingService {
   /**
@@ -47,6 +150,7 @@ class VideoClippingService {
       videoUrl,
       status: "queued",
       createdAt: new Date().toISOString(),
+      type: "viral_clips",
       progress: 0,
       message: "Job queued...",
     });
@@ -106,26 +210,11 @@ class VideoClippingService {
 
       // Format Results
       const rawSuggestions = result.clipSuggestions || result.scenes || [];
-      const formattedSuggestions = rawSuggestions.map((s, index) => ({
-        id: s.id || `clip_${index}_${crypto.randomBytes(4).toString("hex")}`,
-        start: s.start,
-        end: s.end,
-        duration: s.end - s.start,
-        viralScore: s.viralScore || 60,
-        reason: s.reason || "High engagement potential detected",
-        text: s.text || `Segment ${index + 1}`,
-        strategyLabel: s.strategyLabel || null,
-        strategyIntent: s.strategyIntent || null,
-        hookText: s.hookText || null,
-        captionSuggestion: s.captionSuggestion || "Watch till the end! 😱 #viral",
-        bestFor: s.bestFor || null,
-        retentionNotes: Array.isArray(s.retentionNotes) ? s.retentionNotes : [],
-        scoreBreakdown: s.scoreBreakdown || null,
-        studioMove: s.studioMove || null,
-        campaignRole: s.campaignRole || null,
-        campaignOrder: s.campaignOrder || index + 1,
-        status: "suggested",
-      }));
+      const maxDuration = normalizeNumber(
+        result.videoDurationSeconds || result.durationSeconds || result.duration,
+        0
+      );
+      const formattedSuggestions = prioritizeAndNormalizeSuggestions(rawSuggestions, maxDuration);
 
       // Update Job as Completed
       await db.collection("clip_analyses").doc(jobId).update({
@@ -133,6 +222,8 @@ class VideoClippingService {
         progress: 100,
         message: "Analysis complete",
         clipSuggestions: formattedSuggestions,
+        rawCandidatesDetected: rawSuggestions.length,
+        qualitySummary: buildFindViralQualitySummary(rawSuggestions, formattedSuggestions),
         scenesDetected: formattedSuggestions.length,
         completedAt: new Date().toISOString(),
       });
@@ -192,30 +283,11 @@ class VideoClippingService {
 
       // Extract suggestions (support either key from python)
       const rawSuggestions = result.clipSuggestions || result.scenes || [];
-
-      // 2. Format suggestions consistent with frontend expectations
-      // Format: { id, start, end, duration, score, reason, text }
-      const formattedSuggestions = rawSuggestions.map((s, index) => ({
-        id: s.id || `clip_${index}_${crypto.randomBytes(4).toString("hex")}`,
-        start: s.start,
-        end: s.end,
-        duration: s.end - s.start,
-        viralScore: s.viralScore || 60,
-        reason: s.reason || "High engagement potential detected",
-        text: s.text || `Segment ${index + 1}`,
-        strategyLabel: s.strategyLabel || null,
-        strategyIntent: s.strategyIntent || null,
-        hookText: s.hookText || null,
-        captionSuggestion: s.captionSuggestion || null,
-        bestFor: s.bestFor || null,
-        retentionNotes: Array.isArray(s.retentionNotes) ? s.retentionNotes : [],
-        scoreBreakdown: s.scoreBreakdown || null,
-        studioMove: s.studioMove || null,
-        campaignRole: s.campaignRole || null,
-        campaignOrder: s.campaignOrder || index + 1,
-        status: "suggested",
-        platforms: ["TikTok", "YouTube Shorts", "Instagram Reels"], // Phase 1 defaults
-      }));
+      const maxDuration = normalizeNumber(
+        result.videoDurationSeconds || result.durationSeconds || result.duration,
+        0
+      );
+      const formattedSuggestions = prioritizeAndNormalizeSuggestions(rawSuggestions, maxDuration);
 
       // 3. Store results in Firestore for persistence/history
       const analysisId = crypto.randomBytes(16).toString("hex");
@@ -225,8 +297,11 @@ class VideoClippingService {
         contentId,
         videoUrl,
         clipSuggestions: formattedSuggestions,
+        type: "viral_clips",
         status: "completed",
         createdAt: new Date().toISOString(),
+        rawCandidatesDetected: rawSuggestions.length,
+        qualitySummary: buildFindViralQualitySummary(rawSuggestions, formattedSuggestions),
         scenesDetected: formattedSuggestions.length,
         // Frontend compatibility fields
         clipsGenerated: formattedSuggestions.length,

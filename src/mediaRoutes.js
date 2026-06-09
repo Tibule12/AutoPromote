@@ -963,11 +963,16 @@ router.post("/analyze", async (req, res) => {
   const userId = req.user.uid;
   const { fileUrl, localPath = null, forceFresh = false, scanNonce = "" } = req.body;
   const cost = CREDIT_COSTS.analyze || 8;
+  const analysisSource = fileUrl || localPath;
 
   try {
     console.log(
       `[MediaRoute] Analyze clip request for user ${userId}, forceFresh=${Boolean(forceFresh)}, nonce=${scanNonce ? "set" : "none"}`
     );
+
+    if (!analysisSource) {
+      return res.status(400).json({ error: "Missing fileUrl or localPath" });
+    }
 
     // Check and deduct credits first
     const credits = await chargeVideoEditorCredits(userId, cost, "/analyze");
@@ -983,7 +988,7 @@ router.post("/analyze", async (req, res) => {
     }
 
     console.log(`[MediaRoute] Credits OK. Starting analysis...`);
-    const scenes = await videoEditingService.analyzeVideo(fileUrl || localPath, userId, {
+    const scenes = await videoEditingService.analyzeVideo(analysisSource, userId, {
       forceFresh: Boolean(forceFresh),
       scanNonce: typeof scanNonce === "string" ? scanNonce : "",
       localPath: localPath || null,

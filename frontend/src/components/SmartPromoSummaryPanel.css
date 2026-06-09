@@ -253,6 +253,14 @@
   flex-wrap: wrap;
 }
 
+.promo-summary-live-head-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
 .promo-summary-live-preview-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -332,11 +340,9 @@
 }
 
 .promo-summary-live-preview-viewport video {
-  transition:
-    transform 1.3s cubic-bezier(0.22, 1, 0.36, 1),
-    transform-origin 1.3s cubic-bezier(0.22, 1, 0.36, 1),
-    filter 1.3s ease;
   filter: saturate(1.04) contrast(1.04);
+  will-change: transform;
+  transform-origin: center center;
 }
 
 .promo-summary-live-preview-overlay {

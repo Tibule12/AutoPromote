@@ -701,6 +701,7 @@ class VideoEditingService {
       target_aspect_ratio: "9:16",
       force_fresh: Boolean(options.forceFresh),
       scan_nonce: typeof options.scanNonce === "string" ? options.scanNonce : "",
+      local_path: options.localPath || null,
     };
     try {
       let response;
