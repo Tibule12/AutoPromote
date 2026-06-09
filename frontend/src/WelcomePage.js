@@ -11,8 +11,7 @@ import {
   exampleContent,
   featureCards,
   pricingCards,
-  testimonials,
-  usageStats,
+  proofChecklist,
   workflowSteps,
 } from "./data/landingPageData";
 import "./WelcomePage.css";
@@ -98,8 +97,7 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
         </section>
 
         <ProofSection
-          testimonials={testimonials}
-          usageStats={usageStats}
+          proofChecklist={proofChecklist}
           exampleContent={exampleContent}
         />
 

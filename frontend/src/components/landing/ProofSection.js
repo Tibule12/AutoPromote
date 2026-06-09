@@ -1,49 +1,35 @@
-const ProofSection = ({ testimonials, usageStats, exampleContent }) => (
+const ProofSection = ({ proofChecklist, exampleContent }) => (
   <div className="ap-section ap-section-split" id="proof">
     <div>
       <div className="ap-section-heading">
-        <p className="ap-eyebrow">Creator testimonials</p>
-        <h2>Built by creators, for creators</h2>
-        <p>Fast feedback, less guesswork, clearer growth.</p>
+        <p className="ap-eyebrow">Product signals</p>
+        <h2>What your workflow can do</h2>
+        <p>These describe the actual workflow steps the page is presenting.</p>
       </div>
-      <div className="ap-testimonial-grid">
-        {testimonials.map(testimonial => (
-          <article key={testimonial.creator} className="ap-testimonial ap-reveal">
-            <p>“{testimonial.quote}”</p>
-            <p className="meta">
-              <span>{testimonial.creator}</span>
-              <span>•</span>
-              <span>{testimonial.role}</span>
-            </p>
-            <p className="platform">{testimonial.platform}</p>
-          </article>
+      <ul className="ap-proof-checks ap-reveal">
+        {proofChecklist.map(item => (
+          <li key={item.label}>
+            <strong>{item.label}:</strong> {item.text}
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
 
     <div className="ap-proof-stack">
       <div>
         <div className="ap-section-heading">
-          <p className="ap-eyebrow">Usage statistics</p>
-          <h2>Signal, not vibes</h2>
-          <p>Usage that actually matters.</p>
+          <p className="ap-eyebrow">Example content outputs</p>
+          <h2>Example outputs</h2>
+          <p>Sample previews (for illustration, not live usage claims).</p>
         </div>
-        <div className="ap-stat-grid">
-          {usageStats.map(stat => (
-            <div key={stat.label} className="ap-stat-card ap-reveal">
-              <span className="value">{stat.value}</span>
-              <span className="label">{stat.label}</span>
-            </div>
+        <div className="ap-example-grid">
+          {exampleContent.map(item => (
+            <article key={item.tag} className="ap-example-card ap-reveal">
+              <span>{item.tag}</span>
+              <p>{item.text}</p>
+            </article>
           ))}
         </div>
-      </div>
-      <div className="ap-example-grid">
-        {exampleContent.map(item => (
-          <div key={item.tag} className="ap-example-card ap-reveal">
-            <span>{item.tag}</span>
-            <p>{item.text}</p>
-          </div>
-        ))}
       </div>
     </div>
   </div>
