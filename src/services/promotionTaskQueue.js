@@ -973,6 +973,30 @@ async function processNextPlatformTask() {
           }
           // If another task owns the lock, attempt takeover if the lock is stale
           if (existing.taskId && existing.taskId !== task.id) {
+            if (existing.success === false) {
+              try {
+                await db
+                  .collection("platform_posts")
+                  .doc(lock.id)
+                  .set(
+                    {
+                      taskId: task.id,
+                      success: null,
+                      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+                    },
+                    { merge: true }
+                  );
+                lockId = lock.id;
+              } catch (e) {
+                await selectedDoc.ref.update({
+                  status: "skipped",
+                  skippedReason: "duplicate_pending",
+                  skippedExisting: existing.externalId || existing.id || null,
+                  updatedAt: new Date().toISOString(),
+                });
+                return { taskId: task.id, skipped: true, reason: "duplicate_pending", existing };
+              }
+            } else
             try {
               const LOCK_TAKEOVER_MS = parseInt(
                 process.env.PLATFORM_POST_LOCK_TAKEOVER_MS || "300000",
@@ -1389,6 +1413,13 @@ async function processNextPlatformTask() {
       reason: task.reason,
       uid: task.uid,
     });
+    if (!simulatedResult || simulatedResult.success === false) {
+      const err = new Error(
+        simulatedResult?.error || `Platform post failed for ${task.platform || "unknown"}`
+      );
+      err.platformResult = simulatedResult || null;
+      throw err;
+    }
     if (selectedVariant) {
       simulatedResult.usedVariant = selectedVariant;
       simulatedResult.variantIndex = variantIndex;
