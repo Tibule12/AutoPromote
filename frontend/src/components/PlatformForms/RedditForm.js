@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import EmojiPicker from "../EmojiPicker";
 import { sanitizeUrl } from "../../utils/security";
 import { API_BASE_URL } from "../../config";
+import { auth } from "../../firebaseClient";
 import AdaptiveMediaPreview from "./AdaptiveMediaPreview";
 import { revokeObjectUrlLater } from "../../utils/objectUrl";
 
@@ -10,7 +11,7 @@ const RedditForm = ({
   initialData = {},
   creatorInfo,
   globalTitle,
-  globalDescription,
+  globalDescription: _globalDescription,
   currentFile,
   onFileChange,
   onReviewAI,
@@ -34,7 +35,11 @@ const RedditForm = ({
 
   const [subreddit, setSubreddit] = useState(initialData.subreddit || "");
   const [manualSubreddit, setManualSubreddit] = useState(initialData.subreddit || "");
-  const [availableSubreddits, setAvailableSubreddits] = useState([]);
+  const creatorSubreddits = useMemo(() => {
+    const raw = creatorInfo?.meta?.subreddits || creatorInfo?.subreddits || [];
+    return Array.isArray(raw) ? raw : [];
+  }, [creatorInfo]);
+  const [availableSubreddits, setAvailableSubreddits] = useState(creatorSubreddits);
   const [isLoadingSubreddits, setIsLoadingSubreddits] = useState(false);
   const [subredditFetchError, setSubredditFetchError] = useState("");
   const [title, setTitle] = useState(initialData.title || globalTitle || "");
@@ -65,27 +70,70 @@ const RedditForm = ({
   );
 
   useEffect(() => {
+    if (creatorSubreddits.length) {
+      setAvailableSubreddits(creatorSubreddits);
+    }
+  }, [creatorSubreddits]);
+
+  useEffect(() => {
     let isMounted = true;
 
     const fetchSubreddits = async () => {
+      if (creatorSubreddits.length) {
+        const normalizedInitial = String(initialData.subreddit || "")
+          .replace(/^r\//i, "")
+          .trim();
+        const storedLast =
+          (typeof window !== "undefined" && localStorage.getItem("lastRedditSubreddit")) || "";
+        const normalizedStored = String(storedLast).replace(/^r\//i, "").trim();
+        const fallback =
+          normalizedInitial ||
+          normalizedStored ||
+          (creatorSubreddits[0] &&
+            String(creatorSubreddits[0].name || "").replace(/^r\//i, "").trim()) ||
+          "";
+
+        if (fallback && isMounted) {
+          setSubreddit(fallback);
+          setManualSubreddit(fallback);
+        }
+        return;
+      }
+
       setIsLoadingSubreddits(true);
       setSubredditFetchError("");
 
       try {
-        const token =
-          (typeof window !== "undefined" &&
-            (localStorage.getItem("token") ||
-              localStorage.getItem("authToken") ||
-              sessionStorage.getItem("token") ||
-              sessionStorage.getItem("authToken"))) ||
-          null;
+        let token = null;
+        if (auth.currentUser) {
+          token = await auth.currentUser.getIdToken();
+        } else if (typeof window !== "undefined") {
+          token =
+            localStorage.getItem("token") ||
+            localStorage.getItem("authToken") ||
+            sessionStorage.getItem("token") ||
+            sessionStorage.getItem("authToken") ||
+            null;
+        }
+
+        if (!token) {
+          if (isMounted) {
+            setSubredditFetchError("");
+            setIsLoadingSubreddits(false);
+          }
+          return;
+        }
 
         const res = await fetch(`${API_BASE_URL}/api/reddit/metadata`, {
           credentials: "include",
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         if (!res.ok) {
+          if (res.status === 401) {
+            if (isMounted) setSubredditFetchError("");
+            return;
+          }
           throw new Error(`Failed to load subreddits (${res.status})`);
         }
 
@@ -125,7 +173,7 @@ const RedditForm = ({
     return () => {
       isMounted = false;
     };
-  }, [initialData.subreddit]);
+  }, [creatorSubreddits, initialData.subreddit]);
 
   useEffect(() => {
     const normalized = String(subreddit || "").replace(/^r\//i, "").trim();
