@@ -18076,11 +18076,41 @@ async def preflight_multicam_sync(
 
     def build_window_positions(source_duration, offset, sync_rate):
         if has_timeline_window:
-            timeline_windows = {
-                "start": timeline_start + 5.0,
-                "middle": timeline_start + max(5.0, (timeline_duration - SAMPLE_SECONDS) / 2.0),
-                "end": timeline_start + max(5.0, timeline_duration - SAMPLE_SECONDS - 5.0),
-            }
+            safe_sync_rate = max(0.001, float(sync_rate or 1.0))
+            safe_source_duration = max(0.0, float(source_duration or 0.0))
+            safe_offset = float(offset or 0.0)
+            window_start = float(timeline_start)
+            window_end = float(timeline_start) + float(timeline_duration)
+            min_source_timeline = safe_offset
+            max_source_timeline = safe_offset + (
+                max(0.0, safe_source_duration - SAMPLE_SECONDS) / safe_sync_rate
+            )
+            min_external_timeline = external_offset
+            max_external_timeline = external_offset + max(0.0, external_duration - SAMPLE_SECONDS)
+            valid_start = max(window_start, min_source_timeline, min_external_timeline)
+            valid_end = min(window_end - SAMPLE_SECONDS, max_source_timeline, max_external_timeline)
+            if valid_end < valid_start:
+                timeline_windows = {
+                    "start": window_start + 5.0,
+                    "middle": window_start + max(5.0, (timeline_duration - SAMPLE_SECONDS) / 2.0),
+                    "end": window_start + max(5.0, timeline_duration - SAMPLE_SECONDS - 5.0),
+                }
+            else:
+                proof_pad = min(5.0, max(0.0, (valid_end - valid_start) / 4.0))
+                proof_start = min(valid_end, max(valid_start, window_start + 5.0, valid_start + proof_pad))
+                proof_middle = min(
+                    valid_end,
+                    max(valid_start, window_start + max(5.0, (timeline_duration - SAMPLE_SECONDS) / 2.0)),
+                )
+                proof_end = max(
+                    valid_start,
+                    min(valid_end, window_start + max(5.0, timeline_duration - SAMPLE_SECONDS - 5.0)),
+                )
+                timeline_windows = {
+                    "start": proof_start,
+                    "middle": proof_middle,
+                    "end": proof_end,
+                }
             return {
                 label: {
                     "source_pos": (timeline_pos - float(offset)) * sync_rate,
