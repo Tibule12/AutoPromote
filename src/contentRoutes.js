@@ -709,12 +709,20 @@ router.post(
         );
       } catch (e) {}
       try {
+        const safeHeaderDump = Object.keys(req.headers)
+          .sort()
+          .map(k => {
+            const value = String(req.headers[k]);
+            if (k.toLowerCase() === "authorization") {
+              const scheme = value.split(/\s+/, 1)[0] || "Bearer";
+              return `${k}:${scheme} [REDACTED]`;
+            }
+            return `${k}:${value.slice(0, 120)}`;
+          })
+          .join(" | ");
         console.log(
           "[upload.debug.headers]",
-          Object.keys(req.headers)
-            .sort()
-            .map(k => `${k}:${String(req.headers[k]).slice(0, 120)}`)
-            .join(" | ")
+          safeHeaderDump
         );
       } catch (e) {}
       const userId = req.userId || req.user?.uid;
