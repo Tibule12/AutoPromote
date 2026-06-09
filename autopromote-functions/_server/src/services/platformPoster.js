@@ -438,12 +438,14 @@ async function dispatchPlatformPost({ platform, contentId, payload, reason, uid 
       payload = payload || {}; // Ensure payload object exists
 
       if (missingMedia) {
-        // Prefer processed/optimized URL, then raw upload URL, then link
+        // Prefer the same source users previewed/uploaded. Processed URLs are
+        // a fallback only; older transform outputs can carry platform-specific
+        // timing changes that should not silently replace the clean clip.
         const mediaUrl =
-          ctx.processedUrl ||
           ctx.persistentMediaUrl ||
           ctx.url ||
           ctx.mediaUrl ||
+          ctx.processedUrl ||
           ctx.landingPageUrl ||
           null;
         if (mediaUrl) payload.mediaUrl = mediaUrl;
