@@ -15,32 +15,41 @@ const TOKEN_URL = "https://open.tiktokapis.com/v2/oauth/token/";
 const AUTH_URL = "https://www.tiktok.com/v2/auth/authorize/";
 
 const DEFAULT_CHUNK_SIZE = parseInt(process.env.TIKTOK_CHUNK_SIZE || "5242880", 10); // 5MB default
+const MIN_TIKTOK_CHUNK_SIZE = 5 * 1024 * 1024;
+const MAX_TIKTOK_CHUNK_SIZE = 64 * 1024 * 1024;
+const MAX_TIKTOK_FINAL_CHUNK_SIZE = 128 * 1024 * 1024;
+
+function getTikTokTotalChunks(videoSize, chunkSize) {
+  if (videoSize <= chunkSize) return 1;
+  return Math.floor(videoSize / chunkSize);
+}
+
+function isTikTokRateLimitError(error) {
+  const message = String(error?.message || error || "");
+  return /rate_limit_exceeded|rate limit/i.test(message);
+}
 
 // Compute candidate chunk sizes following TikTok Media Transfer Guide
 function computeChunkCandidates(videoSize) {
-  const MB = 1024 * 1024;
-  const minChunk = 5 * MB;
   const candidates = [];
 
-  if (videoSize < minChunk) {
-    // Must upload whole file
+  if (videoSize <= MAX_TIKTOK_CHUNK_SIZE) {
     return [videoSize];
   }
 
-  // Use a limited set of standard chunk sizes to avoid spanning thousands of candidates
-  // TikTok supports chunks between 5MB and 64MB.
-  // We prioritize larger chunks to reduce HTTP requests.
   const sizesToTryMB = [64, 50, 40, 32, 25, 20, 15, 10, 5];
 
   for (const sizeMB of sizesToTryMB) {
-    const cs = sizeMB * MB;
-    const totalChunks = Math.ceil(videoSize / cs);
+    const cs = sizeMB * 1024 * 1024;
+    if (cs < MIN_TIKTOK_CHUNK_SIZE || cs > MAX_TIKTOK_CHUNK_SIZE) continue;
 
-    // Safety check for ridiculous chunk counts (unlikely with these sizes)
+    const totalChunks = getTikTokTotalChunks(videoSize, cs);
+    if (totalChunks < 2) continue;
     if (totalChunks > 1000) continue;
 
-    // We do NOT strictly enforce last-chunk >= 5MB here because most APIs allow the last chunk to be smaller.
-    // If specific errors arise, we can adjust. The previous logic was overly restrictive and caused infinite-like loops.
+    const finalChunkSize = videoSize - cs * (totalChunks - 1);
+    if (finalChunkSize > MAX_TIKTOK_FINAL_CHUNK_SIZE) continue;
+
     candidates.push(cs);
   }
 
@@ -193,12 +202,6 @@ async function refreshToken(uid, refreshToken) {
   if (!clientKey) {
     throw new Error("TikTok client key not configured");
   }
-
-  const body = {
-    client_key: clientKey,
-    grant_type: "refresh_token",
-    refresh_token: refreshToken,
-  };
 
   const params = new URLSearchParams();
   params.append("client_key", clientKey);
@@ -387,7 +390,7 @@ async function initializeVideoUpload({
       source: "FILE_UPLOAD",
       video_size: videoSize,
       chunk_size: videoSize === chunkSize ? videoSize : chunkSize,
-      total_chunk_count: Math.ceil(videoSize / chunkSize),
+      total_chunk_count: getTikTokTotalChunks(videoSize, chunkSize),
     },
   };
 
@@ -558,7 +561,7 @@ async function uploadVideoChunk({
   uploadUrl,
   videoBuffer,
   chunkIndex,
-  totalChunks: _totalChunks,
+  totalChunks,
   chunkSize = DEFAULT_CHUNK_SIZE,
   maxAttempts = 3,
   publishId = null,
@@ -566,11 +569,17 @@ async function uploadVideoChunk({
   if (!fetchFn) throw new Error("Fetch not available");
 
   const start = chunkIndex * chunkSize;
-  const end = Math.min((chunkIndex + 1) * chunkSize - 1, videoBuffer.length - 1);
-  const chunk = videoBuffer.slice(
-    start,
-    Math.min((chunkIndex + 1) * chunkSize, videoBuffer.length)
-  );
+  const isLastChunk = chunkIndex === totalChunks - 1;
+  const end = isLastChunk
+    ? videoBuffer.length - 1
+    : Math.min((chunkIndex + 1) * chunkSize - 1, videoBuffer.length - 1);
+  const chunk = videoBuffer.slice(start, end + 1);
+
+  if (!chunk.length || start > videoBuffer.length - 1) {
+    throw new Error(
+      `Invalid TikTok chunk range: index=${chunkIndex} total=${totalChunks} start=${start} size=${videoBuffer.length}`
+    );
+  }
 
   // Prepare header permutations to try when the endpoint rejects certain header shapes
   const baseHeaders = { "Content-Type": "application/octet-stream" };
@@ -771,7 +780,7 @@ async function uploadVideoChunk({
 /**
  * Publish the uploaded video
  */
-async function publishVideo({ accessToken, publishId, title, privacyLevel = undefined, soundId }) {
+async function publishVideo({ accessToken, publishId, privacyLevel = undefined }) {
   if (!fetchFn) throw new Error("Fetch not available");
 
   // Allow caller to override privacy when finalizing the publish
@@ -818,7 +827,6 @@ async function publishVideo({ accessToken, publishId, title, privacyLevel = unde
 async function pullFromUrlPublish({
   accessToken,
   videoUrl,
-  contentId,
   title,
   privacyLevel = undefined,
   maxWaitMs = 120000,
@@ -1043,9 +1051,7 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
 
   try {
     // If possible, try PULL_FROM_URL first (cheaper). If it stalls/fails, fallback to FILE_UPLOAD
-    let triedPull = false;
     if (contentId && videoUrl && !process.env.TIKTOK_FORCE_FILE_UPLOAD) {
-      triedPull = true;
       let pullResult = await pullFromUrlPublish({
         accessToken,
         videoUrl,
@@ -1294,8 +1300,12 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
     // Initialize upload (FILE_UPLOAD).
     // Compute chunk_size candidates using the Media Transfer Guide and try them (larger chunks first).
     const computedCandidates = computeChunkCandidates(videoSize);
-    // Append a few conservative fallbacks (DEFAULT_CHUNK_SIZE and a couple of small sizes) ensuring uniqueness
-    const fallbackCandidates = [DEFAULT_CHUNK_SIZE, Math.min(DEFAULT_CHUNK_SIZE, 262144), 65536];
+    const fallbackCandidates =
+      DEFAULT_CHUNK_SIZE >= MIN_TIKTOK_CHUNK_SIZE &&
+      DEFAULT_CHUNK_SIZE <= MAX_TIKTOK_CHUNK_SIZE &&
+      videoSize > MAX_TIKTOK_CHUNK_SIZE
+        ? [DEFAULT_CHUNK_SIZE]
+        : [];
     const chunkSizeCandidates = Array.from(new Set([...computedCandidates, ...fallbackCandidates]));
 
     let publish_id = null;
@@ -1319,7 +1329,7 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
         publish_id = initData.publish_id;
         upload_url = initData.upload_url;
 
-        const totalChunks = Math.ceil(videoSize / cs);
+        const totalChunks = getTikTokTotalChunks(videoSize, cs);
         for (let i = 0; i < totalChunks; i++) {
           await uploadVideoChunk({
             publishId: publish_id,
@@ -1335,7 +1345,7 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
         console.log(
           "[tiktok] upload completed with chunkSize=%d totalChunks=%d",
           cs,
-          Math.ceil(videoSize / cs)
+          totalChunks
         );
         break;
       } catch (e) {
@@ -1344,6 +1354,9 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
           cs,
           e && (e.message || e)
         );
+        if (isTikTokRateLimitError(e)) {
+          throw e;
+        }
         // If this is the last candidate, rethrow so outer catch handles it
         if (csIndex === chunkSizeCandidates.length - 1) {
           throw e;
