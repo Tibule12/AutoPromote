@@ -1619,59 +1619,89 @@ function SmartPromoSummaryPanel({
   return (
     <div className="promo-summary-overlay" role="dialog" aria-modal="true" aria-label="Smart Promo">
       <div className="promo-summary-shell">
-        <div className="promo-summary-header">
-          <div>
-            <span className="promo-summary-eyebrow">Visual Editing Engine</span>
-            <h3>Smart Promo</h3>
-            <p>
-              Turn one static recording into a dynamic visual edit with original audio preserved,
-              then generate three preview cuts from that same continuous timeline.
-            </p>
+        <div className="promo-summary-topline promo-summary-reveal" style={{ "--promo-delay": "40ms" }}>
+          <div className="promo-summary-header">
+            <span className="promo-summary-kicker">Smart Promo Studio</span>
+            <h3>Turn one long clip into a creator-ready visual system.</h3>
+            <p>AutoPromote keeps your audio intact, upgrades framing and movement, then delivers one master plus three social-first previews.</p>
           </div>
-          <button type="button" className="promo-summary-close" onClick={onClose} aria-label="Close promo summary">
-            &times;
-          </button>
+          <div className="promo-summary-header-actions">
+            <button type="button" className="promo-summary-secondary promo-summary-minor-action" onClick={onClose}>
+              Go back
+            </button>
+            <button type="button" className="promo-summary-close" onClick={onClose} aria-label="Close promo summary">
+              &times;
+            </button>
+          </div>
         </div>
 
-        <div className="promo-summary-meta">
-          <div className="promo-summary-pill">Source: {sourceSummary}</div>
-          <div className="promo-summary-pill">Estimate: {displayedPromoCost} credits</div>
-          <div className="promo-summary-pill">Balance: {creditBalance ?? "..."}</div>
-          <div className="promo-summary-pill">
-            Output: 1 master edit + 3 previews
+        <div className="promo-summary-hero-strip promo-summary-reveal" style={{ "--promo-delay": "120ms" }}>
+          <div className="promo-summary-meta">
+            <div className="promo-summary-pill">
+              <span>Source</span>
+              <strong>{sourceSummary}</strong>
+            </div>
+            <div className="promo-summary-pill">
+              <span>Estimate</span>
+              <strong>{displayedPromoCost} credits</strong>
+            </div>
+            <div className="promo-summary-pill">
+              <span>Balance</span>
+              <strong>{creditBalance ?? "..."}</strong>
+            </div>
+            <div className="promo-summary-pill">
+              <span>Output</span>
+              <strong>1 master + 3 previews</strong>
+            </div>
+            <div className="promo-summary-pill">
+              <span>Mode</span>
+              <strong>{selectedOutputMode.pill}</strong>
+            </div>
           </div>
-          <div className="promo-summary-pill">Mode: {selectedOutputMode.pill}</div>
-        </div>
-        <div className="promo-summary-billing-note">
-          Smart Promo is a credit-based generation. Your monthly editing credits are used
-          first, and you can top up anytime if you want more promo runs before renewal.
-        </div>
-        <div className="promo-summary-billing-note promo-summary-time-note">
-          Smart Promo rendering can take {waitEstimate} depending on source length, visual complexity, and upload speed.
-          Keep this tab open while the job is running.
-        </div>
-        <div className="promo-summary-director-brief">
-          <div>
-            <span className="promo-summary-card-label">Creative Director Brief</span>
-            <strong>{promoDirectorBrief.title}</strong>
-            <p>{promoDirectorBrief.summary}</p>
+          <div className="promo-summary-note-row">
+            <div className="promo-summary-note-card promo-summary-reveal" style={{ "--promo-delay": "220ms" }}>
+              <span>Usage model</span>
+              <strong>Credit-based generation</strong>
+              <small>
+                Monthly credits are consumed first. Add credits whenever you need more promo runs.
+              </small>
+            </div>
+            <div className="promo-summary-note-card promo-summary-reveal" style={{ "--promo-delay": "260ms" }}>
+              <span>Render ETA</span>
+              <strong>{waitEstimate}</strong>
+              <small>Keep this panel open while generation is running.</small>
+            </div>
           </div>
-          <ul>
-            {promoDirectorBrief.bullets.map(item => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
         </div>
+
+        <section className="promo-summary-card promo-summary-card-brief promo-summary-reveal" style={{ "--promo-delay": "190ms" }}>
+          <span className="promo-summary-card-label">Creative Director Brief</span>
+          <div className="promo-summary-director-brief">
+            <div>
+              <strong>{promoDirectorBrief.title}</strong>
+              <p>{promoDirectorBrief.summary}</p>
+            </div>
+            <ul>
+              {promoDirectorBrief.bullets.map(item => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+        </section>
 
         {(isGenerating || jobId || previewTimeline.length > 0) && (
-          <div className="promo-summary-live-shell">
-            <div className="promo-summary-live-sidebar">
-              <span className="promo-summary-card-label">Processing Steps</span>
+          <section className="promo-summary-live-shell promo-summary-reveal" style={{ "--promo-delay": "290ms" }}>
+            <aside className="promo-summary-live-sidebar promo-summary-reveal" style={{ "--promo-delay": "340ms" }}>
+              <div className="promo-summary-live-sidebar-head">
+                <span className="promo-summary-card-label">Processing</span>
+                <strong>Live timeline is rendering now.</strong>
+              </div>
               <div className="promo-summary-live-steps">
-                {visualProgressSteps.map(step => (
+                {visualProgressSteps.map((step, stepIndex) => (
                   <div
                     key={step.id}
-                    className={`promo-summary-live-step is-${step.state}`}
+                    className={`promo-summary-live-step is-${step.state} promo-summary-reveal`}
+                    style={{ "--promo-delay": `${370 + stepIndex * 40}ms` }}
                   >
                     <div className="promo-summary-live-step-marker" />
                     <div>
@@ -1681,7 +1711,7 @@ function SmartPromoSummaryPanel({
                   </div>
                 ))}
               </div>
-              <div className="promo-summary-live-progress">
+              <div className="promo-summary-live-progress promo-summary-reveal" style={{ "--promo-delay": "520ms" }}>
                 <div className="promo-summary-live-progress-head">
                   <strong>Overall Progress</strong>
                   <span>{progressPercent}%</span>
@@ -1691,19 +1721,20 @@ function SmartPromoSummaryPanel({
                 </div>
                 <small>{analysisDetails?.detail || statusText || "Preparing Smart Promo..."}</small>
               </div>
-              <div className="promo-summary-live-audio">
-                <strong>Audio Status</strong>
-                <span>Original audio preserved</span>
-                <small>Audio will remain untouched and continuous.</small>
+              <div className="promo-summary-live-audio promo-summary-reveal" style={{ "--promo-delay": "580ms" }}>
+                <strong>Audio stays untouched</strong>
+                <span>Dialogue, pacing, and tone are preserved.</span>
+                <small>Only visual motion and framing are generated.</small>
               </div>
-            </div>
+            </aside>
 
-            <div className="promo-summary-live-main">
-                  <div className="promo-summary-live-head">
-                    <div>
-                      <span className="promo-summary-card-label">Planned Edit Timeline</span>
-                      <strong>Smart Promo is acting like a visual director while the audio stays intact.</strong>
-                    </div>
+            <div className="promo-summary-live-main promo-summary-reveal" style={{ "--promo-delay": "360ms" }}>
+              <div className="promo-summary-live-head">
+                <div>
+                  <span className="promo-summary-card-label">Live scene previews</span>
+                  <strong>Visual director mode is active on a continuous timeline.</strong>
+                  <small>Source frame sync stays aligned to current audio energy.</small>
+                </div>
                 <div className="promo-summary-live-head-actions">
                   <small>{analysisDetails?.detail || "Waiting for the edit timeline..."}</small>
                   <button
@@ -1715,10 +1746,10 @@ function SmartPromoSummaryPanel({
                     {previewAudioEnabled ? "Mute Preview Audio" : "Unmute Preview Audio"}
                   </button>
                 </div>
-                </div>
+              </div>
 
-                <div className="promo-summary-live-preview-grid">
-                <article className="promo-summary-live-preview-card">
+              <div className="promo-summary-live-preview-grid">
+                <article className="promo-summary-live-preview-card promo-summary-reveal" style={{ "--promo-delay": "430ms" }}>
                   <span className="promo-summary-card-label">Original Video</span>
                   <strong>Uploaded Source</strong>
                   <div className="promo-summary-live-preview-stage is-original">
@@ -1750,7 +1781,7 @@ function SmartPromoSummaryPanel({
                   </div>
                 </article>
 
-                <article className="promo-summary-live-preview-card">
+                <article className="promo-summary-live-preview-card promo-summary-reveal" style={{ "--promo-delay": "480ms" }}>
                   <span className="promo-summary-card-label">Smart Promo Preview</span>
                   <strong>{activePreviewSegment?.editLabel || "Building virtual camera moves"}</strong>
                   <div className="promo-summary-live-preview-stage is-smart-promo">
@@ -1771,7 +1802,7 @@ function SmartPromoSummaryPanel({
                     ) : (
                       <div className="promo-summary-live-preview-empty">Preview camera moves will appear here.</div>
                     )}
-                    <div className="promo-summary-live-preview-overlay">
+                <div className="promo-summary-live-preview-overlay">
                       <div className="promo-summary-live-preview-overlay-copy">
                         <strong>{activePreviewMeta?.shotLabel || "Smart Promo Preview"}</strong>
                         <span>{activePreviewSegment?.reason || "Animated low-res preview while the final render completes."}</span>
@@ -1787,10 +1818,10 @@ function SmartPromoSummaryPanel({
                 </article>
               </div>
 
-              <div className="promo-summary-live-waveform">
+              <div className="promo-summary-live-waveform promo-summary-reveal" style={{ "--promo-delay": "650ms" }}>
                 <div className="promo-summary-live-waveform-head">
-                  <span className="promo-summary-card-label">Waveform</span>
-                  <small>Temporary low-res visual preview while the full render finishes.</small>
+                  <span className="promo-summary-card-label">Timeline Energy</span>
+                  <small>Live sync feed from the visual director.</small>
                 </div>
                 <div className="promo-summary-live-waveform-bars">
                   {waveformBars.map(bar => (
@@ -1806,7 +1837,11 @@ function SmartPromoSummaryPanel({
               {previewTimeline.length ? (
                 <div className="promo-summary-live-timeline">
                   {previewTimeline.map((segment, segIdx) => (
-                    <article key={segment.id} className={`promo-summary-live-segment is-${segment.visualMode}${segIdx === activeSegmentFrameIndex ? " is-active" : ""}`}>
+                    <article
+                      key={segment.id}
+                      className={`promo-summary-live-segment is-${segment.visualMode}${segIdx === activeSegmentFrameIndex ? " is-active" : ""} promo-summary-reveal`}
+                      style={{ "--promo-delay": `${700 + segIdx * 35}ms` }}
+                    >
                       <div className="promo-summary-live-segment-frame">
                         {segmentFrames[segment.id] ? (
                           <img
@@ -1836,11 +1871,11 @@ function SmartPromoSummaryPanel({
                 </div>
               )}
             </div>
-          </div>
+          </section>
         )}
 
-        <div className="promo-summary-grid">
-          <section className="promo-summary-card promo-summary-card-wide">
+        <div className="promo-summary-grid promo-summary-reveal" style={{ "--promo-delay": "610ms" }}>
+          <section className="promo-summary-card promo-summary-card-wide promo-summary-reveal" style={{ "--promo-delay": "420ms" }}>
             <span className="promo-summary-card-label">Output Goal</span>
             <div className="promo-summary-mode-grid">
               {PROMO_OUTPUT_MODES.map(mode => (
@@ -1857,7 +1892,7 @@ function SmartPromoSummaryPanel({
             </div>
           </section>
 
-          <section className="promo-summary-card">
+          <section className="promo-summary-card promo-summary-reveal" style={{ "--promo-delay": "470ms" }}>
             <span className="promo-summary-card-label">Duration</span>
             <div className="promo-summary-choice-row">
               {activeDurations.map(value => (
@@ -1873,7 +1908,7 @@ function SmartPromoSummaryPanel({
             </div>
           </section>
 
-          <section className="promo-summary-card">
+          <section className="promo-summary-card promo-summary-reveal" style={{ "--promo-delay": "520ms" }}>
             <span className="promo-summary-card-label">Style</span>
             <div className="promo-summary-style-grid">
               {PROMO_STYLES.map(style => (
@@ -1890,7 +1925,7 @@ function SmartPromoSummaryPanel({
             </div>
           </section>
 
-          <section className="promo-summary-card">
+          <section className="promo-summary-card promo-summary-reveal" style={{ "--promo-delay": "570ms" }}>
             <span className="promo-summary-card-label">Status</span>
             <div className="promo-summary-status">
               <strong>{statusText || "Ready to generate."}</strong>
@@ -1922,9 +1957,9 @@ function SmartPromoSummaryPanel({
 
         {pendingEstimate && (
           <div className="promo-summary-confirm-backdrop" role="presentation">
-            <div className="promo-summary-confirm" role="dialog" aria-modal="true" aria-label="Confirm Smart Promo credits">
+            <div className="promo-summary-confirm promo-summary-reveal" role="dialog" aria-modal="true" aria-label="Confirm Smart Promo credits" style={{ "--promo-delay": "140ms" }}>
               <span className="promo-summary-card-label">Confirm Smart Promo Package</span>
-              <strong>{pendingEstimate.credits} credits required</strong>
+              <strong>{pendingEstimate.credits} Credits Required</strong>
               <p>
                 Credits cover video analysis, visual edit planning, output rendering, thumbnail/poster rendering,
                 and temporary processing/storage.
@@ -1968,9 +2003,12 @@ function SmartPromoSummaryPanel({
           </div>
         )}
 
-        <div className="promo-summary-results">
+        <div className="promo-summary-results promo-summary-reveal" style={{ "--promo-delay": "700ms" }}>
           <div className="promo-summary-results-head">
-            <strong>Smart Promo Results</strong>
+            <div>
+              <strong>Smart Promo Results</strong>
+              <span>Ready-to-use clips from your generated timeline</span>
+            </div>
             <span>
               {jobId
                 ? `Job ${jobId}`
@@ -2008,117 +2046,118 @@ function SmartPromoSummaryPanel({
             <div className="promo-summary-results-grid">
               {promoClips.map((clip, index) => {
                 const selectedVisual = getSelectedVisualForClip(clip, index);
-                return (
-                <article
-                  key={clip.id || clip.url || index}
-                  className={`promo-summary-result-card ${clip.storyMaster ? "is-story-master" : ""}`}
-                >
-                  {selectedVisual?.url ? (
-                    <div className="promo-summary-selected-package">
-                      <div className="promo-summary-selected-package-copy">
-                        <span>Selected visual package</span>
-                        <strong>{selectedVisual.hookText || clip.titleSuggestion || clip.hookText || "Ready to publish"}</strong>
-                        <small>
-                          This is the visual that will travel with the clip when you use it in the editor.
-                        </small>
+                  return (
+                  <article
+                    key={clip.id || clip.url || index}
+                    className={`promo-summary-result-card ${clip.storyMaster ? "is-story-master" : ""} promo-summary-reveal`}
+                    style={{ "--promo-delay": `${820 + index * 80}ms` }}
+                  >
+                    {selectedVisual?.url ? (
+                      <div className="promo-summary-selected-package">
+                        <div className="promo-summary-selected-package-copy">
+                          <span>Selected visual package</span>
+                          <strong>{selectedVisual.hookText || clip.titleSuggestion || clip.hookText || "Ready to publish"}</strong>
+                          <small>
+                            This is the visual that will travel with the clip when you use it in the editor.
+                          </small>
+                        </div>
+                        <div className="promo-summary-selected-package-frame">
+                          <SafeImage src={selectedVisual.url} alt="Selected promo visual preview" />
+                        </div>
                       </div>
-                      <div className="promo-summary-selected-package-frame">
-                        <SafeImage src={selectedVisual.url} alt="Selected promo visual preview" />
-                      </div>
-                    </div>
-                  ) : null}
-                  <div className="promo-summary-video-shell">
-                    <video src={clip.url} controls preload="metadata" />
-                  </div>
-                  <div className="promo-summary-result-copy">
-                    {clip.campaignRoleLabel ? (
-                      <div className="promo-summary-role-badge">{clip.campaignRoleLabel}</div>
                     ) : null}
-                    <strong>{clip.promoCaption || clip.title || `Smart Promo Output ${index + 1}`}</strong>
-                    <span>
-                      {(clip.duration || durationSeconds) ? `${Math.round(Number(clip.duration || durationSeconds))}s` : ""}
-                      {clip.confidenceLabel ? ` · ${clip.confidenceLabel}` : ""}
-                    </span>
-                    {clip.hookReason ? <small>{clip.hookReason}</small> : null}
-                    {clip.bestFor ? <small>Best for: {clip.bestFor}</small> : null}
-                    {clip.travelReason ? <small>{clip.travelReason}</small> : null}
-                    {clip.selectionWhy ? <small>{clip.selectionWhy}</small> : null}
-                    {clip.titleSuggestion || clip.hookText ? (
-                      <small>Hook: {clip.titleSuggestion || clip.hookText}</small>
-                    ) : null}
-                    <small>{formatExpiry(clip.expiresAt)}</small>
-                  </div>
-                  {clip.visualAssets?.length ? (
-                    <div className="promo-summary-assets">
-                      <div className="promo-summary-assets-head">
-                        <strong>Promo visuals</strong>
-                        <span>{clip.visualAssets.length} ready-made assets</span>
-                      </div>
-                      <div className="promo-summary-asset-grid">
-                        {clip.visualAssets.slice(0, 3).map(asset => (
-                          <button
-                            key={asset.id || asset.url}
-                            type="button"
-                            className={`promo-summary-asset-card ${
-                              selectedVisual?.url === asset.url ? "is-selected" : ""
-                            }`}
-                            onClick={() => handleSelectVisual(clip, index, asset)}
-                          >
-                            <SafeImage src={asset.url} alt={asset.label || asset.type || "Promo visual"} />
-                            <span>{selectedVisual?.url === asset.url ? "Selected" : asset.label || asset.type || "Visual"}</span>
-                          </button>
-                        ))}
-                      </div>
+                    <div className="promo-summary-video-shell">
+                      <video src={clip.url} controls preload="metadata" />
                     </div>
-                  ) : null}
-                  <div className="promo-summary-result-actions">
-                    <button type="button" className="promo-summary-secondary" onClick={() => handleDownload(clip)}>
-                      Download
-                    </button>
-                    {clip.visualAssets?.[0]?.url ? (
+                    <div className="promo-summary-result-copy">
+                      {clip.campaignRoleLabel ? (
+                        <div className="promo-summary-role-badge">{clip.campaignRoleLabel}</div>
+                      ) : null}
+                      <strong>{clip.promoCaption || clip.title || `Smart Promo Output ${index + 1}`}</strong>
+                      <span>
+                        {(clip.duration || durationSeconds) ? `${Math.round(Number(clip.duration || durationSeconds))}s` : ""}
+                        {clip.confidenceLabel ? ` · ${clip.confidenceLabel}` : ""}
+                      </span>
+                      {clip.hookReason ? <small>{clip.hookReason}</small> : null}
+                      {clip.bestFor ? <small>Best for: {clip.bestFor}</small> : null}
+                      {clip.travelReason ? <small>Travel reason: {clip.travelReason}</small> : null}
+                      {clip.selectionWhy ? <small>{clip.selectionWhy}</small> : null}
+                      {clip.titleSuggestion || clip.hookText ? (
+                        <small>Hook: {clip.titleSuggestion || clip.hookText}</small>
+                      ) : null}
+                      <small>{formatExpiry(clip.expiresAt)}</small>
+                    </div>
+                    {clip.visualAssets?.length ? (
+                      <div className="promo-summary-assets">
+                        <div className="promo-summary-assets-head">
+                          <strong>Promo visuals</strong>
+                          <span>{clip.visualAssets.length} ready-made assets</span>
+                        </div>
+                        <div className="promo-summary-asset-grid">
+                          {clip.visualAssets.slice(0, 3).map(asset => (
+                            <button
+                              key={asset.id || asset.url}
+                              type="button"
+                              className={`promo-summary-asset-card ${
+                                selectedVisual?.url === asset.url ? "is-selected" : ""
+                              }`}
+                              onClick={() => handleSelectVisual(clip, index, asset)}
+                            >
+                              <SafeImage src={asset.url} alt={asset.label || asset.type || "Promo visual"} />
+                              <span>{selectedVisual?.url === asset.url ? "Selected" : asset.label || asset.type || "Visual"}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
+                    <div className="promo-summary-result-actions">
+                      <button type="button" className="promo-summary-secondary" onClick={() => handleDownload(clip)}>
+                        Download
+                      </button>
+                      {clip.visualAssets?.[0]?.url ? (
+                        <button
+                          type="button"
+                          className="promo-summary-secondary"
+                          onClick={() => handleDownloadVisuals(clip)}
+                        >
+                          Download Visuals
+                        </button>
+                      ) : null}
                       <button
                         type="button"
-                        className="promo-summary-secondary"
-                        onClick={() => handleDownloadVisuals(clip)}
+                        className="promo-summary-primary"
+                        onClick={() =>
+                          onUseClip &&
+                          onUseClip({
+                            ...clip,
+                            selectedVisual,
+                            selectedThumbnailUrl: selectedVisual?.url || null,
+                          })
+                        }
                       >
-                        Download Visuals
+                        Use Clip + Visual
                       </button>
-                    ) : null}
-                    <button
-                      type="button"
-                      className="promo-summary-primary"
-                      onClick={() =>
-                        onUseClip &&
-                        onUseClip({
-                          ...clip,
-                          selectedVisual,
-                          selectedThumbnailUrl: selectedVisual?.url || null,
-                        })
-                      }
-                    >
-                      Use Clip + Visual
-                    </button>
-                  </div>
-                </article>
+                    </div>
+                  </article>
                 );
               })}
             </div>
           )}
         </div>
+        {/* Hidden elements for frame capture */}
+        <video
+          ref={captureVideoRef}
+          src={sourcePreviewUrl}
+          crossOrigin="anonymous"
+          preload="auto"
+          muted
+          style={{ display: "none" }}
+        />
+        <canvas
+          ref={captureCanvasRef}
+          style={{ display: "none" }}
+        />
       </div>
-      {/* Hidden elements for frame capture */}
-      <video
-        ref={captureVideoRef}
-        src={sourcePreviewUrl}
-        crossOrigin="anonymous"
-        preload="auto"
-        muted
-        style={{ display: "none" }}
-      />
-      <canvas
-        ref={captureCanvasRef}
-        style={{ display: "none" }}
-      />
     </div>
   );
 }

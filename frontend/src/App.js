@@ -41,7 +41,6 @@ import ChatWidget from "./ChatWidget";
 import PayPalSubscriptionPanel from "./components/PayPalSubscriptionPanel";
 import { Sentry } from "./sentryClient";
 import TestSentryButton from "./components/TestSentryButton";
-import Footer from "./components/Footer";
 import WelcomePage from "./WelcomePage";
 import LoginForm from "./LoginForm";
 import RegisterForm from "./RegisterForm";
@@ -1750,9 +1749,6 @@ function App() {
 
       {/* AI Chat Widget - only show when user is logged in */}
       {user && <ChatWidget user={user} />}
-
-      {/* Global Footer */}
-      <Footer />
     </div>
   );
 }

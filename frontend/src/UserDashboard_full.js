@@ -89,6 +89,7 @@ const UserDashboard = ({
   const notificationSessionStartedAtRef = useRef(Date.now());
   const didHydrateNotificationPollRef = useRef(false);
   const [uploadLaunchTab, setUploadLaunchTab] = useState(null);
+  const [billingReturnTab, setBillingReturnTab] = useState("profile");
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedPlatforms, setSelectedPlatforms] = useState([]);
   const [platformOptions, setPlatformOptions] = useState({});
@@ -119,6 +120,24 @@ const UserDashboard = ({
   );
 
   const [scheduleContentMap, setScheduleContentMap] = useState({});
+
+  const BILLING_RETURN_TAB_LABELS = {
+    profile: "Overview",
+    connections: "Connections",
+    upload: "Uploads",
+    schedules: "Queue",
+    analytics: "Analytics",
+    clips: "Clip Studio",
+    idea_video: "Creative Tools",
+    security: "Security",
+    notifications: "Notifications",
+    "admin-audit": "Admin Audit",
+    "admin-kyc": "Admin KYC",
+    wolf_hunt: "Mission Board",
+    ads: "Rewards",
+    rewards: "Rewards",
+    live: "Live",
+  };
 
   // Platform statuses managed by the usePlatformStatus hook
   const {
@@ -417,11 +436,18 @@ const UserDashboard = ({
         toast("Clip Studio is currently locked.", { icon: "🔒" });
         return;
       }
+      if (tab !== activeTab) {
+        if (tab === "billing") {
+          setBillingReturnTab(activeTab);
+        } else if (activeTab === "billing") {
+          setBillingReturnTab(activeTab);
+        }
+      }
       setUploadLaunchTab(tab === "upload" ? options?.uploadTab || null : null);
       setActiveTab(tab);
       setSidebarOpen(false);
     },
-    [ENABLE_WOLF_HUNT, clipStudioLocked]
+    [ENABLE_WOLF_HUNT, clipStudioLocked, activeTab]
   );
   const triggerSchedulesRefresh = useCallback(() => {
     onSchedulesChanged && onSchedulesChanged();
@@ -1208,7 +1234,7 @@ const UserDashboard = ({
         <div style={{ display: "flex", justifyContent: "flex-end", padding: "10px 20px 0 0" }}>
           <VoiceOverGuide activeTab={activeTab} />
         </div>
-        <UsageLimitBanner />
+        <UsageLimitBanner backLabel={BILLING_RETURN_TAB_LABELS[activeTab] || "Dashboard"} />
         {!emailVerified && (
           <div
             className="verification-banner"
@@ -1435,7 +1461,49 @@ const UserDashboard = ({
 
         {activeTab === "ads" && <MissionControlPanel />}
 
-        {activeTab === "billing" && <PayPalSubscriptionPanel />}
+        {activeTab === "billing" && (
+          <div style={{ padding: "0 0 16px" }}>
+            <button
+              type="button"
+              onClick={() => handleNav(billingReturnTab || "profile")}
+              aria-label={`Go back to ${BILLING_RETURN_TAB_LABELS[billingReturnTab] || "previous section"}`}
+              style={{
+                marginBottom: "12px",
+                border: "1px solid #4f46e5",
+                background: "#4f46e5",
+                color: "#ffffff",
+                padding: "10px 18px",
+                borderRadius: "12px",
+                cursor: "pointer",
+                fontWeight: 700,
+                lineHeight: 1,
+                fontSize: "0.95rem",
+                boxShadow: "0 2px 10px rgba(79, 70, 229, 0.35)",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "6px",
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = "#4338ca";
+                e.currentTarget.style.borderColor = "#4338ca";
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = "#4f46e5";
+                e.currentTarget.style.borderColor = "#4f46e5";
+              }}
+              onMouseDown={e => {
+                e.currentTarget.style.transform = "translateY(1px)";
+              }}
+              onMouseUp={e => {
+                e.currentTarget.style.transform = "translateY(0)";
+              }}
+            >
+              Back to {BILLING_RETURN_TAB_LABELS[billingReturnTab] || "previous section"}
+            </button>
+            <PayPalSubscriptionPanel />
+          </div>
+        )}
 
         {activeTab === "connections" && (
           <ConnectionsPanel

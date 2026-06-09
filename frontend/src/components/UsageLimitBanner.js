@@ -4,11 +4,14 @@
 import React, { useState, useEffect } from "react";
 import { auth } from "../firebaseClient";
 import { API_BASE_URL } from "../config";
+import { useLocation, useNavigate } from "react-router-dom";
 import "./UsageLimitBanner.css";
 
-const UsageLimitBanner = () => {
+const UsageLimitBanner = ({ backLabel }) => {
   const [usage, setUsage] = useState(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     loadUsageStats();
@@ -35,8 +38,12 @@ const UsageLimitBanner = () => {
   };
 
   const handleUpgrade = () => {
-    // Navigate to pricing page (use hash router so we don't hit server)
-    window.location.hash = "#/pricing";
+    navigate("/pricing", {
+      state: {
+        from: `${location.pathname}${location.search}${location.hash}`,
+        backLabel,
+      },
+    });
   };
 
   if (loading || !usage || usage.isPaid) {
