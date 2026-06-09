@@ -1,4 +1,3 @@
-import Footer from "./components/Footer";
 import TopNav from "./components/landing/TopNav";
 import HeroScreenshot from "./components/landing/HeroScreenshot";
 import SectionHeading from "./components/landing/SectionHeading";
@@ -7,6 +6,7 @@ import WorkflowSection from "./components/landing/WorkflowSection";
 import ProofSection from "./components/landing/ProofSection";
 import PricingSection from "./components/landing/PricingSection";
 import FinalCta from "./components/landing/FinalCta";
+import Footer from "./components/Footer";
 import {
   exampleContent,
   featureCards,

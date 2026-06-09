@@ -10227,9 +10227,43 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           <div className="nle-billing-modal" role="dialog" aria-modal="true" aria-label="Cam Combiner billing">
             <div className="nle-billing-modal-backdrop" onClick={() => setBillingPanelOpen(false)} />
             <div className="nle-billing-modal-panel">
+              <button
+                type="button"
+                onClick={() => setBillingPanelOpen(false)}
+                style={{
+                  marginBottom: "12px",
+                  border: "1px solid #4f46e5",
+                  background: "#4f46e5",
+                  color: "#ffffff",
+                  padding: "10px 18px",
+                  borderRadius: "12px",
+                  cursor: "pointer",
+                  fontWeight: 700,
+                  lineHeight: 1,
+                  fontSize: "0.95rem",
+                  boxShadow: "0 2px 10px rgba(79, 70, 229, 0.35)",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "6px",
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = "#4338ca";
+                  e.currentTarget.style.borderColor = "#4338ca";
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = "#4f46e5";
+                  e.currentTarget.style.borderColor = "#4f46e5";
+                }}
+                onMouseDown={e => {
+                  e.currentTarget.style.transform = "translateY(1px)";
+                }}
+                onMouseUp={e => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                }}
+              >
+                Back to Cam Combiner
+              </button>
               <PayPalSubscriptionPanel
-                onClose={() => setBillingPanelOpen(false)}
-                closeLabel="Back to Cam Combiner"
                 title="PayPal credits and plan access"
                 subtitle="Top up credits before clean-audio sync or server rendering, or upgrade your plan from here."
               />

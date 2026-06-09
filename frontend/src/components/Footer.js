@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { PUBLIC_SITE_URL } from "../config";
 import "./Footer.css";
 import NewsletterSubscribe from "./NewsletterSubscribe";
@@ -28,6 +28,7 @@ const Icon = ({ name }) => {
 
 const Footer = () => {
   const [showNewsletter, setShowNewsletter] = useState(false);
+  const location = useLocation();
   const [lang, setLang] = useState(() => {
     try {
       return localStorage.getItem("ap_lang") || "en";
@@ -50,7 +51,12 @@ const Footer = () => {
         <div className="ap-footer-col">
           <div className="ap-footer-header">Product</div>
           <Link to="/features">Features</Link>
-          <Link to="/pricing">Pricing</Link>
+          <Link
+            to="/pricing"
+            state={{ from: `${location.pathname}${location.search}${location.hash}` }}
+          >
+            Pricing
+          </Link>
           <Link to="/integrations">Integrations</Link>
           <Link to="/metrics">Analytics</Link>
           <Link to="/changelog">Changelog</Link>
