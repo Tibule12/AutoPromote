@@ -2564,6 +2564,15 @@ try {
   // Ensure unmatched routes serve the React app
   app.use((req, res, next) => {
     // Avoid serving index.html for API, static, or well-known paths
+    if (req.path === "/") {
+      if (req.method === "HEAD") return res.status(200).end();
+      return res.status(200).json({
+        ok: true,
+        service: "AutoPromote API",
+        status: "healthy",
+        health: "/api/health",
+      });
+    }
     if (
       req.path &&
       (req.path.startsWith("/static") ||
