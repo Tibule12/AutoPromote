@@ -6,8 +6,6 @@ const { extractOwnedStoragePathFromUrl } = require("./utils/cleanupSource");
 const authMiddleware = require("./authMiddleware");
 const Joi = require("joi");
 const crypto = require("crypto");
-const path = require("path");
-const sanitizeForFirestore = require(path.join(__dirname, "utils", "sanitizeForFirestore"));
 const {
   usageLimitMiddleware,
   trackUsage,
@@ -26,10 +24,10 @@ const { getPlanCapabilities } = require("./config/subscriptionPlans");
 // --- OPTIMIZATION START: Eager Loading for Performance ---
 // Previously lazy-loaded inside request handler causing 2-5s lag per upload.
 // Moving to module scope initializes them once at startup.
-const hashtagEngine = require("./services/hashtagEngine");
-const smartDistributionEngine = require("./services/smartDistributionEngine");
-const viralImpactEngine = require("./services/viralImpactEngine");
-const algorithmExploitationEngine = require("./services/algorithmExploitationEngine");
+const _hashtagEngine = require("./services/hashtagEngine");
+const _smartDistributionEngine = require("./services/smartDistributionEngine");
+const _viralImpactEngine = require("./services/viralImpactEngine");
+const _algorithmExploitationEngine = require("./services/algorithmExploitationEngine");
 const { performViralOptimization } = require("./services/viralOptimizationService");
 const {
   diagnoseContent,
@@ -60,9 +58,9 @@ const {
 const { buildRepostCreativePlan } = require("./services/repostSchedulerService");
 
 // Optional services still loaded defensively
-let viralInsuranceService;
+let _viralInsuranceService;
 try {
-  viralInsuranceService = require("./services/viralInsuranceService");
+  _viralInsuranceService = require("./services/viralInsuranceService");
 } catch (e) {
   console.warn("[Startup] Optional Protocol 7 Service not found:", e.message);
 }
@@ -324,7 +322,7 @@ async function getOwnedContentSnapshot(userId, identifier) {
 function hasExplicitFutureSchedule(scheduledPromotionTime) {
   if (!scheduledPromotionTime) return false;
   const scheduledAt = Date.parse(scheduledPromotionTime);
-  return Number.isFinite(scheduledAt) && scheduledAt > Date.now() + 30000;
+  return Number.isFinite(scheduledAt) && scheduledAt > Date.now();
 }
 
 function toPositiveFiniteNumber(value) {
@@ -727,7 +725,6 @@ router.post(
       const isE2ETest = req.headers && req.headers["x-playwright-e2e"] === "1";
       if (isE2ETest && !req.body.isDryRun) {
         const fakeId = `e2e-fake-${Date.now()}`;
-        const isAdminTest = req.user && (req.user.isAdmin === true || req.user.role === "admin");
         const status = "approved";
         const approvalStatus = "approved";
         return res.status(201).json({ content: { id: fakeId, status, approvalStatus } });
@@ -812,7 +809,6 @@ router.post(
         return tier;
       }
 
-      const isAdmin = !!(req.user && (req.user.isAdmin === true || req.user.role === "admin"));
       const detectedIntent = determineContentIntent(platform_options);
 
       if (!req.body.isDryRun) {

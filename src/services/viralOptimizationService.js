@@ -27,7 +27,7 @@ function loadEngines() {
 function hasExplicitFutureSchedule(scheduledPromotionTime) {
   if (!scheduledPromotionTime) return false;
   const scheduledAt = Date.parse(scheduledPromotionTime);
-  return Number.isFinite(scheduledAt) && scheduledAt > Date.now() + 30000;
+  return Number.isFinite(scheduledAt) && scheduledAt > Date.now();
 }
 
 /**
