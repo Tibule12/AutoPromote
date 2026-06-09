@@ -15,8 +15,8 @@ function buildPlatformPayload(content, platform) {
   switch (platform) {
     case "youtube":
       return {
-        title,
-        description,
+        title: opts.title || title,
+        description: opts.description || description,
         mediaUrl: opts.media_url || url,
         fileUrl: opts.media_url || url,
         shortsMode: !!opts.shortsMode,
@@ -68,9 +68,9 @@ function buildPlatformPayload(content, platform) {
     case "linkedin":
       return {
         title: opts.title || title,
-        description,
-        text: opts.commentary || description || title,
-        commentary: opts.commentary || description || title,
+        description: opts.description || description,
+        text: opts.commentary || opts.description || description || opts.title || title,
+        commentary: opts.commentary || opts.description || description || opts.title || title,
         mediaUrl: opts.media_url || url,
         videoUrl: opts.media_url || url,
         postType: opts.postType || "video",

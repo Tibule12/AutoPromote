@@ -788,6 +788,11 @@ const PlatformPreview = ({
   // 2. YouTube Mockup
   if (platformId === "youtube") {
     const isShorts = data.shortsMode;
+    const shortDescription = data.description
+      ? data.description.length > 90
+        ? `${data.description.substring(0, 90)}...`
+        : data.description
+      : "";
     if (isShorts) {
       // YouTube Shorts (flexible for horizontal videos)
       const isHorizontal = mediaAspectRatio && mediaAspectRatio > 1.2;
@@ -820,6 +825,19 @@ const PlatformPreview = ({
             <div style={{ fontWeight: "bold", marginBottom: "5px" }}>
               {data.title || "Title goes here..."}
             </div>
+            {shortDescription ? (
+              <div
+                style={{
+                  fontSize: "0.8rem",
+                  lineHeight: "1.35",
+                  marginBottom: "8px",
+                  opacity: 0.92,
+                  whiteSpace: "pre-wrap",
+                }}
+              >
+                {shortDescription}
+              </div>
+            ) : null}
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               {creatorInfo?.snippet?.thumbnails?.default?.url ? (
                 <img
@@ -1220,7 +1238,9 @@ const PlatformPreview = ({
             whiteSpace: "pre-wrap",
           }}
         >
-          {data.commentary || data.title || "Your post content..."}
+          {[String(data.title || "").trim(), String(data.commentary || "").trim()]
+            .filter(Boolean)
+            .join("\n\n") || "Your post content..."}
         </div>
         {renderMedia({ width: "100%", height: "auto", maxHeight: "400px" })}
         <div
@@ -2315,9 +2335,9 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
 
     if (scheduledTime) {
       const scheduledAtMs = Date.parse(scheduledTime);
-      if (!Number.isFinite(scheduledAtMs) || scheduledAtMs <= Date.now() + 30000) {
-        setFeedbackMessage("Choose a queue time at least 30 seconds in the future.");
-        toast.error("Choose a queue time at least 30 seconds in the future.");
+      if (!Number.isFinite(scheduledAtMs) || scheduledAtMs <= Date.now()) {
+        setFeedbackMessage("Choose a queue time that has not already passed.");
+        toast.error("Choose a queue time that has not already passed.");
         return;
       }
     }
