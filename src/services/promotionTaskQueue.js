@@ -95,6 +95,24 @@ function buildPlatformPostHash({ platform, contentId, payload = {} }) {
     .digest("hex");
 }
 
+function signTaskDocument(task) {
+  if (!task || task._testStub) return task;
+  try {
+    const { attachSignature } = require("../utils/docSigner");
+    const copy = { ...task };
+    delete copy._sig;
+    return attachSignature(copy);
+  } catch (_) {
+    return task;
+  }
+}
+
+async function replaceSignedTask(ref, current, patch) {
+  const next = signTaskDocument({ ...(current || {}), ...(patch || {}) });
+  await ref.set(next);
+  return next;
+}
+
 async function enqueueYouTubeUploadTask({
   contentId,
   uid,
@@ -193,6 +211,7 @@ async function processNextYouTubeTask() {
   }
   if (!selectedDoc) return null; // none ready yet
   const task = { id: selectedDoc.id, ...selectedData };
+  let taskData = { ...selectedData };
 
   // Verify signature before processing
   try {
@@ -217,7 +236,10 @@ async function processNextYouTubeTask() {
   }
 
   const taskRef = selectedDoc.ref;
-  await taskRef.update({ status: "processing", updatedAt: new Date().toISOString() });
+  taskData = await replaceSignedTask(taskRef, taskData, {
+    status: "processing",
+    updatedAt: new Date().toISOString(),
+  });
 
   try {
     const { uploadVideo } = require("./youtubeService");
@@ -250,7 +272,7 @@ async function processNextYouTubeTask() {
       console.warn("Failed to record youtube platform post:", e.message);
     }
 
-    await taskRef.update({
+    await replaceSignedTask(taskRef, taskData, {
       status: "completed",
       outcome,
       completedAt: new Date().toISOString(),
@@ -284,7 +306,11 @@ async function processNextYouTubeTask() {
       updatedAt: new Date().toISOString(),
       failedAt: new Date().toISOString(),
     };
-    await taskRef.update(failed);
+    if (retryable) {
+      taskData = await replaceSignedTask(taskRef, taskData, failed);
+    } else {
+      await taskRef.update(failed);
+    }
     if (failed.status === "failed") {
       // Notify User: Failed
       if (task.uid) {
@@ -892,6 +918,7 @@ async function processNextPlatformTask() {
   }
   if (!selectedDoc) return null;
   const task = { id: selectedDoc.id, ...selectedData };
+  let taskData = { ...selectedData };
 
   // Debug visibility (User explicitly requested upload logs)
   console.log(
@@ -925,7 +952,10 @@ async function processNextPlatformTask() {
   } catch (e) {
     console.log("[process] signature verification error", e && e.message);
   }
-  await selectedDoc.ref.update({ status: "processing", updatedAt: new Date().toISOString() });
+  taskData = await replaceSignedTask(selectedDoc.ref, taskData, {
+    status: "processing",
+    updatedAt: new Date().toISOString(),
+  });
   let lockId = null; // promote to function-scope so catch handlers can access it
   try {
     const { dispatchPlatformPost } = require("./platformPoster");
@@ -935,7 +965,7 @@ async function processNextPlatformTask() {
     const cooldownUntil = await getCooldown(task.platform);
     if (cooldownUntil && cooldownUntil > Date.now()) {
       // Re-queue with nextAttemptAt = cooldownUntil
-      await selectedDoc.ref.update({
+      taskData = await replaceSignedTask(selectedDoc.ref, taskData, {
         status: "queued",
         nextAttemptAt: new Date(cooldownUntil + 500).toISOString(),
         updatedAt: new Date().toISOString(),
@@ -1464,7 +1494,7 @@ async function processNextPlatformTask() {
         }
       }
     } catch (_) {}
-    await selectedDoc.ref.update({
+    await replaceSignedTask(selectedDoc.ref, taskData, {
       status: "completed",
       outcome: simulatedResult,
       completedAt: new Date().toISOString(),
@@ -1638,7 +1668,11 @@ async function processNextPlatformTask() {
       updatedAt: new Date().toISOString(),
       failedAt: new Date().toISOString(),
     };
-    await selectedDoc.ref.update(failed);
+    if (retryable) {
+      taskData = await replaceSignedTask(selectedDoc.ref, taskData, failed);
+    } else {
+      await selectedDoc.ref.update(failed);
+    }
     if (failed.status === "failed") {
       try {
         await db
