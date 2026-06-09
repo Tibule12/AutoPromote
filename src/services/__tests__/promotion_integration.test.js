@@ -94,7 +94,7 @@ describe("Promotion integration (mocked platforms)", () => {
     jest.spyOn(rl, "getCooldown").mockResolvedValue(null);
 
     // run processor
-    await processNextPlatformTask();
+    const out = await processNextPlatformTask();
     expect(out).toBeTruthy();
     expect(out).toHaveProperty("taskId");
 
@@ -352,7 +352,7 @@ describe("Promotion integration (mocked platforms)", () => {
     const rl = require("../rateLimitTracker");
     jest.spyOn(rl, "getCooldown").mockResolvedValue(null);
 
-    await processNextPlatformTask();
+    const out = await processNextPlatformTask();
     // transient retry may be indicated by a direct error/retry, or by detecting a recent duplicate (skip)
     if (out && out.skipped) {
       expect(out.reason).toBe("duplicate_recent_post");
@@ -420,7 +420,7 @@ describe("Promotion integration (mocked platforms)", () => {
       uid,
       platform,
       reason: "approved",
-      payload: {},
+      payload: { message: "force-platform-failure-path" },
     });
     const signer = require("../../utils/docSigner");
     jest.spyOn(signer, "verifySignature").mockReturnValue(true);
