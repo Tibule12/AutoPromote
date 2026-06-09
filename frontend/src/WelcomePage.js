@@ -17,6 +17,21 @@ import {
 } from "./data/landingPageData";
 import "./WelcomePage.css";
 
+const availabilityCards = [
+  {
+    title: "Publishing queue and scheduling",
+    subtitle: "Upload, queue, and schedule content across connected platforms.",
+  },
+  {
+    title: "Editing and clip preparation",
+    subtitle: "Trim, caption, and format media inside the product before you publish.",
+  },
+  {
+    title: "Analytics and account depth",
+    subtitle: "Reporting and posting depth vary by connected account permissions and platform APIs.",
+  },
+];
+
 const WelcomePage = ({ onGetStarted, onSignIn }) => {
   const handleWatchDemo = () => {
     window.open("/demo-teaser.mp4", "_blank", "noopener,noreferrer");
@@ -62,6 +77,15 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
             copy="Visual, practical tools that replace scattered workflows."
           />
           <FeatureGrid items={featureCards} />
+        </section>
+
+        <section className="ap-section" id="availability">
+          <SectionHeading
+            eyebrow="Availability Snapshot"
+            title="What Works Today"
+            copy="A conservative view of the product today so teams can plan around live functionality instead of aspirational copy."
+          />
+          <FeatureGrid items={availabilityCards} />
         </section>
 
         <section className="ap-section" id="workflow">
