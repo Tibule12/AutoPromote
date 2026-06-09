@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getAuth } from "firebase/auth";
-import { API_ENDPOINTS } from "../config";
+import { API_ENDPOINTS, MEDIA_API_URL } from "../config";
 import { SafeImage } from "./SafeMedia";
 import "./SmartPromoSummaryPanel.css";
 
@@ -233,6 +233,137 @@ const inferVisualStageFromProgress = analysis => {
   return "rendering_final_output";
 };
 
+const normalizeIncomingPreview = analysis => {
+  if (!analysis || typeof analysis !== "object") return null;
+  if (analysis.preview && typeof analysis.preview === "object") {
+    return analysis.preview;
+  }
+
+  const status = inferVisualStageFromProgress(analysis);
+  const normalizedStatus = String(analysis?.status || "").toLowerCase();
+  return {
+    status: normalizedStatus,
+    stage: status,
+    progress: Number(analysis.progress || 0),
+    detail: String(analysis.detail || "").trim(),
+    frameOffsetMs: Number.isFinite(Number(analysis.previewFrameOffsetMs || analysis.currentPreviewFrameOffsetMs))
+      ? Number(analysis.previewFrameOffsetMs || analysis.currentPreviewFrameOffsetMs)
+      : null,
+    currentAction: null,
+    timeline: [],
+    totalTimelineEvents: 0,
+  };
+};
+
+const getTimelineTotalDurationMs = timeline => {
+  if (!Array.isArray(timeline) || !timeline.length) return 0;
+
+  const totalSeconds = timeline.reduce((sum, segment) => {
+    const duration = Number(segment?.duration || 0);
+    return sum + (Number.isFinite(duration) && duration > 0 ? duration : 0);
+  }, 0);
+
+  return Number.isFinite(totalSeconds) && totalSeconds > 0 ? totalSeconds * 1000 : 0;
+};
+
+const resolveSegmentCursor = (timeline, offsetMs, fallbackPercent = 0) => {
+  if (!Array.isArray(timeline) || !timeline.length) {
+    return {
+      segmentIndex: 0,
+      segment: null,
+      segmentOffsetMs: 0,
+      segmentProgress: 0,
+    };
+  }
+
+  const totalDuration = timeline.reduce((total, segment) => {
+    const start = Number(segment?.start || 0);
+    const end = Number(segment?.end || start);
+    const duration = Number.isFinite(segment?.duration)
+      ? Number(segment.duration)
+      : Math.max(0, end - start);
+    return total + (Number.isFinite(duration) ? duration : 0);
+  }, 0);
+
+  if (!Number.isFinite(totalDuration) || totalDuration <= 0) {
+    const fallbackIndex = Math.max(0, Math.floor(((Number(fallbackPercent) || 0) / 100) * timeline.length - 1));
+    return {
+      segmentIndex: Math.min(timeline.length - 1, Math.max(0, fallbackIndex)),
+      segment: timeline[Math.min(timeline.length - 1, Math.max(0, fallbackIndex))] || timeline[0],
+      segmentOffsetMs: 0,
+      segmentProgress: 0,
+    };
+  }
+
+  const totalDurationMs = Math.max(1, totalDuration * 1000);
+  const safeOffsetMs = Math.max(0, Number(offsetMs || 0));
+  let cursorMs = safeOffsetMs % totalDurationMs;
+
+  for (let index = 0; index < timeline.length; index += 1) {
+    const segment = timeline[index] || {};
+    const segmentDurationMs = Math.max(0, Number(segment.duration || 0) * 1000);
+    if (segmentDurationMs <= 0) continue;
+
+    if (cursorMs <= segmentDurationMs) {
+      return {
+        segmentIndex: index,
+        segment,
+        segmentOffsetMs: cursorMs,
+        segmentProgress: Math.min(1, Math.max(0, cursorMs / segmentDurationMs)),
+      };
+    }
+
+    cursorMs -= segmentDurationMs;
+  }
+
+  const lastIndex = timeline.length - 1;
+  const fallbackSegment = timeline[lastIndex] || timeline[0];
+  const fallbackDurationMs = Math.max(0.001, Number(fallbackSegment?.duration || 0) * 1000);
+  return {
+    segmentIndex: lastIndex,
+    segment: fallbackSegment,
+    segmentOffsetMs: fallbackDurationMs,
+    segmentProgress: 1,
+  };
+};
+
+const clamp01 = value => {
+  if (!Number.isFinite(value)) return 0;
+  return Math.max(0, Math.min(1, value));
+};
+
+const resolveSourceTimeFromTimelineOffset = (timeline, offsetMs) => {
+  const safeOffsetMs = Number.isFinite(Number(offsetMs)) ? Number(offsetMs) : 0;
+  if (!Array.isArray(timeline) || !timeline.length || !Number.isFinite(safeOffsetMs)) {
+    return 0;
+  }
+
+  const totalDurationMs = getTimelineTotalDurationMs(timeline);
+  if (!totalDurationMs) {
+    return 0;
+  }
+
+  const normalizedOffsetMs = ((safeOffsetMs % totalDurationMs) + totalDurationMs) % totalDurationMs;
+  let cursorMs = normalizedOffsetMs;
+
+  for (const segment of timeline) {
+    const segmentStartMs = Math.max(0, Number(segment?.start || 0) * 1000);
+    const segmentDurationMs = Math.max(0, Number(segment?.duration || 0) * 1000);
+    if (segmentDurationMs <= 0) {
+      continue;
+    }
+
+    if (cursorMs <= segmentDurationMs) {
+      return segmentStartMs + cursorMs;
+    }
+
+    cursorMs -= segmentDurationMs;
+  }
+
+  const lastSegment = timeline[timeline.length - 1] || {};
+  return Math.max(0, Number(lastSegment?.end || 0) * 1000);
+};
+
 const extractPlannedTimeline = analysis => {
   const rawTimeline =
     (Array.isArray(analysis?.plannedEditTimeline) && analysis.plannedEditTimeline) ||
@@ -271,6 +402,120 @@ const extractPlannedTimeline = analysis => {
       faceCount: Number(segment.faceCount ?? 0),
       framingVariant: segment.framingVariant || "center",
     }));
+};
+
+const buildFallbackTimelineFromEvents = (events = [], sourceDurationMs = 0) => {
+  const safeDurationMs = Number.isFinite(Number(sourceDurationMs)) ? Math.max(0, Number(sourceDurationMs)) : 0;
+  const normalizedEvents = Array.isArray(events)
+    ? events
+        .map(event => {
+          const rawOffsetMs = Number(
+            event?.atMs ?? event?.timestampMs ?? event?.startTimeMs ?? event?.offsetMs ?? 0
+          );
+          return {
+            ...event,
+            normalizedOffsetMs: Number.isFinite(rawOffsetMs) ? Math.max(0, rawOffsetMs) : null,
+            label: String(event?.label || event?.action || "Smart edit").trim() || "Smart edit",
+            detail: String(event?.description || event?.detail || event?.label || event?.action || "Dynamic scene pacing").trim(),
+          };
+        })
+        .filter(event => Number.isFinite(event.normalizedOffsetMs))
+        .sort((left, right) => left.normalizedOffsetMs - right.normalizedOffsetMs)
+    : [];
+
+  if (!normalizedEvents.length) {
+    const fallbackDurationMs = safeDurationMs > 0 ? safeDurationMs : 12000;
+    const segmentCount = Math.max(5, Math.min(9, Math.ceil(fallbackDurationMs / 1800)));
+    const segmentMs = Math.max(900, Math.floor(fallbackDurationMs / segmentCount));
+    const visualModes = ["focus", "tight", "wide", "slow_movement", "focus", "tight"];
+    return Array.from({ length: segmentCount }, (_, index) => {
+      const segmentStartMs = Math.min(index * segmentMs, fallbackDurationMs);
+      const segmentEndMs = Math.min((index + 1) * segmentMs, fallbackDurationMs);
+      const segmentDurationMs = Math.max(220, segmentEndMs - segmentStartMs);
+      const position = segmentCount > 1 ? index / (segmentCount - 1) : 0;
+
+      return {
+        id: `fallback-segment-${index}`,
+        start: segmentStartMs / 1000,
+        end: segmentEndMs / 1000,
+        duration: segmentDurationMs / 1000,
+        editLabel: index === 0 ? "Warmup scan" : index === segmentCount - 1 ? "Closing hold" : "Live visual move",
+        reason: `Estimated ${index % 2 ? "focus lock" : "frame push"} from live preview signal.`,
+        visualMode: visualModes[index % visualModes.length],
+        audioEnergyDb: -34 + (Math.sin(position * Math.PI * 2) * 10),
+        motionScore: 0.18 + Math.max(0.01, Math.cos(position * Math.PI * 1.4) * 0.22),
+        focusX: Math.min(0.92, Math.max(0.08, 0.35 + Math.sin(position * Math.PI * 2) * 0.32)),
+        focusY: Math.min(0.92, Math.max(0.08, 0.65 - Math.cos(position * Math.PI * 2) * 0.25)),
+        startFocusX: Math.min(0.92, Math.max(0.08, 0.2 + (index % 2 ? 0.44 : 0.2))),
+        startFocusY: Math.min(0.92, Math.max(0.08, 0.22 + (index % 2 ? 0.2 : 0.35))),
+        endFocusX: Math.min(0.92, Math.max(0.08, 0.78 - (index % 2 ? 0.44 : 0.22))),
+        endFocusY: Math.min(0.92, Math.max(0.08, 0.22 + (index % 2 ? 0.35 : 0.2))),
+        zoom: 0.88 + (index % 3) * 0.04,
+        zoomStart: 0.96 + (index % 4) * 0.02,
+        zoomEnd: 0.89 + ((index + 1) % 4) * 0.02,
+        faceCount: 0,
+        framingVariant: index % 2 === 0 ? "slow_movement" : "asymmetric",
+      };
+    });
+  }
+
+  const points = [];
+  normalizedEvents.forEach((event, index) => {
+    const atMs = event.normalizedOffsetMs || 0;
+    if (index === 0 && atMs > 0) {
+      points.push({ offsetMs: 0, sourceEvent: event });
+    }
+    if (!points.some(point => point.offsetMs === atMs)) {
+      points.push({ offsetMs: atMs, sourceEvent: event });
+    }
+  });
+
+  const totalMs = safeDurationMs > 0
+    ? safeDurationMs
+    : Math.max(2000, (points[points.length - 1]?.offsetMs || 0) + 1200);
+  if (points.length === 1 || points[points.length - 1].offsetMs < totalMs - 120) {
+    points.push({ offsetMs: totalMs, sourceEvent: points[points.length - 1]?.sourceEvent || normalizedEvents[0] });
+  }
+
+  const segments = [];
+  for (let index = 0; index < points.length - 1; index += 1) {
+    const start = points[index];
+    const end = points[index + 1];
+    const segStartMs = Number(start.offsetMs || 0);
+    const segEndMs = Number(end.offsetMs || segStartMs);
+    const segmentDurationMs = Math.max(1200, segEndMs - segStartMs);
+    const sourceEvent = start.sourceEvent || {};
+    const actionToken = String(sourceEvent.action || sourceEvent.label || "").toLowerCase();
+    const isRenderingAction = actionToken.includes("render");
+    const isAnalysisAction = actionToken.includes("analyz") || actionToken.includes("queued") || actionToken.includes("wait");
+    const visualMode = isRenderingAction ? "tight" : isAnalysisAction ? "wide" : index % 2 === 0 ? "focus" : "wide";
+    const progress = (index + 1) / Math.max(2, points.length);
+
+    segments.push({
+      id: sourceEvent.id || `preview-event-${index}`,
+      start: segStartMs / 1000,
+      end: segEndMs / 1000,
+      duration: segmentDurationMs / 1000,
+      editLabel: sourceEvent.label || `Edit ${index + 1}`,
+      reason: sourceEvent.detail || sourceEvent.description || "Dynamic visual rhythm update.",
+      visualMode,
+      audioEnergyDb: (isAnalysisAction ? -28 : -16) + progress * 4,
+      motionScore: isRenderingAction ? 0.52 : isAnalysisAction ? 0.19 : 0.33,
+      focusX: Math.min(0.9, Math.max(0.1, 0.35 + progress * 0.25)),
+      focusY: Math.min(0.9, Math.max(0.1, 0.65 - progress * 0.2)),
+      startFocusX: Math.min(0.9, Math.max(0.1, 0.35 + (progress + 0.08) * 0.25)),
+      startFocusY: Math.min(0.9, Math.max(0.1, 0.64 - (progress - 0.08) * 0.2)),
+      endFocusX: Math.min(0.9, Math.max(0.1, 0.4 + progress * 0.2)),
+      endFocusY: Math.min(0.9, Math.max(0.1, 0.6 - progress * 0.18)),
+      zoom: isRenderingAction ? 0.9 : 1,
+      zoomStart: isRenderingAction ? 1 : 0.97,
+      zoomEnd: isRenderingAction ? 0.9 : 0.95,
+      faceCount: 0,
+      framingVariant: isAnalysisAction ? "center" : index % 2 === 0 ? "asymmetric" : "slow_movement",
+    });
+  }
+
+  return segments;
 };
 
 const buildVisualProgressSteps = analysis => {
@@ -319,53 +564,64 @@ const buildWaveformBars = timeline => {
   return bars.slice(0, 72);
 };
 
-const getPreviewViewportMeta = segment => {
+const getPreviewViewportMeta = (segment, segmentProgress = 0) => {
   if (!segment) {
     return {
       focusX: 0.5,
       focusY: 0.5,
       scale: 1,
       translateX: 0,
+      translateY: 0,
       visualMode: "focus",
       framingVariant: "center",
     };
   }
 
-  const focusX = Math.max(0.18, Math.min(0.82, Number(segment.endFocusX ?? segment.focusX ?? 0.5)));
-  const focusY = Math.max(0.22, Math.min(0.78, Number(segment.endFocusY ?? segment.focusY ?? 0.5)));
+  const startFocusX = Math.max(0.18, Math.min(0.82, Number(segment.startFocusX ?? segment.focusX ?? 0.5)));
+  const endFocusX = Math.max(0.18, Math.min(0.82, Number(segment.endFocusX ?? segment.focusX ?? 0.5)));
+  const startFocusY = Math.max(0.22, Math.min(0.78, Number(segment.startFocusY ?? segment.focusY ?? 0.5)));
+  const endFocusY = Math.max(0.22, Math.min(0.78, Number(segment.endFocusY ?? segment.focusY ?? 0.5)));
+  const zoomStart = Math.max(0.82, Math.min(1, Number(segment.zoomStart ?? segment.zoom ?? 1)));
   const zoomEnd = Math.max(0.82, Math.min(1, Number(segment.zoomEnd ?? segment.zoom ?? 1)));
+  const t = clamp01(segmentProgress);
+  const focusX = startFocusX + (endFocusX - startFocusX) * t;
+  const focusY = startFocusY + (endFocusY - startFocusY) * t;
+  const resolvedZoom = zoomStart + (zoomEnd - zoomStart) * t;
   const visualMode = String(segment.visualMode || "focus").toLowerCase();
   const framingVariant = String(segment.framingVariant || "center").toLowerCase();
 
   let scale = 1;
-  if (visualMode === "tight") scale = Math.min(1.34, 1 + (1 - zoomEnd) * 2.15);
-  else if (visualMode === "focus") scale = Math.min(1.22, 1 + (1 - zoomEnd) * 1.55);
+  if (visualMode === "tight") scale = Math.min(1.34, 1 + (1 - resolvedZoom) * 2.15);
+  else if (visualMode === "focus") scale = Math.min(1.22, 1 + (1 - resolvedZoom) * 1.55);
   else scale = framingVariant === "slow_movement" ? 1.03 : 1.01;
 
   let translateX = 0;
   if (framingVariant === "asymmetric") translateX = focusX < 0.5 ? 2.5 : -2.5;
   if (framingVariant === "slow_movement") translateX += focusX < 0.5 ? 1.3 : -1.3;
 
+  const translateY = (focusY - 0.5) * 3.8;
+
   return {
     focusX,
     focusY,
     scale,
     translateX,
+    translateY,
     visualMode,
     framingVariant,
   };
 };
 
-const buildPreviewViewportStyle = segment => {
-  const meta = getPreviewViewportMeta(segment);
+const buildPreviewViewportStyle = (segment, segmentProgress = 0) => {
+  const meta = getPreviewViewportMeta(segment, segmentProgress);
   return {
-    transform: `translateX(${meta.translateX}%) scale(${meta.scale.toFixed(3)})`,
+    transform: `translate(${meta.translateX}%, ${meta.translateY || 0}%) scale(${meta.scale.toFixed(3)})`,
     transformOrigin: `${Math.round(meta.focusX * 100)}% ${Math.round(meta.focusY * 100)}%`,
   };
 };
 
-const buildPreviewFocusBoxStyle = segment => {
-  const meta = getPreviewViewportMeta(segment);
+const buildPreviewFocusBoxStyle = (segment, segmentProgress = 0) => {
+  const meta = getPreviewViewportMeta(segment, segmentProgress);
   const width = Math.max(52, Math.min(100, 100 / meta.scale));
   const height = Math.max(52, Math.min(100, 100 / meta.scale));
   const left = Math.max(0, Math.min(100 - width, meta.focusX * 100 - width / 2));
@@ -379,7 +635,7 @@ const buildPreviewFocusBoxStyle = segment => {
 };
 
 const describePreviewSegment = segment => {
-  const meta = getPreviewViewportMeta(segment);
+  const meta = getPreviewViewportMeta(segment, 0);
   const shotLabel =
     {
       wide: "Wide Shot",
@@ -536,15 +792,26 @@ function SmartPromoSummaryPanel({
   const [errorText, setErrorText] = useState("");
   const [restoringClips, setRestoringClips] = useState(false);
   const [pendingEstimate, setPendingEstimate] = useState(null);
+  const [livePreviewOffsetMs, setLivePreviewOffsetMs] = useState(0);
   const [segmentFrames, setSegmentFrames] = useState({});
   const [activeSegmentFrameIndex, setActiveSegmentFrameIndex] = useState(0);
+  const [activeSegmentOffsetMs, setActiveSegmentOffsetMs] = useState(0);
   const captureVideoRef = useRef(null);
   const captureCanvasRef = useRef(null);
+  const sourcePreviewVideoRef = useRef(null);
+  const smartPromoVideoRef = useRef(null);
   const [activePreviewIndex, setActivePreviewIndex] = useState(0);
   const [isEstimating, setIsEstimating] = useState(false);
   const [selectedVisualByClipId, setSelectedVisualByClipId] = useState({});
   const [sourcePreviewUrl, setSourcePreviewUrl] = useState("");
+  const [previewAudioEnabled, setPreviewAudioEnabled] = useState(true);
+  const [sourceDurationMs, setSourceDurationMs] = useState(0);
   const pollingActiveRef = useRef(true);
+  const eventSourceRef = useRef(null);
+  const livePreviewCursorRafRef = useRef(null);
+  const livePreviewSyncRafRef = useRef(null);
+  const liveOffsetAnchorMsRef = useRef(0);
+  const liveOffsetUpdatedAtRef = useRef(Date.now());
 
   const promoCost = Number(creditCosts?.["promo-summary"] || 18);
   const displayedPromoCost = pendingEstimate?.credits || promoCost;
@@ -553,6 +820,10 @@ function SmartPromoSummaryPanel({
     pollingActiveRef.current = true;
     return () => {
       pollingActiveRef.current = false;
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+        eventSourceRef.current = null;
+      }
     };
   }, []);
 
@@ -587,7 +858,15 @@ function SmartPromoSummaryPanel({
     return "Current source";
   }, [sourceFile, sourceUrl]);
 
+  const updateSourceDuration = useCallback(target => {
+    const durationMs = Number(target?.duration || 0) * 1000;
+    if (Number.isFinite(durationMs) && durationMs > 0) {
+      setSourceDurationMs(prev => (Math.abs((prev || 0) - durationMs) > 100 ? durationMs : prev));
+    }
+  }, []);
+
   useEffect(() => {
+    setSourceDurationMs(0);
     if (sourceFile instanceof File || sourceFile instanceof Blob) {
       const objectUrl = URL.createObjectURL(sourceFile);
       setSourcePreviewUrl(objectUrl);
@@ -627,14 +906,17 @@ function SmartPromoSummaryPanel({
       const formData = new FormData();
       formData.append("file", uploadFile, uploadFile.name || "source.mp4");
 
+      const uploadEndpoint = `${MEDIA_API_URL.replace(/\/$/, "")}/api/media/upload-source`;
       let response;
       try {
-        response = await fetch("http://127.0.0.1:8000/api/media/upload-source", {
+        response = await fetch(uploadEndpoint, {
           method: "POST",
           body: formData,
         });
       } catch {
-        throw new Error("Cannot reach media worker. Make sure python_media_worker is running on port 8000.");
+        throw new Error(
+          `Cannot reach media worker. Make sure python_media_worker is running at ${uploadEndpoint}.`
+        );
       }
 
       const uploadResult = await response.json().catch(() => ({}));
@@ -718,24 +1000,136 @@ function SmartPromoSummaryPanel({
     throw new Error("Status check failed.");
   };
 
+  const stopActiveStream = () => {
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+      eventSourceRef.current = null;
+    }
+  };
+
+  const applyAnalysisUpdate = analysis => {
+    const plannedTimeline = extractPlannedTimeline(analysis);
+    const sourceDurationSeconds = Number(
+      analysis?.sourceDurationSeconds || analysis?.sourceDuration || analysis?.source_duration_seconds
+    );
+    const timelineTotalMs = getTimelineTotalDurationMs(plannedTimeline);
+    const nextStatus = buildStatusLabel(analysis);
+    const preview = normalizeIncomingPreview(analysis) || {};
+    const frameOffsetMs = Number.isFinite(Number(preview.frameOffsetMs))
+      ? Number(preview.frameOffsetMs)
+      : null;
+
+    const syncedOffsetMs = Number.isFinite(frameOffsetMs)
+      ? frameOffsetMs
+      : Number.isFinite(timelineTotalMs)
+        ? timelineTotalMs * (Math.max(0, Math.min(100, Number(analysis?.progress || 0))) / 100)
+        : null;
+
+    if (Number.isFinite(syncedOffsetMs)) {
+      setLivePreviewOffsetMs(syncedOffsetMs);
+      liveOffsetAnchorMsRef.current = syncedOffsetMs;
+      liveOffsetUpdatedAtRef.current = Date.now();
+    }
+    if (Number.isFinite(sourceDurationSeconds) && sourceDurationSeconds > 0) {
+      setSourceDurationMs(prev => {
+        const next = sourceDurationSeconds * 1000;
+        return Math.abs((prev || 0) - next) > 250 ? next : prev;
+      });
+    }
+
+    setStatusText(nextStatus);
+    setAnalysisDetails({
+      analysisReused: Boolean(analysis?.analysisReused),
+      workflowType: analysis?.workflowType || null,
+      confidenceSummary: analysis?.confidenceSummary || null,
+      progress: Number(analysis?.progress || 0),
+      status: analysis?.status || "",
+      detail: analysis?.detail || "",
+      stage: analysis?.stage || inferVisualStageFromProgress(analysis),
+      plannedTimeline,
+      frameOffsetMs,
+      preview,
+      currentAction: preview?.currentAction || null,
+      timeline: Array.isArray(preview?.timeline) ? preview.timeline : [],
+      totalTimelineEvents: Number(preview?.totalTimelineEvents || 0),
+    });
+
+    return nextStatus;
+  };
+
+  const startLiveStream = async (token, analysisJobId = jobId) => {
+    if (!analysisJobId) throw new Error("Missing Smart Promo job id.");
+    if (typeof EventSource === "undefined") {
+      throw new Error("Live preview is not supported in this browser.");
+    }
+
+    const streamUrl = `${API_ENDPOINTS.CLIPS_PROMO_SUMMARY_PREVIEW_STREAM(analysisJobId)}?token=${encodeURIComponent(token)}`;
+    return new Promise((resolve, reject) => {
+      const eventSource = new EventSource(streamUrl);
+      eventSourceRef.current = eventSource;
+      let settled = false;
+
+      const finish = (error, result) => {
+        if (settled) return;
+        settled = true;
+        stopActiveStream();
+        if (error) reject(error);
+        else resolve(result);
+      };
+
+      const handleMessage = raw => {
+        let payload = null;
+        try {
+          payload = JSON.parse(raw.data || "{}");
+        } catch (error) {
+          return;
+        }
+        if (!payload || typeof payload !== "object") return;
+
+        if (payload.kind === "error") {
+          finish(new Error(payload.message || payload.error || "Smart Promo live stream failed."));
+          return;
+        }
+
+        const analysis = payload.analysis || payload.data;
+        if (!analysis) return;
+
+        const statusTextValue = applyAnalysisUpdate(analysis);
+        if (onStatusChange) onStatusChange(statusTextValue);
+
+        if (analysis.status === "completed") {
+          setPromoClips(normalizePromoAnalysisResults(analysis));
+          if (analysis.analysisReused) {
+            setStatusText("Smart Promo edit is ready. Reused saved analysis.");
+          }
+          finish(null, analysis);
+          return;
+        }
+
+        if (analysis.status === "failed") {
+          finish(new Error(analysis.error || "Promo generation failed."));
+        }
+      };
+
+      eventSource.onmessage = handleMessage;
+      eventSource.addEventListener("preview", handleMessage);
+      eventSource.addEventListener("done", handleMessage);
+      eventSource.addEventListener("error", handleMessage);
+      eventSource.addEventListener("open", handleMessage);
+      eventSource.addEventListener("heartbeat", () => {});
+      eventSource.onerror = () => {
+        finish(new Error("Smart Promo stream disconnected."));
+      };
+    });
+  };
+
   const startPolling = async (token, analysisJobId) => {
     let activeToken = token;
     while (pollingActiveRef.current) {
       const result = await fetchAnalysis(activeToken, analysisJobId);
       const analysis = result.analysis;
       activeToken = result.token;
-      const nextStatus = buildStatusLabel(analysis);
-      setStatusText(nextStatus);
-      setAnalysisDetails({
-        analysisReused: Boolean(analysis.analysisReused),
-        workflowType: analysis.workflowType || null,
-        confidenceSummary: analysis.confidenceSummary || null,
-        progress: Number(analysis.progress || 0),
-        status: analysis.status || "",
-        detail: analysis.detail || "",
-        stage: inferVisualStageFromProgress(analysis),
-        plannedTimeline: extractPlannedTimeline(analysis),
-      });
+      const nextStatus = applyAnalysisUpdate(analysis);
       if (onStatusChange) onStatusChange(nextStatus);
 
       if (analysis.status === "completed") {
@@ -834,7 +1228,15 @@ function SmartPromoSummaryPanel({
       }
 
       if (nextJobId) {
-        await startPolling(token, nextJobId);
+        stopActiveStream();
+
+        try {
+          await startLiveStream(token, nextJobId);
+        } catch (streamError) {
+          console.warn("Smart Promo live stream failed, fallback to polling.", streamError);
+          setStatusText("Live preview unavailable. Falling back to status polling...");
+          await startPolling(token, nextJobId);
+        }
       }
     } catch (error) {
       setErrorText(error.message || "Promo generation failed.");
@@ -883,16 +1285,31 @@ function SmartPromoSummaryPanel({
     () => analysisDetails?.plannedTimeline || [],
     [analysisDetails]
   );
+  const previewTimeline = useMemo(() => {
+    if (plannedTimeline.length) return plannedTimeline;
+    return buildFallbackTimelineFromEvents(
+      analysisDetails?.timeline || analysisDetails?.preview?.timeline || [],
+      sourceDurationMs
+    );
+  }, [plannedTimeline, sourceDurationMs]);
+  const timelineTotalDurationMs = useMemo(
+    () => getTimelineTotalDurationMs(previewTimeline),
+    [previewTimeline]
+  );
   const progressPercent = Math.max(0, Math.min(100, Number(analysisDetails?.progress || 0)));
-  const activePreviewSegment = plannedTimeline[activePreviewIndex] || plannedTimeline[0] || null;
-  const waveformBars = useMemo(() => buildWaveformBars(plannedTimeline), [plannedTimeline]);
+  const activePreviewSegment = previewTimeline[activePreviewIndex] || previewTimeline[0] || null;
+  const activeSegmentDurationMs = Number(activePreviewSegment?.duration || 0) * 1000;
+  const activeSegmentProgress = activeSegmentDurationMs > 0
+    ? Math.min(1, Math.max(0, activeSegmentOffsetMs / activeSegmentDurationMs))
+    : 0;
+  const waveformBars = useMemo(() => buildWaveformBars(previewTimeline), [previewTimeline]);
   const previewViewportStyle = useMemo(
-    () => buildPreviewViewportStyle(activePreviewSegment),
-    [activePreviewSegment]
+    () => buildPreviewViewportStyle(activePreviewSegment, activeSegmentProgress),
+    [activePreviewSegment, activeSegmentProgress]
   );
   const previewFocusBoxStyle = useMemo(
-    () => buildPreviewFocusBoxStyle(activePreviewSegment),
-    [activePreviewSegment]
+    () => buildPreviewFocusBoxStyle(activePreviewSegment, activeSegmentProgress),
+    [activePreviewSegment, activeSegmentProgress]
   );
   const activePreviewMeta = useMemo(
     () => (activePreviewSegment ? describePreviewSegment(activePreviewSegment) : null),
@@ -900,34 +1317,133 @@ function SmartPromoSummaryPanel({
   );
 
   useEffect(() => {
-    if (!plannedTimeline.length) {
+    if (!previewTimeline.length) {
       setActivePreviewIndex(0);
+      setActiveSegmentFrameIndex(0);
+      setActiveSegmentOffsetMs(0);
       return undefined;
     }
 
-    let cancelled = false;
-    let timeoutId;
-    let cursor = 0;
+    const status = String(analysisDetails?.status || "").toLowerCase();
+    const terminalState = status === "completed" || status === "failed";
+    const isRunning = Boolean(status) && !terminalState;
 
-    const cycle = () => {
-      if (cancelled) return;
-      setActivePreviewIndex(cursor);
-      const activeSegment = plannedTimeline[cursor] || plannedTimeline[0];
-      cursor = (cursor + 1) % plannedTimeline.length;
-      const nextDelay = Math.max(1200, Math.min(3600, Number(activeSegment?.duration || 3) * 480));
-      timeoutId = window.setTimeout(cycle, nextDelay);
+    let isActive = true;
+    const updateFromOffset = () => {
+      if (!isActive) return;
+      if (!isRunning) {
+        const finalIndex = Math.max(0, previewTimeline.length - 1);
+        setActivePreviewIndex(prev => (prev === finalIndex ? prev : finalIndex));
+        setActiveSegmentFrameIndex(prev => (prev === finalIndex ? prev : finalIndex));
+        setActiveSegmentOffsetMs(0);
+        return;
+      }
+
+      if (!timelineTotalDurationMs || !Number.isFinite(timelineTotalDurationMs)) {
+        const fallbackIndex = Math.min(
+          previewTimeline.length - 1,
+          Math.max(0, Math.floor((progressPercent / 100) * previewTimeline.length))
+        );
+        setActivePreviewIndex(prev => (prev === fallbackIndex ? prev : fallbackIndex));
+        setActiveSegmentFrameIndex(prev => (prev === fallbackIndex ? prev : fallbackIndex));
+        setActiveSegmentOffsetMs(0);
+        return;
+      }
+
+      const anchorOffsetMs = Number.isFinite(liveOffsetAnchorMsRef.current)
+        ? liveOffsetAnchorMsRef.current
+        : Number.isFinite(livePreviewOffsetMs)
+          ? livePreviewOffsetMs
+          : 0;
+      const anchorAtMs = Number.isFinite(liveOffsetUpdatedAtRef.current)
+        ? liveOffsetUpdatedAtRef.current
+        : Date.now();
+      const progressedOffsetMs = anchorOffsetMs + Math.max(0, Date.now() - anchorAtMs);
+      const clampedOffsetMs = timelineTotalDurationMs > 0
+        ? progressedOffsetMs % timelineTotalDurationMs
+        : progressedOffsetMs;
+
+      if (Number.isFinite(clampedOffsetMs)) {
+        setLivePreviewOffsetMs(prev => (Math.abs(prev - clampedOffsetMs) > 6 ? clampedOffsetMs : prev));
+        const segmentCursor = resolveSegmentCursor(previewTimeline, clampedOffsetMs, progressPercent);
+        const nextIndex = segmentCursor.segmentIndex;
+        const nextOffset = segmentCursor.segmentOffsetMs || 0;
+        setActivePreviewIndex(prev => (prev === nextIndex ? prev : nextIndex));
+        setActiveSegmentFrameIndex(prev => (prev === nextIndex ? prev : nextIndex));
+        setActiveSegmentOffsetMs(prev => (Math.abs(prev - nextOffset) > 6 ? nextOffset : prev));
+      }
+
+      livePreviewCursorRafRef.current = window.requestAnimationFrame(updateFromOffset);
     };
 
-    cycle();
+    livePreviewCursorRafRef.current = window.requestAnimationFrame(updateFromOffset);
     return () => {
-      cancelled = true;
-      if (timeoutId) window.clearTimeout(timeoutId);
+      isActive = false;
+      if (livePreviewCursorRafRef.current) {
+        window.cancelAnimationFrame(livePreviewCursorRafRef.current);
+        livePreviewCursorRafRef.current = null;
+      }
     };
-  }, [plannedTimeline]);
+  }, [previewTimeline, isGenerating, analysisDetails?.status, progressPercent, timelineTotalDurationMs]);
+
+  useEffect(() => {
+    const status = String(analysisDetails?.status || "").toLowerCase();
+    const isRunning = Boolean(status && !["completed", "failed"].includes(status));
+    if (!previewTimeline.length || !sourcePreviewUrl || !isRunning) {
+      return undefined;
+    }
+
+    const sourceVideos = [sourcePreviewVideoRef.current, smartPromoVideoRef.current]
+      .filter(Boolean)
+      .filter(video => Number.isFinite(Number(video.duration)) && video.duration > 0);
+
+    if (!sourceVideos.length) return undefined;
+
+    let isActive = true;
+    const applyTimelineSeek = () => {
+      const sourceTimeMs = resolveSourceTimeFromTimelineOffset(previewTimeline, livePreviewOffsetMs);
+      if (!Number.isFinite(sourceTimeMs) || sourceTimeMs < 0) return;
+      let startedPlayback = false;
+
+      sourceVideos.forEach(video => {
+        if (!startedPlayback) {
+          video.play().catch(() => {});
+          startedPlayback = true;
+        }
+        if (video.paused) {
+          video.play().catch(() => {});
+        }
+        if (video.playbackRate !== 1) {
+          video.playbackRate = 1;
+        }
+        const safeDurationMs = Number(video.duration || 0) * 1000;
+        const safeTime = Math.max(0, Math.min(sourceTimeMs / 1000, (safeDurationMs / 1000) * 0.995));
+        if (Math.abs((video.currentTime || 0) - safeTime) > 0.004) {
+          video.currentTime = safeTime;
+        }
+      });
+    };
+
+    applyTimelineSeek();
+    const syncTick = () => {
+      if (!isActive) return;
+      applyTimelineSeek();
+      livePreviewSyncRafRef.current = window.requestAnimationFrame(syncTick);
+    };
+
+    livePreviewSyncRafRef.current = window.requestAnimationFrame(syncTick);
+    return () => {
+      isActive = false;
+      if (livePreviewSyncRafRef.current) {
+        window.cancelAnimationFrame(livePreviewSyncRafRef.current);
+        livePreviewSyncRafRef.current = null;
+      }
+    };
+  }, [analysisDetails?.status, livePreviewOffsetMs, previewTimeline, sourcePreviewUrl]);
 
   // Capture video frames for each timeline segment
   useEffect(() => {
-    if (!plannedTimeline.length || !sourcePreviewUrl) {
+    if (!previewTimeline.length || !sourcePreviewUrl) {
       setSegmentFrames({});
       return;
     }
@@ -969,7 +1485,7 @@ function SmartPromoSummaryPanel({
       canvas.width = 320;
       canvas.height = 180;
 
-      for (const segment of plannedTimeline) {
+      for (const segment of previewTimeline) {
         if (cancelled) break;
         const seekTime = segment.start + Math.min(0.5, Number(segment.duration || 0) * 0.3);
         try {
@@ -1006,7 +1522,7 @@ function SmartPromoSummaryPanel({
     return () => {
       cancelled = true;
     };
-  }, [plannedTimeline, sourcePreviewUrl]);
+  }, [previewTimeline, sourcePreviewUrl]);
 
   const handleDownload = async clip => {
     if (!clip?.url) return;
@@ -1029,6 +1545,26 @@ function SmartPromoSummaryPanel({
     } catch {
       // Fallback: open in new tab if fetch fails (CORS, etc.)
       window.open(clip.url, "_blank", "noopener,noreferrer");
+    }
+  };
+
+  const handleTogglePreviewAudio = async () => {
+    const nextState = !previewAudioEnabled;
+    setPreviewAudioEnabled(nextState);
+    const videos = [sourcePreviewVideoRef.current, smartPromoVideoRef.current].filter(Boolean);
+    videos.forEach(video => {
+      if (video) {
+        video.muted = !nextState;
+      }
+    });
+    if (nextState) {
+      for (const video of videos) {
+        try {
+          await video.play();
+        } catch (_) {
+          // Browsers often block autoplay until direct gesture.
+        }
+      }
     }
   };
 
@@ -1127,7 +1663,7 @@ function SmartPromoSummaryPanel({
           </ul>
         </div>
 
-        {(isGenerating || jobId || plannedTimeline.length > 0) && (
+        {(isGenerating || jobId || previewTimeline.length > 0) && (
           <div className="promo-summary-live-shell">
             <div className="promo-summary-live-sidebar">
               <span className="promo-summary-card-label">Processing Steps</span>
@@ -1163,22 +1699,41 @@ function SmartPromoSummaryPanel({
             </div>
 
             <div className="promo-summary-live-main">
-              <div className="promo-summary-live-head">
-                <div>
-                  <span className="promo-summary-card-label">Planned Edit Timeline</span>
-                  <strong>Smart Promo is acting like a visual director while the audio stays intact.</strong>
+                  <div className="promo-summary-live-head">
+                    <div>
+                      <span className="promo-summary-card-label">Planned Edit Timeline</span>
+                      <strong>Smart Promo is acting like a visual director while the audio stays intact.</strong>
+                    </div>
+                <div className="promo-summary-live-head-actions">
+                  <small>{analysisDetails?.detail || "Waiting for the edit timeline..."}</small>
+                  <button
+                    type="button"
+                    className="promo-summary-secondary"
+                    onClick={handleTogglePreviewAudio}
+                    disabled={!previewTimeline.length}
+                  >
+                    {previewAudioEnabled ? "Mute Preview Audio" : "Unmute Preview Audio"}
+                  </button>
                 </div>
-                <small>{analysisDetails?.detail || "Waiting for the edit timeline..."}</small>
-              </div>
+                </div>
 
-              <div className="promo-summary-live-preview-grid">
+                <div className="promo-summary-live-preview-grid">
                 <article className="promo-summary-live-preview-card">
                   <span className="promo-summary-card-label">Original Video</span>
                   <strong>Uploaded Source</strong>
                   <div className="promo-summary-live-preview-stage is-original">
                     {sourcePreviewUrl ? (
                       <>
-                        <video src={sourcePreviewUrl} muted autoPlay loop playsInline preload="metadata" />
+                        <video
+                          ref={sourcePreviewVideoRef}
+                          src={sourcePreviewUrl}
+                          muted={!previewAudioEnabled}
+                          autoPlay
+                          loop
+                          playsInline
+                          preload="metadata"
+                          onLoadedMetadata={event => updateSourceDuration(event.currentTarget)}
+                        />
                         {activePreviewSegment ? (
                           <>
                             <div className="promo-summary-live-focus-box" style={previewFocusBoxStyle} />
@@ -1202,13 +1757,15 @@ function SmartPromoSummaryPanel({
                     {sourcePreviewUrl ? (
                       <div className="promo-summary-live-preview-viewport">
                         <video
+                          ref={smartPromoVideoRef}
                           src={sourcePreviewUrl}
-                          muted
+                          muted={!previewAudioEnabled}
                           autoPlay
                           loop
                           playsInline
                           preload="metadata"
                           style={previewViewportStyle}
+                          onLoadedMetadata={event => updateSourceDuration(event.currentTarget)}
                         />
                       </div>
                     ) : (
@@ -1246,9 +1803,9 @@ function SmartPromoSummaryPanel({
                 </div>
               </div>
 
-              {plannedTimeline.length ? (
+              {previewTimeline.length ? (
                 <div className="promo-summary-live-timeline">
-                  {plannedTimeline.map((segment, segIdx) => (
+                  {previewTimeline.map((segment, segIdx) => (
                     <article key={segment.id} className={`promo-summary-live-segment is-${segment.visualMode}${segIdx === activeSegmentFrameIndex ? " is-active" : ""}`}>
                       <div className="promo-summary-live-segment-frame">
                         {segmentFrames[segment.id] ? (

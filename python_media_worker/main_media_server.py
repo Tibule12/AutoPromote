@@ -5961,6 +5961,29 @@ def build_speaker_track_crop_filter(positions, src_width, src_height, target_asp
     return keyframes, crop_w, crop_h
 
 
+def build_safe_vertical_fit_filter(input_label="[0:v]", output_label="[vout]", target_width=1080, target_height=1920):
+    """
+    Build a vertical shorts/reels filter that never crops the foreground.
+
+    Landscape podcast footage is usually composed for the full wide frame; a
+    hard 9:16 crop can remove the speaker entirely. This keeps the complete
+    source visible and fills the empty vertical canvas with a blurred copy.
+    """
+    target_width = int(target_width or 1080)
+    target_height = int(target_height or 1920)
+    blur_width = max(2, target_width // 10)
+    blur_height = max(2, target_height // 10)
+    return (
+        f"{input_label}split[v_bg_in][v_fg_in];"
+        f"[v_bg_in]scale={target_width}:{target_height}:force_original_aspect_ratio=increase,"
+        f"crop={target_width}:{target_height},scale={blur_width}:{blur_height},"
+        f"boxblur=2:1,scale={target_width}:{target_height}[bg];"
+        f"[v_fg_in]scale={target_width}:{target_height}:force_original_aspect_ratio=decrease,"
+        f"setsar=1[fg];"
+        f"[bg][fg]overlay=(W-w)/2:(H-h)/2{output_label}"
+    )
+
+
 # ============================================================
 # ENHANCED VIRALITY SCORING — Audio energy + motion analysis
 # ============================================================
@@ -7698,7 +7721,7 @@ def build_visual_edit_master_plan(
         "campaignRoleLabel": "Master Visual Edit",
         "renderStrategy": "visual_master",
         "storyMaster": True,
-        "visualOnly": True,
+        "visualOnly": False,
         "audioContinuous": True,
         "confidenceScore": confidence_score,
         "confidenceLabel": confidence_label,
@@ -7766,10 +7789,10 @@ def derive_shorts_from_visual_master(master_plan, max_shorts=3):
                 "segments": preview_segments,
                 "campaignRole": preview_id,
                 "campaignRoleLabel": label,
-                "renderStrategy": "visual_master_preview",
-                "storyMaster": False,
-                "visualOnly": True,
-                "audioContinuous": True,
+        "renderStrategy": "visual_master_preview",
+        "storyMaster": False,
+        "visualOnly": False,
+        "audioContinuous": True,
                 "confidenceScore": float(master_plan.get("confidenceScore", 0.0) or 0.0),
                 "confidenceLabel": master_plan.get("confidenceLabel"),
                 "analysisFocus": "visual_pacing",
@@ -21185,7 +21208,16 @@ async def speaker_track_crop(request: Dict[str, Any]):
         logger.info(f"Detecting speaker positions in {input_path}...")
         positions = await loop.run_in_executor(None, detect_speaker_positions, input_path, 0.5)
 
-        if positions and len(positions) >= 3:
+        if target_aspect == "9:16" and src_w > src_h:
+            logger.info("Landscape source detected; using safe vertical fit instead of destructive speaker crop")
+            await run_subprocess_async([
+                "ffmpeg", "-i", input_path,
+                "-filter_complex", build_safe_vertical_fit_filter("[0:v]", "[vout]"),
+                "-map", "[vout]", "-map", "0:a?",
+                "-c:v", "libx264", "-preset", "ultrafast", "-crf", "24",
+                "-c:a", "copy", "-y", output_path
+            ], check=True)
+        elif positions and len(positions) >= 3:
             keyframes, crop_w, crop_h = build_speaker_track_crop_filter(positions, src_w, src_h, target_aspect)
             sendcmd_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_sendcmd.txt")
             with open(sendcmd_path, "w") as f:
@@ -21196,11 +21228,13 @@ async def speaker_track_crop(request: Dict[str, Any]):
                 "-c:v", GPU_VIDEO_ENCODER, "-preset", GPU_PRESET, "-c:a", "copy", "-y", output_path
             ], check=True)
         else:
-            logger.info("No faces detected, using center crop fallback")
-            vf = "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920"
+            logger.info("No faces detected, using safe vertical fit fallback")
             await run_subprocess_async([
-                "ffmpeg", "-i", input_path, "-vf", vf,
-                "-c:v", "libx264", "-c:a", "copy", "-y", output_path
+                "ffmpeg", "-i", input_path,
+                "-filter_complex", build_safe_vertical_fit_filter("[0:v]", "[vout]"),
+                "-map", "[vout]", "-map", "0:a?",
+                "-c:v", "libx264", "-preset", "ultrafast", "-crf", "24",
+                "-c:a", "copy", "-y", output_path
             ], check=True)
 
         if os.path.exists(output_path):
@@ -21260,6 +21294,11 @@ async def auto_generate_clips(request: Dict[str, Any], background_tasks: Backgro
         or "clean"
     ).strip().lower()
     campaign_roles = request.get("campaign_roles") or []
+    source_duration_seconds = request.get("source_duration_seconds")
+    try:
+        source_duration_seconds = float(source_duration_seconds) if source_duration_seconds is not None else None
+    except (TypeError, ValueError):
+        source_duration_seconds = None
     analysis_cache_key = str(request.get("analysis_cache_key") or request.get("source_fingerprint") or video_url).strip()
     workflow_type = str(request.get("workflow_type") or SMART_PROMO_WORKFLOW_TYPE).strip() or SMART_PROMO_WORKFLOW_TYPE
 
@@ -21281,6 +21320,7 @@ async def auto_generate_clips(request: Dict[str, Any], background_tasks: Backgro
             "clips": [],
             "outputMode": output_mode,
             "workflowType": workflow_type,
+            "sourceDurationSeconds": source_duration_seconds,
         })
     except Exception:
         pass
@@ -21302,6 +21342,7 @@ async def auto_generate_clips(request: Dict[str, Any], background_tasks: Backgro
             analysis_cache_key,
             workflow_type,
             style_hint,
+            source_duration_seconds,
         ),
     )
     return {"status": "processing", "job_id": job_id, "mode": "async"}
@@ -21320,6 +21361,7 @@ async def _auto_generate_clips_impl(
     analysis_cache_key=None,
     workflow_type=SMART_PROMO_WORKFLOW_TYPE,
     style_hint="clean",
+    source_duration_seconds=None,
 ):
     """Background task: analyze → sort → render top clips."""
     promo_angle = ""
@@ -21331,12 +21373,18 @@ async def _auto_generate_clips_impl(
     input_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_autogen_input.mp4")
     analysis_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_autogen_analysis.mp4")
     render_source_path = input_path
+    source_duration = 0.0
 
     try:
         # 1. Download
         await materialize_video_input(video_url, input_path)
         source_file_mb = os.path.getsize(input_path) / (1024 * 1024) if os.path.exists(input_path) else 0
-        source_duration = get_media_duration(input_path)
+        source_duration = 0.0
+        try:
+            source_duration = float(source_duration_seconds) if source_duration_seconds is not None else 0.0
+        except (TypeError, ValueError):
+            source_duration = 0.0
+        source_duration = max(0.0, get_media_duration(input_path) if not source_duration else source_duration)
         logger.info(
             json.dumps({
                 "event": "job_input_loaded",
@@ -21356,11 +21404,61 @@ async def _auto_generate_clips_impl(
                 status_code=413,
                 detail=f"Video is too long for this worker ({source_duration:.1f}s > {MEDIA_WORKER_MAX_VIDEO_SECONDS}s).",
             )
+        source_has_audio = has_audio_stream(render_source_path) or media_has_audio_stream(render_source_path)
+
+        def emit_preview_state(
+            *,
+            status="rendering",
+            progress=0,
+            stage="rendering",
+            detail="",
+            active_clip_index=None,
+            active_segment_index=None,
+            frame_offset_ms=None,
+            action_label=None,
+        ):
+            payload = {
+                "status": status,
+                "progress": int(progress),
+                "stage": stage,
+                "detail": detail,
+            }
+            if active_clip_index is not None:
+                payload["activeClipIndex"] = active_clip_index
+            if active_segment_index is not None:
+                payload["activeSegmentIndex"] = active_segment_index
+            if frame_offset_ms is not None:
+                try:
+                    normalized_frame_offset_ms = max(0, int(float(frame_offset_ms)))
+                    payload["previewFrameOffsetMs"] = normalized_frame_offset_ms
+                    payload["currentPreviewFrameOffsetMs"] = normalized_frame_offset_ms
+                    payload["previewTimeline"] = payload.get("previewTimeline") or []
+                except Exception:
+                    pass
+            if action_label:
+                payload["currentAction"] = {
+                    "action": action_label,
+                    "label": action_label,
+                    "status": status,
+                    "phase": stage,
+                }
+                payload["previewEvents"] = [{
+                    "id": f"preview-{int(time.time() * 1000)}",
+                    "action": action_label,
+                    "label": action_label,
+                    "status": status,
+                    "phase": stage,
+                    "timestampMs": int(time.time() * 1000),
+                    "atMs": payload.get("previewFrameOffsetMs"),
+                }]
+            update_firestore_job(job_id, payload)
+
         update_firestore_job(job_id, {
             "status": "analyzing",
             "progress": 10,
             "stage": "analyzing_original_video",
             "detail": "Analyzing original video",
+            "sourceDurationSeconds": source_duration,
         })
 
         # 1b. Normalize a cheaper analysis copy so odd source timing does not
@@ -21899,13 +21997,14 @@ async def _auto_generate_clips_impl(
 
         for idx, clip in enumerate(ranked):
             try:
-                update_firestore_job(job_id, {
-                    "status": "rendering",
-                    "progress": min(94, 50 + int(42 * idx / max(1, len(ranked)))),
-                    "stage": "rendering_final_output",
-                    "detail": f"Rendering output {idx + 1} of {len(ranked)}",
-                    "activeClipIndex": idx,
-                })
+                emit_preview_state(
+                    progress=min(94, 50 + int(42 * idx / max(1, len(ranked)))),
+                    stage="rendering_final_output",
+                    detail=f"Rendering output {idx + 1} of {len(ranked)}",
+                    active_clip_index=idx,
+                    frame_offset_ms=float(clip.get("start", 0.0) or 0.0) * 1000.0,
+                    action_label="rendering_clip",
+                )
                 clip_output = os.path.join(SHARED_TMP_DIR, f"{job_id}_clip_{idx}.mp4")
                 trimmed = os.path.join(SHARED_TMP_DIR, f"{job_id}_trim_{idx}.mp4")
                 trimmed_visual = os.path.join(SHARED_TMP_DIR, f"{job_id}_trim_visual_{idx}.mp4")
@@ -21930,6 +22029,24 @@ async def _auto_generate_clips_impl(
                         float(clip.get("duration", 0.0) or 0.0),
                     )
                     for segment_index, segment in enumerate(clip.get("segments")):
+                        segment_start_ms = float(segment.get("start", 0.0) or 0.0) * 1000.0
+                        emit_preview_state(
+                            progress=min(
+                                94,
+                                50
+                                + int(42 * idx / max(1, len(ranked)))
+                                + int((12 * (segment_index + 1)) / max(1, len(clip.get("segments", [])))),
+                            ),
+                            stage="rendering_final_output",
+                            detail=(
+                                f'Rendering { "story master" if clip.get("storyMaster") else "clip" } '
+                                f"{idx + 1}/{len(ranked)} segment {segment_index + 1}/{len(clip.get('segments', []))}"
+                            ),
+                            active_clip_index=idx,
+                            active_segment_index=segment_index,
+                            frame_offset_ms=segment_start_ms,
+                            action_label="rendering_visual_segment",
+                        )
                         segment_path = os.path.join(
                             SHARED_TMP_DIR,
                             f"{job_id}_segment_{idx}_{segment_index}.mp4",
@@ -21981,17 +22098,32 @@ async def _auto_generate_clips_impl(
                             render_width,
                             render_height,
                         )
-                    await run_subprocess_async([
-                        "ffmpeg", "-ss", str(clip["start"]), "-i", render_source_path,
-                        "-t", str(duration), "-vf", single_visual_filter,
-                        *smart_promo_encode_args,
-                        *(["-an"] if visual_only_render else ["-c:a", "aac"]),
-                        "-y",
-                        trimmed_visual if visual_only_render else trimmed,
-                    ], check=True, job_context=job_id, timeout_seconds=MEDIA_WORKER_SUBPROCESS_TIMEOUT_SECONDS)
+                    emit_preview_state(
+                        progress=min(94, 52 + int(42 * idx / max(1, len(ranked)))),
+                        stage="rendering_final_output",
+                        detail=(
+                            f"Rendering {'story master' if is_story_master_render else 'clip'} {idx + 1} "
+                            f"from {clip.get('start', 0.0):.2f}s to {clip.get('end', 0.0):.2f}s"
+                        ),
+                        active_clip_index=idx,
+                        frame_offset_ms=float(clip.get("start", 0.0) or 0.0) * 1000.0,
+                        action_label="rendering_visual_beat",
+                    )
+                await run_subprocess_async([
+                    "ffmpeg", "-ss", str(clip["start"]), "-i", render_source_path,
+                    "-t", str(duration), "-vf", single_visual_filter,
+                    *smart_promo_encode_args,
+                    *(["-an"] if visual_only_render else ["-c:a", "aac"]),
+                    "-y",
+                    trimmed_visual if visual_only_render else trimmed,
+                ], check=True, job_context=job_id, timeout_seconds=MEDIA_WORKER_SUBPROCESS_TIMEOUT_SECONDS)
+
+                source_audio_available = bool(source_has_audio)
+                if not source_audio_available:
+                    source_audio_available = bool(has_audio_stream(render_source_path) or media_has_audio_stream(render_source_path))
 
                 if visual_only_render:
-                    if has_audio_stream(render_source_path):
+                    if source_audio_available:
                         try:
                             await run_subprocess_async([
                                 "ffmpeg",
@@ -22056,6 +22188,66 @@ async def _auto_generate_clips_impl(
                     else:
                         shutil.copy(trimmed_visual, trimmed)
 
+                if source_audio_available and not has_audio_stream(trimmed):
+                    repaired_audio = os.path.join(SHARED_TMP_DIR, f"{job_id}_repair_audio_{idx}.m4a")
+                    repaired_trimmed = os.path.join(SHARED_TMP_DIR, f"{job_id}_repair_trimmed_{idx}.mp4")
+                    try:
+                        logger.warning(
+                            "Audio missing on Smart Promo clip %s after render; repairing with source stream.",
+                            idx,
+                        )
+                        await run_subprocess_async([
+                            "ffmpeg",
+                            "-ss",
+                            str(clip["start"]),
+                            "-i",
+                            render_source_path,
+                            "-t",
+                            str(duration),
+                            "-vn",
+                            "-c:a",
+                            "aac",
+                            "-y",
+                            repaired_audio,
+                        ], check=True, job_context=job_id, timeout_seconds=MEDIA_WORKER_SUBPROCESS_TIMEOUT_SECONDS)
+                        await run_subprocess_async([
+                            "ffmpeg",
+                            "-i",
+                            trimmed,
+                            "-i",
+                            repaired_audio,
+                            "-map",
+                            "0:v:0",
+                            "-map",
+                            "1:a:0",
+                            "-c:v",
+                            "copy",
+                            "-c:a",
+                            "aac",
+                            "-shortest",
+                            "-y",
+                            repaired_trimmed,
+                        ], check=True, job_context=job_id, timeout_seconds=MEDIA_WORKER_SUBPROCESS_TIMEOUT_SECONDS)
+                        if os.path.exists(repaired_trimmed):
+                            shutil.move(repaired_trimmed, trimmed)
+                    except Exception as audio_repair_err:
+                        logger.warning(
+                            "Smart Promo clip audio repair failed for index %s: %s",
+                            idx,
+                            audio_repair_err,
+                        )
+                    finally:
+                        if os.path.exists(repaired_audio):
+                            try:
+                                os.remove(repaired_audio)
+                            except Exception:
+                                pass
+                        if os.path.exists(repaired_trimmed):
+                            try:
+                                os.remove(repaired_trimmed)
+                            except Exception:
+                                pass
+
                 if caption_style in CAPTION_STYLES and not visual_only_render:
 
                     # Generate captions
@@ -22073,7 +22265,7 @@ async def _auto_generate_clips_impl(
                             with open(ass_path, "w", encoding="utf-8") as f:
                                 f.write(ass_content)
                             safe_ass = ass_path.replace("\\", "/").replace(":", "\\:")
-                            audio_args = ["-c:a", "copy"] if has_audio_stream(trimmed) else ["-an"]
+                            audio_args = ["-c:a", "aac", "-b:a", "160k"] if has_audio_stream(trimmed) else ["-an"]
                             await run_subprocess_async([
                                 "ffmpeg", "-i", trimmed, "-vf", f"ass='{safe_ass}'",
                                 *smart_promo_encode_args, *audio_args, "-y", clip_output
@@ -22094,7 +22286,7 @@ async def _auto_generate_clips_impl(
                             safe_ass = ass_path.replace("\\", "/").replace(":", "\\:")
                             await run_subprocess_async([
                                 "ffmpeg", "-i", trimmed, "-vf", f"ass='{safe_ass}'",
-                                *smart_promo_encode_args, "-c:a", "copy", "-y", clip_output
+                                *smart_promo_encode_args, "-c:a", "aac", "-b:a", "160k", "-y", clip_output
                             ], check=True, job_context=job_id, timeout_seconds=MEDIA_WORKER_SUBPROCESS_TIMEOUT_SECONDS)
                             if os.path.exists(ass_path):
                                 os.remove(ass_path)
@@ -22106,9 +22298,73 @@ async def _auto_generate_clips_impl(
                 else:
                     shutil.copy(trimmed, clip_output)
 
+                if source_audio_available and os.path.exists(clip_output) and not has_audio_stream(clip_output):
+                    repaired_audio = os.path.join(SHARED_TMP_DIR, f"{job_id}_final_repair_audio_{idx}.m4a")
+                    repaired_final = os.path.join(SHARED_TMP_DIR, f"{job_id}_final_repair_{idx}.mp4")
+                    try:
+                        logger.warning(
+                            "Audio missing on Smart Promo final clip %s after captions/render; repairing from source stream.",
+                            idx,
+                        )
+                        await run_subprocess_async([
+                            "ffmpeg",
+                            "-ss",
+                            str(clip["start"]),
+                            "-i",
+                            render_source_path,
+                            "-t",
+                            str(duration),
+                            "-vn",
+                            "-c:a",
+                            "aac",
+                            "-y",
+                            repaired_audio,
+                        ], check=True, job_context=job_id, timeout_seconds=MEDIA_WORKER_SUBPROCESS_TIMEOUT_SECONDS)
+                        await run_subprocess_async([
+                            "ffmpeg",
+                            "-i",
+                            clip_output,
+                            "-i",
+                            repaired_audio,
+                            "-map",
+                            "0:v:0",
+                            "-map",
+                            "1:a:0",
+                            "-c:v",
+                            "copy",
+                            "-c:a",
+                            "aac",
+                            "-shortest",
+                            "-y",
+                            repaired_final,
+                        ], check=True, job_context=job_id, timeout_seconds=MEDIA_WORKER_SUBPROCESS_TIMEOUT_SECONDS)
+                        if os.path.exists(repaired_final):
+                            os.replace(repaired_final, clip_output)
+                    except Exception as final_audio_repair_err:
+                        logger.warning(
+                            "Smart Promo final clip audio repair failed for index %s: %s",
+                            idx,
+                            final_audio_repair_err,
+                        )
+                    finally:
+                        if os.path.exists(repaired_audio):
+                            try:
+                                os.remove(repaired_audio)
+                            except Exception:
+                                pass
+                        if os.path.exists(repaired_final):
+                            try:
+                                os.remove(repaired_final)
+                            except Exception:
+                                pass
+
                 if os.path.exists(clip_output):
                     storage_path = f"generated_clips/{job_id}/clip_{idx}_{uuid.uuid4().hex[:8]}.mp4"
                     url = upload_file_to_firebase(clip_output, storage_path)
+                    if not str(url or "").strip():
+                        raise RuntimeError(
+                            "Rendered clip upload failed because storage did not return a usable URL."
+                        )
                     update_firestore_job(job_id, {
                         "status": "generating_visuals",
                         "progress": min(94, 52 + int(42 * (idx + 1) / max(1, len(ranked)))),
@@ -22280,8 +22536,19 @@ async def _auto_generate_clips_impl(
                 "pipelineVersion": SMART_PROMO_PIPELINE_VERSION,
                 "workflowType": workflow_type,
                 "confidenceSummary": confidence_summary or None,
+                "sourceDurationSeconds": source_duration,
             })
         else:
+            clip_errors = [
+                str(entry.get("error") or "").strip()
+                for entry in completed
+                if str(entry.get("error") or "").strip()
+            ]
+            error_message = (
+                f"Promo generation completed without usable clips. First clip failure: {clip_errors[0]}"
+                if clip_errors
+                else "Promo generation completed without usable clips"
+            )
             update_firestore_job(job_id, {
                 "status": "failed",
                 "progress": 100,
@@ -22290,18 +22557,19 @@ async def _auto_generate_clips_impl(
                 "derivedShorts": derived_short_outputs,
                 "completed_clips": 0,
                 "total_clips": len(ranked),
-                "error": "Promo generation completed without usable clips",
+                "error": error_message,
                 "analysisReused": analysis_reused,
                 "artifactId": artifact_id,
                 "pipelineVersion": SMART_PROMO_PIPELINE_VERSION,
                 "workflowType": workflow_type,
                 "confidenceSummary": confidence_summary or None,
+                "sourceDurationSeconds": source_duration,
             })
 
     except Exception as e:
         logger.error(f"Auto-generate failed: {e}")
         try:
-            update_firestore_job(job_id, {"status": "failed", "error": str(e)})
+            update_firestore_job(job_id, {"status": "failed", "error": str(e), "sourceDurationSeconds": source_duration})
         except:
             pass
     finally:
@@ -22730,10 +22998,15 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     working_path = dyn_cropped_path
                     logger.info("Visual enhancement render complete")
                 else:
-                    logger.info("Not enough dynamic segments for visual enhancement; falling back to center crop")
-                    vf_crop = "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920"
+                    logger.info("Not enough dynamic segments for visual enhancement; falling back to safe vertical fit")
                     await run_subprocess_async(
-                        ["ffmpeg", "-i", trimmed_path, "-vf", vf_crop, "-c:v", "libx264", "-c:a", "copy", "-y", dyn_cropped_path],
+                        [
+                            "ffmpeg", "-i", trimmed_path,
+                            "-filter_complex", build_safe_vertical_fit_filter("[0:v]", "[vout]"),
+                            "-map", "[vout]", "-map", "0:a?",
+                            "-c:v", "libx264", "-preset", "ultrafast", "-crf", "24",
+                            "-c:a", "copy", "-y", dyn_cropped_path,
+                        ],
                         check=True,
                     )
                     working_path = dyn_cropped_path
@@ -22752,7 +23025,17 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     loop = asyncio.get_running_loop()
                     positions = await loop.run_in_executor(None, detect_speaker_positions, trimmed_path, 0.5)
 
-                    if positions and len(positions) >= 3:
+                    if src_w > src_h:
+                        logger.info("Landscape source detected; using safe vertical fit instead of destructive speaker crop")
+                        await run_subprocess_async([
+                            "ffmpeg", "-i", trimmed_path,
+                            "-filter_complex", build_safe_vertical_fit_filter("[0:v]", "[vout]"),
+                            "-map", "[vout]", "-map", "0:a?",
+                            "-c:v", "libx264", "-preset", "ultrafast", "-crf", "24",
+                            "-c:a", "copy", "-y", cropped_path
+                        ], check=True)
+                        working_path = cropped_path
+                    elif positions and len(positions) >= 3:
                         keyframes, crop_w, crop_h = build_speaker_track_crop_filter(positions, src_w, src_h, "9:16")
                         sendcmd_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_sendcmd.txt")
                         with open(sendcmd_path, "w") as f:
@@ -22769,21 +23052,23 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         ], check=True)
                         working_path = cropped_path
                     else:
-                        logger.info("Speaker tracking found no faces, falling back to center crop")
-                        vf_crop = "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920"
+                        logger.info("Speaker tracking found no faces, falling back to safe vertical fit")
                         await run_subprocess_async([
                             "ffmpeg", "-i", trimmed_path,
-                            "-vf", vf_crop,
-                            "-c:v", "libx264", "-c:a", "copy", "-y", cropped_path
+                            "-filter_complex", build_safe_vertical_fit_filter("[0:v]", "[vout]"),
+                            "-map", "[vout]", "-map", "0:a?",
+                            "-c:v", "libx264", "-preset", "ultrafast", "-crf", "24",
+                            "-c:a", "copy", "-y", cropped_path
                         ], check=True)
                         working_path = cropped_path
                 else:
-                    logger.info("Applying Smart Crop (Center Focus 9:16)...")
-                    vf_crop = "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920"
+                    logger.info("Applying Smart Crop safe vertical fit (9:16)...")
                     await run_subprocess_async([
                         "ffmpeg", "-i", trimmed_path,
-                        "-vf", vf_crop,
-                        "-c:v", "libx264", "-c:a", "copy", "-y", cropped_path
+                        "-filter_complex", build_safe_vertical_fit_filter("[0:v]", "[vout]"),
+                        "-map", "[vout]", "-map", "0:a?",
+                        "-c:v", "libx264", "-preset", "ultrafast", "-crf", "24",
+                        "-c:a", "copy", "-y", cropped_path
                     ], check=True)
                     working_path = cropped_path
             except Exception as e:

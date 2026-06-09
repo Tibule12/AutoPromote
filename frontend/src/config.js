@@ -46,6 +46,7 @@ export const API_ENDPOINTS = {
   CLIPS_PROMO_SUMMARY: `${API_BASE_URL}/api/clips/promo-summary`,
   CLIPS_PROMO_SUMMARY_ESTIMATE: `${API_BASE_URL}/api/clips/promo-summary/estimate`,
   CLIPS_ANALYSIS: analysisId => `${API_BASE_URL}/api/clips/analysis/${encodeURIComponent(analysisId)}`,
+  CLIPS_PROMO_SUMMARY_PREVIEW_STREAM: analysisId => `${API_BASE_URL}/api/clips/promo-summary/${encodeURIComponent(analysisId)}/preview/stream`,
   CLIPS_USER: `${API_BASE_URL}/api/clips/user`,
   MY_CONTENT: `${API_BASE_URL}/api/content/my-content`,
   MY_SCHEDULES: `${API_BASE_URL}/api/content/my-promotion-schedules`,

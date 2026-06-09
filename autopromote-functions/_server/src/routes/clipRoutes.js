@@ -3,7 +3,7 @@ const router = express.Router();
 const axios = require("axios");
 const videoClippingService = require("../services/videoClippingService");
 const authMiddleware = require("../authMiddleware");
-const { deductCredits, refundCredits } = require("../creditSystem");
+const { deductCredits, refundCredits, getCreditBreakdown } = require("../creditSystem");
 const { db } = require("../firebaseAdmin");
 const { cleanupSourceFile } = require("../utils/cleanupSource");
 const { CREDIT_COSTS } = require("../config/subscriptionPlans");
@@ -25,6 +25,12 @@ const PROMO_SUMMARY_MAX_DURATION_SECONDS = parseInt(
   10
 );
 const PROMO_VISUALS_PER_CLIP = parseInt(process.env.SMART_PROMO_VISUALS_PER_CLIP || "3", 10);
+const PROMO_SUMMARY_REUSE_WINDOW_HOURS = Number.isFinite(
+  parseInt(process.env.SMART_PROMO_SUMMARY_REUSE_WINDOW_HOURS || String(PROMO_SUMMARY_RETENTION_HOURS), 10)
+)
+  ? parseInt(process.env.SMART_PROMO_SUMMARY_REUSE_WINDOW_HOURS || String(PROMO_SUMMARY_RETENTION_HOURS), 10)
+  : PROMO_SUMMARY_RETENTION_HOURS;
+const PROMO_SUMMARY_REUSE_WINDOW_MS = Math.max(1, PROMO_SUMMARY_REUSE_WINDOW_HOURS) * 60 * 60 * 1000;
 
 function estimatePromoSummaryCredits({
   videoDurationSeconds = 0,
@@ -404,15 +410,386 @@ const sanitizeErrorMessage = error => {
   return rawMessage.replace(/[\r\n\t]+/g, " ").slice(0, 240).trim() || "unknown_error";
 };
 
+const parseTimestampMs = value => {
+  if (!value) return null;
+  if (typeof value.toDate === "function") return value.toDate().getTime();
+  if (value instanceof Date) return value.getTime();
+  if (typeof value === "number") return Number.isFinite(value) ? value : null;
+  if (typeof value === "string") {
+    const parsed = Date.parse(value);
+    return Number.isNaN(parsed) ? null : parsed;
+  }
+  return null;
+};
+
+const normalizeAnalysisStatus = value => {
+  const status = String(value || "").trim().toLowerCase();
+  if (status === "complete" || status === "done" || status === "success") return "completed";
+  if (status === "error") return "failed";
+  return status || "queued";
+};
+
+const normalizeAnalysisStage = value => {
+  const stage = String(value || "").trim().toLowerCase();
+  return stage.replace(/\s+/g, "_") || null;
+};
+
+const normalizeAnalysisProgress = value => {
+  const progress = Number(value || 0);
+  if (!Number.isFinite(progress)) return 0;
+  return Math.max(0, Math.min(100, Math.round(progress)));
+};
+
+const normalizePromoConfidenceSummary = data => {
+  if (!data || typeof data !== "object") return null;
+  const confidenceScore = Number(data.confidenceScore || data.score || 0);
+  const confidencePercent = Number.isFinite(confidenceScore)
+    ? Math.max(0, Math.min(100, Math.round(confidenceScore * 100)))
+    : 0;
+  const confidenceLabel =
+    String(data.confidenceLabel || "").trim() ||
+    (confidencePercent >= 80 ? "High confidence" : confidencePercent >= 50 ? "Moderate confidence" : "Draft confidence");
+
+  return {
+    ...data,
+    confidencePercent,
+    confidenceScore: Number.isFinite(confidenceScore) ? confidenceScore : 0,
+    confidenceLabel,
+    summary: String(data.summary || data.reason || "").trim() || null,
+  };
+};
+
+const normalizePromoTimelineSegment = segment => {
+  if (!segment || typeof segment !== "object") return null;
+  const start = Number(segment.start || 0);
+  const end = Number(segment.end || 0);
+  const duration = Number.isFinite(segment.duration)
+    ? Number(segment.duration)
+    : Math.max(0, Number.isFinite(start) && Number.isFinite(end) ? end - start : 0);
+
+  return {
+    ...segment,
+    id: segment.id || `segment-${Math.random().toString(36).slice(2, 9)}`,
+    start: Number.isFinite(start) ? Math.max(0, start) : 0,
+    end: Number.isFinite(end) ? Math.max(0, end) : 0,
+    duration: Math.max(0, Number.isFinite(duration) ? duration : 0),
+    visualMode: segment.visualMode || segment.mode || "focus",
+    editLabel: segment.editLabel || segment.label || segment.mode || "Visual Reframe",
+  };
+};
+
+const normalizePromoSummaryPayload = (data = {}, overrides = {}) => {
+  const status = normalizeAnalysisStatus(data.status);
+  const stage = normalizeAnalysisStage(data.stage || data.phase);
+  const progress = normalizeAnalysisProgress(data.progress);
+  const detail = String(
+    data.detail ||
+      (status === "failed" ? data.error || "" : "") ||
+      data.message ||
+      ""
+  ).trim();
+  const normalizedClips = Array.isArray(data.clips)
+    ? data.clips
+    : [];
+  const normalizedPromoClips = Array.isArray(data.promoClips)
+    ? data.promoClips
+    : normalizedClips;
+  const normalizedGeneratedClips = Array.isArray(data.generatedClips)
+    ? data.generatedClips
+    : normalizedPromoClips.length
+      ? normalizedPromoClips
+      : normalizedClips;
+  const normalizedClipSuggestions = Array.isArray(data.clipSuggestions)
+    ? data.clipSuggestions
+    : [];
+
+  return {
+    ...data,
+    ...overrides,
+    status,
+    stage,
+    progress,
+    detail,
+    workflowType: data.workflowType || data.workflow_type || null,
+    analysisReused: Boolean(data.analysisReused),
+    clips: normalizedClips,
+    promoClips: normalizedPromoClips,
+    generatedClips: normalizedGeneratedClips,
+    clipSuggestions: normalizedClipSuggestions,
+    plannedEditTimeline: Array.isArray(data.plannedEditTimeline)
+      ? data.plannedEditTimeline.map(normalizePromoTimelineSegment).filter(Boolean)
+      : Array.isArray(data.storyMasterClip?.segments)
+        ? data.storyMasterClip.segments.map(normalizePromoTimelineSegment).filter(Boolean)
+        : [],
+    confidenceSummary: normalizePromoConfidenceSummary(data.confidenceSummary),
+  };
+};
+
+const normalizePromoPreviewEvent = (event = {}, fallbackIndex = 0) => {
+  if (!event || typeof event !== "object") return null;
+  const timestampCandidate = Number(
+    event.timestampMs ??
+      event.recordedAt ??
+      event.timeMs ??
+      event.time ??
+      Date.now()
+  );
+  const timestampMs = Number.isFinite(timestampCandidate) ? timestampCandidate : Date.now();
+  const atMsCandidate = Number(event.atMs ?? event.offsetMs ?? event.positionMs);
+  const atMs = Number.isFinite(atMsCandidate) ? atMsCandidate : null;
+
+  return {
+    id: String(event.id || event.eventId || `preview-${fallbackIndex}`).trim(),
+    timestampMs,
+    atMs,
+    status: String(event.status || "").trim() || null,
+    phase: String(event.phase || event.stage || "").trim() || null,
+    action: String(event.action || event.type || event.name || "processing").trim(),
+    label: String(event.label || event.title || event.message || event.detail || "").trim() || "Promo action",
+    description: String(event.description || event.caption || "").trim() || null,
+    frameUrl: event.frameUrl || event.previewUrl || event.thumbnailUrl || null,
+    clipId: event.clipId || event.sourceClipId || null,
+    visualAssets: Array.isArray(event.visualAssets) ? event.visualAssets.slice(0, 8) : null,
+    payload: event.payload || null,
+  };
+};
+
+const buildPromoPreviewTimeline = data => {
+  const fallbackEvents = [];
+
+  const rawEvents = Array.isArray(data?.previewEvents)
+    ? data.previewEvents
+    : Array.isArray(data?.previewTimeline)
+      ? data.previewTimeline
+      : [];
+  const normalized = rawEvents
+    .map((event, index) => normalizePromoPreviewEvent(event, index))
+    .filter(Boolean);
+  if (normalized.length) {
+    return normalized
+      .filter((event, index, list) => event && (!event.id || list.findIndex(item => item.id === event.id) === index))
+      .sort((left, right) => (left.timestampMs || 0) - (right.timestampMs || 0));
+  }
+
+  const status = normalizeAnalysisStatus(data?.status);
+  const stage = normalizeAnalysisStage(data?.stage || data?.phase);
+  const baseStatusLabel = `Status: ${status}${stage ? ` (${stage})` : ""}`;
+
+  fallbackEvents.push({
+    id: "status-queued",
+    action: "queued",
+    label: "Job queued",
+    timestampMs: parseTimestampMs(data?.createdAt) || Date.now(),
+  });
+
+  if (status !== "queued") {
+    fallbackEvents.push({
+      id: "status-analyzing",
+      action: "analyzing",
+      label: "Analyzing source and scene rhythm",
+      timestampMs: Date.parse(data?.updatedAt || data?.createdAt || Date.now()),
+      detail: baseStatusLabel,
+      phase: stage || status,
+      status,
+    });
+  }
+
+  if (status === "rendering" || status === "processing" || status === "completed") {
+    const timeline = Array.isArray(data?.plannedEditTimeline) ? data.plannedEditTimeline : [];
+    timeline.forEach((segment, index) => {
+      const startMs = Number(segment?.start);
+      fallbackEvents.push({
+        id: `edit-${index + 1}`,
+        action: "edit_step",
+        status,
+        phase: segment?.visualMode || segment?.mode || "edit_step",
+        label: String(
+          segment?.editLabel || segment?.label || segment?.mode || "Applying smart edit"
+        ).trim(),
+        description: String(segment?.description || "").trim() || null,
+        atMs: Number.isFinite(startMs) ? startMs * 1000 : null,
+      });
+    });
+  }
+
+  if (Array.isArray(data?.clips) && data.clips.length) {
+    data.clips.slice(0, 4).forEach((clip, index) => {
+      fallbackEvents.push({
+        id: `clip-${clip?.id || index + 1}`,
+        action: "clip_ready",
+        label: String(clip?.hookText || clip?.titleSuggestion || `Clip ${index + 1}`).trim(),
+        phase: "clip_ready",
+        status,
+        atMs: Number.isFinite(Number(clip?.start))
+          ? Number(clip.start) * 1000
+          : null,
+        description: String(clip?.reason || "").trim() || null,
+        frameUrl: clip?.poster || clip?.thumbnailUrl || null,
+      });
+    });
+  }
+
+  const fallback = fallbackEvents.map((event, index) => normalizePromoPreviewEvent(event, index));
+  return fallback.filter(Boolean).sort((left, right) => (left.timestampMs || 0) - (right.timestampMs || 0));
+};
+
+const buildPromoSummaryPreviewPayload = data => {
+  const status = normalizeAnalysisStatus(data?.status);
+  const stage = normalizeAnalysisStage(data?.stage || data?.phase);
+  const progress = normalizeAnalysisProgress(data?.progress);
+  const detail = String(
+    data?.detail ||
+      (status === "failed" ? data?.error || "" : "") ||
+      data?.message ||
+      ""
+  ).trim();
+  const timeline = buildPromoPreviewTimeline(data || {});
+  const latest = timeline.length ? timeline[timeline.length - 1] : null;
+  const frameUrl =
+    data?.previewFrameUrl ||
+    data?.previewUrl ||
+    data?.currentPreviewUrl ||
+    latest?.frameUrl ||
+    data?.thumbnailUrl ||
+    null;
+  return {
+    jobId: data?.id || data?.jobId || null,
+    status,
+    stage,
+    progress,
+    detail,
+    frameUrl,
+    frameOffsetMs: Number.isFinite(Number(data?.previewFrameOffsetMs))
+      ? Number(data.previewFrameOffsetMs)
+      : Number.isFinite(Number(latest?.atMs))
+        ? latest.atMs
+        : null,
+    currentAction: latest
+      ? {
+          action: latest.action,
+          label: latest.label,
+          description: latest.description,
+          status: latest.status,
+          phase: latest.phase,
+        }
+      : null,
+    timeline,
+    totalTimelineEvents: timeline.length,
+    updatedAt: data?.updatedAt || data?.updated_at || null,
+  };
+};
+
+const writeSseEvent = (res, event, payload) => {
+  if (!res || res.writableEnded) return;
+  try {
+    res.write(`event: ${String(event || "message")}\n`);
+    res.write(`data: ${JSON.stringify(payload || {})}\n\n`);
+  } catch (error) {
+    // Intentionally swallow SSE write errors. Connection cleanup is handled by route loop.
+    return;
+  }
+};
+
+const buildPromoSummaryStreamPayload = normalized => {
+  const preview = buildPromoSummaryPreviewPayload(normalized);
+  return {
+    kind: "preview",
+    analysisId: normalized?.id || null,
+    jobId: normalized?.id || null,
+    status: preview.status,
+    stage: preview.stage,
+    progress: preview.progress,
+    detail: preview.detail,
+    updatedAt: normalized?.updatedAt || normalized?.updated_at || null,
+    preview,
+    analysis: normalized,
+    data: normalized,
+  };
+};
+
+const countReusablePromoClips = data => {
+  const values = [
+    data.generatedClipsCount,
+    Array.isArray(data.generatedClipIds) ? data.generatedClipIds.length : 0,
+    Array.isArray(data.generatedClips) ? data.generatedClips.length : 0,
+    Array.isArray(data.promoClips) ? data.promoClips.length : 0,
+    Array.isArray(data.clips) ? data.clips.length : 0,
+  ];
+  return values.find(value => Number.isFinite(value) && value > 0) || 0;
+};
+
+const isUsablePromoSummaryForReuse = data => {
+  const status = normalizeAnalysisStatus(data.status);
+  const hasClips = countReusablePromoClips(data) > 0;
+  if (status !== "completed" || !hasClips) return false;
+  if (data.billing?.refundedAt) return false;
+  const now = Date.now();
+  const createdAtMs = parseTimestampMs(data.createdAt);
+  const expiresAtMs = parseTimestampMs(data.expiresAt);
+  if (createdAtMs && now - createdAtMs > PROMO_SUMMARY_REUSE_WINDOW_MS) return false;
+  if (expiresAtMs && expiresAtMs < now) return false;
+  return true;
+};
+
+async function findReusablePromoSummaryJob({
+  userId,
+  analysisCacheKey,
+  normalizedOutputMode,
+  normalizedStyle,
+  normalizedPromoAngle,
+  workflowType,
+  targetDurationSeconds,
+}) {
+  if (!analysisCacheKey || !userId) return null;
+
+  const snapshot = await db
+    .collection("clip_analyses")
+    .where("analysisCacheKey", "==", analysisCacheKey)
+    .get();
+
+  const validCandidates = [];
+  snapshot.forEach(doc => {
+    const data = doc.data() || {};
+    if (data.userId !== userId) return;
+    if (data.type !== "promo_summary") return;
+    if (String(data.outputMode || "").trim().toLowerCase() !== normalizedOutputMode) return;
+    if (String(data.style || "").trim().toLowerCase() !== normalizedStyle) return;
+    if (String(data.promoAngle || "").trim().toLowerCase() !== normalizedPromoAngle) return;
+    if (String(data.workflowType || "").trim() !== String(workflowType || "")) return;
+    if (Number(data.targetDurationSeconds || 0) !== Number(targetDurationSeconds || 0)) return;
+    if (!isUsablePromoSummaryForReuse(data)) return;
+
+    validCandidates.push({
+      ...data,
+      id: doc.id,
+      createdAtMs: parseTimestampMs(data.createdAt) || 0,
+    });
+  });
+
+  validCandidates.sort((left, right) => right.createdAtMs - left.createdAtMs);
+  return validCandidates.length ? validCandidates[0] : null;
+}
+
 async function persistPromoSummaryOutputs(docRef, data) {
   if (data.outputsPersistedAt) return data;
 
-  const renderedClips = (Array.isArray(data.clips) ? data.clips : [])
+  const clipSources = [
+    Array.isArray(data.generatedClips) ? data.generatedClips : [],
+    Array.isArray(data.promoClips) ? data.promoClips : [],
+    Array.isArray(data.clips) ? data.clips : [],
+  ];
+  const renderedClips = clipSources
+    .flat()
     .filter(clip => clip?.rendered && clip?.url)
     .slice(0, PROMO_SUMMARY_CLIP_COUNT);
 
   if (!renderedClips.length) {
-    throw new Error("Promo generation completed without usable clips");
+    const clipErrors = clipSources
+      .flat()
+      .map(clip => String(clip?.error || "").trim())
+      .filter(Boolean);
+    const errorDetail = clipErrors.length ? `. First clip failure: ${clipErrors[0]}` : "";
+    throw new Error(`Promo generation completed without usable clips${errorDetail}`);
   }
 
   const nowIso = new Date().toISOString();
@@ -591,18 +968,22 @@ async function cleanupPromoSummarySource(data, platformTag) {
 }
 
 function hasPromoSummaryConsumedCompute(data) {
-  const status = String(data?.status || "").trim().toLowerCase();
-  const phase = String(data?.phase || data?.stage || "").trim().toLowerCase();
-  const progress = Number(data?.progress || 0);
+  const status = normalizeAnalysisStatus(data?.status);
+  const phase = normalizeAnalysisStage(data?.phase || data?.stage);
+  const progress = normalizeAnalysisProgress(data?.progress);
   const clipSuggestions = Array.isArray(data?.clipSuggestions) ? data.clipSuggestions.length : 0;
   const clips = Array.isArray(data?.clips) ? data.clips.length : 0;
 
   return (
     status === "analyzing" ||
     status === "rendering" ||
+    status === "processing" ||
+    status === "in_progress" ||
     status === "completed" ||
     phase === "analyzing" ||
     phase === "rendering" ||
+    phase === "processing" ||
+    phase === "in_progress" ||
     progress > 0 ||
     clipSuggestions > 0 ||
     clips > 0
@@ -639,7 +1020,8 @@ async function reconcilePromoSummaryJob(docRef, data) {
     return data;
   }
 
-  if (data.status === "completed" && !data.outputsPersistedAt) {
+  const status = normalizeAnalysisStatus(data.status);
+  if (status === "completed" && !data.outputsPersistedAt) {
     try {
       return await persistPromoSummaryOutputs(docRef, data);
     } catch (error) {
@@ -653,14 +1035,14 @@ async function reconcilePromoSummaryJob(docRef, data) {
       );
       const failedData = {
         ...data,
-        status: "failed",
+        status: normalizeAnalysisStatus("failed"),
         error: error.message,
       };
       return markPromoSummaryNonRefundable(docRef, failedData, "persist_failed_after_compute");
     }
   }
 
-  if (data.status === "failed") {
+  if (status === "failed") {
     if (hasPromoSummaryConsumedCompute(data)) {
       return markPromoSummaryNonRefundable(
         docRef,
@@ -686,7 +1068,8 @@ async function monitorPromoSummaryJob(jobId) {
       return;
     }
 
-    if (data.status === "completed" || data.status === "failed") {
+    const status = normalizeAnalysisStatus(data.status);
+    if (status === "completed" || status === "failed") {
       await reconcilePromoSummaryJob(jobRef, data);
       return;
     }
@@ -709,7 +1092,7 @@ async function monitorPromoSummaryJob(jobId) {
   );
   const failedTimeoutData = {
     ...timeoutData,
-    status: "failed",
+    status: normalizeAnalysisStatus("failed"),
     error: "Promo summary timed out while waiting for worker completion.",
   };
   if (hasPromoSummaryConsumedCompute(failedTimeoutData)) {
@@ -907,10 +1290,168 @@ router.get("/analysis/:id", authMiddleware, async (req, res) => {
     }
 
     const reconciled = await reconcilePromoSummaryJob(docRef, doc.data());
-    res.json({ analysis: { id: doc.id, ...reconciled } });
+    const normalized = normalizePromoSummaryPayload(reconciled, { id: doc.id });
+    const preview = buildPromoSummaryPreviewPayload(normalized);
+    res.json({
+      success: true,
+      analysis: normalized,
+      data: normalized,
+      analysisId: normalized.id || doc.id,
+      jobId: normalized.id || doc.id,
+      preview,
+    });
   } catch (error) {
     console.error("Fetch analysis error:", error);
     res.status(500).json({ error: "Server error" });
+  }
+});
+
+/**
+ * @route GET /promo-summary/:analysisId/preview
+ * @desc Legacy poll-style promo preview payload for quick sync/debug
+ * @access Private
+ */
+router.get("/promo-summary/:analysisId/preview", authMiddleware, async (req, res) => {
+  try {
+    const docRef = db.collection("clip_analyses").doc(req.params.analysisId);
+    const doc = await docRef.get();
+
+    if (!doc.exists) {
+      return res.status(404).json({ error: "Analysis not found" });
+    }
+
+    if (doc.data().userId !== req.user.uid) {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
+
+    const reconciled = await reconcilePromoSummaryJob(docRef, doc.data());
+    const normalized = normalizePromoSummaryPayload(reconciled, { id: doc.id });
+    const preview = buildPromoSummaryPreviewPayload(normalized);
+    res.json({
+      success: true,
+      analysisId: normalized.id || doc.id,
+      jobId: normalized.id || doc.id,
+      status: preview.status,
+      stage: preview.stage,
+      progress: preview.progress,
+      preview,
+      analysis: normalized,
+      data: normalized,
+    });
+  } catch (error) {
+    console.error("Fetch smart promo preview error:", error);
+    res.status(500).json({ error: "Preview fetch failed", message: error.message });
+  }
+});
+
+/**
+ * @route GET /promo-summary/:analysisId/preview/stream
+ * @desc Live SSE-style smart promo preview stream (action-by-action updates)
+ * @access Private
+ */
+router.get("/promo-summary/:analysisId/preview/stream", authMiddleware, async (req, res) => {
+  try {
+    const docRef = db.collection("clip_analyses").doc(req.params.analysisId);
+    let doc = await docRef.get();
+
+    if (!doc.exists) {
+      return res.status(404).json({ error: "Analysis not found" });
+    }
+
+    if (doc.data().userId !== req.user.uid) {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
+
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+    res.setHeader("X-Accel-Buffering", "no");
+    res.flushHeaders && res.flushHeaders();
+    res.write("retry: 2500\n\n");
+
+    const send = buildPayload => writeSseEvent(res, buildPayload.kind || "preview", buildPayload);
+    let isClosed = false;
+    req.on("close", () => {
+      isClosed = true;
+      if (!res.writableEnded) {
+        try {
+          res.end();
+        } catch (_) {}
+      }
+    });
+
+    const heartbeat = () => {
+      if (!isClosed && !res.writableEnded) {
+        writeSseEvent(res, "heartbeat", {
+          kind: "heartbeat",
+          jobId: req.params.analysisId,
+          timestamp: Date.now(),
+        });
+      }
+    };
+
+    let lastSignature = "";
+    send({
+      kind: "open",
+      analysisId: req.params.analysisId,
+      jobId: req.params.analysisId,
+      connected: true,
+      timestamp: Date.now(),
+    });
+
+    const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+    while (!isClosed && !res.writableEnded) {
+      if (!doc.exists) {
+        send({ kind: "error", error: "Analysis not found", status: "failed" });
+        break;
+      }
+
+      const data = doc.data() || {};
+      if (data.userId !== req.user.uid) {
+        send({ kind: "error", error: "Unauthorized", status: "failed" });
+        break;
+      }
+
+      const reconciled = await reconcilePromoSummaryJob(docRef, data);
+      const normalized = normalizePromoSummaryPayload(reconciled, { id: doc.id });
+      const payload = buildPromoSummaryStreamPayload(normalized);
+      const signature = `${payload.status}|${payload.progress}|${payload.preview?.updatedAt || ""}|${payload.preview?.frameOffsetMs || ""}|${payload.preview?.totalTimelineEvents || 0}`;
+
+      if (signature !== lastSignature) {
+        const kind = normalized.status === "completed" || normalized.status === "failed" ? "done" : "preview";
+        send({ ...payload, kind });
+        lastSignature = signature;
+      }
+
+      if (payload.status === "completed" || payload.status === "failed") {
+        break;
+      }
+
+      heartbeat();
+      await sleep(1200);
+      doc = await docRef.get();
+    }
+
+    if (!res.writableEnded) {
+      res.end();
+    }
+  } catch (error) {
+    console.error("Stream smart promo preview error:", error);
+    try {
+      if (!res.headersSent) {
+        res.status(500).json({ error: "Preview stream failed", message: error.message });
+      } else {
+        writeSseEvent(res, "error", {
+          kind: "error",
+          error: "Preview stream failed",
+          message: error.message,
+        });
+        res.end();
+      }
+    } catch (_) {
+      // swallow
+    }
   }
 });
 
@@ -954,6 +1495,7 @@ router.post("/promo-summary/estimate", authMiddleware, async (req, res) => {
 router.post("/promo-summary", authMiddleware, async (req, res) => {
   const {
     videoUrl,
+    localPath = null,
     contentId = null,
     durationSeconds = 30,
     style = "clean",
@@ -963,6 +1505,7 @@ router.post("/promo-summary", authMiddleware, async (req, res) => {
     sourceFingerprint = null,
     videoDurationSeconds = 0,
   } = req.body || {};
+  const sourceDurationSeconds = Math.max(0, Number(videoDurationSeconds || 0));
   const userId = req.user.uid;
 
   const requestedOutputMode = String(outputMode || "visual_edit").trim().toLowerCase();
@@ -993,11 +1536,12 @@ router.post("/promo-summary", authMiddleware, async (req, res) => {
   const analysisCacheKey =
     sourceFingerprint ||
     sourceStoragePath ||
+    localPath ||
     contentId ||
     `${videoUrl}|${Math.round(Number(videoDurationSeconds || 0))}`;
 
-  if (!videoUrl) {
-    return res.status(400).json({ error: "Missing videoUrl" });
+  if (!videoUrl && !localPath) {
+    return res.status(400).json({ error: "Missing videoUrl or localPath" });
   }
 
   try {
@@ -1016,6 +1560,60 @@ router.post("/promo-summary", authMiddleware, async (req, res) => {
         error: "Video too long",
         message: `Smart Promo currently supports videos up to ${Math.round(PROMO_SUMMARY_MAX_DURATION_SECONDS / 60)} minutes for one job.`,
         estimate,
+      });
+    }
+
+    const reusable = await findReusablePromoSummaryJob({
+      userId,
+      analysisCacheKey,
+      normalizedOutputMode,
+      normalizedStyle,
+      normalizedPromoAngle,
+      workflowType,
+      targetDurationSeconds,
+    });
+
+    if (reusable) {
+      const reusableCredits = await getCreditBreakdown(userId).catch(() => null);
+      await db
+        .collection("clip_analyses")
+        .doc(reusable.id)
+        .set(
+          {
+            analysisReused: true,
+            lastReusedAt: new Date().toISOString(),
+            reuseCount: Math.max(0, Number(reusable.reuseCount || 0)) + 1,
+          },
+          { merge: true }
+        )
+        .catch(() => {});
+      const response = {
+        success: true,
+        reused: true,
+        analysisReused: true,
+        jobId: reusable.id,
+        reusedFromJobId: reusable.id,
+        analysisId: reusable.id,
+        cost: 0,
+        estimate,
+        creditsRemaining: reusableCredits?.totalAvailable ?? null,
+        clipCount: Math.max(1, countReusablePromoClips(reusable)),
+        promoAngle: normalizedPromoAngle,
+        outputMode: normalizedOutputMode,
+        workflowType: workflowType,
+        message: "Smart Promo cached summary reused.",
+        preview: buildPromoSummaryPreviewPayload({
+          ...reusable,
+          id: reusable.id,
+        }),
+      };
+      return res.json({
+        ...response,
+        clips: [],
+        promoClips: [],
+        generatedClips: [],
+        clipSuggestions: [],
+        data: response,
       });
     }
 
@@ -1059,9 +1657,22 @@ router.post("/promo-summary", authMiddleware, async (req, res) => {
           sourceStoragePath &&
             /^(temp_uploads|temp_sources)\//.test(String(sourceStoragePath))
         ),
-        sourceStoragePath: sourceStoragePath || null,
-        sourceFingerprint: sourceFingerprint || null,
-        analysisCacheKey,
+      sourceStoragePath: sourceStoragePath || null,
+      sourceFingerprint: sourceFingerprint || null,
+      sourceDurationSeconds,
+      analysisCacheKey,
+        previewEvents: [
+          {
+            id: `evt_${jobId}_queued`,
+            action: "queued",
+            label: "Smart Promo job created.",
+            status: "queued",
+            phase: "queued",
+            atMs: 0,
+            timestampMs: Date.now(),
+          },
+        ],
+        previewFrameOffsetMs: 0,
         billing: {
           charged: true,
           cost: estimate.credits,
@@ -1077,7 +1688,8 @@ router.post("/promo-summary", authMiddleware, async (req, res) => {
       .post(
         `${MEDIA_WORKER_URL}/auto-generate-clips`,
         {
-          video_url: videoUrl,
+          video_url: videoUrl || "",
+          local_path: localPath || "",
           job_id: jobId,
           max_clips: PROMO_SUMMARY_CLIP_COUNT,
           target_duration: targetDurationSeconds,
@@ -1090,6 +1702,7 @@ router.post("/promo-summary", authMiddleware, async (req, res) => {
           output_mode: normalizedOutputMode,
           workflow_type: workflowType,
           analysis_cache_key: analysisCacheKey,
+          source_duration_seconds: sourceDurationSeconds,
           campaign_roles: campaignRoles,
           creative_brief: {
             promo_angle: normalizedPromoAngle,
@@ -1128,9 +1741,10 @@ router.post("/promo-summary", authMiddleware, async (req, res) => {
       });
     });
 
-    res.json({
+    const response = {
       success: true,
       jobId,
+      analysisId: jobId,
       cost: estimate.credits,
       estimate,
       creditsRemaining: credits.remaining,
@@ -1138,7 +1752,31 @@ router.post("/promo-summary", authMiddleware, async (req, res) => {
       promoAngle: normalizedPromoAngle,
       outputMode: normalizedOutputMode,
       message: "Smart Promo Summary started.",
-    });
+      analysis: null,
+      clips: [],
+      promoClips: [],
+      generatedClips: [],
+      clipSuggestions: [],
+      preview: buildPromoSummaryPreviewPayload({
+        id: jobId,
+        status: "queued",
+        stage: "queued",
+        progress: 0,
+        message: "Smart Promo Summary started.",
+        previewEvents: [
+          {
+            id: `evt_${jobId}_queued`,
+            action: "queued",
+            label: "Smart Promo job created.",
+            status: "queued",
+            phase: "queued",
+            atMs: 0,
+            timestampMs: Date.now(),
+          },
+        ],
+      }),
+    };
+    return res.json({ ...response, data: response });
   } catch (error) {
     console.error("[ClipRoute] Promo summary error", {
       message: sanitizeErrorMessage(error),
