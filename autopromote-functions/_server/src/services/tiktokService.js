@@ -29,6 +29,54 @@ function isTikTokRateLimitError(error) {
   return /rate_limit_exceeded|rate limit/i.test(message);
 }
 
+function normalizeTikTokPrivacyLevel(value, fallback = "SELF_ONLY") {
+  const raw = String(value || fallback || "SELF_ONLY")
+    .trim()
+    .toUpperCase();
+  const aliases = {
+    PUBLIC: "PUBLIC_TO_EVERYONE",
+    EVERYONE: "PUBLIC_TO_EVERYONE",
+    PUBLIC_TO_EVERYONE: "PUBLIC_TO_EVERYONE",
+    FRIENDS: "MUTUAL_FOLLOW_FRIENDS",
+    MUTUALS: "MUTUAL_FOLLOW_FRIENDS",
+    MUTUAL_FOLLOW_FRIENDS: "MUTUAL_FOLLOW_FRIENDS",
+    FOLLOWERS: "FOLLOWER_OF_CREATOR",
+    FOLLOWER_OF_CREATOR: "FOLLOWER_OF_CREATOR",
+    PRIVATE: "SELF_ONLY",
+    SELF: "SELF_ONLY",
+    SELF_ONLY: "SELF_ONLY",
+  };
+  return aliases[raw] || aliases[String(fallback || "SELF_ONLY").toUpperCase()] || "SELF_ONLY";
+}
+
+function resolveTikTokCommercialFlags(payload = {}) {
+  const opts = payload?.platform_options?.tiktok || payload?.platformOptions?.tiktok || {};
+  const commercial = payload?.commercial || opts?.commercial || {};
+  const isCommercial = !!(
+    opts.is_commercial_content ||
+    opts.commercial ||
+    opts.isCommercial ||
+    payload.commercialContent ||
+    commercial.isCommercial ||
+    commercial.is_commercial_content
+  );
+  const brandOrganic = !!(
+    opts.brand_organic_toggle ||
+    opts.brandOrganic ||
+    opts.yourBrand ||
+    payload.yourBrand ||
+    commercial.yourBrand ||
+    commercial.brandOrganic
+  );
+  const brandedContent = !!(
+    opts.brand_content_toggle ||
+    opts.brandedContent ||
+    payload.brandedContent ||
+    commercial.brandedContent
+  );
+  return { isCommercial, brandOrganic, brandedContent };
+}
+
 // Compute candidate chunk sizes following TikTok Media Transfer Guide
 function computeChunkCandidates(videoSize) {
   const candidates = [];
@@ -368,21 +416,15 @@ async function initializeVideoUpload({
   const body = {
     post_info: {
       title: title || "",
-      privacy_level: privacyLevel, // Set by caller (admin-approved publishes default PUBLIC)
+      privacy_level: normalizeTikTokPrivacyLevel(privacyLevel),
       disable_duet: false,
       disable_comment: false,
       disable_stitch: false,
       video_cover_timestamp_ms: 1000,
-      // Inject Commercial Content flags if present
       ...(isCommercial
         ? {
-            // TikTok API structure for disclosure
-            commercial_content_type: brandOrganic
-              ? "BRAND_ORGANIC"
-              : brandedContent
-                ? "BRANDED_CONTENT"
-                : "NONE",
-            is_disclosed: true,
+            brand_organic_toggle: !!brandOrganic,
+            brand_content_toggle: !!brandedContent,
           }
         : {}),
     },
@@ -837,13 +879,13 @@ async function pullFromUrlPublish({
   if (!fetchFn) throw new Error("Fetch not available");
   // Init PULL_FROM_URL
   const initBody = {
-    post_info: {
-      post_mode: "DIRECT_POST",
-      title: title || "",
-      privacy_level: privacyLevel || "SELF_ONLY",
-      is_commercial_content: isCommercial,
-      brand_content_toggle: brandedContent,
-      brand_organic_toggle: brandOrganic,
+        post_info: {
+          post_mode: "DIRECT_POST",
+          title: title || "",
+          privacy_level: normalizeTikTokPrivacyLevel(privacyLevel),
+          is_commercial_content: isCommercial,
+          brand_content_toggle: brandedContent,
+          brand_organic_toggle: brandOrganic,
     },
     source_info: { source: "PULL_FROM_URL", video_url: videoUrl },
   };
@@ -970,14 +1012,13 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
   const title = baseTitle;
 
   // Default privacy: make approved publishes public, otherwise can be overridden by payload.privacy
-  let privacyLevel =
-    payload?.privacy || (reason === "approved" ? "PUBLIC_TO_EVERYONE" : "SELF_ONLY");
+  let privacyLevel = normalizeTikTokPrivacyLevel(
+    payload?.privacyLevel || payload?.privacy,
+    reason === "approved" ? "PUBLIC_TO_EVERYONE" : "SELF_ONLY"
+  );
 
   // Extract commercial content metrics
-  const opts = payload?.platform_options?.tiktok || {};
-  const isCommercial = opts.is_commercial_content || opts.commercial || false;
-  const brandOrganic = opts.brand_organic_toggle || opts.brandOrganic || false;
-  const brandedContent = opts.brand_content_toggle || opts.brandedContent || false;
+  const { isCommercial, brandOrganic, brandedContent } = resolveTikTokCommercialFlags(payload);
 
   if (isCommercial || brandOrganic || brandedContent) {
     privacyLevel = "PUBLIC_TO_EVERYONE";
@@ -1396,7 +1437,7 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
       accessToken,
       publishId: publish_id,
       title,
-      privacyLevel: postPrivacyLevel,
+      privacyLevel: normalizeTikTokPrivacyLevel(postPrivacyLevel),
       soundId,
     });
 
