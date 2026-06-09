@@ -338,10 +338,9 @@ function buildHookOverlayFilter(hookText, platform, options = {}) {
 function processMedia(inputFile, outputFile, options = {}) {
   return new Promise((resolve, reject) => {
     const {
-      trimSilence = true,
+      trimSilence = false,
       normalizeAudio = true,
       fixAspectRatio = true,
-      targetAspectRatio = 9 / 16, // Default to TikTok/Reels vertical
       viralMutation = false, // ENABLE THE COMEBACK: Randomly mutate content to bypass hash/duplicate detection
       hookText = "",
       subtitlePath = "",
@@ -361,15 +360,11 @@ function processMedia(inputFile, outputFile, options = {}) {
     let videoFilterChain = "";
     let audioFilterChain = "";
 
-    // 1. Retention Guard: Trim Silence at Start
-    // silenceremove=start_periods=1:start_duration=0.5:start_threshold=-40dB
+    // 1. Retention Guard: Trim Silence at Start.
+    // Disabled by default for platform publish transforms because audio-only
+    // silence removal shifts A/V sync when the video stream is not trimmed by
+    // exactly the same amount.
     if (trimSilence) {
-      // Applied as an audio filter. Note: this shifts audio. Video needs to be synced or we just cut content.
-      // FFmpeg 'silenceremove' only affects audio streams.
-      // To cut VIDEO based on audio silence is complex.
-      // Simplified "Sci-Fi" approach: We just cut the first 1.5s if it's dead silence,
-      // OR we rely on 'silenceremove' and let ffmpeg sync (it usually drops video frames to match).
-      // For safety, we will use a dedicated silence remover that works well.
       audioFilterChain += "silenceremove=start_periods=1:start_duration=0.3:start_threshold=-35dB,";
     }
 
@@ -403,6 +398,9 @@ function processMedia(inputFile, outputFile, options = {}) {
     // We need to name the streams to chain them properly.
     // [0:a] -> [a_proc]
     // [0:v] -> [v_proc]
+
+    audioFilterChain += "asetpts=PTS-STARTPTS,aresample=async=1:first_pts=0,";
+    videoFilterChain += "setpts=PTS-STARTPTS,";
 
     if (audioFilterChain.endsWith(",")) audioFilterChain = audioFilterChain.slice(0, -1);
     if (videoFilterChain.endsWith(",")) videoFilterChain = videoFilterChain.slice(0, -1);
@@ -476,6 +474,8 @@ function processMedia(inputFile, outputFile, options = {}) {
         "-c:a aac",
         "-b:a 192k",
         "-pix_fmt yuv420p",
+        "-r 30",
+        "-vsync cfr",
         "-movflags +faststart", // Web optimization
       ])
       .save(outputFile)
@@ -546,7 +546,7 @@ async function processMediaTransformTaskDoc(doc) {
 
     // Apply "Comeback" Logic (Protcol 7 Mutation) if requested
     await processMedia(tmpIn, tmpOut, {
-      trimSilence: true, // Always clean the hook
+      trimSilence: data.meta?.trimSilence === true,
       normalizeAudio: true, // Always professional audio
       fixAspectRatio: shouldFixRatio, // Intelligent formatting
       viralMutation: viralMode, // Change DNA if this is a "Remix" attempt
@@ -777,29 +777,6 @@ async function processMediaTransformTaskById(taskId) {
     return { id: doc.id, skipped: true, status: data.status };
   }
   return processMediaTransformTaskDoc(doc);
-}
-
-function detectMimeType(filePath) {
-  const ext = path.extname(filePath).toLowerCase();
-  switch (ext) {
-    case ".jpg":
-    case ".jpeg":
-      return "image/jpeg";
-    case ".png":
-      return "image/png";
-    case ".webp":
-      return "image/webp";
-    case ".mp3":
-      return "audio/mpeg";
-    case ".wav":
-      return "audio/wav";
-    case ".mp4":
-      return "video/mp4";
-    case ".mov":
-      return "video/quicktime";
-    default:
-      return "application/octet-stream";
-  }
 }
 
 module.exports = {

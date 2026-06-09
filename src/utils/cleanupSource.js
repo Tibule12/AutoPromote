@@ -155,6 +155,10 @@ async function hasPendingDependentTasks(contentId, currentPlatform) {
  * @param {string} fileUrl - The GS URI or HTTPS URL of the file to delete
  */
 async function cleanupSourceFile(fileUrl, options = {}) {
+  if (process.env.DISABLE_SOURCE_CLEANUP === "true") {
+    return { status: "skipped_disabled" };
+  }
+
   if (!fileUrl) return;
 
   let contentId = options && options.contentId ? String(options.contentId) : null;
