@@ -47,7 +47,10 @@
   line-height: 1;
   white-space: nowrap;
   padding: 0 16px;
-  transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+  transition:
+    transform 0.18s ease,
+    background 0.18s ease,
+    border-color 0.18s ease;
 }
 
 .subscription-panel-close:hover {
@@ -209,6 +212,36 @@
   color: #333;
 }
 
+.usage-detail {
+  margin-top: 8px;
+  color: #4b5563;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.usage-subtext {
+  display: block;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+.usage-pill-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.usage-pill {
+  border: 1px solid #dbeafe;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .usage-bar {
   position: relative;
   height: 32px;
@@ -241,6 +274,33 @@
   font-weight: 600;
   color: white;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.usage-cost-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+  margin-top: 20px;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 18px;
+}
+
+.usage-cost-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: #374151;
+  font-size: 13px;
+}
+
+.usage-cost-item strong {
+  color: #111827;
+  white-space: nowrap;
 }
 
 /* Plans Section */

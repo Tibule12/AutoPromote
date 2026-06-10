@@ -113,6 +113,61 @@ async function replaceSignedTask(ref, current, patch) {
   return next;
 }
 
+async function notifyPublishingQuotaBlocked({ uid, platform, contentId, quota, used, planTier }) {
+  if (!uid) return;
+  const dashboardUrl =
+    process.env.PUBLIC_SITE_URL || process.env.APP_PUBLIC_URL || "https://autopromote.org/#/billing";
+  let userData = {};
+  let contentData = {};
+  try {
+    const [userSnap, contentSnap] = await Promise.all([
+      db.collection("users").doc(uid).get(),
+      contentId ? db.collection("content").doc(contentId).get() : Promise.resolve(null),
+    ]);
+    userData = userSnap && userSnap.exists ? userSnap.data() || {} : {};
+    contentData = contentSnap && contentSnap.exists ? contentSnap.data() || {} : {};
+  } catch (_) {}
+
+  const contentTitle = contentData.title || contentData.originalName || "your scheduled post";
+  const message = `Publishing limit reached for ${platform}. ${contentTitle} was not enqueued because ${used}/${quota} monthly auto-publish slots are already used.`;
+
+  await notificationEngine
+    .sendNotification(uid, message, "warning", {
+      type: "publishing_quota_exceeded",
+      platform,
+      contentId,
+      used,
+      quota,
+      plan: planTier,
+      link: dashboardUrl,
+    })
+    .catch(console.warn);
+
+  let email = userData.email || userData.emailAddress || userData.profile?.email || null;
+  if (!email) {
+    try {
+      const authUser = await admin.auth().getUser(uid);
+      email = authUser.email || null;
+    } catch (_) {}
+  }
+  if (!email) return;
+
+  try {
+    const { sendUsageLimitWarningEmail } = require("./emailService");
+    await sendUsageLimitWarningEmail({
+      email,
+      name: userData.displayName || userData.name || userData.profile?.name || "there",
+      feature: "Auto-publishing",
+      used,
+      limit: quota,
+      resetLabel: "the next monthly billing period",
+      dashboardUrl,
+    });
+  } catch (emailError) {
+    console.warn("[enqueue] quota warning email failed:", emailError && emailError.message);
+  }
+}
+
 async function enqueueYouTubeUploadTask({
   contentId,
   uid,
@@ -634,7 +689,8 @@ async function enqueuePlatformPostTask({
       console.warn("[enqueue] sponsor approval check failed, allowing safely", e && e.message);
     }
   }
-  // Quota enforcement (monthly task quota based on plan)
+  // Quota enforcement for platform posts.
+  // Use a publishing-specific allowance and do not count failed/skipped attempts as usage.
   try {
     console.log("[enqueue] checking quota for uid", uid);
     const { getEffectiveTierSnapshot } = require("./billingService");
@@ -642,23 +698,39 @@ async function enqueuePlatformPostTask({
     console.log("[enqueue] plan tier:", planTier);
     const { getPlan } = require("./planService");
     const plan = getPlan(planTier);
-    const quota = plan.monthlyTaskQuota || 0;
+    const defaultPlatformPostQuotas = {
+      free: 10,
+      premium: 150,
+      basic: 150,
+      pro: 500,
+      enterprise: 2000,
+    };
+    const envKey = `PLATFORM_POST_MONTHLY_QUOTA_${String(planTier || "free").toUpperCase()}`;
+    const quota =
+      parseInt(process.env[envKey] || "", 10) ||
+      parseInt(process.env.PLATFORM_POST_MONTHLY_QUOTA || "", 10) ||
+      defaultPlatformPostQuotas[planTier] ||
+      plan.monthlyTaskQuota ||
+      0;
     if (quota > 0) {
-      // Count tasks enqueued this calendar month
+      // Count successful or still-live platform post tasks this calendar month.
       const now = new Date();
       const monthStart = new Date(
         Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)
       ).toISOString();
-      // Lightweight: sample up to quota+5 tasks to detect overage
       console.log("[enqueue] checking promotion_tasks count since", monthStart);
       const snap = await db
         .collection("promotion_tasks")
         .where("uid", "==", uid)
         .where("createdAt", ">=", monthStart)
         .where("type", "==", "platform_post")
-        .limit(quota + 5)
+        .limit(Math.max(quota + 25, 100))
         .get();
-      const used = snap.size;
+      let used = 0;
+      snap.forEach(taskDoc => {
+        const taskData = taskDoc.data() || {};
+        if (["queued", "processing", "completed"].includes(taskData.status)) used += 1;
+      });
       console.log("[enqueue] used tasks:", used, "quota:", quota);
       if (used >= quota) {
         // Record overage event (best effort)
@@ -671,6 +743,14 @@ async function enqueuePlatformPostTask({
             createdAt: new Date().toISOString(),
           });
         } catch (_) {}
+        await notifyPublishingQuotaBlocked({
+          uid,
+          platform,
+          contentId,
+          quota,
+          used,
+          planTier,
+        }).catch(console.warn);
         console.log("[enqueue] quota exceeded");
         return {
           skipped: true,

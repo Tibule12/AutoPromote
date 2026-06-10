@@ -728,25 +728,43 @@ router.get("/usage/current", authMiddleware, async (req, res) => {
     const monthStart = new Date(
       Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1)
     ).toISOString();
-    // Count tasks (approx; sample up to 5000)
+    // Count live/successful platform publishing tasks. Failed/skipped attempts should not
+    // burn the user's publishing allowance.
     const taskSnap = await db
       .collection("promotion_tasks")
       .where("uid", "==", uid)
       .where("createdAt", ">=", monthStart)
+      .where("type", "==", "platform_post")
       .limit(5000)
       .get();
-    const tasksUsed = taskSnap.size;
+    let tasksUsed = 0;
+    taskSnap.forEach(doc => {
+      const task = doc.data() || {};
+      if (["queued", "processing", "completed"].includes(task.status)) tasksUsed += 1;
+    });
     // Plan quota
     let quota = 0;
     let planTier = "free";
     try {
-      const userSnap = await db.collection("users").doc(uid).get();
-      if (userSnap.exists) {
-        const plan = userSnap.data().plan || {};
-        planTier = plan.tier || plan.id || "free";
-        const { getPlan } = require("../services/planService");
-        quota = getPlan(planTier).monthlyTaskQuota || 0;
-      }
+      const { getEffectiveTierSnapshot } = require("../services/billingService");
+      const { tierId } = await getEffectiveTierSnapshot(uid);
+      planTier = tierId || "free";
+      const { getPlan } = require("../services/planService");
+      const plan = getPlan(planTier);
+      const defaultPlatformPostQuotas = {
+        free: 10,
+        premium: 150,
+        basic: 150,
+        pro: 500,
+        enterprise: 2000,
+      };
+      const envKey = `PLATFORM_POST_MONTHLY_QUOTA_${String(planTier || "free").toUpperCase()}`;
+      quota =
+        parseInt(process.env[envKey] || "", 10) ||
+        parseInt(process.env.PLATFORM_POST_MONTHLY_QUOTA || "", 10) ||
+        defaultPlatformPostQuotas[planTier] ||
+        plan.monthlyTaskQuota ||
+        0;
     } catch (_) {}
     const overage = quota ? Math.max(0, tasksUsed - quota) : 0;
     return res.json({ ok: true, monthStart, plan: planTier, quota, tasksUsed, overage });
@@ -754,11 +772,6 @@ router.get("/usage/current", authMiddleware, async (req, res) => {
     return res.status(500).json({ ok: false, error: e.message });
   }
 });
-
-// Utility safe number
-function num(v) {
-  return typeof v === "number" && !Number.isNaN(v) ? v : 0;
-}
 
 async function fetchTaskMetrics(limitPerType = 150) {
   const types = ["youtube_upload", "platform_post"];

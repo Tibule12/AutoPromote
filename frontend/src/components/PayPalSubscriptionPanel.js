@@ -801,6 +801,17 @@ const PayPalSubscriptionPanel = ({
   };
 
   const missionUsage = usage?.missionOpportunities || usage?.viralBoosts || null;
+  const publishingUsage = usage?.publishing || null;
+  const creditUsage = usage?.credits || null;
+  const featureCostLabels = {
+    camCombinerRender: "Cam Combiner server MP4",
+    cleanAudioSync: "Clean-audio sync proof",
+    findViralClips: "Find Viral Clips",
+    finalClipRender: "Final clip render",
+    smartPromo: "Smart Promo",
+    videoProcessing: "Video processing",
+    transcription: "Audio transcript",
+  };
   const editingFeatureGroups = [
     "multicam",
     "autoDirector",
@@ -833,6 +844,8 @@ const PayPalSubscriptionPanel = ({
   };
 
   const renderUsageBar = (used, limit, unlimited) => {
+    const safeUsed = Number.isFinite(Number(used)) ? Number(used) : 0;
+    const safeLimit = Number.isFinite(Number(limit)) ? Number(limit) : 0;
     if (unlimited) {
       return (
         <div className="usage-bar">
@@ -842,8 +855,8 @@ const PayPalSubscriptionPanel = ({
       );
     }
 
-    const percentage = limit > 0 ? Math.min((used / limit) * 100, 100) : 0;
-    const isOverLimit = used > limit;
+    const percentage = safeLimit > 0 ? Math.min((safeUsed / safeLimit) * 100, 100) : 0;
+    const isOverLimit = safeLimit > 0 && safeUsed > safeLimit;
 
     return (
       <div className="usage-bar">
@@ -852,10 +865,20 @@ const PayPalSubscriptionPanel = ({
           style={{ width: `${percentage}%` }}
         />
         <span className="usage-text">
-          {used} / {limit} used
+          {safeUsed} / {safeLimit} used
         </span>
       </div>
     );
+  };
+
+  const renderRemainingText = item => {
+    if (!item) return null;
+    if (item.unlimited) return "Unlimited";
+    if (Number.isFinite(Number(item.remaining))) return `${Number(item.remaining)} remaining`;
+    if (Number.isFinite(Number(item.limit)) && Number.isFinite(Number(item.used))) {
+      return `${Math.max(0, Number(item.limit) - Number(item.used))} remaining`;
+    }
+    return null;
   };
 
   if (loading) {
@@ -962,11 +985,67 @@ const PayPalSubscriptionPanel = ({
             </div>
 
             <div className="usage-item">
+              <label>Auto-publish Slots</label>
+              {publishingUsage &&
+                renderUsageBar(
+                  publishingUsage.used,
+                  publishingUsage.limit,
+                  publishingUsage.unlimited
+                )}
+              {publishingUsage && (
+                <div className="usage-detail">
+                  {renderRemainingText(publishingUsage)}
+                  {publishingUsage.byPlatform &&
+                    Object.keys(publishingUsage.byPlatform).length > 0 && (
+                      <div className="usage-pill-list">
+                        {Object.entries(publishingUsage.byPlatform).map(([platform, count]) => (
+                          <span className="usage-pill" key={platform}>
+                            {platform}: {count}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                </div>
+              )}
+            </div>
+
+            <div className="usage-item">
+              <label>Editing Credits</label>
+              {creditUsage &&
+                renderUsageBar(
+                  creditUsage.monthlyUsed,
+                  creditUsage.monthlyAllocation,
+                  false
+                )}
+              {creditUsage && (
+                <div className="usage-detail">
+                  {creditUsage.monthlyRemaining || 0} monthly remaining
+                  {Number(creditUsage.topUpBalance || 0) > 0 &&
+                    ` + ${creditUsage.topUpBalance} top-up`}
+                  <span className="usage-subtext">
+                    {creditUsage.totalAvailable || 0} credits available now
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <div className="usage-item">
               <label>Mission Opportunities</label>
               {missionUsage &&
                 renderUsageBar(missionUsage.used, missionUsage.limit, missionUsage.unlimited)}
             </div>
           </div>
+
+          {usage.featureCosts && (
+            <div className="usage-cost-grid">
+              {Object.entries(featureCostLabels).map(([key, label]) => (
+                <div className="usage-cost-item" key={key}>
+                  <span>{label}</span>
+                  <strong>{usage.featureCosts[key] || 0} cr</strong>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

@@ -56,6 +56,25 @@ function findInternalPlanIdByPayPalPlanId(paypalPlanId) {
   return match ? match.id : null;
 }
 
+function getPlatformPostQuota(planId, plan) {
+  const normalized = normalizePlanId(planId || "free");
+  const defaultPlatformPostQuotas = {
+    free: 10,
+    premium: 150,
+    basic: 150,
+    pro: 500,
+    enterprise: 2000,
+  };
+  const envKey = `PLATFORM_POST_MONTHLY_QUOTA_${String(normalized).toUpperCase()}`;
+  return (
+    parseInt(process.env[envKey] || "", 10) ||
+    parseInt(process.env.PLATFORM_POST_MONTHLY_QUOTA || "", 10) ||
+    defaultPlatformPostQuotas[normalized] ||
+    plan?.features?.wolfHuntTasks ||
+    0
+  );
+}
+
 function extractPayPalNextBillingDate(paypalSub) {
   return (
     paypalSub?.billing_info?.next_billing_time ||
@@ -1078,9 +1097,12 @@ router.get("/usage", authMiddleware, async (req, res) => {
 
     // Get user data
     const userDoc = await db.collection("users").doc(userId).get();
-    const userData = userDoc.data() || {};
+    const userData = userDoc.exists ? userDoc.data() || {} : {};
 
-    const tier = normalizePlanId(userData.subscriptionTier || "free");
+    const effectiveTier = await getEffectiveTierSnapshot(userId, null, userData).catch(() => ({
+      tierId: userData.subscriptionTier || "free",
+    }));
+    const tier = normalizePlanId(effectiveTier.tierId || userData.subscriptionTier || "free");
     const plan = resolvePlan(tier);
 
     // Calculate period start
@@ -1114,7 +1136,7 @@ router.get("/usage", authMiddleware, async (req, res) => {
     };
 
     // Get usage counts (with error handling for missing indexes/collections)
-    let uploadsByUserIdSnap, uploadsByLegacySnap, postsSnap, boostsSnap;
+    let uploadsByUserIdSnap, uploadsByLegacySnap, postsSnap, boostsSnap, platformTaskSnap;
     try {
       [uploadsByUserIdSnap, uploadsByLegacySnap] = await Promise.all([
         db.collection("content").where("userId", "==", userId).get(),
@@ -1140,17 +1162,40 @@ router.get("/usage", authMiddleware, async (req, res) => {
       boostsSnap = { docs: [] };
     }
 
+    try {
+      platformTaskSnap = await db
+        .collection("promotion_tasks")
+        .where("uid", "==", userId)
+        .where("createdAt", ">=", periodStart.toISOString())
+        .where("type", "==", "platform_post")
+        .limit(1000)
+        .get();
+    } catch (e) {
+      console.log("[PayPal] Platform publish usage query error:", e.message);
+      platformTaskSnap = { docs: [] };
+    }
+
     const uploadLimit = plan.features.uploads;
     const communityPostLimit = plan.features.communityPosts;
     const missionOpportunityLimit = plan.features.wolfHuntTasks;
+    const platformPostLimit = getPlatformPostQuota(tier, plan);
     const isUnlimited = value => value === Infinity || value === "unlimited" || value === "Unlimited";
 
     const uploadsUsed = countDocsSince([uploadsByUserIdSnap, uploadsByLegacySnap], periodStart);
     const postsUsed = countDocsSince([postsSnap], periodStart);
     const boostsUsed = countDocsSince([boostsSnap], periodStart);
+    const publishingByPlatform = {};
+    let publishingUsed = 0;
+    (platformTaskSnap.docs || []).forEach(doc => {
+      const data = doc.data() || {};
+      const status = String(data.status || "").toLowerCase();
+      if (!["queued", "processing", "completed"].includes(status)) return;
+      publishingUsed += 1;
+      const platformName = String(data.platform || "unknown").toLowerCase();
+      publishingByPlatform[platformName] = (publishingByPlatform[platformName] || 0) + 1;
+    });
 
     // Credit usage for the current month
-    const monthKey = periodStart.toISOString().slice(0, 7) || new Date().toISOString().slice(0, 7);
     const monthlyCreditsAllocation = plan.features.monthlyCredits || 0;
     let monthlyCreditsUsed = 0;
     try {
@@ -1189,12 +1234,30 @@ router.get("/usage", authMiddleware, async (req, res) => {
         limit: isUnlimited(missionOpportunityLimit) ? null : missionOpportunityLimit,
         unlimited: isUnlimited(missionOpportunityLimit),
       },
+      publishing: {
+        used: publishingUsed,
+        limit: isUnlimited(platformPostLimit) ? null : platformPostLimit,
+        remaining: isUnlimited(platformPostLimit)
+          ? null
+          : Math.max(0, Number(platformPostLimit || 0) - publishingUsed),
+        unlimited: isUnlimited(platformPostLimit),
+        byPlatform: publishingByPlatform,
+      },
       credits: {
         monthlyAllocation: monthlyCreditsAllocation,
         monthlyUsed: monthlyCreditsUsed,
         monthlyRemaining: Math.max(0, monthlyCreditsAllocation - monthlyCreditsUsed),
         topUpBalance,
         totalAvailable: Math.max(0, monthlyCreditsAllocation - monthlyCreditsUsed) + topUpBalance,
+      },
+      featureCosts: {
+        camCombinerRender: CREDIT_COSTS["render-multicam"] || 0,
+        cleanAudioSync: CREDIT_COSTS["clean-audio-sync"] || 0,
+        findViralClips: CREDIT_COSTS.analyze || CREDIT_COSTS["find-viral-clips"] || 0,
+        finalClipRender: CREDIT_COSTS["render-clip"] || 0,
+        smartPromo: CREDIT_COSTS["promo-summary"] || CREDIT_COSTS["smart-promo-summary"] || 0,
+        videoProcessing: CREDIT_COSTS.process || 0,
+        transcription: CREDIT_COSTS.transcribe || CREDIT_COSTS["audio-extract"] || 0,
       },
       periodStart: periodStart.toISOString(),
       periodEnd: userData.subscriptionPeriodEnd,
