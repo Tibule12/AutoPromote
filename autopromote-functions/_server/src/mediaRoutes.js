@@ -506,11 +506,43 @@ router.post("/multicam/preflight-sync", async (req, res) => {
   }
 
   try {
-    const result = await videoEditingService.preflightMulticamSync({ sources, external_audio_url: externalAudioUrl });
+    const externalAudioOffsetSeconds = Number(
+      req.body?.external_audio_offset_seconds ??
+        req.body?.externalAudio?.offset_seconds ??
+        0
+    ) || 0;
+    const result = await videoEditingService.preflightMulticamSync({
+      sources,
+      external_audio_url: externalAudioUrl,
+      externalAudio: req.body?.externalAudio || null,
+      external_audio_offset_seconds: externalAudioOffsetSeconds,
+      external_audio_sync_trim_start: req.body?.external_audio_sync_trim_start,
+      external_audio_sync_trim_duration: req.body?.external_audio_sync_trim_duration,
+      timeline_start: Number(
+        req.body?.timeline_start ??
+          req.body?.timelineStart ??
+          req.body?.overlap_start ??
+          req.body?.overlapStart ??
+          0
+      ) || 0,
+      overlap_duration: Number(
+        req.body?.overlap_duration ??
+          req.body?.overlapDuration ??
+          req.body?.timeline_duration ??
+          req.body?.timelineDuration ??
+          0
+      ) || 0,
+    });
     res.json(result);
   } catch (error) {
-    console.error("[MediaRoute] Multicam preflight sync error:", error.message);
-    res.status(500).json({ message: "Preflight sync check failed", details: error.message });
+    const statusCode = Number(error.statusCode || error.response?.status || 500);
+    const safeStatus = statusCode >= 400 && statusCode < 500 ? statusCode : 500;
+    const details = error.workerDetail || error.response?.data?.detail || error.response?.data?.message || error.message;
+    console.error("[MediaRoute] Multicam preflight sync error:", details);
+    res.status(safeStatus).json({
+      message: "Preflight sync check failed",
+      details,
+    });
   }
 });
 

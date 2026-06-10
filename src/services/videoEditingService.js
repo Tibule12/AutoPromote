@@ -1104,7 +1104,10 @@ class VideoEditingService {
   async preflightMulticamSync({
     sources,
     external_audio_url,
+    externalAudio = null,
     external_audio_offset_seconds = 0,
+    external_audio_sync_trim_start = 0,
+    external_audio_sync_trim_duration = 0,
     timeline_start = 0,
     overlap_duration = 0,
   }) {
@@ -1131,9 +1134,28 @@ class VideoEditingService {
         offset_seconds: Number(s.offset_seconds || 0),
         sync_rate: Number(s.sync_rate ?? s.syncRate ?? 1),
         syncRate: Number(s.syncRate ?? s.sync_rate ?? 1),
+        sync_trim_start: Number(s.sync_trim_start ?? s.upload_trim_start ?? 0) || 0,
+        sync_trim_duration: Number(s.sync_trim_duration ?? s.upload_trim_duration ?? 0) || 0,
       })),
       external_audio_url,
       external_audio_offset_seconds: Number(external_audio_offset_seconds || 0),
+      externalAudio: {
+        ...(externalAudio && typeof externalAudio === "object" ? externalAudio : {}),
+        url: external_audio_url,
+        offset_seconds: Number(external_audio_offset_seconds || 0),
+        sync_trim_start: Number(
+          externalAudio?.sync_trim_start ??
+            externalAudio?.upload_trim_start ??
+            external_audio_sync_trim_start ??
+            0
+        ) || 0,
+        sync_trim_duration: Number(
+          externalAudio?.sync_trim_duration ??
+            externalAudio?.upload_trim_duration ??
+            external_audio_sync_trim_duration ??
+            0
+        ) || 0,
+      },
       timeline_start: Number(timeline_start || 0),
       timelineStart: Number(timeline_start || 0),
       overlap_start: Number(timeline_start || 0),

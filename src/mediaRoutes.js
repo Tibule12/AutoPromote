@@ -508,7 +508,10 @@ router.post("/multicam/preflight-sync", async (req, res) => {
     const result = await videoEditingService.preflightMulticamSync({
       sources,
       external_audio_url: externalAudioUrl,
+      externalAudio: req.body?.externalAudio || null,
       external_audio_offset_seconds: externalAudioOffsetSeconds,
+      external_audio_sync_trim_start: req.body?.external_audio_sync_trim_start,
+      external_audio_sync_trim_duration: req.body?.external_audio_sync_trim_duration,
       timeline_start: Number(
         req.body?.timeline_start ??
           req.body?.timelineStart ??

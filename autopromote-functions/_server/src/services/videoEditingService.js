@@ -876,7 +876,16 @@ class VideoEditingService {
     }
   }
 
-  async preflightMulticamSync({ sources, external_audio_url }) {
+  async preflightMulticamSync({
+    sources,
+    external_audio_url,
+    externalAudio = null,
+    external_audio_offset_seconds = 0,
+    external_audio_sync_trim_start = 0,
+    external_audio_sync_trim_duration = 0,
+    timeline_start = 0,
+    overlap_duration = 0,
+  }) {
     console.log("[VideoEditing] Running multicam preflight sync", {
       sourceCount: sources.length,
       hasExternalAudio: !!external_audio_url,
@@ -893,20 +902,58 @@ class VideoEditingService {
     }
 
     const payload = {
-      sources: sources.map(s => ({
-        id: s.id,
+      sources: sources.map((s, index) => ({
+        id: s.id || `camera_${index + 1}`,
         label: s.label || "",
         url: s.url,
         offset_seconds: Number(s.offset_seconds || 0),
         sync_rate: Number(s.sync_rate ?? s.syncRate ?? 1),
         syncRate: Number(s.syncRate ?? s.sync_rate ?? 1),
+        sync_trim_start: Number(s.sync_trim_start ?? s.upload_trim_start ?? 0) || 0,
+        sync_trim_duration: Number(s.sync_trim_duration ?? s.upload_trim_duration ?? 0) || 0,
       })),
       external_audio_url,
+      external_audio_offset_seconds: Number(external_audio_offset_seconds || 0),
+      externalAudio: {
+        ...(externalAudio && typeof externalAudio === "object" ? externalAudio : {}),
+        url: external_audio_url,
+        offset_seconds: Number(external_audio_offset_seconds || 0),
+        sync_trim_start: Number(
+          externalAudio?.sync_trim_start ??
+            externalAudio?.upload_trim_start ??
+            external_audio_sync_trim_start ??
+            0
+        ) || 0,
+        sync_trim_duration: Number(
+          externalAudio?.sync_trim_duration ??
+            externalAudio?.upload_trim_duration ??
+            external_audio_sync_trim_duration ??
+            0
+        ) || 0,
+      },
+      timeline_start: Number(timeline_start || 0),
+      timelineStart: Number(timeline_start || 0),
+      overlap_start: Number(timeline_start || 0),
+      overlapStart: Number(timeline_start || 0),
+      overlap_duration: Number(overlap_duration || 0),
+      overlapDuration: Number(overlap_duration || 0),
     };
 
-    const response = await axios.post(`${workerUrl}/multicam/preflight-sync`, payload, {
-      timeout: 120000,
-    });
+    let response;
+    try {
+      response = await axios.post(`${workerUrl}/multicam/preflight-sync`, payload, {
+        timeout: 120000,
+      });
+    } catch (error) {
+      const workerDetail = error.response?.data?.detail || error.response?.data?.message || error.message;
+      const message = typeof workerDetail === "string"
+        ? workerDetail
+        : JSON.stringify(workerDetail);
+      const wrappedError = new Error(message || "Multicam preflight worker failed");
+      wrappedError.statusCode = error.response?.status;
+      wrappedError.workerDetail = workerDetail;
+      throw wrappedError;
+    }
 
     return response.data;
   }
