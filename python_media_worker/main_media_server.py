@@ -353,14 +353,50 @@ def clamp_float(value, minimum, maximum):
     return max(minimum, min(maximum, numeric_value))
 
 def _detect_gpu_encoder():
-    """Check if NVIDIA NVENC is available for GPU-accelerated encoding."""
+    """Check if NVIDIA NVENC can actually encode on this runtime."""
+    forced_encoder = os.getenv("VIDEO_ENCODER", "").strip().lower()
+    if forced_encoder in {"libx264", "x264", "cpu"}:
+        return "libx264"
+    if forced_encoder in {"h264_nvenc", "nvenc"} and env_flag("ALLOW_UNPROVEN_NVENC", default=False):
+        return "h264_nvenc"
+
     try:
         result = subprocess.run(
             ["ffmpeg", "-hide_banner", "-encoders"],
             capture_output=True, text=True, timeout=10,
         )
-        if "h264_nvenc" in result.stdout:
+        if "h264_nvenc" not in result.stdout:
+            return "libx264"
+
+        # Some Cloud Run images list h264_nvenc because FFmpeg was compiled
+        # with it, but the runtime has no NVIDIA device access. Prove a tiny
+        # encode before selecting NVENC for real renders.
+        probe = subprocess.run(
+            [
+                "ffmpeg",
+                "-hide_banner",
+                "-loglevel",
+                "error",
+                "-f",
+                "lavfi",
+                "-i",
+                "color=size=64x64:rate=1:duration=1",
+                "-c:v",
+                "h264_nvenc",
+                "-f",
+                "null",
+                "-",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=15,
+        )
+        if probe.returncode == 0:
             return "h264_nvenc"
+        logger.warning(
+            "NVENC is compiled into FFmpeg but not usable on this runtime; falling back to libx264: %s",
+            (probe.stderr or probe.stdout or "").strip()[-500:],
+        )
     except Exception:
         pass
     return "libx264"

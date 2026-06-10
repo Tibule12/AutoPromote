@@ -533,10 +533,11 @@ class VideoEditingService {
   }
 
   async proveMulticamRender(multicamRequest, userId, jobId) {
+    const requestedTier = multicamRequest?.renderTier || multicamRequest?.render_tier || "premium";
     const proofRequest = {
       ...multicamRequest,
-      renderTier: "simple",
-      render_tier: "simple",
+      renderTier: requestedTier,
+      render_tier: requestedTier,
       burnCaptions: false,
       burn_captions: false,
       brandWatermark: false,
@@ -555,6 +556,7 @@ class VideoEditingService {
       jobId,
       sourceCount: payload.sources.length,
       duration: payload.overlap_duration,
+      renderTier: payload.renderTier || payload.render_tier,
     });
 
     const response = await this.postCamCombinerWorker("/render-multicam", payload, 900000);
