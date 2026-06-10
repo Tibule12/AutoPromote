@@ -14,6 +14,11 @@ try {
 } catch (e) { console.warn("Optional youtubeStatsPoller not found"); }
 
 async function main() {
+  if (process.env.ENABLE_CONTENT_DIAGNOSIS_CRON !== "true") {
+    console.log("Content Diagnosis Automation Job skipped: ENABLE_CONTENT_DIAGNOSIS_CRON is not true.");
+    process.exit(0);
+  }
+
   console.log("⏱️  Starting Content Diagnosis Automation Job...");
   
   // 1. Initialize Database
