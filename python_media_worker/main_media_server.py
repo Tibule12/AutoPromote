@@ -19457,6 +19457,24 @@ async def render_multicam_impl(request: RenderMultiCamRequest, provided_job_id: 
         if request.preSyncClapAlignment is not None
         else bool(request.pre_sync_clap_alignment)
     )
+    pre_sync_window_skip_threshold = max(
+        0.0,
+        float(os.getenv("MULTICAM_PRESYNC_CLAP_MIN_FULL_RENDER_SECONDS", "180") or 180),
+    )
+    should_run_pre_sync_clap_alignment = bool(pre_sync_clap_alignment)
+    if (
+        should_run_pre_sync_clap_alignment
+        and float(requested_overlap_duration or 0.0) > 0.25
+        and float(requested_overlap_duration or 0.0) < pre_sync_window_skip_threshold
+    ):
+        should_run_pre_sync_clap_alignment = False
+        logger.info(
+            "PRESYNC CLAP SKIPPED FOR SHORT WINDOW %s: "
+            "requested_duration=%.3fs threshold=%.3fs; using windowed CFR/preflight sync instead",
+            job_id,
+            float(requested_overlap_duration or 0.0),
+            pre_sync_window_skip_threshold,
+        )
     pre_sync_min_confidence = (
         float(request.preSyncMinConfidence)
         if request.preSyncMinConfidence is not None
@@ -19510,7 +19528,7 @@ async def render_multicam_impl(request: RenderMultiCamRequest, provided_job_id: 
 
     try:
         stage_started_at = time.perf_counter()
-        if external_audio_url and pre_sync_clap_alignment:
+        if external_audio_url and should_run_pre_sync_clap_alignment:
             if request.async_mode:
                 update_firestore_job(job_id, {"progress": 5, "detail": "Detecting clap alignment"})
             pre_sync_result = await align_multicam_sources_to_clap(
