@@ -23,6 +23,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Pre-download Whisper "small" model during build to avoid cold-start delay (~1GB)
 RUN python -c "import whisper; whisper.load_model('small')"
 
+# Pre-cache faster-whisper too; production Premium captions must not depend on
+# a live Hugging Face model lookup during user renders.
+RUN python -c "from faster_whisper import WhisperModel; WhisperModel('small', device='cpu', compute_type='int8')"
+
 # Copy source code
 COPY . .
 

@@ -1428,53 +1428,61 @@ def transcribe_with_hints(file_path, *, word_timestamps=False, language=None, pr
     prompt = build_transcription_prompt(prompt_hint)
 
     if engine == "faster":
-        model = get_faster_whisper_model(model_name=model_name)
-        if not model:
-            raise HTTPException(status_code=500, detail="faster-whisper model not allocated")
-        transcription_options = {
-            "word_timestamps": word_timestamps,
-            "temperature": 0,
-            "condition_on_previous_text": False,
-            "compression_ratio_threshold": 2.2,
-            "log_prob_threshold": -0.8,
-            "no_speech_threshold": 0.45,
-            "initial_prompt": prompt,
-            "vad_filter": env_flag("FASTER_WHISPER_VAD_FILTER", default=False),
-        }
-        if normalized_language:
-            transcription_options["language"] = normalized_language
-        if task:
-            transcription_options["task"] = task
+        try:
+            model = get_faster_whisper_model(model_name=model_name)
+            if not model:
+                raise RuntimeError("faster-whisper model not allocated")
+            transcription_options = {
+                "word_timestamps": word_timestamps,
+                "temperature": 0,
+                "condition_on_previous_text": False,
+                "compression_ratio_threshold": 2.2,
+                "log_prob_threshold": -0.8,
+                "no_speech_threshold": 0.45,
+                "initial_prompt": prompt,
+                "vad_filter": env_flag("FASTER_WHISPER_VAD_FILTER", default=False),
+            }
+            if normalized_language:
+                transcription_options["language"] = normalized_language
+            if task:
+                transcription_options["task"] = task
 
-        faster_segments, info = model.transcribe(file_path, **transcription_options)
-        segments = []
-        for segment in faster_segments:
-            words = []
-            for word in (getattr(segment, "words", None) or []):
-                words.append(
+            faster_segments, info = model.transcribe(file_path, **transcription_options)
+            segments = []
+            for segment in faster_segments:
+                words = []
+                for word in (getattr(segment, "words", None) or []):
+                    words.append(
+                        {
+                            "start": float(getattr(word, "start", 0.0) or 0.0),
+                            "end": float(getattr(word, "end", 0.0) or 0.0),
+                            "word": str(getattr(word, "word", "") or ""),
+                            "probability": float(getattr(word, "probability", 0.0) or 0.0),
+                        }
+                    )
+                segments.append(
                     {
-                        "start": float(getattr(word, "start", 0.0) or 0.0),
-                        "end": float(getattr(word, "end", 0.0) or 0.0),
-                        "word": str(getattr(word, "word", "") or ""),
-                        "probability": float(getattr(word, "probability", 0.0) or 0.0),
+                        "id": int(getattr(segment, "id", len(segments)) or len(segments)),
+                        "start": float(getattr(segment, "start", 0.0) or 0.0),
+                        "end": float(getattr(segment, "end", 0.0) or 0.0),
+                        "text": str(getattr(segment, "text", "") or ""),
+                        "words": words,
                     }
                 )
-            segments.append(
-                {
-                    "id": int(getattr(segment, "id", len(segments)) or len(segments)),
-                    "start": float(getattr(segment, "start", 0.0) or 0.0),
-                    "end": float(getattr(segment, "end", 0.0) or 0.0),
-                    "text": str(getattr(segment, "text", "") or ""),
-                    "words": words,
-                }
+            return {
+                "text": " ".join(segment.get("text", "").strip() for segment in segments).strip(),
+                "segments": segments,
+                "language": getattr(info, "language", None),
+                "duration": getattr(info, "duration", None),
+                "engine": "faster-whisper",
+            }
+        except Exception as exc:
+            if env_flag("FASTER_WHISPER_STRICT", default=False):
+                raise
+            logger.warning(
+                "faster-whisper unavailable; falling back to bundled openai-whisper: %s",
+                str(exc)[-500:],
             )
-        return {
-            "text": " ".join(segment.get("text", "").strip() for segment in segments).strip(),
-            "segments": segments,
-            "language": getattr(info, "language", None),
-            "duration": getattr(info, "duration", None),
-            "engine": "faster-whisper",
-        }
 
     model = get_whisper_model(model_name=model_name)
     if not model:
