@@ -34,33 +34,27 @@ const MULTICAM_MAX_RENDER_SECONDS = parseInt(
   process.env.MULTICAM_MAX_RENDER_SECONDS || String(20 * 60),
   10
 ) || 20 * 60;
+const MULTICAM_SERVER_PROOF_REQUIRED =
+  process.env.MULTICAM_SERVER_PROOF_REQUIRED === "true" ||
+  (process.env.MULTICAM_SERVER_PROOF_REQUIRED !== "false" && IS_PRODUCTION_RUNTIME);
 
 const normalizeMulticamRenderTier = value => {
   const tier = String(value || "premium").trim().toLowerCase().replace(/-/g, "_");
   return ["simple", "premium", "studio"].includes(tier) ? tier : "premium";
 };
 
-const estimateMulticamRenderCredits = ({ renderTier, baseCost }) => {
-  const safeBase = Number(baseCost || 15);
-  const tier = normalizeMulticamRenderTier(renderTier);
-  if (tier === "simple") return Math.max(8, Math.round(safeBase * 0.67));
-  if (tier === "studio") return Math.max(safeBase + 8, Math.ceil(safeBase * 1.6));
-  return safeBase;
+const MULTICAM_RENDER_CREDITS_BY_TIER = {
+  simple: 75,
+  premium: 150,
+  studio: 300,
 };
 
-const estimateCleanAudioSyncCredits = ({ sources = [], externalAudio = {} }) => {
-  const videoSources = Array.isArray(sources) ? sources : [];
-  const longestDuration = Math.max(
-    0,
-    ...videoSources.map(source => Number(source.duration || source.duration_seconds || 0)),
-    Number(externalAudio.duration || externalAudio.duration_seconds || 0)
-  );
-  const totalBytes =
-    videoSources.reduce((sum, source) => sum + Math.max(0, Number(source.size || 0)), 0) +
-    Math.max(0, Number(externalAudio.size || 0));
-  const durationMinutes = Math.max(1, longestDuration / 60);
-  return Math.max(18, Math.ceil(10 + videoSources.length * 6 + durationMinutes * 1.25 + totalBytes / (1024 * 1024 * 1024) * 4));
+const estimateMulticamRenderCredits = ({ renderTier }) => {
+  const tier = normalizeMulticamRenderTier(renderTier);
+  return MULTICAM_RENDER_CREDITS_BY_TIER[tier] || MULTICAM_RENDER_CREDITS_BY_TIER.premium;
 };
+
+const estimateCleanAudioSyncCredits = () => CREDIT_COSTS["clean-audio-sync"] || 18;
 
 const shouldRetryWithLocalWorker = error => {
   const status = error.response?.status;
@@ -585,12 +579,31 @@ router.post("/render-multicam", async (req, res) => {
       });
     }
 
-    const result = await chargeVideoEditorCredits(userId, cost, "render-multicam");
-    if (!result.success) {
+    let creditResult = null;
+    let creditBreakdown = null;
+    const deferCreditCharge = MULTICAM_SERVER_PROOF_REQUIRED && !VIDEO_EDITOR_CREDITS_DISABLED;
+    if (MULTICAM_SERVER_PROOF_REQUIRED) {
+      if (deferCreditCharge) {
+        creditBreakdown = await getCreditBreakdown(userId);
+        if (Number(creditBreakdown.totalAvailable || 0) < cost) {
+          return res.status(403).json({
+            message: `Multicam rendering costs ${cost} credits. You have ${creditBreakdown.totalAvailable || 0} credits available.`,
+            required: cost,
+            remaining: creditBreakdown.totalAvailable || 0,
+            topUpPacks: CREDIT_TOP_UP_PACKS,
+          });
+        }
+      } else {
+        creditResult = { success: true, remaining: null, skipped: true };
+      }
+    } else {
+      creditResult = await chargeVideoEditorCredits(userId, cost, "render-multicam");
+    }
+    if (creditResult && !creditResult.success) {
       return res.status(403).json({
-        message: `Multicam rendering costs ${cost} credits. You have ${result.remaining || 0} credits available.`,
+        message: `Multicam rendering costs ${cost} credits. You have ${creditResult.remaining || 0} credits available.`,
         required: cost,
-        remaining: result.remaining || 0,
+        remaining: creditResult.remaining || 0,
         topUpPacks: CREDIT_TOP_UP_PACKS,
       });
     }
@@ -602,7 +615,7 @@ router.post("/render-multicam", async (req, res) => {
         switches: Array.isArray(req.body?.switches) ? req.body.switches : [],
         autoSwitch: !!req.body?.autoSwitch,
         audioBasedAutoSwitch: req.body?.audioBasedAutoSwitch !== false,
-        autoSwitchInterval: Number(req.body?.autoSwitchInterval ?? 3),
+        autoSwitchInterval: Number(req.body?.autoSwitchInterval ?? 2),
         autoSwitchAggressiveness:
           typeof req.body?.autoSwitchAggressiveness === "string"
             ? req.body.autoSwitchAggressiveness
@@ -611,18 +624,32 @@ router.post("/render-multicam", async (req, res) => {
         render_tier: renderTier,
         primaryAudioCameraId:
           typeof req.body?.primaryAudioCameraId === "string" ? req.body.primaryAudioCameraId : null,
+        directorChannelCameraIds: Array.isArray(req.body?.directorChannelCameraIds)
+          ? req.body.directorChannelCameraIds
+          : Array.isArray(req.body?.director_channel_camera_ids)
+            ? req.body.director_channel_camera_ids
+            : null,
         overlapStart: Number(req.body?.overlapStart ?? 0),
         overlapDuration: Number(req.body?.overlapDuration ?? 0),
         outputAspectRatio:
           typeof req.body?.outputAspectRatio === "string" ? req.body.outputAspectRatio : "9:16",
         externalAudio: req.body?.externalAudio || null,
-        brandWatermark: req.body?.brandWatermark !== false,
+        brandWatermark: req.body?.brandWatermark === true || req.body?.brand_watermark === true,
+        burnCaptions: req.body?.burnCaptions === true || req.body?.burn_captions === true,
+        captionStyle:
+          typeof req.body?.captionStyle === "string" && req.body.captionStyle.trim()
+            ? req.body.captionStyle.trim()
+            : typeof req.body?.caption_style === "string" && req.body.caption_style.trim()
+              ? req.body.caption_style.trim()
+              : "podcast_clean",
         watermarkText:
           typeof req.body?.watermarkText === "string" && req.body.watermarkText.trim()
             ? req.body.watermarkText.trim()
             : "AutoPromote Cam Combiner",
-        generateThumbnail: req.body?.generateThumbnail !== false,
-        creditReceipt: result,
+        generateThumbnail: req.body?.generateThumbnail === true || req.body?.generate_thumbnail === true,
+        creditReceipt: creditResult,
+        pendingCreditCost: deferCreditCharge ? cost : 0,
+        requireServerProof: MULTICAM_SERVER_PROOF_REQUIRED,
       },
       userId
     );
@@ -630,11 +657,15 @@ router.post("/render-multicam", async (req, res) => {
     res.json({
       success: true,
       jobId: job.jobId,
-      message: "Multi-camera render started",
+      message: MULTICAM_SERVER_PROOF_REQUIRED
+        ? "Multi-camera render queued for server proof"
+        : "Multi-camera render started",
       renderTier,
-      chargedCredits: cost,
-      remainingCredits: result.remaining,
-      billingDisabled: !!result.skipped,
+      chargedCredits: !MULTICAM_SERVER_PROOF_REQUIRED && creditResult && !creditResult.skipped ? cost : 0,
+      pendingCredits: deferCreditCharge ? cost : 0,
+      remainingCredits: creditResult ? creditResult.remaining : creditBreakdown?.totalAvailable,
+      billingDisabled: !!creditResult?.skipped,
+      serverProofRequired: MULTICAM_SERVER_PROOF_REQUIRED,
     });
   } catch (error) {
     console.error("[MediaRoute] Multicam render error:", error.message);
@@ -660,10 +691,7 @@ router.post("/multicam/clean-audio-sync", async (req, res) => {
   }
 
   const requestedEstimate = Number(req.body?.estimatedCredits || 0);
-  const estimatedCredits = Math.max(
-    CREDIT_COSTS["clean-audio-sync"] || 18,
-    requestedEstimate > 0 ? requestedEstimate : estimateCleanAudioSyncCredits({ sources, externalAudio })
-  );
+  const estimatedCredits = estimateCleanAudioSyncCredits();
   const jobId = `clean-audio-sync-${Date.now()}-${uuidv4().slice(0, 8)}`;
   let creditResult = null;
 

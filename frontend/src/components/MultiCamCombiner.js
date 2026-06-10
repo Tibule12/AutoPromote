@@ -7477,7 +7477,13 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `Server returned ${response.status}`);
+        const detailText =
+          errorData.error ||
+          errorData.message ||
+          errorData.details ||
+          errorData.detail ||
+          `Server returned ${response.status}`;
+        throw new Error(detailText);
       }
 
       const data = await response.json();
