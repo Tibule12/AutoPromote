@@ -13606,11 +13606,41 @@ def build_multicam_segments_from_switches(request, prepared_sources, overlap_sta
             timeline_start,
             segment_duration,
         )
-        if source_start < -0.01 or source_end > float(source["duration"]) + 0.01:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Switch segment exceeds source bounds for {source['label']}",
+        source_duration_limit = float(source["duration"])
+        if source_start < -0.01 or source_end > source_duration_limit + 0.01:
+            out_of_bounds_seconds = max(0.0, -source_start, source_end - source_duration_limit)
+            is_tail_segment = next_switch is None
+            allow_boundary_clip = is_tail_segment or out_of_bounds_seconds <= 0.25
+            if not allow_boundary_clip:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Switch segment exceeds source bounds for {source['label']}",
+                )
+            clipped_source_start = clamp_float(source_start, 0.0, max(0.0, source_duration_limit - 0.02))
+            clipped_source_end = clamp_float(source_end, clipped_source_start + 0.02, source_duration_limit)
+            clipped_source_duration = clipped_source_end - clipped_source_start
+            if clipped_source_duration <= 0.02:
+                continue
+            sync_rate = max(0.001, float(source.get("sync_rate") or 1.0))
+            clipped_timeline_duration = min(segment_duration, clipped_source_duration / sync_rate)
+            if clipped_timeline_duration <= 0.02:
+                continue
+            logger.warning(
+                "MULTICAM SWITCH SEGMENT CLIPPED TO SOURCE BOUNDS: "
+                "camera=%s label=%s timeline=%.3f→%.3f source=%.3f→%.3f limit=%.3f overrun=%.3f",
+                source.get("id"),
+                source.get("label"),
+                timeline_start,
+                timeline_start + clipped_timeline_duration,
+                clipped_source_start,
+                clipped_source_end,
+                source_duration_limit,
+                out_of_bounds_seconds,
             )
+            timeline_end = timeline_start + clipped_timeline_duration
+            segment_duration = clipped_timeline_duration
+            source_start = clipped_source_start
+            source_end = clipped_source_end
 
         segments.append(
             {
@@ -13618,7 +13648,7 @@ def build_multicam_segments_from_switches(request, prepared_sources, overlap_sta
                 "timeline_start": round(timeline_start, 3),
                 "timeline_end": round(timeline_end, 3),
                 "source_start": round(max(0.0, source_start), 3),
-                "source_end": round(min(float(source["duration"]), source_end), 3),
+                "source_end": round(min(source_duration_limit, source_end), 3),
                 "layout_mode": normalize_multicam_layout_mode(switch.get("layout_mode", "cut") or "cut"),
                 "layout_reason": switch.get("layout_reason", ""),
                 "secondary_camera_id": switch.get("secondary_camera_id"),
