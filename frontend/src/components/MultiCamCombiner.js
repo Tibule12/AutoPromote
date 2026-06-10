@@ -7557,12 +7557,17 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
               }
               setServerExportPending(false);
               setIsExporting(false);
-            } else if (statusData.status === "failed") {
+            } else if (statusData.status === "failed" || statusData.status === "proof_failed") {
               window.clearInterval(pollInterval);
+              const failureMessage =
+                statusData.error ||
+                statusData.workerError ||
+                statusData.detail ||
+                "Server render failed.";
               setStatusMessage(
-                statusData.error || statusData.detail || "Server render failed."
+                failureMessage
               );
-              toast.error(statusData.error || "Server render failed.");
+              toast.error(failureMessage);
               setServerExportPending(false);
               setIsExporting(false);
               setExportProgress(0);

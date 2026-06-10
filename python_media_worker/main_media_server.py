@@ -19610,19 +19610,22 @@ async def render_multicam_impl(request: RenderMultiCamRequest, provided_job_id: 
             pre_sync_clap_status=(pre_sync_result or {}).get("status") if pre_sync_result else "not_requested",
         )
 
-        calculated_overlap_start = max(source["offset_seconds"] for source in prepared_sources)
-        calculated_overlap_end = min(
-            source["offset_seconds"] + source["duration"] for source in prepared_sources
-        )
-
-        if has_explicit_segments:
-            overlap_start = float(requested_timeline_start or 0.0)
-            segment_timeline_end = max(
-                [float(segment.timeline_end or 0.0) for segment in (request.segments or [])] or [0.0]
+        def resolve_multicam_overlap_window():
+            calculated_start = max(source["offset_seconds"] for source in prepared_sources)
+            calculated_end = min(
+                source["offset_seconds"] + source["duration"] for source in prepared_sources
             )
-            overlap_duration = float(requested_overlap_duration or segment_timeline_end or 0.0)
-            overlap_end = overlap_start + overlap_duration
-        else:
+
+            if has_explicit_segments:
+                start = float(requested_timeline_start or 0.0)
+                segment_timeline_end = max(
+                    [float(segment.timeline_end or 0.0) for segment in (request.segments or [])] or [0.0]
+                )
+                requested_duration = float(requested_overlap_duration or segment_timeline_end or 0.0)
+                end = min(calculated_end, start + requested_duration) if requested_duration > 0 else calculated_end
+                duration = max(0.0, end - start)
+                return start, duration, end, calculated_start, calculated_end
+
             if has_requested_overlap_start:
                 overlap_anchor = float(requested_overlap_start)
             elif external_audio_url:
@@ -19631,12 +19634,21 @@ async def render_multicam_impl(request: RenderMultiCamRequest, provided_job_id: 
                 # pads/delays the master audio and creates visible lip drift.
                 overlap_anchor = 0.0
             else:
-                overlap_anchor = float(calculated_overlap_start)
-            overlap_start = max(calculated_overlap_start, overlap_anchor)
-            overlap_end = calculated_overlap_end
+                overlap_anchor = float(calculated_start)
+            start = max(calculated_start, overlap_anchor)
+            end = calculated_end
             if float(requested_overlap_duration or 0.0) > 0:
-                overlap_end = min(overlap_end, overlap_start + float(requested_overlap_duration))
-            overlap_duration = max(0.0, overlap_end - overlap_start)
+                end = min(end, start + float(requested_overlap_duration))
+            duration = max(0.0, end - start)
+            return start, duration, end, calculated_start, calculated_end
+
+        (
+            overlap_start,
+            overlap_duration,
+            overlap_end,
+            calculated_overlap_start,
+            calculated_overlap_end,
+        ) = resolve_multicam_overlap_window()
 
         if overlap_duration <= 0.25:
             raise HTTPException(status_code=400, detail="The selected camera offsets do not produce a usable overlap")
@@ -19780,6 +19792,31 @@ async def render_multicam_impl(request: RenderMultiCamRequest, provided_job_id: 
                         "Render will proceed but result may have sync issues."
                     )
                 preflight_sync_corrections = apply_proven_multicam_preflight_sync(preflight, prepared_sources)
+                if preflight_sync_corrections:
+                    previous_overlap_start = overlap_start
+                    previous_overlap_duration = overlap_duration
+                    (
+                        overlap_start,
+                        overlap_duration,
+                        overlap_end,
+                        calculated_overlap_start,
+                        calculated_overlap_end,
+                    ) = resolve_multicam_overlap_window()
+                    logger.info(
+                        "PREFLIGHT SYNC WINDOW RECALCULATED %s: "
+                        "start %.3f→%.3f duration %.3f→%.3f calculated_end=%.3f",
+                        job_id,
+                        previous_overlap_start,
+                        overlap_start,
+                        previous_overlap_duration,
+                        overlap_duration,
+                        calculated_overlap_end,
+                    )
+                    if overlap_duration <= 0.25:
+                        raise HTTPException(
+                            status_code=400,
+                            detail="The proven camera sync corrections do not leave a usable overlap",
+                        )
                 if preflight_sync_corrections and not skip_visual_proxy:
                     visual_proxy_stage_started_at = time.perf_counter()
                     if request.async_mode:

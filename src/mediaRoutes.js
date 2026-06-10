@@ -954,6 +954,9 @@ router.get("/status/:jobId", async (req, res) => {
       message: data.message,
       offsets: data.offsets,
       error: data.error,
+      workerError: data.workerError || null,
+      workerStatus: data.workerStatus || null,
+      serverProof: data.serverProof || null,
     });
   } catch (e) {
     console.error("Status check failed:", e);
