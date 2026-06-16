@@ -746,23 +746,15 @@ router.get("/usage/current", authMiddleware, async (req, res) => {
     let quota = 0;
     let planTier = "free";
     try {
-      const { getEffectiveTierSnapshot } = require("../services/billingService");
+      const { getEffectiveTierSnapshot, getPlatformPostMonthlyQuota } = require("../services/billingService");
       const { tierId } = await getEffectiveTierSnapshot(uid);
       planTier = tierId || "free";
       const { getPlan } = require("../services/planService");
       const plan = getPlan(planTier);
-      const defaultPlatformPostQuotas = {
-        free: 10,
-        premium: 150,
-        basic: 150,
-        pro: 500,
-        enterprise: 2000,
-      };
-      const envKey = `PLATFORM_POST_MONTHLY_QUOTA_${String(planTier || "free").toUpperCase()}`;
       quota =
-        parseInt(process.env[envKey] || "", 10) ||
-        parseInt(process.env.PLATFORM_POST_MONTHLY_QUOTA || "", 10) ||
-        defaultPlatformPostQuotas[planTier] ||
+        (getPlatformPostMonthlyQuota &&
+          typeof getPlatformPostMonthlyQuota === "function" &&
+          getPlatformPostMonthlyQuota(planTier, plan)) ||
         plan.monthlyTaskQuota ||
         0;
     } catch (_) {}

@@ -1262,7 +1262,7 @@
   text-overflow: ellipsis;
 }
 
-.nle-reaction-always-chip {
+.nle-reaction-overlay-chip {
   min-height: 58px;
   display: grid;
   align-content: center;
@@ -1276,18 +1276,43 @@
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.035);
 }
 
-.nle-reaction-always-chip strong {
+.nle-reaction-overlay-chip strong {
   color: #ecfdf5;
   font-size: 0.86rem;
   font-weight: 900;
 }
 
-.nle-reaction-always-chip span {
+.nle-reaction-overlay-chip span {
   color: rgba(167, 243, 208, 0.84);
   font-size: 0.72rem;
   font-weight: 900;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.nle-reaction-toggle {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.nle-reaction-toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.nle-reaction-toggle.is-active strong {
+  color: #dcfce7;
+}
+
+.nle-reaction-toggle.is-active span {
+  color: #86efac;
 }
 
 .nle-reaction-side-control {
@@ -3574,6 +3599,7 @@
 }
 
 .nle-export-result,
+.nle-render-review-card,
 .nle-status-banner {
   margin-top: 14px;
   padding: 14px 16px;
@@ -3583,14 +3609,28 @@
 }
 
 .nle-export-result strong,
+.nle-render-review-card strong,
 .nle-status-banner {
   color: #fff8ec;
 }
 
-.nle-export-result span {
+.nle-export-result span,
+.nle-render-review-card span {
   display: block;
   margin-top: 6px;
   color: rgba(255, 255, 255, 0.7);
+}
+
+.nle-render-review-card {
+  border-color: rgba(250, 204, 21, 0.28);
+  background: rgba(113, 63, 18, 0.22);
+}
+
+.nle-render-review-card ul {
+  margin: 10px 0 0;
+  padding-left: 18px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.84rem;
 }
 
 .nle-export-actions {
@@ -3692,6 +3732,27 @@
 .nle-saved-render-card {
   padding: 10px 0;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.nle-saved-render-card.is-needs_review strong {
+  color: #fef08a;
+}
+
+.nle-saved-render-card.is-rejected strong {
+  color: #fecaca;
+}
+
+.nle-saved-render-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.nle-mini-btn.is-danger,
+.nle-btn.is-danger {
+  border-color: rgba(248, 113, 113, 0.38);
+  color: #fecaca;
 }
 
 .nle-saved-render-card > div:nth-child(2) {

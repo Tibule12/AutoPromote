@@ -332,7 +332,14 @@ function toPositiveFiniteNumber(value) {
 
 async function getPromotionQuotaSnapshot(userId, tierId) {
   const plan = getPlan(tierId);
-  const quota = toPositiveFiniteNumber(plan && plan.monthlyTaskQuota);
+  const platformPostQuotaRaw =
+    billingService && typeof billingService.getPlatformPostMonthlyQuota === "function"
+      ? billingService.getPlatformPostMonthlyQuota(tierId, plan)
+      : 0;
+  const normalizedQuota =
+    toPositiveFiniteNumber(platformPostQuotaRaw) ||
+    toPositiveFiniteNumber(plan && plan.monthlyTaskQuota);
+  const quota = normalizedQuota;
 
   if (quota <= 0) {
     return { enforced: false, limit: null, used: 0, remaining: null };
@@ -345,14 +352,15 @@ async function getPromotionQuotaSnapshot(userId, tierId) {
     .where("uid", "==", userId)
     .where("createdAt", ">=", monthStart)
     .where("type", "==", "platform_post")
+    .where("status", "in", ["queued", "processing", "completed"])
     .limit(quota + 5)
     .get();
 
   return {
     enforced: true,
-    limit: quota,
+    limit: normalizedQuota,
     used: snap.size,
-    remaining: Math.max(0, quota - snap.size),
+    remaining: Math.max(0, normalizedQuota - snap.size),
   };
 }
 

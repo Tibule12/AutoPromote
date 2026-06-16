@@ -697,21 +697,12 @@ async function enqueuePlatformPostTask({
     const { tierId: planTier } = await getEffectiveTierSnapshot(uid);
     console.log("[enqueue] plan tier:", planTier);
     const { getPlan } = require("./planService");
+    const { getPlatformPostMonthlyQuota } = require("./billingService");
     const plan = getPlan(planTier);
-    const defaultPlatformPostQuotas = {
-      free: 10,
-      premium: 150,
-      basic: 150,
-      pro: 500,
-      enterprise: 2000,
-    };
-    const envKey = `PLATFORM_POST_MONTHLY_QUOTA_${String(planTier || "free").toUpperCase()}`;
     const quota =
-      parseInt(process.env[envKey] || "", 10) ||
-      parseInt(process.env.PLATFORM_POST_MONTHLY_QUOTA || "", 10) ||
-      defaultPlatformPostQuotas[planTier] ||
-      plan.monthlyTaskQuota ||
-      0;
+      getPlatformPostMonthlyQuota && typeof getPlatformPostMonthlyQuota === "function"
+        ? getPlatformPostMonthlyQuota(planTier, plan)
+        : plan.monthlyTaskQuota || 0;
     if (quota > 0) {
       // Count successful or still-live platform post tasks this calendar month.
       const now = new Date();

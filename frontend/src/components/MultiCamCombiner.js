@@ -80,6 +80,27 @@ const formatRenderExpiry = expiresAt => {
   if (remainingHours < 48) return `Expires in ${remainingHours}h`;
   return `Expires in ${Math.ceil(remainingHours / 24)} days`;
 };
+
+export const getRenderApprovalState = render => {
+  const approvalStatus = String(render?.approvalStatus || "").toLowerCase();
+  if (["needs_review", "approved", "rejected"].includes(approvalStatus)) return approvalStatus;
+  if (render?.canDownload && (render.outputUrl || render.output_url)) return "approved";
+  const status = String(render?.status || "").toLowerCase();
+  if (["needs_review", "approved", "rejected"].includes(status)) return status;
+  return "unknown";
+};
+
+export const canDownloadApprovedRender = render =>
+  getRenderApprovalState(render) === "approved" && Boolean(render?.outputUrl || render?.output_url);
+
+export const getRenderApprovalCopy = render => {
+  const state = getRenderApprovalState(render);
+  if (state === "approved") return "Approved master";
+  if (state === "rejected") return "Rejected render";
+  if (state === "needs_review") return "Needs human review";
+  return "Render";
+};
+
 const FRAME_STEP_SECONDS = 1 / 30;
 const AUDIO_SYNC_BINS_PER_SECOND = 20;
 const WAVEFORM_BAR_COUNT = 24;
@@ -413,7 +434,7 @@ const MULTICAM_LAYOUT_OPTIONS = [
 const MULTICAM_LAYOUT_TITLES = {
   smart: "Pulse Director",
   "split-vertical": "Dual Pulse",
-  pip: "Reaction always on",
+  pip: "Reaction overlay",
   "scene-grid": "Scene Matrix",
   cut: "Hero Angle",
 };
@@ -595,6 +616,21 @@ const applyDirectorStyleToLayout = (layout, directorStyleId, rankedSources = [])
     default:
       return safeLayout;
   }
+};
+
+const suppressReactionOverlayLayout = layout => {
+  const safeLayout = layout || {};
+  if (normalizeMulticamLayoutMode(safeLayout.layoutMode) !== "pip") return safeLayout;
+  const primaryCameraId = safeLayout.primaryCameraId || safeLayout.visibleCameraIds?.[0] || null;
+  return {
+    ...safeLayout,
+    layoutMode: "cut",
+    secondaryCameraId: null,
+    visibleCameraIds: [primaryCameraId].filter(Boolean),
+    reason: safeLayout.reason
+      ? `reaction_overlay_disabled:${safeLayout.reason}`
+      : "reaction_overlay_disabled",
+  };
 };
 
 const getSourceMediaUrl = source => source?.previewUrl || source?.url || source?.uploadedUrl || "";
@@ -1734,6 +1770,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const [exportProgress, setExportProgress] = useState(0);
   const [outputAspectRatio, setOutputAspectRatio] = useState("9:16");
   const [exportResult, setExportResult] = useState(null);
+  const [pendingRenderReview, setPendingRenderReview] = useState(null);
   const [recentRenders, setRecentRenders] = useState([]);
   const [recentRendersStatus, setRecentRendersStatus] = useState("");
   const [serverExportPending, setServerExportPending] = useState(false);
@@ -1743,6 +1780,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const [singleLensAutoSummary, setSingleLensAutoSummary] = useState("");
   const [focusPickerActive, setFocusPickerActive] = useState(false);
   const [multicamLayoutMode, setMulticamLayoutMode] = useState("cut");
+  const [reactionOverlayEnabled, setReactionOverlayEnabled] = useState(false);
   const [directorStyleId, setDirectorStyleId] = useState(DIRECTOR_STYLE_PRESETS[0].id);
   const [autoDirectorEnabled, setAutoDirectorEnabled] = useState(false);
   const [autoDirectorSummary, setAutoDirectorSummary] = useState(null);
@@ -1804,6 +1842,52 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       setRecentRendersStatus("Saved masters could not be loaded right now.");
     }
   }, []);
+
+  const handleReviewAction = useCallback(
+    async (job, action) => {
+      if (!job?.jobId || !["approve", "reject"].includes(action)) return;
+      try {
+        const user = getAuth().currentUser;
+        if (!user) throw new Error("Sign in again to review this render.");
+        const token = await user.getIdToken();
+        const response = await fetch(`${API_BASE_URL}/api/media/render-jobs/${job.jobId}/${action}`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ notes: "" }),
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || `Could not ${action} render.`);
+        }
+
+        const updatedJob = data.job || {};
+        if (action === "approve" && canDownloadApprovedRender(updatedJob)) {
+          const approvedUrl = updatedJob.outputUrl || updatedJob.output_url;
+          setExportResult({
+            url: approvedUrl,
+            file: { name: `multicam-master-${Date.now()}.mp4` },
+            duration: updatedJob.duration || job.duration || 0,
+            isServerRender: true,
+          });
+          setPendingRenderReview(null);
+          setStatusMessage("Render approved. Download is available.");
+        } else if (action === "reject") {
+          setExportResult(null);
+          setPendingRenderReview(updatedJob);
+          setStatusMessage("Render rejected. Download remains blocked.");
+        }
+        await loadRecentRenders();
+      } catch (error) {
+        console.warn(`Render ${action} failed`, error);
+        toast.error(error.message || `Could not ${action} render.`);
+      }
+    },
+    [loadRecentRenders]
+  );
+
   const playheadRef = useRef(0);
   const scrollContainerRef = useRef(null);
   const previewPanelRef = useRef(null);
@@ -2101,11 +2185,12 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       audioAnalysisByCameraId,
       timelineLayoutMode
     );
-    return applyDirectorStyleToLayout(
+    const styledLayout = applyDirectorStyleToLayout(
       baseLayout,
       directorStyleId,
       readySources.length ? readySources : sources
     );
+    return reactionOverlayEnabled ? styledLayout : suppressReactionOverlayLayout(styledLayout);
   }, [
     isSingleSourceWorkflow,
     activeCameraId,
@@ -2117,6 +2202,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     multicamLayoutMode,
     activeSegment?.layoutMode,
     directorStyleId,
+    reactionOverlayEnabled,
     isImageStoryFlow,
   ]);
   const effectiveMulticamLayoutMode = resolvedMulticamLayout.layoutMode || "cut";
@@ -2127,7 +2213,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     return readySources.find(source => source.id !== activeCameraId)?.id || null;
   }, [isSingleSourceWorkflow, readySources, activeCameraId, secondaryCameraId]);
   const previewMulticamLayoutMode =
-    !isSingleSourceWorkflow && effectiveMulticamLayoutMode === "cut" && reactionOverlayCameraId
+    reactionOverlayEnabled && !isSingleSourceWorkflow && effectiveMulticamLayoutMode === "cut" && reactionOverlayCameraId
       ? "pip"
       : effectiveMulticamLayoutMode;
   const previewSecondaryCameraId =
@@ -2661,7 +2747,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
 
     if (previewMulticamLayoutMode === "scene-grid") return "Conversation matrix live";
     if (previewMulticamLayoutMode === "split-vertical") return "Shared reaction moment";
-    if (previewMulticamLayoutMode === "pip") return "Reaction always on";
+    if (previewMulticamLayoutMode === "pip") return "Reaction overlay";
     return "Hero angle locked";
   }, [isSingleSourceWorkflow, flowEditEnabled, currentFlowSegment, previewMulticamLayoutMode, selectedSingleCamSegment]);
   const directorHeroNarrative = useMemo(() => {
@@ -2678,7 +2764,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       return "The whole conversation stays open in a living vertical matrix.";
     }
     if (previewMulticamLayoutMode === "pip") {
-      return "The lead holds frame while a reaction stays alive in orbit.";
+      return "The lead holds frame while the chosen reaction overlay stays visible.";
     }
     return "The director is holding one hero angle.";
   }, [isSingleSourceWorkflow, previewMulticamLayoutMode, autoDirectorEnabled, autoDirectorSummary, selectedSingleCamSegment]);
@@ -4313,7 +4399,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           : current
       );
       setStatusMessage(
-        "Clean audio is ready. Tip: clap once at the start next time for an easier waveform lock."
+        "Clean audio is ready. Export will prove sync against the camera scratch audio before rendering."
       );
     } catch (error) {
       setStatusMessage(
@@ -6682,7 +6768,10 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
               directorStyleId,
               readySources
             );
-            const visibleFeeds = (exportLayout.visibleCameraIds || [currentSegment?.cameraId])
+            const effectiveExportLayout = reactionOverlayEnabled
+              ? exportLayout
+              : suppressReactionOverlayLayout(exportLayout);
+            const visibleFeeds = (effectiveExportLayout.visibleCameraIds || [currentSegment?.cameraId])
               .filter(Boolean)
               .slice(0, 6)
               .map((cameraId, index) => ({
@@ -6692,16 +6781,16 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
               }))
               .filter(feed => feed.video);
             drawCompositeVisualToCanvas(context, canvas, {
-              layoutMode: exportLayout.layoutMode,
+              layoutMode: effectiveExportLayout.layoutMode,
               primaryVideo: exportVisuals.get(currentSegment?.cameraId),
-              secondaryVideo: exportVisuals.get(exportLayout.secondaryCameraId),
+              secondaryVideo: exportVisuals.get(effectiveExportLayout.secondaryCameraId),
               primaryLabel: currentCameraLabel,
               primaryFraming:
                 flowEditEnabled && currentSegment?.id
                   ? normalizeSegmentFraming(flowSegmentFraming[currentSegment?.id])
                   : activeSingleCamFraming,
               secondaryLabel: readySources.find(
-                source => source.id === exportLayout.secondaryCameraId
+                source => source.id === effectiveExportLayout.secondaryCameraId
               )?.label,
               transitionState: getFlowTransitionState(currentSegment, exportPlayhead),
               visibleFeeds,
@@ -7459,6 +7548,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           auto_switch_interval: 2,
           autoSwitchAggressiveness: flowIntensityMode === "harder" ? "aggressive" : "balanced",
           auto_switch_aggressiveness: flowIntensityMode === "harder" ? "aggressive" : "balanced",
+          reactionOverlays: reactionOverlayEnabled,
+          reaction_overlays: reactionOverlayEnabled,
           burnCaptions: multicamBurnCaptions,
           burn_captions: multicamBurnCaptions,
           captionStyle: "podcast_clean",
@@ -7493,7 +7584,17 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
 
       setExportProgress(1);
       const outputUrl = data.output_url || data.outputUrl;
-      if (outputUrl) {
+      if (data.approvalStatus === "needs_review" || data.status === "needs_review") {
+        setPendingRenderReview({
+          ...data,
+          jobId: data.jobId,
+          previewUrl: data.previewUrl || data.heldOutputUrl,
+          duration: data.duration || renderWindowDuration,
+        });
+        setExportResult(null);
+        setStatusMessage("Render complete. Human review is required before download.");
+        loadRecentRenders();
+      } else if (outputUrl) {
         setExportResult({
           url: outputUrl,
           file: { name: `multicam-master-${Date.now()}.mp4` },
@@ -7535,7 +7636,21 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
               statusData.detail || `Server rendering... ${statusData.progress || 0}%`
             );
 
-            if (statusData.status === "completed") {
+            if (statusData.status === "needs_review" || statusData.approvalStatus === "needs_review") {
+              window.clearInterval(pollInterval);
+              setExportProgress(1);
+              setPendingRenderReview({
+                ...statusData,
+                jobId: renderJobId,
+                previewUrl: statusData.previewUrl || statusData.heldOutputUrl,
+                duration: statusData.result?.duration || renderWindowDuration,
+              });
+              setExportResult(null);
+              setStatusMessage("Render complete. Human review is required before download.");
+              loadRecentRenders();
+              setServerExportPending(false);
+              setIsExporting(false);
+            } else if (statusData.status === "completed") {
               window.clearInterval(pollInterval);
               const completedUrl =
                 statusData.output_url ||
@@ -7709,8 +7824,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
 
   const renderRecentRendersPanel = () => {
     const savedMasters = recentRenders.filter(render => {
-      const downloadUrl = render.outputUrl || render.output_url;
-      return render.status === "completed" && !!downloadUrl;
+      const state = getRenderApprovalState(render);
+      return ["needs_review", "approved", "rejected"].includes(state);
     });
     if (!savedMasters.length && !recentRendersStatus) return null;
     return (
@@ -7724,31 +7839,113 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         {recentRendersStatus ? <span>{recentRendersStatus}</span> : null}
         {savedMasters.slice(0, 4).map(render => {
           const downloadUrl = render.outputUrl || render.output_url;
+          const previewUrl = render.previewUrl || render.heldOutputUrl || downloadUrl;
+          const approvalState = getRenderApprovalState(render);
+          const canDownload = canDownloadApprovedRender(render);
           return (
-            <div className="nle-saved-render-card" key={render.jobId}>
+            <div className={`nle-saved-render-card is-${approvalState}`} key={render.jobId}>
               {render.thumbnailUrl ? (
                 <img src={render.thumbnailUrl} alt="" loading="lazy" />
               ) : (
                 <div className="nle-saved-render-thumb">MP4</div>
               )}
               <div>
-                <strong>Master ready</strong>
+                <strong>{getRenderApprovalCopy(render)}</strong>
                 <span>
                   {formatDurationLabel(Number(render.duration || 0))} ·{" "}
                   {formatRenderExpiry(render.expiresAt)}
                 </span>
               </div>
-              <a
-                className="nle-mini-btn"
-                href={downloadUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Download
-              </a>
+              {approvalState === "needs_review" ? (
+                <div className="nle-saved-render-actions">
+                  {previewUrl ? (
+                    <a
+                      className="nle-mini-btn"
+                      href={previewUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Preview
+                    </a>
+                  ) : null}
+                  <button
+                    type="button"
+                    className="nle-mini-btn"
+                    onClick={() => handleReviewAction(render, "approve")}
+                  >
+                    Approve
+                  </button>
+                  <button
+                    type="button"
+                    className="nle-mini-btn is-danger"
+                    onClick={() => handleReviewAction(render, "reject")}
+                  >
+                    Reject
+                  </button>
+                </div>
+              ) : canDownload ? (
+                <a
+                  className="nle-mini-btn"
+                  href={downloadUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Download
+                </a>
+              ) : null}
             </div>
           );
         })}
+      </div>
+    );
+  };
+
+  const renderApprovalReviewPanel = () => {
+    if (!pendingRenderReview) return null;
+    const previewUrl = pendingRenderReview.previewUrl || pendingRenderReview.heldOutputUrl;
+    const qaWarnings = Array.isArray(pendingRenderReview.qaWarnings)
+      ? pendingRenderReview.qaWarnings
+      : [];
+
+    return (
+      <div className="nle-render-review-card">
+        <div>
+          <strong>Human review required</strong>
+          <span>Download is locked until this master is approved.</span>
+        </div>
+        {qaWarnings.length ? (
+          <ul>
+            {qaWarnings.slice(0, 4).map(warning => (
+              <li key={warning}>{warning}</li>
+            ))}
+          </ul>
+        ) : null}
+        <div className="nle-export-actions">
+          {previewUrl ? (
+            <a
+              className="nle-btn secondary"
+              href={previewUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Preview Render
+            </a>
+          ) : null}
+          <button
+            className="nle-btn"
+            type="button"
+            onClick={() => handleReviewAction(pendingRenderReview, "approve")}
+          >
+            Approve Render
+          </button>
+          <button
+            className="nle-btn secondary is-danger"
+            type="button"
+            onClick={() => handleReviewAction(pendingRenderReview, "reject")}
+          >
+            Reject Render
+          </button>
+        </div>
       </div>
     );
   };
@@ -7958,21 +8155,36 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                         className={`nle-live-switch-btn nle-camera-switch-btn ${
                           activeCameraId === source.id ? "is-live" : ""
                         }`}
-                        onClick={() => handleRecordSwitch(source.id, "pip")}
+                        onClick={() => handleRecordSwitch(source.id, "cut")}
                         disabled={!timelineDuration}
                       >
                         <strong>Show {source.label || `Cam ${index + 1}`}</strong>
                         <span>{activeCameraId === source.id ? "Full screen" : "Switch preview"}</span>
                       </button>
                     ))}
-                    <div className="nle-reaction-always-chip nle-reaction-side-control">
-                      <strong>Reaction</strong>
+                    <div className="nle-reaction-overlay-chip nle-reaction-side-control">
+                      <button
+                        type="button"
+                        className={`nle-reaction-toggle ${reactionOverlayEnabled ? "is-active" : ""}`}
+                        onClick={() => {
+                          setReactionOverlayEnabled(value => !value);
+                          setStatusMessage(
+                            reactionOverlayEnabled
+                              ? "Reaction overlay disabled. Export will keep the active camera clean."
+                              : "Reaction overlay enabled. Use it only when the active camera has open space."
+                          );
+                        }}
+                        disabled={readySources.length < 2}
+                      >
+                        <strong>Reaction overlay</strong>
+                        <span>{reactionOverlayEnabled ? "On" : readySources.length >= 2 ? "Off" : "Needs 2 cams"}</span>
+                      </button>
                       <div className="nle-reaction-side-buttons">
                         <button
                           type="button"
                           className={previewReactionSide === "left" ? "is-active" : ""}
                           onClick={() => handleSetActiveReactionSide("left")}
-                          disabled={!activeCameraId || readySources.length < 2}
+                          disabled={!reactionOverlayEnabled || !activeCameraId || readySources.length < 2}
                         >
                           Left
                         </button>
@@ -7980,7 +8192,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                           type="button"
                           className={previewReactionSide === "right" ? "is-active" : ""}
                           onClick={() => handleSetActiveReactionSide("right")}
-                          disabled={!activeCameraId || readySources.length < 2}
+                          disabled={!reactionOverlayEnabled || !activeCameraId || readySources.length < 2}
                         >
                           Right
                         </button>
@@ -8275,6 +8487,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                 </div>
               ) : null}
               {renderExportStageTracker()}
+
+              {renderApprovalReviewPanel()}
 
               {exportResult ? (
                 <div className="nle-export-result">
@@ -9101,8 +9315,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                 </label>
 
                 <p className="nle-clean-audio-tip">
-                  For best syncing, clap once at the start of recording so AutoPromote can lock the
-                  waveform spike quickly. Export will still run a safety preflight before rendering.
+                  AutoPromote proves sync by matching the camera scratch audio against the clean audio.
+                  Export still runs a safety preflight before rendering.
                 </p>
                 {shouldUseBackendCleanAudioSync && (
                   <p className="nle-clean-audio-tip is-warning">
@@ -9805,9 +10019,23 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                         <strong>Wide</strong>
                         <span>W</span>
                       </button>
-                      <div className="nle-reaction-always-chip">
-                        <strong>Reaction</strong>
-                        <span>{readySources.length >= 2 ? "Always on" : "Needs 2 cams"}</span>
+                      <div className="nle-reaction-overlay-chip">
+                        <button
+                          type="button"
+                          className={`nle-reaction-toggle ${reactionOverlayEnabled ? "is-active" : ""}`}
+                          onClick={() => {
+                            setReactionOverlayEnabled(value => !value);
+                            setStatusMessage(
+                              reactionOverlayEnabled
+                                ? "Reaction overlay disabled. Export will keep the active camera clean."
+                                : "Reaction overlay enabled. Use it only when the active camera has open space."
+                            );
+                          }}
+                          disabled={readySources.length < 2}
+                        >
+                          <strong>Reaction overlay</strong>
+                          <span>{reactionOverlayEnabled ? "On" : readySources.length >= 2 ? "Off" : "Needs 2 cams"}</span>
+                        </button>
                       </div>
                       <button
                         type="button"
@@ -10183,6 +10411,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
               </div>
             ) : null}
             {renderExportStageTracker()}
+
+            {renderApprovalReviewPanel()}
 
             {exportResult ? (
               <div className="nle-export-result">

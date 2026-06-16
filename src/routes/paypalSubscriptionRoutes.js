@@ -15,7 +15,7 @@ const {
   CREDIT_COSTS,
   CREDIT_TOP_UP_PACKS,
 } = require("../config/subscriptionPlans");
-const { getEffectiveTierSnapshot } = require("../services/billingService");
+const { getEffectiveTierSnapshot, getPlatformPostMonthlyQuota } = require("../services/billingService");
 
 // PayPal SDK + helpers
 const paypalClient = require("../paypalClient");
@@ -57,20 +57,11 @@ function findInternalPlanIdByPayPalPlanId(paypalPlanId) {
 }
 
 function getPlatformPostQuota(planId, plan) {
-  const normalized = normalizePlanId(planId || "free");
-  const defaultPlatformPostQuotas = {
-    free: 10,
-    premium: 150,
-    basic: 150,
-    pro: 500,
-    enterprise: 2000,
-  };
-  const envKey = `PLATFORM_POST_MONTHLY_QUOTA_${String(normalized).toUpperCase()}`;
   return (
-    parseInt(process.env[envKey] || "", 10) ||
-    parseInt(process.env.PLATFORM_POST_MONTHLY_QUOTA || "", 10) ||
-    defaultPlatformPostQuotas[normalized] ||
-    plan?.features?.wolfHuntTasks ||
+    (getPlatformPostMonthlyQuota &&
+      typeof getPlatformPostMonthlyQuota === "function" &&
+      getPlatformPostMonthlyQuota(planId, plan)) ||
+    (plan && plan.features && plan.features.wolfHuntTasks) ||
     0
   );
 }

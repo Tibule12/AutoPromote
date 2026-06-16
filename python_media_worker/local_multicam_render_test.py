@@ -188,6 +188,16 @@ def parse_args():
         help="Force the reaction PiP side when camera 2 is primary.",
     )
     parser.add_argument(
+        "--reaction-overlays",
+        action="store_true",
+        help="Enable the same optional reaction PiP overlay flag used by production exports.",
+    )
+    parser.add_argument(
+        "--no-burn-captions",
+        action="store_true",
+        help="Disable burned captions for fast local layout proofs.",
+    )
+    parser.add_argument(
         "--skip-audio",
         action="store_true",
         help="Ignore external audio even if provided, useful for fast layout-only tests.",
@@ -711,6 +721,72 @@ def grade_window_result(result, good_threshold, block_threshold, min_usable_samp
     }
 
 
+def qa_receipt_timeline_duration(args, duration_probe):
+    if args.timeline_duration and args.timeline_duration > 0:
+        return float(args.timeline_duration)
+    durations = [
+        float(item.get("duration") or 0.0)
+        for item in (duration_probe or [])
+        if isinstance(item, dict) and float(item.get("duration") or 0.0) > 0.1
+    ]
+    if durations:
+        return min(durations)
+    return max(float(args.duration or 0.0), 1.0)
+
+
+def build_qa_receipt_request(args, proof_duration):
+    return worker.RenderMultiCamRequest(
+        sources=[
+            worker.MultiCamSource(
+                id="cam1",
+                url=str(args.camera1),
+                label="Camera 1",
+                offset_seconds=args.camera1_offset,
+                sync_rate=args.camera1_sync_rate,
+                rotation_degrees=args.camera1_rotate,
+                cache_key=local_input_cache_key(args.camera1, "camera1"),
+            ),
+            worker.MultiCamSource(
+                id="cam2",
+                url=str(args.camera2),
+                label="Camera 2",
+                offset_seconds=args.camera2_offset,
+                sync_rate=args.camera2_sync_rate,
+                reaction_side=None if args.camera2_reaction_side == "auto" else args.camera2_reaction_side,
+                rotation_degrees=args.camera2_rotate,
+                cache_key=local_input_cache_key(args.camera2, "camera2"),
+            ),
+        ],
+        auto_switch=bool(args.auto_switch),
+        audio_based_auto_switch=True,
+        auto_switch_interval=args.auto_switch_interval,
+        auto_switch_aggressiveness=args.auto_switch_aggressiveness,
+        primary_audio_camera_id="cam1",
+        director_channel_camera_ids=[
+            item.strip()
+            for item in str(args.director_channel_camera_map or "").split(",")
+            if item.strip()
+        ] or None,
+        external_audio_url=str(args.external_audio) if args.external_audio and not args.skip_audio else None,
+        external_audio_offset_seconds=args.external_audio_offset,
+        external_audio_mix_mode="external_only",
+        overlap_start=0.0,
+        overlap_duration=float(proof_duration or 0.0),
+        timeline_start=0.0,
+        output_aspect_ratio=args.aspect,
+        render_tier=args.render_tier,
+        renderTier=args.render_tier,
+        pre_sync_clap_alignment=(not args.skip_presync_clap and args.qa_presync_clap),
+        reactionOverlays=bool(args.reaction_overlays),
+        reaction_overlays=bool(args.reaction_overlays),
+        burnCaptions=False if args.no_burn_captions else None,
+        burn_captions=False if args.no_burn_captions else None,
+        brandWatermark=False,
+        generateThumbnail=(not args.no_thumbnails),
+        async_mode=False,
+    )
+
+
 def build_qa_report(results, args, output_dir, run_id, duration_probe):
     window_grades = []
     final_status = "SAFE"
@@ -743,6 +819,7 @@ def build_qa_report(results, args, output_dir, run_id, duration_probe):
 
     report = {
         "status": final_status,
+        "qa_proof_receipt_id": run_id,
         "run_id": run_id,
         "output_dir": str(output_dir),
         "duration_probe": duration_probe,
@@ -760,6 +837,14 @@ def build_qa_report(results, args, output_dir, run_id, duration_probe):
             else "Do not start the full render yet. Inspect/fix the risky or blocked proof windows first."
         ),
     }
+    proof_duration = qa_receipt_timeline_duration(args, duration_probe)
+    proof_request = build_qa_receipt_request(args, proof_duration)
+    report["proof_scope"] = {
+        "timeline_start": 0.0,
+        "duration_seconds": round(float(proof_duration or 0.0), 3),
+        "signed": bool(worker.multicam_qa_receipt_secret()),
+    }
+    report = worker.sign_multicam_qa_proof_receipt(report, proof_request, proof_duration)
     report_path = output_dir / f"{run_id}_qa_report.json"
     report_path.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
 
@@ -1102,7 +1187,11 @@ async def render_window(args, name, window_start, window_duration, paths, output
         render_tier=args.render_tier,
         renderTier=args.render_tier,
         pre_sync_clap_alignment=(not args.skip_presync_clap and args.qa_presync_clap),
-        brandWatermark=True,
+        reactionOverlays=bool(args.reaction_overlays),
+        reaction_overlays=bool(args.reaction_overlays),
+        burnCaptions=False if args.no_burn_captions else None,
+        burn_captions=False if args.no_burn_captions else None,
+        brandWatermark=False,
         watermarkText="AutoPromote Cam Combiner",
         generateThumbnail=(not args.no_thumbnails),
         async_mode=False,

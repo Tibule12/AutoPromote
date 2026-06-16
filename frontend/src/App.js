@@ -974,12 +974,18 @@ function App() {
         platforms && platforms.length
           ? platforms
           : userDefaults.defaultPlatforms || ["youtube", "tiktok", "instagram"];
-      const scheduledPromotionTime =
-        params.scheduled_promotion_time ||
-        schedule?.date ||
-        schedule?.when ||
-        schedule?.scheduled_promotion_time ||
-        null;
+      const scheduledPromotionTime = (() => {
+        const raw =
+          params.scheduled_promotion_time ||
+          schedule?.date ||
+          schedule?.when ||
+          schedule?.scheduled_promotion_time;
+        if (typeof raw !== "string") return undefined;
+        const normalized = raw.trim();
+        if (!normalized) return undefined;
+        const parsed = Date.parse(normalized);
+        return Number.isFinite(parsed) ? normalized : undefined;
+      })();
       // Use Firebase auth token when available; fall back to app user token or runtime E2E test token
       let token = null;
       try {
