@@ -1,5 +1,6 @@
 const { db } = require("./firebaseAdmin");
 const { normalizePlanId, resolvePlan } = require("./config/subscriptionPlans");
+const { getEffectiveTierSnapshot } = require("./services/billingService");
 
 const LOCAL_TEST_CREDIT_BALANCE = 999999;
 const LOCAL_BYPASS_OPERATIONS = new Set([
@@ -51,7 +52,10 @@ const getCreditBreakdown = async (userId) => {
   ]);
 
   const userData = userSnap.exists ? userSnap.data() : {};
-  const tier = normalizePlanId(userData.subscriptionTier || "free");
+  const effectiveTier = await getEffectiveTierSnapshot(userId, null, userData).catch(() => ({
+    tierId: userData.subscriptionTier || "free",
+  }));
+  const tier = normalizePlanId(effectiveTier.tierId || userData.subscriptionTier || "free");
   const plan = resolvePlan(tier);
   const monthlyAllocation = plan.features.monthlyCredits || 0;
 
@@ -105,6 +109,7 @@ const deductCredits = async (userId, amount, operation = "unknown") => {
   }
 
   const userRef = db.collection("users").doc(userId);
+  const billingRef = db.collection("user_billing").doc(userId);
   const monthKey = new Date().toISOString().slice(0, 7);
 
   try {
@@ -115,7 +120,14 @@ const deductCredits = async (userId, amount, operation = "unknown") => {
       }
 
       const userData = userDoc.data();
-      const tier = normalizePlanId(userData.subscriptionTier || "free");
+      const billingDoc = await transaction.get(billingRef);
+      const billingData = billingDoc.exists ? billingDoc.data() || {} : {};
+      const tier = normalizePlanId(
+        billingData.tierId ||
+          billingData.tier ||
+          userData.subscriptionTier ||
+          (userData.subscriptionStatus === "active" ? "premium" : "free")
+      );
       const plan = resolvePlan(tier);
       const monthlyAllocation = plan.features.monthlyCredits || 0;
 

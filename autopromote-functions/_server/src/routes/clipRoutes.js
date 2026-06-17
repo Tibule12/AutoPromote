@@ -1657,10 +1657,9 @@ router.post("/promo-summary", authMiddleware, async (req, res) => {
           sourceStoragePath &&
             /^(temp_uploads|temp_sources)\//.test(String(sourceStoragePath))
         ),
-      sourceStoragePath: sourceStoragePath || null,
-      sourceFingerprint: sourceFingerprint || null,
-      sourceDurationSeconds,
-      analysisCacheKey,
+        sourceStoragePath: sourceStoragePath || null,
+        sourceFingerprint: sourceFingerprint || null,
+        sourceDurationSeconds,
         previewEvents: [
           {
             id: `evt_${jobId}_queued`,
@@ -1673,6 +1672,7 @@ router.post("/promo-summary", authMiddleware, async (req, res) => {
           },
         ],
         previewFrameOffsetMs: 0,
+        analysisCacheKey,
         billing: {
           charged: true,
           cost: estimate.credits,

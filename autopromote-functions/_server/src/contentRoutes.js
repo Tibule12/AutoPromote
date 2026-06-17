@@ -6,8 +6,6 @@ const { extractOwnedStoragePathFromUrl } = require("./utils/cleanupSource");
 const authMiddleware = require("./authMiddleware");
 const Joi = require("joi");
 const crypto = require("crypto");
-const path = require("path");
-const _sanitizeForFirestore = require(path.join(__dirname, "utils", "sanitizeForFirestore"));
 const {
   usageLimitMiddleware,
   trackUsage,
@@ -328,7 +326,7 @@ async function getOwnedContentSnapshot(userId, identifier) {
 function hasExplicitFutureSchedule(scheduledPromotionTime) {
   if (!scheduledPromotionTime) return false;
   const scheduledAt = Date.parse(scheduledPromotionTime);
-  return Number.isFinite(scheduledAt) && scheduledAt > Date.now() + 30000;
+  return Number.isFinite(scheduledAt) && scheduledAt > Date.now();
 }
 
 function toPositiveFiniteNumber(value) {
@@ -338,7 +336,14 @@ function toPositiveFiniteNumber(value) {
 
 async function getPromotionQuotaSnapshot(userId, tierId) {
   const plan = getPlan(tierId);
-  const quota = toPositiveFiniteNumber(plan && plan.monthlyTaskQuota);
+  const platformPostQuotaRaw =
+    billingService && typeof billingService.getPlatformPostMonthlyQuota === "function"
+      ? billingService.getPlatformPostMonthlyQuota(tierId, plan)
+      : 0;
+  const normalizedQuota =
+    toPositiveFiniteNumber(platformPostQuotaRaw) ||
+    toPositiveFiniteNumber(plan && plan.monthlyTaskQuota);
+  const quota = normalizedQuota;
 
   if (quota <= 0) {
     return { enforced: false, limit: null, used: 0, remaining: null };
@@ -351,14 +356,15 @@ async function getPromotionQuotaSnapshot(userId, tierId) {
     .where("uid", "==", userId)
     .where("createdAt", ">=", monthStart)
     .where("type", "==", "platform_post")
+    .where("status", "in", ["queued", "processing", "completed"])
     .limit(quota + 5)
     .get();
 
   return {
     enforced: true,
-    limit: quota,
+    limit: normalizedQuota,
     used: snap.size,
-    remaining: Math.max(0, quota - snap.size),
+    remaining: Math.max(0, normalizedQuota - snap.size),
   };
 }
 
@@ -717,13 +723,18 @@ router.post(
         );
       } catch (e) {}
       try {
-        console.log(
-          "[upload.debug.headers]",
-          Object.keys(req.headers)
-            .sort()
-            .map(k => `${k}:${String(req.headers[k]).slice(0, 120)}`)
-            .join(" | ")
-        );
+        const safeHeaderDump = Object.keys(req.headers)
+          .sort()
+          .map(k => {
+            const value = String(req.headers[k]);
+            if (k.toLowerCase() === "authorization") {
+              const scheme = value.split(/\s+/, 1)[0] || "Bearer";
+              return `${k}:${scheme} [REDACTED]`;
+            }
+            return `${k}:${value.slice(0, 120)}`;
+          })
+          .join(" | ");
+        console.log("[upload.debug.headers]", safeHeaderDump);
       } catch (e) {}
       const userId = req.userId || req.user?.uid;
       try {

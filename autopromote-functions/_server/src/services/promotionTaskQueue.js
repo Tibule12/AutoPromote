@@ -95,6 +95,79 @@ function buildPlatformPostHash({ platform, contentId, payload = {} }) {
     .digest("hex");
 }
 
+function signTaskDocument(task) {
+  if (!task || task._testStub) return task;
+  try {
+    const { attachSignature } = require("../utils/docSigner");
+    const copy = { ...task };
+    delete copy._sig;
+    return attachSignature(copy);
+  } catch (_) {
+    return task;
+  }
+}
+
+async function replaceSignedTask(ref, current, patch) {
+  const next = signTaskDocument({ ...(current || {}), ...(patch || {}) });
+  await ref.set(next);
+  return next;
+}
+
+async function notifyPublishingQuotaBlocked({ uid, platform, contentId, quota, used, planTier }) {
+  if (!uid) return;
+  const dashboardUrl =
+    process.env.PUBLIC_SITE_URL || process.env.APP_PUBLIC_URL || "https://autopromote.org/#/billing";
+  let userData = {};
+  let contentData = {};
+  try {
+    const [userSnap, contentSnap] = await Promise.all([
+      db.collection("users").doc(uid).get(),
+      contentId ? db.collection("content").doc(contentId).get() : Promise.resolve(null),
+    ]);
+    userData = userSnap && userSnap.exists ? userSnap.data() || {} : {};
+    contentData = contentSnap && contentSnap.exists ? contentSnap.data() || {} : {};
+  } catch (_) {}
+
+  const contentTitle = contentData.title || contentData.originalName || "your scheduled post";
+  const message = `Publishing limit reached for ${platform}. ${contentTitle} was not enqueued because ${used}/${quota} monthly auto-publish slots are already used.`;
+
+  await notificationEngine
+    .sendNotification(uid, message, "warning", {
+      type: "publishing_quota_exceeded",
+      platform,
+      contentId,
+      used,
+      quota,
+      plan: planTier,
+      link: dashboardUrl,
+    })
+    .catch(console.warn);
+
+  let email = userData.email || userData.emailAddress || userData.profile?.email || null;
+  if (!email) {
+    try {
+      const authUser = await admin.auth().getUser(uid);
+      email = authUser.email || null;
+    } catch (_) {}
+  }
+  if (!email) return;
+
+  try {
+    const { sendUsageLimitWarningEmail } = require("./emailService");
+    await sendUsageLimitWarningEmail({
+      email,
+      name: userData.displayName || userData.name || userData.profile?.name || "there",
+      feature: "Auto-publishing",
+      used,
+      limit: quota,
+      resetLabel: "the next monthly billing period",
+      dashboardUrl,
+    });
+  } catch (emailError) {
+    console.warn("[enqueue] quota warning email failed:", emailError && emailError.message);
+  }
+}
+
 async function enqueueYouTubeUploadTask({
   contentId,
   uid,
@@ -193,6 +266,7 @@ async function processNextYouTubeTask() {
   }
   if (!selectedDoc) return null; // none ready yet
   const task = { id: selectedDoc.id, ...selectedData };
+  let taskData = { ...selectedData };
 
   // Verify signature before processing
   try {
@@ -217,7 +291,10 @@ async function processNextYouTubeTask() {
   }
 
   const taskRef = selectedDoc.ref;
-  await taskRef.update({ status: "processing", updatedAt: new Date().toISOString() });
+  taskData = await replaceSignedTask(taskRef, taskData, {
+    status: "processing",
+    updatedAt: new Date().toISOString(),
+  });
 
   try {
     const { uploadVideo } = require("./youtubeService");
@@ -250,7 +327,7 @@ async function processNextYouTubeTask() {
       console.warn("Failed to record youtube platform post:", e.message);
     }
 
-    await taskRef.update({
+    await replaceSignedTask(taskRef, taskData, {
       status: "completed",
       outcome,
       completedAt: new Date().toISOString(),
@@ -284,7 +361,11 @@ async function processNextYouTubeTask() {
       updatedAt: new Date().toISOString(),
       failedAt: new Date().toISOString(),
     };
-    await taskRef.update(failed);
+    if (retryable) {
+      taskData = await replaceSignedTask(taskRef, taskData, failed);
+    } else {
+      await taskRef.update(failed);
+    }
     if (failed.status === "failed") {
       // Notify User: Failed
       if (task.uid) {
@@ -608,31 +689,39 @@ async function enqueuePlatformPostTask({
       console.warn("[enqueue] sponsor approval check failed, allowing safely", e && e.message);
     }
   }
-  // Quota enforcement (monthly task quota based on plan)
+  // Quota enforcement for platform posts.
+  // Use a publishing-specific allowance and do not count failed/skipped attempts as usage.
   try {
     console.log("[enqueue] checking quota for uid", uid);
     const { getEffectiveTierSnapshot } = require("./billingService");
     const { tierId: planTier } = await getEffectiveTierSnapshot(uid);
     console.log("[enqueue] plan tier:", planTier);
     const { getPlan } = require("./planService");
+    const { getPlatformPostMonthlyQuota } = require("./billingService");
     const plan = getPlan(planTier);
-    const quota = plan.monthlyTaskQuota || 0;
+    const quota =
+      getPlatformPostMonthlyQuota && typeof getPlatformPostMonthlyQuota === "function"
+        ? getPlatformPostMonthlyQuota(planTier, plan)
+        : plan.monthlyTaskQuota || 0;
     if (quota > 0) {
-      // Count tasks enqueued this calendar month
+      // Count successful or still-live platform post tasks this calendar month.
       const now = new Date();
       const monthStart = new Date(
         Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)
       ).toISOString();
-      // Lightweight: sample up to quota+5 tasks to detect overage
       console.log("[enqueue] checking promotion_tasks count since", monthStart);
       const snap = await db
         .collection("promotion_tasks")
         .where("uid", "==", uid)
         .where("createdAt", ">=", monthStart)
         .where("type", "==", "platform_post")
-        .limit(quota + 5)
+        .limit(Math.max(quota + 25, 100))
         .get();
-      const used = snap.size;
+      let used = 0;
+      snap.forEach(taskDoc => {
+        const taskData = taskDoc.data() || {};
+        if (["queued", "processing", "completed"].includes(taskData.status)) used += 1;
+      });
       console.log("[enqueue] used tasks:", used, "quota:", quota);
       if (used >= quota) {
         // Record overage event (best effort)
@@ -645,6 +734,14 @@ async function enqueuePlatformPostTask({
             createdAt: new Date().toISOString(),
           });
         } catch (_) {}
+        await notifyPublishingQuotaBlocked({
+          uid,
+          platform,
+          contentId,
+          quota,
+          used,
+          planTier,
+        }).catch(console.warn);
         console.log("[enqueue] quota exceeded");
         return {
           skipped: true,
@@ -892,6 +989,7 @@ async function processNextPlatformTask() {
   }
   if (!selectedDoc) return null;
   const task = { id: selectedDoc.id, ...selectedData };
+  let taskData = { ...selectedData };
 
   // Debug visibility (User explicitly requested upload logs)
   console.log(
@@ -925,7 +1023,10 @@ async function processNextPlatformTask() {
   } catch (e) {
     console.log("[process] signature verification error", e && e.message);
   }
-  await selectedDoc.ref.update({ status: "processing", updatedAt: new Date().toISOString() });
+  taskData = await replaceSignedTask(selectedDoc.ref, taskData, {
+    status: "processing",
+    updatedAt: new Date().toISOString(),
+  });
   let lockId = null; // promote to function-scope so catch handlers can access it
   try {
     const { dispatchPlatformPost } = require("./platformPoster");
@@ -935,7 +1036,7 @@ async function processNextPlatformTask() {
     const cooldownUntil = await getCooldown(task.platform);
     if (cooldownUntil && cooldownUntil > Date.now()) {
       // Re-queue with nextAttemptAt = cooldownUntil
-      await selectedDoc.ref.update({
+      taskData = await replaceSignedTask(selectedDoc.ref, taskData, {
         status: "queued",
         nextAttemptAt: new Date(cooldownUntil + 500).toISOString(),
         updatedAt: new Date().toISOString(),
@@ -973,6 +1074,30 @@ async function processNextPlatformTask() {
           }
           // If another task owns the lock, attempt takeover if the lock is stale
           if (existing.taskId && existing.taskId !== task.id) {
+            if (existing.success === false) {
+              try {
+                await db
+                  .collection("platform_posts")
+                  .doc(lock.id)
+                  .set(
+                    {
+                      taskId: task.id,
+                      success: null,
+                      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+                    },
+                    { merge: true }
+                  );
+                lockId = lock.id;
+              } catch (e) {
+                await selectedDoc.ref.update({
+                  status: "skipped",
+                  skippedReason: "duplicate_pending",
+                  skippedExisting: existing.externalId || existing.id || null,
+                  updatedAt: new Date().toISOString(),
+                });
+                return { taskId: task.id, skipped: true, reason: "duplicate_pending", existing };
+              }
+            } else
             try {
               const LOCK_TAKEOVER_MS = parseInt(
                 process.env.PLATFORM_POST_LOCK_TAKEOVER_MS || "300000",
@@ -1389,6 +1514,13 @@ async function processNextPlatformTask() {
       reason: task.reason,
       uid: task.uid,
     });
+    if (!simulatedResult || simulatedResult.success === false) {
+      const err = new Error(
+        simulatedResult?.error || `Platform post failed for ${task.platform || "unknown"}`
+      );
+      err.platformResult = simulatedResult || null;
+      throw err;
+    }
     if (selectedVariant) {
       simulatedResult.usedVariant = selectedVariant;
       simulatedResult.variantIndex = variantIndex;
@@ -1433,7 +1565,7 @@ async function processNextPlatformTask() {
         }
       }
     } catch (_) {}
-    await selectedDoc.ref.update({
+    await replaceSignedTask(selectedDoc.ref, taskData, {
       status: "completed",
       outcome: simulatedResult,
       completedAt: new Date().toISOString(),
@@ -1607,7 +1739,11 @@ async function processNextPlatformTask() {
       updatedAt: new Date().toISOString(),
       failedAt: new Date().toISOString(),
     };
-    await selectedDoc.ref.update(failed);
+    if (retryable) {
+      taskData = await replaceSignedTask(selectedDoc.ref, taskData, failed);
+    } else {
+      await selectedDoc.ref.update(failed);
+    }
     if (failed.status === "failed") {
       try {
         await db

@@ -150,7 +150,6 @@ class VideoClippingService {
       videoUrl,
       status: "queued",
       createdAt: new Date().toISOString(),
-      type: "viral_clips",
       progress: 0,
       message: "Job queued...",
     });
@@ -178,6 +177,8 @@ class VideoClippingService {
    */
   async processAnalysisBackground(jobId, videoUrl, _contentId, _userId) {
     console.log(`[VideoClipping] Starting Analysis Job ${jobId}`);
+    const db = getDb();
+
     try {
       await db.collection("clip_analyses").doc(jobId).update({
         status: "processing",
@@ -208,7 +209,6 @@ class VideoClippingService {
 
       const result = response.data;
 
-      // Format Results
       const rawSuggestions = result.clipSuggestions || result.scenes || [];
       const maxDuration = normalizeNumber(
         result.videoDurationSeconds || result.durationSeconds || result.duration,

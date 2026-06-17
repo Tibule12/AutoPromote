@@ -413,6 +413,39 @@ describe("Promotion integration (mocked platforms)", () => {
     signer.verifySignature.mockRestore();
   });
 
+  test("success false results are retried instead of marked completed", async () => {
+    const platform = "twitter";
+    const queued = await enqueuePlatformPostTask({
+      contentId,
+      uid,
+      platform,
+      reason: "approved",
+      payload: { message: "force-platform-failure-path" },
+    });
+    const signer = require("../../utils/docSigner");
+    jest.spyOn(signer, "verifySignature").mockReturnValue(true);
+    const poster = require("../platformPoster");
+    const spyDispatch = jest
+      .spyOn(poster, "dispatchPlatformPost")
+      .mockResolvedValue({ success: false, error: "platform said no" });
+    const rl = require("../rateLimitTracker");
+    jest.spyOn(rl, "getCooldown").mockResolvedValue(null);
+
+    const out = await processNextPlatformTask();
+    expect(out).toHaveProperty("taskId", queued.id);
+    expect(out).toHaveProperty("error", "platform said no");
+    expect(out.retrying).toBe(true);
+
+    const taskDoc = await db.collection("promotion_tasks").doc(queued.id).get();
+    const data = taskDoc.data();
+    expect(data.status).toBe("queued");
+    expect(data.error).toBe("platform said no");
+    expect(data.completedAt).toBeUndefined();
+
+    spyDispatch.mockRestore();
+    signer.verifySignature.mockRestore();
+  });
+
   test("concurrent processing ensures single post", async () => {
     const platform = "twitter";
     const poster = require("../platformPoster");
@@ -527,7 +560,7 @@ describe("Promotion integration (mocked platforms)", () => {
     }
 
     // run one processor to observe its decision
-    const out = await processNextPlatformTask();
+    await processNextPlatformTask();
     // debug statements removed for linting
     // run additional processors and poll for eventual state movement because
     // lock handoff plus emulator timing can occasionally leave both tasks queued
@@ -549,8 +582,6 @@ describe("Promotion integration (mocked platforms)", () => {
       .where("platform", "==", platform)
       .get();
     // debug: inspect task docs and posts
-    const t1 = await db.collection("promotion_tasks").doc(r1.id).get();
-    const t2 = await db.collection("promotion_tasks").doc(r2.id).get();
     // debug logs removed for linting
 
     // Note: concurrency & adaptive fast-follow may produce additional tasks; ensure progress occurred

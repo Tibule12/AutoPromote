@@ -349,6 +349,7 @@ async function postToLinkedIn({
 }) {
   if (!uid) throw new Error("uid required");
 
+  const resolvedTitle = String(title || articleTitle || "").trim();
   const resolvedText = String(
     text || commentary || message || caption || description || title || ""
   ).trim();
@@ -427,7 +428,7 @@ async function postToLinkedIn({
         {
           status: "READY",
           media: assetUrn,
-          title: { text: "Video" },
+          title: { text: resolvedTitle || "Video" },
         },
       ];
     } catch (e) {
@@ -443,7 +444,7 @@ async function postToLinkedIn({
         {
           status: "READY",
           media: assetUrn,
-          title: { text: "Image" },
+          title: { text: resolvedTitle || "Image" },
         },
       ];
     } catch (e) {
@@ -460,7 +461,7 @@ async function postToLinkedIn({
         status: "READY",
         originalUrl: useArticleUrl,
         title: {
-          text: articleTitle || "Article",
+          text: articleTitle || resolvedTitle || "Article",
         },
         description: {
           text: articleDescription || "",

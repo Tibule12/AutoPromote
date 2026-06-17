@@ -16,19 +16,21 @@
     "expo": "~53.0.22",
     "expo-constants": "~17.1.8",
     "expo-status-bar": "~2.2.3",
-    "hono": "^4.12.23",
+    "hono": "^4.12.25",
     "react": "19.0.0",
     "react-native": "0.79.6",
     "react-native-webview": "13.16.1",
     "undici": "^7.24.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0"
+    "@babel/core": "^7.29.7"
   },
   "private": true,
   "overrides": {
     "axios": "^1.16.1",
     "hono": "$hono",
+    "protobufjs": "7.6.4",
+    "form-data": "^4.0.6",
     "@hono/node-server": "^1.19.14",
     "basic-ftp": "^5.3.1",
     "follow-redirects": "^1.16.0",
@@ -36,9 +38,9 @@
     "@xmldom/xmldom": "0.9.10",
     "postcss": "8.5.10",
     "glob": "^11.1.0",
-    "js-yaml": "^4.1.1",
+    "js-yaml": "^4.2.0",
     "node-forge": "1.4.0",
-    "tar": "^7.5.7",
+    "tar": "^7.5.16",
     "uuid": "^14.0.0",
     "ws": "8.21.0",
     "shell-quote": "1.8.4",

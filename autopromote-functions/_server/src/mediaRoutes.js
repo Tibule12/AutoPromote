@@ -17,6 +17,13 @@ const {
   getPlanCapabilities,
 } = require("./config/subscriptionPlans");
 const { getEffectiveTierSnapshot } = require("./services/billingService");
+const {
+  buildApprovalUpdate,
+  buildRejectionUpdate,
+  isMulticamRenderJob,
+  normalizeRenderApproval,
+  sanitizeResultForApproval,
+} = require("./services/renderApprovalService");
 const MEDIA_WORKER_URL =
   process.env.MEDIA_WORKER_URL || "https://media-worker-v1-341498038874.us-central1.run.app";
 const LOCAL_MEDIA_WORKER_URL = process.env.LOCAL_MEDIA_WORKER_URL || "http://127.0.0.1:8000";
@@ -165,18 +172,37 @@ const toIsoString = value => {
 
 const normalizeRenderJob = (doc, data = {}) => {
   const result = data.result || {};
-  const outputUrl =
-    data.outputUrl || data.output_url || result.url || result.output_url || result.firebase_output_url || null;
+  const approvalView = normalizeRenderApproval(doc.id, data);
+  const outputUrl = approvalView.outputUrl;
   const thumbnailUrl =
-    data.thumbnailUrl || data.thumbnail_url || result.thumbnailUrl || result.thumbnail_url || null;
+    approvalView.thumbnailUrl ||
+    data.thumbnailUrl ||
+    data.thumbnail_url ||
+    result.thumbnailUrl ||
+    result.thumbnail_url ||
+    null;
+  const status =
+    approvalView.approvalStatus === "needs_review" || approvalView.approvalStatus === "rejected"
+      ? approvalView.approvalStatus
+      : data.status || "queued";
   return {
     jobId: data.jobId || doc.id,
     type: data.type || data.feature || "media_job",
-    status: data.status || "queued",
+    status,
     stage: data.stage || null,
     progress: Number(data.progress || 0),
     outputUrl,
     output_url: outputUrl,
+    previewUrl: approvalView.previewUrl,
+    heldOutputUrl: approvalView.heldOutputUrl,
+    approvedOutputUrl: approvalView.approvedOutputUrl,
+    approvalStatus: approvalView.approvalStatus,
+    deliveryStatus: approvalView.deliveryStatus,
+    reviewRequired: approvalView.reviewRequired,
+    canDownload: approvalView.canDownload,
+    qaWarnings: approvalView.qaWarnings,
+    qaReport: approvalView.qaReport,
+    approval: approvalView.approval,
     thumbnailUrl,
     thumbnail_url: thumbnailUrl,
     duration: data.duration || result.duration || 0,
@@ -189,6 +215,18 @@ const normalizeRenderJob = (doc, data = {}) => {
     error: data.error || null,
   };
 };
+
+const isAdminRequester = user =>
+  Boolean(
+    user?.admin ||
+      user?.isAdmin ||
+      user?.role === "admin" ||
+      user?.token?.admin ||
+      user?.claims?.admin ||
+      user?.customClaims?.admin
+  );
+
+const canReviewRenderJob = (user, data = {}) => data.userId === user?.uid || isAdminRequester(user);
 
 const isFailedJobStatus = status => {
   const normalized = String(status || "").toLowerCase();
@@ -896,8 +934,11 @@ router.get("/renders", async (req, res) => {
     const renders = snapshot.docs
       .map(doc => normalizeRenderJob(doc, doc.data() || {}))
       .filter(job => {
-        const outputUrl = job.outputUrl || job.output_url;
-        return job.type === "multicam_render" && job.status === "completed" && !!outputUrl;
+        const hasReviewState = ["needs_review", "approved", "rejected"].includes(
+          job.approvalStatus
+        );
+        const hasDownloadUrl = Boolean(job.outputUrl || job.output_url);
+        return job.type === "multicam_render" && (hasReviewState || hasDownloadUrl);
       })
       .sort((a, b) => {
         const aTime = Date.parse(a.completedAt || a.createdAt || "") || 0;
@@ -914,6 +955,76 @@ router.get("/renders", async (req, res) => {
   } catch (error) {
     console.error("[MediaRoute] Failed to list renders:", error.message);
     res.status(500).json({ success: false, message: "Could not load recent renders" });
+  }
+});
+
+router.post("/render-jobs/:jobId/approve", async (req, res) => {
+  try {
+    const { jobId } = req.params;
+    const userId = req.user.uid;
+    const notes = typeof req.body?.notes === "string" ? req.body.notes.trim().slice(0, 1000) : null;
+    const ref = admin.firestore().collection("video_edits").doc(jobId);
+    const doc = await ref.get();
+
+    if (!doc.exists) {
+      return res.status(404).json({ success: false, message: "Job not found" });
+    }
+
+    const data = { ...(doc.data() || {}), jobId };
+    if (!canReviewRenderJob(req.user, data)) {
+      return res.status(403).json({ success: false, message: "Unauthorized access to job" });
+    }
+    if (!isMulticamRenderJob(data)) {
+      return res.status(400).json({ success: false, message: "Only multicam renders can be approved" });
+    }
+
+    const timestamp = admin.firestore.FieldValue.serverTimestamp();
+    const update = buildApprovalUpdate({ data, approvedBy: userId, notes, timestamp });
+    await ref.set(update, { merge: true });
+
+    const updatedDoc = await ref.get();
+    res.json({
+      success: true,
+      job: normalizeRenderJob(updatedDoc, updatedDoc.data() || {}),
+    });
+  } catch (error) {
+    console.error("[MediaRoute] Render approval failed:", error.message);
+    res.status(500).json({ success: false, message: error.message || "Render approval failed" });
+  }
+});
+
+router.post("/render-jobs/:jobId/reject", async (req, res) => {
+  try {
+    const { jobId } = req.params;
+    const userId = req.user.uid;
+    const notes = typeof req.body?.notes === "string" ? req.body.notes.trim().slice(0, 1000) : null;
+    const ref = admin.firestore().collection("video_edits").doc(jobId);
+    const doc = await ref.get();
+
+    if (!doc.exists) {
+      return res.status(404).json({ success: false, message: "Job not found" });
+    }
+
+    const data = { ...(doc.data() || {}), jobId };
+    if (!canReviewRenderJob(req.user, data)) {
+      return res.status(403).json({ success: false, message: "Unauthorized access to job" });
+    }
+    if (!isMulticamRenderJob(data)) {
+      return res.status(400).json({ success: false, message: "Only multicam renders can be rejected" });
+    }
+
+    const timestamp = admin.firestore.FieldValue.serverTimestamp();
+    const update = buildRejectionUpdate({ data, rejectedBy: userId, notes, timestamp });
+    await ref.set(update, { merge: true });
+
+    const updatedDoc = await ref.get();
+    res.json({
+      success: true,
+      job: normalizeRenderJob(updatedDoc, updatedDoc.data() || {}),
+    });
+  } catch (error) {
+    console.error("[MediaRoute] Render rejection failed:", error.message);
+    res.status(500).json({ success: false, message: error.message || "Render rejection failed" });
   }
 });
 
@@ -937,16 +1048,33 @@ router.get("/status/:jobId", async (req, res) => {
 
     await refundCleanAudioSyncJobIfNeeded(userId, jobId, data, "worker_failed");
 
+    const approvalView = normalizeRenderApproval(jobId, data);
+    const status =
+      approvalView.approvalStatus === "needs_review" || approvalView.approvalStatus === "rejected"
+        ? approvalView.approvalStatus
+        : data.status;
+    const sanitizedResult = sanitizeResultForApproval(data.result, approvalView);
+
     res.json({
       success: true,
-      status: data.status,
+      status,
       stage: data.stage,
       progress: data.progress,
-      result: data.result, // Node worker result
-      output_url: data.output_url, // Python worker result (Async)
+      result: sanitizedResult, // Node worker result, gated until approval
+      output_url: approvalView.output_url, // Python worker result, gated until approval
       audio_url: data.audio_url,
-      outputUrl: data.outputUrl, // Legacy Node worker result
-      thumbnailUrl: data.thumbnailUrl || data.thumbnail_url || data.result?.thumbnailUrl || data.result?.thumbnail_url,
+      outputUrl: approvalView.outputUrl, // Legacy Node worker result, gated until approval
+      previewUrl: approvalView.previewUrl,
+      heldOutputUrl: approvalView.heldOutputUrl,
+      approvedOutputUrl: approvalView.approvedOutputUrl,
+      approvalStatus: approvalView.approvalStatus,
+      deliveryStatus: approvalView.deliveryStatus,
+      reviewRequired: approvalView.reviewRequired,
+      canDownload: approvalView.canDownload,
+      qaWarnings: approvalView.qaWarnings,
+      qaReport: approvalView.qaReport,
+      approval: approvalView.approval,
+      thumbnailUrl: approvalView.thumbnailUrl || data.thumbnailUrl || data.thumbnail_url || data.result?.thumbnailUrl || data.result?.thumbnail_url,
       expiresAt: data.expiresAt || data.result?.expiresAt || data.result?.expires_at || null,
       retentionDays: data.retentionDays || data.result?.retention_days || null,
       clipSuggestions: data.clipSuggestions, // Viral clips
@@ -954,6 +1082,9 @@ router.get("/status/:jobId", async (req, res) => {
       message: data.message,
       offsets: data.offsets,
       error: data.error,
+      workerError: data.workerError || null,
+      workerStatus: data.workerStatus || null,
+      serverProof: data.serverProof || null,
     });
   } catch (e) {
     console.error("Status check failed:", e);

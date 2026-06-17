@@ -15,6 +15,9 @@ try {
 
 // Packages definition - mirroring frontend for validation
 const PACKAGES = {
+  pack_boost: { credits: 50, price: "4.99" },
+  pack_pro: { credits: 200, price: "14.99" },
+  pack_studio: { credits: 500, price: "29.99" },
   pack_small: { credits: 50, price: "4.99" },
   pack_medium: { credits: 150, price: "12.99" },
   pack_large: { credits: 500, price: "39.99" },
@@ -242,7 +245,7 @@ router.post(
             (evt.resource.id || evt.resource.order_id || evt.resource.parent_payment);
           await db
             .collection("paypal_webhook_events")
-            .add({ event: evt, receivedAt: new Date().toISOString() });
+            .add({ event: evt, orderId: orderId || null, receivedAt: new Date().toISOString() });
         } catch (e) {
           console.warn("Failed to persist paypal webhook event", e && e.message);
         }

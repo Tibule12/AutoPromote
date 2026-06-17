@@ -1,4 +1,6 @@
 import { API_ENDPOINTS } from "../config";
+import { auth, storage } from "../firebaseClient";
+import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 
 export const STORAGE_UPLOAD_LIMIT_MB = 500;
 
@@ -30,7 +32,63 @@ export function buildBackendUploadError(error) {
   return new Error(error?.message || "Upload failed. Please try again.");
 }
 
-export async function uploadSourceFileViaBackend({ file, token, mediaType, fileName, onProgress }) {
+function sanitizeStorageFileName(fileName) {
+  const raw = String(fileName || "untitled").trim() || "untitled";
+  return Array.from(raw)
+    .map(char => {
+      const code = char.charCodeAt(0);
+      const isAlphaNumeric =
+        (code >= 48 && code <= 57) || (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+      return isAlphaNumeric || char === "." || char === "_" || char === "-" ? char : "_";
+    })
+    .join("")
+    .slice(0, 120);
+}
+
+async function uploadSourceFileViaFirebase({ file, mediaType, fileName, onProgress }) {
+  const user = auth.currentUser;
+  if (!user?.uid) {
+    throw new Error("Please sign in again before uploading.");
+  }
+
+  const safeMediaType = ["video", "image", "audio"].includes(mediaType) ? mediaType : inferUploadMediaType(file);
+  const safeFileName = sanitizeStorageFileName(fileName || file.name || "untitled");
+  const storagePath = `uploads/${safeMediaType}s/${user.uid}/${Date.now()}_${safeFileName}`;
+  const fileRef = ref(storage, storagePath);
+
+  const snapshot = await new Promise((resolve, reject) => {
+    const task = uploadBytesResumable(fileRef, file, {
+      contentType: file.type || "application/octet-stream",
+      customMetadata: {
+        ownerUid: user.uid,
+        source: "unified_publisher_client_upload",
+      },
+    });
+
+    task.on(
+      "state_changed",
+      state => {
+        if (typeof onProgress === "function") {
+          onProgress(state.bytesTransferred, state.totalBytes || file.size || 0);
+        }
+      },
+      reject,
+      () => resolve(task.snapshot)
+    );
+  });
+
+  const url = await getDownloadURL(snapshot.ref);
+  const size = snapshot.metadata?.size ? Number(snapshot.metadata.size) : file.size || 0;
+  return {
+    ok: true,
+    storagePath,
+    url,
+    size,
+    uploadMode: "firebase_resumable",
+  };
+}
+
+async function uploadSourceFileViaBackendRequest({ file, token, mediaType, fileName, onProgress }) {
   if (!(file instanceof Blob)) {
     throw new Error("Upload requires a File or Blob.");
   }
@@ -68,4 +126,29 @@ export async function uploadSourceFileViaBackend({ file, token, mediaType, fileN
   }
 
   return result;
+}
+
+export async function uploadSourceFileViaBackend({ file, token, mediaType, fileName, onProgress }) {
+  if (!(file instanceof Blob)) {
+    throw new Error("Upload requires a File or Blob.");
+  }
+
+  const normalizedMediaType = mediaType || inferUploadMediaType(file);
+  try {
+    return await uploadSourceFileViaFirebase({
+      file,
+      mediaType: normalizedMediaType,
+      fileName,
+      onProgress,
+    });
+  } catch (firebaseError) {
+    console.warn("Firebase resumable upload failed, falling back to backend upload:", firebaseError);
+    return uploadSourceFileViaBackendRequest({
+      file,
+      token,
+      mediaType: normalizedMediaType,
+      fileName,
+      onProgress,
+    });
+  }
 }

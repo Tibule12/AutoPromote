@@ -158,6 +158,36 @@ async function sendScheduleReminder({ email, name, contentTitle, scheduledTime, 
   });
 }
 
+async function sendUsageLimitWarningEmail({
+  email,
+  name,
+  feature,
+  used,
+  limit,
+  resetLabel,
+  dashboardUrl,
+}) {
+  const subject = `AutoPromote usage limit reached: ${feature || "Publishing"}`;
+  const vars = {
+    name: name || "there",
+    feature: feature || "Publishing",
+    used: used == null ? "all" : used,
+    limit: limit == null ? "available" : limit,
+    resetLabel: resetLabel || "your next billing period",
+    dashboardUrl: dashboardUrl || "https://autopromote.org/#/billing",
+  };
+  const textTpl =
+    "Hi {{name}},\n\nYour AutoPromote {{feature}} allowance is currently full ({{used}} / {{limit}} used). Scheduled posts that need this allowance will wait until you have capacity again.\n\nYou can review usage and top up here: {{dashboardUrl}}\n\nThis resets in {{resetLabel}}.";
+  const safeUrl = escapeHtml(vars.dashboardUrl);
+  const htmlInner = `<h1>${escapeHtml(vars.feature)} limit reached</h1><p>Hi ${escapeHtml(vars.name)},</p><p>Your AutoPromote ${escapeHtml(vars.feature)} allowance is currently full.</p><div style="background:#111827;border:1px solid rgba(250,204,21,.35);border-radius:14px;padding:16px;margin:18px 0"><p style="margin:0;color:#fff"><strong>${escapeHtml(vars.used)} / ${escapeHtml(vars.limit)}</strong> used</p><p style="margin:8px 0 0;color:#cbd5e1">Reset: ${escapeHtml(vars.resetLabel)}</p></div><p>Scheduled posts that need this allowance will wait until you have capacity again.</p><p><a class="button" href="${safeUrl}">Review usage</a></p><div class="linkbox">${safeUrl}</div>`;
+  return sendEmail({
+    to: email,
+    subject,
+    text: renderTemplate(textTpl, vars),
+    html: buildLayout(htmlInner),
+  });
+}
+
 module.exports = {
   sendVerificationEmail,
   sendPasswordResetEmail,
@@ -166,5 +196,6 @@ module.exports = {
   sendContentPublishedNotification,
   sendSecurityAlert,
   sendScheduleReminder,
+  sendUsageLimitWarningEmail,
   sendEmail,
 };

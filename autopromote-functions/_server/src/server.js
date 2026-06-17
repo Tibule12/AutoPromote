@@ -317,15 +317,16 @@ function printMissingEnvOnce() {
   if (!process.env.JWT_AUDIENCE) missing.push("JWT_AUDIENCE");
   if (!process.env.JWT_ISSUER) missing.push("JWT_ISSUER");
   if (!process.env.RATE_LIMIT_GLOBAL_MAX) missing.push("RATE_LIMIT_GLOBAL_MAX");
-  if (!process.env.FIREBASE_PROJECT_ID) missing.push("FIREBASE_PROJECT_ID");
-  if (!process.env.FIREBASE_CLIENT_EMAIL) missing.push("FIREBASE_CLIENT_EMAIL");
-  if (!process.env.FIREBASE_PRIVATE_KEY) missing.push("FIREBASE_PRIVATE_KEY");
+  const canUseCloudRunApplicationDefault =
+    !!process.env.K_SERVICE || !!process.env.GOOGLE_APPLICATION_CREDENTIALS;
+  if (!canUseCloudRunApplicationDefault && !process.env.FIREBASE_SERVICE_ACCOUNT_JSON && !process.env.FIREBASE_SERVICE_ACCOUNT_BASE64) {
+    if (!process.env.FIREBASE_PROJECT_ID) missing.push("FIREBASE_PROJECT_ID");
+    if (!process.env.FIREBASE_CLIENT_EMAIL) missing.push("FIREBASE_CLIENT_EMAIL");
+    if (!process.env.FIREBASE_PRIVATE_KEY) missing.push("FIREBASE_PRIVATE_KEY");
+  }
   if (missing.length) {
-    console.error("[startup] Missing required env vars:", missing.join(", "));
-    console.error(
-      "  Backend cannot start without these. Set them in your environment and redeploy."
-    );
-    process.exit(1);
+    console.warn("[startup] Missing recommended env vars:", missing.join(", "));
+    console.warn("  Continuing startup; routes that depend on missing configuration may be limited.");
   }
   const enabledFlag = process.env.ENABLE_BACKGROUND_JOBS === "true";
   const typoFlag = process.env.ENABLE_BACKROUND_JOBS === "true";

@@ -135,6 +135,25 @@ const FEATURE_PRICES = {
   processing_fee_percent: 0.0,
 };
 
+function getPlatformPostMonthlyQuota(planId, plan = null) {
+  const normalized = normalizePlanId(planId || "free");
+  const defaultPlatformPostQuotas = {
+    free: 10,
+    premium: 150,
+    basic: 150,
+    pro: 500,
+    enterprise: 2000,
+  };
+  const envKey = `PLATFORM_POST_MONTHLY_QUOTA_${String(normalized).toUpperCase()}`;
+  return (
+    parseInt(process.env[envKey] || "", 10) ||
+    parseInt(process.env.PLATFORM_POST_MONTHLY_QUOTA || "", 10) ||
+    defaultPlatformPostQuotas[normalized] ||
+    (plan && plan.features ? Number(plan.features.wolfHuntTasks) : 0) ||
+    0
+  );
+}
+
 async function resolveEffectiveTierId(userId, billingData, userData) {
   const safeBilling = billingData || {};
   let safeUser = userData || null;
@@ -259,7 +278,7 @@ async function getEffectiveTierSnapshot(userId, providedBillingData, providedUse
 /**
  * Calculate the charge for a specific upload based on user tier and content intent
  */
-async function calculateCreatorCharge(userId, intent, featuresSelected = []) {
+async function calculateCreatorCharge(userId, intent, _featuresSelected = []) {
   // 1. Get User Tier & Usage
   const userRef = db.collection("users").doc(userId);
   const userSnap = await userRef.get();
@@ -360,7 +379,7 @@ async function checkViralCoins(userId) {
  * Enforces the "Global Distribution" tier limits.
  */
 async function checkPlatformLimit(userId, platformCount) {
-  const { tierId: userTierId, tier: userTier } = await getEffectiveTierSnapshot(userId);
+  const { tier: userTier } = await getEffectiveTierSnapshot(userId);
 
   const limit = userTier.platform_limit || 1;
 
@@ -524,6 +543,7 @@ module.exports = {
   trackAIUsage,
   checkBotEntitlement, // NEW
   trackBotUsage, // NEW
+  getPlatformPostMonthlyQuota,
   trackUploadUsage: async (userId, virtualCost = 0) => {
     // Increment usage counter
     const ref = db.collection("user_billing").doc(userId);

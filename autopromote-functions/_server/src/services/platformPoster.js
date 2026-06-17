@@ -51,6 +51,9 @@ async function buildContentContext(contentId) {
       persistentMediaUrl: data.persistentMediaUrl || null,
       url: data.url || null,
       mediaUrl: data.mediaUrl || data.media_url || data.video_url || data.file_url || null,
+      thumbnailUrl:
+        data.thumbnailUrl || data.thumbnail_url || data.posterUrl || data.coverImage || null,
+      imageUrl: data.imageUrl || data.image_url || null,
       tags: data.tags || [],
       youtubeVideoId: data.youtube && data.youtube.videoId,
     };
@@ -432,8 +435,17 @@ async function dispatchPlatformPost({ platform, contentId, payload, reason, uid 
       !payload || !(payload.mediaUrl || payload.videoUrl || payload.imageUrl || payload.url);
     const missingTitle = !payload || !payload.title;
     const missingDesc = !payload || !payload.description;
+    const missingThumb =
+      !payload ||
+      !(
+        payload.thumbnailUrl ||
+        payload.thumbnail_url ||
+        payload.posterUrl ||
+        payload.coverImage ||
+        payload.imageUrl
+      );
 
-    if (contentId && (missingMedia || missingTitle || missingDesc)) {
+    if (contentId && (missingMedia || missingTitle || missingDesc || missingThumb)) {
       const ctx = await buildContentContext(contentId);
       payload = payload || {}; // Ensure payload object exists
 
@@ -452,6 +464,10 @@ async function dispatchPlatformPost({ platform, contentId, payload, reason, uid 
       }
       if (missingTitle && ctx.title) payload.title = ctx.title;
       if (missingDesc && ctx.description) payload.description = ctx.description;
+      if (missingThumb) {
+        const thumb = ctx.thumbnailUrl || ctx.imageUrl || null;
+        if (thumb) payload.thumbnailUrl = thumb;
+      }
     }
   } catch (err) {
     console.warn("[platformPoster] Context hydration failed:", err.message);

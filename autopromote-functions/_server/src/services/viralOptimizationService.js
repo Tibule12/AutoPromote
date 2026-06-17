@@ -27,7 +27,7 @@ function loadEngines() {
 function hasExplicitFutureSchedule(scheduledPromotionTime) {
   if (!scheduledPromotionTime) return false;
   const scheduledAt = Date.parse(scheduledPromotionTime);
-  return Number.isFinite(scheduledAt) && scheduledAt > Date.now() + 30000;
+  return Number.isFinite(scheduledAt) && scheduledAt > Date.now();
 }
 
 /**
@@ -205,7 +205,7 @@ async function performViralOptimization(contentId, userId, contentData, options 
             contentId,
             user_id: userId,
             platform,
-            title: platformSettings.title || content.title || "Queued Upload",
+            title: platformSettings.title || contentData.title || "Queued Upload",
             scheduleType: "specific",
             startTime: scheduled_promotion_time,
             frequency: promotion_frequency || schedule_hint.frequency || "once",

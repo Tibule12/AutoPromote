@@ -16,7 +16,9 @@ const {
 
 const router = express.Router();
 
-// Tool-recognizable router-wide limiter for CodeQL and defense in depth.
+// Analyzer-visible router-wide limiter for user profile routes. This is
+// additive to the distributed limiter below and keeps CodeQL from missing
+// protection on authenticated reads/writes.
 const routerLimiter = expressRateLimit({
   windowMs: parseInt(process.env.USER_ROUTE_LIMIT_WINDOW_MS || String(15 * 60 * 1000), 10),
   max: parseInt(process.env.USER_ROUTE_LIMIT_MAX || "300", 10),
@@ -673,7 +675,7 @@ module.exports = router;
 
 // Plan endpoints (after exports intentionally for clarity if imported earlier)
 // Get available plans (public)
-router.get("/plans", publicLimiter, async (req, res) => {
+router.get("/plans", async (req, res) => {
   try {
     const { getPlans } = require("./services/planService");
     return res.json({ ok: true, plans: getPlans() });
@@ -683,7 +685,7 @@ router.get("/plans", publicLimiter, async (req, res) => {
 });
 
 // Get my plan
-router.get("/me/plan", authMiddleware, publicLimiter, async (req, res) => {
+router.get("/me/plan", authMiddleware, async (req, res) => {
   try {
     const snap = await db.collection("users").doc(req.userId).get();
     const plan =
@@ -695,7 +697,7 @@ router.get("/me/plan", authMiddleware, publicLimiter, async (req, res) => {
 });
 
 // Assign / change my plan (temporary pseudo billing)
-router.post("/me/plan", authMiddleware, writeLimiter, async (req, res) => {
+router.post("/me/plan", authMiddleware, async (req, res) => {
   try {
     const { tier } = req.body || {};
     if (!tier) return res.status(400).json({ ok: false, error: "tier required" });

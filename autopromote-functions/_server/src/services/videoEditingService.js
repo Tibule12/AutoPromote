@@ -331,7 +331,9 @@ class VideoEditingService {
         completedAt: new Date().toISOString(),
       });
     } catch (error) {
-      console.error(`[VideoEditing] Multicam Job ${jobId} Failed:`, error.message);
+      const workerDetail = getWorkerErrorDetail(error);
+      const errorMessage = workerDetail || error.message;
+      console.error(`[VideoEditing] Multicam Job ${jobId} Failed:`, errorMessage);
       let creditRefund = null;
       let refundableReceipt = multicamRequest?.creditReceipt || null;
       if (!refundableReceipt) {
@@ -349,7 +351,7 @@ class VideoEditingService {
         try {
           creditRefund = await refundCredits(userId, refundableReceipt, "render-multicam-refund", {
             jobId,
-            reason: error.message,
+            reason: errorMessage,
             renderTier: multicamRequest.renderTier || multicamRequest.render_tier || "premium",
           });
         } catch (refundError) {
@@ -360,7 +362,9 @@ class VideoEditingService {
       await docRef.update({
         status: error.serverProof ? "proof_failed" : "failed",
         stage: error.serverProof ? "server_proof_failed" : "failed",
-        error: error.message,
+        error: errorMessage,
+        workerError: workerDetail || null,
+        workerStatus: error.statusCode || error.response?.status || null,
         serverProof: error.serverProof || null,
         creditRefund,
         progress: 0,
@@ -452,11 +456,27 @@ class VideoEditingService {
     try {
       return await axios.post(`${CAM_COMBINER_WORKER_URL}${endpoint}`, payload, { timeout });
     } catch (error) {
-      if (!shouldTryLocalCamCombinerWorker(error)) throw error;
+      const workerDetail = getWorkerErrorDetail(error);
+      if (!shouldTryLocalCamCombinerWorker(error)) {
+        error.workerDetail = workerDetail;
+        if (workerDetail && workerDetail !== error.message) {
+          error.message = `${error.message}: ${workerDetail}`;
+        }
+        throw error;
+      }
       console.warn(
         `[VideoEditing] Falling back to local Cam Combiner worker. Primary worker: ${CAM_COMBINER_WORKER_URL}`
       );
-      return axios.post(`${LOCAL_CAM_COMBINER_WORKER_URL}${endpoint}`, payload, { timeout });
+      try {
+        return await axios.post(`${LOCAL_CAM_COMBINER_WORKER_URL}${endpoint}`, payload, { timeout });
+      } catch (fallbackError) {
+        const fallbackDetail = getWorkerErrorDetail(fallbackError);
+        fallbackError.workerDetail = fallbackDetail;
+        if (fallbackDetail && fallbackDetail !== fallbackError.message) {
+          fallbackError.message = `${fallbackError.message}: ${fallbackDetail}`;
+        }
+        throw fallbackError;
+      }
     }
   }
 
@@ -513,10 +533,11 @@ class VideoEditingService {
   }
 
   async proveMulticamRender(multicamRequest, userId, jobId) {
+    const requestedTier = multicamRequest?.renderTier || multicamRequest?.render_tier || "premium";
     const proofRequest = {
       ...multicamRequest,
-      renderTier: "simple",
-      render_tier: "simple",
+      renderTier: requestedTier,
+      render_tier: requestedTier,
       burnCaptions: false,
       burn_captions: false,
       brandWatermark: false,
@@ -535,6 +556,7 @@ class VideoEditingService {
       jobId,
       sourceCount: payload.sources.length,
       duration: payload.overlap_duration,
+      renderTier: payload.renderTier || payload.render_tier,
     });
 
     const response = await this.postCamCombinerWorker("/render-multicam", payload, 900000);

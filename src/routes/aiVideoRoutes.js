@@ -125,10 +125,28 @@ function extractJsonPayload(value = "") {
 }
 
 function cleanSceneText(value = "") {
-  return String(value)
-    .replace(/^\s*(scene\s*)?\d+[\).:-]\s*/i, "")
-    .replace(/^["'“”]+|["'“”]+$/g, "")
-    .trim();
+  let text = String(value || "").slice(0, 2000).trim();
+
+  let cursor = 0;
+  const lowerText = text.toLowerCase();
+  if (lowerText.startsWith("scene")) {
+    cursor = 5;
+    while (cursor < text.length && text[cursor] === " ") cursor += 1;
+  }
+
+  const digitStart = cursor;
+  while (cursor < text.length && text[cursor] >= "0" && text[cursor] <= "9") cursor += 1;
+  if (cursor > digitStart) {
+    while (cursor < text.length && text[cursor] === " ") cursor += 1;
+    if (").:-".includes(text[cursor])) {
+      text = text.slice(cursor + 1).trim();
+    }
+  }
+
+  const quoteChars = new Set(['"', "'", "“", "”"]);
+  while (text.length && quoteChars.has(text[0])) text = text.slice(1).trimStart();
+  while (text.length && quoteChars.has(text[text.length - 1])) text = text.slice(0, -1).trimEnd();
+  return text.trim();
 }
 
 function normalizeScenes(payload, fallbackText = "") {

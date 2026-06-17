@@ -77,7 +77,7 @@ const _verifyFirebaseToken = async (req, res, next) => {
 router.post("/register", async (req, res) => {
   let userRecord = null;
   try {
-    const { name, email, password, role = "user", idToken } = req.body;
+    const { name, email, password, idToken } = req.body;
 
     // If the frontend already created a Firebase Auth user (via client-side SDK),
     // it will send `idToken` so we can just update the existing user record.

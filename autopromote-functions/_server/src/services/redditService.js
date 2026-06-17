@@ -11,6 +11,9 @@ try {
   fetchFn = global.fetch;
 }
 
+const REDDIT_VIDEO_FALLBACK_POSTER_BASE64 =
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+lm6kAAAAASUVORK5CYII=";
+
 /**
  * Get user's Reddit connection tokens
  */
@@ -225,6 +228,60 @@ async function uploadRedditMedia(uid, contentUrl, mimeType) {
   };
 }
 
+async function getContentPosterUrl(contentId) {
+  if (!contentId) return null;
+  try {
+    const snap = await db.collection("content").doc(contentId).get();
+    if (!snap.exists) return null;
+    const data = snap.data() || {};
+    return (
+      data.thumbnailUrl ||
+      data.thumbnail_url ||
+      data.posterUrl ||
+      data.coverImage ||
+      data.imageUrl ||
+      data.image_url ||
+      null
+    );
+  } catch (_) {
+    return null;
+  }
+}
+
+async function getFallbackPosterUrl() {
+  try {
+    const storage =
+      require("../firebaseAdmin").storage ||
+      (admin.storage ? admin.storage() : null);
+    const bucket =
+      storage && typeof storage.bucket === "function"
+        ? storage.bucket()
+        : admin.storage
+          ? admin.storage().bucket()
+          : null;
+    if (!bucket) return null;
+
+    const file = bucket.file("system/reddit-video-placeholder.png");
+    const [exists] = await file.exists();
+    if (!exists) {
+      await file.save(Buffer.from(REDDIT_VIDEO_FALLBACK_POSTER_BASE64, "base64"), {
+        metadata: {
+          contentType: "image/png",
+          cacheControl: "public, max-age=31536000",
+        },
+      });
+    }
+    const [signed] = await file.getSignedUrl({
+      action: "read",
+      expires: "03-01-2500",
+    });
+    return signed;
+  } catch (e) {
+    console.warn("[Reddit] Failed to provision fallback poster:", e.message);
+    return null;
+  }
+}
+
 /**
  * Submit a post to Reddit
  */
@@ -271,11 +328,11 @@ async function postToReddit({
 
     // 2. Upload Thumbnail (required by Reddit video submit API)
     let posterSource = thumbnailUrl;
-
-    // Fallback to local static icon route to avoid external-host SSRF blocks.
     if (!posterSource) {
-      // Use localhost static endpoint to avoid outbound SSRF allowlist rejection for external hosts.
-      posterSource = "http://127.0.0.1:5000/tiktok-demo";
+      posterSource = await getContentPosterUrl(contentId);
+    }
+    if (!posterSource) {
+      posterSource = await getFallbackPosterUrl();
     }
 
     if (posterSource) {
