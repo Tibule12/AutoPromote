@@ -38,7 +38,7 @@ const SUBSCRIPTION_PLANS = {
     features: {
       monthlyCredits: 500,
       uploads: 80,
-      platformLimit: 12,
+      platformLimit: 6,
       wolfHuntTasks: 100,
       analytics: "Advanced insights",
       support: "Priority support",
@@ -54,10 +54,10 @@ const SUBSCRIPTION_PLANS = {
     features: {
       monthlyCredits: 2000,
       uploads: 240,
-      platformLimit: 30,
+      platformLimit: 6,
       wolfHuntTasks: 500,
-      analytics: "Team reporting",
-      support: "Dedicated support",
+      analytics: "Export-ready analytics",
+      support: "Priority support",
       multicam: true,
       teamSeats: 10,
     },
@@ -69,7 +69,7 @@ const SUBSCRIPTION_PLANS = {
  * These are deducted from the user's monthly credit allocation (or purchased top-ups).
  */
 const CREDIT_COSTS = {
-  process: 10,       // Smart Crop + Silence Removal + full pipeline
+  process: 10, // Smart Crop + Silence Removal + full pipeline
   "render-multicam": 150,
   "clean-audio-sync": 18,
   analyze: 8,
@@ -77,6 +77,8 @@ const CREDIT_COSTS = {
   transcribe: 3,
   hook: 3,
   music: 1,
+  "idea-video-preview": 5,
+  "idea-video-render": 25,
 };
 
 /**
@@ -256,13 +258,13 @@ const PLAN_CAPABILITIES = {
       recoveryLab: true,
       canExport: true,
       topContentLimit: 100,
-      summary: "Team reporting with export-ready analytics and Recovery Lab.",
+      summary: "Export-ready analytics with Recovery Lab.",
     },
     support: {
       ticketAccess: true,
       allowedPriorities: ["low", "medium", "high"],
-      responseTarget: "Dedicated support lane with fastest handling",
-      channel: "Dedicated support",
+      responseTarget: "Priority queue, target reply within 1 business day",
+      channel: "Priority support",
     },
   },
 };

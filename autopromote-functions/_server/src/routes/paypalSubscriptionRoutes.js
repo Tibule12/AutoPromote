@@ -47,6 +47,24 @@ if (!fetchFn) {
 
 const { safeFetch } = require("../utils/ssrfGuard");
 
+const HIDDEN_PUBLIC_PLAN_FEATURES = new Set(["wolfHuntTasks", "teamSeats"]);
+
+function buildPublicPlan(plan) {
+  const features = Object.fromEntries(
+    Object.entries(plan.features || {}).filter(([key]) => !HIDDEN_PUBLIC_PLAN_FEATURES.has(key))
+  );
+  const capabilities = { ...getPlanCapabilities(plan.id) };
+  delete capabilities.missions;
+  delete capabilities.teamSeats;
+
+  return {
+    ...plan,
+    features,
+    paypalPlanId: plan.paypalPlanIdEnv ? process.env[plan.paypalPlanIdEnv] : undefined,
+    capabilities,
+  };
+}
+
 function findInternalPlanIdByPayPalPlanId(paypalPlanId) {
   if (!paypalPlanId) return null;
   const match = Object.values(SUBSCRIPTION_PLANS).find(plan => {
@@ -625,11 +643,7 @@ async function createSubscriptionViaRest({ planId, userData, returnUrl, cancelUr
  */
 router.get("/plans", async (req, res) => {
   try {
-    const plans = Object.values(SUBSCRIPTION_PLANS).map(plan => ({
-      ...plan,
-      paypalPlanId: plan.paypalPlanIdEnv ? process.env[plan.paypalPlanIdEnv] : undefined,
-      capabilities: getPlanCapabilities(plan.id),
-    }));
+    const plans = Object.values(SUBSCRIPTION_PLANS).map(buildPublicPlan);
     res.json({
       success: true,
       plans,
@@ -1143,14 +1157,14 @@ router.get("/usage", authMiddleware, async (req, res) => {
     const uploadLimit = plan.features.uploads;
     const communityPostLimit = plan.features.communityPosts;
     const missionOpportunityLimit = plan.features.wolfHuntTasks;
-    const isUnlimited = value => value === Infinity || value === "unlimited" || value === "Unlimited";
+    const isUnlimited = value =>
+      value === Infinity || value === "unlimited" || value === "Unlimited";
 
     const uploadsUsed = countDocsSince([uploadsByUserIdSnap, uploadsByLegacySnap], periodStart);
     const postsUsed = countDocsSince([postsSnap], periodStart);
     const boostsUsed = countDocsSince([boostsSnap], periodStart);
 
     // Credit usage for the current month
-    const monthKey = periodStart.toISOString().slice(0, 7) || new Date().toISOString().slice(0, 7);
     const monthlyCreditsAllocation = plan.features.monthlyCredits || 0;
     let monthlyCreditsUsed = 0;
     try {
@@ -1195,6 +1209,17 @@ router.get("/usage", authMiddleware, async (req, res) => {
         monthlyRemaining: Math.max(0, monthlyCreditsAllocation - monthlyCreditsUsed),
         topUpBalance,
         totalAvailable: Math.max(0, monthlyCreditsAllocation - monthlyCreditsUsed) + topUpBalance,
+      },
+      featureCosts: {
+        ideaVideoPreview: CREDIT_COSTS["idea-video-preview"] || 0,
+        ideaVideoRender: CREDIT_COSTS["idea-video-render"] || 0,
+        camCombinerRender: CREDIT_COSTS["render-multicam"] || 0,
+        cleanAudioSync: CREDIT_COSTS["clean-audio-sync"] || 0,
+        findViralClips: CREDIT_COSTS.analyze || CREDIT_COSTS["find-viral-clips"] || 0,
+        finalClipRender: CREDIT_COSTS["render-clip"] || 0,
+        smartPromo: CREDIT_COSTS["promo-summary"] || CREDIT_COSTS["smart-promo-summary"] || 0,
+        videoProcessing: CREDIT_COSTS.process || 0,
+        transcription: CREDIT_COSTS.transcribe || CREDIT_COSTS["audio-extract"] || 0,
       },
       periodStart: periodStart.toISOString(),
       periodEnd: userData.subscriptionPeriodEnd,

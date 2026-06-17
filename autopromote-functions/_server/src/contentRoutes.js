@@ -7,7 +7,7 @@ const authMiddleware = require("./authMiddleware");
 const Joi = require("joi");
 const crypto = require("crypto");
 const path = require("path");
-const sanitizeForFirestore = require(path.join(__dirname, "utils", "sanitizeForFirestore"));
+const _sanitizeForFirestore = require(path.join(__dirname, "utils", "sanitizeForFirestore"));
 const {
   usageLimitMiddleware,
   trackUsage,
@@ -26,10 +26,10 @@ const { getPlanCapabilities } = require("./config/subscriptionPlans");
 // --- OPTIMIZATION START: Eager Loading for Performance ---
 // Previously lazy-loaded inside request handler causing 2-5s lag per upload.
 // Moving to module scope initializes them once at startup.
-const hashtagEngine = require("./services/hashtagEngine");
-const smartDistributionEngine = require("./services/smartDistributionEngine");
-const viralImpactEngine = require("./services/viralImpactEngine");
-const algorithmExploitationEngine = require("./services/algorithmExploitationEngine");
+const _hashtagEngine = require("./services/hashtagEngine");
+const _smartDistributionEngine = require("./services/smartDistributionEngine");
+const _viralImpactEngine = require("./services/viralImpactEngine");
+const _algorithmExploitationEngine = require("./services/algorithmExploitationEngine");
 const { performViralOptimization } = require("./services/viralOptimizationService");
 const {
   diagnoseContent,
@@ -45,7 +45,7 @@ async function ensureRecoveryLabAccess(userId) {
   const entitlements = getPlanCapabilities(snapshot.tierId);
 
   if (!entitlements.analytics.recoveryLab) {
-    const error = new Error("Recovery Lab is available on Studio and Team plans.");
+    const error = new Error("Recovery Lab is available on Studio and Agency plans.");
     error.statusCode = 403;
     error.entitlements = entitlements;
     throw error;
@@ -60,9 +60,9 @@ const {
 const { buildRepostCreativePlan } = require("./services/repostSchedulerService");
 
 // Optional services still loaded defensively
-let viralInsuranceService;
+let _viralInsuranceService;
 try {
-  viralInsuranceService = require("./services/viralInsuranceService");
+  _viralInsuranceService = require("./services/viralInsuranceService");
 } catch (e) {
   console.warn("[Startup] Optional Protocol 7 Service not found:", e.message);
 }
@@ -191,7 +191,11 @@ function summarizeSchedule(doc) {
     frequency: data.frequency || "once",
     isActive: typeof data.isActive === "boolean" ? data.isActive : true,
     status: data.status || null,
-    title: data.title || data.platformSpecificSettings?.title || data.platformSpecificSettings?.caption || null,
+    title:
+      data.title ||
+      data.platformSpecificSettings?.title ||
+      data.platformSpecificSettings?.caption ||
+      null,
     createdAt: data.createdAt || data.created_at || null,
     updatedAt: data.updatedAt || data.updated_at || null,
   };
@@ -595,7 +599,9 @@ const contentUploadSchema = Joi.object({
   platform_options: Joi.object().pattern(Joi.string(), Joi.object()).optional(),
   meta: Joi.object().optional(),
   scheduled_promotion_time: Joi.string().isoDate().optional(),
-  promotion_frequency: Joi.string().valid("once", "hourly", "daily", "weekly", "monthly").optional(),
+  promotion_frequency: Joi.string()
+    .valid("once", "hourly", "daily", "weekly", "monthly")
+    .optional(),
   schedule_hint: Joi.object().optional(),
   auto_promote: Joi.object().optional(),
   quality_score: Joi.number().optional(),
@@ -727,7 +733,6 @@ router.post(
       const isE2ETest = req.headers && req.headers["x-playwright-e2e"] === "1";
       if (isE2ETest && !req.body.isDryRun) {
         const fakeId = `e2e-fake-${Date.now()}`;
-        const isAdminTest = req.user && (req.user.isAdmin === true || req.user.role === "admin");
         const status = "approved";
         const approvalStatus = "approved";
         return res.status(201).json({ content: { id: fakeId, status, approvalStatus } });
@@ -812,7 +817,6 @@ router.post(
         return tier;
       }
 
-      const isAdmin = !!(req.user && (req.user.isAdmin === true || req.user.role === "admin"));
       const detectedIntent = determineContentIntent(platform_options);
 
       if (!req.body.isDryRun) {
@@ -886,7 +890,9 @@ router.post(
 
       const firstPlatformText = (fields = []) =>
         Object.values(platform_options || {})
-          .map(options => fields.map(field => options?.[field]).find(value => String(value || "").trim()))
+          .map(options =>
+            fields.map(field => options?.[field]).find(value => String(value || "").trim())
+          )
           .find(value => String(value || "").trim());
       const resolvedTitle =
         String(title || firstPlatformText(["title"]) || "").trim() || "Untitled Post";
@@ -1428,9 +1434,13 @@ router.get("/repost-activity", authMiddleware, async (req, res) => {
       summary: {
         totalContent: contentItems.length,
         totalReposts: repostPosts.length,
-        successfulReposts: repostPosts.filter(p => p.status === "posted" || p.status === "success").length,
-        failedReposts: repostPosts.filter(p => p.status === "failed" || p.status === "error").length,
-        pendingSchedules: repostSchedules.filter(s => s.status === "processing" || s.status === "queued").length,
+        successfulReposts: repostPosts.filter(p => p.status === "posted" || p.status === "success")
+          .length,
+        failedReposts: repostPosts.filter(p => p.status === "failed" || p.status === "error")
+          .length,
+        pendingSchedules: repostSchedules.filter(
+          s => s.status === "processing" || s.status === "queued"
+        ).length,
       },
     });
   } catch (error) {
@@ -1454,7 +1464,8 @@ router.post("/:contentId/promotion-schedules", authMiddleware, async (req, res) 
     const contentDoc = await db.collection("content").doc(contentId).get();
     if (!contentDoc.exists) return res.status(404).json({ error: "Content not found" });
     const content = contentDoc.data();
-    if ((content.user_id || content.userId) !== userId) return res.status(403).json({ error: "Forbidden" });
+    if ((content.user_id || content.userId) !== userId)
+      return res.status(403).json({ error: "Forbidden" });
 
     const promotionService = require("./promotionService");
     const schedules = [];

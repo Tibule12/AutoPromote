@@ -679,7 +679,9 @@ const PayPalSubscriptionPanel = ({
           });
           const parsed = await parseJsonSafe(res);
           if (!res.ok) {
-            throw new Error(parsed?.json?.error || parsed?.error || "Could not create PayPal order");
+            throw new Error(
+              parsed?.json?.error || parsed?.error || "Could not create PayPal order"
+            );
           }
           return parsed.json?.id || parsed.json?.orderID || parsed.json?.orderId;
         },
@@ -696,7 +698,9 @@ const PayPalSubscriptionPanel = ({
           });
           const parsed = await parseJsonSafe(res);
           if (!res.ok || !parsed?.json?.success) {
-            throw new Error(parsed?.json?.error || parsed?.error || "Could not capture PayPal order");
+            throw new Error(
+              parsed?.json?.error || parsed?.error || "Could not capture PayPal order"
+            );
           }
           await fetchUsage();
           toast.success(`${pack.credits} credits added.`);
@@ -743,9 +747,7 @@ const PayPalSubscriptionPanel = ({
       creatorTipping: "💰",
       sponsoredPosts: "📢",
       apiAccess: "🔌",
-      teamSeats: "👥",
       whiteLabel: "🎨",
-      wolfHuntTasks: "🐺",
       monthlyCredits: "🎟️",
       multicam: "🎬",
     };
@@ -766,9 +768,7 @@ const PayPalSubscriptionPanel = ({
       creatorTipping: "Creator tipping",
       sponsoredPosts: "Sponsored posts",
       apiAccess: "API access",
-      teamSeats: "Team seats",
       whiteLabel: "White-label",
-      wolfHuntTasks: "Mission opportunities",
       monthlyCredits: "Monthly AI credits",
       multicam: "Multi-camera editing",
     };
@@ -788,22 +788,20 @@ const PayPalSubscriptionPanel = ({
     if (key === "platformLimit" && typeof value === "number") {
       return `${value} platform${value === 1 ? "" : "s"}`;
     }
-    if (key === "wolfHuntTasks" && typeof value === "number") {
-      return `${value} mission actions`;
-    }
     if (key === "monthlyCredits" && typeof value === "number") {
       return `${value} credits/mo`;
     }
     if (typeof value === "number") {
-      return `${value} ${key === "teamSeats" ? "seats" : "per month"}`;
+      return `${value} per month`;
     }
     return value;
   };
 
-  const missionUsage = usage?.missionOpportunities || usage?.viralBoosts || null;
   const publishingUsage = usage?.publishing || null;
   const creditUsage = usage?.credits || null;
   const featureCostLabels = {
+    ideaVideoPreview: "Idea-to-Video preview",
+    ideaVideoRender: "Idea-to-Video full render",
     camCombinerRender: "Cam Combiner server MP4",
     cleanAudioSync: "Clean-audio sync proof",
     findViralClips: "Find Viral Clips",
@@ -821,6 +819,7 @@ const PayPalSubscriptionPanel = ({
     "findViralClips",
     "smartPromoSummary",
   ];
+  const hiddenPlanFeatureKeys = new Set(["teamSeats", "wolfHuntTasks"]);
 
   const getPlanEditingSummary = plan => {
     const editing = plan.capabilities?.editing;
@@ -1012,11 +1011,7 @@ const PayPalSubscriptionPanel = ({
             <div className="usage-item">
               <label>Editing Credits</label>
               {creditUsage &&
-                renderUsageBar(
-                  creditUsage.monthlyUsed,
-                  creditUsage.monthlyAllocation,
-                  false
-                )}
+                renderUsageBar(creditUsage.monthlyUsed, creditUsage.monthlyAllocation, false)}
               {creditUsage && (
                 <div className="usage-detail">
                   {creditUsage.monthlyRemaining || 0} monthly remaining
@@ -1027,12 +1022,6 @@ const PayPalSubscriptionPanel = ({
                   </span>
                 </div>
               )}
-            </div>
-
-            <div className="usage-item">
-              <label>Mission Opportunities</label>
-              {missionUsage &&
-                renderUsageBar(missionUsage.used, missionUsage.limit, missionUsage.unlimited)}
             </div>
           </div>
 
@@ -1083,13 +1072,15 @@ const PayPalSubscriptionPanel = ({
                 </div>
 
                 <div className="plan-features">
-                  {Object.entries(plan.features || {}).map(([key, value]) => (
-                    <div key={key} className="feature-item">
-                      <span className="feature-icon">{getFeatureIcon(key)}</span>
-                      <span className="feature-name">{getFeatureLabel(key)}:</span>
-                      <span className="feature-value">{renderFeatureValue(key, value)}</span>
-                    </div>
-                  ))}
+                  {Object.entries(plan.features || {})
+                    .filter(([key]) => !hiddenPlanFeatureKeys.has(key))
+                    .map(([key, value]) => (
+                      <div key={key} className="feature-item">
+                        <span className="feature-icon">{getFeatureIcon(key)}</span>
+                        <span className="feature-name">{getFeatureLabel(key)}:</span>
+                        <span className="feature-value">{renderFeatureValue(key, value)}</span>
+                      </div>
+                    ))}
                 </div>
 
                 {(() => {
@@ -1105,8 +1096,12 @@ const PayPalSubscriptionPanel = ({
                         </p>
                         {plan.id !== "free" && (
                           <div className="plan-editing-badges">
-                            <span className="plan-editing-badge included">Creative tools included</span>
-                            <span className="plan-editing-badge metered">Generations use credits</span>
+                            <span className="plan-editing-badge included">
+                              Creative tools included
+                            </span>
+                            <span className="plan-editing-badge metered">
+                              Generations use credits
+                            </span>
                             {editingSummary.topUpsEnabled && (
                               <span className="plan-editing-badge topup">Top up anytime</span>
                             )}
@@ -1196,7 +1191,8 @@ const PayPalSubscriptionPanel = ({
             <div className="topup-section">
               <h3>Top Up Anytime</h3>
               <p className="topup-copy">
-                If you use up your monthly editing credits before renewal, you can add more and keep going.
+                If you use up your monthly editing credits before renewal, you can add more and keep
+                going.
               </p>
               <div className="topup-grid">
                 {creditTopUpPacks.map(pack => (

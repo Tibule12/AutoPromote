@@ -21541,7 +21541,8 @@ async def render_multicam_impl(request: RenderMultiCamRequest, provided_job_id: 
 try:
     import edge_tts
     # Safer import for moviepy 1.x
-    from moviepy.editor import VideoFileClip, AudioFileClip, concatenate_videoclips, CompositeAudioClip, CompositeVideoClip
+    from moviepy.editor import VideoFileClip, AudioFileClip, concatenate_videoclips, CompositeAudioClip, CompositeVideoClip, ImageClip
+    from PIL import Image, ImageDraw, ImageFont
     
     MOVIEPY_AVAILABLE = True
 except ImportError as e:
@@ -21555,13 +21556,256 @@ class IdeaScene(BaseModel):
     text: str
     video_url: str
     keywords: Optional[str] = None
+    caption: Optional[str] = None
+    duration: Optional[float] = None
 
 class RenderIdeaRequest(BaseModel):
     scenes: List[IdeaScene]
     music_file: Optional[str] = None # Local file name in assets or URL
-    voice: str = "en-US-GuyNeural" 
+    voice: str = "en-US-AriaNeural"
+    voice_rate: str = "+8%"
+    target_duration: Optional[float] = None
     aspect_ratio: str = "9:16"
     subtitles: bool = True
+
+IDEA_TTS_FALLBACK_VOICES = [
+    "en-US-AriaNeural",
+    "en-US-JennyNeural",
+    "en-US-GuyNeural",
+]
+
+def normalize_idea_voice_rate(rate):
+    rate = str(rate or "+8%").strip()
+    if re.match(r"^[+-]\d{1,2}%$", rate):
+        return rate
+    return "+8%"
+
+def clean_idea_tts_text(text):
+    cleaned = str(text or "").strip()
+    cleaned = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", " ", cleaned)
+    cleaned = re.sub(r"\s+", " ", cleaned).strip()
+    return cleaned or "This scene is ready."
+
+async def synthesize_idea_tts(text, output_path, requested_voice, voice_rate):
+    voices = []
+    for voice in [requested_voice, os.getenv("IDEA_VIDEO_VOICE"), *IDEA_TTS_FALLBACK_VOICES]:
+        voice = str(voice or "").strip()
+        if voice and voice not in voices:
+            voices.append(voice)
+
+    safe_text = clean_idea_tts_text(text)
+    safe_rate = normalize_idea_voice_rate(voice_rate)
+    last_error = None
+
+    for voice in voices:
+        try:
+            if os.path.exists(output_path):
+                os.remove(output_path)
+            communicate = edge_tts.Communicate(safe_text, voice, rate=safe_rate)
+            await communicate.save(output_path)
+            if os.path.exists(output_path) and os.path.getsize(output_path) > 1024:
+                if voice != requested_voice:
+                    logger.warning("Idea video TTS fell back from %s to %s", requested_voice, voice)
+                return voice
+            raise RuntimeError("No audio was written by Edge TTS")
+        except Exception as e:
+            last_error = e
+            logger.warning("Idea video TTS failed for voice %s: %s", voice, e)
+
+    raise RuntimeError(f"TTS failed for all fallback voices: {last_error}")
+
+def get_idea_video_font(size, bold=False):
+    candidates = [
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        "/usr/share/fonts/truetype/liberation2/LiberationSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/liberation2/LiberationSans-Regular.ttf",
+    ]
+    for path in candidates:
+        if path and os.path.exists(path):
+            return ImageFont.truetype(path, size)
+    return ImageFont.load_default()
+
+def wrap_idea_caption(draw, text, font, max_width):
+    words = str(text or "").strip().split()
+    lines = []
+    line = ""
+    for word in words:
+        test_line = f"{line} {word}".strip()
+        bbox = draw.textbbox((0, 0), test_line, font=font)
+        if bbox[2] - bbox[0] > max_width and line:
+            lines.append(line)
+            line = word
+        else:
+            line = test_line
+    if line:
+        lines.append(line)
+    return lines[:3]
+
+def build_idea_caption_text(scene):
+    caption = str(scene.caption or "").strip()
+    if caption:
+        return caption
+    text = str(scene.text or "").strip()
+    if len(text) <= 74:
+        return text
+    return text[:71].rsplit(" ", 1)[0] + "..."
+
+def create_idea_caption_overlay(text, output_path, size=(1080, 1920)):
+    image = Image.new("RGBA", size, (0, 0, 0, 0))
+    draw = ImageDraw.Draw(image)
+    max_width = 920
+    font = get_idea_video_font(70, bold=True)
+    small_font = get_idea_video_font(32, bold=True)
+    lines = wrap_idea_caption(draw, text, font, max_width)
+    if not lines:
+        image.save(output_path)
+        return output_path
+
+    line_height = 82
+    text_height = len(lines) * line_height
+    box_padding_x = 46
+    box_padding_y = 38
+    box_w = max_width + box_padding_x * 2
+    box_h = text_height + box_padding_y * 2 + 16
+    box_x = (size[0] - box_w) // 2
+    box_y = int(size[1] * 0.63)
+
+    draw.rounded_rectangle(
+        [box_x, box_y, box_x + box_w, box_y + box_h],
+        radius=34,
+        fill=(3, 7, 18, 218),
+        outline=(255, 255, 255, 42),
+        width=2,
+    )
+    draw.rounded_rectangle(
+        [box_x + 34, box_y + 24, box_x + 174, box_y + 34],
+        radius=5,
+        fill=(168, 85, 247, 255),
+    )
+    draw.text((box_x + box_padding_x, box_y + 44), "WATCH THIS", font=small_font, fill=(191, 219, 254, 255))
+
+    y = box_y + 92
+    for line in lines:
+        for dx, dy in ((3, 3), (-2, 2), (2, -2)):
+            draw.text((box_x + box_padding_x + dx, y + dy), line, font=font, fill=(0, 0, 0, 150))
+        draw.text((box_x + box_padding_x, y), line, font=font, fill=(255, 255, 255, 255))
+        y += line_height
+
+    image.save(output_path)
+    return output_path
+
+def normalize_idea_target_duration(value, scene_count):
+    scene_count = max(1, int(scene_count or 1))
+    try:
+        duration = float(value or 0)
+    except Exception:
+        duration = 0
+    if duration <= 0:
+        duration = min(60.0, max(12.0, scene_count * 5.0))
+    return clamp_float(duration, max(5.0, scene_count * 2.0), 90.0)
+
+def allocate_idea_scene_durations(scenes, target_duration):
+    scene_count = max(1, len(scenes))
+    requested = []
+    for scene in scenes:
+        try:
+            requested.append(max(0.0, float(scene.duration or 0)))
+        except Exception:
+            requested.append(0.0)
+
+    if sum(requested) <= 0:
+        return [target_duration / scene_count for _ in scenes]
+
+    requested_total = sum(requested)
+    return [max(1.5, (duration / requested_total) * target_duration) for duration in requested]
+
+def build_idea_atempo_filter(speed):
+    speed = max(0.5, min(3.0, float(speed or 1.0)))
+    parts = []
+    while speed > 2.0:
+        parts.append("atempo=2.0")
+        speed /= 2.0
+    while speed < 0.5:
+        parts.append("atempo=0.5")
+        speed /= 0.5
+    parts.append(f"atempo={speed:.5f}")
+    return ",".join(parts)
+
+def fit_idea_audio_to_duration(audio_clip, target_duration):
+    target_duration = max(0.75, float(target_duration or 0.75))
+    if audio_clip.duration <= target_duration:
+        return audio_clip
+
+    speed = audio_clip.duration / target_duration
+    return audio_clip.fl_time(lambda t: t * speed).set_duration(target_duration)
+
+def get_idea_clip_luma(video_clip):
+    samples = []
+    sample_times = [0.15]
+    if video_clip.duration and video_clip.duration > 0.6:
+        sample_times.extend([video_clip.duration * 0.5, max(0.15, video_clip.duration - 0.2)])
+
+    for sample_time in sample_times:
+        try:
+            frame = video_clip.get_frame(min(max(0.0, sample_time), max(0.0, video_clip.duration - 0.05)))
+            arr = np.asarray(frame, dtype=np.float32)
+            if arr.size == 0:
+                continue
+            red = arr[..., 0]
+            green = arr[..., 1]
+            blue = arr[..., 2]
+            luma = (0.2126 * red) + (0.7152 * green) + (0.0722 * blue)
+            samples.append(float(np.mean(luma)))
+        except Exception as luma_error:
+            logger.debug("Idea video luma sample failed: %s", luma_error)
+    if not samples:
+        return 80.0
+    return float(sum(samples) / len(samples))
+
+def brighten_idea_frame(frame):
+    arr = np.asarray(frame, dtype=np.float32)
+    arr = (arr * 1.10) + 10.0
+    return np.clip(arr, 0, 255).astype(np.uint8)
+
+def create_idea_visual_fallback(scene, output_path, size=(1080, 1920)):
+    width, height = size
+    image = Image.new("RGB", size, (18, 25, 43))
+    draw = ImageDraw.Draw(image, "RGBA")
+    top = np.array([24, 35, 77], dtype=np.float32)
+    bottom = np.array([20, 120, 100], dtype=np.float32)
+    for y in range(height):
+        mix = y / max(1, height - 1)
+        color = (top * (1 - mix) + bottom * mix).astype(np.uint8)
+        draw.line([(0, y), (width, y)], fill=tuple(int(v) for v in color))
+
+    draw.ellipse([width * 0.58, height * 0.08, width * 1.08, height * 0.34], fill=(255, 255, 255, 28))
+    draw.ellipse([-width * 0.22, height * 0.62, width * 0.38, height * 0.94], fill=(255, 255, 255, 22))
+    draw.rounded_rectangle(
+        [86, 128, width - 86, height - 128],
+        radius=54,
+        outline=(255, 255, 255, 48),
+        width=3,
+    )
+
+    kicker_font = get_idea_video_font(34, bold=True)
+    title_font = get_idea_video_font(72, bold=True)
+    body_font = get_idea_video_font(38, bold=False)
+    caption = build_idea_caption_text(scene)
+    lines = wrap_idea_caption(draw, caption, title_font, width - 220) or ["AutoPromote"]
+    body = wrap_idea_caption(draw, str(scene.keywords or "Creator video").strip(), body_font, width - 240)
+
+    draw.text((122, 190), "AUTOPROMOTE", font=kicker_font, fill=(191, 219, 254, 245))
+    y = 275
+    for line in lines:
+        draw.text((122, y), line, font=title_font, fill=(255, 255, 255, 255))
+        y += 86
+    if body:
+        y += 42
+        for line in body[:2]:
+            draw.text((122, y), line, font=body_font, fill=(219, 234, 254, 235))
+            y += 48
+
+    image.save(output_path, quality=95)
+    return output_path
 
 @app.post("/render-idea-video")
 async def render_idea_video(request: RenderIdeaRequest, background_tasks: BackgroundTasks):
@@ -21579,6 +21823,8 @@ async def render_idea_video(request: RenderIdeaRequest, background_tasks: Backgr
 
     try:
         clips = []
+        target_total_duration = normalize_idea_target_duration(request.target_duration, len(request.scenes))
+        scene_allocations = allocate_idea_scene_durations(request.scenes, target_total_duration)
         
         # 1. Process Each Scene
         for i, scene in enumerate(request.scenes):
@@ -21587,12 +21833,13 @@ async def render_idea_video(request: RenderIdeaRequest, background_tasks: Backgr
             tts_filename = os.path.join(SHARED_TMP_DIR, f"{job_id}_scene_{i}.mp3")
             temp_files.append(tts_filename)
             
-            communicate = edge_tts.Communicate(scene.text, request.voice)
-            await communicate.save(tts_filename)
+            await synthesize_idea_tts(scene.text, tts_filename, request.voice, request.voice_rate)
             
             # Load Audio Duration
             audio_clip = AudioFileClip(tts_filename)
-            scene_duration = audio_clip.duration + 0.5 # Add small pause
+            scene_duration = max(1.5, float(scene_allocations[i] if i < len(scene_allocations) else target_total_duration / max(1, len(request.scenes))))
+            audio_target_duration = max(0.75, scene_duration - 0.25)
+            audio_clip = fit_idea_audio_to_duration(audio_clip, audio_target_duration)
             
             # B. Download & Process Video
             video_filename = os.path.join(SHARED_TMP_DIR, f"{job_id}_scene_{i}_src.mp4")
@@ -21630,18 +21877,38 @@ async def render_idea_video(request: RenderIdeaRequest, background_tasks: Backgr
             # Target 1080x1920 (9:16)
             W, H = video_clip.size
             TARGET_W, TARGET_H = 1080, 1920
-            
+
+            source_luma = get_idea_clip_luma(video_clip)
+            if source_luma < 24:
+                logger.warning("Idea video scene %s source was too dark (luma %.2f); using generated fallback visual", i, source_luma)
+                video_clip.close()
+                fallback_visual_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_scene_{i}_fallback.jpg")
+                temp_files.append(fallback_visual_path)
+                create_idea_visual_fallback(scene, fallback_visual_path, (TARGET_W, TARGET_H))
+                video_clip = ImageClip(fallback_visual_path).set_duration(scene_duration)
+                W, H = TARGET_W, TARGET_H
+            else:
+                video_clip = video_clip.fl_image(brighten_idea_frame)
+
             # Crop to aspect ratio first
             # If landscape (16:9) -> Crop center 9:16
-            if W/H > TARGET_W/TARGET_H:
-                 video_clip = video_clip.crop(x1=(W/2 - (H*TARGET_W/TARGET_H)/2), width=H*TARGET_W/TARGET_H, height=H)
-            else:
-                 pass # Already narrow or fits
-            
-            video_clip = video_clip.resize(height=TARGET_H)
-            # Center crop strictly to 1080 width if needed
-            if video_clip.w > TARGET_W:
-                video_clip = video_clip.crop(x1=video_clip.w/2 - TARGET_W/2, width=TARGET_W)
+            if not isinstance(video_clip, ImageClip):
+                if W / H > TARGET_W / TARGET_H:
+                    video_clip = video_clip.crop(x1=(W/2 - (H*TARGET_W/TARGET_H)/2), width=H*TARGET_W/TARGET_H, height=H)
+
+                video_clip = video_clip.resize(height=TARGET_H)
+                # Center crop strictly to 1080 width if needed
+                if video_clip.w > TARGET_W:
+                    video_clip = video_clip.crop(x1=video_clip.w/2 - TARGET_W/2, width=TARGET_W)
+
+                # Add a subtle push-in so stock footage feels alive instead of sitting flat.
+                video_clip = video_clip.resize(1.055)
+                video_clip = video_clip.crop(
+                    x_center=video_clip.w / 2,
+                    y_center=video_clip.h / 2,
+                    width=TARGET_W,
+                    height=TARGET_H,
+                )
                 
             # Loop video if shorter than audio
             if video_clip.duration < scene_duration:
@@ -21651,17 +21918,34 @@ async def render_idea_video(request: RenderIdeaRequest, background_tasks: Backgr
                 
             # Set Audio
             video_clip = video_clip.set_audio(audio_clip)
+
+            if request.subtitles:
+                caption_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_scene_{i}_caption.png")
+                temp_files.append(caption_path)
+                create_idea_caption_overlay(build_idea_caption_text(scene), caption_path, (TARGET_W, TARGET_H))
+                caption_clip = ImageClip(caption_path).set_duration(scene_duration)
+                video_clip = CompositeVideoClip([video_clip, caption_clip], size=(TARGET_W, TARGET_H))
+
             clips.append(video_clip)
 
         # 2. Concatenate
         final_clip = concatenate_videoclips(clips, method="compose") # compose handles different sizes safer
+        if final_clip.duration > target_total_duration + 0.05:
+            final_clip = final_clip.subclip(0, target_total_duration)
+        elif final_clip.duration < target_total_duration - 0.05 and clips:
+            pad_duration = target_total_duration - final_clip.duration
+            pad_source = clips[-1].to_ImageClip(t=max(0, clips[-1].duration - 0.05)).set_duration(pad_duration)
+            if clips[-1].audio:
+                pad_source = pad_source.set_audio(None)
+            final_clip = concatenate_videoclips([final_clip, pad_source], method="compose")
         
         # 3. Add Background Music (Optional)
         # Assuming asset path logic similar to main server
         # For now, skip music to ensure stability first
         
         # 4. Write Output
-        final_clip.write_videofile(final_output_path, codec=GPU_VIDEO_ENCODER if GPU_VIDEO_ENCODER == "h264_nvenc" else "libx264", audio_codec="aac", fps=24, logger=None)
+        idea_video_encoder = os.getenv("IDEA_VIDEO_ENCODER", "libx264").strip() or "libx264"
+        final_clip.write_videofile(final_output_path, codec=idea_video_encoder, audio_codec="aac", fps=24, logger=None)
         
         # Close clips to release file handles
         for c in clips: c.close()

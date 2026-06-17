@@ -17,6 +17,8 @@ const LOCAL_BYPASS_OPERATIONS = new Set([
   "smart-promo-summary",
   "audio-extract",
   "transcribe",
+  "idea-video-preview",
+  "idea-video-render",
 ]);
 
 const isProductionRuntime = () =>

@@ -15,7 +15,10 @@ const {
   CREDIT_COSTS,
   CREDIT_TOP_UP_PACKS,
 } = require("../config/subscriptionPlans");
-const { getEffectiveTierSnapshot, getPlatformPostMonthlyQuota } = require("../services/billingService");
+const {
+  getEffectiveTierSnapshot,
+  getPlatformPostMonthlyQuota,
+} = require("../services/billingService");
 
 // PayPal SDK + helpers
 const paypalClient = require("../paypalClient");
@@ -46,6 +49,24 @@ if (!fetchFn) {
 }
 
 const { safeFetch } = require("../utils/ssrfGuard");
+
+const HIDDEN_PUBLIC_PLAN_FEATURES = new Set(["wolfHuntTasks", "teamSeats"]);
+
+function buildPublicPlan(plan) {
+  const features = Object.fromEntries(
+    Object.entries(plan.features || {}).filter(([key]) => !HIDDEN_PUBLIC_PLAN_FEATURES.has(key))
+  );
+  const capabilities = { ...getPlanCapabilities(plan.id) };
+  delete capabilities.missions;
+  delete capabilities.teamSeats;
+
+  return {
+    ...plan,
+    features,
+    paypalPlanId: plan.paypalPlanIdEnv ? process.env[plan.paypalPlanIdEnv] : undefined,
+    capabilities,
+  };
+}
 
 function findInternalPlanIdByPayPalPlanId(paypalPlanId) {
   if (!paypalPlanId) return null;
@@ -635,11 +656,7 @@ async function createSubscriptionViaRest({ planId, userData, returnUrl, cancelUr
  */
 router.get("/plans", async (req, res) => {
   try {
-    const plans = Object.values(SUBSCRIPTION_PLANS).map(plan => ({
-      ...plan,
-      paypalPlanId: plan.paypalPlanIdEnv ? process.env[plan.paypalPlanIdEnv] : undefined,
-      capabilities: getPlanCapabilities(plan.id),
-    }));
+    const plans = Object.values(SUBSCRIPTION_PLANS).map(buildPublicPlan);
     res.json({
       success: true,
       plans,
@@ -1170,7 +1187,8 @@ router.get("/usage", authMiddleware, async (req, res) => {
     const communityPostLimit = plan.features.communityPosts;
     const missionOpportunityLimit = plan.features.wolfHuntTasks;
     const platformPostLimit = getPlatformPostQuota(tier, plan);
-    const isUnlimited = value => value === Infinity || value === "unlimited" || value === "Unlimited";
+    const isUnlimited = value =>
+      value === Infinity || value === "unlimited" || value === "Unlimited";
 
     const uploadsUsed = countDocsSince([uploadsByUserIdSnap, uploadsByLegacySnap], periodStart);
     const postsUsed = countDocsSince([postsSnap], periodStart);
@@ -1242,6 +1260,8 @@ router.get("/usage", authMiddleware, async (req, res) => {
         totalAvailable: Math.max(0, monthlyCreditsAllocation - monthlyCreditsUsed) + topUpBalance,
       },
       featureCosts: {
+        ideaVideoPreview: CREDIT_COSTS["idea-video-preview"] || 0,
+        ideaVideoRender: CREDIT_COSTS["idea-video-render"] || 0,
         camCombinerRender: CREDIT_COSTS["render-multicam"] || 0,
         cleanAudioSync: CREDIT_COSTS["clean-audio-sync"] || 0,
         findViralClips: CREDIT_COSTS.analyze || CREDIT_COSTS["find-viral-clips"] || 0,

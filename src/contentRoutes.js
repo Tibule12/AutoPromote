@@ -43,7 +43,7 @@ async function ensureRecoveryLabAccess(userId) {
   const entitlements = getPlanCapabilities(snapshot.tierId);
 
   if (!entitlements.analytics.recoveryLab) {
-    const error = new Error("Recovery Lab is available on Studio and Team plans.");
+    const error = new Error("Recovery Lab is available on Studio and Agency plans.");
     error.statusCode = 403;
     error.entitlements = entitlements;
     throw error;
@@ -189,7 +189,11 @@ function summarizeSchedule(doc) {
     frequency: data.frequency || "once",
     isActive: typeof data.isActive === "boolean" ? data.isActive : true,
     status: data.status || null,
-    title: data.title || data.platformSpecificSettings?.title || data.platformSpecificSettings?.caption || null,
+    title:
+      data.title ||
+      data.platformSpecificSettings?.title ||
+      data.platformSpecificSettings?.caption ||
+      null,
     createdAt: data.createdAt || data.created_at || null,
     updatedAt: data.updatedAt || data.updated_at || null,
   };
@@ -601,7 +605,9 @@ const contentUploadSchema = Joi.object({
   platform_options: Joi.object().pattern(Joi.string(), Joi.object()).optional(),
   meta: Joi.object().optional(),
   scheduled_promotion_time: Joi.string().isoDate().optional(),
-  promotion_frequency: Joi.string().valid("once", "hourly", "daily", "weekly", "monthly").optional(),
+  promotion_frequency: Joi.string()
+    .valid("once", "hourly", "daily", "weekly", "monthly")
+    .optional(),
   schedule_hint: Joi.object().optional(),
   auto_promote: Joi.object().optional(),
   quality_score: Joi.number().optional(),
@@ -728,10 +734,7 @@ router.post(
             return `${k}:${value.slice(0, 120)}`;
           })
           .join(" | ");
-        console.log(
-          "[upload.debug.headers]",
-          safeHeaderDump
-        );
+        console.log("[upload.debug.headers]", safeHeaderDump);
       } catch (e) {}
       const userId = req.userId || req.user?.uid;
       try {
@@ -898,7 +901,9 @@ router.post(
 
       const firstPlatformText = (fields = []) =>
         Object.values(platform_options || {})
-          .map(options => fields.map(field => options?.[field]).find(value => String(value || "").trim()))
+          .map(options =>
+            fields.map(field => options?.[field]).find(value => String(value || "").trim())
+          )
           .find(value => String(value || "").trim());
       const resolvedTitle =
         String(title || firstPlatformText(["title"]) || "").trim() || "Untitled Post";
@@ -1440,9 +1445,13 @@ router.get("/repost-activity", authMiddleware, async (req, res) => {
       summary: {
         totalContent: contentItems.length,
         totalReposts: repostPosts.length,
-        successfulReposts: repostPosts.filter(p => p.status === "posted" || p.status === "success").length,
-        failedReposts: repostPosts.filter(p => p.status === "failed" || p.status === "error").length,
-        pendingSchedules: repostSchedules.filter(s => s.status === "processing" || s.status === "queued").length,
+        successfulReposts: repostPosts.filter(p => p.status === "posted" || p.status === "success")
+          .length,
+        failedReposts: repostPosts.filter(p => p.status === "failed" || p.status === "error")
+          .length,
+        pendingSchedules: repostSchedules.filter(
+          s => s.status === "processing" || s.status === "queued"
+        ).length,
       },
     });
   } catch (error) {
@@ -1466,7 +1475,8 @@ router.post("/:contentId/promotion-schedules", authMiddleware, async (req, res) 
     const contentDoc = await db.collection("content").doc(contentId).get();
     if (!contentDoc.exists) return res.status(404).json({ error: "Content not found" });
     const content = contentDoc.data();
-    if ((content.user_id || content.userId) !== userId) return res.status(403).json({ error: "Forbidden" });
+    if ((content.user_id || content.userId) !== userId)
+      return res.status(403).json({ error: "Forbidden" });
 
     const promotionService = require("./promotionService");
     const schedules = [];

@@ -892,8 +892,8 @@ const AnalyticsPanel = () => {
         >
           <h4 style={{ marginTop: 0, marginBottom: "0.35rem" }}>Recovery Lab</h4>
           <div style={{ color: "var(--muted)", fontSize: ".85rem" }}>
-            Recovery Lab is unlocked on Studio and Team plans. Creator keeps workflow analytics,
-            while Studio and Team add diagnostics, remediation, and automation controls.
+            Recovery Lab is unlocked on Studio and Agency plans. Creator keeps workflow analytics,
+            while Studio and Agency add diagnostics, remediation, and automation controls.
           </div>
         </div>
       )}

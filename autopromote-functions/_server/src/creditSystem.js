@@ -1,6 +1,5 @@
 const { db } = require("./firebaseAdmin");
 const { normalizePlanId, resolvePlan } = require("./config/subscriptionPlans");
-const { getEffectiveTierSnapshot } = require("./services/billingService");
 
 const LOCAL_TEST_CREDIT_BALANCE = 999999;
 const LOCAL_BYPASS_OPERATIONS = new Set([
@@ -17,6 +16,8 @@ const LOCAL_BYPASS_OPERATIONS = new Set([
   "smart-promo-summary",
   "audio-extract",
   "transcribe",
+  "idea-video-preview",
+  "idea-video-render",
 ]);
 
 const isProductionRuntime = () =>
