@@ -30,6 +30,26 @@ function hasExplicitFutureSchedule(scheduledPromotionTime) {
   return Number.isFinite(scheduledAt) && scheduledAt > Date.now();
 }
 
+function getPlatformScheduleTime(platform, scheduledPromotionTime, platformScheduleTimes = {}) {
+  const candidate = platformScheduleTimes && platformScheduleTimes[platform];
+  if (hasExplicitFutureSchedule(candidate)) return new Date(candidate).toISOString();
+  if (hasExplicitFutureSchedule(scheduledPromotionTime)) {
+    return new Date(scheduledPromotionTime).toISOString();
+  }
+  return null;
+}
+
+function pickPlatformScheduleTimes(platformScheduleTimes, scheduleHint = {}) {
+  if (
+    platformScheduleTimes &&
+    typeof platformScheduleTimes === "object" &&
+    Object.keys(platformScheduleTimes).length > 0
+  ) {
+    return platformScheduleTimes;
+  }
+  return scheduleHint.platform_schedule_times || scheduleHint.platformScheduleTimes || {};
+}
+
 /**
  * Performs the heavy-lifting viral optimization in the background.
  * @param {string} contentId - The Firestore Doc ID.
@@ -71,6 +91,7 @@ async function performViralOptimization(contentId, userId, contentData, options 
       share_boost = false,
       target_platforms = [],
       scheduled_promotion_time,
+      platform_schedule_times = {},
       promotion_frequency = "once",
       schedule_hint = {},
       platform_options = {},
@@ -192,14 +213,29 @@ async function performViralOptimization(contentId, userId, contentData, options 
     }
 
     // 8. Schedule Promotion
-    const shouldCreateInitialSchedule = hasExplicitFutureSchedule(scheduled_promotion_time);
-    const schedulePlatforms = shouldCreateInitialSchedule
-      ? [...new Set((Array.isArray(target_platforms) ? target_platforms : []).filter(Boolean))]
-      : [];
+    const uniqueTargetPlatforms = [
+      ...new Set((Array.isArray(target_platforms) ? target_platforms : []).filter(Boolean)),
+    ];
+    const effectivePlatformScheduleTimes = pickPlatformScheduleTimes(
+      platform_schedule_times,
+      schedule_hint
+    );
+    const scheduledPlatformEntries = uniqueTargetPlatforms
+      .map(platform => ({
+        platform,
+        startTime: getPlatformScheduleTime(
+          platform,
+          scheduled_promotion_time,
+          effectivePlatformScheduleTimes
+        ),
+      }))
+      .filter(entry => entry.startTime);
+    const shouldCreateInitialSchedule = scheduledPlatformEntries.length > 0;
+    const schedulePlatforms = scheduledPlatformEntries.map(entry => entry.platform);
 
-    if (shouldCreateInitialSchedule && schedulePlatforms.length > 0) {
+    if (shouldCreateInitialSchedule) {
       await Promise.all(
-        schedulePlatforms.map(platform => {
+        scheduledPlatformEntries.map(({ platform, startTime }) => {
           const platformSettings = (platform_options && platform_options[platform]) || {};
           return db.collection("promotion_schedules").add({
             contentId,
@@ -207,7 +243,7 @@ async function performViralOptimization(contentId, userId, contentData, options 
             platform,
             title: platformSettings.title || contentData.title || "Queued Upload",
             scheduleType: "specific",
-            startTime: scheduled_promotion_time,
+            startTime,
             frequency: promotion_frequency || schedule_hint.frequency || "once",
             timezone: schedule_hint.timezone || "UTC",
             status: "pending",
@@ -229,8 +265,8 @@ async function performViralOptimization(contentId, userId, contentData, options 
 
     // Success Notification
     const successMsg =
-      shouldCreateInitialSchedule && schedulePlatforms.length > 0
-        ? `Content optimized & scheduled for ${schedulePlatforms.join(", ")} at ${new Date(scheduled_promotion_time).toLocaleString()}`
+      shouldCreateInitialSchedule
+        ? `Content optimized & scheduled for ${schedulePlatforms.join(", ")}`
         : `Content optimized successfully`;
 
     await notificationEngine.sendNotification(userId, successMsg, "success", {

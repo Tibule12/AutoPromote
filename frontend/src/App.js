@@ -986,6 +986,26 @@ function App() {
         const parsed = Date.parse(normalized);
         return Number.isFinite(parsed) ? normalized : undefined;
       })();
+      const platformScheduleTimes = (() => {
+        const rawMap =
+          params.platform_schedule_times ||
+          schedule?.platformScheduleTimes ||
+          schedule?.platform_schedule_times;
+        if (!rawMap || typeof rawMap !== "object" || Array.isArray(rawMap)) return undefined;
+
+        const normalizedMap = Object.entries(rawMap).reduce((acc, [platform, value]) => {
+          if (typeof platform !== "string" || typeof value !== "string") return acc;
+          const trimmedPlatform = platform.trim();
+          const trimmedValue = value.trim();
+          const parsed = Date.parse(trimmedValue);
+          if (trimmedPlatform && Number.isFinite(parsed)) {
+            acc[trimmedPlatform] = new Date(parsed).toISOString();
+          }
+          return acc;
+        }, {});
+
+        return Object.keys(normalizedMap).length > 0 ? normalizedMap : undefined;
+      })();
       // Use Firebase auth token when available; fall back to app user token or runtime E2E test token
       let token = null;
       try {
@@ -1016,6 +1036,7 @@ function App() {
           body: JSON.stringify({
             target_platforms: requestedPlatforms,
             scheduled_promotion_time: scheduledPromotionTime,
+            platform_schedule_times: platformScheduleTimes,
           }),
         });
         let readinessResult = null;
@@ -1149,7 +1170,8 @@ function App() {
         ...schedule,
         frequency: schedule?.frequency || userDefaults.defaultFrequency || "once",
         timezone: userDefaults.timezone || "UTC",
-        mode: scheduledPromotionTime ? "queued_new_upload" : "publish_now",
+        mode: scheduledPromotionTime || platformScheduleTimes ? "queued_new_upload" : "publish_now",
+        platform_schedule_times: platformScheduleTimes,
       };
       // Defensive: ensure non-empty URL for real uploads (avoid sending empty "url" to server)
       if (!isDryRun && (!finalUrl || String(finalUrl).trim() === "")) {
@@ -1206,6 +1228,7 @@ function App() {
             : userDefaults.defaultPlatforms || ["youtube", "tiktok", "instagram"],
         platform_options: pOps,
         scheduled_promotion_time: scheduledPromotionTime,
+        platform_schedule_times: platformScheduleTimes,
         promotion_frequency: schedule_hint.frequency,
         schedule_hint,
         meta: {

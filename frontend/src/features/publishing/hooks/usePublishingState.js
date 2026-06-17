@@ -30,6 +30,8 @@ export const usePublishingState = (initialPlatforms = []) => {
   // --- Scheduling ---
   const [scheduledTime, setScheduledTime] = useState(""); // ISO date string or empty for "Now"
   const [frequency, setFrequency] = useState("once"); // 'once', 'daily', 'weekly'
+  const [customPlatformSchedule, setCustomPlatformSchedule] = useState(false);
+  const [platformScheduleTimes, setPlatformScheduleTimes] = useState({});
 
   // --- Platform Selection ---
   // valid values: "tiktok", "youtube", "instagram", "facebook", "linkedin", "twitter", "pinterest"
@@ -58,6 +60,13 @@ export const usePublishingState = (initialPlatforms = []) => {
         ...prev[platformId],
         ...data,
       },
+    }));
+  }, []);
+
+  const updatePlatformScheduleTime = useCallback((platformId, value) => {
+    setPlatformScheduleTimes(prev => ({
+      ...prev,
+      [platformId]: value,
     }));
   }, []);
 
@@ -101,6 +110,8 @@ export const usePublishingState = (initialPlatforms = []) => {
     setVariants([]);
     setScheduledTime("");
     setFrequency("once");
+    setCustomPlatformSchedule(false);
+    setPlatformScheduleTimes({});
     setSelectedPlatforms(initialPlatforms);
     setPlatformData({});
   }, [initialPlatforms]);
@@ -135,6 +146,11 @@ export const usePublishingState = (initialPlatforms = []) => {
     setScheduledTime,
     frequency,
     setFrequency,
+    customPlatformSchedule,
+    setCustomPlatformSchedule,
+    platformScheduleTimes,
+    setPlatformScheduleTimes,
+    updatePlatformScheduleTime,
 
     // State (Selection/Data)
     selectedPlatforms,

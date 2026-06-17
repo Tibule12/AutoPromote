@@ -329,6 +329,12 @@ function hasExplicitFutureSchedule(scheduledPromotionTime) {
   return Number.isFinite(scheduledAt) && scheduledAt > Date.now();
 }
 
+function hasAnyExplicitFutureSchedule(scheduledPromotionTime, platformScheduleTimes) {
+  if (hasExplicitFutureSchedule(scheduledPromotionTime)) return true;
+  if (!platformScheduleTimes || typeof platformScheduleTimes !== "object") return false;
+  return Object.values(platformScheduleTimes).some(hasExplicitFutureSchedule);
+}
+
 function toPositiveFiniteNumber(value) {
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
@@ -375,7 +381,10 @@ async function evaluateUploadReadiness(userId, options = {}) {
   const platformCount = targetPlatforms.length;
   const scheduledPromotionTime = options.scheduled_promotion_time || null;
   const requiredDistributionTasks = platformCount > 0 ? platformCount : 0;
-  const publishMode = hasExplicitFutureSchedule(scheduledPromotionTime)
+  const publishMode = hasAnyExplicitFutureSchedule(
+    scheduledPromotionTime,
+    options.platform_schedule_times
+  )
     ? "queued_new_upload"
     : "publish_now";
 
@@ -605,6 +614,7 @@ const contentUploadSchema = Joi.object({
   platform_options: Joi.object().pattern(Joi.string(), Joi.object()).optional(),
   meta: Joi.object().optional(),
   scheduled_promotion_time: Joi.string().isoDate().optional(),
+  platform_schedule_times: Joi.object().pattern(Joi.string(), Joi.string().isoDate()).optional(),
   promotion_frequency: Joi.string()
     .valid("once", "hourly", "daily", "weekly", "monthly")
     .optional(),
@@ -769,6 +779,7 @@ router.post(
         target_platforms,
         platform_options,
         scheduled_promotion_time,
+        platform_schedule_times,
         promotion_frequency,
         schedule_hint,
         auto_promote,
@@ -835,6 +846,7 @@ router.post(
           const readiness = await evaluateUploadReadiness(userId, {
             target_platforms,
             scheduled_promotion_time,
+            platform_schedule_times,
           });
           if (!readiness.allowed) {
             return res.status(403).json({
@@ -920,6 +932,7 @@ router.post(
         platform_options,
         intent: detectedIntent, // Persist the calculated intent
         scheduled_promotion_time,
+        platform_schedule_times,
         promotion_frequency,
         schedule_hint,
         auto_promote,
@@ -1036,7 +1049,7 @@ router.post(
         if (
           target_platforms &&
           target_platforms.length > 0 &&
-          !hasExplicitFutureSchedule(scheduled_promotion_time)
+          !hasAnyExplicitFutureSchedule(scheduled_promotion_time, platform_schedule_times)
         ) {
           // Lazy-load to avoid import cycles or heavy init
           // Fire and forget (user doesn't wait)
@@ -1154,6 +1167,7 @@ router.post(
             target_platforms:
               detectedIntent === "commercial" ? target_platforms : content.target_platforms || [],
             scheduled_promotion_time,
+            platform_schedule_times,
             promotion_frequency,
             schedule_hint,
             platform_options,

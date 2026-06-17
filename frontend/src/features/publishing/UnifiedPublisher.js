@@ -174,6 +174,30 @@ const buildTikTokCaption = ({ title, description, caption }) => {
   return [String(title || "").trim(), String(description || "").trim()].filter(Boolean).join("\n");
 };
 
+const toIsoDateTimeOrNull = value => {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  const parsed = Date.parse(trimmed);
+  return Number.isFinite(parsed) ? new Date(parsed).toISOString() : null;
+};
+
+const buildPlatformScheduleTimes = ({
+  platforms,
+  scheduledTime,
+  customPlatformSchedule,
+  platformScheduleTimes,
+}) => {
+  if (!customPlatformSchedule || !scheduledTime || !Array.isArray(platforms)) return {};
+
+  return platforms.reduce((acc, platform) => {
+    const rawValue = platformScheduleTimes?.[platform] || scheduledTime;
+    const isoValue = toIsoDateTimeOrNull(rawValue);
+    if (isoValue) acc[platform] = isoValue;
+    return acc;
+  }, {});
+};
+
 function normalizeTikTokCreatorInfo(primary, fallbackRaw, fallbackSummary) {
   const displayName =
     primary?.display_name ||
@@ -1401,6 +1425,10 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
     setScheduledTime,
     frequency,
     setFrequency,
+    customPlatformSchedule,
+    setCustomPlatformSchedule,
+    platformScheduleTimes,
+    updatePlatformScheduleTime,
 
     selectedPlatforms,
     togglePlatform,
@@ -1784,7 +1812,12 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
     setShowUpgradeModal(true);
   };
 
-  const preflightUploadReadiness = async ({ token, platforms, scheduledTime }) => {
+  const preflightUploadReadiness = async ({
+    token,
+    platforms,
+    scheduledTime,
+    platformScheduleTimes: readinessPlatformScheduleTimes,
+  }) => {
     const controller = new AbortController();
     const timeoutMs = 12000;
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
@@ -1801,6 +1834,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
         body: JSON.stringify({
           target_platforms: platforms,
           scheduled_promotion_time: scheduledTime || null,
+          platform_schedule_times: readinessPlatformScheduleTimes || undefined,
         }),
         signal: controller.signal,
       });
@@ -2333,12 +2367,32 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
       return;
     }
 
+    const platformScheduleTimesForPayload = buildPlatformScheduleTimes({
+      platforms,
+      scheduledTime,
+      customPlatformSchedule,
+      platformScheduleTimes,
+    });
+
     if (scheduledTime) {
       const scheduledAtMs = Date.parse(scheduledTime);
       if (!Number.isFinite(scheduledAtMs) || scheduledAtMs <= Date.now()) {
         setFeedbackMessage("Choose a queue time that has not already passed.");
         toast.error("Choose a queue time that has not already passed.");
         return;
+      }
+
+      if (customPlatformSchedule) {
+        for (const platform of platforms) {
+          const rawValue = platformScheduleTimes[platform] || scheduledTime;
+          const platformTimeMs = Date.parse(rawValue);
+          if (!Number.isFinite(platformTimeMs) || platformTimeMs <= Date.now()) {
+            const platformName = getPlatformName(platform);
+            setFeedbackMessage(`${platformName} needs a future queue time.`);
+            toast.error(`${platformName} needs a future queue time.`);
+            return;
+          }
+        }
       }
     }
 
@@ -2363,6 +2417,9 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
         token,
         platforms,
         scheduledTime: scheduledTime ? new Date(scheduledTime).toISOString() : null,
+        platformScheduleTimes: Object.keys(platformScheduleTimesForPayload).length
+          ? platformScheduleTimesForPayload
+          : undefined,
       });
 
       if (
@@ -2524,6 +2581,9 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
           ? {
               date: new Date(scheduledTime).toISOString(),
               frequency: frequency,
+              platformScheduleTimes: Object.keys(platformScheduleTimesForPayload).length
+                ? platformScheduleTimesForPayload
+                : undefined,
             }
           : undefined,
         isDryRun: false,
@@ -3062,6 +3122,78 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                     : "Leave empty to publish immediately after upload."}
                 </small>
               </div>
+
+              {scheduledTime && (
+                <div style={{ marginTop: "10px" }}>
+                  <label
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      fontSize: "12px",
+                      fontWeight: 800,
+                      color: "#f8fafc",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={customPlatformSchedule}
+                      onChange={e => setCustomPlatformSchedule(e.target.checked)}
+                    />
+                    Customize time per platform
+                  </label>
+                  {customPlatformSchedule && (
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+                        gap: "10px",
+                        marginTop: "10px",
+                      }}
+                    >
+                      {selectedPlatforms.map(platform => (
+                        <label
+                          key={platform}
+                          style={{
+                            display: "block",
+                            padding: "10px",
+                            border: "1px solid rgba(148, 163, 184, 0.2)",
+                            borderRadius: "10px",
+                            background: "rgba(2, 6, 23, 0.42)",
+                          }}
+                        >
+                          <span
+                            style={{
+                              display: "block",
+                              marginBottom: "6px",
+                              color: "#e2e8f0",
+                              fontSize: "12px",
+                              fontWeight: 800,
+                            }}
+                          >
+                            {getPlatformName(platform)}
+                          </span>
+                          <input
+                            type="datetime-local"
+                            value={platformScheduleTimes[platform] || scheduledTime}
+                            onChange={e => updatePlatformScheduleTime(platform, e.target.value)}
+                            style={{
+                              width: "100%",
+                              padding: "8px 9px",
+                              borderRadius: "9px",
+                              border: "1px solid rgba(148, 163, 184, 0.32)",
+                              background: "rgba(2, 6, 23, 0.78)",
+                              color: "#f8fafc",
+                              fontSize: "12px",
+                            }}
+                          />
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {scheduledTime && (
                 <div style={{ marginTop: "10px" }}>

@@ -24,6 +24,10 @@ const PENALTY_BOX_DURATIONS = {
 
 const MAX_ATTEMPTS = parseInt(process.env.TASK_MAX_ATTEMPTS || "5", 10);
 const BASE_BACKOFF_MS = parseInt(process.env.TASK_BASE_BACKOFF_MS || "60000", 10); // 1 min default
+const STALE_PROCESSING_MS = parseInt(
+  process.env.TASK_STALE_PROCESSING_MS || String(45 * 60 * 1000),
+  10
+);
 let __lastIndexWarn = 0;
 const INDEX_WARN_INTERVAL_MS = 5 * 60 * 1000; // throttle to every 5 min
 function handleIndexError(e, context, sampleLink) {
@@ -88,6 +92,54 @@ function canRetry(classification) {
   if (classification === "not_found") return false; // likely unrecoverable for this resource
   if (classification === "validation") return false; // user/content input must change
   return true;
+}
+
+function getTaskTimestampMs(data, fields = ["processingStartedAt", "updatedAt"]) {
+  for (const field of fields) {
+    const value = data && data[field];
+    if (!value) continue;
+    if (typeof value === "string") {
+      const parsed = Date.parse(value);
+      if (Number.isFinite(parsed)) return parsed;
+    }
+    if (typeof value === "number" && Number.isFinite(value)) return value;
+    if (value && typeof value.toMillis === "function") return value.toMillis();
+    if (value && typeof value._seconds === "number") return value._seconds * 1000;
+    if (value && typeof value.seconds === "number") return value.seconds * 1000;
+  }
+  return 0;
+}
+
+function isTaskReadyForProcessing(data, nowMs = Date.now()) {
+  if (!data) return false;
+  if (data.status === "queued") {
+    const nextAt = data.nextAttemptAt ? Date.parse(data.nextAttemptAt) : nowMs;
+    return !Number.isFinite(nextAt) || nextAt <= nowMs;
+  }
+  if (data.status === "processing") {
+    const processingMs = getTaskTimestampMs(data);
+    return processingMs > 0 && nowMs - processingMs >= STALE_PROCESSING_MS;
+  }
+  return false;
+}
+
+function buildProcessingUpdate(taskId, previousData = {}) {
+  const nowIso = new Date().toISOString();
+  const update = {
+    status: "processing",
+    processingStartedAt: nowIso,
+    updatedAt: nowIso,
+    processingRecoveryCount:
+      previousData.status === "processing" ? (previousData.processingRecoveryCount || 0) + 1 : 0,
+  };
+  if (previousData.status === "processing") {
+    update.recoveredFromStaleProcessing = {
+      taskId,
+      previousUpdatedAt: previousData.updatedAt || null,
+      recoveredAt: nowIso,
+    };
+  }
+  return update;
 }
 
 function buildPlatformPostHash({ platform, contentId, payload = {} }) {
@@ -246,7 +298,7 @@ async function processNextYouTubeTask() {
     snapshot = await db
       .collection("promotion_tasks")
       .where("type", "==", "youtube_upload")
-      .where("status", "in", ["queued"])
+      .where("status", "in", ["queued", "processing"])
       .orderBy("createdAt")
       .limit(5)
       .get();
@@ -265,8 +317,7 @@ async function processNextYouTubeTask() {
   const now = Date.now();
   for (const d of snapshot.docs) {
     const data = d.data();
-    const nextAt = data.nextAttemptAt ? Date.parse(data.nextAttemptAt) : Date.now();
-    if (nextAt <= now) {
+    if (isTaskReadyForProcessing(data, now)) {
       selectedDoc = d;
       selectedData = data;
       break;
@@ -299,10 +350,7 @@ async function processNextYouTubeTask() {
   }
 
   const taskRef = selectedDoc.ref;
-  taskData = await replaceSignedTask(taskRef, taskData, {
-    status: "processing",
-    updatedAt: new Date().toISOString(),
-  });
+  taskData = await replaceSignedTask(taskRef, taskData, buildProcessingUpdate(task.id, taskData));
 
   try {
     const { uploadVideo } = require("./youtubeService");
@@ -931,7 +979,7 @@ async function processNextPlatformTask() {
     snapshot = await db
       .collection("promotion_tasks")
       .where("type", "==", "platform_post")
-      .where("status", "in", ["queued"])
+      .where("status", "in", ["queued", "processing"])
       .orderBy("createdAt")
       .limit(10)
       .get();
@@ -953,8 +1001,7 @@ async function processNextPlatformTask() {
   let bestScore = -Infinity;
   for (const d of snapshot.docs) {
     const data = d.data();
-    const nextAt = data.nextAttemptAt ? Date.parse(data.nextAttemptAt) : Date.now();
-    if (nextAt > now) continue; // not ready
+    if (!isTaskReadyForProcessing(data, now)) continue; // not ready or fresh processing
     // Dynamic priority heuristic: base 0 + youtube velocity if present on content + random tie breaker
     let priority = 0;
     try {
@@ -1031,10 +1078,11 @@ async function processNextPlatformTask() {
   } catch (e) {
     console.log("[process] signature verification error", e && e.message);
   }
-  taskData = await replaceSignedTask(selectedDoc.ref, taskData, {
-    status: "processing",
-    updatedAt: new Date().toISOString(),
-  });
+  taskData = await replaceSignedTask(
+    selectedDoc.ref,
+    taskData,
+    buildProcessingUpdate(task.id, taskData)
+  );
   let lockId = null; // promote to function-scope so catch handlers can access it
   try {
     const { dispatchPlatformPost } = require("./platformPoster");
