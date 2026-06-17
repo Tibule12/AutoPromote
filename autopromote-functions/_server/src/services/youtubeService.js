@@ -148,7 +148,7 @@ async function ensureFreshTokens(oauth2Client, connectionData, uid) {
 async function downloadVideoBuffer(fileUrl) {
   // Protect against SSRF by validating the URL before fetching.
   // Also enforce a sane maximum download size (configurable via env).
-  const MAX_BYTES = parseInt(process.env.YT_MAX_VIDEO_BYTES || "52428800", 10); // 50MB default
+  const MAX_BYTES = parseInt(process.env.YT_MAX_VIDEO_BYTES || "524288000", 10); // 500MB default
   const res = await safeFetch(fileUrl, fetch, { requireHttps: true });
   if (!res || !res.ok) throw new Error("Failed to download video asset");
   const lenHeader = res.headers && res.headers.get && res.headers.get("content-length");

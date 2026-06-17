@@ -27,7 +27,7 @@ const ytPublicLimiter = rateLimiter({
 const multer = require("multer");
 const upload = multer({
   dest: "uploads/",
-  limits: { fileSize: parseInt(process.env.YT_MAX_VIDEO_BYTES || "52428800", 10) },
+  limits: { fileSize: parseInt(process.env.YT_MAX_VIDEO_BYTES || "524288000", 10) },
 });
 
 const YT_CLIENT_ID = process.env.YT_CLIENT_ID;

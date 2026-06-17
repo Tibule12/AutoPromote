@@ -157,6 +157,29 @@ function extractStoragePathFromUrl(fileUrl, bucketName) {
   }
 }
 
+function canUseTikTokPullFromUrl(fileUrl) {
+  if (process.env.TIKTOK_FORCE_FILE_UPLOAD) return false;
+  if (String(process.env.TIKTOK_ALLOW_UNVERIFIED_PULL_FROM_URL || "").toLowerCase() === "true") {
+    return true;
+  }
+
+  try {
+    const hostname = new URL(fileUrl).hostname.toLowerCase();
+    if (
+      hostname === "firebasestorage.googleapis.com" ||
+      hostname === "storage.googleapis.com" ||
+      hostname.endsWith(".googleapis.com") ||
+      hostname.endsWith(".firebasestorage.app") ||
+      hostname.endsWith(".appspot.com")
+    ) {
+      return false;
+    }
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
 /**
  * Get user's TikTok connection tokens
  */
@@ -1048,36 +1071,34 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
             if (storagePath) break;
           }
         }
-        if (!process.env.TIKTOK_FORCE_FILE_UPLOAD) {
-          if (storagePath) {
-            try {
-              const targetBucketName = bucketName;
-              if (!targetBucketName) {
-                throw new Error("storage_bucket_not_configured");
-              }
-              const { Storage } = require("@google-cloud/storage");
-              const storage = new Storage();
-              const file = storage.bucket(targetBucketName).file(storagePath);
-              const [signed] = await file.getSignedUrl({
-                version: "v4",
-                action: "read",
-                expires: Date.now() + 60 * 60 * 1000,
-              });
-              videoUrl = signed;
-              // persist fresh URL
-              try {
-                await db.collection("content").doc(contentId).update({
-                  storagePath,
-                  mediaUrl: signed,
-                  urlSignedAt: new Date().toISOString(),
-                });
-              } catch (_) {}
-            } catch (e) {
-              console.warn(
-                "[tiktok] failed to generate signed url from storagePath",
-                e && (e.message || e)
-              );
+        if (storagePath) {
+          try {
+            const targetBucketName = bucketName;
+            if (!targetBucketName) {
+              throw new Error("storage_bucket_not_configured");
             }
+            const { Storage } = require("@google-cloud/storage");
+            const storage = new Storage();
+            const file = storage.bucket(targetBucketName).file(storagePath);
+            const [signed] = await file.getSignedUrl({
+              version: "v4",
+              action: "read",
+              expires: Date.now() + 60 * 60 * 1000,
+            });
+            videoUrl = signed;
+            // persist fresh URL
+            try {
+              await db.collection("content").doc(contentId).update({
+                storagePath,
+                mediaUrl: signed,
+                urlSignedAt: new Date().toISOString(),
+              });
+            } catch (_) {}
+          } catch (e) {
+            console.warn(
+              "[tiktok] failed to generate signed url from storagePath",
+              e && (e.message || e)
+            );
           }
         }
       }
@@ -1092,7 +1113,7 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
 
   try {
     // If possible, try PULL_FROM_URL first (cheaper). If it stalls/fails, fallback to FILE_UPLOAD
-    if (contentId && videoUrl && !process.env.TIKTOK_FORCE_FILE_UPLOAD) {
+    if (contentId && videoUrl && canUseTikTokPullFromUrl(videoUrl)) {
       let pullResult = await pullFromUrlPublish({
         accessToken,
         videoUrl,

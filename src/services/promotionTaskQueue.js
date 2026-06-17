@@ -63,6 +63,13 @@ function classifyError(message = "") {
     return "transient";
   if (m.includes("auth") || m.includes("unauthorized") || m.includes("permission")) return "auth";
   if (m.includes("not found")) return "not_found";
+  if (
+    m.includes("exceeds maximum allowed size") ||
+    m.includes("too large") ||
+    m.includes("corrupt") ||
+    m.includes("invalid file")
+  )
+    return "validation";
   return "generic";
 }
 
@@ -79,6 +86,7 @@ function computeNextAttempt(attempts, classification) {
 function canRetry(classification) {
   if (classification === "auth") return false; // require manual intervention
   if (classification === "not_found") return false; // likely unrecoverable for this resource
+  if (classification === "validation") return false; // user/content input must change
   return true;
 }
 
