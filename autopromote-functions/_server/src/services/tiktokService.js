@@ -106,8 +106,87 @@ function computeChunkCandidates(videoSize) {
 
 const fs = require("fs");
 const path = require("path");
+const os = require("os");
+const { Transform } = require("stream");
+const { pipeline } = require("stream/promises");
 const TIKTOK_CAPTURE_DIR =
   process.env.TIKTOK_CAPTURE_DIR || path.join(process.cwd(), "tmp", "tiktok-chunk-captures");
+
+async function downloadVideoToTempFile(videoUrl) {
+  const maxBytes = parseInt(process.env.TIKTOK_MAX_VIDEO_BYTES || "524288000", 10);
+  const videoResponse = await safeFetch(videoUrl, fetchFn, {
+    requireHttps: true,
+    fetchOptions: { redirect: "follow" },
+  });
+
+  if (!videoResponse.ok) {
+    console.error(`[tiktok] Download failed for URL: ${videoUrl}`);
+    const statusText =
+      videoResponse && videoResponse.status ? `status=${videoResponse.status}` : "";
+    let errorBody = "";
+    try {
+      errorBody = await videoResponse.text();
+    } catch (_) {}
+    throw new Error(`Failed to download video ${statusText} from ${videoUrl}. Body: ${errorBody}`);
+  }
+
+  const lenHeader = videoResponse.headers && videoResponse.headers.get("content-length");
+  if (lenHeader) {
+    const len = parseInt(lenHeader, 10);
+    if (!Number.isNaN(len) && len > maxBytes) {
+      throw new Error("Remote video exceeds maximum allowed size");
+    }
+  }
+
+  const tempDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), "autopromote-tiktok-"));
+  const tempPath = path.join(tempDir, "video-upload");
+  let downloadedBytes = 0;
+  const counter = new Transform({
+    transform(chunk, _encoding, callback) {
+      downloadedBytes += chunk.length;
+      if (downloadedBytes > maxBytes) {
+        callback(new Error("Downloaded video exceeds maximum allowed size"));
+        return;
+      }
+      callback(null, chunk);
+    },
+  });
+
+  try {
+    await pipeline(videoResponse.body, counter, fs.createWriteStream(tempPath));
+  } catch (error) {
+    await fs.promises.rm(tempDir, { recursive: true, force: true }).catch(() => {});
+    throw error;
+  }
+
+  if (downloadedBytes < 100) {
+    let snippet = "";
+    try {
+      snippet = (await fs.promises.readFile(tempPath, "utf8")).replace(/\n/g, " ");
+    } catch (_) {}
+    await fs.promises.rm(tempDir, { recursive: true, force: true }).catch(() => {});
+    throw new Error(
+      `Video file corrupted (too small: ${downloadedBytes} bytes) from ${videoUrl}. Content: "${snippet}". Please re-upload.`
+    );
+  }
+
+  return {
+    path: tempPath,
+    size: downloadedBytes,
+    cleanup: () => fs.promises.rm(tempDir, { recursive: true, force: true }).catch(() => {}),
+  };
+}
+
+async function readFilePrefix(filePath, length = 16) {
+  const handle = await fs.promises.open(filePath, "r");
+  try {
+    const buffer = Buffer.alloc(length);
+    const result = await handle.read(buffer, 0, length, 0);
+    return buffer.slice(0, result.bytesRead);
+  } finally {
+    await handle.close();
+  }
+}
 
 function getConfiguredStorageBucketName() {
   if (process.env.FIREBASE_STORAGE_BUCKET) {
@@ -842,6 +921,221 @@ async function uploadVideoChunk({
   throw lastErr || new Error("Chunk upload failed: unknown error");
 }
 
+async function uploadVideoChunkFromFile({
+  uploadUrl,
+  videoFilePath,
+  videoSize,
+  chunkIndex,
+  totalChunks,
+  chunkSize = DEFAULT_CHUNK_SIZE,
+  maxAttempts = 3,
+  publishId = null,
+}) {
+  if (!fetchFn) throw new Error("Fetch not available");
+
+  const start = chunkIndex * chunkSize;
+  const isLastChunk = chunkIndex === totalChunks - 1;
+  const end = isLastChunk
+    ? videoSize - 1
+    : Math.min((chunkIndex + 1) * chunkSize - 1, videoSize - 1);
+  const chunkLength = end - start + 1;
+
+  if (chunkLength <= 0 || start > videoSize - 1) {
+    throw new Error(
+      `Invalid TikTok chunk range: index=${chunkIndex} total=${totalChunks} start=${start} size=${videoSize}`
+    );
+  }
+
+  const prefix = await readFilePrefix(videoFilePath, 16).catch(() => Buffer.alloc(0));
+  const baseHeaders = { "Content-Type": "application/octet-stream" };
+  const variants = [
+    {
+      name: "default",
+      method: "PUT",
+      headers: {
+        ...baseHeaders,
+        "Content-Range": `bytes ${start}-${end}/${videoSize}`,
+        "Content-Length": `${chunkLength}`,
+      },
+    },
+    {
+      name: "no-content-length",
+      method: "PUT",
+      headers: {
+        ...baseHeaders,
+        "Content-Range": `bytes ${start}-${end}/${videoSize}`,
+      },
+    },
+    {
+      name: "no-content-range",
+      method: "PUT",
+      headers: {
+        ...baseHeaders,
+        "Content-Length": `${chunkLength}`,
+      },
+    },
+    {
+      name: "video-mp4",
+      method: "PUT",
+      headers: {
+        "Content-Type": "video/mp4",
+        "Content-Range": `bytes ${start}-${end}/${videoSize}`,
+        "Content-Length": `${chunkLength}`,
+      },
+    },
+    {
+      name: "post-range",
+      method: "POST",
+      headers: {
+        ...baseHeaders,
+        "Content-Range": `bytes ${start}-${end}/${videoSize}`,
+        "Content-Length": `${chunkLength}`,
+      },
+    },
+    {
+      name: "range-no-total",
+      method: "PUT",
+      headers: {
+        ...baseHeaders,
+        "Content-Range": `bytes ${start}-${end}`,
+        "Content-Length": `${chunkLength}`,
+      },
+    },
+    {
+      name: "accept-any",
+      method: "PUT",
+      headers: {
+        ...baseHeaders,
+        Accept: "*/*",
+        "Content-Range": `bytes ${start}-${end}/${videoSize}`,
+        "Content-Length": `${chunkLength}`,
+      },
+    },
+    {
+      name: "put-video-mp4-no-range",
+      method: "PUT",
+      headers: {
+        "Content-Type": "video/mp4",
+        "Content-Length": `${chunkLength}`,
+      },
+    },
+  ];
+
+  let lastErr = null;
+  const tries = Math.min(maxAttempts, variants.length);
+
+  for (let attempt = 0; attempt < tries; attempt++) {
+    const v = variants[attempt];
+    try {
+      const urlForLog = uploadUrl.split("?")[0];
+      console.log(
+        `[tiktok] chunk upload attempt=%d variant=%s url=%s start=%d end=%d chunkLen=%d hexPrefix=%s`,
+        attempt,
+        v.name,
+        urlForLog,
+        start,
+        end,
+        chunkLength,
+        prefix.toString("hex")
+      );
+
+      const res = await fetch(uploadUrl, {
+        method: v.method || "PUT",
+        headers: v.headers,
+        body: fs.createReadStream(videoFilePath, { start, end }),
+      });
+
+      const bodyText = await res.text().catch(() => null);
+      const resHeadersObj = {};
+      try {
+        if (res && res.headers && typeof res.headers.forEach === "function") {
+          res.headers.forEach((val, k) => {
+            resHeadersObj[k] = val;
+          });
+        } else if (res && res.headers && typeof res.headers.entries === "function") {
+          for (const [k, v2] of res.headers.entries()) resHeadersObj[k] = v2;
+        }
+      } catch (_) {}
+
+      if (res.ok) {
+        console.log(
+          `[tiktok] chunk upload succeeded attempt=%d variant=%s status=%d headers=%o`,
+          attempt,
+          v.name,
+          res.status,
+          resHeadersObj
+        );
+        return { success: true };
+      }
+
+      console.warn(
+        `[tiktok] chunk upload attempt failed attempt=%d variant=%s status=%d body=%s headers=%o`,
+        attempt,
+        v.name,
+        res.status,
+        bodyText || "<no-body>",
+        resHeadersObj
+      );
+
+      try {
+        await saveChunkCapture({
+          publishId,
+          uploadUrl,
+          method: v.method || "PUT",
+          headers: v.headers,
+          chunk: null,
+          attempt,
+          variant: v.name,
+          status: res.status,
+          resHeaders: resHeadersObj,
+          resBody: bodyText || null,
+        });
+      } catch (_) {}
+
+      lastErr = new Error(
+        `Chunk upload failed: status=${res.status} body=${bodyText || "<no-body>"}`
+      );
+
+      if (![415, 416].includes(res.status)) {
+        break;
+      }
+
+      await new Promise(r => setTimeout(r, 250 * (attempt + 1)));
+    } catch (e) {
+      lastErr = e;
+      console.warn("[tiktok] chunk upload exception", e && (e.message || e));
+      try {
+        await saveChunkCapture({
+          publishId,
+          uploadUrl,
+          method: v && v.method ? v.method : "PUT",
+          headers: v && v.headers ? v.headers : {},
+          chunk: null,
+          attempt,
+          variant: v && v.name ? v.name : "exception",
+          error: e,
+        });
+      } catch (_) {}
+      await new Promise(r => setTimeout(r, 250 * (attempt + 1)));
+    }
+  }
+
+  try {
+    await saveChunkCapture({
+      publishId,
+      uploadUrl,
+      method: "FINAL",
+      headers: {},
+      chunk: null,
+      attempt: tries - 1,
+      variant: "final-failed",
+      error: lastErr,
+    });
+  } catch (_) {}
+
+  throw lastErr || new Error("Chunk upload failed: unknown error");
+}
+
 /**
  * Publish the uploaded video
  */
@@ -1199,50 +1493,25 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
       } catch (_) {}
     }
 
-    // Download video for FILE_UPLOAD fallback (unless caller supplied a buffer)
-    let videoBuffer;
+    // Download video for FILE_UPLOAD fallback (unless caller supplied a buffer).
+    // Production downloads go to disk so Render does not hold the full video in RAM.
+    let videoSource;
     let videoSize;
     if (payload && payload.videoBuffer) {
-      // Accept a Buffer or base64 string supplied by the caller to avoid a second download
+      let videoBuffer;
       if (typeof payload.videoBuffer === "string") {
         videoBuffer = Buffer.from(payload.videoBuffer, "base64");
       } else {
         videoBuffer = Buffer.from(payload.videoBuffer);
       }
       videoSize = videoBuffer.byteLength;
+      videoSource = { buffer: videoBuffer, size: videoSize, cleanup: async () => {} };
     } else {
-      const videoResponse = await safeFetch(videoUrl, fetchFn, {
-        requireHttps: true,
-        fetchOptions: { redirect: "follow" },
-      });
-
-      if (!videoResponse.ok) {
-        console.error(`[tiktok] Download failed for URL: ${videoUrl}`);
-        const statusText =
-          videoResponse && videoResponse.status ? `status=${videoResponse.status}` : "";
-        let errorBody = "";
-        try {
-          errorBody = await videoResponse.text();
-        } catch (_) {}
-        throw new Error(
-          `Failed to download video ${statusText} from ${videoUrl}. Body: ${errorBody}`
-        );
-      }
-
-      const ab = await videoResponse.arrayBuffer();
-      videoBuffer = Buffer.from(ab);
-      videoSize = videoBuffer.byteLength;
-
-      if (videoSize < 100) {
-        let snippet = "";
-        try {
-          snippet = videoBuffer.toString("utf8").replace(/\n/g, " ");
-        } catch (_) {}
-        throw new Error(
-          `Video file corrupted (too small: ${videoSize} bytes) from ${videoUrl}. Content: "${snippet}". Please re-upload.`
-        );
-      }
+      videoSource = await downloadVideoToTempFile(videoUrl);
+      videoSize = videoSource.size;
     }
+
+    try {
 
     // For small videos, try the simpler single-PUT upload endpoint which is less error-prone
     if (videoSize <= DEFAULT_CHUNK_SIZE) {
@@ -1289,7 +1558,9 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
               fetchOptions: {
                 method: "PUT",
                 headers: { "Content-Type": "video/mp4", "Content-Length": `${videoSize}` },
-                body: Buffer.from(videoBuffer),
+                body: videoSource.buffer
+                  ? Buffer.from(videoSource.buffer)
+                  : fs.createReadStream(videoSource.path),
               },
               requireHttps: true,
               allowHosts: ["open.tiktokapis.com", "sandbox.tiktokapis.com"],
@@ -1393,14 +1664,26 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
 
         const totalChunks = getTikTokTotalChunks(videoSize, cs);
         for (let i = 0; i < totalChunks; i++) {
-          await uploadVideoChunk({
-            publishId: publish_id,
-            uploadUrl: upload_url,
-            videoBuffer: Buffer.from(videoBuffer),
-            chunkIndex: i,
-            totalChunks,
-            chunkSize: cs,
-          });
+          if (videoSource.buffer) {
+            await uploadVideoChunk({
+              publishId: publish_id,
+              uploadUrl: upload_url,
+              videoBuffer: videoSource.buffer,
+              chunkIndex: i,
+              totalChunks,
+              chunkSize: cs,
+            });
+          } else {
+            await uploadVideoChunkFromFile({
+              publishId: publish_id,
+              uploadUrl: upload_url,
+              videoFilePath: videoSource.path,
+              videoSize,
+              chunkIndex: i,
+              totalChunks,
+              chunkSize: cs,
+            });
+          }
         }
 
         uploadSucceeded = true;
@@ -1493,6 +1776,11 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
       videoId: publishResult.publicaly_available_post_id,
       status: publishResult.status,
     };
+    } finally {
+      if (videoSource && typeof videoSource.cleanup === "function") {
+        await videoSource.cleanup();
+      }
+    }
   } catch (e) {
     console.error("[tiktok] uploadTikTokVideo failed:", e && (e.stack || e.message || e));
     try {

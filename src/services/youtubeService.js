@@ -1,9 +1,13 @@
 const fetch = require("node-fetch");
-const streamifier = require("streamifier");
 const { cleanupSourceFile } = require("../utils/cleanupSource");
 const { google } = require("googleapis");
 const { admin, db } = require("../firebaseAdmin");
 const crypto = require("crypto");
+const fs = require("fs");
+const os = require("os");
+const path = require("path");
+const { Transform } = require("stream");
+const { pipeline } = require("stream/promises");
 const { recordVelocityTrigger, recordUploadDuplicate } = require("./aggregationService");
 const { safeFetch } = require("../utils/ssrfGuard");
 
@@ -145,7 +149,7 @@ async function ensureFreshTokens(oauth2Client, connectionData, uid) {
   return oauth2Client;
 }
 
-async function downloadVideoBuffer(fileUrl) {
+async function downloadVideoToTempFile(fileUrl) {
   // Protect against SSRF by validating the URL before fetching.
   // Also enforce a sane maximum download size (configurable via env).
   const MAX_BYTES = parseInt(process.env.YT_MAX_VIDEO_BYTES || "524288000", 10); // 500MB default
@@ -157,12 +161,31 @@ async function downloadVideoBuffer(fileUrl) {
     if (!Number.isNaN(len) && len > MAX_BYTES)
       throw new Error("Remote video exceeds maximum allowed size");
   }
-  const buf = await res.buffer();
-  if (buf && buf.length > MAX_BYTES)
-    throw new Error("Downloaded video exceeds maximum allowed size");
 
-  if (buf && buf.length < 100) {
-    const preview = buf.toString("utf8");
+  const tempDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), "autopromote-youtube-"));
+  const tempPath = path.join(tempDir, "video-upload");
+  let downloadedBytes = 0;
+  const counter = new Transform({
+    transform(chunk, _encoding, callback) {
+      downloadedBytes += chunk.length;
+      if (downloadedBytes > MAX_BYTES) {
+        callback(new Error("Downloaded video exceeds maximum allowed size"));
+        return;
+      }
+      callback(null, chunk);
+    },
+  });
+
+  try {
+    await pipeline(res.body, counter, fs.createWriteStream(tempPath));
+  } catch (error) {
+    await fs.promises.rm(tempDir, { recursive: true, force: true }).catch(() => {});
+    throw error;
+  }
+
+  if (downloadedBytes < 100) {
+    const preview = await fs.promises.readFile(tempPath, "utf8").catch(() => "");
+    await fs.promises.rm(tempDir, { recursive: true, force: true }).catch(() => {});
     if (preview.includes("undefined")) {
       // It seems the client sent a string "undefined" or a file with that text as content
       throw new Error(
@@ -172,7 +195,11 @@ async function downloadVideoBuffer(fileUrl) {
     throw new Error(`Downloaded video is too small (<100 bytes). Invalid file. URL: ${fileUrl}`);
   }
 
-  return buf;
+  return {
+    path: tempPath,
+    size: downloadedBytes,
+    cleanup: () => fs.promises.rm(tempDir, { recursive: true, force: true }).catch(() => {}),
+  };
 }
 
 function deriveShortsMetadata(base) {
@@ -331,7 +358,7 @@ async function uploadVideo({
     }
   }
 
-  const videoBuffer = await downloadVideoBuffer(fileUrl);
+  const videoAsset = await downloadVideoToTempFile(fileUrl);
 
   const ytOptions = (payload && payload.platform_options && payload.platform_options.youtube) || {};
 
@@ -353,22 +380,27 @@ async function uploadVideo({
     if (!finalTags.includes("mobile")) finalTags.push("mobile");
   }
 
-  const insertRes = await youtube.videos.insert({
-    part: "snippet,status",
-    requestBody: {
-      snippet: {
-        title: finalTitle,
-        description: finalDescription,
-        tags: finalTags,
-        categoryId,
+  let insertRes;
+  try {
+    insertRes = await youtube.videos.insert({
+      part: "snippet,status",
+      requestBody: {
+        snippet: {
+          title: finalTitle,
+          description: finalDescription,
+          tags: finalTags,
+          categoryId,
+        },
+        status: {
+          privacyStatus,
+          selfDeclaredMadeForKids,
+        },
       },
-      status: {
-        privacyStatus,
-        selfDeclaredMadeForKids,
-      },
-    },
-    media: { mimeType, body: streamifier.createReadStream(videoBuffer) },
-  });
+      media: { mimeType, body: fs.createReadStream(videoAsset.path) },
+    });
+  } finally {
+    await videoAsset.cleanup();
+  }
 
   const videoId = insertRes?.data?.id;
   const publishedAt = insertRes?.data?.snippet?.publishedAt || new Date().toISOString();
