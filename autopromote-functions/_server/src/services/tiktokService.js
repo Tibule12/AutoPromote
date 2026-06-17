@@ -1043,6 +1043,7 @@ async function uploadVideoChunkFromFile({
         method: v.method || "PUT",
         headers: v.headers,
         body: fs.createReadStream(videoFilePath, { start, end }),
+        duplex: "half",
       });
 
       const bodyText = await res.text().catch(() => null);
@@ -1554,14 +1555,19 @@ async function uploadTikTokVideo({ contentId, payload, uid, reason }) {
                 "Content-Length": `${videoSize}`,
               }
             );
+            const uploadBody = videoSource.buffer
+              ? Buffer.from(videoSource.buffer)
+              : fs.createReadStream(videoSource.path);
+            const uploadFetchOptions = {
+              method: "PUT",
+              headers: { "Content-Type": "video/mp4", "Content-Length": `${videoSize}` },
+              body: uploadBody,
+            };
+            if (!videoSource.buffer) {
+              uploadFetchOptions.duplex = "half";
+            }
             const uploadToTikTokRes = await safeFetch(uploadUrl, fetchFn, {
-              fetchOptions: {
-                method: "PUT",
-                headers: { "Content-Type": "video/mp4", "Content-Length": `${videoSize}` },
-                body: videoSource.buffer
-                  ? Buffer.from(videoSource.buffer)
-                  : fs.createReadStream(videoSource.path),
-              },
+              fetchOptions: uploadFetchOptions,
               requireHttps: true,
               allowHosts: ["open.tiktokapis.com", "sandbox.tiktokapis.com"],
             });
