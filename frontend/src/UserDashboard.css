@@ -176,6 +176,7 @@ body.dashboard-mode ::-webkit-scrollbar-thumb:hover {
   left: 0;
   bottom: 0;
   width: 280px;
+  box-sizing: border-box;
   background: #08111f;
   border-right: 1px solid var(--border);
   transform: translateX(-100%);
@@ -615,16 +616,18 @@ body.dashboard-mode ::-webkit-scrollbar-thumb:hover {
     position: fixed;
     left: -280px;
     top: 0;
-    height: 100vh;
-    height: 100dvh;
-    max-height: 100dvh;
+    bottom: 0;
+    height: auto;
+    max-height: none;
     z-index: 40;
     transition: left 0.3s ease;
     width: 280px;
+    box-sizing: border-box;
     padding-top: calc(64px + env(safe-area-inset-top));
-    padding-bottom: calc(1.25rem + env(safe-area-inset-bottom));
+    padding-bottom: calc(7rem + env(safe-area-inset-bottom));
     background: #08111f;
     overflow-y: auto;
+    overscroll-behavior-y: contain;
     touch-action: pan-y;
   }
   .dashboard-sidebar.open {
