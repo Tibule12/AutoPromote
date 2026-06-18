@@ -267,7 +267,7 @@ const UserDashboard = ({
                 <span style={{ fontSize: "20px" }}>🐺</span>
                 <b>RECRUITMENT NOTICE</b>
               </div>
-                    <span>You&apos;ve published content. Now it&apos;s time to hunt.</span>
+              <span>You&apos;ve published content. Now it&apos;s time to hunt.</span>
               <button
                 onClick={() => {
                   toast.dismiss(t.id);
@@ -551,12 +551,18 @@ const UserDashboard = ({
     async ids => {
       const uniqueIds = Array.from(new Set((ids || []).filter(Boolean)));
       if (uniqueIds.length === 0) return;
-      if (!window.confirm(`Abort ${uniqueIds.length} queued schedule${uniqueIds.length === 1 ? "" : "s"}?`)) {
+      if (
+        !window.confirm(
+          `Abort ${uniqueIds.length} queued schedule${uniqueIds.length === 1 ? "" : "s"}?`
+        )
+      ) {
         return;
       }
 
       await withAuth(async token => {
-        const toastId = toast.loading(`Aborting ${uniqueIds.length} schedule${uniqueIds.length === 1 ? "" : "s"}...`);
+        const toastId = toast.loading(
+          `Aborting ${uniqueIds.length} schedule${uniqueIds.length === 1 ? "" : "s"}...`
+        );
         try {
           const results = await Promise.all(
             uniqueIds.map(async id => {
@@ -570,13 +576,19 @@ const UserDashboard = ({
           const failed = results.filter(result => !result.ok);
           triggerSchedulesRefresh();
           if (failed.length > 0) {
-            toast.error(`${failed.length} schedule${failed.length === 1 ? "" : "s"} could not be aborted`, {
-              id: toastId,
-            });
+            toast.error(
+              `${failed.length} schedule${failed.length === 1 ? "" : "s"} could not be aborted`,
+              {
+                id: toastId,
+              }
+            );
           } else {
-            toast.success(`Aborted ${uniqueIds.length} schedule${uniqueIds.length === 1 ? "" : "s"}`, {
-              id: toastId,
-            });
+            toast.success(
+              `Aborted ${uniqueIds.length} schedule${uniqueIds.length === 1 ? "" : "s"}`,
+              {
+                id: toastId,
+              }
+            );
           }
         } catch (e) {
           console.warn(e);
@@ -1175,30 +1187,8 @@ const UserDashboard = ({
                 >
                   Mission Board
                 </li>
-              ) : (
-                <li
-                  className="locked-feature"
-                  style={{ opacity: 0.6, cursor: "not-allowed" }}
-                  onClick={e => {
-                    e.stopPropagation();
-                    toast("Mission Board is currently locked.", { icon: "🔒" });
-                  }}
-                >
-                  Mission Board 🔒
-                </li>
-              )}
-              {clipStudioLocked ? (
-                <li
-                  className="locked-feature"
-                  style={{ opacity: 0.6, cursor: "not-allowed" }}
-                  onClick={e => {
-                    e.stopPropagation();
-                    toast("Clip Studio is currently locked.", { icon: "🔒" });
-                  }}
-                >
-                  Clip Studio 🔒
-                </li>
-              ) : (
+              ) : null}
+              {!clipStudioLocked && (
                 <li
                   className={activeTab === "clips" ? "active" : ""}
                   onClick={() => handleNav("clips")}
@@ -1211,16 +1201,6 @@ const UserDashboard = ({
                 onClick={() => handleNav("idea_video")}
               >
                 Creative Tools
-              </li>
-              <li
-                className="locked-feature"
-                style={{ opacity: 0.6, cursor: "not-allowed" }}
-                onClick={e => {
-                  e.stopPropagation();
-                  toast("Promotion controls are coming soon.", { icon: "🔒" });
-                }}
-              >
-                Promotion Controls 🔒
               </li>
             </ul>
           </nav>
