@@ -1,4 +1,4 @@
-what did /* UnifiedPublisher.css */
+/* UnifiedPublisher.css */
 
 .unified-publisher-container {
   display: flex;
@@ -406,6 +406,170 @@ button {
   font-size: 0.8rem;
 }
 
+/* --- Publish Queue Scheduling --- */
+.scheduling-tools {
+  margin-top: 15px;
+  padding: 16px;
+  border: 1px solid rgba(125, 211, 252, 0.18);
+  border-radius: 12px;
+  background: linear-gradient(145deg, rgba(8, 13, 28, 0.98), rgba(14, 23, 42, 0.94));
+  color: #f8fafc;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.24);
+}
+
+.schedule-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.schedule-header h4 {
+  margin: 0 0 6px 0;
+  font-size: 0.96rem;
+  line-height: 1.15;
+}
+
+.schedule-header p {
+  margin: 0;
+  color: #b6c3d5;
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+
+.queue-mode-pill {
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 850;
+  line-height: 1;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+
+.queue-mode-pill.queued {
+  color: #bfdbfe;
+  background: rgba(37, 99, 235, 0.2);
+  border-color: rgba(96, 165, 250, 0.18);
+}
+
+.queue-mode-pill.ready {
+  color: #bbf7d0;
+  background: rgba(16, 185, 129, 0.16);
+  border-color: rgba(52, 211, 153, 0.18);
+}
+
+.queue-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.queue-summary-card {
+  min-width: 0;
+  padding: 10px 11px;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.58);
+}
+
+.queue-summary-card span {
+  display: block;
+  color: #93a4bb;
+  font-size: 0.64rem;
+  font-weight: 850;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.queue-summary-card strong {
+  display: block;
+  margin-top: 5px;
+  color: #f8fafc;
+  font-size: 0.78rem;
+  line-height: 1.25;
+}
+
+.schedule-field,
+.platform-schedule-block {
+  margin-top: 12px;
+}
+
+.schedule-field label,
+.platform-schedule-row span {
+  display: block;
+  color: #f8fafc;
+  font-size: 0.76rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.schedule-field input,
+.schedule-field select,
+.platform-schedule-row input {
+  width: 100%;
+  min-height: 39px;
+  margin-top: 6px;
+  padding: 9px 10px;
+  border-radius: 9px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  background: rgba(2, 6, 23, 0.78);
+  color: #f8fafc;
+  font-size: 0.78rem;
+  line-height: 1.2;
+}
+
+.schedule-field input:focus,
+.schedule-field select:focus,
+.platform-schedule-row input:focus {
+  outline: none;
+  border-color: rgba(125, 211, 252, 0.7);
+  box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.18);
+}
+
+.schedule-field small {
+  display: block;
+  margin-top: 7px;
+  color: #b6c3d5;
+  font-size: 0.7rem;
+  line-height: 1.45;
+}
+
+.platform-schedule-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #f8fafc;
+  font-size: 0.76rem;
+  font-weight: 850;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.platform-schedule-toggle input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: #38bdf8;
+}
+
+.platform-schedule-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.platform-schedule-row {
+  display: block;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 10px;
+  background: rgba(2, 6, 23, 0.36);
+}
+
 /* --- Platform Toggles --- */
 .platform-toggles {
   display: flex;
@@ -629,6 +793,58 @@ button {
     word-break: break-word !important;
   }
 
+  .scheduling-tools {
+    padding: 12px;
+    border-radius: 10px;
+  }
+
+  .schedule-header {
+    gap: 10px;
+  }
+
+  .schedule-header h4 {
+    font-size: 0.9rem;
+  }
+
+  .schedule-header p {
+    font-size: 0.68rem;
+  }
+
+  .queue-mode-pill {
+    padding: 5px 8px;
+    font-size: 0.62rem;
+  }
+
+  .queue-summary-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .queue-summary-card {
+    padding: 9px;
+  }
+
+  .queue-summary-card strong {
+    font-size: 0.72rem;
+  }
+
+  .platform-schedule-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .platform-schedule-row {
+    padding: 9px;
+  }
+
+  .schedule-field input,
+  .schedule-field select,
+  .platform-schedule-row input {
+    min-height: 37px;
+    font-size: 0.72rem;
+    padding: 8px 9px;
+  }
+
   /* no further modifications to card appearance on mobile */
 
   .platform-mini-preview video,
@@ -651,6 +867,10 @@ button {
     position: static !important;
     margin-top: 8px !important;
     border-radius: 8px !important;
+  }
+
+  .unified-publisher-container {
+    padding-bottom: calc(88px + env(safe-area-inset-bottom));
   }
 }
 

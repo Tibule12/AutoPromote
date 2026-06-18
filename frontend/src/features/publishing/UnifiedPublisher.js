@@ -78,7 +78,9 @@ const buildMediaMeta = ({
 });
 
 const hasMeaningfulMediaMeta = meta =>
-  !!(meta && Object.values(meta).some(value => value !== undefined && value !== null && value !== ""));
+  !!(
+    meta && Object.values(meta).some(value => value !== undefined && value !== null && value !== "")
+  );
 
 const formatFileSize = bytes => {
   const size = Number(bytes) || 0;
@@ -415,10 +417,10 @@ const PlatformPreview = ({
     }
   }, []);
 
-  const safeThumbUrl = React.useMemo(() => normalizeSafeHttpUrl(thumbnailUrl), [
-    thumbnailUrl,
-    normalizeSafeHttpUrl,
-  ]);
+  const safeThumbUrl = React.useMemo(
+    () => normalizeSafeHttpUrl(thumbnailUrl),
+    [thumbnailUrl, normalizeSafeHttpUrl]
+  );
   // Correctly resolve the file to preview: Platform specific > Global
   const fileToPreview = data.file || globalFile;
 
@@ -688,10 +690,10 @@ const PlatformPreview = ({
     }
     return (
       <div style={wrapperStyle}>
-          <SafeImage
-            src={sanitizeUrl(effectivePreviewUrl)}
-            alt="Preview"
-            style={mediaStyle}
+        <SafeImage
+          src={sanitizeUrl(effectivePreviewUrl)}
+          alt="Preview"
+          style={mediaStyle}
           onLoad={event => {
             const { naturalWidth, naturalHeight } = event.currentTarget;
             if (naturalWidth && naturalHeight) {
@@ -1840,9 +1842,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
       });
     } catch (error) {
       if (error?.name === "AbortError") {
-        const timeoutError = new Error(
-          "Plan check timed out. Please retry in a moment."
-        );
+        const timeoutError = new Error("Plan check timed out. Please retry in a moment.");
         timeoutError.code = "READINESS_TIMEOUT";
         timeoutError.httpStatus = 408;
         throw timeoutError;
@@ -1905,7 +1905,10 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
       // 2. Update Global State
       setGlobalFile(file);
       console.log("Global file selected:", file.name);
-      const extension = String(file.name || "").split(".").pop()?.toLowerCase();
+      const extension = String(file.name || "")
+        .split(".")
+        .pop()
+        ?.toLowerCase();
       if (extension === "mov" || file.type === "video/quicktime") {
         setFeedbackMessage(
           "MOV selected. If the preview stays black or fails, the browser may not support this MOV codec. H.264 MP4 is safest for local preview."
@@ -2014,7 +2017,9 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                 selectedPromoVisual.type ||
                 "Promo visual"}
             </strong>
-            <small>This stays separate from the live video preview so your frame is not cropped.</small>
+            <small>
+              This stays separate from the live video preview so your frame is not cropped.
+            </small>
           </div>
           <img
             src={sanitizeUrl(selectedPromoVisual.url)}
@@ -2543,10 +2548,15 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
         .find(data => String(data?.title || "").trim());
       const firstPlatformWithDescription = platforms
         .map(platform => getPlatformEffectiveData(platform))
-        .find(data => String(data?.description || data?.caption || data?.message || data?.commentary || "").trim());
+        .find(data =>
+          String(
+            data?.description || data?.caption || data?.message || data?.commentary || ""
+          ).trim()
+        );
       const resolvedTitle =
-        String(primaryPlatformData?.title || globalTitle || firstPlatformWithTitle?.title || "").trim() ||
-        "Untitled Post";
+        String(
+          primaryPlatformData?.title || globalTitle || firstPlatformWithTitle?.title || ""
+        ).trim() || "Untitled Post";
       const resolvedDescription = String(
         primaryPlatformData?.description ||
           globalDescription ||
@@ -2729,8 +2739,8 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                       }}
                     >
                       Review AI Enhancements opens your included paid-plan editor tools. Find Viral
-                      Clips uses {viralClipCost} credits per analysis, and you can top up anytime
-                      if you use your monthly allowance early.
+                      Clips uses {viralClipCost} credits per analysis, and you can top up anytime if
+                      you use your monthly allowance early.
                     </div>
                   )}
 
@@ -2758,7 +2768,9 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                         Preview:
                       </label>
                       {effectiveThumbnailUrl && (
-                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                        <div
+                          style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}
+                        >
                           <SafeImage
                             src={safeThumbUrl}
                             alt="Thumbnail"
@@ -2785,7 +2797,10 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                         preload="metadata"
                         onLoadedMetadata={e => setDuration(e.target.duration)}
                         onError={e => {
-                          const message = getBrowserPreviewFailureMessage(globalFile, e.currentTarget);
+                          const message = getBrowserPreviewFailureMessage(
+                            globalFile,
+                            e.currentTarget
+                          );
                           console.warn("Master preview video failed to load", {
                             fileName: globalFile?.name,
                             fileType: globalFile?.type,
@@ -2810,7 +2825,8 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                         Start: {trimStart}s / End: {trimEnd > 0 ? trimEnd + "s" : "Full"}
                       </label>
                       <div style={{ fontSize: "0.78rem", color: "#94a3b8", marginBottom: "6px" }}>
-                        Trim the master clip window before it flows into the platform-specific forms.
+                        Trim the master clip window before it flows into the platform-specific
+                        forms.
                       </div>
                       <label style={{ display: "block", fontSize: "0.8rem", marginBottom: "4px" }}>
                         Start time
@@ -3017,106 +3033,41 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
             </div>
 
             {/* --- PUBLISH QUEUE --- */}
-            <div
-              className="scheduling-tools"
-              style={{
-                marginTop: "15px",
-                padding: "14px",
-                border: "1px solid rgba(125, 92, 255, 0.28)",
-                borderRadius: "14px",
-                background:
-                  "linear-gradient(135deg, rgba(20, 18, 44, 0.96), rgba(10, 18, 35, 0.92))",
-                color: "#f8fafc",
-                boxShadow: "0 14px 34px rgba(15, 23, 42, 0.22)",
-              }}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between", gap: "12px" }}>
+            <div className="scheduling-tools">
+              <div className="schedule-header">
                 <div>
-                  <h4 style={{ margin: "0 0 6px 0", fontSize: "15px" }}>Publish Queue</h4>
-                  <p style={{ margin: 0, color: "#cbd5e1", fontSize: "12px", lineHeight: 1.5 }}>
+                  <h4>Publish Queue</h4>
+                  <p>
                     Queue the new media selected here for the platforms you choose. This does not
                     re-queue old uploads from your library.
                   </p>
                 </div>
-                <span
-                  style={{
-                    alignSelf: "flex-start",
-                    padding: "6px 10px",
-                    borderRadius: "999px",
-                    background: isQueuedPublish
-                      ? "rgba(37, 99, 235, 0.22)"
-                      : "rgba(16, 185, 129, 0.18)",
-                    color: isQueuedPublish ? "#bfdbfe" : "#bbf7d0",
-                    fontSize: "11px",
-                    fontWeight: 800,
-                    whiteSpace: "nowrap",
-                  }}
-                >
+                <span className={`queue-mode-pill ${isQueuedPublish ? "queued" : "ready"}`}>
                   {queueActionLabel}
                 </span>
               </div>
 
               <BestTimeToPost selectedPlatforms={selectedPlatforms} />
 
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
-                  gap: "10px",
-                  marginTop: "12px",
-                }}
-              >
-                <div
-                  style={{
-                    border: "1px solid rgba(148, 163, 184, 0.18)",
-                    borderRadius: "12px",
-                    padding: "10px",
-                    background: "rgba(15, 23, 42, 0.62)",
-                  }}
-                >
-                  <div style={{ color: "#94a3b8", fontSize: "10px", letterSpacing: "0.08em" }}>
-                    NEW MEDIA
-                  </div>
-                  <strong style={{ display: "block", marginTop: "4px", fontSize: "12px" }}>
-                    {selectedMediaName}
-                  </strong>
+              <div className="queue-summary-grid">
+                <div className="queue-summary-card">
+                  <span>New Media</span>
+                  <strong>{selectedMediaName}</strong>
                 </div>
-                <div
-                  style={{
-                    border: "1px solid rgba(148, 163, 184, 0.18)",
-                    borderRadius: "12px",
-                    padding: "10px",
-                    background: "rgba(15, 23, 42, 0.62)",
-                  }}
-                >
-                  <div style={{ color: "#94a3b8", fontSize: "10px", letterSpacing: "0.08em" }}>
-                    PLATFORMS
-                  </div>
-                  <strong style={{ display: "block", marginTop: "4px", fontSize: "12px" }}>
-                    {queuePlatformCount} selected
-                  </strong>
+                <div className="queue-summary-card">
+                  <span>Platforms</span>
+                  <strong>{queuePlatformCount} selected</strong>
                 </div>
               </div>
 
-              <div style={{ marginTop: "12px" }}>
-                <label style={{ display: "block", fontSize: "12px", fontWeight: "bold" }}>
-                  Publish Time
-                </label>
+              <div className="schedule-field">
+                <label>Publish Time</label>
                 <input
                   type="datetime-local"
                   value={scheduledTime}
                   onChange={e => setScheduledTime(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "9px 10px",
-                    marginTop: "6px",
-                    borderRadius: "10px",
-                    border: "1px solid rgba(148, 163, 184, 0.32)",
-                    background: "rgba(2, 6, 23, 0.74)",
-                    color: "#f8fafc",
-                  }}
                 />
-                <small style={{ color: "#cbd5e1", fontSize: "11px", lineHeight: 1.5 }}>
+                <small>
                   {scheduledTime
                     ? "This new upload will be queued for the selected platforms. Plan limits are checked before anything is uploaded."
                     : "Leave empty to publish immediately after upload."}
@@ -3124,18 +3075,8 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
               </div>
 
               {scheduledTime && (
-                <div style={{ marginTop: "10px" }}>
-                  <label
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                      fontSize: "12px",
-                      fontWeight: 800,
-                      color: "#f8fafc",
-                      cursor: "pointer",
-                    }}
-                  >
+                <div className="platform-schedule-block">
+                  <label className="platform-schedule-toggle">
                     <input
                       type="checkbox"
                       checked={customPlatformSchedule}
@@ -3144,49 +3085,14 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                     Customize time per platform
                   </label>
                   {customPlatformSchedule && (
-                    <div
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-                        gap: "10px",
-                        marginTop: "10px",
-                      }}
-                    >
+                    <div className="platform-schedule-grid">
                       {selectedPlatforms.map(platform => (
-                        <label
-                          key={platform}
-                          style={{
-                            display: "block",
-                            padding: "10px",
-                            border: "1px solid rgba(148, 163, 184, 0.2)",
-                            borderRadius: "10px",
-                            background: "rgba(2, 6, 23, 0.42)",
-                          }}
-                        >
-                          <span
-                            style={{
-                              display: "block",
-                              marginBottom: "6px",
-                              color: "#e2e8f0",
-                              fontSize: "12px",
-                              fontWeight: 800,
-                            }}
-                          >
-                            {getPlatformName(platform)}
-                          </span>
+                        <label key={platform} className="platform-schedule-row">
+                          <span>{getPlatformName(platform)}</span>
                           <input
                             type="datetime-local"
                             value={platformScheduleTimes[platform] || scheduledTime}
                             onChange={e => updatePlatformScheduleTime(platform, e.target.value)}
-                            style={{
-                              width: "100%",
-                              padding: "8px 9px",
-                              borderRadius: "9px",
-                              border: "1px solid rgba(148, 163, 184, 0.32)",
-                              background: "rgba(2, 6, 23, 0.78)",
-                              color: "#f8fafc",
-                              fontSize: "12px",
-                            }}
                           />
                         </label>
                       ))}
@@ -3196,30 +3102,21 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
               )}
 
               {scheduledTime && (
-                <div style={{ marginTop: "10px" }}>
-                  <label style={{ display: "block", fontSize: "12px", fontWeight: "bold" }}>
-                    Frequency
-                  </label>
+                <div className="schedule-field">
+                  <label>Frequency</label>
                   <select
                     value={frequency}
                     onChange={e => setFrequency(e.target.value)}
                     className="form-control"
-                    style={{
-                      width: "100%",
-                      borderRadius: "10px",
-                      background: "rgba(2, 6, 23, 0.74)",
-                      color: "#f8fafc",
-                      border: "1px solid rgba(148, 163, 184, 0.32)",
-                    }}
                   >
                     <option value="once">Once</option>
                     <option value="daily">Daily</option>
                     <option value="weekly">Weekly</option>
                     <option value="monthly">Monthly</option>
                   </select>
-                  <small style={{ color: "#cbd5e1", fontSize: "11px", lineHeight: 1.5 }}>
-                    Each platform in the queue uses one automated distribution task from the
-                    current plan allowance.
+                  <small>
+                    Each platform in the queue uses one automated distribution task from the current
+                    plan allowance.
                   </small>
                 </div>
               )}
@@ -3382,7 +3279,10 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                         file: normalizedResult,
                         media_url: normalizedResult.url,
                       });
-                    } else if (normalizedResult instanceof File || normalizedResult instanceof Blob) {
+                    } else if (
+                      normalizedResult instanceof File ||
+                      normalizedResult instanceof Blob
+                    ) {
                       updatePlatformData(target, {
                         file: normalizedResult,
                       });
@@ -3488,7 +3388,8 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                 updatePlatformData(editingTarget, {
                   trimStart: clip.start,
                   trimEnd: clip.end,
-                  selectedThumbnailUrl: clip.selectedThumbnailUrl || clip.selectedVisual?.url || null,
+                  selectedThumbnailUrl:
+                    clip.selectedThumbnailUrl || clip.selectedVisual?.url || null,
                   selectedVisual: clip.selectedVisual || null,
                 });
                 setFeedbackMessage(
