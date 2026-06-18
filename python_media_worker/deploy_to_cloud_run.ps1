@@ -50,7 +50,9 @@ gcloud run deploy $ServiceName `
     --memory 4Gi `
     --cpu 2 `
     --timeout 300 `
-    --concurrency 80
+    --concurrency 1 `
+    --min-instances 0 `
+    --max-instances 3
 
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Deployment failed!"

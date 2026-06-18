@@ -61,9 +61,13 @@ try {
   usageLedger = require("./src/services/usageLedgerService");
 } catch (_) {}
 
-const LOOP_INTERVAL_MS = parseInt(process.env.JOB_LOOP_INTERVAL_MS || "5000", 10);
+const LOOP_INTERVAL_MS = parseInt(process.env.JOB_LOOP_INTERVAL_MS || "30000", 10);
 const YT_POLL_INTERVAL_MS = parseInt(process.env.YT_STATS_LOOP_INTERVAL_MS || "60000", 10);
-const PLATFORM_POLL_INTERVAL_MS = parseInt(process.env.PLATFORM_STATS_LOOP_INTERVAL_MS || "900000", 10); // default 15 minutes
+const PLATFORM_POLL_INTERVAL_MS = parseInt(
+  process.env.PLATFORM_STATS_LOOP_INTERVAL_MS || "900000",
+  10
+); // default 15 minutes
+const WORKER_STATUS_INTERVAL_MS = parseInt(process.env.WORKER_STATUS_INTERVAL_MS || "60000", 10);
 const ENABLE = process.env.ENABLE_BACKGROUND_JOBS === "true";
 
 if (!ENABLE) {
@@ -73,6 +77,7 @@ if (!ENABLE) {
 
 let lastYouTubePoll = 0;
 let lastPlatformPoll = 0;
+let lastWorkerStatus = 0;
 let lastRollupDate = null; // YYYYMMDD of last completed rollup
 
 async function loop() {
@@ -80,7 +85,10 @@ async function loop() {
   try {
     // Heartbeat
     try {
-      await setStatus("worker_loop", { ts: Date.now(), loopInterval: LOOP_INTERVAL_MS });
+      if (Date.now() - lastWorkerStatus >= WORKER_STATUS_INTERVAL_MS) {
+        lastWorkerStatus = Date.now();
+        await setStatus("worker_loop", { ts: Date.now(), loopInterval: LOOP_INTERVAL_MS });
+      }
     } catch (_) {}
 
     // Process one platform task (if any)
@@ -125,7 +133,7 @@ async function loop() {
     }
 
     // Periodic Platform stats poll
-    if (platformPoller && (Date.now() - lastPlatformPoll >= PLATFORM_POLL_INTERVAL_MS)) {
+    if (platformPoller && Date.now() - lastPlatformPoll >= PLATFORM_POLL_INTERVAL_MS) {
       lastPlatformPoll = Date.now();
       try {
         const batch = await platformPoller.pollPlatformPostMetricsBatch({
@@ -230,17 +238,17 @@ async function loop() {
     // Checks for engagement tasks that human users haven't picked up
     // Priority Surge (New Uploads) runs frequently (80% chance) to ensure velocity
     // Stale Cleanups (Old Tasks) run rarely (10% chance)
-    if (randChance(0.8)) { 
+    if (randChance(0.8)) {
       try {
-         const communityEngine = require('./src/services/communityEngine');
-         // This function now handles BOTH priority surges (first) and stale tasks (second)
-         // It internally prioritizes the surge.
-         const result = await communityEngine.processStaleBounties();
-         if (result.processed > 0) {
-             console.log(`[Worker] Auto-Pilot: ${result.message}`);
-         }
+        const communityEngine = require("./src/services/communityEngine");
+        // This function now handles BOTH priority surges (first) and stale tasks (second)
+        // It internally prioritizes the surge.
+        const result = await communityEngine.processStaleBounties();
+        if (result.processed > 0) {
+          console.log(`[Worker] Auto-Pilot: ${result.message}`);
+        }
       } catch (err) {
-         console.warn("[Worker] Auto-Pilot Error:", err.message);
+        console.warn("[Worker] Auto-Pilot Error:", err.message);
       }
     }
 

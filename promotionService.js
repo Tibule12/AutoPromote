@@ -1,7 +1,5 @@
 const { db } = require("./firebaseAdmin");
 const optimizationService = require("./optimizationService");
-const paypalClient = require("./paypalClient");
-const paypal = require("@paypal/paypal-server-sdk");
 const { enqueuePlatformPostTask } = require("./src/services/promotionTaskQueue");
 
 class PromotionService {
@@ -78,7 +76,7 @@ class PromotionService {
   }
 
   // Optimize platform-specific settings
-  optimizePlatformSettings(content, platform, scheduleData) {
+  optimizePlatformSettings(content, platform, _scheduleData) {
     const settings = {};
 
     switch (platform) {
@@ -258,9 +256,7 @@ class PromotionService {
   async getActivePromotions(filters = {}) {
     try {
       // Simplified query to avoid complex index requirements (filter in memory instead)
-      let query = db
-        .collection("promotion_schedules")
-        .where("isActive", "==", true);
+      let query = db.collection("promotion_schedules").where("isActive", "==", true);
 
       // Apply filters
       if (filters.platform) {
@@ -280,10 +276,10 @@ class PromotionService {
       // Get all promotions
       for (const doc of snapshot.docs) {
         const data = doc.data();
-        
+
         // Manual filter for startTime (replaces the DB query constraint)
         if (data.startTime > now) continue;
-        
+
         const promotion = { id: doc.id, ...data };
 
         // Get associated content
@@ -382,19 +378,19 @@ class PromotionService {
 
       snapshot.forEach(doc => {
         const data = doc.data();
-        
+
         // Manual filter for endTime
         if (data.endTime && data.endTime <= now) {
-            const promotion = { id: doc.id, ...data };
-            completedPromotions.push(promotion);
-    
-            // Mark as completed in batch
-            batch.update(doc.ref, {
-              isActive: false,
-              status: "completed",
-              completedAt: now,
-              updatedAt: now,
-            });
+          const promotion = { id: doc.id, ...data };
+          completedPromotions.push(promotion);
+
+          // Mark as completed in batch
+          batch.update(doc.ref, {
+            isActive: false,
+            status: "completed",
+            completedAt: now,
+            updatedAt: now,
+          });
         }
       });
 
@@ -433,8 +429,6 @@ class PromotionService {
         throw new Error("Content not found");
       }
 
-      const content = { id: contentDoc.id, ...contentDoc.data() };
-
       // Update content status — real metrics will come from platform APIs after posting
       await db.collection("content").doc(schedule.contentId).update({
         lastPromotionDate: new Date().toISOString(),
@@ -455,18 +449,18 @@ class PromotionService {
       try {
         console.log(`🚀 [Integration] Enqueuing real platform task for ${schedule.platform}`);
         const result = await enqueuePlatformPostTask({
-            contentId: schedule.contentId,
-            uid: schedule.user_id || schedule.uid || "bf04dPKELvVMivWoUyLsAVyw2sg2",
-            platform: schedule.platform,
-            reason: "scheduled_promotion_" + scheduleId,
-            payload: {
-                scheduleId: scheduleId
-            },
-            skipIfDuplicate: true 
+          contentId: schedule.contentId,
+          uid: schedule.user_id || schedule.uid || "bf04dPKELvVMivWoUyLsAVyw2sg2",
+          platform: schedule.platform,
+          reason: "scheduled_promotion_" + scheduleId,
+          payload: {
+            scheduleId: scheduleId,
+          },
+          skipIfDuplicate: true,
         });
         console.log("✅ Task enqueue result:", JSON.stringify(result, null, 2));
       } catch (err) {
-          console.error("⚠️ Failed to enqueue real platform task:", err.message);
+        console.error("⚠️ Failed to enqueue real platform task:", err.message);
       }
 
       console.log(
@@ -623,60 +617,78 @@ class PromotionService {
       // Only pick pending, active schedules
       // Note: Composite index requirement: status ASC, isActive ASC, startTime ASC
       // If index missing, efficient fallback is to filter in memory for small batches
-      const snapshot = await db.collection("promotion_schedules")
-        .where("status", "==", "pending")
-        .where("isActive", "==", true)
-        .orderBy("startTime")
-        .limit(20)
-        .get();
+      let snapshot;
+      let queryAlreadyFilteredByTime = true;
+      try {
+        snapshot = await db
+          .collection("promotion_schedules")
+          .where("status", "==", "pending")
+          .where("isActive", "==", true)
+          .where("startTime", "<=", now)
+          .orderBy("startTime")
+          .limit(20)
+          .get();
+      } catch (queryError) {
+        if (queryError.code !== 9 && !queryError.message?.includes("index")) {
+          throw queryError;
+        }
+        queryAlreadyFilteredByTime = false;
+        snapshot = await db
+          .collection("promotion_schedules")
+          .where("status", "==", "pending")
+          .where("isActive", "==", true)
+          .orderBy("startTime")
+          .limit(20)
+          .get();
+      }
 
       if (snapshot.empty) return 0;
 
       let processed = 0;
       for (const doc of snapshot.docs) {
         const data = doc.data();
-        // Check timing (Firestore query ensures ordered by startTime, but check <= now)
-        if (data.startTime && data.startTime <= now) {
-          console.log(`⏰ [Scheduler] Triggering due schedule ${doc.id} (plat=${data.platform})`);
-          
-          // 1. Lock: Mark as processing
-          await doc.ref.update({ 
-            status: "processing", 
-            processingStartedAt: new Date().toISOString() 
-          });
+        if (!queryAlreadyFilteredByTime && (!data.startTime || data.startTime > now)) {
+          continue;
+        }
+        console.log(`⏰ [Scheduler] Triggering due schedule ${doc.id} (plat=${data.platform})`);
 
-          try {
-            // 2. Execute
-            const result = await this.executePromotion(doc.id);
-            
-            // 3. Complete (logic might vary for recurring, but for 'pending' this moves it forward)
-            await doc.ref.update({ 
-              status: "executed", 
-              lastExecutedAt: new Date().toISOString(),
-              // If it was a one-time schedule, deactivate it.
-              // If recurring, createNextRecurrence (handled inside schedulePromotion but executePromotion doesn't trigger recursion?)
-              // Re-reading logic: executePromotion doesn't recurse. schedulePromotion does. 
-              // processCompletedPromotions handles expiry.
-              // For now, mark executed.
-            });
-            processed++;
-          } catch (err) {
-            console.error(`❌ [Scheduler] Failed schedule ${doc.id}:`, err.message);
-            await doc.ref.update({ 
-              status: "failed", 
-              error: err.message,
-              failedAt: new Date().toISOString()
-            });
-          }
+        // 1. Lock: Mark as processing
+        await doc.ref.update({
+          status: "processing",
+          processingStartedAt: new Date().toISOString(),
+        });
+
+        try {
+          // 2. Execute
+          await this.executePromotion(doc.id);
+
+          // 3. Complete (logic might vary for recurring, but for 'pending' this moves it forward)
+          await doc.ref.update({
+            status: "executed",
+            lastExecutedAt: new Date().toISOString(),
+            // If it was a one-time schedule, deactivate it.
+            // If recurring, createNextRecurrence (handled inside schedulePromotion but executePromotion doesn't trigger recursion?)
+            // Re-reading logic: executePromotion doesn't recurse. schedulePromotion does.
+            // processCompletedPromotions handles expiry.
+            // For now, mark executed.
+          });
+          processed++;
+        } catch (err) {
+          console.error(`❌ [Scheduler] Failed schedule ${doc.id}:`, err.message);
+          await doc.ref.update({
+            status: "failed",
+            error: err.message,
+            failedAt: new Date().toISOString(),
+          });
         }
       }
       return processed;
     } catch (error) {
-       // Ignore "requires an index" errors to avoid log spam if index is building
-       if (error.code !== 9 && !error.message?.includes("index")) {
-          console.error("Error processing due schedules:", error);
-       }
-       return 0;
+      // Ignore "requires an index" errors to avoid log spam if index is building
+      if (error.code !== 9 && !error.message?.includes("index")) {
+        console.error("Error processing due schedules:", error);
+      }
+      return 0;
     }
   }
 }

@@ -41,8 +41,8 @@ gcloud run deploy "$SERVICE_NAME" \
     --cpu-boost \
     --timeout 900 \
     --concurrency 1 \
-    --min-instances 2 \
-    --max-instances 50 \
+    --min-instances 0 \
+    --max-instances 3 \
     --set-env-vars "FIREBASE_STORAGE_BUCKET=autopromote-cc6d3.firebasestorage.app"
 
 echo "=========================================="
