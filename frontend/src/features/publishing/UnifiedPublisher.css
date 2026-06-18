@@ -506,9 +506,8 @@ button {
   line-height: 1.2;
 }
 
-.schedule-field input,
 .schedule-field select,
-.platform-schedule-row input {
+.datetime-part input {
   width: 100%;
   min-height: 39px;
   margin-top: 6px;
@@ -521,9 +520,8 @@ button {
   line-height: 1.2;
 }
 
-.schedule-field input:focus,
 .schedule-field select:focus,
-.platform-schedule-row input:focus {
+.datetime-part input:focus {
   outline: none;
   border-color: rgba(125, 211, 252, 0.7);
   box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.18);
@@ -568,6 +566,56 @@ button {
   border: 1px solid rgba(148, 163, 184, 0.15);
   border-radius: 10px;
   background: rgba(2, 6, 23, 0.36);
+}
+
+.datetime-split-control {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(92px, 0.8fr) auto;
+  gap: 8px;
+  align-items: end;
+  margin-top: 6px;
+}
+
+.datetime-split-control.compact {
+  grid-template-columns: minmax(0, 1.15fr) minmax(86px, 0.85fr);
+}
+
+.datetime-part {
+  min-width: 0;
+}
+
+.datetime-part span {
+  display: block;
+  color: #93a4bb;
+  font-size: 0.6rem;
+  font-weight: 850;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.datetime-part input {
+  appearance: none;
+  -webkit-appearance: none;
+  color-scheme: dark;
+  text-align: left;
+}
+
+.datetime-clear-btn {
+  min-height: 39px;
+  padding: 0 10px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 9px;
+  background: rgba(15, 23, 42, 0.72);
+  color: #cbd5e1;
+  font-size: 0.68rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.datetime-clear-btn:hover {
+  border-color: rgba(125, 211, 252, 0.45);
+  color: #f8fafc;
 }
 
 /* --- Platform Toggles --- */
@@ -837,12 +885,26 @@ button {
     padding: 9px;
   }
 
-  .schedule-field input,
   .schedule-field select,
-  .platform-schedule-row input {
+  .datetime-part input {
     min-height: 37px;
     font-size: 0.72rem;
     padding: 8px 9px;
+  }
+
+  .datetime-split-control {
+    grid-template-columns: minmax(0, 1.15fr) minmax(82px, 0.85fr) auto;
+    gap: 7px;
+  }
+
+  .datetime-split-control.compact {
+    grid-template-columns: minmax(0, 1.15fr) minmax(82px, 0.85fr);
+  }
+
+  .datetime-clear-btn {
+    min-height: 37px;
+    padding: 0 9px;
+    font-size: 0.64rem;
   }
 
   /* no further modifications to card appearance on mobile */

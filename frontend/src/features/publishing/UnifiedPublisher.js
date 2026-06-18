@@ -184,6 +184,66 @@ const toIsoDateTimeOrNull = value => {
   return Number.isFinite(parsed) ? new Date(parsed).toISOString() : null;
 };
 
+const todayDateValue = () => {
+  const now = new Date();
+  const offsetMs = now.getTimezoneOffset() * 60 * 1000;
+  return new Date(now.getTime() - offsetMs).toISOString().slice(0, 10);
+};
+
+const splitDateTimeValue = value => {
+  if (typeof value !== "string" || !value.trim()) {
+    return { date: "", time: "" };
+  }
+  const [date = "", rawTime = ""] = value.split("T");
+  return { date, time: rawTime.slice(0, 5) };
+};
+
+const mergeDateTimeValue = (currentValue, patch = {}) => {
+  const current = splitDateTimeValue(currentValue);
+  const date = Object.prototype.hasOwnProperty.call(patch, "date") ? patch.date : current.date;
+  const time = Object.prototype.hasOwnProperty.call(patch, "time") ? patch.time : current.time;
+
+  if (!date) return "";
+  return `${date}T${time || "09:00"}`;
+};
+
+const DateTimeSplitControl = ({ value, onChange, compact = false }) => {
+  const { date, time } = splitDateTimeValue(value);
+
+  return (
+    <div className={`datetime-split-control ${compact ? "compact" : ""}`}>
+      <label className="datetime-part date-part">
+        <span>Date</span>
+        <input
+          type="date"
+          value={date}
+          onChange={event => onChange(mergeDateTimeValue(value, { date: event.target.value }))}
+        />
+      </label>
+      <label className="datetime-part time-part">
+        <span>Time</span>
+        <input
+          type="time"
+          value={time}
+          onChange={event =>
+            onChange(
+              mergeDateTimeValue(value, {
+                date: date || todayDateValue(),
+                time: event.target.value,
+              })
+            )
+          }
+        />
+      </label>
+      {!compact && value ? (
+        <button type="button" className="datetime-clear-btn" onClick={() => onChange("")}>
+          Clear
+        </button>
+      ) : null}
+    </div>
+  );
+};
+
 const buildPlatformScheduleTimes = ({
   platforms,
   scheduledTime,
@@ -3062,11 +3122,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
 
               <div className="schedule-field">
                 <label>Publish Time</label>
-                <input
-                  type="datetime-local"
-                  value={scheduledTime}
-                  onChange={e => setScheduledTime(e.target.value)}
-                />
+                <DateTimeSplitControl value={scheduledTime} onChange={setScheduledTime} />
                 <small>
                   {scheduledTime
                     ? "This new upload will be queued for the selected platforms. Plan limits are checked before anything is uploaded."
@@ -3089,10 +3145,10 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
                       {selectedPlatforms.map(platform => (
                         <label key={platform} className="platform-schedule-row">
                           <span>{getPlatformName(platform)}</span>
-                          <input
-                            type="datetime-local"
+                          <DateTimeSplitControl
                             value={platformScheduleTimes[platform] || scheduledTime}
-                            onChange={e => updatePlatformScheduleTime(platform, e.target.value)}
+                            onChange={value => updatePlatformScheduleTime(platform, value)}
+                            compact
                           />
                         </label>
                       ))}
