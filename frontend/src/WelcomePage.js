@@ -27,13 +27,14 @@ const availabilityCards = [
   },
   {
     title: "Analytics and account depth",
-    subtitle: "Reporting and posting depth vary by connected account permissions and platform APIs.",
+    subtitle:
+      "Reporting and posting depth vary by connected account permissions and platform APIs.",
   },
 ];
 
 const WelcomePage = ({ onGetStarted, onSignIn }) => {
   const handleWatchDemo = () => {
-    window.open("/demo-teaser.mp4", "_blank", "noopener,noreferrer");
+    document.getElementById("demo-player")?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
 
   return (
@@ -96,10 +97,7 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
           <WorkflowSection steps={workflowSteps} />
         </section>
 
-        <ProofSection
-          proofChecklist={proofChecklist}
-          exampleContent={exampleContent}
-        />
+        <ProofSection proofChecklist={proofChecklist} exampleContent={exampleContent} />
 
         <section className="ap-section" id="pricing">
           <SectionHeading
