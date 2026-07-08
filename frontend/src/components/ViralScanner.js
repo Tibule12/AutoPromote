@@ -1192,10 +1192,11 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
           <h3>
             <span style={{ fontSize: "1.5rem" }}>🔥</span> Viral Moment Scanner
           </h3>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <div className="scanner-header-actions">
             {/* Credit Display */}
             {creditBalance !== null && (
               <div
+                className="scanner-credit-pill"
                 style={{
                   background: "rgba(0,0,0,0.4)",
                   padding: "6px 10px",

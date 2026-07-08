@@ -2066,9 +2066,15 @@ function SmartPromoSummaryPanel({
                         </div>
                       </div>
                     ) : null}
-                    <div className="promo-summary-video-shell">
-                      <video src={clip.url} controls preload="metadata" />
-                    </div>
+                    {clip.url ? (
+                      <div className="promo-summary-video-shell">
+                        <video src={clip.url} controls preload="metadata" />
+                      </div>
+                    ) : (
+                      <div className="promo-summary-video-shell promo-summary-video-shell-empty">
+                        <span>Video output is still preparing...</span>
+                      </div>
+                    )}
                     <div className="promo-summary-result-copy">
                       {clip.campaignRoleLabel ? (
                         <div className="promo-summary-role-badge">{clip.campaignRoleLabel}</div>
@@ -2145,14 +2151,16 @@ function SmartPromoSummaryPanel({
           )}
         </div>
         {/* Hidden elements for frame capture */}
-        <video
-          ref={captureVideoRef}
-          src={sourcePreviewUrl}
-          crossOrigin="anonymous"
-          preload="auto"
-          muted
-          style={{ display: "none" }}
-        />
+        {sourcePreviewUrl ? (
+          <video
+            ref={captureVideoRef}
+            src={sourcePreviewUrl}
+            crossOrigin="anonymous"
+            preload="auto"
+            muted
+            style={{ display: "none" }}
+          />
+        ) : null}
         <canvas
           ref={captureCanvasRef}
           style={{ display: "none" }}

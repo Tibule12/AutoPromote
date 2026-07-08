@@ -16,6 +16,38 @@ import useCinematicEffects from "../hooks/useCinematicEffects";
 import CinematicEffectsPanel from "./CinematicEffectsPanel";
 import { useSubscription } from "../hooks/useSubscription";
 
+const DESKTOP_EDITING_TOOL_QUERY = "(min-width: 900px) and (hover: hover) and (pointer: fine)";
+
+const canUseDesktopEditingTools = () => {
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function") return true;
+  return window.matchMedia(DESKTOP_EDITING_TOOL_QUERY).matches;
+};
+
+const DESKTOP_TOOL_MESSAGE =
+  "Viral Clip Studio and Cam Combiner are desktop tools. Open AutoPromote on a laptop or computer to use the timeline editor.";
+
+function DesktopOnlyToolNotice({ toolName, onClose }) {
+  return (
+    <div className="desktop-tool-overlay" role="dialog" aria-modal="true" aria-label={`${toolName} desktop required`}>
+      <div className="desktop-tool-card">
+        <span className="desktop-tool-eyebrow">Desktop Required</span>
+        <h3>{toolName}</h3>
+        <p>
+          This workspace needs a larger screen, precise pointer controls, and room for the
+          timeline. Use AutoPromote on a laptop or desktop computer to open it.
+        </p>
+        <div className="desktop-tool-list">
+          <span>Best on laptop or desktop</span>
+          <span>Timeline editing and exports stay available there</span>
+        </div>
+        <button type="button" className="desktop-tool-close" onClick={onClose}>
+          Back to editor
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function VideoEditor({ file, onSave, onCancel, images = [] }) {
   const { editing, credits: subscriptionCredits } = useSubscription();
   const [videoSrc, setVideoSrc] = useState("");
@@ -53,8 +85,9 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
   const effectivePackages = topUpPacks.length > 0 ? topUpPacks : CREDIT_PACKAGES;
 
   const [processedFile, setProcessedFile] = useState(null);
+  const [desktopToolsAvailable, setDesktopToolsAvailable] = useState(canUseDesktopEditingTools);
   const [clipSuggestions, setClipSuggestions] = useState(() =>
-    file?.openStudio && Array.isArray(file?.clips) ? file.clips : null
+    canUseDesktopEditingTools() && file?.openStudio && Array.isArray(file?.clips) ? file.clips : null
   ); // Store detected clips or manual studio entry
   const [showMultiCamCombiner, setShowMultiCamCombiner] = useState(false);
   const autoOpenedStudioRef = useRef(false);
@@ -490,6 +523,23 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
     if (videoRef.current) attachVideo(videoRef.current);
   });
 
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return undefined;
+    const mediaQuery = window.matchMedia(DESKTOP_EDITING_TOOL_QUERY);
+    const handleChange = event => {
+      setDesktopToolsAvailable(event.matches);
+    };
+
+    setDesktopToolsAvailable(mediaQuery.matches);
+    if (typeof mediaQuery.addEventListener === "function") {
+      mediaQuery.addEventListener("change", handleChange);
+      return () => mediaQuery.removeEventListener("change", handleChange);
+    }
+
+    mediaQuery.addListener(handleChange);
+    return () => mediaQuery.removeListener(handleChange);
+  }, []);
+
   // Initialize video source from file prop
   useEffect(() => {
     if (file) {
@@ -512,11 +562,16 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
 
       if (file.openStudio && Array.isArray(file.clips) && file.clips.length) {
         autoOpenedStudioRef.current = true;
-        setClipSuggestions(file.clips);
-        setStatusMessage("Opened the detected viral clip window in Studio.");
+        if (desktopToolsAvailable) {
+          setClipSuggestions(file.clips);
+          setStatusMessage("Opened the detected viral clip window in Studio.");
+        } else {
+          setClipSuggestions(null);
+          setStatusMessage(DESKTOP_TOOL_MESSAGE);
+        }
       }
     }
-  }, [file]);
+  }, [desktopToolsAvailable, file]);
 
   // Revoke blob URL only on unmount
   useEffect(() => {
@@ -540,7 +595,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
     if (!isSmallTouchDevice && !isIosDevice) return;
 
     autoOpenedStudioRef.current = true;
-    handleLaunchStudio();
+    // Studio used to auto-open on small touch devices. It is now desktop-only.
   }, [clipSuggestions, processing, videoSrc]);
 
   const toggleOption = key => {
@@ -724,7 +779,14 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
       const suggestions = result.clipSuggestions || (result.data && result.data.clipSuggestions);
 
       if (suggestions && suggestions.length > 0) {
-        setClipSuggestions(suggestions);
+        if (desktopToolsAvailable) {
+          setClipSuggestions(suggestions);
+        } else {
+          setClipSuggestions(null);
+          setStatusMessage(
+            "Found viral clips. Open AutoPromote on a laptop or desktop to edit them in Viral Clip Studio."
+          );
+        }
         setProcessing(false);
         return;
       }
@@ -807,6 +869,11 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
   };
 
   const handleLaunchStudio = durationOverride => {
+    if (!desktopToolsAvailable) {
+      setStatusMessage(DESKTOP_TOOL_MESSAGE);
+      return;
+    }
+
     const explicitDuration = Number(durationOverride || 0);
     const previewDuration = Number(videoRef.current?.duration || 0);
     const fallbackDuration =
@@ -1236,6 +1303,24 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
   };
 
   if (clipSuggestions) {
+    if (!desktopToolsAvailable) {
+      const notice = (
+        <DesktopOnlyToolNotice
+          toolName="Viral Clip Studio"
+          onClose={() => {
+            setClipSuggestions(null);
+            setStatusMessage(DESKTOP_TOOL_MESSAGE);
+          }}
+        />
+      );
+
+      if (typeof document !== "undefined" && document.body) {
+        return createPortal(notice, document.body);
+      }
+
+      return notice;
+    }
+
     const studio = (
       <ViralClipStudio
         videoUrl={videoSrc}
@@ -1260,6 +1345,24 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
   }
 
   if (showMultiCamCombiner) {
+    if (!desktopToolsAvailable) {
+      const notice = (
+        <DesktopOnlyToolNotice
+          toolName="Cam Combiner"
+          onClose={() => {
+            setShowMultiCamCombiner(false);
+            setStatusMessage(DESKTOP_TOOL_MESSAGE);
+          }}
+        />
+      );
+
+      if (typeof document !== "undefined" && document.body) {
+        return createPortal(notice, document.body);
+      }
+
+      return notice;
+    }
+
     const combiner = (
       <MultiCamCombiner
         primaryFile={processedFile || file}
@@ -1626,6 +1729,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
               run them.
             </p>
             <div className="studio-launch-badge-row">
+              <span className="studio-launch-badge desktop-only">Desktop editing tools</span>
               <span className="studio-launch-badge included">Cam Combiner included</span>
               <span className="studio-launch-badge included">Flow Edit included</span>
               <span className="studio-launch-badge included">Thumbnail Lab included</span>
@@ -1645,11 +1749,18 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
               Credit-based runs draw from included monthly credits first, then top-up credits.
               Included editing tools stay available on paid plans.
             </div>
+            {!desktopToolsAvailable ? (
+              <div className="studio-launch-desktop-note">
+                Viral Clip Studio and Cam Combiner are optimized for laptop and desktop editing.
+                You can still use mobile-friendly tools here, then finish timeline work on a computer.
+              </div>
+            ) : null}
             <div className="studio-launch-actions">
               <button
                 className="process-btn studio-launch-btn"
                 onClick={handleLaunchStudio}
-                disabled={processing}
+                disabled={processing || !desktopToolsAvailable}
+                title={!desktopToolsAvailable ? DESKTOP_TOOL_MESSAGE : undefined}
               >
                 {processing ? "Launching Studio..." : "🔥 Launch Viral Clip Studio"}
               </button>
@@ -1659,7 +1770,8 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                   setStatusMessage("");
                   setShowMultiCamCombiner(true);
                 }}
-                disabled={processing}
+                disabled={processing || !desktopToolsAvailable}
+                title={!desktopToolsAvailable ? DESKTOP_TOOL_MESSAGE : undefined}
                 type="button"
               >
                 Combine Multi-Camera Angles First
