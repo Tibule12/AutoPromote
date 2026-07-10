@@ -5,9 +5,19 @@ const auth = new GoogleAuth({
 });
 
 let authClientPromise = null;
+const DEFAULT_PRODUCTION_JOB_NAME = "cam-combiner-render-job";
+
+function isProductionRuntime() {
+  return (
+    process.env.NODE_ENV === "production" ||
+    process.env.RENDER === "true" ||
+    Boolean(process.env.K_SERVICE)
+  );
+}
 
 function getMulticamRenderJobName() {
-  return String(process.env.MULTICAM_RENDER_JOB_NAME || "").trim();
+  const configured = String(process.env.MULTICAM_RENDER_JOB_NAME || "").trim();
+  return configured || (isProductionRuntime() ? DEFAULT_PRODUCTION_JOB_NAME : "");
 }
 
 function isDurableMulticamRenderEnabled() {

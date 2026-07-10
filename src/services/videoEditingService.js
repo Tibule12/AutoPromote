@@ -23,9 +23,13 @@ const {
 // Use the deployed URL for stability if env var is missing
 const MEDIA_WORKER_URL =
   process.env.MEDIA_WORKER_URL || "https://media-worker-v1-341498038874.us-central1.run.app";
+const DEFAULT_CAM_COMBINER_WORKER_URL =
+  "https://cam-combiner-worker-341498038874.us-central1.run.app";
 const LOCAL_MEDIA_WORKER_URL = process.env.LOCAL_MEDIA_WORKER_URL || "http://127.0.0.1:8000";
 const CAM_COMBINER_WORKER_URL =
-  process.env.CAM_COMBINER_WORKER_URL || process.env.MULTICAM_WORKER_URL || MEDIA_WORKER_URL;
+  process.env.CAM_COMBINER_WORKER_URL ||
+  process.env.MULTICAM_WORKER_URL ||
+  DEFAULT_CAM_COMBINER_WORKER_URL;
 const LOCAL_CAM_COMBINER_WORKER_URL =
   process.env.LOCAL_CAM_COMBINER_WORKER_URL || LOCAL_MEDIA_WORKER_URL;
 const IS_PRODUCTION_RUNTIME =

@@ -28,6 +28,15 @@ describe("cloudRunAuth URL policy", () => {
     ).toBe(true);
   });
 
+  it("uses OIDC automatically on a production Render backend", () => {
+    process.env.NODE_ENV = "production";
+    process.env.RENDER = "true";
+    const { shouldAuthenticateWorkerUrl } = require("../cloudRunAuth");
+    expect(
+      shouldAuthenticateWorkerUrl("https://cam-combiner-worker-abc.us-central1.run.app/health")
+    ).toBe(true);
+  });
+
   it("supports an explicit no-auth override for public development workers", () => {
     process.env.K_SERVICE = "thulani-api";
     process.env.WORKER_AUTH_MODE = "none";

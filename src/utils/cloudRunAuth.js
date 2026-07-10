@@ -16,7 +16,13 @@ function shouldAuthenticateWorkerUrl(value) {
   if (process.env.WORKER_AUTH_MODE === "none") return false;
   if (isLocalUrl(value)) return false;
   if (process.env.WORKER_AUTH_MODE === "oidc") return true;
-  return Boolean(process.env.K_SERVICE || process.env.GOOGLE_CLOUD_PROJECT || process.env.GCLOUD_PROJECT);
+  return Boolean(
+    process.env.NODE_ENV === "production" ||
+      process.env.RENDER === "true" ||
+      process.env.K_SERVICE ||
+      process.env.GOOGLE_CLOUD_PROJECT ||
+      process.env.GCLOUD_PROJECT
+  );
 }
 
 function getAudience(value) {
