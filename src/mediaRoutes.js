@@ -851,8 +851,7 @@ router.post("/render-multicam", async (req, res) => {
       });
     }
 
-    const job = await videoEditingService.startMulticamRenderJob(
-      {
+    const multicamJobRequest = {
         sources,
         segments: Array.isArray(req.body?.segments) ? req.body.segments : [],
         switches: Array.isArray(req.body?.switches) ? req.body.switches : [],
@@ -910,13 +909,14 @@ router.post("/render-multicam", async (req, res) => {
         generateThumbnail: req.body?.generateThumbnail === true || req.body?.generate_thumbnail === true,
         creditReceipt: creditResult,
         pendingCreditCost: deferCreditCharge ? cost : 0,
-        requireServerProof: MULTICAM_SERVER_PROOF_REQUIRED,
-      },
-      userId,
-      durableRenderEnabled
-        ? { jobId: durableJobId, capacityReserved: true }
-        : undefined
-    );
+      requireServerProof: MULTICAM_SERVER_PROOF_REQUIRED,
+    };
+    const job = durableRenderEnabled
+      ? await videoEditingService.startMulticamRenderJob(multicamJobRequest, userId, {
+          jobId: durableJobId,
+          capacityReserved: true,
+        })
+      : await videoEditingService.startMulticamRenderJob(multicamJobRequest, userId);
     capacityReserved = false;
 
     res.json({
