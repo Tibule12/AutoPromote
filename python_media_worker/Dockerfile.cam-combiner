@@ -1,0 +1,29 @@
+FROM python:3.10-slim
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PORT=8080 \
+    WHISPER_ENGINE=faster \
+    FASTER_WHISPER_DEVICE=cpu \
+    FASTER_WHISPER_COMPUTE_TYPE=int8 \
+    ALLOW_RUNTIME_DEPENDENCY_INSTALL=false
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ffmpeg \
+    libsm6 \
+    libxext6 \
+    fonts-dejavu-core \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY requirements.cam-combiner.txt .
+RUN pip install --no-cache-dir -r requirements.cam-combiner.txt
+
+# Cache only the CPU transcription model Cam Combiner actually uses.
+RUN python -c "from faster_whisper import WhisperModel; WhisperModel('small', device='cpu', compute_type='int8')"
+
+COPY . .
+RUN mkdir -p /app/tmp
+
+EXPOSE 8080
+CMD ["sh", "-c", "uvicorn main_media_server:app --host 0.0.0.0 --port ${PORT:-8080}"]

@@ -112,6 +112,104 @@ class MulticamDirectorRuleTests(unittest.TestCase):
             worker.MULTICAM_REQUIRE_SIGNED_QA_PROOF = previous_signed
             worker.MEDIA_WORKER_TASK_SECRET = previous_secret
 
+    def test_long_render_qa_gate_accepts_signed_server_plan_receipt(self):
+        previous_required = worker.MULTICAM_REQUIRE_QA_PROOF_FOR_LONG_RENDER
+        previous_allowed = worker.MULTICAM_ALLOW_LONG_RENDER_WITHOUT_QA
+        previous_seconds = worker.MULTICAM_QA_PROOF_REQUIRED_SECONDS
+        previous_signed = worker.MULTICAM_REQUIRE_SIGNED_QA_PROOF
+        previous_secret = worker.MEDIA_WORKER_TASK_SECRET
+        worker.MULTICAM_REQUIRE_QA_PROOF_FOR_LONG_RENDER = True
+        worker.MULTICAM_ALLOW_LONG_RENDER_WITHOUT_QA = False
+        worker.MULTICAM_QA_PROOF_REQUIRED_SECONDS = 300.0
+        worker.MULTICAM_REQUIRE_SIGNED_QA_PROOF = True
+        worker.MEDIA_WORKER_TASK_SECRET = "unit-test-qa-secret"
+        try:
+            request = worker.RenderMultiCamRequest(
+                sources=[
+                    {"id": "cam1", "url": "cam1.mp4"},
+                    {"id": "cam2", "url": "cam2.mp4"},
+                ],
+                overlap_duration=1200,
+                qaProofStatus="passed",
+                qaProofReceiptId="server-plan-123",
+            )
+            request.qaProofReceipt = worker.sign_multicam_qa_proof_receipt(
+                {
+                    "overall_status": "SAFE",
+                    "proof_kind": "server_plan_v1",
+                    "external_audio_present": False,
+                    "checks": {
+                        "layout_contract": {"status": "passed"},
+                        "director_truth": {"status": "passed"},
+                        "director_latency": {"status": "passed"},
+                    },
+                },
+                request,
+                1200,
+            )
+            gate = worker.enforce_multicam_long_render_qa_gate(request, 1200)
+            self.assertEqual(gate["status"], "passed")
+            self.assertEqual(gate["qa_proof_receipt_status"], "signed_server_plan_receipt_passed")
+        finally:
+            worker.MULTICAM_REQUIRE_QA_PROOF_FOR_LONG_RENDER = previous_required
+            worker.MULTICAM_ALLOW_LONG_RENDER_WITHOUT_QA = previous_allowed
+            worker.MULTICAM_QA_PROOF_REQUIRED_SECONDS = previous_seconds
+            worker.MULTICAM_REQUIRE_SIGNED_QA_PROOF = previous_signed
+            worker.MEDIA_WORKER_TASK_SECRET = previous_secret
+
+    def test_production_limits_verify_receipt_against_requested_window_after_sync_clamp(self):
+        previous_required = worker.MULTICAM_REQUIRE_QA_PROOF_FOR_LONG_RENDER
+        previous_allowed = worker.MULTICAM_ALLOW_LONG_RENDER_WITHOUT_QA
+        previous_seconds = worker.MULTICAM_QA_PROOF_REQUIRED_SECONDS
+        previous_signed = worker.MULTICAM_REQUIRE_SIGNED_QA_PROOF
+        previous_secret = worker.MEDIA_WORKER_TASK_SECRET
+        previous_limits = worker.MULTICAM_ENFORCE_PROD_LIMITS
+        worker.MULTICAM_REQUIRE_QA_PROOF_FOR_LONG_RENDER = True
+        worker.MULTICAM_ALLOW_LONG_RENDER_WITHOUT_QA = False
+        worker.MULTICAM_QA_PROOF_REQUIRED_SECONDS = 300.0
+        worker.MULTICAM_REQUIRE_SIGNED_QA_PROOF = True
+        worker.MULTICAM_ENFORCE_PROD_LIMITS = False
+        worker.MEDIA_WORKER_TASK_SECRET = "unit-test-qa-secret"
+        try:
+            request = worker.RenderMultiCamRequest(
+                sources=[
+                    {"id": "cam1", "url": "cam1.mp4"},
+                    {"id": "cam2", "url": "cam2.mp4"},
+                ],
+                overlap_duration=1200,
+                qaProofStatus="passed",
+                qaProofReceiptId="server-plan-clamped-window",
+            )
+            request.qaProofReceipt = worker.sign_multicam_qa_proof_receipt(
+                {
+                    "overall_status": "SAFE",
+                    "proof_kind": "server_plan_v1",
+                    "external_audio_present": False,
+                    "checks": {
+                        "layout_contract": {"status": "passed"},
+                        "director_truth": {"status": "passed"},
+                        "director_latency": {"status": "passed"},
+                    },
+                },
+                request,
+                1200,
+            )
+            limits = worker.enforce_multicam_production_limits(
+                request,
+                1197.25,
+                qa_overlap_duration=1200,
+            )
+            self.assertEqual(limits["duration_seconds"], 1197.25)
+            self.assertEqual(limits["qa_gate"]["duration_seconds"], 1200.0)
+            self.assertEqual(limits["qa_gate"]["status"], "passed")
+        finally:
+            worker.MULTICAM_REQUIRE_QA_PROOF_FOR_LONG_RENDER = previous_required
+            worker.MULTICAM_ALLOW_LONG_RENDER_WITHOUT_QA = previous_allowed
+            worker.MULTICAM_QA_PROOF_REQUIRED_SECONDS = previous_seconds
+            worker.MULTICAM_REQUIRE_SIGNED_QA_PROOF = previous_signed
+            worker.MULTICAM_ENFORCE_PROD_LIMITS = previous_limits
+            worker.MEDIA_WORKER_TASK_SECRET = previous_secret
+
     def test_long_render_rejects_unsigned_passed_receipt_when_signature_required(self):
         previous_required = worker.MULTICAM_REQUIRE_QA_PROOF_FOR_LONG_RENDER
         previous_allowed = worker.MULTICAM_ALLOW_LONG_RENDER_WITHOUT_QA
@@ -2042,7 +2140,7 @@ class MulticamDirectorRuleTests(unittest.TestCase):
         with self.assertRaises(worker.HTTPException):
             worker.enforce_multicam_final_quality_gate(gate)
 
-    def test_final_quality_gate_blocks_continuous_anchor_drift_risk(self):
+    def test_final_quality_gate_allows_accepted_unsafe_anchor_after_dense_sync_passes(self):
         unsafe_anchor_residual = worker.MULTICAM_POST_RENDER_SYNC_UNSAFE_SECONDS + 0.01
         gate = worker.build_multicam_final_quality_gate(
             output_validation={"has_video_stream": True, "has_audio_stream": True},
@@ -2082,6 +2180,7 @@ class MulticamDirectorRuleTests(unittest.TestCase):
                                 "checkpoint_index": 7,
                                 "timeline_absolute_seconds": 1500.0,
                                 "status": "accepted",
+                                "correction_applied": True,
                                 "abs_residual_seconds": unsafe_anchor_residual,
                                 "correlation": 0.62,
                             }
@@ -2092,15 +2191,17 @@ class MulticamDirectorRuleTests(unittest.TestCase):
             segment_duration_receipts=[{"ok": True, "delta_seconds": 0.0}],
         )
 
-        self.assertEqual(gate["status"], "failed")
+        self.assertEqual(gate["status"], "passed")
         anchor_check = next(
             check for check in gate["checks"] if check["name"] == "continuous_sync_anchors"
         )
-        self.assertFalse(anchor_check["passed"])
+        self.assertTrue(anchor_check["passed"])
         self.assertEqual(anchor_check["details"]["high_residual_anchor_count"], 1)
+        self.assertEqual(anchor_check["details"]["uncorrected_high_residual_anchor_count"], 0)
+        self.assertEqual(anchor_check["details"]["unsafe_residual_anchor_count"], 0)
+        self.assertEqual(anchor_check["details"]["correction_anchor_count"], 1)
         self.assertEqual(anchor_check["details"]["worst_anchor"]["camera_id"], "cam2")
-        with self.assertRaises(worker.HTTPException):
-            worker.enforce_multicam_final_quality_gate(gate)
+        worker.enforce_multicam_final_quality_gate(gate)
 
     def test_final_quality_gate_blocks_rejected_high_anchor_residual_after_dense_sync_passes(self):
         soft_anchor_residual = worker.MULTICAM_POST_RENDER_SYNC_GOOD_SECONDS + 0.01
@@ -2199,6 +2300,69 @@ class MulticamDirectorRuleTests(unittest.TestCase):
         self.assertEqual(anchor_check["details"]["uncorrected_high_residual_anchor_count"], 0)
         worker.enforce_multicam_final_quality_gate(gate)
 
+    def test_final_quality_gate_blocks_required_continuous_sync_when_no_anchor_map_active(self):
+        gate = worker.build_multicam_final_quality_gate(
+            output_validation={"has_video_stream": True, "has_audio_stream": True},
+            post_render_sync_audit={
+                "status": "good",
+                "sample_count": 186,
+                "candidate_sample_count": 186,
+                "sample_coverage_ratio": 1.0,
+                "max_sample_gap_seconds": 52.0,
+                "usable_sample_count": 178,
+                "max_abs_residual_seconds": 0.041,
+            },
+            layout_contract_audit={"status": "passed", "issue_count": 0},
+            director_truth_audit={"status": "passed", "issue_count": 0},
+            director_latency_audit={"status": "passed", "issue_count": 0},
+            director_audio={"status": "active"},
+            continuous_sync_anchors={
+                "enabled": True,
+                "status": "skipped_no_active_camera_maps",
+                "active_camera_count": 0,
+                "cameras": {},
+            },
+            segment_duration_receipts=[{"ok": True, "delta_seconds": 0.0}],
+        )
+
+        self.assertEqual(gate["status"], "failed")
+        anchor_check = next(
+            check for check in gate["checks"] if check["name"] == "continuous_sync_anchors"
+        )
+        self.assertFalse(anchor_check["passed"])
+        self.assertEqual(anchor_check["severity"], "error")
+        self.assertTrue(anchor_check["details"]["required"])
+        with self.assertRaises(worker.HTTPException):
+            worker.enforce_multicam_final_quality_gate(gate)
+
+    def test_final_quality_gate_does_not_require_external_anchor_maps_for_camera_audio_only(self):
+        gate = worker.build_multicam_final_quality_gate(
+            output_validation={"has_video_stream": True, "has_audio_stream": True},
+            post_render_sync_audit={
+                "status": "good",
+                "sample_count": 2,
+                "candidate_sample_count": 2,
+                "sample_coverage_ratio": 1.0,
+                "max_sample_gap_seconds": 4.0,
+                "usable_sample_count": 2,
+                "max_abs_residual_seconds": 0.0,
+            },
+            layout_contract_audit={"status": "passed", "issue_count": 0},
+            director_truth_audit={"status": "passed", "issue_count": 0},
+            director_latency_audit={"status": "passed", "issue_count": 0},
+            director_audio=None,
+            continuous_sync_anchors=None,
+            continuous_sync_required=False,
+            segment_duration_receipts=[{"ok": True, "delta_seconds": 0.0}],
+        )
+
+        self.assertEqual(gate["status"], "passed")
+        anchor_check = next(
+            check for check in gate["checks"] if check["name"] == "continuous_sync_anchors"
+        )
+        self.assertTrue(anchor_check["passed"])
+        self.assertFalse(anchor_check["details"]["required"])
+
     def test_final_quality_gate_blocks_sparse_sync_proof(self):
         gate = worker.build_multicam_final_quality_gate(
             output_validation={"has_video_stream": True, "has_audio_stream": True},
@@ -2243,6 +2407,180 @@ class MulticamDirectorRuleTests(unittest.TestCase):
             "usable_sample_count": worker.MULTICAM_POST_RENDER_SYNC_MIN_DENSE_USABLE_SAMPLES - 1,
         }
         self.assertFalse(worker.multicam_post_render_sync_has_dense_time_coverage(sparse_receipt))
+
+    def test_continuous_sync_map_uses_mid_clip_drift_correction_anchors(self):
+        source = {"offset_seconds": 0.0, "sync_rate": 1.0}
+        sync_map = worker.activate_continuous_sync_map(
+            source,
+            [
+                {
+                    "status": "accepted",
+                    "corrected_timeline_seconds": 0.0,
+                    "source_position_seconds": 0.0,
+                },
+                {
+                    "status": "accepted",
+                    "correction_applied": True,
+                    "corrected_timeline_seconds": 100.0,
+                    "source_position_seconds": 103.0,
+                },
+                {
+                    "status": "accepted",
+                    "correction_applied": True,
+                    "corrected_timeline_seconds": 200.0,
+                    "source_position_seconds": 200.0,
+                },
+                {
+                    "status": "rejected_low_confidence",
+                    "corrected_timeline_seconds": 150.0,
+                    "source_position_seconds": 400.0,
+                },
+            ],
+        )
+
+        self.assertTrue(sync_map["active"])
+        self.assertEqual(sync_map["anchor_count"], 3)
+        self.assertAlmostEqual(
+            worker.get_source_start_for_timeline(source, overlap_start=0.0, timeline_start=50.0),
+            51.5,
+            places=4,
+        )
+        self.assertAlmostEqual(
+            worker.get_source_start_for_timeline(source, overlap_start=0.0, timeline_start=150.0),
+            151.5,
+            places=4,
+        )
+        self.assertAlmostEqual(
+            worker.get_source_start_for_timeline(source, overlap_start=0.0, timeline_start=200.0),
+            200.0,
+            places=4,
+        )
+
+    def test_preflight_piecewise_sync_maps_recover_nonlinear_window_drift(self):
+        previous_enabled = worker.MULTICAM_PREFLIGHT_PIECEWISE_SYNC_ANCHORS
+        worker.MULTICAM_PREFLIGHT_PIECEWISE_SYNC_ANCHORS = True
+        try:
+            source = {
+                "id": "cam1",
+                "label": "Host",
+                "offset_seconds": 1969.003083,
+                "sync_rate": 1.000250063,
+            }
+            preflight = {
+                "status": "unsafe",
+                "cameras": {
+                    "cam_0": {
+                        "confidence": "unsafe",
+                        "avg_correlation": 0.4381,
+                        "drift_seconds": 12.208,
+                        "max_residual_offset_seconds": 7.139,
+                        "windows": {
+                            "start": {
+                                "estimated_offset_seconds": 5.069,
+                                "correlation": 0.44,
+                                "camera_source_position_seconds": 7.0,
+                                "timeline_position_seconds": 1975.0,
+                            },
+                            "middle": {
+                                "estimated_offset_seconds": -7.139,
+                                "correlation": 0.51,
+                                "camera_source_position_seconds": 27.0,
+                                "timeline_position_seconds": 1995.0,
+                            },
+                            "end": {
+                                "estimated_offset_seconds": 5.059,
+                                "correlation": 0.36,
+                                "camera_source_position_seconds": 47.0,
+                                "timeline_position_seconds": 2015.0,
+                            },
+                        },
+                    }
+                },
+            }
+
+            applied = worker.apply_preflight_piecewise_sync_maps(preflight, [source])
+
+            self.assertEqual(len(applied), 1)
+            self.assertEqual(applied[0]["correction_source"], "preflight_piecewise_sync_anchors")
+            self.assertEqual(worker.multicam_preflight_blocking_cameras(preflight, applied), [])
+            self.assertTrue(source["continuous_sync_map"]["active"])
+            self.assertEqual(source["continuous_sync_map"]["anchor_count"], 3)
+            self.assertAlmostEqual(
+                worker.get_source_start_for_timeline(source, overlap_start=0.0, timeline_start=1980.069),
+                7.0,
+                places=3,
+            )
+            self.assertAlmostEqual(
+                worker.get_source_start_for_timeline(source, overlap_start=0.0, timeline_start=1987.861),
+                27.0,
+                places=3,
+            )
+            self.assertAlmostEqual(
+                worker.get_source_start_for_timeline(source, overlap_start=0.0, timeline_start=2020.059),
+                47.0,
+                places=3,
+            )
+        finally:
+            worker.MULTICAM_PREFLIGHT_PIECEWISE_SYNC_ANCHORS = previous_enabled
+
+    def test_preflight_piecewise_sources_request_dense_continuous_sync(self):
+        source = {
+            "id": "cam1",
+            "preflight_piecewise_sync_applied": True,
+            "continuous_sync_map": {
+                "anchors": [
+                    {
+                        "status": "accepted",
+                        "abs_residual_seconds": 2.5,
+                        "source_position_seconds": 10.0,
+                        "corrected_timeline_seconds": 20.0,
+                    }
+                ]
+            },
+        }
+
+        self.assertTrue(worker.source_needs_dense_continuous_sync_anchors(source))
+
+        payload = worker.build_multicam_continuous_sync_receipt_cache_payload(
+            [source],
+            "/tmp/external.wav",
+            overlap_start=100.0,
+            overlap_duration=60.0,
+            checkpoints=[0.0, 10.0, 20.0],
+        )
+
+        self.assertEqual(payload["version"], 4)
+        self.assertTrue(payload["sources"][0]["dense_continuous_sync"])
+        self.assertGreater(payload["sources"][0]["source_max_shift_seconds"], worker.MULTICAM_CONTINUOUS_SYNC_MAX_SHIFT_SECONDS)
+
+    def test_switch_segment_falls_back_when_piecewise_source_is_out_of_bounds(self):
+        request = worker.RenderMultiCamRequest(
+            sources=[
+                worker.MultiCamSource(id="cam1", url="cam1.mp4", label="Camera 1"),
+                worker.MultiCamSource(id="cam2", url="cam2.mp4", label="Camera 2"),
+            ],
+            switches=[
+                worker.MultiCamSwitch(camera_id="cam1", start_time=0.0),
+                worker.MultiCamSwitch(camera_id="cam2", start_time=10.0),
+            ],
+            auto_switch=False,
+            overlap_duration=20.0,
+        )
+        cam1 = {"id": "cam1", "label": "Camera 1", "duration": 20.0, "offset_seconds": 0.0, "sync_rate": 1.0}
+        worker.activate_continuous_sync_map(
+            cam1,
+            [
+                {"status": "accepted", "corrected_timeline_seconds": 5.0, "source_position_seconds": 0.0},
+                {"status": "accepted", "corrected_timeline_seconds": 15.0, "source_position_seconds": 10.0},
+            ],
+        )
+        cam2 = {"id": "cam2", "label": "Camera 2", "duration": 40.0, "offset_seconds": 0.0, "sync_rate": 1.0}
+
+        segments = worker.build_multicam_segments_from_switches(request, [cam1, cam2], 0.0, 20.0)
+
+        self.assertTrue(segments)
+        self.assertEqual(segments[0]["camera_id"], "cam2")
+        self.assertIn("source_bounds_fallback_from_cam1", segments[0]["layout_reason"])
 
     def test_trusted_director_channel_map_decodes_only_render_window(self):
         decoded_seconds = 6
@@ -2423,6 +2761,58 @@ class MulticamDirectorRuleTests(unittest.TestCase):
         self.assertEqual(prepared_sources[0]["audio_activity_channel_index"], 0)
         self.assertEqual(prepared_sources[1]["audio_activity_channel_index"], 1)
 
+    def test_director_channel_override_can_be_trusted_by_contract_when_automap_is_ambiguous(self):
+        decoded_seconds = 6
+        stereo_silence = b"\0\0" * 2 * 8000 * decoded_seconds
+
+        def fake_run(cmd, *args, **kwargs):
+            return types.SimpleNamespace(returncode=0, stdout=stereo_silence, stderr=b"")
+
+        prepared_sources = [
+            {"id": "cam1", "label": "Camera 1", "duration": 30.0, "offset": 0.0},
+            {"id": "cam2", "label": "Camera 2", "duration": 30.0, "offset": 0.0},
+        ]
+        auto_receipt = {
+            "mapping_confident": False,
+            "mapped_camera_ids": ["cam2", "cam1"],
+            "method": "auto_unit",
+            "score_margin": 0.02,
+        }
+        trusted_proof = {
+            "trusted": True,
+            "reason": "director_channel_map_trusted",
+            "contract_id": "episode2-beta-sync-v1",
+        }
+
+        with tempfile.NamedTemporaryFile(suffix=".wav") as external_audio:
+            external_audio.write(b"fake")
+            external_audio.flush()
+            with unittest.mock.patch.dict(
+                os.environ,
+                {},
+                clear=False,
+            ), unittest.mock.patch.object(worker.subprocess, "run", side_effect=fake_run), unittest.mock.patch.object(
+                worker, "get_media_duration", return_value=30.0
+            ), unittest.mock.patch.object(
+                worker, "auto_map_multicam_director_channels", return_value=auto_receipt
+            ):
+                receipt = worker.apply_external_director_channel_activity(
+                    prepared_sources,
+                    external_audio.name,
+                    overlap_start=0.0,
+                    overlap_duration=5.0,
+                    segment_duration=0.5,
+                    channel_camera_ids_override=["cam1", "cam2"],
+                    trusted_channel_mapping_proof=trusted_proof,
+                )
+
+        self.assertEqual(receipt["status"], "active")
+        self.assertEqual(receipt["mapping_method"], "request_override_trusted_without_audio_proof")
+        self.assertEqual(receipt["auto_mapping"]["override_trust"]["reason"], "director_channel_map_trusted")
+        self.assertEqual(receipt["auto_mapping"]["override_trust"]["contract_id"], "episode2-beta-sync-v1")
+        self.assertEqual(prepared_sources[0]["audio_activity_channel_index"], 0)
+        self.assertEqual(prepared_sources[1]["audio_activity_channel_index"], 1)
+
     def test_director_channel_override_can_be_explicitly_corrected(self):
         decoded_seconds = 6
         stereo_silence = b"\0\0" * 2 * 8000 * decoded_seconds
@@ -2467,6 +2857,58 @@ class MulticamDirectorRuleTests(unittest.TestCase):
         self.assertEqual(receipt["auto_mapping"]["override_conflict"]["status"], "corrected")
         self.assertEqual(prepared_sources[0]["audio_activity_channel_index"], 1)
         self.assertEqual(prepared_sources[1]["audio_activity_channel_index"], 0)
+
+    def test_trusted_sync_contract_validates_sources_window_and_channel_map(self):
+        request = worker.RenderMultiCamRequest(
+            sources=[
+                worker.MultiCamSource(id="cam1", url="file:///tmp/cam1.mp4"),
+                worker.MultiCamSource(id="cam2", url="file:///tmp/cam2.mp4"),
+            ],
+            trustedSyncContract={
+                "id": "episode2-beta-sync-v1",
+                "status": "locked",
+                "sources": {
+                    "cam1": {"offset_seconds": -1.92, "sync_rate": 1.00024},
+                    "cam2": {"offset_seconds": 0.08, "sync_rate": 0.99991},
+                },
+                "timeline_windows": [{"start": 600.0, "end": 900.0}],
+                "director_channel_map": {
+                    "status": "locked",
+                    "channel_camera_ids": ["cam2", "cam1"],
+                },
+            },
+        )
+
+        sync_receipt = worker.validate_multicam_trusted_sync_contract(request, 720.0, 60.0)
+        channel_receipt = worker.validate_multicam_trusted_director_channel_map(request)
+
+        self.assertTrue(sync_receipt["trusted"])
+        self.assertEqual(sync_receipt["contract_id"], "episode2-beta-sync-v1")
+        self.assertEqual(sync_receipt["source_sync"]["cam1"]["offset_seconds"], -1.92)
+        self.assertEqual(sync_receipt["source_sync"]["cam2"]["sync_rate"], 0.99991)
+        self.assertTrue(channel_receipt["trusted"])
+        self.assertEqual(channel_receipt["channel_camera_ids"], ["cam2", "cam1"])
+
+    def test_trusted_sync_contract_rejects_missing_request_source(self):
+        request = worker.RenderMultiCamRequest(
+            sources=[
+                worker.MultiCamSource(id="cam1", url="file:///tmp/cam1.mp4"),
+                worker.MultiCamSource(id="cam2", url="file:///tmp/cam2.mp4"),
+            ],
+            trustedSyncContract={
+                "status": "locked",
+                "sources": {
+                    "cam1": {"offset_seconds": 0.0, "sync_rate": 1.0},
+                },
+                "timeline_windows": [{"start": 0.0, "end": 120.0}],
+            },
+        )
+
+        receipt = worker.validate_multicam_trusted_sync_contract(request, 30.0, 30.0)
+
+        self.assertFalse(receipt["trusted"])
+        self.assertEqual(receipt["reason"], "sync_contract_missing_request_sources")
+        self.assertEqual(receipt["missing_source_ids"], ["cam2"])
 
     def test_preflight_cache_payload_includes_render_timeline_window(self):
         sources = [
@@ -2515,6 +2957,30 @@ class MulticamDirectorRuleTests(unittest.TestCase):
         self.assertIsNone(request.preSyncClapAlignment)
         self.assertFalse(request.reaction_overlays)
         self.assertIsNone(request.reactionOverlays)
+
+    def test_media_log_locator_removes_firebase_download_token(self):
+        source = (
+            "https://firebasestorage.googleapis.com/v0/b/example/o/cam.mp4"
+            "?alt=media&token=never-log-this-token"
+        )
+
+        sanitized = worker.redact_media_locator_for_logs(source)
+
+        self.assertIn("cam.mp4?[REDACTED]", sanitized)
+        self.assertNotIn("never-log-this-token", sanitized)
+        self.assertNotIn("alt=media", sanitized)
+
+    def test_subprocess_text_redaction_removes_signed_url_query(self):
+        log_line = (
+            "Input from https://storage.googleapis.com/example/cam.mp4"
+            "?X-Goog-Signature=secret-signature&X-Goog-Credential=secret-credential"
+        )
+
+        sanitized = worker.redact_sensitive_urls_in_text(log_line)
+
+        self.assertIn("cam.mp4?[REDACTED]", sanitized)
+        self.assertNotIn("secret-signature", sanitized)
+        self.assertNotIn("secret-credential", sanitized)
 
 
 if __name__ == "__main__":

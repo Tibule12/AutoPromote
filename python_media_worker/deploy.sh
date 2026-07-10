@@ -28,7 +28,8 @@ gcloud config set project "$PROJECT_ID"
 echo "Step 1: Building container image via Cloud Build..."
 gcloud builds submit --tag "gcr.io/$PROJECT_ID/$SERVICE_NAME" .
 
-# 2. Deploy to Cloud Run (2nd Gen for CPU always-on + background task support)
+# 2. Deploy to Cloud Run. Cam Combiner production uses the dedicated
+# deploy_cam_combiner.sh script; these defaults keep the shared worker safe.
 echo "Step 2: Deploying to Cloud Run..."
 gcloud run deploy "$SERVICE_NAME" \
     --image "gcr.io/$PROJECT_ID/$SERVICE_NAME" \
@@ -43,7 +44,7 @@ gcloud run deploy "$SERVICE_NAME" \
     --concurrency 1 \
     --min-instances 0 \
     --max-instances 3 \
-    --set-env-vars "FIREBASE_STORAGE_BUCKET=autopromote-cc6d3.firebasestorage.app"
+    --set-env-vars "NODE_ENV=production,FIREBASE_STORAGE_BUCKET=autopromote-cc6d3.firebasestorage.app,MULTICAM_UPLOAD_FIREBASE=true,MULTICAM_MASTER_RETENTION_DAYS=7,ENABLE_LOCAL_MEDIA_OUTPUT_FALLBACK=false"
 
 echo "=========================================="
 echo "   Deployment SUCCESS!                    "
