@@ -15,6 +15,7 @@
     "responseHeader": [
       "Content-Type",
       "Content-Range",
+      "Range",
       "Content-Disposition",
       "Authorization",
       "X-Goog-Meta-*",

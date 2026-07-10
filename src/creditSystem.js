@@ -1,4 +1,5 @@
 const { db } = require("./firebaseAdmin");
+const crypto = require("crypto");
 const { normalizePlanId, resolvePlan } = require("./config/subscriptionPlans");
 const { getEffectiveTierSnapshot } = require("./services/billingService");
 
@@ -87,7 +88,7 @@ const getCreditBreakdown = async (userId) => {
  * Priority: monthly allocation first, then top-up balance.
  * Records a ledger entry for monthly tracking.
  */
-const deductCredits = async (userId, amount, operation = "unknown") => {
+const deductCredits = async (userId, amount, operation = "unknown", metadata = {}) => {
   if (Number(amount || 0) > 0 && shouldBypassEditingCredits(operation)) {
     console.log(
       `[credits] Local editing credit bypass active for ${operation}. User ${userId}, skipped ${amount} credits.`
@@ -111,9 +112,22 @@ const deductCredits = async (userId, amount, operation = "unknown") => {
   const userRef = db.collection("users").doc(userId);
   const billingRef = db.collection("user_billing").doc(userId);
   const monthKey = new Date().toISOString().slice(0, 7);
+  const idempotencyKey = String(metadata?.idempotencyKey || "").trim();
+  const chargeKeyHash = idempotencyKey
+    ? crypto.createHash("sha256").update(`${userId}:${idempotencyKey}`).digest("hex")
+    : "";
+  const chargeRef = chargeKeyHash
+    ? db.collection("credit_charges").doc(chargeKeyHash)
+    : null;
 
   try {
     return await db.runTransaction(async transaction => {
+      const existingCharge = chargeRef ? await transaction.get(chargeRef) : null;
+      if (existingCharge?.exists) {
+        const receipt = existingCharge.data()?.receipt || {};
+        return { ...receipt, success: true, alreadyCharged: true };
+      }
+
       const userDoc = await transaction.get(userRef);
       if (!userDoc.exists) {
         throw new Error("User not found");
@@ -171,7 +185,9 @@ const deductCredits = async (userId, amount, operation = "unknown") => {
       }
 
       // Record ledger entry for monthly tracking
-      const ledgerRef = db.collection("credit_usage").doc();
+      const ledgerRef = chargeKeyHash
+        ? db.collection("credit_usage").doc(`charge_${chargeKeyHash}`)
+        : db.collection("credit_usage").doc();
       transaction.set(ledgerRef, {
         userId,
         amount,
@@ -179,12 +195,12 @@ const deductCredits = async (userId, amount, operation = "unknown") => {
         fromTopUp,
         operation,
         monthKey,
+        metadata,
         createdAt: new Date().toISOString(),
       });
 
       const newTotal = totalAvailable - amount;
-
-      return {
+      const receipt = {
         success: true,
         remaining: newTotal,
         monthlyRemaining: monthlyRemaining - fromMonthly,
@@ -196,6 +212,19 @@ const deductCredits = async (userId, amount, operation = "unknown") => {
         operation,
         source: fromTopUp > 0 ? "monthly+topup" : "monthly",
       };
+      if (chargeRef) {
+        transaction.set(chargeRef, {
+          userId,
+          operation,
+          amount,
+          monthKey,
+          idempotencyKey,
+          receipt,
+          createdAt: new Date().toISOString(),
+        });
+      }
+
+      return receipt;
     });
   } catch (error) {
     console.error("Credit deduction failed:", error);
@@ -213,15 +242,37 @@ const refundCredits = async (
   const fromMonthly = Math.max(0, Number(refund?.fromMonthly || 0) || 0);
   const fromTopUp = Math.max(0, Number(refund?.fromTopUp || 0) || 0);
   const monthKey = refund?.monthKey || new Date().toISOString().slice(0, 7);
+  const idempotencyKey = String(
+    metadata?.idempotencyKey ||
+      (metadata?.jobId ? `${operation}:${metadata.jobId}` : "")
+  ).trim();
+  const refundKeyHash = idempotencyKey
+    ? crypto.createHash("sha256").update(idempotencyKey).digest("hex")
+    : "";
 
   if (amount <= 0) {
     return { success: false, message: "No refundable amount provided" };
   }
 
   const userRef = db.collection("users").doc(userId);
+  const refundRef = refundKeyHash
+    ? db.collection("credit_refunds").doc(refundKeyHash)
+    : null;
 
   try {
     return await db.runTransaction(async transaction => {
+      const existingRefund = refundRef ? await transaction.get(refundRef) : null;
+      if (existingRefund?.exists) {
+        const existing = existingRefund.data() || {};
+        return {
+          success: true,
+          alreadyRefunded: true,
+          refunded: Number(existing.amount || amount),
+          fromMonthly: Number(existing.fromMonthly || fromMonthly),
+          fromTopUp: Number(existing.fromTopUp || fromTopUp),
+        };
+      }
+
       const userDoc = await transaction.get(userRef);
       if (!userDoc.exists) {
         throw new Error("User not found");
@@ -237,7 +288,9 @@ const refundCredits = async (
         });
       }
 
-      const ledgerRef = db.collection("credit_usage").doc();
+      const ledgerRef = refundKeyHash
+        ? db.collection("credit_usage").doc(`refund_${refundKeyHash}`)
+        : db.collection("credit_usage").doc();
       transaction.set(ledgerRef, {
         userId,
         amount: -amount,
@@ -248,6 +301,20 @@ const refundCredits = async (
         createdAt: new Date().toISOString(),
         metadata,
       });
+
+      if (refundRef) {
+        transaction.set(refundRef, {
+          userId,
+          amount,
+          fromMonthly,
+          fromTopUp,
+          operation,
+          monthKey,
+          idempotencyKey,
+          metadata,
+          createdAt: new Date().toISOString(),
+        });
+      }
 
       return {
         success: true,

@@ -5,7 +5,32 @@
         "action": { "type": "Delete" },
         "condition": {
           "age": 1,
-          "matchesPrefix": ["temp_uploads/", "temp_sources/"]
+          "matchesPrefix": [
+            "temp_uploads/",
+            "temp_sources/",
+            "temp_scans/",
+            "temp/multicam/",
+            "temp/multicam-clean-sync/",
+            "temp/multicam-clean-sync-audio/"
+          ]
+        }
+      },
+      {
+        "action": { "type": "Delete" },
+        "condition": {
+          "age": 3,
+          "matchesPrefix": ["temp/multicam-ingest/"]
+        }
+      },
+      {
+        "action": { "type": "Delete" },
+        "condition": {
+          "age": 7,
+          "matchesPrefix": [
+            "processed/multicam_",
+            "processed/thumbnails/multicam_",
+            "processed/manifests/multicam_"
+          ]
         }
       },
       {

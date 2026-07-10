@@ -14,7 +14,15 @@ To prevent excessive billing for storage, we must ensure temporary files are del
 - **Action:** These files persist during the analysis session.
 - **Policy:** Configure Lifecycle Rule to delete files older than 1 day.
 
-## 3. Generated Clips & Edited Videos
+## 3. Cam Combiner Media
+
+- **Original ingest:** `temp/multicam-ingest/{userId}/*`, retained for 72 hours so a failed job can retry without another multi-gigabyte upload.
+- **Sync artifacts:** `temp/multicam-clean-sync*`, retained for at most 24 hours.
+- **Deliverables:** `processed/multicam_*`, thumbnails, and manifests are retained for 7 days.
+- **Upload model:** Originals are uploaded once with an authenticated resumable session. Preflight and rendering reuse the same object generation.
+- **Safety:** Object creation timestamps in filenames are never treated as deletion deadlines. Only explicit object metadata or object age controls expiry.
+
+## 4. Generated Clips & Edited Videos
 
 - **Path:** `generated_clips/{userId}/*` and `edited_videos/{userId}/*`
 - **Action:** User-owned assets.
@@ -22,7 +30,7 @@ To prevent excessive billing for storage, we must ensure temporary files are del
   - Free Tier users: Auto-delete "edited_videos" after 30 days.
   - Keep "generated_clips" until further notice (smaller file size, high value).
 
-## 4. Main Uploads
+## 5. Main Uploads
 
 - **Path:** `uploads/{type}/*`
 - **Action:** Primary source videos.
@@ -41,7 +49,32 @@ To prevent excessive billing for storage, we must ensure temporary files are del
         "action": { "type": "Delete" },
         "condition": {
           "age": 1,
-          "matchesPrefix": ["temp_uploads/", "temp_sources/"]
+          "matchesPrefix": [
+            "temp_uploads/",
+            "temp_sources/",
+            "temp_scans/",
+            "temp/multicam/",
+            "temp/multicam-clean-sync/",
+            "temp/multicam-clean-sync-audio/"
+          ]
+        }
+      },
+      {
+        "action": { "type": "Delete" },
+        "condition": {
+          "age": 3,
+          "matchesPrefix": ["temp/multicam-ingest/"]
+        }
+      },
+      {
+        "action": { "type": "Delete" },
+        "condition": {
+          "age": 7,
+          "matchesPrefix": [
+            "processed/multicam_",
+            "processed/thumbnails/multicam_",
+            "processed/manifests/multicam_"
+          ]
         }
       },
       {

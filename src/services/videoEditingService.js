@@ -4,18 +4,32 @@
 
 const axios = require("axios");
 const admin = require("firebase-admin");
+const crypto = require("crypto");
 const db = admin.firestore();
 const fs = require("fs");
 const { queueAudioExtractionTask } = require("./mediaWorkerTaskQueue");
 const { deductCredits, refundCredits } = require("../creditSystem");
+const { buildWorkerRequestConfig } = require("../utils/cloudRunAuth");
+const {
+  executeMulticamRenderJob,
+  isDurableMulticamRenderEnabled,
+} = require("./cloudRunJobService");
+const {
+  releaseMulticamRenderCapacity,
+  reserveMulticamRenderCapacity,
+} = require("./multicamCapacityService");
 
 // Point to the Python service (default to Cloud Run in production, localhost in dev)
 // Use the deployed URL for stability if env var is missing
 const MEDIA_WORKER_URL =
   process.env.MEDIA_WORKER_URL || "https://media-worker-v1-341498038874.us-central1.run.app";
+const DEFAULT_CAM_COMBINER_WORKER_URL =
+  "https://cam-combiner-worker-341498038874.us-central1.run.app";
 const LOCAL_MEDIA_WORKER_URL = process.env.LOCAL_MEDIA_WORKER_URL || "http://127.0.0.1:8000";
 const CAM_COMBINER_WORKER_URL =
-  process.env.CAM_COMBINER_WORKER_URL || process.env.MULTICAM_WORKER_URL || MEDIA_WORKER_URL;
+  process.env.CAM_COMBINER_WORKER_URL ||
+  process.env.MULTICAM_WORKER_URL ||
+  DEFAULT_CAM_COMBINER_WORKER_URL;
 const LOCAL_CAM_COMBINER_WORKER_URL =
   process.env.LOCAL_CAM_COMBINER_WORKER_URL || LOCAL_MEDIA_WORKER_URL;
 const IS_PRODUCTION_RUNTIME =
@@ -25,7 +39,7 @@ const ALLOW_LOCAL_WORKER_FALLBACK =
   (!IS_PRODUCTION_RUNTIME && process.env.ALLOW_LOCAL_WORKER_FALLBACK !== "false");
 const MULTICAM_MASTER_RETENTION_DAYS = Math.max(
   1,
-  parseInt(process.env.MULTICAM_MASTER_RETENTION_DAYS || "4", 10) || 4
+  parseInt(process.env.MULTICAM_MASTER_RETENTION_DAYS || "7", 10) || 7
 );
 
 function getWorkerErrorDetail(error) {
@@ -180,30 +194,98 @@ class VideoEditingService {
     }
   }
 
-  async startMulticamRenderJob(multicamRequest, userId) {
-    const jobId = uuidv4();
+  async startMulticamRenderJob(multicamRequest, userId, options = {}) {
+    const jobId = options.jobId || uuidv4();
+    const durableRender = isDurableMulticamRenderEnabled();
+    let capacityReserved = options.capacityReserved === true;
+    const dispatchToken = durableRender ? uuidv4() : null;
+    const dispatchTokenHash = dispatchToken
+      ? crypto.createHash("sha256").update(dispatchToken).digest("hex")
+      : null;
+    const persistedRequest = durableRender
+      ? this.buildMulticamWorkerPayload(multicamRequest, jobId)
+      : multicamRequest;
+    if (durableRender) {
+      persistedRequest.async_mode = true;
+      persistedRequest.job_id = jobId;
+      persistedRequest.plan_only = false;
+      persistedRequest.planOnly = false;
+    }
     console.log(`[VideoEditing] Starting multicam render job ${jobId} for User ${userId}`);
 
     try {
+      if (durableRender && !capacityReserved) {
+        await reserveMulticamRenderCapacity({ jobId, userId });
+        capacityReserved = true;
+      }
+
       await db.collection("video_edits").doc(jobId).set({
         jobId,
         userId,
         type: "multicam_render",
-        multicamRequest,
+        multicamRequest: persistedRequest,
         creditReceipt: multicamRequest?.creditReceipt || null,
+        pendingCreditCost: Number(multicamRequest?.pendingCreditCost || 0),
+        requireServerProof: multicamRequest?.requireServerProof === true,
         retentionDays: MULTICAM_MASTER_RETENTION_DAYS,
         status: "queued",
+        stage: durableRender ? "queued_for_cloud_run_job" : "queued",
+        dispatchMode: durableRender ? "cloud_run_job" : "process_background",
+        dispatchTokenHash,
         progress: 0,
         createdAt: new Date().toISOString(),
       });
 
-      this.processMulticamJobBackground(jobId, multicamRequest, userId).catch(err => {
-        console.error(`[VideoEditing] Multicam Job ${jobId} Failed (uncaught):`, err);
-      });
+      if (durableRender) {
+        const dispatch = await executeMulticamRenderJob({ jobId, dispatchToken });
+        await db.collection("video_edits").doc(jobId).set(
+          {
+            status: "queued",
+            stage: "cloud_run_job_accepted",
+            detail: "Durable render worker accepted the job",
+            cloudRunExecution: dispatch.executionName,
+            dispatchedAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          },
+          { merge: true }
+        );
+      } else {
+        this.processMulticamJobBackground(jobId, multicamRequest, userId).catch(err => {
+          console.error(`[VideoEditing] Multicam Job ${jobId} Failed (uncaught):`, err);
+        });
+      }
 
-      return { jobId };
+      return { jobId, dispatchMode: durableRender ? "cloud_run_job" : "process_background" };
     } catch (error) {
       console.error("Failed to start multicam render job:", error);
+      const creditReceipt = multicamRequest?.creditReceipt;
+      let creditRefund = null;
+      if (creditReceipt && !creditReceipt.skipped) {
+        creditRefund = await refundCredits(userId, creditReceipt, "render-multicam-refund", {
+          jobId,
+          reason: `dispatch_failed:${error.message}`,
+          idempotencyKey: `render-multicam-refund:${jobId}`,
+        }).catch(refundError => ({ success: false, message: refundError.message }));
+      }
+      await db.collection("video_edits").doc(jobId).set(
+        {
+          status: "dispatch_failed",
+          stage: "dispatch_failed",
+          error: error.message,
+          refundRequired: Boolean(creditReceipt && !creditReceipt.skipped && !creditRefund?.success),
+          creditRefund,
+          failedAt: new Date().toISOString(),
+        },
+        { merge: true }
+      ).catch(() => null);
+      if (capacityReserved) {
+        await releaseMulticamRenderCapacity(jobId, "dispatch_failed").catch(releaseError => {
+          console.error(
+            `[VideoEditing] Could not release multicam capacity for ${jobId}:`,
+            releaseError.message
+          );
+        });
+      }
       throw new Error("Failed to queue multi-camera render job");
     }
   }
@@ -277,6 +359,14 @@ class VideoEditingService {
           updatedAt: new Date().toISOString(),
         });
         const proofResult = await this.proveMulticamRender(multicamRequest, userId, jobId);
+        Object.assign(multicamRequest, {
+          qaProofStatus: proofResult.qaProofStatus,
+          qa_proof_status: proofResult.qaProofStatus,
+          qaProofReceiptId: proofResult.qaProofReceiptId,
+          qa_proof_receipt_id: proofResult.qaProofReceiptId,
+          qaProofReceipt: proofResult.qaProofReceipt,
+          qa_proof_receipt: proofResult.qaProofReceipt,
+        });
         await docRef.update({
           status: "proof_passed",
           stage: "server_proof_passed",
@@ -380,6 +470,8 @@ class VideoEditingService {
             id: source.id,
             label: source.label || "",
             url: source.url,
+            storage_path: source.storagePath || source.storage_path || null,
+            storagePath: source.storagePath || source.storage_path || null,
             offset_seconds: Number(source.offsetSeconds ?? source.offset_seconds ?? 0),
             sync_rate: Number(source.syncRate ?? source.sync_rate ?? 1),
             syncRate: Number(source.syncRate ?? source.sync_rate ?? 1),
@@ -407,13 +499,21 @@ class VideoEditingService {
             layout_mode: item.layoutMode || item.layout_mode || "cut",
           }))
         : [],
-      auto_switch: !!multicamRequest?.autoSwitch,
-      audio_based_auto_switch: multicamRequest?.audioBasedAutoSwitch !== false,
-      auto_switch_interval: Number(multicamRequest?.autoSwitchInterval ?? 2),
-      auto_switch_aggressiveness: multicamRequest?.autoSwitchAggressiveness || "balanced",
+      auto_switch: multicamRequest?.autoSwitch === true || multicamRequest?.auto_switch === true,
+      audio_based_auto_switch:
+        multicamRequest?.audioBasedAutoSwitch !== false &&
+        multicamRequest?.audio_based_auto_switch !== false,
+      auto_switch_interval: Number(
+        multicamRequest?.autoSwitchInterval ?? multicamRequest?.auto_switch_interval ?? 2
+      ),
+      auto_switch_aggressiveness:
+        multicamRequest?.autoSwitchAggressiveness ||
+        multicamRequest?.auto_switch_aggressiveness ||
+        "balanced",
       render_tier: multicamRequest?.renderTier || multicamRequest?.render_tier || "premium",
       renderTier: multicamRequest?.renderTier || multicamRequest?.render_tier || "premium",
-      primary_audio_camera_id: multicamRequest?.primaryAudioCameraId || null,
+      primary_audio_camera_id:
+        multicamRequest?.primaryAudioCameraId || multicamRequest?.primary_audio_camera_id || null,
       director_channel_camera_ids: Array.isArray(multicamRequest?.directorChannelCameraIds)
         ? multicamRequest.directorChannelCameraIds
         : Array.isArray(multicamRequest?.director_channel_camera_ids)
@@ -424,13 +524,59 @@ class VideoEditingService {
         : Array.isArray(multicamRequest?.director_channel_camera_ids)
           ? multicamRequest.director_channel_camera_ids
           : null,
-      overlap_start: Number(multicamRequest?.overlapStart ?? 0),
-      overlapStart: Number(multicamRequest?.overlapStart ?? 0),
-      overlap_duration: Number(multicamRequest?.overlapDuration ?? 0),
-      overlapDuration: Number(multicamRequest?.overlapDuration ?? 0),
-      output_aspect_ratio: multicamRequest?.outputAspectRatio || "9:16",
-      outputAspectRatio: multicamRequest?.outputAspectRatio || "9:16",
+      trusted_sync_contract:
+        multicamRequest?.trustedSyncContract || multicamRequest?.trusted_sync_contract || null,
+      trustedSyncContract:
+        multicamRequest?.trustedSyncContract || multicamRequest?.trusted_sync_contract || null,
+      trusted_director_channel_map:
+        multicamRequest?.trustedDirectorChannelMap ||
+        multicamRequest?.trusted_director_channel_map ||
+        null,
+      trustedDirectorChannelMap:
+        multicamRequest?.trustedDirectorChannelMap ||
+        multicamRequest?.trusted_director_channel_map ||
+        null,
+      overlap_start: Number(multicamRequest?.overlapStart ?? multicamRequest?.overlap_start ?? 0),
+      overlapStart: Number(multicamRequest?.overlapStart ?? multicamRequest?.overlap_start ?? 0),
+      overlap_duration: Number(
+        multicamRequest?.overlapDuration ?? multicamRequest?.overlap_duration ?? 0
+      ),
+      overlapDuration: Number(
+        multicamRequest?.overlapDuration ?? multicamRequest?.overlap_duration ?? 0
+      ),
+      timeline_start: Number(
+        multicamRequest?.timelineStart ??
+          multicamRequest?.timeline_start ??
+          multicamRequest?.overlapStart ??
+          multicamRequest?.overlap_start ??
+          0
+      ),
+      timelineStart: Number(
+        multicamRequest?.timelineStart ??
+          multicamRequest?.timeline_start ??
+          multicamRequest?.overlapStart ??
+          multicamRequest?.overlap_start ??
+          0
+      ),
+      output_aspect_ratio:
+        multicamRequest?.outputAspectRatio || multicamRequest?.output_aspect_ratio || "9:16",
+      outputAspectRatio:
+        multicamRequest?.outputAspectRatio || multicamRequest?.output_aspect_ratio || "9:16",
+      reaction_overlays:
+        multicamRequest?.reactionOverlays === true || multicamRequest?.reaction_overlays === true,
+      reactionOverlays:
+        multicamRequest?.reactionOverlays === true || multicamRequest?.reaction_overlays === true,
+      pre_sync_clap_alignment:
+        multicamRequest?.preSyncClapAlignment === true ||
+        multicamRequest?.pre_sync_clap_alignment === true,
+      preSyncClapAlignment:
+        multicamRequest?.preSyncClapAlignment === true ||
+        multicamRequest?.pre_sync_clap_alignment === true,
       external_audio_url: multicamRequest?.externalAudio?.url || null,
+      external_audio_storage_path:
+        multicamRequest?.externalAudio?.storagePath ||
+        multicamRequest?.externalAudio?.storage_path ||
+        null,
       external_audio_offset_seconds: Number(multicamRequest?.externalAudio?.offset_seconds ?? 0),
       external_audio_mix_mode: multicamRequest?.externalAudio?.mix_mode || "external_only",
       external_audio_cache_key: multicamRequest?.externalAudio?.cache_key || null,
@@ -447,14 +593,26 @@ class VideoEditingService {
       generateThumbnail: multicamRequest?.generateThumbnail === true || multicamRequest?.generate_thumbnail === true,
       plan_only: multicamRequest?.planOnly === true || multicamRequest?.plan_only === true,
       planOnly: multicamRequest?.planOnly === true || multicamRequest?.plan_only === true,
+      qa_proof_status: multicamRequest?.qaProofStatus || multicamRequest?.qa_proof_status || null,
+      qaProofStatus: multicamRequest?.qaProofStatus || multicamRequest?.qa_proof_status || null,
+      qa_proof_receipt_id:
+        multicamRequest?.qaProofReceiptId || multicamRequest?.qa_proof_receipt_id || null,
+      qaProofReceiptId:
+        multicamRequest?.qaProofReceiptId || multicamRequest?.qa_proof_receipt_id || null,
+      qa_proof_receipt:
+        multicamRequest?.qaProofReceipt || multicamRequest?.qa_proof_receipt || null,
+      qaProofReceipt:
+        multicamRequest?.qaProofReceipt || multicamRequest?.qa_proof_receipt || null,
       job_id: jobId,
       async_mode: !!jobId,
     };
   }
 
   async postCamCombinerWorker(endpoint, payload, timeout) {
+    const primaryUrl = `${CAM_COMBINER_WORKER_URL}${endpoint}`;
     try {
-      return await axios.post(`${CAM_COMBINER_WORKER_URL}${endpoint}`, payload, { timeout });
+      const requestConfig = await buildWorkerRequestConfig(primaryUrl, { timeout });
+      return await axios.post(primaryUrl, payload, requestConfig);
     } catch (error) {
       const workerDetail = getWorkerErrorDetail(error);
       if (!shouldTryLocalCamCombinerWorker(error)) {
@@ -506,6 +664,13 @@ class VideoEditingService {
     requirePassed("director_truth_audit", proof?.director_truth_audit);
     requirePassed("director_latency_audit", proof?.director_latency_audit);
 
+    const qaProofReceipt = proof?.qa_proof_receipt || proof?.qaProofReceipt || null;
+    const qaProofReceiptId =
+      proof?.qa_proof_receipt_id || proof?.qaProofReceiptId || qaProofReceipt?.qa_proof_receipt_id;
+    if (!qaProofReceipt || !qaProofReceiptId) {
+      failures.push({ gate: "signed_server_plan_receipt", status: "missing" });
+    }
+
     const receipt = {
       status: failures.length ? "failed" : "passed",
       checkedAt: new Date().toISOString(),
@@ -521,6 +686,9 @@ class VideoEditingService {
       directorLatencyAudit: proof?.director_latency_audit || null,
       directorAudio: proof?.director_audio || null,
       renderSegmentMerge: proof?.render_segment_merge || null,
+      qaProofStatus: proof?.qa_proof_status || proof?.qaProofStatus || null,
+      qaProofReceiptId,
+      qaProofReceipt,
     };
 
     if (failures.length) {
@@ -559,7 +727,7 @@ class VideoEditingService {
       renderTier: payload.renderTier || payload.render_tier,
     });
 
-    const response = await this.postCamCombinerWorker("/render-multicam", payload, 900000);
+    const response = await this.postCamCombinerWorker("/render-multicam", payload, 3550000);
     return this.validateMulticamServerProof(response.data, multicamRequest);
   }
 
@@ -1138,16 +1306,6 @@ class VideoEditingService {
       hasExternalAudio: !!external_audio_url,
     });
 
-    let workerUrl = CAM_COMBINER_WORKER_URL;
-    if (ALLOW_LOCAL_WORKER_FALLBACK && LOCAL_CAM_COMBINER_WORKER_URL) {
-      try {
-        await axios.get(`${LOCAL_CAM_COMBINER_WORKER_URL}/health`, { timeout: 2000 });
-        workerUrl = LOCAL_CAM_COMBINER_WORKER_URL;
-      } catch {
-        // fall through to cloud worker
-      }
-    }
-
     const payload = {
       sources: sources.map((s, index) => ({
         id: s.id || `camera_${index + 1}`,
@@ -1188,9 +1346,11 @@ class VideoEditingService {
 
     let response;
     try {
-      response = await axios.post(`${workerUrl}/multicam/preflight-sync`, payload, {
-        timeout: 120000,
-      });
+      response = await this.postCamCombinerWorker(
+        "/multicam/preflight-sync",
+        payload,
+        120000
+      );
     } catch (error) {
       const workerDetail = error.response?.data?.detail || error.response?.data?.message || error.message;
       const message = typeof workerDetail === "string"
@@ -1215,7 +1375,7 @@ class VideoEditingService {
     const payload = this.buildMulticamWorkerPayload(multicamRequest, jobId);
 
     let response;
-    response = await this.postCamCombinerWorker("/render-multicam", payload, 1800000);
+    response = await this.postCamCombinerWorker("/render-multicam", payload, 3550000);
 
     const result = response.data;
     if (result.status === "processing" && result.mode === "async") {

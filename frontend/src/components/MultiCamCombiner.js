@@ -49,6 +49,7 @@ import CinematicEffectsPanel from "./CinematicEffectsPanel";
 import { useSubscription } from "../hooks/useSubscription";
 import PayPalSubscriptionPanel from "./PayPalSubscriptionPanel";
 import { SafeAudio, SafeVideo } from "./SafeMedia";
+import { uploadMulticamSourceResumable } from "../utils/multicamResumableUpload";
 
 const MULTICAM_MAX_SOURCES = 6;
 
@@ -350,6 +351,9 @@ const readCachedRenderProxyUpload = async cacheKey => {
         trimStart: Number(entry.trimStart || 0) || 0,
         trimDuration: Number(entry.trimDuration || 0) || 0,
         size: Number(entry.size || 0) || 0,
+        storagePath: entry.storagePath || "",
+        cacheKey: entry.cacheKey || "",
+        deleteAfter: entry.deleteAfter || null,
       });
     };
     request.onerror = () => resolve(null);
@@ -372,7 +376,11 @@ const writeCachedRenderProxyUpload = async (cacheKey, upload = {}) => {
       size: Number(upload.size || 0) || 0,
       trimStart: Number(upload.trimStart || 0) || 0,
       trimDuration: Number(upload.trimDuration || 0) || 0,
-      expiresAt: Date.now() + RENDER_PROXY_UPLOAD_CACHE_TTL_MS,
+      storagePath: upload.storagePath || "",
+      cacheKey: upload.cacheKey || "",
+      deleteAfter: upload.deleteAfter || null,
+      expiresAt:
+        Number(upload.cacheExpiresAt || 0) || Date.now() + RENDER_PROXY_UPLOAD_CACHE_TTL_MS,
     });
     tx.oncomplete = () => {
       db.close();
@@ -698,21 +706,6 @@ const estimateCleanAudioSyncCredits = () => {
 const estimateMulticamRenderCredits = renderTier => {
   const tier = String(renderTier || "premium").trim().toLowerCase().replace(/-/g, "_");
   return MULTICAM_RENDER_CREDITS_BY_TIER[tier] || MULTICAM_RENDER_CREDITS_BY_TIER.premium;
-};
-
-const estimateVideoProxyBytes = durationSeconds =>
-  Math.round(
-    ((UPLOAD_COMPRESSION_TARGET_BPS + UPLOAD_COMPRESSION_AUDIO_BPS) / 8) *
-      Math.max(0.2, Number(durationSeconds || 0)) *
-      1.05
-  );
-
-const estimateCleanAudioProxyBytes = (externalTrack, durationSeconds) => {
-  const fileSize = Number(externalTrack?.file?.size || 0) || 0;
-  if (!fileSize) return 0;
-  if (fileSize <= 20 * BYTES_PER_MB) return fileSize;
-  const proxyDuration = Math.max(0.2, Number(durationSeconds || 0) || VIDEO_SYNC_MAX_EXTRACT_SECONDS);
-  return Math.round(16000 * 2 * proxyDuration);
 };
 
 const getSourceTimelineTime = (source, playhead, timelineStart) =>
@@ -1814,6 +1807,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const [billingPanelOpen, setBillingPanelOpen] = useState(false);
 
   const cancelExportRef = useRef(false);
+  const exportAbortControllerRef = useRef(null);
+  const renderSubmissionStartedRef = useRef(false);
   const exportPollIntervalRef = useRef(null);
   const fileInputRef = useRef(null);
   const flowAudioInputRef = useRef(null);
@@ -3984,6 +3979,9 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
 
   const handleCancelExport = () => {
     cancelExportRef.current = true;
+    if (!renderSubmissionStartedRef.current) {
+      exportAbortControllerRef.current?.abort();
+    }
     if (exportPollIntervalRef.current) {
       window.clearInterval(exportPollIntervalRef.current);
       exportPollIntervalRef.current = null;
@@ -3991,7 +3989,11 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     setServerExportPending(false);
     setIsExporting(false);
     setExportProgress(0);
-    setStatusMessage("Export cancelled.");
+    setStatusMessage(
+      renderSubmissionStartedRef.current
+        ? "Stopped monitoring. The server render was already submitted and may still finish."
+        : "Export cancelled before the paid render was submitted."
+    );
   };
 
   const applyAutoDirectorPlan = (forceStatus = false) => {
@@ -5432,6 +5434,51 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     file
       ? `${file.name || "media"}:${file.size || 0}:${file.lastModified || 0}`
       : "";
+
+  const buildOriginalIngestCacheKey = file =>
+    file ? `cloud-original:v1:${buildBackendMediaCacheKey(file)}` : "";
+
+  const uploadOriginalForCloudRender = async ({ user, file, label, purpose, signal }) => {
+    if (!file) throw new Error(`${label || "Media"} is missing its original file.`);
+    const cacheKey = buildOriginalIngestCacheKey(file);
+    const cached = await readCachedRenderProxyUpload(cacheKey);
+    if (cached?.url) {
+      setStatusMessage(`${label}: reusing the original cloud upload.`);
+      return cached;
+    }
+
+    const startedAt = Date.now();
+    const uploaded = await uploadMulticamSourceResumable({
+      apiBaseUrl: API_BASE_URL,
+      getToken: forceRefresh => user.getIdToken(forceRefresh === true),
+      file,
+      purpose,
+      signal,
+      onProgress: (loaded, total) => {
+        const elapsedSeconds = Math.max(1, (Date.now() - startedAt) / 1000);
+        const speed = loaded / elapsedSeconds;
+        const remainingSeconds = speed > 0 ? Math.max(0, total - loaded) / speed : 0;
+        const eta = remainingSeconds > 90
+          ? ` · ~${Math.ceil(remainingSeconds / 60)} min left`
+          : remainingSeconds > 10
+            ? ` · ~${Math.ceil(remainingSeconds)} sec left`
+            : "";
+        setStatusMessage(
+          `Uploading ${label} once — ${formatMediaBytes(loaded)} / ${formatMediaBytes(total)}${eta}`
+        );
+      },
+    });
+    const cacheExpiresAt = uploaded.deleteAfter
+      ? Math.max(Date.now(), Date.parse(uploaded.deleteAfter) - 30 * 60 * 1000)
+      : Date.now() + 70 * 60 * 60 * 1000;
+    const cachedUpload = {
+      ...uploaded,
+      videoUrl: uploaded.url,
+      cacheExpiresAt,
+    };
+    await writeCachedRenderProxyUpload(cacheKey, cachedUpload);
+    return cachedUpload;
+  };
 
   const buildSyncAudioCacheKey = (file, trimWindow = null) => {
     if (!file) return "";
@@ -6913,62 +6960,34 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     const plannedRenderWindowEnd = cloudRenderWindowEnd;
     const plannedRenderWindowDuration = cloudRenderWindowDuration;
     const plannedProxyItems = await Promise.all(readySources.filter(isVideoSource).map(async source => {
-      const sourceDuration = Number(source.duration || 0);
-      const sourceTrimStartForWindow = clampNumber(
-        getSourceTimelineTime(source, plannedRenderWindowStart, timelineBounds.timelineStart) - 2,
-        0,
-        Math.max(0, sourceDuration - 0.2),
-        0
-      );
-      const sourceTrimEndForWindow = clampNumber(
-        getSourceTimelineTime(source, plannedRenderWindowEnd, timelineBounds.timelineStart) + 2,
-        sourceTrimStartForWindow + 0.2,
-        sourceDuration || sourceTrimStartForWindow + plannedRenderWindowDuration,
-        sourceTrimStartForWindow + plannedRenderWindowDuration
-      );
-      const sourceTrimDurationForWindow = Math.max(
-        0.2,
-        sourceTrimEndForWindow - sourceTrimStartForWindow
-      );
-      const uploadedTrimStart = Number(source.uploadedRenderTrimStart || 0) || 0;
-      const uploadedTrimDuration = Number(source.uploadedRenderTrimDuration || 0) || 0;
-      const hasMatchingRenderProxy =
-        String(source.uploadedUrl || "").startsWith("http") &&
-        uploadedTrimDuration > 0 &&
-        Math.abs(uploadedTrimStart - sourceTrimStartForWindow) <= 1 &&
-        Math.abs(
-          (uploadedTrimStart + uploadedTrimDuration) -
-            (sourceTrimStartForWindow + sourceTrimDurationForWindow)
-        ) <= 2;
-      const cachedUpload = !hasMatchingRenderProxy && source.file
-        ? await readCachedRenderProxyUpload(
-            buildRenderProxyCacheKey(source.file, {
-              start: sourceTrimStartForWindow,
-              duration: sourceTrimDurationForWindow,
-            })
-          )
+      const cachedUpload = source.file
+        ? await readCachedRenderProxyUpload(buildOriginalIngestCacheKey(source.file))
         : null;
-      const canReuseRenderProxy = hasMatchingRenderProxy || Boolean(cachedUpload?.url);
+      const existingRemoteOriginal = String(source.cloudOriginalUrl || "").startsWith("http");
+      const canReuseOriginal = existingRemoteOriginal || Boolean(cachedUpload?.url);
       return {
         label: getExportSourceLabel(source, readySources.findIndex(item => item.id === source.id)),
-        estimatedBytes: canReuseRenderProxy ? 0 : estimateVideoProxyBytes(sourceTrimDurationForWindow),
-        hasMatchingRenderProxy: canReuseRenderProxy,
+        estimatedBytes: canReuseOriginal ? 0 : Number(source.file?.size || 0),
+        hasMatchingRenderProxy: canReuseOriginal,
       };
     }));
     const estimatedVideoUploadBytes = plannedProxyItems.reduce(
       (sum, item) => sum + item.estimatedBytes,
       0
     );
-    const estimatedCleanAudioUploadBytes = hasExternalCleanAudio
-      ? estimateCleanAudioProxyBytes(externalAudioTrack, plannedRenderWindowDuration + 4)
+    const cachedExternalOriginal = hasExternalCleanAudio && externalAudioTrack?.file
+      ? await readCachedRenderProxyUpload(buildOriginalIngestCacheKey(externalAudioTrack.file))
+      : null;
+    const estimatedCleanAudioUploadBytes = hasExternalCleanAudio && !cachedExternalOriginal?.url
+      ? Number(externalAudioTrack?.file?.size || 0)
       : 0;
     const estimatedTotalUploadBytes = estimatedVideoUploadBytes + estimatedCleanAudioUploadBytes;
     const proxyLines = plannedProxyItems.map(
       item =>
         `${item.label}: ${
           item.hasMatchingRenderProxy
-            ? "existing proxy reused"
-            : `~${formatMediaBytes(item.estimatedBytes)} proxy`
+            ? "existing original upload reused"
+            : `${formatMediaBytes(item.estimatedBytes)} original`
         }`
     );
     const approvedRender = window.confirm(
@@ -6977,13 +6996,13 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         "",
         `Render window: ${formatDurationLabel(plannedRenderWindowStart)} to ${formatDurationLabel(plannedRenderWindowEnd)} (${formatDurationLabel(plannedRenderWindowDuration)})`,
         `Render credits: ${multicamRenderCreditEstimate} credits`,
-        "Proxy upload + automatic preflight: 0 credits",
+        "One-time resumable source upload + automatic preflight: 0 credits",
         hasExternalCleanAudio ? "Separate clean-audio sync charge: 0 credits in this export flow" : null,
         "",
         "Estimated upload before render:",
         ...proxyLines,
         hasExternalCleanAudio
-          ? `Clean audio proxy: ~${formatMediaBytes(estimatedCleanAudioUploadBytes)}`
+          ? `Clean audio original: ${formatMediaBytes(estimatedCleanAudioUploadBytes)}`
           : null,
         `Estimated total upload: ~${formatMediaBytes(estimatedTotalUploadBytes)}`,
         "",
@@ -6994,9 +7013,22 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         .join("\n")
     );
     if (!approvedRender) {
-      setStatusMessage("MP4 render cancelled before proxy upload or credits.");
+      setStatusMessage("MP4 render cancelled before source upload or credits.");
       return;
     }
+    cancelExportRef.current = false;
+    renderSubmissionStartedRef.current = false;
+    exportAbortControllerRef.current?.abort();
+    const exportAbortController = new AbortController();
+    exportAbortControllerRef.current = exportAbortController;
+    const exportSignal = exportAbortController.signal;
+    const assertExportActive = () => {
+      if (cancelExportRef.current || exportSignal.aborted) {
+        const cancelledError = new Error("Export cancelled before the paid render was submitted.");
+        cancelledError.name = "AbortError";
+        throw cancelledError;
+      }
+    };
     setServerExportPending(true);
     setIsExporting(true);
     setExportProgress(0);
@@ -7007,7 +7039,6 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       const auth = getAuth();
       const user = auth.currentUser;
       if (!user) throw new Error("You must be signed in to use server rendering.");
-      const storage = getStorage();
       const renderWindowStart = cloudRenderWindowStartSafe;
       const renderWindowEnd = cloudRenderWindowEnd;
       const renderWindowDuration = cloudRenderWindowDuration;
@@ -7015,15 +7046,83 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
 
       let externalAudioPayload = null;
       const verifiedSyncBySourceId = new Map();
+      const originalUploadsBySourceId = new Map();
+
+      setStatusMessage("Uploading original sources once. Uploads are resumable and retained for 72 hours...");
+      const sourceUploadResults = await Promise.all(
+        readySources.map(async (source, index) => {
+          const existingUrl = String(source.cloudOriginalUrl || "").startsWith("http")
+            ? source.cloudOriginalUrl
+            : "";
+          if (existingUrl) {
+            return [source.id, {
+              url: existingUrl,
+              cacheKey: source.cloudOriginalCacheKey || buildBackendMediaCacheKey(source.file),
+              storagePath: source.cloudOriginalStoragePath || "",
+            }];
+          }
+          const uploaded = await uploadOriginalForCloudRender({
+            user,
+            file: source.file,
+            label: getExportSourceLabel(source, index),
+            purpose: "camera_original",
+            signal: exportSignal,
+          });
+          return [source.id, uploaded];
+        })
+      );
+      assertExportActive();
+      sourceUploadResults.forEach(([sourceId, uploaded]) => {
+        originalUploadsBySourceId.set(sourceId, uploaded);
+      });
+      setSources(currentSources =>
+        currentSources.map(source => {
+          const uploaded = originalUploadsBySourceId.get(source.id);
+          return uploaded
+            ? {
+                ...source,
+                cloudOriginalUrl: uploaded.url,
+                cloudOriginalStoragePath: uploaded.storagePath || "",
+                cloudOriginalCacheKey: uploaded.cacheKey || buildBackendMediaCacheKey(source.file),
+              }
+            : source;
+        })
+      );
+
+      let externalOriginalUpload = null;
+      if (hasExternalCleanAudio && externalAudioTrack) {
+        const existingExternalUrl = String(externalAudioTrack.cloudOriginalUrl || "").startsWith("http")
+          ? externalAudioTrack.cloudOriginalUrl
+          : "";
+        externalOriginalUpload = existingExternalUrl
+          ? {
+              url: existingExternalUrl,
+              cacheKey:
+                externalAudioTrack.cloudOriginalCacheKey ||
+                buildBackendMediaCacheKey(externalAudioTrack.file),
+              storagePath: externalAudioTrack.cloudOriginalStoragePath || "",
+            }
+          : await uploadOriginalForCloudRender({
+              user,
+              file: externalAudioTrack.file,
+              label: "External clean audio",
+              purpose: "external_audio",
+              signal: exportSignal,
+            });
+      }
+      assertExportActive();
 
       const runExportPreflight = async (preflightSourcesPayload, preflightExternalAudioPayload) => {
-        setStatusMessage("Preflight: proving start/middle/end sync before video proxy upload...");
+        assertExportActive();
+        setStatusMessage("Preflight: proving start/middle/end sync from the uploaded originals...");
         try {
           const preflightBody = {
             sources: preflightSourcesPayload.map(source => ({
               id: source.id,
               label: source.label || "",
               url: source.url,
+              storage_path: source.storage_path || source.storagePath || "",
+              storagePath: source.storagePath || source.storage_path || "",
               offset_seconds: getPreflightProxyOffsetSeconds(source),
               sync_rate: source.sync_rate,
               syncRate: source.syncRate,
@@ -7039,6 +7138,14 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
               offset_seconds: preflightExternalAudioPayload.offset_seconds,
               mix_mode: preflightExternalAudioPayload.mix_mode,
               cache_key: preflightExternalAudioPayload.cache_key,
+              storage_path:
+                preflightExternalAudioPayload.storage_path ||
+                preflightExternalAudioPayload.storagePath ||
+                "",
+              storagePath:
+                preflightExternalAudioPayload.storagePath ||
+                preflightExternalAudioPayload.storage_path ||
+                "",
               sync_trim_start: Number(preflightExternalAudioPayload.upload_trim_start || 0) || 0,
               sync_trim_duration: Number(preflightExternalAudioPayload.upload_trim_duration || 0) || 0,
               upload_trim_start: Number(preflightExternalAudioPayload.upload_trim_start || 0) || 0,
@@ -7061,7 +7168,9 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
               Authorization: `Bearer ${preflightToken}`,
             },
             body: JSON.stringify(preflightBody),
+            signal: exportSignal,
           });
+          assertExportActive();
           const preflight = await preflightRes.json();
           console.log("PREFLIGHT AUTO-ALIGN RESULT:", preflight);
           if (!preflightRes.ok || preflight?.error) {
@@ -7085,7 +7194,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
             }
           });
           if (preflightStatus !== "good") {
-            setStatusMessage("Sync preflight was not proven safe. Render-window video upload cancelled before credits are spent.");
+            setStatusMessage("Sync preflight was not proven safe. Render cancelled before credits are spent.");
           } else if (adjustments.length) {
             setSources(currentSources =>
               currentSources.map(source => {
@@ -7104,7 +7213,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
               })
             );
             setStatusMessage(
-              `Preflight corrected and verified ${adjustments.length} camera${adjustments.length === 1 ? "" : "s"}. Preparing render proxies now.`
+              `Preflight corrected and verified ${adjustments.length} camera${adjustments.length === 1 ? "" : "s"}. Starting the original-quality render.`
             );
           } else if (verifiedIds.size) {
             setSources(currentSources =>
@@ -7118,7 +7227,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                   : source
               )
             );
-            setStatusMessage("Preflight proved start/middle/end sync. Preparing render proxies now.");
+            setStatusMessage("Preflight proved start/middle/end sync. Starting the original-quality render.");
           } else if (preflight.status === "unsafe") {
             setStatusMessage("Warning: Sync preflight could not find a safe automatic correction.");
           }
@@ -7127,7 +7236,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           if (preflightStatus !== "good" || missingVerified.length) {
             const preflightSummary = summarizePreflightIssue(preflight);
             throw new Error(
-              `Automatic start/middle/end sync returned ${preflightStatus || "unknown"} and could not prove ${missingVerified.length || preflightSourcesPayload.length} camera${(missingVerified.length || preflightSourcesPayload.length) === 1 ? "" : "s"}. ${preflightSummary ? `${preflightSummary}. ` : ""}Render-window video upload cancelled before credits are spent.`
+              `Automatic start/middle/end sync returned ${preflightStatus || "unknown"} and could not prove ${missingVerified.length || preflightSourcesPayload.length} camera${(missingVerified.length || preflightSourcesPayload.length) === 1 ? "" : "s"}. ${preflightSummary ? `${preflightSummary}. ` : ""}Render cancelled before credits are spent.`
             );
           }
         } catch (preflightErr) {
@@ -7135,95 +7244,49 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           const preflightErrorText = String(preflightErr?.message || "");
           if (/token expired|auth|session/i.test(preflightErrorText)) {
             throw new Error(
-              "Session refreshed too late during sync preflight. Render-window video upload cancelled before credits are spent. Retry now; small sync proxies should be reused."
+              "Session refreshed too late during sync preflight. Render cancelled before credits are spent. Retry now; the original uploads will be reused."
             );
           }
           throw preflightErr instanceof Error
             ? preflightErr
-            : new Error("Automatic start/middle/end sync preflight failed. Render-window video upload cancelled before credits are spent.");
+            : new Error("Automatic start/middle/end sync preflight failed. Render cancelled before credits are spent.");
         }
       };
 
       if (hasExternalCleanAudio && externalAudioTrack) {
-        setStatusMessage("Uploading small audio proxies for sync preflight before video render uploads...");
-        const preflightSourcesPayload = [];
-        for (let i = 0; i < readySources.length; i++) {
-          const source = readySources[i];
+        setStatusMessage("Originals uploaded. Proving start/middle/end sync on the server...");
+        const preflightSourcesPayload = readySources.map((source, i) => {
           const sourceLabel = getExportSourceLabel(source, i);
-          const sourceDuration = Number(source.duration || 0);
-          const sourceTrimStartForWindow = clampNumber(
-            getSourceTimelineTime(source, renderWindowStart, timelineBounds.timelineStart) - 2,
-            0,
-            Math.max(0, sourceDuration - 0.2),
-            0
-          );
-          const sourceTrimEndForWindow = clampNumber(
-            getSourceTimelineTime(source, renderWindowEnd, timelineBounds.timelineStart) + 2,
-            sourceTrimStartForWindow + 0.2,
-            sourceDuration || sourceTrimStartForWindow + renderWindowDuration,
-            sourceTrimStartForWindow + renderWindowDuration
-          );
-          const sourceTrimDurationForWindow = Math.max(
-            0.2,
-            sourceTrimEndForWindow - sourceTrimStartForWindow
-          );
-          // eslint-disable-next-line no-await-in-loop
-          const syncUpload = await uploadMediaForBackendSync({
-            user,
-            storage,
-            file: source.file,
-            fallbackUrl: "",
-            folder: "temp/multicam-clean-sync",
-            label: `${sourceLabel} preflight audio`,
-            mode: "audio_only",
-            trimWindow: {
-              start: sourceTrimStartForWindow,
-              duration: sourceTrimDurationForWindow,
-            },
-          });
-          preflightSourcesPayload.push({
+          const originalUpload = originalUploadsBySourceId.get(source.id);
+          return {
             id: source.id,
-            url: syncUpload.syncAudioUrl || syncUpload.url,
+            url: originalUpload?.url,
             label: sourceLabel,
             offset_seconds: Number(source.offsetSeconds) || 0,
             sync_rate: getSourceSyncRate(source),
             syncRate: getSourceSyncRate(source),
-            upload_trim_start: Number(syncUpload.trimStart ?? sourceTrimStartForWindow) || 0,
-            upload_trim_duration: Number(syncUpload.trimDuration ?? sourceTrimDurationForWindow) || 0,
-          });
-        }
+            cache_key: originalUpload?.cacheKey || buildBackendMediaCacheKey(source.file),
+            storage_path: originalUpload?.storagePath || "",
+            storagePath: originalUpload?.storagePath || "",
+            upload_trim_start: 0,
+            upload_trim_duration: 0,
+          };
+        });
 
         const externalOriginalOffset = Number(externalAudioTrack.offsetSeconds || 0) || 0;
-        const externalTrimStartForWindow = Math.max(
-          0,
-          renderTimelineStart - externalOriginalOffset - 2
-        );
-        const externalTrimDurationForWindow = Math.min(
-          Number(externalAudioTrack.duration || 0) || renderWindowDuration + 4,
-          renderWindowDuration + 4
-        );
-        const externalAudioUpload = await uploadMediaForBackendSync({
-          user,
-          storage,
-          file: externalAudioTrack.file,
-          fallbackUrl: "",
-          folder: "temp/multicam-clean-sync-audio",
-          label: "External clean audio",
-          mode: "audio_only",
-          trimWindow: {
-            start: externalTrimStartForWindow,
-            duration: externalTrimDurationForWindow,
-          },
-        });
-        const externalAudioRemoteUrl = externalAudioUpload.url;
-        const externalUploadTrimStart = Number(externalAudioUpload.trimStart ?? externalTrimStartForWindow) || 0;
+        const externalAudioRemoteUrl = externalOriginalUpload?.url;
         externalAudioPayload = {
           url: externalAudioRemoteUrl,
-          offset_seconds: externalOriginalOffset + externalUploadTrimStart,
+          offset_seconds: externalOriginalOffset,
           mix_mode: externalAudioMixMode,
-          cache_key: buildBackendMediaCacheKey(externalAudioTrack.file) || externalAudioTrack.name,
-          upload_trim_start: externalUploadTrimStart,
-          upload_trim_duration: Number(externalAudioUpload.trimDuration ?? externalTrimDurationForWindow) || 0,
+          cache_key:
+            externalOriginalUpload?.cacheKey ||
+            buildBackendMediaCacheKey(externalAudioTrack.file) ||
+            externalAudioTrack.name,
+          storage_path: externalOriginalUpload?.storagePath || "",
+          storagePath: externalOriginalUpload?.storagePath || "",
+          upload_trim_start: 0,
+          upload_trim_duration: 0,
         };
         setExternalAudioTrack(current =>
           current
@@ -7231,12 +7294,14 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                 ...current,
                 url: externalAudioRemoteUrl,
                 cacheKey: externalAudioPayload.cache_key,
-                uploadedRenderTrimStart: externalUploadTrimStart,
-                uploadedRenderTrimDuration: externalAudioPayload.upload_trim_duration,
+                cloudOriginalUrl: externalAudioRemoteUrl,
+                cloudOriginalStoragePath: externalOriginalUpload?.storagePath || "",
+                cloudOriginalCacheKey: externalAudioPayload.cache_key,
               }
             : current
         );
         await runExportPreflight(preflightSourcesPayload, externalAudioPayload);
+        assertExportActive();
       }
 
       const sourcesPayload = [];
@@ -7256,77 +7321,12 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         setStatusMessage(
           `Preparing ${sourceLabel} for cloud render (${i + 1}/${readySources.length})...`
         );
-        const sourceDuration = Number(source.duration || 0);
-        const sourceTrimStartForWindow = clampNumber(
-          getSourceTimelineTime(sourceForRender, renderWindowStart, timelineBounds.timelineStart) - 2,
-          0,
-          Math.max(0, sourceDuration - 0.2),
-          0
-        );
-        const sourceTrimEndForWindow = clampNumber(
-          getSourceTimelineTime(sourceForRender, renderWindowEnd, timelineBounds.timelineStart) + 2,
-          sourceTrimStartForWindow + 0.2,
-          sourceDuration || sourceTrimStartForWindow + renderWindowDuration,
-          sourceTrimStartForWindow + renderWindowDuration
-        );
-        const sourceTrimDurationForWindow = Math.max(
-          0.2,
-          sourceTrimEndForWindow - sourceTrimStartForWindow
-        );
-        const uploadedTrimStart = Number(source.uploadedRenderTrimStart || 0) || 0;
-        const uploadedTrimDuration = Number(source.uploadedRenderTrimDuration || 0) || 0;
-        const hasMatchingRenderProxy =
-          String(source.uploadedUrl || "").startsWith("http") &&
-          uploadedTrimDuration > 0 &&
-          Math.abs(uploadedTrimStart - sourceTrimStartForWindow) <= 1 &&
-          Math.abs(
-            (uploadedTrimStart + uploadedTrimDuration) -
-              (sourceTrimStartForWindow + sourceTrimDurationForWindow)
-          ) <= 2;
-        const cachedRenderProxyUpload = !hasMatchingRenderProxy && source.file
-          ? await readCachedRenderProxyUpload(
-              buildRenderProxyCacheKey(source.file, {
-                start: sourceTrimStartForWindow,
-                duration: sourceTrimDurationForWindow,
-              })
-            )
-          : null;
-
-        let usingRenderProxy = hasMatchingRenderProxy || Boolean(cachedRenderProxyUpload?.url);
-        let remoteUrl =
-          hasMatchingRenderProxy
-            ? source.uploadedUrl
-            : cachedRenderProxyUpload?.url ||
-              (String(source.url || "").startsWith("http") ? source.url : "");
-        if (!remoteUrl && source.file) {
-          const uploadResult = await uploadMediaForBackendSync({
-            user,
-            storage,
-            file: source.file,
-            fallbackUrl: "",
-            folder: "temp/multicam-clean-sync",
-            label: sourceLabel,
-            mode: "auto",
-            trimWindow: {
-              start: sourceTrimStartForWindow,
-              duration: sourceTrimDurationForWindow,
-            },
-          });
-          remoteUrl = uploadResult.videoUrl || uploadResult.url;
-          usingRenderProxy = true;
-          setStatusMessage(`${sourceLabel} ready for cloud render.`);
-        } else if (cachedRenderProxyUpload?.url) {
-          setStatusMessage(`${sourceLabel} uploaded proxy reused for cloud render.`);
-        }
-        if (!remoteUrl) {
-          remoteUrl = source.serverRenderLocalPath || source.localRenderPath || "";
-        }
+        const originalUpload = originalUploadsBySourceId.get(source.id);
+        const remoteUrl = originalUpload?.url || "";
         if (!remoteUrl) throw new Error(`No video file for ${source.label}.`);
 
         const renderSyncRate = getSourceSyncRate(sourceForRender);
-        const renderOffsetSeconds =
-          (Number(sourceForRender.offsetSeconds) || 0) +
-          (usingRenderProxy ? sourceTrimStartForWindow / Math.max(0.001, renderSyncRate) : 0);
+        const renderOffsetSeconds = Number(sourceForRender.offsetSeconds) || 0;
         sourcesPayload.push({
           id: source.id,
           url: remoteUrl,
@@ -7334,6 +7334,9 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           offset_seconds: renderOffsetSeconds,
           sync_rate: renderSyncRate,
           syncRate: renderSyncRate,
+          cache_key: originalUpload?.cacheKey || buildBackendMediaCacheKey(source.file),
+          storage_path: originalUpload?.storagePath || "",
+          storagePath: originalUpload?.storagePath || "",
           reaction_side: getPreviewReactionSideForSource(
             source,
             i,
@@ -7344,8 +7347,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
             i,
             reactionSideOverridesByCameraId[source.id]
           ),
-          upload_trim_start: usingRenderProxy ? sourceTrimStartForWindow : 0,
-          upload_trim_duration: usingRenderProxy ? sourceTrimDurationForWindow : 0,
+          upload_trim_start: 0,
+          upload_trim_duration: 0,
         });
       }
       setSources(currentSources =>
@@ -7356,9 +7359,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
             : uploaded
               ? {
                   ...source,
-                  uploadedUrl: uploaded.url,
-                  uploadedRenderTrimStart: Number(uploaded.upload_trim_start || 0) || 0,
-                  uploadedRenderTrimDuration: Number(uploaded.upload_trim_duration || 0) || 0,
+                  cloudOriginalUrl: uploaded.url,
+                  cloudOriginalCacheKey: uploaded.cache_key || source.cloudOriginalCacheKey || "",
                 }
               : source;
         })
@@ -7515,6 +7517,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
             ? [sourcesPayload[1].id, sourcesPayload[0].id]
             : [sourcesPayload[0].id, sourcesPayload[1].id]
           : null;
+      assertExportActive();
+      renderSubmissionStartedRef.current = true;
       const renderToken = await user.getIdToken(true);
       const response = await fetch(`${API_BASE_URL}/api/media/render-multicam`, {
         method: "POST",
@@ -7564,7 +7568,10 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           external_audio_mix_mode: externalAudioPayload?.mix_mode || "external_only",
           external_audio_cache_key: externalAudioPayload?.cache_key || null,
         }),
+        signal: exportSignal,
       });
+
+      if (cancelExportRef.current) return;
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -7697,9 +7704,23 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       }
     } catch (error) {
       console.error(error);
-      setStatusMessage(error.message || "Server export failed.");
-      toast.error(error.message || "Server export failed.");
+      if (!exportSignal.aborted && !renderSubmissionStartedRef.current) {
+        exportAbortController.abort();
+      }
+      if (error?.name === "AbortError" || cancelExportRef.current) {
+        setStatusMessage(
+          renderSubmissionStartedRef.current
+            ? "Stopped monitoring. The server render was already submitted and may still finish."
+            : "Export cancelled before the paid render was submitted."
+        );
+      } else {
+        setStatusMessage(error.message || "Server export failed.");
+        toast.error(error.message || "Server export failed.");
+      }
     } finally {
+      if (exportAbortControllerRef.current === exportAbortController) {
+        exportAbortControllerRef.current = null;
+      }
       if (!asyncRenderStarted) {
         setServerExportPending(false);
         setIsExporting(false);
