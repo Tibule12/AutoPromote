@@ -77,6 +77,22 @@ describe("mediaRoutes render approval", () => {
       type: "multicam_render",
       status: "completed",
       output_url: "https://cdn.example.com/held.mp4",
+      renderSpecVersion: 2,
+      totalDurationSeconds: 2640,
+      checkpointSeconds: 300,
+      checkpointedRender: true,
+      expectedCheckpointCount: 9,
+      renderCheckpoint: {
+        stage: "rendering_chunks",
+        currentIndex: 4,
+        completedCount: 4,
+        expectedCount: 9,
+        completedDurationSeconds: 1200,
+        totalDurationSeconds: 2640,
+        chunks: ["intentionally-not-exposed"],
+      },
+      manifest_url: "https://cdn.example.com/multicam-job-1.json",
+      manifest_storage_path: "processed/manifests/multicam_job-1.json",
       result: {
         url: "https://cdn.example.com/held.mp4",
         duration: 90,
@@ -94,6 +110,21 @@ describe("mediaRoutes render approval", () => {
     expect(response.body.outputUrl).toBeNull();
     expect(response.body.result.url).toBeUndefined();
     expect(response.body.previewUrl).toBe("https://cdn.example.com/held.mp4");
+    expect(response.body.renderCheckpoint).toEqual({
+      stage: "rendering_chunks",
+      status: null,
+      resumable: false,
+      currentIndex: 4,
+      completedCount: 4,
+      expectedCount: 9,
+      completedDurationSeconds: 1200,
+      totalDurationSeconds: 2640,
+    });
+    expect(response.body.renderCheckpoint.chunks).toBeUndefined();
+    expect(response.body.manifestUrl).toBe("https://cdn.example.com/multicam-job-1.json");
+    expect(response.body.manifestStoragePath).toBe(
+      "processed/manifests/multicam_job-1.json"
+    );
   });
 
   it("approves a held render and exposes the approved output URL", async () => {

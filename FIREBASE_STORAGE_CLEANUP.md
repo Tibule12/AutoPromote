@@ -18,6 +18,7 @@ To prevent excessive billing for storage, we must ensure temporary files are del
 
 - **Original ingest:** `temp/multicam-ingest/{userId}/*`, retained for 72 hours so a failed job can retry without another multi-gigabyte upload.
 - **Sync artifacts:** `temp/multicam-clean-sync*`, retained for at most 24 hours.
+- **Render checkpoints:** `temp/multicam-checkpoints/{jobId}/*`, deleted immediately after the final master and manifest commit; the 24-hour lifecycle rule removes abandoned checkpoints after terminal failures.
 - **Deliverables:** `processed/multicam_*`, thumbnails, and manifests are retained for 7 days.
 - **Upload model:** Originals are uploaded once with an authenticated resumable session. Preflight and rendering reuse the same object generation.
 - **Safety:** Object creation timestamps in filenames are never treated as deletion deadlines. Only explicit object metadata or object age controls expiry.
@@ -54,6 +55,7 @@ To prevent excessive billing for storage, we must ensure temporary files are del
             "temp_sources/",
             "temp_scans/",
             "temp/multicam/",
+            "temp/multicam-checkpoints/",
             "temp/multicam-clean-sync/",
             "temp/multicam-clean-sync-audio/"
           ]

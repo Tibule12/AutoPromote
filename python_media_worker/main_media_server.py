@@ -32,6 +32,19 @@ from scenedetect import SceneManager, open_video
 from scenedetect.detectors import ContentDetector
 from dotenv import load_dotenv
 
+try:
+    from .multicam_chunking import (
+        build_multicam_chunk_plan,
+        multicam_chunk_checkpoint_paths,
+        multicam_chunk_plan_fingerprint,
+    )
+except ImportError:
+    from multicam_chunking import (
+        build_multicam_chunk_plan,
+        multicam_chunk_checkpoint_paths,
+        multicam_chunk_plan_fingerprint,
+    )
+
 # Fix asyncio event loop policy for Windows (Enable Proactor for Subprocesses)
 if sys.platform == 'win32':
     asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
@@ -527,7 +540,7 @@ def probe_media_stream_summary(input_path):
                 "-v",
                 "error",
                 "-show_entries",
-                "stream=index,codec_type,codec_name,duration",
+                "stream=index,codec_type,codec_name,profile,pix_fmt,width,height,avg_frame_rate,time_base,duration",
                 "-show_entries",
                 "format=duration,size",
                 "-of",
@@ -8797,6 +8810,165 @@ def upload_file_to_firebase_with_retries(local_path, destination_path, attempts=
     return None
 
 
+def sha256_file(local_path, chunk_bytes=8 * 1024 * 1024):
+    digest = hashlib.sha256()
+    with open(local_path, "rb") as source_file:
+        while True:
+            chunk = source_file.read(max(1024, int(chunk_bytes or 0)))
+            if not chunk:
+                break
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def upload_multicam_checkpoint_object(local_path, destination_path, metadata=None, attempts=3):
+    """Publish a private, deterministic checkpoint object with integrity metadata."""
+    if not local_path or not os.path.exists(local_path):
+        raise RuntimeError(f"Multicam checkpoint file is missing: {local_path}")
+    safe_metadata = {
+        str(key): str(value)
+        for key, value in (metadata or {}).items()
+        if value is not None
+    }
+    safe_metadata["sha256"] = sha256_file(local_path)
+    safe_metadata["autopromotePurpose"] = safe_metadata.get(
+        "autopromotePurpose",
+        "multicam_render_checkpoint",
+    )
+    timeout_seconds = max(
+        120,
+        int(os.getenv("FIREBASE_UPLOAD_TIMEOUT_SECONDS", "900") or 900),
+    )
+    attempts = max(1, min(int(attempts or 1), 5))
+    last_error = None
+    for attempt in range(1, attempts + 1):
+        try:
+            bucket = storage.bucket()
+            blob = bucket.blob(destination_path)
+            blob.metadata = safe_metadata
+            blob.cache_control = "private, no-store, max-age=0"
+            blob.chunk_size = 8 * 1024 * 1024
+            blob.upload_from_filename(local_path, timeout=timeout_seconds)
+            blob.reload(timeout=60)
+            return {
+                "storage_path": destination_path,
+                "generation": str(blob.generation or ""),
+                "size_bytes": int(blob.size or os.path.getsize(local_path)),
+                "sha256": safe_metadata["sha256"],
+                "metadata": safe_metadata,
+            }
+        except Exception as error:
+            last_error = error
+            if attempt < attempts:
+                time.sleep(min(8, 2 ** (attempt - 1)))
+    raise RuntimeError(
+        f"Could not publish multicam checkpoint {destination_path}: {last_error}"
+    )
+
+
+def restore_multicam_checkpoint_object(destination_path, local_path, expected_metadata=None):
+    """Restore a checkpoint only when its immutable metadata and SHA-256 match."""
+    expected = {
+        str(key): str(value)
+        for key, value in (expected_metadata or {}).items()
+        if value is not None
+    }
+    try:
+        bucket = storage.bucket()
+        blob = bucket.blob(destination_path)
+        if not blob.exists(timeout=30):
+            return None
+        blob.reload(timeout=60)
+        actual_metadata = {
+            str(key): str(value)
+            for key, value in (blob.metadata or {}).items()
+            if value is not None
+        }
+        if any(actual_metadata.get(key) != value for key, value in expected.items()):
+            logger.warning(
+                "Ignoring stale multicam checkpoint metadata for %s",
+                destination_path,
+            )
+            return None
+        expected_sha256 = actual_metadata.get("sha256")
+        if not expected_sha256:
+            logger.warning("Ignoring multicam checkpoint without SHA-256: %s", destination_path)
+            return None
+        os.makedirs(os.path.dirname(os.path.abspath(local_path)), exist_ok=True)
+        part_path = f"{local_path}.part"
+        if os.path.exists(part_path):
+            os.remove(part_path)
+        blob.download_to_filename(part_path, timeout=900)
+        actual_sha256 = sha256_file(part_path)
+        if not hmac.compare_digest(expected_sha256, actual_sha256):
+            os.remove(part_path)
+            logger.error("Multicam checkpoint SHA-256 mismatch: %s", destination_path)
+            return None
+        os.replace(part_path, local_path)
+        return {
+            "storage_path": destination_path,
+            "generation": str(blob.generation or ""),
+            "size_bytes": int(blob.size or os.path.getsize(local_path)),
+            "sha256": actual_sha256,
+            "metadata": actual_metadata,
+            "restored": True,
+        }
+    except Exception as error:
+        logger.warning("Could not restore multicam checkpoint %s: %s", destination_path, error)
+        try:
+            if os.path.exists(f"{local_path}.part"):
+                os.remove(f"{local_path}.part")
+        except OSError:
+            pass
+        return None
+
+
+def delete_multicam_checkpoint_prefix(job_id):
+    safe_job_id = re.sub(r"[^A-Za-z0-9_-]+", "-", str(job_id or "")).strip("-")
+    if not safe_job_id:
+        return {"deleted": 0, "status": "skipped_invalid_job_id"}
+    prefix = f"temp/multicam-checkpoints/{safe_job_id}/"
+    deleted = 0
+    try:
+        bucket = storage.bucket()
+        for blob in bucket.list_blobs(prefix=prefix):
+            blob.delete(timeout=60)
+            deleted += 1
+        return {"deleted": deleted, "status": "deleted", "prefix": prefix}
+    except Exception as error:
+        logger.warning("Could not clean multicam checkpoints for %s: %s", job_id, error)
+        return {
+            "deleted": deleted,
+            "status": "cleanup_deferred_to_lifecycle",
+            "prefix": prefix,
+            "error": str(error)[:500],
+        }
+
+
+def delete_multicam_checkpoint_object(destination_path):
+    safe_path = str(destination_path or "").strip()
+    if not safe_path.startswith("temp/multicam-checkpoints/"):
+        return False
+    try:
+        storage.bucket().blob(safe_path).delete(timeout=60)
+        return True
+    except Exception as error:
+        logger.warning("Could not discard invalid multicam checkpoint %s: %s", safe_path, error)
+        return False
+
+
+def persist_multicam_checkpoint_receipt(job_id, chunk_index, receipt):
+    if not job_id or not FIREBASE_STATUS_UPDATES_ENABLED:
+        return False
+    compact_receipt = dict(receipt or {})
+    compact_receipt.pop("metadata", None)
+    compact_receipt["updatedAt"] = firestore.SERVER_TIMESTAMP
+    firestore.client().collection("video_edits").document(job_id).collection(
+        "multicam_chunks"
+    ).document(f"{int(chunk_index):04d}").set(compact_receipt, merge=True)
+    return True
+
+
 def resolve_local_output_path(file_name):
     safe_name = os.path.basename(str(file_name or "")).strip()
     if not safe_name or safe_name in {".", ".."}:
@@ -11583,6 +11755,16 @@ class RenderMultiCamRequest(BaseModel):
     async_mode: bool = False
     plan_only: bool = False
     planOnly: Optional[bool] = None
+    render_spec_version: Optional[int] = None
+    renderSpecVersion: Optional[int] = None
+    total_duration_seconds: Optional[float] = None
+    totalDurationSeconds: Optional[float] = None
+    checkpoint_seconds: Optional[float] = None
+    checkpointSeconds: Optional[float] = None
+    checkpointed_render: Optional[bool] = None
+    checkpointedRender: Optional[bool] = None
+    expected_checkpoint_count: Optional[int] = None
+    expectedCheckpointCount: Optional[int] = None
     qa_proof_status: Optional[str] = None
     qaProofStatus: Optional[str] = None
     qa_proof_receipt_id: Optional[str] = None
@@ -11592,8 +11774,37 @@ class RenderMultiCamRequest(BaseModel):
 
 MULTICAM_ENFORCE_PROD_LIMITS = env_flag("MULTICAM_ENFORCE_PROD_LIMITS", default=IS_PRODUCTION_ENV)
 MULTICAM_BETA_MAX_CAMERAS = max(2, int(os.getenv("MULTICAM_BETA_MAX_CAMERAS", "3") or 3))
-MULTICAM_BETA_MAX_SECONDS = max(60, int(os.getenv("MULTICAM_BETA_MAX_SECONDS", "1200") or 1200))
+MULTICAM_BETA_MAX_SECONDS = max(60, int(os.getenv("MULTICAM_BETA_MAX_SECONDS", "10800") or 10800))
 MULTICAM_BETA_MAX_SEGMENTS = max(20, int(os.getenv("MULTICAM_BETA_MAX_SEGMENTS", "450") or 450))
+MULTICAM_RENDER_CHECKPOINTS_ENABLED = env_flag(
+    "MULTICAM_RENDER_CHECKPOINTS_ENABLED",
+    default=IS_PRODUCTION_ENV,
+)
+MULTICAM_RENDER_CHECKPOINT_SECONDS = max(
+    60.0,
+    min(1200.0, float(os.getenv("MULTICAM_RENDER_CHECKPOINT_SECONDS", "300") or 300)),
+)
+MULTICAM_CHECKPOINT_DURATION_TOLERANCE_SECONDS = max(
+    2.0 / 30.0,
+    min(
+        0.25,
+        float(os.getenv("MULTICAM_CHECKPOINT_DURATION_TOLERANCE_SECONDS", "0.10") or 0.10),
+    ),
+)
+
+
+def resolve_multicam_checkpoint_seconds(request=None):
+    requested = None
+    if request is not None:
+        requested = (
+            request.checkpoint_seconds
+            if request.checkpoint_seconds is not None
+            else request.checkpointSeconds
+        )
+    return max(
+        60.0,
+        min(1200.0, float(requested or MULTICAM_RENDER_CHECKPOINT_SECONDS)),
+    )
 MULTICAM_REQUIRE_QA_PROOF_FOR_LONG_RENDER = env_flag(
     "MULTICAM_REQUIRE_QA_PROOF_FOR_LONG_RENDER",
     default=IS_PRODUCTION_ENV,
@@ -16960,6 +17171,12 @@ def enforce_multicam_production_limits(
     qa_overlap_duration=None,
 ):
     tier = normalize_multicam_render_tier(request)
+    checkpoint_seconds = resolve_multicam_checkpoint_seconds(request)
+    checkpoint_count = max(
+        1,
+        int(math.ceil(float(overlap_duration or 0.0) / checkpoint_seconds)),
+    )
+    max_segments_for_duration = MULTICAM_BETA_MAX_SEGMENTS * checkpoint_count
     canonical_qa_duration = (
         float(qa_overlap_duration)
         if qa_overlap_duration is not None and float(qa_overlap_duration) > 0.0
@@ -16975,7 +17192,10 @@ def enforce_multicam_production_limits(
         "tier": tier,
         "max_cameras": MULTICAM_BETA_MAX_CAMERAS,
         "max_duration_seconds": MULTICAM_BETA_MAX_SECONDS,
-        "max_segments": MULTICAM_BETA_MAX_SEGMENTS,
+        "max_segments_per_checkpoint": MULTICAM_BETA_MAX_SEGMENTS,
+        "max_segments": max_segments_for_duration,
+        "checkpoint_seconds": round(checkpoint_seconds, 3),
+        "checkpoint_count": checkpoint_count,
         "camera_count": len(request.sources or []),
         "duration_seconds": round(float(overlap_duration or 0.0), 3),
         "segment_count": segment_count,
@@ -16999,7 +17219,7 @@ def enforce_multicam_production_limits(
                 "limits": limits,
             },
         )
-    if segment_count is not None and int(segment_count) > MULTICAM_BETA_MAX_SEGMENTS:
+    if segment_count is not None and int(segment_count) > max_segments_for_duration:
         raise HTTPException(
             status_code=422,
             detail={
@@ -17032,6 +17252,64 @@ def validate_multicam_segment_duration(segment_path, expected_duration, segment_
         if strict_mode:
             raise HTTPException(status_code=500, detail={"message": message, "segment": receipt})
         logger.warning(message)
+    return receipt
+
+
+def validate_multicam_checkpoint_media(
+    checkpoint_path,
+    expected_duration,
+    chunk_index,
+    *,
+    expected_width,
+    expected_height,
+):
+    summary = probe_media_stream_summary(checkpoint_path)
+    streams = summary.get("streams") or []
+    video_streams = [stream for stream in streams if stream.get("codec_type") == "video"]
+    audio_streams = [stream for stream in streams if stream.get("codec_type") == "audio"]
+    video = video_streams[0] if video_streams else {}
+    actual_duration = float((summary.get("format") or {}).get("duration") or 0.0)
+    expected = max(0.0, float(expected_duration or 0.0))
+    delta = actual_duration - expected
+    profile = {
+        "codec_name": video.get("codec_name"),
+        "profile": video.get("profile"),
+        "pix_fmt": video.get("pix_fmt"),
+        "width": int(video.get("width") or 0),
+        "height": int(video.get("height") or 0),
+        "avg_frame_rate": video.get("avg_frame_rate"),
+        "time_base": video.get("time_base"),
+        "has_audio": bool(audio_streams),
+    }
+    profile_fingerprint = hashlib.sha256(
+        json.dumps(profile, sort_keys=True, separators=(",", ":"), default=str).encode("utf-8")
+    ).hexdigest()
+    receipt = {
+        "segment_index": f"checkpoint-{chunk_index}",
+        "path": checkpoint_path,
+        "expected_duration_seconds": round(expected, 6),
+        "actual_duration_seconds": round(actual_duration, 6),
+        "delta_seconds": round(delta, 6),
+        "tolerance_seconds": round(MULTICAM_CHECKPOINT_DURATION_TOLERANCE_SECONDS, 6),
+        "profile": profile,
+        "profile_fingerprint": profile_fingerprint,
+        "ok": bool(
+            video_streams
+            and not audio_streams
+            and str(video.get("codec_name") or "").lower() == "h264"
+            and int(video.get("width") or 0) == int(expected_width)
+            and int(video.get("height") or 0) == int(expected_height)
+            and abs(delta) <= MULTICAM_CHECKPOINT_DURATION_TOLERANCE_SECONDS
+        ),
+    }
+    if not receipt["ok"]:
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "message": "Multicam checkpoint failed strict media validation",
+                "checkpoint": receipt,
+            },
+        )
     return receipt
 
 def validate_multicam_output_streams(output_path, expected_duration, job_id):
@@ -21665,6 +21943,212 @@ async def apply_multicam_color_matching(prepared_sources, overlap_start, overlap
     return receipt
 
 
+async def render_multicam_video_segment(
+    segment,
+    segment_output_path,
+    segment_index,
+    *,
+    prepared_sources,
+    source_map,
+    overlap_start,
+    output_width,
+    output_height,
+    render_tier_profile,
+    job_id,
+):
+    segment_start = float(segment["timeline_start"])
+    segment_end = float(segment["timeline_end"])
+    segment_duration = max(0.0, segment_end - segment_start)
+    if segment_duration <= 0.02:
+        raise HTTPException(status_code=400, detail="Multicam segment duration is empty")
+
+    source = source_map.get(segment["camera_id"]) or prepared_sources[0]
+    trim_start = float(segment["source_start"])
+    trim_end = float(segment["source_end"])
+    raw_segment_duration = max(0.02, trim_end - trim_start)
+    layout_mode = normalize_multicam_layout_mode(segment.get("layout_mode", "cut") or "cut")
+
+    if trim_start < 0 or trim_end > source["duration"] + 0.01:
+        raise HTTPException(status_code=400, detail=f"Segment exceeds source bounds for {source['label']}")
+
+    layout_sources = pick_layout_sources(
+        source,
+        prepared_sources,
+        overlap_start,
+        segment_start,
+        segment_duration,
+        max_sources=int(render_tier_profile.get("max_layout_sources") or 3),
+        preferred_secondary_camera_id=segment.get("secondary_camera_id"),
+    )
+    logger.info(
+        f"Segment {segment_index}: camera={source['label']} layout={layout_mode} "
+        f"reason={segment.get('layout_reason', '')} "
+        f"secondary={segment.get('secondary_camera_id')} "
+        f"timeline={segment_start:.1f}s→{segment_end:.1f}s sources={len(layout_sources)}"
+    )
+    rendered_composite = await render_multicam_layout_segment(
+        segment_output_path,
+        layout_mode,
+        layout_sources,
+        overlap_start,
+        segment_start,
+        segment_duration,
+        output_width,
+        output_height,
+        job_id,
+        primary_source_start=trim_start,
+        primary_source_end=trim_end,
+        layout_source_ranges={
+            camera_id: (start, end)
+            for camera_id, start, end in [
+                (
+                    segment.get("camera_id"),
+                    segment.get("source_start"),
+                    segment.get("source_end"),
+                ),
+                (
+                    segment.get("secondary_camera_id"),
+                    segment.get("secondary_source_start"),
+                    segment.get("secondary_source_end"),
+                ),
+            ]
+            if camera_id is not None and start is not None and end is not None
+        },
+        segment_index=segment_index,
+    )
+    if not rendered_composite:
+        logger.info(
+            f"Segment {segment_index}: FALLBACK to single-camera — layout={layout_mode} "
+            f"layout_sources={len(layout_sources)} "
+            f"reason={'not_enough_sources' if len(layout_sources) < 2 else 'layout_mode_not_applicable'}"
+        )
+        single_setpts = clamp_float(segment_duration / raw_segment_duration, 0.25, 4.0)
+        single_render_path = source.get("render_path") or source["path"]
+        single_render_shift = max(
+            0.0,
+            float(source.get("render_time_shift_seconds", 0.0) or 0.0),
+        )
+        single_render_trim_start = max(0.0, trim_start - single_render_shift)
+        single_rotation = source.get(
+            "render_rotation_degrees",
+            source.get("rotation_degrees", 0),
+        )
+        single_visual_filter = str(
+            source.get("render_visual_filter", source.get("source_visual_filter") or "") or ""
+        ).strip().strip(",")
+        single_prefix = (
+            f"{multicam_rotation_filter(single_rotation)}"
+            f"trim=start=0:duration={raw_segment_duration:.6f},"
+            f"setpts=PTS-STARTPTS,setpts={single_setpts:.9f}*PTS,fps=30,"
+            f"{single_visual_filter + ',' if single_visual_filter else ''}"
+        )
+        single_filter = ";".join(
+            [
+                f"[0:v]{single_prefix}setsar=1[cutsrc]",
+                multicam_single_cut_filter(
+                    "cutsrc",
+                    output_width,
+                    output_height,
+                    "v",
+                    is_vertical_output=output_height > output_width,
+                ),
+            ]
+        )
+        await run_subprocess_async(
+            [
+                "ffmpeg",
+                "-fflags",
+                "+genpts",
+                "-ss",
+                str(single_render_trim_start),
+                "-i",
+                single_render_path,
+                "-t",
+                str(raw_segment_duration),
+                "-filter_complex",
+                single_filter,
+                "-map",
+                "[v]",
+                "-t",
+                f"{segment_duration:.6f}",
+                *build_multicam_segment_encode_args(),
+                "-an",
+                "-movflags",
+                "+faststart",
+                "-vsync",
+                "cfr",
+                "-y",
+                segment_output_path,
+            ],
+            check=True,
+            job_context=job_id,
+        )
+    return validate_multicam_segment_duration(
+        segment_output_path,
+        segment_duration,
+        segment_index,
+    )
+
+
+async def concat_multicam_video_parts(part_paths, output_path, concat_list_path, job_id):
+    if not part_paths:
+        raise HTTPException(status_code=400, detail="No multicam video parts were produced")
+    if len(part_paths) == 1:
+        shutil.copy2(part_paths[0], output_path)
+        return {"mode": "single_part_copy", "part_count": 1}
+
+    with open(concat_list_path, "w", encoding="utf-8") as concat_file:
+        for part_path in part_paths:
+            concat_file.write(f"file '{part_path}'\n")
+    try:
+        try:
+            await run_subprocess_async(
+                [
+                    "ffmpeg",
+                    "-f",
+                    "concat",
+                    "-safe",
+                    "0",
+                    "-i",
+                    concat_list_path,
+                    "-c",
+                    "copy",
+                    "-y",
+                    output_path,
+                ],
+                check=True,
+                job_context=job_id,
+            )
+            return {"mode": "stream_copy", "part_count": len(part_paths)}
+        except Exception:
+            await run_subprocess_async(
+                [
+                    "ffmpeg",
+                    "-f",
+                    "concat",
+                    "-safe",
+                    "0",
+                    "-i",
+                    concat_list_path,
+                    "-c:v",
+                    "libx264",
+                    "-an",
+                    "-pix_fmt",
+                    "yuv420p",
+                    "-movflags",
+                    "+faststart",
+                    "-y",
+                    output_path,
+                ],
+                check=True,
+                job_context=job_id,
+            )
+            return {"mode": "fallback_reencode", "part_count": len(part_paths)}
+    finally:
+        if os.path.exists(concat_list_path):
+            os.remove(concat_list_path)
+
+
 async def render_multicam_impl(
     request: RenderMultiCamRequest,
     provided_job_id: str = None,
@@ -21693,6 +22177,7 @@ async def render_multicam_impl(
     job_id = provided_job_id or str(uuid.uuid4())
     render_tier = normalize_multicam_render_tier(request)
     render_tier_profile = get_multicam_render_tier_profile(render_tier)
+    render_checkpoint_seconds = resolve_multicam_checkpoint_seconds(request)
     primary_audio_camera_id = request.primary_audio_camera_id or request.primaryAudioCameraId
     has_explicit_segments = bool(request.segments)
     has_requested_overlap_start = request.overlap_start is not None or request.overlapStart is not None
@@ -21783,7 +22268,17 @@ async def render_multicam_impl(
     external_audio_materialized_path = external_audio_input_path
     prepared_sources = []
     segment_paths = []
+    transient_segment_paths = []
     segment_duration_receipts = []
+    checkpoint_plan = None
+    checkpoint_plan_receipt = None
+    checkpoint_plan_temp_path = ""
+    checkpoint_receipts = []
+    checkpoint_cleanup_receipt = None
+    checkpointing_enabled = False
+    checkpoint_render_segments = []
+    checkpoint_canonical_plan = None
+    stitch_receipt = None
     pre_sync_result = None
     preflight = None
     # Camera-audio-only renders have no external clean-audio file. Downstream
@@ -22959,142 +23454,376 @@ async def render_multicam_impl(
 
         stage_started_at = time.perf_counter()
         source_map = {source["id"]: source for source in prepared_sources}
-        for index, segment in enumerate(render_segments):
-            segment_start = float(segment["timeline_start"])
-            segment_end = float(segment["timeline_end"])
-            segment_duration = max(0.0, segment_end - segment_start)
-            if segment_duration <= 0.02:
-                continue
-
-            source = source_map.get(segment["camera_id"]) or prepared_sources[0]
-            trim_start = float(segment["source_start"])
-            trim_end = float(segment["source_end"])
-            raw_segment_duration = max(0.02, trim_end - trim_start)
-            layout_mode = normalize_multicam_layout_mode(segment.get("layout_mode", "cut") or "cut")
-
-            if trim_start < 0 or trim_end > source["duration"] + 0.01:
-                raise HTTPException(status_code=400, detail=f"Segment exceeds source bounds for {source['label']}")
-
-            segment_output_path = os.path.join(shared_tmp_dir, f"{job_id}_multicam_segment_{index}.mp4")
-            layout_sources = pick_layout_sources(
-                source,
-                prepared_sources,
-                overlap_start,
-                segment_start,
-            segment_duration,
-            max_sources=int(render_tier_profile.get("max_layout_sources") or 3),
-            preferred_secondary_camera_id=segment.get("secondary_camera_id"),
+        checkpointing_enabled = bool(
+            request.async_mode
+            and MULTICAM_RENDER_CHECKPOINTS_ENABLED
+            and master_duration > render_checkpoint_seconds + 0.5
         )
-            logger.info(
-                f"Segment {index}: camera={source['label']} layout={layout_mode} "
-                f"reason={segment.get('layout_reason', '')} "
-                f"secondary={segment.get('secondary_camera_id')} "
-                f"timeline={segment_start:.1f}s→{segment_end:.1f}s sources={len(layout_sources)}"
+
+        if checkpointing_enabled:
+            checkpoint_plan = build_multicam_chunk_plan(
+                render_segments,
+                render_checkpoint_seconds,
             )
-            rendered_composite = await render_multicam_layout_segment(
-                segment_output_path,
-                layout_mode,
-                layout_sources,
-                overlap_start,
-                segment_start,
-                segment_duration,
-                output_width,
-                output_height,
-                job_id,
-                primary_source_start=trim_start,
-                primary_source_end=trim_end,
-                layout_source_ranges={
-                    camera_id: (start, end)
-                    for camera_id, start, end in [
-                        (
-                            segment.get("camera_id"),
-                            segment.get("source_start"),
-                            segment.get("source_end"),
+            checkpoint_context = {
+                "version": 2,
+                "renderer_contract": "cam-combiner-checkpoint-v2",
+                "render_tier": render_tier,
+                "render_tier_profile": render_tier_profile,
+                "output_aspect_ratio": output_aspect_ratio,
+                "output_width": output_width,
+                "output_height": output_height,
+                "fast_composite": multicam_fast_composite_enabled(),
+                "encoder_args": build_multicam_segment_encode_args(),
+                "sources": [
+                    {
+                        "id": source.get("id"),
+                        "cache_key": next(
+                            (
+                                request_source.cache_key
+                                for request_source in request.sources
+                                if request_source.id == source.get("id")
+                            ),
+                            None,
                         ),
-                        (
-                            segment.get("secondary_camera_id"),
-                            segment.get("secondary_source_start"),
-                            segment.get("secondary_source_end"),
+                        "offset_seconds": round(float(source.get("offset_seconds") or 0.0), 6),
+                        "sync_rate": round(float(source.get("sync_rate") or 1.0), 9),
+                        "rotation_degrees": source.get("render_rotation_degrees", source.get("rotation_degrees")),
+                        "render_time_shift_seconds": round(
+                            float(source.get("render_time_shift_seconds") or 0.0),
+                            6,
                         ),
-                    ]
-                    if camera_id is not None and start is not None and end is not None
+                        "reaction_side": source.get("reaction_side"),
+                        "focus_x": source.get("focus_x"),
+                        "focus_y": source.get("focus_y"),
+                        "source_visual_filter": source.get("source_visual_filter") or "",
+                        "render_visual_filter": source.get("render_visual_filter") or "",
+                        "color_metadata": source.get("color_metadata") or {},
+                    }
+                    for source in prepared_sources
+                ],
+            }
+            checkpoint_canonical_plan = {
+                "version": 2,
+                "context": checkpoint_context,
+                "chunks": [
+                    {
+                        "index": int(chunk["index"]),
+                        "start": round(float(chunk["start"]), 6),
+                        "end": round(float(chunk["end"]), 6),
+                        "duration": round(float(chunk["duration"]), 6),
+                        "segments": [
+                            {
+                                key: (
+                                    round(float(segment.get(key)), 6)
+                                    if key in {
+                                        "timeline_start",
+                                        "timeline_end",
+                                        "source_start",
+                                        "source_end",
+                                        "secondary_source_start",
+                                        "secondary_source_end",
+                                    }
+                                    and segment.get(key) is not None
+                                    else segment.get(key)
+                                )
+                                for key in (
+                                    "camera_id",
+                                    "secondary_camera_id",
+                                    "layout_mode",
+                                    "timeline_start",
+                                    "timeline_end",
+                                    "source_start",
+                                    "source_end",
+                                    "secondary_source_start",
+                                    "secondary_source_end",
+                                )
+                                if segment.get(key) is not None
+                            }
+                            for segment in chunk["segments"]
+                        ],
+                    }
+                    for chunk in checkpoint_plan["chunks"]
+                ],
+            }
+            checkpoint_plan["fingerprint"] = multicam_chunk_plan_fingerprint(
+                [checkpoint_canonical_plan]
+            )
+            checkpoint_plan["context"] = checkpoint_context
+            safe_checkpoint_job_id = re.sub(
+                r"[^A-Za-z0-9_-]+",
+                "-",
+                str(job_id),
+            ).strip("-")
+            checkpoint_storage_prefix = (
+                f"temp/multicam-checkpoints/{safe_checkpoint_job_id}/"
+                f"{checkpoint_plan['fingerprint']}"
+            )
+            checkpoint_plan_temp_path = os.path.join(
+                shared_tmp_dir,
+                f"{job_id}_multicam_checkpoint_plan.json",
+            )
+            with open(checkpoint_plan_temp_path, "w", encoding="utf-8") as checkpoint_plan_file:
+                json.dump(checkpoint_plan, checkpoint_plan_file, indent=2, default=str)
+            checkpoint_plan_receipt = upload_multicam_checkpoint_object(
+                checkpoint_plan_temp_path,
+                f"{checkpoint_storage_prefix}/plan.json",
+                {
+                    "autopromotePurpose": "multicam_checkpoint_plan",
+                    "autopromoteJobId": job_id,
+                    "planFingerprint": checkpoint_plan["fingerprint"],
                 },
-                segment_index=index,
             )
-            if not rendered_composite:
-                logger.info(
-                    f"Segment {index}: FALLBACK to single-camera — layout={layout_mode} "
-                    f"layout_sources={len(layout_sources)} reason={'not_enough_sources' if len(layout_sources)<2 else 'layout_mode_not_applicable'}"
+            render_chunks = checkpoint_plan["chunks"]
+            overloaded_chunks = [
+                chunk
+                for chunk in render_chunks
+                if len(chunk.get("segments") or []) > MULTICAM_BETA_MAX_SEGMENTS
+            ]
+            if overloaded_chunks:
+                raise HTTPException(
+                    status_code=422,
+                    detail={
+                        "message": "Cam Combiner checkpoint segment plan is too complex",
+                        "max_segments_per_checkpoint": MULTICAM_BETA_MAX_SEGMENTS,
+                        "checkpoint_indexes": [chunk["index"] for chunk in overloaded_chunks[:10]],
+                    },
                 )
-            if not rendered_composite:
-                single_setpts = clamp_float(segment_duration / raw_segment_duration, 0.25, 4.0)
-                single_render_path = source.get("render_path") or source["path"]
-                single_render_shift = max(0.0, float(source.get("render_time_shift_seconds", 0.0) or 0.0))
-                single_render_trim_start = max(0.0, trim_start - single_render_shift)
-                single_rotation = source.get("render_rotation_degrees", source.get("rotation_degrees", 0))
-                single_visual_filter = str(source.get("render_visual_filter", source.get("source_visual_filter") or "") or "").strip().strip(",")
-                single_prefix = (
-                    f"{multicam_rotation_filter(single_rotation)}"
-                    f"trim=start=0:duration={raw_segment_duration:.6f},"
-                    f"setpts=PTS-STARTPTS,setpts={single_setpts:.9f}*PTS,fps=30,"
-                    f"{single_visual_filter + ',' if single_visual_filter else ''}"
+            checkpoint_render_segments = [
+                segment
+                for chunk in render_chunks
+                for segment in chunk.get("segments") or []
+            ]
+            if request.async_mode:
+                update_firestore_job(
+                    job_id,
+                    {
+                        "stage": "rendering_checkpoint_chunks",
+                        "detail": f"Rendering checkpoint 1 of {len(render_chunks)}",
+                        "renderCheckpoint": {
+                            "version": 1,
+                            "status": "rendering",
+                            "stage": "rendering_checkpoint_chunks",
+                            "resumable": True,
+                            "planFingerprint": checkpoint_plan["fingerprint"],
+                            "planStoragePath": checkpoint_plan_receipt["storage_path"],
+                            "checkpointSeconds": render_checkpoint_seconds,
+                            "totalChunks": len(render_chunks),
+                            "expectedCount": len(render_chunks),
+                            "currentIndex": 0,
+                            "completedCount": 0,
+                            "totalDurationSeconds": round(master_duration, 3),
+                        },
+                    },
                 )
-                single_filter = ";".join(
-                    [
-                        (
-                            f"[0:v]{single_prefix}setsar=1[cutsrc]"
-                        ),
-                        multicam_single_cut_filter(
-                            "cutsrc",
-                            output_width,
-                            output_height,
-                            "v",
-                            is_vertical_output=output_height > output_width,
-                        ),
-                    ]
+        else:
+            render_chunks = [
+                {
+                    "index": 0,
+                    "start": float(render_segments[0]["timeline_start"]),
+                    "end": float(render_segments[-1]["timeline_end"]),
+                    "duration": master_duration,
+                    "segments": render_segments,
+                }
+            ]
+            checkpoint_render_segments = render_segments
+
+        rendered_segment_count = 0
+        for chunk in render_chunks:
+            chunk_index = int(chunk["index"])
+            chunk_duration = float(chunk["duration"])
+            chunk_part_paths = []
+            chunk_output_path = ""
+            checkpoint_receipt = None
+
+            if checkpointing_enabled:
+                checkpoint_paths = multicam_chunk_checkpoint_paths(
+                    shared_tmp_dir,
+                    job_id,
+                    checkpoint_plan["fingerprint"],
+                    chunk_index,
                 )
-                await run_subprocess_async(
-                    [
-                        "ffmpeg",
-                        "-fflags", "+genpts",
-                        "-ss",
-                        str(single_render_trim_start),
-                        "-i",
-                        single_render_path,
-                        "-t",
-                        str(raw_segment_duration),
-                        "-filter_complex",
-                        single_filter,
-                        "-map",
-                        "[v]",
-                        "-t",
-                        f"{segment_duration:.6f}",
-                        *build_multicam_segment_encode_args(),
-                        "-an",
-                        "-movflags",
-                        "+faststart",
-                        "-vsync", "cfr",
-                        "-y",
+                os.makedirs(checkpoint_paths["directory"], exist_ok=True)
+                chunk_output_path = checkpoint_paths["video_path"]
+                checkpoint_storage_path = (
+                    f"{checkpoint_storage_prefix}/chunk_{chunk_index:04d}.mp4"
+                )
+                expected_metadata = {
+                    "autopromoteJobId": job_id,
+                    "planFingerprint": checkpoint_plan["fingerprint"],
+                    "chunkIndex": chunk_index,
+                    "expectedDuration": f"{chunk_duration:.6f}",
+                }
+                checkpoint_receipt = restore_multicam_checkpoint_object(
+                    checkpoint_storage_path,
+                    chunk_output_path,
+                    expected_metadata,
+                )
+                if checkpoint_receipt:
+                    try:
+                        duration_receipt = validate_multicam_checkpoint_media(
+                            chunk_output_path,
+                            chunk_duration,
+                            chunk_index,
+                            expected_width=output_width,
+                            expected_height=output_height,
+                        )
+                        expected_profile_fingerprint = str(
+                            (checkpoint_receipt.get("metadata") or {}).get("profileFingerprint") or ""
+                        )
+                        if not expected_profile_fingerprint or not hmac.compare_digest(
+                            expected_profile_fingerprint,
+                            duration_receipt["profile_fingerprint"],
+                        ):
+                            raise HTTPException(
+                                status_code=500,
+                                detail="Multicam checkpoint stream profile changed",
+                            )
+                        segment_duration_receipts.append(duration_receipt)
+                        checkpoint_receipt.update(
+                            {
+                                "index": chunk_index,
+                                "status": "restored",
+                                "timelineStart": round(float(chunk["start"]), 3),
+                                "timelineEnd": round(float(chunk["end"]), 3),
+                                "expectedDuration": round(chunk_duration, 3),
+                                "actualDuration": duration_receipt["actual_duration_seconds"],
+                                "segmentCount": len(chunk["segments"]),
+                                "profileFingerprint": duration_receipt["profile_fingerprint"],
+                            }
+                        )
+                    except Exception as checkpoint_validation_error:
+                        logger.warning(
+                            "Discarding invalid multicam checkpoint %s: %s",
+                            checkpoint_storage_path,
+                            checkpoint_validation_error,
+                        )
+                        delete_multicam_checkpoint_object(checkpoint_storage_path)
+                        if os.path.exists(chunk_output_path):
+                            os.remove(chunk_output_path)
+                        checkpoint_receipt = None
+
+            if not checkpoint_receipt:
+                for segment in chunk["segments"]:
+                    segment_index = rendered_segment_count
+                    segment_output_path = os.path.join(
+                        shared_tmp_dir,
+                        f"{job_id}_multicam_segment_{segment_index}.mp4",
+                    )
+                    transient_segment_paths.append(segment_output_path)
+                    duration_receipt = await render_multicam_video_segment(
+                        segment,
                         segment_output_path,
-                    ],
-                    check=True,
-                    job_context=job_id,
+                        segment_index,
+                        prepared_sources=prepared_sources,
+                        source_map=source_map,
+                        overlap_start=overlap_start,
+                        output_width=output_width,
+                        output_height=output_height,
+                        render_tier_profile=render_tier_profile,
+                        job_id=job_id,
+                    )
+                    segment_duration_receipts.append(duration_receipt)
+                    chunk_part_paths.append(segment_output_path)
+                    rendered_segment_count += 1
+
+                if checkpointing_enabled:
+                    chunk_concat_list_path = os.path.join(
+                        shared_tmp_dir,
+                        f"{job_id}_multicam_chunk_{chunk_index:04d}_concat.txt",
+                    )
+                    await concat_multicam_video_parts(
+                        chunk_part_paths,
+                        chunk_output_path,
+                        chunk_concat_list_path,
+                        job_id,
+                    )
+                    duration_receipt = validate_multicam_checkpoint_media(
+                        chunk_output_path,
+                        chunk_duration,
+                        chunk_index,
+                        expected_width=output_width,
+                        expected_height=output_height,
+                    )
+                    segment_duration_receipts.append(duration_receipt)
+                    checkpoint_receipt = upload_multicam_checkpoint_object(
+                        chunk_output_path,
+                        checkpoint_storage_path,
+                        {
+                            **expected_metadata,
+                            "autopromotePurpose": "multicam_render_checkpoint",
+                            "timelineStart": f"{float(chunk['start']):.6f}",
+                            "timelineEnd": f"{float(chunk['end']):.6f}",
+                            "profileFingerprint": duration_receipt["profile_fingerprint"],
+                        },
+                    )
+                    checkpoint_receipt.update(
+                        {
+                            "index": chunk_index,
+                            "status": "completed",
+                            "timelineStart": round(float(chunk["start"]), 3),
+                            "timelineEnd": round(float(chunk["end"]), 3),
+                            "expectedDuration": round(chunk_duration, 3),
+                            "actualDuration": duration_receipt["actual_duration_seconds"],
+                            "segmentCount": len(chunk["segments"]),
+                            "profileFingerprint": duration_receipt["profile_fingerprint"],
+                        }
+                    )
+                else:
+                    segment_paths.extend(chunk_part_paths)
+
+            if checkpointing_enabled:
+                segment_paths.append(chunk_output_path)
+                checkpoint_receipts.append(checkpoint_receipt)
+                persist_multicam_checkpoint_receipt(job_id, chunk_index, checkpoint_receipt)
+                for chunk_part_path in chunk_part_paths:
+                    if os.path.exists(chunk_part_path):
+                        os.remove(chunk_part_path)
+                completed_count = len(checkpoint_receipts)
+                completed_duration = sum(
+                    float(item.get("expectedDuration", 0.0) or 0.0)
+                    for item in checkpoint_receipts
                 )
-            segment_duration_receipts.append(
-                validate_multicam_segment_duration(
-                    segment_output_path,
-                    segment_duration,
-                    index,
+                checkpoint_progress = min(
+                    81,
+                    55 + int(round(26 * completed_count / max(1, len(render_chunks)))),
                 )
-            )
-            segment_paths.append(segment_output_path)
+                update_firestore_job(
+                    job_id,
+                    {
+                        "progress": checkpoint_progress,
+                        "stage": "rendering_checkpoint_chunks",
+                        "detail": (
+                            f"Checkpoint {completed_count} of {len(render_chunks)} ready"
+                        ),
+                        "renderCheckpoint": {
+                            "version": 1,
+                            "status": "rendering" if completed_count < len(render_chunks) else "ready_to_stitch",
+                            "stage": "rendering_checkpoint_chunks",
+                            "resumable": True,
+                            "planFingerprint": checkpoint_plan["fingerprint"],
+                            "planStoragePath": checkpoint_plan_receipt["storage_path"],
+                            "checkpointSeconds": render_checkpoint_seconds,
+                            "totalChunks": len(render_chunks),
+                            "expectedCount": len(render_chunks),
+                            "currentIndex": chunk_index,
+                            "completedCount": completed_count,
+                            "lastCompletedChunk": chunk_index,
+                            "completedDurationSeconds": round(completed_duration, 3),
+                            "totalDurationSeconds": round(master_duration, 3),
+                        },
+                    },
+                )
 
         if not segment_paths:
             raise HTTPException(status_code=400, detail="No multicam segments were produced")
         record_performance_stage(
             "render_video_segments",
             stage_started_at,
-            segment_count=len(segment_paths),
+            segment_count=len(render_segments),
+            rendered_segment_count=rendered_segment_count,
+            checkpoint_count=len(checkpoint_receipts),
+            checkpointing_enabled=checkpointing_enabled,
             director_segment_count=len(director_segments),
             render_segment_merge=render_segment_merge_receipt,
             fast_composite=multicam_fast_composite_enabled(),
@@ -23102,54 +23831,38 @@ async def render_multicam_impl(
         )
 
         if request.async_mode:
-            update_firestore_job(job_id, {"progress": 82, "detail": "Concatenating master"})
+            update_firestore_job(
+                job_id,
+                {
+                    "progress": 82,
+                    "stage": "stitching_checkpoints" if checkpointing_enabled else "concatenating_master",
+                    "detail": "Stitching verified checkpoints" if checkpointing_enabled else "Concatenating master",
+                },
+            )
 
         stage_started_at = time.perf_counter()
-        with open(concat_list_path, "w", encoding="utf-8") as concat_file:
-            for segment_path in segment_paths:
-                concat_file.write(f"file '{segment_path}'\n")
-
-        try:
-            await run_subprocess_async(
-                [
-                    "ffmpeg",
-                    "-f",
-                    "concat",
-                    "-safe",
-                    "0",
-                    "-i",
-                    concat_list_path,
-                    "-c",
-                    "copy",
-                    "-y",
-                    video_only_output_path,
-                ],
-                check=True,
-                job_context=job_id,
+        stitch_receipt = await concat_multicam_video_parts(
+            segment_paths,
+            video_only_output_path,
+            concat_list_path,
+            job_id,
+        )
+        if checkpointing_enabled:
+            stitched_media_receipt = validate_multicam_checkpoint_media(
+                video_only_output_path,
+                master_duration,
+                "stitched-master",
+                expected_width=output_width,
+                expected_height=output_height,
             )
-        except Exception:
-            await run_subprocess_async(
-                [
-                    "ffmpeg",
-                    "-f",
-                    "concat",
-                    "-safe",
-                    "0",
-                    "-i",
-                    concat_list_path,
-                    "-c:v",
-                    "libx264",
-                    "-an",
-                    "-pix_fmt",
-                    "yuv420p",
-                    "-movflags",
-                    "+faststart",
-                    "-y",
-                    video_only_output_path,
-                ],
-                check=True,
-                job_context=job_id,
-            )
+            stitch_receipt["media_validation"] = stitched_media_receipt
+        record_performance_stage(
+            "stitch_video_parts",
+            stage_started_at,
+            mode=stitch_receipt.get("mode"),
+            part_count=stitch_receipt.get("part_count"),
+            checkpointing_enabled=checkpointing_enabled,
+        )
 
         if external_audio_url:
             if request.async_mode:
@@ -23271,7 +23984,7 @@ async def render_multicam_impl(
             stage_started_at = time.perf_counter()
             pre_caption_sync_audit = await audit_multicam_render_sync(
                 output_path,
-                render_segments,
+                checkpoint_render_segments,
                 source_map,
                 overlap_start,
                 job_id,
@@ -23348,6 +24061,19 @@ async def render_multicam_impl(
 
         stage_started_at = time.perf_counter()
         output_validation = validate_multicam_output_streams(output_path, master_duration, job_id)
+        if (
+            checkpointing_enabled
+            and abs(float(output_validation.get("duration_delta_seconds") or 0.0))
+            > MULTICAM_CHECKPOINT_DURATION_TOLERANCE_SECONDS
+        ):
+            raise HTTPException(
+                status_code=500,
+                detail={
+                    "message": "Checkpointed multicam master duration failed strict validation",
+                    "validation": output_validation,
+                    "tolerance_seconds": MULTICAM_CHECKPOINT_DURATION_TOLERANCE_SECONDS,
+                },
+            )
         reuse_pre_caption_audit = (
             os.getenv("MULTICAM_REUSE_VIDEO_ONLY_SYNC_AUDIT", "0").strip().lower() not in {"0", "false", "no", "off"}
             and pre_caption_sync_audit
@@ -23365,7 +24091,7 @@ async def render_multicam_impl(
         else:
             post_render_sync_audit = await audit_multicam_render_sync(
                 output_path,
-                render_segments,
+                checkpoint_render_segments,
                 source_map,
                 overlap_start,
                 job_id,
@@ -23496,6 +24222,31 @@ async def render_multicam_impl(
             datetime.datetime.now(datetime.timezone.utc)
             + datetime.timedelta(days=retention_days)
         ).isoformat()
+        checkpoint_manifest = {
+            "enabled": checkpointing_enabled,
+            "resumable": checkpointing_enabled,
+            "status": "stitched" if checkpointing_enabled else "not_required",
+            "checkpoint_seconds": round(render_checkpoint_seconds, 3),
+            "plan_fingerprint": (checkpoint_plan or {}).get("fingerprint"),
+            "plan_storage_path": (checkpoint_plan_receipt or {}).get("storage_path"),
+            "canonical_plan": checkpoint_canonical_plan,
+            "total_chunks": len(checkpoint_receipts),
+            "completed_chunks": len(checkpoint_receipts),
+            "stitch": stitch_receipt,
+            "cleanup_policy": (
+                "delete_after_master_manifest_commit; temp lifecycle fallback"
+                if checkpointing_enabled
+                else "not_applicable"
+            ),
+            "chunks": [
+                {
+                    key: value
+                    for key, value in receipt.items()
+                    if key != "metadata"
+                }
+                for receipt in checkpoint_receipts
+            ],
+        }
         performance_timing = {
             "started_at_epoch_seconds": round(render_wall_started_at, 3),
             "elapsed_seconds": round(max(0.0, time.perf_counter() - render_perf_started_at), 3),
@@ -23506,6 +24257,14 @@ async def render_multicam_impl(
             "segment_count": len(segments),
             "render_segment_count": len(render_segments),
             "render_segment_merge": render_segment_merge_receipt,
+            "checkpointing": {
+                "enabled": checkpointing_enabled,
+                "checkpoint_seconds": round(render_checkpoint_seconds, 3),
+                "checkpoint_count": len(checkpoint_receipts),
+                "restored_count": sum(
+                    1 for receipt in checkpoint_receipts if receipt.get("status") == "restored"
+                ),
+            },
             "stages": performance_stages,
         }
         result_data = {
@@ -23554,12 +24313,14 @@ async def render_multicam_impl(
             "post_render_sync_audit": post_render_sync_audit,
             "final_quality_gate": final_quality_gate,
             "performance_timing": performance_timing,
+            "render_checkpoint": checkpoint_manifest,
             "render_receipt": {
                 "production_limits": production_limits,
                 "tier_profile": render_tier_profile,
                 "fast_composite": multicam_fast_composite_enabled(),
                 "performance_timing": performance_timing,
                 "render_segment_merge": render_segment_merge_receipt,
+                "render_checkpoint": checkpoint_manifest,
                 "trusted_sync_contract": trusted_sync_contract_receipt,
                 "trusted_director_channel_map": trusted_director_channel_map_receipt,
                 "final_quality_gate": final_quality_gate,
@@ -23610,6 +24371,11 @@ async def render_multicam_impl(
         result_data["manifest_storage_path"] = manifest_storage_path
 
         if request.async_mode:
+            compact_checkpoint = {
+                key: value
+                for key, value in checkpoint_manifest.items()
+                if key not in {"chunks", "canonical_plan"}
+            }
             # Firestore documents are capped at 1 MiB. Keep polling/delivery
             # state compact and put the full EDL/audits in the GCS manifest.
             compact_result = {
@@ -23627,9 +24393,11 @@ async def render_multicam_impl(
                 "manifest_storage_path": manifest_storage_path,
                 "final_quality_gate": final_quality_gate,
                 "performance_timing": performance_timing,
+                "render_checkpoint": compact_checkpoint,
             }
             update_firestore_job(job_id, {
                 "status": "completed",
+                "stage": "completed",
                 "progress": 100,
                 "detail": "Multi-camera master ready",
                 "result": compact_result,
@@ -23643,30 +24411,60 @@ async def render_multicam_impl(
                 "thumbnail_storage_path": thumbnail_storage_path,
                 "thumbnailStoragePath": thumbnail_storage_path,
                 "manifest_url": manifest_url,
+                "manifestUrl": manifest_url,
                 "manifest_storage_path": manifest_storage_path,
+                "manifestStoragePath": manifest_storage_path,
                 "expires_at": expires_at,
                 "expiresAt": expires_at,
                 "retentionDays": retention_days,
                 "duration": result_data["duration"],
                 "renderTier": render_tier,
                 "qaReport": final_quality_gate,
+                "renderCheckpoint": {
+                    **compact_checkpoint,
+                    "status": "completed" if checkpointing_enabled else "not_required",
+                    "stage": "completed",
+                    "expectedCount": len(checkpoint_receipts),
+                    "currentIndex": len(checkpoint_receipts) - 1 if checkpoint_receipts else None,
+                    "completedDurationSeconds": round(master_duration, 3),
+                    "totalDurationSeconds": round(master_duration, 3),
+                },
             }, critical=True, max_attempts=5)
+
+            if checkpointing_enabled:
+                checkpoint_cleanup_receipt = delete_multicam_checkpoint_prefix(job_id)
+                result_data["render_checkpoint"]["cleanup"] = checkpoint_cleanup_receipt
+                update_firestore_job(
+                    job_id,
+                    {
+                        "renderCheckpoint": {
+                            **compact_checkpoint,
+                            "status": "completed",
+                            "stage": "completed",
+                            "expectedCount": len(checkpoint_receipts),
+                            "currentIndex": len(checkpoint_receipts) - 1 if checkpoint_receipts else None,
+                            "completedDurationSeconds": round(master_duration, 3),
+                            "totalDurationSeconds": round(master_duration, 3),
+                            "cleanup": checkpoint_cleanup_receipt,
+                        }
+                    },
+                )
 
         return result_data
     except HTTPException as e:
-        if request.async_mode:
+        if request.async_mode and not propagate_errors:
             update_firestore_job(job_id, {"status": "failed", "error": str(e.detail), "progress": 0})
-            if propagate_errors:
-                raise
             return
+        if propagate_errors:
+            raise
         raise
     except Exception as e:
         logger.error(f"Multicam render failed: {e}")
-        if request.async_mode:
+        if request.async_mode and not propagate_errors:
             update_firestore_job(job_id, {"status": "failed", "error": str(e), "progress": 0})
-            if propagate_errors:
-                raise
             return
+        if propagate_errors:
+            raise
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         # Safety net: if ffmpeg produced the final master but anything after that fails
@@ -23701,6 +24499,9 @@ async def render_multicam_impl(
         for segment_path in segment_paths:
             if os.path.exists(segment_path):
                 os.remove(segment_path)
+        for transient_segment_path in transient_segment_paths:
+            if os.path.exists(transient_segment_path):
+                os.remove(transient_segment_path)
         if os.path.exists(concat_list_path):
             os.remove(concat_list_path)
         if os.path.exists(video_only_output_path):
@@ -23716,6 +24517,8 @@ async def render_multicam_impl(
             os.remove(thumbnail_temp_path)
         if manifest_temp_path and os.path.exists(manifest_temp_path):
             os.remove(manifest_temp_path)
+        if checkpoint_plan_temp_path and os.path.exists(checkpoint_plan_temp_path):
+            os.remove(checkpoint_plan_temp_path)
         if os.path.exists(output_path):
             os.remove(output_path)
         
