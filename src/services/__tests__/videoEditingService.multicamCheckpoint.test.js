@@ -96,4 +96,25 @@ describe("VideoEditingService multicam checkpoint contract", () => {
       })
     );
   });
+
+  it("allows full-length original preflight more than two minutes to finish", async () => {
+    const service = new VideoEditingService();
+    const postWorker = jest
+      .spyOn(service, "postCamCombinerWorker")
+      .mockResolvedValue({ data: { status: "good", cameras: {} } });
+
+    await expect(
+      service.preflightMulticamSync({
+        sources: [{ id: "cam-1", url: "https://cdn.example.com/cam-1.mov" }],
+        external_audio_url: "https://cdn.example.com/clean-audio.wav",
+        overlap_duration: 44 * 60,
+      })
+    ).resolves.toEqual({ status: "good", cameras: {} });
+
+    expect(postWorker).toHaveBeenCalledWith(
+      "/multicam/preflight-sync",
+      expect.any(Object),
+      300000
+    );
+  });
 });
