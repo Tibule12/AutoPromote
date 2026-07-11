@@ -1406,7 +1406,11 @@ class VideoEditingService {
       response = await this.postCamCombinerWorker(
         "/multicam/preflight-sync",
         payload,
-        120000
+        // Full-length originals can take more than two minutes to materialize
+        // and sample at start/middle/end. Keep this above the worker's normal
+        // processing time so a successful sync result is not discarded by the
+        // API gateway moments before it arrives.
+        300000
       );
     } catch (error) {
       const workerDetail = error.response?.data?.detail || error.response?.data?.message || error.message;
