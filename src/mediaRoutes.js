@@ -54,10 +54,15 @@ const ALLOW_LOCAL_WORKER_FALLBACK =
   process.env.ALLOW_LOCAL_WORKER_FALLBACK === "true" ||
   (!IS_PRODUCTION_RUNTIME && process.env.ALLOW_LOCAL_WORKER_FALLBACK !== "false");
 const VIDEO_EDITOR_CREDITS_DISABLED = process.env.DISABLE_VIDEO_EDITOR_CREDITS === "true";
-const MULTICAM_MAX_RENDER_SECONDS = parseInt(
-  process.env.MULTICAM_MAX_RENDER_SECONDS || String(20 * 60),
+const MULTICAM_MAX_TOTAL_RENDER_SECONDS = parseInt(
+  process.env.MULTICAM_MAX_TOTAL_RENDER_SECONDS || String(3 * 60 * 60),
   10
-) || 20 * 60;
+) || 3 * 60 * 60;
+const MULTICAM_CHECKPOINT_SECONDS = parseInt(
+  process.env.MULTICAM_CHECKPOINT_SECONDS || String(5 * 60),
+  10
+) || 5 * 60;
+const MULTICAM_BILLING_UNIT_SECONDS = 20 * 60;
 const MULTICAM_SERVER_PROOF_REQUIRED =
   process.env.MULTICAM_SERVER_PROOF_REQUIRED === "true" ||
   (process.env.MULTICAM_SERVER_PROOF_REQUIRED !== "false" && IS_PRODUCTION_RUNTIME);
@@ -73,9 +78,13 @@ const MULTICAM_RENDER_CREDITS_BY_TIER = {
   studio: 300,
 };
 
-const estimateMulticamRenderCredits = ({ renderTier }) => {
+const getMulticamBillingUnits = durationSeconds =>
+  Math.max(1, Math.ceil(Math.max(0, Number(durationSeconds) || 0) / MULTICAM_BILLING_UNIT_SECONDS));
+
+const estimateMulticamRenderCredits = ({ renderTier, durationSeconds }) => {
   const tier = normalizeMulticamRenderTier(renderTier);
-  return MULTICAM_RENDER_CREDITS_BY_TIER[tier] || MULTICAM_RENDER_CREDITS_BY_TIER.premium;
+  const unitCost = MULTICAM_RENDER_CREDITS_BY_TIER[tier] || MULTICAM_RENDER_CREDITS_BY_TIER.premium;
+  return unitCost * getMulticamBillingUnits(durationSeconds);
 };
 
 const estimateCleanAudioSyncCredits = () => CREDIT_COSTS["clean-audio-sync"] || 18;
@@ -329,6 +338,8 @@ const refundMulticamRenderJobIfNeeded = async (userId, jobId, data, reason = "wo
 
 const getRequestedMulticamDuration = body => {
   const candidates = [
+    body?.totalDurationSeconds,
+    body?.total_duration_seconds,
     body?.overlapDuration,
     body?.overlap_duration,
     body?.timelineDuration,
@@ -759,8 +770,16 @@ router.post("/multicam/preflight-sync", async (req, res) => {
 router.post("/render-multicam", async (req, res) => {
   const userId = req.user?.uid || req.userId;
   const renderTier = normalizeMulticamRenderTier(req.body?.renderTier || req.body?.render_tier);
+  const requestedDuration = getRequestedMulticamDuration(req.body);
+  const billingUnits = getMulticamBillingUnits(requestedDuration);
+  const expectedCheckpointCount = Math.max(
+    1,
+    Math.ceil(requestedDuration / MULTICAM_CHECKPOINT_SECONDS)
+  );
+  const checkpointedRender = expectedCheckpointCount > 1;
   const cost = estimateMulticamRenderCredits({
     renderTier,
+    durationSeconds: requestedDuration,
     baseCost: CREDIT_COSTS["render-multicam"] || 15,
   });
   const sources = Array.isArray(req.body?.sources) ? req.body.sources : [];
@@ -776,12 +795,11 @@ router.post("/render-multicam", async (req, res) => {
     return res.status(400).json({ message: "At least two camera sources are required" });
   }
 
-  const requestedDuration = getRequestedMulticamDuration(req.body);
-  if (requestedDuration > MULTICAM_MAX_RENDER_SECONDS + 0.5) {
+  if (requestedDuration > MULTICAM_MAX_TOTAL_RENDER_SECONDS + 0.5) {
     return res.status(400).json({
-      message: "Cam Combiner renders are capped at 20 minutes. Please select a shorter range.",
+      message: "Cam Combiner renders are capped at 3 hours. Please select a shorter range.",
       code: "MULTICAM_DURATION_LIMIT",
-      maxDurationSeconds: MULTICAM_MAX_RENDER_SECONDS,
+      maxDurationSeconds: MULTICAM_MAX_TOTAL_RENDER_SECONDS,
     });
   }
 
@@ -907,6 +925,11 @@ router.post("/render-multicam", async (req, res) => {
             ? req.body.watermarkText.trim()
             : "AutoPromote Cam Combiner",
         generateThumbnail: req.body?.generateThumbnail === true || req.body?.generate_thumbnail === true,
+        renderSpecVersion: 2,
+        totalDurationSeconds: requestedDuration,
+        checkpointSeconds: MULTICAM_CHECKPOINT_SECONDS,
+        checkpointedRender,
+        expectedCheckpointCount,
         creditReceipt: creditResult,
         pendingCreditCost: deferCreditCharge ? cost : 0,
         requireServerProof: MULTICAM_SERVER_PROOF_REQUIRED,
@@ -928,6 +951,12 @@ router.post("/render-multicam", async (req, res) => {
           : "Multi-camera render queued for server proof"
         : "Multi-camera render started",
       renderTier,
+      renderSpecVersion: 2,
+      totalDurationSeconds: requestedDuration,
+      checkpointSeconds: MULTICAM_CHECKPOINT_SECONDS,
+      checkpointedRender,
+      expectedCheckpointCount,
+      billingUnits,
       chargedCredits:
         (!MULTICAM_SERVER_PROOF_REQUIRED || durableRenderEnabled) && creditResult && !creditResult.skipped
           ? cost
@@ -1308,12 +1337,62 @@ router.get("/status/:jobId", async (req, res) => {
         ? approvalView.approvalStatus
         : data.status;
     const sanitizedResult = sanitizeResultForApproval(data.result, approvalView);
+    const rawRenderCheckpoint =
+      data.renderCheckpoint && typeof data.renderCheckpoint === "object"
+        ? data.renderCheckpoint
+        : data.result?.renderCheckpoint && typeof data.result.renderCheckpoint === "object"
+          ? data.result.renderCheckpoint
+          : null;
+    const expectedCheckpointCount = Number(
+      data.expectedCheckpointCount ??
+        data.result?.expectedCheckpointCount ??
+        rawRenderCheckpoint?.expectedCount ??
+        rawRenderCheckpoint?.totalChunks ??
+        0
+    );
+    const renderCheckpoint = rawRenderCheckpoint || expectedCheckpointCount > 0
+      ? {
+          stage: rawRenderCheckpoint?.stage || data.stage || null,
+          status: rawRenderCheckpoint?.status || null,
+          resumable: rawRenderCheckpoint?.resumable === true,
+          currentIndex: rawRenderCheckpoint?.currentIndex ?? null,
+          completedCount: Number(rawRenderCheckpoint?.completedCount || 0),
+          expectedCount: expectedCheckpointCount,
+          completedDurationSeconds: Number(rawRenderCheckpoint?.completedDurationSeconds || 0),
+          totalDurationSeconds: Number(
+            rawRenderCheckpoint?.totalDurationSeconds ??
+              data.totalDurationSeconds ??
+              data.result?.totalDurationSeconds ??
+              0
+          ),
+        }
+      : null;
+    const manifestUrl =
+      data.manifestUrl ||
+      data.manifest_url ||
+      data.result?.manifestUrl ||
+      data.result?.manifest_url ||
+      null;
+    const manifestStoragePath =
+      data.manifestStoragePath ||
+      data.manifest_storage_path ||
+      data.result?.manifestStoragePath ||
+      data.result?.manifest_storage_path ||
+      null;
 
     res.json({
       success: true,
       status,
       stage: data.stage,
       progress: data.progress,
+      renderSpecVersion: data.renderSpecVersion || data.result?.renderSpecVersion || null,
+      totalDurationSeconds: data.totalDurationSeconds || data.result?.totalDurationSeconds || 0,
+      checkpointSeconds: data.checkpointSeconds || data.result?.checkpointSeconds || 0,
+      checkpointedRender: data.checkpointedRender === true || data.result?.checkpointedRender === true,
+      expectedCheckpointCount,
+      renderCheckpoint,
+      manifestUrl,
+      manifestStoragePath,
       result: sanitizedResult, // Node worker result, gated until approval
       output_url: approvalView.output_url, // Python worker result, gated until approval
       audio_url: data.audio_url,

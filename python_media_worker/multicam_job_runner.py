@@ -31,6 +31,19 @@ def _execution_identity():
     )
 
 
+def _task_retry_context():
+    """Return the zero-based Cloud Run attempt and configured retry budget."""
+    try:
+        attempt = max(0, int(os.getenv("CLOUD_RUN_TASK_ATTEMPT") or "0"))
+    except (TypeError, ValueError):
+        attempt = 0
+    try:
+        max_retries = max(0, int(os.getenv("MULTICAM_JOB_MAX_RETRIES") or "1"))
+    except (TypeError, ValueError):
+        max_retries = 1
+    return attempt, max_retries
+
+
 def _compact_check(value):
     if not isinstance(value, dict):
         return None
@@ -323,33 +336,55 @@ def run():
         message = _error_text(error)
         print(f"Multicam job {job_id} failed: {message}", file=sys.stderr)
         refundable = bool(job and job.get("creditReceipt") and not job.get("creditReceipt", {}).get("skipped"))
+        attempt, max_retries = _task_retry_context()
+        terminal_attempt = attempt >= max_retries
+        now = datetime.datetime.now(datetime.timezone.utc).isoformat()
+        retry_state = {
+            "attempt": attempt,
+            "maxRetries": max_retries,
+            "terminal": terminal_attempt,
+            "lastError": message,
+            "updatedAt": now,
+        }
+        if not terminal_attempt:
+            retry_state["nextAttempt"] = attempt + 1
+
+        failure_update = {
+            "status": "failed" if terminal_attempt else "retrying",
+            "stage": "durable_render_failed" if terminal_attempt else "durable_render_retry_scheduled",
+            "error": message,
+            "refundRequired": refundable if terminal_attempt else False,
+            "retryState": retry_state,
+            "renderLease": {
+                "execution": execution_id,
+                "taskAttempt": str(attempt),
+                ("failedAt" if terminal_attempt else "retryScheduledAt"): now,
+            },
+        }
+        if terminal_attempt:
+            failure_update["progress"] = 0
+        else:
+            failure_update["detail"] = (
+                f"Render attempt {attempt + 1} failed; durable retry {attempt + 2} is scheduled"
+            )
         try:
             worker.update_firestore_job(
                 job_id,
-                {
-                    "status": "failed",
-                    "stage": "durable_render_failed",
-                    "progress": 0,
-                    "error": message,
-                    "refundRequired": refundable,
-                    "renderLease": {
-                        "execution": execution_id,
-                        "taskAttempt": os.getenv("CLOUD_RUN_TASK_ATTEMPT"),
-                        "failedAt": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-                    },
-                },
+                failure_update,
                 critical=True,
                 max_attempts=5,
             )
         except Exception as status_error:
             print(f"Critical failure status delivery also failed: {status_error}", file=sys.stderr)
-        callback_succeeded = refundable and _notify_failure_callback(job_id, message)
-        try:
-            attempt = int(os.getenv("CLOUD_RUN_TASK_ATTEMPT") or "0")
-            max_retries = int(os.getenv("MULTICAM_JOB_MAX_RETRIES") or "1")
-        except ValueError:
-            attempt, max_retries = 0, 1
-        if callback_succeeded or attempt >= max_retries:
+
+        # Cloud Run will retry a nonterminal task attempt. Keep the job's
+        # checkpoint objects, capacity reservation, and credit receipt intact so
+        # that retry can resume instead of charging/refunding or competing for a
+        # new slot. The API callback owns the idempotent refund, so it must only
+        # run after the retry budget is exhausted.
+        if terminal_attempt:
+            if refundable:
+                _notify_failure_callback(job_id, message)
             _release_capacity(job_id, "failed")
         return 1
 

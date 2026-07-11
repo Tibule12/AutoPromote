@@ -41,6 +41,37 @@ const MULTICAM_MASTER_RETENTION_DAYS = Math.max(
   1,
   parseInt(process.env.MULTICAM_MASTER_RETENTION_DAYS || "7", 10) || 7
 );
+const DEFAULT_MULTICAM_CHECKPOINT_SECONDS =
+  parseInt(process.env.MULTICAM_CHECKPOINT_SECONDS || String(5 * 60), 10) || 5 * 60;
+
+function normalizeMulticamCheckpointContract(multicamRequest = {}) {
+  const totalDurationSeconds = Math.max(
+    0,
+    Number(
+      multicamRequest.totalDurationSeconds ??
+        multicamRequest.total_duration_seconds ??
+        multicamRequest.overlapDuration ??
+        multicamRequest.overlap_duration ??
+        0
+    ) || 0
+  );
+  const checkpointSeconds = Math.max(
+    1,
+    Number(
+      multicamRequest.checkpointSeconds ??
+        multicamRequest.checkpoint_seconds ??
+        DEFAULT_MULTICAM_CHECKPOINT_SECONDS
+    ) || DEFAULT_MULTICAM_CHECKPOINT_SECONDS
+  );
+  const expectedCheckpointCount = Math.max(1, Math.ceil(totalDurationSeconds / checkpointSeconds));
+  return {
+    renderSpecVersion: 2,
+    totalDurationSeconds,
+    checkpointSeconds,
+    checkpointedRender: expectedCheckpointCount > 1,
+    expectedCheckpointCount,
+  };
+}
 
 function getWorkerErrorDetail(error) {
   const status = error.response?.status;
@@ -197,14 +228,16 @@ class VideoEditingService {
   async startMulticamRenderJob(multicamRequest, userId, options = {}) {
     const jobId = options.jobId || uuidv4();
     const durableRender = isDurableMulticamRenderEnabled();
+    const checkpointContract = normalizeMulticamCheckpointContract(multicamRequest);
+    const normalizedMulticamRequest = { ...multicamRequest, ...checkpointContract };
     let capacityReserved = options.capacityReserved === true;
     const dispatchToken = durableRender ? uuidv4() : null;
     const dispatchTokenHash = dispatchToken
       ? crypto.createHash("sha256").update(dispatchToken).digest("hex")
       : null;
     const persistedRequest = durableRender
-      ? this.buildMulticamWorkerPayload(multicamRequest, jobId)
-      : multicamRequest;
+      ? this.buildMulticamWorkerPayload(normalizedMulticamRequest, jobId)
+      : normalizedMulticamRequest;
     if (durableRender) {
       persistedRequest.async_mode = true;
       persistedRequest.job_id = jobId;
@@ -224,6 +257,15 @@ class VideoEditingService {
         userId,
         type: "multicam_render",
         multicamRequest: persistedRequest,
+        ...checkpointContract,
+        renderCheckpoint: {
+          stage: "queued",
+          currentIndex: null,
+          completedCount: 0,
+          expectedCount: checkpointContract.expectedCheckpointCount,
+          completedDurationSeconds: 0,
+          totalDurationSeconds: checkpointContract.totalDurationSeconds,
+        },
         creditReceipt: multicamRequest?.creditReceipt || null,
         pendingCreditCost: Number(multicamRequest?.pendingCreditCost || 0),
         requireServerProof: multicamRequest?.requireServerProof === true,
@@ -250,12 +292,16 @@ class VideoEditingService {
           { merge: true }
         );
       } else {
-        this.processMulticamJobBackground(jobId, multicamRequest, userId).catch(err => {
+        this.processMulticamJobBackground(jobId, normalizedMulticamRequest, userId).catch(err => {
           console.error(`[VideoEditing] Multicam Job ${jobId} Failed (uncaught):`, err);
         });
       }
 
-      return { jobId, dispatchMode: durableRender ? "cloud_run_job" : "process_background" };
+      return {
+        jobId,
+        dispatchMode: durableRender ? "cloud_run_job" : "process_background",
+        ...checkpointContract,
+      };
     } catch (error) {
       console.error("Failed to start multicam render job:", error);
       const creditReceipt = multicamRequest?.creditReceipt;
@@ -464,7 +510,18 @@ class VideoEditingService {
   }
 
   buildMulticamWorkerPayload(multicamRequest, jobId = null) {
+    const checkpointContract = normalizeMulticamCheckpointContract(multicamRequest);
     return {
+      render_spec_version: checkpointContract.renderSpecVersion,
+      renderSpecVersion: checkpointContract.renderSpecVersion,
+      total_duration_seconds: checkpointContract.totalDurationSeconds,
+      totalDurationSeconds: checkpointContract.totalDurationSeconds,
+      checkpoint_seconds: checkpointContract.checkpointSeconds,
+      checkpointSeconds: checkpointContract.checkpointSeconds,
+      checkpointed_render: checkpointContract.checkpointedRender,
+      checkpointedRender: checkpointContract.checkpointedRender,
+      expected_checkpoint_count: checkpointContract.expectedCheckpointCount,
+      expectedCheckpointCount: checkpointContract.expectedCheckpointCount,
       sources: Array.isArray(multicamRequest?.sources)
         ? multicamRequest.sources.map(source => ({
             id: source.id,

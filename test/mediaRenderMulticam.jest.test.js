@@ -2,6 +2,7 @@ const express = require("express");
 const request = require("supertest");
 
 const mockStartMulticamRenderJob = jest.fn();
+const mockDeductCredits = jest.fn();
 
 jest.mock("../src/authMiddleware", () => (req, res, next) => {
   req.user = { uid: "testUser123" };
@@ -9,7 +10,7 @@ jest.mock("../src/authMiddleware", () => (req, res, next) => {
 });
 
 jest.mock("../src/creditSystem", () => ({
-  deductCredits: jest.fn().mockResolvedValue({ success: true, remaining: 85 }),
+  deductCredits: mockDeductCredits,
 }));
 
 jest.mock("../src/services/billingService", () => ({
@@ -41,6 +42,7 @@ describe("media multicam render route", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockDeductCredits.mockResolvedValue({ success: true, remaining: 550 });
     app = express();
     app.use(express.json());
     app.use("/api/media", mediaRoutes);
@@ -126,5 +128,71 @@ describe("media multicam render route", () => {
     expect(res.body).toEqual(
       expect.objectContaining({ message: "At least two camera sources are required" })
     );
+  });
+
+  test("POST /api/media/render-multicam accepts a 44-minute checkpointed render and scales credits", async () => {
+    mockStartMulticamRenderJob.mockResolvedValue({
+      jobId: "episode-2-job",
+      dispatchMode: "process_background",
+    });
+
+    const res = await request(app)
+      .post("/api/media/render-multicam")
+      .send({
+        sources: [
+          { id: "cam-1", url: "https://cdn.example.com/cam-1.mp4" },
+          { id: "cam-2", url: "https://cdn.example.com/cam-2.mp4" },
+        ],
+        overlapDuration: 44 * 60,
+        renderTier: "premium",
+      })
+      .expect(200);
+
+    expect(mockDeductCredits).toHaveBeenCalledWith("testUser123", 450, "render-multicam", {});
+    expect(mockStartMulticamRenderJob).toHaveBeenCalledWith(
+      expect.objectContaining({
+        renderSpecVersion: 2,
+        totalDurationSeconds: 44 * 60,
+        checkpointSeconds: 300,
+        checkpointedRender: true,
+        expectedCheckpointCount: 9,
+      }),
+      "testUser123"
+    );
+    expect(res.body).toEqual(
+      expect.objectContaining({
+        success: true,
+        jobId: "episode-2-job",
+        renderSpecVersion: 2,
+        totalDurationSeconds: 44 * 60,
+        checkpointSeconds: 300,
+        checkpointedRender: true,
+        expectedCheckpointCount: 9,
+        billingUnits: 3,
+        chargedCredits: 450,
+      })
+    );
+  });
+
+  test("POST /api/media/render-multicam rejects renders above the three-hour total cap", async () => {
+    const res = await request(app)
+      .post("/api/media/render-multicam")
+      .send({
+        sources: [
+          { id: "cam-1", url: "https://cdn.example.com/cam-1.mp4" },
+          { id: "cam-2", url: "https://cdn.example.com/cam-2.mp4" },
+        ],
+        totalDurationSeconds: 3 * 60 * 60 + 1,
+      })
+      .expect(400);
+
+    expect(res.body).toEqual(
+      expect.objectContaining({
+        code: "MULTICAM_DURATION_LIMIT",
+        maxDurationSeconds: 3 * 60 * 60,
+      })
+    );
+    expect(mockDeductCredits).not.toHaveBeenCalled();
+    expect(mockStartMulticamRenderJob).not.toHaveBeenCalled();
   });
 });

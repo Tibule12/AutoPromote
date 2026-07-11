@@ -10,6 +10,7 @@
             "temp_sources/",
             "temp_scans/",
             "temp/multicam/",
+            "temp/multicam-checkpoints/",
             "temp/multicam-clean-sync/",
             "temp/multicam-clean-sync-audio/"
           ]

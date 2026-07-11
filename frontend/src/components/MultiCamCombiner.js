@@ -62,7 +62,11 @@ const getCameraColor = (cameraId, sources) => {
 
 const DRIFT_THRESHOLD_SECONDS = 0.18;
 const EXPORT_FRAME_RATE = 30;
-const SERVER_MULTICAM_MAX_DURATION_SECONDS = 20 * 60;
+const SERVER_MULTICAM_MAX_DURATION_SECONDS = 3 * 60 * 60;
+const MULTICAM_RENDER_CHECKPOINT_SECONDS = 5 * 60;
+const MULTICAM_RENDER_BILLING_UNIT_SECONDS = 20 * 60;
+const MULTICAM_RENDER_SPEC_VERSION = 2;
+const ACTIVE_MULTICAM_RENDER_JOB_STORAGE_KEY = "autopromote:multicam-active-render-job";
 const LOCAL_MEDIA_WORKER_HOSTS = new Set(["localhost", "127.0.0.1", "0.0.0.0"]);
 
 const canUseLocalMediaWorker = () => {
@@ -100,6 +104,114 @@ export const getRenderApprovalCopy = render => {
   if (state === "rejected") return "Rejected render";
   if (state === "needs_review") return "Needs human review";
   return "Render";
+};
+
+export const getMulticamRenderBillingUnits = durationSeconds => {
+  const duration = Math.max(0, Number(durationSeconds) || 0);
+  return duration > 0 ? Math.ceil(duration / MULTICAM_RENDER_BILLING_UNIT_SECONDS) : 0;
+};
+
+export const getFullTimelineRenderWindow = durationSeconds => {
+  const requestedDuration = Math.max(0, Number(durationSeconds) || 0);
+  const duration = Math.min(requestedDuration, SERVER_MULTICAM_MAX_DURATION_SECONDS);
+  return {
+    start: 0,
+    end: duration,
+    duration,
+    exceedsServerCap: requestedDuration > SERVER_MULTICAM_MAX_DURATION_SECONDS,
+    checkpointSeconds: MULTICAM_RENDER_CHECKPOINT_SECONDS,
+    checkpointCount: duration > 0
+      ? Math.ceil(duration / MULTICAM_RENDER_CHECKPOINT_SECONDS)
+      : 0,
+  };
+};
+
+export const getRenderOutputUrl = render =>
+  render?.output_url ||
+  render?.outputUrl ||
+  render?.approvedOutputUrl ||
+  render?.result?.url ||
+  render?.result?.output_url ||
+  render?.result?.outputUrl ||
+  "";
+
+export const getRenderManifestLocation = render =>
+  render?.manifestUrl ||
+  render?.manifest_url ||
+  render?.manifestStoragePath ||
+  render?.manifest_storage_path ||
+  render?.result?.manifestUrl ||
+  render?.result?.manifest_url ||
+  render?.result?.manifestStoragePath ||
+  render?.result?.manifest_storage_path ||
+  "";
+
+export const getRenderCheckpointSummary = render => {
+  const checkpoint = render?.renderCheckpoint || render?.render_checkpoint || render?.result?.renderCheckpoint || {};
+  const expectedCount = Math.max(
+    0,
+    Number(
+      checkpoint.expectedCount ??
+      checkpoint.expected_count ??
+      render?.expectedCheckpointCount ??
+      render?.expected_checkpoint_count ??
+      0
+    ) || 0
+  );
+  const completedCount = Math.min(
+    expectedCount || Number.MAX_SAFE_INTEGER,
+    Math.max(0, Number(checkpoint.completedCount ?? checkpoint.completed_count ?? 0) || 0)
+  );
+  const rawCurrentIndex = Number(checkpoint.currentIndex ?? checkpoint.current_index);
+  const currentIndex = Number.isFinite(rawCurrentIndex) && rawCurrentIndex >= 0
+    ? rawCurrentIndex
+    : null;
+  const activeCheckpoint = expectedCount
+    ? Math.min(
+        expectedCount,
+        Math.max(
+          completedCount < expectedCount ? completedCount + 1 : completedCount,
+          currentIndex === null ? 0 : currentIndex + 1
+        )
+      )
+    : 0;
+  return {
+    stage: checkpoint.stage || render?.stage || "",
+    status: checkpoint.status || "",
+    currentIndex,
+    completedCount,
+    expectedCount,
+    activeCheckpoint,
+    completedDurationSeconds: Math.max(
+      0,
+      Number(checkpoint.completedDurationSeconds ?? checkpoint.completed_duration_seconds ?? 0) || 0
+    ),
+    totalDurationSeconds: Math.max(
+      0,
+      Number(
+        checkpoint.totalDurationSeconds ??
+        checkpoint.total_duration_seconds ??
+        render?.totalDurationSeconds ??
+        render?.total_duration_seconds ??
+        0
+      ) || 0
+    ),
+    label: expectedCount ? `Checkpoint ${activeCheckpoint}/${expectedCount}` : "",
+  };
+};
+
+export const isAsyncRenderDeliveryReady = render => {
+  if (!getRenderOutputUrl(render)) return false;
+  const renderSpecVersion = Number(
+    render?.renderSpecVersion ??
+    render?.render_spec_version ??
+    render?.result?.renderSpecVersion ??
+    render?.result?.render_spec_version ??
+    0
+  );
+  return renderSpecVersion >= MULTICAM_RENDER_SPEC_VERSION
+    ? Boolean(getRenderManifestLocation(render))
+    : true;
 };
 
 const FRAME_STEP_SECONDS = 1 / 30;
@@ -703,9 +815,14 @@ const estimateCleanAudioSyncCredits = () => {
   return CLEAN_AUDIO_SYNC_CREDITS;
 };
 
-const estimateMulticamRenderCredits = renderTier => {
+export const estimateMulticamRenderCredits = (
+  renderTier,
+  durationSeconds = MULTICAM_RENDER_BILLING_UNIT_SECONDS
+) => {
   const tier = String(renderTier || "premium").trim().toLowerCase().replace(/-/g, "_");
-  return MULTICAM_RENDER_CREDITS_BY_TIER[tier] || MULTICAM_RENDER_CREDITS_BY_TIER.premium;
+  const perUnitCredits =
+    MULTICAM_RENDER_CREDITS_BY_TIER[tier] || MULTICAM_RENDER_CREDITS_BY_TIER.premium;
+  return perUnitCredits * getMulticamRenderBillingUnits(durationSeconds);
 };
 
 const getSourceTimelineTime = (source, playhead, timelineStart) =>
@@ -1738,6 +1855,50 @@ const buildMulticamDraftKey = sources => {
   return fingerprint ? `autopromote:multicam-draft:${fingerprint}` : "";
 };
 
+const readActiveMulticamRenderJob = () => {
+  if (typeof window === "undefined" || !window.localStorage) return null;
+  try {
+    const raw = window.localStorage.getItem(ACTIVE_MULTICAM_RENDER_JOB_STORAGE_KEY);
+    if (!raw) return null;
+    try {
+      const parsed = JSON.parse(raw);
+      return parsed?.jobId ? parsed : null;
+    } catch (_parseError) {
+      return { jobId: raw };
+    }
+  } catch (_storageError) {
+    return null;
+  }
+};
+
+const persistActiveMulticamRenderJob = job => {
+  if (typeof window === "undefined" || !window.localStorage || !job?.jobId) return;
+  try {
+    window.localStorage.setItem(
+      ACTIVE_MULTICAM_RENDER_JOB_STORAGE_KEY,
+      JSON.stringify({
+        jobId: job.jobId,
+        duration: Number(job.duration || 0),
+        renderSpecVersion: Number(job.renderSpecVersion || MULTICAM_RENDER_SPEC_VERSION),
+      })
+    );
+  } catch (_storageError) {
+    // Polling still works in this tab when private storage is unavailable.
+  }
+};
+
+const clearActiveMulticamRenderJob = jobId => {
+  if (typeof window === "undefined" || !window.localStorage) return;
+  try {
+    const activeJob = readActiveMulticamRenderJob();
+    if (!jobId || !activeJob?.jobId || activeJob.jobId === jobId) {
+      window.localStorage.removeItem(ACTIVE_MULTICAM_RENDER_JOB_STORAGE_KEY);
+    }
+  } catch (_storageError) {
+    // A completed render must not fail just because local storage is blocked.
+  }
+};
+
 function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange }) {
   const { canUseFeature, credits } = useSubscription();
   const [sources, setSources] = useState(() =>
@@ -1803,7 +1964,9 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const [multicamBurnCaptions, setMulticamBurnCaptions] = useState(false);
   const [multicamBrandWatermark, setMulticamBrandWatermark] = useState(false);
   const [multicamGenerateThumbnail, setMulticamGenerateThumbnail] = useState(false);
-  const [cloudRenderWindowStart, setCloudRenderWindowStart] = useState(0);
+  const [activeRenderJobId, setActiveRenderJobId] = useState("");
+  const [activeRenderCheckpoint, setActiveRenderCheckpoint] = useState(null);
+  const [activeRenderManifest, setActiveRenderManifest] = useState("");
   const [billingPanelOpen, setBillingPanelOpen] = useState(false);
 
   const cancelExportRef = useRef(false);
@@ -1837,6 +2000,175 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       setRecentRendersStatus("Saved masters could not be loaded right now.");
     }
   }, []);
+
+  const startRenderStatusPolling = useCallback(
+    (renderJobId, options = {}) => {
+      if (!renderJobId) return;
+      if (exportPollIntervalRef.current) {
+        window.clearInterval(exportPollIntervalRef.current);
+        exportPollIntervalRef.current = null;
+      }
+
+      const fallbackDuration = Math.max(0, Number(options.duration || 0));
+      const fallbackRenderSpecVersion = Number(
+        options.renderSpecVersion || MULTICAM_RENDER_SPEC_VERSION
+      );
+      cancelExportRef.current = false;
+      renderSubmissionStartedRef.current = true;
+      setActiveRenderJobId(renderJobId);
+      setActiveRenderCheckpoint(null);
+      setActiveRenderManifest("");
+      persistActiveMulticamRenderJob({
+        jobId: renderJobId,
+        duration: fallbackDuration,
+        renderSpecVersion: fallbackRenderSpecVersion,
+      });
+
+      const stopPolling = ({ clearPersisted = false } = {}) => {
+        if (exportPollIntervalRef.current) {
+          window.clearInterval(exportPollIntervalRef.current);
+          exportPollIntervalRef.current = null;
+        }
+        if (clearPersisted) {
+          clearActiveMulticamRenderJob(renderJobId);
+          setActiveRenderJobId("");
+        }
+      };
+
+      const pollJob = async () => {
+        if (cancelExportRef.current) return;
+        try {
+          const currentUser = getAuth().currentUser;
+          if (!currentUser) return;
+          const idToken = await currentUser.getIdToken();
+          const statusRes = await fetch(`${API_BASE_URL}/api/media/status/${renderJobId}`, {
+            headers: { Authorization: `Bearer ${idToken}` },
+          });
+          const statusData = await statusRes.json().catch(() => ({}));
+          if (!statusRes.ok || !statusData.success) return;
+
+          const normalizedStatus = {
+            ...statusData,
+            renderSpecVersion:
+              statusData.renderSpecVersion ||
+              statusData.render_spec_version ||
+              fallbackRenderSpecVersion,
+          };
+          const checkpoint = getRenderCheckpointSummary(normalizedStatus);
+          const manifestLocation = getRenderManifestLocation(normalizedStatus);
+          setActiveRenderCheckpoint(checkpoint.expectedCount ? checkpoint : null);
+          setActiveRenderManifest(manifestLocation);
+
+          const serverProgress = Math.max(0, Number(statusData.progress || 0) / 100);
+          const checkpointProgress = checkpoint.expectedCount
+            ? checkpoint.completedCount / checkpoint.expectedCount
+            : 0;
+          setExportProgress(Math.min(0.99, Math.max(serverProgress, checkpointProgress)));
+          const checkpointCopy = checkpoint.label
+            ? `${checkpoint.label} · ${checkpoint.completedCount}/${checkpoint.expectedCount} complete`
+            : "";
+          setStatusMessage(
+            [checkpointCopy, statusData.detail || statusData.stage || "Server rendering..."]
+              .filter(Boolean)
+              .join(" — ")
+          );
+
+          if (
+            statusData.status === "needs_review" ||
+            statusData.approvalStatus === "needs_review"
+          ) {
+            stopPolling({ clearPersisted: true });
+            setExportProgress(1);
+            setPendingRenderReview({
+              ...statusData,
+              jobId: renderJobId,
+              previewUrl: statusData.previewUrl || statusData.heldOutputUrl,
+              duration:
+                statusData.result?.duration ||
+                statusData.totalDurationSeconds ||
+                fallbackDuration,
+              manifestUrl: manifestLocation,
+            });
+            setExportResult(null);
+            setStatusMessage("Render finished and is waiting for human review.");
+            loadRecentRenders();
+            setServerExportPending(false);
+            setIsExporting(false);
+            return;
+          }
+
+          if (statusData.status === "completed") {
+            const completedUrl = getRenderOutputUrl(normalizedStatus);
+            const specVersion = Number(normalizedStatus.renderSpecVersion || 0);
+            if (!isAsyncRenderDeliveryReady(normalizedStatus)) {
+              if (specVersion >= MULTICAM_RENDER_SPEC_VERSION) {
+                const pendingParts = [
+                  !completedUrl ? "master output" : null,
+                  !manifestLocation ? "render manifest" : null,
+                ].filter(Boolean);
+                setStatusMessage(
+                  `${checkpoint.label || "All checkpoints rendered"} — finalizing ${pendingParts.join(" and ")}...`
+                );
+                return;
+              }
+              stopPolling({ clearPersisted: true });
+              setStatusMessage("Render completed but no output URL was returned.");
+              setServerExportPending(false);
+              setIsExporting(false);
+              return;
+            }
+
+            stopPolling({ clearPersisted: true });
+            setExportProgress(1);
+            setExportResult({
+              url: completedUrl,
+              file: { name: `multicam-master-${Date.now()}.mp4` },
+              duration:
+                statusData.result?.duration ||
+                statusData.totalDurationSeconds ||
+                fallbackDuration,
+              manifestUrl: manifestLocation,
+              isServerRender: true,
+            });
+            setStatusMessage("Multi-camera render and manifest complete. Download ready.");
+            loadRecentRenders();
+            setServerExportPending(false);
+            setIsExporting(false);
+            return;
+          }
+
+          if (statusData.status === "failed" || statusData.status === "proof_failed") {
+            stopPolling({ clearPersisted: true });
+            const failureMessage =
+              statusData.error ||
+              statusData.workerError ||
+              statusData.detail ||
+              "Server render failed.";
+            setStatusMessage(failureMessage);
+            toast.error(failureMessage);
+            setServerExportPending(false);
+            setIsExporting(false);
+            setExportProgress(0);
+          }
+        } catch (pollError) {
+          console.warn("Multicam render status poll failed", pollError);
+        }
+      };
+
+      pollJob();
+      exportPollIntervalRef.current = window.setInterval(pollJob, 5000);
+    },
+    [loadRecentRenders]
+  );
+
+  useEffect(() => {
+    const activeJob = readActiveMulticamRenderJob();
+    if (!activeJob?.jobId) return;
+    setServerExportPending(true);
+    setIsExporting(true);
+    setStatusMessage(`Resuming server render ${activeJob.jobId}...`);
+    startRenderStatusPolling(activeJob.jobId, activeJob);
+  }, [startRenderStatusPolling]);
 
   const handleReviewAction = useCallback(
     async (job, action) => {
@@ -1992,10 +2324,6 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     () => estimateCleanAudioSyncCredits(readySources, externalAudioTrack),
     [readySources, externalAudioTrack]
   );
-  const multicamRenderCreditEstimate = useMemo(
-    () => estimateMulticamRenderCredits(multicamRenderTier),
-    [multicamRenderTier]
-  );
   const externalAudioSourceProxy = useMemo(
     () =>
       externalAudioTrack
@@ -2021,22 +2349,15 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           ? Math.min(baseTimelineDuration, Number(flowEditPlan.duration) || baseTimelineDuration)
           : baseTimelineDuration
       : baseTimelineDuration;
-  const cloudRenderWindowMaxStart = Math.max(
-    0,
-    (Number(timelineDuration) || 0) - SERVER_MULTICAM_MAX_DURATION_SECONDS
+  const cloudRenderWindow = getFullTimelineRenderWindow(timelineDuration);
+  const cloudRenderWindowStartSafe = cloudRenderWindow.start;
+  const cloudRenderWindowDuration = cloudRenderWindow.duration;
+  const cloudRenderWindowEnd = cloudRenderWindow.end;
+  const isLongCloudRenderSource = cloudRenderWindow.checkpointCount > 1;
+  const multicamRenderCreditEstimate = useMemo(
+    () => estimateMulticamRenderCredits(multicamRenderTier, cloudRenderWindowDuration),
+    [multicamRenderTier, cloudRenderWindowDuration]
   );
-  const cloudRenderWindowStartSafe = clampNumber(
-    Number(cloudRenderWindowStart) || 0,
-    0,
-    cloudRenderWindowMaxStart,
-    0
-  );
-  const cloudRenderWindowDuration = Math.min(
-    SERVER_MULTICAM_MAX_DURATION_SECONDS,
-    Math.max(0, (Number(timelineDuration) || 0) - cloudRenderWindowStartSafe)
-  );
-  const cloudRenderWindowEnd = cloudRenderWindowStartSafe + cloudRenderWindowDuration;
-  const isLongCloudRenderSource = (Number(timelineDuration) || 0) > SERVER_MULTICAM_MAX_DURATION_SECONDS + 0.5;
   const shouldLoopFlowAudio =
     !!flowAudioUrl &&
     !!flowEditEnabled &&
@@ -3051,9 +3372,6 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       if (draft.useExternalCleanAudio !== undefined) {
         setUseExternalCleanAudio(Boolean(draft.useExternalCleanAudio));
       }
-      if (Number.isFinite(Number(draft.cloudRenderWindowStart))) {
-        setCloudRenderWindowStart(Math.max(0, Number(draft.cloudRenderWindowStart) || 0));
-      }
       if (draft.sourceUploads && typeof draft.sourceUploads === "object") {
         setSources(currentSources =>
           currentSources.map(source => {
@@ -3124,7 +3442,6 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           masterAudioCameraId,
           outputAspectRatio,
           useExternalCleanAudio,
-          cloudRenderWindowStart,
           sourceUploads,
           externalAudioUpload: {
             url: String(externalAudioTrack?.url || "").startsWith("http")
@@ -3147,7 +3464,6 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     masterAudioCameraId,
     outputAspectRatio,
     useExternalCleanAudio,
-    cloudRenderWindowStart,
     externalAudioTrack,
     flowEditPlan,
   ]);
@@ -3365,12 +3681,6 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       setPlayhead(timelineDuration);
     }
   }, [playhead, timelineDuration, isPlaying]);
-
-  useEffect(() => {
-    if (Math.abs((Number(cloudRenderWindowStart) || 0) - cloudRenderWindowStartSafe) > 0.05) {
-      setCloudRenderWindowStart(cloudRenderWindowStartSafe);
-    }
-  }, [cloudRenderWindowStart, cloudRenderWindowStartSafe]);
 
   useEffect(() => {
     const unresolvedSources = sources.filter(
@@ -6951,9 +7261,15 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       setStatusMessage("Set up synced sources before exporting.");
       return;
     }
+    if (cloudRenderWindow.exceedsServerCap) {
+      const message = "Server MP4 render supports a maximum total timeline of 3 hours.";
+      setStatusMessage(message);
+      toast.error(message);
+      return;
+    }
     if (cloudRenderWindowDuration <= 0.5) {
-      setStatusMessage("Pick a valid render window before starting the cloud export.");
-      toast.error("Pick a valid render window first.");
+      setStatusMessage("The full timeline must be longer than half a second before export.");
+      toast.error("Set a valid timeline before export.");
       return;
     }
     const plannedRenderWindowStart = cloudRenderWindowStartSafe;
@@ -6994,8 +7310,9 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       [
         "Start verified MP4 render preparation?",
         "",
-        `Render window: ${formatDurationLabel(plannedRenderWindowStart)} to ${formatDurationLabel(plannedRenderWindowEnd)} (${formatDurationLabel(plannedRenderWindowDuration)})`,
-        `Render credits: ${multicamRenderCreditEstimate} credits`,
+        `Full timeline: ${formatDurationLabel(plannedRenderWindowStart)} to ${formatDurationLabel(plannedRenderWindowEnd)} (${formatDurationLabel(plannedRenderWindowDuration)})`,
+        `Internal checkpoints: ${cloudRenderWindow.checkpointCount} × up to ${formatDurationLabel(MULTICAM_RENDER_CHECKPOINT_SECONDS)}`,
+        `Render credits: ${multicamRenderCreditEstimate} credits (${getMulticamRenderBillingUnits(plannedRenderWindowDuration)} started 20-minute billing units)`,
         "One-time resumable source upload + automatic preflight: 0 credits",
         hasExternalCleanAudio ? "Separate clean-audio sync charge: 0 credits in this export flow" : null,
         "",
@@ -7042,7 +7359,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       const renderWindowStart = cloudRenderWindowStartSafe;
       const renderWindowEnd = cloudRenderWindowEnd;
       const renderWindowDuration = cloudRenderWindowDuration;
-      const renderTimelineStart = (Number(timelineBounds.timelineStart) || 0) + renderWindowStart;
+      const renderTimelineStart = 0;
 
       let externalAudioPayload = null;
       const verifiedSyncBySourceId = new Map();
@@ -7487,7 +7804,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
 
       if (!renderSegmentsPayload?.length) {
         throw new Error(
-          "No valid camera segments inside this 20-minute window. Move the render window to where your synced cameras overlap."
+          "No valid camera segments were found across the full synced timeline. Check source offsets and duration coverage."
         );
       }
 
@@ -7540,6 +7857,16 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           overlap_start: renderTimelineStart,
           overlapDuration: renderWindowDuration,
           overlap_duration: renderWindowDuration,
+          renderSpecVersion: MULTICAM_RENDER_SPEC_VERSION,
+          render_spec_version: MULTICAM_RENDER_SPEC_VERSION,
+          totalDurationSeconds: renderWindowDuration,
+          total_duration_seconds: renderWindowDuration,
+          checkpointSeconds: MULTICAM_RENDER_CHECKPOINT_SECONDS,
+          checkpoint_seconds: MULTICAM_RENDER_CHECKPOINT_SECONDS,
+          checkpointedRender: cloudRenderWindow.checkpointCount > 1,
+          checkpointed_render: cloudRenderWindow.checkpointCount > 1,
+          expectedCheckpointCount: cloudRenderWindow.checkpointCount,
+          expected_checkpoint_count: cloudRenderWindow.checkpointCount,
           outputAspectRatio: outputAspectRatio,
           output_aspect_ratio: outputAspectRatio,
           renderTier: multicamRenderTier,
@@ -7585,122 +7912,55 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       }
 
       const data = await response.json();
-      if (!data.success && !data.output_url) {
+      if (!data.success && !getRenderOutputUrl(data)) {
         throw new Error(data.error || "Server render did not return a result.");
       }
 
-      setExportProgress(1);
-      const outputUrl = data.output_url || data.outputUrl;
+      const immediateManifest = getRenderManifestLocation(data);
+      const outputUrl = getRenderOutputUrl(data);
       if (data.approvalStatus === "needs_review" || data.status === "needs_review") {
+        clearActiveMulticamRenderJob(data.jobId);
         setPendingRenderReview({
           ...data,
           jobId: data.jobId,
           previewUrl: data.previewUrl || data.heldOutputUrl,
           duration: data.duration || renderWindowDuration,
+          manifestUrl: immediateManifest,
         });
         setExportResult(null);
-        setStatusMessage("Render complete. Human review is required before download.");
+        setStatusMessage("Render finished and is waiting for human review.");
         loadRecentRenders();
-      } else if (outputUrl) {
+      } else if (isAsyncRenderDeliveryReady(data)) {
+        clearActiveMulticamRenderJob(data.jobId);
+        setExportProgress(1);
         setExportResult({
           url: outputUrl,
           file: { name: `multicam-master-${Date.now()}.mp4` },
           duration: data.duration || renderWindowDuration,
+          manifestUrl: immediateManifest,
           isServerRender: true,
         });
-        setStatusMessage("Local MP4 render complete. Download it to your laptop.");
+        setStatusMessage("Multi-camera render and manifest complete. Download ready.");
       } else {
         const renderJobId = data.jobId;
         if (!renderJobId) {
-          throw new Error("Server did not return a job ID");
+          throw new Error(
+            outputUrl && Number(data.renderSpecVersion || 0) >= MULTICAM_RENDER_SPEC_VERSION
+              ? "Server returned a master without its required render manifest or job ID."
+              : "Server did not return a job ID"
+          );
         }
+        const checkpoint = getRenderCheckpointSummary(data);
+        setActiveRenderCheckpoint(checkpoint.expectedCount ? checkpoint : null);
+        setActiveRenderManifest(immediateManifest);
         setStatusMessage(
-          `Server render started (Job: ${renderJobId}). Waiting for completion...`
+          `Server render started (Job: ${renderJobId}). ${checkpoint.expectedCount || cloudRenderWindow.checkpointCount} internal checkpoints queued.`
         );
         asyncRenderStarted = true;
-
-        // Poll for render completion
-        const pollInterval = window.setInterval(async () => {
-          if (cancelExportRef.current) {
-            window.clearInterval(pollInterval);
-            return;
-          }
-          try {
-            const user = getAuth().currentUser;
-            if (!user) {
-              window.clearInterval(pollInterval);
-              return;
-            }
-            const idToken = await user.getIdToken();
-            const statusRes = await fetch(`${API_BASE_URL}/api/media/status/${renderJobId}`, {
-              headers: { Authorization: `Bearer ${idToken}` },
-            });
-            const statusData = await statusRes.json().catch(() => ({}));
-            if (!statusRes.ok || !statusData.success) return;
-
-            setExportProgress(Math.min(0.99, (statusData.progress || 0) / 100));
-            setStatusMessage(
-              statusData.detail || `Server rendering... ${statusData.progress || 0}%`
-            );
-
-            if (statusData.status === "needs_review" || statusData.approvalStatus === "needs_review") {
-              window.clearInterval(pollInterval);
-              setExportProgress(1);
-              setPendingRenderReview({
-                ...statusData,
-                jobId: renderJobId,
-                previewUrl: statusData.previewUrl || statusData.heldOutputUrl,
-                duration: statusData.result?.duration || renderWindowDuration,
-              });
-              setExportResult(null);
-              setStatusMessage("Render complete. Human review is required before download.");
-              loadRecentRenders();
-              setServerExportPending(false);
-              setIsExporting(false);
-            } else if (statusData.status === "completed") {
-              window.clearInterval(pollInterval);
-              const completedUrl =
-                statusData.output_url ||
-                statusData.outputUrl ||
-                statusData.result?.url ||
-                statusData.result?.output_url;
-              if (completedUrl) {
-                setExportProgress(1);
-                setExportResult({
-                  url: completedUrl,
-                  file: { name: `multicam-master-${Date.now()}.mp4` },
-                  duration: statusData.result?.duration || renderWindowDuration,
-                  isServerRender: true,
-                });
-                setStatusMessage("Multi-camera render complete. Download ready.");
-                loadRecentRenders();
-              } else {
-                setStatusMessage("Render completed but no output URL was returned.");
-              }
-              setServerExportPending(false);
-              setIsExporting(false);
-            } else if (statusData.status === "failed" || statusData.status === "proof_failed") {
-              window.clearInterval(pollInterval);
-              const failureMessage =
-                statusData.error ||
-                statusData.workerError ||
-                statusData.detail ||
-                "Server render failed.";
-              setStatusMessage(
-                failureMessage
-              );
-              toast.error(failureMessage);
-              setServerExportPending(false);
-              setIsExporting(false);
-              setExportProgress(0);
-            }
-          } catch (pollErr) {
-            console.warn("Multicam render status poll failed", pollErr);
-          }
-        }, 5000);
-
-        // Store interval for cleanup
-        exportPollIntervalRef.current = pollInterval;
+        startRenderStatusPolling(renderJobId, {
+          duration: renderWindowDuration,
+          renderSpecVersion: data.renderSpecVersion || MULTICAM_RENDER_SPEC_VERSION,
+        });
       }
     } catch (error) {
       console.error(error);
@@ -7792,53 +8052,50 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   };
 
   const renderCloudRenderWindowPanel = () => {
-    if (!isLongCloudRenderSource) return null;
+    if (!isLongCloudRenderSource && !cloudRenderWindow.exceedsServerCap) return null;
+    const checkpointSummary = activeRenderCheckpoint?.expectedCount
+      ? activeRenderCheckpoint
+      : {
+          expectedCount: cloudRenderWindow.checkpointCount,
+          completedCount: 0,
+          label: "",
+        };
     return (
       <div className="nle-cloud-render-window">
         <div className="nle-cloud-render-window-copy">
-          <strong>Cloud render window</strong>
+          <strong>
+            {cloudRenderWindow.exceedsServerCap
+              ? "Timeline exceeds the 3-hour server limit"
+              : "Full-episode checkpoint render"}
+          </strong>
           <span>
-            Long source detected. AutoPromote will create trimmed upload proxies for the selected
-            20-minute section instead of uploading full camera files.
+            Originals upload once, then the full timeline is submitted once from 0. The server
+            resumes internally in {formatDurationLabel(MULTICAM_RENDER_CHECKPOINT_SECONDS)}
+            checkpoints; you do not upload or submit each checkpoint separately.
           </span>
         </div>
         <div className="nle-cloud-render-window-range">
-          <input
-            type="range"
-            min="0"
-            max={Math.max(1, Math.round(cloudRenderWindowMaxStart))}
-            step="1"
-            value={Math.round(cloudRenderWindowStartSafe)}
-            onChange={event => setCloudRenderWindowStart(Number(event.target.value) || 0)}
-            disabled={isExporting}
-            aria-label="Cloud render window start time"
-          />
           <div className="nle-cloud-render-window-times">
             <span>
-              Rendering {formatDurationLabel(cloudRenderWindowStartSafe)} to{" "}
-              {formatDurationLabel(cloudRenderWindowEnd)}
+              Full timeline {formatDurationLabel(cloudRenderWindowStartSafe)} to{" "}
+              {formatDurationLabel(Number(timelineDuration) || 0)}
             </span>
-            <strong>{formatDurationLabel(cloudRenderWindowDuration)} max</strong>
+            <strong>
+              {cloudRenderWindow.exceedsServerCap
+                ? "Shorten the project before server export"
+                : `${checkpointSummary.expectedCount} internal checkpoints`}
+            </strong>
           </div>
         </div>
-        <div className="nle-cloud-render-window-actions">
-          <button
-            type="button"
-            className="nle-mini-btn"
-            onClick={() => setCloudRenderWindowStart(0)}
-            disabled={isExporting || cloudRenderWindowStartSafe <= 0.5}
-          >
-            First 20 min
-          </button>
-          <button
-            type="button"
-            className="nle-mini-btn"
-            onClick={() => setCloudRenderWindowStart(cloudRenderWindowMaxStart)}
-            disabled={isExporting || cloudRenderWindowMaxStart <= 0.5}
-          >
-            Final 20 min
-          </button>
-        </div>
+        {activeRenderJobId ? (
+          <div className="nle-cloud-render-window-actions">
+            <span>
+              {checkpointSummary.label || `Checkpoint 0/${checkpointSummary.expectedCount}`} ·{" "}
+              {checkpointSummary.completedCount} complete
+            </span>
+            <strong>{activeRenderManifest ? "Manifest ready" : `Job ${activeRenderJobId}`}</strong>
+          </div>
+        ) : null}
       </div>
     );
   };
