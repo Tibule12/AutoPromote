@@ -1,6 +1,7 @@
 import {
   estimateMulticamRenderCredits,
   getFullTimelineRenderWindow,
+  getProductionProofRenderWindow,
   getMulticamRenderBillingUnits,
   getRenderCheckpointSummary,
   getRenderManifestLocation,
@@ -58,6 +59,21 @@ describe("MultiCamCombiner checkpoint render helpers", () => {
         duration: 3 * 60 * 60,
         exceedsServerCap: true,
       })
+    );
+  });
+
+  it("builds a real 60-second production window without changing the full timeline", () => {
+    expect(getProductionProofRenderWindow(44 * 60, 120)).toEqual({
+      start: 120,
+      end: 180,
+      duration: 60,
+      exceedsServerCap: false,
+      checkpointSeconds: 300,
+      checkpointCount: 1,
+      renderPurpose: "production_proof",
+    });
+    expect(getProductionProofRenderWindow(45, 120)).toEqual(
+      expect.objectContaining({ start: 0, end: 45, duration: 45 })
     );
   });
 

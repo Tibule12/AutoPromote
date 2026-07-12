@@ -64,6 +64,9 @@ const DRIFT_THRESHOLD_SECONDS = 0.18;
 const EXPORT_FRAME_RATE = 30;
 const SERVER_MULTICAM_MAX_DURATION_SECONDS = 3 * 60 * 60;
 const MULTICAM_RENDER_CHECKPOINT_SECONDS = 5 * 60;
+const MULTICAM_PRODUCTION_PROOF_SECONDS = 60;
+const MULTICAM_PRODUCTION_PROOF_DEFAULT_START_SECONDS = 120;
+const MULTICAM_PRODUCTION_PROOF_CREDITS = 15;
 const MULTICAM_RENDER_BILLING_UNIT_SECONDS = 20 * 60;
 const MULTICAM_RENDER_SPEC_VERSION = 2;
 const ACTIVE_MULTICAM_RENDER_JOB_STORAGE_KEY = "autopromote:multicam-active-render-job";
@@ -123,6 +126,22 @@ export const getFullTimelineRenderWindow = durationSeconds => {
     checkpointCount: duration > 0
       ? Math.ceil(duration / MULTICAM_RENDER_CHECKPOINT_SECONDS)
       : 0,
+  };
+};
+
+export const getProductionProofRenderWindow = (durationSeconds, preferredStartSeconds = 120) => {
+  const timelineDuration = Math.max(0, Number(durationSeconds) || 0);
+  const duration = Math.min(MULTICAM_PRODUCTION_PROOF_SECONDS, timelineDuration);
+  const latestStart = Math.max(0, timelineDuration - duration);
+  const start = Math.min(latestStart, Math.max(0, Number(preferredStartSeconds) || 0));
+  return {
+    start,
+    end: start + duration,
+    duration,
+    exceedsServerCap: false,
+    checkpointSeconds: MULTICAM_RENDER_CHECKPOINT_SECONDS,
+    checkpointCount: duration > 0 ? 1 : 0,
+    renderPurpose: "production_proof",
   };
 };
 
@@ -1965,6 +1984,11 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const [multicamBurnCaptions, setMulticamBurnCaptions] = useState(false);
   const [multicamBrandWatermark, setMulticamBrandWatermark] = useState(false);
   const [multicamGenerateThumbnail, setMulticamGenerateThumbnail] = useState(false);
+  const [cloudRenderMode, setCloudRenderMode] = useState("proof");
+  const [proofRenderStartSeconds, setProofRenderStartSeconds] = useState(
+    MULTICAM_PRODUCTION_PROOF_DEFAULT_START_SECONDS
+  );
+  const [recoverableProjectStatus, setRecoverableProjectStatus] = useState("");
   const [activeRenderJobId, setActiveRenderJobId] = useState("");
   const [activeRenderCheckpoint, setActiveRenderCheckpoint] = useState(null);
   const [activeRenderManifest, setActiveRenderManifest] = useState("");
@@ -1999,6 +2023,88 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     } catch (error) {
       console.warn("Could not load Cam Combiner renders", error);
       setRecentRendersStatus("Saved masters could not be loaded right now.");
+    }
+  }, []);
+
+  const recoverLatestUploadedProject = useCallback(async () => {
+    try {
+      const user = getAuth().currentUser;
+      if (!user) throw new Error("Sign in before recovering uploaded originals.");
+      setRecoverableProjectStatus("Finding your uploaded camera originals...");
+      const token = await user.getIdToken();
+      const response = await fetch(`${API_BASE_URL}/api/media/multicam/recoverable-project`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.success || !data.project) {
+        throw new Error(data.message || "Could not recover the uploaded project.");
+      }
+      const project = data.project;
+      const duration = Math.max(0, Number(project.duration) || 0);
+      const restoredSources = (project.sources || []).map((source, index) => ({
+        id: source.id || `cam-${index + 1}`,
+        label: normalizeSourceLabel(source.label, index),
+        name: source.label || `Camera ${index + 1}`,
+        file: null,
+        mediaKind: "video",
+        previewUrl: source.url,
+        url: source.url,
+        uploadedUrl: source.url,
+        cloudOriginalUrl: source.url,
+        cloudOriginalStoragePath: source.storagePath || "",
+        cloudOriginalCacheKey: source.cacheKey || "",
+        offsetSeconds: Number(source.offsetSeconds) || 0,
+        syncRate: Number(source.syncRate) || 1,
+        rotationDegrees: Number(source.rotationDegrees) || 0,
+        reactionSide: source.reactionSide || null,
+        duration,
+        videoWidth: 0,
+        videoHeight: 0,
+      }));
+      if (restoredSources.length < 2) {
+        throw new Error("The saved project does not contain both uploaded cameras.");
+      }
+      setSources(restoredSources);
+      setSwitches([{ id: "switch-1", cameraId: restoredSources[0].id, startTime: 0 }]);
+      setMasterAudioCameraId(restoredSources[0].id);
+      setOutputAspectRatio(project.outputAspectRatio || "9:16");
+      setMulticamRenderTier(project.renderTier || "premium");
+      const external = project.externalAudio;
+      if (external?.url) {
+        setExternalAudioTrack({
+          name: "Recovered external clean audio",
+          file: null,
+          previewUrl: external.url,
+          url: external.url,
+          cloudOriginalUrl: external.url,
+          cloudOriginalStoragePath: external.storagePath || "",
+          cloudOriginalCacheKey: external.cacheKey || "",
+          offsetSeconds: Number(external.offsetSeconds) || 0,
+          duration,
+        });
+        setUseExternalCleanAudio(true);
+        setExternalAudioMixMode(external.mixMode || "external_only");
+      }
+      const suggestedIds = Array.isArray(project.suggestedChannelCameraIds)
+        ? project.suggestedChannelCameraIds
+        : [];
+      setExternalAudioSpeakerChannelsSwapped(
+        suggestedIds.length >= 2 &&
+          suggestedIds[0] === restoredSources[1].id &&
+          suggestedIds[1] === restoredSources[0].id
+      );
+      setConfirmedDirectorChannelMapKey("");
+      setCloudRenderMode("proof");
+      setProofRenderStartSeconds(
+        Math.min(MULTICAM_PRODUCTION_PROOF_DEFAULT_START_SECONDS, Math.max(0, duration - 60))
+      );
+      setRecoverableProjectStatus(
+        "Uploaded originals restored. No upload is needed; verify the shown left/right speakers, then run the 60-second proof."
+      );
+      setStatusMessage("Recovered the existing Firebase originals without uploading again.");
+    } catch (error) {
+      setRecoverableProjectStatus(error.message || "Could not recover uploaded originals.");
+      toast.error(error.message || "Could not recover uploaded originals.");
     }
   }, []);
 
@@ -2363,14 +2469,17 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           ? Math.min(baseTimelineDuration, Number(flowEditPlan.duration) || baseTimelineDuration)
           : baseTimelineDuration
       : baseTimelineDuration;
-  const cloudRenderWindow = getFullTimelineRenderWindow(timelineDuration);
+  const cloudRenderWindow = cloudRenderMode === "proof"
+    ? getProductionProofRenderWindow(timelineDuration, proofRenderStartSeconds)
+    : getFullTimelineRenderWindow(timelineDuration);
   const cloudRenderWindowStartSafe = cloudRenderWindow.start;
   const cloudRenderWindowDuration = cloudRenderWindow.duration;
   const cloudRenderWindowEnd = cloudRenderWindow.end;
-  const isLongCloudRenderSource = cloudRenderWindow.checkpointCount > 1;
   const multicamRenderCreditEstimate = useMemo(
-    () => estimateMulticamRenderCredits(multicamRenderTier, cloudRenderWindowDuration),
-    [multicamRenderTier, cloudRenderWindowDuration]
+    () => cloudRenderMode === "proof"
+      ? MULTICAM_PRODUCTION_PROOF_CREDITS
+      : estimateMulticamRenderCredits(multicamRenderTier, cloudRenderWindowDuration),
+    [cloudRenderMode, multicamRenderTier, cloudRenderWindowDuration]
   );
   const shouldLoopFlowAudio =
     !!flowAudioUrl &&
@@ -7344,11 +7453,15 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     );
     const approvedRender = window.confirm(
       [
-        "Start verified MP4 render preparation?",
+        cloudRenderMode === "proof"
+          ? "Start the 60-second production proof?"
+          : "Start the full verified MP4 render?",
         "",
-        `Full timeline: ${formatDurationLabel(plannedRenderWindowStart)} to ${formatDurationLabel(plannedRenderWindowEnd)} (${formatDurationLabel(plannedRenderWindowDuration)})`,
+        `${cloudRenderMode === "proof" ? "Proof range" : "Full timeline"}: ${formatDurationLabel(plannedRenderWindowStart)} to ${formatDurationLabel(plannedRenderWindowEnd)} (${formatDurationLabel(plannedRenderWindowDuration)})`,
         `Internal checkpoints: ${cloudRenderWindow.checkpointCount} × up to ${formatDurationLabel(MULTICAM_RENDER_CHECKPOINT_SECONDS)}`,
-        `Render credits: ${multicamRenderCreditEstimate} credits (${getMulticamRenderBillingUnits(plannedRenderWindowDuration)} started 20-minute billing units)`,
+        cloudRenderMode === "proof"
+          ? `Proof render credits: ${MULTICAM_PRODUCTION_PROOF_CREDITS}`
+          : `Render credits: ${multicamRenderCreditEstimate} credits (${getMulticamRenderBillingUnits(plannedRenderWindowDuration)} started 20-minute billing units)`,
         "One-time resumable source upload + automatic preflight: 0 credits",
         hasExternalCleanAudio ? "Separate clean-audio sync charge: 0 credits in this export flow" : null,
         "",
@@ -7395,7 +7508,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       const renderWindowStart = cloudRenderWindowStartSafe;
       const renderWindowEnd = cloudRenderWindowEnd;
       const renderWindowDuration = cloudRenderWindowDuration;
-      const renderTimelineStart = 0;
+      const renderTimelineStart = renderWindowStart;
 
       let externalAudioPayload = null;
       const verifiedSyncBySourceId = new Map();
@@ -7913,6 +8026,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           checkpointed_render: cloudRenderWindow.checkpointCount > 1,
           expectedCheckpointCount: cloudRenderWindow.checkpointCount,
           expected_checkpoint_count: cloudRenderWindow.checkpointCount,
+          renderPurpose: cloudRenderWindow.renderPurpose || "full_master",
+          render_purpose: cloudRenderWindow.renderPurpose || "full_master",
           outputAspectRatio: outputAspectRatio,
           output_aspect_ratio: outputAspectRatio,
           renderTier: multicamRenderTier,
@@ -8098,7 +8213,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   };
 
   const renderCloudRenderWindowPanel = () => {
-    if (!isLongCloudRenderSource && !cloudRenderWindow.exceedsServerCap) return null;
+    if (Number(timelineDuration || 0) <= MULTICAM_PRODUCTION_PROOF_SECONDS) return null;
     const checkpointSummary = activeRenderCheckpoint?.expectedCount
       ? activeRenderCheckpoint
       : {
@@ -8112,26 +8227,70 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           <strong>
             {cloudRenderWindow.exceedsServerCap
               ? "Timeline exceeds the 3-hour server limit"
-              : "Full-episode checkpoint render"}
+              : cloudRenderMode === "proof"
+                ? "60-second production proof"
+                : "Full-episode checkpoint render"}
           </strong>
           <span>
-            Originals upload once, then the full timeline is submitted once from 0. The server
-            resumes internally in {formatDurationLabel(MULTICAM_RENDER_CHECKPOINT_SECONDS)}
-            checkpoints; you do not upload or submit each checkpoint separately.
+            {cloudRenderMode === "proof"
+              ? "Uses the existing Firebase originals and the real production renderer. It does not upload the cameras again."
+              : `Originals upload once, then the full timeline is submitted once. The server resumes internally in ${formatDurationLabel(MULTICAM_RENDER_CHECKPOINT_SECONDS)} checkpoints.`}
           </span>
         </div>
+        <div className="nle-cloud-render-window-actions">
+          <button
+            type="button"
+            className={`nle-mini-btn ${cloudRenderMode === "proof" ? "is-active" : ""}`}
+            onClick={() => setCloudRenderMode("proof")}
+          >
+            60-second proof · {MULTICAM_PRODUCTION_PROOF_CREDITS} credits
+          </button>
+          <button
+            type="button"
+            className={`nle-mini-btn ${cloudRenderMode === "full" ? "is-active" : ""}`}
+            onClick={() => setCloudRenderMode("full")}
+          >
+            Full episode
+          </button>
+          <button
+            type="button"
+            className="nle-mini-btn"
+            onClick={recoverLatestUploadedProject}
+            disabled={isExporting || serverExportPending}
+          >
+            Reuse my uploaded originals
+          </button>
+        </div>
+        {recoverableProjectStatus ? <span>{recoverableProjectStatus}</span> : null}
         <div className="nle-cloud-render-window-range">
           <div className="nle-cloud-render-window-times">
             <span>
-              Full timeline {formatDurationLabel(cloudRenderWindowStartSafe)} to{" "}
-              {formatDurationLabel(Number(timelineDuration) || 0)}
+              {cloudRenderMode === "proof" ? "Proof range" : "Full timeline"}{" "}
+              {formatDurationLabel(cloudRenderWindowStartSafe)} to{" "}
+              {formatDurationLabel(cloudRenderWindowEnd)}
             </span>
             <strong>
               {cloudRenderWindow.exceedsServerCap
                 ? "Shorten the project before server export"
-                : `${checkpointSummary.expectedCount} internal checkpoints`}
+                : cloudRenderMode === "proof"
+                  ? `${MULTICAM_PRODUCTION_PROOF_CREDITS} credits · no re-upload`
+                  : `${checkpointSummary.expectedCount} internal checkpoints`}
             </strong>
           </div>
+          {cloudRenderMode === "proof" ? (
+            <label className="nle-field-block">
+              <span>Proof start (seconds)</span>
+              <input
+                className="nle-input"
+                type="number"
+                min="0"
+                max={Math.max(0, Number(timelineDuration || 0) - MULTICAM_PRODUCTION_PROOF_SECONDS)}
+                step="1"
+                value={proofRenderStartSeconds}
+                onChange={event => setProofRenderStartSeconds(Math.max(0, Number(event.target.value) || 0))}
+              />
+            </label>
+          ) : null}
         </div>
         {activeRenderJobId ? (
           <div className="nle-cloud-render-window-actions">

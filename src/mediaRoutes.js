@@ -63,6 +63,11 @@ const MULTICAM_CHECKPOINT_SECONDS = parseInt(
   10
 ) || 5 * 60;
 const MULTICAM_BILLING_UNIT_SECONDS = 20 * 60;
+const MULTICAM_PRODUCTION_PROOF_SECONDS = 60;
+const MULTICAM_PRODUCTION_PROOF_CREDITS = Math.max(
+  1,
+  parseInt(process.env.MULTICAM_PRODUCTION_PROOF_CREDITS || "15", 10) || 15
+);
 const MULTICAM_SERVER_PROOF_REQUIRED =
   process.env.MULTICAM_SERVER_PROOF_REQUIRED === "true" ||
   (process.env.MULTICAM_SERVER_PROOF_REQUIRED !== "false" && IS_PRODUCTION_RUNTIME);
@@ -86,6 +91,11 @@ const estimateMulticamRenderCredits = ({ renderTier, durationSeconds }) => {
   const unitCost = MULTICAM_RENDER_CREDITS_BY_TIER[tier] || MULTICAM_RENDER_CREDITS_BY_TIER.premium;
   return unitCost * getMulticamBillingUnits(durationSeconds);
 };
+
+const normalizeMulticamRenderPurpose = value =>
+  String(value || "full_master").trim().toLowerCase() === "production_proof"
+    ? "production_proof"
+    : "full_master";
 
 const estimateCleanAudioSyncCredits = () => CREDIT_COSTS["clean-audio-sync"] || 18;
 
@@ -755,6 +765,86 @@ router.post("/multicam/uploads/abort", async (req, res) => {
   }
 });
 
+router.get("/multicam/recoverable-project", async (req, res) => {
+  try {
+    const userId = req.user?.uid || req.userId;
+    const snapshot = await admin
+      .firestore()
+      .collection("video_edits")
+      .where("userId", "==", userId)
+      .limit(50)
+      .get();
+    const candidates = snapshot.docs
+      .map(doc => ({ id: doc.id, ...(doc.data() || {}) }))
+      .filter(item => {
+        const request = item.multicamRequest || {};
+        return item.type === "multicam_render" && Array.isArray(request.sources) && request.sources.length >= 2;
+      })
+      .sort((left, right) => {
+        const toMillis = value => {
+          if (value?.toMillis) return value.toMillis();
+          return Date.parse(value || "") || 0;
+        };
+        return toMillis(right.updatedAt || right.createdAt) - toMillis(left.updatedAt || left.createdAt);
+      });
+    const latest = candidates[0];
+    if (!latest) {
+      return res.status(404).json({ success: false, message: "No uploaded Cam Combiner project was found" });
+    }
+    const request = latest.multicamRequest || {};
+    let failureDetail = {};
+    try {
+      failureDetail = typeof latest.error === "string" ? JSON.parse(latest.error) : latest.error || {};
+    } catch (_parseError) {
+      failureDetail = {};
+    }
+    const suggestedChannelCameraIds =
+      failureDetail?.director_audio?.auto_mapping?.mapped_camera_ids ||
+      failureDetail?.director_audio?.auto_mapping?.mappedCameraIds ||
+      request.directorChannelCameraIds ||
+      request.director_channel_camera_ids ||
+      [];
+    const sources = request.sources.map(source => ({
+      id: source.id,
+      label: source.label,
+      url: source.url,
+      storagePath: source.storagePath || source.storage_path || "",
+      cacheKey: source.cache_key || source.cacheKey || "",
+      offsetSeconds: Number(source.offset_seconds || 0),
+      syncRate: Number(source.syncRate ?? source.sync_rate ?? 1) || 1,
+      rotationDegrees: Number(source.rotationDegrees ?? source.rotation_degrees ?? 0) || 0,
+      reactionSide: source.reactionSide || source.reaction_side || null,
+    }));
+    const external = request.externalAudio || null;
+    return res.json({
+      success: true,
+      project: {
+        previousJobId: latest.id,
+        status: latest.status,
+        duration: Number(request.totalDurationSeconds || request.total_duration_seconds || request.overlapDuration || 0),
+        outputAspectRatio: request.outputAspectRatio || request.output_aspect_ratio || "9:16",
+        renderTier: request.renderTier || request.render_tier || "premium",
+        sources,
+        externalAudio: external
+          ? {
+              url: external.url,
+              storagePath: external.storagePath || external.storage_path || "",
+              cacheKey: external.cache_key || external.cacheKey || "",
+              offsetSeconds: Number(external.offset_seconds || 0),
+              mixMode: external.mix_mode || "external_only",
+            }
+          : null,
+        suggestedChannelCameraIds: Array.isArray(suggestedChannelCameraIds)
+          ? suggestedChannelCameraIds.slice(0, 2)
+          : [],
+      },
+    });
+  } catch (error) {
+    console.error("[MediaRoute] Recoverable multicam project lookup failed:", error.message);
+    return res.status(500).json({ success: false, message: "Could not recover uploaded originals" });
+  }
+});
+
 router.post("/multicam/preflight-sync", async (req, res) => {
   const userId = req.user?.uid || req.userId;
   const sources = Array.isArray(req.body?.sources) ? req.body.sources : [];
@@ -827,17 +917,23 @@ router.post("/render-multicam", async (req, res) => {
   const userId = req.user?.uid || req.userId;
   const renderTier = normalizeMulticamRenderTier(req.body?.renderTier || req.body?.render_tier);
   const requestedDuration = getRequestedMulticamDuration(req.body);
+  const renderPurpose = normalizeMulticamRenderPurpose(
+    req.body?.renderPurpose || req.body?.render_purpose
+  );
   const billingUnits = getMulticamBillingUnits(requestedDuration);
   const expectedCheckpointCount = Math.max(
     1,
     Math.ceil(requestedDuration / MULTICAM_CHECKPOINT_SECONDS)
   );
   const checkpointedRender = expectedCheckpointCount > 1;
-  const cost = estimateMulticamRenderCredits({
-    renderTier,
-    durationSeconds: requestedDuration,
-    baseCost: CREDIT_COSTS["render-multicam"] || 15,
-  });
+  const cost =
+    renderPurpose === "production_proof"
+      ? MULTICAM_PRODUCTION_PROOF_CREDITS
+      : estimateMulticamRenderCredits({
+          renderTier,
+          durationSeconds: requestedDuration,
+          baseCost: CREDIT_COSTS["render-multicam"] || 15,
+        });
   const sources = Array.isArray(req.body?.sources) ? req.body.sources : [];
   const durableRenderEnabled = isDurableMulticamRenderEnabled();
   const durableJobId = durableRenderEnabled ? uuidv4() : null;
@@ -856,6 +952,17 @@ router.post("/render-multicam", async (req, res) => {
       message: "Cam Combiner renders are capped at 3 hours. Please select a shorter range.",
       code: "MULTICAM_DURATION_LIMIT",
       maxDurationSeconds: MULTICAM_MAX_TOTAL_RENDER_SECONDS,
+    });
+  }
+
+  if (
+    renderPurpose === "production_proof" &&
+    (requestedDuration <= 0 || requestedDuration > MULTICAM_PRODUCTION_PROOF_SECONDS + 0.5)
+  ) {
+    return res.status(400).json({
+      message: "Production proof renders must be 60 seconds or shorter.",
+      code: "MULTICAM_PROOF_DURATION_LIMIT",
+      maxDurationSeconds: MULTICAM_PRODUCTION_PROOF_SECONDS,
     });
   }
 
@@ -946,6 +1053,8 @@ router.post("/render-multicam", async (req, res) => {
             : "balanced",
         renderTier,
         render_tier: renderTier,
+        renderPurpose,
+        render_purpose: renderPurpose,
         primaryAudioCameraId:
           typeof req.body?.primaryAudioCameraId === "string" ? req.body.primaryAudioCameraId : null,
         directorChannelCameraIds: Array.isArray(req.body?.directorChannelCameraIds)
@@ -1015,6 +1124,7 @@ router.post("/render-multicam", async (req, res) => {
           : "Multi-camera render queued for server proof"
         : "Multi-camera render started",
       renderTier,
+      renderPurpose,
       renderSpecVersion: 2,
       totalDurationSeconds: requestedDuration,
       checkpointSeconds: MULTICAM_CHECKPOINT_SECONDS,
