@@ -54,6 +54,24 @@ describe("mediaRoutes entitlement enforcement", () => {
     expect(deductCredits).not.toHaveBeenCalled();
   });
 
+  it("rejects a production proof longer than 60 seconds before charging", async () => {
+    const app = express();
+    app.use(express.json());
+    app.use("/api/media", mediaRoutes);
+
+    const response = await request(app)
+      .post("/api/media/render-multicam")
+      .send({
+        sources: [{ id: "cam-1" }, { id: "cam-2" }],
+        renderPurpose: "production_proof",
+        overlapDuration: 61,
+      });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body.code).toBe("MULTICAM_PROOF_DURATION_LIMIT");
+    expect(deductCredits).not.toHaveBeenCalled();
+  });
+
   it("requires confirmed stereo channel ownership before a paid auto-director request", () => {
     const result = mediaRoutes.validateTrustedDirectorChannelMapRequest({
       sources: [{ id: "cam-1" }, { id: "cam-2" }],
