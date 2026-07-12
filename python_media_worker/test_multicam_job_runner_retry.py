@@ -33,11 +33,19 @@ class FakeRenderMultiCamRequest:
         self.__dict__.update(values)
 
 
+class FakeHTTPException(Exception):
+    def __init__(self, status_code, detail):
+        super().__init__(str(detail))
+        self.status_code = status_code
+        self.detail = detail
+
+
 class MulticamJobRunnerRetryTests(unittest.TestCase):
     def setUp(self):
         fake_worker.FIREBASE_STATUS_UPDATES_ENABLED = True
         fake_worker.logger = mock.Mock()
         fake_worker.RenderMultiCamRequest = FakeRenderMultiCamRequest
+        fake_worker.HTTPException = FakeHTTPException
         fake_worker.update_firestore_job = mock.Mock(return_value=True)
 
         document_ref = object()
@@ -136,6 +144,30 @@ class MulticamJobRunnerRetryTests(unittest.TestCase):
         self.assertEqual(exit_code, 1)
         notify_failure.assert_called_once()
         release_capacity.assert_called_once_with("retry-job-123", "failed")
+
+    def test_deterministic_proof_rejection_does_not_consume_retry_budget(self):
+        async def rejected_render(*_args, **_kwargs):
+            raise FakeHTTPException(
+                422,
+                {
+                    "message": "Auto Director could not prove which clean-audio channel belongs to each camera",
+                    "director_audio": {"status": "unproven_channel_mapping"},
+                },
+            )
+
+        fake_worker.render_multicam_impl = rejected_render
+        exit_code, notify_failure, release_capacity = self.run_failed_attempt(attempt=0)
+
+        self.assertEqual(exit_code, 1)
+        notify_failure.assert_called_once()
+        release_capacity.assert_called_once_with("retry-job-123", "failed")
+        _job_id, update = fake_worker.update_firestore_job.call_args.args
+        self.assertEqual(update["status"], "failed")
+        self.assertEqual(update["stage"], "durable_render_rejected")
+        self.assertTrue(update["refundRequired"])
+        self.assertTrue(update["retryState"]["terminal"])
+        self.assertFalse(update["retryState"]["retryable"])
+        self.assertNotIn("nextAttempt", update["retryState"])
 
 
 if __name__ == "__main__":

@@ -1959,6 +1959,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const [externalAudioTrack, setExternalAudioTrack] = useState(null);
   const [externalAudioMixMode, setExternalAudioMixMode] = useState("external_only");
   const [externalAudioSpeakerChannelsSwapped, setExternalAudioSpeakerChannelsSwapped] = useState(false);
+  const [confirmedDirectorChannelMapKey, setConfirmedDirectorChannelMapKey] = useState("");
   const [cleanAudioSyncJob, setCleanAudioSyncJob] = useState(null);
   const [multicamRenderTier, setMulticamRenderTier] = useState("premium");
   const [multicamBurnCaptions, setMulticamBurnCaptions] = useState(false);
@@ -2257,6 +2258,19 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const readySources = useMemo(
     () => sources.filter(source => getSourceMediaUrl(source) && Number(source.duration) > 0.05),
     [sources]
+  );
+  const directorChannelMapKey = useMemo(() => {
+    if (!externalAudioTrack || readySources.length < 2) return "";
+    const audioIdentity = externalAudioTrack.file
+      ? `${externalAudioTrack.file.name || "audio"}:${externalAudioTrack.file.size || 0}:${externalAudioTrack.file.lastModified || 0}`
+      : String(externalAudioTrack.name || externalAudioTrack.url || externalAudioTrack.previewUrl || "audio");
+    const channelCameraIds = externalAudioSpeakerChannelsSwapped
+      ? [readySources[1]?.id, readySources[0]?.id]
+      : [readySources[0]?.id, readySources[1]?.id];
+    return `${audioIdentity}|${channelCameraIds.filter(Boolean).join("|")}`;
+  }, [externalAudioSpeakerChannelsSwapped, externalAudioTrack, readySources]);
+  const directorChannelMapConfirmed = Boolean(
+    directorChannelMapKey && confirmedDirectorChannelMapKey === directorChannelMapKey
   );
   const getExportSourceLabel = useCallback((source, index) => {
     const label = String(source?.label || source?.name || "").trim();
@@ -4678,6 +4692,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       duration: 0,
     });
     setExternalAudioMixMode("external_only");
+    setConfirmedDirectorChannelMapKey("");
     setCleanAudioSyncJob(null);
     const externalAudioTooLarge = Number(file.size || 0) > BROWSER_SYNC_MAX_EXTERNAL_AUDIO_BYTES;
     if (externalAudioTooLarge) {
@@ -4736,6 +4751,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     setExternalAudioTrack(null);
     setExternalAudioMixMode("external_only");
     setExternalAudioSpeakerChannelsSwapped(false);
+    setConfirmedDirectorChannelMapKey("");
     setStatusMessage("External clean audio removed. Camera audio is back in control.");
   };
 
@@ -7261,6 +7277,26 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       setStatusMessage("Set up synced sources before exporting.");
       return;
     }
+    if (
+      hasExternalCleanAudio &&
+      readySources.length >= 2 &&
+      !directorChannelMapConfirmed
+    ) {
+      const leftCamera = getExportSourceLabel(
+        externalAudioSpeakerChannelsSwapped ? readySources[1] : readySources[0],
+        externalAudioSpeakerChannelsSwapped ? 1 : 0
+      );
+      const rightCamera = getExportSourceLabel(
+        externalAudioSpeakerChannelsSwapped ? readySources[0] : readySources[1],
+        externalAudioSpeakerChannelsSwapped ? 0 : 1
+      );
+      const message =
+        `Confirm the clean-audio speaker mapping before any upload or charge: ` +
+        `left channel = ${leftCamera}, right channel = ${rightCamera}.`;
+      setStatusMessage(message);
+      toast.error(message);
+      return;
+    }
     if (cloudRenderWindow.exceedsServerCap) {
       const message = "Server MP4 render supports a maximum total timeline of 3 hours.";
       setStatusMessage(message);
@@ -7834,6 +7870,14 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
             ? [sourcesPayload[1].id, sourcesPayload[0].id]
             : [sourcesPayload[0].id, sourcesPayload[1].id]
           : null;
+      const trustedDirectorChannelMap = directorChannelCameraIds
+        ? {
+            status: "approved",
+            proof_kind: "human_confirmed_ui_v1",
+            channel_camera_ids: directorChannelCameraIds,
+            contract_id: `human-channel-map:${directorChannelMapKey}`,
+          }
+        : null;
       assertExportActive();
       renderSubmissionStartedRef.current = true;
       const renderToken = await user.getIdToken(true);
@@ -7851,6 +7895,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           primary_audio_camera_id: masterAudioCameraId,
           directorChannelCameraIds,
           director_channel_camera_ids: directorChannelCameraIds,
+          trustedDirectorChannelMap,
+          trusted_director_channel_map: trustedDirectorChannelMap,
           timelineStart: renderTimelineStart,
           timeline_start: renderTimelineStart,
           overlapStart: renderTimelineStart,
@@ -9702,14 +9748,39 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                     </div>
 
                     {readySources.length >= 2 && (
-                      <label className="nle-clean-audio-toggle is-studio-toggle">
-                        <input
-                          type="checkbox"
-                          checked={externalAudioSpeakerChannelsSwapped}
-                          onChange={event => setExternalAudioSpeakerChannelsSwapped(event.target.checked)}
-                        />
-                        <span>Swap clean-audio speaker channels</span>
-                      </label>
+                      <div className="nle-clean-audio-channel-map">
+                        <label className="nle-clean-audio-toggle is-studio-toggle">
+                          <input
+                            type="checkbox"
+                            checked={externalAudioSpeakerChannelsSwapped}
+                            onChange={event => setExternalAudioSpeakerChannelsSwapped(event.target.checked)}
+                          />
+                          <span>Swap left/right clean-audio channels</span>
+                        </label>
+                        <p>
+                          Left channel: {getExportSourceLabel(
+                            externalAudioSpeakerChannelsSwapped ? readySources[1] : readySources[0],
+                            externalAudioSpeakerChannelsSwapped ? 1 : 0
+                          )}
+                          {" · "}
+                          Right channel: {getExportSourceLabel(
+                            externalAudioSpeakerChannelsSwapped ? readySources[0] : readySources[1],
+                            externalAudioSpeakerChannelsSwapped ? 0 : 1
+                          )}
+                        </p>
+                        <label className="nle-clean-audio-toggle is-studio-toggle">
+                          <input
+                            type="checkbox"
+                            checked={directorChannelMapConfirmed}
+                            onChange={event =>
+                              setConfirmedDirectorChannelMapKey(
+                                event.target.checked ? directorChannelMapKey : ""
+                              )
+                            }
+                          />
+                          <span>I verified which speaker belongs to each channel</span>
+                        </label>
+                      </div>
                     )}
 
                     <div className="nle-sync-actions">
