@@ -2,6 +2,7 @@ import os
 import tempfile
 import types
 import unittest
+from unittest import mock
 
 import python_media_worker.main_media_server as worker
 
@@ -2552,6 +2553,18 @@ class MulticamDirectorRuleTests(unittest.TestCase):
         self.assertEqual(payload["version"], 4)
         self.assertTrue(payload["sources"][0]["dense_continuous_sync"])
         self.assertGreater(payload["sources"][0]["source_max_shift_seconds"], worker.MULTICAM_CONTINUOUS_SYNC_MAX_SHIFT_SECONDS)
+
+    def test_preflight_prefers_local_audio_cache_over_remote_video_url(self):
+        with (
+            mock.patch.object(worker.os.path, "exists", side_effect=lambda path: path == "/tmp/camera.wav"),
+            mock.patch.object(worker, "has_audio_stream", return_value=True),
+        ):
+            selected = worker.select_multicam_preflight_audio_source({
+                "path": "https://storage.example.test/camera.mov",
+                "audio_analysis_path": "/tmp/camera.wav",
+            })
+
+        self.assertEqual(selected, "/tmp/camera.wav")
 
     def test_dense_continuous_sync_proof_replaces_per_segment_probing(self):
         interval = float(worker.MULTICAM_CONTINUOUS_SYNC_DENSE_DRIFT_INTERVAL_SECONDS)
