@@ -124,7 +124,11 @@ class MulticamJobRunnerRetryTests(unittest.TestCase):
         )
 
         self.assertEqual(exit_code, 1)
-        notify_failure.assert_called_once_with("retry-job-123", "transient ffmpeg failure")
+        notify_failure.assert_called_once_with(
+            "retry-job-123",
+            "transient ffmpeg failure",
+            dispatch_token="dispatch-token-long-enough",
+        )
         release_capacity.assert_called_once_with("retry-job-123", "failed")
 
         _job_id, update = fake_worker.update_firestore_job.call_args.args
@@ -168,6 +172,29 @@ class MulticamJobRunnerRetryTests(unittest.TestCase):
         self.assertTrue(update["retryState"]["terminal"])
         self.assertFalse(update["retryState"]["retryable"])
         self.assertNotIn("nextAttempt", update["retryState"])
+
+    def test_failure_callback_sends_per_job_dispatch_proof(self):
+        response = mock.Mock(status_code=200)
+        with (
+            mock.patch.dict(
+                os.environ,
+                {
+                    "MULTICAM_JOB_CALLBACK_URL": "https://api.example.test/callback",
+                    "MULTICAM_JOB_CALLBACK_SECRET": "stale-shared-secret",
+                },
+                clear=False,
+            ),
+            mock.patch.object(runner.requests, "post", return_value=response) as post,
+        ):
+            result = runner._notify_failure_callback(
+                "retry-job-123",
+                "proof failed",
+                dispatch_token="dispatch-token-long-enough",
+            )
+
+        self.assertTrue(result)
+        headers = post.call_args.kwargs["headers"]
+        self.assertEqual(headers["X-Multicam-Dispatch-Token"], "dispatch-token-long-enough")
 
 
 if __name__ == "__main__":

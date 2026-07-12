@@ -404,16 +404,6 @@ const upload = multer({
 // intentionally mounted before user auth and protected by a dedicated managed
 // secret; its only authority is to reconcile a failed job's existing receipt.
 router.post("/internal/multicam-job-failed", async (req, res) => {
-  const expectedSecret = String(process.env.MULTICAM_JOB_CALLBACK_SECRET || "");
-  const providedSecret = String(req.get("x-multicam-job-secret") || "");
-  const secretMatches =
-    expectedSecret.length > 0 &&
-    expectedSecret.length === providedSecret.length &&
-    crypto.timingSafeEqual(Buffer.from(expectedSecret), Buffer.from(providedSecret));
-  if (!secretMatches) {
-    return res.status(401).json({ success: false, message: "Invalid render job callback" });
-  }
-
   const jobId = String(req.body?.jobId || "").trim();
   if (!/^[A-Za-z0-9_-]{8,160}$/.test(jobId)) {
     return res.status(400).json({ success: false, message: "Invalid job ID" });
@@ -426,6 +416,27 @@ router.post("/internal/multicam-job-failed", async (req, res) => {
       return res.status(404).json({ success: false, message: "Job not found" });
     }
     const data = snapshot.data() || {};
+    const expectedSecret = String(process.env.MULTICAM_JOB_CALLBACK_SECRET || "");
+    const providedSecret = String(req.get("x-multicam-job-secret") || "");
+    const secretMatches =
+      expectedSecret.length > 0 &&
+      expectedSecret.length === providedSecret.length &&
+      crypto.timingSafeEqual(Buffer.from(expectedSecret), Buffer.from(providedSecret));
+    const providedDispatchToken = String(req.get("x-multicam-dispatch-token") || "");
+    const expectedDispatchHash = String(data.dispatchTokenHash || "");
+    const providedDispatchHash = providedDispatchToken
+      ? crypto.createHash("sha256").update(providedDispatchToken).digest("hex")
+      : "";
+    const dispatchTokenMatches =
+      providedDispatchToken.length >= 16 &&
+      expectedDispatchHash.length === providedDispatchHash.length &&
+      crypto.timingSafeEqual(
+        Buffer.from(expectedDispatchHash),
+        Buffer.from(providedDispatchHash)
+      );
+    if (!secretMatches && !dispatchTokenMatches) {
+      return res.status(401).json({ success: false, message: "Invalid render job callback" });
+    }
     const refund = await refundMulticamRenderJobIfNeeded(
       data.userId,
       jobId,

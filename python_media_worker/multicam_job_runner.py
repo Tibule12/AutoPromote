@@ -85,19 +85,21 @@ def _compact_check(value):
     }
 
 
-def _notify_failure_callback(job_id, reason):
+def _notify_failure_callback(job_id, reason, dispatch_token=None):
     callback_url = str(os.getenv("MULTICAM_JOB_CALLBACK_URL") or "").strip()
     callback_secret = str(os.getenv("MULTICAM_JOB_CALLBACK_SECRET") or "")
-    if not callback_url or not callback_secret:
+    if not callback_url or (not callback_secret and not dispatch_token):
         worker.logger.error("Multicam failure callback is not configured for job %s", job_id)
         return False
     try:
+        headers = {"Content-Type": "application/json"}
+        if callback_secret:
+            headers["X-Multicam-Job-Secret"] = callback_secret
+        if dispatch_token:
+            headers["X-Multicam-Dispatch-Token"] = str(dispatch_token)
         response = requests.post(
             callback_url,
-            headers={
-                "Content-Type": "application/json",
-                "X-Multicam-Job-Secret": callback_secret,
-            },
+            headers=headers,
             json={"jobId": job_id, "reason": str(reason)[:1000]},
             timeout=30,
         )
@@ -456,7 +458,7 @@ def run():
         # run after the retry budget is exhausted.
         if terminal_attempt:
             if refundable:
-                _notify_failure_callback(job_id, message)
+                _notify_failure_callback(job_id, message, dispatch_token=dispatch_token)
             _release_capacity(job_id, "failed")
         return 1
 
