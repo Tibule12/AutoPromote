@@ -14935,6 +14935,126 @@ def multicam_segment_sync_measurement_is_good(measurement):
     )
 
 
+def prove_multicam_segments_from_continuous_sync_anchors(
+    segments,
+    prepared_sources,
+    preflight_receipt,
+    continuous_sync_receipt,
+):
+    """Return a receipt when episode-wide anchors already prove segment trims.
+
+    Segment source ranges are generated through each source's continuous sync map.
+    When that map has dense, high-confidence coverage, probing every individual
+    director cut repeats the same audio-correlation work hundreds of times.
+    """
+    receipt = {
+        "status": "not_proven",
+        "proof_kind": "dense_continuous_sync_anchors_v1",
+        "camera_count": 0,
+        "cameras": [],
+        "reasons": [],
+    }
+    if (preflight_receipt or {}).get("status") != "good":
+        receipt["reasons"].append("preflight_not_good")
+    if (continuous_sync_receipt or {}).get("status") != "active":
+        receipt["reasons"].append("continuous_sync_not_active")
+
+    used_camera_ids = []
+    for segment in segments or []:
+        for camera_id in (segment.get("camera_id"), segment.get("secondary_camera_id")):
+            camera_id = str(camera_id or "").strip()
+            if camera_id and camera_id not in used_camera_ids:
+                used_camera_ids.append(camera_id)
+    receipt["camera_count"] = len(used_camera_ids)
+    receipt["used_camera_ids"] = used_camera_ids
+    if not used_camera_ids:
+        receipt["reasons"].append("no_segment_cameras")
+
+    source_map = {
+        str(source.get("id") or ""): source
+        for source in prepared_sources or []
+        if source.get("id")
+    }
+    camera_receipts = (continuous_sync_receipt or {}).get("cameras") or {}
+    expected_checkpoints = [
+        float(value)
+        for value in (continuous_sync_receipt or {}).get("checkpoints_relative_seconds") or []
+    ]
+    expected_count = len(expected_checkpoints)
+    minimum_accepted = max(2, int(math.ceil(expected_count * 0.60))) if expected_count else 2
+    expected_gaps = [
+        right - left
+        for left, right in zip(expected_checkpoints, expected_checkpoints[1:])
+    ]
+    receipt_cadence = max(
+        expected_gaps
+        or [float((continuous_sync_receipt or {}).get("anchor_interval_seconds") or 0.0)]
+        or [0.0]
+    )
+
+    for camera_id in used_camera_ids:
+        source = source_map.get(camera_id) or {}
+        sync_map = source.get("continuous_sync_map") or {}
+        camera = camera_receipts.get(camera_id) or {}
+        anchors = camera.get("anchors") or []
+        accepted = [
+            anchor
+            for anchor in anchors
+            if anchor.get("status") == "accepted"
+            and anchor.get("corrected_timeline_seconds") is not None
+            and float(anchor.get("correlation", 0.0) or 0.0) >= MULTICAM_CONTINUOUS_SYNC_MIN_CORRELATION
+        ]
+        unsafe_rejections = [
+            anchor
+            for anchor in anchors
+            if anchor.get("status") in {"rejected_large_shift", "error"}
+        ]
+        accepted_relative = sorted(
+            float(anchor.get("timeline_relative_seconds") or 0.0)
+            for anchor in accepted
+        )
+        max_gap = max(
+            [right - left for left, right in zip(accepted_relative, accepted_relative[1:])] or [0.0]
+        )
+        # Validate a cached receipt against the cadence with which it was
+        # generated. A later configuration change must not reinterpret a
+        # previously complete 120-second map as an incomplete 10-second map.
+        dense_required = bool((continuous_sync_receipt or {}).get("dense_drift_source_count"))
+        allowed_gap = receipt_cadence * 2.1
+        camera_proven = bool(
+            camera.get("active")
+            and sync_map.get("active")
+            and len(accepted) >= minimum_accepted
+            and not unsafe_rejections
+            and max_gap <= allowed_gap
+        )
+        camera_summary = {
+            "camera_id": camera_id,
+            "status": "proven" if camera_proven else "not_proven",
+            "dense_required": dense_required,
+            "accepted_anchor_count": len(accepted),
+            "expected_anchor_count": expected_count,
+            "minimum_accepted_anchor_count": minimum_accepted,
+            "coverage_ratio": round(len(accepted) / max(1, expected_count), 4),
+            "max_anchor_gap_seconds": round(max_gap, 3),
+            "allowed_anchor_gap_seconds": round(allowed_gap, 3),
+            "unsafe_rejection_count": len(unsafe_rejections),
+        }
+        receipt["cameras"].append(camera_summary)
+        if not camera_proven:
+            receipt["reasons"].append(f"camera_not_proven:{camera_id}")
+
+    if not receipt["reasons"]:
+        receipt.update({
+            "status": "proven",
+            "message": (
+                "All segment source ranges are covered by active episode-wide sync maps; "
+                "per-segment FFmpeg correlation is redundant"
+            ),
+        })
+    return receipt
+
+
 async def repair_multicam_segment_sync_before_render(
     segments,
     prepared_sources,
@@ -22430,14 +22550,24 @@ async def render_multicam_impl(
                     audio_analysis_path = local_path
                     visual_cache_key = f"pre-sync:{visual_cache_key}:{local_path}"
                     logger.info(f"Pre-sync aligned source ready for {source.label or source.id}: {local_path}")
-                elif plan_only_audio_first_requested and os.path.exists(str(source_url or "")):
-                    local_path = os.path.abspath(str(source_url))
-                    audio_analysis_path = local_path
-                    visual_cache_key = f"plan-only-direct:{visual_cache_key}:{local_path}"
+                elif plan_only_audio_first_requested:
+                    # Durable proof only needs source metadata and camera scratch
+                    # audio. Remote production URLs used to fall through to the
+                    # full-window CFR transcode here, making proof as expensive as
+                    # a render before checkpoint 1. Keep the remote media locator
+                    # for lightweight ffprobe calls and extract only mono audio.
+                    if os.path.exists(str(source_url or "")):
+                        local_path = os.path.abspath(str(source_url))
+                        audio_analysis_path = local_path
+                    else:
+                        local_path = str(source_url or "").strip()
+                        audio_analysis_path = await materialize_multicam_audio_analysis_cache(
+                            local_path
+                        )
+                    visual_cache_key = f"plan-only-audio-first:{visual_cache_key}"
                     logger.info(
-                        "Plan-only audio-first source ready for %s without CFR/video proxy prep: %s",
+                        "Plan-only audio-first source ready for %s without CFR/video proxy prep",
                         source.label or source.id,
-                        local_path,
                     )
                 else:
                     use_windowed_cfr = (
@@ -23211,14 +23341,40 @@ async def render_multicam_impl(
             prepared_sources,
             overlap_start,
         )
-        segments, pre_render_segment_sync_repair_receipt = await repair_multicam_segment_sync_before_render(
+        dense_sync_segment_proof = prove_multicam_segments_from_continuous_sync_anchors(
             segments,
             prepared_sources,
-            ext_local,
-            effective_external_audio_offset_seconds,
-            overlap_start,
-            job_id,
+            preflight,
+            continuous_sync_receipt,
         )
+        if dense_sync_segment_proof.get("status") == "proven":
+            pre_render_segment_sync_repair_receipt = {
+                "enabled": bool(MULTICAM_PRE_RENDER_SEGMENT_SYNC_REPAIR),
+                "status": "skipped_dense_continuous_sync_proven",
+                "repair_count": 0,
+                "repairs": [],
+                "episode_sync_proof": dense_sync_segment_proof,
+            }
+            logger.info(
+                "MULTICAM SEGMENT SYNC PROVED BY DENSE ANCHORS %s: %s",
+                job_id,
+                json.dumps(dense_sync_segment_proof, default=str),
+            )
+        else:
+            logger.info(
+                "MULTICAM DENSE ANCHOR PROOF FALLBACK %s: %s",
+                job_id,
+                json.dumps(dense_sync_segment_proof, default=str),
+            )
+            segments, pre_render_segment_sync_repair_receipt = await repair_multicam_segment_sync_before_render(
+                segments,
+                prepared_sources,
+                ext_local,
+                effective_external_audio_offset_seconds,
+                overlap_start,
+                job_id,
+            )
+            pre_render_segment_sync_repair_receipt["episode_sync_proof"] = dense_sync_segment_proof
         if (pre_render_segment_sync_repair_receipt or {}).get("status") == "failed":
             raise HTTPException(
                 status_code=422,

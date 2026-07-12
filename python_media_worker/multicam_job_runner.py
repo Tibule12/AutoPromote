@@ -9,6 +9,8 @@ import json
 import os
 import re
 import sys
+import threading
+import time
 
 import requests
 
@@ -42,6 +44,35 @@ def _task_retry_context():
     except (TypeError, ValueError):
         max_retries = 1
     return attempt, max_retries
+
+
+def _is_nonretryable_render_error(error):
+    """Return True for deterministic request/proof failures.
+
+    Cloud Run task retries are useful for interrupted infrastructure and
+    checkpointable FFmpeg work. They are wasteful for a 4xx proof rejection:
+    identical inputs will produce the identical rejection on every attempt.
+    """
+    raw_status = getattr(error, "status_code", None)
+    if raw_status is None:
+        raw_status = getattr(error, "status", None)
+    try:
+        status_code = int(raw_status)
+    except (TypeError, ValueError):
+        status_code = 0
+    if 400 <= status_code < 500 and status_code not in {408, 429}:
+        return True
+
+    normalized = _error_text(error).lower()
+    deterministic_markers = (
+        "unproven_channel_mapping",
+        "could not prove which clean-audio channel",
+        "trusted multicam sync contract is invalid",
+        "trusted director channel map is invalid",
+        "unsafe active-speaker",
+        "could not be sync-proved before render",
+    )
+    return any(marker in normalized for marker in deterministic_markers)
 
 
 def _compact_check(value):
@@ -248,13 +279,46 @@ def run():
                 }
             )
             proof_request = worker.RenderMultiCamRequest(**proof_payload)
-            proof_result = asyncio.run(
-                worker.render_multicam_impl(
-                    proof_request,
-                    provided_job_id=f"{job_id}-proof",
-                    propagate_errors=True,
-                )
+            proof_heartbeat_stop = threading.Event()
+            proof_started_at = time.monotonic()
+
+            def report_proof_heartbeat():
+                while not proof_heartbeat_stop.wait(20):
+                    elapsed_seconds = max(0, int(time.monotonic() - proof_started_at))
+                    minutes, seconds = divmod(elapsed_seconds, 60)
+                    worker.update_firestore_job(
+                        job_id,
+                        {
+                            "status": "proofing",
+                            "stage": "durable_server_proof_audio_first",
+                            "progress": 8,
+                            "detail": (
+                                "Audio-first server proof is active "
+                                f"({minutes}m {seconds:02d}s elapsed)"
+                            ),
+                            "proofHeartbeatAt": datetime.datetime.now(
+                                datetime.timezone.utc
+                            ).isoformat(),
+                        },
+                    )
+
+            proof_heartbeat_thread = threading.Thread(
+                target=report_proof_heartbeat,
+                name=f"multicam-proof-heartbeat-{job_id[:12]}",
+                daemon=True,
             )
+            proof_heartbeat_thread.start()
+            try:
+                proof_result = asyncio.run(
+                    worker.render_multicam_impl(
+                        proof_request,
+                        provided_job_id=f"{job_id}-proof",
+                        propagate_errors=True,
+                    )
+                )
+            finally:
+                proof_heartbeat_stop.set()
+                proof_heartbeat_thread.join(timeout=2)
             if not isinstance(proof_result, dict) or proof_result.get("status") != "planned":
                 raise RuntimeError("Durable server proof did not return a safe plan")
 
@@ -337,12 +401,14 @@ def run():
         print(f"Multicam job {job_id} failed: {message}", file=sys.stderr)
         refundable = bool(job and job.get("creditReceipt") and not job.get("creditReceipt", {}).get("skipped"))
         attempt, max_retries = _task_retry_context()
-        terminal_attempt = attempt >= max_retries
+        nonretryable = _is_nonretryable_render_error(error)
+        terminal_attempt = nonretryable or attempt >= max_retries
         now = datetime.datetime.now(datetime.timezone.utc).isoformat()
         retry_state = {
             "attempt": attempt,
             "maxRetries": max_retries,
             "terminal": terminal_attempt,
+            "retryable": not nonretryable,
             "lastError": message,
             "updatedAt": now,
         }
@@ -351,7 +417,13 @@ def run():
 
         failure_update = {
             "status": "failed" if terminal_attempt else "retrying",
-            "stage": "durable_render_failed" if terminal_attempt else "durable_render_retry_scheduled",
+            "stage": (
+                "durable_render_rejected"
+                if nonretryable
+                else "durable_render_failed"
+                if terminal_attempt
+                else "durable_render_retry_scheduled"
+            ),
             "error": message,
             "refundRequired": refundable if terminal_attempt else False,
             "retryState": retry_state,

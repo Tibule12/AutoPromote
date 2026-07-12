@@ -2553,6 +2553,81 @@ class MulticamDirectorRuleTests(unittest.TestCase):
         self.assertTrue(payload["sources"][0]["dense_continuous_sync"])
         self.assertGreater(payload["sources"][0]["source_max_shift_seconds"], worker.MULTICAM_CONTINUOUS_SYNC_MAX_SHIFT_SECONDS)
 
+    def test_dense_continuous_sync_proof_replaces_per_segment_probing(self):
+        interval = float(worker.MULTICAM_CONTINUOUS_SYNC_DENSE_DRIFT_INTERVAL_SECONDS)
+        checkpoints = [0.0, interval, interval * 2.0, interval * 3.0]
+        sources = []
+        cameras = {}
+        for camera_id in ("cam1", "cam2"):
+            anchors = [
+                {
+                    "status": "accepted",
+                    "timeline_relative_seconds": checkpoint,
+                    "corrected_timeline_seconds": checkpoint + 5.0,
+                    "source_position_seconds": checkpoint,
+                    "correlation": 0.55,
+                    "abs_residual_seconds": 0.04,
+                }
+                for checkpoint in checkpoints
+            ]
+            sources.append({
+                "id": camera_id,
+                "preflight_piecewise_sync_applied": True,
+                "continuous_sync_map": {"active": True, "anchors": anchors},
+            })
+            cameras[camera_id] = {"active": True, "anchors": anchors}
+
+        proof = worker.prove_multicam_segments_from_continuous_sync_anchors(
+            [
+                {
+                    "camera_id": "cam1",
+                    "secondary_camera_id": "cam2",
+                    "timeline_start": 0.0,
+                    "timeline_end": checkpoints[-1],
+                }
+            ],
+            sources,
+            {"status": "good"},
+            {
+                "status": "active",
+                "checkpoints_relative_seconds": checkpoints,
+                "cameras": cameras,
+            },
+        )
+
+        self.assertEqual(proof["status"], "proven")
+        self.assertEqual(proof["camera_count"], 2)
+        self.assertTrue(all(camera["status"] == "proven" for camera in proof["cameras"]))
+
+    def test_dense_continuous_sync_proof_falls_back_on_unsafe_anchor(self):
+        anchors = [
+            {
+                "status": "accepted",
+                "timeline_relative_seconds": 0.0,
+                "corrected_timeline_seconds": 5.0,
+                "correlation": 0.5,
+            },
+            {
+                "status": "rejected_large_shift",
+                "timeline_relative_seconds": 120.0,
+                "correlation": 0.6,
+                "abs_residual_seconds": 4.0,
+            },
+        ]
+        proof = worker.prove_multicam_segments_from_continuous_sync_anchors(
+            [{"camera_id": "cam1", "timeline_start": 0.0, "timeline_end": 120.0}],
+            [{"id": "cam1", "continuous_sync_map": {"active": True, "anchors": anchors}}],
+            {"status": "good"},
+            {
+                "status": "active",
+                "checkpoints_relative_seconds": [0.0, 120.0],
+                "cameras": {"cam1": {"active": True, "anchors": anchors}},
+            },
+        )
+
+        self.assertEqual(proof["status"], "not_proven")
+        self.assertIn("camera_not_proven:cam1", proof["reasons"])
+
     def test_switch_segment_falls_back_when_piecewise_source_is_out_of_bounds(self):
         request = worker.RenderMultiCamRequest(
             sources=[

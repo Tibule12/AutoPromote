@@ -265,6 +265,51 @@ const isFailedJobStatus = status => {
   return normalized === "failed" || normalized.endsWith("_failed") || normalized.includes("failed");
 };
 
+const validateTrustedDirectorChannelMapRequest = body => {
+  const sources = Array.isArray(body?.sources) ? body.sources : [];
+  const autoSwitch = body?.autoSwitch === true || body?.auto_switch === true;
+  const externalAudioUrl = body?.externalAudio?.url || body?.external_audio_url || null;
+  if (!autoSwitch || !externalAudioUrl || sources.length < 2) {
+    return { ok: true, required: false };
+  }
+
+  const requestedIds = Array.isArray(body?.directorChannelCameraIds)
+    ? body.directorChannelCameraIds
+    : Array.isArray(body?.director_channel_camera_ids)
+      ? body.director_channel_camera_ids
+      : [];
+  const channelMap = body?.trustedDirectorChannelMap || body?.trusted_director_channel_map;
+  const status = String(
+    channelMap?.status || channelMap?.overall_status || channelMap?.overallStatus || ""
+  ).toLowerCase();
+  const mappedIds = Array.isArray(channelMap?.channel_camera_ids)
+    ? channelMap.channel_camera_ids
+    : Array.isArray(channelMap?.channelCameraIds)
+      ? channelMap.channelCameraIds
+      : [];
+  const normalizedMappedIds = mappedIds.map(value => String(value || "").trim()).filter(Boolean);
+  const normalizedRequestedIds = requestedIds
+    .map(value => String(value || "").trim())
+    .filter(Boolean);
+  const sourceIds = new Set(
+    sources.map(source => String(source?.id || "").trim()).filter(Boolean)
+  );
+  const trustedStatus = ["approved", "locked", "safe", "passed", "trusted"].includes(status);
+  const knownSources = normalizedMappedIds.slice(0, 2).every(id => sourceIds.has(id));
+  const matchesRequest =
+    normalizedRequestedIds.length >= 2 &&
+    normalizedRequestedIds.slice(0, 2).every((id, index) => id === normalizedMappedIds[index]);
+
+  if (!trustedStatus || normalizedMappedIds.length < 2 || !knownSources || !matchesRequest) {
+    return {
+      ok: false,
+      required: true,
+      reason: "A confirmed left/right clean-audio channel mapping is required before charging",
+    };
+  }
+  return { ok: true, required: true, channelCameraIds: normalizedMappedIds.slice(0, 2) };
+};
+
 const isRefundableCleanAudioSyncStatus = status => {
   const normalized = String(status || "").toLowerCase();
   return isFailedJobStatus(normalized) || normalized === "sync_low_confidence";
@@ -800,6 +845,14 @@ router.post("/render-multicam", async (req, res) => {
       message: "Cam Combiner renders are capped at 3 hours. Please select a shorter range.",
       code: "MULTICAM_DURATION_LIMIT",
       maxDurationSeconds: MULTICAM_MAX_TOTAL_RENDER_SECONDS,
+    });
+  }
+
+  const directorChannelMapValidation = validateTrustedDirectorChannelMapRequest(req.body);
+  if (!directorChannelMapValidation.ok) {
+    return res.status(422).json({
+      message: directorChannelMapValidation.reason,
+      code: "MULTICAM_CHANNEL_MAP_CONFIRMATION_REQUIRED",
     });
   }
 
@@ -1614,5 +1667,7 @@ router.post("/memetic/seed", async (req, res) => {
     res.json({ success: true, message: "Seeding initiated. Cohort: Global" });
   }, 1000);
 });
+
+router.validateTrustedDirectorChannelMapRequest = validateTrustedDirectorChannelMapRequest;
 
 module.exports = router;

@@ -53,4 +53,40 @@ describe("mediaRoutes entitlement enforcement", () => {
     expect(response.body.code).toBe("MULTICAM_PLAN_REQUIRED");
     expect(deductCredits).not.toHaveBeenCalled();
   });
+
+  it("requires confirmed stereo channel ownership before a paid auto-director request", () => {
+    const result = mediaRoutes.validateTrustedDirectorChannelMapRequest({
+      sources: [{ id: "cam-1" }, { id: "cam-2" }],
+      autoSwitch: true,
+      externalAudio: { url: "https://cdn.example.com/clean.wav" },
+      directorChannelCameraIds: ["cam-1", "cam-2"],
+    });
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        ok: false,
+        required: true,
+      })
+    );
+  });
+
+  it("accepts a human-confirmed stereo channel contract before charging", () => {
+    const result = mediaRoutes.validateTrustedDirectorChannelMapRequest({
+      sources: [{ id: "cam-1" }, { id: "cam-2" }],
+      autoSwitch: true,
+      externalAudio: { url: "https://cdn.example.com/clean.wav" },
+      directorChannelCameraIds: ["cam-2", "cam-1"],
+      trustedDirectorChannelMap: {
+        status: "approved",
+        proof_kind: "human_confirmed_ui_v1",
+        channel_camera_ids: ["cam-2", "cam-1"],
+      },
+    });
+
+    expect(result).toEqual({
+      ok: true,
+      required: true,
+      channelCameraIds: ["cam-2", "cam-1"],
+    });
+  });
 });
