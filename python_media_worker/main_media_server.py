@@ -1291,6 +1291,16 @@ async def materialize_multicam_audio_analysis_cache(source_url):
     return cache_path
 
 
+def select_multicam_preflight_audio_source(prepared_source):
+    """Prefer a local extracted audio cache over a remote visual locator."""
+    source = prepared_source or {}
+    for key in ("audio_audit_path", "audio_analysis_path", "path"):
+        candidate = str(source.get(key) or "").strip()
+        if candidate and os.path.exists(candidate) and has_audio_stream(candidate):
+            return candidate
+    return str(source.get("path") or "").strip()
+
+
 async def materialize_to_cfr_cache(source_url, keep_audio=False):
     """
     Download + CFR-transcode the source directly into the persistent CFR cache.
@@ -22781,7 +22791,7 @@ async def render_multicam_impl(
                 if original_source.id in source_url_overrides:
                     preflight_src = source_url_overrides[original_source.id]
                 else:
-                    preflight_src = prepared_source["path"] if prepared_source is not None else None
+                    preflight_src = select_multicam_preflight_audio_source(prepared_source)
                     if not preflight_src or not has_audio_stream(preflight_src):
                         preflight_src = os.path.join(shared_tmp_dir, f"{job_id}_preflight_src_audio_{idx}.mp4")
                         preflight_src = await prepare_presync_media_input(
