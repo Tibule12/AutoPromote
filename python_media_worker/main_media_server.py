@@ -11697,7 +11697,7 @@ class CleanAudioSyncRequest(BaseModel):
     sources: List[MultiCamSource]
     external_audio: ExternalCleanAudioInput
     mix_mode: str = "external_only"
-    output_aspect_ratio: str = "9:16"
+    output_aspect_ratio: str = "16:9"
 
 class MultiCamSwitch(BaseModel):
     camera_id: str
@@ -11743,7 +11743,7 @@ class RenderMultiCamRequest(BaseModel):
     overlapDuration: float = 0.0
     timeline_start: Optional[float] = None
     timelineStart: Optional[float] = None
-    output_aspect_ratio: str = "9:16"
+    output_aspect_ratio: str = "16:9"
     outputAspectRatio: Optional[str] = None
     pre_sync_clap_alignment: bool = False
     preSyncClapAlignment: Optional[bool] = None
@@ -12474,7 +12474,12 @@ def strip_multicam_reaction_overlays(segments, prepared_sources):
     }
     stripped = []
     for segment in segments or []:
-        updated = reclaim_multicam_active_speaker_primary(segment, valid_source_ids)
+        current_layout_mode = normalize_multicam_layout_mode(segment.get("layout_mode", "cut") or "cut")
+        updated = (
+            reclaim_multicam_active_speaker_primary(segment, valid_source_ids)
+            if current_layout_mode == "pip"
+            else dict(segment)
+        )
         layout_mode = normalize_multicam_layout_mode(updated.get("layout_mode", "cut") or "cut")
         if layout_mode == "pip":
             prior_reason = str(updated.get("layout_reason", "") or "")
@@ -15552,43 +15557,16 @@ def enforce_reaction_overlay_on_multicam_segments(segments, prepared_sources, en
         return strip_multicam_reaction_overlays(segments, prepared_sources)
 
     enforced = []
-    reaction_overlay_reasons = {
-        "active_speaker_with_reaction",
-        "earned_reaction_accent",
-        "earned_shared_reaction",
-        "reaction_accent",
-        "shared_reaction_accent",
-    }
     for segment in segments or []:
-        updated = reclaim_multicam_active_speaker_primary(segment, valid_source_ids)
+        current_layout_mode = normalize_multicam_layout_mode(segment.get("layout_mode", "cut") or "cut")
+        updated = (
+            reclaim_multicam_active_speaker_primary(segment, valid_source_ids)
+            if current_layout_mode == "pip"
+            else dict(segment)
+        )
         layout_mode = normalize_multicam_layout_mode(updated.get("layout_mode", "cut") or "cut")
-        layout_reason = str(updated.get("layout_reason", "") or "")
-        reason_parts = {
-            part.strip()
-            for part in layout_reason.replace(":", ";").split(";")
-            if part.strip()
-        }
-        if layout_mode == "cut":
-            secondary_camera_id = pick_multicam_reaction_secondary_camera_id(
-                updated.get("camera_id"),
-                prepared_sources,
-                ranked_sources=updated.get("ranked_sources"),
-                preferred_secondary_camera_id=updated.get("secondary_camera_id"),
-            )
-            if secondary_camera_id:
-                updated["layout_mode"] = "pip"
-                if not reason_parts.intersection(reaction_overlay_reasons):
-                    updated["layout_reason"] = (
-                        f"active_speaker_with_reaction:{layout_reason}"
-                        if layout_reason and not layout_reason.startswith("active_speaker_with_reaction:")
-                        else layout_reason or "active_speaker_with_reaction"
-                    )
-                updated["secondary_camera_id"] = secondary_camera_id
-                updated["layout_confidence"] = round(
-                    max(0.25, float(updated.get("layout_confidence", 0.0) or 0.0)),
-                    4,
-                )
-                layout_mode = "pip"
+        # Enabled means the director may keep an earned or user-authored PiP.
+        # It must not add a reaction window to every clean/zoomed speaker cut.
         if layout_mode == "pip" and not updated.get("secondary_camera_id"):
             secondary_camera_id = pick_multicam_reaction_secondary_camera_id(
                 updated.get("camera_id"),
@@ -17128,7 +17106,7 @@ def build_multicam_qa_request_fingerprint_payload(request, overlap_duration=None
             "duration_seconds": _multicam_clean_identity_value(duration),
         },
         "render": {
-            "aspect": str(getattr(request, "outputAspectRatio", None) or getattr(request, "output_aspect_ratio", "9:16") or "9:16"),
+            "aspect": str(getattr(request, "outputAspectRatio", None) or getattr(request, "output_aspect_ratio", "16:9") or "16:9"),
             "tier": normalize_multicam_render_tier(request),
             "auto_switch": bool(getattr(request, "auto_switch", False)),
             "reaction_overlays": bool(multicam_reaction_overlays_enabled(request)),
@@ -18272,7 +18250,7 @@ def multicam_preflight_blocking_cameras(preflight_receipt, piecewise_corrections
 
 
 def get_multicam_output_dimensions(output_aspect_ratio):
-    normalized = str(output_aspect_ratio or "9:16").strip()
+    normalized = str(output_aspect_ratio or "16:9").strip()
     if normalized == "9:16":
         return 1080, 1920
     if normalized == "1:1":
@@ -18511,19 +18489,19 @@ def multicam_pip_geometry(output_width, output_height, primary_source=None, reac
             "pip_gap": pip_gap,
         }
 
-    base_margin_x = max(44, int(safe_width * 0.035))
-    base_margin_y = max(34, int(safe_height * 0.045))
-    base_width = safe_width - (base_margin_x * 2)
-    base_height = safe_height - (base_margin_y * 2)
-    pip_width = max(340, int(safe_width * (0.205 if safe_reaction_count == 1 else 0.18)))
+    base_margin_x = 0
+    base_margin_y = 0
+    base_width = safe_width
+    base_height = safe_height
+    pip_width = max(300, int(safe_width * (0.20 if safe_reaction_count == 1 else 0.175)))
     pip_height = max(135, int(pip_width * 9 / 16))
     pip_gap = max(16, int(safe_height * 0.024))
-    pip_x = base_margin_x + 28 if reaction_side == "left" else safe_width - pip_width - base_margin_x - 28
+    pip_x = 36 if reaction_side == "left" else safe_width - pip_width - 36
     pip_stack_height = pip_height * safe_reaction_count + pip_gap * (safe_reaction_count - 1)
     # Landscape podcast framing often puts hands and bodies in the lower third.
     # Keep the reaction card up in the cleaner wall/TV zone instead of covering
     # the active person.
-    pip_y = base_margin_y + max(54, int(safe_height * 0.105))
+    pip_y = max(46, int(safe_height * 0.09))
     return {
         "reaction_side": reaction_side,
         "hero": {"x": base_margin_x, "y": base_margin_y, "width": base_width, "height": base_height},
@@ -18551,34 +18529,8 @@ def multicam_single_cut_filter(
     focus_x=0.5,
     focus_y=0.48,
 ):
-    if not is_vertical_output:
-        card_margin_x = max(36, int(width * 0.035))
-        card_margin_y = max(28, int(height * 0.045))
-        card_width = max(2, int(width) - (card_margin_x * 2))
-        card_height = max(2, int(height) - (card_margin_y * 2))
-        card_x = int((int(width) - card_width) / 2)
-        card_y = int((int(height) - card_height) / 2)
-        return ";".join(
-            [
-                f"[{input_label}]split=2[cutwidebgsrc][cutwidecardsrc]",
-                multicam_blurred_canvas_filter("cutwidebgsrc", width, height, "cutwidecanvas", blur=20),
-                multicam_modern_card_filter("cutwidecardsrc", card_width, card_height, "cutwidecard", margin=0, blur=12),
-                *multicam_overlay_card_filters(
-                    "cutwidecanvas",
-                    "cutwidecard",
-                    card_x,
-                    card_y,
-                    card_width,
-                    card_height,
-                    output_label,
-                    radius=72,
-                ),
-            ]
-        )
-
-    # A 9:16 export means full-screen vertical, not a horizontal card floating
-    # in a portrait canvas. Crop around the measured speaker focus so wide
-    # podcast cameras remain useful without exposing padded proxy edges.
+    # A single active speaker fills the chosen program canvas. Rounded frames
+    # remain for explicit reaction, split, shared-moment and grid layouts.
     safe_focus_x = clamp_float(float(0.5 if focus_x is None else focus_x), 0.06, 0.94)
     safe_focus_y = clamp_float(float(0.48 if focus_y is None else focus_y), 0.12, 0.82)
     return (
@@ -18919,15 +18871,15 @@ async def render_multicam_layout_segment(
         # Shared Moment is true split-screen coverage: two people at the same
         # level, equal presence, with no stacked "show both" treatment.
         filters.append(multicam_blurred_canvas_filter("s00", output_width, output_height, "canvas", blur=26))
-        filters.append(multicam_fit_card_filter("s01", card_width, card_height, "shared_left", blur=18))
-        filters.append(multicam_fit_card_filter("s10", card_width, card_height, "shared_right", blur=16))
+        filters.append(multicam_modern_card_filter("s01", card_width, card_height, "shared_left", focus_x=multicam_shared_moment_focus_x(layout_sources[0])))
+        filters.append(multicam_modern_card_filter("s10", card_width, card_height, "shared_right", focus_x=multicam_shared_moment_focus_x(layout_sources[1])))
         filters.extend(multicam_overlay_card_filters("canvas", "shared_left", side_margin, top_margin, card_width, card_height, "split_a", radius=card_radius))
         filters.extend(multicam_overlay_card_filters("split_a", "shared_right", right_x, top_margin, card_width, card_height, "v", radius=card_radius))
     elif layout_mode == "pip":
         reaction_source_count = min(3, len(layout_sources))
         reaction_count = max(1, reaction_source_count - 1)
         pip_geometry = multicam_pip_geometry(output_width, output_height, layout_sources[0], reaction_count)
-        filters.extend(multicam_prepare_video_branches(0, "p0", setpts_factors[0], branches=2, trim_start=fine_seek_values[0], trim_duration=trim_duration_values[0], rotation_degrees=rotation_values[0], color_filter=color_filter_values[0]))
+        filters.extend(multicam_prepare_video_branches(0, "p0", setpts_factors[0], branches=1, trim_start=fine_seek_values[0], trim_duration=trim_duration_values[0], rotation_degrees=rotation_values[0], color_filter=color_filter_values[0]))
         for reaction_index in range(1, reaction_source_count):
             filters.extend(multicam_prepare_video_branches(reaction_index, f"p{reaction_index}", setpts_factors[reaction_index], branches=1, trim_start=fine_seek_values[reaction_index], trim_duration=trim_duration_values[reaction_index], rotation_degrees=rotation_values[reaction_index], color_filter=color_filter_values[reaction_index]))
         base_margin_x = pip_geometry["hero"]["x"]
@@ -18939,10 +18891,8 @@ async def render_multicam_layout_segment(
         pip_gap = pip_geometry["pip_gap"]
         pip_x = pip_geometry["pip"]["x"]
         pip_y = pip_geometry["pip"]["y"]
-        filters.append(multicam_blurred_canvas_filter("p00", output_width, output_height, "canvas", blur=20))
-        filters.append(multicam_modern_card_filter("p01", base_width, base_height, "basecard", margin=0, blur=12, focus_x=multicam_source_focus_x(layout_sources[0])))
-        filters.extend(multicam_overlay_card_filters("canvas", "basecard", base_margin_x, base_margin_y, base_width, base_height, "pip_a", radius=72))
-        current_base_label = "pip_a"
+        filters.append(multicam_modern_card_filter("p00", base_width, base_height, "hero", margin=0, blur=0, focus_x=multicam_source_focus_x(layout_sources[0])))
+        current_base_label = "hero"
         for reaction_index in range(1, reaction_source_count):
             card_label = f"pipcard{reaction_index}"
             output_label = "v" if reaction_index == reaction_source_count - 1 else f"pip_stack_{reaction_index}"
@@ -18990,8 +18940,8 @@ async def render_multicam_layout_segment(
         # Shared Moment in landscape should feel like two equal people in the
         # same beat, not a stacked "show both" strip.
         filters.append(multicam_blurred_canvas_filter("s00", output_width, output_height, "canvas", blur=20))
-        filters.append(multicam_fit_card_filter("s01", card_width, card_height, "shared_left", blur=12))
-        filters.append(multicam_fit_card_filter("s10", card_width, card_height, "shared_right", blur=12))
+        filters.append(multicam_modern_card_filter("s01", card_width, card_height, "shared_left", focus_x=multicam_shared_moment_focus_x(layout_sources[0])))
+        filters.append(multicam_modern_card_filter("s10", card_width, card_height, "shared_right", focus_x=multicam_shared_moment_focus_x(layout_sources[1])))
         filters.extend(multicam_overlay_card_filters("canvas", "shared_left", side_margin, top_margin, card_width, card_height, "split_a", radius=card_radius))
         filters.extend(multicam_overlay_card_filters("split_a", "shared_right", right_x, top_margin, card_width, card_height, "v", radius=card_radius))
     elif layout_mode == "split-vertical":
@@ -19005,8 +18955,8 @@ async def render_multicam_layout_segment(
         second_x = side_margin + card_width + gap
         card_radius = max(88, min(180, int(card_height * 0.18)))
         filters.append(multicam_blurred_canvas_filter("s00", output_width, output_height, "canvas", blur=20))
-        filters.append(multicam_fit_card_filter("s01", card_width, card_height, "splitcard0", blur=12))
-        filters.append(multicam_fit_card_filter("s10", card_width, card_height, "splitcard1", blur=12))
+        filters.append(multicam_modern_card_filter("s01", card_width, card_height, "splitcard0", focus_x=multicam_shared_moment_focus_x(layout_sources[0])))
+        filters.append(multicam_modern_card_filter("s10", card_width, card_height, "splitcard1", focus_x=multicam_shared_moment_focus_x(layout_sources[1])))
         filters.extend(multicam_overlay_card_filters("canvas", "splitcard0", side_margin, top_margin, card_width, card_height, "split_a", radius=card_radius))
         filters.extend(multicam_overlay_card_filters("split_a", "splitcard1", second_x, top_margin, card_width, card_height, "v", radius=card_radius))
 
@@ -21524,10 +21474,9 @@ def build_multicam_cinematic_polish_filter():
             "unsharp=3:3:0.16:3:3:0.035,"
             "vignette=angle=PI/18:eval=init"
         )
-    return (
-        "eq=contrast=1.025:brightness=0.000:saturation=1.015:gamma=1.000,"
-        "unsharp=3:3:0.08:3:3:0.015"
-    )
+    # Preserve the camera image by default. The heavier creative grade remains
+    # available only when a deployment explicitly opts into studio mode.
+    return "format=yuv420p"
 
 
 def choose_multicam_color_reference_index(prepared_sources, requested_index=0):
@@ -21567,7 +21516,7 @@ def build_multicam_color_receipt_cache_payload(
     auto_color_match_enabled=False,
 ):
     return {
-        "version": 6,
+        "version": 7,
         "overlap_start": round(float(overlap_start or 0.0), 3),
         "overlap_duration": round(float(overlap_duration or 0.0), 3),
         "reference_index": int(reference_index or 0),
@@ -22480,7 +22429,7 @@ async def render_multicam_impl(
         if request.timelineStart is not None
         else requested_overlap_start
     )
-    output_aspect_ratio = request.output_aspect_ratio or request.outputAspectRatio or "9:16"
+    output_aspect_ratio = request.outputAspectRatio or request.output_aspect_ratio or "16:9"
     nested_external_audio = request.externalAudio
     external_audio_url = request.external_audio_url or (nested_external_audio.url if nested_external_audio else None)
     director_channel_camera_ids = (
@@ -23563,6 +23512,14 @@ async def render_multicam_impl(
                     "pre_render_segment_sync_repair": pre_render_segment_sync_repair_receipt,
                 },
             )
+        # Repairs above may alter layout modes. Enforce the user's final
+        # reaction choice immediately before audit and render so Off guarantees
+        # no PiP, while On only preserves explicitly earned/user-authored PiP.
+        segments = enforce_reaction_overlay_on_multicam_segments(
+            segments,
+            prepared_sources,
+            enabled=multicam_reaction_overlays_enabled(request),
+        )
         production_limits = enforce_multicam_production_limits(
             request,
             overlap_duration,

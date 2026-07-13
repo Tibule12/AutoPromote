@@ -493,7 +493,7 @@ class MulticamDirectorRuleTests(unittest.TestCase):
 
         self.assertEqual(audit["status"], "passed")
 
-    def test_reaction_overlay_is_not_forced_unless_enabled(self):
+    def test_reaction_permission_does_not_force_pip_on_clean_cut(self):
         segments = [
             {
                 "camera_id": "cam1",
@@ -518,8 +518,8 @@ class MulticamDirectorRuleTests(unittest.TestCase):
 
         self.assertEqual(disabled[0]["layout_mode"], "cut")
         self.assertIsNone(disabled[0].get("secondary_camera_id"))
-        self.assertEqual(enabled[0]["layout_mode"], "pip")
-        self.assertEqual(enabled[0]["secondary_camera_id"], "cam2")
+        self.assertEqual(enabled[0]["layout_mode"], "cut")
+        self.assertIsNone(enabled[0].get("secondary_camera_id"))
 
     def test_disabled_reaction_overlay_strips_requested_pip(self):
         segments = [
@@ -1283,7 +1283,7 @@ class MulticamDirectorRuleTests(unittest.TestCase):
             {"strong_isolated_audio_owner", "sustained_isolated_handoff"},
         )
 
-    def test_cut_reclaim_keeps_active_speaker_primary_with_mandatory_reaction(self):
+    def test_reaction_permission_does_not_rewrite_clean_cut_camera(self):
         segments = [
             {
                 "camera_id": "cam2",
@@ -1306,10 +1306,8 @@ class MulticamDirectorRuleTests(unittest.TestCase):
             enabled=True,
         )
 
-        self.assertEqual(segment["camera_id"], "cam1")
-        self.assertEqual(segment["secondary_camera_id"], "cam2")
-        self.assertEqual(segment["layout_mode"], "pip")
-        self.assertTrue(segment["layout_reason"].startswith("active_speaker_with_reaction:"))
+        self.assertEqual(segment["camera_id"], "cam2")
+        self.assertEqual(segment["layout_mode"], "cut")
 
     def test_keeps_valid_active_speaker_hero_reaction_layout(self):
         segments = [
@@ -1335,7 +1333,7 @@ class MulticamDirectorRuleTests(unittest.TestCase):
         self.assertEqual(segment["secondary_camera_id"], "cam2")
         self.assertEqual(segment["layout_reason"], "earned_reaction_accent")
 
-    def test_plain_speaker_cut_gets_mandatory_reaction_pip(self):
+    def test_plain_speaker_cut_stays_clean_when_reactions_are_allowed(self):
         segments = [
             {
                 "camera_id": "cam1",
@@ -1359,11 +1357,11 @@ class MulticamDirectorRuleTests(unittest.TestCase):
         )
 
         self.assertEqual(segment["camera_id"], "cam1")
-        self.assertEqual(segment["layout_mode"], "pip")
-        self.assertEqual(segment["secondary_camera_id"], "cam2")
-        self.assertEqual(segment["layout_reason"], "active_speaker_with_reaction:speaker_owned_cut")
+        self.assertEqual(segment["layout_mode"], "cut")
+        self.assertIsNone(segment["secondary_camera_id"])
+        self.assertEqual(segment["layout_reason"], "speaker_owned_cut")
 
-    def test_explicit_reaction_cut_can_attach_secondary_without_stealing_primary(self):
+    def test_reaction_reason_without_pip_layout_does_not_create_overlay(self):
         segments = [
             {
                 "camera_id": "cam1",
@@ -1387,8 +1385,8 @@ class MulticamDirectorRuleTests(unittest.TestCase):
         )
 
         self.assertEqual(segment["camera_id"], "cam1")
-        self.assertEqual(segment["layout_mode"], "pip")
-        self.assertEqual(segment["secondary_camera_id"], "cam2")
+        self.assertEqual(segment["layout_mode"], "cut")
+        self.assertIsNone(segment["secondary_camera_id"])
         self.assertEqual(segment["layout_reason"], "earned_reaction_accent")
 
     def test_strong_isolated_audio_overrides_editorial_hold(self):
@@ -1441,7 +1439,7 @@ class MulticamDirectorRuleTests(unittest.TestCase):
         self.assertEqual(switch["secondary_camera_id"], "cam1")
         self.assertTrue(switch["layout_reason"].startswith("speaker_owner_reconciled:"))
 
-    def test_strong_isolated_audio_reclaim_keeps_reaction_with_active_speaker(self):
+    def test_reaction_permission_leaves_clean_director_cut_unchanged(self):
         segments = [
             {
                 "camera_id": "cam1",
@@ -1462,10 +1460,9 @@ class MulticamDirectorRuleTests(unittest.TestCase):
             enabled=True,
         )
 
-        self.assertEqual(segment["camera_id"], "cam2")
-        self.assertEqual(segment["secondary_camera_id"], "cam1")
-        self.assertEqual(segment["layout_mode"], "pip")
-        self.assertTrue(segment["layout_reason"].startswith("active_speaker_with_reaction:"))
+        self.assertEqual(segment["camera_id"], "cam1")
+        self.assertIsNone(segment["secondary_camera_id"])
+        self.assertEqual(segment["layout_mode"], "cut")
 
     def test_weak_clean_audio_spike_is_not_earned_handoff(self):
         self.assertFalse(
@@ -1797,14 +1794,7 @@ class MulticamDirectorRuleTests(unittest.TestCase):
                 if segment.get("audio_decision_reliable")
             )
         )
-        self.assertTrue(
-            all(
-                segment.get("layout_mode") == "pip"
-                and segment.get("secondary_camera_id")
-                and segment.get("secondary_camera_id") != segment.get("camera_id")
-                for segment in segments
-            )
-        )
+        self.assertTrue(any(segment.get("layout_mode") == "cut" for segment in segments))
 
     def test_opening_handoff_backdates_to_clean_audio_onset(self):
         def source(camera_id, activity_by_time):
@@ -1877,15 +1867,7 @@ class MulticamDirectorRuleTests(unittest.TestCase):
         self.assertTrue(cam1_segments)
         self.assertLessEqual(cam1_segments[0]["timeline_start"], 55.5)
         self.assertGreaterEqual(cam1_segments[0]["timeline_start"], 55.0)
-        self.assertEqual(cam1_segments[0]["secondary_camera_id"], "cam2")
-        self.assertTrue(
-            all(
-                segment.get("layout_mode") == "pip"
-                and segment.get("secondary_camera_id")
-                and segment.get("secondary_camera_id") != segment.get("camera_id")
-                for segment in segments
-            )
-        )
+        self.assertTrue(any(segment.get("layout_mode") == "cut" for segment in segments))
 
     def test_unproven_speaker_coverage_uses_shared_layout_not_guessed_pip(self):
         prepared_sources = [
@@ -3073,6 +3055,7 @@ class MulticamDirectorRuleTests(unittest.TestCase):
         self.assertIsNone(request.preSyncClapAlignment)
         self.assertFalse(request.reaction_overlays)
         self.assertIsNone(request.reactionOverlays)
+        self.assertEqual(request.output_aspect_ratio, "16:9")
 
     def test_media_log_locator_removes_firebase_download_token(self):
         source = (
@@ -3107,6 +3090,22 @@ class MulticamDirectorRuleTests(unittest.TestCase):
         self.assertEqual(worker.get_multicam_output_dimensions("9:16"), (1080, 1920))
         self.assertEqual(worker.get_multicam_output_dimensions("1:1"), (1080, 1080))
         self.assertEqual(worker.get_multicam_output_dimensions("16:9"), (1920, 1080))
+        self.assertEqual(worker.get_multicam_output_dimensions(None), (1920, 1080))
+
+    def test_landscape_single_cut_is_full_screen_not_a_rounded_card(self):
+        filter_chain = worker.multicam_single_cut_filter(
+            "camera",
+            1920,
+            1080,
+            "program",
+            is_vertical_output=False,
+            focus_x=0.5,
+        )
+
+        self.assertIn("scale=1920:1080:force_original_aspect_ratio=increase", filter_chain)
+        self.assertNotIn("split=2", filter_chain)
+        self.assertNotIn("boxblur", filter_chain)
+        self.assertNotIn("movie=", filter_chain)
 
     def test_vertical_single_cut_is_full_screen_and_focus_centered(self):
         filter_chain = worker.multicam_single_cut_filter(
@@ -3136,6 +3135,33 @@ class MulticamDirectorRuleTests(unittest.TestCase):
         self.assertLessEqual(geometry["pip"]["width"], int(1080 * 0.31))
         self.assertEqual(geometry["reaction_side"], "left")
 
+    def test_landscape_reaction_layout_keeps_full_screen_hero(self):
+        geometry = worker.multicam_pip_geometry(
+            1920,
+            1080,
+            primary_source={"focus_x": 0.2},
+            reaction_count=1,
+        )
+
+        self.assertEqual(geometry["hero"], {"x": 0, "y": 0, "width": 1920, "height": 1080})
+        self.assertLessEqual(geometry["pip"]["width"], int(1920 * 0.20))
+        self.assertEqual(geometry["reaction_side"], "right")
+
+    def test_rounded_card_content_crops_edge_to_edge_without_inner_rectangle(self):
+        filter_chain = worker.multicam_modern_card_filter(
+            "camera",
+            900,
+            700,
+            "card",
+            focus_x=0.42,
+        )
+
+        self.assertIn("force_original_aspect_ratio=increase", filter_chain)
+        self.assertIn("crop=900:700", filter_chain)
+        self.assertNotIn("split=2", filter_chain)
+        self.assertNotIn("force_original_aspect_ratio=decrease", filter_chain)
+        self.assertNotIn("overlay=", filter_chain)
+
     def test_visual_proxy_preserves_source_aspect_without_padding(self):
         with mock.patch.object(worker, "get_video_dimensions", return_value=(1920, 1080)):
             dimensions = worker.get_multicam_source_proxy_dimensions(
@@ -3163,6 +3189,15 @@ class MulticamDirectorRuleTests(unittest.TestCase):
         self.assertIn("tonemap=hable:desat=0.0", hlg_filter)
         self.assertNotIn("desat=0.35", hlg_filter)
         self.assertEqual(worker.choose_multicam_color_reference_index(sources, 0), 1)
+
+    def test_default_cinematic_polish_is_neutral(self):
+        with mock.patch.dict(os.environ, {"MULTICAM_CINEMATIC_POLISH_MODE": "fast"}):
+            polish_filter = worker.build_multicam_cinematic_polish_filter()
+
+        self.assertEqual(polish_filter, "format=yuv420p")
+        self.assertNotIn("eq=", polish_filter)
+        self.assertNotIn("unsharp", polish_filter)
+        self.assertNotIn("colorbalance", polish_filter)
 
     def test_color_matching_defaults_to_normalization_only(self):
         sources = [

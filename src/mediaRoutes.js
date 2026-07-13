@@ -822,7 +822,7 @@ router.get("/multicam/recoverable-project", async (req, res) => {
         previousJobId: latest.id,
         status: latest.status,
         duration: Number(request.totalDurationSeconds || request.total_duration_seconds || request.overlapDuration || 0),
-        outputAspectRatio: request.outputAspectRatio || request.output_aspect_ratio || "9:16",
+        outputAspectRatio: request.outputAspectRatio || request.output_aspect_ratio || "16:9",
         renderTier: request.renderTier || request.render_tier || "premium",
         sources,
         externalAudio: external
@@ -1072,7 +1072,7 @@ router.post("/render-multicam", async (req, res) => {
             0
         ),
         outputAspectRatio:
-          typeof req.body?.outputAspectRatio === "string" ? req.body.outputAspectRatio : "9:16",
+          typeof req.body?.outputAspectRatio === "string" ? req.body.outputAspectRatio : "16:9",
         reactionOverlays:
           req.body?.reactionOverlays === true || req.body?.reaction_overlays === true,
         preSyncClapAlignment:
@@ -1215,7 +1215,7 @@ router.post("/multicam/clean-audio-sync", async (req, res) => {
       sources,
       external_audio: externalAudio,
       mix_mode: req.body?.mixMode || "external_only",
-      output_aspect_ratio: req.body?.outputAspectRatio || "9:16",
+      output_aspect_ratio: req.body?.outputAspectRatio || "16:9",
       estimated_credits: estimatedCredits,
       requested_estimate: requestedEstimate,
     }));

@@ -616,9 +616,9 @@ class VideoEditingService {
           0
       ),
       output_aspect_ratio:
-        multicamRequest?.outputAspectRatio || multicamRequest?.output_aspect_ratio || "9:16",
+        multicamRequest?.outputAspectRatio || multicamRequest?.output_aspect_ratio || "16:9",
       outputAspectRatio:
-        multicamRequest?.outputAspectRatio || multicamRequest?.output_aspect_ratio || "9:16",
+        multicamRequest?.outputAspectRatio || multicamRequest?.output_aspect_ratio || "16:9",
       reaction_overlays:
         multicamRequest?.reactionOverlays === true || multicamRequest?.reaction_overlays === true,
       reactionOverlays:
