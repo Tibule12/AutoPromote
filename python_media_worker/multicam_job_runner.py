@@ -264,7 +264,22 @@ def run():
             }
         )
 
-        if bool(job.get("requireServerProof", True)):
+        require_server_proof = bool(job.get("requireServerProof", True))
+        embedded_server_proof = require_server_proof and str(
+            os.getenv("MULTICAM_EMBEDDED_SERVER_PROOF", "1") or "1"
+        ).strip().lower() not in {"0", "false", "no", "off"}
+        if embedded_server_proof:
+            worker.update_firestore_job(
+                job_id,
+                {
+                    "status": "proofing",
+                    "stage": "embedded_server_proof",
+                    "progress": 8,
+                    "detail": "Preparing sources and proving sync/director once before encoding",
+                },
+            )
+
+        if require_server_proof and not embedded_server_proof:
             proof_payload = copy.deepcopy(full_payload)
             proof_payload.update(
                 {
@@ -388,6 +403,7 @@ def run():
                 render_request,
                 provided_job_id=job_id,
                 propagate_errors=True,
+                allow_embedded_server_proof=embedded_server_proof,
             )
         )
         if not isinstance(result, dict) or result.get("status") != "completed":

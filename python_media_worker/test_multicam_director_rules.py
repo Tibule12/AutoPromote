@@ -113,6 +113,34 @@ class MulticamDirectorRuleTests(unittest.TestCase):
             worker.MULTICAM_REQUIRE_SIGNED_QA_PROOF = previous_signed
             worker.MEDIA_WORKER_TASK_SECRET = previous_secret
 
+    def test_durable_embedded_proof_can_pass_initial_gate_but_not_final_gate(self):
+        previous_required = worker.MULTICAM_REQUIRE_QA_PROOF_FOR_LONG_RENDER
+        previous_allowed = worker.MULTICAM_ALLOW_LONG_RENDER_WITHOUT_QA
+        previous_seconds = worker.MULTICAM_QA_PROOF_REQUIRED_SECONDS
+        worker.MULTICAM_REQUIRE_QA_PROOF_FOR_LONG_RENDER = True
+        worker.MULTICAM_ALLOW_LONG_RENDER_WITHOUT_QA = False
+        worker.MULTICAM_QA_PROOF_REQUIRED_SECONDS = 300.0
+        try:
+            request = worker.RenderMultiCamRequest(
+                sources=[
+                    {"id": "cam1", "url": "cam1.mp4"},
+                    {"id": "cam2", "url": "cam2.mp4"},
+                ],
+                overlap_duration=1200,
+            )
+            pending = worker.enforce_multicam_long_render_qa_gate(
+                request,
+                1200,
+                allow_pending_embedded_proof=True,
+            )
+            self.assertEqual(pending["status"], "pending_embedded_proof")
+            with self.assertRaises(worker.HTTPException):
+                worker.enforce_multicam_long_render_qa_gate(request, 1200)
+        finally:
+            worker.MULTICAM_REQUIRE_QA_PROOF_FOR_LONG_RENDER = previous_required
+            worker.MULTICAM_ALLOW_LONG_RENDER_WITHOUT_QA = previous_allowed
+            worker.MULTICAM_QA_PROOF_REQUIRED_SECONDS = previous_seconds
+
     def test_long_render_qa_gate_accepts_signed_server_plan_receipt(self):
         previous_required = worker.MULTICAM_REQUIRE_QA_PROOF_FOR_LONG_RENDER
         previous_allowed = worker.MULTICAM_ALLOW_LONG_RENDER_WITHOUT_QA
@@ -3069,6 +3097,105 @@ class MulticamDirectorRuleTests(unittest.TestCase):
         self.assertIn("cam.mp4?[REDACTED]", sanitized)
         self.assertNotIn("secret-signature", sanitized)
         self.assertNotIn("secret-credential", sanitized)
+
+    def test_video_dimensions_accept_ffprobe_csv_with_empty_rotation_column(self):
+        probe_result = types.SimpleNamespace(stdout="1920x1080x\n")
+        with mock.patch.object(worker.subprocess, "run", return_value=probe_result):
+            self.assertEqual(worker.get_video_dimensions("/tmp/phone.mov"), (1920, 1080))
+
+    def test_output_dimensions_preserve_requested_program_aspect(self):
+        self.assertEqual(worker.get_multicam_output_dimensions("9:16"), (1080, 1920))
+        self.assertEqual(worker.get_multicam_output_dimensions("1:1"), (1080, 1080))
+        self.assertEqual(worker.get_multicam_output_dimensions("16:9"), (1920, 1080))
+
+    def test_vertical_single_cut_is_full_screen_and_focus_centered(self):
+        filter_chain = worker.multicam_single_cut_filter(
+            "camera",
+            1080,
+            1920,
+            "program",
+            is_vertical_output=True,
+            focus_x=0.31,
+        )
+
+        self.assertIn("scale=1080:1920:force_original_aspect_ratio=increase", filter_chain)
+        self.assertIn("iw*0.3100-ow/2", filter_chain)
+        self.assertNotIn("split=2", filter_chain)
+        self.assertNotIn("boxblur", filter_chain)
+        self.assertNotIn("movie=", filter_chain)
+
+    def test_vertical_reaction_layout_uses_full_screen_hero_and_small_overlay(self):
+        geometry = worker.multicam_pip_geometry(
+            1080,
+            1920,
+            primary_source={"focus_x": 0.82},
+            reaction_count=1,
+        )
+
+        self.assertEqual(geometry["hero"], {"x": 0, "y": 0, "width": 1080, "height": 1920})
+        self.assertLessEqual(geometry["pip"]["width"], int(1080 * 0.31))
+        self.assertEqual(geometry["reaction_side"], "left")
+
+    def test_visual_proxy_preserves_source_aspect_without_padding(self):
+        with mock.patch.object(worker, "get_video_dimensions", return_value=(1920, 1080)):
+            dimensions = worker.get_multicam_source_proxy_dimensions(
+                {"path": "/tmp/camera.mov", "rotation_degrees": 0},
+                max_long_edge=1280,
+            )
+        visual_filter = worker.build_multicam_proxy_visual_filter(
+            {"rotation_degrees": 0},
+            *dimensions,
+        )
+
+        self.assertEqual(dimensions, (1280, 720))
+        self.assertIn("scale=1280:720", visual_filter)
+        self.assertNotIn("pad=", visual_filter)
+
+    def test_hlg_tonemap_keeps_source_colour_and_sdr_camera_is_reference(self):
+        hlg_filter = worker.build_multicam_base_color_filter(
+            {"color_transfer": "arib-std-b67", "color_primaries": "bt2020"}
+        )
+        sources = [
+            {"path": "/tmp/hdr.mov", "color_metadata": {"color_transfer": "arib-std-b67"}},
+            {"path": "/tmp/sdr.mov", "color_metadata": {"color_transfer": "bt709"}},
+        ]
+
+        self.assertIn("tonemap=hable:desat=0.0", hlg_filter)
+        self.assertNotIn("desat=0.35", hlg_filter)
+        self.assertEqual(worker.choose_multicam_color_reference_index(sources, 0), 1)
+
+    def test_color_matching_defaults_to_normalization_only(self):
+        sources = [
+            {
+                "id": "hdr",
+                "label": "HDR camera",
+                "path": "/tmp/hdr.mov",
+                "duration": 60.0,
+                "offset_seconds": 0.0,
+                "sync_rate": 1.0,
+                "color_metadata": {"color_transfer": "arib-std-b67"},
+            },
+            {
+                "id": "sdr",
+                "label": "SDR camera",
+                "path": "/tmp/sdr.mov",
+                "duration": 60.0,
+                "offset_seconds": 0.0,
+                "sync_rate": 1.0,
+                "color_metadata": {"color_transfer": "bt709"},
+            },
+        ]
+
+        with mock.patch.dict(os.environ, {"MULTICAM_AUTO_COLOR_MATCH": "0"}):
+            receipt = worker.asyncio.run(
+                worker.apply_multicam_color_matching(sources, 0.0, 5.0, "unit-normalize")
+            )
+
+        self.assertEqual(receipt["status"], "normalization_only")
+        self.assertFalse(receipt["auto_color_match_enabled"])
+        self.assertTrue(all(not source["color_match_applied"] for source in sources))
+        self.assertTrue(all(source["color_match_filter"] == "" for source in sources))
+        self.assertIn("tonemap=hable:desat=0.0", sources[0]["source_visual_filter"])
 
 
 if __name__ == "__main__":

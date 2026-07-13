@@ -1620,13 +1620,15 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   clip-path: inset(0 round 16px);
   transform: translateZ(0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .nle-shell.is-combine-workspace .nle-studio-program-shell .nle-preview-stage {
-  width: 100%;
+  width: auto;
   height: 100% !important;
   max-width: 100%;
-  aspect-ratio: 16 / 9;
   display: block;
   border-radius: inherit;
   border: 0;
