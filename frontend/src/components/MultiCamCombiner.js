@@ -1679,11 +1679,12 @@ const getPipPreviewViewports = (width, height) => {
 
 const getReactionStackPreviewViewports = (width, height, reactionCount, side = "right") => {
   const count = Math.max(1, Math.min(2, Number(reactionCount) || 1));
-  const stackWidth = width * (count > 1 ? 0.21 : 0.27);
+  const stackWidth = width * 0.31;
   const stackHeight = stackWidth * (9 / 16);
-  const gap = height * 0.024;
-  const x = side === "left" ? width * 0.035 : width - stackWidth - width * 0.035;
-  const startY = height * 0.055;
+  const gap = height * 0.018;
+  const x = side === "left" ? width * 0.039 : width - stackWidth - width * 0.039;
+  const stackTotalHeight = stackHeight * count + gap * (count - 1);
+  const startY = Math.min(height * 0.62, height - stackTotalHeight - height * 0.08);
   return Array.from({ length: count }, (_, index) => ({
     x,
     y: startY + index * (stackHeight + gap),
@@ -3363,9 +3364,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const studioProgramStageStyle = useMemo(
     () => ({
       ...previewStageStyle,
-      aspectRatio: "16 / 9",
       height: "100%",
-      width: "100%",
+      width: "auto",
       maxWidth: "100%",
     }),
     [previewStageStyle]
@@ -8849,7 +8849,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                     </div>
                     <div className={`nle-proof-item ${readySources.length >= 2 ? "is-done" : ""}`}>
                       <span>{readySources.length >= 2 ? "✓" : "4"}</span>
-                      <strong>Reaction layer always on</strong>
+                      <strong>Reaction overlay optional</strong>
                     </div>
                   </div>
                   <div className="nle-studio-credit-note is-simple">
@@ -9071,6 +9071,13 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                   </button>
                 ))}
               </div>
+              <small>
+                {outputAspectRatio === "9:16"
+                  ? "Full-screen vertical crop · reactions stay optional"
+                  : outputAspectRatio === "1:1"
+                    ? "Square program output"
+                    : "Full-screen landscape output"}
+              </small>
             </div>
           </div>
         </div>

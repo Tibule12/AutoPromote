@@ -196,6 +196,40 @@ class MulticamJobRunnerRetryTests(unittest.TestCase):
         headers = post.call_args.kwargs["headers"]
         self.assertEqual(headers["X-Multicam-Dispatch-Token"], "dispatch-token-long-enough")
 
+    def test_required_server_proof_runs_inside_single_render_call_by_default(self):
+        self.job["requireServerProof"] = True
+        completed_render = mock.AsyncMock(
+            return_value={
+                "status": "completed",
+                "output_storage_path": "processed/multicam-proof.mp4",
+            }
+        )
+        fake_worker.render_multicam_impl = completed_render
+        environment = {
+            "MULTICAM_JOB_ID": "embedded-proof-job",
+            "MULTICAM_DISPATCH_TOKEN": "dispatch-token-long-enough",
+            "CLOUD_RUN_EXECUTION": "execution-embedded",
+            "MULTICAM_EMBEDDED_SERVER_PROOF": "1",
+        }
+
+        with (
+            mock.patch.dict(os.environ, environment, clear=False),
+            mock.patch.object(runner, "_claim_job", return_value=("claimed", self.job)),
+            mock.patch.object(runner, "_release_capacity") as release_capacity,
+        ):
+            exit_code = runner.run()
+
+        self.assertEqual(exit_code, 0)
+        completed_render.assert_awaited_once()
+        self.assertTrue(completed_render.await_args.kwargs["allow_embedded_server_proof"])
+        release_capacity.assert_called_once_with("embedded-proof-job", "completed")
+        proofing_updates = [
+            call.args[1]
+            for call in fake_worker.update_firestore_job.call_args_list
+            if len(call.args) > 1 and call.args[1].get("stage") == "embedded_server_proof"
+        ]
+        self.assertEqual(len(proofing_updates), 1)
+
 
 if __name__ == "__main__":
     unittest.main()

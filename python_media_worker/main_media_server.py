@@ -601,8 +601,14 @@ def get_video_dimensions(input_path):
             text=True,
             check=True,
         )
-        width_text, height_text = result.stdout.strip().split("x") if "x" in result.stdout else (1080, 1920)
-        return max(320, int(width_text)), max(320, int(height_text))
+        # Some phone MOV files make ffprobe's CSV writer append an empty
+        # rotation field (for example ``1920x1080x``). Splitting on every x
+        # threw that valid result away and incorrectly treated landscape video
+        # as 1080x1920, which then produced portrait proxies with black bars.
+        dimensions = re.search(r"(\d+)x(\d+)", result.stdout or "")
+        if not dimensions:
+            return 1080, 1920
+        return max(320, int(dimensions.group(1))), max(320, int(dimensions.group(2)))
     except Exception:
         return 1080, 1920
 
@@ -17247,7 +17253,13 @@ def multicam_qa_proof_receipt_passes(receipt, request=None, overlap_duration=Non
             return False, signature_reason
     return True, "qa_proof_receipt_passed"
 
-def enforce_multicam_long_render_qa_gate(request, overlap_duration, *, stage="pre_render_window"):
+def enforce_multicam_long_render_qa_gate(
+    request,
+    overlap_duration,
+    *,
+    stage="pre_render_window",
+    allow_pending_embedded_proof=False,
+):
     duration_seconds = float(overlap_duration or 0.0)
     plan_only_requested = bool(
         getattr(request, "planOnly", None)
@@ -17272,6 +17284,7 @@ def enforce_multicam_long_render_qa_gate(request, overlap_duration, *, stage="pr
         "qa_proof_receipt_status": receipt_reason,
         "plan_only": plan_only_requested,
         "allow_without_qa": bool(MULTICAM_ALLOW_LONG_RENDER_WITHOUT_QA),
+        "embedded_proof_pending": bool(allow_pending_embedded_proof),
     }
     if (
         not MULTICAM_REQUIRE_QA_PROOF_FOR_LONG_RENDER
@@ -17283,6 +17296,9 @@ def enforce_multicam_long_render_qa_gate(request, overlap_duration, *, stage="pr
         return gate
     if qa_status in {"passed", "approved", "safe"} and qa_receipt_id and receipt_passed:
         gate["status"] = "passed"
+        return gate
+    if allow_pending_embedded_proof:
+        gate["status"] = "pending_embedded_proof"
         return gate
     gate["status"] = "blocked"
     raise HTTPException(
@@ -17299,6 +17315,7 @@ def enforce_multicam_production_limits(
     segment_count=None,
     *,
     qa_overlap_duration=None,
+    allow_pending_embedded_proof=False,
 ):
     tier = normalize_multicam_render_tier(request)
     checkpoint_seconds = resolve_multicam_checkpoint_seconds(request)
@@ -17316,6 +17333,7 @@ def enforce_multicam_production_limits(
         request,
         canonical_qa_duration,
         stage="production_limits",
+        allow_pending_embedded_proof=allow_pending_embedded_proof,
     )
     limits = {
         "enabled": bool(MULTICAM_ENFORCE_PROD_LIMITS),
@@ -18254,7 +18272,12 @@ def multicam_preflight_blocking_cameras(preflight_receipt, piecewise_corrections
 
 
 def get_multicam_output_dimensions(output_aspect_ratio):
-    return (1920, 1080) if str(output_aspect_ratio or "9:16") != "9:16" else (1080, 1920)
+    normalized = str(output_aspect_ratio or "9:16").strip()
+    if normalized == "9:16":
+        return 1080, 1920
+    if normalized == "1:1":
+        return 1080, 1080
+    return 1920, 1080
 
 def normalize_multicam_rotation_degrees(value):
     try:
@@ -18334,7 +18357,9 @@ def multicam_modern_card_filter(input_label, width, height, output_label, margin
     safe_focus_y = clamp_float(float(0.48 if focus_y is None else focus_y), 0.12, 0.82)
     return (
         f"[{input_label}]scale={width}:{height}:force_original_aspect_ratio=increase,"
-        f"crop={width}:{height}:(iw-ow)*{safe_focus_x:.4f}:(ih-oh)*{safe_focus_y:.4f},"
+        f"crop={width}:{height}:"
+        f"min(max(iw*{safe_focus_x:.4f}-ow/2\\,0)\\,iw-ow):"
+        f"min(max(ih*{safe_focus_y:.4f}-oh/2\\,0)\\,ih-oh),"
         f"setsar=1[{output_label}]"
     )
 
@@ -18463,16 +18488,22 @@ def multicam_pip_geometry(output_width, output_height, primary_source=None, reac
     reaction_side = multicam_reaction_side_for_primary(primary_source or {})
 
     if is_vertical_output:
-        hero_width = safe_width - 64
-        hero_height = int(hero_width * 9 / 16)
-        hero_x = 32
-        hero_y = 128
-        pip_width = int(safe_width * 0.52)
+        # A vertical program should remain a vertical program. The active
+        # speaker fills the canvas while reactions stay small and sit away
+        # from the measured speaker position.
+        hero_width = safe_width
+        hero_height = safe_height
+        hero_x = 0
+        hero_y = 0
+        pip_width = int(safe_width * 0.31)
         pip_height = int(pip_width * 9 / 16)
         pip_gap = max(18, int(safe_height * 0.018))
-        pip_x = 34 if reaction_side == "left" else safe_width - pip_width - 34
+        pip_x = 42 if reaction_side == "left" else safe_width - pip_width - 42
         pip_stack_height = pip_height * safe_reaction_count + pip_gap * (safe_reaction_count - 1)
-        pip_y = min(safe_height - pip_stack_height - 72, hero_y + hero_height + 34)
+        pip_y = min(
+            safe_height - pip_stack_height - max(120, int(safe_height * 0.08)),
+            int(safe_height * 0.62),
+        )
         return {
             "reaction_side": reaction_side,
             "hero": {"x": hero_x, "y": hero_y, "width": hero_width, "height": hero_height},
@@ -18511,7 +18542,15 @@ def multicam_overlay_card_filters(base_label, card_label, x, y, width, height, o
         f"[{base_label}][{rounded}]overlay=x={int(x)}:y={int(y)}:shortest=1[{output_label}]",
     ]
 
-def multicam_single_cut_filter(input_label, width, height, output_label, is_vertical_output=True):
+def multicam_single_cut_filter(
+    input_label,
+    width,
+    height,
+    output_label,
+    is_vertical_output=True,
+    focus_x=0.5,
+    focus_y=0.48,
+):
     if not is_vertical_output:
         card_margin_x = max(36, int(width * 0.035))
         card_margin_y = max(28, int(height * 0.045))
@@ -18537,17 +18576,17 @@ def multicam_single_cut_filter(input_label, width, height, output_label, is_vert
             ]
         )
 
-    card_width = int(width) - 72
-    card_height = max(2, int(card_width * 9 / 16))
-    card_x = int((int(width) - card_width) / 2)
-    card_y = int((int(height) - card_height) / 2)
-    return ";".join(
-        [
-            f"[{input_label}]split=2[cutbgsrc][cutcardsrc]",
-            multicam_blurred_canvas_filter("cutbgsrc", width, height, "cutcanvas", blur=26),
-            multicam_modern_card_filter("cutcardsrc", card_width, card_height, "cutcard", margin=0, blur=18),
-            *multicam_overlay_card_filters("cutcanvas", "cutcard", card_x, card_y, card_width, card_height, output_label),
-        ]
+    # A 9:16 export means full-screen vertical, not a horizontal card floating
+    # in a portrait canvas. Crop around the measured speaker focus so wide
+    # podcast cameras remain useful without exposing padded proxy edges.
+    safe_focus_x = clamp_float(float(0.5 if focus_x is None else focus_x), 0.06, 0.94)
+    safe_focus_y = clamp_float(float(0.48 if focus_y is None else focus_y), 0.12, 0.82)
+    return (
+        f"[{input_label}]scale={int(width)}:{int(height)}:force_original_aspect_ratio=increase,"
+        f"crop={int(width)}:{int(height)}:"
+        f"min(max(iw*{safe_focus_x:.4f}-ow/2\\,0)\\,iw-ow):"
+        f"min(max(ih*{safe_focus_y:.4f}-oh/2\\,0)\\,ih-oh),"
+        f"setsar=1[{output_label}]"
     )
 
 def source_has_active_continuous_sync_map(source):
@@ -18800,25 +18839,21 @@ async def render_multicam_layout_segment(
         pip_x = pip_geometry["pip"]["x"]
         pip_y = pip_geometry["pip"]["y"]
 
-        filters.extend(multicam_prepare_video_branches(0, "p0", setpts_factors[0], branches=2, trim_start=fine_seek_values[0], trim_duration=trim_duration_values[0], rotation_degrees=rotation_values[0], color_filter=color_filter_values[0]))
+        filters.extend(multicam_prepare_video_branches(0, "p0", setpts_factors[0], branches=1, trim_start=fine_seek_values[0], trim_duration=trim_duration_values[0], rotation_degrees=rotation_values[0], color_filter=color_filter_values[0]))
         for reaction_index in range(1, reaction_source_count):
             filters.extend(multicam_prepare_video_branches(reaction_index, f"p{reaction_index}", setpts_factors[reaction_index], branches=1, trim_start=fine_seek_values[reaction_index], trim_duration=trim_duration_values[reaction_index], rotation_degrees=rotation_values[reaction_index], color_filter=color_filter_values[reaction_index]))
-        filters.append(multicam_blurred_canvas_filter("p00", output_width, output_height, "canvas", blur=26))
-        filters.append(multicam_modern_card_filter("p01", hero_width, hero_height, "hero", margin=8, blur=18, focus_x=multicam_source_focus_x(layout_sources[0])))
-        filters.extend(
-            multicam_overlay_card_filters(
-                "canvas",
-                "hero",
-                hero_x,
-                hero_y,
+        filters.append(
+            multicam_modern_card_filter(
+                "p00",
                 hero_width,
                 hero_height,
-                "pip_base",
-                border_color="0xF8FAFC@0.26",
-                radius=118,
+                "hero",
+                margin=0,
+                blur=0,
+                focus_x=multicam_source_focus_x(layout_sources[0]),
             )
         )
-        current_base_label = "pip_base"
+        current_base_label = "hero"
         for reaction_index in range(1, reaction_source_count):
             card_label = f"pip{reaction_index}"
             output_label = "v" if reaction_index == reaction_source_count - 1 else f"pip_stack_{reaction_index}"
@@ -21420,12 +21455,15 @@ def build_multicam_color_match_filter(reference_profile, source_profile):
     ref_chroma = max(1.0, float(reference_profile.get("mean_chroma") or 1.0))
     src_chroma = max(1.0, float(source_profile.get("mean_chroma") or ref_chroma))
 
-    brightness = clamp_float((ref_luma - src_luma) / 255.0, -0.018, 0.018)
-    contrast = clamp_float(ref_contrast / src_contrast, 0.985, 1.025)
-    saturation = clamp_float(ref_chroma / src_chroma, 0.97, 1.015)
-    red_shift = clamp_float((float(reference_profile.get("mean_r") or 0.0) - float(source_profile.get("mean_r") or 0.0)) / 255.0, -0.018, 0.018)
-    green_shift = clamp_float((float(reference_profile.get("mean_g") or 0.0) - float(source_profile.get("mean_g") or 0.0)) / 255.0, -0.012, 0.012)
-    blue_shift = clamp_float((float(reference_profile.get("mean_b") or 0.0) - float(source_profile.get("mean_b") or 0.0)) / 255.0, -0.018, 0.018)
+    # Different podcast angles contain different walls, screens and clothing;
+    # their whole-frame averages are not a licence for a strong creative grade.
+    # Keep matching corrective and conservative so skin colour stays natural.
+    brightness = clamp_float((ref_luma - src_luma) / 255.0, -0.012, 0.012)
+    contrast = clamp_float(ref_contrast / src_contrast, 0.99, 1.015)
+    saturation = clamp_float(ref_chroma / src_chroma, 0.985, 1.01)
+    red_shift = clamp_float((float(reference_profile.get("mean_r") or 0.0) - float(source_profile.get("mean_r") or 0.0)) / 510.0, -0.009, 0.009)
+    green_shift = clamp_float((float(reference_profile.get("mean_g") or 0.0) - float(source_profile.get("mean_g") or 0.0)) / 510.0, -0.006, 0.006)
+    blue_shift = clamp_float((float(reference_profile.get("mean_b") or 0.0) - float(source_profile.get("mean_b") or 0.0)) / 510.0, -0.009, 0.009)
 
     # Keep the correction gentle: iPhone auto-exposure varies during a take, so
     # this nudges global camera character without chasing every moment.
@@ -21458,7 +21496,9 @@ def build_multicam_base_color_filter(color_metadata):
             return (
                 "zscale=t=linear:npl=100,"
                 "format=gbrpf32le,"
-                "tonemap=tonemap=hable:desat=0.35,"
+                # HLG already carries real colour information. desat=0.35 was
+                # bleaching skin, clothes, and screens in production proofs.
+                "tonemap=tonemap=hable:desat=0.0,"
                 "zscale=p=bt709:t=bt709:m=bt709:r=tv,"
                 "format=yuv420p"
             )
@@ -21485,10 +21525,29 @@ def build_multicam_cinematic_polish_filter():
             "vignette=angle=PI/18:eval=init"
         )
     return (
-        "eq=contrast=1.055:brightness=0.004:saturation=1.025:gamma=1.000,"
-        "colorbalance=rs=-0.00120:gs=-0.00100:bs=0.00220:rm=-0.00100:gm=-0.00100:bm=0.00180:rh=-0.00060:gh=-0.00050:bh=0.00120,"
-        "unsharp=3:3:0.14:3:3:0.030"
+        "eq=contrast=1.025:brightness=0.000:saturation=1.015:gamma=1.000,"
+        "unsharp=3:3:0.08:3:3:0.015"
     )
+
+
+def choose_multicam_color_reference_index(prepared_sources, requested_index=0):
+    """Prefer a native SDR/BT.709 camera as the neutral colour reference."""
+    sources = list(prepared_sources or [])
+    if not sources:
+        return 0
+    safe_requested = min(max(0, int(requested_index or 0)), len(sources) - 1)
+    sdr_indices = [
+        index
+        for index, source in enumerate(sources)
+        if not is_multicam_hdr_source(
+            source.get("color_metadata") or probe_video_color_metadata(source.get("path"))
+        )
+    ]
+    if not sdr_indices:
+        return safe_requested
+    if safe_requested in sdr_indices:
+        return safe_requested
+    return sdr_indices[0]
 
 
 def multicam_file_cache_identity(path):
@@ -21499,12 +21558,20 @@ def multicam_file_cache_identity(path):
         return str(path or "")
 
 
-def build_multicam_color_receipt_cache_payload(prepared_sources, overlap_start, overlap_duration, reference_index, cinematic_polish_filter):
+def build_multicam_color_receipt_cache_payload(
+    prepared_sources,
+    overlap_start,
+    overlap_duration,
+    reference_index,
+    cinematic_polish_filter,
+    auto_color_match_enabled=False,
+):
     return {
-        "version": 4,
+        "version": 6,
         "overlap_start": round(float(overlap_start or 0.0), 3),
         "overlap_duration": round(float(overlap_duration or 0.0), 3),
         "reference_index": int(reference_index or 0),
+        "auto_color_match_enabled": bool(auto_color_match_enabled),
         "cinematic_polish_filter": str(cinematic_polish_filter or ""),
         "sources": [
             {
@@ -21727,7 +21794,7 @@ def multicam_visual_proxy_cache_path(source_path, visual_filter, width=1920, hei
             "width": int(width),
             "height": int(height),
             "encoder": GPU_VIDEO_ENCODER,
-            "version": 8,
+            "version": 9,
         },
         sort_keys=True,
     )
@@ -21763,6 +21830,31 @@ def get_multicam_visual_proxy_dimensions(output_width, output_height):
     proxy_width = max(2, proxy_width - (proxy_width % 2))
     proxy_height = max(2, proxy_height - (proxy_height % 2))
     return proxy_width, proxy_height
+
+
+def get_multicam_source_proxy_dimensions(source, max_long_edge=None):
+    """Keep proxy pixels in the camera's display aspect ratio.
+
+    The old output-shaped proxy padded a landscape camera into 9:16 before the
+    layout pass. Later crops treated the padding as real video, which exposed a
+    rectangular black frame inside rounded cards.
+    """
+    configured_long_edge = int(
+        max_long_edge
+        or os.getenv("MULTICAM_VISUAL_PROXY_MAX_LONG_EDGE", "1280")
+        or 1280
+    )
+    configured_long_edge = max(360, min(1920, configured_long_edge))
+    source_width, source_height = get_video_dimensions((source or {}).get("path"))
+    rotation = normalize_multicam_rotation_degrees((source or {}).get("rotation_degrees", 0))
+    if rotation in {90, 270}:
+        source_width, source_height = source_height, source_width
+    scale = configured_long_edge / max(1, source_width, source_height)
+    proxy_width = max(2, int(round(source_width * scale)))
+    proxy_height = max(2, int(round(source_height * scale)))
+    proxy_width -= proxy_width % 2
+    proxy_height -= proxy_height % 2
+    return max(2, proxy_width), max(2, proxy_height)
 
 
 def unauditable_multicam_visual_proxy_sources(prepared_sources):
@@ -21816,8 +21908,7 @@ def build_multicam_proxy_visual_filter(source, proxy_width, proxy_height):
         multicam_rotation_filter(source.get("rotation_degrees", 0)).strip(","),
         source.get("base_color_filter"),
         source.get("color_match_filter"),
-        f"scale={int(proxy_width)}:{int(proxy_height)}:force_original_aspect_ratio=decrease",
-        f"pad={int(proxy_width)}:{int(proxy_height)}:(ow-iw)/2:(oh-ih)/2",
+        f"scale={int(proxy_width)}:{int(proxy_height)}:flags=lanczos",
         "setsar=1",
         source.get("cinematic_polish_filter"),
         "fps=30",
@@ -21828,7 +21919,7 @@ async def prepare_multicam_visual_proxy_sources(prepared_sources, overlap_start,
     if os.getenv("MULTICAM_VISUAL_PROXY_CACHE", "1").strip().lower() in {"0", "false", "no", "off"}:
         return {"status": "disabled"}
 
-    proxy_width, proxy_height = get_multicam_visual_proxy_dimensions(output_width, output_height)
+    max_long_edge = int(os.getenv("MULTICAM_VISUAL_PROXY_MAX_LONG_EDGE", "1280") or 1280)
     safe_sources = list(prepared_sources or [])
     proxy_concurrency = max(
         1,
@@ -21841,6 +21932,10 @@ async def prepare_multicam_visual_proxy_sources(prepared_sources, overlap_start,
 
     async def prepare_source_proxy(source):
         async with proxy_semaphore:
+            proxy_width, proxy_height = get_multicam_source_proxy_dimensions(
+                source,
+                max_long_edge=max_long_edge,
+            )
             proxy_start = max(0.0, get_source_start_for_timeline(source, overlap_start, 0.0) - 2.0)
             proxy_duration = min(
                 max(0.25, float(source.get("duration") or 0.0) - proxy_start),
@@ -21918,8 +22013,8 @@ async def prepare_multicam_visual_proxy_sources(prepared_sources, overlap_start,
 
     return {
         "status": "active",
-        "mode": "per_camera_polished_window_proxy",
-        "max_long_edge": max(proxy_width, proxy_height),
+        "mode": "per_camera_aspect_preserved_polished_window_proxy",
+        "max_long_edge": max_long_edge,
         "source_count": len(receipts),
         "concurrency": proxy_concurrency,
         "sources": receipts,
@@ -21928,19 +22023,29 @@ async def prepare_multicam_visual_proxy_sources(prepared_sources, overlap_start,
 
 async def apply_multicam_color_matching(prepared_sources, overlap_start, overlap_duration, job_id, reference_index=0):
     cinematic_polish_filter = build_multicam_cinematic_polish_filter()
+    auto_color_match_enabled = env_flag("MULTICAM_AUTO_COLOR_MATCH", default=False)
+    safe_reference_index = choose_multicam_color_reference_index(
+        prepared_sources,
+        requested_index=reference_index,
+    )
     cache_payload = build_multicam_color_receipt_cache_payload(
         prepared_sources,
         overlap_start,
         overlap_duration,
-        reference_index,
+        safe_reference_index,
         cinematic_polish_filter,
+        auto_color_match_enabled,
     )
     cache_path = multicam_receipt_cache_path("color", cache_payload)
     cached_receipt = read_multicam_receipt_cache(
         cache_path,
         max_age_seconds=float(os.getenv("MULTICAM_COLOR_RECEIPT_CACHE_MAX_AGE_SECONDS", "1209600") or 1209600),
     )
-    if cached_receipt and cached_receipt.get("status") in {"active", "skipped_no_matchable_sources"}:
+    if cached_receipt and cached_receipt.get("status") in {
+        "active",
+        "normalization_only",
+        "skipped_no_matchable_sources",
+    }:
         apply_multicam_color_receipt_to_sources(cached_receipt, prepared_sources)
         cached_receipt["cache_hit"] = True
         cached_receipt["cache_path"] = cache_path
@@ -21953,6 +22058,7 @@ async def apply_multicam_color_matching(prepared_sources, overlap_start, overlap
         "reference_source_label": None,
         "cache_hit": False,
         "cache_path": cache_path,
+        "auto_color_match_enabled": auto_color_match_enabled,
         "base_normalization": {
             "status": "active",
             "target": "bt709_sdr",
@@ -21970,10 +22076,44 @@ async def apply_multicam_color_matching(prepared_sources, overlap_start, overlap
         },
         "sources": [],
     }
+
+    if not auto_color_match_enabled:
+        reference_source = prepared_sources[safe_reference_index] if prepared_sources else {}
+        receipt["reference_source_id"] = reference_source.get("id")
+        receipt["reference_source_label"] = reference_source.get("label")
+        for index, source in enumerate(prepared_sources or []):
+            color_metadata = source.get("color_metadata") or probe_video_color_metadata(source["path"])
+            base_color_filter = build_multicam_base_color_filter(color_metadata)
+            source["color_metadata"] = color_metadata
+            source["base_color_filter"] = base_color_filter
+            source["color_match_filter"] = ""
+            source["cinematic_polish_filter"] = cinematic_polish_filter
+            source["source_visual_filter"] = combine_multicam_filter_chains(
+                base_color_filter,
+                cinematic_polish_filter,
+            )
+            source["color_match_reference_id"] = reference_source.get("id")
+            source["color_match_applied"] = False
+            receipt["sources"].append({
+                "id": source.get("id"),
+                "label": source.get("label"),
+                "role": "reference" if index == safe_reference_index else "normalized",
+                "color_metadata": color_metadata,
+                "base_color_filter": base_color_filter,
+                "filter": "",
+                "cinematic_polish_filter": cinematic_polish_filter,
+                "source_visual_filter": source.get("source_visual_filter") or "",
+                "applied": False,
+            })
+        receipt["matched_source_count"] = 0
+        receipt["status"] = "normalization_only"
+        write_multicam_receipt_cache(cache_path, receipt)
+        logger.info("MULTICAM COLOR NORMALIZATION %s: %s", job_id, json.dumps(receipt, default=str))
+        return receipt
+
     if len(prepared_sources or []) < 2:
         return receipt
 
-    safe_reference_index = min(max(0, int(reference_index or 0)), len(prepared_sources) - 1)
     reference_source = prepared_sources[safe_reference_index]
     receipt["reference_source_id"] = reference_source.get("id")
     receipt["reference_source_label"] = reference_source.get("label")
@@ -22181,6 +22321,7 @@ async def render_multicam_video_segment(
                     output_height,
                     "v",
                     is_vertical_output=output_height > output_width,
+                    focus_x=multicam_source_focus_x(source),
                 ),
             ]
         )
@@ -22284,6 +22425,7 @@ async def render_multicam_impl(
     provided_job_id: str = None,
     *,
     propagate_errors: bool = False,
+    allow_embedded_server_proof: bool = False,
 ):
     if len(request.sources or []) < 2:
         raise HTTPException(status_code=400, detail="At least two camera sources are required")
@@ -22329,6 +22471,7 @@ async def render_multicam_impl(
             request,
             requested_overlap_duration,
             stage="requested_window",
+            allow_pending_embedded_proof=allow_embedded_server_proof,
         )
     requested_timeline_start = (
         float(request.timeline_start)
@@ -22740,10 +22883,13 @@ async def render_multicam_impl(
             request,
             overlap_duration,
             qa_overlap_duration=requested_overlap_duration,
+            allow_pending_embedded_proof=allow_embedded_server_proof,
         )
         output_width, output_height = get_multicam_output_dimensions(output_aspect_ratio)
+        visual_proxy_enabled = env_flag("MULTICAM_USE_VISUAL_PROXY", default=False)
         skip_visual_proxy = (
             not bool(render_tier_profile.get("visual_proxy"))
+            or not visual_proxy_enabled
             or env_flag("MULTICAM_SKIP_VISUAL_PROXY", default=False)
             or plan_only_audio_first_requested
         )
@@ -22751,7 +22897,7 @@ async def render_multicam_impl(
             "MULTICAM_FORCE_DIRECT_AUDITABLE_SOURCE_VIDEO",
             default=False,
         )
-        if skip_visual_proxy:
+        if skip_visual_proxy and plan_only_audio_first_requested:
             color_match_receipt = {
                 "status": "skipped_fast_proof_tier",
                 "reason": "render_tier_simple_or_MULTICAM_SKIP_VISUAL_PROXY",
@@ -22778,6 +22924,30 @@ async def render_multicam_impl(
                 source["cinematic_polish_filter"] = ""
                 source["source_visual_filter"] = ""
                 source["render_visual_filter"] = ""
+
+        elif skip_visual_proxy:
+            # A full-window mezzanine processes every camera for the entire
+            # requested duration before cutting a single final frame. Production
+            # timing showed that proxy pass taking far longer than the real
+            # edit. Render directly from the auditable CFR sources and apply the
+            # safe visual filter only to frames that survive the director cut.
+            color_match_receipt = await apply_multicam_color_matching(
+                prepared_sources,
+                overlap_start,
+                overlap_duration,
+                job_id,
+                reference_index=0,
+            )
+            visual_proxy_receipt = {
+                "status": "direct_source_active",
+                "mode": "direct_auditable_cfr_source_render",
+                "reason": "MULTICAM_USE_VISUAL_PROXY_disabled",
+                "source_count": len(prepared_sources),
+                "durable_proxy_files_created": 0,
+            }
+            for source in prepared_sources:
+                source.pop("render_path", None)
+                source["render_visual_filter"] = source.get("source_visual_filter") or ""
 
         # -------- Preflight sync check (when external audio is available) --------
         if external_audio_url:
@@ -23398,6 +23568,7 @@ async def render_multicam_impl(
             overlap_duration,
             segment_count=len(segments),
             qa_overlap_duration=requested_overlap_duration,
+            allow_pending_embedded_proof=allow_embedded_server_proof,
         )
         layout_contract_audit = audit_multicam_layout_contract(
             segments,
@@ -23453,6 +23624,71 @@ async def render_multicam_impl(
                     detail={
                         "message": "Multicam director would join an active speaker too late before render",
                         "director_latency_audit": director_latency_audit,
+                    },
+                )
+
+        if allow_embedded_server_proof and not plan_only_requested:
+            embedded_checks = {
+                "sync_preflight": preflight or {"status": "not_required"},
+                "continuous_sync_anchors": continuous_sync_receipt or {"status": "not_required"},
+                "layout_contract": layout_contract_audit,
+                "director_truth": director_truth_audit,
+                "director_latency": director_latency_audit,
+            }
+            accepted_statuses = {"passed", "good", "planned", "active", "not_required"}
+            failed_embedded_checks = [
+                name
+                for name, check in embedded_checks.items()
+                if str((check or {}).get("status") or "").strip().lower() not in accepted_statuses
+            ]
+            if failed_embedded_checks:
+                raise HTTPException(
+                    status_code=422,
+                    detail={
+                        "message": "Embedded durable server proof failed before render encoding",
+                        "failed_checks": failed_embedded_checks,
+                        "checks": embedded_checks,
+                    },
+                )
+            embedded_receipt_id = f"{job_id}-embedded-server-plan"
+            embedded_receipt = sign_multicam_qa_proof_receipt(
+                {
+                    "overall_status": "SAFE",
+                    "proof_kind": "server_plan_v1",
+                    "qa_proof_receipt_id": embedded_receipt_id,
+                    "job_id": job_id,
+                    "external_audio_present": bool(effective_external_audio_url),
+                    "checks": embedded_checks,
+                },
+                request,
+                float(requested_overlap_duration or overlap_duration),
+            )
+            request.qa_proof_status = "passed"
+            request.qaProofStatus = "passed"
+            request.qa_proof_receipt_id = embedded_receipt_id
+            request.qaProofReceiptId = embedded_receipt_id
+            request.qa_proof_receipt = embedded_receipt
+            request.qaProofReceipt = embedded_receipt
+            enforce_multicam_long_render_qa_gate(
+                request,
+                float(requested_overlap_duration or overlap_duration),
+                stage="embedded_server_proof_complete",
+            )
+            if request.async_mode:
+                update_firestore_job(
+                    job_id,
+                    {
+                        "status": "proof_passed",
+                        "stage": "embedded_server_proof_passed",
+                        "progress": 48,
+                        "detail": "Sync and director proof passed; encoding selected frames",
+                        "serverProof": {
+                            "status": "passed",
+                            "mode": "embedded_single_pass",
+                            "qaProofReceiptId": embedded_receipt_id,
+                            "qaProofReceipt": embedded_receipt,
+                            "checks": embedded_checks,
+                        },
                     },
                 )
 
