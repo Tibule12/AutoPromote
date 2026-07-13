@@ -156,6 +156,8 @@ describe("media multicam render route", () => {
         checkpointSeconds: 300,
         checkpointedRender: true,
         expectedCheckpointCount: 9,
+        outputAspectRatio: "16:9",
+        reactionOverlays: false,
       }),
       "testUser123"
     );

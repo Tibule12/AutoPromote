@@ -4072,7 +4072,11 @@
 }
 
 .nle-aspect-btn {
-  padding: 2px 8px;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  padding: 5px 8px;
   font-size: 0.72rem;
   border-radius: 4px;
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -4080,6 +4084,19 @@
   color: rgba(255, 255, 255, 0.5);
   cursor: pointer;
   transition: all 0.15s;
+}
+
+.nle-aspect-btn strong {
+  color: inherit;
+  font-size: 0.74rem;
+  line-height: 1.1;
+}
+
+.nle-aspect-btn span {
+  color: inherit;
+  font-size: 0.62rem;
+  line-height: 1.1;
+  white-space: nowrap;
 }
 
 .nle-aspect-btn.is-active {

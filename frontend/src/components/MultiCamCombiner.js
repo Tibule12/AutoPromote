@@ -1942,7 +1942,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const [statusMessage, setStatusMessage] = useState("");
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
-  const [outputAspectRatio, setOutputAspectRatio] = useState("9:16");
+  const [outputAspectRatio, setOutputAspectRatio] = useState("16:9");
   const [exportResult, setExportResult] = useState(null);
   const [pendingRenderReview, setPendingRenderReview] = useState(null);
   const [recentRenders, setRecentRenders] = useState([]);
@@ -2068,7 +2068,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       setSources(restoredSources);
       setSwitches([{ id: "switch-1", cameraId: restoredSources[0].id, startTime: 0 }]);
       setMasterAudioCameraId(restoredSources[0].id);
-      setOutputAspectRatio(project.outputAspectRatio || "9:16");
+      setOutputAspectRatio(project.outputAspectRatio || "16:9");
       setMulticamRenderTier(project.renderTier || "premium");
       const external = project.externalAudio;
       if (external?.url) {
@@ -2652,10 +2652,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     if (secondaryCameraId && secondaryCameraId !== activeCameraId) return secondaryCameraId;
     return readySources.find(source => source.id !== activeCameraId)?.id || null;
   }, [isSingleSourceWorkflow, readySources, activeCameraId, secondaryCameraId]);
-  const previewMulticamLayoutMode =
-    reactionOverlayEnabled && !isSingleSourceWorkflow && effectiveMulticamLayoutMode === "cut" && reactionOverlayCameraId
-      ? "pip"
-      : effectiveMulticamLayoutMode;
+  const previewMulticamLayoutMode = effectiveMulticamLayoutMode;
   const previewSecondaryCameraId =
     previewMulticamLayoutMode === "pip" && reactionOverlayCameraId
       ? reactionOverlayCameraId
@@ -2949,7 +2946,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         const viewport = viewports[index];
         assignCardStyle(cameraId, viewport, {
           padding: "0",
-          objectFit: "contain",
+          objectFit: "cover",
           borderColor: "rgba(255, 255, 255, 0.12)",
           ...(cameraId === activeCameraId ? previewActiveVideoStyle : {}),
         });
@@ -2969,14 +2966,14 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       const [primaryViewport, secondaryViewport] = getSharedMomentPreviewViewports(100, 100);
       assignCardStyle(activeCameraId, primaryViewport, {
         padding: "0",
-        objectFit: "contain",
+        objectFit: "cover",
         objectPosition: "center center",
         borderColor: "rgba(255, 255, 255, 0.12)",
         ...previewActiveVideoStyle,
       });
       assignCardStyle(previewSecondaryCameraId, secondaryViewport, {
         padding: "0",
-        objectFit: "contain",
+        objectFit: "cover",
         objectPosition: "center center",
         borderColor: "rgba(255, 255, 255, 0.12)",
       });
@@ -3355,8 +3352,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
 
     return {
       position: "relative",
-      aspectRatio: aspectRatioMap[outputAspectRatio] || "9 / 16",
-      height: heightMap[outputAspectRatio] || "clamp(260px, 50vh, 420px)",
+      aspectRatio: aspectRatioMap[outputAspectRatio] || "16 / 9",
+      height: heightMap[outputAspectRatio] || "clamp(220px, 38vh, 420px)",
       width: "auto",
       maxWidth: "100%",
     };
@@ -8653,14 +8650,14 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                           setReactionOverlayEnabled(value => !value);
                           setStatusMessage(
                             reactionOverlayEnabled
-                              ? "Reaction overlay disabled. Export will keep the active camera clean."
-                              : "Reaction overlay enabled. Use it only when the active camera has open space."
+                              ? "Reaction windows are off. The backend will render no reaction PiP."
+                              : "Reaction windows are allowed. The director may use one only for an earned reaction."
                           );
                         }}
                         disabled={readySources.length < 2}
                       >
-                        <strong>Reaction overlay</strong>
-                        <span>{reactionOverlayEnabled ? "On" : readySources.length >= 2 ? "Off" : "Needs 2 cams"}</span>
+                        <strong>Reaction windows (optional)</strong>
+                        <span>{reactionOverlayEnabled ? "On — earned reactions only" : readySources.length >= 2 ? "Off — no reaction" : "Needs 2 cams"}</span>
                       </button>
                       <div className="nle-reaction-side-buttons">
                         <button
@@ -9058,25 +9055,38 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
             </div>
             <div className="nle-director-stat-card is-output-card">
               <span>Output Stage</span>
-              <strong>{outputAspectRatio}</strong>
+              <strong>
+                {outputAspectRatio === "16:9"
+                  ? "Full Podcast / YouTube"
+                  : outputAspectRatio === "9:16"
+                    ? "Reels / Shorts"
+                    : "Square Feed"}
+              </strong>
               <div className="nle-aspect-buttons">
-                {["9:16", "16:9", "1:1"].map(ar => (
+                {[
+                  { ratio: "16:9", label: "Podcast / YouTube" },
+                  { ratio: "9:16", label: "Reels / Shorts" },
+                  { ratio: "1:1", label: "Square Feed" },
+                ].map(({ ratio, label }) => (
                   <button
-                    key={ar}
+                    key={ratio}
                     type="button"
-                    className={`nle-aspect-btn ${outputAspectRatio === ar ? "is-active" : ""}`}
-                    onClick={() => setOutputAspectRatio(ar)}
+                    className={`nle-aspect-btn ${outputAspectRatio === ratio ? "is-active" : ""}`}
+                    onClick={() => setOutputAspectRatio(ratio)}
                   >
-                    {ar}
+                    <strong>{ratio}</strong>
+                    <span>{label}</span>
                   </button>
                 ))}
               </div>
               <small>
-                {outputAspectRatio === "9:16"
-                  ? "Full-screen vertical crop · reactions stay optional"
+                {outputAspectRatio === "16:9"
+                  ? "Full-screen landscape podcast video"
+                  : outputAspectRatio === "9:16"
+                    ? "Vertical social clip for Reels and Shorts"
                   : outputAspectRatio === "1:1"
-                    ? "Square program output"
-                    : "Full-screen landscape output"}
+                    ? "Square social-feed video"
+                    : "Full-screen landscape podcast video"}
               </small>
             </div>
           </div>
@@ -10542,14 +10552,14 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                             setReactionOverlayEnabled(value => !value);
                             setStatusMessage(
                               reactionOverlayEnabled
-                                ? "Reaction overlay disabled. Export will keep the active camera clean."
-                                : "Reaction overlay enabled. Use it only when the active camera has open space."
+                                ? "Reaction windows are off. The backend will render no reaction PiP."
+                                : "Reaction windows are allowed. The director may use one only for an earned reaction."
                             );
                           }}
                           disabled={readySources.length < 2}
                         >
-                          <strong>Reaction overlay</strong>
-                          <span>{reactionOverlayEnabled ? "On" : readySources.length >= 2 ? "Off" : "Needs 2 cams"}</span>
+                          <strong>Reaction windows (optional)</strong>
+                          <span>{reactionOverlayEnabled ? "On — earned reactions only" : readySources.length >= 2 ? "Off — no reaction" : "Needs 2 cams"}</span>
                         </button>
                       </div>
                       <button

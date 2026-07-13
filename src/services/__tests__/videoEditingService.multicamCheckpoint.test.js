@@ -79,6 +79,10 @@ describe("VideoEditingService multicam checkpoint contract", () => {
         checkpointedRender: true,
         expected_checkpoint_count: 9,
         expectedCheckpointCount: 9,
+        output_aspect_ratio: "16:9",
+        outputAspectRatio: "16:9",
+        reaction_overlays: false,
+        reactionOverlays: false,
       })
     );
     expect(mockExecuteMulticamRenderJob).toHaveBeenCalledWith({
