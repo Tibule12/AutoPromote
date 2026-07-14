@@ -11865,6 +11865,14 @@ MULTICAM_POST_RENDER_SYNC_MIN_USABLE_RATIO = clamp_float(
     0.1,
     1.0,
 )
+MULTICAM_POST_RENDER_SYNC_SHORT_PROOF_SECONDS = max(
+    30.0,
+    float(os.getenv("MULTICAM_POST_RENDER_SYNC_SHORT_PROOF_SECONDS", "90.0") or 90.0),
+)
+MULTICAM_POST_RENDER_SYNC_SHORT_PROOF_MIN_USABLE = max(
+    3,
+    int(os.getenv("MULTICAM_POST_RENDER_SYNC_SHORT_PROOF_MIN_USABLE", "4") or 4),
+)
 MULTICAM_POST_RENDER_SYNC_MIN_COVERAGE_RATIO = clamp_float(
     float(os.getenv("MULTICAM_POST_RENDER_SYNC_MIN_COVERAGE_RATIO", "0.60") or 0.60),
     0.1,
@@ -17817,6 +17825,24 @@ def multicam_post_render_sync_has_dense_time_coverage(receipt, usable_sample_cou
     )
 
 
+def multicam_post_render_sync_min_usable_count(sample_count, timeline_duration_seconds):
+    safe_sample_count = max(0, int(sample_count or 0))
+    ratio_count = max(
+        1,
+        int(math.ceil(float(safe_sample_count) * MULTICAM_POST_RENDER_SYNC_MIN_USABLE_RATIO)),
+    )
+    try:
+        timeline_duration = max(0.0, float(timeline_duration_seconds or 0.0))
+    except (TypeError, ValueError):
+        timeline_duration = 0.0
+    if 0.0 < timeline_duration <= MULTICAM_POST_RENDER_SYNC_SHORT_PROOF_SECONDS:
+        return min(
+            ratio_count,
+            max(1, min(safe_sample_count, MULTICAM_POST_RENDER_SYNC_SHORT_PROOF_MIN_USABLE)),
+        )
+    return ratio_count
+
+
 async def audit_multicam_render_sync(output_path, segments, source_map, overlap_start, job_id):
     timeline_duration = max(
         [float(segment.get("timeline_end", 0.0) or 0.0) for segment in (segments or [])] or [0.0]
@@ -17833,6 +17859,7 @@ async def audit_multicam_render_sync(output_path, segments, source_map, overlap_
         "usable_sample_count": 0,
         "max_abs_residual_seconds": None,
         "avg_correlation": 0.0,
+        "timeline_duration_seconds": round(timeline_duration, 3),
         "thresholds": {
             "good_seconds": MULTICAM_POST_RENDER_SYNC_GOOD_SECONDS,
             "unsafe_seconds": MULTICAM_POST_RENDER_SYNC_UNSAFE_SECONDS,
@@ -17972,8 +17999,16 @@ async def audit_multicam_render_sync(output_path, segments, source_map, overlap_
         if float(item.get("correlation", 0.0) or 0.0) >= MULTICAM_POST_RENDER_SYNC_MIN_CORRELATION
     ]
     receipt["usable_sample_count"] = len(usable)
-    min_usable_count = max(1, int(math.ceil(float(receipt["sample_count"] or 0) * MULTICAM_POST_RENDER_SYNC_MIN_USABLE_RATIO)))
+    min_usable_count = multicam_post_render_sync_min_usable_count(
+        receipt["sample_count"],
+        timeline_duration,
+    )
     receipt["min_usable_sample_count"] = min_usable_count
+    receipt["min_usable_sample_policy"] = (
+        "short_proof_quorum"
+        if 0.0 < timeline_duration <= MULTICAM_POST_RENDER_SYNC_SHORT_PROOF_SECONDS
+        else "sample_ratio"
+    )
     if not usable:
         receipt["status"] = "questionable"
         receipt["message"] = "Post-render sync audit could not find strong camera/output audio correlation"

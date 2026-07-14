@@ -2419,6 +2419,11 @@ class MulticamDirectorRuleTests(unittest.TestCase):
         }
         self.assertFalse(worker.multicam_post_render_sync_has_dense_time_coverage(sparse_receipt))
 
+    def test_post_render_sync_short_proof_uses_bounded_sample_quorum(self):
+        self.assertEqual(worker.multicam_post_render_sync_min_usable_count(13, 60.0), 4)
+        self.assertEqual(worker.multicam_post_render_sync_min_usable_count(2, 60.0), 2)
+        self.assertEqual(worker.multicam_post_render_sync_min_usable_count(13, 600.0), 10)
+
     def test_continuous_sync_map_uses_mid_clip_drift_correction_anchors(self):
         source = {"offset_seconds": 0.0, "sync_rate": 1.0}
         sync_map = worker.activate_continuous_sync_map(
