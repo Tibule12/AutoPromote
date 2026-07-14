@@ -8210,7 +8210,31 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   };
 
   const renderCloudRenderWindowPanel = () => {
-    if (Number(timelineDuration || 0) <= MULTICAM_PRODUCTION_PROOF_SECONDS) return null;
+    if (Number(timelineDuration || 0) <= MULTICAM_PRODUCTION_PROOF_SECONDS) {
+      if (readySources.length >= 2) return null;
+      return (
+        <div className="nle-cloud-render-window is-recovery-entry">
+          <div className="nle-cloud-render-window-copy">
+            <strong>Already uploaded your podcast cameras?</strong>
+            <span>
+              Restore the latest Cam Combiner originals from Firebase and continue without
+              uploading those files again.
+            </span>
+          </div>
+          <div className="nle-cloud-render-window-actions">
+            <button
+              type="button"
+              className="nle-mini-btn is-active"
+              onClick={recoverLatestUploadedProject}
+              disabled={isExporting || serverExportPending}
+            >
+              Reuse my uploaded originals
+            </button>
+          </div>
+          {recoverableProjectStatus ? <span>{recoverableProjectStatus}</span> : null}
+        </div>
+      );
+    }
     const checkpointSummary = activeRenderCheckpoint?.expectedCount
       ? activeRenderCheckpoint
       : {
