@@ -81,6 +81,8 @@ export const isRecoverableMediaUrl = value => {
   }
 };
 
+export const getRecoveredPodcastOutputAspectRatio = _savedAspectRatio => "16:9";
+
 const canUseLocalMediaWorker = () => {
   if (process.env.REACT_APP_ENABLE_LOCAL_MEDIA_WORKER === "true") return true;
   if (process.env.NODE_ENV !== "development") return false;
@@ -788,6 +790,14 @@ const getSourceMediaKind = source =>
     : "video";
 const isImageSource = source => getSourceMediaKind(source) === "image";
 const isVideoSource = source => getSourceMediaKind(source) === "video";
+export const needsSourceMediaMetadata = source => {
+  if (!getSourceMediaUrl(source)) return false;
+  const dimensionsMissing =
+    Number(source?.videoWidth) <= 0 || Number(source?.videoHeight) <= 0;
+  return isImageSource(source)
+    ? dimensionsMissing
+    : Number(source?.duration) <= 0.05 || dimensionsMissing;
+};
 const normalizeImageSourceDuration = value =>
   Number(clampNumber(value, IMAGE_SOURCE_DURATION_MIN, IMAGE_SOURCE_DURATION_MAX, DEFAULT_IMAGE_SEGMENT_DURATION).toFixed(2));
 const formatMediaBytes = bytes => {
@@ -2087,7 +2097,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       setSources(restoredSources);
       setSwitches([{ id: "switch-1", cameraId: restoredSources[0].id, startTime: 0 }]);
       setMasterAudioCameraId(restoredSources[0].id);
-      setOutputAspectRatio(project.outputAspectRatio || "16:9");
+      setOutputAspectRatio(getRecoveredPodcastOutputAspectRatio(project.outputAspectRatio));
       setMulticamRenderTier(project.renderTier || "premium");
       const external = project.externalAudio;
       if (external?.url) {
@@ -2119,7 +2129,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         Math.min(MULTICAM_PRODUCTION_PROOF_DEFAULT_START_SECONDS, Math.max(0, duration - 60))
       );
       setRecoverableProjectStatus(
-        "Uploaded originals restored. No upload is needed; verify the shown left/right speakers, then run the 60-second proof."
+        "Uploaded originals restored in 16:9 YouTube format. No upload is needed; verify the shown left/right speakers, then run the 60-second proof."
       );
       setStatusMessage("Recovered the existing Firebase originals without uploading again.");
     } catch (error) {
@@ -3822,13 +3832,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   }, [playhead, timelineDuration, isPlaying]);
 
   useEffect(() => {
-    const unresolvedSources = sources.filter(
-      source =>
-        getSourceMediaUrl(source) &&
-        (isImageSource(source)
-          ? Number(source.videoWidth) <= 0 || Number(source.videoHeight) <= 0
-          : Number(source.duration) <= 0.05)
-    );
+    const unresolvedSources = sources.filter(needsSourceMediaMetadata);
     if (!unresolvedSources.length) return;
 
     let isCancelled = false;
