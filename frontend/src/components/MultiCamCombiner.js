@@ -7618,6 +7618,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       const renderTimelineStart = renderWindowStart;
 
       let externalAudioPayload = null;
+      let trustedSyncContract = null;
       const verifiedSyncBySourceId = new Map();
       const originalUploadsBySourceId = new Map();
 
@@ -7694,6 +7695,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
               id: source.id,
               label: source.label || "",
               url: source.url,
+              cache_key: source.cache_key || "",
               storage_path: source.storage_path || source.storagePath || "",
               storagePath: source.storagePath || source.storage_path || "",
               offset_seconds: getPreflightProxyOffsetSeconds(source),
@@ -7810,6 +7812,13 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
             const preflightSummary = summarizePreflightIssue(preflight);
             throw new Error(
               `Automatic start/middle/end sync returned ${preflightStatus || "unknown"} and could not prove ${missingVerified.length || preflightSourcesPayload.length} camera${(missingVerified.length || preflightSourcesPayload.length) === 1 ? "" : "s"}. ${preflightSummary ? `${preflightSummary}. ` : ""}Render cancelled before credits are spent.`
+            );
+          }
+          trustedSyncContract =
+            preflight.trusted_sync_contract || preflight.trustedSyncContract || null;
+          if (!trustedSyncContract) {
+            throw new Error(
+              "Sync passed, but the server did not return a reusable signed proof. Render cancelled before credits are spent."
             );
           }
         } catch (preflightErr) {
@@ -8115,6 +8124,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           primary_audio_camera_id: masterAudioCameraId,
           directorChannelCameraIds,
           director_channel_camera_ids: directorChannelCameraIds,
+          trustedSyncContract,
+          trusted_sync_contract: trustedSyncContract,
           trustedDirectorChannelMap,
           trusted_director_channel_map: trustedDirectorChannelMap,
           timelineStart: renderTimelineStart,

@@ -1,5 +1,6 @@
 describe("cloudRunJobService", () => {
   const originalName = process.env.MULTICAM_RENDER_JOB_NAME;
+  const originalFastName = process.env.MULTICAM_FAST_RENDER_JOB_NAME;
   const originalProject = process.env.GOOGLE_CLOUD_PROJECT;
   const originalRegion = process.env.MULTICAM_RENDER_JOB_REGION;
   const originalNodeEnv = process.env.NODE_ENV;
@@ -9,6 +10,8 @@ describe("cloudRunJobService", () => {
     jest.resetModules();
     if (originalName === undefined) delete process.env.MULTICAM_RENDER_JOB_NAME;
     else process.env.MULTICAM_RENDER_JOB_NAME = originalName;
+    if (originalFastName === undefined) delete process.env.MULTICAM_FAST_RENDER_JOB_NAME;
+    else process.env.MULTICAM_FAST_RENDER_JOB_NAME = originalFastName;
     if (originalProject === undefined) delete process.env.GOOGLE_CLOUD_PROJECT;
     else process.env.GOOGLE_CLOUD_PROJECT = originalProject;
     if (originalRegion === undefined) delete process.env.MULTICAM_RENDER_JOB_REGION;
@@ -52,5 +55,24 @@ describe("cloudRunJobService", () => {
     process.env.RENDER = "true";
     const { getMulticamRenderJobName } = require("../cloudRunJobService");
     expect(getMulticamRenderJobName()).toBe("cam-combiner-render-job");
+  });
+
+  it("routes no-caption renders to the lean production job", async () => {
+    delete process.env.MULTICAM_FAST_RENDER_JOB_NAME;
+    process.env.NODE_ENV = "production";
+    process.env.GOOGLE_CLOUD_PROJECT = "example-project";
+    const { getMulticamRenderJobName, resolveJobResourceName } = require("../cloudRunJobService");
+    const request = { burnCaptions: false, burn_captions: false };
+
+    expect(getMulticamRenderJobName(request)).toBe("cam-combiner-render-fast-job");
+    await expect(resolveJobResourceName(request)).resolves.toBe(
+      "projects/example-project/locations/us-central1/jobs/cam-combiner-render-fast-job"
+    );
+  });
+
+  it("keeps caption renders on the model-equipped job", () => {
+    process.env.NODE_ENV = "production";
+    const { getMulticamRenderJobName } = require("../cloudRunJobService");
+    expect(getMulticamRenderJobName({ burn_captions: true })).toBe("cam-combiner-render-job");
   });
 });

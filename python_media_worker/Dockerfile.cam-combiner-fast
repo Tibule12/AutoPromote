@@ -1,0 +1,24 @@
+FROM python:3.10-slim
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PORT=8080 \
+    ALLOW_RUNTIME_DEPENDENCY_INSTALL=false \
+    MULTICAM_FAST_NO_CAPTIONS=1
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ffmpeg \
+    libsm6 \
+    libxext6 \
+    fonts-dejavu-core \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY requirements.cam-combiner-fast.txt .
+RUN pip install --no-cache-dir -r requirements.cam-combiner-fast.txt
+
+COPY . .
+RUN mkdir -p /app/tmp
+
+EXPOSE 8080
+CMD ["sh", "-c", "uvicorn main_media_server:app --host 0.0.0.0 --port ${PORT:-8080}"]

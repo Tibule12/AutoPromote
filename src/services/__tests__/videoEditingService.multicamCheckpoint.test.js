@@ -85,10 +85,16 @@ describe("VideoEditingService multicam checkpoint contract", () => {
         reactionOverlays: false,
       })
     );
-    expect(mockExecuteMulticamRenderJob).toHaveBeenCalledWith({
-      jobId: "episode-2-job",
-      dispatchToken: expect.any(String),
-    });
+    expect(mockExecuteMulticamRenderJob).toHaveBeenCalledWith(
+      expect.objectContaining({
+        jobId: "episode-2-job",
+        dispatchToken: expect.any(String),
+        multicamRequest: expect.objectContaining({
+          burn_captions: false,
+          checkpointed_render: true,
+        }),
+      })
+    );
     expect(result).toEqual(
       expect.objectContaining({
         jobId: "episode-2-job",

@@ -1,0 +1,19 @@
+steps:
+  - name: gcr.io/cloud-builders/docker
+    entrypoint: bash
+    args:
+      - -c
+      - docker pull "${_IMAGE}" || true
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - --cache-from
+      - ${_IMAGE}
+      - --file
+      - Dockerfile.cam-combiner-fast
+      - --tag
+      - ${_IMAGE}
+      - .
+images:
+  - ${_IMAGE}
+timeout: 3600s

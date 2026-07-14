@@ -70,6 +70,37 @@ def _read_cloud_run_resource_allocation():
     return round(allocated_vcpu, 3), memory_limit_bytes
 
 
+def _read_cloud_run_actual_usage():
+    """Read metered cgroup CPU use and peak resident memory for right-sizing."""
+    cpu_usage_seconds = None
+    memory_current_bytes = None
+    memory_peak_bytes = None
+    try:
+        with open("/sys/fs/cgroup/cpu.stat", "r", encoding="utf-8") as cpu_file:
+            cpu_stats = dict(
+                line.split(None, 1)
+                for line in cpu_file.read().splitlines()
+                if len(line.split(None, 1)) == 2
+            )
+        cpu_usage_seconds = float(cpu_stats.get("usage_usec", 0.0)) / 1_000_000.0
+    except Exception:
+        pass
+    for path, target in (
+        ("/sys/fs/cgroup/memory.current", "current"),
+        ("/sys/fs/cgroup/memory.peak", "peak"),
+    ):
+        try:
+            with open(path, "r", encoding="utf-8") as memory_file:
+                value = int(memory_file.read().strip())
+            if target == "current":
+                memory_current_bytes = value
+            else:
+                memory_peak_bytes = value
+        except Exception:
+            pass
+    return cpu_usage_seconds, memory_current_bytes, memory_peak_bytes
+
+
 def _datetime_value(value):
     if isinstance(value, datetime.datetime):
         return value if value.tzinfo else value.replace(tzinfo=datetime.timezone.utc)
@@ -291,6 +322,11 @@ def run():
         raw_request = job.get("multicamRequest")
         if not isinstance(raw_request, dict):
             raise RuntimeError("Job has no canonical multicamRequest")
+        lean_no_captions = str(os.getenv("MULTICAM_FAST_NO_CAPTIONS", "0") or "0").strip().lower() in {
+            "1", "true", "yes", "on"
+        }
+        if lean_no_captions and bool(raw_request.get("burnCaptions") or raw_request.get("burn_captions")):
+            raise RuntimeError("Caption render was dispatched to the lean no-caption worker")
         if not job.get("creditReceipt"):
             raise RuntimeError("Render credit reservation is missing")
 
@@ -471,6 +507,7 @@ def run():
             None,
         )
         allocated_vcpu, memory_limit_bytes = _read_cloud_run_resource_allocation()
+        actual_cpu_seconds, memory_current_bytes, memory_peak_bytes = _read_cloud_run_actual_usage()
         memory_limit_gib = (
             float(memory_limit_bytes) / float(1024 ** 3)
             if memory_limit_bytes is not None
@@ -478,8 +515,9 @@ def run():
         )
         created_at = _datetime_value((job or {}).get("createdAt"))
         execution_telemetry = {
-            "version": 1,
+            "version": 2,
             "execution": execution_id,
+            "workerFlavor": "lean_no_captions" if lean_no_captions else "caption_capable",
             "taskAttempt": os.getenv("CLOUD_RUN_TASK_ATTEMPT") or "0",
             "runnerStartedAt": runner_started_at.isoformat(),
             "runnerCompletedAt": runner_completed_at.isoformat(),
@@ -504,6 +542,10 @@ def run():
             "allocatedVcpu": allocated_vcpu,
             "memoryLimitBytes": memory_limit_bytes,
             "memoryLimitGiB": round(memory_limit_gib, 3) if memory_limit_gib is not None else None,
+            "actualCpuSeconds": round(actual_cpu_seconds, 3) if actual_cpu_seconds is not None else None,
+            "memoryCurrentBytes": memory_current_bytes,
+            "memoryPeakBytes": memory_peak_bytes,
+            "memoryPeakGiB": round(memory_peak_bytes / float(1024 ** 3), 3) if memory_peak_bytes is not None else None,
             "workerVcpuSeconds": round(worker_elapsed_seconds * allocated_vcpu, 3),
             "runnerVcpuSeconds": round(runner_elapsed_seconds * allocated_vcpu, 3),
             "workerGiBSeconds": (

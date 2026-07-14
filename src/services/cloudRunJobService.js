@@ -6,6 +6,7 @@ const auth = new GoogleAuth({
 
 let authClientPromise = null;
 const DEFAULT_PRODUCTION_JOB_NAME = "cam-combiner-render-job";
+const DEFAULT_PRODUCTION_FAST_JOB_NAME = "cam-combiner-render-fast-job";
 
 function isProductionRuntime() {
   return (
@@ -15,7 +16,17 @@ function isProductionRuntime() {
   );
 }
 
-function getMulticamRenderJobName() {
+function multicamRequestNeedsCaptions(multicamRequest = null) {
+  if (!multicamRequest || typeof multicamRequest !== "object") return null;
+  return multicamRequest.burnCaptions === true || multicamRequest.burn_captions === true;
+}
+
+function getMulticamRenderJobName(multicamRequest = null) {
+  const needsCaptions = multicamRequestNeedsCaptions(multicamRequest);
+  if (needsCaptions === false) {
+    const configuredFast = String(process.env.MULTICAM_FAST_RENDER_JOB_NAME || "").trim();
+    return configuredFast || (isProductionRuntime() ? DEFAULT_PRODUCTION_FAST_JOB_NAME : "");
+  }
   const configured = String(process.env.MULTICAM_RENDER_JOB_NAME || "").trim();
   return configured || (isProductionRuntime() ? DEFAULT_PRODUCTION_JOB_NAME : "");
 }
@@ -32,8 +43,8 @@ async function resolveProjectId() {
   return configured || auth.getProjectId();
 }
 
-async function resolveJobResourceName() {
-  const configuredName = getMulticamRenderJobName();
+async function resolveJobResourceName(multicamRequest = null) {
+  const configuredName = getMulticamRenderJobName(multicamRequest);
   if (!configuredName) {
     throw new Error("MULTICAM_RENDER_JOB_NAME is not configured");
   }
@@ -60,12 +71,12 @@ function buildRunJobOverrides(jobId, dispatchToken) {
   };
 }
 
-async function executeMulticamRenderJob({ jobId, dispatchToken }) {
+async function executeMulticamRenderJob({ jobId, dispatchToken, multicamRequest = null }) {
   if (!jobId || !dispatchToken) {
     throw new Error("A job ID and dispatch token are required for durable rendering");
   }
 
-  const resourceName = await resolveJobResourceName();
+  const resourceName = await resolveJobResourceName(multicamRequest);
   if (!authClientPromise) authClientPromise = auth.getClient();
   const client = await authClientPromise;
   const response = await client.request({
@@ -88,5 +99,6 @@ module.exports = {
   executeMulticamRenderJob,
   getMulticamRenderJobName,
   isDurableMulticamRenderEnabled,
+  multicamRequestNeedsCaptions,
   resolveJobResourceName,
 };

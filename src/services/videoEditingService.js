@@ -279,7 +279,11 @@ class VideoEditingService {
       });
 
       if (durableRender) {
-        const dispatch = await executeMulticamRenderJob({ jobId, dispatchToken });
+        const dispatch = await executeMulticamRenderJob({
+          jobId,
+          dispatchToken,
+          multicamRequest: persistedRequest,
+        });
         await db.collection("video_edits").doc(jobId).set(
           {
             status: "queued",
@@ -1368,6 +1372,7 @@ class VideoEditingService {
         id: s.id || `camera_${index + 1}`,
         label: s.label || "",
         url: s.url,
+        cache_key: s.cache_key || null,
         offset_seconds: Number(s.offset_seconds || 0),
         sync_rate: Number(s.sync_rate ?? s.syncRate ?? 1),
         syncRate: Number(s.syncRate ?? s.sync_rate ?? 1),

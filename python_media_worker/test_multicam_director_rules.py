@@ -1,3 +1,4 @@
+import json
 import os
 import tempfile
 import types
@@ -3052,6 +3053,63 @@ class MulticamDirectorRuleTests(unittest.TestCase):
         self.assertFalse(receipt["trusted"])
         self.assertEqual(receipt["reason"], "sync_contract_missing_request_sources")
         self.assertEqual(receipt["missing_source_ids"], ["cam2"])
+
+    def test_server_preflight_contract_is_signed_identity_bound_and_reusable(self):
+        request = worker.RenderMultiCamRequest(
+            sources=[
+                worker.MultiCamSource(
+                    id="cam1",
+                    url="https://storage/cam1.mp4",
+                    cache_key="cam1-generation-7",
+                    offset_seconds=3.41,
+                    sync_rate=1.0003,
+                ),
+                worker.MultiCamSource(
+                    id="cam2",
+                    url="https://storage/cam2.mp4",
+                    cache_key="cam2-generation-9",
+                    offset_seconds=5.72,
+                    sync_rate=1.00032,
+                ),
+            ],
+            external_audio_url="https://storage/clean.wav",
+            external_audio_cache_key="clean-generation-4",
+            timeline_start=750.0,
+            overlap_duration=60.0,
+        )
+        preflight = {
+            "status": "good",
+            "cameras": {
+                "cam_0": {
+                    "confidence": "good",
+                    "current_offset": 3.41,
+                    "current_sync_rate": 1.0003,
+                },
+                "cam_1": {
+                    "confidence": "good",
+                    "current_offset": 5.72,
+                    "current_sync_rate": 1.00032,
+                },
+            },
+        }
+
+        with mock.patch.dict(os.environ, {"MULTICAM_QA_RECEIPT_SECRET": "unit-secret"}):
+            contract = worker.build_signed_multicam_preflight_sync_contract(request, preflight)
+            render_request = request.copy(update={"trusted_sync_contract": contract})
+            receipt = worker.validate_multicam_trusted_sync_contract(render_request, 750.0, 60.0)
+
+            self.assertTrue(receipt["trusted"])
+            self.assertEqual(receipt["contract_id"], contract["id"])
+            tampered = json.loads(json.dumps(contract))
+            tampered["sources"]["cam1"]["offset_seconds"] += 0.5
+            tampered_request = request.copy(update={"trusted_sync_contract": tampered})
+            rejected = worker.validate_multicam_trusted_sync_contract(
+                tampered_request,
+                750.0,
+                60.0,
+            )
+            self.assertFalse(rejected["trusted"])
+            self.assertEqual(rejected["reason"], "server_sync_contract_signature_invalid")
 
     def test_preflight_cache_payload_includes_render_timeline_window(self):
         sources = [
