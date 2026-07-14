@@ -896,12 +896,21 @@ router.get("/multicam/recoverable-project", async (req, res) => {
     } catch (_parseError) {
       failureDetail = {};
     }
-    const suggestedChannelCameraIds =
-      failureDetail?.director_audio?.auto_mapping?.mapped_camera_ids ||
-      failureDetail?.director_audio?.auto_mapping?.mappedCameraIds ||
-      request.directorChannelCameraIds ||
-      request.director_channel_camera_ids ||
-      [];
+    const trustedChannelMap =
+      request.trustedDirectorChannelMap || request.trusted_director_channel_map || null;
+    const trustedChannelCameraIds =
+      trustedChannelMap?.channel_camera_ids || trustedChannelMap?.channelCameraIds || [];
+    const channelMapApproved =
+      trustedChannelMap?.status === "approved" &&
+      Array.isArray(trustedChannelCameraIds) &&
+      trustedChannelCameraIds.length >= 2;
+    const suggestedChannelCameraIds = channelMapApproved
+      ? trustedChannelCameraIds
+      : failureDetail?.director_audio?.auto_mapping?.mapped_camera_ids ||
+        failureDetail?.director_audio?.auto_mapping?.mappedCameraIds ||
+        request.directorChannelCameraIds ||
+        request.director_channel_camera_ids ||
+        [];
     const sources = request.sources.map((source, index) => ({
       id: source.id,
       label: source.label,
@@ -935,6 +944,7 @@ router.get("/multicam/recoverable-project", async (req, res) => {
         suggestedChannelCameraIds: Array.isArray(suggestedChannelCameraIds)
           ? suggestedChannelCameraIds.slice(0, 2)
           : [],
+        channelMapApproved,
       },
     });
   } catch (error) {

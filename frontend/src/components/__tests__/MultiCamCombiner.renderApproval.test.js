@@ -49,11 +49,24 @@ describe("MultiCamCombiner render approval helpers", () => {
 
   it("labels the paid proof action as a 60-second proof instead of a polished master", () => {
     expect(
-      getMulticamRenderButtonLabel({ mode: "proof", isSyncing: false, isPending: false })
+      getMulticamRenderButtonLabel({
+        mode: "proof",
+        isSyncing: false,
+        isPending: false,
+        needsChannelConfirmation: false,
+      })
     ).toBe("Render 60-second Proof (15 cr)");
     expect(
       getMulticamRenderButtonLabel({ mode: "full", isSyncing: false, isPending: false })
     ).toBe("Render Full Episode MP4");
+    expect(
+      getMulticamRenderButtonLabel({
+        mode: "proof",
+        isSyncing: false,
+        isPending: false,
+        needsChannelConfirmation: true,
+      })
+    ).toBe("Confirm Speaker Mapping Above");
   });
 
   it("reloads dimensions for recovered videos even when their duration is already known", () => {

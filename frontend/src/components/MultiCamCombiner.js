@@ -83,13 +83,19 @@ export const isRecoverableMediaUrl = value => {
 
 export const getRecoveredPodcastOutputAspectRatio = _savedAspectRatio => "16:9";
 
-export const getMulticamRenderButtonLabel = ({ mode, isSyncing, isPending }) => {
+export const getMulticamRenderButtonLabel = ({
+  mode,
+  isSyncing,
+  isPending,
+  needsChannelConfirmation = false,
+}) => {
   if (isSyncing) return "Sync Check Running...";
   if (isPending) {
     return mode === "proof"
       ? "Submitting 60-second Proof..."
       : "Submitting Full-Episode Render...";
   }
+  if (needsChannelConfirmation) return "Confirm Speaker Mapping Above";
   return mode === "proof"
     ? `Render 60-second Proof (${MULTICAM_PRODUCTION_PROOF_CREDITS} cr)`
     : "Render Full Episode MP4";
@@ -2011,6 +2017,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const [externalAudioMixMode, setExternalAudioMixMode] = useState("external_only");
   const [externalAudioSpeakerChannelsSwapped, setExternalAudioSpeakerChannelsSwapped] = useState(false);
   const [confirmedDirectorChannelMapKey, setConfirmedDirectorChannelMapKey] = useState("");
+  const [applyRecoveredChannelMapApproval, setApplyRecoveredChannelMapApproval] = useState(false);
   const [cleanAudioSyncJob, setCleanAudioSyncJob] = useState(null);
   const [multicamRenderTier, setMulticamRenderTier] = useState("premium");
   const [multicamBurnCaptions, setMulticamBurnCaptions] = useState(false);
@@ -2136,6 +2143,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           suggestedIds[1] === restoredSources[0].id
       );
       setConfirmedDirectorChannelMapKey("");
+      setApplyRecoveredChannelMapApproval(project.channelMapApproved === true);
       setCloudRenderMode("proof");
       setProofRenderStartSeconds(
         Math.min(MULTICAM_PRODUCTION_PROOF_DEFAULT_START_SECONDS, Math.max(0, duration - 60))
@@ -2420,6 +2428,11 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   const directorChannelMapConfirmed = Boolean(
     directorChannelMapKey && confirmedDirectorChannelMapKey === directorChannelMapKey
   );
+  useEffect(() => {
+    if (!applyRecoveredChannelMapApproval || !directorChannelMapKey) return;
+    setConfirmedDirectorChannelMapKey(directorChannelMapKey);
+    setApplyRecoveredChannelMapApproval(false);
+  }, [applyRecoveredChannelMapApproval, directorChannelMapKey]);
   const getExportSourceLabel = useCallback((source, index) => {
     const label = String(source?.label || source?.name || "").trim();
     if (!label || /^(camera|source)\s+\d+$/i.test(label)) {
@@ -8872,6 +8885,46 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                       </span>
                     </label>
                   </div>
+                  {hasExternalCleanAudio && readySources.length >= 2 ? (
+                    <div
+                      className={`nle-render-channel-map ${
+                        directorChannelMapConfirmed ? "is-confirmed" : "needs-confirmation"
+                      }`}
+                    >
+                      <strong>
+                        {directorChannelMapConfirmed
+                          ? "Speaker mapping confirmed"
+                          : "Confirm speaker mapping to unlock render"}
+                      </strong>
+                      <span>
+                        Left: {getExportSourceLabel(
+                          externalAudioSpeakerChannelsSwapped
+                            ? readySources[1]
+                            : readySources[0],
+                          externalAudioSpeakerChannelsSwapped ? 1 : 0
+                        )}
+                        {" · "}
+                        Right: {getExportSourceLabel(
+                          externalAudioSpeakerChannelsSwapped
+                            ? readySources[0]
+                            : readySources[1],
+                          externalAudioSpeakerChannelsSwapped ? 0 : 1
+                        )}
+                      </span>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={directorChannelMapConfirmed}
+                          onChange={event =>
+                            setConfirmedDirectorChannelMapKey(
+                              event.target.checked ? directorChannelMapKey : ""
+                            )
+                          }
+                        />
+                        <span>I confirm these speakers</span>
+                      </label>
+                    </div>
+                  ) : null}
                   <button
                     className="nle-btn nle-render-primary-btn"
                     type="button"
@@ -8881,7 +8934,10 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                       cleanAudioSyncIsRunning ||
                       syncingCameraId === "external-clean-audio" ||
                       !canExportProject ||
-                      isSingleSourceWorkflow
+                      isSingleSourceWorkflow ||
+                      (hasExternalCleanAudio &&
+                        readySources.length >= 2 &&
+                        !directorChannelMapConfirmed)
                     }
                   >
                     {getMulticamRenderButtonLabel({
@@ -8890,6 +8946,10 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                         cleanAudioSyncIsRunning ||
                         syncingCameraId === "external-clean-audio",
                       isPending: serverExportPending,
+                      needsChannelConfirmation:
+                        hasExternalCleanAudio &&
+                        readySources.length >= 2 &&
+                        !directorChannelMapConfirmed,
                     })}
                   </button>
                   <div className="nle-render-proof-list">
