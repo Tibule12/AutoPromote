@@ -34,6 +34,7 @@ const {
 const {
   abortMulticamUpload,
   completeMulticamUpload,
+  recoverMulticamUpload,
   startMulticamUpload,
   verifyMulticamRenderInputs,
 } = require("./services/multicamUploadService");
@@ -96,6 +97,47 @@ const normalizeMulticamRenderPurpose = value =>
   String(value || "full_master").trim().toLowerCase() === "production_proof"
     ? "production_proof"
     : "full_master";
+
+const getPersistedMulticamExternalAudio = request => {
+  if (request?.externalAudio?.url || request?.externalAudio?.storagePath || request?.externalAudio?.storage_path) {
+    return request.externalAudio;
+  }
+  if (request?.external_audio_url || request?.external_audio_storage_path) {
+    return {
+      url: request.external_audio_url || "",
+      storagePath: request.external_audio_storage_path || "",
+      cache_key: request.external_audio_cache_key || null,
+      offset_seconds: request.external_audio_offset_seconds || 0,
+      mix_mode: request.external_audio_mix_mode || "external_only",
+    };
+  }
+  return null;
+};
+
+const getPersistedMulticamStorageSignature = request => {
+  const sourcePaths = (request?.sources || []).map(
+    source => source.storagePath || source.storage_path || ""
+  );
+  const external = getPersistedMulticamExternalAudio(request);
+  return JSON.stringify([
+    ...sourcePaths,
+    external?.storagePath || external?.storage_path || "",
+  ]);
+};
+
+const getPersistedMulticamDuration = request =>
+  Math.max(
+    0,
+    Number(
+      request?.fullTimelineDuration ??
+        request?.full_timeline_duration ??
+        request?.totalDurationSeconds ??
+        request?.total_duration_seconds ??
+        request?.overlapDuration ??
+        request?.overlap_duration ??
+        0
+    ) || 0
+  );
 
 const estimateCleanAudioSyncCredits = () => CREDIT_COSTS["clean-audio-sync"] || 18;
 
@@ -787,11 +829,67 @@ router.get("/multicam/recoverable-project", async (req, res) => {
         };
         return toMillis(right.updatedAt || right.createdAt) - toMillis(left.updatedAt || left.createdAt);
       });
-    const latest = candidates[0];
-    if (!latest) {
-      return res.status(404).json({ success: false, message: "No uploaded Cam Combiner project was found" });
+    let recoveredProject = null;
+    for (const candidate of candidates) {
+      const candidateRequest = candidate.multicamRequest || {};
+      const candidateSources = Array.isArray(candidateRequest.sources)
+        ? candidateRequest.sources
+        : [];
+      const external = getPersistedMulticamExternalAudio(candidateRequest);
+      const hasStoredCameraObjects =
+        candidateSources.length >= 2 &&
+        candidateSources.every(source => source.storagePath || source.storage_path);
+      const hasStoredExternalObject =
+        !external || Boolean(external.storagePath || external.storage_path);
+      if (!hasStoredCameraObjects || !hasStoredExternalObject) continue;
+
+      try {
+        const recoveredSources = await Promise.all(
+          candidateSources.map(source =>
+            recoverMulticamUpload({
+              userId,
+              source,
+              purpose: "camera_original",
+            })
+          )
+        );
+        const recoveredExternal = external
+          ? await recoverMulticamUpload({
+              userId,
+              source: external,
+              purpose: "external_audio",
+            })
+          : null;
+        recoveredProject = {
+          candidate,
+          request: candidateRequest,
+          recoveredSources,
+          recoveredExternal,
+        };
+        break;
+      } catch (recoveryError) {
+        console.warn(
+          `[MediaRoute] Skipping non-recoverable multicam job ${candidate.id}: ${recoveryError.message}`
+        );
+      }
     }
-    const request = latest.multicamRequest || {};
+
+    if (!recoveredProject) {
+      return res.status(404).json({
+        success: false,
+        message: "No reusable Firebase Cam Combiner originals were found",
+      });
+    }
+
+    const { candidate: latest, request, recoveredSources, recoveredExternal } = recoveredProject;
+    const storageSignature = getPersistedMulticamStorageSignature(request);
+    const duration = candidates.reduce((maximum, candidate) => {
+      const candidateRequest = candidate.multicamRequest || {};
+      if (getPersistedMulticamStorageSignature(candidateRequest) !== storageSignature) {
+        return maximum;
+      }
+      return Math.max(maximum, getPersistedMulticamDuration(candidateRequest));
+    }, getPersistedMulticamDuration(request));
     let failureDetail = {};
     try {
       failureDetail = typeof latest.error === "string" ? JSON.parse(latest.error) : latest.error || {};
@@ -804,32 +902,32 @@ router.get("/multicam/recoverable-project", async (req, res) => {
       request.directorChannelCameraIds ||
       request.director_channel_camera_ids ||
       [];
-    const sources = request.sources.map(source => ({
+    const sources = request.sources.map((source, index) => ({
       id: source.id,
       label: source.label,
-      url: source.url,
-      storagePath: source.storagePath || source.storage_path || "",
-      cacheKey: source.cache_key || source.cacheKey || "",
+      url: recoveredSources[index].url,
+      storagePath: recoveredSources[index].storagePath,
+      cacheKey: recoveredSources[index].cacheKey || source.cache_key || source.cacheKey || "",
       offsetSeconds: Number(source.offset_seconds || 0),
       syncRate: Number(source.syncRate ?? source.sync_rate ?? 1) || 1,
       rotationDegrees: Number(source.rotationDegrees ?? source.rotation_degrees ?? 0) || 0,
       reactionSide: source.reactionSide || source.reaction_side || null,
     }));
-    const external = request.externalAudio || null;
+    const external = getPersistedMulticamExternalAudio(request);
     return res.json({
       success: true,
       project: {
         previousJobId: latest.id,
         status: latest.status,
-        duration: Number(request.totalDurationSeconds || request.total_duration_seconds || request.overlapDuration || 0),
+        duration,
         outputAspectRatio: request.outputAspectRatio || request.output_aspect_ratio || "16:9",
         renderTier: request.renderTier || request.render_tier || "premium",
         sources,
         externalAudio: external
           ? {
-              url: external.url,
-              storagePath: external.storagePath || external.storage_path || "",
-              cacheKey: external.cache_key || external.cacheKey || "",
+              url: recoveredExternal.url,
+              storagePath: recoveredExternal.storagePath,
+              cacheKey: recoveredExternal.cacheKey || external.cache_key || external.cacheKey || "",
               offsetSeconds: Number(external.offset_seconds || 0),
               mixMode: external.mix_mode || "external_only",
             }

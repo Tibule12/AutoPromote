@@ -2,6 +2,7 @@ import {
   canDownloadApprovedRender,
   getRenderApprovalCopy,
   getRenderApprovalState,
+  isRecoverableMediaUrl,
 } from "../MultiCamCombiner";
 
 jest.mock("firebase/auth", () => ({
@@ -27,6 +28,17 @@ jest.mock("../../hooks/useSubscription", () => ({
 jest.mock("../../hooks/useCinematicEffects", () => jest.fn(() => ({})));
 
 describe("MultiCamCombiner render approval helpers", () => {
+  it("accepts cloud media URLs and rejects filesystem paths", () => {
+    expect(
+      isRecoverableMediaUrl(
+        "https://firebasestorage.googleapis.com/v0/b/example/o/camera.mov?alt=media"
+      )
+    ).toBe(true);
+    expect(isRecoverableMediaUrl("/home/user/project/tmp/camera.mov")).toBe(false);
+    expect(isRecoverableMediaUrl("file:///home/user/project/tmp/camera.mov")).toBe(false);
+    expect(isRecoverableMediaUrl("")).toBe(false);
+  });
+
   it("blocks downloads for needs_review renders", () => {
     const render = {
       approvalStatus: "needs_review",
