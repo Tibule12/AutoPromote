@@ -117,6 +117,12 @@ describe("mediaRoutes recoverable multicam project", () => {
           totalDurationSeconds: 60,
           outputAspectRatio: "16:9",
           sources: cloudSources,
+          directorChannelCameraIds: ["cam-2", "cam-1"],
+          trustedDirectorChannelMap: {
+            status: "approved",
+            proof_kind: "owner_verified_test_contract",
+            channel_camera_ids: ["cam-2", "cam-1"],
+          },
         },
       }),
       asFirestoreDoc("older-full-job", {
@@ -137,6 +143,8 @@ describe("mediaRoutes recoverable multicam project", () => {
     expect(response.body.project.previousJobId).toBe("reusable-proof-job");
     expect(response.body.project.duration).toBe(2640);
     expect(response.body.project.sources).toHaveLength(2);
+    expect(response.body.project.channelMapApproved).toBe(true);
+    expect(response.body.project.suggestedChannelCameraIds).toEqual(["cam-2", "cam-1"]);
     expect(response.body.project.sources.every(source => source.url.startsWith("https://"))).toBe(
       true
     );

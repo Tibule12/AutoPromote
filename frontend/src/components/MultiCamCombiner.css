@@ -1407,6 +1407,46 @@
   background: rgba(2, 6, 23, 0.42);
 }
 
+.nle-render-channel-map {
+  display: grid;
+  gap: 7px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(245, 158, 11, 0.48);
+  background: rgba(245, 158, 11, 0.09);
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.nle-render-channel-map.is-confirmed {
+  border-color: rgba(52, 211, 153, 0.48);
+  background: rgba(52, 211, 153, 0.09);
+}
+
+.nle-render-channel-map > strong {
+  color: #fff;
+  font-size: 0.78rem;
+}
+
+.nle-render-channel-map > span {
+  font-size: 0.7rem;
+}
+
+.nle-render-channel-map label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.nle-render-channel-map input {
+  width: 17px;
+  height: 17px;
+  accent-color: #34d399;
+}
+
 .nle-render-finish-toggle {
   display: grid;
   grid-template-columns: 18px 1fr;
