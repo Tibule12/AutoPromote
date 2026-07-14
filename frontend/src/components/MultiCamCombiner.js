@@ -194,6 +194,42 @@ export const getRenderManifestLocation = render =>
   render?.result?.manifest_storage_path ||
   "";
 
+export const getRenderPerformanceReceipt = render => {
+  const performance =
+    render?.performanceTiming ||
+    render?.performance_timing ||
+    render?.result?.performanceTiming ||
+    render?.result?.performance_timing ||
+    {};
+  const execution = render?.executionTelemetry || render?.execution_telemetry || {};
+  const publishStage = Array.isArray(performance.stages)
+    ? performance.stages.find(stage => stage?.stage === "publish_outputs") || {}
+    : {};
+  return {
+    workerSeconds: Math.max(
+      0,
+      Number(execution.workerElapsedSeconds ?? performance.elapsed_seconds ?? 0) || 0
+    ),
+    endToEndSeconds: Math.max(0, Number(execution.endToEndSeconds || 0) || 0),
+    runnerSeconds: Math.max(0, Number(execution.runnerElapsedSeconds || 0) || 0),
+    outputSizeBytes: Math.max(
+      0,
+      Number(execution.outputSizeBytes ?? publishStage.output_size_bytes ?? 0) || 0
+    ),
+    allocatedVcpu: Math.max(0, Number(execution.allocatedVcpu || 0) || 0),
+    memoryLimitGiB: Math.max(0, Number(execution.memoryLimitGiB || 0) || 0),
+    workerVcpuSeconds: Math.max(0, Number(execution.workerVcpuSeconds || 0) || 0),
+    workerGiBSeconds: Math.max(0, Number(execution.workerGiBSeconds || 0) || 0),
+  };
+};
+
+const formatRenderBytes = bytes => {
+  const size = Math.max(0, Number(bytes) || 0);
+  if (!size) return "";
+  if (size >= 1024 ** 3) return `${(size / 1024 ** 3).toFixed(2)} GB`;
+  return `${(size / 1024 ** 2).toFixed(1)} MB`;
+};
+
 export const getRenderCheckpointSummary = render => {
   const checkpoint = render?.renderCheckpoint || render?.render_checkpoint || render?.result?.renderCheckpoint || {};
   const expectedCount = Math.max(
@@ -2286,8 +2322,15 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                 fallbackDuration,
               manifestUrl: manifestLocation,
               isServerRender: true,
+              performanceTiming: statusData.performanceTiming || statusData.result?.performance_timing,
+              executionTelemetry: statusData.executionTelemetry,
             });
-            setStatusMessage("Multi-camera render and manifest complete. Download ready.");
+            const completedPerformance = getRenderPerformanceReceipt(statusData);
+            setStatusMessage(
+              completedPerformance.workerSeconds
+                ? `Multi-camera render complete in ${formatDurationLabel(completedPerformance.workerSeconds)} worker time. Download ready.`
+                : "Multi-camera render and manifest complete. Download ready."
+            );
             loadRecentRenders();
             setServerExportPending(false);
             setIsExporting(false);
@@ -2684,7 +2727,26 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       directorStyleId,
       readySources.length ? readySources : sources
     );
-    return reactionOverlayEnabled ? styledLayout : suppressReactionOverlayLayout(styledLayout);
+    if (!reactionOverlayEnabled) return suppressReactionOverlayLayout(styledLayout);
+
+    // Turning the reaction control on must show its placement immediately.
+    // The server still chooses the strongest reaction moment, but a user should
+    // never have to render first just to discover whether the PiP is enabled.
+    const layoutSources = readySources.length ? readySources : sources;
+    const previewCompanionCameraId =
+      styledLayout.secondaryCameraId ||
+      layoutSources.find(source => source?.id && source.id !== activeCameraId)?.id ||
+      null;
+    if (previewCompanionCameraId && styledLayout.layoutMode !== "pip") {
+      return {
+        ...styledLayout,
+        layoutMode: "pip",
+        secondaryCameraId: previewCompanionCameraId,
+        visibleCameraIds: [activeCameraId, previewCompanionCameraId].filter(Boolean),
+        reason: "reaction_placement_preview",
+      };
+    }
+    return styledLayout;
   }, [
     isSingleSourceWorkflow,
     activeCameraId,
@@ -8145,6 +8207,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           duration: data.duration || renderWindowDuration,
           manifestUrl: immediateManifest,
           isServerRender: true,
+          performanceTiming: data.performanceTiming || data.result?.performance_timing,
+          executionTelemetry: data.executionTelemetry,
         });
         setStatusMessage("Multi-camera render and manifest complete. Download ready.");
       } else {
@@ -8394,6 +8458,18 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           const previewUrl = render.previewUrl || render.heldOutputUrl || downloadUrl;
           const approvalState = getRenderApprovalState(render);
           const canDownload = canDownloadApprovedRender(render);
+          const performanceReceipt = getRenderPerformanceReceipt(render);
+          const performanceParts = [
+            performanceReceipt.workerSeconds
+              ? `${formatDurationLabel(performanceReceipt.workerSeconds)} worker`
+              : null,
+            performanceReceipt.endToEndSeconds
+              ? `${formatDurationLabel(performanceReceipt.endToEndSeconds)} end-to-end`
+              : null,
+            performanceReceipt.outputSizeBytes
+              ? formatRenderBytes(performanceReceipt.outputSizeBytes)
+              : null,
+          ].filter(Boolean);
           return (
             <div className={`nle-saved-render-card is-${approvalState}`} key={render.jobId}>
               {render.thumbnailUrl ? (
@@ -8407,6 +8483,9 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                   {formatDurationLabel(Number(render.duration || 0))} ·{" "}
                   {formatRenderExpiry(render.expiresAt)}
                 </span>
+                {performanceParts.length ? (
+                  <span>Cost receipt · {performanceParts.join(" · ")}</span>
+                ) : null}
               </div>
               {approvalState === "needs_review" ? (
                 <div className="nle-saved-render-actions">
@@ -8722,14 +8801,14 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                           setReactionOverlayEnabled(value => !value);
                           setStatusMessage(
                             reactionOverlayEnabled
-                              ? "Reaction windows are off. The backend will render no reaction PiP."
-                              : "Reaction windows are allowed. The director may use one only for an earned reaction."
+                              ? "Smart reaction insert is off. The backend will render no reaction PiP."
+                              : "Smart reaction insert is on. Previewing placement now; the director will use the strongest reaction moment."
                           );
                         }}
                         disabled={readySources.length < 2}
                       >
-                        <strong>Reaction windows (optional)</strong>
-                        <span>{reactionOverlayEnabled ? "On — earned reactions only" : readySources.length >= 2 ? "Off — no reaction" : "Needs 2 cams"}</span>
+                        <strong>Smart reaction insert</strong>
+                        <span>{reactionOverlayEnabled ? "On — placement preview visible" : readySources.length >= 2 ? "Off — no reaction" : "Needs 2 cams"}</span>
                       </button>
                       <div className="nle-reaction-side-buttons">
                         <button
@@ -10673,14 +10752,14 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                             setReactionOverlayEnabled(value => !value);
                             setStatusMessage(
                               reactionOverlayEnabled
-                                ? "Reaction windows are off. The backend will render no reaction PiP."
-                                : "Reaction windows are allowed. The director may use one only for an earned reaction."
+                                ? "Smart reaction insert is off. The backend will render no reaction PiP."
+                                : "Smart reaction insert is on. Previewing placement now; the director will use the strongest reaction moment."
                             );
                           }}
                           disabled={readySources.length < 2}
                         >
-                          <strong>Reaction windows (optional)</strong>
-                          <span>{reactionOverlayEnabled ? "On — earned reactions only" : readySources.length >= 2 ? "Off — no reaction" : "Needs 2 cams"}</span>
+                          <strong>Smart reaction insert</strong>
+                          <span>{reactionOverlayEnabled ? "On — placement preview visible" : readySources.length >= 2 ? "Off — no reaction" : "Needs 2 cams"}</span>
                         </button>
                       </div>
                       <button

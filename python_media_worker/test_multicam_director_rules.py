@@ -543,6 +543,46 @@ class MulticamDirectorRuleTests(unittest.TestCase):
         self.assertIsNone(disabled[0].get("secondary_camera_id"))
         self.assertTrue(disabled[0]["layout_reason"].startswith("reaction_overlay_disabled:"))
 
+    def test_smart_reaction_insert_promotes_strongest_companion_moment(self):
+        segments = [
+            {
+                "camera_id": "cam1",
+                "secondary_camera_id": None,
+                "layout_mode": "cut",
+                "layout_reason": "clean_channel_authority",
+                "timeline_start": 0.0,
+                "timeline_end": 4.0,
+                "audio_second_activity": 0.41,
+                "ranked_sources": [
+                    {"camera_id": "cam1", "audio_activity": 1.0},
+                    {"camera_id": "cam2", "audio_activity": 0.41},
+                ],
+            },
+            {
+                "camera_id": "cam2",
+                "secondary_camera_id": None,
+                "layout_mode": "cut",
+                "layout_reason": "clean_channel_authority",
+                "timeline_start": 4.0,
+                "timeline_end": 8.0,
+                "audio_second_activity": 0.87,
+                "ranked_sources": [
+                    {"camera_id": "cam2", "audio_activity": 1.0},
+                    {"camera_id": "cam1", "audio_activity": 0.87},
+                ],
+            },
+        ]
+
+        enabled = worker.enforce_reaction_overlay_on_multicam_segments(
+            segments,
+            self.prepared_sources,
+            enabled=True,
+        )
+
+        self.assertEqual([segment["layout_mode"] for segment in enabled], ["cut", "pip"])
+        self.assertEqual(enabled[1]["secondary_camera_id"], "cam1")
+        self.assertTrue(enabled[1]["layout_reason"].startswith("smart_reaction_insert:"))
+
     def test_layout_contract_blocks_unknown_reaction_placement(self):
         audit = worker.audit_multicam_layout_contract(
             [
@@ -3217,11 +3257,11 @@ class MulticamDirectorRuleTests(unittest.TestCase):
         self.assertNotIn("desat=0.35", hlg_filter)
         self.assertEqual(worker.choose_multicam_color_reference_index(sources, 0), 1)
 
-    def test_default_cinematic_polish_is_neutral(self):
+    def test_default_cinematic_polish_adds_bounded_adaptive_clarity(self):
         with mock.patch.dict(os.environ, {"MULTICAM_CINEMATIC_POLISH_MODE": "fast"}):
             polish_filter = worker.build_multicam_cinematic_polish_filter()
 
-        self.assertEqual(polish_filter, "format=yuv420p")
+        self.assertEqual(polish_filter, "cas=strength=0.22,format=yuv420p")
         self.assertNotIn("eq=", polish_filter)
         self.assertNotIn("unsharp", polish_filter)
         self.assertNotIn("colorbalance", polish_filter)
@@ -3322,8 +3362,35 @@ class MulticamDirectorRuleTests(unittest.TestCase):
         self.assertEqual(receipt["matched_source_count"], 1)
         self.assertFalse(sources[0]["color_match_applied"])
         self.assertTrue(sources[1]["color_match_applied"])
-        self.assertIn("brightness=0.05000", sources[1]["color_match_filter"])
-        self.assertIn("saturation=1.08000", sources[1]["color_match_filter"])
+        self.assertIn("gamma=", sources[1]["color_match_filter"])
+        self.assertIn("saturation=1.04000", sources[1]["color_match_filter"])
+        self.assertNotIn("brightness=", sources[1]["color_match_filter"])
+
+    def test_color_match_uses_neutral_surfaces_and_face_midtones(self):
+        reference = {
+            "mean_luma": 134.347,
+            "contrast_luma": 61.03,
+            "mean_chroma": 68.738,
+            "face_luma_mean": 123.147,
+            "neutral_median_r": 217.0,
+            "neutral_median_g": 200.0,
+            "neutral_median_b": 182.0,
+        }
+        underlit = {
+            "mean_luma": 98.784,
+            "contrast_luma": 63.073,
+            "mean_chroma": 42.07,
+            "face_luma_mean": 108.849,
+            "neutral_median_r": 202.0,
+            "neutral_median_g": 188.0,
+            "neutral_median_b": 162.0,
+        }
+
+        color_filter = worker.build_multicam_color_match_filter(reference, underlit)
+
+        self.assertIn("bs=0.02259", color_filter)
+        self.assertIn("gamma=1.094", color_filter)
+        self.assertNotIn("brightness=", color_filter)
 
 
 if __name__ == "__main__":
