@@ -3097,7 +3097,7 @@ class MulticamDirectorRuleTests(unittest.TestCase):
         self.assertEqual(worker.get_multicam_output_dimensions("16:9"), (1920, 1080))
         self.assertEqual(worker.get_multicam_output_dimensions(None), (1920, 1080))
 
-    def test_landscape_single_cut_is_full_screen_not_a_rounded_card(self):
+    def test_simple_landscape_single_cut_is_full_screen(self):
         filter_chain = worker.multicam_single_cut_filter(
             "camera",
             1920,
@@ -3105,12 +3105,34 @@ class MulticamDirectorRuleTests(unittest.TestCase):
             "program",
             is_vertical_output=False,
             focus_x=0.5,
+            rounded_frame=False,
         )
 
         self.assertIn("scale=1920:1080:force_original_aspect_ratio=increase", filter_chain)
         self.assertNotIn("split=2", filter_chain)
         self.assertNotIn("boxblur", filter_chain)
         self.assertNotIn("movie=", filter_chain)
+
+    def test_premium_landscape_single_cut_is_alpha_rounded_over_blurred_canvas(self):
+        self.assertFalse(worker.get_multicam_render_tier_profile("simple")["rounded_active_speaker"])
+        self.assertTrue(worker.get_multicam_render_tier_profile("premium")["rounded_active_speaker"])
+        filter_chain = worker.multicam_single_cut_filter(
+            "camera",
+            1920,
+            1080,
+            "program",
+            is_vertical_output=False,
+            focus_x=0.5,
+            rounded_frame=True,
+        )
+
+        self.assertIn("split=2", filter_chain)
+        self.assertIn("boxblur", filter_chain)
+        self.assertIn("crop=1824:984", filter_chain)
+        self.assertIn("movie=", filter_chain)
+        self.assertIn("alphamerge", filter_chain)
+        self.assertIn("overlay=x=48:y=48", filter_chain)
+        self.assertNotIn("force_original_aspect_ratio=decrease", filter_chain)
 
     def test_vertical_single_cut_is_full_screen_and_focus_centered(self):
         filter_chain = worker.multicam_single_cut_filter(
@@ -3204,7 +3226,7 @@ class MulticamDirectorRuleTests(unittest.TestCase):
         self.assertNotIn("unsharp", polish_filter)
         self.assertNotIn("colorbalance", polish_filter)
 
-    def test_color_matching_defaults_to_normalization_only(self):
+    def test_color_matching_respects_explicit_disable(self):
         sources = [
             {
                 "id": "hdr",
@@ -3236,6 +3258,72 @@ class MulticamDirectorRuleTests(unittest.TestCase):
         self.assertTrue(all(not source["color_match_applied"] for source in sources))
         self.assertTrue(all(source["color_match_filter"] == "" for source in sources))
         self.assertIn("tonemap=hable:desat=0.0", sources[0]["source_visual_filter"])
+
+    def test_color_matching_defaults_on_and_chooses_best_exposed_normalized_camera(self):
+        sources = [
+            {
+                "id": "bright-hdr",
+                "label": "Bright HDR camera",
+                "path": "/tmp/bright-hdr.mov",
+                "duration": 60.0,
+                "offset_seconds": 0.0,
+                "sync_rate": 1.0,
+                "color_metadata": {"color_transfer": "arib-std-b67"},
+            },
+            {
+                "id": "dark-sdr",
+                "label": "Dark SDR camera",
+                "path": "/tmp/dark-sdr.mov",
+                "duration": 60.0,
+                "offset_seconds": 0.0,
+                "sync_rate": 1.0,
+                "color_metadata": {"color_transfer": "bt709"},
+            },
+        ]
+        profiles = [
+            {
+                "sample_frame_count": 12,
+                "mean_r": 168.4,
+                "mean_g": 123.9,
+                "mean_b": 118.3,
+                "mean_luma": 133.0,
+                "contrast_luma": 59.1,
+                "mean_chroma": 64.6,
+                "warmth": 0.1968,
+                "green_bias": -0.0763,
+            },
+            {
+                "sample_frame_count": 12,
+                "mean_r": 117.6,
+                "mean_g": 97.1,
+                "mean_b": 94.0,
+                "mean_luma": 101.3,
+                "contrast_luma": 60.4,
+                "mean_chroma": 41.1,
+                "warmth": 0.0928,
+                "green_bias": -0.0340,
+            },
+        ]
+
+        with mock.patch.dict(os.environ, {}, clear=True), mock.patch.object(
+            worker, "read_multicam_receipt_cache", return_value=None
+        ), mock.patch.object(
+            worker, "write_multicam_receipt_cache"
+        ), mock.patch.object(
+            worker, "analyze_multicam_color_profile", side_effect=profiles
+        ):
+            receipt = worker.asyncio.run(
+                worker.apply_multicam_color_matching(sources, 0.0, 60.0, "unit-match")
+            )
+
+        self.assertTrue(receipt["auto_color_match_enabled"])
+        self.assertEqual(receipt["status"], "active")
+        self.assertEqual(receipt["reference_source_id"], "bright-hdr")
+        self.assertEqual(receipt["matched_source_count"], 1)
+        self.assertFalse(sources[0]["color_match_applied"])
+        self.assertTrue(sources[1]["color_match_applied"])
+        self.assertIn("brightness=0.05000", sources[1]["color_match_filter"])
+        self.assertIn("saturation=1.08000", sources[1]["color_match_filter"])
 
 
 if __name__ == "__main__":
