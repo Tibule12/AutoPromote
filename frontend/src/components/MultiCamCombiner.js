@@ -7539,21 +7539,36 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         hasMatchingRenderProxy: canReuseOriginal,
       };
     }));
-    const estimatedVideoUploadBytes = plannedProxyItems.reduce(
-      (sum, item) => sum + item.estimatedBytes,
-      0
+    // If even one camera original is unavailable, use the same small local
+    // render-window proxy path for every proof camera. Mixing absolute-timeline
+    // originals with zero-based proxies would make sync semantics ambiguous.
+    const usePlannedProofProxies =
+      cloudRenderMode === "proof" &&
+      plannedProxyItems.some(item => !item.hasMatchingRenderProxy);
+    const estimatedProofProxyBytesPerCamera = Math.ceil(
+      (plannedRenderWindowDuration *
+        (UPLOAD_COMPRESSION_TARGET_BPS + UPLOAD_COMPRESSION_AUDIO_BPS)) /
+        8
     );
+    const estimatedVideoUploadBytes = usePlannedProofProxies
+      ? plannedProxyItems.length * estimatedProofProxyBytesPerCamera
+      : plannedProxyItems.reduce((sum, item) => sum + item.estimatedBytes, 0);
     const cachedExternalOriginal = hasExternalCleanAudio && externalAudioTrack?.file
       ? await readCachedRenderProxyUpload(buildOriginalIngestCacheKey(externalAudioTrack.file))
       : null;
-    const estimatedCleanAudioUploadBytes = hasExternalCleanAudio && !cachedExternalOriginal?.url
-      ? Number(externalAudioTrack?.file?.size || 0)
-      : 0;
+    const estimatedCleanAudioUploadBytes =
+      hasExternalCleanAudio && usePlannedProofProxies
+        ? Math.ceil((plannedRenderWindowDuration * UPLOAD_COMPRESSION_AUDIO_BPS) / 8)
+        : hasExternalCleanAudio && !cachedExternalOriginal?.url
+          ? Number(externalAudioTrack?.file?.size || 0)
+          : 0;
     const estimatedTotalUploadBytes = estimatedVideoUploadBytes + estimatedCleanAudioUploadBytes;
     const proxyLines = plannedProxyItems.map(
       item =>
         `${item.label}: ${
-          item.hasMatchingRenderProxy
+          usePlannedProofProxies
+            ? `~${formatMediaBytes(estimatedProofProxyBytesPerCamera)} selected-window proof proxy`
+            : item.hasMatchingRenderProxy
             ? "existing original upload reused"
             : `${formatMediaBytes(item.estimatedBytes)} original`
         }`
@@ -7569,7 +7584,9 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         cloudRenderMode === "proof"
           ? `Proof render credits: ${MULTICAM_PRODUCTION_PROOF_CREDITS}`
           : `Render credits: ${multicamRenderCreditEstimate} credits (${getMulticamRenderBillingUnits(plannedRenderWindowDuration)} started 20-minute billing units)`,
-        "One-time resumable source upload + automatic preflight: 0 credits",
+        usePlannedProofProxies
+          ? "Fast proof upload: selected 60-second camera windows only; originals upload after approval"
+          : "One-time resumable source upload + automatic preflight: 0 credits",
         hasExternalCleanAudio ? "Separate clean-audio sync charge: 0 credits in this export flow" : null,
         "",
         "Estimated upload before render:",
@@ -7615,16 +7632,55 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       const renderWindowStart = cloudRenderWindowStartSafe;
       const renderWindowEnd = cloudRenderWindowEnd;
       const renderWindowDuration = cloudRenderWindowDuration;
-      const renderTimelineStart = renderWindowStart;
+      const useProofProxyTimeline = usePlannedProofProxies;
+      const renderTimelineStart = useProofProxyTimeline ? 0 : renderWindowStart;
 
       let externalAudioPayload = null;
       let trustedSyncContract = null;
       const verifiedSyncBySourceId = new Map();
       const originalUploadsBySourceId = new Map();
 
-      setStatusMessage("Uploading original sources once. Uploads are resumable and retained for 72 hours...");
+      setStatusMessage(
+        useProofProxyTimeline
+          ? "Creating small selected-window proof proxies. Camera originals stay local until you approve the proof..."
+          : "Uploading original sources once. Uploads are resumable and retained for 72 hours..."
+      );
+      const proofProxyStorage = useProofProxyTimeline ? getStorage() : null;
       const sourceUploadResults = await Promise.all(
         readySources.map(async (source, index) => {
+          if (useProofProxyTimeline) {
+            const sourceTrimStart = Math.max(
+              0,
+              getSourceTimelineTime(source, renderWindowStart, timelineBounds.timelineStart)
+            );
+            const sourceTrimDuration = Math.max(
+              0.5,
+              renderWindowDuration * getSourceSyncRate(source)
+            );
+            const trimWindow = {
+              start: sourceTrimStart,
+              duration: sourceTrimDuration,
+            };
+            const uploaded = await uploadMediaForBackendSync({
+              user,
+              storage: proofProxyStorage,
+              file: source.file,
+              fallbackUrl: "",
+              folder: "temp/multicam",
+              label: `${getExportSourceLabel(source, index)} proof window`,
+              mode: "auto",
+              trimWindow,
+            });
+            return [
+              source.id,
+              {
+                url: uploaded.videoUrl || uploaded.url,
+                cacheKey: buildRenderProxyCacheKey(source.file, trimWindow),
+                storagePath: "",
+                proofProxy: true,
+              },
+            ];
+          }
           const existingUrl = String(source.cloudOriginalUrl || "").startsWith("http")
             ? source.cloudOriginalUrl
             : "";
@@ -7652,7 +7708,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       setSources(currentSources =>
         currentSources.map(source => {
           const uploaded = originalUploadsBySourceId.get(source.id);
-          return uploaded
+          return uploaded && !useProofProxyTimeline
             ? {
                 ...source,
                 cloudOriginalUrl: uploaded.url,
@@ -7665,30 +7721,64 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
 
       let externalOriginalUpload = null;
       if (hasExternalCleanAudio && externalAudioTrack) {
-        const existingExternalUrl = String(externalAudioTrack.cloudOriginalUrl || "").startsWith("http")
-          ? externalAudioTrack.cloudOriginalUrl
-          : "";
-        externalOriginalUpload = existingExternalUrl
-          ? {
-              url: existingExternalUrl,
-              cacheKey:
-                externalAudioTrack.cloudOriginalCacheKey ||
-                buildBackendMediaCacheKey(externalAudioTrack.file),
-              storagePath: externalAudioTrack.cloudOriginalStoragePath || "",
-            }
-          : await uploadOriginalForCloudRender({
-              user,
-              file: externalAudioTrack.file,
-              label: "External clean audio",
-              purpose: "external_audio",
-              signal: exportSignal,
-            });
+        if (useProofProxyTimeline) {
+          const externalTrimWindow = {
+            start: Math.max(
+              0,
+              renderWindowStart +
+                (Number(timelineBounds.timelineStart) || 0) -
+                (Number(externalAudioTrack.offsetSeconds) || 0)
+            ),
+            duration: renderWindowDuration,
+          };
+          const uploaded = await uploadMediaForBackendSync({
+            user,
+            storage: proofProxyStorage,
+            file: externalAudioTrack.file,
+            fallbackUrl: "",
+            folder: "temp/multicam-clean-sync-audio",
+            label: "External clean audio proof window",
+            mode: "audio_only",
+            trimWindow: externalTrimWindow,
+          });
+          externalOriginalUpload = {
+            url: uploaded.syncAudioUrl || uploaded.url,
+            cacheKey: buildSyncAudioCacheKey(externalAudioTrack.file, externalTrimWindow),
+            storagePath: "",
+            proofProxy: true,
+          };
+        } else {
+          const existingExternalUrl = String(
+            externalAudioTrack.cloudOriginalUrl || ""
+          ).startsWith("http")
+            ? externalAudioTrack.cloudOriginalUrl
+            : "";
+          externalOriginalUpload = existingExternalUrl
+            ? {
+                url: existingExternalUrl,
+                cacheKey:
+                  externalAudioTrack.cloudOriginalCacheKey ||
+                  buildBackendMediaCacheKey(externalAudioTrack.file),
+                storagePath: externalAudioTrack.cloudOriginalStoragePath || "",
+              }
+            : await uploadOriginalForCloudRender({
+                user,
+                file: externalAudioTrack.file,
+                label: "External clean audio",
+                purpose: "external_audio",
+                signal: exportSignal,
+              });
+        }
       }
       assertExportActive();
 
       const runExportPreflight = async (preflightSourcesPayload, preflightExternalAudioPayload) => {
         assertExportActive();
-        setStatusMessage("Preflight: proving start/middle/end sync from the uploaded originals...");
+        setStatusMessage(
+          useProofProxyTimeline
+            ? "Preflight: proving start/middle/end sync from the selected proof windows..."
+            : "Preflight: proving start/middle/end sync from the uploaded originals..."
+        );
         try {
           const preflightBody = {
             sources: preflightSourcesPayload.map(source => ({
@@ -7836,7 +7926,11 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
       };
 
       if (hasExternalCleanAudio && externalAudioTrack) {
-        setStatusMessage("Originals uploaded. Proving start/middle/end sync on the server...");
+        setStatusMessage(
+          useProofProxyTimeline
+            ? "Proof windows uploaded. Proving start/middle/end sync on the server..."
+            : "Originals uploaded. Proving start/middle/end sync on the server..."
+        );
         const preflightSourcesPayload = readySources.map((source, i) => {
           const sourceLabel = getExportSourceLabel(source, i);
           const originalUpload = originalUploadsBySourceId.get(source.id);
@@ -7844,7 +7938,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
             id: source.id,
             url: originalUpload?.url,
             label: sourceLabel,
-            offset_seconds: Number(source.offsetSeconds) || 0,
+            offset_seconds: useProofProxyTimeline ? 0 : Number(source.offsetSeconds) || 0,
             sync_rate: getSourceSyncRate(source),
             syncRate: getSourceSyncRate(source),
             cache_key: originalUpload?.cacheKey || buildBackendMediaCacheKey(source.file),
@@ -7855,7 +7949,9 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           };
         });
 
-        const externalOriginalOffset = Number(externalAudioTrack.offsetSeconds || 0) || 0;
+        const externalOriginalOffset = useProofProxyTimeline
+          ? 0
+          : Number(externalAudioTrack.offsetSeconds || 0) || 0;
         const externalAudioRemoteUrl = externalOriginalUpload?.url;
         externalAudioPayload = {
           url: externalAudioRemoteUrl,
@@ -7871,7 +7967,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
           upload_trim_duration: 0,
         };
         setExternalAudioTrack(current =>
-          current
+          current && !useProofProxyTimeline
             ? {
                 ...current,
                 url: externalAudioRemoteUrl,
@@ -7897,6 +7993,11 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
               syncRate: verifiedSync.syncRate,
               sync_rate: verifiedSync.syncRate,
             }
+          : useProofProxyTimeline
+            ? {
+                ...source,
+                offsetSeconds: 0,
+              }
           : source;
         setExportProgress((i / readySources.length) * 0.5);
         const sourceLabel = getExportSourceLabel(source, i);
