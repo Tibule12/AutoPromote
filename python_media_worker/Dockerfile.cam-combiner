@@ -1,3 +1,6 @@
+ARG MULTICAM_MODEL_CACHE_IMAGE=gcr.io/autopromote-cc6d3/cam-combiner-worker:latest
+FROM ${MULTICAM_MODEL_CACHE_IMAGE} AS whisper_model_cache
+
 FROM python:3.10-slim
 
 ENV DEBIAN_FRONTEND=noninteractive \
@@ -21,8 +24,10 @@ WORKDIR /app
 COPY requirements.cam-combiner.txt .
 RUN pip install --no-cache-dir -r requirements.cam-combiner.txt
 
-# Cache only the CPU transcription model Cam Combiner actually uses.
-RUN python -c "from faster_whisper import WhisperModel; WhisperModel('small', device='cpu', compute_type='int8')"
+# Reuse the already-proven production model instead of depending on a live
+# Hugging Face CDN download during every image rebuild.
+COPY --from=whisper_model_cache /root/.cache/huggingface /root/.cache/huggingface
+RUN HF_HUB_OFFLINE=1 python -c "from faster_whisper import WhisperModel; WhisperModel('small', device='cpu', compute_type='int8', local_files_only=True)"
 
 COPY . .
 RUN mkdir -p /app/tmp
