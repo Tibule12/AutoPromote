@@ -1,5 +1,6 @@
 import {
   canDownloadApprovedRender,
+  getMulticamRenderButtonLabel,
   getRecoveredPodcastOutputAspectRatio,
   getRenderApprovalCopy,
   getRenderApprovalState,
@@ -44,6 +45,15 @@ describe("MultiCamCombiner render approval helpers", () => {
   it("restores podcast projects as 16:9 even when an old proof was saved vertically", () => {
     expect(getRecoveredPodcastOutputAspectRatio("9:16")).toBe("16:9");
     expect(getRecoveredPodcastOutputAspectRatio("16:9")).toBe("16:9");
+  });
+
+  it("labels the paid proof action as a 60-second proof instead of a polished master", () => {
+    expect(
+      getMulticamRenderButtonLabel({ mode: "proof", isSyncing: false, isPending: false })
+    ).toBe("Render 60-second Proof (15 cr)");
+    expect(
+      getMulticamRenderButtonLabel({ mode: "full", isSyncing: false, isPending: false })
+    ).toBe("Render Full Episode MP4");
   });
 
   it("reloads dimensions for recovered videos even when their duration is already known", () => {
