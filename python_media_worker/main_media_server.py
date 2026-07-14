@@ -15589,6 +15589,74 @@ def enforce_reaction_overlay_on_multicam_segments(segments, prepared_sources, en
                     4,
                 )
         enforced.append(updated)
+
+    # The UI presents this as a smart reaction insert, not as a permission that
+    # may silently do nothing. Keep normal speaker cuts clean, but when the
+    # director found a genuinely active companion and produced no PiP at all,
+    # promote the strongest short moment into one reaction window.
+    if not any(
+        normalize_multicam_layout_mode(item.get("layout_mode", "cut") or "cut") == "pip"
+        for item in enforced
+    ):
+        candidates = []
+        for index, item in enumerate(enforced):
+            if normalize_multicam_layout_mode(item.get("layout_mode", "cut") or "cut") != "cut":
+                continue
+            primary_camera_id = item.get("camera_id")
+            secondary_camera_id = pick_multicam_reaction_secondary_camera_id(
+                primary_camera_id,
+                prepared_sources,
+                ranked_sources=item.get("ranked_sources"),
+                preferred_secondary_camera_id=item.get("secondary_camera_id"),
+            )
+            if not secondary_camera_id:
+                continue
+            timeline_start = float(item.get("timeline_start", 0.0) or 0.0)
+            timeline_end = float(item.get("timeline_end", timeline_start) or timeline_start)
+            duration = max(0.0, timeline_end - timeline_start)
+            # Anything shorter flashes by like a layout glitch. A reaction
+            # insert needs enough time for the viewer to read the second face.
+            if duration < 2.5:
+                continue
+            ranked_companion = next(
+                (
+                    candidate
+                    for candidate in (item.get("ranked_sources") or [])
+                    if str(candidate.get("camera_id") or "") == str(secondary_camera_id)
+                ),
+                {},
+            )
+            companion_activity = max(
+                float(item.get("audio_second_activity", 0.0) or 0.0),
+                float(ranked_companion.get("audio_activity", 0.0) or 0.0),
+                float(ranked_companion.get("current_audio_activity", 0.0) or 0.0),
+                float(ranked_companion.get("visual_speaking_score", 0.0) or 0.0),
+            )
+            reaction_story_value = float(item.get("editorial_reaction_story_value", 0.0) or 0.0)
+            if companion_activity < 0.35 and reaction_story_value < 0.25:
+                continue
+            score = (reaction_story_value * 1.5) + companion_activity + min(duration, 6.0) * 0.01
+            candidates.append((score, index, secondary_camera_id))
+
+        if candidates:
+            _score, selected_index, secondary_camera_id = max(
+                candidates,
+                key=lambda candidate: (candidate[0], candidate[1]),
+            )
+            selected = dict(enforced[selected_index])
+            selected["layout_mode"] = "pip"
+            selected["secondary_camera_id"] = secondary_camera_id
+            selected["layout_confidence"] = round(
+                max(0.5, float(selected.get("layout_confidence", 0.0) or 0.0)),
+                4,
+            )
+            prior_reason = str(selected.get("layout_reason", "") or "")
+            selected["layout_reason"] = (
+                f"smart_reaction_insert:{prior_reason}"
+                if prior_reason
+                else "smart_reaction_insert"
+            )
+            enforced[selected_index] = selected
     return enforced
 
 def audit_multicam_layout_contract(segments, prepared_sources, output_width=None, output_height=None):
@@ -21425,8 +21493,12 @@ async def build_continuous_sync_anchor_maps(
 
 
 def analyze_multicam_color_profile(video_path, sample_start=0.0, sample_duration=90.0, pre_filter=""):
-    width = 64
-    height = 36
+    # 320x180 is still cheap (twelve frames for a 60-second proof), but large
+    # enough to detect faces and distinguish neutral walls from saturated TV
+    # graphics. The old 64x36 whole-frame mean let screens and clothing choose
+    # the white balance, which made skin orange/green in mixed-camera renders.
+    width = 320
+    height = 180
     frame_bytes = width * height * 3
     safe_start = max(0.0, float(sample_start or 0.0))
     safe_duration = max(1.0, float(sample_duration or 1.0))
@@ -21459,13 +21531,74 @@ def analyze_multicam_color_profile(video_path, sample_start=0.0, sample_duration
     if usable_bytes <= 0:
         raise RuntimeError("ffmpeg color analysis returned no video frames")
 
-    pixels = np.frombuffer(result.stdout[:usable_bytes], dtype=np.uint8).reshape((-1, 3)).astype(np.float32)
+    frames = np.frombuffer(result.stdout[:usable_bytes], dtype=np.uint8).reshape(
+        (-1, height, width, 3)
+    )
+    pixels = frames.reshape((-1, 3)).astype(np.float32)
     red = pixels[:, 0]
     green = pixels[:, 1]
     blue = pixels[:, 2]
     luma = (0.2126 * red) + (0.7152 * green) + (0.0722 * blue)
     chroma = np.sqrt(((red - luma) ** 2) + ((blue - luma) ** 2))
-    return {
+    max_channel = np.max(pixels, axis=1)
+    min_channel = np.min(pixels, axis=1)
+    saturation = (max_channel - min_channel) / np.maximum(max_channel, 1.0)
+    neutral_luma_floor = max(96.0, float(np.percentile(luma, 55.0)))
+    neutral_mask = (
+        (luma >= neutral_luma_floor)
+        & (luma <= 245.0)
+        & (saturation <= 0.28)
+        & (max_channel < 252.0)
+    )
+    if float(np.mean(neutral_mask)) < 0.015:
+        neutral_mask = (
+            (luma >= max(88.0, float(np.percentile(luma, 60.0))))
+            & (luma <= 248.0)
+            & (saturation <= 0.38)
+        )
+    neutral_pixels = pixels[neutral_mask]
+
+    face_luma_samples = []
+    face_detection_count = 0
+    try:
+        face_detector = cv2.CascadeClassifier(
+            cv2.data.haarcascades + "haarcascade_frontalface_alt.xml"
+        )
+        if not face_detector.empty():
+            for frame in frames:
+                frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+                gray = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2GRAY)
+                detections = face_detector.detectMultiScale(
+                    gray,
+                    scaleFactor=1.05,
+                    minNeighbors=3,
+                    minSize=(18, 18),
+                )
+                if len(detections) == 0:
+                    continue
+                x, y, face_width, face_height = max(
+                    detections,
+                    key=lambda detection: int(detection[2]) * int(detection[3]),
+                )
+                inset_x = max(1, int(face_width * 0.10))
+                inset_y = max(1, int(face_height * 0.10))
+                face_rgb = frame[
+                    y + inset_y : y + face_height - inset_y,
+                    x + inset_x : x + face_width - inset_x,
+                ].reshape((-1, 3)).astype(np.float32)
+                if face_rgb.size <= 0:
+                    continue
+                face_luma = (
+                    (0.2126 * face_rgb[:, 0])
+                    + (0.7152 * face_rgb[:, 1])
+                    + (0.0722 * face_rgb[:, 2])
+                )
+                face_luma_samples.append(face_luma)
+                face_detection_count += 1
+    except Exception as face_error:
+        logger.warning("Multicam face exposure analysis skipped: %s", face_error)
+
+    profile = {
         "sample_start_seconds": round(safe_start, 3),
         "sample_duration_seconds": round(safe_duration, 3),
         "sample_frame_count": int(usable_bytes / frame_bytes),
@@ -21478,6 +21611,25 @@ def analyze_multicam_color_profile(video_path, sample_start=0.0, sample_duration
         "warmth": round(float((np.mean(red) - np.mean(blue)) / 255.0), 5),
         "green_bias": round(float((np.mean(green) - ((np.mean(red) + np.mean(blue)) / 2.0)) / 255.0), 5),
     }
+    if neutral_pixels.size > 0:
+        neutral_median = np.median(neutral_pixels, axis=0)
+        profile.update({
+            "neutral_sample_ratio": round(float(np.mean(neutral_mask)), 5),
+            "neutral_median_r": round(float(neutral_median[0]), 3),
+            "neutral_median_g": round(float(neutral_median[1]), 3),
+            "neutral_median_b": round(float(neutral_median[2]), 3),
+        })
+    if face_luma_samples:
+        combined_face_luma = np.concatenate(face_luma_samples)
+        profile.update({
+            "face_detection_count": face_detection_count,
+            "face_luma_mean": round(float(np.mean(combined_face_luma)), 3),
+            "face_luma_median": round(float(np.median(combined_face_luma)), 3),
+            "face_luma_p90": round(float(np.percentile(combined_face_luma, 90.0)), 3),
+        })
+    else:
+        profile["face_detection_count"] = 0
+    return profile
 
 
 def build_multicam_color_match_filter(reference_profile, source_profile):
@@ -21488,26 +21640,62 @@ def build_multicam_color_match_filter(reference_profile, source_profile):
     ref_chroma = max(1.0, float(reference_profile.get("mean_chroma") or 1.0))
     src_chroma = max(1.0, float(source_profile.get("mean_chroma") or ref_chroma))
 
-    # Match the darker angle visibly, while keeping the correction bounded so
-    # different walls, screens, and clothing cannot drive a destructive grade.
-    brightness = clamp_float((ref_luma - src_luma) / 255.0, -0.045, 0.050)
-    contrast = clamp_float(ref_contrast / src_contrast, 0.98, 1.04)
-    saturation = clamp_float(ref_chroma / src_chroma, 0.94, 1.08)
-    warmth_delta = float(reference_profile.get("warmth") or 0.0) - float(
-        source_profile.get("warmth") or 0.0
+    # Lift underlit faces and backgrounds through midtones instead of adding a
+    # flat brightness offset. Flat brightness washed highlights while black
+    # clothes and faces still looked muddy.
+    ref_face_luma = float(reference_profile.get("face_luma_mean") or 0.0)
+    src_face_luma = float(source_profile.get("face_luma_mean") or 0.0)
+    global_exposure_ratio = ref_luma / max(src_luma, 1.0)
+    face_exposure_ratio = (
+        ref_face_luma / max(src_face_luma, 1.0)
+        if ref_face_luma > 0.0 and src_face_luma > 0.0
+        else global_exposure_ratio
     )
-    green_bias_delta = float(reference_profile.get("green_bias") or 0.0) - float(
-        source_profile.get("green_bias") or 0.0
+    bounded_global_ratio = global_exposure_ratio ** 0.65
+    exposure_ratio = (
+        max(face_exposure_ratio, bounded_global_ratio)
+        if global_exposure_ratio >= 1.0
+        else min(face_exposure_ratio, bounded_global_ratio)
     )
-    red_shift = clamp_float(warmth_delta * 0.24, -0.025, 0.025)
-    green_shift = clamp_float(green_bias_delta * 0.20, -0.012, 0.012)
-    blue_shift = clamp_float(warmth_delta * -0.14, -0.018, 0.018)
+    gamma = clamp_float(exposure_ratio ** 0.45, 0.90, 1.14)
+    contrast = clamp_float(ref_contrast / src_contrast, 0.98, 1.03)
+    saturation = clamp_float(ref_chroma / src_chroma, 0.96, 1.04)
+
+    neutral_keys = ("neutral_median_r", "neutral_median_g", "neutral_median_b")
+    has_neutral_reference = all(reference_profile.get(key) is not None for key in neutral_keys)
+    has_neutral_source = all(source_profile.get(key) is not None for key in neutral_keys)
+    if has_neutral_reference and has_neutral_source:
+        ref_neutral_r = float(reference_profile["neutral_median_r"])
+        ref_neutral_g = float(reference_profile["neutral_median_g"])
+        ref_neutral_b = float(reference_profile["neutral_median_b"])
+        src_neutral_r = float(source_profile["neutral_median_r"])
+        src_neutral_g = float(source_profile["neutral_median_g"])
+        src_neutral_b = float(source_profile["neutral_median_b"])
+        red_relative_delta = (
+            ((ref_neutral_r - ref_neutral_g) - (src_neutral_r - src_neutral_g)) / 255.0
+        )
+        blue_relative_delta = (
+            ((ref_neutral_b - ref_neutral_g) - (src_neutral_b - src_neutral_g)) / 255.0
+        )
+        red_shift = clamp_float(red_relative_delta * 0.42, -0.030, 0.030)
+        blue_shift = clamp_float(blue_relative_delta * 0.72, -0.040, 0.040)
+        green_shift = clamp_float(-(red_shift + blue_shift) * 0.12, -0.008, 0.008)
+    else:
+        warmth_delta = float(reference_profile.get("warmth") or 0.0) - float(
+            source_profile.get("warmth") or 0.0
+        )
+        green_bias_delta = float(reference_profile.get("green_bias") or 0.0) - float(
+            source_profile.get("green_bias") or 0.0
+        )
+        red_shift = clamp_float(warmth_delta * 0.15, -0.020, 0.020)
+        green_shift = clamp_float(green_bias_delta * 0.12, -0.008, 0.008)
+        blue_shift = clamp_float(warmth_delta * -0.10, -0.015, 0.015)
 
     return (
         "colorbalance="
         f"rs={red_shift:.5f}:gs={green_shift:.5f}:bs={blue_shift:.5f}:"
         f"rm={red_shift * 0.72:.5f}:gm={green_shift * 0.72:.5f}:bm={blue_shift * 0.72:.5f},"
-        f"eq=brightness={brightness:.5f}:contrast={contrast:.5f}:saturation={saturation:.5f}"
+        f"eq=gamma={gamma:.5f}:contrast={contrast:.5f}:saturation={saturation:.5f}"
     )
 
 
@@ -21560,9 +21748,10 @@ def build_multicam_cinematic_polish_filter():
             "unsharp=3:3:0.16:3:3:0.035,"
             "vignette=angle=PI/18:eval=init"
         )
-    # Preserve the camera image by default. The heavier creative grade remains
-    # available only when a deployment explicitly opts into studio mode.
-    return "format=yuv420p"
+    # Premium's fast path still needs a restrained clarity pass. Contrast-
+    # adaptive sharpening makes faces and dark clothing read more cleanly than
+    # a global unsharp mask, without the heavy denoise cost of studio mode.
+    return "cas=strength=0.22,format=yuv420p"
 
 
 def choose_multicam_color_reference_index(prepared_sources, requested_index=0):
@@ -21635,7 +21824,7 @@ def build_multicam_color_receipt_cache_payload(
     auto_color_match_enabled=False,
 ):
     return {
-        "version": 8,
+        "version": 9,
         "overlap_start": round(float(overlap_start or 0.0), 3),
         "overlap_duration": round(float(overlap_duration or 0.0), 3),
         "reference_index": int(reference_index or 0),
@@ -22139,7 +22328,7 @@ async def apply_multicam_color_matching(prepared_sources, overlap_start, overlap
             "stages": (
                 ["noise_reduction", "contrast_lift", "warm_grade", "saturation_balance", "sharpening", "vignette"]
                 if any(token in cinematic_polish_filter for token in ("hqdn3d", "gradfun", "vignette"))
-                else ["contrast_lift", "warm_grade", "saturation_balance", "light_sharpening"]
+                else ["face_midtone_lift", "neutral_white_balance", "saturation_guard", "adaptive_sharpening"]
             ),
         },
         "sources": [],

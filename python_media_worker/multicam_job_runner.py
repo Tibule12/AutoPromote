@@ -12,6 +12,9 @@ import sys
 import threading
 import time
 
+_RUNNER_PROCESS_STARTED_PERF = time.perf_counter()
+_RUNNER_PROCESS_STARTED_AT = datetime.datetime.now(datetime.timezone.utc)
+
 import requests
 
 import main_media_server as worker
@@ -44,6 +47,38 @@ def _task_retry_context():
     except (TypeError, ValueError):
         max_retries = 1
     return attempt, max_retries
+
+
+def _read_cloud_run_resource_allocation():
+    """Read the actual task cgroup limits for durable cost telemetry."""
+    allocated_vcpu = float(os.cpu_count() or 1)
+    memory_limit_bytes = None
+    try:
+        with open("/sys/fs/cgroup/cpu.max", "r", encoding="utf-8") as cpu_file:
+            quota_text, period_text = cpu_file.read().strip().split()[:2]
+        if quota_text != "max":
+            allocated_vcpu = max(0.001, float(quota_text) / max(1.0, float(period_text)))
+    except Exception:
+        pass
+    try:
+        with open("/sys/fs/cgroup/memory.max", "r", encoding="utf-8") as memory_file:
+            memory_text = memory_file.read().strip()
+        if memory_text != "max":
+            memory_limit_bytes = max(0, int(memory_text))
+    except Exception:
+        pass
+    return round(allocated_vcpu, 3), memory_limit_bytes
+
+
+def _datetime_value(value):
+    if isinstance(value, datetime.datetime):
+        return value if value.tzinfo else value.replace(tzinfo=datetime.timezone.utc)
+    if isinstance(value, str) and value.strip():
+        try:
+            return datetime.datetime.fromisoformat(value.replace("Z", "+00:00"))
+        except ValueError:
+            return None
+    return None
 
 
 def _is_nonretryable_render_error(error):
@@ -221,6 +256,11 @@ def _claim_job(doc_ref, dispatch_token, execution_id):
 
 
 def run():
+    # Start before importing the large media stack above. Cloud Run allocates
+    # CPU/memory during container import too, so omitting import time would
+    # understate the units used by every job.
+    runner_started_perf = _RUNNER_PROCESS_STARTED_PERF
+    runner_started_at = _RUNNER_PROCESS_STARTED_AT
     job_id = str(os.getenv("MULTICAM_JOB_ID") or "").strip()
     dispatch_token = str(os.getenv("MULTICAM_DISPATCH_TOKEN") or "").strip()
     if not re.fullmatch(r"[A-Za-z0-9_-]{8,160}", job_id):
@@ -410,6 +450,94 @@ def run():
             raise RuntimeError("Durable renderer returned no completed result")
         if not result.get("output_storage_path"):
             raise RuntimeError("Durable renderer completed without a cloud storage path")
+
+        # Persist a compact unit ledger for pricing and capacity decisions. It
+        # records measured time/bytes and allocated compute units; dollar cost
+        # can then be calculated against the current Cloud Run rate card without
+        # guessing later from logs.
+        runner_completed_at = datetime.datetime.now(datetime.timezone.utc)
+        runner_elapsed_seconds = max(0.0, time.perf_counter() - runner_started_perf)
+        performance_timing = result.get("performance_timing") or {}
+        worker_elapsed_seconds = max(
+            0.0,
+            float(performance_timing.get("elapsed_seconds") or 0.0),
+        )
+        output_size_bytes = next(
+            (
+                int(stage.get("output_size_bytes"))
+                for stage in (performance_timing.get("stages") or [])
+                if stage.get("stage") == "publish_outputs" and stage.get("output_size_bytes") is not None
+            ),
+            None,
+        )
+        allocated_vcpu, memory_limit_bytes = _read_cloud_run_resource_allocation()
+        memory_limit_gib = (
+            float(memory_limit_bytes) / float(1024 ** 3)
+            if memory_limit_bytes is not None
+            else None
+        )
+        created_at = _datetime_value((job or {}).get("createdAt"))
+        execution_telemetry = {
+            "version": 1,
+            "execution": execution_id,
+            "taskAttempt": os.getenv("CLOUD_RUN_TASK_ATTEMPT") or "0",
+            "runnerStartedAt": runner_started_at.isoformat(),
+            "runnerCompletedAt": runner_completed_at.isoformat(),
+            "runnerElapsedSeconds": round(runner_elapsed_seconds, 3),
+            "workerElapsedSeconds": round(worker_elapsed_seconds, 3),
+            "startupAndPublishOverheadSeconds": round(
+                max(0.0, runner_elapsed_seconds - worker_elapsed_seconds),
+                3,
+            ),
+            "renderedDurationSeconds": round(float(result.get("duration") or 0.0), 3),
+            "workerRealtimeFactor": (
+                round(worker_elapsed_seconds / max(float(result.get("duration") or 0.0), 0.001), 4)
+                if float(result.get("duration") or 0.0) > 0.0
+                else None
+            ),
+            "outputSizeBytes": output_size_bytes,
+            "outputBytesPerRenderedSecond": (
+                round(output_size_bytes / max(float(result.get("duration") or 0.0), 0.001), 3)
+                if output_size_bytes is not None and float(result.get("duration") or 0.0) > 0.0
+                else None
+            ),
+            "allocatedVcpu": allocated_vcpu,
+            "memoryLimitBytes": memory_limit_bytes,
+            "memoryLimitGiB": round(memory_limit_gib, 3) if memory_limit_gib is not None else None,
+            "workerVcpuSeconds": round(worker_elapsed_seconds * allocated_vcpu, 3),
+            "runnerVcpuSeconds": round(runner_elapsed_seconds * allocated_vcpu, 3),
+            "workerGiBSeconds": (
+                round(worker_elapsed_seconds * memory_limit_gib, 3)
+                if memory_limit_gib is not None
+                else None
+            ),
+            "runnerGiBSeconds": (
+                round(runner_elapsed_seconds * memory_limit_gib, 3)
+                if memory_limit_gib is not None
+                else None
+            ),
+            "endToEndSeconds": (
+                round(max(0.0, (runner_completed_at - created_at).total_seconds()), 3)
+                if created_at is not None
+                else None
+            ),
+            "dispatchToRunnerSeconds": (
+                round(max(0.0, (runner_started_at - created_at).total_seconds()), 3)
+                if created_at is not None
+                else None
+            ),
+        }
+        try:
+            worker.update_firestore_job(
+                job_id,
+                {"executionTelemetry": execution_telemetry},
+            )
+        except Exception as telemetry_error:
+            worker.logger.error(
+                "Could not persist execution telemetry for %s: %s",
+                job_id,
+                telemetry_error,
+            )
 
         _release_capacity(job_id, "completed")
         print(f"Multicam job {job_id} completed: {result.get('output_storage_path')}")

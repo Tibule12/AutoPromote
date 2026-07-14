@@ -293,8 +293,11 @@ const normalizeRenderJob = (doc, data = {}) => {
     renderTier: data.renderTier || result.renderTier || result.render_tier || null,
     expiresAt: toIsoString(data.expiresAt || result.expiresAt || result.expires_at),
     retentionDays: data.retentionDays || result.retention_days || null,
+    performanceTiming:
+      data.performanceTiming || data.performance_timing || result.performanceTiming || result.performance_timing || null,
+    executionTelemetry: data.executionTelemetry || data.execution_telemetry || null,
     createdAt: toIsoString(data.createdAt || data.created_at),
-    completedAt: toIsoString(data.completedAt || data.completed_at),
+    completedAt: toIsoString(data.completedAt || data.completed_at || data.updated_at),
     detail: data.detail || data.message || null,
     error: data.error || null,
   };
@@ -1692,6 +1695,9 @@ router.get("/status/:jobId", async (req, res) => {
       thumbnailUrl: approvalView.thumbnailUrl || data.thumbnailUrl || data.thumbnail_url || data.result?.thumbnailUrl || data.result?.thumbnail_url,
       expiresAt: data.expiresAt || data.result?.expiresAt || data.result?.expires_at || null,
       retentionDays: data.retentionDays || data.result?.retention_days || null,
+      performanceTiming:
+        data.performanceTiming || data.performance_timing || data.result?.performanceTiming || data.result?.performance_timing || null,
+      executionTelemetry: data.executionTelemetry || data.execution_telemetry || null,
       clipSuggestions: data.clipSuggestions, // Viral clips
       detail: data.detail,
       message: data.message,
