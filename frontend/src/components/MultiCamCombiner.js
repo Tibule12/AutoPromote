@@ -83,6 +83,18 @@ export const isRecoverableMediaUrl = value => {
 
 export const getRecoveredPodcastOutputAspectRatio = _savedAspectRatio => "16:9";
 
+export const getMulticamRenderButtonLabel = ({ mode, isSyncing, isPending }) => {
+  if (isSyncing) return "Sync Check Running...";
+  if (isPending) {
+    return mode === "proof"
+      ? "Submitting 60-second Proof..."
+      : "Submitting Full-Episode Render...";
+  }
+  return mode === "proof"
+    ? `Render 60-second Proof (${MULTICAM_PRODUCTION_PROOF_CREDITS} cr)`
+    : "Render Full Episode MP4";
+};
+
 const canUseLocalMediaWorker = () => {
   if (process.env.REACT_APP_ENABLE_LOCAL_MEDIA_WORKER === "true") return true;
   if (process.env.NODE_ENV !== "development") return false;
@@ -8872,11 +8884,13 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                       isSingleSourceWorkflow
                     }
                   >
-                    {cleanAudioSyncIsRunning || syncingCameraId === "external-clean-audio"
-                      ? "Sync Check Running..."
-                      : serverExportPending
-                        ? "Preparing Verified MP4..."
-                        : "Render Polished MP4"}
+                    {getMulticamRenderButtonLabel({
+                      mode: cloudRenderMode,
+                      isSyncing:
+                        cleanAudioSyncIsRunning ||
+                        syncingCameraId === "external-clean-audio",
+                      isPending: serverExportPending,
+                    })}
                   </button>
                   <div className="nle-render-proof-list">
                     <div className={`nle-proof-item ${hasExternalCleanAudio ? "is-done" : ""}`}>
