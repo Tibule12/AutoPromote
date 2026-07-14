@@ -1,8 +1,10 @@
 import {
   canDownloadApprovedRender,
+  getRecoveredPodcastOutputAspectRatio,
   getRenderApprovalCopy,
   getRenderApprovalState,
   isRecoverableMediaUrl,
+  needsSourceMediaMetadata,
 } from "../MultiCamCombiner";
 
 jest.mock("firebase/auth", () => ({
@@ -37,6 +39,32 @@ describe("MultiCamCombiner render approval helpers", () => {
     expect(isRecoverableMediaUrl("/home/user/project/tmp/camera.mov")).toBe(false);
     expect(isRecoverableMediaUrl("file:///home/user/project/tmp/camera.mov")).toBe(false);
     expect(isRecoverableMediaUrl("")).toBe(false);
+  });
+
+  it("restores podcast projects as 16:9 even when an old proof was saved vertically", () => {
+    expect(getRecoveredPodcastOutputAspectRatio("9:16")).toBe("16:9");
+    expect(getRecoveredPodcastOutputAspectRatio("16:9")).toBe("16:9");
+  });
+
+  it("reloads dimensions for recovered videos even when their duration is already known", () => {
+    expect(
+      needsSourceMediaMetadata({
+        mediaKind: "video",
+        url: "https://cdn.example.com/camera.mov",
+        duration: 2640,
+        videoWidth: 0,
+        videoHeight: 0,
+      })
+    ).toBe(true);
+    expect(
+      needsSourceMediaMetadata({
+        mediaKind: "video",
+        url: "https://cdn.example.com/camera.mov",
+        duration: 2640,
+        videoWidth: 1920,
+        videoHeight: 1080,
+      })
+    ).toBe(false);
   });
 
   it("blocks downloads for needs_review renders", () => {
