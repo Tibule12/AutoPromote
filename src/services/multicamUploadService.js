@@ -130,6 +130,57 @@ async function verifyMulticamRenderInputs({ userId, sources, externalAudio }) {
   return Promise.all(checks);
 }
 
+async function recoverMulticamUpload({ userId, source, purpose }) {
+  const storagePath = source?.storagePath || source?.storage_path;
+  assertOwnedIngestPath(userId, storagePath);
+  const bucketName = resolveIngestBucketName();
+  if (!bucketName) {
+    const error = new Error("Multicam ingest bucket is not configured");
+    error.statusCode = 503;
+    throw error;
+  }
+
+  const [metadata] = await admin.storage().bucket(bucketName).file(storagePath).getMetadata();
+  const customMetadata = metadata.metadata || {};
+  if (customMetadata.ownerUid !== userId || customMetadata.purpose !== purpose) {
+    const error = new Error("Recoverable source ownership or purpose does not match");
+    error.statusCode = 403;
+    throw error;
+  }
+  if (Number(metadata.size || 0) <= 0) {
+    const error = new Error("Recoverable source is empty");
+    error.statusCode = 409;
+    throw error;
+  }
+
+  const deleteAfter = Date.parse(customMetadata.deleteAfter || "");
+  if (Number.isFinite(deleteAfter) && deleteAfter <= Date.now()) {
+    const error = new Error("Recoverable source has expired");
+    error.statusCode = 410;
+    throw error;
+  }
+
+  const storedTokens = String(customMetadata.firebaseStorageDownloadTokens || "")
+    .split(",")
+    .map(token => token.trim())
+    .filter(Boolean);
+  const existingToken = getDownloadTokenFromUrl(source?.url);
+  const downloadToken = storedTokens.includes(existingToken) ? existingToken : storedTokens[0];
+  if (!downloadToken) {
+    const error = new Error("Recoverable source has no Firebase download token");
+    error.statusCode = 409;
+    throw error;
+  }
+
+  return {
+    url: buildFirebaseDownloadUrl(bucketName, storagePath, downloadToken),
+    storagePath,
+    size: Number(metadata.size),
+    deleteAfter: customMetadata.deleteAfter || null,
+    cacheKey: `${bucketName}/${storagePath}#${metadata.generation || "current"}`,
+  };
+}
+
 async function startMulticamUpload({
   userId,
   fileName,
@@ -268,6 +319,7 @@ module.exports = {
   buildFirebaseDownloadUrl,
   buildIngestStoragePath,
   completeMulticamUpload,
+  recoverMulticamUpload,
   sanitizeFileName,
   startMulticamUpload,
   verifyMulticamRenderInputs,

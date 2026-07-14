@@ -72,6 +72,15 @@ const MULTICAM_RENDER_SPEC_VERSION = 2;
 const ACTIVE_MULTICAM_RENDER_JOB_STORAGE_KEY = "autopromote:multicam-active-render-job";
 const LOCAL_MEDIA_WORKER_HOSTS = new Set(["localhost", "127.0.0.1", "0.0.0.0"]);
 
+export const isRecoverableMediaUrl = value => {
+  try {
+    const parsed = new URL(String(value || ""));
+    return parsed.protocol === "https:" || parsed.protocol === "http:";
+  } catch (_error) {
+    return false;
+  }
+};
+
 const canUseLocalMediaWorker = () => {
   if (process.env.REACT_APP_ENABLE_LOCAL_MEDIA_WORKER === "true") return true;
   if (process.env.NODE_ENV !== "development") return false;
@@ -2041,8 +2050,18 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         throw new Error(data.message || "Could not recover the uploaded project.");
       }
       const project = data.project;
+      const projectSources = Array.isArray(project.sources) ? project.sources : [];
+      if (
+        projectSources.length < 2 ||
+        projectSources.some(source => !isRecoverableMediaUrl(source.url))
+      ) {
+        throw new Error("The saved project does not contain reusable cloud camera originals.");
+      }
+      if (project.externalAudio && !isRecoverableMediaUrl(project.externalAudio.url)) {
+        throw new Error("The saved project clean audio is not available from cloud storage.");
+      }
       const duration = Math.max(0, Number(project.duration) || 0);
-      const restoredSources = (project.sources || []).map((source, index) => ({
+      const restoredSources = projectSources.map((source, index) => ({
         id: source.id || `cam-${index + 1}`,
         label: normalizeSourceLabel(source.label, index),
         name: source.label || `Camera ${index + 1}`,

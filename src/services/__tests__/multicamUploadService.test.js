@@ -22,6 +22,7 @@ jest.mock("firebase-admin", () => ({
 const {
   buildIngestStoragePath,
   completeMulticamUpload,
+  recoverMulticamUpload,
   startMulticamUpload,
   verifyMulticamRenderInputs,
 } = require("../multicamUploadService");
@@ -139,6 +140,41 @@ describe("multicam upload service", () => {
         ],
       })
     ).resolves.toHaveLength(1);
+  });
+
+  it("rebuilds a Firebase media URL when a saved job contains a local path", async () => {
+    const storagePath = "temp/multicam-ingest/user-1/camera.mov";
+    mockFileObjects.set(`test-bucket/${storagePath}`, {
+      createResumableUpload: jest.fn(),
+      getMetadata: jest.fn().mockResolvedValue([
+        {
+          size: "4096",
+          generation: "12",
+          metadata: {
+            ownerUid: "user-1",
+            purpose: "camera_original",
+            firebaseStorageDownloadTokens: "token-1",
+            deleteAfter: new Date(Date.now() + 60000).toISOString(),
+          },
+        },
+      ]),
+      delete: jest.fn(),
+    });
+
+    const recovered = await recoverMulticamUpload({
+      userId: "user-1",
+      purpose: "camera_original",
+      source: {
+        storagePath,
+        url: "/home/user/project/tmp/camera.mov",
+      },
+    });
+
+    expect(recovered.url).toBe(
+      "https://firebasestorage.googleapis.com/v0/b/test-bucket/o/temp%2Fmulticam-ingest%2Fuser-1%2Fcamera.mov?alt=media&token=token-1"
+    );
+    expect(recovered.storagePath).toBe(storagePath);
+    expect(recovered.cacheKey).toBe(`test-bucket/${storagePath}#12`);
   });
 
   it("rejects another user's ingest path before dispatch", async () => {
