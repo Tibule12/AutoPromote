@@ -16804,6 +16804,7 @@ def get_multicam_render_tier_profile(tier):
             "burn_captions": False,
             "brand_watermark": False,
             "generate_thumbnail": False,
+            "rounded_active_speaker": False,
             "max_layout_sources": 2,
             "audio_bitrate": "160k",
         },
@@ -16816,6 +16817,7 @@ def get_multicam_render_tier_profile(tier):
             "burn_captions": True,
             "brand_watermark": True,
             "generate_thumbnail": True,
+            "rounded_active_speaker": True,
             "max_layout_sources": 3,
             "audio_bitrate": "192k",
         },
@@ -16828,6 +16830,7 @@ def get_multicam_render_tier_profile(tier):
             "burn_captions": True,
             "brand_watermark": True,
             "generate_thumbnail": True,
+            "rounded_active_speaker": True,
             "max_layout_sources": 3,
             "audio_bitrate": "256k",
         },
@@ -18563,11 +18566,56 @@ def multicam_single_cut_filter(
     is_vertical_output=True,
     focus_x=0.5,
     focus_y=0.48,
+    rounded_frame=False,
 ):
-    # A single active speaker fills the chosen program canvas. Rounded frames
-    # remain for explicit reaction, split, shared-moment and grid layouts.
     safe_focus_x = clamp_float(float(0.5 if focus_x is None else focus_x), 0.06, 0.94)
     safe_focus_y = clamp_float(float(0.48 if focus_y is None else focus_y), 0.12, 0.82)
+    if rounded_frame:
+        # Premium single-speaker cuts keep the program at its requested aspect
+        # ratio while presenting the active camera as a real alpha-rounded card.
+        # The card is edge-to-edge video over a darkened blurred copy, so the
+        # source's original rectangular frame cannot leak through its corners.
+        margin_x = 40 if is_vertical_output else 48
+        margin_y = 72 if is_vertical_output else 48
+        card_width = max(2, int(width) - (margin_x * 2))
+        card_height = max(2, int(height) - (margin_y * 2))
+        radius = 72 if is_vertical_output else 64
+        bg_source = f"{output_label}premiumbgsrc"
+        card_source = f"{output_label}premiumcardsrc"
+        background = f"{output_label}premiumbg"
+        card = f"{output_label}premiumcard"
+        rounded = f"{output_label}premiumrounded"
+        return ";".join(
+            [
+                f"[{input_label}]split=2[{bg_source}][{card_source}]",
+                multicam_blurred_canvas_filter(
+                    bg_source,
+                    int(width),
+                    int(height),
+                    background,
+                    blur=24,
+                ),
+                multicam_modern_card_filter(
+                    card_source,
+                    card_width,
+                    card_height,
+                    card,
+                    focus_x=safe_focus_x,
+                    focus_y=safe_focus_y,
+                ),
+                multicam_rounded_card_filter(
+                    card,
+                    card_width,
+                    card_height,
+                    rounded,
+                    radius=radius,
+                ),
+                (
+                    f"[{background}][{rounded}]overlay=x={margin_x}:y={margin_y}:"
+                    f"shortest=1[{output_label}]"
+                ),
+            ]
+        )
     return (
         f"[{input_label}]scale={int(width)}:{int(height)}:force_original_aspect_ratio=increase,"
         f"crop={int(width)}:{int(height)}:"
@@ -21440,18 +21488,21 @@ def build_multicam_color_match_filter(reference_profile, source_profile):
     ref_chroma = max(1.0, float(reference_profile.get("mean_chroma") or 1.0))
     src_chroma = max(1.0, float(source_profile.get("mean_chroma") or ref_chroma))
 
-    # Different podcast angles contain different walls, screens and clothing;
-    # their whole-frame averages are not a licence for a strong creative grade.
-    # Keep matching corrective and conservative so skin colour stays natural.
-    brightness = clamp_float((ref_luma - src_luma) / 255.0, -0.012, 0.012)
-    contrast = clamp_float(ref_contrast / src_contrast, 0.99, 1.015)
-    saturation = clamp_float(ref_chroma / src_chroma, 0.985, 1.01)
-    red_shift = clamp_float((float(reference_profile.get("mean_r") or 0.0) - float(source_profile.get("mean_r") or 0.0)) / 510.0, -0.009, 0.009)
-    green_shift = clamp_float((float(reference_profile.get("mean_g") or 0.0) - float(source_profile.get("mean_g") or 0.0)) / 510.0, -0.006, 0.006)
-    blue_shift = clamp_float((float(reference_profile.get("mean_b") or 0.0) - float(source_profile.get("mean_b") or 0.0)) / 510.0, -0.009, 0.009)
+    # Match the darker angle visibly, while keeping the correction bounded so
+    # different walls, screens, and clothing cannot drive a destructive grade.
+    brightness = clamp_float((ref_luma - src_luma) / 255.0, -0.045, 0.050)
+    contrast = clamp_float(ref_contrast / src_contrast, 0.98, 1.04)
+    saturation = clamp_float(ref_chroma / src_chroma, 0.94, 1.08)
+    warmth_delta = float(reference_profile.get("warmth") or 0.0) - float(
+        source_profile.get("warmth") or 0.0
+    )
+    green_bias_delta = float(reference_profile.get("green_bias") or 0.0) - float(
+        source_profile.get("green_bias") or 0.0
+    )
+    red_shift = clamp_float(warmth_delta * 0.24, -0.025, 0.025)
+    green_shift = clamp_float(green_bias_delta * 0.20, -0.012, 0.012)
+    blue_shift = clamp_float(warmth_delta * -0.14, -0.018, 0.018)
 
-    # Keep the correction gentle: iPhone auto-exposure varies during a take, so
-    # this nudges global camera character without chasing every moment.
     return (
         "colorbalance="
         f"rs={red_shift:.5f}:gs={green_shift:.5f}:bs={blue_shift:.5f}:"
@@ -21534,6 +21585,39 @@ def choose_multicam_color_reference_index(prepared_sources, requested_index=0):
     return sdr_indices[0]
 
 
+def choose_multicam_color_reference_profile_index(prepared_sources, requested_index=0):
+    """Choose the best exposed normalized camera, regardless of HDR origin."""
+    sources = list(prepared_sources or [])
+    if not sources:
+        return 0
+    safe_requested = min(max(0, int(requested_index or 0)), len(sources) - 1)
+    scored = []
+    for index, source in enumerate(sources):
+        profile = source.get("color_profile") or {}
+        if not profile or int(profile.get("sample_frame_count") or 0) <= 0:
+            continue
+        luma = float(profile.get("mean_luma") or 0.0)
+        contrast = float(profile.get("contrast_luma") or 0.0)
+        chroma = float(profile.get("mean_chroma") or 0.0)
+        score = abs(luma - 128.0)
+        if luma < 82.0:
+            score += (82.0 - luma) * 2.5
+        elif luma > 178.0:
+            score += (luma - 178.0) * 2.0
+        if contrast < 32.0:
+            score += (32.0 - contrast) * 0.75
+        elif contrast > 82.0:
+            score += (contrast - 82.0) * 0.35
+        if chroma < 18.0:
+            score += (18.0 - chroma) * 0.35
+        if index == safe_requested:
+            score -= 1.0
+        scored.append((score, index))
+    if not scored:
+        return choose_multicam_color_reference_index(sources, safe_requested)
+    return min(scored, key=lambda item: (item[0], item[1]))[1]
+
+
 def multicam_file_cache_identity(path):
     try:
         stat = os.stat(path)
@@ -21551,7 +21635,7 @@ def build_multicam_color_receipt_cache_payload(
     auto_color_match_enabled=False,
 ):
     return {
-        "version": 7,
+        "version": 8,
         "overlap_start": round(float(overlap_start or 0.0), 3),
         "overlap_duration": round(float(overlap_duration or 0.0), 3),
         "reference_index": int(reference_index or 0),
@@ -22007,8 +22091,8 @@ async def prepare_multicam_visual_proxy_sources(prepared_sources, overlap_start,
 
 async def apply_multicam_color_matching(prepared_sources, overlap_start, overlap_duration, job_id, reference_index=0):
     cinematic_polish_filter = build_multicam_cinematic_polish_filter()
-    auto_color_match_enabled = env_flag("MULTICAM_AUTO_COLOR_MATCH", default=False)
-    safe_reference_index = choose_multicam_color_reference_index(
+    auto_color_match_enabled = env_flag("MULTICAM_AUTO_COLOR_MATCH", default=True)
+    requested_reference_index = choose_multicam_color_reference_index(
         prepared_sources,
         requested_index=reference_index,
     )
@@ -22016,7 +22100,7 @@ async def apply_multicam_color_matching(prepared_sources, overlap_start, overlap
         prepared_sources,
         overlap_start,
         overlap_duration,
-        safe_reference_index,
+        -1 if auto_color_match_enabled else requested_reference_index,
         cinematic_polish_filter,
         auto_color_match_enabled,
     )
@@ -22062,6 +22146,7 @@ async def apply_multicam_color_matching(prepared_sources, overlap_start, overlap
     }
 
     if not auto_color_match_enabled:
+        safe_reference_index = requested_reference_index
         reference_source = prepared_sources[safe_reference_index] if prepared_sources else {}
         receipt["reference_source_id"] = reference_source.get("id")
         receipt["reference_source_label"] = reference_source.get("label")
@@ -22098,10 +22183,6 @@ async def apply_multicam_color_matching(prepared_sources, overlap_start, overlap
     if len(prepared_sources or []) < 2:
         return receipt
 
-    reference_source = prepared_sources[safe_reference_index]
-    receipt["reference_source_id"] = reference_source.get("id")
-    receipt["reference_source_label"] = reference_source.get("label")
-
     sample_duration = max(1.0, min(120.0, float(overlap_duration or 1.0)))
     for index, source in enumerate(prepared_sources):
         color_metadata = source.get("color_metadata") or probe_video_color_metadata(source["path"])
@@ -22111,7 +22192,7 @@ async def apply_multicam_color_matching(prepared_sources, overlap_start, overlap
         source["color_match_filter"] = ""
         source["cinematic_polish_filter"] = cinematic_polish_filter
         source["source_visual_filter"] = combine_multicam_filter_chains(base_color_filter, cinematic_polish_filter)
-        source["color_match_reference_id"] = reference_source.get("id")
+        source["color_match_reference_id"] = None
         source["color_match_applied"] = False
         try:
             sample_start = get_source_start_for_timeline(source, overlap_start, 0.0)
@@ -22126,7 +22207,7 @@ async def apply_multicam_color_matching(prepared_sources, overlap_start, overlap
             receipt["sources"].append({
                 "id": source.get("id"),
                 "label": source.get("label"),
-                "role": "reference" if index == safe_reference_index else "matched",
+                "role": "candidate",
                 "color_metadata": color_metadata,
                 "base_color_filter": base_color_filter,
                 "profile": profile,
@@ -22140,7 +22221,7 @@ async def apply_multicam_color_matching(prepared_sources, overlap_start, overlap
             receipt["sources"].append({
                 "id": source.get("id"),
                 "label": source.get("label"),
-                "role": "reference" if index == safe_reference_index else "matched",
+                "role": "candidate",
                 "status": "analysis_failed",
                 "error": str(color_error),
                 "color_metadata": color_metadata,
@@ -22150,6 +22231,18 @@ async def apply_multicam_color_matching(prepared_sources, overlap_start, overlap
                 "source_visual_filter": source.get("source_visual_filter") or "",
                 "applied": False,
             })
+
+    safe_reference_index = choose_multicam_color_reference_profile_index(
+        prepared_sources,
+        requested_index=reference_index,
+    )
+    reference_source = prepared_sources[safe_reference_index]
+    receipt["reference_source_id"] = reference_source.get("id")
+    receipt["reference_source_label"] = reference_source.get("label")
+    for source in prepared_sources:
+        source["color_match_reference_id"] = reference_source.get("id")
+    for index, item in enumerate(receipt["sources"]):
+        item["role"] = "reference" if index == safe_reference_index else "matched"
 
     reference_profile = reference_source.get("color_profile")
     if not reference_profile:
@@ -22306,6 +22399,7 @@ async def render_multicam_video_segment(
                     "v",
                     is_vertical_output=output_height > output_width,
                     focus_x=multicam_source_focus_x(source),
+                    rounded_frame=bool(render_tier_profile.get("rounded_active_speaker")),
                 ),
             ]
         )
