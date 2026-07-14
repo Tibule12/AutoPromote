@@ -18,6 +18,7 @@ import WolfHuntDashboard from "./EngagementMarketplace";
 import ClipStudioPanel from "./UserDashboardTabs/ClipStudioPanel";
 import IdeaVideoPanel from "./UserDashboardTabs/IdeaVideoPanel";
 import MissionControlPanel from "./UserDashboardTabs/MissionControlPanel";
+import CamCombinerPanel from "./UserDashboardTabs/CamCombinerPanel";
 // LiveWatch import removed
 // LiveHub import removed
 import FloatingActions from "./components/FloatingActions";
@@ -128,6 +129,7 @@ const UserDashboard = ({
     schedules: "Queue",
     analytics: "Analytics",
     clips: "Clip Studio",
+    cam_combiner: "Cam Combiner",
     idea_video: "Creative Tools",
     security: "Security",
     notifications: "Notifications",
@@ -1139,6 +1141,12 @@ const UserDashboard = ({
                 Publish
               </li>
               <li
+                className={activeTab === "cam_combiner" ? "active" : ""}
+                onClick={() => handleNav("cam_combiner")}
+              >
+                Cam Combiner
+              </li>
+              <li
                 className={activeTab === "schedules" ? "active" : ""}
                 onClick={() => handleNav("schedules")}
               >
@@ -1526,6 +1534,17 @@ const UserDashboard = ({
 
         {activeTab === "clips" && !clipStudioLocked && (
           <ClipStudioPanel content={contentList} onRefresh={onUpload} />
+        )}
+        {activeTab === "cam_combiner" && (
+          <CamCombinerPanel
+            onClose={() => handleNav("profile")}
+            onUseExport={result => {
+              if (!result?.file) return;
+              setSelectedFile(result.file);
+              handleNav("upload");
+              toast.success("Cam Combiner export is ready to publish.");
+            }}
+          />
         )}
         {activeTab === "idea_video" && (
           <IdeaVideoPanel
