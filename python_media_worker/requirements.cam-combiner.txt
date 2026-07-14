@@ -1,13 +1,10 @@
-# Cam Combiner CPU runtime. Keep this separate from the general media worker so
-# a CPU-only Cloud Run revision never pulls PyTorch's CUDA/NVIDIA stack.
+# Caption-capable Cam Combiner runtime. General-worker TTS, MoviePy, download,
+# librosa, and imageio dependencies do not belong in this dedicated image.
 ffmpeg-python
 opencv-python-headless
 Pillow
-librosa
 numpy
-soundfile
 scenedetect
-tqdm
 
 fastapi
 uvicorn
@@ -15,10 +12,5 @@ python-multipart
 requests
 python-dotenv
 
-edge-tts
-moviepy==1.0.3
-imageio[ffmpeg]
-
 firebase-admin
 faster-whisper
-yt-dlp

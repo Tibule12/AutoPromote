@@ -28,8 +28,13 @@ import ffmpeg  # FFmpeg (Phase 1)
 from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageEnhance
 import firebase_admin
 from firebase_admin import credentials, storage, firestore
-from scenedetect import SceneManager, open_video
-from scenedetect.detectors import ContentDetector
+try:
+    from scenedetect import SceneManager, open_video
+    from scenedetect.detectors import ContentDetector
+except ImportError:
+    SceneManager = None
+    open_video = None
+    ContentDetector = None
 from dotenv import load_dotenv
 
 try:
@@ -189,13 +194,18 @@ except ImportError:
 try:
     import yt_dlp
 except ImportError:
-    import logging
-    logging.getLogger("MediaWorker").warning("yt_dlp module not found. Installing...")
-    try:
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "yt-dlp"])
-        import yt_dlp
-    except:
-        yt_dlp = None
+    yt_dlp = None
+    allow_runtime_dependency_install = str(
+        os.getenv("ALLOW_RUNTIME_DEPENDENCY_INSTALL", "false" if os.getenv("K_SERVICE") else "true")
+    ).strip().lower() in {"1", "true", "yes", "on"}
+    if allow_runtime_dependency_install:
+        import logging
+        logging.getLogger("MediaWorker").warning("yt_dlp module not found. Installing...")
+        try:
+            subprocess.check_call([sys.executable, "-m", "pip", "install", "yt-dlp"])
+            import yt_dlp
+        except Exception:
+            yt_dlp = None
 
 # Logging setup
 logging.basicConfig(level=logging.INFO)
@@ -16976,6 +16986,34 @@ def validate_multicam_trusted_sync_contract(request, overlap_start, overlap_dura
             "reason": "sync_contract_status_not_trusted",
             "contract_status": contract.get("status") or contract.get("overall_status") or contract.get("overallStatus"),
         }
+    proof_kind = str(contract.get("proof_kind") or contract.get("proofKind") or "").strip().lower()
+    if proof_kind == "server_sync_preflight_v1":
+        signature = str(contract.get("signature") or "")
+        secret = multicam_qa_receipt_secret()
+        if not signature or not secret:
+            return {
+                "status": "untrusted",
+                "trusted": False,
+                "reason": "server_sync_contract_signature_missing",
+            }
+        expected_signature = hmac.new(
+            secret.encode("utf-8"),
+            _multicam_sync_contract_signature_payload(contract),
+            hashlib.sha256,
+        ).hexdigest()
+        if not hmac.compare_digest(signature, expected_signature):
+            return {
+                "status": "untrusted",
+                "trusted": False,
+                "reason": "server_sync_contract_signature_invalid",
+            }
+        expires_at = float(contract.get("expires_at_unix") or 0.0)
+        if expires_at <= time.time():
+            return {
+                "status": "untrusted",
+                "trusted": False,
+                "reason": "server_sync_contract_expired",
+            }
     raw_sources = contract.get("sources") or contract.get("source_sync") or contract.get("sourceSync") or []
     if isinstance(raw_sources, dict):
         raw_sources = [
@@ -17023,6 +17061,58 @@ def validate_multicam_trusted_sync_contract(request, overlap_start, overlap_dura
             "reason": "sync_contract_missing_request_sources",
             "missing_source_ids": sorted(request_source_ids - set(source_map.keys())),
         }
+    if proof_kind == "server_sync_preflight_v1":
+        source_identities = contract.get("source_identities") or {}
+        for request_source in getattr(request, "sources", None) or []:
+            camera_id = str(getattr(request_source, "id", "") or "").strip()
+            expected_identity = str(source_identities.get(camera_id) or "")
+            actual_identity = str(
+                getattr(request_source, "cache_key", None)
+                or getattr(request_source, "url", None)
+                or ""
+            )
+            if not expected_identity or not hmac.compare_digest(expected_identity, actual_identity):
+                return {
+                    "status": "untrusted",
+                    "trusted": False,
+                    "reason": "server_sync_contract_source_identity_changed",
+                    "camera_id": camera_id,
+                }
+            requested_offset = float(getattr(request_source, "offset_seconds", 0.0) or 0.0)
+            requested_rate = float(
+                getattr(request_source, "sync_rate", None)
+                if getattr(request_source, "sync_rate", None) is not None
+                else getattr(request_source, "syncRate", 1.0) or 1.0
+            )
+            proven = source_map.get(camera_id) or {}
+            if (
+                abs(requested_offset - float(proven.get("offset_seconds") or 0.0)) > 0.002
+                or abs(requested_rate - float(proven.get("sync_rate") or 1.0)) > 0.000002
+            ):
+                return {
+                    "status": "untrusted",
+                    "trusted": False,
+                    "reason": "server_sync_contract_timing_changed",
+                    "camera_id": camera_id,
+                }
+        nested_external_audio = getattr(request, "externalAudio", None)
+        request_external_identity = str(
+            getattr(request, "external_audio_cache_key", None)
+            or _multicam_model_value(nested_external_audio, "cache_key", None)
+            or getattr(request, "external_audio_url", None)
+            or _multicam_model_value(nested_external_audio, "url", None)
+            or ""
+        )
+        contract_external_identity = str(contract.get("external_audio_identity") or "")
+        if (
+            not contract_external_identity
+            or not hmac.compare_digest(contract_external_identity, request_external_identity)
+        ):
+            return {
+                "status": "untrusted",
+                "trusted": False,
+                "reason": "server_sync_contract_external_audio_changed",
+            }
     timeline_start = float(overlap_start or 0.0)
     timeline_end = timeline_start + max(0.0, float(overlap_duration or 0.0))
     windows = contract.get("timeline_windows") or contract.get("timelineWindows") or contract.get("windows") or []
@@ -17060,6 +17150,98 @@ def validate_multicam_trusted_sync_contract(request, overlap_start, overlap_dura
         },
         "contract_id": contract.get("id") or contract.get("contract_id") or contract.get("contractId"),
     }
+
+
+def _multicam_sync_contract_signature_payload(contract):
+    unsigned = dict(contract or {})
+    unsigned.pop("signature", None)
+    return json.dumps(unsigned, sort_keys=True, separators=(",", ":"), default=str).encode("utf-8")
+
+
+def build_signed_multicam_preflight_sync_contract(request, preflight_result):
+    """Turn a successful public preflight into a short-lived, window-bound render contract."""
+    if str((preflight_result or {}).get("status") or "").strip().lower() != "good":
+        return None
+    timeline_start = float(
+        request.timeline_start
+        if request.timeline_start is not None
+        else request.timelineStart
+        if request.timelineStart is not None
+        else request.overlap_start
+        if request.overlap_start is not None
+        else request.overlapStart or 0.0
+    )
+    duration = float(request.overlap_duration or request.overlapDuration or 0.0)
+    if duration <= 0.0:
+        return None
+    cameras = preflight_result.get("cameras") or {}
+    source_sync = {}
+    source_identities = {}
+    for index, source in enumerate(request.sources or []):
+        receipt = cameras.get(f"cam_{index}") or {}
+        if str(receipt.get("confidence") or "").strip().lower() != "good":
+            return None
+        sync_fit = receipt.get("sync_fit") or {}
+        has_fit = str(sync_fit.get("status") or "").strip().lower() == "fit"
+        offset = (
+            receipt.get("suggested_offset_seconds")
+            if has_fit and receipt.get("suggested_offset_seconds") is not None
+            else receipt.get("current_offset")
+        )
+        sync_rate = (
+            receipt.get("suggested_sync_rate")
+            if has_fit and receipt.get("suggested_sync_rate") is not None
+            else receipt.get("current_sync_rate")
+        )
+        if offset is None or sync_rate is None:
+            return None
+        source_sync[source.id] = {
+            "offset_seconds": round(float(offset), 6),
+            "sync_rate": round(float(sync_rate), 9),
+        }
+        source_identities[source.id] = str(source.cache_key or source.url or "")
+
+    nested_external_audio = request.externalAudio
+    external_identity = str(
+        request.external_audio_cache_key
+        or _multicam_model_value(nested_external_audio, "cache_key", None)
+        or request.external_audio_url
+        or _multicam_model_value(nested_external_audio, "url", None)
+        or ""
+    )
+    issued_at = time.time()
+    identity = {
+        "sources": source_identities,
+        "external_audio": external_identity,
+        "start": round(timeline_start, 3),
+        "duration": round(duration, 3),
+    }
+    contract = {
+        "id": "sync-preflight-" + hashlib.sha256(
+            json.dumps(identity, sort_keys=True).encode("utf-8")
+        ).hexdigest()[:24],
+        "status": "locked",
+        "proof_kind": "server_sync_preflight_v1",
+        "issued_at_unix": round(issued_at, 3),
+        "expires_at_unix": round(issued_at + (72 * 60 * 60), 3),
+        "sources": source_sync,
+        "source_identities": source_identities,
+        "external_audio_identity": external_identity,
+        "timeline_windows": [
+            {
+                "start": round(timeline_start, 3),
+                "end": round(timeline_start + duration, 3),
+            }
+        ],
+    }
+    secret = multicam_qa_receipt_secret()
+    if secret:
+        contract["signature"] = hmac.new(
+            secret.encode("utf-8"),
+            _multicam_sync_contract_signature_payload(contract),
+            hashlib.sha256,
+        ).hexdigest()
+    return contract
 
 def validate_multicam_trusted_director_channel_map(request, director_channel_camera_ids=None):
     channel_map = multicam_request_trusted_director_channel_map(request)
@@ -20597,6 +20779,10 @@ async def multicam_preflight_sync(request: RenderMultiCamRequest):
                 else (request.overlapDuration if request.overlapDuration else None)
             ),
         )
+        trusted_sync_contract = build_signed_multicam_preflight_sync_contract(request, result)
+        if trusted_sync_contract:
+            result["trusted_sync_contract"] = trusted_sync_contract
+            result["trustedSyncContract"] = trusted_sync_contract
         logger.info(
             "PREFLIGHT_SYNC_RESULT job=%s status=%s cameras=%s",
             job_id,
@@ -22696,6 +22882,13 @@ async def render_multicam_impl(
 ):
     if len(request.sources or []) < 2:
         raise HTTPException(status_code=400, detail="At least two camera sources are required")
+    if env_flag("MULTICAM_FAST_NO_CAPTIONS", default=False) and bool(
+        request.burn_captions or request.burnCaptions
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="Caption render must use the caption-capable Cam Combiner job",
+        )
 
     render_wall_started_at = time.time()
     render_perf_started_at = time.perf_counter()
@@ -23261,29 +23454,49 @@ async def render_multicam_impl(
                     timeline_duration_seconds=overlap_duration,
                 )
                 preflight_cache_path = multicam_receipt_cache_path("preflight", preflight_cache_payload)
-                preflight = read_multicam_receipt_cache(
-                    preflight_cache_path,
-                    max_age_seconds=float(os.getenv("MULTICAM_PREFLIGHT_RECEIPT_CACHE_MAX_AGE_SECONDS", "1209600") or 1209600),
-                )
-                if preflight and preflight.get("status") in {"good", "questionable", "unsafe"}:
-                    preflight["cache_hit"] = True
-                    preflight["cache_path"] = preflight_cache_path
-                    logger.info("PREFLIGHT CACHE HIT %s: %s", job_id, preflight_cache_path)
-                else:
-                    preflight = await preflight_multicam_sync(
-                        source_paths,
-                        source_offsets,
-                        ext_local,
+                if trusted_sync_contract_receipt.get("trusted"):
+                    # The user-facing preflight already decoded and correlated
+                    # start/middle/end for this exact source identity and render
+                    # window. Its signed contract is verified above, so doing the
+                    # same three correlations inside the Job only burns time and
+                    # money. Continuous anchors and the post-render audit still run.
+                    preflight = {
+                        "status": "good",
+                        "cameras": {},
+                        "cache_hit": True,
+                        "cache_path": preflight_cache_path,
+                        "proof_reuse": "signed_server_sync_preflight_v1",
+                        "trusted_sync_contract": trusted_sync_contract_receipt,
+                    }
+                    logger.info(
+                        "PREFLIGHT SIGNED CONTRACT REUSED %s: %s",
                         job_id,
-                        source_sync_rates,
-                        external_audio_offset_seconds=effective_external_audio_offset_seconds,
-                        timeline_start_seconds=overlap_start,
-                        timeline_duration_seconds=overlap_duration,
+                        trusted_sync_contract_receipt.get("contract_id"),
                     )
-                    preflight["cache_hit"] = False
-                    preflight["cache_path"] = preflight_cache_path
-                    if preflight.get("status") in {"good", "questionable", "unsafe"}:
-                        write_multicam_receipt_cache(preflight_cache_path, preflight)
+                else:
+                    preflight = read_multicam_receipt_cache(
+                        preflight_cache_path,
+                        max_age_seconds=float(os.getenv("MULTICAM_PREFLIGHT_RECEIPT_CACHE_MAX_AGE_SECONDS", "1209600") or 1209600),
+                    )
+                    if preflight and preflight.get("status") in {"good", "questionable", "unsafe"}:
+                        preflight["cache_hit"] = True
+                        preflight["cache_path"] = preflight_cache_path
+                        logger.info("PREFLIGHT CACHE HIT %s: %s", job_id, preflight_cache_path)
+                    else:
+                        preflight = await preflight_multicam_sync(
+                            source_paths,
+                            source_offsets,
+                            ext_local,
+                            job_id,
+                            source_sync_rates,
+                            external_audio_offset_seconds=effective_external_audio_offset_seconds,
+                            timeline_start_seconds=overlap_start,
+                            timeline_duration_seconds=overlap_duration,
+                        )
+                        preflight["cache_hit"] = False
+                        preflight["cache_path"] = preflight_cache_path
+                        if preflight.get("status") in {"good", "questionable", "unsafe"}:
+                            write_multicam_receipt_cache(preflight_cache_path, preflight)
                 logger.info(f"PREFLIGHT: {preflight['status']} — {preflight}")
                 preflight_piecewise_sync_corrections = apply_preflight_piecewise_sync_maps(preflight, prepared_sources)
                 if preflight["status"] == "unsafe":

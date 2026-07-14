@@ -1,0 +1,15 @@
+# Lean Cam Combiner runtime for renders that do not request burned captions.
+# Keep transcription, TTS, MoviePy, downloaders, and their model weights out of
+# this image: they add cold-start bytes but are never used by this render path.
+ffmpeg-python
+opencv-python-headless
+Pillow
+numpy
+
+fastapi
+uvicorn
+python-multipart
+requests
+python-dotenv
+
+firebase-admin
