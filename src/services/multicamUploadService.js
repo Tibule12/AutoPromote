@@ -40,6 +40,10 @@ function getRetentionHours() {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_RETENTION_HOURS;
 }
 
+function getDeleteAfterFromCompletion(completedAtMs = Date.now()) {
+  return new Date(completedAtMs + getRetentionHours() * 60 * 60 * 1000).toISOString();
+}
+
 function buildIngestStoragePath({ userId, fileName, sizeBytes, lastModified, fingerprint }) {
   const identity = [
     userId,
@@ -231,7 +235,7 @@ async function startMulticamUpload({
     fingerprint,
   });
   const downloadToken = crypto.randomUUID();
-  const deleteAfter = new Date(Date.now() + getRetentionHours() * 60 * 60 * 1000).toISOString();
+  const uploadStartedAt = new Date().toISOString();
   const bucket = admin.storage().bucket(bucketName);
   const file = bucket.file(storagePath);
   const [uploadUrl] = await file.createResumableUpload({
@@ -245,7 +249,7 @@ async function startMulticamUpload({
         ownerUid: userId,
         purpose: normalizedPurpose,
         expectedSizeBytes: String(normalizedSize),
-        deleteAfter,
+        uploadStartedAt,
         firebaseStorageDownloadTokens: downloadToken,
       },
     },
@@ -256,7 +260,7 @@ async function startMulticamUpload({
     storagePath,
     bucketName,
     downloadToken,
-    deleteAfter,
+    deleteAfter: null,
     expectedSizeBytes: normalizedSize,
     chunkSizeBytes: 16 * 1024 * 1024,
   };
@@ -295,13 +299,27 @@ async function completeMulticamUpload({ userId, storagePath, downloadToken, size
     throw error;
   }
 
+  // Retention starts only after Firebase has finalized the complete object.
+  // Starting this clock when a resumable upload session is created steals
+  // hours from large uploads and can make a freshly completed source expire.
+  const completedAt = new Date();
+  const deleteAfter = getDeleteAfterFromCompletion(completedAt.getTime());
+  await file.setMetadata({
+    customTime: completedAt.toISOString(),
+    metadata: {
+      ...customMetadata,
+      uploadCompletedAt: completedAt.toISOString(),
+      deleteAfter,
+    },
+  });
+
   return {
     url: buildFirebaseDownloadUrl(bucketName, storagePath, downloadToken),
     storagePath,
     bucketName,
     size: actualSize,
     generation: metadata.generation || null,
-    deleteAfter: customMetadata.deleteAfter || null,
+    deleteAfter,
     cacheKey: `${bucketName}/${storagePath}#${metadata.generation || "current"}`,
   };
 }

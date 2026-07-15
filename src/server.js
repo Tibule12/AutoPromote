@@ -1,4 +1,14 @@
 require("dotenv").config(); // Load environment variables from .env file
+
+// Render environment values are strings and may acquire whitespace when copied
+// from the dashboard. Canonicalize the flag once so every health check and
+// background loop reads the same value. Keep the historical misspelling as a
+// compatibility fallback.
+const rawBackgroundJobsFlag =
+  process.env.ENABLE_BACKGROUND_JOBS ?? process.env.ENABLE_BACKROUND_JOBS;
+if (rawBackgroundJobsFlag !== undefined) {
+  process.env.ENABLE_BACKGROUND_JOBS = String(rawBackgroundJobsFlag).trim().toLowerCase();
+}
 // Bootstrap: ensure Firebase service account env is materialized as a credentials file
 require("./bootstrap");
 // This helps hosts (Render, Docker) that only provide the JSON via env var instead of a file path.
@@ -2939,10 +2949,13 @@ try {
 
   // Leader election: only one instance (the leader) should launch intervals.
   let __isLeader = false;
+  // This ID must remain stable for the lifetime of the process. Generating a
+  // new UUID on every renewal makes the current leader look like a stranger
+  // and causes it to lose its own lease.
+  const backgroundLeaderId = require("crypto").randomUUID();
   const electLeader = async () => {
     try {
       const { db } = require("./firebaseAdmin");
-      const id = require("crypto").randomUUID();
       const doc = db.collection("system_locks").doc("bg_leader");
       const now = Date.now();
       const leaseMs = parseInt(process.env.LEADER_LEASE_MS || "120000", 10); // 2m lease
@@ -2951,14 +2964,18 @@ try {
         const v = snap.exists ? snap.data() : null;
         if (v && v.expiresAt && v.expiresAt > now) {
           // Existing leader valid
-          if (v.owner === id) {
+          if (v.owner === backgroundLeaderId) {
             tx.update(doc, { expiresAt: now + leaseMs });
             __isLeader = true;
           } else {
             __isLeader = false;
           }
         } else {
-          tx.set(doc, { owner: id, expiresAt: now + leaseMs, renewedAt: now });
+          tx.set(doc, {
+            owner: backgroundLeaderId,
+            expiresAt: now + leaseMs,
+            renewedAt: now,
+          });
           __isLeader = true;
         }
       });
