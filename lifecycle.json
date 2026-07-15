@@ -19,7 +19,7 @@
       {
         "action": { "type": "Delete" },
         "condition": {
-          "age": 3,
+          "daysSinceCustomTime": 3,
           "matchesPrefix": ["temp/multicam-ingest/"]
         }
       },
