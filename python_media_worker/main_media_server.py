@@ -17153,8 +17153,39 @@ def validate_multicam_trusted_sync_contract(request, overlap_start, overlap_dura
 
 
 def _multicam_sync_contract_signature_payload(contract):
-    unsigned = dict(contract or {})
+    # JSON.stringify collapses whole-valued floats (120.0 -> 120) while
+    # Python's json.dumps preserves the decimal. The contract crosses the
+    # browser, Node, Firestore, and Cloud Run before verification, so normalize
+    # schema numeric fields back to floats before hashing. Their values are
+    # unchanged; this only gives equivalent JSON numbers one canonical form.
+    unsigned = json.loads(json.dumps(dict(contract or {}), default=str))
     unsigned.pop("signature", None)
+
+    def normalize_number(container, key):
+        if not isinstance(container, dict) or key not in container:
+            return
+        value = container.get(key)
+        if value is None or isinstance(value, bool):
+            return
+        try:
+            container[key] = float(value)
+        except (TypeError, ValueError):
+            return
+
+    for key in ("issued_at_unix", "expires_at_unix"):
+        normalize_number(unsigned, key)
+
+    raw_sources = unsigned.get("sources") or unsigned.get("source_sync") or unsigned.get("sourceSync")
+    source_items = raw_sources.values() if isinstance(raw_sources, dict) else raw_sources or []
+    for source_sync in source_items:
+        for key in ("offset_seconds", "offset", "sync_rate", "syncRate"):
+            normalize_number(source_sync, key)
+
+    timeline_windows = unsigned.get("timeline_windows") or unsigned.get("timelineWindows") or []
+    for window in timeline_windows if isinstance(timeline_windows, list) else []:
+        for key in ("start", "end"):
+            normalize_number(window, key)
+
     return json.dumps(unsigned, sort_keys=True, separators=(",", ":"), default=str).encode("utf-8")
 
 

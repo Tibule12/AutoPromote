@@ -3100,6 +3100,23 @@ class MulticamDirectorRuleTests(unittest.TestCase):
 
             self.assertTrue(receipt["trusted"])
             self.assertEqual(receipt["contract_id"], contract["id"])
+
+            # Browser JSON.stringify and Firestore turn whole-valued floats
+            # into integers. That representation change must not invalidate a
+            # contract whose numeric values are identical.
+            browser_round_trip = json.loads(json.dumps(contract))
+            browser_round_trip["timeline_windows"][0]["start"] = 750
+            browser_round_trip["timeline_windows"][0]["end"] = 810
+            browser_round_trip_request = request.copy(
+                update={"trusted_sync_contract": browser_round_trip}
+            )
+            round_trip_receipt = worker.validate_multicam_trusted_sync_contract(
+                browser_round_trip_request,
+                750.0,
+                60.0,
+            )
+            self.assertTrue(round_trip_receipt["trusted"])
+
             tampered = json.loads(json.dumps(contract))
             tampered["sources"]["cam1"]["offset_seconds"] += 0.5
             tampered_request = request.copy(update={"trusted_sync_contract": tampered})
