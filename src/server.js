@@ -6,17 +6,30 @@ require("dotenv").config(); // Load environment variables from .env file
 // compatibility fallback.
 const rawBackgroundJobsFlag =
   process.env.ENABLE_BACKGROUND_JOBS ?? process.env.ENABLE_BACKROUND_JOBS;
-if (rawBackgroundJobsFlag !== undefined) {
-  process.env.ENABLE_BACKGROUND_JOBS = String(rawBackgroundJobsFlag).trim().toLowerCase();
-} else if (String(process.env.RENDER || "").trim().toLowerCase() === "true") {
-  // AutoPromote's Render service is the durable scheduler host. If Render
-  // fails to inject a dashboard variable during a rollout, keep cleanup alive
-  // instead of silently leaking temporary storage. An explicit false above is
-  // still respected.
+const isRenderRuntime = [
+  process.env.RENDER,
+  process.env.RENDER_SERVICE_ID,
+  process.env.RENDER_EXTERNAL_HOSTNAME,
+].some(value => String(value || "").trim().length > 0);
+const isDedicatedProductionApi =
+  process.env.NODE_ENV === "production" &&
+  !process.env.K_SERVICE &&
+  !process.env.FUNCTION_TARGET &&
+  !process.env.AWS_LAMBDA_FUNCTION_NAME &&
+  !process.env.VERCEL;
+
+if (isRenderRuntime || isDedicatedProductionApi) {
+  // This dedicated API is AutoPromote's scheduler host. Do not let duplicate
+  // or stale host configuration silently turn off storage cleanup. Serverless
+  // runtimes are excluded above because they cannot own durable intervals.
   process.env.ENABLE_BACKGROUND_JOBS = "true";
-  console.warn(
-    "[startup] Render did not inject ENABLE_BACKGROUND_JOBS; defaulting background jobs to enabled."
-  );
+  if (String(rawBackgroundJobsFlag || "").trim().toLowerCase() !== "true") {
+    console.warn(
+      "[startup] Dedicated production API received background jobs as disabled; forcing them on."
+    );
+  }
+} else if (rawBackgroundJobsFlag !== undefined) {
+  process.env.ENABLE_BACKGROUND_JOBS = String(rawBackgroundJobsFlag).trim().toLowerCase();
 }
 // Bootstrap: ensure Firebase service account env is materialized as a credentials file
 require("./bootstrap");
