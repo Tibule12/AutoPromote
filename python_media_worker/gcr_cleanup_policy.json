@@ -1,0 +1,34 @@
+[
+  {
+    "name": "delete-untagged-after-3-days",
+    "action": { "type": "Delete" },
+    "condition": {
+      "tagState": "untagged",
+      "olderThan": "3d"
+    }
+  },
+  {
+    "name": "delete-stale-build-cache-after-14-days",
+    "action": { "type": "Delete" },
+    "condition": {
+      "tagState": "any",
+      "packageNamePrefixes": ["cam-combiner-worker/cache"],
+      "olderThan": "14d"
+    }
+  },
+  {
+    "name": "keep-latest-production-tags",
+    "action": { "type": "Keep" },
+    "condition": {
+      "tagState": "tagged",
+      "tagPrefixes": ["latest"]
+    }
+  },
+  {
+    "name": "keep-three-rollbacks",
+    "action": { "type": "Keep" },
+    "mostRecentVersions": {
+      "keepCount": 3
+    }
+  }
+]
