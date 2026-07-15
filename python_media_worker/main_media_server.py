@@ -476,6 +476,10 @@ def build_multicam_segment_encode_args():
         "libx264",
         "-preset",
         "ultrafast",
+        # Two four-thread segment encodes keep an 8-vCPU Cloud Run job busy
+        # without letting each short FFmpeg process oversubscribe the machine.
+        "-threads",
+        os.getenv("MULTICAM_X264_THREADS", "4"),
         "-pix_fmt",
         "yuv420p",
         *color_args,
@@ -15600,14 +15604,45 @@ def enforce_reaction_overlay_on_multicam_segments(segments, prepared_sources, en
                 )
         enforced.append(updated)
 
-    # The UI presents this as a smart reaction insert, not as a permission that
-    # may silently do nothing. Keep normal speaker cuts clean, but when the
-    # director found a genuinely active companion and produced no PiP at all,
-    # promote the strongest short moment into one reaction window.
-    if not any(
-        normalize_multicam_layout_mode(item.get("layout_mode", "cut") or "cut") == "pip"
-        for item in enforced
-    ):
+    # The UI presents this as a smart reaction treatment, not a one-shot flag.
+    # Keep normal/zoomed speaker cuts clean, but distribute a restrained number
+    # of earned reaction moments across the program. Previously, the presence
+    # of a single PiP (often at 00:00) prevented every later reaction, even in a
+    # full podcast.
+    if enforced:
+        program_start = min(float(item.get("timeline_start", 0.0) or 0.0) for item in enforced)
+        program_end = max(
+            float(item.get("timeline_end", item.get("timeline_start", 0.0)) or 0.0)
+            for item in enforced
+        )
+        program_duration = max(0.0, program_end - program_start)
+        reaction_interval_seconds = clamp_float(
+            float(os.getenv("MULTICAM_REACTION_INSERT_INTERVAL_SECONDS", "40") or 40),
+            24.0,
+            120.0,
+        )
+        max_reaction_inserts = max(
+            1,
+            int(os.getenv("MULTICAM_REACTION_MAX_INSERTS", "90") or 90),
+        )
+        target_reaction_count = min(
+            max_reaction_inserts,
+            max(1, int(math.ceil(program_duration / reaction_interval_seconds))),
+        )
+        existing_reaction_indexes = [
+            index
+            for index, item in enumerate(enforced)
+            if normalize_multicam_layout_mode(item.get("layout_mode", "cut") or "cut") == "pip"
+        ]
+        reaction_centers = [
+            (
+                float(enforced[index].get("timeline_start", 0.0) or 0.0)
+                + float(enforced[index].get("timeline_end", 0.0) or 0.0)
+            )
+            / 2.0
+            for index in existing_reaction_indexes
+        ]
+        needed_reaction_count = max(0, target_reaction_count - len(existing_reaction_indexes))
         candidates = []
         for index, item in enumerate(enforced):
             if normalize_multicam_layout_mode(item.get("layout_mode", "cut") or "cut") != "cut":
@@ -15646,12 +15681,32 @@ def enforce_reaction_overlay_on_multicam_segments(segments, prepared_sources, en
             if companion_activity < 0.35 and reaction_story_value < 0.25:
                 continue
             score = (reaction_story_value * 1.5) + companion_activity + min(duration, 6.0) * 0.01
-            candidates.append((score, index, secondary_camera_id))
+            center = timeline_start + (duration / 2.0)
+            candidates.append((score, index, secondary_camera_id, center))
 
-        if candidates:
-            _score, selected_index, secondary_camera_id = max(
-                candidates,
-                key=lambda candidate: (candidate[0], candidate[1]),
+        minimum_spacing = reaction_interval_seconds * 0.55
+        while needed_reaction_count > 0 and candidates:
+            spaced_candidates = [
+                candidate
+                for candidate in candidates
+                if not reaction_centers
+                or min(abs(candidate[3] - center) for center in reaction_centers) >= minimum_spacing
+            ]
+            # Very short proofs may not contain two moments a full interval
+            # apart. Relax once, but never stack reaction windows back-to-back.
+            if not spaced_candidates:
+                relaxed_spacing = min(12.0, max(5.0, program_duration * 0.18))
+                spaced_candidates = [
+                    candidate
+                    for candidate in candidates
+                    if not reaction_centers
+                    or min(abs(candidate[3] - center) for center in reaction_centers) >= relaxed_spacing
+                ]
+            if not spaced_candidates:
+                break
+            _score, selected_index, secondary_camera_id, selected_center = max(
+                spaced_candidates,
+                key=lambda candidate: (candidate[0], candidate[3]),
             )
             selected = dict(enforced[selected_index])
             selected["layout_mode"] = "pip"
@@ -15667,6 +15722,9 @@ def enforce_reaction_overlay_on_multicam_segments(segments, prepared_sources, en
                 else "smart_reaction_insert"
             )
             enforced[selected_index] = selected
+            reaction_centers.append(selected_center)
+            candidates = [candidate for candidate in candidates if candidate[1] != selected_index]
+            needed_reaction_count -= 1
     return enforced
 
 def audit_multicam_layout_contract(segments, prepared_sources, output_width=None, output_height=None):
@@ -21710,12 +21768,12 @@ async def build_continuous_sync_anchor_maps(
 
 
 def analyze_multicam_color_profile(video_path, sample_start=0.0, sample_duration=90.0, pre_filter=""):
-    # 320x180 is still cheap (twelve frames for a 60-second proof), but large
-    # enough to detect faces and distinguish neutral walls from saturated TV
-    # graphics. The old 64x36 whole-frame mean let screens and clothing choose
-    # the white balance, which made skin orange/green in mixed-camera renders.
-    width = 320
-    height = 180
+    # Twelve 480x270 frames are still cheap, while retaining enough facial
+    # structure for profile/angled podcast guests. Production previously used
+    # one 320x180 frontal cascade; a zero-detection result silently reduced the
+    # promised face-aware grade to a whole-frame average.
+    width = 480
+    height = 270
     frame_bytes = width * height * 3
     safe_start = max(0.0, float(sample_start or 0.0))
     safe_duration = max(1.0, float(sample_duration or 1.0))
@@ -21775,43 +21833,126 @@ def analyze_multicam_color_profile(video_path, sample_start=0.0, sample_duration
         )
     neutral_pixels = pixels[neutral_mask]
 
-    face_luma_samples = []
+    haar_face_luma_samples = []
+    subject_midtone_luma_samples = []
     face_detection_count = 0
+    subject_midtone_sample_count = 0
+    face_detection_methods = set()
     try:
-        face_detector = cv2.CascadeClassifier(
-            cv2.data.haarcascades + "haarcascade_frontalface_alt.xml"
-        )
-        if not face_detector.empty():
-            for frame in frames:
-                frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-                gray = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2GRAY)
-                detections = face_detector.detectMultiScale(
-                    gray,
-                    scaleFactor=1.05,
+        detector_specs = [
+            ("frontal_default", "haarcascade_frontalface_default.xml", False),
+            ("frontal_alt2", "haarcascade_frontalface_alt2.xml", False),
+            ("profile", "haarcascade_profileface.xml", False),
+            ("profile_mirrored", "haarcascade_profileface.xml", True),
+        ]
+        face_detectors = []
+        for method, filename, mirrored in detector_specs:
+            detector_path = os.path.join(cv2.data.haarcascades, filename)
+            detector = cv2.CascadeClassifier(detector_path)
+            if not detector.empty():
+                face_detectors.append((method, detector, mirrored))
+
+        for frame in frames:
+            frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+            gray = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2GRAY)
+            equalized_gray = cv2.equalizeHist(gray)
+            detection_candidates = []
+            for method, detector, mirrored in face_detectors:
+                detector_input = cv2.flip(equalized_gray, 1) if mirrored else equalized_gray
+                detections = detector.detectMultiScale(
+                    detector_input,
+                    scaleFactor=1.07,
                     minNeighbors=3,
-                    minSize=(18, 18),
+                    minSize=(24, 24),
+                    maxSize=(int(width * 0.48), int(height * 0.86)),
                 )
-                if len(detections) == 0:
-                    continue
-                x, y, face_width, face_height = max(
-                    detections,
-                    key=lambda detection: int(detection[2]) * int(detection[3]),
-                )
+                for x, y, face_width, face_height in detections:
+                    mapped_x = width - int(x) - int(face_width) if mirrored else int(x)
+                    detection_candidates.append(
+                        (
+                            int(face_width) * int(face_height),
+                            mapped_x,
+                            int(y),
+                            int(face_width),
+                            int(face_height),
+                            method,
+                        )
+                    )
+
+            if detection_candidates:
+                _area, x, y, face_width, face_height, method = max(detection_candidates)
                 inset_x = max(1, int(face_width * 0.10))
                 inset_y = max(1, int(face_height * 0.10))
                 face_rgb = frame[
                     y + inset_y : y + face_height - inset_y,
                     x + inset_x : x + face_width - inset_x,
                 ].reshape((-1, 3)).astype(np.float32)
-                if face_rgb.size <= 0:
+                if face_rgb.size > 0:
+                    haar_face_luma_samples.append(
+                        (0.2126 * face_rgb[:, 0])
+                        + (0.7152 * face_rgb[:, 1])
+                        + (0.0722 * face_rgb[:, 2])
+                    )
+                    face_detection_count += 1
+                    face_detection_methods.add(method)
                     continue
-                face_luma = (
-                    (0.2126 * face_rgb[:, 0])
-                    + (0.7152 * face_rgb[:, 1])
-                    + (0.0722 * face_rgb[:, 2])
+
+            # Cascades can still miss dark skin, side profiles, hats, or a
+            # container image whose Haar data is incomplete. Use a bounded
+            # upper-frame skin-region estimate for exposure only; record it as
+            # a subject fallback instead of pretending it was a face detection.
+            ycrcb = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2YCrCb)
+            skin_mask = cv2.inRange(
+                ycrcb,
+                np.array([20, 122, 68], dtype=np.uint8),
+                np.array([245, 188, 142], dtype=np.uint8),
+            )
+            skin_mask[int(height * 0.84) :, :] = 0
+            kernel = np.ones((3, 3), np.uint8)
+            skin_mask = cv2.morphologyEx(skin_mask, cv2.MORPH_OPEN, kernel)
+            skin_mask = cv2.morphologyEx(skin_mask, cv2.MORPH_CLOSE, kernel, iterations=2)
+            component_count, _labels, stats, centroids = cv2.connectedComponentsWithStats(
+                skin_mask,
+                connectivity=8,
+            )
+            fallback_candidates = []
+            frame_area = float(width * height)
+            for component_index in range(1, component_count):
+                x, y, region_width, region_height, region_area = [
+                    int(value) for value in stats[component_index]
+                ]
+                if region_area < frame_area * 0.0015 or region_area > frame_area * 0.09:
+                    continue
+                if region_width < 12 or region_height < 14:
+                    continue
+                aspect = float(region_width) / max(1.0, float(region_height))
+                center_x, center_y = centroids[component_index]
+                if aspect < 0.38 or aspect > 1.85 or center_y > height * 0.72:
+                    continue
+                edge_penalty = 0.65 if center_x < width * 0.04 or center_x > width * 0.96 else 1.0
+                upper_weight = 1.25 - min(0.65, float(center_y) / max(1.0, height))
+                fallback_candidates.append(
+                    (region_area * edge_penalty * upper_weight, x, y, region_width, region_height)
                 )
-                face_luma_samples.append(face_luma)
-                face_detection_count += 1
+            if fallback_candidates:
+                _score, x, y, region_width, region_height = max(fallback_candidates)
+                # Tall skin components often include neck/arms. Keep the upper,
+                # face-sized portion so clothing and furniture cannot set skin exposure.
+                sampled_height = min(region_height, max(18, int(region_width * 1.30)))
+                pad_x = max(2, int(region_width * 0.10))
+                pad_y = max(2, int(sampled_height * 0.08))
+                x0 = max(0, x - pad_x)
+                x1 = min(width, x + region_width + pad_x)
+                y0 = max(0, y - pad_y)
+                y1 = min(height, y + sampled_height + pad_y)
+                subject_rgb = frame[y0:y1, x0:x1].reshape((-1, 3)).astype(np.float32)
+                if subject_rgb.size > 0:
+                    subject_midtone_luma_samples.append(
+                        (0.2126 * subject_rgb[:, 0])
+                        + (0.7152 * subject_rgb[:, 1])
+                        + (0.0722 * subject_rgb[:, 2])
+                    )
+                    subject_midtone_sample_count += 1
     except Exception as face_error:
         logger.warning("Multicam face exposure analysis skipped: %s", face_error)
 
@@ -21836,16 +21977,23 @@ def analyze_multicam_color_profile(video_path, sample_start=0.0, sample_duration
             "neutral_median_g": round(float(neutral_median[1]), 3),
             "neutral_median_b": round(float(neutral_median[2]), 3),
         })
-    if face_luma_samples:
-        combined_face_luma = np.concatenate(face_luma_samples)
+    exposure_samples = haar_face_luma_samples or subject_midtone_luma_samples
+    if exposure_samples:
+        combined_face_luma = np.concatenate(exposure_samples)
         profile.update({
             "face_detection_count": face_detection_count,
+            "face_detection_methods": sorted(face_detection_methods),
+            "subject_midtone_sample_count": subject_midtone_sample_count,
+            "face_exposure_source": "haar_face" if haar_face_luma_samples else "skin_subject_fallback",
             "face_luma_mean": round(float(np.mean(combined_face_luma)), 3),
             "face_luma_median": round(float(np.median(combined_face_luma)), 3),
             "face_luma_p90": round(float(np.percentile(combined_face_luma, 90.0)), 3),
         })
     else:
         profile["face_detection_count"] = 0
+        profile["face_detection_methods"] = []
+        profile["subject_midtone_sample_count"] = 0
+        profile["face_exposure_source"] = "global_frame_fallback"
     return profile
 
 
@@ -21868,7 +22016,10 @@ def build_multicam_color_match_filter(reference_profile, source_profile):
         if ref_face_luma > 0.0 and src_face_luma > 0.0
         else global_exposure_ratio
     )
-    bounded_global_ratio = global_exposure_ratio ** 0.65
+    # A valid face sample must not make an underlit background darker than the
+    # already acceptable global fallback. Keep most of the whole-frame lift,
+    # then allow the face ratio to increase it when skin itself is darker.
+    bounded_global_ratio = global_exposure_ratio ** 0.90
     exposure_ratio = (
         max(face_exposure_ratio, bounded_global_ratio)
         if global_exposure_ratio >= 1.0
@@ -21894,8 +22045,12 @@ def build_multicam_color_match_filter(reference_profile, source_profile):
         blue_relative_delta = (
             ((ref_neutral_b - ref_neutral_g) - (src_neutral_b - src_neutral_g)) / 255.0
         )
-        red_shift = clamp_float(red_relative_delta * 0.42, -0.030, 0.030)
-        blue_shift = clamp_float(blue_relative_delta * 0.72, -0.040, 0.040)
+        # Each camera receives its own restrained neutral correction first.
+        # This residual match should only close the remaining camera-to-camera
+        # gap; the previous stronger shifts copied a warm reference cast onto
+        # every source and made skin look orange/pink.
+        red_shift = clamp_float(red_relative_delta * 0.18, -0.014, 0.014)
+        blue_shift = clamp_float(blue_relative_delta * 0.22, -0.018, 0.018)
         green_shift = clamp_float(-(red_shift + blue_shift) * 0.12, -0.008, 0.008)
     else:
         warmth_delta = float(reference_profile.get("warmth") or 0.0) - float(
@@ -21913,6 +22068,43 @@ def build_multicam_color_match_filter(reference_profile, source_profile):
         f"rs={red_shift:.5f}:gs={green_shift:.5f}:bs={blue_shift:.5f}:"
         f"rm={red_shift * 0.72:.5f}:gm={green_shift * 0.72:.5f}:bm={blue_shift * 0.72:.5f},"
         f"eq=gamma={gamma:.5f}:contrast={contrast:.5f}:saturation={saturation:.5f}"
+    )
+
+
+def build_multicam_neutral_white_balance_filter(profile):
+    """Build a restrained per-camera neutral correction before cross-camera matching."""
+    neutral_keys = ("neutral_median_r", "neutral_median_g", "neutral_median_b")
+    if not profile or not all(profile.get(key) is not None for key in neutral_keys):
+        return ""
+    neutral_ratio = float(profile.get("neutral_sample_ratio") or 0.0)
+    if neutral_ratio < 0.01:
+        return ""
+
+    neutral_r = float(profile["neutral_median_r"])
+    neutral_g = float(profile["neutral_median_g"])
+    neutral_b = float(profile["neutral_median_b"])
+    correction_strength = clamp_float(
+        float(os.getenv("MULTICAM_NEUTRAL_WB_STRENGTH", "0.22") or 0.22),
+        0.0,
+        0.42,
+    )
+    red_shift = clamp_float(
+        -((neutral_r - neutral_g) / 255.0) * correction_strength,
+        -0.018,
+        0.018,
+    )
+    blue_shift = clamp_float(
+        -((neutral_b - neutral_g) / 255.0) * correction_strength,
+        -0.026,
+        0.026,
+    )
+    green_shift = clamp_float(-(red_shift + blue_shift) * 0.10, -0.005, 0.005)
+    if max(abs(red_shift), abs(green_shift), abs(blue_shift)) < 0.0005:
+        return ""
+    return (
+        "colorbalance="
+        f"rs={red_shift:.5f}:gs={green_shift:.5f}:bs={blue_shift:.5f}:"
+        f"rm={red_shift * 0.80:.5f}:gm={green_shift * 0.80:.5f}:bm={blue_shift * 0.80:.5f}"
     )
 
 
@@ -22041,7 +22233,10 @@ def build_multicam_color_receipt_cache_payload(
     auto_color_match_enabled=False,
 ):
     return {
-        "version": 9,
+        # Version 10 adds multi-cascade/subject exposure analysis and per-camera
+        # neutral white balance. Never reuse a receipt that silently recorded
+        # zero faces under the old 320x180 single-cascade analyzer.
+        "version": 10,
         "overlap_start": round(float(overlap_start or 0.0), 3),
         "overlap_duration": round(float(overlap_duration or 0.0), 3),
         "reference_index": int(reference_index or 0),
@@ -22159,10 +22354,12 @@ def apply_multicam_color_receipt_to_sources(receipt, prepared_sources):
         color_metadata = item.get("color_metadata") or source.get("color_metadata") or {}
         source["color_metadata"] = color_metadata
         source["base_color_filter"] = item.get("base_color_filter") or build_multicam_base_color_filter(color_metadata)
+        source["neutral_white_balance_filter"] = item.get("neutral_white_balance_filter") or ""
         source["color_match_filter"] = item.get("filter") or ""
         source["cinematic_polish_filter"] = item.get("cinematic_polish_filter") or build_multicam_cinematic_polish_filter()
         source["source_visual_filter"] = item.get("source_visual_filter") or combine_multicam_filter_chains(
             source.get("base_color_filter"),
+            source.get("neutral_white_balance_filter"),
             source.get("color_match_filter"),
             source.get("cinematic_polish_filter"),
         )
@@ -22381,6 +22578,7 @@ def build_multicam_proxy_visual_filter(source, proxy_width, proxy_height):
     return combine_multicam_filter_chains(
         multicam_rotation_filter(source.get("rotation_degrees", 0)).strip(","),
         source.get("base_color_filter"),
+        source.get("neutral_white_balance_filter"),
         source.get("color_match_filter"),
         f"scale={int(proxy_width)}:{int(proxy_height)}:flags=lanczos",
         "setsar=1",
@@ -22561,6 +22759,7 @@ async def apply_multicam_color_matching(prepared_sources, overlap_start, overlap
             base_color_filter = build_multicam_base_color_filter(color_metadata)
             source["color_metadata"] = color_metadata
             source["base_color_filter"] = base_color_filter
+            source["neutral_white_balance_filter"] = ""
             source["color_match_filter"] = ""
             source["cinematic_polish_filter"] = cinematic_polish_filter
             source["source_visual_filter"] = combine_multicam_filter_chains(
@@ -22575,6 +22774,7 @@ async def apply_multicam_color_matching(prepared_sources, overlap_start, overlap
                 "role": "reference" if index == safe_reference_index else "normalized",
                 "color_metadata": color_metadata,
                 "base_color_filter": base_color_filter,
+                "neutral_white_balance_filter": "",
                 "filter": "",
                 "cinematic_polish_filter": cinematic_polish_filter,
                 "source_visual_filter": source.get("source_visual_filter") or "",
@@ -22595,6 +22795,7 @@ async def apply_multicam_color_matching(prepared_sources, overlap_start, overlap
         base_color_filter = build_multicam_base_color_filter(color_metadata)
         source["color_metadata"] = color_metadata
         source["base_color_filter"] = base_color_filter
+        source["neutral_white_balance_filter"] = ""
         source["color_match_filter"] = ""
         source["cinematic_polish_filter"] = cinematic_polish_filter
         source["source_visual_filter"] = combine_multicam_filter_chains(base_color_filter, cinematic_polish_filter)
@@ -22610,6 +22811,13 @@ async def apply_multicam_color_matching(prepared_sources, overlap_start, overlap
                 pre_filter=base_color_filter,
             )
             source["color_profile"] = profile
+            neutral_white_balance_filter = build_multicam_neutral_white_balance_filter(profile)
+            source["neutral_white_balance_filter"] = neutral_white_balance_filter
+            source["source_visual_filter"] = combine_multicam_filter_chains(
+                base_color_filter,
+                neutral_white_balance_filter,
+                cinematic_polish_filter,
+            )
             receipt["sources"].append({
                 "id": source.get("id"),
                 "label": source.get("label"),
@@ -22617,6 +22825,7 @@ async def apply_multicam_color_matching(prepared_sources, overlap_start, overlap
                 "color_metadata": color_metadata,
                 "base_color_filter": base_color_filter,
                 "profile": profile,
+                "neutral_white_balance_filter": neutral_white_balance_filter,
                 "filter": "",
                 "cinematic_polish_filter": cinematic_polish_filter,
                 "source_visual_filter": source.get("source_visual_filter") or "",
@@ -22632,6 +22841,7 @@ async def apply_multicam_color_matching(prepared_sources, overlap_start, overlap
                 "error": str(color_error),
                 "color_metadata": color_metadata,
                 "base_color_filter": base_color_filter,
+                "neutral_white_balance_filter": "",
                 "filter": "",
                 "cinematic_polish_filter": cinematic_polish_filter,
                 "source_visual_filter": source.get("source_visual_filter") or "",
@@ -22664,6 +22874,7 @@ async def apply_multicam_color_matching(prepared_sources, overlap_start, overlap
         source["color_match_filter"] = color_filter
         source["source_visual_filter"] = combine_multicam_filter_chains(
             source.get("base_color_filter"),
+            source.get("neutral_white_balance_filter"),
             color_filter,
             source.get("cinematic_polish_filter"),
         )
@@ -22680,11 +22891,13 @@ async def apply_multicam_color_matching(prepared_sources, overlap_start, overlap
         if index == safe_reference_index:
             source["source_visual_filter"] = combine_multicam_filter_chains(
                 source.get("base_color_filter"),
+                source.get("neutral_white_balance_filter"),
                 source.get("cinematic_polish_filter"),
             )
         for item in receipt["sources"]:
             if item.get("id") == source.get("id"):
                 item["base_color_filter"] = source.get("base_color_filter") or ""
+                item["neutral_white_balance_filter"] = source.get("neutral_white_balance_filter") or ""
                 item["cinematic_polish_filter"] = source.get("cinematic_polish_filter") or ""
                 item["source_visual_filter"] = source.get("source_visual_filter") or ""
                 break
@@ -24550,6 +24763,15 @@ async def render_multicam_impl(
             checkpoint_render_segments = render_segments
 
         rendered_segment_count = 0
+        segment_render_concurrency = max(
+            1,
+            min(
+                len(render_segments) or 1,
+                # Conservative outside the dedicated 8-vCPU render jobs; both
+                # production job deploy scripts opt into two-way rendering.
+                int(os.getenv("MULTICAM_SEGMENT_RENDER_CONCURRENCY", "1") or 1),
+            ),
+        )
         for chunk in render_chunks:
             chunk_index = int(chunk["index"])
             chunk_duration = float(chunk["duration"])
@@ -24625,28 +24847,42 @@ async def render_multicam_impl(
                         checkpoint_receipt = None
 
             if not checkpoint_receipt:
-                for segment in chunk["segments"]:
-                    segment_index = rendered_segment_count
+                chunk_segments = list(chunk["segments"])
+                chunk_segment_start_index = rendered_segment_count
+                segment_render_semaphore = asyncio.Semaphore(segment_render_concurrency)
+
+                async def render_chunk_segment(segment_offset, segment):
+                    segment_index = chunk_segment_start_index + segment_offset
                     segment_output_path = os.path.join(
                         shared_tmp_dir,
                         f"{job_id}_multicam_segment_{segment_index}.mp4",
                     )
                     transient_segment_paths.append(segment_output_path)
-                    duration_receipt = await render_multicam_video_segment(
-                        segment,
-                        segment_output_path,
-                        segment_index,
-                        prepared_sources=prepared_sources,
-                        source_map=source_map,
-                        overlap_start=overlap_start,
-                        output_width=output_width,
-                        output_height=output_height,
-                        render_tier_profile=render_tier_profile,
-                        job_id=job_id,
-                    )
+                    async with segment_render_semaphore:
+                        duration_receipt = await render_multicam_video_segment(
+                            segment,
+                            segment_output_path,
+                            segment_index,
+                            prepared_sources=prepared_sources,
+                            source_map=source_map,
+                            overlap_start=overlap_start,
+                            output_width=output_width,
+                            output_height=output_height,
+                            render_tier_profile=render_tier_profile,
+                            job_id=job_id,
+                        )
+                    return segment_output_path, duration_receipt
+
+                chunk_render_results = await asyncio.gather(
+                    *[
+                        render_chunk_segment(segment_offset, segment)
+                        for segment_offset, segment in enumerate(chunk_segments)
+                    ]
+                )
+                for segment_output_path, duration_receipt in chunk_render_results:
                     segment_duration_receipts.append(duration_receipt)
                     chunk_part_paths.append(segment_output_path)
-                    rendered_segment_count += 1
+                rendered_segment_count += len(chunk_render_results)
 
                 if checkpointing_enabled:
                     chunk_concat_list_path = os.path.join(
@@ -24748,6 +24984,7 @@ async def render_multicam_impl(
             director_segment_count=len(director_segments),
             render_segment_merge=render_segment_merge_receipt,
             fast_composite=multicam_fast_composite_enabled(),
+            segment_render_concurrency=segment_render_concurrency,
             layout_summary=layout_summary,
         )
 
@@ -24829,7 +25066,9 @@ async def render_multicam_impl(
                     "-c:v",
                     "copy",
                     "-c:a",
-                    "aac",
+                    # The trimmed master is already AAC at the requested tier
+                    # bitrate; a second encode adds latency and generation loss.
+                    "copy",
                     "-shortest",
                     "-movflags",
                     "+faststart",
@@ -24883,7 +25122,10 @@ async def render_multicam_impl(
                         "-c:v",
                         "copy",
                         "-c:a",
-                        "aac",
+                        # render_multicam_audio_bed already produced the final
+                        # AAC master. Copy it during mux instead of paying for a
+                        # second full audio encode.
+                        "copy",
                         "-shortest",
                         "-movflags",
                         "+faststart",

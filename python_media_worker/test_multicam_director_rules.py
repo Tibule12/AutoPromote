@@ -584,6 +584,59 @@ class MulticamDirectorRuleTests(unittest.TestCase):
         self.assertEqual(enabled[1]["secondary_camera_id"], "cam1")
         self.assertTrue(enabled[1]["layout_reason"].startswith("smart_reaction_insert:"))
 
+    def test_smart_reaction_inserts_are_distributed_across_one_minute(self):
+        segments = [
+            {
+                "camera_id": "cam1",
+                "secondary_camera_id": "cam2",
+                "layout_mode": "pip",
+                "layout_reason": "reaction_accent",
+                "timeline_start": 0.0,
+                "timeline_end": 6.0,
+            },
+            {
+                "camera_id": "cam2",
+                "secondary_camera_id": None,
+                "layout_mode": "cut",
+                "layout_reason": "clean_channel_authority",
+                "timeline_start": 6.0,
+                "timeline_end": 30.0,
+                "audio_second_activity": 0.65,
+                "ranked_sources": [
+                    {"camera_id": "cam2", "audio_activity": 1.0},
+                    {"camera_id": "cam1", "audio_activity": 0.65},
+                ],
+            },
+            {
+                "camera_id": "cam1",
+                "secondary_camera_id": None,
+                "layout_mode": "cut",
+                "layout_reason": "clean_channel_authority",
+                "timeline_start": 30.0,
+                "timeline_end": 60.0,
+                "audio_second_activity": 0.72,
+                "ranked_sources": [
+                    {"camera_id": "cam1", "audio_activity": 1.0},
+                    {"camera_id": "cam2", "audio_activity": 0.72},
+                ],
+            },
+        ]
+
+        with mock.patch.dict(
+            os.environ,
+            {"MULTICAM_REACTION_INSERT_INTERVAL_SECONDS": "40"},
+        ):
+            enabled = worker.enforce_reaction_overlay_on_multicam_segments(
+                segments,
+                self.prepared_sources,
+                enabled=True,
+            )
+
+        reaction_segments = [segment for segment in enabled if segment["layout_mode"] == "pip"]
+        self.assertEqual(len(reaction_segments), 2)
+        self.assertEqual(reaction_segments[1]["timeline_start"], 30.0)
+        self.assertEqual(reaction_segments[1]["secondary_camera_id"], "cam2")
+
     def test_layout_contract_blocks_unknown_reaction_placement(self):
         audit = worker.audit_multicam_layout_contract(
             [
@@ -3456,16 +3509,20 @@ class MulticamDirectorRuleTests(unittest.TestCase):
             "contrast_luma": 63.073,
             "mean_chroma": 42.07,
             "face_luma_mean": 108.849,
+            "neutral_sample_ratio": 0.24,
             "neutral_median_r": 202.0,
             "neutral_median_g": 188.0,
             "neutral_median_b": 162.0,
         }
 
         color_filter = worker.build_multicam_color_match_filter(reference, underlit)
+        neutral_filter = worker.build_multicam_neutral_white_balance_filter(underlit)
 
-        self.assertIn("bs=0.02259", color_filter)
-        self.assertIn("gamma=1.094", color_filter)
+        self.assertIn("bs=0.00690", color_filter)
+        self.assertIn("gamma=1.132", color_filter)
         self.assertNotIn("brightness=", color_filter)
+        self.assertIn("rs=-0.01208", neutral_filter)
+        self.assertIn("bs=0.02243", neutral_filter)
 
 
 if __name__ == "__main__":
