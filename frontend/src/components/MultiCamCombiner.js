@@ -2370,49 +2370,39 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     startRenderStatusPolling(activeJob.jobId, activeJob);
   }, [startRenderStatusPolling]);
 
-  const handleReviewAction = useCallback(
-    async (job, action) => {
-      if (!job?.jobId || !["approve", "reject"].includes(action)) return;
+  const handleClearSavedRender = useCallback(
+    async job => {
+      if (!job?.jobId) return;
+      const shouldClear = window.confirm(
+        "Clear this saved master? Its rendered video, thumbnail, and manifest will be deleted. Your uploaded camera originals stay available until their normal expiry."
+      );
+      if (!shouldClear) return;
       try {
         const user = getAuth().currentUser;
-        if (!user) throw new Error("Sign in again to review this render.");
+        if (!user) throw new Error("Sign in again to clear this render.");
         const token = await user.getIdToken();
-        const response = await fetch(`${API_BASE_URL}/api/media/render-jobs/${job.jobId}/${action}`, {
-          method: "POST",
+        const response = await fetch(`${API_BASE_URL}/api/media/render-jobs/${job.jobId}`, {
+          method: "DELETE",
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
           },
-          body: JSON.stringify({ notes: "" }),
         });
         const data = await response.json().catch(() => ({}));
         if (!response.ok || !data.success) {
-          throw new Error(data.message || `Could not ${action} render.`);
+          throw new Error(data.message || "Could not clear saved render.");
         }
-
-        const updatedJob = data.job || {};
-        if (action === "approve" && canDownloadApprovedRender(updatedJob)) {
-          const approvedUrl = updatedJob.outputUrl || updatedJob.output_url;
-          setExportResult({
-            url: approvedUrl,
-            file: { name: `multicam-master-${Date.now()}.mp4` },
-            duration: updatedJob.duration || job.duration || 0,
-            isServerRender: true,
-          });
-          setPendingRenderReview(null);
-          setStatusMessage("Render approved. Download is available.");
-        } else if (action === "reject") {
+        setRecentRenders(current => current.filter(render => render.jobId !== job.jobId));
+        if (pendingRenderReview?.jobId === job.jobId) {
           setExportResult(null);
-          setPendingRenderReview(updatedJob);
-          setStatusMessage("Render rejected. Download remains blocked.");
+          setPendingRenderReview(null);
         }
-        await loadRecentRenders();
+        setStatusMessage("Saved master cleared. Uploaded originals were kept for reuse.");
       } catch (error) {
-        console.warn(`Render ${action} failed`, error);
-        toast.error(error.message || `Could not ${action} render.`);
+        console.warn("Clearing saved render failed", error);
+        toast.error(error.message || "Could not clear saved render.");
       }
     },
-    [loadRecentRenders]
+    [pendingRenderReview]
   );
 
   const playheadRef = useRef(0);
@@ -8551,10 +8541,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
   };
 
   const renderRecentRendersPanel = () => {
-    const savedMasters = recentRenders.filter(render => {
-      const state = getRenderApprovalState(render);
-      return ["needs_review", "approved", "rejected"].includes(state);
-    });
+    const savedMasters = recentRenders.filter(render => Boolean(getRenderOutputUrl(render)));
     if (!savedMasters.length && !recentRendersStatus) return null;
     return (
       <div className="nle-saved-renders">
@@ -8568,8 +8555,6 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         {savedMasters.slice(0, 4).map(render => {
           const downloadUrl = render.outputUrl || render.output_url;
           const previewUrl = render.previewUrl || render.heldOutputUrl || downloadUrl;
-          const approvalState = getRenderApprovalState(render);
-          const canDownload = canDownloadApprovedRender(render);
           const performanceReceipt = getRenderPerformanceReceipt(render);
           const performanceParts = [
             performanceReceipt.workerSeconds
@@ -8583,14 +8568,18 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
               : null,
           ].filter(Boolean);
           return (
-            <div className={`nle-saved-render-card is-${approvalState}`} key={render.jobId}>
-              {render.thumbnailUrl ? (
-                <img src={render.thumbnailUrl} alt="" loading="lazy" />
-              ) : (
-                <div className="nle-saved-render-thumb">MP4</div>
-              )}
+            <div className="nle-saved-render-card" key={render.jobId}>
+              <video
+                className="nle-saved-render-video"
+                src={previewUrl}
+                poster={render.thumbnailUrl || undefined}
+                controls
+                muted
+                playsInline
+                preload="metadata"
+              />
               <div>
-                <strong>{getRenderApprovalCopy(render)}</strong>
+                <strong>Cam Combiner master</strong>
                 <span>
                   {formatDurationLabel(Number(render.duration || 0))} ·{" "}
                   {formatRenderExpiry(render.expiresAt)}
@@ -8599,34 +8588,7 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                   <span>Cost receipt · {performanceParts.join(" · ")}</span>
                 ) : null}
               </div>
-              {approvalState === "needs_review" ? (
-                <div className="nle-saved-render-actions">
-                  {previewUrl ? (
-                    <a
-                      className="nle-mini-btn"
-                      href={previewUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Preview
-                    </a>
-                  ) : null}
-                  <button
-                    type="button"
-                    className="nle-mini-btn"
-                    onClick={() => handleReviewAction(render, "approve")}
-                  >
-                    Approve
-                  </button>
-                  <button
-                    type="button"
-                    className="nle-mini-btn is-danger"
-                    onClick={() => handleReviewAction(render, "reject")}
-                  >
-                    Reject
-                  </button>
-                </div>
-              ) : canDownload ? (
+              <div className="nle-saved-render-actions">
                 <a
                   className="nle-mini-btn"
                   href={downloadUrl}
@@ -8635,7 +8597,14 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                 >
                   Download
                 </a>
-              ) : null}
+                <button
+                  type="button"
+                  className="nle-mini-btn is-danger"
+                  onClick={() => handleClearSavedRender(render)}
+                >
+                  Clear
+                </button>
+              </div>
             </div>
           );
         })}
@@ -8653,8 +8622,8 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
     return (
       <div className="nle-render-review-card">
         <div>
-          <strong>Human review required</strong>
-          <span>Download is locked until this master is approved.</span>
+          <strong>Cam Combiner master ready</strong>
+          <span>This paid render is the final result. Preview, download, or clear it.</span>
         </div>
         {qaWarnings.length ? (
           <ul>
@@ -8662,6 +8631,16 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
               <li key={warning}>{warning}</li>
             ))}
           </ul>
+        ) : null}
+        {previewUrl ? (
+          <video
+            className="nle-render-review-video"
+            src={previewUrl}
+            controls
+            muted
+            playsInline
+            preload="metadata"
+          />
         ) : null}
         <div className="nle-export-actions">
           {previewUrl ? (
@@ -8671,22 +8650,15 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
               target="_blank"
               rel="noopener noreferrer"
             >
-              Preview Render
+              Download Master
             </a>
           ) : null}
           <button
-            className="nle-btn"
-            type="button"
-            onClick={() => handleReviewAction(pendingRenderReview, "approve")}
-          >
-            Approve Render
-          </button>
-          <button
             className="nle-btn secondary is-danger"
             type="button"
-            onClick={() => handleReviewAction(pendingRenderReview, "reject")}
+            onClick={() => handleClearSavedRender(pendingRenderReview)}
           >
-            Reject Render
+            Clear Master
           </button>
         </div>
       </div>

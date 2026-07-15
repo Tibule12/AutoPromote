@@ -38,6 +38,7 @@ const {
   startMulticamUpload,
   verifyMulticamRenderInputs,
 } = require("./services/multicamUploadService");
+const { getMulticamStoragePaths } = require("./services/storageCleanupService");
 const MEDIA_WORKER_URL =
   process.env.MEDIA_WORKER_URL || "https://media-worker-v1-341498038874.us-central1.run.app";
 const DEFAULT_CAM_COMBINER_WORKER_URL =
@@ -296,6 +297,7 @@ const normalizeRenderJob = (doc, data = {}) => {
     performanceTiming:
       data.performanceTiming || data.performance_timing || result.performanceTiming || result.performance_timing || null,
     executionTelemetry: data.executionTelemetry || data.execution_telemetry || null,
+    hiddenFromRenderLibrary: data.hiddenFromRenderLibrary === true,
     createdAt: toIsoString(data.createdAt || data.created_at),
     completedAt: toIsoString(data.completedAt || data.completed_at || data.updated_at),
     detail: data.detail || data.message || null,
@@ -1502,7 +1504,11 @@ router.get("/renders", async (req, res) => {
           job.approvalStatus
         );
         const hasDownloadUrl = Boolean(job.outputUrl || job.output_url);
-        return job.type === "multicam_render" && (hasReviewState || hasDownloadUrl);
+        return (
+          job.type === "multicam_render" &&
+          !job.hiddenFromRenderLibrary &&
+          (hasReviewState || hasDownloadUrl)
+        );
       })
       .sort((a, b) => {
         const aTime = Date.parse(a.completedAt || a.createdAt || "") || 0;
@@ -1519,6 +1525,92 @@ router.get("/renders", async (req, res) => {
   } catch (error) {
     console.error("[MediaRoute] Failed to list renders:", error.message);
     res.status(500).json({ success: false, message: "Could not load recent renders" });
+  }
+});
+
+router.delete("/render-jobs/:jobId", async (req, res) => {
+  try {
+    const { jobId } = req.params;
+    const userId = req.user.uid;
+    const ref = admin.firestore().collection("video_edits").doc(jobId);
+    const doc = await ref.get();
+
+    if (!doc.exists) {
+      return res.status(404).json({ success: false, message: "Render not found" });
+    }
+
+    const data = { ...(doc.data() || {}), jobId };
+    if (data.userId !== userId && !isAdminRequester(req.user)) {
+      return res.status(403).json({ success: false, message: "Unauthorized access to render" });
+    }
+    if (!isMulticamRenderJob(data)) {
+      return res.status(400).json({ success: false, message: "Only Cam Combiner renders can be cleared" });
+    }
+
+    const storagePaths = getMulticamStoragePaths(data);
+    const bucket = admin.storage().bucket();
+    const deletedStoragePaths = await Promise.all(
+      storagePaths.map(async storagePath => {
+        try {
+          await bucket.file(storagePath).delete({ ignoreNotFound: true });
+          return { path: storagePath, status: "deleted" };
+        } catch (error) {
+          return { path: storagePath, status: "failed", error: error.message };
+        }
+      })
+    );
+    const failedDeletes = deletedStoragePaths.filter(item => item.status === "failed");
+    if (failedDeletes.length) {
+      return res.status(502).json({
+        success: false,
+        message: "Could not clear every saved render file",
+        deletedStoragePaths,
+      });
+    }
+
+    const clearedAt = new Date().toISOString();
+    await ref.set(
+      {
+        hiddenFromRenderLibrary: true,
+        retentionStatus: "cleared_by_user",
+        masterDeletedAt: clearedAt,
+        deletedStoragePaths,
+        outputUrl: null,
+        output_url: null,
+        outputStoragePath: null,
+        output_storage_path: null,
+        heldOutputUrl: null,
+        approvedOutputUrl: null,
+        thumbnailUrl: null,
+        thumbnail_url: null,
+        manifestUrl: null,
+        manifest_url: null,
+        result: {
+          url: null,
+          outputUrl: null,
+          output_url: null,
+          firebase_output_url: null,
+          downloadUrl: null,
+          download_url: null,
+          outputStoragePath: null,
+          output_storage_path: null,
+          thumbnailUrl: null,
+          thumbnail_url: null,
+          manifestUrl: null,
+          manifest_url: null,
+        },
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    );
+
+    return res.json({ success: true, jobId, clearedAt, deletedStoragePaths });
+  } catch (error) {
+    console.error("[MediaRoute] Failed to clear saved render:", error.message);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Could not clear saved render",
+    });
   }
 });
 

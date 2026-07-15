@@ -2,6 +2,7 @@ const express = require("express");
 const request = require("supertest");
 
 const docs = new Map();
+const deletedObjects = [];
 
 const makeDoc = id => ({
   id,
@@ -35,7 +36,15 @@ jest.mock("firebase-admin", () => ({
       },
     }
   ),
-  storage: jest.fn(() => ({ bucket: jest.fn() })),
+  storage: jest.fn(() => ({
+    bucket: jest.fn(() => ({
+      file: jest.fn(path => ({
+        delete: jest.fn(async () => {
+          deletedObjects.push(path);
+        }),
+      })),
+    })),
+  })),
 }));
 
 jest.mock("../authMiddleware", () => (req, _res, next) => {
@@ -72,6 +81,7 @@ const buildApp = () => {
 describe("mediaRoutes render approval", () => {
   beforeEach(() => {
     docs.clear();
+    deletedObjects.length = 0;
     docs.set("job-1", {
       userId: "user-1",
       type: "multicam_render",
@@ -93,6 +103,14 @@ describe("mediaRoutes render approval", () => {
       },
       manifest_url: "https://cdn.example.com/multicam-job-1.json",
       manifest_storage_path: "processed/manifests/multicam_job-1.json",
+      outputStoragePath: "processed/multicam_job-1.mp4",
+      thumbnailStoragePath: "processed/thumbnails/multicam_job-1.jpg",
+      multicamRequest: {
+        sources: [
+          { storagePath: "temp/multicam-ingest/user-1/camera-1.mov" },
+          { storagePath: "temp/multicam-ingest/user-1/camera-2.mov" },
+        ],
+      },
       result: {
         url: "https://cdn.example.com/held.mp4",
         duration: 90,
@@ -100,15 +118,16 @@ describe("mediaRoutes render approval", () => {
     });
   });
 
-  it("returns needs_review status and hides downloadable output before approval", async () => {
+  it("returns the completed paid render without an approval gate", async () => {
     const response = await request(buildApp()).get("/api/media/status/job-1");
 
     expect(response.statusCode).toBe(200);
-    expect(response.body.status).toBe("needs_review");
-    expect(response.body.approvalStatus).toBe("needs_review");
-    expect(response.body.output_url).toBeNull();
-    expect(response.body.outputUrl).toBeNull();
-    expect(response.body.result.url).toBeUndefined();
+    expect(response.body.status).toBe("completed");
+    expect(response.body.approvalStatus).toBe("approved");
+    expect(response.body.reviewRequired).toBe(false);
+    expect(response.body.output_url).toBe("https://cdn.example.com/held.mp4");
+    expect(response.body.outputUrl).toBe("https://cdn.example.com/held.mp4");
+    expect(response.body.result.url).toBe("https://cdn.example.com/held.mp4");
     expect(response.body.previewUrl).toBe("https://cdn.example.com/held.mp4");
     expect(response.body.renderCheckpoint).toEqual({
       stage: "rendering_chunks",
@@ -142,18 +161,40 @@ describe("mediaRoutes render approval", () => {
     expect(statusResponse.body.output_url).toBe("https://cdn.example.com/held.mp4");
   });
 
-  it("rejects a held render and keeps download blocked", async () => {
+  it("does not let the legacy rejection endpoint block a completed paid render", async () => {
     const rejectResponse = await request(buildApp())
       .post("/api/media/render-jobs/job-1/reject")
       .send({ notes: "bad output" });
 
     expect(rejectResponse.statusCode).toBe(200);
-    expect(rejectResponse.body.job.approvalStatus).toBe("rejected");
-    expect(rejectResponse.body.job.outputUrl).toBeNull();
+    expect(rejectResponse.body.job.approvalStatus).toBe("approved");
+    expect(rejectResponse.body.job.outputUrl).toBe("https://cdn.example.com/held.mp4");
 
     const statusResponse = await request(buildApp()).get("/api/media/status/job-1");
-    expect(statusResponse.body.status).toBe("rejected");
-    expect(statusResponse.body.canDownload).toBe(false);
-    expect(statusResponse.body.output_url).toBeNull();
+    expect(statusResponse.body.status).toBe("completed");
+    expect(statusResponse.body.canDownload).toBe(true);
+    expect(statusResponse.body.output_url).toBe("https://cdn.example.com/held.mp4");
+  });
+
+  it("clears rendered assets but keeps original-upload references for reuse", async () => {
+    const response = await request(buildApp()).delete("/api/media/render-jobs/job-1");
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(deletedObjects).toEqual(
+      expect.arrayContaining([
+        "processed/multicam_job-1.mp4",
+        "processed/thumbnails/multicam_job-1.jpg",
+        "processed/manifests/multicam_job-1.json",
+      ])
+    );
+    expect(docs.get("job-1")).toEqual(
+      expect.objectContaining({
+        hiddenFromRenderLibrary: true,
+        retentionStatus: "cleared_by_user",
+        outputUrl: null,
+        multicamRequest: expect.objectContaining({ sources: expect.any(Array) }),
+      })
+    );
   });
 });

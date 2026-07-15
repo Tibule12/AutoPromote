@@ -8,6 +8,15 @@ const rawBackgroundJobsFlag =
   process.env.ENABLE_BACKGROUND_JOBS ?? process.env.ENABLE_BACKROUND_JOBS;
 if (rawBackgroundJobsFlag !== undefined) {
   process.env.ENABLE_BACKGROUND_JOBS = String(rawBackgroundJobsFlag).trim().toLowerCase();
+} else if (String(process.env.RENDER || "").trim().toLowerCase() === "true") {
+  // AutoPromote's Render service is the durable scheduler host. If Render
+  // fails to inject a dashboard variable during a rollout, keep cleanup alive
+  // instead of silently leaking temporary storage. An explicit false above is
+  // still respected.
+  process.env.ENABLE_BACKGROUND_JOBS = "true";
+  console.warn(
+    "[startup] Render did not inject ENABLE_BACKGROUND_JOBS; defaulting background jobs to enabled."
+  );
 }
 // Bootstrap: ensure Firebase service account env is materialized as a credentials file
 require("./bootstrap");
