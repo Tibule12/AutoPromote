@@ -292,6 +292,12 @@ const normalizeRenderJob = (doc, data = {}) => {
     thumbnail_url: thumbnailUrl,
     duration: data.duration || result.duration || 0,
     renderTier: data.renderTier || result.renderTier || result.render_tier || null,
+    renderPurpose:
+      data.renderPurpose ||
+      data.render_purpose ||
+      result.renderPurpose ||
+      result.render_purpose ||
+      "full_master",
     expiresAt: toIsoString(data.expiresAt || result.expiresAt || result.expires_at),
     retentionDays: data.retentionDays || result.retention_days || null,
     performanceTiming:
@@ -302,6 +308,76 @@ const normalizeRenderJob = (doc, data = {}) => {
     completedAt: toIsoString(data.completedAt || data.completed_at || data.updated_at),
     detail: data.detail || data.message || null,
     error: data.error || null,
+  };
+};
+
+const buildSourceRequestError = (statusCode, code, message) =>
+  Object.assign(new Error(message), { statusCode, code });
+
+const resolveOwnedMulticamMasterSource = async ({ renderJobId, userId }) => {
+  const normalizedJobId = String(renderJobId || "").trim();
+  if (!normalizedJobId || normalizedJobId.length > 160) {
+    throw buildSourceRequestError(400, "INVALID_RENDER_JOB_ID", "Invalid Cam Combiner render ID");
+  }
+
+  const renderRef = admin.firestore().collection("video_edits").doc(normalizedJobId);
+  const renderDoc = await renderRef.get();
+  if (!renderDoc.exists) {
+    throw buildSourceRequestError(404, "MULTICAM_MASTER_NOT_FOUND", "Saved Cam Combiner master was not found");
+  }
+
+  const renderData = renderDoc.data() || {};
+  if (renderData.userId !== userId) {
+    throw buildSourceRequestError(403, "MULTICAM_MASTER_FORBIDDEN", "You do not own this Cam Combiner master");
+  }
+  if (!isMulticamRenderJob(renderData) || renderData.hiddenFromRenderLibrary === true) {
+    throw buildSourceRequestError(409, "MULTICAM_MASTER_UNAVAILABLE", "This Cam Combiner master is not available for clip generation");
+  }
+  const renderPurpose = normalizeMulticamRenderPurpose(
+    renderData.renderPurpose || renderData.render_purpose || renderData.result?.renderPurpose
+  );
+  if (renderPurpose !== "full_master") {
+    throw buildSourceRequestError(
+      409,
+      "FULL_MULTICAM_MASTER_REQUIRED",
+      "Render the full Cam Combiner master before finding viral clips"
+    );
+  }
+
+  const expiryMs = Date.parse(renderData.expiresAt || renderData.result?.expiresAt || "");
+  if (Number.isFinite(expiryMs) && expiryMs <= Date.now()) {
+    throw buildSourceRequestError(410, "MULTICAM_MASTER_EXPIRED", "This Cam Combiner master has expired");
+  }
+
+  const approvalView = normalizeRenderApproval(normalizedJobId, renderData);
+  const outputUrl = approvalView.outputUrl;
+  const outputStoragePath = getMulticamStoragePaths(renderData).find(path =>
+    path.startsWith("processed/multicam_")
+  );
+  if (!outputUrl || !outputStoragePath) {
+    throw buildSourceRequestError(409, "MULTICAM_MASTER_INCOMPLETE", "The saved Cam Combiner master is incomplete");
+  }
+
+  const [exists] = await admin.storage().bucket().file(outputStoragePath).exists();
+  if (!exists) {
+    throw buildSourceRequestError(410, "MULTICAM_MASTER_DELETED", "The saved Cam Combiner master is no longer in storage");
+  }
+
+  return {
+    outputUrl,
+    outputStoragePath,
+    renderJobId: normalizedJobId,
+  };
+};
+
+const resolveRequestedMediaSource = async ({ fileUrl, localPath, renderJobId, userId }) => {
+  if (renderJobId) {
+    return resolveOwnedMulticamMasterSource({ renderJobId, userId });
+  }
+  return {
+    outputUrl: fileUrl || localPath || "",
+    outputStoragePath: null,
+    renderJobId: null,
   };
 };
 
@@ -650,17 +726,58 @@ router.post("/transcribe", upload.single("file"), async (req, res) => {
 // Body: { fileUrl: "...", options: { smartCrop: true, silenceRemoval: true, ... } }
 router.post("/process", async (req, res) => {
   const userId = req.user.uid;
-  const { fileUrl, options } = req.body;
-  console.log("[MediaRoute] Received request:", { fileUrl, options });
-  const cost = CREDIT_COSTS.process || 10;
+  const { fileUrl: requestedFileUrl, renderJobId, options } = req.body;
+  const isViralClipRender = options?.renderViral === true;
+  const cost = isViralClipRender
+    ? CREDIT_COSTS["render-clip"] || 5
+    : CREDIT_COSTS.process || 10;
 
-  if (!fileUrl) {
+  if (!requestedFileUrl && !renderJobId) {
     return res.status(400).json({ message: "No file provided" });
   }
 
+  let resolvedSource;
+  try {
+    resolvedSource = await resolveRequestedMediaSource({
+      fileUrl: requestedFileUrl,
+      renderJobId,
+      userId,
+    });
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({
+      message: error.message || "Could not load the requested source",
+      code: error.code || "SOURCE_RESOLUTION_FAILED",
+    });
+  }
+
+  const fileUrl = resolvedSource.outputUrl;
+  const resolvedOptions = options?.viralData
+    ? {
+        ...options,
+        viralData: {
+          ...options.viralData,
+          video_url: fileUrl,
+          timeline_segments: Array.isArray(options.viralData.timeline_segments)
+            ? options.viralData.timeline_segments.map(segment =>
+                segment?.id === "main" ? { ...segment, url: fileUrl } : segment
+              )
+            : options.viralData.timeline_segments,
+        },
+      }
+    : options;
+  console.log("[MediaRoute] Received request:", {
+    fileUrl,
+    renderJobId: resolvedSource.renderJobId,
+    options: resolvedOptions,
+  });
+
   // 1. Deduct Credits
   try {
-    const result = await chargeVideoEditorCredits(userId, cost, "process");
+    const result = await chargeVideoEditorCredits(
+      userId,
+      cost,
+      isViralClipRender ? "render-clip" : "process"
+    );
     if (!result.success) {
       return res.status(403).json({
         message: `This operation costs ${cost} credits. You have ${result.remaining || 0} credits available.`,
@@ -676,7 +793,7 @@ router.post("/process", async (req, res) => {
     // 2. Delegate to Service (Async Job Queue)
     // Old sync method: const processResult = await videoEditingService.processVideo(fileUrl, options, userId);
     // New async method: returns { jobId }
-    const job = await videoEditingService.startProcessingJob(fileUrl, options, userId);
+    const job = await videoEditingService.startProcessingJob(fileUrl, resolvedOptions, userId);
 
     // 3. Return Job ID + remaining credits (or defer credit check)
     // Note: The frontend needs to poll /status/:jobId now.
@@ -686,6 +803,7 @@ router.post("/process", async (req, res) => {
       message: "Processing started",
       remainingCredits: result.remaining,
       billingDisabled: !!result.skipped,
+      reusedMulticamMaster: Boolean(resolvedSource.renderJobId),
     });
   } catch (error) {
     console.error("[MediaRoute] Processing error:", error.message);
@@ -1810,9 +1928,31 @@ router.get("/status/:jobId", async (req, res) => {
 // Phase 2: Viral Clip Analysis
 router.post("/analyze", async (req, res) => {
   const userId = req.user.uid;
-  const { fileUrl, localPath = null, forceFresh = false, scanNonce = "" } = req.body;
+  const {
+    fileUrl,
+    localPath = null,
+    renderJobId = null,
+    forceFresh = false,
+    scanNonce = "",
+  } = req.body;
   const cost = CREDIT_COSTS.analyze || 8;
-  const analysisSource = fileUrl || localPath;
+  let resolvedSource;
+  try {
+    resolvedSource = await resolveRequestedMediaSource({
+      fileUrl,
+      localPath,
+      renderJobId,
+      userId,
+    });
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({
+      message: error.message || "Could not load the requested source",
+      code: error.code || "SOURCE_RESOLUTION_FAILED",
+    });
+  }
+  const analysisSource = resolvedSource.outputUrl;
+  const billingOperationId = `viral-analysis:${userId}:${crypto.randomUUID()}`;
+  let creditReceipt = null;
 
   try {
     console.log(
@@ -1824,7 +1964,10 @@ router.post("/analyze", async (req, res) => {
     }
 
     // Check and deduct credits first
-    const credits = await chargeVideoEditorCredits(userId, cost, "/analyze");
+    const credits = await chargeVideoEditorCredits(userId, cost, "/analyze", {
+      idempotencyKey: billingOperationId,
+    });
+    creditReceipt = credits;
     if (!credits.success) {
       console.warn(
         `[MediaRoute] Insufficient credits for user ${userId}. Required: ${cost}, Msg: ${credits.message}`
@@ -1840,39 +1983,87 @@ router.post("/analyze", async (req, res) => {
     const scenes = await videoEditingService.analyzeVideo(analysisSource, userId, {
       forceFresh: Boolean(forceFresh),
       scanNonce: typeof scanNonce === "string" ? scanNonce : "",
-      localPath: localPath || null,
+      localPath: resolvedSource.renderJobId ? null : localPath || null,
     });
     res.json({
       success: true,
       scenes: scenes,
       remainingCredits: credits.remaining,
       billingDisabled: !!credits.skipped,
+      reusedMulticamMaster: Boolean(resolvedSource.renderJobId),
+      sourceRenderJobId: resolvedSource.renderJobId,
     });
   } catch (error) {
     console.error(`[MediaRoute] Analyze error:`, error);
-    res.status(500).json({ message: "Analysis failed", details: error.message });
+    let creditRefund = null;
+    if (creditReceipt?.success && !creditReceipt?.skipped && Number(creditReceipt?.deducted || 0) > 0) {
+      creditRefund = await refundCredits(userId, creditReceipt, "viral-analysis-refund", {
+        idempotencyKey: `${billingOperationId}:refund`,
+        reason: "analysis_failed",
+      });
+    }
+    res.status(500).json({
+      message: "Analysis failed",
+      details: error.message,
+      creditsRefunded: Boolean(creditRefund?.success),
+      creditRefund,
+    });
   }
 });
 
 // Phase 2: Render Specific Clip
 router.post("/render-clip", async (req, res) => {
   const userId = req.user.uid;
-  const { fileUrl, startTime, endTime } = req.body;
+  const { fileUrl, renderJobId = null, startTime, endTime } = req.body;
   const cost = CREDIT_COSTS["render-clip"] || 5;
+  const billingOperationId = `viral-render:${userId}:${crypto.randomUUID()}`;
+  let creditReceipt = null;
 
   try {
-    const creditRes = await chargeVideoEditorCredits(userId, cost, "/render-clip");
+    const resolvedSource = await resolveRequestedMediaSource({
+      fileUrl,
+      renderJobId,
+      userId,
+    });
+    const creditRes = await chargeVideoEditorCredits(userId, cost, "/render-clip", {
+      idempotencyKey: billingOperationId,
+    });
+    creditReceipt = creditRes;
     if (!creditRes.success) return res.status(403).json({ message: "Insufficient credits" });
 
-    const result = await videoEditingService.renderClip(fileUrl, startTime, endTime, userId);
+    const result = await videoEditingService.renderClip(
+      resolvedSource.outputUrl,
+      startTime,
+      endTime,
+      userId
+    );
     res.json({
       success: true,
       url: result.url,
       remainingCredits: creditRes.remaining,
       billingDisabled: !!creditRes.skipped,
+      reusedMulticamMaster: Boolean(resolvedSource.renderJobId),
     });
   } catch (error) {
-    res.status(500).json({ message: "Rendering failed", details: error.message });
+    if (!creditReceipt && error.statusCode) {
+      return res.status(error.statusCode).json({
+        message: error.message || "Could not load the requested source",
+        code: error.code || "SOURCE_RESOLUTION_FAILED",
+      });
+    }
+    let creditRefund = null;
+    if (creditReceipt?.success && !creditReceipt?.skipped && Number(creditReceipt?.deducted || 0) > 0) {
+      creditRefund = await refundCredits(userId, creditReceipt, "viral-render-refund", {
+        idempotencyKey: `${billingOperationId}:refund`,
+        reason: "render_failed",
+      });
+    }
+    res.status(500).json({
+      message: "Rendering failed",
+      details: error.message,
+      creditsRefunded: Boolean(creditRefund?.success),
+      creditRefund,
+    });
   }
 });
 

@@ -1992,7 +1992,13 @@ const clearActiveMulticamRenderJob = jobId => {
   }
 };
 
-function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange }) {
+function MultiCamCombiner({
+  primaryFile,
+  onCancel,
+  onComplete,
+  onStatusChange,
+  onFindViralClips,
+}) {
   const { canUseFeature, credits } = useSubscription();
   const [sources, setSources] = useState(() =>
     buildInitialSources(primaryFile).map((source, index) => ({
@@ -8555,6 +8561,11 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
         {savedMasters.slice(0, 4).map(render => {
           const downloadUrl = render.outputUrl || render.output_url;
           const previewUrl = render.previewUrl || render.heldOutputUrl || downloadUrl;
+          const expiresAtMs = Date.parse(render.expiresAt || "");
+          const sourceExpired = Number.isFinite(expiresAtMs) && expiresAtMs <= Date.now();
+          const isFullMaster =
+            String(render.renderPurpose || render.render_purpose || "full_master") !==
+            "production_proof";
           const performanceReceipt = getRenderPerformanceReceipt(render);
           const performanceParts = [
             performanceReceipt.workerSeconds
@@ -8589,6 +8600,33 @@ function MultiCamCombiner({ primaryFile, onCancel, onComplete, onStatusChange })
                 ) : null}
               </div>
               <div className="nle-saved-render-actions">
+                {onFindViralClips && isFullMaster ? (
+                  <button
+                    type="button"
+                    className="nle-mini-btn"
+                    disabled={sourceExpired}
+                    title={
+                      sourceExpired
+                        ? "This saved master has expired and can no longer be scanned."
+                        : "Reuse this Firebase master in Find Viral Clips without uploading it again."
+                    }
+                    onClick={() =>
+                      onFindViralClips({
+                        name: `cam-combiner-${render.jobId}.mp4`,
+                        type: "video/mp4",
+                        url: downloadUrl,
+                        isRemote: true,
+                        renderJobId: render.jobId,
+                        sourceType: "multicam_master",
+                        workflowAction: "find-viral-clips",
+                        duration: Number(render.duration || 0),
+                        expiresAt: render.expiresAt || null,
+                      })
+                    }
+                  >
+                    Find viral clips · 8 cr
+                  </button>
+                ) : null}
                 <a
                   className="nle-mini-btn"
                   href={downloadUrl}

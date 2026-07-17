@@ -9,9 +9,19 @@ jest.mock("../../components/MultiCamCombiner", () => props => {
   return (
     <div>
       <span>Standalone Cam Combiner</span>
-      <button type="button" onClick={props.onCancel}>Close workspace</button>
+      <button type="button" onClick={props.onCancel}>
+        Close workspace
+      </button>
       <button type="button" onClick={() => props.onComplete({ file: { name: "proof.mp4" } })}>
         Use export
+      </button>
+      <button
+        type="button"
+        onClick={() =>
+          props.onFindViralClips({ renderJobId: "job-1", url: "https://cdn/master.mp4" })
+        }
+      >
+        Find viral clips
       </button>
     </div>
   );
@@ -35,5 +45,22 @@ describe("CamCombinerPanel", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Use export" }));
     expect(onUseExport).toHaveBeenCalledWith({ file: { name: "proof.mp4" } });
+  });
+
+  it("forwards a saved master into Find Viral Clips", () => {
+    const onFindViralClips = jest.fn();
+    render(
+      <CamCombinerPanel
+        onClose={() => {}}
+        onUseExport={() => {}}
+        onFindViralClips={onFindViralClips}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Find viral clips" }));
+    expect(onFindViralClips).toHaveBeenCalledWith({
+      renderJobId: "job-1",
+      url: "https://cdn/master.mp4",
+    });
   });
 });

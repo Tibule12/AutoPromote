@@ -1506,7 +1506,11 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
       setGlobalFile(initialFile);
       if (initialFile.suggestedTitle) setGlobalTitle(initialFile.suggestedTitle);
       if (initialFile.suggestedDescription) setGlobalDescription(initialFile.suggestedDescription);
-      toast.success("Loaded generated video! Proceed to publish.");
+      toast.success(
+        initialFile.workflowAction === "find-viral-clips"
+          ? "Loaded the saved Cam Combiner master without another upload."
+          : "Loaded generated video! Proceed to publish."
+      );
     }
   }, [initialFile, setGlobalFile, setGlobalTitle, setGlobalDescription]);
 
@@ -1766,6 +1770,13 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
   const [selectedPromoVisual, setSelectedPromoVisual] = useState(null);
   const effectiveThumbnailUrl = thumbnailUrl || "";
   const safeThumbUrl = effectiveThumbnailUrl ? sanitizeUrl(effectiveThumbnailUrl) : "";
+
+  useEffect(() => {
+    if (initialFile?.workflowAction !== "find-viral-clips" || !initialFile?.renderJobId) return;
+    setEditingTarget("global");
+    setViralScannerFile(initialFile);
+    setShowViralScanner(true);
+  }, [initialFile]);
 
   useEffect(() => {
     setSelectedPromoVisual(null);

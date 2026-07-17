@@ -1538,6 +1538,12 @@ const UserDashboard = ({
         {activeTab === "cam_combiner" && (
           <CamCombinerPanel
             onClose={() => handleNav("profile")}
+            onFindViralClips={source => {
+              if (!source?.renderJobId || !source?.url) return;
+              setSelectedFile(source);
+              handleNav("upload");
+              toast.success("Opening Find Viral Clips with the saved master — no re-upload needed.");
+            }}
             onUseExport={result => {
               if (!result?.file) return;
               setSelectedFile(result.file);

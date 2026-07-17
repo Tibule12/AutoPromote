@@ -7,6 +7,7 @@ import { trackClipWorkflowEvent } from "../utils/clipWorkflowAnalytics";
 import { SafeImage, SafeVideo } from "./SafeMedia";
 
 const CLIP_SCANNER_CACHE_TTL_MS = 3 * 24 * 60 * 60 * 1000;
+const CLIP_SCAN_CREDIT_COST = 8;
 const PROCESSING_STAGE_DEFINITIONS = [
   {
     id: "audio-energy",
@@ -84,6 +85,23 @@ const normalizePlainText = value =>
     .replace(CONTROL_TEXT_PATTERN, " ")
     .replace(/[<>]/g, "")
     .trim();
+
+const getRemoteSourceUrl = file => {
+  if (typeof file === "string") return file;
+  if (file && typeof file === "object" && typeof file.url === "string") return file.url;
+  return "";
+};
+
+const getSourceRenderJobId = file =>
+  file && typeof file === "object" && typeof file.renderJobId === "string"
+    ? file.renderJobId.trim()
+    : "";
+
+const getScannerSourceType = file => {
+  if (getSourceRenderJobId(file)) return "saved_multicam_master";
+  if (getRemoteSourceUrl(file)) return "remote_url";
+  return "local_file";
+};
 
 const CATEGORY_TAG_RULES = [
   {
@@ -261,12 +279,16 @@ const buildScannerClipGuidance = clip => {
 const buildSourceFingerprint = file => {
   if (!file) return "";
 
-  if (typeof file === "string") {
+  const renderJobId = getSourceRenderJobId(file);
+  if (renderJobId) return `multicam:${renderJobId}`.slice(0, 180);
+
+  const remoteUrl = getRemoteSourceUrl(file);
+  if (remoteUrl) {
     try {
-      const parsedUrl = new URL(file, window.location.origin);
+      const parsedUrl = new URL(remoteUrl, window.location.origin);
       return `remote:${parsedUrl.origin}${parsedUrl.pathname}`.slice(0, 180);
     } catch (_error) {
-      return `remote:${String(file).split("?")[0]}`.slice(0, 180);
+      return `remote:${String(remoteUrl).split("?")[0]}`.slice(0, 180);
     }
   }
 
@@ -280,12 +302,16 @@ const buildSourceFingerprint = file => {
 const buildStableSourceFingerprint = file => {
   if (!file) return "";
 
-  if (typeof file === "string") {
+  const renderJobId = getSourceRenderJobId(file);
+  if (renderJobId) return `multicam:${renderJobId}`.slice(0, 180);
+
+  const remoteUrl = getRemoteSourceUrl(file);
+  if (remoteUrl) {
     try {
-      const parsedUrl = new URL(file, window.location.origin);
+      const parsedUrl = new URL(remoteUrl, window.location.origin);
       return `remote:${parsedUrl.origin}${parsedUrl.pathname}`.slice(0, 180);
     } catch (_error) {
-      return `remote:${String(file).split("?")[0]}`.slice(0, 180);
+      return `remote:${String(remoteUrl).split("?")[0]}`.slice(0, 180);
     }
   }
 
@@ -300,8 +326,10 @@ const getSourceFingerprints = file =>
 
 const getSourceLabel = file => {
   if (!file) return "Untitled source";
-  if (typeof file === "string") {
-    const cleaned = String(file).split("?")[0];
+  if (getSourceRenderJobId(file)) return file.name || "Cam Combiner master";
+  const remoteUrl = getRemoteSourceUrl(file);
+  if (remoteUrl) {
+    const cleaned = String(remoteUrl).split("?")[0];
     return cleaned.split("/").pop() || "Remote video";
   }
   return file.name || "Uploaded video";
@@ -565,7 +593,7 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
   useEffect(() => {
     void trackClipWorkflowEvent("scanner_opened", {
       scanSessionId: scanSessionIdRef.current,
-      sourceType: typeof file === "string" ? "remote_url" : "local_file",
+      sourceType: getScannerSourceType(file),
     });
 
     sourceFingerprintRef.current = buildSourceFingerprint(file);
@@ -585,8 +613,9 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
         previewStopHandlerRef.current = null;
       }
 
-      if (typeof file === "string") {
-        setVideoSrc(file);
+      const remoteUrl = getRemoteSourceUrl(file);
+      if (remoteUrl) {
+        setVideoSrc(remoteUrl);
       } else {
         const url = URL.createObjectURL(file);
         setVideoSrc(url);
@@ -860,7 +889,7 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
 
     void trackClipWorkflowEvent("scan_started", {
       scanSessionId: activeSessionId,
-      sourceType: typeof file === "string" ? "remote_url" : "local_file",
+      sourceType: getScannerSourceType(file),
     });
 
     let stageInterval = null;
@@ -911,8 +940,8 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
         } catch (uploadError) {
           throw new Error(`Cannot reach media worker: ${uploadError.message}. Make sure python_media_worker is running on port 8000.`);
         }
-      } else if (typeof file === "string") {
-        fileUrl = file;
+      } else if (getRemoteSourceUrl(file)) {
+        fileUrl = getRemoteSourceUrl(file);
         setScanProgress(50);
       }
 
@@ -942,6 +971,7 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
         body: JSON.stringify({
           fileUrl: fileUrl || "",
           localPath: localPath || null,
+          renderJobId: getSourceRenderJobId(file) || null,
           forceFresh,
           scanNonce,
         }),
@@ -1251,7 +1281,8 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
               </button>
             </div>
             <p style={{ color: "#ccc", fontSize: "0.9rem", marginBottom: "10px" }}>
-              Viral scans cost roughly <strong>20 credits</strong> per video.
+              Find Viral Clips costs <strong>{CLIP_SCAN_CREDIT_COST} credits</strong> per scan.
+              Rendering a chosen clip uses 5 credits.
             </p>
 
             <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "15px" }}>
@@ -1472,10 +1503,10 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
                       </button>
                     </div>
                   ) : (
-                    <button className="scan-btn" onClick={() => startScan({ forceFresh: true })} disabled={cacheLoadPending}>
+                    <button className="scan-btn" onClick={() => startScan()} disabled={cacheLoadPending}>
                       Start AI Scan{" "}
                       <span style={{ fontSize: "0.8em", opacity: 0.8, marginLeft: "5px" }}>
-                        (20 💎)
+                        ({CLIP_SCAN_CREDIT_COST} 💎)
                       </span>
                     </button>
                   )}

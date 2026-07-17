@@ -686,6 +686,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
         },
         body: JSON.stringify({
           fileUrl: fileUrl,
+          renderJobId: targetFile?.renderJobId || null,
           options: effectiveOptions,
         }),
       });
@@ -1058,6 +1059,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
         },
         body: JSON.stringify({
           fileUrl: finalVideoUrl,
+          renderJobId: file?.renderJobId || null,
           options: {
             ...options,
             ...(extraOptions.addMusic !== undefined ? { addMusic: !!extraOptions.addMusic } : {}),

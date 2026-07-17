@@ -2,7 +2,7 @@ import React from "react";
 import MultiCamCombiner from "../components/MultiCamCombiner";
 import "./CamCombinerPanel.css";
 
-function CamCombinerPanel({ onClose, onUseExport }) {
+function CamCombinerPanel({ onClose, onUseExport, onFindViralClips }) {
   return (
     <section className="dashboard-cam-combiner-page" aria-label="Cam Combiner workspace">
       <MultiCamCombiner
@@ -10,6 +10,7 @@ function CamCombinerPanel({ onClose, onUseExport }) {
         onCancel={onClose}
         onComplete={result => onUseExport?.(result)}
         onStatusChange={() => {}}
+        onFindViralClips={source => onFindViralClips?.(source)}
       />
     </section>
   );
