@@ -18694,14 +18694,13 @@ def multicam_prepare_video_branches(
     outputs = "".join(f"[{prefix}{idx}]" for idx in range(safe_branches))
     return [f"[{input_index}:v]{rotation_prefix}{trim_prefix}setpts={safe_setpts:.9f}*PTS,fps=30,{color_prefix}setsar=1,split={safe_branches}{outputs}"]
 
-def multicam_blurred_canvas_filter(input_label, width, height, output_label, blur=24):
-    blur_width = max(2, int(width) // 10)
-    blur_height = max(2, int(height) // 10)
+def multicam_card_canvas_filter(input_label, width, height, output_label, blur=24):
+    """Build a solid true-black surface behind premium rounded video cards."""
     return (
         f"[{input_label}]scale={width}:{height}:force_original_aspect_ratio=increase,"
-        f"crop={width}:{height},scale={blur_width}:{blur_height},boxblur={max(2, int(blur) // 4)}:1,"
-        f"scale={width}:{height},"
-        f"eq=brightness=-0.14:saturation=0.88,setsar=1[{output_label}]"
+        f"crop={width}:{height},"
+        "drawbox=x=0:y=0:w=iw:h=ih:color=black:t=fill,"
+        f"setsar=1[{output_label}]"
     )
 
 def multicam_modern_card_filter(input_label, width, height, output_label, margin=0, blur=18, focus_x=0.5, focus_y=0.48):
@@ -18889,7 +18888,7 @@ def multicam_pip_geometry(output_width, output_height, primary_source=None, reac
 def multicam_overlay_card_filters(base_label, card_label, x, y, width, height, output_label, border_color="white@0.10", radius=None):
     rounded = f"{output_label}rounded"
     # Keep the exported platform frame clean: no rectangular border plate,
-    # only a real alpha-rounded card over the blurred canvas.
+    # only a real alpha-rounded card over the solid black canvas.
     if radius is None:
         radius = max(82, min(220, min(int(width), int(height)) // 4))
     return [
@@ -18912,7 +18911,7 @@ def multicam_single_cut_filter(
     if rounded_frame:
         # Premium single-speaker cuts keep the program at its requested aspect
         # ratio while presenting the active camera as a real alpha-rounded card.
-        # The card is edge-to-edge video over a darkened blurred copy, so the
+        # The card is edge-to-edge video over a true-black canvas, so the
         # source's original rectangular frame cannot leak through its corners.
         margin_x = 40 if is_vertical_output else 48
         margin_y = 72 if is_vertical_output else 48
@@ -18927,7 +18926,7 @@ def multicam_single_cut_filter(
         return ";".join(
             [
                 f"[{input_label}]split=2[{bg_source}][{card_source}]",
-                multicam_blurred_canvas_filter(
+                multicam_card_canvas_filter(
                     bg_source,
                     int(width),
                     int(height),
@@ -19250,7 +19249,7 @@ async def render_multicam_layout_segment(
         filters.extend(multicam_prepare_video_branches(0, "g0", setpts_factors[0], branches=2, trim_start=fine_seek_values[0], trim_duration=trim_duration_values[0], rotation_degrees=rotation_values[0], color_filter=color_filter_values[0]))
         for index in range(1, min(3, len(layout_sources))):
             filters.extend(multicam_prepare_video_branches(index, f"g{index}", setpts_factors[index], branches=1, trim_start=fine_seek_values[index], trim_duration=trim_duration_values[index], rotation_degrees=rotation_values[index], color_filter=color_filter_values[index]))
-        filters.append(multicam_blurred_canvas_filter("g00", output_width, output_height, "canvas", blur=26))
+        filters.append(multicam_card_canvas_filter("g00", output_width, output_height, "canvas", blur=26))
 
         if len(layout_sources) >= 3:
             top_width = output_width - 64
@@ -19292,7 +19291,7 @@ async def render_multicam_layout_segment(
 
         # Shared Moment is true split-screen coverage: two people at the same
         # level, equal presence, with no stacked "show both" treatment.
-        filters.append(multicam_blurred_canvas_filter("s00", output_width, output_height, "canvas", blur=26))
+        filters.append(multicam_card_canvas_filter("s00", output_width, output_height, "canvas", blur=26))
         filters.append(multicam_modern_card_filter("s01", card_width, card_height, "shared_left", focus_x=multicam_shared_moment_focus_x(layout_sources[0])))
         filters.append(multicam_modern_card_filter("s10", card_width, card_height, "shared_right", focus_x=multicam_shared_moment_focus_x(layout_sources[1])))
         filters.extend(multicam_overlay_card_filters("canvas", "shared_left", side_margin, top_margin, card_width, card_height, "split_a", radius=card_radius))
@@ -19343,7 +19342,7 @@ async def render_multicam_layout_segment(
         card_height = max(2, int((output_height - (top_margin * 2) - gap) / 2))
         bottom_y = top_margin + card_height + gap
         card_radius = max(72, min(180, int(card_height * 0.28)))
-        filters.append(multicam_blurred_canvas_filter("g00", output_width, output_height, "canvas", blur=20))
+        filters.append(multicam_card_canvas_filter("g00", output_width, output_height, "canvas", blur=20))
         filters.append(multicam_modern_card_filter("g01", card_width, card_height, "gridcard0", margin=0, blur=12, focus_x=multicam_source_focus_x(layout_sources[0])))
         filters.append(multicam_modern_card_filter("g10", card_width, card_height, "gridcard1", margin=0, blur=12, focus_x=multicam_source_focus_x(layout_sources[1])))
         filters.extend(multicam_overlay_card_filters("canvas", "gridcard0", side_margin, top_margin, card_width, card_height, "grid_a", radius=card_radius))
@@ -19361,7 +19360,7 @@ async def render_multicam_layout_segment(
 
         # Shared Moment in landscape should feel like two equal people in the
         # same beat, not a stacked "show both" strip.
-        filters.append(multicam_blurred_canvas_filter("s00", output_width, output_height, "canvas", blur=20))
+        filters.append(multicam_card_canvas_filter("s00", output_width, output_height, "canvas", blur=20))
         filters.append(multicam_modern_card_filter("s01", card_width, card_height, "shared_left", focus_x=multicam_shared_moment_focus_x(layout_sources[0])))
         filters.append(multicam_modern_card_filter("s10", card_width, card_height, "shared_right", focus_x=multicam_shared_moment_focus_x(layout_sources[1])))
         filters.extend(multicam_overlay_card_filters("canvas", "shared_left", side_margin, top_margin, card_width, card_height, "split_a", radius=card_radius))
@@ -19376,7 +19375,7 @@ async def render_multicam_layout_segment(
         top_margin = max(42, int((output_height - card_height) / 2))
         second_x = side_margin + card_width + gap
         card_radius = max(88, min(180, int(card_height * 0.18)))
-        filters.append(multicam_blurred_canvas_filter("s00", output_width, output_height, "canvas", blur=20))
+        filters.append(multicam_card_canvas_filter("s00", output_width, output_height, "canvas", blur=20))
         filters.append(multicam_modern_card_filter("s01", card_width, card_height, "splitcard0", focus_x=multicam_shared_moment_focus_x(layout_sources[0])))
         filters.append(multicam_modern_card_filter("s10", card_width, card_height, "splitcard1", focus_x=multicam_shared_moment_focus_x(layout_sources[1])))
         filters.extend(multicam_overlay_card_filters("canvas", "splitcard0", side_margin, top_margin, card_width, card_height, "split_a", radius=card_radius))

@@ -3281,7 +3281,7 @@ class MulticamDirectorRuleTests(unittest.TestCase):
         self.assertNotIn("boxblur", filter_chain)
         self.assertNotIn("movie=", filter_chain)
 
-    def test_premium_landscape_single_cut_is_alpha_rounded_over_blurred_canvas(self):
+    def test_premium_landscape_single_cut_defaults_to_alpha_rounded_over_true_black_canvas(self):
         self.assertFalse(worker.get_multicam_render_tier_profile("simple")["rounded_active_speaker"])
         self.assertTrue(worker.get_multicam_render_tier_profile("premium")["rounded_active_speaker"])
         filter_chain = worker.multicam_single_cut_filter(
@@ -3295,7 +3295,8 @@ class MulticamDirectorRuleTests(unittest.TestCase):
         )
 
         self.assertIn("split=2", filter_chain)
-        self.assertIn("boxblur", filter_chain)
+        self.assertIn("drawbox=x=0:y=0:w=iw:h=ih:color=black:t=fill", filter_chain)
+        self.assertNotIn("boxblur", filter_chain)
         self.assertIn("crop=1824:984", filter_chain)
         self.assertIn("movie=", filter_chain)
         self.assertIn("alphamerge", filter_chain)
