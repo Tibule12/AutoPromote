@@ -6,6 +6,7 @@
     "node": ">=20"
   },
   "overrides": {
+    "websocket-driver": "0.7.5",
     "hono": "$hono",
     "@hono/node-server": "^1.19.14",
     "protobufjs": "7.6.4",
