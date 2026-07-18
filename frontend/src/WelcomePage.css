@@ -175,6 +175,101 @@
   min-height: 20rem;
 }
 
+.ap-cam-demo-shell {
+  display: grid;
+  gap: 0.75rem;
+  height: 100%;
+}
+
+.ap-cam-demo-toolbar,
+.ap-cam-demo-toolbar > div {
+  display: flex;
+  align-items: center;
+}
+
+.ap-cam-demo-toolbar {
+  justify-content: space-between;
+  gap: 0.75rem;
+  color: #f8fbff;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.ap-cam-demo-toolbar > div {
+  gap: 0.48rem;
+}
+
+.ap-cam-demo-status-dot {
+  width: 0.58rem;
+  height: 0.58rem;
+  border-radius: 999px;
+  background: #22c55e;
+  box-shadow: 0 0 0 0.22rem rgba(34, 197, 94, 0.14);
+}
+
+.ap-cam-demo-badge {
+  color: #9ff3bf;
+  border: 1px solid rgba(34, 197, 94, 0.26);
+  background: rgba(34, 197, 94, 0.1);
+  border-radius: 999px;
+  padding: 0.28rem 0.58rem;
+  font-size: 0.72rem;
+}
+
+.ap-cam-demo-copy {
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 0.85rem;
+  padding: 0.72rem 0.82rem;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.ap-cam-demo-copy p,
+.ap-cam-demo-copy h2,
+.ap-cam-demo-copy span {
+  margin: 0;
+}
+
+.ap-cam-demo-copy p {
+  color: #c7d2ff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ap-cam-demo-copy h2 {
+  margin-top: 0.35rem;
+  color: #fff;
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  line-height: 1.2;
+}
+
+.ap-cam-demo-copy span {
+  display: block;
+  margin-top: 0.42rem;
+  color: var(--ap-text-soft);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.ap-cam-demo-video-frame {
+  align-self: end;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 0.9rem;
+  background: #050815;
+  box-shadow: 0 22px 45px rgba(4, 9, 31, 0.45);
+  aspect-ratio: 16 / 9;
+}
+
+.ap-cam-demo-video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #050815;
+}
+
 .ap-mockup-shell {
   border-radius: 0.9rem;
   overflow: hidden;

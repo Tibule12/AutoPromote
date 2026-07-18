@@ -33,7 +33,7 @@ const availabilityCards = [
 
 const WelcomePage = ({ onGetStarted, onSignIn }) => {
   const handleWatchDemo = () => {
-    window.open("/demo-teaser.mp4", "_blank", "noopener,noreferrer");
+    document.getElementById("demo-player")?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
 
   return (

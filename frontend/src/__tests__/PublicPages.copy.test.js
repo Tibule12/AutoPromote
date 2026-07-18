@@ -32,6 +32,16 @@ describe("public marketing pages", () => {
     expect(
       screen.queryByText(/AI-assisted variations focus on stronger hooks/i)
     ).not.toBeInTheDocument();
+
+    expect(screen.getByText(/Two cameras in. One directed podcast out./i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Cam Combiner video demo/i)).toHaveAttribute(
+      "src",
+      "/demos/cam-combiner-demo.webm"
+    );
+    expect(screen.getByLabelText(/Cam Combiner video demo/i)).toHaveAttribute(
+      "poster",
+      "/demos/cam-combiner-demo-poster.jpg"
+    );
   });
 
   test("features and changelog avoid retired viral bonus promises", () => {
