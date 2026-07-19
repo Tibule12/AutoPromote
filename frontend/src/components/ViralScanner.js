@@ -418,6 +418,12 @@ const applyGuidanceToScenes = scenes =>
           ? scene.categories
           : guidance.categories,
       hookText: scene?.hookText || guidance.hookText,
+      scoreConfidence: Number(scene?.scoreConfidence ?? scene?.score_confidence ?? 0),
+      scoreConfidenceLabel:
+        scene?.scoreConfidenceLabel || scene?.score_confidence_label || "Exploratory evidence",
+      scoreMeaning:
+        scene?.scoreMeaning ||
+        "Editorial potential based on this video's hook, clarity, energy, motion, and duration signals.",
       signals: scene?.signals || guidance.signals,
       hasAudio: scene?.hasAudio,
       analysisMode: scene?.analysisMode,
@@ -563,6 +569,7 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
   const [cachedResultsReady, setCachedResultsReady] = useState(false);
   const [cacheLoadPending, setCacheLoadPending] = useState(false);
   const [scanStageIndex, setScanStageIndex] = useState(0);
+  const [learningMeta, setLearningMeta] = useState(null);
 
   // --- Credit System State ---
   const [creditBalance, setCreditBalance] = useState(null);
@@ -605,6 +612,7 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
     setStatusMessage("");
     setVideoDuration(0);
     setScanStageIndex(0);
+    setLearningMeta(null);
 
     if (file) {
       const activeVideo = videoRef.current;
@@ -925,7 +933,7 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
         formData.append("file", file, safeName);
 
         try {
-          const uploadResponse = await fetch("http://127.0.0.1:8000/api/media/upload-source", {
+          const uploadResponse = await fetch(API_ENDPOINTS.MEDIA_SOURCE_UPLOAD, {
             method: "POST",
             body: formData,
           });
@@ -938,7 +946,9 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
           setStatusMessage(`Source ready (${(uploadResult.size / (1024 * 1024)).toFixed(1)}MB, ${(uploadResult.duration || 0).toFixed(1)}s)`);
           setScanProgress(50);
         } catch (uploadError) {
-          throw new Error(`Cannot reach media worker: ${uploadError.message}. Make sure python_media_worker is running on port 8000.`);
+          throw new Error(
+            `Cannot reach the configured media worker: ${uploadError.message}. Check REACT_APP_MEDIA_API_URL.`
+          );
         }
       } else if (getRemoteSourceUrl(file)) {
         fileUrl = getRemoteSourceUrl(file);
@@ -994,10 +1004,20 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
 
       if (!response.ok) {
         const errText = await response.text();
-        throw new Error(`Analysis Error: ${response.status} ${errText}`);
+        let errorPayload = null;
+        try {
+          errorPayload = JSON.parse(errText);
+        } catch (_) {}
+        const refundNotice = errorPayload?.creditsRefunded
+          ? " Your scan credits were automatically refunded."
+          : "";
+        const errorDetail =
+          errorPayload?.details || errorPayload?.message || errText || "Analysis failed";
+        throw new Error(`Analysis Error: ${response.status} ${errorDetail}.${refundNotice}`);
       }
 
       const data = await response.json();
+      setLearningMeta(data.learning || null);
 
       if (data.remainingCredits !== undefined) {
         setCreditBalance(data.remainingCredits);
@@ -1041,6 +1061,8 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
         resultCount: validScenes.length,
         topScore: rankedScenes[0]?.score ?? 0,
         backendTopScore: rankedScenes[0]?.backendScore ?? 0,
+        learningStatus: data.learning?.status || "warming_up",
+        learningSamples: Number(data.learning?.sampleCount || 0),
       });
 
       if (rankedScenes.length > 0) {
@@ -1225,24 +1247,22 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
           <div className="scanner-header-actions">
             {/* Credit Display */}
             {creditBalance !== null && (
-              <div
+              <button
+                type="button"
                 className="scanner-credit-pill"
-                style={{
-                  background: "rgba(0,0,0,0.4)",
-                  padding: "6px 10px",
-                  borderRadius: "6px",
-                  border: "1px solid #444",
-                  fontSize: "0.9rem",
-                  color: "#ffd700",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                }}
                 onClick={() => setShowCreditShop(true)}
+                aria-label={`${formatBalance(creditBalance)} credits available. Open credit shop`}
               >
                 💎 {formatBalance(creditBalance)} Credits
-              </div>
+              </button>
             )}
-            <button className="scanner-close-btn" onClick={onClose}>
+            <button
+              type="button"
+              className="scanner-close-btn"
+              onClick={onClose}
+              aria-label="Close viral moment scanner"
+              title="Close scanner"
+            >
               ✕
             </button>
           </div>
@@ -1250,67 +1270,49 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
 
         {/* Credit Shop Modal */}
         {showCreditShop && (
-          <div
-            style={{
-              position: "absolute",
-              top: 60,
-              left: 20,
-              right: 20,
-              zIndex: 100,
-              background: "#1a1a1a",
-              padding: "20px",
-              borderRadius: "12px",
-              border: "1px solid #444",
-              boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
-            }}
+          <section
+            className="scanner-credit-shop"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="scanner-credit-shop-title"
           >
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px" }}>
-              <h3 style={{ color: "#fff", margin: 0 }}>Get More Credits</h3>
+            <div className="scanner-credit-shop-head">
+              <div>
+                <span>Keep creating</span>
+                <h3 id="scanner-credit-shop-title">Get more credits</h3>
+              </div>
               <button
+                type="button"
+                className="scanner-credit-shop-close"
                 onClick={() => setShowCreditShop(false)}
-                style={{
-                  background: "none",
-                  border: "1px solid #555",
-                  borderRadius: "4px",
-                  color: "#fff",
-                  cursor: "pointer",
-                  padding: "4px 8px",
-                }}
+                aria-label="Close credit shop"
               >
-                Close
+                ✕
               </button>
             </div>
-            <p style={{ color: "#ccc", fontSize: "0.9rem", marginBottom: "10px" }}>
+            <p className="scanner-credit-shop-copy">
               Find Viral Clips costs <strong>{CLIP_SCAN_CREDIT_COST} credits</strong> per scan.
               Rendering a chosen clip uses 5 credits.
             </p>
 
-            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "15px" }}>
+            <div className="scanner-credit-package-grid">
               {CREDIT_PACKAGES.map(pkg => (
                 <button
+                  type="button"
                   key={pkg.id}
                   onClick={() => setSelectedPackage(pkg)}
-                  style={{
-                    flex: 1,
-                    minWidth: "120px",
-                    padding: "12px",
-                    borderRadius: "10px",
-                    border: selectedPackage?.id === pkg.id ? "2px solid #4caf50" : "1px solid #444",
-                    background: selectedPackage?.id === pkg.id ? "rgba(76, 175, 80, 0.2)" : "#222",
-                    color: "#fff",
-                    cursor: "pointer",
-                    textAlign: "left",
-                  }}
+                  className={`scanner-credit-package ${selectedPackage?.id === pkg.id ? "is-selected" : ""}`}
+                  aria-pressed={selectedPackage?.id === pkg.id}
                 >
-                  <div style={{ fontWeight: 700, fontSize: "1rem" }}>{pkg.name}</div>
-                  <div style={{ fontSize: "0.85rem", opacity: 0.8 }}>
+                  <strong>{pkg.name}</strong>
+                  <span>
                     {pkg.credits} credits • ${pkg.price}
-                  </div>
+                  </span>
                 </button>
               ))}
             </div>
-            <div ref={paypalButtonsRef} style={{ minHeight: "150px" }} />
-          </div>
+            <div ref={paypalButtonsRef} className="scanner-paypal-slot" />
+          </section>
         )}
 
         <div className="scanner-body">
@@ -1558,7 +1560,7 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
                     })}
                   </div>
                   <div className="scanner-processing-note">
-                    We’ll show the top clips as soon as scoring finishes, so users can feel the scan working in real time.
+                    Your strongest clips will appear automatically when ranking is complete.
                   </div>
                 </div>
               ) : (
@@ -1570,6 +1572,13 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
                     Found {results.length} ranked moments. Preview the best candidate, then open it
                     in Studio.
                   </p>
+                  {learningMeta ? (
+                    <p style={{ color: "#a7f3d0", fontSize: "0.8rem", marginTop: "6px" }}>
+                      {learningMeta.status === "active"
+                        ? `Personalized from ${learningMeta.sampleCount} measured clip outcomes.`
+                        : `Outcome learning is warming up (${learningMeta.sampleCount || 0}/3 measured clips).`}
+                    </p>
+                  ) : null}
                   {cachedScanMeta?.createdAt ? (
                     <p style={{ color: "#93c5fd", fontSize: "0.8rem", marginTop: "6px" }}>
                       Saved scan from {new Date(cachedScanMeta.createdAt).toLocaleString()}{" "}
@@ -1623,7 +1632,10 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
                           ? "TOP PICK"
                           : "Selected clip"}
                     </span>
-                    <h4>🔥 Viral Score: {selectedClip.score}</h4>
+                    <div className="scanner-score-line">
+                      <h4>🔥 Viral Score: {selectedClip.score}</h4>
+                      <span>{selectedClip.scoreConfidenceLabel}</span>
+                    </div>
                   </div>
                   <span className="scanner-guidance-rank-pill">
                     #{rankedResults.findIndex(clip => clip.id === selectedClip.id) + 1}
@@ -1631,8 +1643,8 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
                 </div>
                 <p className="scanner-guidance-summary">
                   {selectedClip.id === bestClipId
-                    ? "This is AutoPromote's strongest candidate from the scan."
-                    : "This moment is strong enough to shape inside Studio."}
+                    ? selectedClip.reasons[0] || "This is AutoPromote's strongest candidate from the scan."
+                    : selectedClip.reasons[0] || "This moment is strong enough to shape inside Studio."}
                 </p>
                 <div className="scanner-guidance-timing">
                   <span>Start: {Number(selectedClip.start || 0).toFixed(1)}s</span>
@@ -1649,14 +1661,31 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
                     </span>
                   ))}
                 </div>
-                <div className="scanner-reasons-list">
-                  <strong>Why this clip</strong>
-                  {selectedClip.reasons.slice(0, 4).map((reason, index) => (
-                    <div key={`${selectedClip.id}-${index}`} className="scanner-reason-item">
-                      ✔ {reason}
+                <details className="scanner-score-details">
+                  <summary>Why this clip?</summary>
+                  <div className="scanner-reasons-list">
+                    {selectedClip.reasons.slice(0, 4).map((reason, index) => (
+                      <div key={`${selectedClip.id}-${index}`} className="scanner-reason-item">
+                        <span aria-hidden="true">✓</span> {reason}
+                      </div>
+                    ))}
+                    <div className="scanner-score-evidence" title={selectedClip.scoreMeaning}>
+                      <span>Evidence confidence</span>
+                      <strong>
+                        {selectedClip.scoreConfidence > 0
+                          ? `${Math.round(selectedClip.scoreConfidence)}%`
+                          : "Building"}
+                      </strong>
                     </div>
-                  ))}
-                </div>
+                    {selectedClip.learningApplied ? (
+                      <p className="scanner-learning-note">
+                        Personalized {Number(selectedClip.learnedAdjustment || 0) >= 0 ? "+" : ""}
+                        {Number(selectedClip.learnedAdjustment || 0).toFixed(1)} from{" "}
+                        {selectedClip.learningProfileSamples || 0} measured outcomes
+                      </p>
+                    ) : null}
+                  </div>
+                </details>
                 <div className="scanner-guidance-actions">
                   <button
                     className="scanner-action-btn scanner-action-btn-primary"
@@ -1668,7 +1697,7 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
                     className="scanner-action-btn scanner-action-btn-primary"
                     onClick={() => handleUseClip(selectedClip)}
                   >
-                    Use clip package
+                    Edit this clip
                   </button>
                 </div>
                 {selectedClip.score < 60 ? (

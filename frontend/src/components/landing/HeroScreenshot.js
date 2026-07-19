@@ -5,9 +5,11 @@ const DEMOS = [
     id: "cam-combiner",
     label: "Cam Combiner",
     eyebrow: "Multi-cam edit demo",
-    title: "See the Cam Combiner workflow",
-    description: "Watch how multiple camera angles become a polished creator-ready edit.",
+    title: "Two cameras in. One directed podcast out.",
+    description:
+      "See the finished podcast, live direction, reaction placement, and speaker cuts in 12 seconds.",
     src: "/demos/cam-combiner-demo.webm",
+    poster: "/demos/cam-combiner-demo-poster.jpg",
   },
   {
     id: "publish",
@@ -16,6 +18,7 @@ const DEMOS = [
     title: "See publishing before you register",
     description: "Preview the publish flow and how content moves toward connected platforms.",
     src: "/demos/publish-demo.webm",
+    poster: "/demo-poster.jpg",
   },
 ];
 
@@ -62,7 +65,8 @@ const HeroScreenshot = () => {
             id="ap-demo-video"
             className="ap-demo-video"
             src={activeDemo.src}
-            poster="/demo-poster.jpg"
+            poster={activeDemo.poster}
+            aria-label={`${activeDemo.label} video demo`}
             controls
             playsInline
             preload="metadata"

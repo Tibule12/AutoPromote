@@ -3,6 +3,10 @@ const { db } = require("./firebaseAdmin");
 const authMiddleware = require("./authMiddleware");
 const { getPlanCapabilities } = require("./config/subscriptionPlans");
 const { getEffectiveTierSnapshot } = require("./services/billingService");
+const {
+  getClipLearningProfile,
+  recomputeClipLearningProfile,
+} = require("./services/clipOutcomeLearningService");
 const router = express.Router();
 
 function parseTimestamp(value) {
@@ -18,15 +22,6 @@ function parseDateValue(value) {
   if (value instanceof Date) return value;
   const t = parseTimestamp(value);
   return t ? new Date(t) : null;
-}
-
-function getContentCreatedAt(content) {
-  return (
-    parseDateValue(content.createdAt) ||
-    parseDateValue(content.created_at) ||
-    parseDateValue(content.updatedAt) ||
-    parseDateValue(content.updated_at)
-  );
 }
 
 function getOwnerId(record) {
@@ -346,7 +341,6 @@ router.get("/user", authMiddleware, async (req, res) => {
     let totalViews = 0;
     let totalLikes = 0;
     let totalShares = 0;
-    let totalRevenue = 0;
     let totalClicks = 0;
     const contentByPlatform = {};
     let latestSnapshot = null;
@@ -608,6 +602,43 @@ router.post("/workflow-events", authMiddleware, async (req, res) => {
   } catch (error) {
     console.error("Error storing workflow event:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.get("/clip-learning-profile", authMiddleware, async (req, res) => {
+  try {
+    const uid = req.user?.uid || req.userId;
+    if (!uid) return res.status(401).json({ error: "Unauthorized" });
+    const profile = await getClipLearningProfile(uid);
+    return res.json({
+      ok: true,
+      profile: profile || {
+        version: 1,
+        uid,
+        status: "warming_up",
+        sampleCount: 0,
+        confidence: 0,
+        strategyWeights: {},
+        contentTypeWeights: {},
+        durationWeights: {},
+        platformWeights: {},
+      },
+    });
+  } catch (error) {
+    console.error("Error loading clip learning profile:", error);
+    return res.status(500).json({ error: "Failed to load clip learning profile" });
+  }
+});
+
+router.post("/clip-learning-profile/rebuild", authMiddleware, async (req, res) => {
+  try {
+    const uid = req.user?.uid || req.userId;
+    if (!uid) return res.status(401).json({ error: "Unauthorized" });
+    const profile = await recomputeClipLearningProfile(uid);
+    return res.json({ ok: true, profile });
+  } catch (error) {
+    console.error("Error rebuilding clip learning profile:", error);
+    return res.status(500).json({ error: "Failed to rebuild clip learning profile" });
   }
 });
 

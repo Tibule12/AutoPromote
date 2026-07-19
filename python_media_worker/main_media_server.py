@@ -2073,14 +2073,142 @@ def dedupe_ranked_candidates(candidates, max_results=15, source_duration=None):
 def apply_fresh_scan_variation(candidates, scan_nonce=""):
     if not candidates:
         return []
+    nonce = str(scan_nonce or "fresh-scan")
     refreshed = []
     for candidate in candidates:
         updated = dict(candidate)
+        identity = str(updated.get("id") or f"{updated.get('start', 0)}:{updated.get('end', 0)}")
+        digest = hashlib.sha256(f"{nonce}:{identity}".encode("utf-8")).digest()
+        # Explore alternate candidates without changing the underlying viral score.
+        # A fresh nonce produces a stable 0-6 point ranking boost for this run.
+        exploration_boost = round((int.from_bytes(digest[:2], "big") / 65535.0) * 6.0, 2)
+        updated["freshScanRankScore"] = round(
+            float(updated.get("viralScore", 0.0) or 0.0) + exploration_boost,
+            2,
+        )
+        updated["freshScanExplorationBoost"] = exploration_boost
         if scan_nonce:
             updated["freshScanVariant"] = str(scan_nonce)[-8:]
-        updated["freshScanMode"] = "deterministic_refresh"
+        updated["freshScanMode"] = "quality_bounded_exploration"
         refreshed.append(updated)
-    return refreshed
+    return sorted(
+        refreshed,
+        key=lambda item: (
+            float(item.get("freshScanRankScore", 0.0) or 0.0),
+            float(item.get("viralScore", 0.0) or 0.0),
+        ),
+        reverse=True,
+    )
+
+
+def apply_outcome_learning_profile(candidates, learning_profile=None):
+    """Re-rank candidates from the creator's measured post outcomes."""
+    if not candidates or not isinstance(learning_profile, dict):
+        return candidates
+    sample_count = int(learning_profile.get("sampleCount", 0) or 0)
+    if learning_profile.get("status") != "active" or sample_count < 3:
+        return candidates
+
+    profile_confidence = clamp_float(
+        float(learning_profile.get("confidence", 0.0) or 0.0),
+        0.0,
+        1.0,
+    )
+
+    def profile_key(value):
+        normalized = re.sub(r"[^a-z0-9_-]+", "_", str(value or "unknown").strip().lower())
+        return normalized.strip("_")[:80] or "unknown"
+
+    def duration_key(duration):
+        seconds = max(0.0, float(duration or 0.0))
+        if seconds <= 10:
+            return "under_10s"
+        if seconds <= 20:
+            return "10_20s"
+        if seconds <= 35:
+            return "20_35s"
+        if seconds <= 60:
+            return "35_60s"
+        return "over_60s"
+
+    def multiplier(group_name, key):
+        group = learning_profile.get(group_name) or {}
+        entry = group.get(profile_key(key)) or {}
+        if isinstance(entry, (int, float)):
+            return clamp_float(float(entry), 0.85, 1.15)
+        return clamp_float(float(entry.get("multiplier", 1.0) or 1.0), 0.85, 1.15)
+
+    learned = []
+    for candidate in candidates:
+        updated = dict(candidate)
+        base_score = float(updated.get("viralScore", 0.0) or 0.0)
+        strategy_multiplier = multiplier("strategyWeights", updated.get("strategyLabel"))
+        content_multiplier = multiplier("contentTypeWeights", updated.get("contentType"))
+        duration_multiplier = multiplier(
+            "durationWeights",
+            duration_key(updated.get("duration", 0.0)),
+        )
+        combined_multiplier = (strategy_multiplier * content_multiplier * duration_multiplier) ** (1.0 / 3.0)
+        confidence_scale = 0.35 + (profile_confidence * 0.65)
+        adjustment = clamp_float((combined_multiplier - 1.0) * 70.0 * confidence_scale, -12.0, 12.0)
+        learned_score = clamp_float(base_score + adjustment, 10.0, 99.0)
+
+        updated["baseViralScore"] = round(base_score, 2)
+        updated["viralScore"] = round(learned_score, 2)
+        updated["learnedAdjustment"] = round(adjustment, 2)
+        updated["learningProfileSamples"] = sample_count
+        updated["learningProfileConfidence"] = round(profile_confidence, 3)
+        updated["learningApplied"] = abs(adjustment) >= 0.01
+        updated["learningSignals"] = {
+            "strategyMultiplier": round(strategy_multiplier, 4),
+            "contentTypeMultiplier": round(content_multiplier, 4),
+            "durationMultiplier": round(duration_multiplier, 4),
+        }
+        learned.append(updated)
+
+    return sorted(
+        learned,
+        key=lambda item: (
+            float(item.get("viralScore", 0.0) or 0.0),
+            float(item.get("baseViralScore", 0.0) or 0.0),
+        ),
+        reverse=True,
+    )
+
+
+def attach_clip_score_confidence(candidate, *, audio_energy=None, motion_scores=None):
+    """Describe evidence strength separately from editorial/viral potential."""
+    updated = dict(candidate)
+    transcript_confidence = clamp_float(
+        float(updated.get("transcriptConfidence", 0.0) or 0.0),
+        0.0,
+        1.0,
+    )
+    confidence = 28.0
+    confidence += transcript_confidence * 28.0
+    confidence += 12.0 if audio_energy else 0.0
+    confidence += 12.0 if motion_scores else 0.0
+    confidence += 8.0 if updated.get("source") in {"scene_detect", "transcript_window"} else 3.0
+    confidence += 10.0 if updated.get("aiRankScore") is not None else 0.0
+    confidence += 5.0 * float(updated.get("learningProfileConfidence", 0.0) or 0.0)
+    if updated.get("analysisMode") == "visual_only" or updated.get("hasAudio") is False:
+        confidence -= 8.0
+    confidence = round(clamp_float(confidence, 20.0, 95.0), 1)
+
+    if confidence >= 78.0:
+        label = "Strong evidence"
+    elif confidence >= 58.0:
+        label = "Moderate evidence"
+    else:
+        label = "Exploratory evidence"
+
+    updated["scoreConfidence"] = confidence
+    updated["scoreConfidenceLabel"] = label
+    updated["scoreMeaning"] = (
+        "Editorial potential based on hook clarity, transcript evidence, audio energy, "
+        "visual motion, duration fit, and optional AI judgment; not a guaranteed view forecast."
+    )
+    return updated
 
 def build_short_hook_from_text(text, fallback="Watch This"):
     cleaned = re.sub(r"\s+", " ", str(text or "").strip())
@@ -10982,6 +11110,7 @@ async def analyze_clips(request: Dict[str, Any]):
     local_path = request.get("local_path") or ""
     force_fresh = bool(request.get("force_fresh"))
     scan_nonce = str(request.get("scan_nonce") or "")
+    learning_profile = request.get("learning_profile") or {}
 
     # If local_path is provided and exists, use it as the video source
     if local_path and os.path.exists(local_path):
@@ -11273,6 +11402,7 @@ async def analyze_clips(request: Dict[str, Any]):
             promo_angle=str(request.get("promo_angle") or "").strip().lower(),
             max_candidates=10,
         )
+        ranked_candidates = apply_outcome_learning_profile(ranked_candidates, learning_profile)
         if force_fresh:
             ranked_candidates = apply_fresh_scan_variation(ranked_candidates, scan_nonce)
             campaign_roles = ["Lead Hook", "Proof Beat", "Replay Beat", "Trust Close", "Support Cut"]
@@ -11291,6 +11421,15 @@ async def analyze_clips(request: Dict[str, Any]):
                     "Use generated hook text and thumbnails to package the moment",
                 ]
                 candidate["captionSuggestion"] = candidate.get("captionSuggestion") or "Visual Moment"
+
+        ranked_candidates = [
+            attach_clip_score_confidence(
+                candidate,
+                audio_energy=audio_energy,
+                motion_scores=motion_scores,
+            )
+            for candidate in ranked_candidates
+        ]
 
         for index, candidate in enumerate(ranked_candidates):
             studio_package = build_find_viral_studio_package(candidate, index)
@@ -11330,6 +11469,11 @@ async def analyze_clips(request: Dict[str, Any]):
             "clipSuggestions": ranked_candidates,
             "transcriptQuality": transcript_quality,
             "contentType": content_type_label,
+            "learning": {
+                "status": learning_profile.get("status", "warming_up") if isinstance(learning_profile, dict) else "warming_up",
+                "sampleCount": int(learning_profile.get("sampleCount", 0) or 0) if isinstance(learning_profile, dict) else 0,
+                "applied": any(bool(candidate.get("learningApplied")) for candidate in ranked_candidates),
+            },
         }
 
     except HTTPException as he:

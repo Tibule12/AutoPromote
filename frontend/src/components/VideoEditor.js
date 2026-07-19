@@ -1226,6 +1226,27 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
           coverFrame: result.coverFrame || null,
           thumbnailFrame: result.thumbnailFrame || null,
           isRemote: true,
+          clipLearning:
+            selectedClip?.id || selectedClip?.scanSessionId
+              ? {
+                  version: 1,
+                  scanSessionId: selectedClip.scanSessionId || null,
+                  clipId: String(selectedClip.id || ""),
+                  predictedScore: Number(
+                    selectedClip.guidedScore ?? selectedClip.score ?? selectedClip.viralScore ?? 0
+                  ),
+                  scoreConfidence: Number(selectedClip.scoreConfidence || 0),
+                  strategyLabel: selectedClip.strategyLabel || selectedClip.campaignRole || null,
+                  contentType: selectedClip.contentType || "general",
+                  start: Number(selectedClip.start || 0),
+                  end: Number(selectedClip.end || 0),
+                  duration: Number(
+                    selectedClip.duration ||
+                      Math.max(0, Number(selectedClip.end || 0) - Number(selectedClip.start || 0))
+                  ),
+                  scoreBreakdown: selectedClip.scoreBreakdown || null,
+                }
+              : null,
         };
         setProcessedFile(fakeFile);
         setStatusMessage("Viral Clip Rendered! Auto-saving...");

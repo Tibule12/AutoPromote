@@ -39,6 +39,7 @@ const {
   verifyMulticamRenderInputs,
 } = require("./services/multicamUploadService");
 const { getMulticamStoragePaths } = require("./services/storageCleanupService");
+const { getClipLearningProfile } = require("./services/clipOutcomeLearningService");
 const MEDIA_WORKER_URL =
   process.env.MEDIA_WORKER_URL || "https://media-worker-v1-341498038874.us-central1.run.app";
 const DEFAULT_CAM_COMBINER_WORKER_URL =
@@ -1980,16 +1981,26 @@ router.post("/analyze", async (req, res) => {
     }
 
     console.log(`[MediaRoute] Credits OK. Starting analysis...`);
+    const learningProfile = await getClipLearningProfile(userId).catch(error => {
+      console.warn(`[MediaRoute] Clip learning profile unavailable for ${userId}:`, error.message);
+      return null;
+    });
     const scenes = await videoEditingService.analyzeVideo(analysisSource, userId, {
       forceFresh: Boolean(forceFresh),
       scanNonce: typeof scanNonce === "string" ? scanNonce : "",
       localPath: resolvedSource.renderJobId ? null : localPath || null,
+      learningProfile,
     });
     res.json({
       success: true,
       scenes: scenes,
       remainingCredits: credits.remaining,
       billingDisabled: !!credits.skipped,
+      learning: {
+        status: learningProfile?.status || "warming_up",
+        sampleCount: Number(learningProfile?.sampleCount || 0),
+        confidence: Number(learningProfile?.confidence || 0),
+      },
       reusedMulticamMaster: Boolean(resolvedSource.renderJobId),
       sourceRenderJobId: resolvedSource.renderJobId,
     });

@@ -78,7 +78,7 @@
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.08);
   color: rgba(255, 248, 236, 0.92);
-  font-size: 0.76rem;
+  font-size: 0.8rem;
   font-weight: 700;
 }
 
@@ -97,7 +97,7 @@
 .studio-status-label {
   display: block;
   color: rgba(247, 248, 251, 0.62);
-  font-size: 0.7rem;
+  font-size: 0.74rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -147,6 +147,15 @@
 .close-btn:hover {
   background: rgba(255, 255, 255, 0.2);
   transform: rotate(90deg);
+}
+
+.close-btn:focus-visible,
+.viral-studio-container button:focus-visible,
+.viral-studio-container input:focus-visible,
+.viral-studio-container select:focus-visible,
+.viral-studio-container textarea:focus-visible {
+  outline: 3px solid rgba(251, 191, 36, 0.62);
+  outline-offset: 2px;
 }
 
 .studio-layout {
@@ -2313,12 +2322,166 @@
   color: #f8fafc;
   font-size: 0.82rem;
   font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .layer-row-detail {
   color: rgba(247, 248, 251, 0.64);
   font-size: 0.72rem;
   line-height: 1.35;
+}
+
+.active-layer-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.active-layer-header h5 {
+  margin: 2px 0 0;
+  color: #fff8ec;
+  font-size: 1rem;
+}
+
+.layer-type-pill {
+  flex: 0 0 auto;
+  padding: 6px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(247, 248, 251, 0.82);
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.broll-layer-summary {
+  display: grid;
+  grid-template-columns: 82px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  margin: 12px 0 14px;
+  padding: 10px;
+  border: 1px solid rgba(255, 165, 90, 0.18);
+  border-radius: 12px;
+  background: rgba(255, 145, 77, 0.07);
+}
+
+.broll-layer-preview {
+  width: 82px;
+  aspect-ratio: 9 / 16;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 10px;
+  background: rgba(7, 10, 18, 0.72);
+  color: rgba(247, 248, 251, 0.68);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.broll-layer-preview video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.broll-layer-copy {
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.broll-layer-copy strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #fff8ec;
+  font-size: 0.86rem;
+}
+
+.broll-layer-copy > span {
+  color: rgba(247, 248, 251, 0.68);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.broll-layer-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.broll-layer-chip-row span {
+  padding: 5px 7px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(247, 248, 251, 0.78);
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.broll-control-group {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(7, 10, 18, 0.32);
+}
+
+.broll-control-label {
+  color: rgba(247, 248, 251, 0.72);
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.broll-mode-toggle-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.broll-mode-toggle-row .mini-toggle-btn {
+  width: 100%;
+  min-height: 38px;
+}
+
+.broll-control-note {
+  margin: 0;
+  color: rgba(247, 248, 251, 0.62);
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.broll-check-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 30px;
+  color: #f8fafc;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.broll-check-label input {
+  flex: 0 0 auto;
+}
+
+.layer-remove-btn {
+  width: 100%;
+  border-color: rgba(248, 113, 113, 0.28);
+  background: rgba(127, 29, 29, 0.18);
+  color: #fecaca;
 }
 
 .action-buttons {
@@ -2384,7 +2547,20 @@
 
 @media (max-width: 1200px) {
   .studio-header {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+  }
+
+  .studio-header-copy {
+    grid-column: 1 / -1;
+  }
+
+  .studio-header-status {
+    grid-column: 1;
+  }
+
+  .studio-header-actions {
+    grid-column: 2;
   }
 
   .studio-layout {
@@ -2436,6 +2612,34 @@
     padding: 16px;
   }
 
+  .studio-header {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    align-items: start;
+  }
+
+  .studio-header-copy,
+  .studio-header-status,
+  .studio-header-actions {
+    grid-column: 1;
+  }
+
+  .studio-header-subtitle {
+    margin-top: 6px;
+    font-size: 0.9rem;
+  }
+
+  .studio-billing-strip {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .studio-billing-pill {
+    justify-content: center;
+    text-align: center;
+  }
+
   .studio-header-copy h3 {
     font-size: 1.45rem;
   }
@@ -2477,10 +2681,35 @@
     width: 100%;
   }
 
+  .studio-header-status {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .studio-status-pill {
+    min-width: 0;
+    padding: 9px 10px;
+  }
+
+  .studio-header-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr 40px;
+  }
+
+  .studio-header-actions .tool-btn,
+  .studio-header-actions .tool-btn-compact {
+    width: 100%;
+  }
+
   .tool-btn,
   .tool-btn-compact,
   .export-btn {
     width: 100%;
+  }
+
+  .studio-header-actions .close-btn {
+    width: 40px;
   }
 
   .action-buttons {
@@ -2552,7 +2781,9 @@
   height: 100%;
   background: linear-gradient(135deg, #f59e0b, #d97706);
   border-radius: 0;
-  transition: width 0.25s ease, opacity 0.25s ease;
+  transition:
+    width 0.25s ease,
+    opacity 0.25s ease;
 }
 
 .broll-playhead {
@@ -2577,7 +2808,9 @@
   align-items: center;
   justify-content: center;
   z-index: 3;
-  transition: box-shadow 0.15s ease, filter 0.15s ease;
+  transition:
+    box-shadow 0.15s ease,
+    filter 0.15s ease;
   min-width: 16px;
   overflow: hidden;
 }
@@ -2634,6 +2867,217 @@
 
 .broll-upload-btn:hover {
   background: linear-gradient(135deg, #8b5cf6, #c4b5fd) !important;
+}
+
+.broll-sound-panel {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0 14px;
+  padding: 12px;
+  border: 1px solid rgba(45, 212, 191, 0.26);
+  border-radius: 14px;
+  background: rgba(15, 118, 110, 0.12);
+}
+
+.broll-sound-panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.broll-sound-panel-header strong {
+  display: block;
+  max-width: 100%;
+  margin-top: 2px;
+  color: #f8fafc;
+  font-size: 0.9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.broll-sound-state {
+  flex: 0 0 auto;
+  padding: 5px 8px;
+  border: 1px solid rgba(45, 212, 191, 0.32);
+  border-radius: 999px;
+  background: rgba(20, 184, 166, 0.14);
+  color: #ccfbf1;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.broll-sound-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.broll-sound-actions .broll-sound-btn:first-child {
+  grid-column: 1 / -1;
+}
+
+.broll-sound-btn {
+  background: linear-gradient(135deg, #0f766e, #14b8a6) !important;
+  color: #fff !important;
+  border-color: rgba(45, 212, 191, 0.4) !important;
+  font-weight: 700 !important;
+}
+
+.broll-sound-btn:hover {
+  background: linear-gradient(135deg, #0d9488, #5eead4) !important;
+}
+
+.broll-sound-active-btn {
+  max-width: 100%;
+  background: rgba(20, 184, 166, 0.12) !important;
+  border-color: rgba(45, 212, 191, 0.35) !important;
+  color: #ccfbf1 !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.broll-sound-player {
+  width: 100%;
+  min-height: 38px;
+  display: block;
+}
+
+.broll-sound-player.empty {
+  display: none;
+}
+
+.broll-sound-message {
+  margin: 0;
+  color: rgba(204, 251, 241, 0.78);
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.broll-clip-library {
+  display: grid;
+  gap: 12px;
+  margin: 14px 0;
+  padding: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.86), rgba(2, 6, 23, 0.74));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.broll-clip-library-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: #dbeafe;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.broll-clip-library-header strong {
+  min-width: 28px;
+  text-align: center;
+  color: #fff;
+}
+
+.broll-clip-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.broll-clip-card {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 9px;
+  padding: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.68);
+  cursor: pointer;
+  transition:
+    border-color 0.16s ease,
+    background 0.16s ease,
+    transform 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.broll-clip-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(59, 130, 246, 0.44);
+  background: rgba(30, 41, 59, 0.78);
+}
+
+.broll-clip-card.active {
+  border-color: rgba(45, 212, 191, 0.7);
+  background: rgba(13, 148, 136, 0.16);
+  box-shadow:
+    0 0 0 2px rgba(45, 212, 191, 0.12),
+    0 18px 42px rgba(2, 6, 23, 0.35);
+}
+
+.broll-clip-preview {
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #020617;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.34);
+}
+
+.broll-clip-preview video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #020617;
+}
+
+.broll-clip-preview span {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: rgba(226, 232, 240, 0.72);
+  font-size: 0.75rem;
+}
+
+.broll-clip-meta {
+  min-width: 0;
+  display: grid;
+  align-content: start;
+  gap: 4px;
+}
+
+.broll-clip-meta strong {
+  min-width: 0;
+  color: #f8fafc;
+  font-size: 0.86rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.broll-clip-meta span {
+  color: #94a3b8;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.broll-clip-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-self: end;
+}
+
+.broll-clip-actions .mini-toggle-btn {
+  min-height: 30px;
+  padding: 5px 9px;
+  font-size: 0.72rem;
 }
 
 .broll-suggestions {
@@ -2703,7 +3147,7 @@
 }
 
 .draggable-overlay.broll-fullscreen.active {
-  box-shadow: inset 0 0 0 2px rgba(251, 113, 133, 0.9) !important;
+  box-shadow: inset 0 0 0 1px rgba(45, 212, 191, 0.44) !important;
 }
 
 .draggable-overlay.broll-fullscreen:active {
@@ -2720,18 +3164,20 @@
 
 .broll-badge {
   position: absolute;
-  top: 6px;
-  right: 8px;
-  background: rgba(239, 68, 68, 0.85);
-  color: #fff;
-  font-size: 0.6rem;
+  top: 10px;
+  right: 10px;
+  background: rgba(2, 6, 23, 0.68);
+  color: #ccfbf1;
+  font-size: 0.56rem;
   font-weight: 800;
-  padding: 2px 7px;
-  border-radius: 4px;
+  padding: 4px 7px;
+  border: 1px solid rgba(45, 212, 191, 0.26);
+  border-radius: 999px;
   z-index: 10;
   pointer-events: none;
   letter-spacing: 0.03em;
   text-transform: uppercase;
+  backdrop-filter: blur(8px);
 }
 
 .broll-shot-card {
@@ -2794,63 +3240,131 @@
 /* ── B-Roll animation keyframes ── */
 
 @keyframes brollFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes brollFadeOut {
-  from { opacity: 1; }
-  to { opacity: 0; }
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
 @keyframes brollSlideLeftIn {
-  from { transform: translateX(100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 @keyframes brollSlideLeftOut {
-  from { transform: translateX(0); opacity: 1; }
-  to { transform: translateX(-100%); opacity: 0; }
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
 }
 
 @keyframes brollSlideRightIn {
-  from { transform: translateX(-100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 @keyframes brollSlideRightOut {
-  from { transform: translateX(0); opacity: 1; }
-  to { transform: translateX(100%); opacity: 0; }
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
 }
 
 @keyframes brollSlideUpIn {
-  from { transform: translateY(100%); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 @keyframes brollSlideUpOut {
-  from { transform: translateY(0); opacity: 1; }
-  to { transform: translateY(-100%); opacity: 0; }
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
 }
 
 @keyframes brollSlideDownIn {
-  from { transform: translateY(-100%); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 @keyframes brollSlideDownOut {
-  from { transform: translateY(0); opacity: 1; }
-  to { transform: translateY(100%); opacity: 0; }
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
 }
 
 @keyframes brollZoomIn {
-  from { transform: scale(0.3); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+  from {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 @keyframes brollZoomOut {
-  from { transform: scale(1); opacity: 1; }
-  to { transform: scale(0.3); opacity: 0; }
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0.3);
+    opacity: 0;
+  }
 }
 
 /* Enter animations — triggered when overlay appears */
@@ -2886,7 +3400,9 @@
   position: absolute;
   left: 0;
   border-radius: 4px;
-  transition: opacity 0.3s ease, height 0.25s ease;
+  transition:
+    opacity 0.3s ease,
+    height 0.25s ease;
 }
 
 /* Music library scrollbar */
@@ -2897,4 +3413,109 @@
 .ai-settings-card div[style*="overflow-y: auto"]::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.15);
   border-radius: 4px;
+}
+
+/* Focus Viral Clip Studio into a hook + B-roll workspace. The older editor
+   internals stay available to export, but the UI only surfaces this product path. */
+.hook-broll-only-mode .studio-billing-strip,
+.hook-broll-only-mode .studio-timeline-container,
+.hook-broll-only-mode .studio-trim-controls,
+.hook-broll-only-mode .audio-panel,
+.hook-broll-only-mode .workflow-summary-panel,
+.hook-broll-only-mode section:has(.campaign-set-grid),
+.hook-broll-only-mode section:has(.family-cluster-list),
+.hook-broll-only-mode .editing-tools-panel,
+.hook-broll-only-mode .automation-panel .hook-settings-card > h5:first-child,
+.hook-broll-only-mode .automation-panel .music-settings-card {
+  display: none;
+}
+
+.hook-broll-only-mode .broll-timeline-tracks .broll-track-row:nth-child(2),
+.hook-broll-only-mode .broll-timeline-tracks .broll-track-row:nth-child(4) {
+  display: none;
+}
+
+.hook-broll-only-mode .clips-list .clip-guidance-packaging,
+.hook-broll-only-mode .clips-list .clip-guidance-variants,
+.hook-broll-only-mode .clips-list .clip-guidance-family,
+.hook-broll-only-mode .clips-list .clip-guidance-reasons,
+.hook-broll-only-mode .clips-list .clip-fix-card,
+.hook-broll-only-mode .clips-list .clip-guidance-scoreboard,
+.hook-broll-only-mode .clips-list .clip-guidance-mini-list,
+.hook-broll-only-mode .clips-list .clip-tag-row,
+.hook-broll-only-mode .clips-list .clip-score-stack,
+.hook-broll-only-mode .clips-list .clip-priority-badge {
+  display: none;
+}
+
+.hook-broll-only-mode .automation-panel .hook-settings-card {
+  margin-top: 0;
+}
+
+.hook-broll-only-mode .studio-header {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.hook-broll-only-mode .studio-header-status,
+.hook-broll-only-mode .preview-panel .panel-chip-group,
+.hook-broll-only-mode .preview-signal-grid {
+  display: none;
+}
+
+.hook-broll-only-mode .automation-panel {
+  order: 1;
+}
+
+.hook-broll-only-mode .broll-timeline-panel {
+  order: 2;
+}
+
+.hook-broll-only-mode .clips-list {
+  order: 3;
+}
+
+.hook-broll-only-mode .export-panel {
+  order: 4;
+}
+
+.hook-broll-only-mode .layer-panel {
+  display: none;
+}
+
+.hook-broll-only-mode .active-overlay-panel {
+  order: 5;
+}
+
+.hook-broll-only-mode .broll-timeline-actions .clip-action-btn,
+.hook-broll-only-mode .clip-guidance-actions .clip-action-btn {
+  min-height: 42px;
+}
+
+.hook-broll-only-mode .broll-timeline-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.hook-broll-only-mode
+  .broll-timeline-actions
+  .clip-action-btn:not(.broll-upload-btn):not(.broll-sound-btn):not(.broll-sound-active-btn) {
+  display: none;
+}
+
+.hook-broll-only-mode .broll-sound-active-btn {
+  grid-column: 1 / -1;
+}
+
+.hook-broll-only-mode .broll-sound-panel .broll-sound-active-btn {
+  grid-column: auto;
+}
+
+.hook-broll-only-mode .clips-list .clip-guidance-summary,
+.hook-broll-only-mode .clips-list .clip-jump-row,
+.hook-broll-only-mode .clips-list .clip-card p {
+  display: none;
+}
+
+.hook-broll-only-mode .clips-list .clips-scroller {
+  max-height: 360px;
 }

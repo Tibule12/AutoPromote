@@ -20,6 +20,7 @@ const {
 const logger = require("./logger");
 const { enqueuePlatformPostTask } = require("./promotionTaskQueue");
 const { addImpressions } = require("./variantStatsService");
+const { recordClipOutcomeFromPlatformPost } = require("./clipOutcomeLearningService");
 
 function computeNormalizedScore(platform, metrics) {
   if (!metrics) return null;
@@ -173,8 +174,7 @@ function normalizeSnapshot(metrics) {
   };
 }
 
-async function pollPlatformPostMetricsBatch({ batchSize = 5, maxAgeMinutes = 30 } = {}) {
-  const cutoff = Date.now() - maxAgeMinutes * 60000;
+async function pollPlatformPostMetricsBatch({ batchSize = 5 } = {}) {
   // Query by next_check_at to avoid scanning all docs each run.
   // NOTE: Firestore requires a composite index on (success ASC, next_check_at ASC).
   const nowIso = new Date().toISOString();
@@ -439,6 +439,22 @@ async function pollPlatformPostMetricsBatch({ batchSize = 5, maxAgeMinutes = 30 
           logger.warn("amplify_logic_error", { error: ampErr.message });
         }
         await doc.ref.set(update, { merge: true });
+        try {
+          if (snapshot && d.uid && d.contentId) {
+            await recordClipOutcomeFromPlatformPost({
+              postId: doc.id,
+              postData: d,
+              snapshot,
+              normalizedScore,
+            });
+          }
+        } catch (learningError) {
+          logger.warn("clip_outcome_learning_failed", {
+            error: learningError.message,
+            contentId: d.contentId,
+            platform: d.platform,
+          });
+        }
         // Unified content-level aggregation (Platform C)
         try {
           if (d.contentId && typeof normalizedScore === "number") {

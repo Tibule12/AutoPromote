@@ -1179,6 +1179,7 @@ class VideoEditingService {
       force_fresh: Boolean(options.forceFresh),
       scan_nonce: typeof options.scanNonce === "string" ? options.scanNonce : "",
       local_path: options.localPath || null,
+      learning_profile: options.learningProfile || null,
     };
     try {
       let response;

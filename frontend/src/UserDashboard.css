@@ -190,6 +190,8 @@ body.dashboard-mode ::-webkit-scrollbar-thumb:hover {
   transform: translateX(-100%);
   transition: transform 0.25s ease;
   padding: 1rem 1rem 1.25rem 1rem;
+  display: flex;
+  flex-direction: column;
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
@@ -211,6 +213,9 @@ body.dashboard-mode ::-webkit-scrollbar-thumb:hover {
   .dashboard-sidebar {
     transform: none;
     top: 64px;
+    height: calc(100dvh - 64px);
+    overflow-x: hidden;
+    overflow-y: auto;
   }
   .sidebar-backdrop {
     display: none;
@@ -395,13 +400,15 @@ body.dashboard-mode ::-webkit-scrollbar-thumb:hover {
 /* Vertical nav */
 .dashboard-navbar-vertical {
   margin-top: 1rem;
+  min-height: 0;
 }
 .dashboard-navbar-vertical ul {
   list-style: none;
   padding: 0;
   margin: 0;
-  display: grid;
-  gap: 0.45rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
 }
 .dashboard-navbar-vertical li {
   min-height: 42px;
@@ -412,6 +419,8 @@ body.dashboard-mode ::-webkit-scrollbar-thumb:hover {
   border: 1px solid rgba(148, 163, 184, 0.14);
   background: #10172a;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  display: flex;
+  align-items: center;
   font-weight: 750;
   line-height: 1.2;
   transition:
@@ -441,6 +450,33 @@ body.dashboard-mode ::-webkit-scrollbar-thumb:hover {
   color: #e5e7eb;
   font-weight: 750;
   cursor: pointer;
+}
+
+@media (min-width: 1024px) {
+  .dashboard-navbar-vertical {
+    flex: 1 1 auto;
+    display: flex;
+    margin-top: 1.05rem;
+  }
+
+  .dashboard-navbar-vertical ul {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+
+  .dashboard-navbar-vertical li {
+    flex: 1 1 0;
+    min-height: 50px;
+    max-height: 76px;
+    padding: 0 0.95rem;
+    border-radius: 12px;
+    font-size: 0.96rem;
+  }
+
+  .logout-btn {
+    min-height: 52px;
+    margin-top: 0.95rem;
+  }
 }
 
 .logout-btn:hover {

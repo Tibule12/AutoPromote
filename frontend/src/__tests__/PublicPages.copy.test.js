@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import WelcomePage from "../WelcomePage";
 import Features from "../Features";
 import About from "../About";
@@ -17,6 +17,7 @@ const renderWithPath = (ui, pathname) => {
 
 describe("public marketing pages", () => {
   test("welcome page explains current product state conservatively", () => {
+    const openSpy = jest.spyOn(window, "open").mockImplementation(() => null);
     render(<WelcomePage onGetStarted={() => {}} onSignIn={() => {}} />);
 
     expect(screen.getByText(/What Works Today/i)).toBeInTheDocument();
@@ -32,6 +33,24 @@ describe("public marketing pages", () => {
     expect(
       screen.queryByText(/AI-assisted variations focus on stronger hooks/i)
     ).not.toBeInTheDocument();
+
+    expect(screen.getByText(/Two cameras in. One directed podcast out./i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Cam Combiner video demo/i)).toHaveAttribute(
+      "src",
+      "/demos/cam-combiner-demo.webm"
+    );
+    expect(screen.getByLabelText(/Cam Combiner video demo/i)).toHaveAttribute(
+      "poster",
+      "/demos/cam-combiner-demo-poster.jpg"
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /Watch Demo/i }));
+    expect(openSpy).toHaveBeenCalledWith(
+      "/demo-teaser.mp4",
+      "_blank",
+      "noopener,noreferrer"
+    );
+    openSpy.mockRestore();
   });
 
   test("features and changelog avoid retired viral bonus promises", () => {

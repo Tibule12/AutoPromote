@@ -176,6 +176,28 @@ def parse_args():
         help="Comma-separated camera ids for external clean-audio channels, for example cam2,cam1.",
     )
     parser.add_argument(
+        "--primary-audio-camera-id",
+        default="cam1",
+        choices=["cam1", "cam2"],
+        help="Camera id to use as the default primary speaker when clean-channel switching has no active run.",
+    )
+    parser.add_argument(
+        "--clean-channel-min-run-seconds",
+        type=float,
+        default=None,
+        help="Minimum clean-channel active-speaker run length before the director cuts to that camera.",
+    )
+    parser.add_argument(
+        "--trusted-sync-contract-json",
+        default="",
+        help="Trusted sync contract JSON string or file path to pass through the worker.",
+    )
+    parser.add_argument(
+        "--trusted-director-channel-map-json",
+        default="",
+        help="Trusted director channel-map JSON string or file path to pass through the worker.",
+    )
+    parser.add_argument(
         "--camera1-reaction-side",
         default="auto",
         choices=["auto", "left", "right"],
@@ -734,6 +756,18 @@ def qa_receipt_timeline_duration(args, duration_probe):
     return max(float(args.duration or 0.0), 1.0)
 
 
+def load_optional_json_arg(value):
+    raw = str(value or "").strip()
+    if not raw:
+        return None
+    if raw.startswith("{") or raw.startswith("["):
+        return json.loads(raw)
+    path = Path(raw)
+    if path.exists():
+        return json.loads(path.read_text(encoding="utf-8"))
+    return json.loads(raw)
+
+
 def build_qa_receipt_request(args, proof_duration):
     return worker.RenderMultiCamRequest(
         sources=[
@@ -761,7 +795,7 @@ def build_qa_receipt_request(args, proof_duration):
         audio_based_auto_switch=True,
         auto_switch_interval=args.auto_switch_interval,
         auto_switch_aggressiveness=args.auto_switch_aggressiveness,
-        primary_audio_camera_id="cam1",
+        primary_audio_camera_id=args.primary_audio_camera_id,
         director_channel_camera_ids=[
             item.strip()
             for item in str(args.director_channel_camera_map or "").split(",")
@@ -784,6 +818,10 @@ def build_qa_receipt_request(args, proof_duration):
         brandWatermark=False,
         generateThumbnail=(not args.no_thumbnails),
         async_mode=False,
+        trusted_sync_contract=load_optional_json_arg(args.trusted_sync_contract_json),
+        trustedSyncContract=load_optional_json_arg(args.trusted_sync_contract_json),
+        trusted_director_channel_map=load_optional_json_arg(args.trusted_director_channel_map_json),
+        trustedDirectorChannelMap=load_optional_json_arg(args.trusted_director_channel_map_json),
     )
 
 
@@ -1025,24 +1063,37 @@ def install_command_tracer(args):
         job_id,
         primary_source_start=None,
         primary_source_end=None,
+        layout_source_ranges=None,
         segment_index=None,
     ):
         primary = layout_sources[0] if layout_sources else {}
         secondary = layout_sources[1] if len(layout_sources) > 1 else {}
-        primary_start = max(0.0, float(primary_source_start if primary_source_start is not None else 0.0))
+        source_ranges = layout_source_ranges or {}
+        primary_range = source_ranges.get(primary.get("id")) if primary else None
+        secondary_range = source_ranges.get(secondary.get("id")) if secondary else None
+        primary_start = max(
+            0.0,
+            float(primary_range[0] if primary_range else primary_source_start if primary_source_start is not None else 0.0),
+        )
         primary_rate = float(primary.get("sync_rate") or 1.0)
-        if primary_source_end is not None and float(primary_source_end) > primary_start:
+        if primary_range and float(primary_range[1]) > primary_start:
+            primary_duration = max(0.02, float(primary_range[1]) - primary_start)
+        elif primary_source_end is not None and float(primary_source_end) > primary_start:
             primary_duration = max(0.02, float(primary_source_end) - primary_start)
         else:
             primary_duration = max(0.02, float(duration) * primary_rate)
         secondary_start = None
         secondary_duration = None
         if secondary:
-            secondary_start = max(
-                0.0,
-                worker.get_source_start_for_timeline(secondary, overlap_start, timeline_start),
-            )
-            secondary_duration = max(0.02, float(duration) * float(secondary.get("sync_rate") or 1.0))
+            if secondary_range:
+                secondary_start = max(0.0, float(secondary_range[0]))
+                secondary_duration = max(0.02, float(secondary_range[1]) - secondary_start)
+            else:
+                secondary_start = max(
+                    0.0,
+                    worker.get_source_start_for_timeline(secondary, overlap_start, timeline_start),
+                )
+                secondary_duration = max(0.02, float(duration) * float(secondary.get("sync_rate") or 1.0))
 
         print("\nLAYOUT SEGMENT TIMING:")
         print(
@@ -1079,6 +1130,7 @@ def install_command_tracer(args):
             job_id,
             primary_source_start=primary_source_start,
             primary_source_end=primary_source_end,
+            layout_source_ranges=layout_source_ranges,
             segment_index=segment_index,
         )
         if rendered and Path(segment_output_path).exists():
@@ -1119,9 +1171,13 @@ async def render_window(args, name, window_start, window_duration, paths, output
         "offsets": offsets,
         "sync_rates": sync_rates,
         "rotations": rotations,
+        "trusted_sync_contract": load_optional_json_arg(args.trusted_sync_contract_json),
+        "trusted_director_channel_map": load_optional_json_arg(args.trusted_director_channel_map_json),
         "auto_switch": bool(args.auto_switch),
         "auto_switch_interval": args.auto_switch_interval,
         "auto_switch_aggressiveness": args.auto_switch_aggressiveness,
+        "primary_audio_camera_id": args.primary_audio_camera_id,
+        "clean_channel_min_run_seconds": args.clean_channel_min_run_seconds,
         "render_tier": args.render_tier,
         "layout_summary": layout_summary,
         "segments": debug_rows,
@@ -1171,7 +1227,7 @@ async def render_window(args, name, window_start, window_duration, paths, output
         audio_based_auto_switch=True,
         auto_switch_interval=args.auto_switch_interval,
         auto_switch_aggressiveness=args.auto_switch_aggressiveness,
-        primary_audio_camera_id="cam1",
+        primary_audio_camera_id=args.primary_audio_camera_id,
         director_channel_camera_ids=[
             item.strip()
             for item in str(args.director_channel_camera_map or "").split(",")
@@ -1196,6 +1252,10 @@ async def render_window(args, name, window_start, window_duration, paths, output
         generateThumbnail=(not args.no_thumbnails),
         async_mode=False,
         plan_only=bool(args.director_plan_only),
+        trusted_sync_contract=load_optional_json_arg(args.trusted_sync_contract_json),
+        trustedSyncContract=load_optional_json_arg(args.trusted_sync_contract_json),
+        trusted_director_channel_map=load_optional_json_arg(args.trusted_director_channel_map_json),
+        trustedDirectorChannelMap=load_optional_json_arg(args.trusted_director_channel_map_json),
     )
 
     job_id = f"{safe_name(args.job_prefix)}-{safe_name(name)}-{int(time.time())}"
@@ -1280,6 +1340,11 @@ async def render_window(args, name, window_start, window_duration, paths, output
 
 async def main():
     args = parse_args()
+    if args.clean_channel_min_run_seconds is not None:
+        worker.MULTICAM_CLEAN_CHANNEL_MIN_RUN_SECONDS = max(
+            0.25,
+            min(5.0, float(args.clean_channel_min_run_seconds)),
+        )
     logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(message)s")
     worker.logger.setLevel(logging.INFO)
 

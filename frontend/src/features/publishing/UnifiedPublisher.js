@@ -59,6 +59,25 @@ const getPlatformName = platformId => {
 
 const DEFAULT_SELECTED_PLATFORMS = ["tiktok", "youtube"];
 
+const buildClipLearningMetadata = clip => {
+  if (!clip || (!clip.id && !clip.scanSessionId)) return null;
+  const start = Math.max(0, Number(clip.start || 0));
+  const end = Math.max(start, Number(clip.end || start));
+  return {
+    version: 1,
+    scanSessionId: clip.scanSessionId || null,
+    clipId: String(clip.id || ""),
+    predictedScore: Number(clip.guidedScore ?? clip.score ?? clip.viralScore ?? 0),
+    scoreConfidence: Number(clip.scoreConfidence || 0),
+    strategyLabel: clip.strategyLabel || clip.campaignRole || null,
+    contentType: clip.contentType || "general",
+    start,
+    end,
+    duration: Math.max(0, Number(clip.duration || end - start)),
+    scoreBreakdown: clip.scoreBreakdown || null,
+  };
+};
+
 const buildMediaMeta = ({
   trimStart = 0,
   trimEnd = 0,
@@ -1768,6 +1787,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
   const [viralScannerFile, setViralScannerFile] = useState(null);
   const [videoEditorFileOverride, setVideoEditorFileOverride] = useState(null);
   const [selectedPromoVisual, setSelectedPromoVisual] = useState(null);
+  const [selectedClipLearning, setSelectedClipLearning] = useState(null);
   const effectiveThumbnailUrl = thumbnailUrl || "";
   const safeThumbUrl = effectiveThumbnailUrl ? sanitizeUrl(effectiveThumbnailUrl) : "";
 
@@ -1780,6 +1800,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
 
   useEffect(() => {
     setSelectedPromoVisual(null);
+    setSelectedClipLearning(null);
   }, [globalFile]);
 
   const restoreMasterPreview = () => {
@@ -1817,6 +1838,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
     setShowCropper(false);
     setShowViralScanner(false);
     setViralScannerFile(null);
+    setSelectedClipLearning(null);
     setIsPublishing(false);
     setPublishingPlatform(null);
   };
@@ -2668,7 +2690,15 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
             }
           : undefined,
         isDryRun: false,
-        meta: uploadMeta,
+        meta: {
+          ...(uploadMeta || {}),
+          ...((selectedClipLearning || fileToUpload?.clipLearning || mediaFile?.clipLearning)
+            ? {
+                clipLearning:
+                  selectedClipLearning || fileToUpload?.clipLearning || mediaFile?.clipLearning,
+              }
+            : {}),
+        },
       };
 
       if (onUpload) {
@@ -3397,6 +3427,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
               setEditingTarget(null);
             }}
             onSelectClip={clip => {
+              setSelectedClipLearning(buildClipLearningMetadata(clip));
               if (clip?.openStudio) {
                 const sourceFile = viralScannerFile || mediaFile;
                 const studioClip = {

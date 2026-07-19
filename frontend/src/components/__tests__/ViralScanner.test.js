@@ -179,6 +179,11 @@ describe("ViralScanner guided clip selection", () => {
         {
           start_time: 6.2,
           end_time: 20.4,
+          scoreConfidence: 84,
+          scoreConfidenceLabel: "Strong evidence",
+          learningApplied: true,
+          learnedAdjustment: 3.4,
+          learningProfileSamples: 9,
           reason:
             "Speaker explains why this works with a face close-up, fast scene change, and emotional reveal",
         },
@@ -209,11 +214,81 @@ describe("ViralScanner guided clip selection", () => {
     const guidanceCard = await screen.findByTestId("scanner-guidance-card");
     expect(guidanceCard.textContent).toContain("BEST CLIP");
     expect(guidanceCard.textContent).toContain("Viral Score: 100");
+    expect(guidanceCard.textContent).toContain("Strong evidence");
+    expect(guidanceCard.textContent).toContain("Evidence confidence");
+    expect(guidanceCard.textContent).toContain("84%");
+    expect(guidanceCard.textContent).toContain("Personalized +3.4 from 9 measured outcomes");
     expect(guidanceCard.textContent).toContain("Why this clip");
     expect(guidanceCard.textContent).toContain("Starts with a spoken beat or voice-led setup");
     expect(guidanceCard.textContent).toContain("🔥 High Energy");
     expect(guidanceCard.textContent).toContain("😳 Emotional");
     expect(guidanceCard.textContent).toContain("🎓 Educational");
+  });
+
+  test("uploads local files through the configured media worker endpoint and charges 8 credits", async () => {
+    const file = new File(["video-bytes"], "local-source.mp4", { type: "video/mp4" });
+
+    global.fetch = jest.fn((url, options = {}) => {
+      const requestUrl = String(url);
+      const method = String(options.method || "GET").toUpperCase();
+
+      if (requestUrl.includes("/api/analytics/clip-scanner-cache") && method === "GET") {
+        return Promise.resolve({ ok: false, status: 404, json: async () => ({}) });
+      }
+      if (requestUrl.includes("/api/analytics/clip-scanner-cache") && method === "POST") {
+        return Promise.resolve({ ok: true, status: 201, json: async () => ({ ok: true }) });
+      }
+      if (requestUrl.includes("/api/monetization/credits/balance")) {
+        return Promise.resolve({ ok: true, text: async () => JSON.stringify({ balance: 120 }) });
+      }
+      if (requestUrl.includes("/api/media/worker-health")) {
+        return Promise.resolve({ ok: true, status: 200, text: async () => "ok" });
+      }
+      if (requestUrl.includes("/api/media/upload-source")) {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({ localPath: "/tmp/worker_inputs/local-source.mp4", size: 11 }),
+        });
+      }
+      if (requestUrl.includes("/api/media/analyze")) {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({
+            remainingCredits: 112,
+            scenes: [{ id: "local-1", start: 2, end: 14, viralScore: 82 }],
+          }),
+        });
+      }
+      return Promise.resolve({ ok: false, status: 404, json: async () => ({}) });
+    });
+
+    render(<ViralScanner file={file} onSelectClip={jest.fn()} onClose={jest.fn()} />);
+
+    const startButton = await screen.findByRole("button", { name: /Start AI Scan/i });
+    expect(startButton.textContent).toContain("8");
+    await waitFor(() => expect(startButton).not.toBeDisabled());
+
+    await act(async () => {
+      fireEvent.click(startButton);
+    });
+
+    await screen.findByTestId("scanner-guidance-card");
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.stringMatching(/\/api\/media\/upload-source$/),
+      expect.objectContaining({ method: "POST", body: expect.any(FormData) })
+    );
+    const analyzeCall = global.fetch.mock.calls.find(([url]) => String(url).includes("/api/media/analyze"));
+    expect(JSON.parse(analyzeCall[1].body)).toEqual(
+      expect.objectContaining({
+        fileUrl: "/tmp/worker_inputs/local-source.mp4",
+        localPath: "/tmp/worker_inputs/local-source.mp4",
+        forceFresh: false,
+        scanNonce: "",
+      })
+    );
   });
 
   test("passes improvement metadata when sending a weak clip to the editor", async () => {
