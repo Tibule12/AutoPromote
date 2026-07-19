@@ -37,16 +37,6 @@ import usePlatformStatus from "./hooks/usePlatformStatus";
 
 const DEFAULT_IMAGE = `${process.env.PUBLIC_URL || ""}/image.png`;
 
-const isE2E = () => {
-  if (typeof window === "undefined") return false;
-  if (window.__E2E_BYPASS === true) return true;
-  try {
-    return window.localStorage?.getItem("E2E_BYPASS") === "true";
-  } catch {
-    return false;
-  }
-};
-
 const UserDashboard = ({
   user,
   content,
@@ -62,7 +52,7 @@ const UserDashboard = ({
 }) => {
   const [activeTab, setActiveTab] = useState("profile");
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const clipStudioLocked = !isE2E();
+  const clipStudioLocked = process.env.NODE_ENV === "production";
 
   // If Wolf Hunt is disabled, prevent accidentally staying on that tab
   useEffect(() => {

@@ -52,11 +52,11 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
               <br />
               Edit Smarter.
               <br />
-              Publish Everywhere.
+              Publish Across Your Channels.
             </h1>
             <p className="ap-hero-subtext">
-              AutoPromote helps creators turn long-form content into viral clips, publish across
-              platforms, and grow faster with AI.
+              AutoPromote helps creators find promising moments in uploaded videos, prepare media,
+              and publish to supported connected platforms from one workspace.
             </p>
             <div className="ap-hero-ctas">
               <button className="ap-btn ap-btn-primary" onClick={onGetStarted}>
@@ -91,7 +91,7 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
         <section className="ap-section" id="workflow">
           <SectionHeading
             eyebrow="Workflow loop"
-            title="From upload to growth insights"
+            title="From upload to performance insights"
             copy="A single pass keeps every step connected."
           />
           <WorkflowSection steps={workflowSteps} />

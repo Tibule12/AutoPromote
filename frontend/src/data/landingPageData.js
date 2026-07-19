@@ -1,23 +1,23 @@
 export const featureCards = [
   {
     title: "Find Viral Clips",
-    subtitle: "Find moments most likely to perform.",
+    subtitle: "Analyze uploaded videos and identify promising moments to turn into clips.",
   },
   {
     title: "Cam Combiner",
-    subtitle: "Multi-camera podcast editing and AI direction.",
+    subtitle: "Combine multi-camera recordings with guided and automatic speaker cuts.",
   },
   {
-    title: "Viral Clip Studio",
-    subtitle: "Short-form clip creation with captions and B-roll.",
+    title: "Idea-to-Video",
+    subtitle: "Draft scenes, voiceover, visuals, and captions, then render a video using credits.",
   },
   {
     title: "Smart Promo",
-    subtitle: "AI-generated hooks, titles, descriptions, and promotional content.",
+    subtitle: "Create promotional clip plans, captions, hooks, and copy for eligible videos.",
   },
   {
-    title: "Publish Everywhere",
-    subtitle: "Upload once and distribute across multiple platforms.",
+    title: "Cross-Platform Publishing",
+    subtitle: "Upload once and publish to supported connected platforms.",
   },
 ];
 
@@ -28,49 +28,49 @@ export const workflowSteps = [
   },
   {
     title: "Edit & Enhance",
-    text: "Trim, caption, and polish with AI suggestions.",
+    text: "Trim, format, and prepare media with the editing tools available on your plan.",
   },
   {
     title: "Publish",
-    text: "Push to platforms from one workspace.",
+    text: "Publish now or queue content for supported connected platforms.",
   },
   {
     title: "Track Results",
-    text: "See views, retention, and engagement by channel.",
+    text: "Track views, clicks, CTR, and available platform breakdowns.",
   },
   {
     title: "Learn & Improve",
-    text: "A/B prompts and hooks on top-performing clips.",
+    text: "Compare results and optionally rotate an alternate title or hook.",
   },
 ];
 
 export const proofChecklist = [
   {
-    label: "Clips identified",
-    text: "Every upload is scored and split into hook-ready segments.",
+    label: "Optional clip analysis",
+    text: "Run Find Viral Clips on a video when you want suggested moments; analysis uses credits.",
   },
   {
-    label: "Caption quality",
-    text: "Captions are generated per clip format and platform readability checks.",
+    label: "Caption workflow",
+    text: "Generate caption drafts where available, then review and edit them before publishing.",
   },
   {
-    label: "Promotion copy",
-    text: "Hooks and metadata are optimized for each connected destination.",
+    label: "Platform copy",
+    text: "Customize titles, descriptions, captions, and other supported settings per destination.",
   },
 ];
 
 export const exampleContent = [
   {
-    tag: "Long-form to clip",
-    text: "From 45 min interview to 12 high-retention clips in minutes.",
+    tag: "Video to suggested moments",
+    text: "Analyze an eligible uploaded video and choose the moments you want to use.",
   },
   {
-    tag: "AI promotion copy",
-    text: "Hook + description generated and adapted per platform format.",
+    tag: "Idea to video",
+    text: "Draft scenes and captions, review them, and spend credits only when you render.",
   },
   {
-    tag: "Platform output",
-    text: "Same source clip, optimized with 3 platform-ready variants.",
+    tag: "Platform publishing",
+    text: "Use one source asset with destination-specific copy and publishing settings.",
   },
 ];
 
