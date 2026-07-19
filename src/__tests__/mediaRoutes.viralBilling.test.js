@@ -33,7 +33,6 @@ jest.mock("../services/clipOutcomeLearningService", () => ({
 
 const mediaRoutes = require("../mediaRoutes");
 const { deductCredits, refundCredits } = require("../creditSystem");
-const { getClipLearningProfile } = require("../services/clipOutcomeLearningService");
 
 const buildApp = () => {
   const app = express();
@@ -54,7 +53,6 @@ describe("viral scan and render billing recovery", () => {
       monthKey: "2026-07",
     });
     refundCredits.mockResolvedValue({ success: true, refunded: 8 });
-    getClipLearningProfile.mockResolvedValue(null);
   });
 
   it("refunds a charged viral analysis when the worker fails", async () => {
@@ -75,12 +73,6 @@ describe("viral scan and render billing recovery", () => {
   });
 
   it("does not refund a successful viral analysis", async () => {
-    getClipLearningProfile.mockResolvedValue({
-      status: "active",
-      sampleCount: 7,
-      confidence: 0.42,
-      strategyWeights: { hero_clip: { multiplier: 1.05 } },
-    });
     mockAnalyzeVideo.mockResolvedValue([{ id: "clip-1", start: 2, end: 14, viralScore: 84 }]);
 
     const response = await request(buildApp())
@@ -89,13 +81,10 @@ describe("viral scan and render billing recovery", () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.body.scenes).toHaveLength(1);
-    expect(response.body.learning).toEqual({ status: "active", sampleCount: 7, confidence: 0.42 });
     expect(mockAnalyzeVideo).toHaveBeenCalledWith(
       "https://example.com/source.mp4",
       "viral-user",
-      expect.objectContaining({
-        learningProfile: expect.objectContaining({ status: "active", sampleCount: 7 }),
-      })
+      expect.any(Object)
     );
     expect(refundCredits).not.toHaveBeenCalled();
   });

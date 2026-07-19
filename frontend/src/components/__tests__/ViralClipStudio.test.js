@@ -1,7 +1,7 @@
 import React from "react";
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import ViralClipStudio from "../ViralClipStudio";
-import { uploadSourceFileViaBackend } from "../../utils/sourceUpload";
+import { getDownloadURL, uploadBytes } from "firebase/storage";
 
 jest.mock("../../utils/clipWorkflowAnalytics", () => ({
   trackClipWorkflowEvent: jest.fn(() => Promise.resolve(true)),
@@ -234,13 +234,13 @@ describe("ViralClipStudio timeline sequencing", () => {
   }
 
   function ensureHookControlsOpen() {
-    const hookToggle = screen.getByLabelText(/Add Viral Hook/i);
+    const hookToggle = screen.getByLabelText(/^Add Hook$/i);
     if (!hookToggle.checked) {
       fireEvent.click(hookToggle);
     }
   }
 
-  test("does not auto-enable hook controls on initial render", () => {
+  test("enables the hook controls on initial render", () => {
     render(
       <ViralClipStudio
         videoUrl="https://example.com/source.mp4"
@@ -253,8 +253,8 @@ describe("ViralClipStudio timeline sequencing", () => {
       />
     );
 
-    expect(screen.getByLabelText(/Add Viral Hook/i)).not.toBeChecked();
-    expect(screen.queryByRole("button", { name: /Select Hook Segment/i })).not.toBeInTheDocument();
+    expect(screen.getByLabelText(/^Add Hook$/i)).toBeChecked();
+    expect(screen.getByRole("button", { name: /Select Hook Segment/i })).toBeInTheDocument();
   });
 
   test("dragging the selected hook range does not toggle selection mode", () => {
@@ -824,6 +824,7 @@ describe("ViralClipStudio timeline sequencing", () => {
 
   test("materializes blob-backed main timeline clips before export", async () => {
     const onSave = jest.fn();
+    getDownloadURL.mockResolvedValue("https://example.com/mock.mp4");
     global.fetch = jest.fn(url => {
       if (url === "blob:http://localhost:3001/source-video") {
         return Promise.resolve({
@@ -854,17 +855,22 @@ describe("ViralClipStudio timeline sequencing", () => {
       expect(onSave).toHaveBeenCalled();
     });
 
-    expect(onSave).toHaveBeenCalledWith(
-      expect.any(Object),
-      expect.any(Array),
-      expect.objectContaining({
-        timelineSegments: expect.arrayContaining([
-          expect.objectContaining({
-            id: "main",
-          }),
-        ]),
-      })
+    const timelineSegments = onSave.mock.calls[0][2].timelineSegments;
+    expect(uploadBytes).toHaveBeenCalledTimes(1);
+    expect(getDownloadURL).toHaveBeenCalledTimes(1);
+    expect(timelineSegments).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          source_clip_id: "main",
+          url: "https://example.com/mock.mp4",
+        }),
+      ])
     );
+    expect(
+      timelineSegments.every(
+        segment => typeof segment.url === "string" && !segment.url.startsWith("blob:")
+      )
+    ).toBe(true);
   });
 
   test("exports the selected hook once and removes the duplicate span from the main clip", async () => {
@@ -1125,8 +1131,8 @@ describe("ViralClipStudio timeline sequencing", () => {
 
     const guidanceCard = screen.getByTestId("selected-clip-guidance");
     expect(guidanceCard.textContent).toContain("BEST CLIP");
-    expect(guidanceCard.textContent).toContain("Viral Score:");
-    const scoreMatch = guidanceCard.textContent.match(/Viral Score:\s*(\d+)/);
+    expect(guidanceCard.textContent).toContain("Hook Score:");
+    const scoreMatch = guidanceCard.textContent.match(/Hook Score:\s*(\d+)/);
     expect(scoreMatch).not.toBeNull();
     expect(Number(scoreMatch[1])).toBeGreaterThanOrEqual(70);
     expect(guidanceCard.textContent).toContain("Why this clip");
@@ -1175,7 +1181,7 @@ describe("ViralClipStudio timeline sequencing", () => {
       fireEvent.click(within(guidanceCard).getByRole("button", { name: /Improve Clip/i }));
     });
 
-    expect(screen.getByLabelText(/Add Viral Hook/i)).toBeChecked();
+    expect(screen.getByLabelText(/^Add Hook$/i)).toBeChecked();
 
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /Export TikTok/i }));

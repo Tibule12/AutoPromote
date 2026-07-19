@@ -17,6 +17,12 @@ const path = require('path');
 
 const WINDOWS_LAUNCHERS = new Set(['npm', 'npx']);
 
+// Chokidar's native watcher can exhaust Linux's per-user inotify limit on
+// developer machines with several editors/dev servers open. Firebase CLI only
+// watches the rules file here, so polling is a safe and inexpensive fallback.
+process.env.CHOKIDAR_USEPOLLING ||= 'true';
+process.env.CHOKIDAR_INTERVAL ||= '1000';
+
 function getExecutable(command) {
   if (process.platform === 'win32' && WINDOWS_LAUNCHERS.has(command)) {
     return `${command}.cmd`;
