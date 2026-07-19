@@ -1,6 +1,13 @@
 const fs = require("fs");
 const path = require("path");
 
+// Large workspaces can exhaust Linux inotify limits before webpack starts.
+// Polling avoids ENOSPC watcher failures and can still be disabled explicitly.
+process.env.CHOKIDAR_USEPOLLING ??= "true";
+process.env.CHOKIDAR_INTERVAL ??= "1000";
+process.env.WATCHPACK_POLLING ??= "true";
+process.env.WATCHPACK_POLLING_INTERVAL ??= "1000";
+
 function patchWebpackDevServerConfig() {
   const configPath = path.join(
     __dirname,
@@ -81,5 +88,18 @@ function patchWebpackDevServerConfig() {
   }
 }
 
+function patchWebpackDevServerShutdown() {
+  const WebpackDevServer = require("webpack-dev-server");
+  if (
+    typeof WebpackDevServer?.prototype?.close !== "function" &&
+    typeof WebpackDevServer?.prototype?.stopCallback === "function"
+  ) {
+    WebpackDevServer.prototype.close = function close(callback) {
+      return this.stopCallback(callback);
+    };
+  }
+}
+
 patchWebpackDevServerConfig();
+patchWebpackDevServerShutdown();
 require("react-scripts/scripts/start");
