@@ -17,7 +17,8 @@ const renderWithPath = (ui, pathname) => {
 
 describe("public marketing pages", () => {
   test("welcome page explains current product state conservatively", () => {
-    const openSpy = jest.spyOn(window, "open").mockImplementation(() => null);
+    const scrollIntoView = jest.fn();
+    window.HTMLElement.prototype.scrollIntoView = scrollIntoView;
     render(<WelcomePage onGetStarted={() => {}} onSignIn={() => {}} />);
 
     expect(screen.getByText(/What Works Today/i)).toBeInTheDocument();
@@ -34,6 +35,13 @@ describe("public marketing pages", () => {
       screen.queryByText(/AI-assisted variations focus on stronger hooks/i)
     ).not.toBeInTheDocument();
 
+    expect(screen.getByText(/See the new creator dashboard in action./i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Updated Dashboard video demo/i)).toHaveAttribute(
+      "src",
+      "/demos/dashboard-demo.webm"
+    );
+
+    fireEvent.click(screen.getByRole("tab", { name: /Cam Combiner/i }));
     expect(screen.getByText(/Two cameras in. One directed podcast out./i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Cam Combiner video demo/i)).toHaveAttribute(
       "src",
@@ -45,12 +53,7 @@ describe("public marketing pages", () => {
     );
 
     fireEvent.click(screen.getByRole("button", { name: /Watch Demo/i }));
-    expect(openSpy).toHaveBeenCalledWith(
-      "/demo-teaser.mp4",
-      "_blank",
-      "noopener,noreferrer"
-    );
-    openSpy.mockRestore();
+    expect(scrollIntoView).toHaveBeenCalled();
   });
 
   test("features and changelog avoid retired viral bonus promises", () => {

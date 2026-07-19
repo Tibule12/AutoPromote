@@ -2,23 +2,24 @@ import { useState } from "react";
 
 const DEMOS = [
   {
-    id: "cam-combiner",
-    label: "Cam Combiner",
-    eyebrow: "Multi-cam edit demo",
-    title: "Two cameras in. One directed podcast out.",
+    id: "dashboard",
+    label: "Updated Dashboard",
+    eyebrow: "Current AutoPromote experience",
+    title: "See the new creator dashboard in action.",
     description:
-      "See the finished podcast, live direction, reaction placement, and speaker cuts in 12 seconds.",
-    src: "/demos/cam-combiner-demo.webm",
-    poster: "/demos/cam-combiner-demo-poster.jpg",
+      "Walk through publishing, platform previews, the queue, analytics, and the updated creator workspace.",
+    src: "/demos/dashboard-demo.webm",
+    poster: "/demos/dashboard-demo-poster.jpg",
   },
   {
-    id: "publish",
-    label: "Publish Demo",
-    eyebrow: "Publishing demo",
-    title: "See publishing before you register",
-    description: "Preview the publish flow and how content moves toward connected platforms.",
-    src: "/demos/publish-demo.webm",
-    poster: "/demo-poster.jpg",
+    id: "cam-combiner",
+    label: "Cam Combiner",
+    eyebrow: "Multi-camera podcast editing",
+    title: "Two cameras in. One directed podcast out.",
+    description:
+      "See the finished podcast, live direction, reaction placement, and speaker cuts before you sign up.",
+    src: "/demos/cam-combiner-demo.webm",
+    poster: "/demos/cam-combiner-demo-poster.jpg",
   },
 ];
 
@@ -34,7 +35,9 @@ const HeroScreenshot = () => {
             <span className="ap-demo-status-dot" aria-hidden="true" />
             <span className="ap-demo-toolbar-title">{activeDemo.label}</span>
           </div>
-          <span className="ap-demo-badge">Watch before signup</span>
+          <span className="ap-demo-badge">
+            {activeDemo.id === "dashboard" ? "2-minute walkthrough" : "12-second demo"}
+          </span>
         </div>
 
         <div className="ap-demo-selector" role="tablist" aria-label="Choose a demo">
