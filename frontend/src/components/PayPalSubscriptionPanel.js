@@ -771,6 +771,7 @@ const PayPalSubscriptionPanel = ({
       whiteLabel: "White-label",
       monthlyCredits: "Monthly AI credits",
       multicam: "Multi-camera editing",
+      teamSeats: "Team seats",
     };
 
     return (
@@ -790,6 +791,9 @@ const PayPalSubscriptionPanel = ({
     }
     if (key === "monthlyCredits" && typeof value === "number") {
       return `${value} credits/mo`;
+    }
+    if (key === "teamSeats" && typeof value === "number") {
+      return `${value} seat${value === 1 ? "" : "s"}`;
     }
     if (typeof value === "number") {
       return `${value} per month`;
@@ -819,7 +823,7 @@ const PayPalSubscriptionPanel = ({
     "findViralClips",
     "smartPromoSummary",
   ];
-  const hiddenPlanFeatureKeys = new Set(["teamSeats", "wolfHuntTasks"]);
+  const hiddenPlanFeatureKeys = new Set(["wolfHuntTasks"]);
 
   const getPlanEditingSummary = plan => {
     const editing = plan.capabilities?.editing;

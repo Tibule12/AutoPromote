@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { auth } from "../firebaseClient";
 import { API_ENDPOINTS } from "../config";
+import { withWorkspaceHeaders } from "../utils/workspace";
 import "./AnalyticsPanel.css";
 
 const RANGE_OPTIONS = [
@@ -60,11 +61,11 @@ const AnalyticsPanel = () => {
     const token = await currentUser.getIdToken();
     const res = await fetch(url, {
       ...options,
-      headers: {
+      headers: withWorkspaceHeaders({
         ...(options.headers || {}),
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
-      },
+      }),
       credentials: "include",
     });
     return res;
@@ -85,13 +86,13 @@ const AnalyticsPanel = () => {
         const token = await currentUser.getIdToken(forceRefreshToken);
         const [res, workflowRes] = await Promise.all([
           fetch(`${API_ENDPOINTS.ANALYTICS_USER}?range=${timeRange}`, {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: withWorkspaceHeaders({ Authorization: `Bearer ${token}` }),
             credentials: "include",
           }).catch(() => ({ ok: false, status: 500 })),
           fetch(
             `${API_ENDPOINTS.ANALYTICS_WORKFLOW_SUMMARY}?workflow=clip_scanner&range=${timeRange}`,
             {
-              headers: { Authorization: `Bearer ${token}` },
+              headers: withWorkspaceHeaders({ Authorization: `Bearer ${token}` }),
               credentials: "include",
             }
           ).catch(() => ({ ok: false, status: 500 })),

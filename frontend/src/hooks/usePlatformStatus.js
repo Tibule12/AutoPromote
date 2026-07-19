@@ -1,7 +1,8 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { auth } from "../firebaseClient";
 import { API_ENDPOINTS } from "../config";
 import { cachedFetch } from "../utils/requestCache";
+import { getActiveWorkspaceId, withWorkspaceHeaders } from "../utils/workspace";
 
 const DEFAULT_STATUS = { connected: false, meta: null };
 
@@ -174,7 +175,10 @@ export default function usePlatformStatus() {
           return;
         }
         const token = await cur.getIdToken(true);
-        const headers = { Authorization: `Bearer ${token}`, Accept: "application/json" };
+        const headers = withWorkspaceHeaders({
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        });
 
         const fetchStatus = async () => {
           const res = await fetch(config.endpoint, { headers });
@@ -197,7 +201,11 @@ export default function usePlatformStatus() {
 
         let data;
         if (config.cacheKey) {
-          data = await cachedFetch(config.cacheKey, fetchStatus, config.cacheTtl || 30000);
+          data = await cachedFetch(
+            `${config.cacheKey}:${getActiveWorkspaceId() || "personal"}`,
+            fetchStatus,
+            config.cacheTtl || 30000
+          );
         } else {
           data = await fetchStatus();
         }
@@ -222,7 +230,7 @@ export default function usePlatformStatus() {
       const cur = auth.currentUser;
       if (!cur) return;
       const data = await cachedFetch(
-        "platform-status-unified",
+        `platform-status-unified:${getActiveWorkspaceId() || "personal"}`,
         async () => {
           let token;
           try {
@@ -232,7 +240,10 @@ export default function usePlatformStatus() {
           }
 
           const res = await fetch(API_ENDPOINTS.PLATFORM_STATUS, {
-            headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+            headers: withWorkspaceHeaders({
+              Authorization: `Bearer ${token}`,
+              Accept: "application/json",
+            }),
           });
           if (!res.ok) throw new Error(`platform_status_${res.status}`);
           return res.json();
@@ -256,6 +267,15 @@ export default function usePlatformStatus() {
     }
   }, []);
 
+  useEffect(() => {
+    const handleWorkspaceChange = () => {
+      setPlatformSummary({ platforms: {} });
+      loadAllUnified();
+    };
+    window.addEventListener("autopromote:workspace-change", handleWorkspaceChange);
+    return () => window.removeEventListener("autopromote:workspace-change", handleWorkspaceChange);
+  }, [loadAllUnified]);
+
   /**
    * Disconnect a platform and update local state immediately.
    */
@@ -266,7 +286,7 @@ export default function usePlatformStatus() {
       const token = await cur.getIdToken(true);
       const res = await fetch(API_ENDPOINTS.PLATFORM_DISCONNECT(platform), {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
+        headers: withWorkspaceHeaders({ Authorization: `Bearer ${token}` }),
       });
       if (!res.ok) {
         const j = await res.json().catch(() => ({}));

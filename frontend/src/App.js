@@ -33,6 +33,12 @@ import {
 import { API_ENDPOINTS, API_BASE_URL, PUBLIC_SITE_URL } from "./config";
 import { parseJsonSafe } from "./utils/parseJsonSafe";
 import {
+  ensureActiveWorkspace,
+  setActiveWorkspaceId,
+  withWorkspaceHeaders,
+} from "./utils/workspace";
+import { WORKSPACE_ENDPOINTS } from "./config/workspaceApi";
+import {
   buildBackendUploadError,
   inferUploadMediaType,
   uploadSourceFileViaBackend,
@@ -387,13 +393,14 @@ function App() {
           return;
         }
       }
+      const workspaceId = await ensureActiveWorkspace(WORKSPACE_ENDPOINTS.CURRENT, token);
       const res = await fetch(`${API_ENDPOINTS.MY_CONTENT}?includeStats=0`, {
         method: "GET",
-        headers: {
+        headers: withWorkspaceHeaders({
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
           Accept: "application/json",
-        },
+        }, workspaceId),
         mode: "cors",
       });
       if (!res.ok) {
@@ -441,11 +448,11 @@ function App() {
       }
       const res = await fetch(`${API_ENDPOINTS.MY_SCHEDULES}?summary=1&limit=100`, {
         method: "GET",
-        headers: {
+        headers: withWorkspaceHeaders({
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
           Accept: "application/json",
-        },
+        }),
       });
       if (res.ok) {
         const parsed = await parseJsonSafe(res);
@@ -1251,11 +1258,11 @@ function App() {
       );
       const res = await fetch(API_ENDPOINTS.CONTENT_UPLOAD, {
         method: "POST",
-        headers: {
+        headers: withWorkspaceHeaders({
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
           Accept: "application/json",
-        },
+        }),
         body: JSON.stringify(payload),
       });
       // Read response body safely so we can show any server-side validation error
@@ -1327,11 +1334,11 @@ function App() {
             }
             const r = await fetch(API_ENDPOINTS.YOUTUBE_UPLOAD, {
               method: "POST",
-              headers: {
+              headers: withWorkspaceHeaders({
                 Authorization: `Bearer ${token}`,
                 "Content-Type": "application/json",
                 Accept: "application/json",
-              },
+              }),
               body: JSON.stringify({
                 contentId,
                 videoUrl: payload.url,
@@ -1345,7 +1352,10 @@ function App() {
         };
         const getFacebookStatus = async () => {
           const s = await fetch(API_ENDPOINTS.FACEBOOK_STATUS, {
-            headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+            headers: withWorkspaceHeaders({
+              Authorization: `Bearer ${token}`,
+              Accept: "application/json",
+            }),
           });
           if (!s.ok) return null;
           return s.json();
@@ -1367,11 +1377,11 @@ function App() {
             };
             const r = await fetch(API_ENDPOINTS.FACEBOOK_UPLOAD, {
               method: "POST",
-              headers: {
+              headers: withWorkspaceHeaders({
                 Authorization: `Bearer ${token}`,
                 "Content-Type": "application/json",
                 Accept: "application/json",
-              },
+              }),
               body: JSON.stringify(body),
             });
             if (!r.ok) console.warn("Facebook upload failed");
@@ -1386,11 +1396,11 @@ function App() {
             const mediaType = (type || "video").toLowerCase();
             const r = await fetch(API_ENDPOINTS.INSTAGRAM_UPLOAD, {
               method: "POST",
-              headers: {
+              headers: withWorkspaceHeaders({
                 Authorization: `Bearer ${token}`,
                 "Content-Type": "application/json",
                 Accept: "application/json",
-              },
+              }),
               body: JSON.stringify({
                 pageId,
                 mediaUrl: payload.url,
@@ -1650,6 +1660,10 @@ function App() {
                     onUpload={handleContentUpload}
                     mySchedules={mySchedules}
                     onSchedulesChanged={refreshSchedules}
+                    onWorkspaceChanged={async workspace => {
+                      setActiveWorkspaceId(workspace?.id || null);
+                      await fetchUserContent();
+                    }}
                   />
                 )}
                 {/* MFA Modal */}

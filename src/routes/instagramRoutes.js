@@ -2,6 +2,7 @@ const express = require("express");
 const fetch = require("node-fetch");
 const { db } = require("../../firebaseAdmin");
 const authMiddleware = require("../../authMiddleware");
+const workspaceScope = require("../middlewares/workspaceScope");
 const { cleanupSourceFile } = require("../../src/utils/cleanupSource");
 
 const router = express.Router();
@@ -12,6 +13,7 @@ router.get("/health", (req, res) => res.json({ ok: true }));
 router.get(
   "/status",
   authMiddleware,
+  workspaceScope,
   require("../statusInstrument")("instagramStatus", async (req, res) => {
     const uid = req.userId || req.user?.uid;
     const fbSnap = await db
@@ -37,7 +39,7 @@ router.get(
 );
 
 // Upload an image or reel to Instagram via IG Graph API
-router.post("/upload", authMiddleware, async (req, res) => {
+router.post("/upload", authMiddleware, workspaceScope, async (req, res) => {
   try {
     const { pageId, mediaUrl, caption, mediaType } = req.body || {};
     if (!pageId || !mediaUrl)

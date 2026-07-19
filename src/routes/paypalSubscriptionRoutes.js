@@ -50,7 +50,7 @@ if (!fetchFn) {
 
 const { safeFetch } = require("../utils/ssrfGuard");
 
-const HIDDEN_PUBLIC_PLAN_FEATURES = new Set(["wolfHuntTasks", "teamSeats"]);
+const HIDDEN_PUBLIC_PLAN_FEATURES = new Set(["wolfHuntTasks"]);
 
 function buildPublicPlan(plan) {
   const features = Object.fromEntries(
@@ -58,7 +58,6 @@ function buildPublicPlan(plan) {
   );
   const capabilities = { ...getPlanCapabilities(plan.id) };
   delete capabilities.missions;
-  delete capabilities.teamSeats;
 
   return {
     ...plan,

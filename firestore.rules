@@ -13,6 +13,34 @@ service cloud.firestore {
         request.auth.token.firebase.sign_in_provider == 'service_account';
     }
 
+    function isActiveWorkspaceMember(workspaceId) {
+      return request.auth != null &&
+        exists(/databases/$(database)/documents/workspaces/$(workspaceId)/members/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/workspaces/$(workspaceId)/members/$(request.auth.uid)).data.status == 'active';
+    }
+
+    function canEditWorkspace(workspaceId) {
+      return isActiveWorkspaceMember(workspaceId) &&
+        get(/databases/$(database)/documents/workspaces/$(workspaceId)/members/$(request.auth.uid)).data.role in ['owner', 'admin', 'editor'];
+    }
+
+    match /workspaces/{workspaceId} {
+      allow read: if isAdmin() || isServiceAccount() || isActiveWorkspaceMember(workspaceId);
+      allow create: if request.auth != null && request.resource.data.ownerUid == request.auth.uid;
+      allow update, delete: if isAdmin() || isServiceAccount() ||
+        (isActiveWorkspaceMember(workspaceId) &&
+          get(/databases/$(database)/documents/workspaces/$(workspaceId)/members/$(request.auth.uid)).data.role in ['owner', 'admin']);
+
+      match /members/{memberId} {
+        allow read: if isAdmin() || isServiceAccount() || isActiveWorkspaceMember(workspaceId);
+        allow write: if isAdmin() || isServiceAccount();
+      }
+
+      match /invites/{inviteId} {
+        allow read, write: if isAdmin() || isServiceAccount();
+      }
+    }
+
     // Users can read/write their own user document
     match /users/{userId} {
       allow read, write: if isAdmin() || isServiceAccount() || request.auth.uid == userId;
@@ -23,13 +51,33 @@ service cloud.firestore {
       allow create: if isAdmin() || isServiceAccount() ||
         (request.auth != null && (
           (request.resource.data.keys().hasAny(['userId']) && request.resource.data.userId == request.auth.uid) ||
-          (request.resource.data.keys().hasAny(['user_id']) && request.resource.data.user_id == request.auth.uid)
+          (request.resource.data.keys().hasAny(['user_id']) && request.resource.data.user_id == request.auth.uid) ||
+          (request.resource.data.keys().hasAny(['workspace_id']) && canEditWorkspace(request.resource.data.workspace_id))
         ));
 
       allow update, delete, get, list: if isAdmin() || isServiceAccount() ||
         (request.auth != null && resource != null && (
           (resource.data.keys().hasAny(['userId']) && resource.data.userId == request.auth.uid) ||
-          (resource.data.keys().hasAny(['user_id']) && resource.data.user_id == request.auth.uid)
+          (resource.data.keys().hasAny(['user_id']) && resource.data.user_id == request.auth.uid) ||
+          (resource.data.keys().hasAny(['workspace_id']) && isActiveWorkspaceMember(resource.data.workspace_id))
+        ));
+    }
+
+    match /promotion_schedules/{scheduleId} {
+      allow read: if isAdmin() || isServiceAccount() ||
+        (request.auth != null && resource != null && (
+          resource.data.user_id == request.auth.uid ||
+          (resource.data.keys().hasAny(['workspace_id']) && isActiveWorkspaceMember(resource.data.workspace_id))
+        ));
+      allow create: if isAdmin() || isServiceAccount() ||
+        (request.auth != null && (
+          request.resource.data.user_id == request.auth.uid ||
+          (request.resource.data.keys().hasAny(['workspace_id']) && canEditWorkspace(request.resource.data.workspace_id))
+        ));
+      allow update, delete: if isAdmin() || isServiceAccount() ||
+        (request.auth != null && resource != null && (
+          resource.data.user_id == request.auth.uid ||
+          (resource.data.keys().hasAny(['workspace_id']) && canEditWorkspace(resource.data.workspace_id))
         ));
     }
 

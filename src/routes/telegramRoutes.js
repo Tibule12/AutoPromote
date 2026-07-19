@@ -2,6 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const authMiddleware = require("../authMiddleware");
+const workspaceScope = require("../middlewares/workspaceScope");
 const { db } = require("../firebaseAdmin");
 const logger = require("../services/logger");
 const { rateLimiter } = require("../middlewares/globalRateLimiter");
@@ -319,7 +320,7 @@ router.post("/auth/callback", authMiddleware, tgWriteLimiter, async (req, res) =
  * GET /api/telegram/status
  * Check if user has connected Telegram
  */
-router.get("/status", authMiddleware, async (req, res) => {
+router.get("/status", authMiddleware, workspaceScope, async (req, res) => {
   try {
     const uid = req.user.uid;
     const connection = await telegramService.getUserTelegramConnection(uid);
@@ -518,7 +519,7 @@ router.post("/webhook", async (req, res) => {
  * POST /api/telegram/test-message
  * Test endpoint to send a message via bot (for testing)
  */
-router.post("/test-message", authMiddleware, tgWriteLimiter, async (req, res) => {
+router.post("/test-message", authMiddleware, workspaceScope, tgWriteLimiter, async (req, res) => {
   try {
     const uid = req.user.uid;
     const { message } = req.body;

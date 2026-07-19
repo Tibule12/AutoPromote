@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const authMiddleware = require("../authMiddleware");
+const workspaceScope = require("../middlewares/workspaceScope");
 const { db } = require("../firebaseAdmin");
 const {
   searchTracks,
@@ -13,7 +14,7 @@ const {
 const { createSpotifyCampaign } = require("../services/communityEngine");
 
 // GET /status - Check connection
-router.get("/status", authMiddleware, async (req, res) => {
+router.get("/status", authMiddleware, workspaceScope, async (req, res) => {
   try {
     const uid = req.userId || req.user.uid;
     const userRef = db.collection("users").doc(uid);
@@ -38,7 +39,7 @@ router.get("/status", authMiddleware, async (req, res) => {
 });
 
 // GET /search?q=query
-router.get("/search", authMiddleware, async (req, res) => {
+router.get("/search", authMiddleware, workspaceScope, async (req, res) => {
   try {
     const uid = req.userId || req.user.uid;
     const { q } = req.query;
@@ -74,7 +75,7 @@ router.get("/search", authMiddleware, async (req, res) => {
 });
 
 // POST /batch-metrics
-router.post("/batch-metrics", authMiddleware, async (req, res) => {
+router.post("/batch-metrics", authMiddleware, workspaceScope, async (req, res) => {
   try {
     const uid = req.userId || req.user.uid;
     const { trackIds } = req.body;
@@ -90,7 +91,7 @@ router.post("/batch-metrics", authMiddleware, async (req, res) => {
 });
 
 // POST /campaigns
-router.post("/campaigns", authMiddleware, async (req, res) => {
+router.post("/campaigns", authMiddleware, workspaceScope, async (req, res) => {
   try {
     const uid = req.userId || req.user.uid;
     const { playlistId, brandName, rewardPerStream } = req.body;
@@ -121,7 +122,7 @@ router.post("/campaigns", authMiddleware, async (req, res) => {
 });
 
 // POST /publish (Create Playlist or Add to one)
-router.post("/publish", authMiddleware, async (req, res) => {
+router.post("/publish", authMiddleware, workspaceScope, async (req, res) => {
   try {
     const uid = req.userId || req.user.uid;
     const { contentId, payload } = req.body;

@@ -2,6 +2,7 @@ const express = require("express");
 const fetch = require("node-fetch");
 const { admin, db } = require("../../firebaseAdmin");
 const authMiddleware = require("../../authMiddleware");
+const workspaceScope = require("../middlewares/workspaceScope");
 const crypto = require("crypto");
 const { rateLimiter } = require("../middlewares/globalRateLimiter");
 const codeqlLimiter = require("../middlewares/codeqlRateLimit");
@@ -267,6 +268,7 @@ router.get("/callback", ytPublicLimiter, async (req, res) => {
 router.get(
   "/status",
   authMiddleware,
+  workspaceScope,
   ytPublicLimiter,
   require("../statusInstrument")("youtubeStatus", async (req, res) => {
     const { getCache, setCache } = require("../utils/simpleCache");
@@ -300,7 +302,7 @@ router.get(
 );
 
 // Fetch live stats for one video (requires contentId or explicit videoId)
-router.get("/stats", authMiddleware, ytPublicLimiter, async (req, res) => {
+router.get("/stats", authMiddleware, workspaceScope, ytPublicLimiter, async (req, res) => {
   try {
     const uid = req.userId || req.user?.uid;
     const { contentId, videoId } = req.query;
@@ -322,7 +324,7 @@ router.get("/stats", authMiddleware, ytPublicLimiter, async (req, res) => {
 });
 
 // Batch poll (manual trigger) for stale stats & velocity update
-router.post("/stats/poll", authMiddleware, ytWriteLimiter, async (req, res) => {
+router.post("/stats/poll", authMiddleware, workspaceScope, ytWriteLimiter, async (req, res) => {
   try {
     const uid = req.userId || req.user?.uid;
     const { velocityThreshold, batchSize } = req.body || {};
@@ -339,7 +341,7 @@ router.post("/stats/poll", authMiddleware, ytWriteLimiter, async (req, res) => {
 });
 
 // Upload a video to YouTube given either: (1) a file upload (multipart 'file'), (2) a contentId that points to a stored asset, or (3) an external URL
-router.post("/upload", authMiddleware, ytWriteLimiter, upload.single("file"), async (req, res) => {
+router.post("/upload", authMiddleware, workspaceScope, ytWriteLimiter, upload.single("file"), async (req, res) => {
   try {
     const {
       title,

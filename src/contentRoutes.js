@@ -953,6 +953,8 @@ router.post(
             ? req.body.meta.duration
             : undefined,
         user_id: userId,
+        workspace_id: req.workspaceId || null,
+        created_by: req.actorUserId || userId,
         created_at: new Date(),
         // Approval status used by admin UI/routes. Keep in sync with `status` for compatibility.
         // IMMEDIATE PUBLISH MODE: All users are auto-approved per user request.
@@ -1507,6 +1509,13 @@ router.post("/:contentId/promotion-schedules", authMiddleware, async (req, res) 
       // Store user_id so GET /my-promotion-schedules can find it
       await db.collection("promotion_schedules").doc(schedule.id).update({ user_id: userId });
       schedule.user_id = userId;
+      if (req.workspaceId) {
+        await db.collection("promotion_schedules").doc(schedule.id).update({
+          workspace_id: req.workspaceId,
+          created_by: req.actorUserId || userId,
+        });
+        schedule.workspace_id = req.workspaceId;
+      }
       schedules.push(schedule);
     }
 

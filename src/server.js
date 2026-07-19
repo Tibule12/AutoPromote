@@ -535,6 +535,12 @@ try {
 } catch (e) {
   authMiddleware = (req, res, next) => next();
 }
+let workspaceScope;
+try {
+  workspaceScope = require("./middlewares/workspaceScope");
+} catch (e) {
+  workspaceScope = (req, res, next) => next();
+}
 const viralGrowthRoutes = require("./routes/viralGrowthRoutes");
 const engagementRoutes = require("./routes/engagementRoutes");
 let monetizationRoutes;
@@ -1339,13 +1345,26 @@ try {
       routeLimiter({ windowHint: "content" }),
       authMiddleware,
       requireAcceptedTerms({ version: process.env.REQUIRED_TERMS_VERSION || "AUTOPROMOTE-v1.0" }),
+      workspaceScope,
       contentRoutes
     );
   } else {
-    app.use("/api/content", routeLimiter({ windowHint: "content" }), contentRoutes);
+    app.use(
+      "/api/content",
+      routeLimiter({ windowHint: "content" }),
+      authMiddleware,
+      workspaceScope,
+      contentRoutes
+    );
   }
   app.use("/api/sounds", soundRoutes);
-  app.use("/api/analytics", routeLimiter({ windowHint: "analytics" }), analyticsRoutes);
+  app.use(
+    "/api/analytics",
+    routeLimiter({ windowHint: "analytics" }),
+    authMiddleware,
+    workspaceScope,
+    analyticsRoutes
+  );
   app.use("/api/admin", routeLimiter({ windowHint: "admin" }), adminRoutes);
   app.use("/api/admin/security", adminSecurityRoutes);
   app.use("/api/admin/analytics", adminAnalyticsRoutes);
@@ -1447,6 +1466,8 @@ try {
     "/api/platform",
     routeLimiter({ windowHint: "platform" }),
     codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (req, res, next) => next(),
+    authMiddleware,
+    workspaceScope,
     platformConnectionsRoutes
   );
   console.log("🚏 Platform connections routes mounted at /api/platform");

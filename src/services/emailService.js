@@ -188,6 +188,30 @@ async function sendUsageLimitWarningEmail({
   });
 }
 
+async function sendWorkspaceInvitation({
+  email,
+  inviterName,
+  workspaceName,
+  role,
+  inviteUrl,
+  expiresInDays = 7,
+}) {
+  const safeUrl = escapeHtml(inviteUrl);
+  const safeWorkspace = escapeHtml(workspaceName || "an AutoPromote workspace");
+  const safeInviter = escapeHtml(inviterName || "A workspace owner");
+  const safeRole = escapeHtml(role || "editor");
+  const subject = `You were invited to ${workspaceName || "an AutoPromote workspace"}`;
+  const text = `${inviterName || "A workspace owner"} invited you to ${workspaceName || "an AutoPromote workspace"} as ${role || "editor"}. Accept within ${expiresInDays} days: ${inviteUrl}`;
+  const htmlInner = `<h1>Join ${safeWorkspace}</h1><p>${safeInviter} invited you to collaborate as <strong>${safeRole}</strong>.</p><p><a class="button" href="${safeUrl}">Accept invitation</a></p><div class="linkbox">${safeUrl}</div><p class="note">This invitation expires in ${escapeHtml(expiresInDays)} days and can only be accepted by ${escapeHtml(email)}.</p>`;
+  return sendEmail({
+    to: email,
+    subject,
+    text,
+    htmlbody: buildLayout(htmlInner),
+    sensitive: true,
+  });
+}
+
 module.exports = {
   sendVerificationEmail,
   sendPasswordResetEmail,
@@ -197,5 +221,6 @@ module.exports = {
   sendSecurityAlert,
   sendScheduleReminder,
   sendUsageLimitWarningEmail,
+  sendWorkspaceInvitation,
   sendEmail,
 };

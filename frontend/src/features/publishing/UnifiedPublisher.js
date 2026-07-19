@@ -17,6 +17,7 @@ import { usePublishingState } from "./hooks/usePublishingState";
 import { useMediaProcessor } from "./hooks/useMediaProcessor";
 import { useSubscription } from "../../hooks/useSubscription";
 import { sanitizeUrl } from "../../utils/security";
+import { withWorkspaceHeaders } from "../../utils/workspace";
 import { revokeObjectUrlLater } from "../../utils/objectUrl";
 import {
   buildBackendUploadError,
@@ -459,7 +460,7 @@ function normalizeUpgradePlanId(planId) {
 
 async function fetchPlatformStatusSnapshot(token) {
   const res = await fetch(API_ENDPOINTS.PLATFORM_STATUS, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    headers: withWorkspaceHeaders(token ? { Authorization: `Bearer ${token}` } : {}),
   });
 
   if (!res.ok) return { raw: {}, summary: {} };
@@ -1549,7 +1550,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
           const token = auth.currentUser ? await auth.currentUser.getIdToken() : null;
           const [res, platformStatus] = await Promise.all([
             fetch(API_ENDPOINTS.TIKTOK_CREATOR_INFO, {
-              headers: token ? { Authorization: `Bearer ${token}` } : {},
+              headers: withWorkspaceHeaders(token ? { Authorization: `Bearer ${token}` } : {}),
             }),
             fetchPlatformStatusSnapshot(token),
           ]);
@@ -1595,7 +1596,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
       try {
         const token = auth.currentUser ? await auth.currentUser.getIdToken() : null;
         const res = await fetch(API_ENDPOINTS.FACEBOOK_STATUS, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          headers: withWorkspaceHeaders(token ? { Authorization: `Bearer ${token}` } : {}),
         });
         if (mounted && res.ok) {
           const json = await res.json();
@@ -1621,7 +1622,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
           const token = auth.currentUser ? await auth.currentUser.getIdToken() : null;
           const [res, platformStatus] = await Promise.all([
             fetch(API_ENDPOINTS.YOUTUBE_STATUS, {
-              headers: token ? { Authorization: `Bearer ${token}` } : {},
+              headers: withWorkspaceHeaders(token ? { Authorization: `Bearer ${token}` } : {}),
             }),
             fetchPlatformStatusSnapshot(token),
           ]);
@@ -1663,7 +1664,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
           const token = auth.currentUser ? await auth.currentUser.getIdToken() : null;
           const [res, platformStatus] = await Promise.all([
             fetch(API_ENDPOINTS.LINKEDIN_STATUS, {
-              headers: token ? { Authorization: `Bearer ${token}` } : {},
+              headers: withWorkspaceHeaders(token ? { Authorization: `Bearer ${token}` } : {}),
             }),
             fetchPlatformStatusSnapshot(token),
           ]);
@@ -1707,7 +1708,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
           const token = auth.currentUser ? await auth.currentUser.getIdToken() : null;
           const [res, platformStatus] = await Promise.all([
             fetch(API_ENDPOINTS.REDDIT_STATUS, {
-              headers: token ? { Authorization: `Bearer ${token}` } : {},
+              headers: withWorkspaceHeaders(token ? { Authorization: `Bearer ${token}` } : {}),
             }),
             fetchPlatformStatusSnapshot(token),
           ]);
@@ -1921,11 +1922,11 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
     try {
       readinessResponse = await fetch(API_ENDPOINTS.CONTENT_UPLOAD_READINESS, {
         method: "POST",
-        headers: {
+        headers: withWorkspaceHeaders({
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
           Accept: "application/json",
-        },
+        }),
         body: JSON.stringify({
           target_platforms: platforms,
           scheduled_promotion_time: scheduledTime || null,

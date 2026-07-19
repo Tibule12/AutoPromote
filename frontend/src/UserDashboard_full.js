@@ -19,6 +19,7 @@ import ClipStudioPanel from "./UserDashboardTabs/ClipStudioPanel";
 import IdeaVideoPanel from "./UserDashboardTabs/IdeaVideoPanel";
 import MissionControlPanel from "./UserDashboardTabs/MissionControlPanel";
 import CamCombinerPanel from "./UserDashboardTabs/CamCombinerPanel";
+import TeamPanel from "./UserDashboardTabs/TeamPanel";
 // LiveWatch import removed
 // LiveHub import removed
 import FloatingActions from "./components/FloatingActions";
@@ -33,6 +34,11 @@ import { API_ENDPOINTS, API_BASE_URL, ENABLE_WOLF_HUNT } from "./config";
 import toast, { Toaster } from "react-hot-toast";
 import { cachedFetch, batchWithDelay, clearCache } from "./utils/requestCache";
 import { isSafeRedirectUrl } from "./utils/security";
+import {
+  getActiveWorkspaceId,
+  getActiveWorkspaceRole,
+  withWorkspaceHeaders,
+} from "./utils/workspace";
 import usePlatformStatus from "./hooks/usePlatformStatus";
 
 const DEFAULT_IMAGE = `${process.env.PUBLIC_URL || ""}/image.png`;
@@ -49,8 +55,12 @@ const UserDashboard = ({
   onUpload,
   mySchedules = [],
   onSchedulesChanged,
+  onWorkspaceChanged,
 }) => {
-  const [activeTab, setActiveTab] = useState("profile");
+  const hasPendingWorkspaceInvite =
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).has("invite");
+  const [activeTab, setActiveTab] = useState(hasPendingWorkspaceInvite ? "team" : "profile");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const clipStudioLocked = process.env.NODE_ENV === "production";
 
@@ -115,6 +125,7 @@ const UserDashboard = ({
   const BILLING_RETURN_TAB_LABELS = {
     profile: "Overview",
     connections: "Connections",
+    team: "Team",
     upload: "Uploads",
     schedules: "Queue",
     analytics: "Analytics",
@@ -467,7 +478,7 @@ const UserDashboard = ({
         try {
           await fetch(API_ENDPOINTS.SCHEDULE_PAUSE(id), {
             method: "POST",
-            headers: { Authorization: `Bearer ${token}` },
+            headers: withWorkspaceHeaders({ Authorization: `Bearer ${token}` }),
           });
           triggerSchedulesRefresh();
           toast.success("Schedule paused");
@@ -485,7 +496,7 @@ const UserDashboard = ({
         try {
           await fetch(API_ENDPOINTS.SCHEDULE_RESUME(id), {
             method: "POST",
-            headers: { Authorization: `Bearer ${token}` },
+            headers: withWorkspaceHeaders({ Authorization: `Bearer ${token}` }),
           });
           triggerSchedulesRefresh();
           toast.success("Schedule resumed");
@@ -503,7 +514,10 @@ const UserDashboard = ({
         try {
           await fetch(API_ENDPOINTS.SCHEDULE_RESCHEDULE(id), {
             method: "POST",
-            headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+            headers: withWorkspaceHeaders({
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            }),
             body: JSON.stringify({ time: when }),
           });
           triggerSchedulesRefresh();
@@ -523,7 +537,7 @@ const UserDashboard = ({
         try {
           const response = await fetch(API_ENDPOINTS.SCHEDULE_DELETE(id), {
             method: "DELETE",
-            headers: { Authorization: `Bearer ${token}` },
+            headers: withWorkspaceHeaders({ Authorization: `Bearer ${token}` }),
           });
           if (!response.ok && response.status !== 404) {
             throw new Error(`Delete failed with status ${response.status}`);
@@ -560,7 +574,7 @@ const UserDashboard = ({
             uniqueIds.map(async id => {
               const response = await fetch(API_ENDPOINTS.SCHEDULE_DELETE(id), {
                 method: "DELETE",
-                headers: { Authorization: `Bearer ${token}` },
+                headers: withWorkspaceHeaders({ Authorization: `Bearer ${token}` }),
               });
               return { id, ok: response.ok || response.status === 404, status: response.status };
             })
@@ -599,7 +613,10 @@ const UserDashboard = ({
           if (!contentId) throw new Error("Missing contentId");
           const res = await fetch(`${API_BASE_URL}/api/content/${contentId}/promotion-schedules`, {
             method: "POST",
-            headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+            headers: withWorkspaceHeaders({
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            }),
             body: JSON.stringify({ time, frequency, platforms, platformOptions }),
           });
           if (!res.ok) throw new Error("Failed to create schedule");
@@ -807,7 +824,7 @@ const UserDashboard = ({
       try {
         const res = await fetch(API_ENDPOINTS.PLATFORM_DISCONNECT(platform), {
           method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
+          headers: withWorkspaceHeaders({ Authorization: `Bearer ${token}` }),
         });
         if (!res.ok) {
           const j = await res.json().catch(() => ({}));
@@ -851,6 +868,10 @@ const UserDashboard = ({
   };
 
   const openProviderAuth = async endpointUrl => {
+    if (getActiveWorkspaceId() && getActiveWorkspaceRole() !== "owner") {
+      toast.error("Only the workspace owner can connect publishing destinations.");
+      return;
+    }
     try {
       const currentUser = auth.currentUser;
       if (!currentUser) {
@@ -1123,6 +1144,12 @@ const UserDashboard = ({
                 onClick={() => handleNav("connections")}
               >
                 Connections
+              </li>
+              <li
+                className={activeTab === "team" ? "active" : ""}
+                onClick={() => handleNav("team")}
+              >
+                Team
               </li>
               <li
                 className={activeTab === "upload" ? "active" : ""}
@@ -1510,6 +1537,10 @@ const UserDashboard = ({
             handleConnectFacebook={handleConnectFacebook}
             handleDisconnectPlatform={handleDisconnectPlatform}
           />
+        )}
+
+        {activeTab === "team" && (
+          <TeamPanel onWorkspaceChanged={onWorkspaceChanged} onNavigate={handleNav} />
         )}
 
         {activeTab === "admin-audit" && isAdminUser && <AdminAuditViewer />}

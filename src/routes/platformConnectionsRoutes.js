@@ -334,6 +334,12 @@ router.post(
   platformConnectionsPublicLimiter,
   async (req, res) => {
     try {
+      if (
+        req.workspaceRole &&
+        req.workspaceRole !== "owner"
+      ) {
+        return res.status(403).json({ error: "workspace_connection_owner_required" });
+      }
       const uid = req.userId || req.user?.uid;
       const { platform } = req.params || {};
       const allowed = [

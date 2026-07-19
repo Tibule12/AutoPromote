@@ -3,6 +3,7 @@ const express = require("express");
 const fetch = require("node-fetch");
 const router = express.Router();
 const authMiddleware = require("../authMiddleware");
+const workspaceScope = require("../middlewares/workspaceScope");
 const { cleanupSourceFile } = require("../utils/cleanupSource");
 const { admin, db } = require("../firebaseAdmin");
 const { rateLimiter } = require("../middlewares/globalRateLimiter");
@@ -861,6 +862,7 @@ router.get(
 router.get(
   "/status",
   authMiddleware,
+  workspaceScope,
   ttPublicLimiter,
   require("../statusInstrument")("tiktokStatus", async (req, res) => {
     const started = Date.now();
@@ -972,6 +974,7 @@ router.get("/debug/state", authMiddleware, ttPublicLimiter, async (req, res) => 
 router.post(
   "/upload",
   authMiddleware,
+  workspaceScope,
   rateLimit({ max: 5, windowMs: 3600000, key: r => r.ip }),
   async (req, res) => {
     // DEMO MODE: Return success response to demonstrate UX flow for TikTok approval
@@ -1771,7 +1774,7 @@ module.exports = router;
 // Returns minimal creator settings needed by the frontend: display name, privacy options,
 // max video duration, and allowed interactions (comment/duet/stitch). This is used by
 // the frontend to render the required UX before publishing to TikTok.
-router.get("/creator_info", authMiddleware, ttPublicLimiter, async (req, res) => {
+router.get("/creator_info", authMiddleware, workspaceScope, ttPublicLimiter, async (req, res) => {
   try {
     const uid = req.userId || req.user?.uid;
     if (!uid) return res.status(401).json({ error: "Unauthorized" });
