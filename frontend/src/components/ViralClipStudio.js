@@ -15,6 +15,7 @@ import { getAuth } from "firebase/auth";
 import html2canvas from "html2canvas"; // For rendering styled captions
 import { trackClipWorkflowEvent } from "../utils/clipWorkflowAnalytics";
 import toast from "react-hot-toast";
+import { SafeAudio } from "./SafeMedia";
 import "./ViralClipStudio.css"; // We'll create this CSS next
 
 const RAINBOW_COLORS = [
@@ -7057,12 +7058,12 @@ const ViralClipStudio = ({
                   </>
                 ) : null}
               </div>
-              <audio
+              <SafeAudio
                 ref={musicPreviewRef}
                 className={`broll-sound-player ${addMusic && effectiveMusicPreviewUrl ? "" : "empty"}`}
                 controls={addMusic && !!effectiveMusicPreviewUrl}
                 preload="auto"
-                src={addMusic ? getSafeMediaSource(effectiveMusicPreviewUrl) : undefined}
+                src={addMusic ? effectiveMusicPreviewUrl : undefined}
               />
               {addMusic && musicPreviewStatusMessage ? (
                 <p className="broll-sound-message">{musicPreviewStatusMessage}</p>

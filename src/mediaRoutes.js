@@ -1982,7 +1982,11 @@ router.post("/analyze", async (req, res) => {
 
     console.log(`[MediaRoute] Credits OK. Starting analysis...`);
     const learningProfile = await getClipLearningProfile(userId).catch(error => {
-      console.warn(`[MediaRoute] Clip learning profile unavailable for ${userId}:`, error.message);
+      console.warn(
+        "[MediaRoute] Clip learning profile unavailable for %s: %s",
+        userId,
+        error?.message || "Unknown error"
+      );
       return null;
     });
     const scenes = await videoEditingService.analyzeVideo(analysisSource, userId, {

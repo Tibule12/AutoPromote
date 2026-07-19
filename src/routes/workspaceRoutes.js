@@ -5,6 +5,7 @@ const { db } = require("../firebaseAdmin");
 const authMiddleware = require("../authMiddleware");
 const { normalizePlanId, resolvePlan } = require("../config/subscriptionPlans");
 const { sendWorkspaceInvitation } = require("../services/emailService");
+const { isValidWorkspaceInviteEmail } = require("../utils/emailValidation");
 
 const router = express.Router();
 
@@ -305,7 +306,7 @@ router.post("/:id/invite", requireWorkspaceRole, async (req, res) => {
       return res.status(403).json({ ok: false, error: "insufficient_permissions" });
     }
 
-    if (!email || typeof email !== "string" || !/^\S+@\S+\.\S+$/.test(email.trim())) {
+    if (!isValidWorkspaceInviteEmail(email)) {
       return res.status(400).json({ ok: false, error: "valid_email_required" });
     }
 
