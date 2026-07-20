@@ -8,6 +8,21 @@ const { TESTER_PROGRAM } = require("./config/testerProgram");
 const { grantTesterAccess } = require("./services/testerProgramService");
 const { sendTesterAccessGranted } = require("./services/emailService");
 
+const getTesterDashboardUrl = () =>
+  `${String(process.env.PUBLIC_APP_URL || "https://autopromote.org").replace(/\/$/, "")}/#/`;
+
+async function deliverTesterAccessEmail(tester) {
+  if (!tester?.email) {
+    return { ok: false, provider: "none", error: "tester_email_missing" };
+  }
+  return sendTesterAccessGranted({
+    email: tester.email,
+    name: tester.name,
+    expiresAt: tester.expiresAt,
+    dashboardUrl: getTesterDashboardUrl(),
+  });
+}
+
 const adminPublicLimiter = rateLimiter({
   capacity: parseInt(process.env.RATE_LIMIT_ADMIN_PUBLIC || "60", 10),
   refillPerSec: parseFloat(process.env.RATE_LIMIT_REFILL || "5"),
@@ -359,12 +374,7 @@ router.post("/users/:id/tester-access", authMiddleware, adminOnly, async (req, r
 
     if (!result.alreadyGranted && result.tester?.email) {
       try {
-        const delivery = await sendTesterAccessGranted({
-          email: result.tester.email,
-          name: result.tester.name,
-          expiresAt: result.tester.expiresAt,
-          dashboardUrl: `${String(process.env.PUBLIC_APP_URL || "https://autopromote.org").replace(/\/$/, "")}/#/`,
-        });
+        const delivery = await deliverTesterAccessEmail(result.tester);
         emailSent = delivery?.ok === true && delivery?.provider !== "console";
       } catch (emailError) {
         console.error("[tester-program] access email failed:", emailError.message);
@@ -412,6 +422,81 @@ router.post("/users/:id/tester-access", authMiddleware, adminOnly, async (req, r
     return res.status(500).json({ success: false, error: "internal_error" });
   }
 });
+
+// Retry the branded access email without granting another seat or changing the
+// tester's allowance. This is safe to use after a temporary provider failure.
+router.post(
+  "/users/:id/tester-access/resend-email",
+  authMiddleware,
+  adminOnly,
+  async (req, res) => {
+    try {
+      const userId = req.params.id;
+      const adminId = req.userId || req.user?.uid;
+      const userDoc = await db.collection("users").doc(userId).get();
+      if (!userDoc.exists) {
+        return res.status(404).json({ success: false, error: "user_not_found" });
+      }
+
+      const user = userDoc.data() || {};
+      const testerAccess = user.testerAccess || null;
+      if (!testerAccess?.programId) {
+        return res.status(409).json({ success: false, error: "tester_access_not_granted" });
+      }
+      if (
+        testerAccess.status !== "active" ||
+        !Number.isFinite(Date.parse(testerAccess.expiresAt || "")) ||
+        Date.parse(testerAccess.expiresAt) <= Date.now()
+      ) {
+        return res.status(409).json({ success: false, error: "tester_access_expired" });
+      }
+
+      const delivery = await deliverTesterAccessEmail({
+        email: user.email,
+        name: user.name || user.displayName,
+        expiresAt: testerAccess.expiresAt,
+      });
+      const emailSent = delivery?.ok === true && delivery?.provider !== "console";
+
+      await db.collection("audit_logs").add({
+        action: "resend_founding_tester_email",
+        adminId,
+        targetId: userId,
+        details: {
+          programId: testerAccess.programId,
+          emailSent,
+          provider: delivery?.provider || "unknown",
+        },
+        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      });
+
+      if (!emailSent) {
+        console.error(
+          "[tester-program] resend email failed provider=%s error=%s",
+          delivery?.provider || "unknown",
+          delivery?.error || "not_delivered"
+        );
+        return res.status(503).json({
+          success: false,
+          error: "email_not_delivered",
+          message:
+            delivery?.provider === "console"
+              ? "ZeptoMail is not configured in production."
+              : "ZeptoMail did not accept the message. Check the Render email configuration and logs.",
+        });
+      }
+
+      return res.json({
+        success: true,
+        emailSent: true,
+        provider: delivery.provider,
+      });
+    } catch (error) {
+      console.error("[tester-program] resend email failed:", error.message);
+      return res.status(500).json({ success: false, error: "internal_error" });
+    }
+  }
+);
 
 // Admin upgrade user subscription (set plan)
 router.post("/users/:id/upgrade", authMiddleware, adminOnly, async (req, res) => {

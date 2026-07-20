@@ -11,6 +11,7 @@ const AdminUserList = () => {
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [grantingTesterId, setGrantingTesterId] = useState("");
+  const [emailingTesterId, setEmailingTesterId] = useState("");
 
   useEffect(() => {
     fetchUsers();
@@ -73,6 +74,34 @@ const AdminUserList = () => {
       window.alert(`Could not grant tester access: ${err.message}`);
     } finally {
       setGrantingTesterId("");
+    }
+  };
+
+  const handleResendTesterEmail = async user => {
+    const userId = user.id || user.userId;
+    setEmailingTesterId(userId);
+    try {
+      const token = await auth.currentUser.getIdToken();
+      const response = await fetch(
+        `${API_BASE_URL}/api/admin/users/${userId}/tester-access/resend-email`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const parsed = await parseJsonSafe(response);
+      const body = parsed.json || {};
+      if (!response.ok) {
+        throw new Error(body.message || body.error || "Could not resend tester email");
+      }
+      window.alert("The AutoPromote Founding Tester email was sent through ZeptoMail.");
+    } catch (err) {
+      window.alert(`Could not resend tester email: ${err.message}`);
+    } finally {
+      setEmailingTesterId("");
     }
   };
 
@@ -226,34 +255,42 @@ const AdminUserList = () => {
             {r.role !== "admin" && (
               <>
                 <button
-                  onClick={() => handleGrantTesterAccess(r)}
-                  disabled={testerGranted || grantingTesterId === userId}
+                  onClick={() =>
+                    testerActive ? handleResendTesterEmail(r) : handleGrantTesterAccess(r)
+                  }
+                  disabled={
+                    (testerGranted && !testerActive) ||
+                    grantingTesterId === userId ||
+                    emailingTesterId === userId
+                  }
                   style={{
-                    background: testerActive ? "#64748b" : testerGranted ? "#9ca3af" : "#7c3aed",
+                    background: testerActive ? "#0f766e" : testerGranted ? "#9ca3af" : "#7c3aed",
                     color: "white",
                     border: "none",
                     padding: "4px 8px",
                     borderRadius: "4px",
-                    cursor: testerGranted ? "default" : "pointer",
+                    cursor: testerGranted && !testerActive ? "default" : "pointer",
                     fontSize: "0.8em",
                     opacity: grantingTesterId === userId ? 0.65 : 1,
                     whiteSpace: "nowrap",
                   }}
                   title={
                     testerActive
-                      ? `Access expires ${new Date(r.testerAccess.expiresAt).toLocaleDateString()}`
+                      ? `Resend the branded access email. Pass expires ${new Date(r.testerAccess.expiresAt).toLocaleDateString()}`
                       : testerGranted
                         ? "This one-time tester pass has expired"
                         : "Grant a controlled 30-day Founding Tester pass"
                   }
                 >
-                  {grantingTesterId === userId
-                    ? "Granting…"
-                    : testerActive
-                      ? "Tester active"
-                      : testerGranted
-                        ? "Tester expired"
-                        : "✨ Grant Tester"}
+                  {emailingTesterId === userId
+                    ? "Sending…"
+                    : grantingTesterId === userId
+                      ? "Granting…"
+                      : testerActive
+                        ? "✉ Resend email"
+                        : testerGranted
+                          ? "Tester expired"
+                          : "✨ Grant Tester"}
                 </button>
                 <button
                   onClick={() => handleImpersonate(userId, r.name || r.email)}

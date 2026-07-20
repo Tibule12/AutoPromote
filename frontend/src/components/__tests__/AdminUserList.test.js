@@ -70,7 +70,43 @@ describe("AdminUserList", () => {
     );
     expect(window.alert).toHaveBeenCalledWith(expect.stringContaining("Seats: 1/10"));
     expect(await screen.findByText("Founding Tester")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Tester active" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /Resend email/i })).toBeEnabled();
+  });
+
+  test("resends an active tester email without granting another seat", async () => {
+    global.fetch
+      .mockResolvedValueOnce(
+        jsonResponse({
+          success: true,
+          users: [
+            {
+              id: "active-tester",
+              name: "Bongani",
+              email: "bongani@example.com",
+              role: "user",
+              testerAccess: {
+                programId: "founding_testers_2026",
+                status: "active",
+                expiresAt: "2099-08-19T00:00:00.000Z",
+              },
+            },
+          ],
+        })
+      )
+      .mockResolvedValueOnce(
+        jsonResponse({ success: true, emailSent: true, provider: "zeptomail" })
+      );
+
+    render(<AdminUserList />);
+    fireEvent.click(await screen.findByRole("button", { name: /Resend email/i }));
+
+    await waitFor(() =>
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringContaining("/active-tester/tester-access/resend-email"),
+        expect.objectContaining({ method: "POST" })
+      )
+    );
+    expect(window.alert).toHaveBeenCalledWith(expect.stringContaining("through ZeptoMail"));
   });
 
   test("searches the simplified user list", async () => {
