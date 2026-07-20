@@ -18,9 +18,11 @@
   - Adjusts selection color inside dashboard to dark to avoid the default blue highlight
 */
 .dashboard-root {
-  /* ensure contained scrollable areas don't show the OS accent color */
+  /* Keep horizontal overscroll contained, but let vertical wheel/touch gestures
+     reach the document scroller. `contain` here made narrow dashboard pages
+     look scrollable while swallowing the user's actual scroll gesture. */
   overscroll-behavior-x: contain;
-  overscroll-behavior-y: contain;
+  overscroll-behavior-y: auto;
 }
 
 /* Firefox */
@@ -65,6 +67,7 @@ body.dashboard-mode {
   min-height: 100%;
   overflow-x: clip;
   overflow-y: auto;
+  overscroll-behavior-y: auto;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -899,8 +902,12 @@ body.dashboard-mode ::-webkit-scrollbar-thumb:hover {
   body.dashboard-mode {
     width: 100%;
     max-width: 100%;
+    height: auto !important;
+    min-height: 100%;
     overflow-x: hidden !important;
+    overflow-y: auto !important;
     overscroll-behavior-x: none;
+    overscroll-behavior-y: auto;
   }
 
   .dashboard-root,
@@ -915,6 +922,8 @@ body.dashboard-mode ::-webkit-scrollbar-thumb:hover {
     padding-top: 64px;
     padding-bottom: calc(64px + env(safe-area-inset-bottom));
     overflow-x: hidden !important;
+    overflow-y: visible;
+    overscroll-behavior-y: auto;
     touch-action: pan-y pinch-zoom;
   }
 

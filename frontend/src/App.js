@@ -206,7 +206,6 @@ function App() {
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
   const [content, setContent] = useState([]);
   const [mySchedules, setMySchedules] = useState([]);
   const [analytics, setAnalytics] = useState(null);
@@ -241,20 +240,15 @@ function App() {
       : "/"
   );
 
-  // Track whether any modal overlay is open (login/register etc.).
-  // Used for styling and to disable body scrolling/touch.
+  // Lock page scrolling only while an auth/verification modal is actually
+  // visible. Deriving this directly avoids a stale modal-open class surviving
+  // the transition from login into the dashboard.
   useEffect(() => {
-    // add/remove class for global CSS (UnifiedPublisher uses it too)
-    document.body.classList.toggle("modal-open", modalOpen);
-  }, [modalOpen]);
+    const shouldLockScroll =
+      showLogin || showRegister || showAdminLogin || showMfaModal || showTermsModal;
+    document.body.classList.toggle("modal-open", shouldLockScroll);
 
-  // auto-set modalOpen when login/register visibility changes
-  useEffect(() => {
-    if (showLogin || showRegister || showAdminLogin || showMfaModal || showTermsModal) {
-      setModalOpen(true);
-    } else {
-      setModalOpen(false);
-    }
+    return () => document.body.classList.remove("modal-open");
   }, [showLogin, showRegister, showAdminLogin, showMfaModal, showTermsModal]);
 
   // E2E test auth bypass: when true, skip firebase auth and set test user
@@ -1712,7 +1706,6 @@ function App() {
                             onResendVerification={resendVerificationEmail}
                             onClose={() => {
                               setShowLogin(false);
-                              setModalOpen(false);
                             }}
                           />
                         </div>
@@ -1750,11 +1743,9 @@ function App() {
                             onResendVerification={resendVerificationEmail}
                             onClose={() => {
                               setShowRegister(false);
-                              setModalOpen(false);
                             }}
                             onLogin={() => {
                               setShowRegister(false);
-                              setModalOpen(true);
                               setShowLogin(true);
                             }}
                           />
