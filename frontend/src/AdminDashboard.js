@@ -37,7 +37,7 @@ function AdminDashboard({ analytics, user, onLogout }) {
   const [dashboardData, setDashboardData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState("content");
+  const [activeTab, setActiveTab] = useState("users");
   const [refreshing, setRefreshing] = useState(false);
   const [transactionsFilter, setTransactionsFilter] = useState("all");
 
@@ -3154,163 +3154,19 @@ function AdminDashboard({ analytics, user, onLogout }) {
           <>
             <div
               style={{
-                padding: "20px",
-                background: "#fff3e0",
-                borderRadius: "8px",
-                marginBottom: "20px",
+                padding: "18px 20px",
+                background: "white",
+                border: "1px solid #e5e7eb",
+                borderRadius: "12px",
               }}
             >
-              <h3 style={{ margin: 0, color: "#e65100" }}>👥 User Database</h3>
-              <p>
-                Monitor user growth, subscription tiers, and engagement. Manual actions are
-                audit-logged.
+              <h2 style={{ margin: 0, color: "#111827" }}>User management</h2>
+              <p style={{ margin: "6px 0 0", color: "#6b7280" }}>
+                Find an account, grant controlled tester access, impersonate for support, or manage
+                access. Administrative actions are audit-logged.
               </p>
             </div>
-
-            <div style={{ marginTop: 24 }}>
-              <div style={{ display: "flex", flexWrap: "wrap", margin: "-10px" }}>
-                <StatCard
-                  title="Active Users"
-                  value={dashboardData.activeUsers}
-                  subtitle={`${dashboardData.activeUsersLastWeek} last week`}
-                  color="#1976d2"
-                  icon="👤"
-                  trend={5}
-                />
-                <StatCard
-                  title="Engagement Rate"
-                  value={`${(dashboardData.engagementRate * 100).toFixed(1)}%`}
-                  subtitle={`${dashboardData.engagementChange > 0 ? "+" : ""}${(dashboardData.engagementChange * 100).toFixed(1)}% change`}
-                  color="#5e35b1"
-                  icon="📊"
-                  trend={dashboardData.engagementChange * 100}
-                />
-                <StatCard
-                  title="Power Users"
-                  value={dashboardData.userSegmentation.powerUsers}
-                  subtitle={`${((dashboardData.userSegmentation.powerUsers / dashboardData.userSegmentation.total) * 100).toFixed(1)}% of total users`}
-                  color="#2e7d32"
-                  icon="⭐"
-                  trend={3}
-                />
-              </div>
-            </div>
-
-            <div style={{ marginTop: 30, display: "flex", gap: "20px" }}>
-              <div style={{ flex: 1 }}>
-                <div
-                  style={{
-                    backgroundColor: "white",
-                    borderRadius: "12px",
-                    padding: "20px",
-                    boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-                    marginBottom: "24px",
-                  }}
-                >
-                  <h3 style={{ marginTop: 0, marginBottom: "20px", color: "#333" }}>
-                    User Segmentation
-                  </h3>
-                  <ProgressBar
-                    label="Power Users"
-                    value={Math.round(
-                      (dashboardData.userSegmentation.powerUsers /
-                        dashboardData.userSegmentation.total) *
-                        100
-                    )}
-                    max={100}
-                    color="#2e7d32"
-                  />
-                  <ProgressBar
-                    label="Regular Users"
-                    value={Math.round(
-                      (dashboardData.userSegmentation.regularUsers /
-                        dashboardData.userSegmentation.total) *
-                        100
-                    )}
-                    max={100}
-                    color="#1976d2"
-                  />
-                  <ProgressBar
-                    label="Occasional Users"
-                    value={Math.round(
-                      (dashboardData.userSegmentation.occasionalUsers /
-                        dashboardData.userSegmentation.total) *
-                        100
-                    )}
-                    max={100}
-                    color="#ed6c02"
-                  />
-                </div>
-              </div>
-              <div style={{ flex: 1 }}>
-                <PieChart
-                  data={dashboardData.demographics?.ageGroups || {}}
-                  title="Age Distribution"
-                  colors={["#1976d2", "#5e35b1", "#2e7d32", "#ed6c02", "#d32f2f"]}
-                />
-              </div>
-            </div>
-
-            <div style={{ marginTop: 10, display: "flex", gap: "20px" }}>
-              <div style={{ flex: 1 }}>
-                <PieChart
-                  data={dashboardData.demographics?.geoDistribution || {}}
-                  title="Geographic Distribution"
-                  colors={["#1976d2", "#5e35b1", "#2e7d32", "#ed6c02", "#d32f2f", "#9c27b0"]}
-                />
-              </div>
-              <div style={{ flex: 1 }}>
-                <div
-                  style={{
-                    backgroundColor: "white",
-                    borderRadius: "12px",
-                    padding: "20px",
-                    boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-                    marginBottom: "24px",
-                  }}
-                >
-                  <h3 style={{ marginTop: 0, marginBottom: "20px", color: "#333" }}>
-                    Performance Metrics
-                  </h3>
-                  <div style={{ display: "flex", flexWrap: "wrap" }}>
-                    <div style={{ flex: "1 0 50%", padding: "10px" }}>
-                      <div style={{ fontSize: "0.9rem", color: "#666", marginBottom: "5px" }}>
-                        Conversion Rate
-                      </div>
-                      <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#1976d2" }}>
-                        {dashboardData.performanceMetrics?.conversionRate}%
-                      </div>
-                    </div>
-                    <div style={{ flex: "1 0 50%", padding: "10px" }}>
-                      <div style={{ fontSize: "0.9rem", color: "#666", marginBottom: "5px" }}>
-                        Bounce Rate
-                      </div>
-                      <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#ed6c02" }}>
-                        {dashboardData.performanceMetrics?.bounceRate}%
-                      </div>
-                    </div>
-                    <div style={{ flex: "1 0 50%", padding: "10px" }}>
-                      <div style={{ fontSize: "0.9rem", color: "#666", marginBottom: "5px" }}>
-                        Avg. Session Duration
-                      </div>
-                      <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#2e7d32" }}>
-                        {Math.floor(dashboardData.performanceMetrics?.averageSessionDuration / 60)}m{" "}
-                        {dashboardData.performanceMetrics?.averageSessionDuration % 60}s
-                      </div>
-                    </div>
-                    <div style={{ flex: "1 0 50%", padding: "10px" }}>
-                      <div style={{ fontSize: "0.9rem", color: "#666", marginBottom: "5px" }}>
-                        Return Visitor Rate
-                      </div>
-                      <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#5e35b1" }}>
-                        {dashboardData.performanceMetrics?.returnVisitorRate}%
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div style={{ marginTop: 20 }}>
+            <div style={{ marginTop: 16 }}>
               <AdminUserList />
             </div>
           </>
@@ -3680,88 +3536,25 @@ function AdminDashboard({ analytics, user, onLogout }) {
     }
   };
 
-  // Export to CSV functionality
-  const exportToCSV = (data, filename) => {
-    if (!data || data.length === 0) {
-      alert("No data to export");
-      return;
-    }
-
-    const headers = Object.keys(data[0]);
-    const csvContent = [
-      headers.join(","),
-      ...data.map(row =>
-        headers
-          .map(header => {
-            const value = row[header];
-            // Handle values with commas or quotes
-            if (typeof value === "string" && (value.includes(",") || value.includes('"'))) {
-              return `"${value.replace(/"/g, '""')}"`;
-            }
-            return value;
-          })
-          .join(",")
-      ),
-    ].join("\n");
-
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", `${filename}_${new Date().toISOString().split("T")[0]}.csv`);
-    link.style.visibility = "hidden";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   return (
     <div style={{ padding: "24px", backgroundColor: "#f5f5f5", minHeight: "100vh" }}>
       <div
         style={{
           marginBottom: "24px",
           display: "flex",
+          flexWrap: "wrap",
+          gap: "16px",
           justifyContent: "space-between",
           alignItems: "center",
         }}
       >
-        <h1 style={{ color: "#333", margin: 0 }}>Admin Dashboard</h1>
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <div style={{ marginRight: "16px" }}>
-            <VoiceOverGuide activeTab={activeTab} scripts={adminScripts} theme="light" />
-          </div>
-          <button
-            onClick={() => {
-              const dataToExport =
-                activeTab === "overview"
-                  ? dashboardData?.topContent
-                  : activeTab === "users"
-                    ? []
-                    : activeTab === "content"
-                      ? dashboardData?.topContent
-                      : activeTab === "revenue"
-                        ? dashboardData?.financialMetrics?.revenueByMonth
-                        : activeTab === "credits"
-                          ? dashboardData?.creditPurchases || []
-                          : [];
-              exportToCSV(dataToExport, `autopromote_${activeTab}`);
-            }}
-            style={{
-              backgroundColor: "#2e7d32",
-              color: "white",
-              border: "none",
-              padding: "10px 20px",
-              borderRadius: "8px",
-              fontSize: "0.9rem",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              marginRight: "15px",
-            }}
-          >
-            <span style={{ marginRight: "8px" }}>📥</span>
-            Export CSV
-          </button>
+        <div>
+          <h1 style={{ color: "#111827", margin: 0 }}>AutoPromote Admin</h1>
+          <p style={{ color: "#6b7280", margin: "5px 0 0" }}>
+            Manage users, publishing, billing, payouts, and system health.
+          </p>
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", alignItems: "center" }}>
           <button
             onClick={refreshData}
             disabled={refreshing}
@@ -3775,11 +3568,9 @@ function AdminDashboard({ analytics, user, onLogout }) {
               cursor: refreshing ? "not-allowed" : "pointer",
               display: "flex",
               alignItems: "center",
-              marginRight: "15px",
             }}
           >
-            <span style={{ marginRight: "8px" }}>🔄</span>
-            {refreshing ? "Refreshing..." : "Refresh Data"}
+            {refreshing ? "Refreshing…" : "Refresh"}
           </button>
           <button
             onClick={() => {
@@ -3795,8 +3586,6 @@ function AdminDashboard({ analytics, user, onLogout }) {
               borderRadius: "8px",
               fontSize: "0.9rem",
               cursor: "pointer",
-              marginRight: "15px",
-              marginLeft: "10px",
               fontWeight: 600,
             }}
           >
@@ -3806,45 +3595,26 @@ function AdminDashboard({ analytics, user, onLogout }) {
             Last updated: {new Date().toLocaleString()}
           </div>
         </div>
-        <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
-          <StatCard
-            title="Autopilot enabled tests"
-            value={dashboardData?.autopilot?.enabledCount || 0}
-            subtitle="Number of ab-tests where autopilot is enabled"
-            icon="🤖"
-            color="#1976d2"
-          />
-          <StatCard
-            title="Autopilot actions (24h)"
-            value={dashboardData?.autopilot?.actionsLast24h || 0}
-            subtitle="Autopilot apply or rollback actions in last 24 hours"
-            icon="📣"
-            color="#2e7d32"
-          />
-          <StatCard
-            title="Active Promotions"
-            value={dashboardData?.activePromotions || 0}
-            subtitle="Promotion schedules currently active"
-            icon="🚀"
-            color="#7b1fa2"
-          />
-          <StatCard
-            title="Total Revenue"
-            value={dashboardData?.totalRevenue || 0}
-            subtitle="Total collected revenue"
-            icon="💰"
-            color="#d32f2f"
-          />
-        </div>
       </div>
-      <div style={{ marginBottom: "24px", display: "flex", flexWrap: "wrap" }}>
-        <TabButton name="content" label="Content" icon="📄" />
+      <div
+        style={{
+          marginBottom: "24px",
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "4px",
+          padding: "8px",
+          background: "white",
+          border: "1px solid #e5e7eb",
+          borderRadius: "12px",
+        }}
+      >
         <TabButton name="users" label="Users" icon="👥" />
-        <TabButton name="subscriptions" label="Subscriptions" icon="💳" />
+        <TabButton name="content" label="Content" icon="📄" />
+        <TabButton name="subscriptions" label="Billing" icon="💳" />
         <TabButton name="revenue" label="Revenue" icon="💰" />
-        <TabButton name="credits" label="Credit Purchases" icon="🪙" />
+        <TabButton name="credits" label="Credits" icon="🪙" />
         <TabButton name="payouts" label="Payouts" icon="💸" />
-        <TabButton name="system" label="System Health" icon="🤖" />
+        <TabButton name="system" label="System" icon="🤖" />
       </div>
       {error && (
         <div
@@ -3861,13 +3631,6 @@ function AdminDashboard({ analytics, user, onLogout }) {
         </div>
       )}
       {renderDashboardContent()}
-      {/* ActivityFeed shown below simple settings, or we could move it into overview */}
-      {dashboardData?.recentActivities && (
-        <div style={{ marginTop: 40 }}>
-          <h3>Recent System Activity</h3>
-          <ActivityFeed activities={dashboardData.recentActivities} />
-        </div>
-      )}
     </div>
   );
 }

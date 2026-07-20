@@ -4,7 +4,7 @@ import "../AdminDashboard.css";
 const AdminTable = ({ data, columns, title, emptyMessage = "No data available" }) => {
   return (
     <div className="dashboard-panel">
-      <h3 className="panel-title">{title}</h3>
+      {title && <h3 className="panel-title">{title}</h3>}
       {data && data.length > 0 ? (
         <div style={{ overflowX: "auto" }}>
           <table className="data-table">
