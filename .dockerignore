@@ -1,6 +1,11 @@
 # Dependencies
 node_modules/
 frontend/node_modules/
+**/node_modules/
+.venv/
+.venv-*/
+**/.venv/
+**/.venv-*/
 
 # Version control
 .git/
@@ -18,6 +23,8 @@ build/
 dist/
 frontend/build/
 frontend/docs/
+**/build/
+**/dist/
 
 # Cache directories
 .cache/
@@ -30,6 +37,7 @@ frontend/docs/
 .temp/
 .tmp/
 .tmpdir/
+tmp/
 .tempdir/
 
 # IDE files
@@ -53,6 +61,10 @@ ui-debug.log
 .nyc_output/
 coverage/
 .coverage/
+**/__pycache__/
+
+# Runtime-generated logs are not application source
+logs/
 
 # Firebase
 .firebase/
