@@ -69,6 +69,66 @@
   margin-bottom: 1rem;
 }
 
+.ap-invite-card {
+  margin: 1.25rem 0 1.5rem;
+  padding: clamp(1.2rem, 3vw, 1.8rem);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  border: 1px solid rgba(167, 139, 250, 0.55);
+  border-radius: 1.35rem;
+  background: linear-gradient(135deg, rgba(91, 33, 182, 0.3), rgba(17, 25, 44, 0.96));
+  box-shadow: 0 24px 70px rgba(76, 29, 149, 0.3);
+}
+
+.ap-invite-card--warning {
+  border-color: rgba(251, 191, 36, 0.48);
+  background: linear-gradient(135deg, rgba(120, 53, 15, 0.25), rgba(17, 25, 44, 0.96));
+}
+
+.ap-invite-card__copy {
+  max-width: 47rem;
+}
+
+.ap-invite-card h2 {
+  margin: 0.35rem 0 0.65rem;
+  color: #fff;
+  font-size: clamp(1.45rem, 3vw, 2rem);
+}
+
+.ap-invite-card p:not(.ap-eyebrow) {
+  margin: 0;
+  color: var(--ap-text-soft);
+  line-height: 1.6;
+}
+
+.ap-invite-steps {
+  margin: 1rem 0 0;
+  padding-left: 1.3rem;
+  color: var(--ap-text-soft);
+  line-height: 1.65;
+}
+
+.ap-invite-card__actions {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  min-width: 13rem;
+}
+
+@media (max-width: 760px) {
+  .ap-invite-card {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .ap-invite-card__actions {
+    width: 100%;
+  }
+}
+
 .ap-logo {
   color: #fff;
   font-weight: 800;

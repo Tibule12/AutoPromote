@@ -200,9 +200,9 @@ async function sendWorkspaceInvitation({
   const safeWorkspace = escapeHtml(workspaceName || "an AutoPromote workspace");
   const safeInviter = escapeHtml(inviterName || "A workspace owner");
   const safeRole = escapeHtml(role || "editor");
-  const subject = `You were invited to ${workspaceName || "an AutoPromote workspace"}`;
-  const text = `${inviterName || "A workspace owner"} invited you to ${workspaceName || "an AutoPromote workspace"} as ${role || "editor"}. Accept within ${expiresInDays} days: ${inviteUrl}`;
-  const htmlInner = `<h1>Join ${safeWorkspace}</h1><p>${safeInviter} invited you to collaborate as <strong>${safeRole}</strong>.</p><p><a class="button" href="${safeUrl}">Accept invitation</a></p><div class="linkbox">${safeUrl}</div><p class="note">This invitation expires in ${escapeHtml(expiresInDays)} days and can only be accepted by ${escapeHtml(email)}.</p>`;
+  const subject = `✨ You’re invited to join ${workspaceName || "an AutoPromote workspace"}`;
+  const text = `${inviterName || "A workspace owner"} invited you to ${workspaceName || "an AutoPromote workspace"} as ${role || "editor"}.\n\nTo join:\n1. Open the invitation link.\n2. Sign in, or create an AutoPromote account using ${email}.\n3. Verify your email if prompted and sign in. AutoPromote will open the shared workspace automatically.\n\nAccept within ${expiresInDays} days: ${inviteUrl}`;
+  const htmlInner = `<h1>You’re invited ✨</h1><p>${safeInviter} saved you a seat in <strong>${safeWorkspace}</strong> as <strong>${safeRole}</strong>.</p><p style="color:#a78bfa;font-weight:700">Your shared AutoPromote workspace is one click away.</p><p><a class="button" href="${safeUrl}">Join the workspace</a></p><p><strong>How to join:</strong></p><ol style="color:#d1d5db;line-height:1.7;padding-left:22px"><li>Open the invitation link.</li><li>Sign in, or create an AutoPromote account using <strong>${escapeHtml(email)}</strong>.</li><li>Verify your email if prompted and sign in. AutoPromote will open the shared workspace automatically.</li></ol><div class="linkbox">${safeUrl}</div><p class="note">This invitation expires in ${escapeHtml(expiresInDays)} days and can only be accepted by ${escapeHtml(email)}.</p>`;
   return sendEmail({
     to: email,
     subject,

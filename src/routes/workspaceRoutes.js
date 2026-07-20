@@ -9,8 +9,6 @@ const { isValidWorkspaceInviteEmail } = require("../utils/emailValidation");
 
 const router = express.Router();
 
-router.use(authMiddleware);
-
 const WORKSPACE_ROLES = {
   OWNER: "owner",
   ADMIN: "admin",
@@ -20,7 +18,10 @@ const WORKSPACE_ROLES = {
 const INVITE_TTL_DAYS = Math.max(1, parseInt(process.env.WORKSPACE_INVITE_TTL_DAYS || "7", 10));
 
 function hashInviteToken(token) {
-  return crypto.createHash("sha256").update(String(token || "")).digest("hex");
+  return crypto
+    .createHash("sha256")
+    .update(String(token || ""))
+    .digest("hex");
 }
 
 function timestampToMillis(value) {
@@ -41,14 +42,79 @@ function getPublicAppUrl() {
   ).replace(/\/$/, "");
 }
 
+function maskInviteEmail(email) {
+  const normalized = String(email || "")
+    .trim()
+    .toLowerCase();
+  const separator = normalized.lastIndexOf("@");
+  if (separator <= 0) return "the email address that received this invitation";
+
+  const local = normalized.slice(0, separator);
+  const domain = normalized.slice(separator + 1);
+  const visibleLocal =
+    local.length <= 2
+      ? `${local[0] || ""}*`
+      : `${local[0]}${"*".repeat(Math.min(4, local.length - 2))}${local.at(-1)}`;
+  return `${visibleLocal}@${domain}`;
+}
+
+// Let a signed-out invitee understand where the invitation leads without
+// exposing member data. The high-entropy invitation token is required and is
+// compared with the same timing-safe check used during acceptance.
+router.get("/:id/invite/:inviteId/preview", async (req, res) => {
+  try {
+    const { id, inviteId } = req.params;
+    const inviteToken = String(req.query?.token || "");
+    if (!inviteToken) {
+      return res.status(400).json({ ok: false, error: "invite_token_required" });
+    }
+
+    const workspaceRef = db.collection("workspaces").doc(id);
+    const [workspaceDoc, inviteDoc] = await Promise.all([
+      workspaceRef.get(),
+      workspaceRef.collection("invites").doc(inviteId).get(),
+    ]);
+    if (!workspaceDoc.exists || !inviteDoc.exists) {
+      return res.status(404).json({ ok: false, error: "invite_not_found" });
+    }
+
+    const invite = inviteDoc.data() || {};
+    const suppliedHash = hashInviteToken(inviteToken);
+    if (
+      !invite.tokenHash ||
+      invite.tokenHash.length !== suppliedHash.length ||
+      !crypto.timingSafeEqual(Buffer.from(invite.tokenHash), Buffer.from(suppliedHash))
+    ) {
+      return res.status(404).json({ ok: false, error: "invite_not_found" });
+    }
+    if (invite.status !== "pending") {
+      return res.status(410).json({ ok: false, error: "invite_not_pending" });
+    }
+    if (isInviteExpired(invite)) {
+      return res.status(410).json({ ok: false, error: "invite_expired" });
+    }
+
+    const expiresAtMs = timestampToMillis(invite.expiresAt);
+    return res.json({
+      ok: true,
+      workspaceName: String(workspaceDoc.data()?.name || "AutoPromote Workspace").slice(0, 80),
+      role: invite.role || WORKSPACE_ROLES.EDITOR,
+      maskedEmail: maskInviteEmail(invite.email),
+      expiresAt: new Date(expiresAtMs).toISOString(),
+    });
+  } catch (error) {
+    console.error("[workspace] invite preview failed:", error);
+    return res.status(500).json({ ok: false, error: "internal_error" });
+  }
+});
+
+router.use(authMiddleware);
+
 async function getUserPlanSeatLimit(userId) {
   const userDoc = await db.collection("users").doc(userId).get();
   const userData = userDoc.exists ? userDoc.data() : {};
   const rawPlanId =
-    userData?.subscriptionPlan ||
-    userData?.subscription?.planId ||
-    userData?.plan?.tier ||
-    "free";
+    userData?.subscriptionPlan || userData?.subscription?.planId || userData?.plan?.tier || "free";
   const planId = normalizePlanId(rawPlanId);
   const plan = resolvePlan(planId);
   const seatLimit = Number(plan?.features?.teamSeats || 1);
@@ -86,7 +152,8 @@ async function requireWorkspaceRole(req, res, next) {
     if (!uid) return res.status(401).json({ ok: false, error: "unauthorized" });
 
     const workspaceDoc = await db.collection("workspaces").doc(workspaceId).get();
-    if (!workspaceDoc.exists) return res.status(404).json({ ok: false, error: "workspace_not_found" });
+    if (!workspaceDoc.exists)
+      return res.status(404).json({ ok: false, error: "workspace_not_found" });
 
     const workspace = workspaceDoc.data() || {};
     const isOwner = workspace.ownerUid === uid;
@@ -114,7 +181,9 @@ router.post("/", async (req, res) => {
   try {
     const uid = req.userId || (req.user && req.user.uid);
     const email = req.user?.email || null;
-    const requestedName = String(req.body?.name || "").trim().slice(0, 80);
+    const requestedName = String(req.body?.name || "")
+      .trim()
+      .slice(0, 80);
 
     const existing = await db.collection("workspaces").where("ownerUid", "==", uid).limit(1).get();
     if (!existing.empty) {
@@ -159,11 +228,7 @@ router.get("/", async (req, res) => {
     const uid = req.userId || req.user?.uid;
     const [owned, memberships] = await Promise.all([
       db.collection("workspaces").where("ownerUid", "==", uid).get(),
-      db
-        .collectionGroup("members")
-        .where("uid", "==", uid)
-        .where("status", "==", "active")
-        .get(),
+      db.collectionGroup("members").where("uid", "==", uid).where("status", "==", "active").get(),
     ]);
 
     const refs = new Map();
@@ -252,7 +317,10 @@ router.get("/current", async (req, res) => {
         { merge: true }
       );
     }
-    const membersSnap = await workspaceDoc.ref.collection("members").where("status", "==", "active").get();
+    const membersSnap = await workspaceDoc.ref
+      .collection("members")
+      .where("status", "==", "active")
+      .get();
     const members = membersSnap.docs.map(d => ({ id: d.id, ...d.data() }));
     const canManage = [WORKSPACE_ROLES.OWNER, WORKSPACE_ROLES.ADMIN].includes(membership.role);
     let pendingInvites = [];
@@ -311,11 +379,20 @@ router.post("/:id/invite", requireWorkspaceRole, async (req, res) => {
     }
 
     const normalizedEmail = email.trim().toLowerCase();
-    if (normalizedEmail === String(req.user?.email || "").trim().toLowerCase()) {
+    if (
+      normalizedEmail ===
+      String(req.user?.email || "")
+        .trim()
+        .toLowerCase()
+    ) {
       return res.status(400).json({ ok: false, error: "cannot_invite_yourself" });
     }
 
-    const normalizedRole = [WORKSPACE_ROLES.ADMIN, WORKSPACE_ROLES.EDITOR, WORKSPACE_ROLES.VIEWER].includes(role)
+    const normalizedRole = [
+      WORKSPACE_ROLES.ADMIN,
+      WORKSPACE_ROLES.EDITOR,
+      WORKSPACE_ROLES.VIEWER,
+    ].includes(role)
       ? role
       : WORKSPACE_ROLES.EDITOR;
     if (normalizedRole === WORKSPACE_ROLES.ADMIN && memberRole !== WORKSPACE_ROLES.OWNER) {
@@ -323,7 +400,10 @@ router.post("/:id/invite", requireWorkspaceRole, async (req, res) => {
     }
 
     const workspaceRef = db.collection("workspaces").doc(req.workspaceId);
-    const membersSnap = await workspaceRef.collection("members").where("status", "==", "active").get();
+    const membersSnap = await workspaceRef
+      .collection("members")
+      .where("status", "==", "active")
+      .get();
     const currentSeats = membersSnap.size;
     const effectivePlan = await getEffectiveWorkspacePlan(req.workspace);
     const seatLimit = effectivePlan.seatLimit;
@@ -338,7 +418,10 @@ router.post("/:id/invite", requireWorkspaceRole, async (req, res) => {
       return res.status(409).json({ ok: false, error: "invite_already_pending" });
     }
 
-    const pendingSnap = await workspaceRef.collection("invites").where("status", "==", "pending").get();
+    const pendingSnap = await workspaceRef
+      .collection("invites")
+      .where("status", "==", "pending")
+      .get();
     const activePendingCount = pendingSnap.docs.filter(doc => !isInviteExpired(doc.data())).length;
 
     if (currentSeats + activePendingCount >= seatLimit) {
@@ -403,7 +486,9 @@ router.patch("/:id", requireWorkspaceRole, async (req, res) => {
     if (![WORKSPACE_ROLES.OWNER, WORKSPACE_ROLES.ADMIN].includes(req.workspaceMembership.role)) {
       return res.status(403).json({ ok: false, error: "insufficient_permissions" });
     }
-    const name = String(req.body?.name || "").trim().slice(0, 80);
+    const name = String(req.body?.name || "")
+      .trim()
+      .slice(0, 80);
     if (!name) return res.status(400).json({ ok: false, error: "workspace_name_required" });
     await db.collection("workspaces").doc(req.workspaceId).update({
       name,
@@ -426,7 +511,10 @@ router.post("/:id/leave", requireWorkspaceRole, async (req, res) => {
     const workspaceRef = db.collection("workspaces").doc(req.workspaceId);
     const memberRef = workspaceRef.collection("members").doc(actorUid);
     await db.runTransaction(async tx => {
-      const [workspaceDoc, memberDoc] = await Promise.all([tx.get(workspaceRef), tx.get(memberRef)]);
+      const [workspaceDoc, memberDoc] = await Promise.all([
+        tx.get(workspaceRef),
+        tx.get(memberRef),
+      ]);
       if (!workspaceDoc.exists) throw new Error("workspace_not_found");
       if (!memberDoc.exists || memberDoc.data()?.status !== "active") {
         throw new Error("member_not_active");
@@ -495,7 +583,8 @@ router.post("/:id/invite/:inviteId/accept", async (req, res) => {
         throw new Error("invite_token_invalid");
       }
       if (invite.email !== email) throw new Error("invite_email_mismatch");
-      if (memberDoc.exists && memberDoc.data()?.status === "active") throw new Error("already_member");
+      if (memberDoc.exists && memberDoc.data()?.status === "active")
+        throw new Error("already_member");
 
       const activeMembersSnap = await tx.get(
         workspaceRef.collection("members").where("status", "==", "active")
@@ -596,7 +685,10 @@ router.delete("/:id/members/:uid", requireWorkspaceRole, async (req, res) => {
     const memberRef = workspaceRef.collection("members").doc(targetUid);
 
     await db.runTransaction(async tx => {
-      const [workspaceDoc, memberDoc] = await Promise.all([tx.get(workspaceRef), tx.get(memberRef)]);
+      const [workspaceDoc, memberDoc] = await Promise.all([
+        tx.get(workspaceRef),
+        tx.get(memberRef),
+      ]);
       if (!workspaceDoc.exists) throw new Error("workspace_not_found");
       if (!memberDoc.exists) throw new Error("member_not_found");
 
@@ -655,7 +747,11 @@ router.patch("/:id/members/:uid/role", requireWorkspaceRole, async (req, res) =>
       return res.status(403).json({ ok: false, error: "owner_required_for_admin_role" });
     }
 
-    const memberRef = db.collection("workspaces").doc(req.workspaceId).collection("members").doc(targetUid);
+    const memberRef = db
+      .collection("workspaces")
+      .doc(req.workspaceId)
+      .collection("members")
+      .doc(targetUid);
     const memberDoc = await memberRef.get();
     if (!memberDoc.exists || memberDoc.data()?.status !== "active") {
       return res.status(404).json({ ok: false, error: "member_not_found" });
