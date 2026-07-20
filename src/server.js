@@ -1131,6 +1131,7 @@ try {
       "X-Requested-With",
       "x-correlation-id",
       "x-request-id",
+      "X-Workspace-Id",
       "X-File-Name",
       "X-Media-Type",
       "x-file-name",
