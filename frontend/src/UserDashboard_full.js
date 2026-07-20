@@ -27,7 +27,6 @@ import TopNav from "./components/TopNav";
 import BottomNav from "./components/BottomNav";
 import VoiceOverGuide from "./components/VoiceOverGuide";
 import AdminKyc from "./AdminKyc";
-import UsageLimitBanner from "./components/UsageLimitBanner";
 import { auth } from "./firebaseClient";
 import { sendEmailVerification } from "firebase/auth";
 import { API_ENDPOINTS, API_BASE_URL, ENABLE_WOLF_HUNT } from "./config";
@@ -1287,7 +1286,6 @@ const UserDashboard = ({
         <div style={{ display: "flex", justifyContent: "flex-end", padding: "10px 20px 0 0" }}>
           <VoiceOverGuide activeTab={activeTab} />
         </div>
-        <UsageLimitBanner backLabel={BILLING_RETURN_TAB_LABELS[activeTab] || "Dashboard"} />
         {testerAccessActive && (
           <section className="founding-tester-banner" aria-label="Founding Tester access">
             <div>

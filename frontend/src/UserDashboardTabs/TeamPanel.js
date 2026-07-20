@@ -96,7 +96,7 @@ function TeamPanel({ onWorkspaceChanged, onNavigate }) {
       setWorkspaceData(data);
       setAvailableWorkspaces(listData.workspaces || []);
       setWorkspaceName(data.workspace?.name || "");
-      setWorkspaceMissing(false);
+      setWorkspaceMissing(!data.workspace);
       if (data.workspace?.id) {
         setActiveWorkspaceId(data.workspace.id);
         setActiveWorkspaceRole(data.membership?.role || "");

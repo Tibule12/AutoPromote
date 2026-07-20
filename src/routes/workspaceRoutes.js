@@ -290,7 +290,26 @@ router.get("/current", async (req, res) => {
     }
 
     if (!workspaceDoc || !workspaceDoc.exists) {
-      return res.status(404).json({ ok: false, error: "workspace_not_found" });
+      // A signed-in user who has never created or joined a workspace is a
+      // normal empty state, not a missing API resource. Keep 404 only for an
+      // explicitly requested (usually stale) workspace id so clients can clear it.
+      if (requestedWorkspaceId) {
+        return res.status(404).json({ ok: false, error: "workspace_not_found" });
+      }
+      return res.json({
+        ok: true,
+        empty: true,
+        workspace: null,
+        membership: null,
+        members: [],
+        pendingInvites: [],
+        permissions: {
+          canManageMembers: false,
+          canManageBilling: false,
+          canEdit: false,
+          canPublish: false,
+        },
+      });
     }
 
     const workspace = workspaceDoc.data() || {};

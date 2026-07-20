@@ -42,6 +42,36 @@ describe("TeamPanel", () => {
     expect(window.localStorage.getItem("autopromote.activeWorkspaceId")).toBe("workspace-1");
   });
 
+  test("treats a successful empty current-workspace response as onboarding", async () => {
+    global.fetch
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          ok: true,
+          empty: true,
+          workspace: null,
+          membership: null,
+          members: [],
+          pendingInvites: [],
+          permissions: {},
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ ok: true, workspaces: [] }),
+      });
+
+    render(<TeamPanel onWorkspaceChanged={() => {}} onNavigate={() => {}} />);
+
+    expect(
+      await screen.findByRole("heading", { name: "Create a shared AutoPromote workspace" })
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Create Workspace" })).toBeEnabled();
+    expect(global.fetch).toHaveBeenCalledTimes(2);
+  });
+
   test("accepts an invitation from the signed-in landing URL", async () => {
     window.history.replaceState(
       {},
