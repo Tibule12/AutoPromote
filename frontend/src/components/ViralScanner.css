@@ -1243,6 +1243,26 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+.scanner-access-block {
+  padding: 16px;
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  border-radius: 14px;
+  background: rgba(127, 29, 29, 0.2);
+}
+
+.scanner-access-message,
+.scanner-no-upload-note {
+  margin: 0 0 10px;
+  color: #cbd5e1;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.scanner-no-upload-note {
+  color: #86efac;
+  font-weight: 700;
+}
+
 .scanner-guidance-card {
   margin: 14px 16px 0;
   padding: 18px;

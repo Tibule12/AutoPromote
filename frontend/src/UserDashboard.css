@@ -819,3 +819,233 @@ body.dashboard-mode ::-webkit-scrollbar-thumb:hover {
   max-width: 100% !important;
   padding: 0 !important;
 }
+
+.founding-tester-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  margin: 0 0 1rem;
+  padding: 1.1rem 1.25rem;
+  border: 1px solid rgba(167, 139, 250, 0.5);
+  border-radius: 16px;
+  color: #ede9fe;
+  background: linear-gradient(135deg, rgba(91, 33, 182, 0.94), rgba(30, 41, 59, 0.96));
+  box-shadow: 0 16px 36px rgba(76, 29, 149, 0.24);
+}
+
+.founding-tester-banner > div:first-child {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.founding-tester-banner span {
+  color: #c4b5fd;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.founding-tester-banner strong {
+  color: #fff;
+  font-size: 1.1rem;
+}
+
+.founding-tester-banner p {
+  max-width: 52rem;
+  margin: 0;
+  color: #ddd6fe;
+  line-height: 1.5;
+}
+
+.founding-tester-banner__actions {
+  display: grid;
+  flex: 0 0 auto;
+  gap: 0.55rem;
+  text-align: right;
+}
+
+.founding-tester-banner__actions small {
+  color: #ddd6fe;
+}
+
+.founding-tester-banner__actions button {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.7rem 1rem;
+  color: #2e1065;
+  background: #f5f3ff;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+}
+
+@media (max-width: 760px) {
+  .founding-tester-banner {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .founding-tester-banner__actions {
+    text-align: left;
+  }
+}
+
+/* Authoritative phone/tablet layout. Keep this last so older dashboard rules cannot
+   move the menu off-canvas with a second, conflicting positioning method. */
+@media (max-width: 1023px) {
+  html.dashboard-mode,
+  body.dashboard-mode {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden !important;
+    overscroll-behavior-x: none;
+  }
+
+  .dashboard-root,
+  .dashboard-root * {
+    box-sizing: border-box;
+  }
+
+  .dashboard-root {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding-top: 64px;
+    padding-bottom: calc(64px + env(safe-area-inset-bottom));
+    overflow-x: hidden !important;
+    touch-action: pan-y pinch-zoom;
+  }
+
+  .dashboard-topbar {
+    z-index: 10002;
+    padding-left: max(0.65rem, env(safe-area-inset-left));
+    padding-right: max(0.65rem, env(safe-area-inset-right));
+  }
+
+  .sidebar-backdrop {
+    inset: 64px 0 0;
+    z-index: 10000;
+    border: 0;
+  }
+
+  .dashboard-sidebar,
+  .dashboard-sidebar.open {
+    left: 0 !important;
+    right: auto !important;
+    top: 64px !important;
+    bottom: 0 !important;
+    width: min(86vw, 320px);
+    height: calc(100dvh - 64px);
+    max-height: calc(100dvh - 64px);
+    padding: 0.75rem max(0.75rem, env(safe-area-inset-right))
+      max(0.75rem, env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left));
+    z-index: 10001;
+    overflow: hidden;
+    transform: translateX(-105%) !important;
+    transition: transform 0.22s ease;
+  }
+
+  .dashboard-sidebar.open {
+    transform: translateX(0) !important;
+  }
+
+  .profile-section,
+  .logout-btn {
+    flex: 0 0 auto;
+  }
+
+  .profile-section {
+    padding: 0.8rem;
+  }
+
+  .profile-avatar {
+    width: 54px;
+    height: 54px;
+  }
+
+  .dashboard-navbar-vertical {
+    display: block;
+    flex: 1 1 auto;
+    min-height: 0;
+    margin-top: 0.75rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .dashboard-navbar-vertical ul {
+    padding-bottom: 0.5rem;
+  }
+
+  .dashboard-navbar-vertical li {
+    min-height: 44px;
+  }
+
+  .logout-btn {
+    position: static;
+    min-height: 46px;
+    margin: 0.7rem 0 0;
+  }
+
+  .dashboard-main,
+  .dashboard-main > *,
+  .dashboard-main form,
+  .dashboard-main fieldset {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .dashboard-main {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0.75rem max(0.75rem, env(safe-area-inset-right))
+      calc(1rem + env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left)) !important;
+    overflow-x: hidden !important;
+  }
+
+  .dashboard-main img,
+  .dashboard-main video,
+  .dashboard-main canvas {
+    max-width: 100%;
+  }
+
+  .dashboard-main input:not([type="checkbox"]):not([type="radio"]),
+  .dashboard-main select,
+  .dashboard-main textarea {
+    max-width: 100%;
+    font-size: 16px;
+  }
+
+  .connect-banner {
+    left: max(0.75rem, env(safe-area-inset-left));
+    right: max(0.75rem, env(safe-area-inset-right));
+    min-width: 0;
+    max-width: none;
+    transform: none;
+  }
+
+  .founding-tester-banner {
+    min-width: 0;
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboard-root {
+    padding-top: 52px;
+  }
+
+  .sidebar-backdrop {
+    inset: 52px 0 0;
+  }
+
+  .dashboard-sidebar,
+  .dashboard-sidebar.open {
+    top: 52px !important;
+    height: calc(100dvh - 52px);
+    max-height: calc(100dvh - 52px);
+  }
+}

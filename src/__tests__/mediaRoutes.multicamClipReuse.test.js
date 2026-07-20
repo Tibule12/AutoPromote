@@ -68,7 +68,7 @@ jest.mock(
 );
 
 const mediaRoutes = require("../mediaRoutes");
-const { deductCredits } = require("../creditSystem");
+const { deductCredits, getCreditBreakdown } = require("../creditSystem");
 
 const buildApp = () => {
   const app = express();
@@ -101,6 +101,11 @@ describe("Cam Combiner master reuse for Find Viral Clips", () => {
       fromMonthly: 8,
       fromTopUp: 0,
       monthKey: "2026-07",
+    });
+    getCreditBreakdown.mockResolvedValue({
+      totalAvailable: 100,
+      tier: "premium",
+      localCreditBypass: false,
     });
     mockAnalyzeVideo.mockResolvedValue([{ id: "clip-1", start: 3, end: 15 }]);
     mockStartProcessingJob.mockResolvedValue({ jobId: "clip-render-1" });

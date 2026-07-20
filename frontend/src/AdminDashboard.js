@@ -969,6 +969,7 @@ function AdminDashboard({ analytics, user, onLogout }) {
   const ModerationPanel = ({ dashboardData }) => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [grantingTesterId, setGrantingTesterId] = useState("");
     const [selectedUserId, setSelectedUserId] = useState(null);
     const [actionType, setActionType] = useState("");
 
@@ -1014,6 +1015,42 @@ function AdminDashboard({ analytics, user, onLogout }) {
       } catch (error) {
         console.error(`Error ${action} user:`, error);
         alert(`Error: ${error.message}`);
+      }
+    };
+
+    const handleGrantTesterAccess = async user => {
+      const confirmed = window.confirm(
+        `Grant ${user.email || user.name || "this user"} one of the 10 Founding Tester places?\n\nThis gives 30 days to test Cam Combiner, publishing/queue, Find Viral Clips, and Smart Promo with 1,500 credits, 10 uploads, 30 queued posts, and 3 connected platforms. Other tools stay locked. It does not create a paid subscription or auto-renew.`
+      );
+      if (!confirmed) return;
+
+      setGrantingTesterId(user.id);
+      try {
+        const token = await auth.currentUser?.getIdToken();
+        const response = await fetch(`${API_BASE_URL}/api/admin/users/${user.id}/tester-access`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        const parsed = await parseJsonSafe(response);
+        const body = parsed.json || {};
+        if (!response.ok) {
+          throw new Error(body.message || body.error || "Could not grant tester access");
+        }
+
+        const deliveryNote = body.emailSent
+          ? "The branded access email was sent."
+          : "Access was granted, but the email was not delivered; contact the tester directly.";
+        alert(
+          `${body.alreadyGranted ? "Tester access was already granted." : "Founding Tester access granted."}\n\nSeats: ${body.claimedSeats}/${body.maxSeats}\n${deliveryNote}`
+        );
+        await fetchAllUsers();
+      } catch (error) {
+        alert(`Could not grant tester access: ${error.message}`);
+      } finally {
+        setGrantingTesterId("");
       }
     };
 
@@ -1090,130 +1127,160 @@ function AdminDashboard({ analytics, user, onLogout }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredUsers.map(user => (
-                      <tr key={user.id} style={{ borderBottom: "1px solid #eee" }}>
-                        <td style={{ padding: "12px" }}>
-                          <div style={{ fontWeight: "500" }}>{user.name || "Unknown"}</div>
-                          <div style={{ fontSize: "0.85rem", color: "#666" }}>
-                            {user.id.substring(0, 8)}...
-                          </div>
-                        </td>
-                        <td style={{ padding: "12px" }}>{user.email}</td>
-                        <td style={{ padding: "12px" }}>
-                          <span
-                            style={{
-                              padding: "4px 8px",
-                              borderRadius: "4px",
-                              fontSize: "0.85rem",
-                              backgroundColor:
-                                user.plan === "pro"
-                                  ? "#e3f2fd"
-                                  : user.plan === "premium"
-                                    ? "#f3e5f5"
-                                    : "#f5f5f5",
-                              color:
-                                user.plan === "pro"
-                                  ? "#1976d2"
-                                  : user.plan === "premium"
-                                    ? "#7b1fa2"
-                                    : "#666",
-                            }}
-                          >
-                            {user.plan || "free"}
-                          </span>
-                        </td>
-                        <td style={{ padding: "12px" }}>
-                          <span
-                            style={{
-                              padding: "4px 8px",
-                              borderRadius: "4px",
-                              fontSize: "0.85rem",
-                              backgroundColor: user.suspended ? "#ffebee" : "#e8f5e9",
-                              color: user.suspended ? "#d32f2f" : "#2e7d32",
-                            }}
-                          >
-                            {user.suspended ? "Suspended" : "Active"}
-                          </span>
-                        </td>
-                        <td style={{ padding: "12px", fontSize: "0.9rem" }}>
-                          {user.createdAt
-                            ? new Date(user.createdAt.seconds * 1000).toLocaleDateString()
-                            : "N/A"}
-                        </td>
-                        <td style={{ padding: "12px" }}>
-                          <div style={{ display: "flex", gap: "8px" }}>
-                            {!user.suspended ? (
+                    {filteredUsers.map(user => {
+                      const testerActive =
+                        user.testerAccess?.status === "active" &&
+                        Date.parse(user.testerAccess?.expiresAt || "") > Date.now();
+                      return (
+                        <tr key={user.id} style={{ borderBottom: "1px solid #eee" }}>
+                          <td style={{ padding: "12px" }}>
+                            <div style={{ fontWeight: "500" }}>{user.name || "Unknown"}</div>
+                            <div style={{ fontSize: "0.85rem", color: "#666" }}>
+                              {user.id.substring(0, 8)}...
+                            </div>
+                          </td>
+                          <td style={{ padding: "12px" }}>{user.email}</td>
+                          <td style={{ padding: "12px" }}>
+                            <span
+                              style={{
+                                padding: "4px 8px",
+                                borderRadius: "4px",
+                                fontSize: "0.85rem",
+                                backgroundColor:
+                                  user.plan === "pro"
+                                    ? "#e3f2fd"
+                                    : user.plan === "premium"
+                                      ? "#f3e5f5"
+                                      : "#f5f5f5",
+                                color:
+                                  user.plan === "pro"
+                                    ? "#1976d2"
+                                    : user.plan === "premium"
+                                      ? "#7b1fa2"
+                                      : "#666",
+                              }}
+                            >
+                              {user.plan || "free"}
+                            </span>
+                          </td>
+                          <td style={{ padding: "12px" }}>
+                            <span
+                              style={{
+                                padding: "4px 8px",
+                                borderRadius: "4px",
+                                fontSize: "0.85rem",
+                                backgroundColor: user.suspended ? "#ffebee" : "#e8f5e9",
+                                color: user.suspended ? "#d32f2f" : "#2e7d32",
+                              }}
+                            >
+                              {user.suspended ? "Suspended" : "Active"}
+                            </span>
+                          </td>
+                          <td style={{ padding: "12px", fontSize: "0.9rem" }}>
+                            {user.createdAt
+                              ? new Date(user.createdAt.seconds * 1000).toLocaleDateString()
+                              : "N/A"}
+                          </td>
+                          <td style={{ padding: "12px" }}>
+                            <div style={{ display: "flex", gap: "8px" }}>
+                              {!user.suspended ? (
+                                <button
+                                  onClick={() => handleUserAction(user.id, "suspend")}
+                                  style={{
+                                    padding: "6px 12px",
+                                    borderRadius: "6px",
+                                    border: "none",
+                                    backgroundColor: "#ed6c02",
+                                    color: "white",
+                                    fontSize: "0.85rem",
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  Suspend
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => handleUserAction(user.id, "unsuspend")}
+                                  style={{
+                                    padding: "6px 12px",
+                                    borderRadius: "6px",
+                                    border: "none",
+                                    backgroundColor: "#2e7d32",
+                                    color: "white",
+                                    fontSize: "0.85rem",
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  Unsuspend
+                                </button>
+                              )}
                               <button
-                                onClick={() => handleUserAction(user.id, "suspend")}
+                                onClick={() => {
+                                  setSelectedUserId(user.id);
+                                  setShowUserModal(true);
+                                }}
                                 style={{
                                   padding: "6px 12px",
                                   borderRadius: "6px",
                                   border: "none",
-                                  backgroundColor: "#ed6c02",
+                                  backgroundColor: "#1976d2",
                                   color: "white",
                                   fontSize: "0.85rem",
                                   cursor: "pointer",
                                 }}
                               >
-                                Suspend
+                                View Details
                               </button>
-                            ) : (
                               <button
-                                onClick={() => handleUserAction(user.id, "unsuspend")}
+                                onClick={() => {
+                                  const liveId = user.liveId || user.id;
+                                  const confirmed = window.confirm(
+                                    `Create and copy private live link for liveId: ${liveId}?`
+                                  );
+                                  if (confirmed) handleCopyPrivateLink(liveId);
+                                }}
                                 style={{
                                   padding: "6px 12px",
                                   borderRadius: "6px",
                                   border: "none",
-                                  backgroundColor: "#2e7d32",
+                                  backgroundColor: "#6a1b9a",
                                   color: "white",
                                   fontSize: "0.85rem",
                                   cursor: "pointer",
                                 }}
                               >
-                                Unsuspend
+                                Copy Live Link
                               </button>
-                            )}
-                            <button
-                              onClick={() => {
-                                setSelectedUserId(user.id);
-                                setShowUserModal(true);
-                              }}
-                              style={{
-                                padding: "6px 12px",
-                                borderRadius: "6px",
-                                border: "none",
-                                backgroundColor: "#1976d2",
-                                color: "white",
-                                fontSize: "0.85rem",
-                                cursor: "pointer",
-                              }}
-                            >
-                              View Details
-                            </button>
-                            <button
-                              onClick={() => {
-                                const liveId = user.liveId || user.id;
-                                const confirmed = window.confirm(
-                                  `Create and copy private live link for liveId: ${liveId}?`
-                                );
-                                if (confirmed) handleCopyPrivateLink(liveId);
-                              }}
-                              style={{
-                                padding: "6px 12px",
-                                borderRadius: "6px",
-                                border: "none",
-                                backgroundColor: "#6a1b9a",
-                                color: "white",
-                                fontSize: "0.85rem",
-                                cursor: "pointer",
-                              }}
-                            >
-                              Copy Live Link
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                              <button
+                                onClick={() => handleGrantTesterAccess(user)}
+                                disabled={testerActive || grantingTesterId === user.id}
+                                title={
+                                  testerActive
+                                    ? `Tester access expires ${new Date(user.testerAccess.expiresAt).toLocaleDateString()}`
+                                    : "Grant a controlled 30-day Founding Tester pass with 1,500 trial credits"
+                                }
+                                style={{
+                                  padding: "6px 12px",
+                                  borderRadius: "6px",
+                                  border: "none",
+                                  backgroundColor: testerActive ? "#64748b" : "#7c3aed",
+                                  color: "white",
+                                  fontSize: "0.85rem",
+                                  cursor: testerActive ? "default" : "pointer",
+                                  opacity: grantingTesterId === user.id ? 0.65 : 1,
+                                }}
+                              >
+                                {testerActive
+                                  ? "Founding Tester"
+                                  : grantingTesterId === user.id
+                                    ? "Granting…"
+                                    : "Grant Tester Access"}
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

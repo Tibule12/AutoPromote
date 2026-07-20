@@ -19,6 +19,7 @@ const {
   getPlanCapabilities,
 } = require("./config/subscriptionPlans");
 const { getEffectiveTierSnapshot } = require("./services/billingService");
+const { TESTER_PROGRAM, applyTesterCapabilityAllowlist } = require("./config/testerProgram");
 const { isDurableMulticamRenderEnabled } = require("./services/cloudRunJobService");
 const {
   releaseMulticamRenderCapacity,
@@ -57,14 +58,10 @@ const ALLOW_LOCAL_WORKER_FALLBACK =
   process.env.ALLOW_LOCAL_WORKER_FALLBACK === "true" ||
   (!IS_PRODUCTION_RUNTIME && process.env.ALLOW_LOCAL_WORKER_FALLBACK !== "false");
 const VIDEO_EDITOR_CREDITS_DISABLED = process.env.DISABLE_VIDEO_EDITOR_CREDITS === "true";
-const MULTICAM_MAX_TOTAL_RENDER_SECONDS = parseInt(
-  process.env.MULTICAM_MAX_TOTAL_RENDER_SECONDS || String(3 * 60 * 60),
-  10
-) || 3 * 60 * 60;
-const MULTICAM_CHECKPOINT_SECONDS = parseInt(
-  process.env.MULTICAM_CHECKPOINT_SECONDS || String(5 * 60),
-  10
-) || 5 * 60;
+const MULTICAM_MAX_TOTAL_RENDER_SECONDS =
+  parseInt(process.env.MULTICAM_MAX_TOTAL_RENDER_SECONDS || String(3 * 60 * 60), 10) || 3 * 60 * 60;
+const MULTICAM_CHECKPOINT_SECONDS =
+  parseInt(process.env.MULTICAM_CHECKPOINT_SECONDS || String(5 * 60), 10) || 5 * 60;
 const MULTICAM_BILLING_UNIT_SECONDS = 20 * 60;
 const MULTICAM_PRODUCTION_PROOF_SECONDS = 60;
 const MULTICAM_PRODUCTION_PROOF_CREDITS = Math.max(
@@ -76,7 +73,10 @@ const MULTICAM_SERVER_PROOF_REQUIRED =
   (process.env.MULTICAM_SERVER_PROOF_REQUIRED !== "false" && IS_PRODUCTION_RUNTIME);
 
 const normalizeMulticamRenderTier = value => {
-  const tier = String(value || "premium").trim().toLowerCase().replace(/-/g, "_");
+  const tier = String(value || "premium")
+    .trim()
+    .toLowerCase()
+    .replace(/-/g, "_");
   return ["simple", "premium", "studio"].includes(tier) ? tier : "premium";
 };
 
@@ -96,12 +96,18 @@ const estimateMulticamRenderCredits = ({ renderTier, durationSeconds }) => {
 };
 
 const normalizeMulticamRenderPurpose = value =>
-  String(value || "full_master").trim().toLowerCase() === "production_proof"
+  String(value || "full_master")
+    .trim()
+    .toLowerCase() === "production_proof"
     ? "production_proof"
     : "full_master";
 
 const getPersistedMulticamExternalAudio = request => {
-  if (request?.externalAudio?.url || request?.externalAudio?.storagePath || request?.externalAudio?.storage_path) {
+  if (
+    request?.externalAudio?.url ||
+    request?.externalAudio?.storagePath ||
+    request?.externalAudio?.storage_path
+  ) {
     return request.externalAudio;
   }
   if (request?.external_audio_url || request?.external_audio_storage_path) {
@@ -121,10 +127,7 @@ const getPersistedMulticamStorageSignature = request => {
     source => source.storagePath || source.storage_path || ""
   );
   const external = getPersistedMulticamExternalAudio(request);
-  return JSON.stringify([
-    ...sourcePaths,
-    external?.storagePath || external?.storage_path || "",
-  ]);
+  return JSON.stringify([...sourcePaths, external?.storagePath || external?.storage_path || ""]);
 };
 
 const getPersistedMulticamDuration = request =>
@@ -186,13 +189,7 @@ const postToMediaWorker = async (endpoint, payload, timeout = 120000) =>
   postToWorker(endpoint, payload, timeout);
 
 const postToCamCombinerWorker = async (endpoint, payload, timeout = 120000) =>
-  postToWorker(
-    endpoint,
-    payload,
-    timeout,
-    CAM_COMBINER_WORKER_URL,
-    LOCAL_CAM_COMBINER_WORKER_URL
-  );
+  postToWorker(endpoint, payload, timeout, CAM_COMBINER_WORKER_URL, LOCAL_CAM_COMBINER_WORKER_URL);
 
 const getFromMediaWorker = async (endpoint, timeout = 15000) => {
   try {
@@ -245,6 +242,87 @@ const chargeVideoEditorCredits = async (userId, amount, routeName, metadata = {}
   }
 
   return deductCredits(userId, amount, routeName, metadata);
+};
+
+const getViralScanPreflight = async userId => {
+  const requiredCredits = CREDIT_COSTS.analyze || 8;
+  const [breakdown, tierSnapshot] = await Promise.all([
+    getCreditBreakdown(userId),
+    getEffectiveTierSnapshot(userId),
+  ]);
+  const capabilities = applyTesterCapabilityAllowlist(
+    getPlanCapabilities(breakdown.tier),
+    tierSnapshot.testerAccess
+  );
+  const feature = capabilities?.editing?.features?.findViralClips || {};
+  const planAllowed = Boolean(feature.enabled || breakdown.localCreditBypass);
+  const canAfford = Number(breakdown.totalAvailable || 0) >= requiredCredits;
+  const topUpsAllowed = Boolean(capabilities?.editing?.topUpsEnabled);
+
+  let code = null;
+  let message = "Find Viral Clips is ready.";
+  if (!planAllowed) {
+    code = "VIRAL_SCAN_PLAN_REQUIRED";
+    message =
+      "Find Viral Clips requires an active Creator, Studio, Agency, or Founding Tester plan.";
+  } else if (!canAfford) {
+    code = "VIRAL_SCAN_CREDITS_REQUIRED";
+    message = tierSnapshot.testerAccess
+      ? `Your limited Founding Tester allowance has ${Number(
+          breakdown.totalAvailable || 0
+        )} credits left; this scan needs ${requiredCredits}. Trial credits cannot be topped up.`
+      : `Find Viral Clips needs ${requiredCredits} credits, but only ${Number(
+          breakdown.totalAvailable || 0
+        )} are available.`;
+  }
+
+  return {
+    allowed: planAllowed && canAfford,
+    code,
+    message,
+    requiredCredits,
+    balance: Number(breakdown.totalAvailable || 0),
+    tier: breakdown.tier,
+    planName: tierSnapshot.testerAccess
+      ? "Founding Tester"
+      : capabilities?.planName || breakdown.tier,
+    planAllowed,
+    canAfford,
+    localCreditBypass: Boolean(breakdown.localCreditBypass),
+    topUpsAllowed,
+    accessSource: tierSnapshot.accessSource || "subscription",
+  };
+};
+
+const requireTesterEditingFeature = featureResolver => async (req, res, next) => {
+  try {
+    const userId = req.user?.uid || req.userId;
+    const snapshot = await getEffectiveTierSnapshot(userId);
+    if (!snapshot.testerAccess) return next();
+
+    const featureId =
+      typeof featureResolver === "function" ? featureResolver(req) : String(featureResolver || "");
+    const capabilities = applyTesterCapabilityAllowlist(
+      getPlanCapabilities(snapshot.tierId),
+      snapshot.testerAccess
+    );
+    if (capabilities?.editing?.features?.[featureId]?.enabled) return next();
+
+    return res.status(403).json({
+      success: false,
+      code: "TESTER_FEATURE_NOT_INCLUDED",
+      message:
+        "This tool is outside the controlled Founding Tester program. Your approved test tools remain available.",
+      allowedWorkflows: snapshot.testerAccess.allowedWorkflows || TESTER_PROGRAM.allowedWorkflows,
+    });
+  } catch (error) {
+    console.error("[MediaRoute] Tester feature check failed:", error.message);
+    return res.status(500).json({
+      success: false,
+      code: "TESTER_FEATURE_CHECK_FAILED",
+      message: "We could not verify the tester feature allowance. Nothing was processed.",
+    });
+  }
 };
 
 const toIsoString = value => {
@@ -302,7 +380,11 @@ const normalizeRenderJob = (doc, data = {}) => {
     expiresAt: toIsoString(data.expiresAt || result.expiresAt || result.expires_at),
     retentionDays: data.retentionDays || result.retention_days || null,
     performanceTiming:
-      data.performanceTiming || data.performance_timing || result.performanceTiming || result.performance_timing || null,
+      data.performanceTiming ||
+      data.performance_timing ||
+      result.performanceTiming ||
+      result.performance_timing ||
+      null,
     executionTelemetry: data.executionTelemetry || data.execution_telemetry || null,
     hiddenFromRenderLibrary: data.hiddenFromRenderLibrary === true,
     createdAt: toIsoString(data.createdAt || data.created_at),
@@ -324,15 +406,27 @@ const resolveOwnedMulticamMasterSource = async ({ renderJobId, userId }) => {
   const renderRef = admin.firestore().collection("video_edits").doc(normalizedJobId);
   const renderDoc = await renderRef.get();
   if (!renderDoc.exists) {
-    throw buildSourceRequestError(404, "MULTICAM_MASTER_NOT_FOUND", "Saved Cam Combiner master was not found");
+    throw buildSourceRequestError(
+      404,
+      "MULTICAM_MASTER_NOT_FOUND",
+      "Saved Cam Combiner master was not found"
+    );
   }
 
   const renderData = renderDoc.data() || {};
   if (renderData.userId !== userId) {
-    throw buildSourceRequestError(403, "MULTICAM_MASTER_FORBIDDEN", "You do not own this Cam Combiner master");
+    throw buildSourceRequestError(
+      403,
+      "MULTICAM_MASTER_FORBIDDEN",
+      "You do not own this Cam Combiner master"
+    );
   }
   if (!isMulticamRenderJob(renderData) || renderData.hiddenFromRenderLibrary === true) {
-    throw buildSourceRequestError(409, "MULTICAM_MASTER_UNAVAILABLE", "This Cam Combiner master is not available for clip generation");
+    throw buildSourceRequestError(
+      409,
+      "MULTICAM_MASTER_UNAVAILABLE",
+      "This Cam Combiner master is not available for clip generation"
+    );
   }
   const renderPurpose = normalizeMulticamRenderPurpose(
     renderData.renderPurpose || renderData.render_purpose || renderData.result?.renderPurpose
@@ -347,7 +441,11 @@ const resolveOwnedMulticamMasterSource = async ({ renderJobId, userId }) => {
 
   const expiryMs = Date.parse(renderData.expiresAt || renderData.result?.expiresAt || "");
   if (Number.isFinite(expiryMs) && expiryMs <= Date.now()) {
-    throw buildSourceRequestError(410, "MULTICAM_MASTER_EXPIRED", "This Cam Combiner master has expired");
+    throw buildSourceRequestError(
+      410,
+      "MULTICAM_MASTER_EXPIRED",
+      "This Cam Combiner master has expired"
+    );
   }
 
   const approvalView = normalizeRenderApproval(normalizedJobId, renderData);
@@ -356,12 +454,20 @@ const resolveOwnedMulticamMasterSource = async ({ renderJobId, userId }) => {
     path.startsWith("processed/multicam_")
   );
   if (!outputUrl || !outputStoragePath) {
-    throw buildSourceRequestError(409, "MULTICAM_MASTER_INCOMPLETE", "The saved Cam Combiner master is incomplete");
+    throw buildSourceRequestError(
+      409,
+      "MULTICAM_MASTER_INCOMPLETE",
+      "The saved Cam Combiner master is incomplete"
+    );
   }
 
   const [exists] = await admin.storage().bucket().file(outputStoragePath).exists();
   if (!exists) {
-    throw buildSourceRequestError(410, "MULTICAM_MASTER_DELETED", "The saved Cam Combiner master is no longer in storage");
+    throw buildSourceRequestError(
+      410,
+      "MULTICAM_MASTER_DELETED",
+      "The saved Cam Combiner master is no longer in storage"
+    );
   }
 
   return {
@@ -385,11 +491,11 @@ const resolveRequestedMediaSource = async ({ fileUrl, localPath, renderJobId, us
 const isAdminRequester = user =>
   Boolean(
     user?.admin ||
-      user?.isAdmin ||
-      user?.role === "admin" ||
-      user?.token?.admin ||
-      user?.claims?.admin ||
-      user?.customClaims?.admin
+    user?.isAdmin ||
+    user?.role === "admin" ||
+    user?.token?.admin ||
+    user?.claims?.admin ||
+    user?.customClaims?.admin
   );
 
 const canReviewRenderJob = (user, data = {}) => data.userId === user?.uid || isAdminRequester(user);
@@ -425,9 +531,7 @@ const validateTrustedDirectorChannelMapRequest = body => {
   const normalizedRequestedIds = requestedIds
     .map(value => String(value || "").trim())
     .filter(Boolean);
-  const sourceIds = new Set(
-    sources.map(source => String(source?.id || "").trim()).filter(Boolean)
-  );
+  const sourceIds = new Set(sources.map(source => String(source?.id || "").trim()).filter(Boolean));
   const trustedStatus = ["approved", "locked", "safe", "passed", "trusted"].includes(status);
   const knownSources = normalizedMappedIds.slice(0, 2).every(id => sourceIds.has(id));
   const matchesRequest =
@@ -564,10 +668,7 @@ router.post("/internal/multicam-job-failed", async (req, res) => {
     const dispatchTokenMatches =
       providedDispatchToken.length >= 16 &&
       expectedDispatchHash.length === providedDispatchHash.length &&
-      crypto.timingSafeEqual(
-        Buffer.from(expectedDispatchHash),
-        Buffer.from(providedDispatchHash)
-      );
+      crypto.timingSafeEqual(Buffer.from(expectedDispatchHash), Buffer.from(providedDispatchHash));
     if (!secretMatches && !dispatchTokenMatches) {
       return res.status(401).json({ success: false, message: "Invalid render job callback" });
     }
@@ -632,6 +733,23 @@ router.get("/worker-health", async (_req, res) => {
   }
 });
 
+// Route: GET /api/media/scan-preflight
+// Confirms plan access and credit balance before a local video is uploaded.
+router.get("/scan-preflight", async (req, res) => {
+  try {
+    const preflight = await getViralScanPreflight(req.user.uid);
+    return res.json({ success: true, ...preflight });
+  } catch (error) {
+    console.error("[MediaRoute] Viral scan preflight error:", error.message);
+    return res.status(500).json({
+      success: false,
+      allowed: false,
+      code: "VIRAL_SCAN_PREFLIGHT_FAILED",
+      message: "We could not verify your Find Viral Clips access. Nothing was uploaded.",
+    });
+  }
+});
+
 // Route: POST /api/media/estimate
 // Returns cost estimate for a set of operations BEFORE processing
 router.post("/estimate", async (req, res) => {
@@ -675,7 +793,11 @@ router.post("/estimate", async (req, res) => {
 
 // Route: POST /api/media/transcribe
 // Handles file upload -> Firebase Storage -> Python Worker -> Returns Captions
-router.post("/transcribe", upload.single("file"), async (req, res) => {
+router.post(
+  "/transcribe",
+  requireTesterEditingFeature("audioExtract"),
+  upload.single("file"),
+  async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
@@ -721,17 +843,21 @@ router.post("/transcribe", upload.single("file"), async (req, res) => {
     console.error(e);
     res.status(500).json({ error: e.message });
   }
-});
+  }
+);
 
 // Route: POST /api/media/process
 // Body: { fileUrl: "...", options: { smartCrop: true, silenceRemoval: true, ... } }
-router.post("/process", async (req, res) => {
+router.post(
+  "/process",
+  requireTesterEditingFeature(req =>
+    req.body?.options?.renderViral === true ? "clipRender" : "watermarkRemoval"
+  ),
+  async (req, res) => {
   const userId = req.user.uid;
   const { fileUrl: requestedFileUrl, renderJobId, options } = req.body;
   const isViralClipRender = options?.renderViral === true;
-  const cost = isViralClipRender
-    ? CREDIT_COSTS["render-clip"] || 5
-    : CREDIT_COSTS.process || 10;
+  const cost = isViralClipRender ? CREDIT_COSTS["render-clip"] || 5 : CREDIT_COSTS.process || 10;
 
   if (!requestedFileUrl && !renderJobId) {
     return res.status(400).json({ message: "No file provided" });
@@ -810,9 +936,10 @@ router.post("/process", async (req, res) => {
     console.error("[MediaRoute] Processing error:", error.message);
     res.status(500).json({ message: "Media processing failed", details: error.message });
   }
-});
+  }
+);
 
-router.post("/extract-audio", async (req, res) => {
+router.post("/extract-audio", requireTesterEditingFeature("audioExtract"), async (req, res) => {
   const userId = req.user.uid;
   const fileUrl = typeof req.body?.fileUrl === "string" ? req.body.fileUrl.trim() : "";
   const sourceLabel = typeof req.body?.sourceLabel === "string" ? req.body.sourceLabel.trim() : "";
@@ -944,14 +1071,20 @@ router.get("/multicam/recoverable-project", async (req, res) => {
       .map(doc => ({ id: doc.id, ...(doc.data() || {}) }))
       .filter(item => {
         const request = item.multicamRequest || {};
-        return item.type === "multicam_render" && Array.isArray(request.sources) && request.sources.length >= 2;
+        return (
+          item.type === "multicam_render" &&
+          Array.isArray(request.sources) &&
+          request.sources.length >= 2
+        );
       })
       .sort((left, right) => {
         const toMillis = value => {
           if (value?.toMillis) return value.toMillis();
           return Date.parse(value || "") || 0;
         };
-        return toMillis(right.updatedAt || right.createdAt) - toMillis(left.updatedAt || left.createdAt);
+        return (
+          toMillis(right.updatedAt || right.createdAt) - toMillis(left.updatedAt || left.createdAt)
+        );
       });
     let recoveredProject = null;
     for (const candidate of candidates) {
@@ -1016,7 +1149,8 @@ router.get("/multicam/recoverable-project", async (req, res) => {
     }, getPersistedMulticamDuration(request));
     let failureDetail = {};
     try {
-      failureDetail = typeof latest.error === "string" ? JSON.parse(latest.error) : latest.error || {};
+      failureDetail =
+        typeof latest.error === "string" ? JSON.parse(latest.error) : latest.error || {};
     } catch (_parseError) {
       failureDetail = {};
     }
@@ -1073,7 +1207,9 @@ router.get("/multicam/recoverable-project", async (req, res) => {
     });
   } catch (error) {
     console.error("[MediaRoute] Recoverable multicam project lookup failed:", error.message);
-    return res.status(500).json({ success: false, message: "Could not recover uploaded originals" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Could not recover uploaded originals" });
   }
 });
 
@@ -1105,11 +1241,10 @@ router.post("/multicam/preflight-sync", async (req, res) => {
         },
       });
     }
-    const externalAudioOffsetSeconds = Number(
-      req.body?.external_audio_offset_seconds ??
-        req.body?.externalAudio?.offset_seconds ??
-        0
-    ) || 0;
+    const externalAudioOffsetSeconds =
+      Number(
+        req.body?.external_audio_offset_seconds ?? req.body?.externalAudio?.offset_seconds ?? 0
+      ) || 0;
     const result = await videoEditingService.preflightMulticamSync({
       sources,
       external_audio_url: externalAudioUrl,
@@ -1117,26 +1252,32 @@ router.post("/multicam/preflight-sync", async (req, res) => {
       external_audio_offset_seconds: externalAudioOffsetSeconds,
       external_audio_sync_trim_start: req.body?.external_audio_sync_trim_start,
       external_audio_sync_trim_duration: req.body?.external_audio_sync_trim_duration,
-      timeline_start: Number(
-        req.body?.timeline_start ??
-          req.body?.timelineStart ??
-          req.body?.overlap_start ??
-          req.body?.overlapStart ??
-          0
-      ) || 0,
-      overlap_duration: Number(
-        req.body?.overlap_duration ??
-          req.body?.overlapDuration ??
-          req.body?.timeline_duration ??
-          req.body?.timelineDuration ??
-          0
-      ) || 0,
+      timeline_start:
+        Number(
+          req.body?.timeline_start ??
+            req.body?.timelineStart ??
+            req.body?.overlap_start ??
+            req.body?.overlapStart ??
+            0
+        ) || 0,
+      overlap_duration:
+        Number(
+          req.body?.overlap_duration ??
+            req.body?.overlapDuration ??
+            req.body?.timeline_duration ??
+            req.body?.timelineDuration ??
+            0
+        ) || 0,
     });
     res.json(result);
   } catch (error) {
     const statusCode = Number(error.statusCode || error.response?.status || 500);
     const safeStatus = statusCode >= 400 && statusCode < 500 ? statusCode : 500;
-    const details = error.workerDetail || error.response?.data?.detail || error.response?.data?.message || error.message;
+    const details =
+      error.workerDetail ||
+      error.response?.data?.detail ||
+      error.response?.data?.message ||
+      error.message;
     console.error("[MediaRoute] Multicam preflight sync error:", details);
     res.status(safeStatus).json({
       message: "Preflight sync check failed",
@@ -1210,6 +1351,17 @@ router.post("/render-multicam", async (req, res) => {
     const tierSnapshot = await getEffectiveTierSnapshot(userId);
     const capabilities = getPlanCapabilities(tierSnapshot.tierId);
 
+    if (
+      tierSnapshot.testerAccess &&
+      requestedDuration > TESTER_PROGRAM.recommendedMaxRecordingMinutes * 60 + 0.5
+    ) {
+      return res.status(400).json({
+        message: `Founding Tester Cam Combiner renders are limited to ${TESTER_PROGRAM.recommendedMaxRecordingMinutes} minutes.`,
+        code: "TESTER_MULTICAM_DURATION_LIMIT",
+        maxDurationSeconds: TESTER_PROGRAM.recommendedMaxRecordingMinutes * 60,
+      });
+    }
+
     if (!capabilities.multicam) {
       return res.status(403).json({
         message: `${capabilities.planName} plan does not include multi-camera rendering.`,
@@ -1232,9 +1384,7 @@ router.post("/render-multicam", async (req, res) => {
     let creditResult = null;
     let creditBreakdown = null;
     const deferCreditCharge =
-      MULTICAM_SERVER_PROOF_REQUIRED &&
-      !VIDEO_EDITOR_CREDITS_DISABLED &&
-      !durableRenderEnabled;
+      MULTICAM_SERVER_PROOF_REQUIRED && !VIDEO_EDITOR_CREDITS_DISABLED && !durableRenderEnabled;
     if (durableRenderEnabled) {
       // A Cloud Run Job can outlive this request. Reserve the credits before
       // dispatch, then refund idempotently if proof or render fails.
@@ -1273,70 +1423,66 @@ router.post("/render-multicam", async (req, res) => {
     }
 
     const multicamJobRequest = {
-        sources,
-        segments: Array.isArray(req.body?.segments) ? req.body.segments : [],
-        switches: Array.isArray(req.body?.switches) ? req.body.switches : [],
-        autoSwitch: !!req.body?.autoSwitch,
-        audioBasedAutoSwitch: req.body?.audioBasedAutoSwitch !== false,
-        autoSwitchInterval: Number(req.body?.autoSwitchInterval ?? 2),
-        autoSwitchAggressiveness:
-          typeof req.body?.autoSwitchAggressiveness === "string"
-            ? req.body.autoSwitchAggressiveness
-            : "balanced",
-        renderTier,
-        render_tier: renderTier,
-        renderPurpose,
-        render_purpose: renderPurpose,
-        primaryAudioCameraId:
-          typeof req.body?.primaryAudioCameraId === "string" ? req.body.primaryAudioCameraId : null,
-        directorChannelCameraIds: Array.isArray(req.body?.directorChannelCameraIds)
-          ? req.body.directorChannelCameraIds
-          : Array.isArray(req.body?.director_channel_camera_ids)
-            ? req.body.director_channel_camera_ids
-            : null,
-        overlapStart: Number(req.body?.overlapStart ?? 0),
-        overlapDuration: Number(req.body?.overlapDuration ?? 0),
-        timelineStart: Number(
-          req.body?.timelineStart ??
-            req.body?.timeline_start ??
-            req.body?.overlapStart ??
-            req.body?.overlap_start ??
-            0
-        ),
-        outputAspectRatio:
-          typeof req.body?.outputAspectRatio === "string" ? req.body.outputAspectRatio : "16:9",
-        reactionOverlays:
-          req.body?.reactionOverlays === true || req.body?.reaction_overlays === true,
-        preSyncClapAlignment:
-          req.body?.preSyncClapAlignment === true ||
-          req.body?.pre_sync_clap_alignment === true,
-        trustedSyncContract:
-          req.body?.trustedSyncContract || req.body?.trusted_sync_contract || null,
-        trustedDirectorChannelMap:
-          req.body?.trustedDirectorChannelMap ||
-          req.body?.trusted_director_channel_map ||
-          null,
-        externalAudio: req.body?.externalAudio || null,
-        brandWatermark: req.body?.brandWatermark === true || req.body?.brand_watermark === true,
-        burnCaptions: req.body?.burnCaptions === true || req.body?.burn_captions === true,
-        captionStyle:
-          typeof req.body?.captionStyle === "string" && req.body.captionStyle.trim()
-            ? req.body.captionStyle.trim()
-            : typeof req.body?.caption_style === "string" && req.body.caption_style.trim()
-              ? req.body.caption_style.trim()
-              : "podcast_clean",
-        watermarkText:
-          typeof req.body?.watermarkText === "string" && req.body.watermarkText.trim()
-            ? req.body.watermarkText.trim()
-            : "AutoPromote Cam Combiner",
-        generateThumbnail: req.body?.generateThumbnail === true || req.body?.generate_thumbnail === true,
-        renderSpecVersion: 2,
-        totalDurationSeconds: requestedDuration,
-        checkpointSeconds: MULTICAM_CHECKPOINT_SECONDS,
-        checkpointedRender,
-        expectedCheckpointCount,
-        creditReceipt: creditResult,
-        pendingCreditCost: deferCreditCharge ? cost : 0,
+      sources,
+      segments: Array.isArray(req.body?.segments) ? req.body.segments : [],
+      switches: Array.isArray(req.body?.switches) ? req.body.switches : [],
+      autoSwitch: !!req.body?.autoSwitch,
+      audioBasedAutoSwitch: req.body?.audioBasedAutoSwitch !== false,
+      autoSwitchInterval: Number(req.body?.autoSwitchInterval ?? 2),
+      autoSwitchAggressiveness:
+        typeof req.body?.autoSwitchAggressiveness === "string"
+          ? req.body.autoSwitchAggressiveness
+          : "balanced",
+      renderTier,
+      render_tier: renderTier,
+      renderPurpose,
+      render_purpose: renderPurpose,
+      primaryAudioCameraId:
+        typeof req.body?.primaryAudioCameraId === "string" ? req.body.primaryAudioCameraId : null,
+      directorChannelCameraIds: Array.isArray(req.body?.directorChannelCameraIds)
+        ? req.body.directorChannelCameraIds
+        : Array.isArray(req.body?.director_channel_camera_ids)
+          ? req.body.director_channel_camera_ids
+          : null,
+      overlapStart: Number(req.body?.overlapStart ?? 0),
+      overlapDuration: Number(req.body?.overlapDuration ?? 0),
+      timelineStart: Number(
+        req.body?.timelineStart ??
+          req.body?.timeline_start ??
+          req.body?.overlapStart ??
+          req.body?.overlap_start ??
+          0
+      ),
+      outputAspectRatio:
+        typeof req.body?.outputAspectRatio === "string" ? req.body.outputAspectRatio : "16:9",
+      reactionOverlays: req.body?.reactionOverlays === true || req.body?.reaction_overlays === true,
+      preSyncClapAlignment:
+        req.body?.preSyncClapAlignment === true || req.body?.pre_sync_clap_alignment === true,
+      trustedSyncContract: req.body?.trustedSyncContract || req.body?.trusted_sync_contract || null,
+      trustedDirectorChannelMap:
+        req.body?.trustedDirectorChannelMap || req.body?.trusted_director_channel_map || null,
+      externalAudio: req.body?.externalAudio || null,
+      brandWatermark: req.body?.brandWatermark === true || req.body?.brand_watermark === true,
+      burnCaptions: req.body?.burnCaptions === true || req.body?.burn_captions === true,
+      captionStyle:
+        typeof req.body?.captionStyle === "string" && req.body.captionStyle.trim()
+          ? req.body.captionStyle.trim()
+          : typeof req.body?.caption_style === "string" && req.body.caption_style.trim()
+            ? req.body.caption_style.trim()
+            : "podcast_clean",
+      watermarkText:
+        typeof req.body?.watermarkText === "string" && req.body.watermarkText.trim()
+          ? req.body.watermarkText.trim()
+          : "AutoPromote Cam Combiner",
+      generateThumbnail:
+        req.body?.generateThumbnail === true || req.body?.generate_thumbnail === true,
+      renderSpecVersion: 2,
+      totalDurationSeconds: requestedDuration,
+      checkpointSeconds: MULTICAM_CHECKPOINT_SECONDS,
+      checkpointedRender,
+      expectedCheckpointCount,
+      creditReceipt: creditResult,
+      pendingCreditCost: deferCreditCharge ? cost : 0,
       requireServerProof: MULTICAM_SERVER_PROOF_REQUIRED,
     };
     const job = durableRenderEnabled
@@ -1364,7 +1510,9 @@ router.post("/render-multicam", async (req, res) => {
       expectedCheckpointCount,
       billingUnits,
       chargedCredits:
-        (!MULTICAM_SERVER_PROOF_REQUIRED || durableRenderEnabled) && creditResult && !creditResult.skipped
+        (!MULTICAM_SERVER_PROOF_REQUIRED || durableRenderEnabled) &&
+        creditResult &&
+        !creditResult.skipped
           ? cost
           : 0,
       reservedCredits: durableRenderEnabled && creditResult && !creditResult.skipped ? cost : 0,
@@ -1388,8 +1536,7 @@ router.post("/render-multicam", async (req, res) => {
       res.set("Retry-After", String(error.retryAfterSeconds));
     }
     res.status(statusCode).json({
-      message:
-        statusCode === 500 ? "Multi-camera render failed" : error.message,
+      message: statusCode === 500 ? "Multi-camera render failed" : error.message,
       details: error.message,
       code: error.code || undefined,
     });
@@ -1441,16 +1588,18 @@ router.post("/multicam/clean-audio-sync", async (req, res) => {
       });
     }
 
-    const syncReplayPayload = JSON.parse(JSON.stringify({
-      job_id: jobId,
-      user_id: userId,
-      sources,
-      external_audio: externalAudio,
-      mix_mode: req.body?.mixMode || "external_only",
-      output_aspect_ratio: req.body?.outputAspectRatio || "16:9",
-      estimated_credits: estimatedCredits,
-      requested_estimate: requestedEstimate,
-    }));
+    const syncReplayPayload = JSON.parse(
+      JSON.stringify({
+        job_id: jobId,
+        user_id: userId,
+        sources,
+        external_audio: externalAudio,
+        mix_mode: req.body?.mixMode || "external_only",
+        output_aspect_ratio: req.body?.outputAspectRatio || "16:9",
+        estimated_credits: estimatedCredits,
+        requested_estimate: requestedEstimate,
+      })
+    );
 
     await admin.firestore().collection("video_edits").doc(jobId).set({
       userId,
@@ -1466,11 +1615,7 @@ router.post("/multicam/clean-audio-sync", async (req, res) => {
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
-    await postToCamCombinerWorker(
-      "/multicam/clean-audio-sync",
-      syncReplayPayload,
-      180000
-    );
+    await postToCamCombinerWorker("/multicam/clean-audio-sync", syncReplayPayload, 180000);
 
     res.json({
       success: true,
@@ -1492,28 +1637,38 @@ router.post("/multicam/clean-audio-sync", async (req, res) => {
       });
 
       if (refundResult?.success) {
-        await admin.firestore().collection("video_edits").doc(jobId).set(
-          {
-            creditsRefunded: true,
-            creditRefundedAt: admin.firestore.FieldValue.serverTimestamp(),
-            refundReason: "worker_start_failed",
-          },
-          { merge: true }
-        ).catch(() => {});
+        await admin
+          .firestore()
+          .collection("video_edits")
+          .doc(jobId)
+          .set(
+            {
+              creditsRefunded: true,
+              creditRefundedAt: admin.firestore.FieldValue.serverTimestamp(),
+              refundReason: "worker_start_failed",
+            },
+            { merge: true }
+          )
+          .catch(() => {});
       }
     }
-    await admin.firestore().collection("video_edits").doc(jobId).set(
-      {
-        userId,
-        feature: "clean-audio-sync",
-        status: "failed",
-        stage: "failed",
-        progress: 0,
-        error: error.response?.data?.detail || error.message,
-        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-      },
-      { merge: true }
-    ).catch(() => {});
+    await admin
+      .firestore()
+      .collection("video_edits")
+      .doc(jobId)
+      .set(
+        {
+          userId,
+          feature: "clean-audio-sync",
+          status: "failed",
+          stage: "failed",
+          progress: 0,
+          error: error.response?.data?.detail || error.message,
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      )
+      .catch(() => {});
     res.status(500).json({
       message: "External clean-audio sync failed to start",
       details: error.response?.data?.detail || error.message,
@@ -1663,7 +1818,9 @@ router.delete("/render-jobs/:jobId", async (req, res) => {
       return res.status(403).json({ success: false, message: "Unauthorized access to render" });
     }
     if (!isMulticamRenderJob(data)) {
-      return res.status(400).json({ success: false, message: "Only Cam Combiner renders can be cleared" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Only Cam Combiner renders can be cleared" });
     }
 
     const storagePaths = getMulticamStoragePaths(data);
@@ -1750,7 +1907,9 @@ router.post("/render-jobs/:jobId/approve", async (req, res) => {
       return res.status(403).json({ success: false, message: "Unauthorized access to job" });
     }
     if (!isMulticamRenderJob(data)) {
-      return res.status(400).json({ success: false, message: "Only multicam renders can be approved" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Only multicam renders can be approved" });
     }
 
     const timestamp = admin.firestore.FieldValue.serverTimestamp();
@@ -1785,7 +1944,9 @@ router.post("/render-jobs/:jobId/reject", async (req, res) => {
       return res.status(403).json({ success: false, message: "Unauthorized access to job" });
     }
     if (!isMulticamRenderJob(data)) {
-      return res.status(400).json({ success: false, message: "Only multicam renders can be rejected" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Only multicam renders can be rejected" });
     }
 
     const timestamp = admin.firestore.FieldValue.serverTimestamp();
@@ -1846,23 +2007,24 @@ router.get("/status/:jobId", async (req, res) => {
         rawRenderCheckpoint?.totalChunks ??
         0
     );
-    const renderCheckpoint = rawRenderCheckpoint || expectedCheckpointCount > 0
-      ? {
-          stage: rawRenderCheckpoint?.stage || data.stage || null,
-          status: rawRenderCheckpoint?.status || null,
-          resumable: rawRenderCheckpoint?.resumable === true,
-          currentIndex: rawRenderCheckpoint?.currentIndex ?? null,
-          completedCount: Number(rawRenderCheckpoint?.completedCount || 0),
-          expectedCount: expectedCheckpointCount,
-          completedDurationSeconds: Number(rawRenderCheckpoint?.completedDurationSeconds || 0),
-          totalDurationSeconds: Number(
-            rawRenderCheckpoint?.totalDurationSeconds ??
-              data.totalDurationSeconds ??
-              data.result?.totalDurationSeconds ??
-              0
-          ),
-        }
-      : null;
+    const renderCheckpoint =
+      rawRenderCheckpoint || expectedCheckpointCount > 0
+        ? {
+            stage: rawRenderCheckpoint?.stage || data.stage || null,
+            status: rawRenderCheckpoint?.status || null,
+            resumable: rawRenderCheckpoint?.resumable === true,
+            currentIndex: rawRenderCheckpoint?.currentIndex ?? null,
+            completedCount: Number(rawRenderCheckpoint?.completedCount || 0),
+            expectedCount: expectedCheckpointCount,
+            completedDurationSeconds: Number(rawRenderCheckpoint?.completedDurationSeconds || 0),
+            totalDurationSeconds: Number(
+              rawRenderCheckpoint?.totalDurationSeconds ??
+                data.totalDurationSeconds ??
+                data.result?.totalDurationSeconds ??
+                0
+            ),
+          }
+        : null;
     const manifestUrl =
       data.manifestUrl ||
       data.manifest_url ||
@@ -1884,7 +2046,8 @@ router.get("/status/:jobId", async (req, res) => {
       renderSpecVersion: data.renderSpecVersion || data.result?.renderSpecVersion || null,
       totalDurationSeconds: data.totalDurationSeconds || data.result?.totalDurationSeconds || 0,
       checkpointSeconds: data.checkpointSeconds || data.result?.checkpointSeconds || 0,
-      checkpointedRender: data.checkpointedRender === true || data.result?.checkpointedRender === true,
+      checkpointedRender:
+        data.checkpointedRender === true || data.result?.checkpointedRender === true,
       expectedCheckpointCount,
       renderCheckpoint,
       manifestUrl,
@@ -1903,11 +2066,20 @@ router.get("/status/:jobId", async (req, res) => {
       qaWarnings: approvalView.qaWarnings,
       qaReport: approvalView.qaReport,
       approval: approvalView.approval,
-      thumbnailUrl: approvalView.thumbnailUrl || data.thumbnailUrl || data.thumbnail_url || data.result?.thumbnailUrl || data.result?.thumbnail_url,
+      thumbnailUrl:
+        approvalView.thumbnailUrl ||
+        data.thumbnailUrl ||
+        data.thumbnail_url ||
+        data.result?.thumbnailUrl ||
+        data.result?.thumbnail_url,
       expiresAt: data.expiresAt || data.result?.expiresAt || data.result?.expires_at || null,
       retentionDays: data.retentionDays || data.result?.retention_days || null,
       performanceTiming:
-        data.performanceTiming || data.performance_timing || data.result?.performanceTiming || data.result?.performance_timing || null,
+        data.performanceTiming ||
+        data.performance_timing ||
+        data.result?.performanceTiming ||
+        data.result?.performance_timing ||
+        null,
       executionTelemetry: data.executionTelemetry || data.execution_telemetry || null,
       clipSuggestions: data.clipSuggestions, // Viral clips
       detail: data.detail,
@@ -1937,6 +2109,22 @@ router.post("/analyze", async (req, res) => {
     scanNonce = "",
   } = req.body;
   const cost = CREDIT_COSTS.analyze || 8;
+  let preflight;
+  try {
+    preflight = await getViralScanPreflight(userId);
+  } catch (error) {
+    console.error("[MediaRoute] Viral scan access check failed:", error.message);
+    return res.status(500).json({
+      message: "We could not verify your Find Viral Clips access. No credits were charged.",
+      code: "VIRAL_SCAN_PREFLIGHT_FAILED",
+    });
+  }
+  if (!preflight.allowed) {
+    return res.status(preflight.code === "VIRAL_SCAN_CREDITS_REQUIRED" ? 402 : 403).json({
+      ...preflight,
+      success: false,
+    });
+  }
   let resolvedSource;
   try {
     resolvedSource = await resolveRequestedMediaSource({
@@ -1973,8 +2161,11 @@ router.post("/analyze", async (req, res) => {
       console.warn(
         `[MediaRoute] Insufficient credits for user ${userId}. Required: ${cost}, Msg: ${credits.message}`
       );
-      return res.status(403).json({
-        message: "Insufficient credits. Please purchase more.",
+      return res.status(402).json({
+        code: "VIRAL_SCAN_CREDITS_REQUIRED",
+        message: `Find Viral Clips needs ${cost} credits, but only ${Number(
+          credits.remaining || 0
+        )} are available.`,
         required: cost,
         balance: credits.remaining,
       });
@@ -2011,7 +2202,11 @@ router.post("/analyze", async (req, res) => {
   } catch (error) {
     console.error(`[MediaRoute] Analyze error:`, error);
     let creditRefund = null;
-    if (creditReceipt?.success && !creditReceipt?.skipped && Number(creditReceipt?.deducted || 0) > 0) {
+    if (
+      creditReceipt?.success &&
+      !creditReceipt?.skipped &&
+      Number(creditReceipt?.deducted || 0) > 0
+    ) {
       creditRefund = await refundCredits(userId, creditReceipt, "viral-analysis-refund", {
         idempotencyKey: `${billingOperationId}:refund`,
         reason: "analysis_failed",
@@ -2027,7 +2222,7 @@ router.post("/analyze", async (req, res) => {
 });
 
 // Phase 2: Render Specific Clip
-router.post("/render-clip", async (req, res) => {
+router.post("/render-clip", requireTesterEditingFeature("clipRender"), async (req, res) => {
   const userId = req.user.uid;
   const { fileUrl, renderJobId = null, startTime, endTime } = req.body;
   const cost = CREDIT_COSTS["render-clip"] || 5;
@@ -2067,7 +2262,11 @@ router.post("/render-clip", async (req, res) => {
       });
     }
     let creditRefund = null;
-    if (creditReceipt?.success && !creditReceipt?.skipped && Number(creditReceipt?.deducted || 0) > 0) {
+    if (
+      creditReceipt?.success &&
+      !creditReceipt?.skipped &&
+      Number(creditReceipt?.deducted || 0) > 0
+    ) {
       creditRefund = await refundCredits(userId, creditReceipt, "viral-render-refund", {
         idempotencyKey: `${billingOperationId}:refund`,
         reason: "render_failed",

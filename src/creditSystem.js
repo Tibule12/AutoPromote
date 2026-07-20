@@ -2,6 +2,7 @@ const { db } = require("./firebaseAdmin");
 const crypto = require("crypto");
 const { normalizePlanId, resolvePlan } = require("./config/subscriptionPlans");
 const { getEffectiveTierSnapshot } = require("./services/billingService");
+const { getActiveTesterAccess, getTesterCreditState } = require("./config/testerProgram");
 
 const LOCAL_TEST_CREDIT_BALANCE = 999999;
 const LOCAL_BYPASS_OPERATIONS = new Set([
@@ -42,11 +43,12 @@ const shouldBypassEditingCredits = operation =>
  * Get the current credit breakdown for a user.
  * Returns { monthlyRemaining, topUpBalance, totalAvailable, monthlyAllocation, monthKey }
  */
-const getCreditBreakdown = async (userId) => {
+const getCreditBreakdown = async userId => {
   const monthKey = new Date().toISOString().slice(0, 7);
   const [userSnap, creditLedgerSnap] = await Promise.all([
     db.collection("users").doc(userId).get(),
-    db.collection("credit_usage")
+    db
+      .collection("credit_usage")
       .where("userId", "==", userId)
       .where("monthKey", "==", monthKey)
       .get(),
@@ -58,15 +60,19 @@ const getCreditBreakdown = async (userId) => {
   }));
   const tier = normalizePlanId(effectiveTier.tierId || userData.subscriptionTier || "free");
   const plan = resolvePlan(tier);
-  const monthlyAllocation = plan.features.monthlyCredits || 0;
+  const testerAccess = effectiveTier.testerAccess || null;
+  const testerCredits = getTesterCreditState(testerAccess, plan.features.monthlyCredits || 0);
+  const monthlyAllocation = testerCredits?.allowance ?? plan.features.monthlyCredits ?? 0;
 
-  let monthlyUsed = 0;
-  creditLedgerSnap.forEach(doc => {
-    monthlyUsed += doc.data().amount || 0;
-  });
+  let monthlyUsed = testerCredits?.used || 0;
+  if (!testerAccess) {
+    creditLedgerSnap.forEach(doc => {
+      monthlyUsed += doc.data().amount || 0;
+    });
+  }
 
   const monthlyRemaining = Math.max(0, monthlyAllocation - monthlyUsed);
-  const topUpBalance = userData.credits || 0; // purchased top-up credits
+  const topUpBalance = testerAccess ? 0 : userData.credits || 0;
   const localCreditBypass = isLocalEditingCreditBypassEnabled();
 
   return {
@@ -74,9 +80,7 @@ const getCreditBreakdown = async (userId) => {
     monthlyUsed,
     monthlyAllocation: localCreditBypass ? LOCAL_TEST_CREDIT_BALANCE : monthlyAllocation,
     topUpBalance,
-    totalAvailable: localCreditBypass
-      ? LOCAL_TEST_CREDIT_BALANCE
-      : monthlyRemaining + topUpBalance,
+    totalAvailable: localCreditBypass ? LOCAL_TEST_CREDIT_BALANCE : monthlyRemaining + topUpBalance,
     monthKey,
     tier,
     localCreditBypass,
@@ -116,9 +120,7 @@ const deductCredits = async (userId, amount, operation = "unknown", metadata = {
   const chargeKeyHash = idempotencyKey
     ? crypto.createHash("sha256").update(`${userId}:${idempotencyKey}`).digest("hex")
     : "";
-  const chargeRef = chargeKeyHash
-    ? db.collection("credit_charges").doc(chargeKeyHash)
-    : null;
+  const chargeRef = chargeKeyHash ? db.collection("credit_charges").doc(chargeKeyHash) : null;
 
   try {
     return await db.runTransaction(async transaction => {
@@ -136,28 +138,42 @@ const deductCredits = async (userId, amount, operation = "unknown", metadata = {
       const userData = userDoc.data();
       const billingDoc = await transaction.get(billingRef);
       const billingData = billingDoc.exists ? billingDoc.data() || {} : {};
-      const tier = normalizePlanId(
+      const subscribedTier = normalizePlanId(
         billingData.tierId ||
           billingData.tier ||
           userData.subscriptionTier ||
           (userData.subscriptionStatus === "active" ? "premium" : "free")
       );
+      const testerAccess = getActiveTesterAccess(userData);
+      const testerTier = normalizePlanId(testerAccess?.planId || "free");
+      const planRank = { free: 0, premium: 1, pro: 2, enterprise: 3 };
+      const tier =
+        testerAccess && planRank[testerTier] > planRank[subscribedTier]
+          ? testerTier
+          : subscribedTier;
       const plan = resolvePlan(tier);
-      const monthlyAllocation = plan.features.monthlyCredits || 0;
+      const testerCredits = getTesterCreditState(
+        testerAccess,
+        plan.features.monthlyCredits || 0
+      );
+      const monthlyAllocation = testerCredits?.allowance ?? plan.features.monthlyCredits ?? 0;
 
       // Count monthly usage from ledger (use transaction-safe query)
-      const ledgerQuery = db.collection("credit_usage")
+      const ledgerQuery = db
+        .collection("credit_usage")
         .where("userId", "==", userId)
         .where("monthKey", "==", monthKey);
       const ledgerSnap = await transaction.get(ledgerQuery);
 
-      let monthlyUsed = 0;
-      ledgerSnap.forEach(doc => {
-        monthlyUsed += doc.data().amount || 0;
-      });
+      let monthlyUsed = testerCredits?.used || 0;
+      if (!testerAccess) {
+        ledgerSnap.forEach(doc => {
+          monthlyUsed += doc.data().amount || 0;
+        });
+      }
 
       const monthlyRemaining = Math.max(0, monthlyAllocation - monthlyUsed);
-      const topUpBalance = userData.credits || 0;
+      const topUpBalance = testerAccess ? 0 : userData.credits || 0;
       const totalAvailable = monthlyRemaining + topUpBalance;
 
       if (totalAvailable < amount) {
@@ -176,8 +192,12 @@ const deductCredits = async (userId, amount, operation = "unknown", metadata = {
       let fromMonthly = Math.min(amount, monthlyRemaining);
       let fromTopUp = amount - fromMonthly;
 
-      // Update top-up balance if used
-      if (fromTopUp > 0) {
+      if (testerAccess) {
+        transaction.update(userRef, {
+          "testerAccess.creditsUsed": monthlyUsed + fromMonthly,
+          testerProgramUpdatedAt: new Date().toISOString(),
+        });
+      } else if (fromTopUp > 0) {
         transaction.update(userRef, {
           credits: topUpBalance - fromTopUp,
           last_credit_deduction: new Date().toISOString(),
@@ -196,6 +216,7 @@ const deductCredits = async (userId, amount, operation = "unknown", metadata = {
         operation,
         monthKey,
         metadata,
+        testerProgramId: testerAccess?.programId || null,
         createdAt: new Date().toISOString(),
       });
 
@@ -210,7 +231,12 @@ const deductCredits = async (userId, amount, operation = "unknown", metadata = {
         fromTopUp,
         monthKey,
         operation,
-        source: fromTopUp > 0 ? "monthly+topup" : "monthly",
+        source: testerAccess
+          ? "founding_tester_allowance"
+          : fromTopUp > 0
+            ? "monthly+topup"
+            : "monthly",
+        testerProgramId: testerAccess?.programId || null,
       };
       if (chargeRef) {
         transaction.set(chargeRef, {
@@ -232,19 +258,13 @@ const deductCredits = async (userId, amount, operation = "unknown", metadata = {
   }
 };
 
-const refundCredits = async (
-  userId,
-  refund,
-  operation = "refund",
-  metadata = {}
-) => {
+const refundCredits = async (userId, refund, operation = "refund", metadata = {}) => {
   const amount = Math.max(0, Number(refund?.deducted ?? refund?.amount ?? 0) || 0);
   const fromMonthly = Math.max(0, Number(refund?.fromMonthly || 0) || 0);
   const fromTopUp = Math.max(0, Number(refund?.fromTopUp || 0) || 0);
   const monthKey = refund?.monthKey || new Date().toISOString().slice(0, 7);
   const idempotencyKey = String(
-    metadata?.idempotencyKey ||
-      (metadata?.jobId ? `${operation}:${metadata.jobId}` : "")
+    metadata?.idempotencyKey || (metadata?.jobId ? `${operation}:${metadata.jobId}` : "")
   ).trim();
   const refundKeyHash = idempotencyKey
     ? crypto.createHash("sha256").update(idempotencyKey).digest("hex")
@@ -255,9 +275,7 @@ const refundCredits = async (
   }
 
   const userRef = db.collection("users").doc(userId);
-  const refundRef = refundKeyHash
-    ? db.collection("credit_refunds").doc(refundKeyHash)
-    : null;
+  const refundRef = refundKeyHash ? db.collection("credit_refunds").doc(refundKeyHash) : null;
 
   try {
     return await db.runTransaction(async transaction => {
@@ -281,7 +299,17 @@ const refundCredits = async (
       const userData = userDoc.data() || {};
       const topUpBalance = Number(userData.credits || 0) || 0;
 
-      if (fromTopUp > 0) {
+      const testerProgramId = String(refund?.testerProgramId || "");
+      const testerAccess = userData.testerAccess || null;
+      if (testerProgramId && testerAccess?.programId === testerProgramId) {
+        transaction.update(userRef, {
+          "testerAccess.creditsUsed": Math.max(
+            0,
+            Number(testerAccess.creditsUsed || 0) - fromMonthly
+          ),
+          testerProgramUpdatedAt: new Date().toISOString(),
+        });
+      } else if (fromTopUp > 0) {
         transaction.update(userRef, {
           credits: topUpBalance + fromTopUp,
           last_credit_refund: new Date().toISOString(),

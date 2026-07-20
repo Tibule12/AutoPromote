@@ -193,7 +193,19 @@
   backdrop-filter: blur(12px);
   padding: 1.45rem;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 1.2rem;
+}
+
+.ap-hero > *,
+.ap-hero-copy,
+.ap-hero-screenshot,
+.ap-demo-shell,
+.ap-demo-toolbar,
+.ap-demo-selector,
+.ap-demo-copy {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .ap-hero-copy h1 {
@@ -822,5 +834,39 @@
 
   .ap-testimonial-grid {
     grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .ap-landing-page {
+    padding-inline: 0.75rem;
+  }
+
+  .ap-hero,
+  .ap-section {
+    padding: 1rem;
+    border-radius: 1.1rem;
+  }
+
+  .ap-hero-copy h1 {
+    font-size: clamp(1.85rem, 10vw, 2.45rem);
+  }
+
+  .ap-hero-ctas {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .ap-hero-ctas .ap-btn {
+    width: 100%;
+  }
+
+  .ap-demo-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .ap-demo-selector {
+    width: 100%;
   }
 }

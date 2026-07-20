@@ -2693,7 +2693,7 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
         isDryRun: false,
         meta: {
           ...(uploadMeta || {}),
-          ...((selectedClipLearning || fileToUpload?.clipLearning || mediaFile?.clipLearning)
+          ...(selectedClipLearning || fileToUpload?.clipLearning || mediaFile?.clipLearning
             ? {
                 clipLearning:
                   selectedClipLearning || fileToUpload?.clipLearning || mediaFile?.clipLearning,
@@ -3422,6 +3422,16 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
         <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 3000 }}>
           <ViralScanner
             file={viralScannerFile || mediaFile} // specific file or fallback
+            onUpgrade={() => {
+              setShowViralScanner(false);
+              setViralScannerFile(null);
+              setEditingTarget(null);
+              setUpgradePlanId("premium");
+              setUpgradePromptMessage(
+                "Find Viral Clips is available on Creator, Studio, and Agency plans. The video stayed on your device because AutoPromote checks access before uploading."
+              );
+              setShowUpgradeModal(true);
+            }}
             onClose={() => {
               setShowViralScanner(false);
               setViralScannerFile(null);

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import "./ViralScanner.css";
 import { auth } from "../firebaseClient";
 import { API_BASE_URL, API_ENDPOINTS } from "../config";
@@ -133,7 +133,8 @@ const CATEGORY_TAG_RULES = [
   {
     label: "Live Performance",
     icon: "🎵",
-    pattern: /(choir|worship|praise|gospel|performance|harmony|stage|live moment|live performance)/i,
+    pattern:
+      /(choir|worship|praise|gospel|performance|harmony|stage|live moment|live performance)/i,
   },
 ];
 
@@ -223,7 +224,8 @@ const buildScannerClipGuidance = clip => {
 
   const reasons = [];
   if (isVisualOnly) reasons.push("Visual-only scan: no audio stream was detected");
-  if (musicLike) reasons.push("Performance energy carries the opening without needing a speech hook");
+  if (musicLike)
+    reasons.push("Performance energy carries the opening without needing a speech hook");
   else if (signals.speech) reasons.push("Starts with a spoken beat or voice-led setup");
   if (signals.subject) reasons.push("Clear face or central subject stays visible");
   if (signals.motion) reasons.push("Fast pacing or a scene change adds momentum");
@@ -238,17 +240,16 @@ const buildScannerClipGuidance = clip => {
         ? "Scene changes and motion shaped this clip candidate"
         : musicLike
           ? "The clip is cleanly isolated around a strong live-performance beat"
-        : "The clip is cleanly isolated and ready for editing"
+          : "The clip is cleanly isolated and ready for editing"
     );
   }
 
   const improvements = [];
-  if (!isVisualOnly && !musicLike && (!signals.speech || !signals.hook)) improvements.push("Cut the first 2 seconds");
+  if (!isVisualOnly && !musicLike && (!signals.speech || !signals.hook))
+    improvements.push("Cut the first 2 seconds");
   if (!signals.hook) improvements.push("Add hook");
   if (!signals.speech) {
-    improvements.push(
-      isVisualOnly || musicLike ? "Add a visual hook/title" : "Add captions"
-    );
+    improvements.push(isVisualOnly || musicLike ? "Add a visual hook/title" : "Add captions");
   }
   if (!signals.subject) improvements.push("Use zoom or crop to center the subject");
   if (!signals.idealLength) {
@@ -322,7 +323,9 @@ const buildStableSourceFingerprint = file => {
 };
 
 const getSourceFingerprints = file =>
-  Array.from(new Set([buildSourceFingerprint(file), buildStableSourceFingerprint(file)].filter(Boolean)));
+  Array.from(
+    new Set([buildSourceFingerprint(file), buildStableSourceFingerprint(file)].filter(Boolean))
+  );
 
 const getSourceLabel = file => {
   if (!file) return "Untitled source";
@@ -540,7 +543,9 @@ const ClipResultThumbnail = ({
         <span>No preview</span>
       )}
       <div className="scanner-clip-thumbnail-shade" />
-      <span className="scanner-clip-thumbnail-score">🔥 {Math.round(Number(clip?.score || 0))}</span>
+      <span className="scanner-clip-thumbnail-score">
+        🔥 {Math.round(Number(clip?.score || 0))}
+      </span>
       <span className="scanner-clip-thumbnail-duration">
         {Math.max(0, Math.round(Number(clip?.duration || 0)))}s
       </span>
@@ -548,7 +553,7 @@ const ClipResultThumbnail = ({
   );
 };
 
-const ViralScanner = ({ file, onSelectClip, onClose }) => {
+const ViralScanner = ({ file, onSelectClip, onClose, onUpgrade }) => {
   const videoRef = useRef(null);
   const videoSectionRef = useRef(null);
   const previewStopHandlerRef = useRef(null);
@@ -574,6 +579,15 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
   // --- Credit System State ---
   const [creditBalance, setCreditBalance] = useState(null);
   const [needsCredits, setNeedsCredits] = useState(false);
+  const [scanAccess, setScanAccess] = useState({
+    checking: true,
+    allowed: false,
+    code: null,
+    message: "Checking your plan and credits before upload...",
+    requiredCredits: CLIP_SCAN_CREDIT_COST,
+    balance: null,
+    topUpsAllowed: false,
+  });
   const [showCreditShop, setShowCreditShop] = useState(false);
   const [paypalLoaded, setPaypalLoaded] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState(null);
@@ -596,6 +610,74 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
     }
     return String(balance);
   };
+
+  const refreshScanAccess = useCallback(async () => {
+    setScanAccess(current => ({
+      ...current,
+      checking: true,
+      message: "Checking your plan and credits before upload...",
+    }));
+
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        const blocked = {
+          checking: false,
+          allowed: false,
+          code: "AUTH_REQUIRED",
+          message: "Please sign in before using Find Viral Clips. Nothing was uploaded.",
+          requiredCredits: CLIP_SCAN_CREDIT_COST,
+          balance: null,
+          topUpsAllowed: false,
+        };
+        setScanAccess(blocked);
+        return blocked;
+      }
+
+      const token = await user.getIdToken();
+      const response = await fetch(API_ENDPOINTS.MEDIA_SCAN_PREFLIGHT, {
+        headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(payload?.message || "Access check failed");
+      }
+
+      const access = {
+        checking: false,
+        allowed: Boolean(payload.allowed),
+        code: payload.code || null,
+        message:
+          payload.message ||
+          (payload.allowed
+            ? "Find Viral Clips is ready."
+            : "Find Viral Clips is not available right now."),
+        requiredCredits: Number(payload.requiredCredits || CLIP_SCAN_CREDIT_COST),
+        balance: Number(payload.balance || 0),
+        tier: payload.tier || "free",
+        planName: payload.planName || "Starter",
+        topUpsAllowed: Boolean(payload.topUpsAllowed),
+      };
+      setCreditBalance(access.balance);
+      setNeedsCredits(access.code === "VIRAL_SCAN_CREDITS_REQUIRED");
+      setScanAccess(access);
+      return access;
+    } catch (error) {
+      const blocked = {
+        checking: false,
+        allowed: false,
+        code: "VIRAL_SCAN_PREFLIGHT_FAILED",
+        message: `${error.message || "Access check failed"}. Nothing was uploaded. Try again.`,
+        requiredCredits: CLIP_SCAN_CREDIT_COST,
+        balance: null,
+        topUpsAllowed: false,
+      };
+      setNeedsCredits(false);
+      setScanAccess(blocked);
+      return blocked;
+    }
+  }, []);
 
   useEffect(() => {
     void trackClipWorkflowEvent("scanner_opened", {
@@ -756,31 +838,10 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
     };
   }, []);
 
-  // Fetch Credits on Mount
+  // Check the plan and editing-credit balance before any source upload begins.
   useEffect(() => {
-    const fetchCredits = async () => {
-      try {
-        const user = auth.currentUser;
-        if (!user) return;
-        const token = await user.getIdToken();
-        const r = await fetch(API_ENDPOINTS.CREDITS_BALANCE, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (r.ok) {
-          const text = await r.text();
-          try {
-            const data = JSON.parse(text);
-            setCreditBalance(data.balance);
-          } catch (e) {
-            console.warn("Failed to parse credits", e);
-          }
-        }
-      } catch (e) {
-        console.warn("Failed to fetch credits", e);
-      }
-    };
-    fetchCredits();
-  }, []);
+    void refreshScanAccess();
+  }, [refreshScanAccess]);
 
   // PayPal SDK Loader
   useEffect(() => {
@@ -857,6 +918,7 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
             setNeedsCredits(false);
             setShowCreditShop(false);
             setStatusMessage("Credits added! You can now scan.");
+            void refreshScanAccess();
           }
         },
         onError: err => {
@@ -865,7 +927,7 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
         },
       })
       .render(container);
-  }, [paypalLoaded, selectedPackage]);
+  }, [paypalLoaded, selectedPackage, refreshScanAccess]);
 
   const startScan = async (options = {}) => {
     if (scanInFlightRef.current || isScanning) return;
@@ -874,6 +936,24 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
     if (!forceFresh && cachedResultsReady && results.length) {
       setStatusMessage(
         "Saved clips are already loaded. Use Fresh rescan only if you want to spend credits and analyze again."
+      );
+      return;
+    }
+
+    setStatusMessage("Checking your plan and credits before upload...");
+    const access = await refreshScanAccess();
+    if (!access.allowed) {
+      const isCreditBlock = access.code === "VIRAL_SCAN_CREDITS_REQUIRED";
+      setNeedsCredits(isCreditBlock);
+      setStatusMessage(access.message);
+      void trackClipWorkflowEvent(
+        isCreditBlock ? "scan_blocked_insufficient_credits" : "scan_blocked_access",
+        {
+          scanSessionId: scanSessionIdRef.current,
+          code: access.code,
+          balance: access.balance,
+          requiredCredits: access.requiredCredits,
+        }
       );
       return;
     }
@@ -925,7 +1005,10 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
       // 1. Upload if necessary — directly to Python worker (no Firebase roundtrip)
       let localPath = null;
       if (file instanceof File || file instanceof Blob) {
-        const safeName = normalizePlainText(file.name || "scan.mp4").replace(/[^a-zA-Z0-9._-]+/g, "-");
+        const safeName = normalizePlainText(file.name || "scan.mp4").replace(
+          /[^a-zA-Z0-9._-]+/g,
+          "-"
+        );
         setStatusMessage("Uploading directly to AI worker...");
         setScanProgress(5);
 
@@ -943,7 +1026,9 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
           }
           localPath = uploadResult.localPath;
           fileUrl = uploadResult.localPath; // Worker reads directly from disk
-          setStatusMessage(`Source ready (${(uploadResult.size / (1024 * 1024)).toFixed(1)}MB, ${(uploadResult.duration || 0).toFixed(1)}s)`);
+          setStatusMessage(
+            `Source ready (${(uploadResult.size / (1024 * 1024)).toFixed(1)}MB, ${(uploadResult.duration || 0).toFixed(1)}s)`
+          );
           setScanProgress(50);
         } catch (uploadError) {
           throw new Error(
@@ -990,12 +1075,34 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
       clearInterval(stageInterval);
 
       if (response.status === 403 || response.status === 402) {
+        const blockPayload = await response.json().catch(() => ({}));
+        const blockCode = blockPayload.code || "VIRAL_SCAN_CREDITS_REQUIRED";
+        const isCreditBlock = blockCode === "VIRAL_SCAN_CREDITS_REQUIRED";
         void trackClipWorkflowEvent("scan_blocked_insufficient_credits", {
           scanSessionId: activeSessionId,
+          code: blockCode,
         });
-        setNeedsCredits(true);
-        setShowCreditShop(true);
-        setStatusMessage("Insufficient credits. Please top up to continue.");
+        setNeedsCredits(isCreditBlock);
+        setScanAccess(current => ({
+          ...current,
+          checking: false,
+          allowed: false,
+          code: blockCode,
+          message:
+            blockPayload.message ||
+            (isCreditBlock
+              ? "Not enough credits to scan. Nothing else was processed."
+              : "Your current plan does not include Find Viral Clips."),
+          balance: blockPayload.balance ?? current.balance,
+          requiredCredits:
+            blockPayload.requiredCredits || blockPayload.required || CLIP_SCAN_CREDIT_COST,
+        }));
+        setStatusMessage(
+          blockPayload.message ||
+            (isCreditBlock
+              ? "Not enough credits to scan."
+              : "Your current plan does not include Find Viral Clips.")
+        );
         clearInterval(stageInterval);
         setIsScanning(false);
         setScanProgress(0);
@@ -1190,10 +1297,11 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
 
   const handleDownloadVisual = async asset => {
     if (!asset?.url) return;
-    const safeName = normalizePlainText(asset.hookText || asset.label || asset.type || "promo-visual")
-      .replace(/[^a-zA-Z0-9._-]+/g, "-")
-      .replace(/-+/g, "-")
-      .replace(/^-|-$/g, "") || "promo-visual";
+    const safeName =
+      normalizePlainText(asset.hookText || asset.label || asset.type || "promo-visual")
+        .replace(/[^a-zA-Z0-9._-]+/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "") || "promo-visual";
     try {
       const response = await fetch(asset.url, { mode: "cors" });
       if (!response.ok) throw new Error(`Visual fetch failed with ${response.status}`);
@@ -1250,8 +1358,20 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
               <button
                 type="button"
                 className="scanner-credit-pill"
-                onClick={() => setShowCreditShop(true)}
-                aria-label={`${formatBalance(creditBalance)} credits available. Open credit shop`}
+                onClick={() => {
+                  if (scanAccess.topUpsAllowed) setShowCreditShop(true);
+                }}
+                disabled={!scanAccess.topUpsAllowed}
+                aria-label={
+                  scanAccess.topUpsAllowed
+                    ? `${formatBalance(creditBalance)} credits available. Open credit shop`
+                    : `${formatBalance(creditBalance)} limited trial credits available`
+                }
+                title={
+                  scanAccess.topUpsAllowed
+                    ? "Open credit shop"
+                    : "Founding Tester credits are limited and cannot be topped up"
+                }
               >
                 💎 {formatBalance(creditBalance)} Credits
               </button>
@@ -1331,7 +1451,11 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
                   <div className="scanner-selected-visual-preview">
                     <div>
                       <span>Selected thumbnail/poster</span>
-                      <strong>{activeSelectedVisual.hookText || activeSelectedVisual.label || "Promo visual"}</strong>
+                      <strong>
+                        {activeSelectedVisual.hookText ||
+                          activeSelectedVisual.label ||
+                          "Promo visual"}
+                      </strong>
                       <div className="scanner-visual-copy-meta">
                         <span
                           className={`scanner-copy-source-pill ${getVisualCopySourceMeta(activeSelectedVisual).className}`}
@@ -1358,7 +1482,8 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
                     <div className="scanner-processing-hero-copy">
                       <strong>AI is scanning your video...</strong>
                       <span>
-                        This usually takes 30 to 60 seconds. We’re already pulling the most marketable moments forward.
+                        This usually takes 30 to 60 seconds. We’re already pulling the most
+                        marketable moments forward.
                       </span>
                     </div>
                     {activeProcessingMoment ? (
@@ -1385,10 +1510,7 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
                       </div>
                       <div className="scanner-processing-waveform">
                         {processingWaveform.map((height, index) => (
-                          <span
-                            key={`processing-wave-${index}`}
-                            style={{ height: `${height}%` }}
-                          />
+                          <span key={`processing-wave-${index}`} style={{ height: `${height}%` }} />
                         ))}
                       </div>
                     </div>
@@ -1467,7 +1589,10 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
                     />
                   ))}
                 </div>
-                <span className="scanner-live-text" style={{ color: "#93c5fd", fontSize: "0.7rem" }}>
+                <span
+                  className="scanner-live-text"
+                  style={{ color: "#93c5fd", fontSize: "0.7rem" }}
+                >
                   {Math.round(scanProgress)}%
                 </span>
               </div>
@@ -1484,28 +1609,63 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
                       : "Let AutoPromote rank the moments most likely to earn the next watch, then move the winner into Studio."}
                   </p>
 
-                  {needsCredits ? (
-                    <div>
+                  {scanAccess.checking ? (
+                    <button className="scan-btn" type="button" disabled aria-label="Start AI Scan">
+                      Checking plan and credits...
+                    </button>
+                  ) : !scanAccess.allowed ? (
+                    <div
+                      className="scanner-access-block"
+                      role="alert"
+                      data-testid="scanner-access-block"
+                    >
                       <p
                         style={{
-                          color: "#ef4444",
+                          color: "#fca5a5",
                           fontWeight: "bold",
                           fontSize: "0.9rem",
                           marginBottom: "8px",
                         }}
                       >
-                        Not enough credits to scan.
+                        {scanAccess.code === "VIRAL_SCAN_PLAN_REQUIRED"
+                          ? "Your plan does not include Find Viral Clips."
+                          : scanAccess.code === "VIRAL_SCAN_CREDITS_REQUIRED"
+                            ? `This scan needs ${scanAccess.requiredCredits} credits. You have ${formatBalance(scanAccess.balance)}.`
+                            : "We could not verify access to Find Viral Clips."}
                       </p>
-                      <button
-                        className="scan-btn"
-                        onClick={() => setShowCreditShop(true)}
-                        style={{ background: "#f59e0b" }}
-                      >
-                        Buy Credits
-                      </button>
+                      <p className="scanner-access-message">{scanAccess.message}</p>
+                      <p className="scanner-no-upload-note">Your video has not been uploaded.</p>
+                      {scanAccess.code === "VIRAL_SCAN_CREDITS_REQUIRED" &&
+                      scanAccess.topUpsAllowed ? (
+                        <button
+                          className="scan-btn"
+                          type="button"
+                          onClick={() => setShowCreditShop(true)}
+                          style={{ background: "#f59e0b" }}
+                        >
+                          Buy Credits
+                        </button>
+                      ) : (scanAccess.code === "VIRAL_SCAN_PLAN_REQUIRED" ||
+                          scanAccess.code === "VIRAL_SCAN_CREDITS_REQUIRED") &&
+                        onUpgrade ? (
+                        <button className="scan-btn" type="button" onClick={onUpgrade}>
+                          {scanAccess.code === "VIRAL_SCAN_CREDITS_REQUIRED"
+                            ? "Trial Allowance Used — View Plans"
+                            : "View Plans"}
+                        </button>
+                      ) : (
+                        <button className="scan-btn" type="button" onClick={refreshScanAccess}>
+                          Check Again
+                        </button>
+                      )}
                     </div>
                   ) : (
-                    <button className="scan-btn" onClick={() => startScan()} disabled={cacheLoadPending}>
+                    <button
+                      className="scan-btn"
+                      type="button"
+                      onClick={() => startScan()}
+                      disabled={cacheLoadPending}
+                    >
                       Start AI Scan{" "}
                       <span style={{ fontSize: "0.8em", opacity: 0.8, marginLeft: "5px" }}>
                         ({CLIP_SCAN_CREDIT_COST} 💎)
@@ -1540,10 +1700,7 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
                             ? "active"
                             : "waiting";
                       return (
-                        <div
-                          key={stage.id}
-                          className={`scanner-stage-row is-${state}`}
-                        >
+                        <div key={stage.id} className={`scanner-stage-row is-${state}`}>
                           <div>
                             <strong>{stage.title}</strong>
                             <span>{stage.detail}</span>
@@ -1589,7 +1746,9 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
                     <button
                       className="scan-btn"
                       onClick={() => {
-                        setStatusMessage("These saved clips are ready. Pick one, preview it, or open it in Studio.");
+                        setStatusMessage(
+                          "These saved clips are ready. Pick one, preview it, or open it in Studio."
+                        );
                       }}
                       style={{
                         marginTop: "10px",
@@ -1643,8 +1802,10 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
                 </div>
                 <p className="scanner-guidance-summary">
                   {selectedClip.id === bestClipId
-                    ? selectedClip.reasons[0] || "This is AutoPromote's strongest candidate from the scan."
-                    : selectedClip.reasons[0] || "This moment is strong enough to shape inside Studio."}
+                    ? selectedClip.reasons[0] ||
+                      "This is AutoPromote's strongest candidate from the scan."
+                    : selectedClip.reasons[0] ||
+                      "This moment is strong enough to shape inside Studio."}
                 </p>
                 <div className="scanner-guidance-timing">
                   <span>Start: {Number(selectedClip.start || 0).toFixed(1)}s</span>
@@ -1730,10 +1891,7 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
                     <small>Ranking while the scan runs</small>
                   </div>
                   {processingMoments.map(moment => (
-                    <div
-                      key={moment.id}
-                      className={`scanner-live-moment-card is-${moment.status}`}
-                    >
+                    <div key={moment.id} className={`scanner-live-moment-card is-${moment.status}`}>
                       <div className="scanner-live-moment-index">{moment.marker}</div>
                       <ClipResultThumbnail
                         videoSrc={videoSrc}
@@ -1762,7 +1920,8 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
                     </div>
                   ))}
                   <div className="scanner-live-moments-footnote">
-                    We’ll show the full clip packages once scoring is complete, so users can jump straight into Studio or export.
+                    We’ll show the full clip packages once scoring is complete, so users can jump
+                    straight into Studio or export.
                   </div>
                 </div>
               ) : null}
@@ -1834,25 +1993,30 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
                             const isSelected = getSelectedVisualForClip(clip)?.url === asset.url;
                             const copyMeta = getVisualCopySourceMeta(asset);
                             return (
-                            <button
-                              key={asset.id || asset.url}
-                              type="button"
-                              className={`scanner-visual-option ${isSelected ? "is-selected" : ""}`}
-                              onClick={event => {
-                                event.stopPropagation();
-                                handleSelectVisual(clip, asset);
-                              }}
-                              title={asset.label || "Generated visual"}
-                            >
-                              <SafeImage src={asset.url} alt={asset.label || "Generated visual"} />
-                              <span className={`scanner-visual-option-pill ${copyMeta.className}`}>
-                                {copyMeta.label}
-                              </span>
-                              <span className="scanner-visual-option-label">
-                                {isSelected ? "Selected" : asset.type || "Visual"}
-                              </span>
-                            </button>
-                          );
+                              <button
+                                key={asset.id || asset.url}
+                                type="button"
+                                className={`scanner-visual-option ${isSelected ? "is-selected" : ""}`}
+                                onClick={event => {
+                                  event.stopPropagation();
+                                  handleSelectVisual(clip, asset);
+                                }}
+                                title={asset.label || "Generated visual"}
+                              >
+                                <SafeImage
+                                  src={asset.url}
+                                  alt={asset.label || "Generated visual"}
+                                />
+                                <span
+                                  className={`scanner-visual-option-pill ${copyMeta.className}`}
+                                >
+                                  {copyMeta.label}
+                                </span>
+                                <span className="scanner-visual-option-label">
+                                  {isSelected ? "Selected" : asset.type || "Visual"}
+                                </span>
+                              </button>
+                            );
                           })}
                       </div>
                       {getSelectedVisualForClip(clip)?.url ? (
@@ -1895,7 +2059,7 @@ const ViralScanner = ({ file, onSelectClip, onClose }) => {
                   ) : null}
                 </div>
               ))}
-              {results.length === 0 && !isScanning && !needsCredits && (
+              {results.length === 0 && !isScanning && scanAccess.allowed && !needsCredits && (
                 <div className="empty-state">
                   Run an AutoPromote scan to surface the moments most worth editing.
                 </div>

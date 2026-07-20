@@ -33,6 +33,10 @@ describe("ViralScanner guided clip selection", () => {
     balance = 120,
     remainingCredits = 100,
     analyzeResponse,
+    accessAllowed = true,
+    accessCode = null,
+    accessMessage = "Find Viral Clips is ready.",
+    topUpsAllowed = true,
   }) {
     global.fetch = jest.fn((url, options = {}) => {
       const requestUrl = String(url);
@@ -62,6 +66,24 @@ describe("ViralScanner guided clip selection", () => {
         return Promise.resolve({
           ok: true,
           text: async () => JSON.stringify({ balance }),
+        });
+      }
+
+      if (requestUrl.includes("/api/media/scan-preflight")) {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({
+            success: true,
+            allowed: accessAllowed,
+            code: accessCode,
+            message: accessMessage,
+            balance,
+            requiredCredits: 8,
+            tier: accessAllowed ? "pro" : "free",
+            planName: accessAllowed ? "Studio" : "Starter",
+            topUpsAllowed,
+          }),
         });
       }
 
@@ -225,6 +247,58 @@ describe("ViralScanner guided clip selection", () => {
     expect(guidanceCard.textContent).toContain("🎓 Educational");
   });
 
+  test("blocks a local upload when the current plan does not include Find Viral Clips", async () => {
+    const file = new File(["video-bytes"], "local-source.mp4", { type: "video/mp4" });
+    const onUpgrade = jest.fn();
+    mockScannerFetch({
+      accessAllowed: false,
+      accessCode: "VIRAL_SCAN_PLAN_REQUIRED",
+      accessMessage:
+        "Find Viral Clips requires an active Creator, Studio, Agency, or Founding Tester plan.",
+      balance: 15,
+    });
+
+    render(
+      <ViralScanner
+        file={file}
+        onSelectClip={jest.fn()}
+        onClose={jest.fn()}
+        onUpgrade={onUpgrade}
+      />
+    );
+
+    const block = await screen.findByTestId("scanner-access-block");
+    expect(block.textContent).toContain("Your plan does not include Find Viral Clips");
+    expect(block.textContent).toContain("Your video has not been uploaded");
+    fireEvent.click(screen.getByRole("button", { name: /View Plans/i }));
+    expect(onUpgrade).toHaveBeenCalledTimes(1);
+    expect(
+      global.fetch.mock.calls.some(([url]) => String(url).includes("/api/media/upload-source"))
+    ).toBe(false);
+    expect(
+      global.fetch.mock.calls.some(([url]) => String(url).endsWith("/api/media/analyze"))
+    ).toBe(false);
+  });
+
+  test("shows the exact credit shortfall before uploading a local file", async () => {
+    const file = new File(["video-bytes"], "local-source.mp4", { type: "video/mp4" });
+    mockScannerFetch({
+      accessAllowed: false,
+      accessCode: "VIRAL_SCAN_CREDITS_REQUIRED",
+      accessMessage: "Find Viral Clips needs 8 credits, but only 3 are available.",
+      balance: 3,
+    });
+
+    render(<ViralScanner file={file} onSelectClip={jest.fn()} onClose={jest.fn()} />);
+
+    const block = await screen.findByTestId("scanner-access-block");
+    expect(block.textContent).toContain("This scan needs 8 credits. You have 3.");
+    expect(screen.getByRole("button", { name: /Buy Credits/i })).toBeInTheDocument();
+    expect(
+      global.fetch.mock.calls.some(([url]) => String(url).includes("/api/media/upload-source"))
+    ).toBe(false);
+  });
+
   test("uploads local files through the configured media worker endpoint and charges 8 credits", async () => {
     const file = new File(["video-bytes"], "local-source.mp4", { type: "video/mp4" });
 
@@ -240,6 +314,20 @@ describe("ViralScanner guided clip selection", () => {
       }
       if (requestUrl.includes("/api/monetization/credits/balance")) {
         return Promise.resolve({ ok: true, text: async () => JSON.stringify({ balance: 120 }) });
+      }
+      if (requestUrl.includes("/api/media/scan-preflight")) {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({
+            success: true,
+            allowed: true,
+            balance: 120,
+            requiredCredits: 8,
+            tier: "pro",
+            planName: "Studio",
+          }),
+        });
       }
       if (requestUrl.includes("/api/media/worker-health")) {
         return Promise.resolve({ ok: true, status: 200, text: async () => "ok" });
@@ -266,9 +354,11 @@ describe("ViralScanner guided clip selection", () => {
 
     render(<ViralScanner file={file} onSelectClip={jest.fn()} onClose={jest.fn()} />);
 
-    const startButton = await screen.findByRole("button", { name: /Start AI Scan/i });
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: /Start AI Scan/i })).not.toBeDisabled()
+    );
+    const startButton = screen.getByRole("button", { name: /Start AI Scan/i });
     expect(startButton.textContent).toContain("8");
-    await waitFor(() => expect(startButton).not.toBeDisabled());
 
     await act(async () => {
       fireEvent.click(startButton);
@@ -280,7 +370,9 @@ describe("ViralScanner guided clip selection", () => {
       expect.stringMatching(/\/api\/media\/upload-source$/),
       expect.objectContaining({ method: "POST", body: expect.any(FormData) })
     );
-    const analyzeCall = global.fetch.mock.calls.find(([url]) => String(url).includes("/api/media/analyze"));
+    const analyzeCall = global.fetch.mock.calls.find(([url]) =>
+      String(url).includes("/api/media/analyze")
+    );
     expect(JSON.parse(analyzeCall[1].body)).toEqual(
       expect.objectContaining({
         fileUrl: "/tmp/worker_inputs/local-source.mp4",

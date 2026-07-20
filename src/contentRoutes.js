@@ -20,6 +20,7 @@ const billingService = require("./services/billingService");
 const complianceService = require("./services/complianceService");
 const { getVariantStats } = require("./services/variantStatsService");
 const { getPlanCapabilities } = require("./config/subscriptionPlans");
+const { applyTesterCapabilityAllowlist } = require("./config/testerProgram");
 
 // --- OPTIMIZATION START: Eager Loading for Performance ---
 // Previously lazy-loaded inside request handler causing 2-5s lag per upload.
@@ -40,7 +41,10 @@ const {
 
 async function ensureRecoveryLabAccess(userId) {
   const snapshot = await billingService.getEffectiveTierSnapshot(userId);
-  const entitlements = getPlanCapabilities(snapshot.tierId);
+  const entitlements = applyTesterCapabilityAllowlist(
+    getPlanCapabilities(snapshot.tierId),
+    snapshot.testerAccess
+  );
 
   if (!entitlements.analytics.recoveryLab) {
     const error = new Error("Recovery Lab is available on Studio and Agency plans.");
@@ -340,11 +344,11 @@ function toPositiveFiniteNumber(value) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
 }
 
-async function getPromotionQuotaSnapshot(userId, tierId) {
+async function getPromotionQuotaSnapshot(userId, tierId, testerAccess = null) {
   const plan = getPlan(tierId);
   const platformPostQuotaRaw =
     billingService && typeof billingService.getPlatformPostMonthlyQuota === "function"
-      ? billingService.getPlatformPostMonthlyQuota(tierId, plan)
+      ? billingService.getPlatformPostMonthlyQuota(tierId, plan, testerAccess)
       : 0;
   const normalizedQuota =
     toPositiveFiniteNumber(platformPostQuotaRaw) ||
@@ -388,11 +392,11 @@ async function evaluateUploadReadiness(userId, options = {}) {
     ? "queued_new_upload"
     : "publish_now";
 
-  const [{ tierId, tier }, usageStats] = await Promise.all([
+  const [{ tierId, tier, testerAccess }, usageStats] = await Promise.all([
     billingService.getEffectiveTierSnapshot(userId),
     getUserUsageStats(userId),
   ]);
-  const promotionQuota = await getPromotionQuotaSnapshot(userId, tierId);
+  const promotionQuota = await getPromotionQuotaSnapshot(userId, tierId, testerAccess);
 
   const base = {
     allowed: true,

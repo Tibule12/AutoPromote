@@ -50,4 +50,47 @@ describe("billingService entitlement enforcement", () => {
 
     expect(snapshot.tierId).toBe("free");
   });
+
+  it("grants Studio entitlements while Founding Tester access is active", async () => {
+    const snapshot = await getEffectiveTierSnapshot(
+      "tester-1",
+      { tier: "free", status: "inactive" },
+      {
+        subscriptionTier: "free",
+        subscriptionStatus: "inactive",
+        testerAccess: {
+          programId: "founding_testers_2026",
+          status: "active",
+          planId: "pro",
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        },
+      }
+    );
+
+    expect(snapshot.tierId).toBe("pro");
+    expect(snapshot.accessSource).toBe("tester_program");
+    expect(snapshot.status).toBe("promotional");
+    expect(snapshot.tier.monthly_upload_cap).toBe(10);
+    expect(snapshot.tier.platform_limit).toBe(3);
+  });
+
+  it("removes Founding Tester entitlements after expiry", async () => {
+    const snapshot = await getEffectiveTierSnapshot(
+      "tester-1",
+      { tier: "free", status: "inactive" },
+      {
+        subscriptionTier: "free",
+        subscriptionStatus: "inactive",
+        testerAccess: {
+          programId: "founding_testers_2026",
+          status: "active",
+          planId: "pro",
+          expiresAt: new Date(Date.now() - 1000).toISOString(),
+        },
+      }
+    );
+
+    expect(snapshot.tierId).toBe("free");
+    expect(snapshot.accessSource).toBe("subscription");
+  });
 });

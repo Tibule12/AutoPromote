@@ -27,6 +27,7 @@ export const API_ENDPOINTS = {
   // Auth endpoints
   LOGIN: `${API_BASE_URL}/api/auth/login`,
   REGISTER: `${API_BASE_URL}/api/auth/register`,
+  RESEND_VERIFICATION: `${API_BASE_URL}/api/auth/resend-verification`,
   FORGOT_PASSWORD: `${API_BASE_URL}/api/auth/forgot-password`,
   REQUEST_RESET: `${API_BASE_URL}/api/auth/forgot-password`,
   RESET_PASSWORD: `${API_BASE_URL}/api/auth/reset-password`,
@@ -40,6 +41,7 @@ export const API_ENDPOINTS = {
   MEDIA_PROCESS: `${API_BASE_URL}/api/media/process`,
   MEDIA_EXTRACT_AUDIO: `${API_BASE_URL}/api/media/extract-audio`,
   MEDIA_WORKER_HEALTH: `${API_BASE_URL}/api/media/worker-health`,
+  MEDIA_SCAN_PREFLIGHT: `${API_BASE_URL}/api/media/scan-preflight`,
   MEDIA_SOURCE_UPLOAD: `${MEDIA_API_URL.replace(/\/$/, "")}/api/media/upload-source`,
   MEDIA_RENDER_CLIP: `${API_BASE_URL}/api/media/render-clip`,
   MEDIA_RENDER_MULTICAM: `${API_BASE_URL}/api/media/render-multicam`,
@@ -48,8 +50,10 @@ export const API_ENDPOINTS = {
   CLIP_LEARNING_PROFILE_REBUILD: `${API_BASE_URL}/api/analytics/clip-learning-profile/rebuild`,
   CLIPS_PROMO_SUMMARY: `${API_BASE_URL}/api/clips/promo-summary`,
   CLIPS_PROMO_SUMMARY_ESTIMATE: `${API_BASE_URL}/api/clips/promo-summary/estimate`,
-  CLIPS_ANALYSIS: analysisId => `${API_BASE_URL}/api/clips/analysis/${encodeURIComponent(analysisId)}`,
-  CLIPS_PROMO_SUMMARY_PREVIEW_STREAM: analysisId => `${API_BASE_URL}/api/clips/promo-summary/${encodeURIComponent(analysisId)}/preview/stream`,
+  CLIPS_ANALYSIS: analysisId =>
+    `${API_BASE_URL}/api/clips/analysis/${encodeURIComponent(analysisId)}`,
+  CLIPS_PROMO_SUMMARY_PREVIEW_STREAM: analysisId =>
+    `${API_BASE_URL}/api/clips/promo-summary/${encodeURIComponent(analysisId)}/preview/stream`,
   CLIPS_USER: `${API_BASE_URL}/api/clips/user`,
   MY_CONTENT: `${API_BASE_URL}/api/content/my-content`,
   MY_SCHEDULES: `${API_BASE_URL}/api/content/my-promotion-schedules`,
@@ -67,6 +71,7 @@ export const API_ENDPOINTS = {
 
   // User endpoints
   USERS_ME: `${API_BASE_URL}/api/users/me`,
+  USERS_PROFILE: `${API_BASE_URL}/api/users/profile`,
   USERS_NOTIFICATIONS: `${API_BASE_URL}/api/users/notifications`,
 
   // Admin endpoints

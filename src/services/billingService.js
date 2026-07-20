@@ -8,6 +8,7 @@ const {
   getUploadLimitForPlan,
   getPlatformLimitForPlan,
 } = require("../config/subscriptionPlans");
+const { TESTER_PROGRAM, getActiveTesterAccess } = require("../config/testerProgram");
 
 const FREE_PLAN = resolvePlan("free");
 const PREMIUM_PLAN = resolvePlan("premium");
@@ -135,7 +136,27 @@ const FEATURE_PRICES = {
   processing_fee_percent: 0.0,
 };
 
-function getPlatformPostMonthlyQuota(planId, plan = null) {
+function buildTesterTier(baseTier) {
+  return {
+    ...baseTier,
+    monthly_upload_cap: TESTER_PROGRAM.usageLimits.uploads,
+    monthly_ai_cap: 30,
+    monthly_bot_cap: 0,
+    platform_limit: TESTER_PROGRAM.usageLimits.connectedPlatforms,
+    allowed_features: {
+      organic_upload: true,
+      bot_boost: false,
+      repost_boost: false,
+      share_boost: false,
+      global_distribution: true,
+      multicam: true,
+    },
+    features: ["organic_upload", "multi_platform", "multicam"],
+  };
+}
+
+function getPlatformPostMonthlyQuota(planId, plan = null, testerAccess = null) {
+  if (testerAccess) return TESTER_PROGRAM.usageLimits.queuedPlatformPosts;
   const normalized = normalizePlanId(planId || "free");
   const defaultPlatformPostQuotas = {
     free: 10,
@@ -169,6 +190,13 @@ async function resolveEffectiveTierId(userId, billingData, userData) {
   );
 
   const now = Date.now();
+  const testerAccess = getActiveTesterAccess(safeUser, now);
+  if (testerAccess) {
+    const testerTier = normalizePlanId(testerAccess.planId || "pro");
+    const planRank = { free: 0, premium: 1, pro: 2, enterprise: 3 };
+    return planRank[billingTier] > planRank[testerTier] ? billingTier : testerTier;
+  }
+
   const normalizedStatus = String(safeUser.subscriptionStatus || safeBilling.status || "")
     .trim()
     .toLowerCase();
@@ -244,7 +272,9 @@ async function getEffectiveTierSnapshot(userId, providedBillingData, providedUse
   }
 
   const tierId = await resolveEffectiveTierId(userId, billingData, userData);
-  const tier = TIERS[tierId.toUpperCase()] || TIERS.FREE;
+  const baseTier = TIERS[tierId.toUpperCase()] || TIERS.FREE;
+  const testerAccess = getActiveTesterAccess(userData);
+  const tier = testerAccess ? buildTesterTier(baseTier) : baseTier;
 
   try {
     const normalizedStatus = String(
@@ -272,6 +302,11 @@ async function getEffectiveTierSnapshot(userId, providedBillingData, providedUse
     tier,
     userData: userData || {},
     billingData: billingData || { tier: "free" },
+    accessSource: testerAccess ? "tester_program" : "subscription",
+    testerAccess,
+    status: testerAccess
+      ? "promotional"
+      : String(userData?.subscriptionStatus || billingData?.status || "inactive"),
   };
 }
 
@@ -289,7 +324,9 @@ async function calculateCreatorCharge(userId, intent, _featuresSelected = []) {
   const billingData = billingSnap.data() || { tier: "free", uploads_this_month: 0 };
 
   const userTierId = await resolveEffectiveTierId(userId, billingData, userData);
-  const userTier = TIERS[userTierId.toUpperCase()] || TIERS.FREE;
+  const baseTier = TIERS[userTierId.toUpperCase()] || TIERS.FREE;
+  const testerAccess = getActiveTesterAccess(userData);
+  const userTier = testerAccess ? buildTesterTier(baseTier) : baseTier;
 
   // 2. Check Upload Caps (for Organic/Commercial)
   const used = billingData.uploads_this_month || 0;
@@ -404,12 +441,7 @@ async function checkPlatformLimit(userId, platformCount) {
  * Prevents free users from connecting more platforms than their tier allows.
  */
 async function checkConnectionLimit(userId, platform) {
-  const billingDocRef = db.collection("user_billing").doc(userId);
-  const billingSnap = await billingDocRef.get();
-  const billingData = billingSnap.data() || { tier: "free" };
-
-  const userTierId = await resolveEffectiveTierId(userId, billingData);
-  const userTier = TIERS[userTierId.toUpperCase()] || TIERS.FREE;
+  const { tier: userTier } = await getEffectiveTierSnapshot(userId);
   const limit = userTier.platform_limit || 1;
 
   // No limit for this tier
@@ -448,8 +480,7 @@ async function checkAILimit(userId) {
   const billingSnap = await billingDocRef.get();
   const billingData = billingSnap.data() || { tier: "free", ai_usage_this_month: 0 };
 
-  const userTierId = await resolveEffectiveTierId(userId, billingData);
-  const userTier = TIERS[userTierId.toUpperCase()] || TIERS.FREE;
+  const { tier: userTier } = await getEffectiveTierSnapshot(userId, billingData);
 
   // Cap check
   if ((billingData.ai_usage_this_month || 0) >= (userTier.monthly_ai_cap || 0)) {
@@ -483,8 +514,10 @@ async function checkBotEntitlement(userId, featureName) {
   const billingSnap = await billingDocRef.get();
   const billingData = billingSnap.data() || { tier: "free", bot_actions_used: 0 };
 
-  const userTierId = await resolveEffectiveTierId(userId, billingData);
-  const userTier = TIERS[userTierId.toUpperCase()] || TIERS.FREE;
+  const { tierId: userTierId, tier: userTier } = await getEffectiveTierSnapshot(
+    userId,
+    billingData
+  );
 
   // 2. feature Gating (Strict Boolean)
   // If the tier explicitly disallows this feature (e.g. "repost_boost" is false for starter)

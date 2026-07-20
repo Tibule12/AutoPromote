@@ -8,17 +8,22 @@ const loginHighlights = [
   "Keep your workflow moving with a faster creator-grade dashboard.",
 ];
 
-const LoginForm = ({ onLogin, onClose }) => {
+const LoginForm = ({ onLogin, onClose, onResendVerification }) => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [agreed, setAgreed] = useState(false);
+  const [needsVerification, setNeedsVerification] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [resendMessage, setResendMessage] = useState("");
 
   const handleChange = useCallback(
     event => {
       const { name, value } = event.target;
       setFormData(prev => ({ ...prev, [name]: value }));
       if (error) setError("");
+      setNeedsVerification(false);
+      setResendMessage("");
     },
     [error]
   );
@@ -49,7 +54,9 @@ const LoginForm = ({ onLogin, onClose }) => {
         message: submitError.message,
       });
 
-      let message = "Login failed. ";
+      const emailNotVerified = submitError.code === "auth/email-not-verified";
+      setNeedsVerification(emailNotVerified);
+      let message = emailNotVerified ? "Verify your email before signing in. " : "Login failed. ";
       if (submitError.code) {
         switch (submitError.code) {
           case "auth/invalid-credential":
@@ -70,6 +77,9 @@ const LoginForm = ({ onLogin, onClose }) => {
           case "auth/too-many-requests":
             message += "Too many failed login attempts. Please try again later.";
             break;
+          case "auth/email-not-verified":
+            message += "Check Inbox, Spam, or Promotions, or resend the email below.";
+            break;
           default:
             message += submitError.message;
         }
@@ -80,6 +90,20 @@ const LoginForm = ({ onLogin, onClose }) => {
       setError(message);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!onResendVerification || !formData.email) return;
+    setIsResending(true);
+    setResendMessage("");
+    try {
+      await onResendVerification(formData.email);
+      setResendMessage("Verification email sent. Check Inbox and Spam.");
+    } catch (resendError) {
+      setResendMessage(resendError.message || "Could not resend the verification email.");
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -112,6 +136,19 @@ const LoginForm = ({ onLogin, onClose }) => {
             </p>
           </div>
           {error && <div className="error-message">{error}</div>}
+          {needsVerification && (
+            <div className="verification-resend-panel">
+              <button
+                type="button"
+                className="auth-home-button"
+                onClick={handleResendVerification}
+                disabled={isResending || !formData.email}
+              >
+                {isResending ? "Sending..." : "Resend verification email"}
+              </button>
+              {resendMessage && <p className="helper-message">{resendMessage}</p>}
+            </div>
+          )}
 
           <div className="auth-form__fields">
             <div className="form-group">

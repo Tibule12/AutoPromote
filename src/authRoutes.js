@@ -17,6 +17,14 @@ function normalizeEmail(email) {
     .toLowerCase();
 }
 
+function getVerificationRedirectUrl() {
+  const frontendUrl = String(process.env.FRONTEND_URL || "https://autopromote.org").replace(
+    /\/$/,
+    ""
+  );
+  return process.env.VERIFY_REDIRECT_URL || `${frontendUrl}/#/`;
+}
+
 function buildResetTokenHash(rawToken) {
   return crypto
     .createHash("sha256")
@@ -147,19 +155,34 @@ router.post("/register", async (req, res) => {
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
-    // Generate email verification link (safe to call even if already verified)
+    // Generate a branded verification email. Delivery is reported truthfully so
+    // the client can fall back to Firebase's mail service when needed.
+    let verificationEmailSent = false;
+    let verificationProvider = null;
     try {
       const verifyLink = await admin.auth().generateEmailVerificationLink(email, {
-        url: process.env.VERIFY_REDIRECT_URL || "https://example.com/verified",
+        url: getVerificationRedirectUrl(),
       });
-      await sendVerificationEmail({ email, link: verifyLink });
+      const delivery = await sendVerificationEmail({ email, link: verifyLink });
+      verificationProvider = delivery?.provider || null;
+      verificationEmailSent = delivery?.ok === true && verificationProvider !== "console";
+      if (!verificationEmailSent) {
+        console.warn(
+          "Verification email was not externally delivered; client fallback required for",
+          normalizeEmail(email)
+        );
+      }
     } catch (e) {
       console.log("⚠️ Could not send verification email:", e.message);
     }
 
     res.status(201).json({
-      message: "User registered. Verification email sent.",
+      message: verificationEmailSent
+        ? "User registered. Verification email sent."
+        : "User registered. Verification email requires client fallback.",
       requiresEmailVerification: true,
+      verificationEmailSent,
+      verificationProvider,
     });
   } catch (error) {
     console.error("Registration error:", error);
@@ -220,12 +243,21 @@ router.post("/resend-verification", async (req, res) => {
     if (!user) return res.status(404).json({ error: "User not found" });
     if (user.emailVerified) return res.json({ message: "Already verified" });
     const link = await admin.auth().generateEmailVerificationLink(email, {
-      url: process.env.VERIFY_REDIRECT_URL || "https://example.com/verified",
+      url: getVerificationRedirectUrl(),
     });
-    await sendVerificationEmail({ email, link });
+    const delivery = await sendVerificationEmail({ email, link });
+    const externallyDelivered = delivery?.ok === true && delivery?.provider !== "console";
+    if (!externallyDelivered) {
+      return res.status(503).json({
+        error: "verification_delivery_unavailable",
+        message:
+          "The email provider did not confirm delivery. Keep this page open and try again shortly.",
+      });
+    }
     return res.json({
       message: "Verification email sent",
       remaining: Math.max(0, LIMIT - entry.count),
+      provider: delivery.provider,
     });
   } catch (e) {
     return res.status(500).json({ error: e.message });

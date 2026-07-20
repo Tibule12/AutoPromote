@@ -142,3 +142,42 @@
 .ap-btn-primary:hover {
   background-color: #3e24c6;
 }
+
+@media (max-width: 640px) {
+  .ap-page-container {
+    width: 100%;
+    max-width: 100%;
+    padding: 1.5rem 0.85rem 4rem;
+    overflow-x: hidden;
+  }
+
+  .ap-page-header {
+    margin-bottom: 1.75rem;
+  }
+
+  .ap-page-header h1 {
+    font-size: clamp(1.8rem, 9vw, 2.25rem);
+  }
+
+  .ap-page-subtitle {
+    font-size: 1rem;
+  }
+
+  .ap-features-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+  }
+
+  .ap-feature-card,
+  .ap-content-section {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    padding: 1.1rem;
+  }
+
+  .ap-partners-logos {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

@@ -58,11 +58,16 @@ const UserDashboard = ({
   onWorkspaceChanged,
 }) => {
   const hasPendingWorkspaceInvite =
-    typeof window !== "undefined" &&
-    new URLSearchParams(window.location.search).has("invite");
+    typeof window !== "undefined" && new URLSearchParams(window.location.search).has("invite");
   const [activeTab, setActiveTab] = useState(hasPendingWorkspaceInvite ? "team" : "profile");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isMobileViewport, setIsMobileViewport] = useState(() =>
+    typeof window === "undefined" ? false : window.matchMedia("(max-width: 1023px)").matches
+  );
   const clipStudioLocked = process.env.NODE_ENV === "production";
+  const testerAccess = user?.testerAccess || user?.user?.testerAccess || null;
+  const testerAccessActive =
+    testerAccess?.status === "active" && Date.parse(testerAccess?.expiresAt || "") > Date.now();
 
   // If Wolf Hunt is disabled, prevent accidentally staying on that tab
   useEffect(() => {
@@ -76,6 +81,31 @@ const UserDashboard = ({
       setActiveTab("profile");
     }
   }, [activeTab, clipStudioLocked]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return undefined;
+    const mediaQuery = window.matchMedia("(max-width: 1023px)");
+    const handleViewportChange = event => setIsMobileViewport(event.matches);
+    setIsMobileViewport(mediaQuery.matches);
+    mediaQuery.addEventListener?.("change", handleViewportChange);
+    return () => mediaQuery.removeEventListener?.("change", handleViewportChange);
+  }, []);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return undefined;
+    document.body.classList.toggle("dashboard-menu-open", sidebarOpen);
+    return () => document.body.classList.remove("dashboard-menu-open");
+  }, [sidebarOpen]);
+
+  useEffect(() => {
+    if (isMobileViewport && activeTab === "cam_combiner") {
+      setActiveTab("profile");
+      setSidebarOpen(false);
+      toast("Cam Combiner needs a desktop-sized screen. Your other tools are ready on mobile.", {
+        icon: "🖥️",
+      });
+    }
+  }, [activeTab, isMobileViewport]);
 
   const [notifs, setNotifs] = useState(
     Array.isArray(notifications) ? notifications.filter(notification => !notification?.read) : []
@@ -439,6 +469,13 @@ const UserDashboard = ({
         toast("Clip Studio is currently locked.", { icon: "🔒" });
         return;
       }
+      if (tab === "cam_combiner" && isMobileViewport) {
+        toast("Cam Combiner is desktop-only because its editing canvas needs more screen space.", {
+          icon: "🖥️",
+        });
+        setSidebarOpen(false);
+        return;
+      }
       if (tab !== activeTab) {
         if (tab === "billing") {
           setBillingReturnTab(activeTab);
@@ -450,7 +487,7 @@ const UserDashboard = ({
       setActiveTab(tab);
       setSidebarOpen(false);
     },
-    [ENABLE_WOLF_HUNT, clipStudioLocked, activeTab]
+    [ENABLE_WOLF_HUNT, clipStudioLocked, activeTab, isMobileViewport]
   );
   const triggerSchedulesRefresh = useCallback(() => {
     onSchedulesChanged && onSchedulesChanged();
@@ -1125,6 +1162,15 @@ const UserDashboard = ({
         </header>
       )}
 
+      {activeTab !== "live" && sidebarOpen && (
+        <button
+          type="button"
+          className="sidebar-backdrop"
+          aria-label="Close dashboard menu"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {activeTab !== "live" && (
         <aside className={`dashboard-sidebar ${sidebarOpen ? "open" : ""}`} aria-label="Sidebar">
           <div className="profile-section">
@@ -1157,12 +1203,14 @@ const UserDashboard = ({
               >
                 Publish
               </li>
-              <li
-                className={activeTab === "cam_combiner" ? "active" : ""}
-                onClick={() => handleNav("cam_combiner")}
-              >
-                Cam Combiner
-              </li>
+              {!isMobileViewport && (
+                <li
+                  className={activeTab === "cam_combiner" ? "active" : ""}
+                  onClick={() => handleNav("cam_combiner")}
+                >
+                  Cam Combiner
+                </li>
+              )}
               <li
                 className={activeTab === "schedules" ? "active" : ""}
                 onClick={() => handleNav("schedules")}
@@ -1240,6 +1288,32 @@ const UserDashboard = ({
           <VoiceOverGuide activeTab={activeTab} />
         </div>
         <UsageLimitBanner backLabel={BILLING_RETURN_TAB_LABELS[activeTab] || "Dashboard"} />
+        {testerAccessActive && (
+          <section className="founding-tester-banner" aria-label="Founding Tester access">
+            <div>
+              <span>✨ Founding Tester</span>
+              <strong>Your controlled 30-day test pass is active</strong>
+              <p>
+                Cam Combiner, publishing and queues, Find Viral Clips, and Smart Promo are ready.
+                Other tools stay locked. Your 1,500-credit trial allowance expires with the pass; it
+                does not renew or charge you.
+              </p>
+              <small>
+                {Number(user?.totalCredits || 0)} credits remaining · 10 uploads · 30 queued posts ·
+                3 connected platforms
+              </small>
+            </div>
+            <div className="founding-tester-banner__actions">
+              <small>Expires {new Date(testerAccess.expiresAt).toLocaleDateString()}</small>
+              <button
+                type="button"
+                onClick={() => handleNav(isMobileViewport ? "upload" : "cam_combiner")}
+              >
+                {isMobileViewport ? "Start publishing" : "Start with Cam Combiner"}
+              </button>
+            </div>
+          </section>
+        )}
         {!emailVerified && (
           <div
             className="verification-banner"
@@ -1556,14 +1630,16 @@ const UserDashboard = ({
         {activeTab === "clips" && !clipStudioLocked && (
           <ClipStudioPanel content={contentList} onRefresh={onUpload} />
         )}
-        {activeTab === "cam_combiner" && (
+        {activeTab === "cam_combiner" && !isMobileViewport && (
           <CamCombinerPanel
             onClose={() => handleNav("profile")}
             onFindViralClips={source => {
               if (!source?.renderJobId || !source?.url) return;
               setSelectedFile(source);
               handleNav("upload");
-              toast.success("Opening Find Viral Clips with the saved master — no re-upload needed.");
+              toast.success(
+                "Opening Find Viral Clips with the saved master — no re-upload needed."
+              );
             }}
             onUseExport={result => {
               if (!result?.file) return;
@@ -1584,7 +1660,7 @@ const UserDashboard = ({
           />
         )}
       </main>
-      <BottomNav activeTab={activeTab} onNav={handleNav} onLogout={onLogout} />
+      <BottomNav activeTab={activeTab} onNav={handleNav} />
     </div>
   );
 };

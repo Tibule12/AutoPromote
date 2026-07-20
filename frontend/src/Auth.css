@@ -8,6 +8,8 @@
   max-width: 1180px;
   margin: 0 auto;
   background: transparent;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .auth-stage {
@@ -16,6 +18,11 @@
   grid-template-columns: minmax(0, 1.05fr) minmax(360px, 460px);
   gap: 1.5rem;
   align-items: stretch;
+  min-width: 0;
+}
+
+.auth-stage > * {
+  min-width: 0;
 }
 
 .auth-stage__panel {
@@ -510,6 +517,68 @@
   line-height: 1.5;
 }
 
+.verification-resend-panel {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border: 1px solid rgba(139, 92, 246, 0.24);
+  border-radius: 16px;
+  background: rgba(245, 243, 255, 0.72);
+}
+
+.auth-container--verification {
+  max-width: 620px;
+}
+
+.verification-card {
+  width: 100%;
+  padding: clamp(1.5rem, 5vw, 2.5rem);
+  border: 1px solid rgba(196, 181, 253, 0.58);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at top right, rgba(216, 180, 254, 0.24), transparent 30%), #fff;
+  box-shadow: 0 24px 68px rgba(46, 16, 101, 0.2);
+  color: #334155;
+  text-align: center;
+}
+
+.verification-card__icon {
+  display: grid;
+  place-items: center;
+  width: 4rem;
+  height: 4rem;
+  margin: 0 auto 1rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #7c3aed, #ec4899);
+  color: #fff;
+  font-size: 1.8rem;
+  box-shadow: 0 14px 28px rgba(124, 58, 237, 0.26);
+}
+
+.verification-card .auth-form__eyebrow {
+  margin-inline: auto;
+}
+
+.verification-card h2 {
+  margin: 0 0 0.8rem;
+  color: #1e1b4b;
+  font-size: clamp(1.65rem, 6vw, 2.2rem);
+}
+
+.verification-card p {
+  overflow-wrap: anywhere;
+  margin: 0.7rem 0;
+  line-height: 1.6;
+}
+
+.verification-card .auth-button {
+  margin: 1rem 0 0.75rem;
+}
+
+.verification-card__note {
+  color: #64748b;
+  font-size: 0.86rem;
+}
+
 .helper-message--dark {
   color: #c4b5fd;
 }
@@ -638,8 +707,17 @@
 }
 
 @media (max-width: 980px) {
+  .auth-container {
+    max-width: 100%;
+    padding: max(0.75rem, env(safe-area-inset-top)) 0.75rem max(1rem, env(safe-area-inset-bottom));
+  }
+
   .auth-stage {
     grid-template-columns: 1fr;
+  }
+
+  .auth-stage__panel--brand {
+    display: none;
   }
 
   .auth-stage__title {
@@ -648,6 +726,29 @@
 
   .auth-form--modal {
     max-width: 100%;
+    min-width: 0;
+    padding: 1.25rem;
+    border-radius: 18px;
+    transform: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .auth-form,
+  .verification-card {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .auth-form__fields .form-group,
+  .auth-form__inline {
+    padding: 0.85rem;
+  }
+
+  .auth-form input,
+  .auth-form select,
+  .auth-form textarea {
+    font-size: 16px;
   }
 }
 

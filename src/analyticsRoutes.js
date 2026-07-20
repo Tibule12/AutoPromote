@@ -2,6 +2,7 @@ const express = require("express");
 const { db } = require("./firebaseAdmin");
 const authMiddleware = require("./authMiddleware");
 const { getPlanCapabilities } = require("./config/subscriptionPlans");
+const { applyTesterCapabilityAllowlist } = require("./config/testerProgram");
 const { getEffectiveTierSnapshot } = require("./services/billingService");
 const {
   getClipLearningProfile,
@@ -275,7 +276,10 @@ router.get("/user", authMiddleware, async (req, res) => {
     if (!uid) return res.status(401).json({ error: "Unauthorized" });
 
     const snapshot = await getEffectiveTierSnapshot(uid);
-    const entitlements = getPlanCapabilities(snapshot.tierId);
+    const entitlements = applyTesterCapabilityAllowlist(
+      getPlanCapabilities(snapshot.tierId),
+      snapshot.testerAccess
+    );
     const allowedRanges = entitlements.analytics.allowedRanges || ["7d"];
     const range = allowedRanges.includes(requestedRange)
       ? requestedRange

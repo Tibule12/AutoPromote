@@ -47,15 +47,18 @@ function escapeHtml(s) {
 }
 
 async function sendVerificationEmail({ email, link }) {
-  const subject = "Verify your AutoPromote account";
+  const subject = "✨ Verify your AutoPromote account";
   const vars = { link };
-  const textTpl = "Welcome to AutoPromote! Verify your email: {{link}}";
-  const htmlInner = `<h1>Welcome!</h1><p>Please verify your email by clicking below:</p><p><a href="${escapeHtml(link)}">Verify Email</a></p>`;
+  const textTpl =
+    "Welcome to AutoPromote!\n\nVerify your email to unlock your dashboard: {{link}}\n\nIf you did not create this account, ignore this email.";
+  const safeLink = escapeHtml(link);
+  const htmlInner = `<h1>Your AutoPromote account is almost ready ✨</h1><p>Welcome! Confirm this email address to unlock your creator dashboard.</p><p><a class="button" href="${safeLink}">Verify my email</a></p><div class="linkbox">${safeLink}</div><p class="note">If you did not create an AutoPromote account, you can safely ignore this email.</p>`;
   return sendEmail({
     to: email,
     subject,
     text: renderTemplate(textTpl, vars),
     html: buildLayout(htmlInner),
+    sensitive: true,
   });
 }
 
@@ -212,6 +215,26 @@ async function sendWorkspaceInvitation({
   });
 }
 
+async function sendTesterAccessGranted({ email, name, expiresAt, dashboardUrl }) {
+  const subject = "✨ Your AutoPromote Founding Tester access is ready";
+  const safeName = escapeHtml(name || "there");
+  const safeDashboardUrl = escapeHtml(dashboardUrl || "https://autopromote.org/#/");
+  const expiryLabel = new Date(expiresAt).toLocaleDateString("en", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+  const text = `Hi ${name || "there"},\n\nYour AutoPromote Founding Tester access is ready. For 30 days you can test Cam Combiner, publishing and queues, Find Viral Clips, and Smart Promo with a limited 1,500-credit trial allowance, 10 uploads, 30 queued platform posts, and up to 3 connected platforms. Tools outside this test are locked. This is promotional access, not a paid subscription, and it will not renew or charge you.\n\nOpen AutoPromote: ${dashboardUrl || "https://autopromote.org/#/"}\n\nAccess expires ${expiryLabel}.`;
+  const htmlInner = `<h1>Your creator test drive is ready ✨</h1><p>Hi ${safeName},</p><p>You now have a <strong>30-day AutoPromote Founding Tester pass</strong>.</p><div style="background:rgba(139,92,246,.12);border:1px solid rgba(167,139,250,.32);border-radius:16px;padding:18px;margin:20px 0"><p style="color:#fff;margin:0 0 8px"><strong>Your controlled test toolkit</strong></p><p style="margin:0 0 8px">1,500 trial credits · 10 uploads · 30 queued platform posts · 3 connected platforms</p><p style="margin:0">Cam Combiner, publishing and queues, Find Viral Clips, and Smart Promo</p></div><p>Tools outside this test are locked, and the trial allowance cannot be topped up.</p><p><a class="button" href="${safeDashboardUrl}">Start testing AutoPromote</a></p><p><strong>For your first test:</strong> use a non-confidential recording of 60 minutes or less, keep your original files backed up, and run the 60-second Cam Combiner proof before a full render. Outputs and suggested clips should be reviewed before publishing.</p><p class="note">Access expires ${escapeHtml(expiryLabel)}. Any unused trial allowance expires with it. This is promotional access—not a paid subscription. It does not auto-renew and you will not be charged.</p>`;
+  return sendEmail({
+    to: email,
+    subject,
+    text,
+    htmlbody: buildLayout(htmlInner),
+    sensitive: true,
+  });
+}
+
 module.exports = {
   sendVerificationEmail,
   sendPasswordResetEmail,
@@ -222,5 +245,6 @@ module.exports = {
   sendScheduleReminder,
   sendUsageLimitWarningEmail,
   sendWorkspaceInvitation,
+  sendTesterAccessGranted,
   sendEmail,
 };

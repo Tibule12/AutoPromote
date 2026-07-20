@@ -13,6 +13,7 @@ const {
   normalizePlanId,
   CREDIT_TOP_UP_PACKS,
 } = require("./config/subscriptionPlans");
+const { applyTesterCapabilityAllowlist } = require("./config/testerProgram");
 
 const router = express.Router();
 
@@ -95,16 +96,21 @@ async function buildSubscriptionProfilePayload(userId, user) {
   ]);
   const normalizedPlanId = normalizePlanId(tierSnapshot.tierId);
   const plan = SUBSCRIPTION_PLANS[normalizedPlanId] || SUBSCRIPTION_PLANS.free;
-  const capabilities = getPlanCapabilities(normalizedPlanId);
+  const capabilities = applyTesterCapabilityAllowlist(
+    getPlanCapabilities(normalizedPlanId),
+    tierSnapshot.testerAccess
+  );
 
   return {
     success: true,
     user,
     userId,
     planId: normalizedPlanId,
-    planName: plan.name,
-    tierName: capabilities.planName || plan.name,
-    price: plan.price,
+    planName: tierSnapshot.testerAccess ? "Founding Tester" : plan.name,
+    tierName: tierSnapshot.testerAccess
+      ? "Founding Tester"
+      : capabilities.planName || plan.name,
+    price: tierSnapshot.testerAccess ? 0 : plan.price,
     monthlyCredits: {
       allocation: credits.monthlyAllocation,
       used: credits.monthlyUsed,
@@ -121,6 +127,21 @@ async function buildSubscriptionProfilePayload(userId, user) {
     entitlements: capabilities,
     topUpPacks: CREDIT_TOP_UP_PACKS,
     subscriptionStatus: tierSnapshot.status || "inactive",
+    testerAccess: tierSnapshot.testerAccess
+      ? {
+          programId: tierSnapshot.testerAccess.programId,
+          programName: tierSnapshot.testerAccess.programName,
+          status: tierSnapshot.testerAccess.status,
+          planId: tierSnapshot.testerAccess.planId,
+          grantedAt: tierSnapshot.testerAccess.grantedAt,
+          expiresAt: tierSnapshot.testerAccess.expiresAt,
+          bonusCredits: tierSnapshot.testerAccess.bonusCredits,
+          creditAllowance: tierSnapshot.testerAccess.creditAllowance,
+          creditsUsed: tierSnapshot.testerAccess.creditsUsed || 0,
+          allowedWorkflows: tierSnapshot.testerAccess.allowedWorkflows || [],
+          autoRenews: false,
+        }
+      : null,
     email: user?.email || "",
     tier: normalizedPlanId,
     balance: credits.totalAvailable,

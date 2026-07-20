@@ -4,8 +4,9 @@
 const { db, storage } = require("../firebaseAdmin");
 const logger = require("../utils/logger");
 const url = require("url");
-const { normalizePlanId, getUploadLimitForPlan } = require("../config/subscriptionPlans");
+const { getUploadLimitForPlan } = require("../config/subscriptionPlans");
 const { getEffectiveTierSnapshot } = require("../services/billingService");
+const { TESTER_PROGRAM } = require("../config/testerProgram");
 
 // Free tier upload limit (per month). Can be overridden with env var FREE_UPLOAD_LIMIT.
 // Default matches the subscription plan configuration (3 uploads/month for free tier).
@@ -125,11 +126,17 @@ function usageLimitMiddleware(options = {}) {
       const userData = userDoc.data() || {};
 
       // Determine the user's subscription tier
-      const { tierId: subscriptionTier } = await getEffectiveTierSnapshot(userId, null, userData);
+      const { tierId: subscriptionTier, testerAccess } = await getEffectiveTierSnapshot(
+        userId,
+        null,
+        userData
+      );
       const isPaidTier = subscriptionTier !== "free";
 
       // Determine upload limit for the user based on plan
-      const planLimit = SUBSCRIPTION_UPLOAD_LIMITS[subscriptionTier] ?? FREE_UPLOAD_LIMIT;
+      const planLimit = testerAccess
+        ? TESTER_PROGRAM.usageLimits.uploads
+        : SUBSCRIPTION_UPLOAD_LIMITS[subscriptionTier] ?? FREE_UPLOAD_LIMIT;
       if (planLimit === Infinity) {
         req.userUsage = {
           limit: planLimit,
@@ -272,7 +279,11 @@ async function getUserUsageStats(userId) {
     const userDoc = await db.collection("users").doc(userId).get();
     const userData = userDoc.data() || {};
 
-    const { tierId: normalizedTier } = await getEffectiveTierSnapshot(userId, null, userData);
+    const { tierId: normalizedTier, testerAccess } = await getEffectiveTierSnapshot(
+      userId,
+      null,
+      userData
+    );
     const isPaidTier = normalizedTier !== "free";
 
     // Get upload count for current month
@@ -289,7 +300,9 @@ async function getUserUsageStats(userId) {
       usageCount += data.count || 1;
     });
 
-    const planLimit = SUBSCRIPTION_UPLOAD_LIMITS[normalizedTier] ?? FREE_UPLOAD_LIMIT;
+    const planLimit = testerAccess
+      ? TESTER_PROGRAM.usageLimits.uploads
+      : SUBSCRIPTION_UPLOAD_LIMITS[normalizedTier] ?? FREE_UPLOAD_LIMIT;
     return {
       isPaid: isPaidTier,
       limit: planLimit,

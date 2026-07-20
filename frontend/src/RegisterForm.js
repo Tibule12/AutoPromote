@@ -8,7 +8,7 @@ const registerHighlights = [
   "Build a sharper publishing system from day one.",
 ];
 
-const RegisterForm = ({ onRegister, onClose, onLogin }) => {
+const RegisterForm = ({ onRegister, onClose, onLogin, onResendVerification }) => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -18,6 +18,9 @@ const RegisterForm = ({ onRegister, onClose, onLogin }) => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [verificationState, setVerificationState] = useState(null);
+  const [isResending, setIsResending] = useState(false);
+  const [resendMessage, setResendMessage] = useState("");
 
   const handleChange = useCallback(
     event => {
@@ -50,19 +53,12 @@ const RegisterForm = ({ onRegister, onClose, onLogin }) => {
     }
 
     try {
-      await onRegister(name, email, password);
-      setSuccess(
-        "Registration successful! A verification email has been sent. Please check your Inbox and Spam folders. You will be redirected to login."
-      );
+      const result = await onRegister(name, email, password);
+      setVerificationState({
+        email,
+        sent: result?.verificationEmailSent === true,
+      });
       setFormData({ name: "", email: "", password: "", confirmPassword: "" });
-
-      setTimeout(() => {
-        if (onLogin) {
-          onLogin();
-        } else {
-          onClose();
-        }
-      }, 4000);
     } catch (submitError) {
       console.error("Registration error:", submitError);
       let message = "Registration failed. ";
@@ -93,6 +89,60 @@ const RegisterForm = ({ onRegister, onClose, onLogin }) => {
       setIsLoading(false);
     }
   };
+
+  const handleResend = async () => {
+    if (!verificationState?.email || !onResendVerification) return;
+    setIsResending(true);
+    setResendMessage("");
+    try {
+      await onResendVerification(verificationState.email);
+      setVerificationState(current => ({ ...current, sent: true }));
+      setResendMessage("A fresh verification email was sent. Check Inbox and Spam.");
+    } catch (resendError) {
+      setResendMessage(resendError.message || "We could not resend the email yet.");
+    } finally {
+      setIsResending(false);
+    }
+  };
+
+  if (verificationState) {
+    return (
+      <div className="auth-container auth-container--verification">
+        <section className="verification-card" aria-live="polite">
+          <div className="verification-card__icon">✉</div>
+          <div className="auth-form__eyebrow">One quick step</div>
+          <h2>Verify your email</h2>
+          <p>
+            We created your AutoPromote account for <strong>{verificationState.email}</strong>.
+          </p>
+          <p>
+            {verificationState.sent
+              ? "Open the verification email, tap the link, then come back and sign in. Check Spam or Promotions too."
+              : "We could not confirm email delivery. Tap resend below before trying to sign in."}
+          </p>
+          {resendMessage && <div className="helper-message">{resendMessage}</div>}
+          <button
+            type="button"
+            className="auth-button"
+            onClick={handleResend}
+            disabled={isResending}
+          >
+            {isResending ? "Sending..." : "Resend verification email"}
+          </button>
+          <button
+            type="button"
+            className="auth-link auth-link--inline"
+            onClick={() => (onLogin ? onLogin() : onClose())}
+          >
+            I verified — go to sign in
+          </button>
+          <p className="verification-card__note">
+            AutoPromote will not open the dashboard until the email is verified.
+          </p>
+        </section>
+      </div>
+    );
+  }
 
   return (
     <div className="auth-container">

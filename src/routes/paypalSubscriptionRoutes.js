@@ -19,6 +19,7 @@ const {
   getEffectiveTierSnapshot,
   getPlatformPostMonthlyQuota,
 } = require("../services/billingService");
+const { TESTER_PROGRAM, applyTesterCapabilityAllowlist } = require("../config/testerProgram");
 
 // PayPal SDK + helpers
 const paypalClient = require("../paypalClient");
@@ -352,32 +353,53 @@ function buildSubscriptionStatusPayload(snapshot, subscription = {}) {
 
   return {
     planId: snapshot.tierId,
-    planName: effectivePlan.name,
-    status: snapshot.tierId === "free" ? "active" : rawStatus,
+    planName: snapshot.testerAccess ? "Founding Tester" : effectivePlan.name,
+    status: snapshot.testerAccess
+      ? "promotional"
+      : snapshot.tierId === "free"
+        ? "active"
+        : rawStatus,
     rawStatus,
     effectiveTier: snapshot.tierId,
     billingTier: normalizePlanId(snapshot.billingData?.tier || "free"),
     userTier: normalizePlanId(
       snapshot.userData?.subscriptionTier || snapshot.userData?.subscription?.planId || "free"
     ),
-    amount: subscription.amount || effectivePlan.price || 0,
+    amount: snapshot.testerAccess ? 0 : subscription.amount || effectivePlan.price || 0,
     currency: subscription.currency || "USD",
     nextBillingDate:
-      snapshot.tierId === "free"
+      snapshot.testerAccess || snapshot.tierId === "free"
         ? null
         : subscription.nextBillingDate || snapshot.userData?.subscriptionPeriodEnd || null,
-    capabilities: getPlanCapabilities(snapshot.tierId),
-    features: effectivePlan.features,
+    capabilities: applyTesterCapabilityAllowlist(
+      getPlanCapabilities(snapshot.tierId),
+      snapshot.testerAccess
+    ),
+    features: snapshot.testerAccess
+      ? {
+          monthlyCredits: TESTER_PROGRAM.totalCreditAllowance,
+          uploads: TESTER_PROGRAM.usageLimits.uploads,
+          platformLimit: TESTER_PROGRAM.usageLimits.connectedPlatforms,
+          teamSeats: 1,
+          multicam: true,
+          analytics: "Basic analytics",
+          support: "Founding Tester feedback lane",
+        }
+      : effectivePlan.features,
     cancelledAt: subscription.cancelledAt || snapshot.userData?.subscriptionCancelledAt || null,
     expiresAt:
-      snapshot.tierId === "free"
+      snapshot.testerAccess
+        ? snapshot.testerAccess.expiresAt
+        : snapshot.tierId === "free"
         ? null
         : subscription.expiresAt ||
           snapshot.userData?.subscriptionExpiresAt ||
           snapshot.userData?.subscriptionPeriodEnd ||
           null,
     subscriptionId:
-      subscription.paypalSubscriptionId || snapshot.userData?.paypalSubscriptionId || null,
+      snapshot.testerAccess
+        ? null
+        : subscription.paypalSubscriptionId || snapshot.userData?.paypalSubscriptionId || null,
   };
 }
 

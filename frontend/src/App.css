@@ -5,11 +5,108 @@
   box-sizing: border-box;
 }
 
+html,
+body,
+#root,
+.App {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+html,
+body {
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
+}
+
+img,
+video,
+canvas {
+  max-width: 100%;
+}
+
 body {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
   color: #333;
+}
+
+@media (max-width: 1023px) {
+  .App {
+    overflow-x: hidden;
+  }
+
+  .App main,
+  .App section,
+  .App article,
+  .App form,
+  .App fieldset,
+  .App [role="dialog"] {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .App input:not([type="checkbox"]):not([type="radio"]),
+  .App select,
+  .App textarea {
+    max-width: 100%;
+    font-size: 16px;
+  }
+
+  .App h1,
+  .App h2,
+  .App h3,
+  .App p,
+  .App a,
+  .App td,
+  .App th,
+  .App label,
+  .App span {
+    overflow-wrap: anywhere;
+  }
+
+  .ap-page-container,
+  .ap-landing-page {
+    width: 100%;
+    max-width: 100%;
+    padding-left: max(0.85rem, env(safe-area-inset-left));
+    padding-right: max(0.85rem, env(safe-area-inset-right));
+    overflow-x: hidden;
+  }
+
+  .ap-features-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ap-content-section,
+  .ap-feature-card {
+    min-width: 0;
+    padding: clamp(1rem, 5vw, 1.5rem);
+  }
+
+  .modal-overlay.open {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .modal-overlay.open > div {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .table-container,
+  .team-table-wrap {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 /* modal overlay defaults (used by login/register modals)

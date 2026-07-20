@@ -32,7 +32,8 @@ jest.mock("../services/clipOutcomeLearningService", () => ({
 }));
 
 const mediaRoutes = require("../mediaRoutes");
-const { deductCredits, refundCredits } = require("../creditSystem");
+const { deductCredits, refundCredits, getCreditBreakdown } = require("../creditSystem");
+const { getEffectiveTierSnapshot } = require("../services/billingService");
 
 const buildApp = () => {
   const app = express();
@@ -53,6 +54,81 @@ describe("viral scan and render billing recovery", () => {
       monthKey: "2026-07",
     });
     refundCredits.mockResolvedValue({ success: true, refunded: 8 });
+    getCreditBreakdown.mockResolvedValue({
+      totalAvailable: 100,
+      tier: "premium",
+      localCreditBypass: false,
+    });
+    getEffectiveTierSnapshot.mockResolvedValue({
+      tierId: "premium",
+      testerAccess: null,
+      accessSource: "subscription",
+    });
+  });
+
+  it("blocks Starter plans during preflight before any upload or credit charge", async () => {
+    getCreditBreakdown.mockResolvedValue({
+      totalAvailable: 15,
+      tier: "free",
+      localCreditBypass: false,
+    });
+    getEffectiveTierSnapshot.mockResolvedValue({
+      tierId: "free",
+      testerAccess: null,
+      accessSource: "subscription",
+    });
+
+    const response = await request(buildApp()).get("/api/media/scan-preflight");
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toMatchObject({
+      allowed: false,
+      code: "VIRAL_SCAN_PLAN_REQUIRED",
+      balance: 15,
+      requiredCredits: 8,
+    });
+    expect(deductCredits).not.toHaveBeenCalled();
+    expect(mockAnalyzeVideo).not.toHaveBeenCalled();
+  });
+
+  it("reports the exact paid-plan credit shortfall during preflight", async () => {
+    getCreditBreakdown.mockResolvedValue({
+      totalAvailable: 3,
+      tier: "premium",
+      localCreditBypass: false,
+    });
+
+    const response = await request(buildApp()).get("/api/media/scan-preflight");
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toMatchObject({
+      allowed: false,
+      code: "VIRAL_SCAN_CREDITS_REQUIRED",
+      balance: 3,
+      requiredCredits: 8,
+      topUpsAllowed: true,
+    });
+    expect(deductCredits).not.toHaveBeenCalled();
+  });
+
+  it("blocks tools outside the controlled Founding Tester allowlist", async () => {
+    getEffectiveTierSnapshot.mockResolvedValue({
+      tierId: "pro",
+      testerAccess: {
+        programId: "founding_testers_2026",
+        status: "active",
+        allowedWorkflows: ["camCombiner", "findViralClips", "smartPromoSummary"],
+      },
+      accessSource: "tester_program",
+    });
+
+    const response = await request(buildApp())
+      .post("/api/media/extract-audio")
+      .send({ fileUrl: "https://example.com/source.mp4" });
+
+    expect(response.statusCode).toBe(403);
+    expect(response.body.code).toBe("TESTER_FEATURE_NOT_INCLUDED");
+    expect(deductCredits).not.toHaveBeenCalled();
   });
 
   it("refunds a charged viral analysis when the worker fails", async () => {

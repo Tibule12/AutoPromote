@@ -44,6 +44,20 @@ describe("ViralScanner saved Cam Combiner source", () => {
       if (requestUrl.includes("/api/monetization/credits/balance")) {
         return Promise.resolve({ ok: true, text: async () => JSON.stringify({ balance: 100 }) });
       }
+      if (requestUrl.includes("/api/media/scan-preflight")) {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({
+            success: true,
+            allowed: true,
+            balance: 100,
+            requiredCredits: 8,
+            tier: "pro",
+            planName: "Studio",
+          }),
+        });
+      }
       if (requestUrl.includes("/api/media/worker-health")) {
         return Promise.resolve({ ok: true, status: 200, text: async () => "ok" });
       }

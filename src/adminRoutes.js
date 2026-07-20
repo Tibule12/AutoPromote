@@ -4,6 +4,9 @@ const authMiddleware = require("./authMiddleware");
 const router = express.Router();
 const { rateLimiter } = require("./middlewares/globalRateLimiter");
 const { normalizePlanId, resolvePlan } = require("./config/subscriptionPlans");
+const { TESTER_PROGRAM } = require("./config/testerProgram");
+const { grantTesterAccess } = require("./services/testerProgramService");
+const { sendTesterAccessGranted } = require("./services/emailService");
 
 const adminPublicLimiter = rateLimiter({
   capacity: parseInt(process.env.RATE_LIMIT_ADMIN_PUBLIC || "60", 10),
@@ -342,6 +345,71 @@ router.post("/users/:id/unsuspend", authMiddleware, adminOnly, async (req, res) 
   } catch (error) {
     console.error("Error unsuspending user:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Grant one of the ten time-limited Founding Tester places. This is a
+// promotional entitlement, not a PayPal subscription, and is idempotent per user.
+router.post("/users/:id/tester-access", authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const adminId = req.userId || req.user?.uid;
+    const result = await grantTesterAccess({ userId, adminId });
+    let emailSent = false;
+
+    if (!result.alreadyGranted && result.tester?.email) {
+      try {
+        const delivery = await sendTesterAccessGranted({
+          email: result.tester.email,
+          name: result.tester.name,
+          expiresAt: result.tester.expiresAt,
+          dashboardUrl: `${String(process.env.PUBLIC_APP_URL || "https://autopromote.org").replace(/\/$/, "")}/#/`,
+        });
+        emailSent = delivery?.ok === true && delivery?.provider !== "console";
+      } catch (emailError) {
+        console.error("[tester-program] access email failed:", emailError.message);
+      }
+
+      await db.collection("audit_logs").add({
+        action: "grant_founding_tester_access",
+        adminId,
+        targetId: userId,
+        details: {
+          programId: TESTER_PROGRAM.id,
+          planId: TESTER_PROGRAM.planId,
+          bonusCredits: TESTER_PROGRAM.bonusCredits,
+          expiresAt: result.tester.expiresAt,
+          emailSent,
+        },
+        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    }
+
+    return res.json({
+      success: true,
+      alreadyGranted: result.alreadyGranted,
+      emailSent,
+      claimedSeats: result.claimedSeats,
+      maxSeats: TESTER_PROGRAM.maxSeats,
+      tester: result.tester,
+      bundle: result.bundle || null,
+    });
+  } catch (error) {
+    const knownCodes = new Set([
+      "user_required",
+      "admin_required",
+      "user_not_found",
+      "tester_program_full",
+    ]);
+    if (knownCodes.has(error.code)) {
+      return res.status(error.statusCode || 400).json({
+        success: false,
+        error: error.code,
+        message: error.message,
+      });
+    }
+    console.error("[tester-program] grant failed:", error);
+    return res.status(500).json({ success: false, error: "internal_error" });
   }
 });
 

@@ -12,6 +12,7 @@ const {
   normalizePlanId,
   CREDIT_TOP_UP_PACKS,
 } = require("../config/subscriptionPlans");
+const { applyTesterCapabilityAllowlist } = require("../config/testerProgram");
 
 // Tool-recognizable route limiter for CodeQL and defense in depth. The
 // validation middleware limiter remains in place for the profile endpoint.
@@ -38,7 +39,10 @@ router.get("/profile", apiLimiter, async (req, res) => {
     const tierSnapshot = await getEffectiveTierSnapshot(userId);
     const normalizedPlanId = normalizePlanId(tierSnapshot.tierId);
     const plan = SUBSCRIPTION_PLANS[normalizedPlanId] || SUBSCRIPTION_PLANS.free;
-    const capabilities = getPlanCapabilities(normalizedPlanId);
+    const capabilities = applyTesterCapabilityAllowlist(
+      getPlanCapabilities(normalizedPlanId),
+      tierSnapshot.testerAccess
+    );
 
     // 3. Firestore user doc (basic info)
 
@@ -46,9 +50,11 @@ router.get("/profile", apiLimiter, async (req, res) => {
       success: true,
       userId,
       planId: normalizedPlanId,
-      planName: plan.name,
-      tierName: capabilities.planName || plan.name,
-      price: plan.price,
+      planName: tierSnapshot.testerAccess ? "Founding Tester" : plan.name,
+      tierName: tierSnapshot.testerAccess
+        ? "Founding Tester"
+        : capabilities.planName || plan.name,
+      price: tierSnapshot.testerAccess ? 0 : plan.price,
       monthlyCredits: {
         allocation: credits.monthlyAllocation,
         used: credits.monthlyUsed,
@@ -65,6 +71,21 @@ router.get("/profile", apiLimiter, async (req, res) => {
       entitlements: capabilities,
       topUpPacks: CREDIT_TOP_UP_PACKS,
       subscriptionStatus: tierSnapshot.status || "inactive",
+      testerAccess: tierSnapshot.testerAccess
+        ? {
+            programId: tierSnapshot.testerAccess.programId,
+            programName: tierSnapshot.testerAccess.programName,
+            status: tierSnapshot.testerAccess.status,
+            planId: tierSnapshot.testerAccess.planId,
+            grantedAt: tierSnapshot.testerAccess.grantedAt,
+            expiresAt: tierSnapshot.testerAccess.expiresAt,
+            bonusCredits: tierSnapshot.testerAccess.bonusCredits,
+            creditAllowance: tierSnapshot.testerAccess.creditAllowance,
+            creditsUsed: tierSnapshot.testerAccess.creditsUsed || 0,
+            allowedWorkflows: tierSnapshot.testerAccess.allowedWorkflows || [],
+            autoRenews: false,
+          }
+        : null,
       email: req.user.email,
       // Legacy
       tier: tierSnapshot.tierId,

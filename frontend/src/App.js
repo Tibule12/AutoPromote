@@ -93,18 +93,18 @@ const PageLoader = () => (
 function hasRenderableImageMeta(meta = {}) {
   return Boolean(
     meta &&
-      (Number(meta.rotate || 0) !== 0 ||
-        meta.flipH === true ||
-        meta.flipV === true ||
-        typeof meta.filter === "string")
+    (Number(meta.rotate || 0) !== 0 ||
+      meta.flipH === true ||
+      meta.flipV === true ||
+      typeof meta.filter === "string")
   );
 }
 
 function hasRenderableVideoTrimMeta(meta = {}) {
   return Boolean(
     meta &&
-      ((Number(meta.trimStart || 0) > 0 || Number(meta.trimEnd || 0) > 0) &&
-        Number(meta.trimEnd || 0) > Number(meta.trimStart || 0))
+    (Number(meta.trimStart || 0) > 0 || Number(meta.trimEnd || 0) > 0) &&
+    Number(meta.trimEnd || 0) > Number(meta.trimStart || 0)
   );
 }
 
@@ -154,10 +154,14 @@ async function renderPlatformImageVariant(file, meta, platformName) {
     context.restore();
 
     const blob = await new Promise((resolve, reject) => {
-      canvas.toBlob(nextBlob => {
-        if (nextBlob) resolve(nextBlob);
-        else reject(new Error("Failed to render the image variant."));
-      }, file.type || "image/jpeg", 0.92);
+      canvas.toBlob(
+        nextBlob => {
+          if (nextBlob) resolve(nextBlob);
+          else reject(new Error("Failed to render the image variant."));
+        },
+        file.type || "image/jpeg",
+        0.92
+      );
     });
 
     const extension =
@@ -276,6 +280,12 @@ function App() {
         const idTokenResult = await firebaseUser.getIdTokenResult(true);
         const hasAdminClaim =
           idTokenResult.claims.admin === true || idTokenResult.claims.role === "admin";
+        if (!firebaseUser.emailVerified && !hasAdminClaim) {
+          setUser(null);
+          setIsAdmin(false);
+          localStorage.removeItem("user");
+          return;
+        }
         const userData = {
           uid: firebaseUser.uid,
           email: firebaseUser.email,
@@ -396,11 +406,14 @@ function App() {
       const workspaceId = await ensureActiveWorkspace(WORKSPACE_ENDPOINTS.CURRENT, token);
       const res = await fetch(`${API_ENDPOINTS.MY_CONTENT}?includeStats=0`, {
         method: "GET",
-        headers: withWorkspaceHeaders({
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        }, workspaceId),
+        headers: withWorkspaceHeaders(
+          {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          workspaceId
+        ),
         mode: "cors",
       });
       if (!res.ok) {
@@ -572,7 +585,12 @@ function App() {
     } else {
       const parsedErr = await parseJsonSafe(res);
       const errorBody = parsedErr.json || null;
-      throw new Error(errorBody?.message || "Login failed");
+      const loginError = new Error(errorBody?.message || "Login failed");
+      loginError.code =
+        errorBody?.error === "email_not_verified"
+          ? "auth/email-not-verified"
+          : errorBody?.error || "auth/login-failed";
+      throw loginError;
     }
   };
 
@@ -648,7 +666,7 @@ function App() {
         setShowMfaModal(true);
         return;
       }
-      alert(error.message || "Login failed");
+      throw error;
     }
   };
 
@@ -684,8 +702,6 @@ function App() {
       const firebaseUser = userCredential.user;
       await updateProfile(firebaseUser, { displayName: name });
 
-      // Backend handles email verification
-
       const idToken = await firebaseUser.getIdToken();
       const res = await fetch(API_ENDPOINTS.REGISTER, {
         method: "POST",
@@ -697,28 +713,78 @@ function App() {
         body: JSON.stringify({ name, email, uid: firebaseUser.uid, idToken }),
       });
 
-      // Sign out immediately so they have to login after verification
-      await signOut(auth);
+      const responseBody = await res.json().catch(() => ({}));
 
-      if (res.ok) {
-        // Success - RegisterForm will show message and switch to login
-        return;
-      } else {
-        let errorMessage = "Registration failed on server.";
-        try {
-          const json = await res.json();
-          if (json && json.error) errorMessage = json.error;
-          else if (json && json.message) errorMessage = json.message;
-        } catch (_e) {
-          // ignore parse errors
-        }
-        throw new Error(errorMessage);
+      if (!res.ok) {
+        throw new Error(
+          responseBody.error || responseBody.message || "Registration failed on server."
+        );
       }
+
+      let verificationEmailSent = responseBody.verificationEmailSent === true;
+      let verificationDelivery = responseBody.verificationProvider || null;
+      if (!verificationEmailSent) {
+        try {
+          await sendEmailVerification(firebaseUser, {
+            url: `${String(PUBLIC_SITE_URL || window.location.origin).replace(/\/$/, "")}/#/`,
+          });
+          verificationEmailSent = true;
+          verificationDelivery = "firebase";
+        } catch (verificationError) {
+          console.error("Firebase verification fallback failed:", verificationError);
+        }
+      }
+
+      // Keep the unverified Firebase session only so the resend button can use
+      // Firebase's verified delivery path. onAuthStateChanged still blocks the
+      // dashboard until Firebase reports emailVerified=true.
+
+      return {
+        email,
+        verificationEmailSent,
+        verificationDelivery,
+      };
     } catch (error) {
       await signOut(auth); // Ensure signed out on error
       alert("Registration failed: " + (error.message || "Unknown error"));
       throw error;
     }
+  };
+
+  const resendVerificationEmail = async email => {
+    const normalizedEmail = String(email || "")
+      .trim()
+      .toLowerCase();
+    if (!normalizedEmail) throw new Error("Enter the email address used to create the account.");
+
+    const currentUser = auth.currentUser;
+    if (
+      currentUser &&
+      String(currentUser.email || "")
+        .trim()
+        .toLowerCase() === normalizedEmail &&
+      !currentUser.emailVerified
+    ) {
+      await sendEmailVerification(currentUser, {
+        url: `${String(PUBLIC_SITE_URL || window.location.origin).replace(/\/$/, "")}/#/`,
+      });
+      return { sent: true, provider: "firebase" };
+    }
+
+    const response = await fetch(API_ENDPOINTS.RESEND_VERIFICATION, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ email: normalizedEmail }),
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(
+        body.message ||
+          body.error ||
+          "The verification email could not be sent. Please try again shortly."
+      );
+    }
+    return { sent: true, provider: body.provider || "email" };
   };
 
   const handleLogin = async userData => {
@@ -802,9 +868,47 @@ function App() {
     } catch (_) {}
   };
 
+  const loadSubscriptionProfile = async providedToken => {
+    try {
+      let token = providedToken;
+      if (!token) {
+        const currentUser = auth.currentUser;
+        if (currentUser) token = await currentUser.getIdToken(true);
+        else return;
+      }
+
+      const response = await fetch(API_ENDPOINTS.USERS_PROFILE, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      });
+      if (!response.ok) return;
+
+      const profile = await response.json().catch(() => ({}));
+      if (!profile || profile.success === false) return;
+      setUser(current => {
+        if (!current) return current;
+        return {
+          ...current,
+          ...profile,
+          user: {
+            ...(current.user || {}),
+            ...(profile.user || {}),
+          },
+          token: current.token,
+        };
+      });
+    } catch (_) {
+      // Profile enrichment is non-blocking; Firebase authentication remains authoritative.
+    }
+  };
+
   useEffect(() => {
     if (!user || user.role === "admin" || user.isAdmin === true) return;
     loadUserDefaults().catch(() => {});
+    loadSubscriptionProfile().catch(() => {});
   }, [user?.uid, user?.role, user?.isAdmin]);
 
   // Save user defaults (timezone, default platforms, frequency, paypalEmail)
@@ -1118,7 +1222,11 @@ function App() {
 
           try {
             if (type === "image" && file instanceof File && hasRenderableImageMeta(meta)) {
-              platformFiles[platformName] = await renderPlatformImageVariant(file, meta, platformName);
+              platformFiles[platformName] = await renderPlatformImageVariant(
+                file,
+                meta,
+                platformName
+              );
             } else if (type === "video" && hasRenderableVideoTrimMeta(meta)) {
               const renderedUrl = await renderPlatformVideoTrimVariant({
                 fileUrl: finalUrl,
@@ -1129,7 +1237,10 @@ function App() {
               if (!platformOptionsObj[platformName]) platformOptionsObj[platformName] = {};
               platformOptionsObj[platformName].media_url = renderedUrl;
               platformOptionsObj[platformName].renderPipeline = "trimmed_clip";
-            } else if (type === "video" && (meta.rotate || meta.flipH || meta.flipV || meta.filter)) {
+            } else if (
+              type === "video" &&
+              (meta.rotate || meta.flipH || meta.flipV || meta.filter)
+            ) {
               platformRenderWarnings.push(
                 `${platformName}: save a platform-specific edited file to apply rotate/flip/filter on video.`
               );
@@ -1206,7 +1317,10 @@ function App() {
         .map(options => options?.title)
         .find(value => String(value || "").trim());
       const firstPlatformDescription = Object.values(pOps)
-        .map(options => options?.description || options?.caption || options?.message || options?.commentary)
+        .map(
+          options =>
+            options?.description || options?.caption || options?.message || options?.commentary
+        )
         .find(value => String(value || "").trim());
       const normalizedTitle = String(title || firstPlatformTitle || "").trim() || "Untitled Post";
       const normalizedDescription = String(description || firstPlatformDescription || "").trim();
@@ -1579,7 +1693,7 @@ function App() {
                           background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
                           zIndex: 10000,
                           overflowY: "auto",
-                          touchAction: "none", // prevent touch through
+                          touchAction: "pan-y", // allow the auth screen to scroll on phones
                           pointerEvents: "auto", // ensure clicks are captured
                         }}
                         onClick={e => e.stopPropagation()}
@@ -1590,11 +1704,12 @@ function App() {
                             display: "flex",
                             justifyContent: "center",
                             alignItems: "flex-start",
-                            padding: "3rem 1.25rem",
+                            padding: "clamp(0.75rem, 4vw, 3rem) clamp(0.5rem, 3vw, 1.25rem)",
                           }}
                         >
                           <LoginForm
                             onLogin={loginUser}
+                            onResendVerification={resendVerificationEmail}
                             onClose={() => {
                               setShowLogin(false);
                               setModalOpen(false);
@@ -1616,7 +1731,7 @@ function App() {
                           background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
                           zIndex: 10000,
                           overflowY: "auto",
-                          touchAction: "none",
+                          touchAction: "pan-y",
                           pointerEvents: "auto",
                         }}
                         onClick={e => e.stopPropagation()}
@@ -1627,11 +1742,12 @@ function App() {
                             display: "flex",
                             justifyContent: "center",
                             alignItems: "flex-start",
-                            padding: "3rem 1.25rem",
+                            padding: "clamp(0.75rem, 4vw, 3rem) clamp(0.5rem, 3vw, 1.25rem)",
                           }}
                         >
                           <RegisterForm
                             onRegister={registerUser}
+                            onResendVerification={resendVerificationEmail}
                             onClose={() => {
                               setShowRegister(false);
                               setModalOpen(false);
