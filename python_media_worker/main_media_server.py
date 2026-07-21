@@ -227,6 +227,10 @@ ENABLE_LOCAL_MEDIA_OUTPUT_FALLBACK = env_flag(
     "ENABLE_LOCAL_MEDIA_OUTPUT_FALLBACK",
     default=not IS_PRODUCTION_ENV,
 )
+ALLOW_DIRECT_SOURCE_UPLOAD = env_flag(
+    "ALLOW_DIRECT_SOURCE_UPLOAD",
+    default=not IS_PRODUCTION_ENV,
+)
 
 FIREBASE_STATUS_UPDATES_ENABLED = bool(firebase_admin._apps)
 MEDIA_WORKER_TASK_SECRET = os.getenv("MEDIA_WORKER_TASK_SECRET", "")
@@ -28960,10 +28964,15 @@ def _run_ingest_job(job_id: str, input_path: str, cache_key: str, cached_mp4: st
 @app.post("/api/media/upload-source")
 async def upload_source_file(file: UploadFile = File(...)):
     """
-    Simple source file upload for Smart Promo.
-    Saves the file locally and returns a local URL the worker can process directly.
-    No Firebase, no transcoding — just save and return path.
+    Local-development source upload for tools that explicitly use a local worker.
+    Production rejects this route; product uploads must use authenticated storage
+    and a backend-issued short-lived read URL.
     """
+    if not ALLOW_DIRECT_SOURCE_UPLOAD:
+        raise HTTPException(
+            status_code=403,
+            detail="Direct worker uploads are disabled. Use an authenticated AutoPromote upload.",
+        )
     if not file.filename:
         raise HTTPException(status_code=400, detail="No file provided")
 

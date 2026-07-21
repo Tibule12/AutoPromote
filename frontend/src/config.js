@@ -11,10 +11,6 @@
 // Default to localhost for development convenience if not specified
 export const API_BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
 
-// Media Worker URL - Python FastAPI service for heavy video processing
-// In production, this might be the same as API_BASE_URL if proxied, or a separate service
-export const MEDIA_API_URL = process.env.REACT_APP_MEDIA_API_URL || "http://localhost:8000";
-
 // Public site URL used for user-facing pages (Terms, Privacy, etc.)
 export const PUBLIC_SITE_URL = process.env.REACT_APP_SITE_URL || "https://autopromote.org";
 
@@ -42,7 +38,6 @@ export const API_ENDPOINTS = {
   MEDIA_EXTRACT_AUDIO: `${API_BASE_URL}/api/media/extract-audio`,
   MEDIA_WORKER_HEALTH: `${API_BASE_URL}/api/media/worker-health`,
   MEDIA_SCAN_PREFLIGHT: `${API_BASE_URL}/api/media/scan-preflight`,
-  MEDIA_SOURCE_UPLOAD: `${MEDIA_API_URL.replace(/\/$/, "")}/api/media/upload-source`,
   MEDIA_RENDER_CLIP: `${API_BASE_URL}/api/media/render-clip`,
   MEDIA_RENDER_MULTICAM: `${API_BASE_URL}/api/media/render-multicam`,
   MEDIA_STATUS: jobId => `${API_BASE_URL}/api/media/status/${encodeURIComponent(jobId)}`,

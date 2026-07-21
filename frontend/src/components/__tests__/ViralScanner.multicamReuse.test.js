@@ -6,6 +6,10 @@ jest.mock("../../utils/clipWorkflowAnalytics", () => ({
   trackClipWorkflowEvent: jest.fn(() => Promise.resolve(true)),
 }));
 
+jest.mock("../../utils/sourceUpload", () => ({
+  uploadTemporaryVideoSource: jest.fn(),
+}));
+
 jest.mock("../../firebaseClient", () => ({
   auth: {
     currentUser: {
@@ -97,11 +101,12 @@ describe("ViralScanner saved Cam Combiner source", () => {
       />
     );
 
-    const startButton = await screen.findByRole("button", { name: /Start AI Scan/i });
-    await waitFor(() => expect(startButton).not.toBeDisabled());
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: /Start AI Scan/i })).not.toBeDisabled()
+    );
 
     await act(async () => {
-      fireEvent.click(startButton);
+      fireEvent.click(screen.getByRole("button", { name: /Start AI Scan/i }));
     });
 
     await screen.findByTestId("scanner-guidance-card");
@@ -113,7 +118,7 @@ describe("ViralScanner saved Cam Combiner source", () => {
       expect.objectContaining({
         renderJobId: "render-1",
         fileUrl: "https://storage.example.com/master.mp4",
-        localPath: null,
+        sourceStoragePath: null,
       })
     );
     expect(

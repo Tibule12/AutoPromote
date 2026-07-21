@@ -3,6 +3,10 @@ import { auth, storage } from "../firebaseClient";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 
 export const STORAGE_UPLOAD_LIMIT_MB = 500;
+const TEMPORARY_SOURCE_PREFIXES = Object.freeze({
+  viral_scan: "temp_scans",
+  smart_promo: "temp_sources",
+});
 
 export function inferUploadMediaType(file, fallback = "video") {
   const inferred = file && typeof file.type === "string" ? file.type.split("/")[0] : "";
@@ -43,6 +47,60 @@ function sanitizeStorageFileName(fileName) {
     })
     .join("")
     .slice(0, 120);
+}
+
+export async function uploadTemporaryVideoSource({ file, purpose, onProgress }) {
+  const user = auth.currentUser;
+  if (!user?.uid) {
+    throw new Error("Please sign in again before uploading.");
+  }
+  if (!(file instanceof Blob)) {
+    throw new Error("Upload requires a File or Blob.");
+  }
+  const prefix = TEMPORARY_SOURCE_PREFIXES[purpose];
+  if (!prefix) {
+    throw new Error("Invalid temporary upload purpose.");
+  }
+  if (file.size <= 0 || file.size > STORAGE_UPLOAD_LIMIT_MB * 1024 * 1024) {
+    throw new Error(`Video uploads must be smaller than ${STORAGE_UPLOAD_LIMIT_MB} MB.`);
+  }
+  if (file.type && !file.type.startsWith("video/") && file.type !== "application/octet-stream") {
+    throw new Error("The selected source must be a video.");
+  }
+
+  const safeFileName = sanitizeStorageFileName(file.name || "source-video");
+  const storagePath = `${prefix}/${user.uid}/${Date.now()}_${safeFileName}`;
+  const fileRef = ref(storage, storagePath);
+
+  const snapshot = await new Promise((resolve, reject) => {
+    const task = uploadBytesResumable(fileRef, file, {
+      contentType: file.type || "application/octet-stream",
+      customMetadata: {
+        ownerUid: user.uid,
+        source: "autopromote_secure_temporary_upload",
+        sourcePurpose: purpose,
+      },
+    });
+
+    task.on(
+      "state_changed",
+      state => {
+        if (typeof onProgress === "function") {
+          onProgress(state.bytesTransferred, state.totalBytes || file.size || 0);
+        }
+      },
+      reject,
+      () => resolve(task.snapshot)
+    );
+  });
+
+  const size = snapshot.metadata?.size ? Number(snapshot.metadata.size) : file.size;
+  return {
+    ok: true,
+    storagePath,
+    size,
+    uploadMode: "firebase_resumable_temporary",
+  };
 }
 
 async function uploadSourceFileViaFirebase({ file, mediaType, fileName, onProgress }) {

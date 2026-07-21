@@ -41,6 +41,10 @@ const {
 } = require("./services/multicamUploadService");
 const { getMulticamStoragePaths } = require("./services/storageCleanupService");
 const { getClipLearningProfile } = require("./services/clipOutcomeLearningService");
+const {
+  deleteOwnedTemporaryVideoSource,
+  resolveOwnedTemporaryVideoSource,
+} = require("./services/ownedTemporaryMediaService");
 const MEDIA_WORKER_URL =
   process.env.MEDIA_WORKER_URL || "https://media-worker-v1-341498038874.us-central1.run.app";
 const DEFAULT_CAM_COMBINER_WORKER_URL =
@@ -484,14 +488,33 @@ const resolveOwnedMulticamMasterSource = async ({ renderJobId, userId }) => {
   };
 };
 
-const resolveRequestedMediaSource = async ({ fileUrl, localPath, renderJobId, userId }) => {
+const resolveRequestedMediaSource = async ({
+  fileUrl,
+  sourceStoragePath,
+  renderJobId,
+  userId,
+}) => {
   if (renderJobId) {
     return resolveOwnedMulticamMasterSource({ renderJobId, userId });
   }
+  if (sourceStoragePath) {
+    const source = await resolveOwnedTemporaryVideoSource({
+      storagePath: sourceStoragePath,
+      userId,
+      purpose: "viral_scan",
+    });
+    return {
+      outputUrl: source.signedUrl,
+      outputStoragePath: source.storagePath,
+      renderJobId: null,
+      temporaryScanSource: true,
+    };
+  }
   return {
-    outputUrl: fileUrl || localPath || "",
+    outputUrl: fileUrl || "",
     outputStoragePath: null,
     renderJobId: null,
+    temporaryScanSource: false,
   };
 };
 
@@ -2122,16 +2145,25 @@ router.post("/analyze", async (req, res) => {
   const userId = req.user.uid;
   const {
     fileUrl,
-    localPath = null,
+    sourceStoragePath = null,
     renderJobId = null,
     forceFresh = false,
     scanNonce = "",
   } = req.body;
+  const deleteSubmittedTemporaryScan = async () => {
+    if (!sourceStoragePath) return;
+    await deleteOwnedTemporaryVideoSource({
+      storagePath: sourceStoragePath,
+      userId,
+      purpose: "viral_scan",
+    }).catch(() => {});
+  };
   const cost = CREDIT_COSTS.analyze || 8;
   let preflight;
   try {
     preflight = await getViralScanPreflight(userId);
   } catch (error) {
+    await deleteSubmittedTemporaryScan();
     console.error("[MediaRoute] Viral scan access check failed:", error.message);
     return res.status(500).json({
       message: "We could not verify your Find Viral Clips access. No credits were charged.",
@@ -2139,6 +2171,7 @@ router.post("/analyze", async (req, res) => {
     });
   }
   if (!preflight.allowed) {
+    await deleteSubmittedTemporaryScan();
     return res.status(preflight.code === "VIRAL_SCAN_CREDITS_REQUIRED" ? 402 : 403).json({
       ...preflight,
       success: false,
@@ -2148,17 +2181,21 @@ router.post("/analyze", async (req, res) => {
   try {
     resolvedSource = await resolveRequestedMediaSource({
       fileUrl,
-      localPath,
+      sourceStoragePath,
       renderJobId,
       userId,
     });
   } catch (error) {
+    await deleteSubmittedTemporaryScan();
     return res.status(error.statusCode || 500).json({
       message: error.message || "Could not load the requested source",
       code: error.code || "SOURCE_RESOLUTION_FAILED",
     });
   }
   const analysisSource = resolvedSource.outputUrl;
+  const temporaryScanStoragePath = resolvedSource.temporaryScanSource
+    ? resolvedSource.outputStoragePath
+    : null;
   const billingOperationId = `viral-analysis:${userId}:${crypto.randomUUID()}`;
   let creditReceipt = null;
 
@@ -2168,7 +2205,7 @@ router.post("/analyze", async (req, res) => {
     );
 
     if (!analysisSource) {
-      return res.status(400).json({ error: "Missing fileUrl or localPath" });
+      return res.status(400).json({ error: "Missing secure video source" });
     }
 
     // Check and deduct credits first
@@ -2202,7 +2239,6 @@ router.post("/analyze", async (req, res) => {
     const scenes = await videoEditingService.analyzeVideo(analysisSource, userId, {
       forceFresh: Boolean(forceFresh),
       scanNonce: typeof scanNonce === "string" ? scanNonce : "",
-      localPath: resolvedSource.renderJobId ? null : localPath || null,
       learningProfile,
     });
     res.json({
@@ -2237,6 +2273,20 @@ router.post("/analyze", async (req, res) => {
       creditsRefunded: Boolean(creditRefund?.success),
       creditRefund,
     });
+  } finally {
+    if (temporaryScanStoragePath) {
+      await deleteOwnedTemporaryVideoSource({
+        storagePath: temporaryScanStoragePath,
+        userId,
+        purpose: "viral_scan",
+      }).catch(cleanupError => {
+        console.warn(
+          "[MediaRoute] Could not delete temporary viral scan source %s: %s",
+          temporaryScanStoragePath,
+          cleanupError.message
+        );
+      });
+    }
   }
 });
 

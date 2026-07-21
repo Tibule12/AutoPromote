@@ -3,6 +3,8 @@ const request = require("supertest");
 
 const mockAnalyzeVideo = jest.fn();
 const mockRenderClip = jest.fn();
+const mockResolveOwnedTemporaryVideoSource = jest.fn();
+const mockDeleteOwnedTemporaryVideoSource = jest.fn();
 
 jest.mock("../authMiddleware", () => (req, _res, next) => {
   req.user = { uid: "viral-user" };
@@ -29,6 +31,11 @@ jest.mock("../services/billingService", () => ({
 
 jest.mock("../services/clipOutcomeLearningService", () => ({
   getClipLearningProfile: jest.fn().mockResolvedValue(null),
+}));
+
+jest.mock("../services/ownedTemporaryMediaService", () => ({
+  resolveOwnedTemporaryVideoSource: mockResolveOwnedTemporaryVideoSource,
+  deleteOwnedTemporaryVideoSource: mockDeleteOwnedTemporaryVideoSource,
 }));
 
 const mediaRoutes = require("../mediaRoutes");
@@ -64,6 +71,12 @@ describe("viral scan and render billing recovery", () => {
       testerAccess: null,
       accessSource: "subscription",
     });
+    mockResolveOwnedTemporaryVideoSource.mockResolvedValue({
+      signedUrl: "https://storage.googleapis.com/private/signed-source.mp4",
+      storagePath: "temp_scans/viral-user/source.mp4",
+      temporary: true,
+    });
+    mockDeleteOwnedTemporaryVideoSource.mockResolvedValue({ status: "deleted" });
   });
 
   it("blocks Starter plans during preflight before any upload or credit charge", async () => {
@@ -163,6 +176,31 @@ describe("viral scan and render billing recovery", () => {
       expect.any(Object)
     );
     expect(refundCredits).not.toHaveBeenCalled();
+  });
+
+  it("verifies an owned temporary upload and deletes it after analysis", async () => {
+    mockAnalyzeVideo.mockResolvedValue([{ id: "secure-clip", start: 3, end: 15 }]);
+
+    const response = await request(buildApp()).post("/api/media/analyze").send({
+      sourceStoragePath: "temp_scans/viral-user/source.mp4",
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(mockResolveOwnedTemporaryVideoSource).toHaveBeenCalledWith({
+      storagePath: "temp_scans/viral-user/source.mp4",
+      userId: "viral-user",
+      purpose: "viral_scan",
+    });
+    expect(mockAnalyzeVideo).toHaveBeenCalledWith(
+      "https://storage.googleapis.com/private/signed-source.mp4",
+      "viral-user",
+      expect.not.objectContaining({ localPath: expect.anything() })
+    );
+    expect(mockDeleteOwnedTemporaryVideoSource).toHaveBeenCalledWith({
+      storagePath: "temp_scans/viral-user/source.mp4",
+      userId: "viral-user",
+      purpose: "viral_scan",
+    });
   });
 
   it("refunds a charged clip render when rendering fails", async () => {

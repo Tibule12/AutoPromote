@@ -7,6 +7,10 @@ const { deductCredits, refundCredits, getCreditBreakdown } = require("../creditS
 const { db } = require("../firebaseAdmin");
 const { cleanupSourceFile } = require("../utils/cleanupSource");
 const { CREDIT_COSTS } = require("../config/subscriptionPlans");
+const {
+  deleteOwnedTemporaryVideoSource,
+  resolveOwnedTemporaryVideoSource,
+} = require("../services/ownedTemporaryMediaService");
 
 const CLIP_ANALYSIS_COST = 0; // Cost per analysis (Phase 1 default)
 const MEDIA_WORKER_URL =
@@ -1507,6 +1511,33 @@ router.post("/promo-summary", authMiddleware, async (req, res) => {
   } = req.body || {};
   const sourceDurationSeconds = Math.max(0, Number(videoDurationSeconds || 0));
   const userId = req.user.uid;
+  let workerVideoUrl = typeof videoUrl === "string" ? videoUrl.trim() : "";
+  let temporarySourceAttachedToJob = false;
+
+  if (localPath) {
+    return res.status(400).json({
+      error: "Unsafe local source disabled",
+      code: "DIRECT_WORKER_SOURCE_DISABLED",
+      message: "Smart Promo now requires a secure AutoPromote upload.",
+    });
+  }
+
+  if (sourceStoragePath) {
+    try {
+      const ownedSource = await resolveOwnedTemporaryVideoSource({
+        storagePath: sourceStoragePath,
+        userId,
+        purpose: "smart_promo",
+      });
+      workerVideoUrl = ownedSource.signedUrl;
+    } catch (error) {
+      return res.status(error.statusCode || 500).json({
+        error: "Secure source verification failed",
+        code: error.code || "TEMP_SOURCE_VERIFICATION_FAILED",
+        message: error.message,
+      });
+    }
+  }
 
   const requestedOutputMode = String(outputMode || "visual_edit").trim().toLowerCase();
   const normalizedOutputMode =
@@ -1540,8 +1571,8 @@ router.post("/promo-summary", authMiddleware, async (req, res) => {
     contentId ||
     `${videoUrl}|${Math.round(Number(videoDurationSeconds || 0))}`;
 
-  if (!videoUrl && !localPath) {
-    return res.status(400).json({ error: "Missing videoUrl or localPath" });
+  if (!workerVideoUrl) {
+    return res.status(400).json({ error: "Missing secure video source" });
   }
 
   try {
@@ -1556,6 +1587,13 @@ router.post("/promo-summary", authMiddleware, async (req, res) => {
       estimate.videoDurationSeconds > 0 &&
       estimate.videoDurationSeconds > PROMO_SUMMARY_MAX_DURATION_SECONDS
     ) {
+      if (sourceStoragePath) {
+        await deleteOwnedTemporaryVideoSource({
+          storagePath: sourceStoragePath,
+          userId,
+          purpose: "smart_promo",
+        }).catch(() => {});
+      }
       return res.status(413).json({
         error: "Video too long",
         message: `Smart Promo currently supports videos up to ${Math.round(PROMO_SUMMARY_MAX_DURATION_SECONDS / 60)} minutes for one job.`,
@@ -1574,6 +1612,13 @@ router.post("/promo-summary", authMiddleware, async (req, res) => {
     });
 
     if (reusable) {
+      if (sourceStoragePath) {
+        await deleteOwnedTemporaryVideoSource({
+          storagePath: sourceStoragePath,
+          userId,
+          purpose: "smart_promo",
+        }).catch(() => {});
+      }
       const reusableCredits = await getCreditBreakdown(userId).catch(() => null);
       await db
         .collection("clip_analyses")
@@ -1619,6 +1664,13 @@ router.post("/promo-summary", authMiddleware, async (req, res) => {
 
     const credits = await deductCredits(userId, estimate.credits, "promo-summary");
     if (!credits.success) {
+      if (sourceStoragePath) {
+        await deleteOwnedTemporaryVideoSource({
+          storagePath: sourceStoragePath,
+          userId,
+          purpose: "smart_promo",
+        }).catch(() => {});
+      }
       return res.status(402).json({
         error: "Insufficient credits",
         message: "Smart Promo Summary is a premium feature and requires credits.",
@@ -1634,7 +1686,7 @@ router.post("/promo-summary", authMiddleware, async (req, res) => {
       .doc(jobId)
       .set({
         userId,
-        videoUrl,
+        videoUrl: workerVideoUrl,
         contentId,
         type: "promo_summary",
         status: "queued",
@@ -1683,13 +1735,14 @@ router.post("/promo-summary", authMiddleware, async (req, res) => {
           monthKey: credits.monthKey || new Date().toISOString().slice(0, 7),
         },
       });
+    temporarySourceAttachedToJob = Boolean(sourceStoragePath);
 
     axios
       .post(
         `${MEDIA_WORKER_URL}/auto-generate-clips`,
         {
-          video_url: videoUrl || "",
-          local_path: localPath || "",
+          video_url: workerVideoUrl,
+          local_path: "",
           job_id: jobId,
           max_clips: PROMO_SUMMARY_CLIP_COUNT,
           target_duration: targetDurationSeconds,
@@ -1778,6 +1831,13 @@ router.post("/promo-summary", authMiddleware, async (req, res) => {
     };
     return res.json({ ...response, data: response });
   } catch (error) {
+    if (sourceStoragePath && !temporarySourceAttachedToJob) {
+      await deleteOwnedTemporaryVideoSource({
+        storagePath: sourceStoragePath,
+        userId,
+        purpose: "smart_promo",
+      }).catch(() => {});
+    }
     console.error("[ClipRoute] Promo summary error", {
       message: sanitizeErrorMessage(error),
     });

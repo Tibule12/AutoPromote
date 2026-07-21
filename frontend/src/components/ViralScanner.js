@@ -4,77 +4,11 @@ import { auth } from "../firebaseClient";
 import { API_BASE_URL, API_ENDPOINTS } from "../config";
 import { applySafeMediaSource, createSecureId } from "../utils/security";
 import { trackClipWorkflowEvent } from "../utils/clipWorkflowAnalytics";
+import { uploadTemporaryVideoSource } from "../utils/sourceUpload";
 import { SafeImage, SafeVideo } from "./SafeMedia";
 
 const CLIP_SCANNER_CACHE_TTL_MS = 3 * 24 * 60 * 60 * 1000;
 const CLIP_SCAN_CREDIT_COST = 8;
-const PROCESSING_STAGE_DEFINITIONS = [
-  {
-    id: "audio-energy",
-    title: "Analyzing audio energy",
-    detail: "Listening for crowd lift, tone changes, and vocal force",
-    progressLabel: "Completed",
-  },
-  {
-    id: "vocal-peaks",
-    title: "Detecting vocal peaks",
-    detail: "Marking lead moments where the performance crests",
-    progressLabel: "Completed",
-  },
-  {
-    id: "audience-response",
-    title: "Finding audience reactions",
-    detail: "Looking for visual payoff and response beats",
-    progressLabel: "Completed",
-  },
-  {
-    id: "viral-score",
-    title: "Scoring viral potential",
-    detail: "Ranking hook strength, emotion, and retention signals",
-    progressLabel: "In progress",
-  },
-  {
-    id: "ranking",
-    title: "Ranking top moments",
-    detail: "Packaging the best clips for Studio",
-    progressLabel: "Waiting",
-  },
-];
-const PROCESSING_STAGE_PROGRESS_POINTS = [52, 61, 70, 79, 88];
-const PROCESSING_MOMENT_TEMPLATES = [
-  {
-    title: "Lead Vocal Peak",
-    tags: ["High Energy", "Strong Hook"],
-    reason: "Lead vocal climbs into a memorable phrase with clear focus on the subject",
-    baseScore: 91,
-    offsetRatio: 0.12,
-    durationRatio: 0.055,
-  },
-  {
-    title: "Harmony Rise",
-    tags: ["Emotional", "Harmony Rise"],
-    reason: "The group locks in visually and sonically as the arrangement opens up",
-    baseScore: 87,
-    offsetRatio: 0.38,
-    durationRatio: 0.05,
-  },
-  {
-    title: "Audience Reaction",
-    tags: ["Crowd Response", "High Energy"],
-    reason: "Energy spikes as the room reacts and the camera catches the payoff",
-    baseScore: 83,
-    offsetRatio: 0.63,
-    durationRatio: 0.048,
-  },
-  {
-    title: "Power Moment",
-    tags: ["Emotional Peak", "Power"],
-    reason: "The delivery lands with a visual close-up and a strong emotional finish",
-    baseScore: 80,
-    offsetRatio: 0.81,
-    durationRatio: 0.045,
-  },
-];
 const CONTROL_TEXT_PATTERN = new RegExp(
   `[${String.fromCharCode(0)}-${String.fromCharCode(31)}${String.fromCharCode(127)}]`,
   "g"
@@ -338,54 +272,6 @@ const getSourceLabel = file => {
   return file.name || "Uploaded video";
 };
 
-const formatScannerClock = seconds => {
-  const safeSeconds = Math.max(0, Number(seconds) || 0);
-  const minutes = Math.floor(safeSeconds / 60);
-  const remainder = Math.floor(safeSeconds % 60);
-  return `${String(minutes).padStart(2, "0")}:${String(remainder).padStart(2, "0")}`;
-};
-
-const buildProcessingWaveform = progress =>
-  Array.from({ length: 48 }, (_, index) => {
-    const base =
-      24 +
-      Math.sin(index * 0.42 + progress * 0.045) * 22 +
-      Math.cos(index * 0.19 + progress * 0.03) * 10;
-    const peakBoost = index % 11 === 0 ? 26 : 0;
-    return Math.max(12, Math.min(96, Math.round(base + peakBoost)));
-  });
-
-const buildProcessingMoments = (durationSeconds, progress) => {
-  const safeDuration = Math.max(75, Number(durationSeconds) || 0);
-  const revealSteps = [18, 38, 58, 76];
-
-  return PROCESSING_MOMENT_TEMPLATES.map((template, index) => {
-    const start = safeDuration * template.offsetRatio;
-    const duration = Math.max(8, safeDuration * template.durationRatio);
-    const end = Math.min(safeDuration, start + duration);
-    const revealAt = revealSteps[index];
-    const unlocked = progress >= revealAt;
-    const locked = progress >= revealAt + 10;
-    const score = Math.min(
-      99,
-      template.baseScore + Math.max(0, Math.round((progress - revealAt) * 0.18))
-    );
-
-    return {
-      id: `processing-${index + 1}`,
-      start,
-      end,
-      duration,
-      reason: template.reason,
-      score: unlocked ? score : Math.max(64, template.baseScore - 7),
-      title: template.title,
-      tags: template.tags,
-      status: unlocked ? (locked ? "locked" : "scanning") : "waiting",
-      marker: index + 1,
-    };
-  });
-};
-
 const applyGuidanceToScenes = scenes =>
   (Array.isArray(scenes) ? scenes : []).map((scene, index) => {
     const baseClip = {
@@ -569,12 +455,11 @@ const ViralScanner = ({ file, onSelectClip, onClose, onUpgrade }) => {
   const [selectedClip, setSelectedClip] = useState(null);
   const [statusMessage, setStatusMessage] = useState("");
   const [scanError, setScanError] = useState("");
+  const [scanPhase, setScanPhase] = useState("idle");
   const [videoSrc, setVideoSrc] = useState(null);
-  const [videoDuration, setVideoDuration] = useState(0);
   const [cachedScanMeta, setCachedScanMeta] = useState(null);
   const [cachedResultsReady, setCachedResultsReady] = useState(false);
   const [cacheLoadPending, setCacheLoadPending] = useState(false);
-  const [scanStageIndex, setScanStageIndex] = useState(0);
   const [learningMeta, setLearningMeta] = useState(null);
 
   // --- Credit System State ---
@@ -693,8 +578,7 @@ const ViralScanner = ({ file, onSelectClip, onClose, onUpgrade }) => {
     setSelectedClip(null);
     setPreviewClip(null);
     setStatusMessage("");
-    setVideoDuration(0);
-    setScanStageIndex(0);
+    setScanPhase("idle");
     setLearningMeta(null);
 
     if (file) {
@@ -968,7 +852,7 @@ const ViralScanner = ({ file, onSelectClip, onClose, onUpgrade }) => {
 
     setIsScanning(true);
     setScanProgress(0);
-    setScanStageIndex(0);
+    setScanPhase("preparing");
     if (forceFresh) {
       setResults([]);
       setSelectedClip(null);
@@ -982,7 +866,7 @@ const ViralScanner = ({ file, onSelectClip, onClose, onUpgrade }) => {
       sourceType: getScannerSourceType(file),
     });
 
-    let stageInterval = null;
+    let scanSucceeded = false;
 
     try {
       const user = auth.currentUser;
@@ -992,7 +876,8 @@ const ViralScanner = ({ file, onSelectClip, onClose, onUpgrade }) => {
       let fileUrl = "";
       const sourceFingerprints = getSourceFingerprints(file);
 
-      setStatusMessage("Waking the AI worker. The first scan can take up to a minute...");
+      setScanPhase("waking");
+      setStatusMessage("Preparing the secure AI analysis service...");
       const workerHealth = await fetch(API_ENDPOINTS.MEDIA_WORKER_HEALTH, {
         headers: { Authorization: `Bearer ${token}` },
         credentials: "include",
@@ -1005,37 +890,36 @@ const ViralScanner = ({ file, onSelectClip, onClose, onUpgrade }) => {
         );
       }
 
-      // 1. Upload if necessary — directly to Python worker (no Firebase roundtrip)
-      let localPath = null;
+      // 1. Upload local videos to an authenticated, user-owned temporary path.
+      let sourceStoragePath = null;
       if (file instanceof File || file instanceof Blob) {
-        const safeName = normalizePlainText(file.name || "scan.mp4").replace(
-          /[^a-zA-Z0-9._-]+/g,
-          "-"
-        );
-        setStatusMessage("Uploading directly to AI worker...");
+        setScanPhase("uploading");
+        setStatusMessage("Securely uploading your video to AutoPromote...");
         setScanProgress(5);
 
-        const formData = new FormData();
-        formData.append("file", file, safeName);
-
         try {
-          const uploadResponse = await fetch(API_ENDPOINTS.MEDIA_SOURCE_UPLOAD, {
-            method: "POST",
-            body: formData,
+          const uploadResult = await uploadTemporaryVideoSource({
+            file,
+            purpose: "viral_scan",
+            onProgress: (bytesTransferred, totalBytes) => {
+              const ratio = totalBytes > 0 ? bytesTransferred / totalBytes : 0;
+              setScanProgress(Math.max(5, Math.min(45, 5 + ratio * 40)));
+              setStatusMessage(
+                `Secure upload ${Math.round(ratio * 100)}% complete. AI analysis has not started yet.`
+              );
+            },
           });
-          const uploadResult = await uploadResponse.json().catch(() => ({}));
-          if (!uploadResponse.ok || !uploadResult?.localPath) {
-            throw new Error(uploadResult?.detail || "Upload to worker failed");
+          if (!uploadResult?.storagePath) {
+            throw new Error("Secure upload did not return a storage path");
           }
-          localPath = uploadResult.localPath;
-          fileUrl = uploadResult.localPath; // Worker reads directly from disk
+          sourceStoragePath = uploadResult.storagePath;
           setStatusMessage(
-            `Source ready (${(uploadResult.size / (1024 * 1024)).toFixed(1)}MB, ${(uploadResult.duration || 0).toFixed(1)}s)`
+            `Secure upload complete (${(uploadResult.size / (1024 * 1024)).toFixed(1)} MB). Starting AI analysis...`
           );
           setScanProgress(50);
         } catch (uploadError) {
           throw new Error(
-            `Cannot reach the configured media worker: ${uploadError.message}. Check REACT_APP_MEDIA_API_URL.`
+            `Secure video upload failed: ${uploadError.message}. Nothing was sent to the AI worker and no credits were used.`
           );
         }
       } else if (getRemoteSourceUrl(file)) {
@@ -1043,22 +927,12 @@ const ViralScanner = ({ file, onSelectClip, onClose, onUpgrade }) => {
         setScanProgress(50);
       }
 
-      // 2. Call Node.js Backend (proxies to Python + Deducts Credits)
-      const analysisStages = PROCESSING_STAGE_DEFINITIONS.map((stage, index) => ({
-        label: stage.detail,
-        pct: PROCESSING_STAGE_PROGRESS_POINTS[index] || 95,
-      }));
-
-      let stageIndex = 0;
-      stageInterval = setInterval(() => {
-        if (stageIndex < analysisStages.length) {
-          const stage = analysisStages[stageIndex];
-          setStatusMessage(stage.label);
-          setScanProgress(stage.pct);
-          setScanStageIndex(stageIndex);
-          stageIndex++;
-        }
-      }, 4000);
+      // 2. The authenticated backend verifies ownership, creates a short-lived
+      // worker URL, charges credits, and waits for real analysis results.
+      setScanPhase("analyzing");
+      setStatusMessage(
+        "AI analysis is running. Verified clip scores will appear only when it finishes."
+      );
 
       const response = await fetch(`${API_BASE_URL}/api/media/analyze`, {
         method: "POST",
@@ -1068,14 +942,12 @@ const ViralScanner = ({ file, onSelectClip, onClose, onUpgrade }) => {
         },
         body: JSON.stringify({
           fileUrl: fileUrl || "",
-          localPath: localPath || null,
+          sourceStoragePath,
           renderJobId: getSourceRenderJobId(file) || null,
           forceFresh,
           scanNonce,
         }),
       });
-
-      clearInterval(stageInterval);
 
       if (response.status === 403 || response.status === 402) {
         const blockPayload = await response.json().catch(() => ({}));
@@ -1106,7 +978,6 @@ const ViralScanner = ({ file, onSelectClip, onClose, onUpgrade }) => {
               ? "Not enough credits to scan."
               : "Your current plan does not include Find Viral Clips.")
         );
-        clearInterval(stageInterval);
         setIsScanning(false);
         setScanProgress(0);
         return;
@@ -1127,6 +998,7 @@ const ViralScanner = ({ file, onSelectClip, onClose, onUpgrade }) => {
       }
 
       const data = await response.json();
+      scanSucceeded = true;
       setLearningMeta(data.learning || null);
 
       if (data.remainingCredits !== undefined) {
@@ -1192,11 +1064,10 @@ const ViralScanner = ({ file, onSelectClip, onClose, onUpgrade }) => {
       setScanError(err?.message || "The scan could not be started. Please try again.");
       setStatusMessage("Error: " + err.message);
     } finally {
-      clearInterval(stageInterval);
       scanInFlightRef.current = false;
       setIsScanning(false);
-      setScanProgress(100);
-      setScanStageIndex(PROCESSING_STAGE_DEFINITIONS.length - 1);
+      setScanPhase("idle");
+      setScanProgress(scanSucceeded ? 100 : 0);
     }
   };
 
@@ -1264,19 +1135,6 @@ const ViralScanner = ({ file, onSelectClip, onClose, onUpgrade }) => {
   const rankedResults = [...results].sort(
     (left, right) => right.score - left.score || right.backendScore - left.backendScore
   );
-  const processingDuration = videoDuration || 14 * 60 + 20;
-  const processingWaveform = buildProcessingWaveform(scanProgress);
-  const processingMoments = buildProcessingMoments(processingDuration, scanProgress);
-  const activeProcessingMoment =
-    [...processingMoments].reverse().find(moment => moment.status !== "waiting") ||
-    processingMoments[0] ||
-    null;
-  const processingInsight =
-    scanProgress >= 86
-      ? "Good energy! We've found several high-potential moments. Almost done ranking the strongest clips."
-      : scanProgress >= 64
-        ? "Momentum is building. AutoPromote is surfacing the reactions and vocal spikes most likely to hold attention."
-        : "We’re reading the rhythm, tone, and camera-friendly beats so the best clips can pop before the scan completes.";
   const bestClipId = rankedResults[0]?.id ?? null;
   const topPickIds = new Set(rankedResults.slice(0, 2).map(clip => clip.id));
   const activePreviewDuration = Math.max(0, Number((previewClip || selectedClip)?.duration || 0));
@@ -1446,10 +1304,6 @@ const ViralScanner = ({ file, onSelectClip, onClose, onUpgrade }) => {
                 <video
                   ref={videoRef}
                   controls={!selectedClip}
-                  onLoadedMetadata={event => {
-                    const duration = Number(event.currentTarget.duration || 0);
-                    if (duration > 0) setVideoDuration(duration);
-                  }}
                 />
                 {activeSelectedVisual?.url ? (
                   <div className="scanner-selected-visual-preview">
@@ -1482,70 +1336,50 @@ const ViralScanner = ({ file, onSelectClip, onClose, onUpgrade }) => {
                     className="scanner-processing-showcase"
                     data-testid="scanner-processing-visuals"
                   >
-                    <div className="scanner-processing-live-pill">LIVE PREVIEW</div>
-                    <div className="scanner-processing-hero-copy">
-                      <strong>AI is scanning your video...</strong>
-                      <span>
-                        This usually takes 30 to 60 seconds. We’re already pulling the most
-                        marketable moments forward.
-                      </span>
+                    <div className="scanner-processing-live-pill">
+                      {scanPhase === "uploading" ? "SECURE UPLOAD" : "VERIFIED ANALYSIS"}
                     </div>
-                    {activeProcessingMoment ? (
-                      <div className="scanner-processing-stage-preview">
-                        <ClipResultThumbnail
-                          videoSrc={videoSrc}
-                          clip={activeProcessingMoment}
-                          isActive
-                          preferVideo
-                          autoplayPreview
-                          className="stage-preview"
-                        />
-                        <div className="scanner-processing-stage-preview-copy">
-                          <span>Movement Preview</span>
-                          <strong>{activeProcessingMoment.title}</strong>
-                          <p>{activeProcessingMoment.reason}</p>
-                        </div>
-                      </div>
-                    ) : null}
-                    <div className="scanner-processing-wave-panel">
-                      <div className="scanner-processing-wave-head">
-                        <span>Audio Energy</span>
-                        <strong>{Math.round(scanProgress)}% mapped</strong>
-                      </div>
-                      <div className="scanner-processing-waveform">
-                        {processingWaveform.map((height, index) => (
-                          <span key={`processing-wave-${index}`} style={{ height: `${height}%` }} />
-                        ))}
-                      </div>
+                    <div className="scanner-processing-hero-copy">
+                      <strong>
+                        {scanPhase === "uploading"
+                          ? "Securely uploading your video..."
+                          : scanPhase === "analyzing"
+                            ? "AI analysis is running..."
+                            : "Preparing your scan..."}
+                      </strong>
+                      <span>
+                        {scanPhase === "uploading"
+                          ? "Your file is going to your private AutoPromote temporary storage. It is not being sent directly from this browser to the AI worker."
+                          : "No clip names, scores, or detected moments are shown until the worker returns real analysis results."}
+                      </span>
                     </div>
                     <div className="scanner-processing-timeline">
                       <div className="scanner-processing-timeline-head">
-                        <span>Timeline</span>
-                        <strong>{formatScannerClock(processingDuration)}</strong>
+                        <span>{statusMessage}</span>
+                        <strong>
+                          {scanPhase === "uploading"
+                            ? `${Math.round(Math.max(0, (scanProgress - 5) / 0.4))}% uploaded`
+                            : "Working"}
+                        </strong>
                       </div>
                       <div className="scanner-processing-track">
                         <span
                           className="scanner-processing-track-progress"
-                          style={{ width: `${Math.max(6, scanProgress)}%` }}
+                          style={{
+                            width:
+                              scanPhase === "uploading"
+                                ? `${Math.max(2, Math.min(100, (scanProgress - 5) / 0.4))}%`
+                                : "100%",
+                          }}
                         />
-                        {processingMoments.map(moment => {
-                          const left = (moment.start / processingDuration) * 100;
-                          const width = Math.max(10, (moment.duration / processingDuration) * 100);
-                          return (
-                            <div
-                              key={moment.id}
-                              className={`scanner-processing-marker is-${moment.status}`}
-                              style={{ left: `${left}%`, width: `${width}%` }}
-                            >
-                              <span>{moment.marker}</span>
-                            </div>
-                          );
-                        })}
                       </div>
                     </div>
                     <div className="scanner-processing-insight">
-                      <strong>⚡ Good energy detected</strong>
-                      <span>{processingInsight}</span>
+                      <strong>🔒 Private temporary source</strong>
+                      <span>
+                        AutoPromote verifies ownership before the worker receives a short-lived read
+                        link. The temporary source is deleted after processing.
+                      </span>
                     </div>
                   </div>
                 ) : null}
@@ -1581,23 +1415,13 @@ const ViralScanner = ({ file, onSelectClip, onClose, onUpgrade }) => {
               <div className="scanner-live-bar">
                 <div className="scanner-live-dot" />
                 <span className="scanner-live-text">
-                  {statusMessage || `Scanning frames... ${Math.round(scanProgress)}%`}
+                  {statusMessage || "Preparing secure analysis..."}
                 </span>
-                <div className="scanner-live-waveform">
-                  {Array.from({ length: 48 }, (_, i) => (
-                    <span
-                      key={`live-wave-${i}`}
-                      style={{
-                        height: `${Math.max(6, Math.min(100, 18 + Math.sin(i * 0.4 + scanProgress * 0.05) * 14 + Math.random() * 10))}%`,
-                      }}
-                    />
-                  ))}
-                </div>
                 <span
                   className="scanner-live-text"
                   style={{ color: "#93c5fd", fontSize: "0.7rem" }}
                 >
-                  {Math.round(scanProgress)}%
+                  {scanPhase === "uploading" ? "Encrypted upload" : "No estimated results"}
                 </span>
               </div>
             )}
@@ -1693,46 +1517,34 @@ const ViralScanner = ({ file, onSelectClip, onClose, onUpgrade }) => {
                   <div className="scanner-processing-dashboard-head">
                     <div>
                       <span className="scanner-processing-kicker">Viral Moment Scanner</span>
-                      <h4>AI is scanning your video...</h4>
-                      <p>{statusMessage || "Watching for hooks, peaks, and crowd response."}</p>
+                      <h4>
+                        {scanPhase === "uploading"
+                          ? "Secure upload in progress"
+                          : scanPhase === "analyzing"
+                            ? "Verified AI analysis in progress"
+                            : "Preparing secure analysis"}
+                      </h4>
+                      <p>{statusMessage}</p>
                     </div>
                     <div
                       className="scanner-processing-ring"
-                      style={{ "--scanner-progress": `${scanProgress}` }}
+                      style={{
+                        "--scanner-progress": `${scanPhase === "uploading" ? Math.max(0, (scanProgress - 5) / 0.4) : 100}`,
+                      }}
                     >
                       <div className="scanner-processing-ring-core">
-                        <strong>{Math.round(scanProgress)}%</strong>
-                        <span>processed</span>
+                        <strong>
+                          {scanPhase === "uploading"
+                            ? `${Math.round(Math.max(0, (scanProgress - 5) / 0.4))}%`
+                            : "AI"}
+                        </strong>
+                        <span>{scanPhase === "uploading" ? "uploaded" : "working"}</span>
                       </div>
                     </div>
                   </div>
-                  <div className="scanner-stage-list">
-                    {PROCESSING_STAGE_DEFINITIONS.map((stage, index) => {
-                      const state =
-                        index < scanStageIndex
-                          ? "completed"
-                          : index === scanStageIndex
-                            ? "active"
-                            : "waiting";
-                      return (
-                        <div key={stage.id} className={`scanner-stage-row is-${state}`}>
-                          <div>
-                            <strong>{stage.title}</strong>
-                            <span>{stage.detail}</span>
-                          </div>
-                          <em>
-                            {state === "completed"
-                              ? "Completed"
-                              : state === "active"
-                                ? "In progress"
-                                : "Waiting"}
-                          </em>
-                        </div>
-                      );
-                    })}
-                  </div>
                   <div className="scanner-processing-note">
-                    Your strongest clips will appear automatically when ranking is complete.
+                    Clip names, timestamps and scores will appear only after the backend returns
+                    verified results.
                   </div>
                 </div>
               ) : (
@@ -1900,43 +1712,14 @@ const ViralScanner = ({ file, onSelectClip, onClose, onUpgrade }) => {
                 <div className="scanner-live-moments-panel">
                   <div className="scanner-live-moments-head">
                     <div>
-                      <span>Live detected moments</span>
-                      <strong>Marketing-ready previews are surfacing now</strong>
+                      <span>Verified results pending</span>
+                      <strong>No moments have been claimed yet</strong>
                     </div>
-                    <small>Ranking while the scan runs</small>
+                    <small>{scanPhase === "uploading" ? "Secure upload" : "AI analysis"}</small>
                   </div>
-                  {processingMoments.map(moment => (
-                    <div key={moment.id} className={`scanner-live-moment-card is-${moment.status}`}>
-                      <div className="scanner-live-moment-index">{moment.marker}</div>
-                      <ClipResultThumbnail
-                        videoSrc={videoSrc}
-                        clip={moment}
-                        isActive={moment.status !== "waiting"}
-                        preferVideo
-                        autoplayPreview={moment.status !== "waiting"}
-                      />
-                      <div className="scanner-live-moment-copy">
-                        <div className="scanner-live-moment-header">
-                          <span>
-                            {formatScannerClock(moment.start)} - {formatScannerClock(moment.end)}
-                          </span>
-                          <strong>{moment.score}/100</strong>
-                        </div>
-                        <h5>{moment.title}</h5>
-                        <div className="scanner-tag-row compact">
-                          {moment.tags.map(tag => (
-                            <span key={`${moment.id}-${tag}`} className="scanner-tag-pill compact">
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                        <p>{moment.reason}</p>
-                      </div>
-                    </div>
-                  ))}
                   <div className="scanner-live-moments-footnote">
-                    We’ll show the full clip packages once scoring is complete, so users can jump
-                    straight into Studio or export.
+                    AutoPromote is waiting for real worker output. Nothing displayed here is a
+                    simulated detection or score.
                   </div>
                 </div>
               ) : null}

@@ -1,9 +1,14 @@
 import React from "react";
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import ViralScanner from "../ViralScanner";
+import { uploadTemporaryVideoSource } from "../../utils/sourceUpload";
 
 jest.mock("../../utils/clipWorkflowAnalytics", () => ({
   trackClipWorkflowEvent: jest.fn(() => Promise.resolve(true)),
+}));
+
+jest.mock("../../utils/sourceUpload", () => ({
+  uploadTemporaryVideoSource: jest.fn(),
 }));
 
 jest.mock("../../firebaseClient", () => ({
@@ -14,12 +19,6 @@ jest.mock("../../firebaseClient", () => ({
       getIdToken: jest.fn(() => Promise.resolve("token")),
     },
   },
-}));
-
-jest.mock("firebase/storage", () => ({
-  ref: jest.fn(),
-  uploadBytesResumable: jest.fn(),
-  getDownloadURL: jest.fn(),
 }));
 
 describe("ViralScanner guided clip selection", () => {
@@ -119,6 +118,14 @@ describe("ViralScanner guided clip selection", () => {
 
   beforeEach(() => {
     global.fetch = jest.fn();
+    uploadTemporaryVideoSource.mockImplementation(async ({ file, onProgress }) => {
+      onProgress?.(file.size, file.size);
+      return {
+        ok: true,
+        storagePath: "temp_scans/scanner-user/secure-local-source.mp4",
+        size: file.size,
+      };
+    });
     Object.defineProperty(window.HTMLMediaElement.prototype, "play", {
       configurable: true,
       writable: true,
@@ -138,7 +145,7 @@ describe("ViralScanner guided clip selection", () => {
     jest.clearAllMocks();
   });
 
-  test("shows live scan visuals while the AI analysis is still processing", async () => {
+  test("shows an honest pending state without fabricated moments while analysis runs", async () => {
     let resolveAnalyze;
     const analyzePromise = new Promise(resolve => {
       resolveAnalyze = resolve;
@@ -172,9 +179,10 @@ describe("ViralScanner guided clip selection", () => {
     });
 
     const processingVisuals = await screen.findByTestId("scanner-processing-visuals");
-    expect(processingVisuals.textContent).toContain("AI is scanning your video");
-    expect(screen.getByText(/Live detected moments/i)).toBeInTheDocument();
-    expect(screen.getByText(/Marketing-ready previews are surfacing now/i)).toBeInTheDocument();
+    expect(processingVisuals.textContent).toContain("AI analysis is running");
+    expect(screen.getByText(/No moments have been claimed yet/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Lead Vocal Peak/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/84\/100/i)).not.toBeInTheDocument();
 
     await act(async () => {
       resolveAnalyze({
@@ -274,9 +282,7 @@ describe("ViralScanner guided clip selection", () => {
     expect(block.textContent).toContain("Your video has not been uploaded");
     fireEvent.click(screen.getByRole("button", { name: /View Plans/i }));
     expect(onUpgrade).toHaveBeenCalledTimes(1);
-    expect(
-      global.fetch.mock.calls.some(([url]) => String(url).includes("/api/media/upload-source"))
-    ).toBe(false);
+    expect(uploadTemporaryVideoSource).not.toHaveBeenCalled();
     expect(
       global.fetch.mock.calls.some(([url]) => String(url).endsWith("/api/media/analyze"))
     ).toBe(false);
@@ -296,9 +302,7 @@ describe("ViralScanner guided clip selection", () => {
     const block = await screen.findByTestId("scanner-access-block");
     expect(block.textContent).toContain("This scan needs 8 credits. You have 3.");
     expect(screen.getByRole("button", { name: /Buy Credits/i })).toBeInTheDocument();
-    expect(
-      global.fetch.mock.calls.some(([url]) => String(url).includes("/api/media/upload-source"))
-    ).toBe(false);
+    expect(uploadTemporaryVideoSource).not.toHaveBeenCalled();
   });
 
   test("explains a worker wake timeout without uploading or charging the scan", async () => {
@@ -325,15 +329,13 @@ describe("ViralScanner guided clip selection", () => {
     });
 
     expect(await screen.findByText(/taking longer than expected to wake up/i)).toBeInTheDocument();
-    expect(
-      global.fetch.mock.calls.some(([url]) => String(url).includes("/api/media/upload-source"))
-    ).toBe(false);
+    expect(uploadTemporaryVideoSource).not.toHaveBeenCalled();
     expect(
       global.fetch.mock.calls.some(([url]) => String(url).endsWith("/api/media/analyze"))
     ).toBe(false);
   });
 
-  test("uploads local files through the configured media worker endpoint and charges 8 credits", async () => {
+  test("uploads local files to authenticated temporary storage and charges 8 credits", async () => {
     const file = new File(["video-bytes"], "local-source.mp4", { type: "video/mp4" });
 
     global.fetch = jest.fn((url, options = {}) => {
@@ -366,13 +368,6 @@ describe("ViralScanner guided clip selection", () => {
       if (requestUrl.includes("/api/media/worker-health")) {
         return Promise.resolve({ ok: true, status: 200, text: async () => "ok" });
       }
-      if (requestUrl.includes("/api/media/upload-source")) {
-        return Promise.resolve({
-          ok: true,
-          status: 200,
-          json: async () => ({ localPath: "/tmp/worker_inputs/local-source.mp4", size: 11 }),
-        });
-      }
       if (requestUrl.includes("/api/media/analyze")) {
         return Promise.resolve({
           ok: true,
@@ -400,21 +395,25 @@ describe("ViralScanner guided clip selection", () => {
 
     await screen.findByTestId("scanner-guidance-card");
 
-    expect(global.fetch).toHaveBeenCalledWith(
-      expect.stringMatching(/\/api\/media\/upload-source$/),
-      expect.objectContaining({ method: "POST", body: expect.any(FormData) })
+    expect(uploadTemporaryVideoSource).toHaveBeenCalledWith(
+      expect.objectContaining({
+        file,
+        purpose: "viral_scan",
+        onProgress: expect.any(Function),
+      })
     );
     const analyzeCall = global.fetch.mock.calls.find(([url]) =>
       String(url).includes("/api/media/analyze")
     );
     expect(JSON.parse(analyzeCall[1].body)).toEqual(
       expect.objectContaining({
-        fileUrl: "/tmp/worker_inputs/local-source.mp4",
-        localPath: "/tmp/worker_inputs/local-source.mp4",
+        fileUrl: "",
+        sourceStoragePath: "temp_scans/scanner-user/secure-local-source.mp4",
         forceFresh: false,
         scanNonce: "",
       })
     );
+    expect(JSON.parse(analyzeCall[1].body)).not.toHaveProperty("localPath");
   });
 
   test("passes improvement metadata when sending a weak clip to the editor", async () => {

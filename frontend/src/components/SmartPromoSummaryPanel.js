@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getAuth } from "firebase/auth";
-import { API_ENDPOINTS, MEDIA_API_URL } from "../config";
+import { API_ENDPOINTS } from "../config";
+import { uploadTemporaryVideoSource } from "../utils/sourceUpload";
 import { SafeImage } from "./SafeMedia";
 import "./SmartPromoSummaryPanel.css";
 
@@ -901,38 +902,33 @@ function SmartPromoSummaryPanel({
         await wait(800);
       }
 
-      // Upload directly to Python media worker — no Firebase roundtrip
-      setStatusText("Uploading to media worker...");
-      const formData = new FormData();
-      formData.append("file", uploadFile, uploadFile.name || "source.mp4");
-
-      const uploadEndpoint = `${MEDIA_API_URL.replace(/\/$/, "")}/api/media/upload-source`;
-      let response;
+      setStatusText("Securely uploading source to AutoPromote...");
+      let uploadResult;
       try {
-        response = await fetch(uploadEndpoint, {
-          method: "POST",
-          body: formData,
+        uploadResult = await uploadTemporaryVideoSource({
+          file: uploadFile,
+          purpose: "smart_promo",
+          onProgress: (bytesTransferred, totalBytes) => {
+            const ratio = totalBytes > 0 ? bytesTransferred / totalBytes : 0;
+            setStatusText(`Secure upload ${Math.round(ratio * 100)}% complete...`);
+          },
         });
-      } catch {
+      } catch (error) {
         throw new Error(
-          `Cannot reach media worker. Make sure python_media_worker is running at ${uploadEndpoint}.`
+          `Secure Smart Promo upload failed: ${error.message}. Nothing was sent to the AI worker.`
         );
       }
 
-      const uploadResult = await response.json().catch(() => ({}));
-      if (!response.ok || !uploadResult?.localPath) {
-        throw new Error(uploadResult?.detail || "Failed to upload source to media worker");
+      if (!uploadResult?.storagePath) {
+        throw new Error("Secure upload did not return a storage path");
       }
 
-      setStatusText(
-        `Source ready (${formatMediaBytes(uploadResult.size || 0)}, ${(uploadResult.duration || 0).toFixed(1)}s)`
-      );
+      setStatusText(`Source ready (${formatMediaBytes(uploadResult.size || 0)})`);
       await wait(500);
 
       return {
-        videoUrl: uploadResult.localPath,   // local filesystem path — worker reads directly
-        localPath: uploadResult.localPath,
-        sourceStoragePath: null,
+        videoUrl: "",
+        sourceStoragePath: uploadResult.storagePath,
       };
     }
 
@@ -1184,7 +1180,7 @@ function SmartPromoSummaryPanel({
     try {
       let token = await getFreshAuthToken(true);
       setStatusText("Uploading source video...");
-      const { videoUrl, localPath, sourceStoragePath } = await resolveVideoSource();
+      const { videoUrl, sourceStoragePath } = await resolveVideoSource();
       const sourceFingerprint = buildSourceFingerprint({ sourceFile, sourceUrl });
       setStatusText("Creating Smart Promo job...");
 
@@ -1199,7 +1195,6 @@ function SmartPromoSummaryPanel({
           },
           body: JSON.stringify({
             videoUrl,
-            localPath: localPath || null,
             durationSeconds,
             style: styleId,
             outputMode,
