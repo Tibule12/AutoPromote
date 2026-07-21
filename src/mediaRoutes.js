@@ -488,12 +488,7 @@ const resolveOwnedMulticamMasterSource = async ({ renderJobId, userId }) => {
   };
 };
 
-const resolveRequestedMediaSource = async ({
-  fileUrl,
-  sourceStoragePath,
-  renderJobId,
-  userId,
-}) => {
+const resolveRequestedMediaSource = async ({ fileUrl, sourceStoragePath, renderJobId, userId }) => {
   if (renderJobId) {
     return resolveOwnedMulticamMasterSource({ renderJobId, userId });
   }
@@ -840,51 +835,51 @@ router.post(
   requireTesterEditingFeature("audioExtract"),
   upload.single("file"),
   async (req, res) => {
-  try {
-    if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+    try {
+      if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
-    const userId = req.user.uid;
-    const bucket = admin.storage().bucket();
-    const filename = `temp_transcribe/${userId}/${uuidv4()}_${req.file.originalname}`;
-    const blob = bucket.file(filename);
+      const userId = req.user.uid;
+      const bucket = admin.storage().bucket();
+      const filename = `temp_transcribe/${userId}/${uuidv4()}_${req.file.originalname}`;
+      const blob = bucket.file(filename);
 
-    console.log(`[MediaRoute] Uploading file for transcription: ${filename}`);
+      console.log(`[MediaRoute] Uploading file for transcription: ${filename}`);
 
-    // 1. Upload to Firebase Storage
-    const blobStream = blob.createWriteStream({
-      metadata: { contentType: req.file.mimetype },
-    });
-
-    blobStream.on("error", err => {
-      console.error(err);
-      res.status(500).json({ error: "Upload to storage failed" });
-    });
-
-    blobStream.on("finish", async () => {
-      // 2. Get Signed URL (or make public? Signed is safer)
-      // Python worker needs to access it.
-      const [url] = await blob.getSignedUrl({
-        action: "read",
-        expires: Date.now() + 1000 * 60 * 60, // 1 hour
+      // 1. Upload to Firebase Storage
+      const blobStream = blob.createWriteStream({
+        metadata: { contentType: req.file.mimetype },
       });
 
-      console.log(`[MediaRoute] File uploaded. Sending to Python Worker...`);
+      blobStream.on("error", err => {
+        console.error(err);
+        res.status(500).json({ error: "Upload to storage failed" });
+      });
 
-      // 3. Call Service (Async Job)
-      try {
-        // Old sync: const segments = await videoEditingService.transcribeVideo(url);
-        const job = await videoEditingService.startTranscriptionJob(url, userId);
-        res.json({ success: true, jobId: job.jobId, message: "Transcription started" });
-      } catch (err) {
-        res.status(500).json({ error: "Transcription service failed: " + err.message });
-      }
-    });
+      blobStream.on("finish", async () => {
+        // 2. Get Signed URL (or make public? Signed is safer)
+        // Python worker needs to access it.
+        const [url] = await blob.getSignedUrl({
+          action: "read",
+          expires: Date.now() + 1000 * 60 * 60, // 1 hour
+        });
 
-    blobStream.end(req.file.buffer);
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: e.message });
-  }
+        console.log(`[MediaRoute] File uploaded. Sending to Python Worker...`);
+
+        // 3. Call Service (Async Job)
+        try {
+          // Old sync: const segments = await videoEditingService.transcribeVideo(url);
+          const job = await videoEditingService.startTranscriptionJob(url, userId);
+          res.json({ success: true, jobId: job.jobId, message: "Transcription started" });
+        } catch (err) {
+          res.status(500).json({ error: "Transcription service failed: " + err.message });
+        }
+      });
+
+      blobStream.end(req.file.buffer);
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ error: e.message });
+    }
   }
 );
 
@@ -896,88 +891,88 @@ router.post(
     req.body?.options?.renderViral === true ? "clipRender" : "watermarkRemoval"
   ),
   async (req, res) => {
-  const userId = req.user.uid;
-  const { fileUrl: requestedFileUrl, renderJobId, options } = req.body;
-  const isViralClipRender = options?.renderViral === true;
-  const cost = isViralClipRender ? CREDIT_COSTS["render-clip"] || 5 : CREDIT_COSTS.process || 10;
+    const userId = req.user.uid;
+    const { fileUrl: requestedFileUrl, renderJobId, options } = req.body;
+    const isViralClipRender = options?.renderViral === true;
+    const cost = isViralClipRender ? CREDIT_COSTS["render-clip"] || 5 : CREDIT_COSTS.process || 10;
 
-  if (!requestedFileUrl && !renderJobId) {
-    return res.status(400).json({ message: "No file provided" });
-  }
+    if (!requestedFileUrl && !renderJobId) {
+      return res.status(400).json({ message: "No file provided" });
+    }
 
-  let resolvedSource;
-  try {
-    resolvedSource = await resolveRequestedMediaSource({
-      fileUrl: requestedFileUrl,
-      renderJobId,
-      userId,
-    });
-  } catch (error) {
-    return res.status(error.statusCode || 500).json({
-      message: error.message || "Could not load the requested source",
-      code: error.code || "SOURCE_RESOLUTION_FAILED",
-    });
-  }
-
-  const fileUrl = resolvedSource.outputUrl;
-  const resolvedOptions = options?.viralData
-    ? {
-        ...options,
-        viralData: {
-          ...options.viralData,
-          video_url: fileUrl,
-          timeline_segments: Array.isArray(options.viralData.timeline_segments)
-            ? options.viralData.timeline_segments.map(segment =>
-                segment?.id === "main" ? { ...segment, url: fileUrl } : segment
-              )
-            : options.viralData.timeline_segments,
-        },
-      }
-    : options;
-  console.log("[MediaRoute] Received request:", {
-    fileUrl,
-    renderJobId: resolvedSource.renderJobId,
-    options: resolvedOptions,
-  });
-
-  // 1. Deduct Credits
-  try {
-    const result = await chargeVideoEditorCredits(
-      userId,
-      cost,
-      isViralClipRender ? "render-clip" : "process"
-    );
-    if (!result.success) {
-      return res.status(403).json({
-        message: `This operation costs ${cost} credits. You have ${result.remaining || 0} credits available.`,
-        required: cost,
-        remaining: result.remaining || 0,
-        monthlyRemaining: result.monthlyRemaining,
-        topUpBalance: result.topUpBalance,
-        tier: result.tier,
-        topUpPacks: CREDIT_TOP_UP_PACKS,
+    let resolvedSource;
+    try {
+      resolvedSource = await resolveRequestedMediaSource({
+        fileUrl: requestedFileUrl,
+        renderJobId,
+        userId,
+      });
+    } catch (error) {
+      return res.status(error.statusCode || 500).json({
+        message: error.message || "Could not load the requested source",
+        code: error.code || "SOURCE_RESOLUTION_FAILED",
       });
     }
 
-    // 2. Delegate to Service (Async Job Queue)
-    // Old sync method: const processResult = await videoEditingService.processVideo(fileUrl, options, userId);
-    // New async method: returns { jobId }
-    const job = await videoEditingService.startProcessingJob(fileUrl, resolvedOptions, userId);
-
-    // 3. Return Job ID + remaining credits (or defer credit check)
-    // Note: The frontend needs to poll /status/:jobId now.
-    res.json({
-      success: true,
-      jobId: job.jobId,
-      message: "Processing started",
-      remainingCredits: result.remaining,
-      billingDisabled: !!result.skipped,
-      reusedMulticamMaster: Boolean(resolvedSource.renderJobId),
+    const fileUrl = resolvedSource.outputUrl;
+    const resolvedOptions = options?.viralData
+      ? {
+          ...options,
+          viralData: {
+            ...options.viralData,
+            video_url: fileUrl,
+            timeline_segments: Array.isArray(options.viralData.timeline_segments)
+              ? options.viralData.timeline_segments.map(segment =>
+                  segment?.id === "main" ? { ...segment, url: fileUrl } : segment
+                )
+              : options.viralData.timeline_segments,
+          },
+        }
+      : options;
+    console.log("[MediaRoute] Received request:", {
+      fileUrl,
+      renderJobId: resolvedSource.renderJobId,
+      options: resolvedOptions,
     });
-  } catch (error) {
-    console.error("[MediaRoute] Processing error:", error.message);
-    res.status(500).json({ message: "Media processing failed", details: error.message });
-  }
+
+    // 1. Deduct Credits
+    try {
+      const result = await chargeVideoEditorCredits(
+        userId,
+        cost,
+        isViralClipRender ? "render-clip" : "process"
+      );
+      if (!result.success) {
+        return res.status(403).json({
+          message: `This operation costs ${cost} credits. You have ${result.remaining || 0} credits available.`,
+          required: cost,
+          remaining: result.remaining || 0,
+          monthlyRemaining: result.monthlyRemaining,
+          topUpBalance: result.topUpBalance,
+          tier: result.tier,
+          topUpPacks: CREDIT_TOP_UP_PACKS,
+        });
+      }
+
+      // 2. Delegate to Service (Async Job Queue)
+      // Old sync method: const processResult = await videoEditingService.processVideo(fileUrl, options, userId);
+      // New async method: returns { jobId }
+      const job = await videoEditingService.startProcessingJob(fileUrl, resolvedOptions, userId);
+
+      // 3. Return Job ID + remaining credits (or defer credit check)
+      // Note: The frontend needs to poll /status/:jobId now.
+      res.json({
+        success: true,
+        jobId: job.jobId,
+        message: "Processing started",
+        remainingCredits: result.remaining,
+        billingDisabled: !!result.skipped,
+        reusedMulticamMaster: Boolean(resolvedSource.renderJobId),
+      });
+    } catch (error) {
+      console.error("[MediaRoute] Processing error:", error.message);
+      res.status(500).json({ message: "Media processing failed", details: error.message });
+    }
   }
 );
 
@@ -2098,6 +2093,12 @@ router.get("/status/:jobId", async (req, res) => {
       output_url: approvalView.output_url, // Python worker result, gated until approval
       audio_url: data.audio_url,
       outputUrl: approvalView.outputUrl, // Legacy Node worker result, gated until approval
+      audioProof:
+        data.audioProof ||
+        data.audio_proof ||
+        data.result?.audioProof ||
+        data.result?.audio_proof ||
+        null,
       previewUrl: approvalView.previewUrl,
       heldOutputUrl: approvalView.heldOutputUrl,
       approvedOutputUrl: approvalView.approvedOutputUrl,
@@ -2319,6 +2320,7 @@ router.post("/render-clip", requireTesterEditingFeature("clipRender"), async (re
     res.json({
       success: true,
       url: result.url,
+      audioProof: result.audioProof || null,
       remainingCredits: creditRes.remaining,
       billingDisabled: !!creditRes.skipped,
       reusedMulticamMaster: Boolean(resolvedSource.renderJobId),

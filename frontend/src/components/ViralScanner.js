@@ -5,6 +5,7 @@ import { API_BASE_URL, API_ENDPOINTS } from "../config";
 import { applySafeMediaSource, createSecureId } from "../utils/security";
 import { trackClipWorkflowEvent } from "../utils/clipWorkflowAnalytics";
 import { uploadTemporaryVideoSource } from "../utils/sourceUpload";
+import { playMediaSafely } from "../utils/mediaPlayback";
 import { SafeImage, SafeVideo } from "./SafeMedia";
 
 const CLIP_SCANNER_CACHE_TTL_MS = 3 * 24 * 60 * 60 * 1000;
@@ -451,6 +452,7 @@ const ViralScanner = ({ file, onSelectClip, onClose, onUpgrade }) => {
   const [scanProgress, setScanProgress] = useState(0);
   const [results, setResults] = useState([]);
   const [previewClip, setPreviewClip] = useState(null);
+  const [previewSoundOn, setPreviewSoundOn] = useState(false);
   const [previewRelativeTime, setPreviewRelativeTime] = useState(0);
   const [selectedClip, setSelectedClip] = useState(null);
   const [statusMessage, setStatusMessage] = useState("");
@@ -577,6 +579,7 @@ const ViralScanner = ({ file, onSelectClip, onClose, onUpgrade }) => {
     setResults([]);
     setSelectedClip(null);
     setPreviewClip(null);
+    setPreviewSoundOn(false);
     setStatusMessage("");
     setScanPhase("idle");
     setLearningMeta(null);
@@ -1096,8 +1099,14 @@ const ViralScanner = ({ file, onSelectClip, onClose, onUpgrade }) => {
       previewStopHandlerRef.current = null;
     }
 
+    const audiblePreview = options.audible !== false && options.source !== "auto_top_pick";
     video.currentTime = clip.start;
-    video.play();
+    video.muted = !audiblePreview;
+    video.volume = audiblePreview ? 1 : 0;
+    setPreviewSoundOn(audiblePreview);
+    void playMediaSafely(video, {
+      onUnexpectedError: error => console.warn("Clip preview playback failed", error),
+    });
     setPreviewClip(clip);
     setPreviewRelativeTime(0);
     if (!options.keepSelection) {
@@ -1301,10 +1310,7 @@ const ViralScanner = ({ file, onSelectClip, onClose, onUpgrade }) => {
           <div ref={videoSectionRef} className="scanner-video-column">
             {videoSrc ? (
               <div className="scanner-video-frame">
-                <video
-                  ref={videoRef}
-                  controls={!selectedClip}
-                />
+                <video ref={videoRef} controls={!selectedClip} />
                 {activeSelectedVisual?.url ? (
                   <div className="scanner-selected-visual-preview">
                     <div>
@@ -1397,12 +1403,40 @@ const ViralScanner = ({ file, onSelectClip, onClose, onUpgrade }) => {
                     <div className="scanner-clip-preview-bar">
                       <span style={{ width: `${activePreviewProgress}%` }} />
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => handlePreviewClip(selectedClip, { keepSelection: true })}
-                    >
-                      Play selected clip
-                    </button>
+                    <div className="scanner-clip-preview-actions">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handlePreviewClip(selectedClip, { keepSelection: true, audible: true })
+                        }
+                      >
+                        Play selected clip with sound
+                      </button>
+                      <button
+                        type="button"
+                        aria-pressed={previewSoundOn}
+                        onClick={() => {
+                          const video = videoRef.current;
+                          if (!video) return;
+                          const nextSoundOn = !previewSoundOn;
+                          video.muted = !nextSoundOn;
+                          video.volume = nextSoundOn ? 1 : 0;
+                          setPreviewSoundOn(nextSoundOn);
+                          if (video.paused) {
+                            void playMediaSafely(video, {
+                              onUnexpectedError: error =>
+                                console.warn("Clip preview playback failed", error),
+                            });
+                          }
+                        }}
+                      >
+                        {previewSoundOn ? "🔊 Sound on" : "🔇 Turn sound on"}
+                      </button>
+                    </div>
+                    <small>
+                      These are detected moments from your source video. Exported clips are created
+                      after you choose “Edit this clip”.
+                    </small>
                   </div>
                 ) : null}
               </div>

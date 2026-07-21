@@ -1,5 +1,6 @@
 import * as SentryLib from "@sentry/react";
 import { BrowserTracing } from "@sentry/tracing";
+import { isExpectedMediaPlaybackInterruption } from "./utils/mediaPlayback";
 
 // Exported binding that will be null when Sentry is not initialized
 let Sentry = null;
@@ -25,7 +26,17 @@ export function initSentry() {
       sendDefaultPii:
         String(process.env.REACT_APP_SENTRY_SEND_DEFAULT_PII || "false").toLowerCase() === "true" ||
         String(process.env.REACT_APP_SENTRY_SEND_DEFAULT_PII || "0") === "1",
-      beforeSend(event) {
+      beforeSend(event, hint) {
+        const exceptionValue = event?.exception?.values?.[0];
+        if (
+          isExpectedMediaPlaybackInterruption(hint?.originalException) ||
+          isExpectedMediaPlaybackInterruption({
+            name: exceptionValue?.type,
+            message: exceptionValue?.value,
+          })
+        ) {
+          return null;
+        }
         if (event.request && event.request.headers) {
           const headers = { ...event.request.headers };
           if (headers.authorization) delete headers.authorization;

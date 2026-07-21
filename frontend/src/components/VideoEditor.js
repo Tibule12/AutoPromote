@@ -28,13 +28,18 @@ const DESKTOP_TOOL_MESSAGE =
 
 function DesktopOnlyToolNotice({ toolName, onClose }) {
   return (
-    <div className="desktop-tool-overlay" role="dialog" aria-modal="true" aria-label={`${toolName} desktop required`}>
+    <div
+      className="desktop-tool-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${toolName} desktop required`}
+    >
       <div className="desktop-tool-card">
         <span className="desktop-tool-eyebrow">Desktop Required</span>
         <h3>{toolName}</h3>
         <p>
-          This workspace needs a larger screen, precise pointer controls, and room for the
-          timeline. Use AutoPromote on a laptop or desktop computer to open it.
+          This workspace needs a larger screen, precise pointer controls, and room for the timeline.
+          Use AutoPromote on a laptop or desktop computer to open it.
         </p>
         <div className="desktop-tool-list">
           <span>Best on laptop or desktop</span>
@@ -87,7 +92,9 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
   const [processedFile, setProcessedFile] = useState(null);
   const [desktopToolsAvailable, setDesktopToolsAvailable] = useState(canUseDesktopEditingTools);
   const [clipSuggestions, setClipSuggestions] = useState(() =>
-    canUseDesktopEditingTools() && file?.openStudio && Array.isArray(file?.clips) ? file.clips : null
+    canUseDesktopEditingTools() && file?.openStudio && Array.isArray(file?.clips)
+      ? file.clips
+      : null
   ); // Store detected clips or manual studio entry
   const [showMultiCamCombiner, setShowMultiCamCombiner] = useState(false);
   const autoOpenedStudioRef = useRef(false);
@@ -896,7 +903,7 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
     ]);
   };
 
-  const handleThumbnailSelect = (thumbData) => {
+  const handleThumbnailSelect = thumbData => {
     setThumbnailData(thumbData);
     setShowThumbnailGenerator(false);
   };
@@ -907,10 +914,12 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
       return;
     }
 
-    const safeName = `${(clip.promoCaption || clip.title || "promo-clip")
-      .replace(/[^a-zA-Z0-9._-]+/g, "-")
-      .replace(/-+/g, "-")
-      .replace(/^-|-$/g, "") || "promo-clip"}.mp4`;
+    const safeName = `${
+      (clip.promoCaption || clip.title || "promo-clip")
+        .replace(/[^a-zA-Z0-9._-]+/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "") || "promo-clip"
+    }.mp4`;
 
     try {
       setStatusMessage("Loading promo clip into the editor...");
@@ -1207,7 +1216,12 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
           }
 
           if (statusData.status === "completed") {
-            result = statusData.result;
+            result = statusData.result || {
+              ...statusData,
+              url: statusData.output_url || statusData.outputUrl || null,
+              thumbnailUrl: statusData.thumbnailUrl || null,
+              audioProof: statusData.audioProof || null,
+            };
             break;
           }
 
@@ -1215,16 +1229,26 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
         }
       }
       // Update the main editor with the final rendered clip
-      if (result.url) {
-        const urlWithCacheBuster = `${result.url}?t=${Date.now()}`;
+      const renderedUrl = result.url || result.output_url || result.outputUrl;
+      if (renderedUrl) {
+        const isSignedUrl =
+          renderedUrl.includes("Signature") ||
+          renderedUrl.includes("token=") ||
+          renderedUrl.includes("Expires");
+        const urlWithCacheBuster = isSignedUrl
+          ? renderedUrl
+          : renderedUrl.includes("?")
+            ? `${renderedUrl}&t=${Date.now()}`
+            : `${renderedUrl}?t=${Date.now()}`;
         setVideoSrc(urlWithCacheBuster);
         const fakeFile = {
           name: `viral_clip_rendered.mp4`,
           type: "video/mp4",
-          url: result.url,
+          url: renderedUrl,
           thumbnailUrl: result.thumbnailUrl || null,
           coverFrame: result.coverFrame || null,
           thumbnailFrame: result.thumbnailFrame || null,
+          audioProof: result.audioProof || result.audio_proof || null,
           isRemote: true,
           clipLearning:
             selectedClip?.id || selectedClip?.scanSessionId
@@ -1249,7 +1273,13 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
               : null,
         };
         setProcessedFile(fakeFile);
-        setStatusMessage("Viral Clip Rendered! Auto-saving...");
+        setStatusMessage(
+          fakeFile.audioProof?.verified
+            ? "Viral clip rendered with verified audio. Auto-saving..."
+            : fakeFile.audioProof?.expected === false
+              ? "Viral clip rendered without audio as requested. Auto-saving..."
+              : "Viral clip rendered. Auto-saving..."
+        );
 
         // Automatically save back to parent if onSave is provided
         if (onSave) {
@@ -1641,18 +1671,34 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
                   {thumbnailData && (
                     <div
                       style={{
-                        position: "absolute", top: 8, right: 8, zIndex: 10,
-                        background: "rgba(0,0,0,0.7)", borderRadius: 8, padding: 4,
+                        position: "absolute",
+                        top: 8,
+                        right: 8,
+                        zIndex: 10,
+                        background: "rgba(0,0,0,0.7)",
+                        borderRadius: 8,
+                        padding: 4,
                         border: "2px solid #a78bfa",
                       }}
                     >
                       <img
                         src={thumbnailData.dataUrl}
                         alt="Thumbnail preview"
-                        style={{ width: 120, height: 72, objectFit: "contain", borderRadius: 4, display: "block", background: "#050816" }}
+                        style={{
+                          width: 120,
+                          height: 72,
+                          objectFit: "contain",
+                          borderRadius: 4,
+                          display: "block",
+                          background: "#050816",
+                        }}
                       />
-                      <div style={{ color: "#a78bfa", fontSize: 9, textAlign: "center", marginTop: 2 }}>
-                        {thumbnailData.source === "smart_promo_visual" ? "Selected Promo Visual" : "Thumbnail"}
+                      <div
+                        style={{ color: "#a78bfa", fontSize: 9, textAlign: "center", marginTop: 2 }}
+                      >
+                        {thumbnailData.source === "smart_promo_visual"
+                          ? "Selected Promo Visual"
+                          : "Thumbnail"}
                       </div>
                     </div>
                   )}
@@ -1774,8 +1820,8 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
             </div>
             {!desktopToolsAvailable ? (
               <div className="studio-launch-desktop-note">
-                Viral Clip Studio and Cam Combiner are optimized for laptop and desktop editing.
-                You can still use mobile-friendly tools here, then finish timeline work on a computer.
+                Viral Clip Studio and Cam Combiner are optimized for laptop and desktop editing. You
+                can still use mobile-friendly tools here, then finish timeline work on a computer.
               </div>
             ) : null}
             <div className="studio-launch-actions">
@@ -1844,11 +1890,17 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
               onClick={() => setShowThumbnailGenerator(true)}
               disabled={!videoSrc || processing}
               style={{
-                padding: "6px 16px", borderRadius: 8, border: "2px solid #a78bfa",
+                padding: "6px 16px",
+                borderRadius: 8,
+                border: "2px solid #a78bfa",
                 background: thumbnailData ? "rgba(167,139,250,0.15)" : "transparent",
                 color: thumbnailData ? "#c4b5fd" : "#a78bfa",
-                fontWeight: 600, fontSize: 14, cursor: videoSrc ? "pointer" : "not-allowed",
-                display: "flex", alignItems: "center", gap: 6,
+                fontWeight: 600,
+                fontSize: 14,
+                cursor: videoSrc ? "pointer" : "not-allowed",
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
               }}
             >
               {thumbnailData ? "📸 ✓ Thumbnail Ready" : "🎬 Generate Thumbnail"}

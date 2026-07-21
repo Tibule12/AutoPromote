@@ -19,6 +19,7 @@ import { useSubscription } from "../../hooks/useSubscription";
 import { sanitizeUrl } from "../../utils/security";
 import { withWorkspaceHeaders } from "../../utils/workspace";
 import { revokeObjectUrlLater } from "../../utils/objectUrl";
+import { playMediaSafely } from "../../utils/mediaPlayback";
 import {
   buildBackendUploadError,
   STORAGE_UPLOAD_LIMIT_MB,
@@ -722,8 +723,11 @@ const PlatformPreview = ({
             onClick={e => {
               // Simple toggle play/pause for non-controlled mockups.
               if (!showControls) {
-                if (e.target.paused) e.target.play();
-                else e.target.pause();
+                if (e.target.paused) {
+                  void playMediaSafely(e.target, {
+                    onUnexpectedError: error => console.warn("Preview playback failed", error),
+                  });
+                } else e.target.pause();
               }
             }}
           />

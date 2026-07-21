@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import initSentry, { Sentry } from "./sentryClient";
 import { send as frontendLog } from "./utils/frontendLogger";
+import { isExpectedMediaPlaybackInterruption } from "./utils/mediaPlayback";
 import { HashRouter } from "react-router-dom";
 import "./App.css";
 import App from "./App";
@@ -55,6 +56,10 @@ window.addEventListener("error", event => {
 window.addEventListener("unhandledrejection", event => {
   try {
     const reason = event.reason || {};
+    if (isExpectedMediaPlaybackInterruption(reason)) {
+      event.preventDefault();
+      return;
+    }
     frontendLog("error", reason.message || "unhandledrejection", { reason });
   } catch (e) {}
 });

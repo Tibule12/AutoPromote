@@ -506,4 +506,46 @@ describe("ViralScanner guided clip selection", () => {
     expect(screen.getByText(/Saved scan from/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Rescan/i })).toBeInTheDocument();
   });
+
+  test("unmutes a detected moment when the user asks to preview it with sound", async () => {
+    mockScannerFetch({
+      scenes: [
+        {
+          id: "audible-clip",
+          start_time: 4,
+          end_time: 16,
+          reason: "Strong spoken hook with rising audio energy",
+          score: 88,
+        },
+      ],
+    });
+
+    const { container } = render(
+      <ViralScanner
+        file="https://example.com/source.mp4"
+        onSelectClip={jest.fn()}
+        onClose={jest.fn()}
+      />
+    );
+
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: /Start AI Scan/i })).not.toBeDisabled()
+    );
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /Start AI Scan/i }));
+    });
+
+    const soundButton = await screen.findByRole("button", {
+      name: /Play selected clip with sound/i,
+    });
+    const video = container.querySelector(".scanner-video-frame video");
+    expect(video.muted).toBe(true);
+
+    await act(async () => {
+      fireEvent.click(soundButton);
+    });
+
+    expect(video.muted).toBe(false);
+    expect(video.volume).toBe(1);
+  });
 });

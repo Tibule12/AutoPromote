@@ -558,7 +558,7 @@ def probe_media_stream_summary(input_path):
                 "-v",
                 "error",
                 "-show_entries",
-                "stream=index,codec_type,codec_name,profile,pix_fmt,width,height,avg_frame_rate,time_base,duration",
+                "stream=index,codec_type,codec_name,profile,pix_fmt,width,height,avg_frame_rate,time_base,duration,channels,sample_rate,bit_rate",
                 "-show_entries",
                 "format=duration,size",
                 "-of",
@@ -729,6 +729,28 @@ def has_audio_stream(input_path):
         return bool(result.stdout.strip())
     except Exception:
         return False
+
+
+def build_audio_delivery_proof(input_path, expected=True):
+    """Return browser-delivery audio evidence for a completed media file."""
+    summary = probe_media_stream_summary(input_path)
+    audio_stream = next(
+        (
+            stream
+            for stream in (summary.get("streams") or [])
+            if str(stream.get("codec_type") or "").lower() == "audio"
+        ),
+        None,
+    )
+    verified = bool(audio_stream)
+    return {
+        "expected": bool(expected),
+        "verified": verified,
+        "codec": str((audio_stream or {}).get("codec_name") or ""),
+        "channels": int((audio_stream or {}).get("channels") or 0),
+        "sample_rate": int((audio_stream or {}).get("sample_rate") or 0),
+        "duration_seconds": round(float((audio_stream or {}).get("duration") or 0.0), 3),
+    }
 
 
 def detect_content_type(input_path, audio_energy=None):
@@ -11570,6 +11592,9 @@ async def render_clip(request: RenderClipRequest):
         await run_subprocess_async(cmd, check=True)
 
         if os.path.exists(output_path):
+             audio_proof = build_audio_delivery_proof(output_path, expected=True)
+             if not audio_proof["verified"]:
+                 raise RuntimeError("Rendered clip failed audio verification; no silent file was delivered")
              # Ensure the path is absolute for Node.js to pick up
              abs_path = os.path.abspath(output_path)
              return {
@@ -11577,7 +11602,8 @@ async def render_clip(request: RenderClipRequest):
                  "job_id": job_id,
                  "output_path": abs_path, 
                  "output_url": upload_file_to_firebase(output_path),
-                 "duration": request.end_time - request.start_time
+                 "duration": request.end_time - request.start_time,
+                 "audio_proof": audio_proof,
              }
         else:
             raise Exception("Output file not generated")
@@ -27770,6 +27796,7 @@ class RenderViralRequest(BaseModel):
     smart_crop: bool = False
     smart_crop_mode: str = "center"  # "center", "speaker_track", "ai_director"
     visual_enhance: bool = False  # Use Smart Promo dynamic visual pipeline (face zoom, movement tracking, reframing)
+    mute_audio: bool = False
     add_hook: bool = False
     hook_text: str = ""
     hook_intro_seconds: float = 3.0
@@ -27839,6 +27866,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                   update_firestore_job(job_id, {"status": "failed", "error": err_msg})
                   return
              raise HTTPException(status_code=400, detail=err_msg)
+
+        source_has_audio = has_audio_stream(input_path)
 
         # 2. Pre-trim to duration or assemble timeline sequence
         timeline_segments = request.timeline_segments or []
@@ -28455,7 +28484,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 brand_text,
                 x_expr="w-tw-44",
                 y_expr="44",
-                fontsize="max(32,h/34)",
+                fontsize=str(max(32, int(base_height / 34))),
                 color="white",
                 box=True,
                 boxcolor="0xff2a26@0.92",
@@ -28533,7 +28562,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
 
         background_audio = request.background_audio if request.background_audio and request.background_audio.enabled else None
         audio_filter_chain = []
-        has_main_audio = has_audio_stream(working_path)
+        has_main_audio = has_audio_stream(working_path) and not request.mute_audio
         audio_mix_labels = []
 
         if has_main_audio:
@@ -28649,8 +28678,14 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         cmd.extend(inputs)
 
         if not filter_chain and not audio_filter_chain:
-             # Just Trim? We already trimmed. So this is a no-op / copy.
-             cmd.extend(["-c", "copy", "-y", output_path])
+             # Preserve the video stream, but normalize retained audio to AAC so
+             # phone/browser playback cannot silently reject an unusual source codec.
+             cmd.extend(["-map", "0:v:0"])
+             if has_main_audio:
+                 cmd.extend(["-map", "0:a:0", "-c:v", "copy", "-c:a", "aac", "-b:a", "160k"])
+             else:
+                 cmd.extend(["-c:v", "copy", "-an"])
+             cmd.extend(["-movflags", "+faststart", "-y", output_path])
         else:
              # Handle case where output label was not set (e.g., intermediate filters)
              if current_v_label != "output":
@@ -28673,17 +28708,31 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                  cmd.extend(["-map", "0:v:0"])
 
              if audio_filter_chain:
-                 cmd.extend(["-map", "[a_mix]", "-c:a", "aac"])
+                 cmd.extend(["-map", "[a_mix]", "-c:a", "aac", "-b:a", "160k"])
+             elif request.mute_audio:
+                 cmd.extend(["-an"])
              else:
-                 cmd.extend(["-map", "0:a?", "-c:a", "copy"])
+                 cmd.extend(["-map", "0:a?", "-c:a", "aac", "-b:a", "160k"])
 
-             cmd.extend(["-shortest", "-c:v", "libx264", "-y", output_path])
+             cmd.extend(["-shortest", "-c:v", "libx264", "-movflags", "+faststart", "-y", output_path])
         
         logger.info(f"Running FFmpeg: {' '.join(cmd)}")
         await run_subprocess_async(cmd, check=True)
 
         if os.path.exists(output_path):
+            audio_expected = bool(
+                (source_has_audio and not request.mute_audio)
+                or overlay_audio_specs
+                or (background_audio and background_audio.url)
+            )
+            audio_proof = build_audio_delivery_proof(output_path, expected=audio_expected)
+            if audio_expected and not audio_proof["verified"]:
+                raise RuntimeError(
+                    "Final viral clip failed audio verification; the silent output was rejected"
+                )
             public_url = upload_file_to_firebase(output_path)
+            if not public_url:
+                raise RuntimeError("Final viral clip could not be published")
             cover_frame_request = request.thumbnail_frame or request.cover_frame
             thumbnail_url = None
             cover_frame_result = None
@@ -28759,6 +28808,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     or os.getenv("VIRAL_BRAND_WATERMARK_TEXT")
                     or "AUTOPROMOTE"
                 ) if brand_watermark_enabled else None,
+                "audio_proof": audio_proof,
             }
             
             if request.async_mode:

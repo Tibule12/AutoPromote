@@ -275,6 +275,22 @@
   cursor: pointer;
 }
 
+.scanner-clip-preview-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.scanner-clip-preview-controls .scanner-clip-preview-actions button {
+  justify-self: auto;
+}
+
+.scanner-clip-preview-controls small {
+  color: rgba(226, 232, 240, 0.76);
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
 .scanner-selected-visual-preview {
   position: absolute;
   top: 18px;
