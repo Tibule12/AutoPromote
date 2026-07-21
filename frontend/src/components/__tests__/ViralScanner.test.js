@@ -37,6 +37,7 @@ describe("ViralScanner guided clip selection", () => {
     accessCode = null,
     accessMessage = "Find Viral Clips is ready.",
     topUpsAllowed = true,
+    workerHealthResponse = null,
   }) {
     global.fetch = jest.fn((url, options = {}) => {
       const requestUrl = String(url);
@@ -88,6 +89,7 @@ describe("ViralScanner guided clip selection", () => {
       }
 
       if (requestUrl.includes("/api/media/worker-health")) {
+        if (workerHealthResponse) return Promise.resolve(workerHealthResponse);
         return Promise.resolve({
           ok: true,
           status: 200,
@@ -296,6 +298,38 @@ describe("ViralScanner guided clip selection", () => {
     expect(screen.getByRole("button", { name: /Buy Credits/i })).toBeInTheDocument();
     expect(
       global.fetch.mock.calls.some(([url]) => String(url).includes("/api/media/upload-source"))
+    ).toBe(false);
+  });
+
+  test("explains a worker wake timeout without uploading or charging the scan", async () => {
+    const file = new File(["video-bytes"], "local-source.mp4", { type: "video/mp4" });
+    mockScannerFetch({
+      workerHealthResponse: {
+        ok: false,
+        status: 503,
+        json: async () => ({
+          code: "MEDIA_WORKER_WAKE_TIMEOUT",
+          message:
+            "The AI worker is taking longer than expected to wake up. Please try the scan again. Your video was not uploaded and no credits were used.",
+        }),
+      },
+    });
+
+    render(<ViralScanner file={file} onSelectClip={jest.fn()} onClose={jest.fn()} />);
+
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: /Start AI Scan/i })).not.toBeDisabled()
+    );
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /Start AI Scan/i }));
+    });
+
+    expect(await screen.findByText(/taking longer than expected to wake up/i)).toBeInTheDocument();
+    expect(
+      global.fetch.mock.calls.some(([url]) => String(url).includes("/api/media/upload-source"))
+    ).toBe(false);
+    expect(
+      global.fetch.mock.calls.some(([url]) => String(url).endsWith("/api/media/analyze"))
     ).toBe(false);
   });
 

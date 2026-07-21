@@ -1250,6 +1250,15 @@
   background: rgba(127, 29, 29, 0.2);
 }
 
+.scanner-scan-error {
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.scanner-scan-error .scanner-access-message {
+  margin-bottom: 0;
+}
+
 .scanner-access-message,
 .scanner-no-upload-note {
   margin: 0 0 10px;

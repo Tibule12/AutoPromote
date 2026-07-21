@@ -42,7 +42,7 @@ gcloud run deploy "$SERVICE_NAME" \
     --cpu-boost \
     --timeout 900 \
     --concurrency 1 \
-    --min-instances 0 \
+    --min-instances 1 \
     --max-instances 3 \
     --set-env-vars "NODE_ENV=production,FIREBASE_STORAGE_BUCKET=autopromote-cc6d3.firebasestorage.app,MULTICAM_UPLOAD_FIREBASE=true,MULTICAM_MASTER_RETENTION_DAYS=7,ENABLE_LOCAL_MEDIA_OUTPUT_FALLBACK=false"
 

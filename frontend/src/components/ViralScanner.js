@@ -568,6 +568,7 @@ const ViralScanner = ({ file, onSelectClip, onClose, onUpgrade }) => {
   const [previewRelativeTime, setPreviewRelativeTime] = useState(0);
   const [selectedClip, setSelectedClip] = useState(null);
   const [statusMessage, setStatusMessage] = useState("");
+  const [scanError, setScanError] = useState("");
   const [videoSrc, setVideoSrc] = useState(null);
   const [videoDuration, setVideoDuration] = useState(0);
   const [cachedScanMeta, setCachedScanMeta] = useState(null);
@@ -931,6 +932,7 @@ const ViralScanner = ({ file, onSelectClip, onClose, onUpgrade }) => {
 
   const startScan = async (options = {}) => {
     if (scanInFlightRef.current || isScanning) return;
+    setScanError("");
     const forceFresh = Boolean(options.forceFresh);
 
     if (!forceFresh && cachedResultsReady && results.length) {
@@ -990,15 +992,16 @@ const ViralScanner = ({ file, onSelectClip, onClose, onUpgrade }) => {
       let fileUrl = "";
       const sourceFingerprints = getSourceFingerprints(file);
 
-      setStatusMessage("Checking AI worker availability...");
+      setStatusMessage("Waking the AI worker. The first scan can take up to a minute...");
       const workerHealth = await fetch(API_ENDPOINTS.MEDIA_WORKER_HEALTH, {
         headers: { Authorization: `Bearer ${token}` },
         credentials: "include",
       });
       if (!workerHealth.ok) {
-        const healthText = await workerHealth.text().catch(() => "");
+        const healthPayload = await workerHealth.json().catch(() => ({}));
         throw new Error(
-          `AI worker is offline, so the video was not uploaded. ${healthText || "Try again when the worker is running."}`
+          healthPayload.message ||
+            "The AI worker could not be reached. Please try the scan again. Your video was not uploaded and no credits were used."
         );
       }
 
@@ -1186,6 +1189,7 @@ const ViralScanner = ({ file, onSelectClip, onClose, onUpgrade }) => {
         scanSessionId: activeSessionId,
         message: err?.message || "Unknown scan failure",
       });
+      setScanError(err?.message || "The scan could not be started. Please try again.");
       setStatusMessage("Error: " + err.message);
     } finally {
       clearInterval(stageInterval);
@@ -1660,17 +1664,28 @@ const ViralScanner = ({ file, onSelectClip, onClose, onUpgrade }) => {
                       )}
                     </div>
                   ) : (
-                    <button
-                      className="scan-btn"
-                      type="button"
-                      onClick={() => startScan()}
-                      disabled={cacheLoadPending}
-                    >
-                      Start AI Scan{" "}
-                      <span style={{ fontSize: "0.8em", opacity: 0.8, marginLeft: "5px" }}>
-                        ({CLIP_SCAN_CREDIT_COST} 💎)
-                      </span>
-                    </button>
+                    <>
+                      {scanError ? (
+                        <div
+                          className="scanner-access-block scanner-scan-error"
+                          role="alert"
+                          data-testid="scanner-scan-error"
+                        >
+                          <p className="scanner-access-message">{scanError}</p>
+                        </div>
+                      ) : null}
+                      <button
+                        className="scan-btn"
+                        type="button"
+                        onClick={() => startScan()}
+                        disabled={cacheLoadPending}
+                      >
+                        {scanError ? "Try AI Scan Again" : "Start AI Scan"}{" "}
+                        <span style={{ fontSize: "0.8em", opacity: 0.8, marginLeft: "5px" }}>
+                          ({CLIP_SCAN_CREDIT_COST} 💎)
+                        </span>
+                      </button>
+                    </>
                   )}
                 </div>
               ) : isScanning ? (

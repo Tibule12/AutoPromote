@@ -57,6 +57,13 @@ const IS_PRODUCTION_RUNTIME =
 const ALLOW_LOCAL_WORKER_FALLBACK =
   process.env.ALLOW_LOCAL_WORKER_FALLBACK === "true" ||
   (!IS_PRODUCTION_RUNTIME && process.env.ALLOW_LOCAL_WORKER_FALLBACK !== "false");
+// Cloud Run can need 30+ seconds to initialize the FFmpeg/Whisper worker from
+// zero instances. A short health timeout incorrectly reports a healthy worker
+// as offline and prevents the browser from starting its upload.
+const MEDIA_WORKER_HEALTH_TIMEOUT_MS = Math.max(
+  10000,
+  parseInt(process.env.MEDIA_WORKER_HEALTH_TIMEOUT_MS || "60000", 10) || 60000
+);
 const VIDEO_EDITOR_CREDITS_DISABLED = process.env.DISABLE_VIDEO_EDITOR_CREDITS === "true";
 const MULTICAM_MAX_TOTAL_RENDER_SECONDS =
   parseInt(process.env.MULTICAM_MAX_TOTAL_RENDER_SECONDS || String(3 * 60 * 60), 10) || 3 * 60 * 60;
@@ -718,16 +725,28 @@ router.get("/credits", async (req, res) => {
 });
 
 router.get("/worker-health", async (_req, res) => {
+  const startedAt = Date.now();
   try {
-    const response = await getFromMediaWorker("/health", 10000);
+    const response = await getFromMediaWorker("/health", MEDIA_WORKER_HEALTH_TIMEOUT_MS);
     res.json({
       ok: true,
       worker: response.data || null,
+      wakeDurationMs: Date.now() - startedAt,
     });
   } catch (error) {
+    const timedOut = error.code === "ECONNABORTED" || error.code === "ETIMEDOUT";
+    console.warn(
+      "[MediaRoute] Media worker health check failed after %dms: %s",
+      Date.now() - startedAt,
+      error.message
+    );
     res.status(503).json({
       ok: false,
-      message: "Media worker is not reachable right now. Please try again in a moment.",
+      code: timedOut ? "MEDIA_WORKER_WAKE_TIMEOUT" : "MEDIA_WORKER_UNAVAILABLE",
+      retryable: true,
+      message: timedOut
+        ? "The AI worker is taking longer than expected to wake up. Please try the scan again. Your video was not uploaded and no credits were used."
+        : "The AI worker could not be reached. Please try the scan again in a moment. Your video was not uploaded and no credits were used.",
       details: error.response?.data?.detail || error.message,
     });
   }
