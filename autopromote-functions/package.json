@@ -44,7 +44,7 @@
     "firebase-functions-test": "^3.1.0"
   },
   "overrides": {
-    "axios": "^1.16.1",
+    "axios": "^1.18.1",
     "websocket-driver": "0.7.5",
     "hono": "4.12.25",
     "@hono/node-server": "^1.19.14",
@@ -52,7 +52,7 @@
     "form-data": "$form-data",
     "basic-ftp": "^5.3.1",
     "follow-redirects": "^1.16.0",
-    "brace-expansion": "5.0.6",
+    "brace-expansion": "5.0.7",
     "js-yaml": "^4.2.0",
     "@babel/core": "7.29.7",
     "glob": "^11.1.0",
@@ -97,7 +97,7 @@
       "brace-expansion": "2.0.3"
     },
     "minimatch@10": {
-      "brace-expansion": "5.0.6"
+      "brace-expansion": "5.0.7"
     }
   },
   "private": true
