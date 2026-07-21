@@ -123,8 +123,13 @@ describe("Cam Combiner master reuse for Find Viral Clips", () => {
     expect(mockAnalyzeVideo).toHaveBeenCalledWith(
       "https://storage.example.com/processed/multicam_render-1.mp4?token=stored",
       "owner-1",
-      expect.objectContaining({ localPath: null })
+      expect.objectContaining({
+        forceFresh: false,
+        learningProfile: null,
+        scanNonce: "",
+      })
     );
+    expect(mockAnalyzeVideo.mock.calls[0][2]).not.toHaveProperty("localPath");
     expect(deductCredits).toHaveBeenCalledWith("owner-1", 8, "/analyze", expect.any(Object));
   });
 
