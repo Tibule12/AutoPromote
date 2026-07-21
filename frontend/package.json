@@ -9,7 +9,7 @@
     "websocket-driver": "0.7.5",
     "hono": "$hono",
     "@hono/node-server": "^1.19.14",
-    "protobufjs": "7.6.4",
+    "protobufjs": "7.6.5",
     "@babel/plugin-transform-modules-systemjs": "7.29.7",
     "follow-redirects": "^1.16.0",
     "@xmldom/xmldom": "0.9.10",
@@ -17,16 +17,16 @@
     "postcss": "8.5.10",
     "fast-xml-parser": "$fast-xml-parser",
     "fast-uri": "3.1.2",
-    "webpack-dev-server": "5.2.5",
+    "webpack-dev-server": "5.2.6",
     "http-proxy-middleware": "$http-proxy-middleware",
     "glob": "^11.1.0",
-    "js-yaml": "^4.2.0",
+    "js-yaml": "^4.3.0",
     "node-forge": "1.4.0",
     "serialize-javascript": "^7.0.5",
     "lodash": "^4.18.1",
     "jsonpath": "^1.2.0",
     "bfj": "^9.1.2",
-    "tar": "^7.5.16",
+    "tar": "^7.5.20",
     "form-data": "^3.0.5",
     "launch-editor": "2.14.1",
     "@babel/core": "7.29.7",
@@ -34,7 +34,7 @@
     "flatted": "3.4.2",
     "@tootallnate/once": "3.0.1",
     "@grpc/grpc-js": "1.14.4",
-    "shell-quote": "1.8.4",
+    "shell-quote": "1.10.0",
     "qs": "6.15.2",
     "uuid": "^14.0.0",
     "ws": "8.21.0",
@@ -57,13 +57,13 @@
       "picomatch": "4.0.4"
     },
     "minimatch@3": {
-      "brace-expansion": "1.1.13"
+      "brace-expansion": "1.1.16"
     },
     "minimatch@5": {
-      "brace-expansion": "2.0.3"
+      "brace-expansion": "2.1.2"
     },
     "minimatch@6": {
-      "brace-expansion": "2.0.3"
+      "brace-expansion": "2.1.2"
     },
     "minimatch@10": {
       "brace-expansion": "5.0.7"

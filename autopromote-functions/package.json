@@ -48,12 +48,12 @@
     "websocket-driver": "0.7.5",
     "hono": "4.12.25",
     "@hono/node-server": "^1.19.14",
-    "protobufjs": "7.6.4",
+    "protobufjs": "7.6.5",
     "form-data": "$form-data",
     "basic-ftp": "^5.3.1",
     "follow-redirects": "^1.16.0",
     "brace-expansion": "5.0.7",
-    "js-yaml": "^4.2.0",
+    "js-yaml": "^4.3.0",
     "@babel/core": "7.29.7",
     "glob": "^11.1.0",
     "minimatch": "^10.2.3",
@@ -85,16 +85,16 @@
       "picomatch": "4.0.4"
     },
     "minimatch@3": {
-      "brace-expansion": "1.1.13"
+      "brace-expansion": "1.1.16"
     },
     "minimatch@5": {
-      "brace-expansion": "2.0.3"
+      "brace-expansion": "2.1.2"
     },
     "minimatch@6": {
-      "brace-expansion": "2.0.3"
+      "brace-expansion": "2.1.2"
     },
     "minimatch@9": {
-      "brace-expansion": "2.0.3"
+      "brace-expansion": "2.1.2"
     },
     "minimatch@10": {
       "brace-expansion": "5.0.7"

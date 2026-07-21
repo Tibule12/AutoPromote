@@ -29,7 +29,7 @@
   "overrides": {
     "axios": "^1.18.1",
     "hono": "$hono",
-    "protobufjs": "7.6.4",
+    "protobufjs": "7.6.5",
     "form-data": "^4.0.6",
     "@hono/node-server": "^1.19.14",
     "basic-ftp": "^5.3.1",
@@ -38,15 +38,15 @@
     "@xmldom/xmldom": "0.9.10",
     "postcss": "8.5.10",
     "glob": "^11.1.0",
-    "js-yaml": "^4.2.0",
+    "js-yaml": "^4.3.0",
     "node-forge": "1.4.0",
-    "tar": "^7.5.16",
+    "tar": "^7.5.20",
     "@expo/cli": {
       "undici": "6.27.0"
     },
     "uuid": "^14.0.0",
     "ws": "8.21.0",
-    "shell-quote": "1.8.4",
+    "shell-quote": "1.10.0",
     "router": {
       "path-to-regexp": "8.4.0"
     },
@@ -69,16 +69,16 @@
       "picomatch": "4.0.4"
     },
     "minimatch@3": {
-      "brace-expansion": "1.1.13"
+      "brace-expansion": "1.1.16"
     },
     "minimatch@5": {
-      "brace-expansion": "2.0.3"
+      "brace-expansion": "2.1.2"
     },
     "minimatch@6": {
-      "brace-expansion": "2.0.3"
+      "brace-expansion": "2.1.2"
     },
     "minimatch@9": {
-      "brace-expansion": "2.0.3"
+      "brace-expansion": "2.1.2"
     },
     "minimatch@10": {
       "brace-expansion": "5.0.7"
