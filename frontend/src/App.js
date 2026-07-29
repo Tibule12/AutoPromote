@@ -1,7 +1,7 @@
 // Trigger CI/CD: minor change for deployment
 /* eslint-disable no-console, no-unused-vars */
 import React, { useState, useEffect, lazy, Suspense } from "react";
-import { Routes, Route, useNavigate } from "react-router-dom";
+import { Routes, Route, useNavigate } from "react-router";
 import DojoPage from "./DojoPage";
 import "./App.css";
 import { auth, db } from "./firebaseClient";

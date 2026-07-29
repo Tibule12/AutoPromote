@@ -5,7 +5,7 @@ try {
   // Parsing fallback removed
 }
 
-// Polyfill TextEncoder/TextDecoder for jsdom (required by newer react-router-dom)
+// Polyfill TextEncoder/TextDecoder for jsdom (required by newer react-router)
 if (typeof global.TextEncoder === "undefined") {
   const { TextEncoder, TextDecoder } = require("util");
   global.TextEncoder = TextEncoder;
@@ -70,9 +70,9 @@ jest.mock("./firebaseClient", () => ({
 // Provide a lightweight stub for ContentUploadForm during tests to avoid
 // (Removed test-only stub for ContentUploadForm; use real component in tests)
 
-// Provide a minimal mock of react-router-dom for Jest environment
+// Provide a minimal mock of react-router for Jest environment
 try {
-  jest.mock("react-router-dom", () => {
+  jest.mock("react-router", () => {
     const React = require("react");
     return {
       MemoryRouter: ({ children }) => React.createElement("div", null, children),

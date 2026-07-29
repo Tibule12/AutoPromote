@@ -10,7 +10,7 @@ import Docs from "../Docs";
 import Blog from "../Blog";
 
 const renderWithPath = (ui, pathname) => {
-  const reactRouterDom = require("react-router-dom");
+  const reactRouterDom = require("react-router");
   reactRouterDom.useLocation = () => ({ pathname });
   return render(ui);
 };

@@ -1,5 +1,5 @@
 import React from "react";
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, Link } from "react-router";
 import ReactMarkdown from "react-markdown";
 import posts from "./blog/posts";
 

@@ -1,5 +1,5 @@
 import React from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router";
 import PayPalSubscriptionPanel from "./components/PayPalSubscriptionPanel";
 
 const pricingFacts = [

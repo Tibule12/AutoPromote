@@ -7,7 +7,7 @@ on:
       - main
       - master
       - develop
-      - 'feat/**'
+      - "feat/**"
 
 jobs:
   emulator-tests:
@@ -21,13 +21,13 @@ jobs:
       - name: Setup Java (required by Firebase Emulator)
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '21'
+          distribution: "temurin"
+          java-version: "21"
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "22.22.0"
 
       - name: Install dependencies
         run: |

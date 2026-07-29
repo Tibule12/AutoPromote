@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from "react";
 import { auth } from "../firebaseClient";
 import { API_BASE_URL } from "../config";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router";
 import "./UsageLimitBanner.css";
 
 const UsageLimitBanner = ({ backLabel }) => {

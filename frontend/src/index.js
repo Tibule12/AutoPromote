@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client";
 import initSentry, { Sentry } from "./sentryClient";
 import { send as frontendLog } from "./utils/frontendLogger";
 import { isExpectedMediaPlaybackInterruption } from "./utils/mediaPlayback";
-import { HashRouter } from "react-router-dom";
+import { HashRouter } from "react-router";
 import "./App.css";
 import App from "./App";
 import { ToastProvider } from "./components/ToastProvider";

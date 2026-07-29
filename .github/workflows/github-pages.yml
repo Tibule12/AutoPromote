@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -21,30 +21,30 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "22.22.0"
+          cache: "npm"
           cache-dependency-path: frontend/package-lock.json
-      
+
       - name: Install dependencies
         run: cd frontend && npm ci
-      
+
       - name: Build
         run: |
           cd frontend
           npm run build
-      
+
       - name: Fix API URLs
         run: node fix-github-pages-api-urls.js
-        
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: frontend/build
-  
+
   deploy:
     environment:
       name: github-pages
