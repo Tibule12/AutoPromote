@@ -39,8 +39,283 @@ import {
   withWorkspaceHeaders,
 } from "./utils/workspace";
 import usePlatformStatus from "./hooks/usePlatformStatus";
+import "./DashboardRedesign.css";
 
 const DEFAULT_IMAGE = `${process.env.PUBLIC_URL || ""}/image.png`;
+
+const DASHBOARD_PAGE_META = {
+  profile: {
+    eyebrow: "Workspace",
+    title: "Overview",
+    description: "See the health of your content operation and jump into your next task.",
+  },
+  connections: {
+    eyebrow: "Workspace",
+    title: "Connections",
+    description: "Connect and manage every channel AutoPromote can publish to.",
+  },
+  team: {
+    eyebrow: "Workspace",
+    title: "Team",
+    description: "Manage collaborators, workspace access, and available seats.",
+  },
+  upload: {
+    eyebrow: "Create",
+    title: "Publisher",
+    description: "Prepare one master asset, tailor each destination, and publish with confidence.",
+  },
+  cam_combiner: {
+    eyebrow: "Create",
+    title: "Cam Combiner",
+    description: "Sync multiple podcast cameras and master audio into one ready-to-edit timeline.",
+  },
+  idea_video: {
+    eyebrow: "Create",
+    title: "Creative Tools",
+    description: "Turn an idea into a structured, editable short-form video workflow.",
+  },
+  schedules: {
+    eyebrow: "Publish",
+    title: "Queue",
+    description: "Review scheduled posts, change timing, and keep every release on track.",
+  },
+  analytics: {
+    eyebrow: "Measure",
+    title: "Analytics",
+    description:
+      "Understand publishing performance, workflow conversion, and recovery opportunities.",
+  },
+  billing: {
+    eyebrow: "Settings",
+    title: "Billing",
+    description: "Manage your plan, publishing capacity, and workspace credits.",
+  },
+  security: {
+    eyebrow: "Settings",
+    title: "Security",
+    description: "Protect your account, sessions, privacy preferences, and connected platforms.",
+  },
+  notifications: {
+    eyebrow: "Workspace",
+    title: "Notifications",
+    description: "Review account updates, publishing events, and actions that need your attention.",
+  },
+  "admin-audit": {
+    eyebrow: "Administration",
+    title: "Admin Audit",
+    description: "Review administrative activity across the platform.",
+  },
+  "admin-kyc": {
+    eyebrow: "Administration",
+    title: "Admin KYC",
+    description: "Review identity verification submissions and account status.",
+  },
+  wolf_hunt: {
+    eyebrow: "Labs",
+    title: "Mission Board",
+    description: "Review available missions and community campaign activity.",
+  },
+  clips: {
+    eyebrow: "Labs",
+    title: "Clip Studio",
+    description: "Find, refine, and export the strongest moments from long-form video.",
+  },
+};
+
+const DASHBOARD_NAV_GROUPS = [
+  {
+    label: "Workspace",
+    items: [
+      { id: "profile", label: "Overview", icon: "overview" },
+      { id: "connections", label: "Connections", icon: "connections" },
+      { id: "team", label: "Team", icon: "team" },
+    ],
+  },
+  {
+    label: "Create",
+    items: [
+      { id: "upload", label: "Publish", icon: "publish" },
+      { id: "cam_combiner", label: "Cam Combiner", icon: "camera", desktopOnly: true },
+      { id: "idea_video", label: "Creative Tools", icon: "sparkles" },
+    ],
+  },
+  {
+    label: "Publish",
+    items: [{ id: "schedules", label: "Queue", icon: "queue" }],
+  },
+  {
+    label: "Measure",
+    items: [{ id: "analytics", label: "Analytics", icon: "analytics" }],
+  },
+  {
+    label: "Settings",
+    items: [
+      { id: "billing", label: "Billing", icon: "billing" },
+      { id: "security", label: "Security", icon: "security" },
+    ],
+  },
+];
+
+function DashboardIcon({ name, size = 18 }) {
+  const sharedProps = {
+    width: size,
+    height: size,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 1.8,
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    "aria-hidden": true,
+  };
+
+  switch (name) {
+    case "overview":
+      return (
+        <svg {...sharedProps}>
+          <rect x="3" y="3" width="7" height="7" rx="2" />
+          <rect x="14" y="3" width="7" height="7" rx="2" />
+          <rect x="3" y="14" width="7" height="7" rx="2" />
+          <rect x="14" y="14" width="7" height="7" rx="2" />
+        </svg>
+      );
+    case "connections":
+      return (
+        <svg {...sharedProps}>
+          <path d="M10 13a5 5 0 0 0 7.1.1l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1" />
+          <path d="M14 11a5 5 0 0 0-7.1-.1l-2 2A5 5 0 0 0 12 20l1.1-1.1" />
+        </svg>
+      );
+    case "team":
+      return (
+        <svg {...sharedProps}>
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+      );
+    case "publish":
+      return (
+        <svg {...sharedProps}>
+          <path d="M12 16V4M7 9l5-5 5 5" />
+          <path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5" />
+        </svg>
+      );
+    case "camera":
+      return (
+        <svg {...sharedProps}>
+          <rect x="3" y="6" width="13" height="12" rx="3" />
+          <path d="m16 10 5-3v10l-5-3z" />
+        </svg>
+      );
+    case "sparkles":
+      return (
+        <svg {...sharedProps}>
+          <path d="m12 3-1.3 3.2L7.5 7.5l3.2 1.3L12 12l1.3-3.2 3.2-1.3-3.2-1.3z" />
+          <path d="m18.5 13-1 2.5-2.5 1 2.5 1 1 2.5 1-2.5 2.5-1-2.5-1z" />
+          <path d="m5 13-.7 1.7-1.8.8 1.8.7L5 18l.7-1.8 1.8-.7-1.8-.8z" />
+        </svg>
+      );
+    case "queue":
+      return (
+        <svg {...sharedProps}>
+          <rect x="3" y="5" width="18" height="16" rx="3" />
+          <path d="M16 3v4M8 3v4M3 10h18M8 14h3M8 17h6" />
+        </svg>
+      );
+    case "analytics":
+      return (
+        <svg {...sharedProps}>
+          <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
+        </svg>
+      );
+    case "billing":
+      return (
+        <svg {...sharedProps}>
+          <rect x="2.5" y="5" width="19" height="14" rx="3" />
+          <path d="M2.5 10h19M7 15h3" />
+        </svg>
+      );
+    case "security":
+      return (
+        <svg {...sharedProps}>
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          <path d="m9 12 2 2 4-4" />
+        </svg>
+      );
+    case "audit":
+      return (
+        <svg {...sharedProps}>
+          <path d="M9 5h10M9 12h10M9 19h10" />
+          <circle cx="4" cy="5" r="1" />
+          <circle cx="4" cy="12" r="1" />
+          <circle cx="4" cy="19" r="1" />
+        </svg>
+      );
+    case "identity":
+      return (
+        <svg {...sharedProps}>
+          <rect x="3" y="4" width="18" height="16" rx="3" />
+          <circle cx="9" cy="10" r="2.5" />
+          <path d="M5.5 17c.7-2 2-3 3.5-3s2.8 1 3.5 3M15 9h3M15 13h3" />
+        </svg>
+      );
+    case "target":
+      return (
+        <svg {...sharedProps}>
+          <circle cx="12" cy="12" r="9" />
+          <circle cx="12" cy="12" r="5" />
+          <circle cx="12" cy="12" r="1" />
+        </svg>
+      );
+    case "clips":
+      return (
+        <svg {...sharedProps}>
+          <circle cx="6" cy="7" r="3" />
+          <circle cx="6" cy="17" r="3" />
+          <path d="m8.5 8.5 11 7.5M8.5 15.5l11-7.5" />
+        </svg>
+      );
+    case "notifications":
+      return (
+        <svg {...sharedProps}>
+          <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+          <path d="M14 21a2.5 2.5 0 0 1-4 0" />
+        </svg>
+      );
+    case "logout":
+      return (
+        <svg {...sharedProps}>
+          <path d="M10 17l5-5-5-5M15 12H3" />
+          <path d="M14 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-5" />
+        </svg>
+      );
+    default:
+      return (
+        <svg {...sharedProps}>
+          <circle cx="12" cy="12" r="9" />
+        </svg>
+      );
+  }
+}
+
+function DashboardNavItem({ item, activeTab, onNavigate }) {
+  const isActive = activeTab === item.id;
+  return (
+    <li className={isActive ? "active" : ""}>
+      <button
+        type="button"
+        onClick={() => onNavigate(item.id)}
+        aria-current={isActive ? "page" : undefined}
+      >
+        <span className="dashboard-nav-icon">
+          <DashboardIcon name={item.icon} />
+        </span>
+        <span>{item.label}</span>
+      </button>
+    </li>
+  );
+}
 
 const UserDashboard = ({
   user,
@@ -1084,11 +1359,26 @@ const UserDashboard = ({
     }
   };
 
+  const currentPageMeta = DASHBOARD_PAGE_META[activeTab] || {
+    eyebrow: "AutoPromote",
+    title: "Dashboard",
+    description: "Manage your content workflow.",
+  };
+
   return (
-    <div className={`dashboard-root ${activeTab === "live" ? "live-mode" : ""}`}>
+    <div
+      className={`dashboard-root ap-dashboard-redesign ${activeTab === "live" ? "live-mode" : ""}`}
+    >
       <Toaster
         position="top-right"
-        toastOptions={{ duration: 4000, style: { background: "#1a1a2e", color: "#fff" } }}
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: "#101a2e",
+            color: "#f8fafc",
+            border: "1px solid rgba(148, 163, 184, 0.18)",
+          },
+        }}
       />
       {/* TopNav removed for live tab as requested */}
       {activeTab !== "live" && (
@@ -1103,61 +1393,32 @@ const UserDashboard = ({
             <span />
             <span />
           </button>
-          <div className="topbar-title">Your Dashboard</div>
-          <div className="topbar-user">{user?.name || "Guest"}</div>
-          <VoiceOverGuide activeTab={activeTab} />
-          <button
-            className="topbar-icon-btn"
-            aria-label="Notifications"
-            onClick={() => handleNav("notifications")}
-            style={{
-              background: "transparent",
-              border: "none",
-              cursor: "pointer",
-              position: "relative",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "var(--text)",
-              marginLeft: "0.5rem",
-            }}
-          >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+          <div className="topbar-page-copy">
+            <span>{currentPageMeta.eyebrow}</span>
+            <strong>{currentPageMeta.title}</strong>
+          </div>
+          <div className="topbar-actions">
+            <VoiceOverGuide activeTab={activeTab} />
+            <button
+              className={`topbar-icon-btn ${activeTab === "notifications" ? "is-active" : ""}`}
+              aria-label="Notifications"
+              onClick={() => handleNav("notifications")}
             >
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-            </svg>
-            {notifs.length > 0 && (
-              <span
-                style={{
-                  position: "absolute",
-                  top: "-4px",
-                  right: "-4px",
-                  background: "#ef4444",
-                  color: "white",
-                  fontSize: "10px",
-                  fontWeight: "bold",
-                  minWidth: "16px",
-                  height: "16px",
-                  borderRadius: "50%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  padding: "0 2px",
-                }}
-              >
-                {notifs.length > 9 ? "9+" : notifs.length}
+              <DashboardIcon name="notifications" size={20} />
+              {notifs.length > 0 && (
+                <span className="topbar-notification-badge">
+                  {notifs.length > 9 ? "9+" : notifs.length}
+                </span>
+              )}
+            </button>
+            <div className="topbar-user-card" title={user?.email || user?.name || "Account"}>
+              <img src={user?.avatarUrl || DEFAULT_IMAGE} alt="" />
+              <span>
+                <strong>{user?.name || "AutoPromote user"}</strong>
+                <small>{user?.email || "Creator workspace"}</small>
               </span>
-            )}
-          </button>
+            </div>
+          </div>
         </header>
       )}
 
@@ -1172,120 +1433,104 @@ const UserDashboard = ({
 
       {activeTab !== "live" && (
         <aside className={`dashboard-sidebar ${sidebarOpen ? "open" : ""}`} aria-label="Sidebar">
-          <div className="profile-section">
-            <img className="profile-avatar" src={user?.avatarUrl || DEFAULT_IMAGE} alt="Avatar" />
-            <h2>{user?.name || "User Name"}</h2>
+          <div className="dashboard-brand">
+            <span className="dashboard-brand-mark" aria-hidden="true">
+              <svg viewBox="0 0 32 32">
+                <path d="M7 5.5 25 16 7 26.5z" />
+                <path d="m13 11 8.5 5L13 21z" />
+              </svg>
+            </span>
+            <span>
+              <strong>AutoPromote</strong>
+              <small>Creator workspace</small>
+            </span>
           </div>
           <nav className="dashboard-navbar-vertical" role="navigation">
-            <ul>
-              <li
-                className={activeTab === "profile" ? "active" : ""}
-                onClick={() => handleNav("profile")}
-              >
-                Overview
-              </li>
-              <li
-                className={activeTab === "connections" ? "active" : ""}
-                onClick={() => handleNav("connections")}
-              >
-                Connections
-              </li>
-              <li
-                className={activeTab === "team" ? "active" : ""}
-                onClick={() => handleNav("team")}
-              >
-                Team
-              </li>
-              <li
-                className={activeTab === "upload" ? "active" : ""}
-                onClick={() => handleNav("upload")}
-              >
-                Publish
-              </li>
-              {!isMobileViewport && (
-                <li
-                  className={activeTab === "cam_combiner" ? "active" : ""}
-                  onClick={() => handleNav("cam_combiner")}
-                >
-                  Cam Combiner
-                </li>
-              )}
-              <li
-                className={activeTab === "schedules" ? "active" : ""}
-                onClick={() => handleNav("schedules")}
-              >
-                Queue
-              </li>
-              <li
-                className={activeTab === "analytics" ? "active" : ""}
-                onClick={() => handleNav("analytics")}
-              >
-                Analytics
-              </li>
-              <li
-                className={activeTab === "billing" ? "active" : ""}
-                onClick={() => handleNav("billing")}
-              >
-                Billing
-              </li>
-              {/* Notifications moved to top bar */}
-              {isAdminUser && (
-                <li
-                  className={activeTab === "admin-audit" ? "active" : ""}
-                  onClick={() => handleNav("admin-audit")}
-                >
-                  Admin Audit
-                </li>
-              )}
-              {isAdminUser && (
-                <li
-                  className={activeTab === "admin-kyc" ? "active" : ""}
-                  onClick={() => handleNav("admin-kyc")}
-                >
-                  Admin KYC
-                </li>
-              )}
-              {/* KYC uploads disabled for live-only AfterDark by design */}
-              <li
-                className={activeTab === "security" ? "active" : ""}
-                onClick={() => handleNav("security")}
-              >
-                Security
-              </li>
-              {ENABLE_WOLF_HUNT ? (
-                <li
-                  className={activeTab === "wolf_hunt" ? "active" : ""}
-                  onClick={() => handleNav("wolf_hunt")}
-                >
-                  Mission Board
-                </li>
-              ) : null}
-              {!clipStudioLocked && (
-                <li
-                  className={activeTab === "clips" ? "active" : ""}
-                  onClick={() => handleNav("clips")}
-                >
-                  Clip Studio
-                </li>
-              )}
-              <li
-                className={activeTab === "idea_video" ? "active" : ""}
-                onClick={() => handleNav("idea_video")}
-              >
-                Creative Tools
-              </li>
-            </ul>
+            {DASHBOARD_NAV_GROUPS.map(group => {
+              const visibleItems = group.items.filter(
+                item => !item.desktopOnly || !isMobileViewport
+              );
+              if (visibleItems.length === 0) return null;
+              return (
+                <section className="dashboard-nav-group" key={group.label}>
+                  <p>{group.label}</p>
+                  <ul>
+                    {visibleItems.map(item => (
+                      <DashboardNavItem
+                        key={item.id}
+                        item={item}
+                        activeTab={activeTab}
+                        onNavigate={handleNav}
+                      />
+                    ))}
+                  </ul>
+                </section>
+              );
+            })}
+
+            {isAdminUser && (
+              <section className="dashboard-nav-group">
+                <p>Administration</p>
+                <ul>
+                  <DashboardNavItem
+                    item={{ id: "admin-audit", label: "Admin Audit", icon: "audit" }}
+                    activeTab={activeTab}
+                    onNavigate={handleNav}
+                  />
+                  <DashboardNavItem
+                    item={{ id: "admin-kyc", label: "Admin KYC", icon: "identity" }}
+                    activeTab={activeTab}
+                    onNavigate={handleNav}
+                  />
+                </ul>
+              </section>
+            )}
+
+            {(ENABLE_WOLF_HUNT || !clipStudioLocked) && (
+              <section className="dashboard-nav-group">
+                <p>Labs</p>
+                <ul>
+                  {ENABLE_WOLF_HUNT && (
+                    <DashboardNavItem
+                      item={{ id: "wolf_hunt", label: "Mission Board", icon: "target" }}
+                      activeTab={activeTab}
+                      onNavigate={handleNav}
+                    />
+                  )}
+                  {!clipStudioLocked && (
+                    <DashboardNavItem
+                      item={{ id: "clips", label: "Clip Studio", icon: "clips" }}
+                      activeTab={activeTab}
+                      onNavigate={handleNav}
+                    />
+                  )}
+                </ul>
+              </section>
+            )}
           </nav>
-          <button className="logout-btn" onClick={onLogout}>
-            Logout
-          </button>
+          <div className="dashboard-sidebar-footer">
+            <a className="dashboard-help-card" href="/docs">
+              <span>Need help getting started?</span>
+              <strong>Visit the docs →</strong>
+            </a>
+            <button className="logout-btn" onClick={onLogout}>
+              <DashboardIcon name="logout" />
+              <span>Sign out</span>
+            </button>
+          </div>
         </aside>
       )}
 
       <main className="dashboard-main">
-        <div style={{ display: "flex", justifyContent: "flex-end", padding: "10px 20px 0 0" }}>
-          <VoiceOverGuide activeTab={activeTab} />
-        </div>
+        {activeTab !== "live" && (
+          <header className="dashboard-page-header">
+            <div>
+              <span>{currentPageMeta.eyebrow}</span>
+              <h1>{currentPageMeta.title}</h1>
+              <p>{currentPageMeta.description}</p>
+            </div>
+          </header>
+        )}
         {testerAccessActive && (
           <section className="founding-tester-banner" aria-label="Founding Tester access">
             <div>
