@@ -4,12 +4,13 @@ import React, { useEffect, useMemo, useState, useRef, useCallback } from "react"
 import "./UserDashboard.css";
 import ProfilePanel from "./UserDashboardTabs/ProfilePanel";
 import UploadPanel from "./UserDashboardTabs/UploadPanel";
+import FindViralClipsPanel from "./UserDashboardTabs/FindViralClipsPanel";
 import SchedulesPanel from "./UserDashboardTabs/SchedulesPanel";
 import AnalyticsPanel from "./UserDashboardTabs/AnalyticsPanel";
 import RewardsPanel from "./UserDashboardTabs/RewardsPanel";
 import NotificationsPanel from "./UserDashboardTabs/NotificationsPanel";
 
-import ConnectionsPanel from "./UserDashboardTabs/ConnectionsPanel";
+import ConnectionsPanel from "./UserDashboardTabs/ConnectionsPanelRedesign";
 import PayPalSubscriptionPanel from "./components/PayPalSubscriptionPanel";
 import AdminAuditViewer from "./AdminAuditViewer";
 import SecurityPanel from "./UserDashboardTabs/SecurityPanel";
@@ -69,9 +70,15 @@ const DASHBOARD_PAGE_META = {
     title: "Cam Combiner",
     description: "Sync multiple podcast cameras and master audio into one ready-to-edit timeline.",
   },
+  find_viral_clips: {
+    eyebrow: "Create",
+    title: "Find Viral Clips",
+    description:
+      "Analyse a finished video and surface the moments most worth turning into short clips.",
+  },
   idea_video: {
     eyebrow: "Create",
-    title: "Creative Tools",
+    title: "Idea-to-Video",
     description: "Turn an idea into a structured, editable short-form video workflow.",
   },
   schedules: {
@@ -136,7 +143,8 @@ const DASHBOARD_NAV_GROUPS = [
     items: [
       { id: "upload", label: "Publish", icon: "publish" },
       { id: "cam_combiner", label: "Cam Combiner", icon: "camera", desktopOnly: true },
-      { id: "idea_video", label: "Creative Tools", icon: "sparkles" },
+      { id: "find_viral_clips", label: "Find Viral Clips", icon: "clips" },
+      { id: "idea_video", label: "Idea-to-Video", icon: "sparkles" },
     ],
   },
   {
@@ -1755,6 +1763,28 @@ const UserDashboard = ({
           />
         )}
 
+        {activeTab === "find_viral_clips" && (
+          <FindViralClipsPanel
+            initialFile={selectedFile}
+            onUpgrade={() => handleNav("billing")}
+            onOpenPublisher={(file, clip) => {
+              if (file && typeof file === "object") {
+                try {
+                  Object.assign(file, {
+                    suggestedTitle: clip?.hookText || clip?.reason || file.suggestedTitle,
+                    workflowAction: "viral-clip-selected",
+                  });
+                } catch (_) {
+                  // File objects can be non-extensible in some browsers; the original file is still valid.
+                }
+              }
+              setSelectedFile(file);
+              handleNav("upload");
+              toast.success("Opening the selected source in Publisher.");
+            }}
+          />
+        )}
+
         {activeTab === "schedules" && (
           <SchedulesPanel
             schedulesList={schedulesList}
@@ -1879,7 +1909,7 @@ const UserDashboard = ({
             onFindViralClips={source => {
               if (!source?.renderJobId || !source?.url) return;
               setSelectedFile(source);
-              handleNav("upload");
+              handleNav("find_viral_clips");
               toast.success(
                 "Opening Find Viral Clips with the saved master — no re-upload needed."
               );

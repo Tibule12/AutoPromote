@@ -2772,9 +2772,40 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
     <div className={`unified-publisher-container${modalOpen ? " modal-open" : ""}`}>
       {/* --- HEADER: Global Context --- */}
       <header className="publisher-header">
-        <h1>Cross-Platform Publisher</h1>
-        <p>Upload once, customize everywhere.</p>
+        <h1>Publisher</h1>
+        <p>Upload once, tailor the details, and publish everywhere.</p>
       </header>
+
+      <ol className="publisher-stepper" aria-label="Publishing workflow">
+        <li className="active">
+          <span>1</span>
+          <div>
+            <strong>Media</strong>
+            <small>Choose the source</small>
+          </div>
+        </li>
+        <li className={globalFile ? "active" : ""}>
+          <span>2</span>
+          <div>
+            <strong>Platforms</strong>
+            <small>Select destinations</small>
+          </div>
+        </li>
+        <li className={selectedPlatforms.length ? "active" : ""}>
+          <span>3</span>
+          <div>
+            <strong>Customize</strong>
+            <small>Perfect each post</small>
+          </div>
+        </li>
+        <li>
+          <span>4</span>
+          <div>
+            <strong>Review</strong>
+            <small>Publish or schedule</small>
+          </div>
+        </li>
+      </ol>
 
       <div className="publisher-layout">
         {/* --- LEFT SIDE: The "Global" Input (Optional Helper) --- */}
