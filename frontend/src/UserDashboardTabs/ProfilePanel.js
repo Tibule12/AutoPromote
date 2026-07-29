@@ -39,232 +39,352 @@ const ProfilePanel = ({
   onNavigate,
 }) => {
   const DEFAULT_IMAGE = `${process.env.PUBLIC_URL || ""}/image.png`;
+  const connectionDefinitions = [
+    {
+      id: "tiktok",
+      label: "TikTok",
+      status: tiktokStatus,
+      handler: handleConnectTikTok,
+      helper: "Connect TikTok for publishing and analytics.",
+    },
+    {
+      id: "facebook",
+      label: "Facebook",
+      status: facebookStatus,
+      handler: handleConnectFacebook,
+      helper: "Connect the account that manages your Facebook Page and Instagram business account.",
+    },
+    {
+      id: "youtube",
+      label: "YouTube",
+      status: youtubeStatus,
+      handler: handleConnectYouTube,
+      helper: "Connect YouTube to upload videos directly.",
+    },
+    {
+      id: "twitter",
+      label: "X / Twitter",
+      status: twitterStatus,
+      handler: handleConnectTwitter,
+      helper: "Connect X to publish and schedule posts.",
+    },
+    {
+      id: "snapchat",
+      label: "Snapchat",
+      status: snapchatStatus,
+      handler: handleConnectSnapchat,
+      helper: "Connect Snapchat when publishing access is enabled.",
+    },
+    {
+      id: "spotify",
+      label: "Spotify",
+      status: spotifyStatus,
+      handler: handleConnectSpotify,
+      helper: "Connect Spotify to manage tracks and playlists.",
+    },
+    {
+      id: "reddit",
+      label: "Reddit",
+      status: redditStatus,
+      handler: handleConnectReddit,
+      helper: "Connect Reddit to publish to your communities.",
+    },
+    {
+      id: "discord",
+      label: "Discord",
+      status: discordStatus,
+      handler: handleConnectDiscord,
+      helper: "Connect Discord channels and webhooks.",
+    },
+    {
+      id: "linkedin",
+      label: "LinkedIn",
+      status: linkedinStatus,
+      handler: handleConnectLinkedin,
+      helper: "Connect LinkedIn for professional publishing.",
+    },
+    {
+      id: "telegram",
+      label: "Telegram",
+      status: telegramStatus,
+      handler: handleConnectTelegram,
+      helper: "Connect Telegram channels for distribution.",
+    },
+    {
+      id: "pinterest",
+      label: "Pinterest",
+      status: pinterestStatus,
+      handler: handleConnectPinterest,
+      helper: "Connect Pinterest to create pins and boards.",
+    },
+  ];
+  const connectedPlatforms = connectionDefinitions.filter(item => item.status?.connected);
+
   return (
-    <section className="profile-details">
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "1rem",
-        }}
-      >
-        <h3>Workspace Overview</h3>
-        <button
-          onClick={() => onNavigate && onNavigate("billing")}
-          style={{
-            padding: "8px 16px",
-            fontSize: "0.9rem",
-            background: "linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)",
-            color: "white",
-            border: "none",
-            borderRadius: "8px",
-            cursor: "pointer",
-            fontWeight: "500",
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-          }}
-        >
-          💳 Billing & Plans
-        </button>
-      </div>
-      <p style={{ color: "#9aa4b2", marginTop: 0, marginBottom: "1rem", maxWidth: 640 }}>
-        Billing controls the paid publishing capacity of your workspace: upload limits, connected
-        platform reach, analytics depth, and support level.
-      </p>
-      <div className="landing-preview">
-        <img
-          className="landing-thumbnail"
-          src={user?.thumbnailUrl || DEFAULT_IMAGE}
-          alt="Landing Thumbnail"
-          referrerPolicy="no-referrer"
-        />
-        <div style={{ color: "#9aa4b2", marginTop: ".5rem" }}>
-          Welcome back, {user?.name || "User"}.
-        </div>
-      </div>
-      <div className="performance-summary">
+    <section className="profile-details overview-dashboard">
+      <section className="overview-hero">
         <div>
-          <strong>Views:</strong> {stats?.views ?? 0}
-        </div>
-        <div>
-          <strong>Clicks:</strong> {stats?.clicks ?? 0}
-        </div>
-        <div>
-          <strong>CTR:</strong> {stats?.ctr ?? 0}%
-        </div>
-      </div>
-
-      <div className="platform-connections" style={{ marginTop: "1rem" }}>
-        <h4>Platform Connections</h4>
-        {/* Render all supported connections dynamically */}
-        <div style={{ display: "grid", gap: ".5rem" }}>
-          {[
-            "tiktok",
-            "facebook",
-            "youtube",
-            "twitter",
-            "snapchat",
-            "spotify",
-            "reddit",
-            "discord",
-            "linkedin",
-            "telegram",
-            "pinterest",
-          ].map(p => {
-            const status =
-              {
-                tiktok: tiktokStatus,
-                facebook: facebookStatus,
-                youtube: youtubeStatus,
-                twitter: twitterStatus,
-                snapchat: snapchatStatus,
-                spotify: spotifyStatus,
-                reddit: redditStatus,
-                discord: discordStatus,
-                linkedin: linkedinStatus,
-                telegram: telegramStatus,
-                pinterest: pinterestStatus,
-              }[p] || {};
-            const handler = {
-              tiktok: handleConnectTikTok,
-              facebook: handleConnectFacebook,
-              youtube: handleConnectYouTube,
-              twitter: handleConnectTwitter,
-              snapchat: handleConnectSnapchat,
-              spotify: handleConnectSpotify,
-              reddit: handleConnectReddit,
-              discord: handleConnectDiscord,
-              linkedin: handleConnectLinkedin,
-              telegram: handleConnectTelegram,
-              pinterest: handleConnectPinterest,
-            }[p];
-            const label = p.charAt(0).toUpperCase() + p.slice(1);
-            const helper =
-              {
-                tiktok: "Connect to link your TikTok account for future posting and analytics.",
-                facebook:
-                  "Connect the Facebook account that manages your Facebook Page and linked Instagram business account.",
-                youtube: "Connect to upload videos directly.",
-                twitter: "Connect to post tweets and schedule posts.",
-                snapchat: "Connect to post Snaps (if enabled).",
-                spotify: "Connect to manage Spotify tracks and playlists.",
-                reddit: "Connect to post to subreddits.",
-                discord: "Connect to manage Discord channels/webhooks.",
-                linkedin: "Connect to post to LinkedIn.",
-                telegram: "Connect to send messages to Telegram channels.",
-                pinterest: "Connect to create pins and boards.",
-              }[p] || "";
-            return (
-              <div key={p} style={{ display: "grid", gap: ".45rem" }}>
-                <div style={{ display: "flex", gap: ".75rem", alignItems: "center" }}>
-                  {status?.connected ? (
-                    <>
-                      <span style={{ color: "#cbd5e1" }}>{label} connected</span>
-                      <button className="check-quality" onClick={handler}>
-                        Reconnect
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button className="check-quality" onClick={handler}>
-                        Connect {label}
-                      </button>
-                      <span style={{ color: "#9aa4b2" }}>{helper}</span>
-                    </>
-                  )}
-                </div>
-                {p === "facebook" && (
-                  <MetaConnectionRequirementsNotice
-                    compact
-                    title="Meta connection requirements"
-                    facebookStatus={facebookStatus}
-                    style={{ marginTop: 0 }}
-                  />
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="profile-defaults" style={{ marginTop: "1rem" }}>
-        <h4>Profile Defaults</h4>
-        <div style={{ display: "grid", gap: ".5rem", maxWidth: 520 }}>
-          <label style={{ color: "#9aa4b2" }}>
-            Timezone
-            <input
-              type="text"
-              value={tz}
-              onChange={e => setTz && setTz(e.target.value)}
-              style={{
-                display: "block",
-                width: "100%",
-                marginTop: ".25rem",
-                padding: ".4rem",
-                borderRadius: "8px",
-                border: "1px solid rgba(255,255,255,0.15)",
-                background: "rgba(255,255,255,0.05)",
-                color: "#eef2ff",
-              }}
-            />
-          </label>
-          <div style={{ color: "#9aa4b2" }}>Default Platforms</div>
-          <div className="platform-toggles">
-            {[
-              "youtube",
-              "twitter",
-              "linkedin",
-              "discord",
-              "reddit",
-              "spotify",
-              "telegram",
-              "tiktok",
-              "facebook",
-              "instagram",
-              "snapchat",
-              "pinterest",
-            ].map(p => (
-              <label key={p}>
-                <input
-                  type="checkbox"
-                  checked={Array.isArray(defaultsPlatforms) ? defaultsPlatforms.includes(p) : false}
-                  onChange={() => toggleDefaultPlatform && toggleDefaultPlatform(p)}
-                />{" "}
-                {p.charAt(0).toUpperCase() + p.slice(1)}
-                {p === "instagram" || p === "snapchat" ? " ⏳" : " ✅"}
-              </label>
-            ))}
-          </div>
-          <label style={{ color: "#9aa4b2" }}>
-            Default Frequency
-            <select
-              value={defaultsFrequency}
-              onChange={e => setDefaultsFrequency && setDefaultsFrequency(e.target.value)}
-              style={{
-                display: "block",
-                width: "100%",
-                marginTop: ".25rem",
-                background: "rgba(255,255,255,0.05)",
-                color: "#eef2ff",
-                border: "1px solid rgba(255,255,255,0.15)",
-                borderRadius: "8px",
-                padding: ".3rem .5rem",
-              }}
-            >
-              <option value="once">Once</option>
-              <option value="daily">Daily</option>
-              <option value="weekly">Weekly</option>
-            </select>
-          </label>
-          <div style={{ display: "flex", gap: ".5rem" }}>
-            <button className="check-quality" onClick={handleSaveDefaults}>
-              Save Defaults
+          <span className="overview-eyebrow">Welcome back, {user?.name || "Creator"}</span>
+          <h2>Create once. Auto-edit. Publish everywhere.</h2>
+          <p>
+            Turn recordings into polished content and distribute them from one focused workspace.
+          </p>
+          <div className="overview-hero-actions">
+            <button className="check-quality" onClick={() => onNavigate?.("upload")}>
+              Start publishing
+            </button>
+            <button className="btn-secondary" onClick={() => onNavigate?.("cam_combiner")}>
+              Open Cam Combiner
             </button>
           </div>
         </div>
-      </div>
+        <div className="overview-identity-card">
+          <img
+            src={user?.thumbnailUrl || user?.avatarUrl || DEFAULT_IMAGE}
+            alt=""
+            referrerPolicy="no-referrer"
+          />
+          <span>
+            <small>Active workspace</small>
+            <strong>{user?.name || "Your workspace"}</strong>
+            <em>
+              {connectedPlatforms.length} connected platform
+              {connectedPlatforms.length === 1 ? "" : "s"}
+            </em>
+          </span>
+        </div>
+      </section>
+
+      <section className="overview-feature-grid" aria-label="Primary creation tools">
+        <article className="overview-feature-card overview-feature-card--primary">
+          <div>
+            <span className="overview-tool-icon">◫</span>
+            <small>Podcast production</small>
+            <h3>Cam Combiner</h3>
+            <p>Sync cameras and master audio, detect speakers, and prepare a clean edit.</p>
+            <button className="check-quality" onClick={() => onNavigate?.("cam_combiner")}>
+              Start Cam Combiner
+            </button>
+          </div>
+          <div className="overview-timeline" aria-hidden="true">
+            <span className="overview-playhead" />
+            {["Camera 1", "Camera 2", "Master audio"].map((label, index) => (
+              <div key={label}>
+                <small>{label}</small>
+                <span>
+                  {Array.from({ length: 5 }).map((_, segment) => (
+                    <i key={segment} className={(segment + index) % 2 ? "cool" : "warm"} />
+                  ))}
+                </span>
+              </div>
+            ))}
+          </div>
+        </article>
+
+        <div className="overview-feature-stack">
+          <article className="overview-feature-card">
+            <span className="overview-tool-icon">✦</span>
+            <div>
+              <small>AI discovery</small>
+              <h3>Find Viral Clips</h3>
+              <p>Find strong moments inside a finished video and send them into editing.</p>
+            </div>
+            <button className="btn-secondary" onClick={() => onNavigate?.("upload")}>
+              Open in Publisher
+            </button>
+          </article>
+          <article className="overview-feature-card">
+            <span className="overview-tool-icon overview-tool-icon--cyan">◇</span>
+            <div>
+              <small>Creative studio</small>
+              <h3>Idea-to-Video</h3>
+              <p>Build scenes, captions, voiceover direction, and a ready-to-publish render.</p>
+            </div>
+            <button className="btn-secondary" onClick={() => onNavigate?.("idea_video")}>
+              Open Creative Tools
+            </button>
+          </article>
+        </div>
+      </section>
+
+      <section className="overview-workflow">
+        <div className="overview-section-heading">
+          <div>
+            <small>Your AutoPromote workflow</small>
+            <h3>From raw media to measurable results</h3>
+          </div>
+        </div>
+        <ol>
+          {[
+            ["Upload", "Import recordings or a finished master."],
+            ["Auto-edit", "Sync, enhance, and prepare the strongest content."],
+            ["Publish", "Distribute to the channels you select."],
+            ["Measure", "Track performance and improve the next release."],
+          ].map(([title, copy], index) => (
+            <li key={title}>
+              <span>{index + 1}</span>
+              <div>
+                <strong>{title}</strong>
+                <small>{copy}</small>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section className="overview-lower-grid">
+        <article className="overview-summary-card">
+          <div className="overview-section-heading">
+            <div>
+              <small>Workspace performance</small>
+              <h3>Publishing activity</h3>
+            </div>
+            <button className="btn-secondary" onClick={() => onNavigate?.("analytics")}>
+              View analytics
+            </button>
+          </div>
+          <div className="performance-summary">
+            <div>
+              <strong>Views</strong>
+              <span>{stats?.views ?? 0}</span>
+            </div>
+            <div>
+              <strong>Clicks</strong>
+              <span>{stats?.clicks ?? 0}</span>
+            </div>
+            <div>
+              <strong>CTR</strong>
+              <span>{stats?.ctr ?? 0}%</span>
+            </div>
+          </div>
+        </article>
+
+        <article className="overview-summary-card">
+          <div className="overview-section-heading">
+            <div>
+              <small>Distribution</small>
+              <h3>Connected platforms</h3>
+            </div>
+            <button className="btn-secondary" onClick={() => onNavigate?.("connections")}>
+              Manage
+            </button>
+          </div>
+          <div className="overview-platform-summary">
+            {connectionDefinitions.slice(0, 6).map(item => (
+              <div key={item.id}>
+                <span>{item.label.slice(0, 1)}</span>
+                <strong>{item.label}</strong>
+                <small className={item.status?.connected ? "is-connected" : ""}>
+                  {item.status?.connected ? "Connected" : "Not connected"}
+                </small>
+              </div>
+            ))}
+          </div>
+        </article>
+      </section>
+
+      <details className="overview-settings">
+        <summary>
+          <span>
+            <strong>Workspace defaults and connection shortcuts</strong>
+            <small>Manage defaults here or use the dedicated Connections page.</small>
+          </span>
+          <span>Open settings</span>
+        </summary>
+        <div className="overview-settings-grid">
+          <div className="platform-connections">
+            <h4>Platform Connections</h4>
+            <div>
+              {connectionDefinitions.map(item => (
+                <div key={item.id}>
+                  <div className="overview-connection-row">
+                    <span className="overview-platform-logo">{item.label.slice(0, 1)}</span>
+                    <span>
+                      <strong>{item.label}</strong>
+                      <small>{item.status?.connected ? "Connected" : item.helper}</small>
+                    </span>
+                    <button className="check-quality" onClick={item.handler}>
+                      {item.status?.connected ? "Reconnect" : "Connect"}
+                    </button>
+                  </div>
+                  {item.id === "facebook" && (
+                    <MetaConnectionRequirementsNotice
+                      compact
+                      title="Meta connection requirements"
+                      facebookStatus={facebookStatus}
+                      style={{ marginTop: 0 }}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="profile-defaults">
+            <div className="overview-section-heading">
+              <div>
+                <small>Publishing preferences</small>
+                <h4>Profile Defaults</h4>
+              </div>
+              <button className="btn-secondary" onClick={() => onNavigate?.("billing")}>
+                Billing & Plans
+              </button>
+            </div>
+            <div className="overview-defaults-form">
+              <label>
+                Timezone
+                <input type="text" value={tz} onChange={e => setTz?.(e.target.value)} />
+              </label>
+              <div>
+                <span>Default Platforms</span>
+                <div className="platform-toggles">
+                  {[
+                    "youtube",
+                    "twitter",
+                    "linkedin",
+                    "discord",
+                    "reddit",
+                    "spotify",
+                    "telegram",
+                    "tiktok",
+                    "facebook",
+                    "instagram",
+                    "snapchat",
+                    "pinterest",
+                  ].map(platform => (
+                    <label key={platform}>
+                      <input
+                        type="checkbox"
+                        checked={
+                          Array.isArray(defaultsPlatforms)
+                            ? defaultsPlatforms.includes(platform)
+                            : false
+                        }
+                        onChange={() => toggleDefaultPlatform?.(platform)}
+                      />
+                      {platform.charAt(0).toUpperCase() + platform.slice(1)}
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <label>
+                Default Frequency
+                <select
+                  value={defaultsFrequency}
+                  onChange={e => setDefaultsFrequency?.(e.target.value)}
+                >
+                  <option value="once">Once</option>
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly</option>
+                </select>
+              </label>
+              <button className="check-quality" onClick={handleSaveDefaults}>
+                Save Defaults
+              </button>
+            </div>
+          </div>
+        </div>
+      </details>
     </section>
   );
 };
