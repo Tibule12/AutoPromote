@@ -14,7 +14,7 @@
     "follow-redirects": "^1.16.0",
     "@xmldom/xmldom": "0.9.10",
     "nth-check": "2.1.1",
-    "postcss": "8.5.10",
+    "postcss": "8.5.25",
     "fast-xml-parser": "$fast-xml-parser",
     "fast-uri": "3.1.4",
     "svgo": "2.8.3",
@@ -27,7 +27,7 @@
     "lodash": "^4.18.1",
     "jsonpath": "^1.2.0",
     "bfj": "^9.1.2",
-    "tar": "^7.5.20",
+    "tar": "^7.5.22",
     "form-data": "^3.0.5",
     "launch-editor": "2.14.1",
     "@babel/core": "7.29.7",
@@ -67,7 +67,7 @@
       "brace-expansion": "2.1.2"
     },
     "minimatch@10": {
-      "brace-expansion": "5.0.7"
+      "brace-expansion": "5.0.8"
     },
     "cosmiconfig@6": {
       "yaml": "1.10.3"
