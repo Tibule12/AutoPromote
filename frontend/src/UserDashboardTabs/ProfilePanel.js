@@ -189,8 +189,8 @@ const ProfilePanel = ({
               <h3>Find Viral Clips</h3>
               <p>Find strong moments inside a finished video and send them into editing.</p>
             </div>
-            <button className="btn-secondary" onClick={() => onNavigate?.("upload")}>
-              Open in Publisher
+            <button className="btn-secondary" onClick={() => onNavigate?.("find_viral_clips")}>
+              Find Viral Clips
             </button>
           </article>
           <article className="overview-feature-card">

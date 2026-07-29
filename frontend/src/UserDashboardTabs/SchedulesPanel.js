@@ -13,7 +13,7 @@ const SchedulesPanel = ({
   onDeleteMany,
   onNavigate,
 }) => {
-  const [viewMode, setViewMode] = useState("orchestrator"); // 'orchestrator' | 'list'
+  const [viewMode, setViewMode] = useState("list"); // 'orchestrator' | 'list'
   const [currentDate] = useState(new Date());
 
   // Injection State (Creation)
@@ -100,9 +100,34 @@ const SchedulesPanel = ({
         : [],
     [schedulesList]
   );
+  const queueSummary = useMemo(() => {
+    const now = Date.now();
+    const weekFromNow = now + 7 * 24 * 60 * 60 * 1000;
+    const platformCount = new Set();
+    let paused = 0;
+    let nextSevenDays = 0;
+
+    visibleSchedules.forEach(schedule => {
+      const status = String(schedule?.status || "").toLowerCase();
+      if (status === "paused") paused += 1;
+      const scheduledAt = new Date(schedule?.startTime || schedule?.time || 0).getTime();
+      if (scheduledAt >= now && scheduledAt <= weekFromNow) nextSevenDays += 1;
+      (schedule?.platforms || (schedule?.platform ? [schedule.platform] : [])).forEach(platform =>
+        platformCount.add(platform)
+      );
+    });
+
+    return {
+      active: visibleSchedules.length,
+      nextSevenDays,
+      paused,
+      platforms: platformCount.size,
+    };
+  }, [visibleSchedules]);
   const selectedCount = selectedScheduleIds.size;
   const allVisibleSelected =
-    visibleSchedules.length > 0 && visibleSchedules.every(schedule => selectedScheduleIds.has(schedule.id));
+    visibleSchedules.length > 0 &&
+    visibleSchedules.every(schedule => selectedScheduleIds.has(schedule.id));
 
   const toggleScheduleSelection = id => {
     if (!id) return;
@@ -165,7 +190,7 @@ const SchedulesPanel = ({
       {/* Header */}
       <div className="orchestrator-header">
         <div>
-          <h2 className="orchestrator-title">PUBLISH QUEUE</h2>
+          <h2 className="orchestrator-title">Publishing Queue</h2>
           <div style={{ color: "#64748b", fontSize: "0.9rem" }}>
             Monitor new uploads that are scheduled for future platform releases.
           </div>
@@ -176,34 +201,62 @@ const SchedulesPanel = ({
             className={`control-btn ${viewMode === "orchestrator" ? "active" : ""}`}
             onClick={() => setViewMode("orchestrator")}
           >
-            WAR ROOM VIEW
+            Calendar
           </button>
           <button
             className={`control-btn ${viewMode === "list" ? "active" : ""}`}
             onClick={() => setViewMode("list")}
           >
-            MANIFEST
+            List
           </button>
           <button
             className="control-btn"
             style={{ borderColor: "#10b981", color: "#10b981" }}
             onClick={() => (onNavigate ? onNavigate("upload") : setShowInjector(!showInjector))}
           >
-            {onNavigate ? "+ QUEUE NEW UPLOAD" : showInjector ? "CANCEL DROP" : "+ SCHEDULE DROP"}
+            {onNavigate ? "+ Schedule post" : showInjector ? "CANCEL DROP" : "+ SCHEDULE DROP"}
           </button>
         </div>
+      </div>
+
+      <div className="queue-kpi-grid" aria-label="Queue summary">
+        <article>
+          <span>Active posts</span>
+          <strong>{queueSummary.active}</strong>
+          <small>Currently in your publishing queue</small>
+        </article>
+        <article>
+          <span>Next 7 days</span>
+          <strong>{queueSummary.nextSevenDays}</strong>
+          <small>Scheduled for the coming week</small>
+        </article>
+        <article>
+          <span>Paused</span>
+          <strong>{queueSummary.paused}</strong>
+          <small>Waiting for you to resume</small>
+        </article>
+        <article>
+          <span>Platforms</span>
+          <strong>{queueSummary.platforms}</strong>
+          <small>Destinations represented</small>
+        </article>
       </div>
 
       <div className="queue-guidance">
         <div>
           <span className="queue-guidance-kicker">How queue works</span>
-          <strong>Choose a fresh media file in Publish, select platforms, then pick a future time.</strong>
+          <strong>
+            Choose a fresh media file in Publish, select platforms, then pick a future time.
+          </strong>
           <p>
             Queue never auto-selects old uploads. Each selected platform uses one automated
             distribution task from the user&apos;s monthly plan allowance.
           </p>
         </div>
-        <button className="queue-guidance-action" onClick={() => onNavigate && onNavigate("upload")}>
+        <button
+          className="queue-guidance-action"
+          onClick={() => onNavigate && onNavigate("upload")}
+        >
           Open Publisher
         </button>
       </div>
@@ -465,12 +518,11 @@ const SchedulesPanel = ({
                   />
                 </label>
                 <div>
-                  <div style={{ fontWeight: "bold", color: "white" }}>
-                    {label}
-                  </div>
+                  <div style={{ fontWeight: "bold", color: "white" }}>{label}</div>
                   <div style={{ fontSize: "0.8rem", color: "#94a3b8" }}>
                     Target: {time ? new Date(time).toLocaleString() : "Unscheduled"} •{" "}
-                    {sch.frequency || "once"} • {sch.source === "new_upload_queue" ? "new upload" : "legacy queue"}
+                    {sch.frequency || "once"} •{" "}
+                    {sch.source === "new_upload_queue" ? "new upload" : "legacy queue"}
                   </div>
                 </div>
                 <div style={{ display: "flex", gap: "5px", alignItems: "center" }}>
@@ -518,7 +570,10 @@ const SchedulesPanel = ({
                   )}
                   <button
                     onClick={() => {
-                      const newTime = prompt("Reschedule to (YYYY-MM-DDTHH:MM):", injectData.date + "T" + injectData.time);
+                      const newTime = prompt(
+                        "Reschedule to (YYYY-MM-DDTHH:MM):",
+                        injectData.date + "T" + injectData.time
+                      );
                       if (newTime && onReschedule) onReschedule(sch.id, newTime + ":00.000Z");
                     }}
                     className="control-btn"
