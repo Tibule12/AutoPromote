@@ -14,7 +14,10 @@ if (global.__STATIC_SERVER_STARTED) {
   const rateLimit = require("express-rate-limit");
   const limiter = rateLimit({
     windowMs: 60 * 1000, // 1 minute
-    max: 200, // Limit each IP to 200 requests per windowMs
+    // A single Playwright worker reuses this server across the full suite. Keep
+    // the guard high enough that test assets and mocked API traffic cannot
+    // throttle later specs.
+    max: 10000,
     standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
     message: "Rate limit exceeded",

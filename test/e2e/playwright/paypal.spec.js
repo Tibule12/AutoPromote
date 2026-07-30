@@ -1,10 +1,13 @@
 const { test, expect } = require("@playwright/test");
-const { spawn } = require("child_process");
 
 const STATIC_PORT = process.env.STATIC_SERVER_PORT || 5000;
 const getBase = () => process.env.E2E_BASE_URL || `http://localhost:${STATIC_PORT}`;
 
-let serverProcess;
+const waitForVisiblePlans = async page => {
+  const plans = page.locator(".plans-section:visible .plan-card:visible");
+  await expect(plans.first()).toBeVisible({ timeout: 60000 });
+  await expect(plans).not.toHaveCount(0);
+};
 
 test.beforeAll(async () => {
   const staticReady = require("./static-server");
@@ -109,13 +112,12 @@ test("upgrade flow opens PayPal and handles cancel return", async ({ page }) => 
       JSON.stringify({ uid: "testUser", email: "test@local", name: "Test User", role: "user" })
     );
   });
-  await page.goto(getBase() + "/#/pricing");
+  await page.goto(getBase() + "/#/pricing", { waitUntil: "domcontentloaded" });
   // Debug: capture a short console dump and page title
   const pageTitle = await page.title();
   console.log("[DEBUG] Page title after goto:", pageTitle);
   // Wait for plans to load: plans-section header and at least one plan card
-  await page.waitForSelector(".plans-section h3");
-  await page.waitForSelector(".plans-grid .plan-card");
+  await waitForVisiblePlans(page);
   // Debug: print plans grid HTML to help diagnose missing subscribe button
   const cardTitles = await page.evaluate(() =>
     Array.from(document.querySelectorAll(".plans-grid .plan-card h4")).map(n =>
@@ -160,6 +162,12 @@ test("upgrade flow opens PayPal and handles cancel return", async ({ page }) => 
 
 // Activation flow: stub activate endpoint and status
 test("activation flow after approval updates subscription state", async ({ page }) => {
+  // Prevent unrelated dashboard/bootstrap requests from reaching production or
+  // delaying the pricing panel. More-specific routes registered below win.
+  await page.route("**/api/**", async route => {
+    await route.fulfill({ status: 200, contentType: "application/json", body: "{}" });
+  });
+
   await page.route("**/api/paypal-subscriptions/create-subscription", async route => {
     const body = JSON.stringify({
       success: true,
@@ -216,8 +224,8 @@ test("activation flow after approval updates subscription state", async ({ page 
       JSON.stringify({ uid: "testUser", email: "test@local", name: "Test User", role: "user" })
     );
   });
-  await page.goto(getBase() + "/#/pricing");
-  await page.waitForSelector("text=Available Plans");
+  await page.goto(getBase() + "/#/pricing", { waitUntil: "domcontentloaded" });
+  await waitForVisiblePlans(page);
 
   // Intercept window.open call instead of relying on a browser popup
   await page.evaluate(() => {

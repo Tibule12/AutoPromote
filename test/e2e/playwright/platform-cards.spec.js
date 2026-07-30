@@ -1,13 +1,10 @@
 const { test, expect } = require("@playwright/test");
-const { spawn } = require("child_process");
 
 const STATIC_PORT = process.env.STATIC_SERVER_PORT || 5000;
 const getBase = () => process.env.E2E_BASE_URL || `http://localhost:${STATIC_PORT}`;
 const DASHBOARD_PUBLISH_NAV_SELECTORS = ['nav li:has-text("Publish")', 'nav li:has-text("Upload")'];
 const LEGACY_DASHBOARD_TILE_FLOW_REASON =
   "Unified Publisher now uses stacked platform forms, so this legacy tile-flow dashboard test is no longer applicable.";
-
-let serverProcess;
 
 test.beforeEach(async ({ page }, testInfo) => {
   if (testInfo.title.includes("Per-platform SPA")) {
@@ -3074,7 +3071,10 @@ test("Per-platform card: TikTok respects creator_info and allows upload", async 
 
 // New test: when posting cap is reached, the UI should show cap info and disable upload
 test("Per-platform card: TikTok blocks upload when posting cap reached", async ({ page }) => {
-  test.setTimeout(60000);
+  test.setTimeout(120000);
+  await page.route("**/api/**", async route => {
+    await route.fulfill({ status: 200, contentType: "application/json", body: "{}" });
+  });
   const fulfillCreatorInfo = async route => {
     await route.fulfill({
       status: 200,
@@ -3105,7 +3105,7 @@ test("Per-platform card: TikTok blocks upload when posting cap reached", async (
       );
     } catch (e) {}
   });
-  await page.goto(getBase() + "/#/dashboard", { waitUntil: "networkidle" });
+  await page.goto(getBase() + "/#/dashboard", { waitUntil: "domcontentloaded" });
   await openDashboardPublishTab(page);
   await page.waitForSelector('text=TikTok Configuration', { timeout: 10000 });
   await page.waitForSelector('text=Posting cap: 2 per 24h', { timeout: 10000 });

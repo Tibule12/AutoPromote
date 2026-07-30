@@ -2,11 +2,11 @@ name: Playwright E2E
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   schedule:
-    - cron: '0 5 * * *' # daily smoke tests at 05:00 UTC
+    - cron: "0 5 * * *" # daily smoke tests at 05:00 UTC
 
 jobs:
   playwright-e2e:
@@ -18,15 +18,15 @@ jobs:
       GENERIC_TOKEN_ENCRYPTION_KEY: ${{ secrets.GENERIC_TOKEN_ENCRYPTION_KEY }}
       RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
       TWITTER_TOKEN_ENCRYPTION_KEY: ${{ secrets.TWITTER_TOKEN_ENCRYPTION_KEY }}
-      ENABLE_TEST_USAGE_NO_DB: '1'
-      FIREBASE_ADMIN_BYPASS: '1'
-      BYPASS_ACCEPTED_TERMS: '1'
-      CI_ROUTE_IMPORTS: '1'
-      CORS_ALLOW_ALL: 'true'
-      OPENAI_LOGGING_ENABLED: '1'
+      ENABLE_TEST_USAGE_NO_DB: "1"
+      FIREBASE_ADMIN_BYPASS: "1"
+      BYPASS_ACCEPTED_TERMS: "1"
+      CI_ROUTE_IMPORTS: "1"
+      CORS_ALLOW_ALL: "true"
+      OPENAI_LOGGING_ENABLED: "1"
     strategy:
       matrix:
-        node-version: [20]
+        node-version: [22.22.0]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,7 +34,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
+          cache: "npm"
       - name: Install deps
         run: npm ci
       - name: Check for FIREBASE Admin service account (cloud vs emulator)
