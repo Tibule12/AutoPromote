@@ -1479,7 +1479,7 @@ const PlatformPreview = ({
   );
 };
 
-const UnifiedPublisher = ({ onUpload, initialFile }) => {
+const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
   const { editing } = useSubscription();
   const viralClipCost = editing?.features?.findViralClips?.creditCost || 8;
   // 1. Initialize State Logic
@@ -1523,6 +1523,14 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
     platformData,
     resetPublishingState,
   } = usePublishingState(DEFAULT_SELECTED_PLATFORMS); // Default selection
+  const [focusedPlatform, setFocusedPlatform] = useState(DEFAULT_SELECTED_PLATFORMS[0] || "tiktok");
+
+  useEffect(() => {
+    if (!selectedPlatforms.length) return;
+    if (!selectedPlatforms.includes(focusedPlatform)) {
+      setFocusedPlatform(selectedPlatforms[0]);
+    }
+  }, [focusedPlatform, selectedPlatforms]);
 
   // Handle Initial File
   useEffect(() => {
@@ -2767,14 +2775,22 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
     (typeof globalFile === "string" ? "Selected media URL" : "No media selected yet");
   const queueActionLabel = isQueuedPublish ? "Queue new post" : "Publish now";
   const queuePlatformCount = selectedPlatforms.length;
+  const selectedMediaSize =
+    globalFile && typeof globalFile === "object" && Number(globalFile.size)
+      ? `${Math.max(1, Math.round(globalFile.size / 1024 / 1024))} MB`
+      : "";
 
   return (
-    <div className={`unified-publisher-container${modalOpen ? " modal-open" : ""}`}>
+    <div
+      className={`unified-publisher-container publisher-redesign${embedded ? " is-embedded" : ""}${modalOpen ? " modal-open" : ""}`}
+    >
       {/* --- HEADER: Global Context --- */}
-      <header className="publisher-header">
-        <h1>Publisher</h1>
-        <p>Upload once, tailor the details, and publish everywhere.</p>
-      </header>
+      {!embedded && (
+        <header className="publisher-header">
+          <h1>Publisher</h1>
+          <p>Upload once, tailor the details, and publish everywhere.</p>
+        </header>
+      )}
 
       <ol className="publisher-stepper" aria-label="Publishing workflow">
         <li className="active">
@@ -2806,6 +2822,30 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
           </div>
         </li>
       </ol>
+
+      <section className="publisher-current-asset" aria-label="Current publishing asset">
+        <span className="publisher-asset-icon">{mediaType === "image" ? "▧" : "▶"}</span>
+        <div>
+          <small>Current media</small>
+          <strong>{selectedMediaName}</strong>
+          <span>
+            {selectedMediaSize || "Choose a master file to begin"}
+            {duration > 0 ? ` · ${Math.round(duration)} seconds` : ""}
+          </span>
+        </div>
+        <div className="publisher-destination-pills">
+          {selectedPlatforms.length ? (
+            selectedPlatforms.map(platform => (
+              <span key={platform}>{getPlatformName(platform)}</span>
+            ))
+          ) : (
+            <em>No platforms selected</em>
+          )}
+        </div>
+        <span className="publisher-asset-status">
+          {globalFile ? "Media ready" : "Waiting for media"}
+        </span>
+      </section>
 
       <div className="publisher-layout">
         {/* --- LEFT SIDE: The "Global" Input (Optional Helper) --- */}
@@ -3278,17 +3318,38 @@ const UnifiedPublisher = ({ onUpload, initialFile }) => {
 
         {/* --- RIGHT SIDE: The Platform Cards (Your Existing Forms) --- */}
         <main className="platform-workspace" style={{ paddingBottom: "120px" }}>
-          <h2>3. Optimize & Publish</h2>
+          <div className="publisher-platform-heading">
+            <div>
+              <small>Customize by platform</small>
+              <h2>Perfect each destination</h2>
+            </div>
+            <div className="publisher-platform-tabs" role="tablist" aria-label="Selected platforms">
+              {selectedPlatforms.map(platformId => (
+                <button
+                  key={platformId}
+                  type="button"
+                  role="tab"
+                  aria-selected={focusedPlatform === platformId}
+                  className={focusedPlatform === platformId ? "active" : ""}
+                  onClick={() => setFocusedPlatform(platformId)}
+                >
+                  {getPlatformName(platformId)}
+                </button>
+              ))}
+            </div>
+          </div>
 
           {selectedPlatforms.length === 0 ? (
             <div className="empty-state">Select a platform to begin.</div>
           ) : (
             <div className="platform-stack">
-              {selectedPlatforms.map(platformId => (
-                <div key={platformId} className="platform-section">
-                  {renderPlatformForm(platformId)}
-                </div>
-              ))}
+              {selectedPlatforms
+                .filter(platformId => platformId === focusedPlatform)
+                .map(platformId => (
+                  <div key={platformId} className="platform-section">
+                    {renderPlatformForm(platformId)}
+                  </div>
+                ))}
             </div>
           )}
 

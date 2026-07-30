@@ -1189,6 +1189,25 @@ const sidebarBodyTextStyle = {
   lineHeight: 1.45,
 };
 
+const VIRAL_STUDIO_WORKFLOW = [
+  {
+    label: "Moments",
+    helper: "Choose the source clip",
+  },
+  {
+    label: "Hook",
+    helper: "Shape the opening seconds",
+  },
+  {
+    label: "B-roll",
+    helper: "Build the visual timeline",
+  },
+  {
+    label: "Export",
+    helper: "Review and render",
+  },
+];
+
 const ViralClipStudio = ({
   videoUrl,
   clips,
@@ -5892,6 +5911,14 @@ const ViralClipStudio = ({
     watermarkDragRef.current = null;
   };
 
+  const studioWorkflowStage = isExporting
+    ? 3
+    : overlays.some(overlay => overlay.bRollMode)
+      ? 2
+      : addHook
+        ? 1
+        : 0;
+
   return (
     <div className="viral-studio-overlay">
       <div className="viral-studio-container hook-broll-only-mode">
@@ -5900,7 +5927,7 @@ const ViralClipStudio = ({
             <span className="studio-eyebrow">Hook + B-roll mode</span>
             <h3>Viral Clip Studio</h3>
             <p className="studio-header-subtitle">
-              Shape the first seconds, place cutaway clips, and export the short from one focused
+              Turn a selected moment into a finished vertical story from one controlled editing
               workspace.
             </p>
             <div className="studio-billing-strip">
@@ -5965,6 +5992,39 @@ const ViralClipStudio = ({
             </button>
           </div>
         </div>
+
+        <nav className="studio-workflow-nav" aria-label="Viral Clip Studio workflow">
+          <div className="studio-workflow-nav__intro">
+            <span>Editing route</span>
+            <strong>Moment to finished short</strong>
+          </div>
+          <ol>
+            {VIRAL_STUDIO_WORKFLOW.map((step, index) => {
+              const state =
+                index < studioWorkflowStage
+                  ? "is-complete"
+                  : index === studioWorkflowStage
+                    ? "is-active"
+                    : "is-pending";
+              return (
+                <li key={step.label} className={state}>
+                  <span>{index < studioWorkflowStage ? "✓" : index + 1}</span>
+                  <div>
+                    <strong>{step.label}</strong>
+                    <small>{step.helper}</small>
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+          <div className="studio-workflow-nav__status">
+            <i aria-hidden="true" />
+            <span>
+              <strong>Live preview</strong>
+              <small>Changes stay local until render</small>
+            </span>
+          </div>
+        </nav>
 
         <div className="studio-layout">
           <div className="phone-preview-container">

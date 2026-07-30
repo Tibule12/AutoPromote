@@ -31,6 +31,8 @@ describe("CamCombinerPanel", () => {
   it("opens without requiring an initial upload", () => {
     render(<CamCombinerPanel onClose={() => {}} onUseExport={() => {}} />);
 
+    expect(screen.getByText("Uploaded recordings")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Open empty editor" }));
     expect(screen.getByText("Standalone Cam Combiner")).toBeInTheDocument();
     expect(mockLatestCombinerProps.primaryFile).toBeNull();
   });
@@ -40,9 +42,14 @@ describe("CamCombinerPanel", () => {
     const onUseExport = jest.fn();
     render(<CamCombinerPanel onClose={onClose} onUseExport={onUseExport} />);
 
+    fireEvent.click(screen.getByRole("button", { name: "Open empty editor" }));
     fireEvent.click(screen.getByRole("button", { name: "Close workspace" }));
+    expect(screen.getByText("Uploaded recordings")).toBeInTheDocument();
+    expect(onClose).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Back to Overview" }));
     expect(onClose).toHaveBeenCalledTimes(1);
 
+    fireEvent.click(screen.getByRole("button", { name: "Open empty editor" }));
     fireEvent.click(screen.getByRole("button", { name: "Use export" }));
     expect(onUseExport).toHaveBeenCalledWith({ file: { name: "proof.mp4" } });
   });
@@ -57,6 +64,7 @@ describe("CamCombinerPanel", () => {
       />
     );
 
+    fireEvent.click(screen.getByRole("button", { name: "Open empty editor" }));
     fireEvent.click(screen.getByRole("button", { name: "Find viral clips" }));
     expect(onFindViralClips).toHaveBeenCalledWith({
       renderJobId: "job-1",

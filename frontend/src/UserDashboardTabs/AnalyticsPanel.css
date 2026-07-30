@@ -21,6 +21,188 @@
   overflow: hidden;
 }
 
+.analytics-performance-overview {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(260px, 0.68fr);
+  gap: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.analytics-performance-card,
+.analytics-insight-card {
+  padding: 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 14px;
+  background: rgba(8, 18, 33, 0.82);
+}
+
+.analytics-card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.9rem;
+}
+
+.analytics-card-heading > div {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.analytics-card-heading span {
+  color: #a78bfa;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.analytics-card-heading h4 {
+  margin: 0;
+  color: #f8fafc;
+  font-size: 0.9rem;
+}
+
+.analytics-card-heading small {
+  color: #8290a7;
+  font-size: 0.68rem;
+}
+
+.analytics-signal-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.analytics-signal-grid > div {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.7rem;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 10px;
+  background: rgba(4, 11, 22, 0.52);
+}
+
+.analytics-signal-grid span {
+  color: #8290a7;
+  font-size: 0.66rem;
+}
+
+.analytics-signal-grid strong {
+  color: #f8fafc;
+  font-size: 1rem;
+}
+
+.analytics-signal-chart {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.analytics-signal-chart > div:not(.analytics-no-signal) {
+  display: grid;
+  grid-template-columns: minmax(74px, 0.26fr) minmax(100px, 1fr) auto;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.analytics-signal-chart span,
+.analytics-signal-chart strong {
+  color: #cbd5e1;
+  font-size: 0.68rem;
+  text-transform: capitalize;
+}
+
+.analytics-signal-chart i {
+  display: block;
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.12);
+}
+
+.analytics-signal-chart b {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #8b5cf6, #22d3ee);
+}
+
+.analytics-no-signal {
+  padding: 1rem;
+  border: 1px dashed rgba(148, 163, 184, 0.16);
+  border-radius: 10px;
+  color: #8290a7;
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+.analytics-top-platform {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.8rem;
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 11px;
+  background: rgba(109, 74, 255, 0.07);
+}
+
+.analytics-top-platform > span {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  place-items: center;
+  border-radius: 10px;
+  color: #c4b5fd;
+  background: rgba(109, 74, 255, 0.16);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.analytics-top-platform > div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.analytics-top-platform strong {
+  color: #f8fafc;
+  font-size: 0.8rem;
+  text-transform: capitalize;
+}
+
+.analytics-top-platform small {
+  color: #8290a7;
+  font-size: 0.64rem;
+  line-height: 1.4;
+}
+
+.analytics-insight-card dl {
+  display: grid;
+  gap: 0;
+  margin: 0.8rem 0 0;
+}
+
+.analytics-insight-card dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.analytics-insight-card dt {
+  color: #8290a7;
+  font-size: 0.68rem;
+}
+
+.analytics-insight-card dd {
+  margin: 0;
+  color: #f8fafc;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
 .ap-workflow-stat-card {
   display: grid;
   gap: 0.2rem;
@@ -70,6 +252,10 @@
   .ap-analytics-trackers {
     grid-template-columns: 1fr !important;
   }
+
+  .analytics-performance-overview {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 700px) {
@@ -95,5 +281,9 @@
     white-space: normal !important;
     text-overflow: unset !important;
     overflow: visible !important;
+  }
+
+  .analytics-signal-grid {
+    grid-template-columns: 1fr;
   }
 }

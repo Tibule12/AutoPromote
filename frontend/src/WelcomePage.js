@@ -34,6 +34,27 @@ const availabilityCards = [
   },
 ];
 
+const commandStages = [
+  {
+    index: "01",
+    label: "Create",
+    title: "Direct the source",
+    copy: "Combine cameras, shape ideas, or start from a finished recording.",
+  },
+  {
+    index: "02",
+    label: "Repurpose",
+    title: "Find the moments",
+    copy: "Turn long-form content into focused clips and promo-ready outputs.",
+  },
+  {
+    index: "03",
+    label: "Distribute",
+    title: "Publish with control",
+    copy: "Customize destinations, schedule the queue, and review performance.",
+  },
+];
+
 function getWorkspaceInviteParams() {
   if (typeof window === "undefined") return null;
   const params = new URLSearchParams(window.location.search);
@@ -160,35 +181,66 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
 
         <section className="ap-hero" id="top">
           <div className="ap-hero-copy">
-            <p className="ap-eyebrow">Creator Operating System</p>
+            <div className="ap-hero-status">
+              <span className="ap-hero-status__dot" aria-hidden="true" />
+              <span>Creator workspace</span>
+              <small>One connected production loop</small>
+            </div>
             <h1>
-              Create Once.
+              Your content moves.
               <br />
-              Edit Smarter.
-              <br />
-              Publish Across Your Channels.
+              Your workflow should
+              <span> move with it.</span>
             </h1>
             <p className="ap-hero-subtext">
-              AutoPromote helps creators find promising moments in uploaded videos, prepare media,
-              and publish to supported connected platforms from one workspace.
+              Direct multi-camera recordings, surface strong moments, build promo cuts, and publish
+              across supported channels without stitching together five different tools.
             </p>
             <div className="ap-hero-ctas">
               <button className="ap-btn ap-btn-primary" onClick={onGetStarted}>
-                Start Free
+                Open your workspace
               </button>
-              <button className="ap-btn ap-btn-outline" onClick={handleWatchDemo}>
-                Watch Demo
+              <button
+                className="ap-btn ap-btn-outline"
+                onClick={handleWatchDemo}
+                aria-label="Watch Demo"
+              >
+                Watch the workflow
               </button>
+            </div>
+            <div className="ap-hero-proof" aria-label="Core AutoPromote workflows">
+              <span>Multi-camera direction</span>
+              <span>Viral moment discovery</span>
+              <span>Connected publishing</span>
             </div>
           </div>
           <HeroScreenshot />
         </section>
 
+        <section className="ap-command-ribbon" aria-label="AutoPromote workflow overview">
+          <div className="ap-command-ribbon__intro">
+            <span>One operating system</span>
+            <strong>From source recording to published result.</strong>
+          </div>
+          <div className="ap-command-ribbon__stages">
+            {commandStages.map(stage => (
+              <article key={stage.index}>
+                <span>{stage.index}</span>
+                <div>
+                  <small>{stage.label}</small>
+                  <strong>{stage.title}</strong>
+                  <p>{stage.copy}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
         <section className="ap-section" id="features">
           <SectionHeading
-            eyebrow="Product capabilities"
-            title="Designed for modern creator teams"
-            copy="Visual, practical tools that replace scattered workflows."
+            eyebrow="Inside the workspace"
+            title="Five focused tools. One visual system."
+            copy="Every feature has a clear job, but the source media and decisions stay connected."
           />
           <FeatureGrid items={featureCards} />
         </section>
@@ -197,7 +249,7 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
           <SectionHeading
             eyebrow="Availability Snapshot"
             title="What Works Today"
-            copy="A conservative view of the product today so teams can plan around live functionality instead of aspirational copy."
+            copy="A clear view of the live product, its connected publishing support, and where platform permissions still matter."
           />
           <FeatureGrid items={availabilityCards} />
         </section>

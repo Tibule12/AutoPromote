@@ -485,55 +485,124 @@ const SecurityPanel = ({ user }) => {
 
   return (
     <section className="security-panel">
-      <h2>Security & Privacy</h2>
+      <section className="security-quick-grid" aria-label="Security status">
+        <article>
+          <span className="security-quick-icon">▣</span>
+          <div>
+            <small>Password</small>
+            <strong>Protected</strong>
+            <p>Update your account password and sign-in protection.</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              const details = document.querySelector(".security-password-details");
+              if (details && !details.open) details.open = true;
+              details?.scrollIntoView?.({ behavior: "smooth", block: "center" });
+            }}
+          >
+            Change password
+          </button>
+        </article>
+        <article>
+          <span className="security-quick-icon">◇</span>
+          <div>
+            <small>Two-step verification</small>
+            <strong>{twoFactorEnabled ? "Enabled" : "Not enabled"}</strong>
+            <p>Add another verification step when signing in.</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              const details = document.querySelector(".security-twofa-details");
+              if (details && !details.open) details.open = true;
+              details?.scrollIntoView?.({ behavior: "smooth", block: "center" });
+            }}
+          >
+            {twoFactorEnabled ? "Manage 2FA" : "Enable 2FA"}
+          </button>
+        </article>
+        <article>
+          <span className="security-quick-icon">◉</span>
+          <div>
+            <small>Active session</small>
+            <strong>{currentSession.browser}</strong>
+            <p>{currentSession.device}</p>
+          </div>
+          <span className="security-quick-status">Active now</span>
+        </article>
+        <article>
+          <span className="security-quick-icon">⌁</span>
+          <div>
+            <small>Security notifications</small>
+            <strong>{privacySettings.emailNotifications ? "Enabled" : "Disabled"}</strong>
+            <p>Receive account and publishing security updates.</p>
+          </div>
+          <span
+            className={`security-quick-status ${
+              privacySettings.emailNotifications ? "enabled" : ""
+            }`}
+          >
+            {privacySettings.emailNotifications ? "On" : "Off"}
+          </span>
+        </article>
+      </section>
 
       {/* Password Change Section */}
-      <div className="security-card">
+      <div className="security-card security-password-card">
         <h3>🔒 Change Password</h3>
-        <form onSubmit={handlePasswordChange} className="password-form">
-          <div className="form-group">
-            <label>Current Password</label>
-            <input
-              type="password"
-              value={passwordForm.currentPassword}
-              onChange={e => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
-              required
-              placeholder="Enter current password"
-            />
-          </div>
+        <p>Choose a unique password you do not use on another service.</p>
+        <details className="security-action-details security-password-details">
+          <summary>Open password settings</summary>
+          <form onSubmit={handlePasswordChange} className="password-form">
+            <div className="form-group">
+              <label>Current Password</label>
+              <input
+                type="password"
+                value={passwordForm.currentPassword}
+                onChange={e =>
+                  setPasswordForm({ ...passwordForm, currentPassword: e.target.value })
+                }
+                required
+                placeholder="Enter current password"
+              />
+            </div>
 
-          <div className="form-group">
-            <label>New Password</label>
-            <input
-              type="password"
-              value={passwordForm.newPassword}
-              onChange={e => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-              required
-              placeholder="Enter new password"
-            />
-            <small className="password-hint">
-              Must be 8+ characters with uppercase, lowercase, and number
-            </small>
-          </div>
+            <div className="form-group">
+              <label>New Password</label>
+              <input
+                type="password"
+                value={passwordForm.newPassword}
+                onChange={e => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                required
+                placeholder="Enter new password"
+              />
+              <small className="password-hint">
+                Must be 8+ characters with uppercase, lowercase, and number
+              </small>
+            </div>
 
-          <div className="form-group">
-            <label>Confirm New Password</label>
-            <input
-              type="password"
-              value={passwordForm.confirmPassword}
-              onChange={e => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
-              required
-              placeholder="Confirm new password"
-            />
-          </div>
+            <div className="form-group">
+              <label>Confirm New Password</label>
+              <input
+                type="password"
+                value={passwordForm.confirmPassword}
+                onChange={e =>
+                  setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })
+                }
+                required
+                placeholder="Confirm new password"
+              />
+            </div>
 
-          {passwordError && <div className="error-message">{passwordError}</div>}
-          {passwordSuccess && <div className="success-message">{passwordSuccess}</div>}
+            {passwordError && <div className="error-message">{passwordError}</div>}
+            {passwordSuccess && <div className="success-message">{passwordSuccess}</div>}
 
-          <button type="submit" disabled={changingPassword} className="btn-primary">
-            {changingPassword ? "Changing..." : "Change Password"}
-          </button>
-        </form>
+            <button type="submit" disabled={changingPassword} className="btn-primary">
+              {changingPassword ? "Changing..." : "Change Password"}
+            </button>
+          </form>
+        </details>
       </div>
 
       {/* Active Session */}
@@ -610,167 +679,170 @@ const SecurityPanel = ({ user }) => {
       </div>
 
       {/* Two-Factor Authentication */}
-      <div className="security-card">
+      <div className="security-card security-twofa-card">
         <h3>🔐 Two-Factor Authentication</h3>
         <p style={{ color: "#222", fontWeight: 500 }}>
           Add an extra layer of security to your account
         </p>
 
-        {twoFactorEnabled ? (
-          <div className="twofa-enabled">
-            <div className="success-badge">✓ 2FA Enabled</div>
-            <p style={{ color: "#222", fontWeight: 500 }}>
-              Your account is protected with two-factor authentication
-            </p>
-            <button className="btn-danger" onClick={handleDisable2FA}>
-              Disable 2FA
-            </button>
-          </div>
-        ) : (
-          <div className="twofa-setup">
-            {!qrCodeUrl && !verificationId ? (
-              <div className="form-group">
-                <label>Choose MFA Method</label>
-                <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem" }}>
-                  <button
-                    className={mfaMethod === "totp" ? "btn-primary" : "btn-secondary"}
-                    onClick={() => setMfaMethod("totp")}
-                    style={{ flex: 1 }}
-                  >
-                    📱 Authenticator App (Recommended)
-                  </button>
-                  <button
-                    className={mfaMethod === "sms" ? "btn-primary" : "btn-secondary"}
-                    onClick={() => setMfaMethod("sms")}
-                    style={{ flex: 1 }}
-                  >
-                    💬 SMS
-                  </button>
-                </div>
-
-                {mfaMethod === "totp" ? (
-                  <div>
-                    <p style={{ fontSize: "0.9rem", color: "#9ca3af", marginBottom: "1rem" }}>
-                      Use an authenticator app like Google Authenticator, Authy, or Microsoft
-                      Authenticator
-                    </p>
+        <details className="security-action-details security-twofa-details">
+          <summary>{twoFactorEnabled ? "Manage two-factor authentication" : "Set up 2FA"}</summary>
+          {twoFactorEnabled ? (
+            <div className="twofa-enabled">
+              <div className="success-badge">✓ 2FA Enabled</div>
+              <p style={{ color: "#222", fontWeight: 500 }}>
+                Your account is protected with two-factor authentication
+              </p>
+              <button className="btn-danger" onClick={handleDisable2FA}>
+                Disable 2FA
+              </button>
+            </div>
+          ) : (
+            <div className="twofa-setup">
+              {!qrCodeUrl && !verificationId ? (
+                <div className="form-group">
+                  <label>Choose MFA Method</label>
+                  <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem" }}>
                     <button
-                      className="btn-primary"
-                      onClick={handleEnable2FA}
-                      disabled={enrolling2FA}
+                      className={mfaMethod === "totp" ? "btn-primary" : "btn-secondary"}
+                      onClick={() => setMfaMethod("totp")}
+                      style={{ flex: 1 }}
                     >
-                      {enrolling2FA ? "Generating..." : "Generate QR Code"}
+                      📱 Authenticator App (Recommended)
+                    </button>
+                    <button
+                      className={mfaMethod === "sms" ? "btn-primary" : "btn-secondary"}
+                      onClick={() => setMfaMethod("sms")}
+                      style={{ flex: 1 }}
+                    >
+                      💬 SMS
                     </button>
                   </div>
-                ) : (
-                  <div>
-                    <label>Phone Number (with country code)</label>
-                    <input
-                      type="tel"
-                      value={phoneNumber}
-                      onChange={e => setPhoneNumber(e.target.value)}
-                      placeholder="+1234567890"
-                      className="phone-input"
-                    />
-                    <small className="input-hint">
-                      Format: +[country code][number] (e.g., +12025551234)
-                    </small>
-                    <div id="recaptcha-container"></div>
-                    <button
-                      className="btn-primary"
-                      onClick={handleEnable2FA}
-                      disabled={enrolling2FA}
-                      style={{ marginTop: "12px" }}
-                    >
-                      {enrolling2FA ? "Sending Code..." : "Send Verification Code"}
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : qrCodeUrl ? (
-              <div className="form-group">
-                <h4>Scan QR Code</h4>
-                <div
-                  style={{
-                    background: "white",
-                    padding: "1rem",
-                    borderRadius: "8px",
-                    marginBottom: "1rem",
-                    textAlign: "center",
-                  }}
-                >
-                  <img src={qrCodeUrl} alt="QR Code" style={{ maxWidth: "200px" }} />
-                </div>
-                <p style={{ fontSize: "0.9rem", color: "#9ca3af", marginBottom: "0.5rem" }}>
-                  Or manually enter this code in your authenticator app:
-                </p>
-                <code
-                  style={{
-                    background: "#1e293b",
-                    padding: "0.5rem",
-                    borderRadius: "4px",
-                    display: "block",
-                    wordBreak: "break-all",
-                    marginBottom: "1rem",
-                  }}
-                >
-                  {totpSecret?.secretKey || ""}
-                </code>
-                <label>Enter the 6-digit code from your authenticator app</label>
-                <input
-                  type="text"
-                  value={verificationCode}
-                  onChange={e => setVerificationCode(e.target.value)}
-                  placeholder="123456"
-                  maxLength="6"
-                  className="code-input"
-                />
-                <button
-                  className="btn-primary"
-                  onClick={handleVerify2FA}
-                  style={{ marginTop: "12px" }}
-                >
-                  Verify & Enable 2FA
-                </button>
-                <button
-                  className="btn-secondary"
-                  onClick={() => {
-                    setQrCodeUrl("");
-                    setTotpSecret(null);
-                    setVerificationCode("");
-                    setEnrolling2FA(false);
-                  }}
-                  style={{ marginTop: "12px", marginLeft: "8px" }}
-                >
-                  Cancel
-                </button>
-              </div>
-            ) : verificationId ? (
-              <div className="form-group">
-                <label>Verification Code</label>
-                <input
-                  type="text"
-                  value={verificationCode}
-                  onChange={e => setVerificationCode(e.target.value)}
-                  placeholder="123456"
-                  maxLength="6"
-                  className="code-input"
-                />
-                <small className="input-hint">Enter the 6-digit code sent to your phone</small>
-                <button
-                  className="btn-primary"
-                  onClick={handleVerify2FA}
-                  style={{ marginTop: "12px" }}
-                >
-                  Verify & Enable 2FA
-                </button>
-              </div>
-            ) : null}
-          </div>
-        )}
 
-        {twoFactorError && <div className="error-message">{twoFactorError}</div>}
-        {twoFactorSuccess && <div className="success-message">{twoFactorSuccess}</div>}
+                  {mfaMethod === "totp" ? (
+                    <div>
+                      <p style={{ fontSize: "0.9rem", color: "#9ca3af", marginBottom: "1rem" }}>
+                        Use an authenticator app like Google Authenticator, Authy, or Microsoft
+                        Authenticator
+                      </p>
+                      <button
+                        className="btn-primary"
+                        onClick={handleEnable2FA}
+                        disabled={enrolling2FA}
+                      >
+                        {enrolling2FA ? "Generating..." : "Generate QR Code"}
+                      </button>
+                    </div>
+                  ) : (
+                    <div>
+                      <label>Phone Number (with country code)</label>
+                      <input
+                        type="tel"
+                        value={phoneNumber}
+                        onChange={e => setPhoneNumber(e.target.value)}
+                        placeholder="+1234567890"
+                        className="phone-input"
+                      />
+                      <small className="input-hint">
+                        Format: +[country code][number] (e.g., +12025551234)
+                      </small>
+                      <div id="recaptcha-container"></div>
+                      <button
+                        className="btn-primary"
+                        onClick={handleEnable2FA}
+                        disabled={enrolling2FA}
+                        style={{ marginTop: "12px" }}
+                      >
+                        {enrolling2FA ? "Sending Code..." : "Send Verification Code"}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : qrCodeUrl ? (
+                <div className="form-group">
+                  <h4>Scan QR Code</h4>
+                  <div
+                    style={{
+                      background: "white",
+                      padding: "1rem",
+                      borderRadius: "8px",
+                      marginBottom: "1rem",
+                      textAlign: "center",
+                    }}
+                  >
+                    <img src={qrCodeUrl} alt="QR Code" style={{ maxWidth: "200px" }} />
+                  </div>
+                  <p style={{ fontSize: "0.9rem", color: "#9ca3af", marginBottom: "0.5rem" }}>
+                    Or manually enter this code in your authenticator app:
+                  </p>
+                  <code
+                    style={{
+                      background: "#1e293b",
+                      padding: "0.5rem",
+                      borderRadius: "4px",
+                      display: "block",
+                      wordBreak: "break-all",
+                      marginBottom: "1rem",
+                    }}
+                  >
+                    {totpSecret?.secretKey || ""}
+                  </code>
+                  <label>Enter the 6-digit code from your authenticator app</label>
+                  <input
+                    type="text"
+                    value={verificationCode}
+                    onChange={e => setVerificationCode(e.target.value)}
+                    placeholder="123456"
+                    maxLength="6"
+                    className="code-input"
+                  />
+                  <button
+                    className="btn-primary"
+                    onClick={handleVerify2FA}
+                    style={{ marginTop: "12px" }}
+                  >
+                    Verify & Enable 2FA
+                  </button>
+                  <button
+                    className="btn-secondary"
+                    onClick={() => {
+                      setQrCodeUrl("");
+                      setTotpSecret(null);
+                      setVerificationCode("");
+                      setEnrolling2FA(false);
+                    }}
+                    style={{ marginTop: "12px", marginLeft: "8px" }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : verificationId ? (
+                <div className="form-group">
+                  <label>Verification Code</label>
+                  <input
+                    type="text"
+                    value={verificationCode}
+                    onChange={e => setVerificationCode(e.target.value)}
+                    placeholder="123456"
+                    maxLength="6"
+                    className="code-input"
+                  />
+                  <small className="input-hint">Enter the 6-digit code sent to your phone</small>
+                  <button
+                    className="btn-primary"
+                    onClick={handleVerify2FA}
+                    style={{ marginTop: "12px" }}
+                  >
+                    Verify & Enable 2FA
+                  </button>
+                </div>
+              ) : null}
+            </div>
+          )}
+
+          {twoFactorError && <div className="error-message">{twoFactorError}</div>}
+          {twoFactorSuccess && <div className="success-message">{twoFactorSuccess}</div>}
+        </details>
       </div>
 
       {/* Connected Platforms */}

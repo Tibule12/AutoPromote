@@ -3,9 +3,21 @@ import "./Auth.css";
 import { PUBLIC_SITE_URL } from "./config";
 
 const loginHighlights = [
-  "Jump back into your publishing command center.",
-  "Manage content, clips, thumbnails, and distribution from one place.",
-  "Keep your workflow moving with a faster creator-grade dashboard.",
+  {
+    index: "01",
+    label: "Create",
+    copy: "Return to Cam Combiner, Idea-to-Video, and your saved source media.",
+  },
+  {
+    index: "02",
+    label: "Promote",
+    copy: "Continue clip discovery, Smart Promo, and destination-specific publishing.",
+  },
+  {
+    index: "03",
+    label: "Measure",
+    copy: "Review your queue, connected channels, and available performance data.",
+  },
 ];
 
 const LoginForm = ({ onLogin, onClose, onResendVerification }) => {
@@ -108,32 +120,73 @@ const LoginForm = ({ onLogin, onClose, onResendVerification }) => {
   };
 
   return (
-    <div className="auth-container">
+    <div className="auth-container auth-container--login">
       <div className="auth-stage">
         <section className="auth-stage__panel auth-stage__panel--brand">
-          <div className="auth-stage__badge">AutoPromote Access</div>
-          <h1 className="auth-stage__title">Welcome back to your growth engine.</h1>
+          <div className="auth-brand-lockup">
+            <span className="auth-brand-lockup__mark" aria-hidden="true">
+              ▶
+            </span>
+            <span>
+              <strong>AutoPromote</strong>
+              <small>Creator OS</small>
+            </span>
+          </div>
+          <div className="auth-stage__badge">
+            <i aria-hidden="true" />
+            Secure workspace access
+          </div>
+          <h1 className="auth-stage__title">
+            Pick up the workflow exactly where you left it.
+          </h1>
           <p className="auth-stage__copy">
-            Sign in to keep building campaigns, packaging content, and pushing your creator stack
-            forward without losing momentum.
+            Your creation tools, publishing queue, connected platforms, and team workspace are one
+            sign-in away.
           </p>
           <div className="auth-stage__highlights">
             {loginHighlights.map(item => (
-              <div key={item} className="auth-stage__highlight">
-                <span className="auth-stage__highlight-mark">+</span>
-                <span>{item}</span>
+              <div key={item.index} className="auth-stage__highlight">
+                <span className="auth-stage__highlight-mark">{item.index}</span>
+                <span>
+                  <strong>{item.label}</strong>
+                  <small>{item.copy}</small>
+                </span>
               </div>
             ))}
+          </div>
+          <div className="auth-workspace-preview" aria-hidden="true">
+            <div className="auth-workspace-preview__topline">
+              <span>Workspace overview</span>
+              <small>Ready</small>
+            </div>
+            <div className="auth-workspace-preview__grid">
+              <span>
+                <small>Create</small>
+                <strong>3 tools</strong>
+              </span>
+              <span>
+                <small>Publish</small>
+                <strong>Queue ready</strong>
+              </span>
+              <span>
+                <small>Measure</small>
+                <strong>Analytics</strong>
+              </span>
+            </div>
           </div>
         </section>
 
         <form onSubmit={handleSubmit} className="auth-form auth-form--modal">
           <div className="auth-form__header">
-            <div className="auth-form__eyebrow">Sign In</div>
-            <h2 className="auth-title auth-title--left">Welcome Back</h2>
-            <p className="auth-subtitle">
-              Step back into AutoPromote and pick up where you left off.
-            </p>
+            <div className="auth-form__topline">
+              <div className="auth-form__eyebrow">Sign In</div>
+              <span className="auth-form__secure">
+                <i aria-hidden="true" />
+                Protected access
+              </span>
+            </div>
+            <h2 className="auth-title auth-title--left">Welcome back</h2>
+            <p className="auth-subtitle">Enter your details to open the creator workspace.</p>
           </div>
           {error && <div className="error-message">{error}</div>}
           {needsVerification && (
@@ -152,31 +205,43 @@ const LoginForm = ({ onLogin, onClose, onResendVerification }) => {
 
           <div className="auth-form__fields">
             <div className="form-group">
-              <label className="form-label">Email</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="form-input"
-                placeholder="Enter your email"
-                required
-                autoComplete="email"
-              />
+              <label className="form-label" htmlFor="login-email">
+                Email
+              </label>
+              <div className="auth-input-shell">
+                <span aria-hidden="true">@</span>
+                <input
+                  id="login-email"
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="form-input"
+                  placeholder="Enter your email"
+                  required
+                  autoComplete="email"
+                />
+              </div>
             </div>
 
             <div className="form-group">
-              <label className="form-label">Password</label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                className="form-input"
-                placeholder="Enter your password"
-                required
-                autoComplete="current-password"
-              />
+              <label className="form-label" htmlFor="login-password">
+                Password
+              </label>
+              <div className="auth-input-shell">
+                <span aria-hidden="true">◆</span>
+                <input
+                  id="login-password"
+                  type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="form-input"
+                  placeholder="Enter your password"
+                  required
+                  autoComplete="current-password"
+                />
+              </div>
             </div>
           </div>
 
@@ -227,7 +292,8 @@ const LoginForm = ({ onLogin, onClose, onResendVerification }) => {
           </button>
 
           <div className="auth-form__note">
-            Secure access to your creator workflows, publishing tools, and growth systems.
+            <span aria-hidden="true">✓</span>
+            <span>Firebase authentication protects access to your AutoPromote workspace.</span>
           </div>
 
           <div className="auth-action-row">
@@ -248,7 +314,7 @@ const LoginForm = ({ onLogin, onClose, onResendVerification }) => {
               }}
               className="auth-link auth-link--inline"
             >
-              Don&apos;t have an account? Create one
+              New to AutoPromote? Create an account
             </button>
           </div>
         </form>

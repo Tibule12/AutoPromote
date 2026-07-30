@@ -50,6 +50,7 @@ import TestSentryButton from "./components/TestSentryButton";
 import WelcomePage from "./WelcomePage";
 import LoginForm from "./LoginForm";
 import RegisterForm from "./RegisterForm";
+import LogoutConfirmDialog from "./components/LogoutConfirmDialog";
 import ForgotPasswordPage from "./ForgotPasswordPage";
 import ResetPasswordPage from "./ResetPasswordPage";
 import UserDashboard from "./UserDashboard_full";
@@ -206,6 +207,8 @@ function App() {
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [logoutInProgress, setLogoutInProgress] = useState(false);
   const [content, setContent] = useState([]);
   const [mySchedules, setMySchedules] = useState([]);
   const [analytics, setAnalytics] = useState(null);
@@ -245,11 +248,23 @@ function App() {
   // the transition from login into the dashboard.
   useEffect(() => {
     const shouldLockScroll =
-      showLogin || showRegister || showAdminLogin || showMfaModal || showTermsModal;
+      showLogin ||
+      showRegister ||
+      showAdminLogin ||
+      showMfaModal ||
+      showTermsModal ||
+      showLogoutConfirm;
     document.body.classList.toggle("modal-open", shouldLockScroll);
 
     return () => document.body.classList.remove("modal-open");
-  }, [showLogin, showRegister, showAdminLogin, showMfaModal, showTermsModal]);
+  }, [
+    showLogin,
+    showRegister,
+    showAdminLogin,
+    showMfaModal,
+    showTermsModal,
+    showLogoutConfirm,
+  ]);
 
   // E2E test auth bypass: when true, skip firebase auth and set test user
   const E2E_AUTH_BYPASS = process.env.REACT_APP_E2E_AUTH_BYPASS === "true";
@@ -965,9 +980,19 @@ function App() {
       setJustLoggedOut(true);
       setTermsRequired(false);
       setRequiredTermsVersion(null);
+      return true;
     } catch (error) {
       console.error("Logout error:", error);
+      return false;
     }
+  };
+
+  const confirmLogout = async () => {
+    if (logoutInProgress) return;
+    setLogoutInProgress(true);
+    const signedOut = await handleLogout();
+    setLogoutInProgress(false);
+    if (signedOut) setShowLogoutConfirm(false);
   };
 
   // Accept Terms action: posts acceptance and continues pending login if any
@@ -1676,31 +1701,11 @@ function App() {
                     {/* Show login modal if requested */}
                     {showLogin && (
                       <div
-                        className="modal-overlay open"
+                        className="modal-overlay open auth-route-overlay"
                         onTransitionEnd={() => {}}
-                        style={{
-                          position: "fixed",
-                          top: 0,
-                          right: 0,
-                          bottom: 0,
-                          left: 0,
-                          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                          zIndex: 10000,
-                          overflowY: "auto",
-                          touchAction: "pan-y", // allow the auth screen to scroll on phones
-                          pointerEvents: "auto", // ensure clicks are captured
-                        }}
                         onClick={e => e.stopPropagation()}
                       >
-                        <div
-                          style={{
-                            minHeight: "100%",
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "flex-start",
-                            padding: "clamp(0.75rem, 4vw, 3rem) clamp(0.5rem, 3vw, 1.25rem)",
-                          }}
-                        >
+                        <div className="auth-route-stage">
                           <LoginForm
                             onLogin={loginUser}
                             onResendVerification={resendVerificationEmail}
@@ -1714,30 +1719,10 @@ function App() {
                     {/* Show register modal if requested */}
                     {showRegister && (
                       <div
-                        className="modal-overlay open"
-                        style={{
-                          position: "fixed",
-                          top: 0,
-                          right: 0,
-                          bottom: 0,
-                          left: 0,
-                          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                          zIndex: 10000,
-                          overflowY: "auto",
-                          touchAction: "pan-y",
-                          pointerEvents: "auto",
-                        }}
+                        className="modal-overlay open auth-route-overlay"
                         onClick={e => e.stopPropagation()}
                       >
-                        <div
-                          style={{
-                            minHeight: "100%",
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "flex-start",
-                            padding: "clamp(0.75rem, 4vw, 3rem) clamp(0.5rem, 3vw, 1.25rem)",
-                          }}
-                        >
+                        <div className="auth-route-stage">
                           <RegisterForm
                             onRegister={registerUser}
                             onResendVerification={resendVerificationEmail}
@@ -1755,7 +1740,11 @@ function App() {
                   </>
                 ) : user && (user.role === "admin" || user.isAdmin === true) ? (
                   // Render admin dashboard for admin users
-                  <AdminDashboard analytics={analytics} user={user} onLogout={handleLogout} />
+                  <AdminDashboard
+                    analytics={analytics}
+                    user={user}
+                    onLogout={() => setShowLogoutConfirm(true)}
+                  />
                 ) : (
                   // Render full user dashboard for normal users
                   <UserDashboard
@@ -1763,7 +1752,7 @@ function App() {
                     content={content}
                     userDefaults={userDefaults}
                     onSaveDefaults={saveUserDefaults}
-                    onLogout={handleLogout}
+                    onLogout={() => setShowLogoutConfirm(true)}
                     onUpload={handleContentUpload}
                     mySchedules={mySchedules}
                     onSchedulesChanged={refreshSchedules}
@@ -1771,6 +1760,16 @@ function App() {
                       setActiveWorkspaceId(workspace?.id || null);
                       await fetchUserContent();
                     }}
+                  />
+                )}
+                {showLogoutConfirm && user && (
+                  <LogoutConfirmDialog
+                    user={user}
+                    isWorking={logoutInProgress}
+                    onCancel={() => {
+                      if (!logoutInProgress) setShowLogoutConfirm(false);
+                    }}
+                    onConfirm={confirmLogout}
                   />
                 )}
                 {/* MFA Modal */}
