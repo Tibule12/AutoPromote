@@ -423,51 +423,122 @@ const IdeaVideoPanel = ({ onPublish }) => {
         <p>Draft creator-style scenes with voiceover, visuals, and captions.</p>
       </div>
 
+      <ol className="iv-progress" aria-label="Idea-to-Video workflow">
+        {[
+          ["Brief", 1],
+          ["Scene plan", 2],
+          ["Review", 2],
+          ["Render", 3],
+        ].map(([label, stage], index) => (
+          <li key={label} className={step > stage ? "complete" : step === stage ? "active" : ""}>
+            <span>{index + 1}</span>
+            <strong>{label}</strong>
+          </li>
+        ))}
+      </ol>
+
       {step === 1 && (
         <div className="iv-step-1">
-          <textarea
-            className="idea-input"
-            placeholder="Drop the real idea. Example: why small creators should stop copying trending sounds and build a repeatable format."
-            value={idea}
-            onChange={e => setIdea(e.target.value)}
-          />
-          <div className="script-controls">
-            <label>
-              Script direction
-              <select value={scriptStyle} onChange={e => setScriptStyle(e.target.value)}>
-                <option value="creator">Creator voice</option>
-                <option value="story">Storytime</option>
-                <option value="educational">Teach fast</option>
-                <option value="cinematic">Cinematic mini-doc</option>
-                <option value="direct_response">Sell without sounding salesy</option>
-              </select>
-            </label>
-            <label>
-              Length
-              <select
-                value={targetSeconds}
-                onChange={e => setTargetSeconds(Number(e.target.value))}
-              >
-                <option value={20}>20 seconds</option>
-                <option value={30}>30 seconds</option>
-                <option value={45}>45 seconds</option>
-                <option value={60}>60 seconds</option>
-              </select>
-            </label>
-            <label>
-              Voice
-              <select value={renderVoice} onChange={e => setRenderVoice(e.target.value)}>
-                {VOICE_OPTIONS.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
+          <div className="iv-creative-grid">
+            <section className="iv-creative-brief">
+              <div className="iv-section-heading">
+                <span>Creative brief</span>
+                <h3>What do you want to create?</h3>
+                <p>
+                  Describe the real point of the video. AutoPromote will turn it into editable
+                  scenes, not lock you into a finished render.
+                </p>
+              </div>
+
+              <textarea
+                className="idea-input"
+                placeholder="Example: Explain why small creators should build a repeatable format instead of copying every trending sound."
+                value={idea}
+                onChange={e => setIdea(e.target.value)}
+              />
+
+              <div className="script-controls">
+                <label>
+                  Format
+                  <select value={scriptStyle} onChange={e => setScriptStyle(e.target.value)}>
+                    <option value="creator">Creator voice</option>
+                    <option value="story">Storytime</option>
+                    <option value="educational">Teach fast</option>
+                    <option value="cinematic">Cinematic mini-doc</option>
+                    <option value="direct_response">Sell without sounding salesy</option>
+                  </select>
+                </label>
+                <label>
+                  Duration
+                  <select
+                    value={targetSeconds}
+                    onChange={e => setTargetSeconds(Number(e.target.value))}
+                  >
+                    <option value={20}>20 seconds</option>
+                    <option value={30}>30 seconds</option>
+                    <option value={45}>45 seconds</option>
+                    <option value={60}>60 seconds</option>
+                  </select>
+                </label>
+                <label>
+                  Voice
+                  <select value={renderVoice} onChange={e => setRenderVoice(e.target.value)}>
+                    {VOICE_OPTIONS.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+            </section>
+
+            <aside className="iv-scene-plan-preview">
+              <div className="iv-section-heading">
+                <span>Draft scene plan</span>
+                <h3>Your editable starting point</h3>
+              </div>
+              {[
+                ["1", "Hook", "Open with the strongest tension or promise."],
+                ["2", "Problem", "Make the idea concrete and recognisable."],
+                ["3", "Solution", "Deliver the useful explanation or payoff."],
+                ["4", "Call to action", "Close with one clear next step."],
+              ].map(([number, title, copy]) => (
+                <article key={title}>
+                  <span>{number}</span>
+                  <div>
+                    <strong>{title}</strong>
+                    <small>{copy}</small>
+                  </div>
+                  <em>Editable</em>
+                </article>
+              ))}
+              <button type="button" className="iv-add-scene-preview" disabled>
+                + More scenes can be added after drafting
+              </button>
+            </aside>
           </div>
-          <button className="btn-primary" onClick={generateScript} disabled={loading}>
-            {loading ? "Writing..." : "Draft Scenes"}
-          </button>
+
+          <section className="iv-before-rendering">
+            <span>Before rendering</span>
+            {[
+              ["Review the script", "Change every voiceover line before spending credits."],
+              ["Choose visuals", "Refine visual direction and stock-footage search cues."],
+              ["Confirm captions", "Edit the on-screen text and voice before export."],
+            ].map(([title, copy]) => (
+              <article key={title}>
+                <strong>{title}</strong>
+                <small>{copy}</small>
+              </article>
+            ))}
+          </section>
+
+          <div className="iv-primary-action">
+            <small>Drafting scenes is free. Credits are only confirmed before rendering.</small>
+            <button className="btn-primary" onClick={generateScript} disabled={loading}>
+              {loading ? "Writing..." : "Generate storyboard"}
+            </button>
+          </div>
         </div>
       )}
 

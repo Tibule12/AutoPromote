@@ -2,15 +2,12 @@ import React from "react";
 import UnifiedPublisher from "../features/publishing/UnifiedPublisher";
 import "./UploadPanel.css";
 
-function UploadPanel({
-  onUpload,
-  initialFile,
-  onClearInitialFile,
-}) {
+function UploadPanel({ onUpload, initialFile, onClearInitialFile }) {
   return (
     <section className="upload-panel">
       <h3 style={{ margin: 0 }}>Upload Content</h3>
       <UnifiedPublisher
+        embedded
         onUpload={async params => {
           if (onUpload) {
             await onUpload(params);

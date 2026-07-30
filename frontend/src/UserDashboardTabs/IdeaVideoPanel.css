@@ -4,37 +4,249 @@
 }
 
 .iv-header {
-  text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+.iv-progress {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  max-width: 1100px;
+  margin: 0 auto 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 12px;
+  background: rgba(4, 11, 22, 0.55);
+  list-style: none;
+}
+
+.iv-progress li {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: #64748b;
+}
+
+.iv-progress li:not(:last-child)::after {
+  position: absolute;
+  top: 15px;
+  right: 10px;
+  left: 40px;
+  height: 1px;
+  background: rgba(148, 163, 184, 0.14);
+  content: "";
+}
+
+.iv-progress li > span {
+  z-index: 1;
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 50%;
+  background: #07111f;
+  font-size: 0.7rem;
+}
+
+.iv-progress li.active,
+.iv-progress li.complete {
+  color: #f8fafc;
+}
+
+.iv-progress li.active > span,
+.iv-progress li.complete > span {
+  border-color: rgba(139, 92, 246, 0.55);
+  color: #fff;
+  background: #6d4aff;
 }
 
 .iv-step-1,
 .iv-step-2,
 .iv-step-3 {
-  max-width: 800px;
+  max-width: 1100px;
   margin: 0 auto;
   background: rgba(255, 255, 255, 0.05);
   padding: 2rem;
   border-radius: 12px;
 }
 
+.iv-creative-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.72fr);
+  gap: 1rem;
+}
+
+.iv-creative-brief,
+.iv-scene-plan-preview {
+  padding: 1.1rem;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 13px;
+  background: rgba(4, 11, 22, 0.52);
+}
+
+.iv-section-heading {
+  display: grid;
+  gap: 0.3rem;
+  margin-bottom: 1rem;
+}
+
+.iv-section-heading > span {
+  color: #a78bfa;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.iv-section-heading h3 {
+  margin: 0;
+  color: #f8fafc;
+  font-size: 1rem;
+}
+
+.iv-section-heading p {
+  margin: 0;
+  color: #8290a7;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
 .idea-input {
   width: 100%;
   min-height: 140px;
   padding: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.9rem;
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: white;
-  font-size: 1.1rem;
+  font-size: 0.92rem;
   border-radius: 8px;
 }
 
 .script-controls {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 160px 220px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.9rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0;
+}
+
+.iv-scene-plan-preview {
+  display: grid;
+  align-content: start;
+  gap: 0.55rem;
+}
+
+.iv-scene-plan-preview .iv-section-heading {
+  margin-bottom: 0.35rem;
+}
+
+.iv-scene-plan-preview article {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.7rem;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 10px;
+  background: rgba(8, 18, 33, 0.72);
+}
+
+.iv-scene-plan-preview article > span {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 8px;
+  color: #c4b5fd;
+  background: rgba(109, 74, 255, 0.14);
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.iv-scene-plan-preview article > div {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.iv-scene-plan-preview article strong {
+  color: #f8fafc;
+  font-size: 0.75rem;
+}
+
+.iv-scene-plan-preview article small {
+  color: #8290a7;
+  font-size: 0.65rem;
+}
+
+.iv-scene-plan-preview article em {
+  color: #a78bfa;
+  font-size: 0.62rem;
+  font-style: normal;
+}
+
+.iv-add-scene-preview {
+  min-height: 36px;
+  border: 1px dashed rgba(139, 92, 246, 0.3);
+  border-radius: 9px;
+  color: #8290a7;
+  background: rgba(109, 74, 255, 0.05);
+  font-size: 0.68rem;
+}
+
+.iv-before-rendering {
+  display: grid;
+  grid-template-columns: auto repeat(3, minmax(0, 1fr));
+  align-items: center;
+  gap: 0.7rem;
+  margin-top: 1rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 12px;
+  background: rgba(4, 11, 22, 0.46);
+}
+
+.iv-before-rendering > span {
+  color: #a78bfa;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.iv-before-rendering article {
+  display: grid;
+  gap: 0.15rem;
+  padding-left: 0.8rem;
+  border-left: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.iv-before-rendering strong {
+  color: #f8fafc;
+  font-size: 0.7rem;
+}
+
+.iv-before-rendering small {
+  color: #8290a7;
+  font-size: 0.63rem;
+}
+
+.iv-primary-action {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.iv-primary-action small {
+  color: #8290a7;
+  font-size: 0.67rem;
+}
+
+.iv-primary-action .btn-primary {
+  min-width: 190px;
 }
 
 .script-controls label,
@@ -249,6 +461,31 @@
   .script-controls,
   .scene-grid {
     grid-template-columns: 1fr;
+  }
+
+  .iv-progress {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem 0;
+  }
+
+  .iv-progress li:nth-child(2)::after {
+    display: none;
+  }
+
+  .iv-creative-grid,
+  .iv-before-rendering {
+    grid-template-columns: 1fr;
+  }
+
+  .iv-before-rendering article {
+    padding: 0.55rem 0 0;
+    border-top: 1px solid rgba(148, 163, 184, 0.14);
+    border-left: 0;
+  }
+
+  .iv-primary-action {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .render-controls {

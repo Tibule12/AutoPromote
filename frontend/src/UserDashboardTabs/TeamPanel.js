@@ -211,7 +211,9 @@ function TeamPanel({ onWorkspaceChanged, onNavigate }) {
       setInviteEmail("");
       setLatestInviteUrl(data.inviteUrl || "");
       await loadWorkspace();
-      toast.success(data.emailSent ? "Invitation emailed." : "Invitation created; copy the link below.");
+      toast.success(
+        data.emailSent ? "Invitation emailed." : "Invitation created; copy the link below."
+      );
     } catch (error) {
       toast.error(friendlyError(error));
     } finally {
@@ -267,7 +269,8 @@ function TeamPanel({ onWorkspaceChanged, onNavigate }) {
   };
 
   const leaveWorkspace = async () => {
-    if (!window.confirm("Leave this workspace? You will lose access to its content and queue.")) return;
+    if (!window.confirm("Leave this workspace? You will lose access to its content and queue."))
+      return;
     setBusyKey("leave");
     try {
       await workspaceFetch(WORKSPACE_ENDPOINTS.LEAVE(workspace.id), { method: "POST" });
@@ -290,7 +293,12 @@ function TeamPanel({ onWorkspaceChanged, onNavigate }) {
     await onWorkspaceChanged?.(data?.workspace || null);
   };
 
-  if (loading) return <section className="team-panel"><p>Loading team workspace…</p></section>;
+  if (loading)
+    return (
+      <section className="team-panel">
+        <p>Loading team workspace…</p>
+      </section>
+    );
 
   if (workspaceMissing || !workspace) {
     return (
@@ -298,7 +306,10 @@ function TeamPanel({ onWorkspaceChanged, onNavigate }) {
         <div className="team-hero">
           <span>Team workspace</span>
           <h2>Create a shared AutoPromote workspace</h2>
-          <p>Share content, publishing queues, analytics, and connected destinations with role-based access.</p>
+          <p>
+            Share content, publishing queues, analytics, and connected destinations with role-based
+            access.
+          </p>
         </div>
         <form className="team-card team-create" onSubmit={createWorkspace}>
           <label htmlFor="workspace-name">Workspace name</label>
@@ -324,11 +335,29 @@ function TeamPanel({ onWorkspaceChanged, onNavigate }) {
         <div>
           <span>{workspace.planName} workspace</span>
           <h2>{workspace.name}</h2>
-          <p>Your role: <strong>{membership?.role || "member"}</strong></p>
+          <p>
+            Your role: <strong>{membership?.role || "member"}</strong>
+          </p>
         </div>
-        <div className="team-seat-summary">
-          <strong>{occupiedSeats} / {workspace.seatLimit}</strong>
-          <span>occupied seats</span>
+        <div className="team-hero-actions">
+          <div className="team-seat-summary">
+            <strong>
+              {occupiedSeats} / {workspace.seatLimit}
+            </strong>
+            <span>occupied seats</span>
+          </div>
+          {permissions.canManageMembers ? (
+            <button
+              type="button"
+              onClick={() => {
+                const management = document.querySelector(".team-management-settings");
+                if (management && !management.open) management.open = true;
+                window.setTimeout(() => document.getElementById("invite-email")?.focus(), 0);
+              }}
+            >
+              + Invite member
+            </button>
+          ) : null}
         </div>
       </div>
 
@@ -341,7 +370,9 @@ function TeamPanel({ onWorkspaceChanged, onNavigate }) {
             onChange={event => switchWorkspace(event.target.value)}
           >
             {availableWorkspaces.map(item => (
-              <option key={item.id} value={item.id}>{item.name} ({item.role})</option>
+              <option key={item.id} value={item.id}>
+                {item.name} ({item.role})
+              </option>
             ))}
           </select>
         </label>
@@ -350,71 +381,222 @@ function TeamPanel({ onWorkspaceChanged, onNavigate }) {
       <div className="team-seat-track" aria-label={`${seatPercent}% of seats occupied`}>
         <span style={{ width: `${seatPercent}%` }} />
       </div>
-      {workspace.overSeatLimit ? <p className="team-warning">This workspace is over its current plan limit. Existing members retain access, but new invitations are blocked.</p> : null}
+      {workspace.overSeatLimit ? (
+        <p className="team-warning">
+          This workspace is over its current plan limit. Existing members retain access, but new
+          invitations are blocked.
+        </p>
+      ) : null}
 
       {permissions.canManageMembers ? (
-        <div className="team-grid">
-          <form className="team-card" onSubmit={renameWorkspace}>
-            <h3>Workspace details</h3>
-            <label htmlFor="rename-workspace">Name</label>
-            <input id="rename-workspace" value={workspaceName} onChange={event => setWorkspaceName(event.target.value)} maxLength={80} required />
-            <button type="submit" disabled={busyKey === "rename"}>Save Name</button>
-          </form>
+        <details className="team-management-settings">
+          <summary>
+            <span>
+              <strong>Workspace settings and invitations</strong>
+              <small>Rename this workspace or invite another teammate.</small>
+            </span>
+            <span>Manage</span>
+          </summary>
+          <div className="team-grid">
+            <form className="team-card" onSubmit={renameWorkspace}>
+              <h3>Workspace details</h3>
+              <label htmlFor="rename-workspace">Name</label>
+              <input
+                id="rename-workspace"
+                value={workspaceName}
+                onChange={event => setWorkspaceName(event.target.value)}
+                maxLength={80}
+                required
+              />
+              <button type="submit" disabled={busyKey === "rename"}>
+                Save Name
+              </button>
+            </form>
 
-          <form className="team-card" onSubmit={inviteMember}>
-            <h3>Invite a teammate</h3>
-            <label htmlFor="invite-email">Email</label>
-            <input id="invite-email" type="email" value={inviteEmail} onChange={event => setInviteEmail(event.target.value)} placeholder="teammate@example.com" required />
-            <label htmlFor="invite-role">Role</label>
-            <select id="invite-role" value={inviteRole} onChange={event => setInviteRole(event.target.value)}>
-              {ROLE_OPTIONS.filter(role => membership?.role === "owner" || role !== "admin").map(role => <option key={role} value={role}>{role}</option>)}
-            </select>
-            <button type="submit" disabled={busyKey === "invite" || occupiedSeats >= workspace.seatLimit}>{busyKey === "invite" ? "Sending…" : "Send Invitation"}</button>
-            {occupiedSeats >= workspace.seatLimit && permissions.canManageBilling ? <button type="button" className="team-secondary" onClick={() => onNavigate?.("billing")}>Upgrade for More Seats</button> : null}
-            {occupiedSeats >= workspace.seatLimit && !permissions.canManageBilling ? <p className="team-muted">Ask the workspace owner to upgrade for more seats.</p> : null}
-          </form>
-        </div>
+            <form className="team-card" onSubmit={inviteMember}>
+              <h3>Invite a teammate</h3>
+              <label htmlFor="invite-email">Email</label>
+              <input
+                id="invite-email"
+                type="email"
+                value={inviteEmail}
+                onChange={event => setInviteEmail(event.target.value)}
+                placeholder="teammate@example.com"
+                required
+              />
+              <label htmlFor="invite-role">Role</label>
+              <select
+                id="invite-role"
+                value={inviteRole}
+                onChange={event => setInviteRole(event.target.value)}
+              >
+                {ROLE_OPTIONS.filter(role => membership?.role === "owner" || role !== "admin").map(
+                  role => (
+                    <option key={role} value={role}>
+                      {role}
+                    </option>
+                  )
+                )}
+              </select>
+              <button
+                type="submit"
+                disabled={busyKey === "invite" || occupiedSeats >= workspace.seatLimit}
+              >
+                {busyKey === "invite" ? "Sending…" : "Send Invitation"}
+              </button>
+              {occupiedSeats >= workspace.seatLimit && permissions.canManageBilling ? (
+                <button
+                  type="button"
+                  className="team-secondary"
+                  onClick={() => onNavigate?.("billing")}
+                >
+                  Upgrade for More Seats
+                </button>
+              ) : null}
+              {occupiedSeats >= workspace.seatLimit && !permissions.canManageBilling ? (
+                <p className="team-muted">Ask the workspace owner to upgrade for more seats.</p>
+              ) : null}
+            </form>
+          </div>
+        </details>
       ) : null}
 
       {latestInviteUrl ? (
         <div className="team-card team-invite-link">
           <strong>Invitation link</strong>
           <input readOnly value={latestInviteUrl} aria-label="Invitation link" />
-          <button type="button" onClick={() => navigator.clipboard?.writeText(latestInviteUrl).then(() => toast.success("Invitation link copied."))}>Copy Link</button>
+          <button
+            type="button"
+            onClick={() =>
+              navigator.clipboard
+                ?.writeText(latestInviteUrl)
+                .then(() => toast.success("Invitation link copied."))
+            }
+          >
+            Copy Link
+          </button>
         </div>
       ) : null}
 
-      <div className="team-card">
-        <h3>Members</h3>
-        <div className="team-table-wrap">
-          <table className="team-table">
-            <thead><tr><th>Member</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
-            <tbody>
-              {sortedMembers.map(member => {
-                const isOwner = member.role === "owner";
-                const canManageTarget = permissions.canManageMembers && !isOwner && (membership?.role === "owner" || member.role !== "admin");
-                return (
-                  <tr key={member.uid || member.id}>
-                    <td>{member.email || member.uid}{member.uid === currentUid ? " (you)" : ""}</td>
-                    <td>{canManageTarget ? <select value={member.role} disabled={busyKey === `role:${member.uid}`} onChange={event => updateRole(member.uid, event.target.value)}>{ROLE_OPTIONS.filter(role => membership?.role === "owner" || role !== "admin").map(role => <option key={role} value={role}>{role}</option>)}</select> : <span className="team-role-pill">{member.role}</span>}</td>
-                    <td>{member.status}</td>
-                    <td>{canManageTarget ? <button type="button" className="team-danger" disabled={busyKey === `remove:${member.uid}`} onClick={() => removeMember(member)}>Remove</button> : "—"}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+      <div className="team-members-layout">
+        <div className="team-card team-members-card">
+          <h3>Members</h3>
+          <div className="team-table-wrap">
+            <table className="team-table">
+              <thead>
+                <tr>
+                  <th>Member</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortedMembers.map(member => {
+                  const isOwner = member.role === "owner";
+                  const canManageTarget =
+                    permissions.canManageMembers &&
+                    !isOwner &&
+                    (membership?.role === "owner" || member.role !== "admin");
+                  return (
+                    <tr key={member.uid || member.id}>
+                      <td>
+                        {member.email || member.uid}
+                        {member.uid === currentUid ? " (you)" : ""}
+                      </td>
+                      <td>
+                        {canManageTarget ? (
+                          <select
+                            value={member.role}
+                            disabled={busyKey === `role:${member.uid}`}
+                            onChange={event => updateRole(member.uid, event.target.value)}
+                          >
+                            {ROLE_OPTIONS.filter(
+                              role => membership?.role === "owner" || role !== "admin"
+                            ).map(role => (
+                              <option key={role} value={role}>
+                                {role}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <span className="team-role-pill">{member.role}</span>
+                        )}
+                      </td>
+                      <td>{member.status}</td>
+                      <td>
+                        {canManageTarget ? (
+                          <button
+                            type="button"
+                            className="team-danger"
+                            disabled={busyKey === `remove:${member.uid}`}
+                            onClick={() => removeMember(member)}
+                          >
+                            Remove
+                          </button>
+                        ) : (
+                          "—"
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
+
+        <aside className="team-card team-roles-card">
+          <h3>Roles and permissions</h3>
+          {[
+            ["Owner", "Full workspace, billing, security, and publishing access."],
+            ["Admin", "Manage members, content, queues, and connections."],
+            ["Editor", "Create, edit, review, and publish content."],
+            ["Viewer", "View content, queues, and analytics without editing."],
+          ].map(([role, copy], index) => (
+            <article key={role}>
+              <span>{index + 1}</span>
+              <div>
+                <strong>{role}</strong>
+                <small>{copy}</small>
+              </div>
+            </article>
+          ))}
+        </aside>
       </div>
 
       {permissions.canManageMembers && invites.length ? (
         <div className="team-card">
           <h3>Pending invitations</h3>
-          {invites.map(invite => <div className="team-pending-row" key={invite.id}><span><strong>{invite.email}</strong><small>{invite.role}</small></span><button type="button" className="team-danger" disabled={busyKey === `invite:${invite.id}`} onClick={() => revokeInvite(invite.id)}>Revoke</button></div>)}
+          {invites.map(invite => (
+            <div className="team-pending-row" key={invite.id}>
+              <span>
+                <strong>{invite.email}</strong>
+                <small>{invite.role}</small>
+              </span>
+              <button
+                type="button"
+                className="team-danger"
+                disabled={busyKey === `invite:${invite.id}`}
+                onClick={() => revokeInvite(invite.id)}
+              >
+                Revoke
+              </button>
+            </div>
+          ))}
         </div>
       ) : null}
 
-      {membership?.role !== "owner" ? <button type="button" className="team-leave" disabled={busyKey === "leave"} onClick={leaveWorkspace}>Leave Workspace</button> : null}
+      {membership?.role !== "owner" ? (
+        <button
+          type="button"
+          className="team-leave"
+          disabled={busyKey === "leave"}
+          onClick={leaveWorkspace}
+        >
+          Leave Workspace
+        </button>
+      ) : null}
     </section>
   );
 }

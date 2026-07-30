@@ -131,17 +131,12 @@ const DASHBOARD_PAGE_META = {
 
 const DASHBOARD_NAV_GROUPS = [
   {
-    label: "Workspace",
-    items: [
-      { id: "profile", label: "Overview", icon: "overview" },
-      { id: "connections", label: "Connections", icon: "connections" },
-      { id: "team", label: "Team", icon: "team" },
-    ],
+    label: "",
+    items: [{ id: "profile", label: "Overview", icon: "overview" }],
   },
   {
     label: "Create",
     items: [
-      { id: "upload", label: "Publish", icon: "publish" },
       { id: "cam_combiner", label: "Cam Combiner", icon: "camera", desktopOnly: true },
       { id: "find_viral_clips", label: "Find Viral Clips", icon: "clips" },
       { id: "idea_video", label: "Idea-to-Video", icon: "sparkles" },
@@ -149,7 +144,10 @@ const DASHBOARD_NAV_GROUPS = [
   },
   {
     label: "Publish",
-    items: [{ id: "schedules", label: "Queue", icon: "queue" }],
+    items: [
+      { id: "upload", label: "Publisher", icon: "publish" },
+      { id: "schedules", label: "Queue", icon: "queue" },
+    ],
   },
   {
     label: "Measure",
@@ -158,6 +156,8 @@ const DASHBOARD_NAV_GROUPS = [
   {
     label: "Settings",
     items: [
+      { id: "connections", label: "Connections", icon: "connections" },
+      { id: "team", label: "Team", icon: "team" },
       { id: "billing", label: "Billing", icon: "billing" },
       { id: "security", label: "Security", icon: "security" },
     ],
@@ -1461,7 +1461,7 @@ const UserDashboard = ({
               if (visibleItems.length === 0) return null;
               return (
                 <section className="dashboard-nav-group" key={group.label}>
-                  <p>{group.label}</p>
+                  {group.label ? <p>{group.label}</p> : null}
                   <ul>
                     {visibleItems.map(item => (
                       <DashboardNavItem

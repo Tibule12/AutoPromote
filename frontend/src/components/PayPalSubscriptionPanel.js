@@ -932,45 +932,85 @@ const PayPalSubscriptionPanel = ({
         </div>
       )}
 
-      {!compact && currentSubscription && (
-        <div className="current-subscription-card">
-          <div className="subscription-header">
-            <div>
-              <h3>{currentSubscription.planName} Plan</h3>
-              <span className={`status-badge ${currentSubscription.status}`}>
-                {currentSubscription.status === "active"
-                  ? "Active"
-                  : currentSubscription.status === "cancelled"
-                    ? "Cancelled"
-                    : currentSubscription.status}
-              </span>
-            </div>
-            {currentSubscription.amount > 0 && (
-              <div className="subscription-price">
-                <span className="price">${currentSubscription.amount}</span>
-                <span className="period">/month</span>
-              </div>
+      {!compact && (
+        <section className="billing-overview-grid">
+          <div className="current-subscription-card">
+            {currentSubscription ? (
+              <>
+                <div className="subscription-header">
+                  <div>
+                    <span className="billing-card-kicker">Current plan</span>
+                    <h3>{currentSubscription.planName} Plan</h3>
+                    <span className={`status-badge ${currentSubscription.status}`}>
+                      {currentSubscription.status === "active"
+                        ? "Active"
+                        : currentSubscription.status === "cancelled"
+                          ? "Cancelled"
+                          : currentSubscription.status}
+                    </span>
+                  </div>
+                  {currentSubscription.amount > 0 && (
+                    <div className="subscription-price">
+                      <span className="price">${currentSubscription.amount}</span>
+                      <span className="period">/month</span>
+                    </div>
+                  )}
+                </div>
+
+                {currentSubscription.nextBillingDate && currentSubscription.status === "active" && (
+                  <p className="billing-date">
+                    Renews {new Date(currentSubscription.nextBillingDate).toLocaleDateString()}
+                  </p>
+                )}
+
+                {currentSubscription.expiresAt && currentSubscription.status === "cancelled" && (
+                  <p className="expiry-date">
+                    Access expires {new Date(currentSubscription.expiresAt).toLocaleDateString()}
+                  </p>
+                )}
+
+                {currentSubscription.status === "active" &&
+                  currentSubscription.planId !== "free" && (
+                    <button
+                      className="cancel-btn"
+                      onClick={handleCancelSubscription}
+                      disabled={processing}
+                    >
+                      Cancel Subscription
+                    </button>
+                  )}
+              </>
+            ) : (
+              <>
+                <span className="billing-card-kicker">Current plan</span>
+                <h3>No active paid plan</h3>
+                <p>Choose a plan below when you are ready to increase publishing capacity.</p>
+              </>
             )}
           </div>
 
-          {currentSubscription.nextBillingDate && currentSubscription.status === "active" && (
-            <p className="billing-date">
-              Next billing: {new Date(currentSubscription.nextBillingDate).toLocaleDateString()}
-            </p>
-          )}
-
-          {currentSubscription.expiresAt && currentSubscription.status === "cancelled" && (
-            <p className="expiry-date">
-              Access expires: {new Date(currentSubscription.expiresAt).toLocaleDateString()}
-            </p>
-          )}
-
-          {currentSubscription.status === "active" && currentSubscription.planId !== "free" && (
-            <button className="cancel-btn" onClick={handleCancelSubscription} disabled={processing}>
-              Cancel Subscription
-            </button>
-          )}
-        </div>
+          <aside className="billing-payment-card">
+            <div className="billing-payment-icon">▤</div>
+            <div>
+              <span>Payment method</span>
+              <h3>PayPal secure checkout</h3>
+              <p>
+                AutoPromote does not store your card details. PayPal manages approval, renewal, and
+                cancellation securely.
+              </p>
+            </div>
+            <dl>
+              <div>
+                <dt>Currency</dt>
+                <dd>{paypalConfig?.currency || "USD"}</dd>
+              </div>
+              <div>
+                <dt>Activation</dt>
+                <dd>After PayPal approval</dd>
+              </div>
+            </dl>
+          </aside>
+        </section>
       )}
 
       {!compact && usage && (
@@ -1042,152 +1082,171 @@ const PayPalSubscriptionPanel = ({
         </div>
       )}
 
-      <div className="plans-section">
-        <h3>{compact ? "Choose your next plan" : "Available Plans"}</h3>
-        <div className="plans-grid">
-          {plans.map(plan => {
-            const normalizedPlanId = normalizeSuggestedPlanId(plan.id);
-            const isCurrent =
-              normalizedPlanId === normalizeSuggestedPlanId(currentSubscription?.planId);
-            const isSuggested =
-              normalizedHighlightPlanId && normalizedPlanId === normalizedHighlightPlanId;
-            const canUseEmbeddedCheckout =
-              paypalLoaded && Boolean(plan.paypalPlanId) && plan.id !== "free" && auth.currentUser;
+      <details
+        className={`billing-plan-options${compact ? " is-compact" : ""}`}
+        open={compact ? true : undefined}
+      >
+        <summary>
+          <span>
+            <strong>Compare plans or change your subscription</strong>
+            <small>Open the complete plan comparison and secure checkout.</small>
+          </span>
+          <span>View plans</span>
+        </summary>
+        <div className="plans-section">
+          <h3>{compact ? "Choose your next plan" : "Available Plans"}</h3>
+          <div className="plans-grid">
+            {plans.map(plan => {
+              const normalizedPlanId = normalizeSuggestedPlanId(plan.id);
+              const isCurrent =
+                normalizedPlanId === normalizeSuggestedPlanId(currentSubscription?.planId);
+              const isSuggested =
+                normalizedHighlightPlanId && normalizedPlanId === normalizedHighlightPlanId;
+              const canUseEmbeddedCheckout =
+                paypalLoaded &&
+                Boolean(plan.paypalPlanId) &&
+                plan.id !== "free" &&
+                auth.currentUser;
 
-            return (
-              <div
-                key={plan.id}
-                className={`plan-card ${isCurrent ? "current-plan" : ""} ${plan.id === "pro" ? "recommended" : ""} ${isSuggested ? "suggested-plan" : ""}`}
-              >
-                {plan.id === "pro" && <span className="recommended-badge">Most Popular</span>}
-                {isSuggested && <span className="suggested-badge">Best fit for this publish</span>}
-
-                <h4>{plan.name}</h4>
-
-                <div className="plan-price">
-                  {plan.price === 0 ? (
-                    <span className="free-label">Start Free</span>
-                  ) : (
-                    <>
-                      <span className="price">${plan.price}</span>
-                      <span className="period">/month</span>
-                    </>
+              return (
+                <div
+                  key={plan.id}
+                  className={`plan-card ${isCurrent ? "current-plan" : ""} ${plan.id === "pro" ? "recommended" : ""} ${isSuggested ? "suggested-plan" : ""}`}
+                >
+                  {plan.id === "pro" && <span className="recommended-badge">Most Popular</span>}
+                  {isSuggested && (
+                    <span className="suggested-badge">Best fit for this publish</span>
                   )}
-                </div>
 
-                <div className="plan-features">
-                  {Object.entries(plan.features || {})
-                    .filter(([key]) => !hiddenPlanFeatureKeys.has(key))
-                    .map(([key, value]) => (
-                      <div key={key} className="feature-item">
-                        <span className="feature-icon">{getFeatureIcon(key)}</span>
-                        <span className="feature-name">{getFeatureLabel(key)}:</span>
-                        <span className="feature-value">{renderFeatureValue(key, value)}</span>
-                      </div>
-                    ))}
-                </div>
+                  <h4>{plan.name}</h4>
 
-                {(() => {
-                  const editingSummary = getPlanEditingSummary(plan);
-                  return (
-                    <div className="plan-editing-summary">
-                      <div className="plan-editing-block">
-                        <div className="plan-editing-title">Editing Access</div>
-                        <p className="plan-editing-copy">
-                          {plan.id === "free"
-                            ? "Paid plans unlock the editing suite. Free users can explore the platform before moving into premium creative workflows."
-                            : `${editingSummary.monthlyCredits} editing credits are included every month. Top up anytime if you need more before renewal.`}
-                        </p>
-                        {plan.id !== "free" && (
-                          <div className="plan-editing-badges">
-                            <span className="plan-editing-badge included">
-                              Creative tools included
-                            </span>
-                            <span className="plan-editing-badge metered">
-                              Generations use credits
-                            </span>
-                            {editingSummary.topUpsEnabled && (
-                              <span className="plan-editing-badge topup">Top up anytime</span>
-                            )}
+                  <div className="plan-price">
+                    {plan.price === 0 ? (
+                      <span className="free-label">Start Free</span>
+                    ) : (
+                      <>
+                        <span className="price">${plan.price}</span>
+                        <span className="period">/month</span>
+                      </>
+                    )}
+                  </div>
+
+                  <div className="plan-features">
+                    {Object.entries(plan.features || {})
+                      .filter(([key]) => !hiddenPlanFeatureKeys.has(key))
+                      .map(([key, value]) => (
+                        <div key={key} className="feature-item">
+                          <span className="feature-icon">{getFeatureIcon(key)}</span>
+                          <span className="feature-name">{getFeatureLabel(key)}:</span>
+                          <span className="feature-value">{renderFeatureValue(key, value)}</span>
+                        </div>
+                      ))}
+                  </div>
+
+                  {(() => {
+                    const editingSummary = getPlanEditingSummary(plan);
+                    return (
+                      <div className="plan-editing-summary">
+                        <div className="plan-editing-block">
+                          <div className="plan-editing-title">Editing Access</div>
+                          <p className="plan-editing-copy">
+                            {plan.id === "free"
+                              ? "Paid plans unlock the editing suite. Free users can explore the platform before moving into premium creative workflows."
+                              : `${editingSummary.monthlyCredits} editing credits are included every month. Top up anytime if you need more before renewal.`}
+                          </p>
+                          {plan.id !== "free" && (
+                            <div className="plan-editing-badges">
+                              <span className="plan-editing-badge included">
+                                Creative tools included
+                              </span>
+                              <span className="plan-editing-badge metered">
+                                Generations use credits
+                              </span>
+                              {editingSummary.topUpsEnabled && (
+                                <span className="plan-editing-badge topup">Top up anytime</span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        {editingSummary.includedTools.length > 0 && (
+                          <div className="plan-editing-block">
+                            <div className="plan-editing-title">Included tools</div>
+                            <div className="plan-editing-list">
+                              {editingSummary.includedTools.map(label => (
+                                <span key={label} className="plan-pill">
+                                  {label}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {editingSummary.creditTools.length > 0 && (
+                          <div className="plan-editing-block">
+                            <div className="plan-editing-title">Credit-based generations</div>
+                            <div className="plan-editing-list">
+                              {editingSummary.creditTools.map(label => (
+                                <span key={label} className="plan-pill accent">
+                                  {label}
+                                </span>
+                              ))}
+                            </div>
                           </div>
                         )}
                       </div>
+                    );
+                  })()}
 
-                      {editingSummary.includedTools.length > 0 && (
-                        <div className="plan-editing-block">
-                          <div className="plan-editing-title">Included tools</div>
-                          <div className="plan-editing-list">
-                            {editingSummary.includedTools.map(label => (
-                              <span key={label} className="plan-pill">
-                                {label}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {editingSummary.creditTools.length > 0 && (
-                        <div className="plan-editing-block">
-                          <div className="plan-editing-title">Credit-based generations</div>
-                          <div className="plan-editing-list">
-                            {editingSummary.creditTools.map(label => (
-                              <span key={label} className="plan-pill accent">
-                                {label}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })()}
-
-                {!isCurrent && plan.id !== "free" && (
-                  <div className="plan-checkout-zone">
-                    {canUseEmbeddedCheckout ? (
-                      <>
-                        <div
-                          className={`paypal-subscription-button-shell ${activatingPlanId === normalizedPlanId ? "is-activating" : ""}`}
-                          ref={node => {
-                            buttonContainerRefs.current[normalizedPlanId] = node;
-                          }}
-                        />
+                  {!isCurrent && plan.id !== "free" && (
+                    <div className="plan-checkout-zone">
+                      {canUseEmbeddedCheckout ? (
+                        <>
+                          <div
+                            className={`paypal-subscription-button-shell ${activatingPlanId === normalizedPlanId ? "is-activating" : ""}`}
+                            ref={node => {
+                              buttonContainerRefs.current[normalizedPlanId] = node;
+                            }}
+                          />
+                          <button
+                            className="subscribe-btn secondary"
+                            onClick={() => handleLegacySubscribe(normalizedPlanId)}
+                            disabled={processing}
+                          >
+                            Open checkout in PayPal instead
+                          </button>
+                        </>
+                      ) : (
                         <button
-                          className="subscribe-btn secondary"
+                          className="subscribe-btn"
                           onClick={() => handleLegacySubscribe(normalizedPlanId)}
                           disabled={processing}
                         >
-                          Open checkout in PayPal instead
+                          {processing ? "Processing..." : `Upgrade to ${plan.name}`}
                         </button>
-                      </>
-                    ) : (
-                      <button
-                        className="subscribe-btn"
-                        onClick={() => handleLegacySubscribe(normalizedPlanId)}
-                        disabled={processing}
-                      >
-                        {processing ? "Processing..." : `Upgrade to ${plan.name}`}
-                      </button>
-                    )}
+                      )}
 
-                    {!auth.currentUser && (
-                      <p className="checkout-helper-text">Sign in first to use in-app checkout.</p>
-                    )}
-                  </div>
-                )}
+                      {!auth.currentUser && (
+                        <p className="checkout-helper-text">
+                          Sign in first to use in-app checkout.
+                        </p>
+                      )}
+                    </div>
+                  )}
 
-                {isCurrent && <div className="current-plan-badge">Your Current Plan</div>}
+                  {isCurrent && <div className="current-plan-badge">Your Current Plan</div>}
 
-                {plan.id === "free" && currentSubscription?.planId !== "free" && (
-                  <div className="downgrade-note">
-                    Cancel your subscription to return to the free tier.
-                  </div>
-                )}
-              </div>
-            );
-          })}
+                  {plan.id === "free" && currentSubscription?.planId !== "free" && (
+                    <div className="downgrade-note">
+                      Cancel your subscription to return to the free tier.
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      </details>
 
       {!compact && (
         <>

@@ -365,6 +365,10 @@ const AnalyticsPanel = () => {
   const workflowFunnel = Array.isArray(workflowSummary?.funnel) ? workflowSummary.funnel : [];
   const workflowEventCounts = workflowSummary?.eventCounts || {};
   const formatPercent = value => `${Math.round((Number(value) || 0) * 100)}%`;
+  const maxPlatformViews = Math.max(
+    1,
+    ...sortedPlatformBreakdown.map(([, data]) => Number(data?.views) || 0)
+  );
 
   const exportAnalyticsSnapshot = () => {
     const rows = [
@@ -513,6 +517,90 @@ const AnalyticsPanel = () => {
           full history.
         </div>
       ) : null}
+
+      <section className="analytics-performance-overview">
+        <article className="analytics-performance-card">
+          <div className="analytics-card-heading">
+            <div>
+              <span>Performance overview</span>
+              <h4>What is driving this period</h4>
+            </div>
+            <small>{stats.range || timeRange}</small>
+          </div>
+          <div className="analytics-signal-grid">
+            <div>
+              <span>Views</span>
+              <strong>{Number(stats.totalViews || 0).toLocaleString()}</strong>
+            </div>
+            <div>
+              <span>Clicks</span>
+              <strong>{Number(stats.totalClicks || 0).toLocaleString()}</strong>
+            </div>
+            <div>
+              <span>CTR</span>
+              <strong>{Number(stats.ctr || 0).toFixed(1)}%</strong>
+            </div>
+          </div>
+          <div className="analytics-signal-chart" aria-label="Platform view comparison">
+            {sortedPlatformBreakdown.length ? (
+              sortedPlatformBreakdown.slice(0, 6).map(([platform, data]) => {
+                const value = Number(data?.views) || 0;
+                return (
+                  <div key={platform}>
+                    <span>{platform}</span>
+                    <i>
+                      <b
+                        style={{
+                          width: `${Math.max(3, (value / maxPlatformViews) * 100)}%`,
+                        }}
+                      />
+                    </i>
+                    <strong>{value.toLocaleString()}</strong>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="analytics-no-signal">
+                Publish content to begin building a platform performance comparison.
+              </div>
+            )}
+          </div>
+        </article>
+
+        <aside className="analytics-insight-card">
+          <div className="analytics-card-heading">
+            <div>
+              <span>Current signal</span>
+              <h4>Best-performing destination</h4>
+            </div>
+          </div>
+          <div className="analytics-top-platform">
+            <span>
+              {String(stats.topPlatform || "—")
+                .slice(0, 2)
+                .toUpperCase()}
+            </span>
+            <div>
+              <strong>{stats.topPlatform || "No platform yet"}</strong>
+              <small>Based on published platform-post performance</small>
+            </div>
+          </div>
+          <dl>
+            <div>
+              <dt>Published posts</dt>
+              <dd>{stats.publishedPostCount || 0}</dd>
+            </div>
+            <div>
+              <dt>All-time posts</dt>
+              <dd>{stats.publishedPostCountAllTime || 0}</dd>
+            </div>
+            <div>
+              <dt>Plan access</dt>
+              <dd>{analyticsEntitlements.label}</dd>
+            </div>
+          </dl>
+        </aside>
+      </section>
 
       <div
         className="ap-analytics-panel-card"

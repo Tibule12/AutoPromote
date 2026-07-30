@@ -2119,12 +2119,16 @@ body.dashboard-mode {
   order: 5;
 }
 
-.ap-dashboard-redesign .analytics-panel > .platform-breakdown {
+.ap-dashboard-redesign .analytics-panel > .analytics-performance-overview {
   order: 6;
 }
 
-.ap-dashboard-redesign .analytics-panel > .recent-content {
+.ap-dashboard-redesign .analytics-panel > .platform-breakdown {
   order: 7;
+}
+
+.ap-dashboard-redesign .analytics-panel > .recent-content {
+  order: 8;
 }
 
 .ap-dashboard-redesign .ap-analytics-header,
