@@ -1,0 +1,100 @@
+.clip-studio-workspace {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+
+.clip-studio-progress {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  margin: 0;
+  padding: 0 18px;
+  list-style: none;
+}
+
+.clip-studio-progress li {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  color: #68758c;
+}
+
+.clip-studio-progress li:not(:last-child)::after {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  left: 42px;
+  height: 1px;
+  background: rgba(148, 163, 184, 0.18);
+  content: "";
+}
+
+.clip-studio-progress li > span {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 999px;
+  background: #0a1324;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.clip-studio-progress li > strong {
+  position: relative;
+  z-index: 1;
+  padding-right: 9px;
+  background: #050d1a;
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.clip-studio-progress li.active,
+.clip-studio-progress li.complete {
+  color: #f3e8ff;
+}
+
+.clip-studio-progress li.active > span,
+.clip-studio-progress li.complete > span {
+  border-color: rgba(168, 85, 247, 0.72);
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+  box-shadow: 0 0 22px rgba(124, 58, 237, 0.24);
+}
+
+.clip-studio-progress li.complete:not(:last-child)::after {
+  background: rgba(168, 85, 247, 0.52);
+}
+
+@media (max-width: 700px) {
+  .clip-studio-progress {
+    padding: 0;
+  }
+
+  .clip-studio-progress li {
+    gap: 5px;
+  }
+
+  .clip-studio-progress li > strong {
+    overflow: hidden;
+    padding-right: 4px;
+    font-size: 0.62rem;
+    text-overflow: ellipsis;
+  }
+
+  .clip-studio-progress li:not(:last-child)::after {
+    right: 5px;
+    left: 32px;
+  }
+
+  .clip-studio-progress li > span {
+    width: 24px;
+    height: 24px;
+  }
+}

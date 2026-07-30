@@ -73,9 +73,6 @@ const TikTokForm = ({
   globalTitle,
   globalDescription,
   bountyAmount,
-  setBountyAmount,
-  bountyNiche,
-  setBountyNiche,
   protocol7Enabled,
   setProtocol7Enabled,
   protocol7Volatility,
@@ -243,6 +240,7 @@ const TikTokForm = ({
 
       {OPTIMAL_TIMES.tiktok && (
         <div
+          className="tiktok-posting-hint"
           style={{
             fontSize: "11px",
             color: "#059669",
@@ -265,7 +263,12 @@ const TikTokForm = ({
       )}
 
       {/* Creator Info & Posting Cap */}
-      <div style={{ fontSize: 12, color: "#666", marginBottom: 12 }}>
+      <div
+        className={`tiktok-creator-status${
+          creatorInfo?.posting_remaining <= 0 ? " is-capped" : ""
+        }`}
+        style={{ fontSize: 12, color: "#666", marginBottom: 12 }}
+      >
         <strong>Creator:</strong>{" "}
         {creatorInfo && (creatorInfo.display_name || creatorInfo.open_id)
           ? creatorInfo.display_name || creatorInfo.open_id
@@ -320,26 +323,6 @@ const TikTokForm = ({
       </div>
 
       <div className="form-group-modern">
-        <label htmlFor="tiktok-description">Description</label>
-        <textarea
-          id="tiktok-description"
-          className="modern-input"
-          value={description}
-          onChange={e => {
-            const nextDescription = e.target.value;
-            setDescription(nextDescription);
-            setIsDescriptionDirty(true);
-            if (!isCaptionDirty) {
-              setCaption(buildDefaultCaption(title, nextDescription));
-            }
-          }}
-          placeholder="Add the description you want viewers to see"
-          maxLength={1000}
-          rows={3}
-        />
-      </div>
-
-      <div className="form-group-modern">
         <label htmlFor="tiktok-caption">Caption & Hashtags</label>
         <div style={{ position: "relative" }}>
           <textarea
@@ -387,7 +370,7 @@ const TikTokForm = ({
           }}
         />
       </div>
-      <div className="form-group-modern">
+      <div className="form-group-modern tiktok-media-override">
         <label htmlFor="tiktok-file-input" className="form-label-bold">
           Video File
         </label>
@@ -510,7 +493,7 @@ const TikTokForm = ({
           </div>
         )}
       </div>
-      <div style={{ display: "grid", gap: 8 }}>
+      <div className="tiktok-core-options" style={{ display: "grid", gap: 8 }}>
         <div>
           <label htmlFor="tiktok-privacy" className="form-label-bold">
             Privacy (required)
@@ -580,179 +563,208 @@ const TikTokForm = ({
           </div>
         </div>
 
-        <div>
-          <label className="form-label-bold">Commercial Content Disclosure</label>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
-              <input
-                type="checkbox"
-                checked={commercialContent}
+        <details className="tiktok-advanced-options">
+          <summary>Advanced TikTok disclosures and consent</summary>
+          <div className="tiktok-advanced-options-body">
+            <div className="form-group-modern tiktok-description-field">
+              <label htmlFor="tiktok-description">Description</label>
+              <textarea
+                id="tiktok-description"
+                className="modern-input"
+                value={description}
                 onChange={e => {
-                  setCommercialContent(e.target.checked);
-                  if (!e.target.checked) {
-                    setYourBrand(false);
-                    setBrandedContent(false);
+                  const nextDescription = e.target.value;
+                  setDescription(nextDescription);
+                  setIsDescriptionDirty(true);
+                  if (!isCaptionDirty) {
+                    setCaption(buildDefaultCaption(title, nextDescription));
                   }
                 }}
+                placeholder="Add the description you want viewers to see"
+                maxLength={1000}
+                rows={3}
               />
-              This content is commercial or promotional (This post promotes a brand, product, or
-              service)
-            </label>
-
-            {bountyAmount > 0 && !commercialContent && (
-              <div style={{ fontSize: "0.8rem", color: "#d97706", marginLeft: "24px" }}>
-                💡 Since you set a ${bountyAmount} Bounty, considering checking this.
-              </div>
-            )}
-
-            {commercialContent && (
-              <div
-                className="disclosure-options"
-                style={{ display: "flex", gap: 12, marginLeft: 24 }}
-              >
-                <label
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 6,
-                    position: "relative",
-                    cursor: "pointer",
-                  }}
-                  onMouseEnter={() => setShowBrandTooltip(true)}
-                  onMouseLeave={() => setShowBrandTooltip(false)}
-                >
+            </div>
+            <div>
+              <label className="form-label-bold">Commercial Content Disclosure</label>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
                   <input
                     type="checkbox"
-                    checked={yourBrand}
-                    onChange={e => setYourBrand(e.target.checked)}
+                    checked={commercialContent}
+                    onChange={e => {
+                      setCommercialContent(e.target.checked);
+                      if (!e.target.checked) {
+                        setYourBrand(false);
+                        setBrandedContent(false);
+                      }
+                    }}
                   />
-                  Your Brand
-                  {showBrandTooltip && (
-                    <span className="tooltip-custom">
-                      You are promoting yourself or your own business. This content will be
-                      classified as Brand Organic.
-                    </span>
-                  )}
+                  This content is commercial or promotional (This post promotes a brand, product, or
+                  service)
                 </label>
 
-                <label
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 6,
-                    position: "relative",
-                    cursor: "pointer",
-                  }}
-                  onMouseEnter={() => setShowBrandedTooltip(true)}
-                  onMouseLeave={() => setShowBrandedTooltip(false)}
-                >
-                  <input
-                    type="checkbox"
-                    checked={brandedContent}
-                    onChange={e => setBrandedContent(e.target.checked)}
-                  />
-                  Branded Content
-                  {showBrandedTooltip && (
-                    <span className="tooltip-custom">
-                      You are promoting another brand or a third party. This content will be
-                      classified as Branded Content.
-                    </span>
-                  )}
-                </label>
+                {bountyAmount > 0 && !commercialContent && (
+                  <div style={{ fontSize: "0.8rem", color: "#d97706", marginLeft: "24px" }}>
+                    💡 Since you set a ${bountyAmount} Bounty, considering checking this.
+                  </div>
+                )}
+
+                {commercialContent && (
+                  <div
+                    className="disclosure-options"
+                    style={{ display: "flex", gap: 12, marginLeft: 24 }}
+                  >
+                    <label
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 6,
+                        position: "relative",
+                        cursor: "pointer",
+                      }}
+                      onMouseEnter={() => setShowBrandTooltip(true)}
+                      onMouseLeave={() => setShowBrandTooltip(false)}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={yourBrand}
+                        onChange={e => setYourBrand(e.target.checked)}
+                      />
+                      Your Brand
+                      {showBrandTooltip && (
+                        <span className="tooltip-custom">
+                          You are promoting yourself or your own business. This content will be
+                          classified as Brand Organic.
+                        </span>
+                      )}
+                    </label>
+
+                    <label
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 6,
+                        position: "relative",
+                        cursor: "pointer",
+                      }}
+                      onMouseEnter={() => setShowBrandedTooltip(true)}
+                      onMouseLeave={() => setShowBrandedTooltip(false)}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={brandedContent}
+                        onChange={e => setBrandedContent(e.target.checked)}
+                      />
+                      Branded Content
+                      {showBrandedTooltip && (
+                        <span className="tooltip-custom">
+                          You are promoting another brand or a third party. This content will be
+                          classified as Branded Content.
+                        </span>
+                      )}
+                    </label>
+                  </div>
+                )}
+
+                {commercialContent && !yourBrand && !brandedContent && (
+                  <div style={{ color: "red", fontSize: 12, marginTop: 4 }}>
+                    You need to indicate if your content promotes yourself or a third party.
+                  </div>
+                )}
+
+                {commercialContent && (
+                  <div
+                    className="prompt"
+                    style={{ marginTop: 8, color: "#0f0f0f", fontWeight: 500, fontSize: "0.9rem" }}
+                  >
+                    {(yourBrand && brandedContent) || brandedContent
+                      ? "Your photo/video will be labeled as 'Paid partnership'"
+                      : yourBrand
+                        ? "Your photo/video will be labeled as 'Promotional content'"
+                        : null}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+                <input
+                  type="checkbox"
+                  checked={aiGenerated}
+                  onChange={e => setAiGenerated(e.target.checked)}
+                />{" "}
+                This content is AI-generated
+              </label>
+              <div style={{ fontSize: 11, color: "#666", marginTop: 4, paddingLeft: 24 }}>
+                Required by TikTok for AI-created or modified content.
+              </div>
+            </div>
+
+            <div className="declaration-section" style={{ fontSize: 13, marginTop: 12 }}>
+              <label style={{ cursor: "pointer", display: "flex", gap: 8 }}>
+                <input
+                  type="checkbox"
+                  checked={consentChecked}
+                  onChange={e => setConsentChecked(e.target.checked)}
+                />{" "}
+                <span style={{ lineHeight: 1.4 }}>
+                  {getTikTokDeclarationJSX(commercialContent, brandedContent)}
+                </span>
+              </label>
+            </div>
+
+            <div
+              className="tiktok-behavior-summary"
+              style={{
+                marginTop: 10,
+                background: "#f9f9f9",
+                padding: 10,
+                borderRadius: 6,
+                fontSize: 13,
+              }}
+            >
+              <strong style={{ fontWeight: 700, color: "#111" }}>
+                Preview of TikTok UX behavior:
+              </strong>
+              <div style={{ marginTop: 6 }}>
+                Privacy: <strong>{privacy || "Not selected"}</strong>
+              </div>
+              <div>
+                Disclosure:{" "}
+                <strong>
+                  {commercialContent
+                    ? yourBrand && brandedContent
+                      ? "Your Brand + Branded"
+                      : yourBrand
+                        ? "Your Brand"
+                        : brandedContent
+                          ? "Branded Content"
+                          : "Commercial"
+                    : "None"}
+                </strong>
+              </div>
+            </div>
+
+            <div
+              className="notice-section"
+              style={{ marginTop: 8, color: "#666", fontSize: "0.95em" }}
+            >
+              <small>
+                Note: After publishing, it may take a few minutes for your content to process and be
+                visible on your TikTok profile.
+              </small>
+            </div>
+
+            {creatorInfo && creatorInfo.max_video_post_duration_sec && (
+              <div style={{ fontSize: 12, color: "#666" }}>
+                Max allowed video duration for this creator:{" "}
+                {creatorInfo.max_video_post_duration_sec} seconds
               </div>
             )}
-
-            {commercialContent && !yourBrand && !brandedContent && (
-              <div style={{ color: "red", fontSize: 12, marginTop: 4 }}>
-                You need to indicate if your content promotes yourself or a third party.
-              </div>
-            )}
-
-            {commercialContent && (
-              <div
-                className="prompt"
-                style={{ marginTop: 8, color: "#0f0f0f", fontWeight: 500, fontSize: "0.9rem" }}
-              >
-                {(yourBrand && brandedContent) || brandedContent
-                  ? "Your photo/video will be labeled as 'Paid partnership'"
-                  : yourBrand
-                    ? "Your photo/video will be labeled as 'Promotional content'"
-                    : null}
-              </div>
-            )}
           </div>
-        </div>
-
-        <div>
-          <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
-            <input
-              type="checkbox"
-              checked={aiGenerated}
-              onChange={e => setAiGenerated(e.target.checked)}
-            />{" "}
-            This content is AI-generated
-          </label>
-          <div style={{ fontSize: 11, color: "#666", marginTop: 4, paddingLeft: 24 }}>
-            Required by TikTok for AI-created or modified content.
-          </div>
-        </div>
-
-        <div className="declaration-section" style={{ fontSize: 13, marginTop: 12 }}>
-          <label style={{ cursor: "pointer", display: "flex", gap: 8 }}>
-            <input
-              type="checkbox"
-              checked={consentChecked}
-              onChange={e => setConsentChecked(e.target.checked)}
-            />{" "}
-            <span style={{ lineHeight: 1.4 }}>
-              {getTikTokDeclarationJSX(commercialContent, brandedContent)}
-            </span>
-          </label>
-        </div>
-
-        <div
-          className="tiktok-behavior-summary"
-          style={{
-            marginTop: 10,
-            background: "#f9f9f9",
-            padding: 10,
-            borderRadius: 6,
-            fontSize: 13,
-          }}
-        >
-          <strong style={{ fontWeight: 700, color: "#111" }}>Preview of TikTok UX behavior:</strong>
-          <div style={{ marginTop: 6 }}>
-            Privacy: <strong>{privacy || "Not selected"}</strong>
-          </div>
-          <div>
-            Disclosure:{" "}
-            <strong>
-              {commercialContent
-                ? yourBrand && brandedContent
-                  ? "Your Brand + Branded"
-                  : yourBrand
-                    ? "Your Brand"
-                    : brandedContent
-                      ? "Branded Content"
-                      : "Commercial"
-                : "None"}
-            </strong>
-          </div>
-        </div>
-
-        <div className="notice-section" style={{ marginTop: 8, color: "#666", fontSize: "0.95em" }}>
-          <small>
-            Note: After publishing, it may take a few minutes for your content to process and be
-            visible on your TikTok profile.
-          </small>
-        </div>
-
-        {creatorInfo && creatorInfo.max_video_post_duration_sec && (
-          <div style={{ fontSize: 12, color: "#666" }}>
-            Max allowed video duration for this creator: {creatorInfo.max_video_post_duration_sec}{" "}
-            seconds
-          </div>
-        )}
+        </details>
       </div>
 
       {setProtocol7Enabled && (

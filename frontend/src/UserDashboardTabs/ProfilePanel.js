@@ -189,7 +189,7 @@ const ProfilePanel = ({
               <h3>Find Viral Clips</h3>
               <p>Find strong moments inside a finished video and send them into editing.</p>
             </div>
-            <button className="btn-secondary" onClick={() => onNavigate?.("find_viral_clips")}>
+            <button className="btn-secondary" onClick={() => onNavigate?.("clip_studio")}>
               Find Viral Clips
             </button>
           </article>

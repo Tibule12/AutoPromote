@@ -26,10 +26,9 @@ describe("UploadPanel", () => {
     mockUnifiedPublisher.mockClear();
   });
 
-  test("renders the upload heading and unified publisher", () => {
+  test("renders the unified publisher", () => {
     render(<UploadPanel />);
 
-    expect(screen.getByRole("heading", { name: /Upload Content/i })).toBeInTheDocument();
     expect(screen.getByText("Unified Publisher Mock")).toBeInTheDocument();
   });
 

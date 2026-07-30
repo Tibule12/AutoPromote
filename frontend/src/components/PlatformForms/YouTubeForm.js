@@ -25,10 +25,6 @@ const YouTubeForm = ({
   creatorInfo,
   globalTitle,
   globalDescription,
-  bountyAmount,
-  setBountyAmount,
-  bountyNiche,
-  setBountyNiche,
   protocol7Enabled,
   setProtocol7Enabled,
   protocol7Volatility,
@@ -218,7 +214,7 @@ const YouTubeForm = ({
         </p>
       </div>
 
-      <div className="form-group-modern">
+      <div className="form-group-modern youtube-legacy-title-field">
         <label>Title</label>
         <div style={{ position: "relative" }}>
           <input
@@ -252,6 +248,7 @@ const YouTubeForm = ({
 
       {OPTIMAL_TIMES.youtube && (
         <div
+          className="youtube-posting-hint"
           style={{
             fontSize: "11px",
             color: "#059669",
@@ -274,7 +271,7 @@ const YouTubeForm = ({
         </div>
       )}
 
-      <div className="form-group-modern">
+      <div className="form-group-modern youtube-media-override">
         <label htmlFor="youtube-file-input" className="form-label-bold">
           Video File
         </label>
@@ -674,6 +671,7 @@ const YouTubeForm = ({
       )}
 
       <div
+        className="youtube-processing-note"
         style={{
           fontSize: "0.85rem",
           color: "#6b7280",

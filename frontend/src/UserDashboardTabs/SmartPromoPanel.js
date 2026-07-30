@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import SmartPromoSummaryPanel from "../components/SmartPromoSummaryPanel";
+import { SafeVideo } from "../components/SafeMedia";
 import { useSubscription } from "../hooks/useSubscription";
 import { sanitizeUrl } from "../utils/security";
 
@@ -102,7 +103,7 @@ function SmartPromoPanel({ initialFile = null, onOpenPublisher, onUpgrade }) {
 
           <div className={`viral-source-preview ${previewUrl ? "has-video" : ""}`}>
             {previewUrl ? (
-              <video src={previewUrl} controls preload="metadata" />
+              <SafeVideo src={previewUrl} controls preload="metadata" />
             ) : (
               <div className="viral-source-empty">
                 <span>✦</span>

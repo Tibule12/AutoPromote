@@ -27,7 +27,7 @@ describe("FindViralClipsPanel Viral Clip Studio handoff", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /analyse video/i }));
     fireEvent.click(screen.getByRole("button", { name: /select detected moment/i }));
-    fireEvent.click(screen.getByRole("button", { name: /open in viral clip studio/i }));
+    fireEvent.click(screen.getByRole("button", { name: /edit selected clip/i }));
 
     expect(onOpenStudio).toHaveBeenCalledWith(
       source,

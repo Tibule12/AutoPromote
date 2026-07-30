@@ -5920,7 +5920,7 @@ const ViralClipStudio = ({
         <div className="studio-header">
           <div className="studio-header-copy">
             <span className="studio-eyebrow">Hook + B-roll mode</span>
-            <h3>Viral Clip Studio</h3>
+            <h3>Clip Studio</h3>
             <p className="studio-header-subtitle">
               Turn a selected moment into a finished vertical story from one controlled editing
               workspace.
@@ -5977,7 +5977,7 @@ const ViralClipStudio = ({
             <button
               type="button"
               className="close-btn"
-              aria-label="Close Viral Clip Studio"
+              aria-label="Close Clip Studio"
               title="Close studio"
               onClick={() => {
                 if (window.confirm("Close the studio? Unsaved changes will be lost.")) onCancel();
@@ -5996,7 +5996,7 @@ const ViralClipStudio = ({
               <small>Select the source sequence and detected moment you want to edit.</small>
             </div>
 
-            <nav className="studio-workflow-nav" aria-label="Viral Clip Studio workflow">
+            <nav className="studio-workflow-nav" aria-label="Clip Studio workflow">
               <div className="studio-workflow-nav__intro">
                 <span>Editing route</span>
                 <strong>Moment to finished short</strong>

@@ -4,8 +4,7 @@ import React, { useEffect, useMemo, useState, useRef, useCallback } from "react"
 import "./UserDashboard.css";
 import ProfilePanel from "./UserDashboardTabs/ProfilePanel";
 import UploadPanel from "./UserDashboardTabs/UploadPanel";
-import FindViralClipsPanel from "./UserDashboardTabs/FindViralClipsPanel";
-import ViralClipStudioPanel from "./UserDashboardTabs/ViralClipStudioPanel";
+import ClipStudioWorkspace from "./UserDashboardTabs/ClipStudioWorkspace";
 import SmartPromoPanel from "./UserDashboardTabs/SmartPromoPanel";
 import SchedulesPanel from "./UserDashboardTabs/SchedulesPanel";
 import AnalyticsPanel from "./UserDashboardTabs/AnalyticsPanel";
@@ -18,7 +17,6 @@ import AdminAuditViewer from "./AdminAuditViewer";
 import SecurityPanel from "./UserDashboardTabs/SecurityPanel";
 // CommunityPanel and CommunityFeed removed
 import WolfHuntDashboard from "./EngagementMarketplace";
-import ClipStudioPanel from "./UserDashboardTabs/ClipStudioPanel";
 import IdeaVideoPanel from "./UserDashboardTabs/IdeaVideoPanel";
 import MissionControlPanel from "./UserDashboardTabs/MissionControlPanel";
 import CamCombinerPanel from "./UserDashboardTabs/CamCombinerPanel";
@@ -72,17 +70,11 @@ const DASHBOARD_PAGE_META = {
     title: "Cam Combiner",
     description: "Sync multiple podcast cameras and master audio into one ready-to-edit timeline.",
   },
-  find_viral_clips: {
+  clip_studio: {
     eyebrow: "Create",
     title: "Find Viral Clips",
     description:
-      "Analyse a finished video and surface the moments most worth turning into short clips.",
-  },
-  viral_clip_studio: {
-    eyebrow: "Create",
-    title: "Viral Clip Studio",
-    description:
-      "Refine moments, hooks, captions, B-roll, audio, and final exports in the full timeline editor.",
+      "Analyse a finished video and review the moments most worth turning into short clips.",
   },
   smart_promo: {
     eyebrow: "Create",
@@ -136,11 +128,6 @@ const DASHBOARD_PAGE_META = {
     title: "Mission Board",
     description: "Review available missions and community campaign activity.",
   },
-  clips: {
-    eyebrow: "Labs",
-    title: "Clip Studio",
-    description: "Find, refine, and export the strongest moments from long-form video.",
-  },
 };
 
 const DASHBOARD_NAV_GROUPS = [
@@ -152,8 +139,7 @@ const DASHBOARD_NAV_GROUPS = [
     label: "Create",
     items: [
       { id: "cam_combiner", label: "Cam Combiner", icon: "camera", desktopOnly: true },
-      { id: "find_viral_clips", label: "Find Viral Clips", icon: "clips" },
-      { id: "viral_clip_studio", label: "Viral Clip Studio", icon: "clips", desktopOnly: true },
+      { id: "clip_studio", label: "Find Viral Clips", icon: "clips" },
       { id: "smart_promo", label: "Smart Promo", icon: "sparkles" },
       { id: "idea_video", label: "Idea-to-Video", icon: "sparkles" },
     ],
@@ -362,7 +348,6 @@ const UserDashboard = ({
   const [isMobileViewport, setIsMobileViewport] = useState(() =>
     typeof window === "undefined" ? false : window.matchMedia("(max-width: 1023px)").matches
   );
-  const clipStudioLocked = process.env.NODE_ENV === "production";
   const testerAccess = user?.testerAccess || user?.user?.testerAccess || null;
   const testerAccessActive =
     testerAccess?.status === "active" && Date.parse(testerAccess?.expiresAt || "") > Date.now();
@@ -373,12 +358,6 @@ const UserDashboard = ({
       setActiveTab("profile");
     }
   }, [activeTab]);
-
-  useEffect(() => {
-    if (clipStudioLocked && activeTab === "clips") {
-      setActiveTab("profile");
-    }
-  }, [activeTab, clipStudioLocked]);
 
   useEffect(() => {
     if (typeof window === "undefined" || !window.matchMedia) return undefined;
@@ -420,8 +399,6 @@ const UserDashboard = ({
   const [uploadLaunchTab, setUploadLaunchTab] = useState(null);
   const [billingReturnTab, setBillingReturnTab] = useState("profile");
   const [selectedFile, setSelectedFile] = useState(null);
-  const [viralStudioFile, setViralStudioFile] = useState(null);
-  const [viralStudioClip, setViralStudioClip] = useState(null);
   const [selectedPlatforms, setSelectedPlatforms] = useState([]);
   const [platformOptions, setPlatformOptions] = useState({});
   const [spotifySelectedTracks, setSpotifySelectedTracks] = useState([]);
@@ -459,10 +436,8 @@ const UserDashboard = ({
     upload: "Uploads",
     schedules: "Queue",
     analytics: "Analytics",
-    clips: "Clip Studio",
     cam_combiner: "Cam Combiner",
-    find_viral_clips: "Find Viral Clips",
-    viral_clip_studio: "Viral Clip Studio",
+    clip_studio: "Find Viral Clips",
     smart_promo: "Smart Promo",
     idea_video: "Creative Tools",
     security: "Security",
@@ -764,33 +739,32 @@ const UserDashboard = ({
 
   const handleNav = useCallback(
     (tab, options = {}) => {
-      if (tab === "wolf_hunt" && !ENABLE_WOLF_HUNT) {
+      const destinationTab = ["clips", "find_viral_clips", "viral_clip_studio"].includes(tab)
+        ? "clip_studio"
+        : tab;
+      if (destinationTab === "wolf_hunt" && !ENABLE_WOLF_HUNT) {
         toast("🐺 Wolf Hunt is currently locked. Come back later!", { icon: "🔒" });
         return;
       }
-      if (tab === "clips" && clipStudioLocked) {
-        toast("Clip Studio is currently locked.", { icon: "🔒" });
-        return;
-      }
-      if (tab === "cam_combiner" && isMobileViewport) {
+      if (destinationTab === "cam_combiner" && isMobileViewport) {
         toast("Cam Combiner is desktop-only because its editing canvas needs more screen space.", {
           icon: "🖥️",
         });
         setSidebarOpen(false);
         return;
       }
-      if (tab !== activeTab) {
-        if (tab === "billing") {
+      if (destinationTab !== activeTab) {
+        if (destinationTab === "billing") {
           setBillingReturnTab(activeTab);
         } else if (activeTab === "billing") {
           setBillingReturnTab(activeTab);
         }
       }
-      setUploadLaunchTab(tab === "upload" ? options?.uploadTab || null : null);
-      setActiveTab(tab);
+      setUploadLaunchTab(destinationTab === "upload" ? options?.uploadTab || null : null);
+      setActiveTab(destinationTab);
       setSidebarOpen(false);
     },
-    [ENABLE_WOLF_HUNT, clipStudioLocked, activeTab, isMobileViewport]
+    [ENABLE_WOLF_HUNT, activeTab, isMobileViewport]
   );
   const triggerSchedulesRefresh = useCallback(() => {
     onSchedulesChanged && onSchedulesChanged();
@@ -1515,20 +1489,13 @@ const UserDashboard = ({
               </section>
             )}
 
-            {(ENABLE_WOLF_HUNT || !clipStudioLocked) && (
+            {ENABLE_WOLF_HUNT && (
               <section className="dashboard-nav-group">
                 <p>Labs</p>
                 <ul>
                   {ENABLE_WOLF_HUNT && (
                     <DashboardNavItem
                       item={{ id: "wolf_hunt", label: "Mission Board", icon: "target" }}
-                      activeTab={activeTab}
-                      onNavigate={handleNav}
-                    />
-                  )}
-                  {!clipStudioLocked && (
-                    <DashboardNavItem
-                      item={{ id: "clips", label: "Clip Studio", icon: "clips" }}
                       activeTab={activeTab}
                       onNavigate={handleNav}
                     />
@@ -1784,23 +1751,9 @@ const UserDashboard = ({
           />
         )}
 
-        {activeTab === "find_viral_clips" && (
-          <FindViralClipsPanel
+        {activeTab === "clip_studio" && (
+          <ClipStudioWorkspace
             initialFile={selectedFile}
-            onUpgrade={() => handleNav("billing")}
-            onOpenStudio={(file, clip) => {
-              setViralStudioFile(file);
-              setViralStudioClip(clip);
-              handleNav("viral_clip_studio");
-              toast.success("Opening the detected moment in Viral Clip Studio.");
-            }}
-          />
-        )}
-
-        {activeTab === "viral_clip_studio" && (
-          <ViralClipStudioPanel
-            initialFile={viralStudioFile}
-            initialClip={viralStudioClip}
             onUpgrade={() => handleNav("billing")}
             onOpenPublisher={(file, clip) => {
               if (file && typeof file === "object") {
@@ -1815,7 +1768,7 @@ const UserDashboard = ({
               }
               setSelectedFile(file);
               handleNav("upload");
-              toast.success("Viral Clip Studio render is ready to publish.");
+              toast.success("Clip Studio render is ready to publish.");
             }}
           />
         )}
@@ -1947,19 +1900,14 @@ const UserDashboard = ({
 
         {activeTab === "wolf_hunt" && <WolfHuntDashboard />}
 
-        {activeTab === "clips" && !clipStudioLocked && (
-          <ClipStudioPanel content={contentList} onRefresh={onUpload} />
-        )}
         {activeTab === "cam_combiner" && !isMobileViewport && (
           <CamCombinerPanel
             onClose={() => handleNav("profile")}
             onFindViralClips={source => {
               if (!source?.renderJobId || !source?.url) return;
               setSelectedFile(source);
-              handleNav("find_viral_clips");
-              toast.success(
-                "Opening Find Viral Clips with the saved master — no re-upload needed."
-              );
+              handleNav("clip_studio");
+              toast.success("Opening Clip Studio with the saved master — no re-upload needed.");
             }}
             onUseExport={result => {
               if (!result?.file) return;

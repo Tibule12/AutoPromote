@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import ViralScanner from "../components/ViralScanner";
+import { SafeVideo } from "../components/SafeMedia";
 
 const DESTINATIONS = ["TikTok", "YouTube Shorts", "Instagram Reels"];
 
@@ -22,6 +23,7 @@ const FindViralClipsPanel = ({ initialFile = null, onOpenStudio, onUpgrade }) =>
   const [selectedClip, setSelectedClip] = useState(null);
   const [targetLength, setTargetLength] = useState("30–60 seconds");
   const [captionLanguage, setCaptionLanguage] = useState("English");
+  const [destinations, setDestinations] = useState(DESTINATIONS);
 
   useEffect(() => {
     setSourceFile(initialFile || null);
@@ -71,47 +73,43 @@ const FindViralClipsPanel = ({ initialFile = null, onOpenStudio, onUpgrade }) =>
       <div className="viral-clips-workspace">
         <article className="viral-source-card">
           <div className="viral-card-heading">
-            <div>
-              <span>Source video</span>
-              <h3>Choose the recording to analyse</h3>
+            <h3>Source video</h3>
+          </div>
+
+          <div className="viral-source-media-row">
+            <div className={`viral-source-preview ${previewUrl ? "has-video" : ""}`}>
+              {previewUrl ? (
+                <SafeVideo src={previewUrl} controls preload="metadata" />
+              ) : (
+                <div className="viral-source-empty">
+                  <span>▶</span>
+                  <strong>Drop in a finished video</strong>
+                  <small>MP4, MOV, or a saved Cam Combiner master</small>
+                </div>
+              )}
             </div>
-            <label className="btn-secondary viral-file-picker">
-              Choose video
-              <input type="file" accept="video/*" onChange={handleFileChange} />
-            </label>
-          </div>
 
-          <div className={`viral-source-preview ${previewUrl ? "has-video" : ""}`}>
-            {previewUrl ? (
-              <video src={previewUrl} controls preload="metadata" />
-            ) : (
-              <div className="viral-source-empty">
-                <span>▶</span>
-                <strong>Drop in a finished video</strong>
-                <small>MP4, MOV, or a saved Cam Combiner master</small>
+            <div className="viral-source-meta">
+              <span aria-hidden="true">▱</span>
+              <div>
+                <strong>{sourceName}</strong>
+                <small>
+                  {sourceFile?.size
+                    ? `${Math.max(1, Math.round(sourceFile.size / 1024 / 1024))} MB`
+                    : "Select a finished video to begin"}
+                </small>
               </div>
-            )}
-          </div>
-
-          <div className="viral-source-meta">
-            <span aria-hidden="true">▣</span>
-            <div>
-              <strong>{sourceName}</strong>
-              <small>
-                {sourceFile?.size
-                  ? `${Math.max(1, Math.round(sourceFile.size / 1024 / 1024))} MB`
-                  : "Ready when you select a source"}
-              </small>
+              <label className="btn-secondary viral-file-picker">
+                {sourceFile ? "Choose another video" : "Choose video"}
+                <input type="file" accept="video/*" onChange={handleFileChange} />
+              </label>
             </div>
           </div>
         </article>
 
         <aside className="viral-settings-card">
           <div className="viral-card-heading">
-            <div>
-              <span>Clip settings</span>
-              <h3>Guide the analysis</h3>
-            </div>
+            <h3>Clip settings</h3>
           </div>
 
           <label>
@@ -127,7 +125,25 @@ const FindViralClipsPanel = ({ initialFile = null, onOpenStudio, onUpgrade }) =>
             <span>Destinations</span>
             <div>
               {DESTINATIONS.map(destination => (
-                <span key={destination}>{destination}</span>
+                <button
+                  key={destination}
+                  type="button"
+                  className={destinations.includes(destination) ? "selected" : ""}
+                  aria-pressed={destinations.includes(destination)}
+                  onClick={() =>
+                    setDestinations(current =>
+                      current.includes(destination)
+                        ? current.filter(item => item !== destination)
+                        : [...current, destination]
+                    )
+                  }
+                >
+                  <span aria-hidden="true">
+                    {destination === "TikTok" ? "♪" : destination === "YouTube Shorts" ? "▶" : "◎"}
+                  </span>
+                  {destination}
+                  <b aria-hidden="true">✓</b>
+                </button>
               ))}
             </div>
           </div>
@@ -153,17 +169,18 @@ const FindViralClipsPanel = ({ initialFile = null, onOpenStudio, onUpgrade }) =>
           >
             ✦ Analyse video
           </button>
-          <small className="viral-settings-note">
-            Your existing plan and credit checks still run before anything is uploaded.
-          </small>
         </aside>
       </div>
 
       <section className="viral-suggestions-shell">
         <div className="viral-card-heading">
           <div>
-            <span>Suggested moments</span>
-            <h3>{selectedClip ? "Selected clip" : "Your strongest moments will appear here"}</h3>
+            <h3>Suggested moments</h3>
+            <small>
+              {selectedClip
+                ? "Review the detected moment before editing or publishing."
+                : "Suggestions require creator review before editing or publishing."}
+            </small>
           </div>
           {selectedClip && (
             <button
@@ -171,7 +188,7 @@ const FindViralClipsPanel = ({ initialFile = null, onOpenStudio, onUpgrade }) =>
               className="btn-secondary"
               onClick={() => onOpenStudio?.(sourceFile, selectedClip)}
             >
-              Open in Viral Clip Studio
+              Edit selected clip
             </button>
           )}
         </div>

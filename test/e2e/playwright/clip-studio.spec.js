@@ -22,9 +22,7 @@ const ANALYSIS_FIXTURE = {
   ],
 };
 
-test("AI Clip Studio: enforce the production lock or complete the enabled workflow", async ({
-  page,
-}) => {
+test("Find Viral Clips uses the redesigned dashboard workflow", async ({ page }) => {
   test.setTimeout(120000); // Increase test timeout
   await page.setExtraHTTPHeaders({ "x-playwright-e2e": "1" });
 
@@ -155,70 +153,27 @@ test("AI Clip Studio: enforce the production lock or complete the enabled workfl
     );
   });
 
-  // Production builds intentionally hide Clip Studio. Keep validating the full
-  // workflow in builds where the feature is enabled, while asserting the
-  // production lock instead of waiting for an element that must not appear.
   await page.goto(getBase() + "/#/dashboard", { waitUntil: "networkidle" });
   await page.waitForSelector("nav", { timeout: 60000 });
-  const clipStudioNav = page.locator('nav li:has-text("Clip Studio")');
-  if ((await clipStudioNav.count()) === 0) {
-    await expect(clipStudioNav).toHaveCount(0);
-    expect(analysisRequested).toBe(false);
-    return;
-  }
-  await clipStudioNav.click();
+  const findViralClipsNav = page.locator('nav li:has-text("Find Viral Clips")');
+  await expect(findViralClipsNav).toHaveCount(1);
+  await findViralClipsNav.click();
 
-  // Click "Select Video from Library" to enter library mode
-  // The UI defaults to a "Clean Landing" state now
-  const selectBtn = page.locator('button:has-text("Select Video from Library")');
-  if (await selectBtn.count() > 0) {
-    await selectBtn.click();
-  }
+  await expect(page.getByRole("heading", { name: "Find Viral Clips" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Source video" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Clip settings" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Suggested moments" })).toBeVisible();
+  await expect(page.locator(".clip-studio-progress")).toHaveCount(0);
 
-  // Wait for video card and open the analysis view.
-  try {
-    await page.waitForSelector(".video-card", { timeout: 60000 });
-  } catch (e) {
-    // If no video card, maybe we need to wait for loading or mocked content failed
-    console.log('[WARN] .video-card not found. Page content: ' + (await page.content()).substring(0, 500));
-    throw e;
-  }
-  const viewAnalysisButton = page.locator('.video-card button:has-text("View"), .video-card .btn-secondary:has-text("View")').first();
-  if ((await viewAnalysisButton.count()) > 0) {
-    await viewAnalysisButton.evaluate(node => node.click());
-  } else {
-    await page.locator('.video-card .btn-primary:has-text("Generate Clips")').first().evaluate(node => node.click());
-  }
+  const sourceInput = page.locator('.find-viral-clips-panel input[type="file"]').first();
+  await sourceInput.setInputFiles(require("path").join(__dirname, "test-assets", "test.mp4"));
+  await expect(page.getByRole("button", { name: /Analyse video/i })).toBeEnabled();
 
-  // Ensure analysis results appear
-  await page.waitForSelector(".analysis-results", { timeout: 10000 });
-
-  // Generate the first suggested clip
-  await page.waitForSelector('.clip-suggestion .btn-primary:has-text("Generate Clip")', {
-    timeout: 10000,
-  });
-  await page.click('.clip-suggestion .btn-primary:has-text("Generate Clip")');
-
-  // After generation, poll the user's clips endpoint until it returns the generated clip, then assert DOM updates
-  const start = Date.now();
-  let userClips = null;
-  while (Date.now() - start < 10000) {
-    userClips = await page.evaluate(async () => {
-      try {
-        const r = await fetch("/api/clips/user");
-        if (!r.ok) return null;
-        return await r.json();
-      } catch (e) {
-        return null;
-      }
-    });
-    if (userClips && userClips.clips && userClips.clips.length > 0) break;
-    await page.waitForTimeout(250);
-  }
-
-  expect(userClips && userClips.clips && userClips.clips.length).toBeGreaterThan(0);
-  // Ensure generation occurred and clips became visible through the user listing.
-  expect(generatedClips.length).toBeGreaterThan(0);
+  await expect(page.getByRole("button", { name: /TikTok/i })).toHaveAttribute(
+    "aria-pressed",
+    "true"
+  );
+  expect(analysisRequested).toBe(false);
 });
 
 // Start static server used by SPA assets

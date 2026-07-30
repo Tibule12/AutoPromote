@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import VideoEditor from "../components/VideoEditor";
+import { SafeVideo } from "../components/SafeMedia";
 import { useSubscription } from "../hooks/useSubscription";
 import { sanitizeUrl } from "../utils/security";
 
@@ -59,6 +60,8 @@ const createStudioSource = (sourceFile, clip, sourceDuration) => {
 function ViralClipStudioPanel({
   initialFile = null,
   initialClip = null,
+  autoOpen = false,
+  onBack,
   onOpenPublisher,
   onUpgrade,
 }) {
@@ -67,14 +70,18 @@ function ViralClipStudioPanel({
   const [selectedClip, setSelectedClip] = useState(initialClip);
   const [sourceDuration, setSourceDuration] = useState(0);
   const [localPreviewUrl, setLocalPreviewUrl] = useState("");
-  const [studioSource, setStudioSource] = useState(null);
+  const [studioSource, setStudioSource] = useState(() =>
+    autoOpen && initialFile ? createStudioSource(initialFile, initialClip, 0) : null
+  );
 
   useEffect(() => {
     setSourceFile(initialFile || null);
     setSelectedClip(initialClip || null);
     setSourceDuration(0);
-    setStudioSource(null);
-  }, [initialClip, initialFile]);
+    setStudioSource(
+      autoOpen && initialFile ? createStudioSource(initialFile, initialClip, 0) : null
+    );
+  }, [autoOpen, initialClip, initialFile]);
 
   useEffect(() => {
     if (!(sourceFile instanceof Blob)) {
@@ -97,7 +104,10 @@ function ViralClipStudioPanel({
     return (
       <VideoEditor
         file={studioSource}
-        onCancel={() => setStudioSource(null)}
+        onCancel={() => {
+          setStudioSource(null);
+          onBack?.();
+        }}
         onSave={renderedFile => {
           setStudioSource(null);
           onOpenPublisher?.(renderedFile, selectedClip);
@@ -108,6 +118,11 @@ function ViralClipStudioPanel({
 
   return (
     <section className="find-viral-clips-panel viral-studio-entry-panel">
+      {onBack ? (
+        <button type="button" className="btn-secondary clip-studio-back" onClick={onBack}>
+          ← Back to discovery
+        </button>
+      ) : null}
       <div className="viral-clips-workspace">
         <article className="viral-source-card">
           <div className="viral-card-heading">
@@ -133,7 +148,7 @@ function ViralClipStudioPanel({
 
           <div className={`viral-source-preview ${previewUrl ? "has-video" : ""}`}>
             {previewUrl ? (
-              <video
+              <SafeVideo
                 src={previewUrl}
                 controls
                 preload="metadata"
@@ -166,7 +181,7 @@ function ViralClipStudioPanel({
         <aside className="viral-settings-card">
           <div className="viral-card-heading">
             <div>
-              <span>Viral Clip Studio</span>
+              <span>Clip Studio</span>
               <h3>Moments, hooks, B-roll, and export</h3>
             </div>
           </div>
@@ -191,10 +206,10 @@ function ViralClipStudioPanel({
               setStudioSource(createStudioSource(sourceFile, selectedClip, sourceDuration));
             }}
           >
-            Open Viral Clip Studio
+            Open Clip Studio
           </button>
           <small className="viral-settings-note">
-            This opens the original Viral Clip Studio and keeps its existing render pipeline.
+            Open the full timeline editor and keep the existing render pipeline.
           </small>
         </aside>
       </div>

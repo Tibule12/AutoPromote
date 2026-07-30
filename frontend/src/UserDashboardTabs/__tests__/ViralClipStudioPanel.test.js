@@ -23,7 +23,7 @@ describe("ViralClipStudioPanel", () => {
       <ViralClipStudioPanel initialFile={source} initialClip={clip} onOpenPublisher={() => {}} />
     );
 
-    fireEvent.click(screen.getByRole("button", { name: /^open viral clip studio$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^open clip studio$/i }));
 
     expect(screen.getByText("Real Viral Clip Studio controller")).toBeInTheDocument();
     const studioFile = mockVideoEditor.mock.calls.at(-1)[0].file;

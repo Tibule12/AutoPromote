@@ -2,7 +2,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { getAuth } from "firebase/auth";
 import { API_ENDPOINTS } from "../config";
 import { uploadTemporaryVideoSource } from "../utils/sourceUpload";
-import { SafeImage } from "./SafeMedia";
+import { applySafeMediaSource } from "../utils/security";
+import { SafeImage, SafeVideo } from "./SafeMedia";
 import "./SmartPromoSummaryPanel.css";
 
 const STORY_EDIT_DURATIONS = [60, 120, 180, 300];
@@ -67,7 +68,7 @@ const compressVideoBeforeUpload = async (file, onProgress) => {
     video.muted = false;
     video.playsInline = true;
     const objectUrl = URL.createObjectURL(file);
-    video.src = objectUrl;
+    applySafeMediaSource(video, objectUrl);
 
     let resolved = false;
     const cleanup = () => { if (!resolved) { resolved = true; URL.revokeObjectURL(objectUrl); } };
@@ -134,7 +135,7 @@ const readLocalVideoDuration = file =>
     video.preload = "metadata";
     video.onloadedmetadata = () => finish(Number(video.duration || 0));
     video.onerror = () => finish(0);
-    video.src = objectUrl;
+    applySafeMediaSource(video, objectUrl);
   });
 
 const buildPromoDirectorBrief = ({ durationSeconds, style }) => {
@@ -1694,7 +1695,7 @@ function SmartPromoSummaryPanel({
               </div>
               <div className="promo-summary-source-card__preview">
                 {sourcePreviewUrl ? (
-                  <video src={sourcePreviewUrl} muted playsInline preload="metadata" />
+                  <SafeVideo src={sourcePreviewUrl} muted playsInline preload="metadata" />
                 ) : (
                   <div>
                     <span aria-hidden="true">▶</span>
@@ -1764,7 +1765,7 @@ function SmartPromoSummaryPanel({
 
               <div className="promo-summary-canvas-stage">
                 {promoClips[0]?.url || sourcePreviewUrl ? (
-                  <video
+                  <SafeVideo
                     src={promoClips[0]?.url || sourcePreviewUrl}
                     controls
                     playsInline
@@ -1992,7 +1993,7 @@ function SmartPromoSummaryPanel({
                   <div className="promo-summary-live-preview-stage is-original">
                     {sourcePreviewUrl ? (
                       <>
-                        <video
+                        <SafeVideo
                           ref={sourcePreviewVideoRef}
                           src={sourcePreviewUrl}
                           muted={!previewAudioEnabled}
@@ -2024,7 +2025,7 @@ function SmartPromoSummaryPanel({
                   <div className="promo-summary-live-preview-stage is-smart-promo">
                     {sourcePreviewUrl ? (
                       <div className="promo-summary-live-preview-viewport">
-                        <video
+                        <SafeVideo
                           ref={smartPromoVideoRef}
                           src={sourcePreviewUrl}
                           muted={!previewAudioEnabled}
@@ -2081,7 +2082,7 @@ function SmartPromoSummaryPanel({
                     >
                       <div className="promo-summary-live-segment-frame">
                         {segmentFrames[segment.id] ? (
-                          <img
+                          <SafeImage
                             src={segmentFrames[segment.id]}
                             alt={`Frame at ${formatTimelineTime(segment.start)}`}
                             loading="lazy"
@@ -2224,7 +2225,7 @@ function SmartPromoSummaryPanel({
                     ) : null}
                     {clip.url ? (
                       <div className="promo-summary-video-shell">
-                        <video src={clip.url} controls preload="metadata" />
+                        <SafeVideo src={clip.url} controls preload="metadata" />
                       </div>
                     ) : (
                       <div className="promo-summary-video-shell promo-summary-video-shell-empty">
@@ -2308,7 +2309,7 @@ function SmartPromoSummaryPanel({
         </div>
         {/* Hidden elements for frame capture */}
         {sourcePreviewUrl ? (
-          <video
+          <SafeVideo
             ref={captureVideoRef}
             src={sourcePreviewUrl}
             crossOrigin="anonymous"

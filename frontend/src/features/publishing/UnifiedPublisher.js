@@ -1501,6 +1501,8 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
     resetPublishingState,
   } = usePublishingState(DEFAULT_SELECTED_PLATFORMS); // Default selection
   const [focusedPlatform, setFocusedPlatform] = useState(DEFAULT_SELECTED_PLATFORMS[0] || "tiktok");
+  const [workflowStep, setWorkflowStep] = useState(initialFile ? 2 : 0);
+  const [publishTiming, setPublishTiming] = useState(scheduledTime ? "schedule" : "now");
 
   useEffect(() => {
     if (!selectedPlatforms.length) return;
@@ -1515,6 +1517,7 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
       setGlobalFile(initialFile);
       if (initialFile.suggestedTitle) setGlobalTitle(initialFile.suggestedTitle);
       if (initialFile.suggestedDescription) setGlobalDescription(initialFile.suggestedDescription);
+      setWorkflowStep(2);
       toast.success(
         initialFile.workflowAction === "find-viral-clips"
           ? "Loaded the selected viral clip. Proceed to publish."
@@ -1810,6 +1813,8 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
     setShowCropper(false);
     setIsPublishing(false);
     setPublishingPlatform(null);
+    setWorkflowStep(0);
+    setPublishTiming("now");
   };
 
   const formatPublisherError = err => {
@@ -1966,6 +1971,7 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
       processFileChange(file);
       // 2. Update Global State
       setGlobalFile(file);
+      setWorkflowStep(1);
       console.log("Global file selected:", file.name);
       const extension = String(file.name || "")
         .split(".")
@@ -2056,6 +2062,7 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
                 </div>
               </div>
               <div className="platform-preview-column">
+                <div className="publisher-preview-title">TikTok preview</div>
                 <PlatformPreview
                   label="TikTok Preview"
                   data={data}
@@ -2104,6 +2111,7 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
                 </div>
               </div>
               <div className="platform-preview-column">
+                <div className="publisher-preview-title">YouTube preview</div>
                 <PlatformPreview
                   thumbnailUrl={effectiveThumbnailUrl}
                   label="YouTube Preview"
@@ -2654,16 +2662,39 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
   };
 
   const modalOpen = showVideoEditor || showCropper || showUpgradeModal;
-  const isQueuedPublish = Boolean(scheduledTime);
+  const isQueuedPublish = publishTiming === "schedule" && Boolean(scheduledTime);
   const selectedMediaName =
     (globalFile && typeof globalFile === "object" && globalFile.name) ||
     (typeof globalFile === "string" ? "Selected media URL" : "No media selected yet");
-  const queueActionLabel = isQueuedPublish ? "Queue new post" : "Publish now";
+  const queueActionLabel = publishTiming === "schedule" ? "Schedule post" : "Publish now";
   const queuePlatformCount = selectedPlatforms.length;
+  const isTikTokPostingCapped =
+    selectedPlatforms.includes("tiktok") &&
+    typeof tiktokCreator?.posting_remaining === "number" &&
+    tiktokCreator.posting_remaining <= 0;
   const selectedMediaSize =
     globalFile && typeof globalFile === "object" && Number(globalFile.size)
       ? `${Math.max(1, Math.round(globalFile.size / 1024 / 1024))} MB`
       : "";
+  const workflowSteps = ["Media", "Platforms", "Customize", "Review"];
+  const workflowStepHelp = [
+    "Choose the source",
+    "Select destinations",
+    "Perfect each post",
+    "Publish or schedule",
+  ];
+  const moveToWorkflowStep = nextStep => {
+    if (nextStep > 0 && !globalFile) {
+      setFeedbackMessage("Choose a media file before selecting platforms.");
+      return;
+    }
+    if (nextStep > 1 && selectedPlatforms.length === 0) {
+      setFeedbackMessage("Select at least one publishing platform before customizing.");
+      return;
+    }
+    setFeedbackMessage("");
+    setWorkflowStep(Math.max(0, Math.min(3, nextStep)));
+  };
 
   return (
     <div
@@ -2678,38 +2709,36 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
       )}
 
       <ol className="publisher-stepper" aria-label="Publishing workflow">
-        <li className="active">
-          <span>1</span>
-          <div>
-            <strong>Media</strong>
-            <small>Choose the source</small>
-          </div>
-        </li>
-        <li className={globalFile ? "active" : ""}>
-          <span>2</span>
-          <div>
-            <strong>Platforms</strong>
-            <small>Select destinations</small>
-          </div>
-        </li>
-        <li className={selectedPlatforms.length ? "active" : ""}>
-          <span>3</span>
-          <div>
-            <strong>Customize</strong>
-            <small>Perfect each post</small>
-          </div>
-        </li>
-        <li>
-          <span>4</span>
-          <div>
-            <strong>Review</strong>
-            <small>Publish or schedule</small>
-          </div>
-        </li>
+        {workflowSteps.map((step, index) => (
+          <li
+            key={step}
+            className={index === workflowStep ? "active" : index < workflowStep ? "complete" : ""}
+          >
+            <button type="button" onClick={() => moveToWorkflowStep(index)}>
+              <span>{index < workflowStep ? "✓" : index + 1}</span>
+              <div>
+                <strong>{step}</strong>
+                <small>{workflowStepHelp[index]}</small>
+              </div>
+            </button>
+          </li>
+        ))}
       </ol>
 
       <section className="publisher-current-asset" aria-label="Current publishing asset">
-        <span className="publisher-asset-icon">{mediaType === "image" ? "▧" : "▶"}</span>
+        <span className={`publisher-asset-icon ${previewUrl ? "has-preview" : ""}`}>
+          {previewUrl ? (
+            mediaType === "image" ? (
+              <SafeImage src={sanitizeUrl(previewUrl)} alt="" />
+            ) : (
+              <SafeVideo src={sanitizeUrl(previewUrl)} muted preload="metadata" />
+            )
+          ) : mediaType === "image" ? (
+            "▧"
+          ) : (
+            "▶"
+          )}
+        </span>
         <div>
           <small>Current media</small>
           <strong>{selectedMediaName}</strong>
@@ -2732,7 +2761,7 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
         </span>
       </section>
 
-      <div className="publisher-layout">
+      <div className={`publisher-layout publisher-step-${workflowStep}`}>
         {/* --- LEFT SIDE: The "Global" Input (Optional Helper) --- */}
         <aside className="global-controls">
           <div className="card global-card">
@@ -2740,8 +2769,14 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
             <div className="form-group">
               <label>Master File</label>
 
-              <input type="file" accept="video/*,image/*" onChange={handleGlobalFileChange} />
-              <small>Applying to {selectedPlatforms.length} platforms</small>
+              <label className="publisher-upload-dropzone">
+                <input type="file" accept="video/*,image/*" onChange={handleGlobalFileChange} />
+                <span className="publisher-upload-icon" aria-hidden="true">
+                  ↑
+                </span>
+                <strong>{globalFile ? "Replace media" : "Choose a video or image"}</strong>
+                <small>Drag and drop or browse your device · MP4, MOV, JPG, PNG</small>
+              </label>
 
               {previewUrl && mediaType !== "video" && (
                 <div
@@ -3097,7 +3132,13 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
 
               <div className="schedule-field">
                 <label>Publish Time</label>
-                <DateTimeSplitControl value={scheduledTime} onChange={setScheduledTime} />
+                <DateTimeSplitControl
+                  value={scheduledTime}
+                  onChange={value => {
+                    setScheduledTime(value);
+                    setPublishTiming(value ? "schedule" : "now");
+                  }}
+                />
                 <small>
                   {scheduledTime
                     ? "This new upload will be queued for the selected platforms. Plan limits are checked before anything is uploaded."
@@ -3211,61 +3252,171 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
             </div>
           )}
 
-          {/* --- Bottom Action Bar (Fixed) --- */}
-          <div className="publish-actions">
-            <div
-              style={{
-                fontSize: "14px",
-                color: "#A0AEC0",
-                display: "flex",
-                gap: "8px",
-                alignItems: "center",
-                marginLeft: "20px", // Add some spacing from edge
-              }}
-            >
-              <span style={{ color: "#fff", fontWeight: "bold" }}>{selectedPlatforms.length}</span>{" "}
-              platforms selected
-              {feedbackMessage && (
-                <span className="feedback-message" style={{ marginLeft: "15px" }}>
-                  | {feedbackMessage}
-                </span>
-              )}
-              {fallbackPublishPlatform && (
-                <span className="feedback-message" style={{ marginLeft: "15px", color: "#a5b4fc" }}>
-                  | Using {getPlatformName(fallbackPublishPlatform)} file because no global file was
-                  selected.
-                </span>
-              )}
-            </div>
+          {workflowStep === 2 ? (
+            <section className="publisher-customize-schedule" aria-label="Publish timing">
+              <div className="publisher-customize-schedule-heading">
+                <div>
+                  <small>Publish timing</small>
+                  <strong>Choose when this post goes live</strong>
+                </div>
+                <div className="publisher-timing-options">
+                  <label>
+                    <input
+                      type="radio"
+                      name="publisher-timing"
+                      checked={publishTiming === "now"}
+                      onChange={() => {
+                        setPublishTiming("now");
+                        setScheduledTime("");
+                      }}
+                    />
+                    Publish now
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      name="publisher-timing"
+                      checked={publishTiming === "schedule"}
+                      onChange={() => setPublishTiming("schedule")}
+                    />
+                    Schedule
+                  </label>
+                </div>
+              </div>
 
-            <div style={{ display: "flex", gap: "15px", marginRight: "20px" }}>
-              <button
-                className="btn-secondary-sm"
-                onClick={resetPublisherForm}
-                style={{ background: "transparent", border: "1px solid #4a5568" }}
-              >
-                Reset Form
-              </button>
-              <button
-                className="btn-primary-large"
-                onClick={handlePublishAll}
-                disabled={isPublishing || selectedPlatforms.length === 0}
-                style={{
-                  background: "linear-gradient(135deg, #3b82f6, #2563eb)",
-                  padding: "12px 30px",
-                  fontSize: "1.1em",
-                  borderRadius: "8px",
-                  fontWeight: "bold",
-                  boxShadow: "0 4px 15px rgba(37, 99, 235, 0.3)",
-                }}
-              >
-                {isPublishing
-                  ? "Publishing..."
-                  : `🚀 Publish to ${selectedPlatforms.map(p => getPlatformName(p)).join(" + ")}`}
-              </button>
-            </div>
-          </div>
+              {publishTiming === "schedule" ? (
+                <div className="publisher-schedule-controls">
+                  <div className="schedule-field">
+                    <label>Default publish time</label>
+                    <DateTimeSplitControl value={scheduledTime} onChange={setScheduledTime} />
+                  </div>
+                  <label className="platform-schedule-toggle">
+                    <input
+                      type="checkbox"
+                      checked={customPlatformSchedule}
+                      onChange={event => setCustomPlatformSchedule(event.target.checked)}
+                    />
+                    Use a different time for each platform
+                  </label>
+                  {customPlatformSchedule ? (
+                    <div className="platform-schedule-grid">
+                      {selectedPlatforms.map(platform => (
+                        <label key={platform} className="platform-schedule-row">
+                          <span>{getPlatformName(platform)}</span>
+                          <DateTimeSplitControl
+                            value={platformScheduleTimes[platform] || scheduledTime}
+                            onChange={value => updatePlatformScheduleTime(platform, value)}
+                            compact
+                          />
+                        </label>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
+            </section>
+          ) : null}
+
+          {workflowStep === 3 ? (
+            <section className="publisher-review-panel" aria-label="Review publishing details">
+              <div className="publisher-review-heading">
+                <div>
+                  <small>Final review</small>
+                  <h2>Ready to publish</h2>
+                </div>
+                <span>{isQueuedPublish ? "Scheduled" : "Publish now"}</span>
+              </div>
+              <div className="publisher-review-grid">
+                <article>
+                  <span>Media</span>
+                  <strong>{selectedMediaName}</strong>
+                  <small>{selectedMediaSize || "Ready"}</small>
+                </article>
+                <article>
+                  <span>Destinations</span>
+                  <strong>{selectedPlatforms.map(getPlatformName).join(", ")}</strong>
+                  <small>{selectedPlatforms.length} platform(s)</small>
+                </article>
+                <article>
+                  <span>Delivery</span>
+                  <strong>{scheduledTime ? "Scheduled" : "Immediately"}</strong>
+                  <small>{scheduledTime || "As soon as processing finishes"}</small>
+                </article>
+              </div>
+              <div className="publisher-review-schedule">
+                <label>Publish timing</label>
+                <DateTimeSplitControl
+                  value={scheduledTime}
+                  onChange={value => {
+                    setScheduledTime(value);
+                    setPublishTiming(value ? "schedule" : "now");
+                  }}
+                />
+                <small>Leave the date empty to publish immediately.</small>
+              </div>
+            </section>
+          ) : null}
         </main>
+      </div>
+
+      <div className="publisher-wizard-actions">
+        <div>
+          {workflowStep > 0 ? (
+            <button
+              type="button"
+              className="btn-secondary-sm"
+              onClick={() => moveToWorkflowStep(workflowStep - 1)}
+            >
+              ← Back
+            </button>
+          ) : (
+            <button type="button" className="btn-secondary-sm" onClick={resetPublisherForm}>
+              Reset
+            </button>
+          )}
+          {feedbackMessage ? <span className="feedback-message">{feedbackMessage}</span> : null}
+          {fallbackPublishPlatform ? (
+            <span className="feedback-message">
+              Using {getPlatformName(fallbackPublishPlatform)} media.
+            </span>
+          ) : null}
+        </div>
+        {workflowStep < 3 ? (
+          <button
+            type="button"
+            className="btn-primary-large"
+            onClick={() => moveToWorkflowStep(workflowStep + 1)}
+            disabled={
+              (workflowStep === 0 && !globalFile) ||
+              (workflowStep === 1 && !selectedPlatforms.length)
+            }
+          >
+            {workflowStep === 0
+              ? "Choose platforms →"
+              : workflowStep === 1
+                ? "Customize posts →"
+                : "Review publishing →"}
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="btn-primary-large"
+            onClick={handlePublishAll}
+            disabled={
+              isPublishing ||
+              selectedPlatforms.length === 0 ||
+              !globalFile ||
+              isTikTokPostingCapped ||
+              (publishTiming === "schedule" && !scheduledTime)
+            }
+          >
+            {isPublishing
+              ? "Publishing..."
+              : isQueuedPublish
+                ? "Queue publishing →"
+                : "Publish now →"}
+          </button>
+        )}
       </div>
 
       {/* --- Modals --- */}

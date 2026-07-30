@@ -3111,10 +3111,14 @@ test("Per-platform card: TikTok blocks upload when posting cap reached", async (
   });
   await page.goto(getBase() + "/#/dashboard", { waitUntil: "domcontentloaded" });
   await openDashboardPublishTab(page);
-  await page.waitForSelector('text=TikTok Configuration', { timeout: 10000 });
+  await page.locator(".publisher-upload-dropzone input[type=file]").setInputFiles(
+    "test/e2e/playwright/test-assets/test.mp4"
+  );
+  await page.getByRole("button", { name: /Customize posts/ }).click();
   await page.waitForSelector('text=Posting cap: 2 per 24h', { timeout: 10000 });
   await page.waitForSelector('text=Posting cap reached', { timeout: 10000 });
-  await expect(page.locator('button:has-text("Publish to TikTok")').first()).toBeVisible();
+  await page.getByRole("button", { name: /Review publishing/ }).click();
+  await expect(page.getByRole("button", { name: /Publish now/ })).toBeDisabled();
 });
 
 test("Per-platform card: TikTok preview and upload", async ({ page }) => {

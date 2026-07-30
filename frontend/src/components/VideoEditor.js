@@ -25,7 +25,7 @@ const canUseDesktopEditingTools = () => {
 };
 
 const DESKTOP_TOOL_MESSAGE =
-  "Viral Clip Studio and Cam Combiner are desktop tools. Open AutoPromote on a laptop or computer to use the timeline editor.";
+  "Clip Studio and Cam Combiner are desktop tools. Open AutoPromote on a laptop or computer to use the timeline editor.";
 
 function DesktopOnlyToolNotice({ toolName, onClose }) {
   return (
@@ -799,7 +799,7 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
         } else {
           setClipSuggestions(null);
           setStatusMessage(
-            "Found viral clips. Open AutoPromote on a laptop or desktop to edit them in Viral Clip Studio."
+            "Found viral clips. Open AutoPromote on a laptop or desktop to edit them in Clip Studio."
           );
         }
         setProcessing(false);
@@ -1345,14 +1345,14 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
 
     if (workflowAction === "generate-clips") {
       setStatusMessage(
-        "Multicam master is ready. Open Viral Clip Studio yourself if you want to generate clips."
+        "Multicam master is ready. Open Clip Studio yourself if you want to generate clips."
       );
       return;
     }
 
     if (workflowAction === "refine-full-video") {
       setStatusMessage(
-        "Multicam master is ready in the editor. Open Viral Clip Studio only if you want to use it."
+        "Multicam master is ready in the editor. Open Clip Studio only if you want to use it."
       );
       return;
     }
@@ -1366,7 +1366,7 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
     if (!desktopToolsAvailable) {
       const notice = (
         <DesktopOnlyToolNotice
-          toolName="Viral Clip Studio"
+          toolName="Clip Studio"
           onClose={() => {
             setClipSuggestions(null);
             setStatusMessage(DESKTOP_TOOL_MESSAGE);
@@ -1799,7 +1799,7 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
           {!hideCreationWorkflows && (
             <div className="studio-launch-card">
               <div className="studio-launch-eyebrow">Primary workflow</div>
-              <h3>Open Viral Clip Studio</h3>
+              <h3>Open Clip Studio</h3>
               <p>
                 Edit timing, overlays, captions, and export from one workspace. Studio access stays
                 included on paid plans, while heavier generations use credits only when you actually
@@ -1828,7 +1828,7 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
               </div>
               {!desktopToolsAvailable ? (
                 <div className="studio-launch-desktop-note">
-                  Viral Clip Studio and Cam Combiner are optimized for laptop and desktop editing.
+                  Clip Studio and Cam Combiner are optimized for laptop and desktop editing.
                   You can still use mobile-friendly tools here, then finish timeline work on a
                   computer.
                 </div>
@@ -1840,7 +1840,7 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
                   disabled={processing || !desktopToolsAvailable}
                   title={!desktopToolsAvailable ? DESKTOP_TOOL_MESSAGE : undefined}
                 >
-                  {processing ? "Launching Studio..." : "🔥 Launch Viral Clip Studio"}
+                  {processing ? "Launching Studio..." : "🔥 Launch Clip Studio"}
                 </button>
                 <button
                   className="legacy-toggle-btn multicam-launch-btn"
