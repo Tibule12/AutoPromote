@@ -4,6 +4,12 @@ const STATIC_PORT = process.env.STATIC_SERVER_PORT || 5000;
 const getBase = () => process.env.E2E_BASE_URL || `http://localhost:${STATIC_PORT}`;
 
 const waitForVisiblePlans = async page => {
+  const planOptions = page.locator("details.billing-plan-options");
+  await expect(planOptions).toBeVisible({ timeout: 60000 });
+  if (!(await planOptions.evaluate(element => element.open))) {
+    await planOptions.locator("summary").click();
+  }
+
   const plans = page.locator(".plans-section:visible .plan-card:visible");
   await expect(plans.first()).toBeVisible({ timeout: 60000 });
   await expect(plans).not.toHaveCount(0);

@@ -2,7 +2,11 @@ const { test, expect } = require("@playwright/test");
 
 const STATIC_PORT = process.env.STATIC_SERVER_PORT || 5000;
 const getBase = () => process.env.E2E_BASE_URL || `http://localhost:${STATIC_PORT}`;
-const DASHBOARD_PUBLISH_NAV_SELECTORS = ['nav li:has-text("Publish")', 'nav li:has-text("Upload")'];
+const DASHBOARD_PUBLISH_NAV_SELECTORS = [
+  'nav button:has-text("Publisher")',
+  'nav li:has-text("Publish")',
+  'nav li:has-text("Upload")',
+];
 const LEGACY_DASHBOARD_TILE_FLOW_REASON =
   "Unified Publisher now uses stacked platform forms, so this legacy tile-flow dashboard test is no longer applicable.";
 
@@ -73,7 +77,7 @@ async function openDashboardPublishTab(page) {
       await navItem.waitFor({ state: "visible", timeout: 10000 });
       await navItem.click();
       await page.waitForSelector(
-        '.content-upload-form, .content-upload-container, #upload-form, .platform-grid, h1:has-text("Cross-Platform Publisher"), h2:has-text("3. Optimize & Publish"), [data-testid="content-upload-form"]',
+        '.unified-publisher-container, .content-upload-form, .content-upload-container, #upload-form, .platform-grid, h1:has-text("Cross-Platform Publisher"), h2:has-text("3. Optimize & Publish"), [data-testid="content-upload-form"]',
         { state: "attached", timeout: 60000 }
       );
       return;
