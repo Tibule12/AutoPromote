@@ -773,6 +773,25 @@ const normalizePromoAnalysisResults = analysis => {
   return fallbackPromoClips(analysis);
 };
 
+const SMART_PROMO_WORKFLOW = [
+  {
+    label: "Brief",
+    helper: "Choose the visual direction",
+  },
+  {
+    label: "Package",
+    helper: "Confirm credits and outputs",
+  },
+  {
+    label: "Generate",
+    helper: "Watch the edit timeline",
+  },
+  {
+    label: "Results",
+    helper: "Review and use the clips",
+  },
+];
+
 function SmartPromoSummaryPanel({
   sourceFile,
   sourceUrl,
@@ -829,6 +848,13 @@ function SmartPromoSummaryPanel({
   }, []);
 
   const canAfford = creditBalance === null || Number(creditBalance) >= displayedPromoCost;
+  const promoWorkflowStage = promoClips.length
+    ? 3
+    : isGenerating || jobId
+      ? 2
+      : pendingEstimate
+        ? 1
+        : 0;
   const activeDurations = STORY_EDIT_DURATIONS;
   const selectedOutputMode = useMemo(
     () => getSelectedPreset(PROMO_OUTPUT_MODES, outputMode),
@@ -1629,6 +1655,36 @@ function SmartPromoSummaryPanel({
             </button>
           </div>
         </div>
+
+        <nav
+          className="promo-summary-workflow promo-summary-reveal"
+          style={{ "--promo-delay": "85ms" }}
+          aria-label="Smart Promo workflow"
+        >
+          <div className="promo-summary-workflow__intro">
+            <span>Workflow</span>
+            <strong>One source. Four controlled stages.</strong>
+          </div>
+          <ol>
+            {SMART_PROMO_WORKFLOW.map((step, index) => {
+              const state =
+                index < promoWorkflowStage
+                  ? "is-complete"
+                  : index === promoWorkflowStage
+                    ? "is-active"
+                    : "is-pending";
+              return (
+                <li key={step.label} className={state}>
+                  <span>{index < promoWorkflowStage ? "✓" : index + 1}</span>
+                  <div>
+                    <strong>{step.label}</strong>
+                    <small>{step.helper}</small>
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        </nav>
 
         <div className="promo-summary-hero-strip promo-summary-reveal" style={{ "--promo-delay": "120ms" }}>
           <div className="promo-summary-meta">
