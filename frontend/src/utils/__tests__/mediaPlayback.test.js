@@ -9,6 +9,16 @@ describe("media playback helpers", () => {
     ).toBe(true);
   });
 
+  test("treats a user-agent media fetch abort as expected even without an AbortError name", () => {
+    expect(
+      isExpectedMediaPlaybackInterruption(
+        new Error(
+          "The fetching process for the media resource was aborted by the user agent at the user's request."
+        )
+      )
+    ).toBe(true);
+  });
+
   test("absorbs expected play interruptions", async () => {
     const onUnexpectedError = jest.fn();
     const media = {

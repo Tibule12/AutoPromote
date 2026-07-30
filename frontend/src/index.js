@@ -47,6 +47,10 @@ root.render(
 // Global error handlers: forward to backend logging endpoint when enabled
 window.addEventListener("error", event => {
   try {
+    if (isExpectedMediaPlaybackInterruption(event.error || event.message)) {
+      event.preventDefault();
+      return;
+    }
     frontendLog("error", event.message || "window error", {
       filename: event.filename,
       lineno: event.lineno,

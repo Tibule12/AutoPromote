@@ -14,6 +14,7 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { getAuth } from "firebase/auth";
 import html2canvas from "html2canvas"; // For rendering styled captions
 import { trackClipWorkflowEvent } from "../utils/clipWorkflowAnalytics";
+import { playMediaSafely } from "../utils/mediaPlayback";
 import toast from "react-hot-toast";
 import { SafeAudio } from "./SafeMedia";
 import "./ViralClipStudio.css"; // We'll create this CSS next
@@ -2429,18 +2430,12 @@ const ViralClipStudio = ({
       return;
     }
 
-    try {
-      const playResult = mediaElement.play();
-      if (playResult && typeof playResult.catch === "function") {
-        playResult.catch(error => {
-          if (error?.name === "NotSupportedError") return;
-          console.log("Auto-play prevented", error);
-        });
-      }
-    } catch (error) {
-      if (error?.name === "NotSupportedError") return;
-      console.log("Auto-play prevented", error);
-    }
+    void playMediaSafely(mediaElement, {
+      onUnexpectedError: error => {
+        if (error?.name === "NotSupportedError") return;
+        console.log("Auto-play prevented", error);
+      },
+    });
   };
 
   const jumpToSourceTime = targetTime => {

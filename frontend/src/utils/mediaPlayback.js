@@ -1,5 +1,5 @@
 const EXPECTED_PLAYBACK_INTERRUPTION =
-  /(play\(\) request was interrupted|interrupted by a call to pause|new load request|media was removed)/i;
+  /(play\(\) request was interrupted|interrupted by a call to pause|new load request|media was removed|fetching process for the media resource was aborted|media resource was aborted by the user agent)/i;
 
 export const isExpectedMediaPlaybackInterruption = error => {
   if (!error) return false;

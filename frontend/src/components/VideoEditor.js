@@ -15,6 +15,7 @@ import { sanitizeUrl } from "../utils/security";
 import useCinematicEffects from "../hooks/useCinematicEffects";
 import CinematicEffectsPanel from "./CinematicEffectsPanel";
 import { useSubscription } from "../hooks/useSubscription";
+import { playMediaSafely } from "../utils/mediaPlayback";
 
 const DESKTOP_EDITING_TOOL_QUERY = "(min-width: 900px) and (hover: hover) and (pointer: fine)";
 
@@ -91,11 +92,9 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
 
   const [processedFile, setProcessedFile] = useState(null);
   const [desktopToolsAvailable, setDesktopToolsAvailable] = useState(canUseDesktopEditingTools);
-  const [clipSuggestions, setClipSuggestions] = useState(() =>
-    canUseDesktopEditingTools() && file?.openStudio && Array.isArray(file?.clips)
-      ? file.clips
-      : null
-  ); // Store detected clips or manual studio entry
+  // Wait until the media source is ready before mounting Studio. Mounting it with
+  // an empty source and immediately replacing that source aborts Firefox's fetch.
+  const [clipSuggestions, setClipSuggestions] = useState(null);
   const [showMultiCamCombiner, setShowMultiCamCombiner] = useState(false);
   const autoOpenedStudioRef = useRef(false);
   const analyzeCost = editing?.features?.findViralClips?.creditCost || creditCosts?.analyze || 8;
@@ -547,38 +546,46 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
     return () => mediaQuery.removeListener(handleChange);
   }, []);
 
-  // Initialize video source from file prop
+  // Initialize the media source only when the source file itself changes. Desktop
+  // capability changes must not revoke a blob URL that the video is still loading.
   useEffect(() => {
-    if (file) {
-      if (file.isRemote) {
-        setVideoSrc(file.url);
-        setProcessedFile(file);
-      } else if (file instanceof File || file instanceof Blob) {
-        // Revoke the previous blob URL only if we're creating a new one for a different file
-        if (blobUrlRef.current) {
-          URL.revokeObjectURL(blobUrlRef.current);
-          blobUrlRef.current = null;
-        }
-        const url = URL.createObjectURL(file);
-        blobUrlRef.current = url;
-        setVideoSrc(url);
-        setProcessedFile(file);
-      } else if (typeof file === "string") {
-        setVideoSrc(file);
-      }
-
-      if (file.openStudio && Array.isArray(file.clips) && file.clips.length) {
-        autoOpenedStudioRef.current = true;
-        if (desktopToolsAvailable) {
-          setClipSuggestions(file.clips);
-          setStatusMessage("Opened the detected viral clip window in Studio.");
-        } else {
-          setClipSuggestions(null);
-          setStatusMessage(DESKTOP_TOOL_MESSAGE);
-        }
-      }
+    if (blobUrlRef.current) {
+      URL.revokeObjectURL(blobUrlRef.current);
+      blobUrlRef.current = null;
     }
-  }, [desktopToolsAvailable, file]);
+
+    if (!file) {
+      setVideoSrc("");
+      setProcessedFile(null);
+      return;
+    }
+
+    if (file.isRemote) {
+      setVideoSrc(file.url || "");
+      setProcessedFile(file);
+    } else if (file instanceof File || file instanceof Blob) {
+      const url = URL.createObjectURL(file);
+      blobUrlRef.current = url;
+      setVideoSrc(url);
+      setProcessedFile(file);
+    } else if (typeof file === "string") {
+      setVideoSrc(file);
+      setProcessedFile(file);
+    }
+  }, [file]);
+
+  useEffect(() => {
+    if (!file?.openStudio || !Array.isArray(file.clips) || !file.clips.length || !videoSrc) return;
+
+    autoOpenedStudioRef.current = true;
+    if (desktopToolsAvailable) {
+      setClipSuggestions(file.clips);
+      setStatusMessage("Opened the detected viral clip window in Studio.");
+    } else {
+      setClipSuggestions(null);
+      setStatusMessage(DESKTOP_TOOL_MESSAGE);
+    }
+  }, [desktopToolsAvailable, file, videoSrc]);
 
   // Revoke blob URL only on unmount
   useEffect(() => {
@@ -837,10 +844,10 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
         // FORCE RE-RENDER OF VIDEO ELEMENT using the correct ref
         if (videoRef.current) {
           videoRef.current.load();
-          videoRef.current.play().catch(e => {
-            if (e?.name !== "AbortError") {
-              console.warn("Auto-play blocked:", e);
-            }
+          void playMediaSafely(videoRef.current, {
+            onUnexpectedError: error => {
+              console.warn("Auto-play blocked:", error);
+            },
           });
         }
 
