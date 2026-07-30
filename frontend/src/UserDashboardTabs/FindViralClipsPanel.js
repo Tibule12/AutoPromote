@@ -15,7 +15,7 @@ const sanitizeVideoUrl = value => {
   }
 };
 
-const FindViralClipsPanel = ({ initialFile = null, onOpenPublisher, onUpgrade }) => {
+const FindViralClipsPanel = ({ initialFile = null, onOpenStudio, onUpgrade }) => {
   const [sourceFile, setSourceFile] = useState(initialFile);
   const [previewUrl, setPreviewUrl] = useState("");
   const [scannerOpen, setScannerOpen] = useState(false);
@@ -25,6 +25,7 @@ const FindViralClipsPanel = ({ initialFile = null, onOpenPublisher, onUpgrade })
 
   useEffect(() => {
     setSourceFile(initialFile || null);
+    setSelectedClip(null);
   }, [initialFile]);
 
   useEffect(() => {
@@ -168,9 +169,9 @@ const FindViralClipsPanel = ({ initialFile = null, onOpenPublisher, onUpgrade })
             <button
               type="button"
               className="btn-secondary"
-              onClick={() => onOpenPublisher?.(sourceFile, selectedClip)}
+              onClick={() => onOpenStudio?.(sourceFile, selectedClip)}
             >
-              Open in Publisher
+              Open in Viral Clip Studio
             </button>
           )}
         </div>

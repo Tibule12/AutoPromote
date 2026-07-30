@@ -5,6 +5,8 @@ import "./UserDashboard.css";
 import ProfilePanel from "./UserDashboardTabs/ProfilePanel";
 import UploadPanel from "./UserDashboardTabs/UploadPanel";
 import FindViralClipsPanel from "./UserDashboardTabs/FindViralClipsPanel";
+import ViralClipStudioPanel from "./UserDashboardTabs/ViralClipStudioPanel";
+import SmartPromoPanel from "./UserDashboardTabs/SmartPromoPanel";
 import SchedulesPanel from "./UserDashboardTabs/SchedulesPanel";
 import AnalyticsPanel from "./UserDashboardTabs/AnalyticsPanel";
 import RewardsPanel from "./UserDashboardTabs/RewardsPanel";
@@ -76,6 +78,18 @@ const DASHBOARD_PAGE_META = {
     description:
       "Analyse a finished video and surface the moments most worth turning into short clips.",
   },
+  viral_clip_studio: {
+    eyebrow: "Create",
+    title: "Viral Clip Studio",
+    description:
+      "Refine moments, hooks, captions, B-roll, audio, and final exports in the full timeline editor.",
+  },
+  smart_promo: {
+    eyebrow: "Create",
+    title: "Smart Promo",
+    description:
+      "Turn one source video into a polished master, social-first previews, and promotional visuals.",
+  },
   idea_video: {
     eyebrow: "Create",
     title: "Idea-to-Video",
@@ -139,6 +153,8 @@ const DASHBOARD_NAV_GROUPS = [
     items: [
       { id: "cam_combiner", label: "Cam Combiner", icon: "camera", desktopOnly: true },
       { id: "find_viral_clips", label: "Find Viral Clips", icon: "clips" },
+      { id: "viral_clip_studio", label: "Viral Clip Studio", icon: "clips", desktopOnly: true },
+      { id: "smart_promo", label: "Smart Promo", icon: "sparkles" },
       { id: "idea_video", label: "Idea-to-Video", icon: "sparkles" },
     ],
   },
@@ -404,6 +420,8 @@ const UserDashboard = ({
   const [uploadLaunchTab, setUploadLaunchTab] = useState(null);
   const [billingReturnTab, setBillingReturnTab] = useState("profile");
   const [selectedFile, setSelectedFile] = useState(null);
+  const [viralStudioFile, setViralStudioFile] = useState(null);
+  const [viralStudioClip, setViralStudioClip] = useState(null);
   const [selectedPlatforms, setSelectedPlatforms] = useState([]);
   const [platformOptions, setPlatformOptions] = useState({});
   const [spotifySelectedTracks, setSpotifySelectedTracks] = useState([]);
@@ -443,6 +461,9 @@ const UserDashboard = ({
     analytics: "Analytics",
     clips: "Clip Studio",
     cam_combiner: "Cam Combiner",
+    find_viral_clips: "Find Viral Clips",
+    viral_clip_studio: "Viral Clip Studio",
+    smart_promo: "Smart Promo",
     idea_video: "Creative Tools",
     security: "Security",
     notifications: "Notifications",
@@ -1767,20 +1788,46 @@ const UserDashboard = ({
           <FindViralClipsPanel
             initialFile={selectedFile}
             onUpgrade={() => handleNav("billing")}
+            onOpenStudio={(file, clip) => {
+              setViralStudioFile(file);
+              setViralStudioClip(clip);
+              handleNav("viral_clip_studio");
+              toast.success("Opening the detected moment in Viral Clip Studio.");
+            }}
+          />
+        )}
+
+        {activeTab === "viral_clip_studio" && (
+          <ViralClipStudioPanel
+            initialFile={viralStudioFile}
+            initialClip={viralStudioClip}
+            onUpgrade={() => handleNav("billing")}
             onOpenPublisher={(file, clip) => {
               if (file && typeof file === "object") {
                 try {
                   Object.assign(file, {
                     suggestedTitle: clip?.hookText || clip?.reason || file.suggestedTitle,
-                    workflowAction: "viral-clip-selected",
+                    workflowAction: "viral-clip-rendered",
                   });
                 } catch (_) {
-                  // File objects can be non-extensible in some browsers; the original file is still valid.
+                  // The rendered file remains valid if this browser prevents custom File properties.
                 }
               }
               setSelectedFile(file);
               handleNav("upload");
-              toast.success("Opening the selected source in Publisher.");
+              toast.success("Viral Clip Studio render is ready to publish.");
+            }}
+          />
+        )}
+
+        {activeTab === "smart_promo" && (
+          <SmartPromoPanel
+            initialFile={selectedFile}
+            onUpgrade={() => handleNav("billing")}
+            onOpenPublisher={file => {
+              setSelectedFile(file);
+              handleNav("upload");
+              toast.success("Smart Promo output is ready to publish.");
             }}
           />
         )}

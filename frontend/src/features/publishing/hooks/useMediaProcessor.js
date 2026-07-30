@@ -9,6 +9,7 @@ export const useMediaProcessor = (initialFile = null) => {
   const [duration, setDuration] = useState(0);
 
   // Editor State
+  const [showVideoEditor, setShowVideoEditor] = useState(false);
   const [showCropper, setShowCropper] = useState(false);
 
   // Transform Metadata (Applied during upload or via editor)
@@ -119,6 +120,8 @@ export const useMediaProcessor = (initialFile = null) => {
     setDuration, // Needed for video metadata loading
 
     // Editor Visibility
+    showVideoEditor,
+    setShowVideoEditor,
     showCropper,
     setShowCropper,
 

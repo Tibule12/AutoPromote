@@ -53,7 +53,7 @@ function DesktopOnlyToolNotice({ toolName, onClose }) {
   );
 }
 
-function VideoEditor({ file, onSave, onCancel, images = [] }) {
+function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflows = false }) {
   const { editing, credits: subscriptionCredits } = useSubscription();
   const [videoSrc, setVideoSrc] = useState("");
   const [processing, setProcessing] = useState(false);
@@ -1789,75 +1789,78 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
         </div>
 
         <div className="ai-controls">
-          <div className="studio-launch-card">
-            <div className="studio-launch-eyebrow">Primary workflow</div>
-            <h3>Open Viral Clip Studio</h3>
-            <p>
-              Edit timing, overlays, captions, and export from one workspace. Studio access stays
-              included on paid plans, while heavier generations use credits only when you actually
-              run them.
-            </p>
-            <div className="studio-launch-badge-row">
-              <span className="studio-launch-badge desktop-only">Desktop editing tools</span>
-              <span className="studio-launch-badge included">Cam Combiner included</span>
-              <span className="studio-launch-badge included">Flow Edit included</span>
-              <span className="studio-launch-badge included">Thumbnail Lab included</span>
-              <span className="studio-launch-badge metered">
-                Find Viral Clips: {analyzeCost} credits
-              </span>
-              <span className="studio-launch-badge metered">
-                Render Final Clip: {renderClipCost} credits
-              </span>
-              <span className="studio-launch-badge metered">
-                Smart Promo Summary: {promoSummaryCost} credits
-              </span>
-            </div>
-            <div className="studio-launch-billing-note">
-              <strong>{totalCreditsAvailable ?? "..."}</strong> editing credits available
-              {billingDetailParts.length ? ` (${billingDetailParts.join(" + ")})` : ""}.
-              Credit-based runs draw from included monthly credits first, then top-up credits.
-              Included editing tools stay available on paid plans.
-            </div>
-            {!desktopToolsAvailable ? (
-              <div className="studio-launch-desktop-note">
-                Viral Clip Studio and Cam Combiner are optimized for laptop and desktop editing. You
-                can still use mobile-friendly tools here, then finish timeline work on a computer.
+          {!hideCreationWorkflows && (
+            <div className="studio-launch-card">
+              <div className="studio-launch-eyebrow">Primary workflow</div>
+              <h3>Open Viral Clip Studio</h3>
+              <p>
+                Edit timing, overlays, captions, and export from one workspace. Studio access stays
+                included on paid plans, while heavier generations use credits only when you actually
+                run them.
+              </p>
+              <div className="studio-launch-badge-row">
+                <span className="studio-launch-badge desktop-only">Desktop editing tools</span>
+                <span className="studio-launch-badge included">Cam Combiner included</span>
+                <span className="studio-launch-badge included">Flow Edit included</span>
+                <span className="studio-launch-badge included">Thumbnail Lab included</span>
+                <span className="studio-launch-badge metered">
+                  Find Viral Clips: {analyzeCost} credits
+                </span>
+                <span className="studio-launch-badge metered">
+                  Render Final Clip: {renderClipCost} credits
+                </span>
+                <span className="studio-launch-badge metered">
+                  Smart Promo Summary: {promoSummaryCost} credits
+                </span>
               </div>
-            ) : null}
-            <div className="studio-launch-actions">
-              <button
-                className="process-btn studio-launch-btn"
-                onClick={handleLaunchStudio}
-                disabled={processing || !desktopToolsAvailable}
-                title={!desktopToolsAvailable ? DESKTOP_TOOL_MESSAGE : undefined}
-              >
-                {processing ? "Launching Studio..." : "🔥 Launch Viral Clip Studio"}
-              </button>
-              <button
-                className="legacy-toggle-btn multicam-launch-btn"
-                onClick={() => {
-                  setStatusMessage("");
-                  setShowMultiCamCombiner(true);
-                }}
-                disabled={processing || !desktopToolsAvailable}
-                title={!desktopToolsAvailable ? DESKTOP_TOOL_MESSAGE : undefined}
-                type="button"
-              >
-                Combine Multi-Camera Angles First
-              </button>
-              <button
-                className="legacy-toggle-btn multicam-launch-btn"
-                onClick={() => {
-                  setStatusMessage("");
-                  setShowSmartPromoSummary(true);
-                }}
-                disabled={processing}
-                type="button"
-              >
-                Smart Promo Summary
-              </button>
+              <div className="studio-launch-billing-note">
+                <strong>{totalCreditsAvailable ?? "..."}</strong> editing credits available
+                {billingDetailParts.length ? ` (${billingDetailParts.join(" + ")})` : ""}.
+                Credit-based runs draw from included monthly credits first, then top-up credits.
+                Included editing tools stay available on paid plans.
+              </div>
+              {!desktopToolsAvailable ? (
+                <div className="studio-launch-desktop-note">
+                  Viral Clip Studio and Cam Combiner are optimized for laptop and desktop editing.
+                  You can still use mobile-friendly tools here, then finish timeline work on a
+                  computer.
+                </div>
+              ) : null}
+              <div className="studio-launch-actions">
+                <button
+                  className="process-btn studio-launch-btn"
+                  onClick={handleLaunchStudio}
+                  disabled={processing || !desktopToolsAvailable}
+                  title={!desktopToolsAvailable ? DESKTOP_TOOL_MESSAGE : undefined}
+                >
+                  {processing ? "Launching Studio..." : "🔥 Launch Viral Clip Studio"}
+                </button>
+                <button
+                  className="legacy-toggle-btn multicam-launch-btn"
+                  onClick={() => {
+                    setStatusMessage("");
+                    setShowMultiCamCombiner(true);
+                  }}
+                  disabled={processing || !desktopToolsAvailable}
+                  title={!desktopToolsAvailable ? DESKTOP_TOOL_MESSAGE : undefined}
+                  type="button"
+                >
+                  Combine Multi-Camera Angles First
+                </button>
+                <button
+                  className="legacy-toggle-btn multicam-launch-btn"
+                  onClick={() => {
+                    setStatusMessage("");
+                    setShowSmartPromoSummary(true);
+                  }}
+                  disabled={processing}
+                  type="button"
+                >
+                  Smart Promo Summary
+                </button>
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="status-message-container">
             {statusMessage && (
@@ -1881,10 +1884,12 @@ function VideoEditor({ file, onSave, onCancel, images = [] }) {
           </div>
 
           <div className="video-actions">
-            <div className="video-actions-note">
-              Thumbnail Lab, Cam Combiner, and Flow Edit stay included on paid plans. Save your
-              credits for analysis, promo generation, and final rendering.
-            </div>
+            {!hideCreationWorkflows && (
+              <div className="video-actions-note">
+                Thumbnail Lab, Cam Combiner, and Flow Edit stay included on paid plans. Save your
+                credits for analysis, promo generation, and final rendering.
+              </div>
+            )}
             <button
               type="button"
               onClick={() => setShowThumbnailGenerator(true)}

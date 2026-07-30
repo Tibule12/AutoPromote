@@ -33,6 +33,7 @@ import FacebookForm from "../../components/PlatformForms/FacebookForm";
 import LinkedInForm from "../../components/PlatformForms/LinkedInForm";
 import RedditForm from "../../components/PlatformForms/RedditForm";
 import BestTimeToPost from "../../components/BestTimeToPost";
+import VideoEditor from "../../components/VideoEditor";
 import ImageCropper from "../../components/ImageCropper";
 import PayPalSubscriptionPanel from "../../components/PayPalSubscriptionPanel";
 import { SafeImage, SafeVideo } from "../../components/SafeMedia";
@@ -120,6 +121,16 @@ const getBrowserPreviewFailureMessage = (file, mediaElement) => {
   }
 
   return `${sizePrefix}The browser could not decode this preview. The upload may still be possible, but for reliable preview/export use H.264 MP4 with AAC audio.`;
+};
+
+const normalizeEditedAsset = (result, fallbackName = "edited-media") => {
+  if (!result) return null;
+  if (result instanceof File) return result;
+  if (result instanceof Blob) {
+    const extension = result.type && result.type.startsWith("image/") ? ".png" : ".mp4";
+    return new File([result], `${fallbackName}${extension}`, { type: result.type || undefined });
+  }
+  return result;
 };
 
 const buildStructuredUploadError = (result, fallbackMessage, httpStatus) => {
@@ -1727,6 +1738,8 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
     previewUrl,
     thumbnailUrl,
     type: mediaType,
+    showVideoEditor,
+    setShowVideoEditor,
     showCropper,
     setShowCropper,
     handleFileChange: processFileChange,
@@ -1753,6 +1766,7 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
   const [publishingPlatform, setPublishingPlatform] = useState(null);
   const [feedbackMessage, setFeedbackMessage] = useState("");
   const [fallbackPublishPlatform, setFallbackPublishPlatform] = useState(null);
+  const [editingTarget, setEditingTarget] = useState(null);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [upgradePlanId, setUpgradePlanId] = useState(null);
   const [upgradePromptMessage, setUpgradePromptMessage] = useState("");
@@ -1760,6 +1774,14 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
 
   const effectiveThumbnailUrl = thumbnailUrl || "";
   const safeThumbUrl = effectiveThumbnailUrl ? sanitizeUrl(effectiveThumbnailUrl) : "";
+
+  const restoreMasterPreview = () => {
+    if (globalFile) {
+      processFileChange(globalFile);
+      return;
+    }
+    resetMediaState();
+  };
 
   const getEffectiveMediaMetaForPlatform = platformId => {
     const platformOverrides = (platformData && platformData[platformId]) || {};
@@ -1783,6 +1805,8 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
     resetMediaState();
     setFeedbackMessage("");
     setFallbackPublishPlatform(null);
+    setEditingTarget(null);
+    setShowVideoEditor(false);
     setShowCropper(false);
     setIsPublishing(false);
     setPublishingPlatform(null);
@@ -1983,6 +2007,18 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
 
       onFileChange: newFile => {
         updatePlatformData(platformId, { file: newFile });
+      },
+
+      onReviewAI: () => {
+        const fileToEdit = data.file || globalFile;
+        if (!fileToEdit) {
+          setFeedbackMessage("Please select a file first.");
+          return;
+        }
+
+        setEditingTarget(platformId);
+        processFileChange(fileToEdit);
+        setShowVideoEditor(true);
       },
 
       // 2. Global Features (Bounty / Protocol 7)
@@ -2617,7 +2653,7 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
     await publish(pending.platforms, pending.label, { skipUpgradePrompt: true });
   };
 
-  const modalOpen = showCropper || showUpgradeModal;
+  const modalOpen = showVideoEditor || showCropper || showUpgradeModal;
   const isQueuedPublish = Boolean(scheduledTime);
   const selectedMediaName =
     (globalFile && typeof globalFile === "object" && globalFile.name) ||
@@ -2729,6 +2765,20 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
               {/* Media Tools */}
               {mediaFile && (
                 <div className="media-tools">
+                  <div style={{ display: "flex", gap: "10px", marginTop: "8px" }}>
+                    <button
+                      type="button"
+                      className="btn-secondary-sm"
+                      style={{ flex: 1 }}
+                      onClick={() => {
+                        setEditingTarget("global");
+                        setShowVideoEditor(true);
+                      }}
+                    >
+                      {mediaType === "image" ? "🎬 Create Slideshow" : "✨ Review AI Enhancements"}
+                    </button>
+                  </div>
+
                   {previewUrl && (
                     <div
                       className="preview-container"
@@ -3219,6 +3269,79 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
       </div>
 
       {/* --- Modals --- */}
+      {showVideoEditor && mediaFile && (
+        <div
+          className="modal-overlay open"
+          style={{
+            position: "fixed",
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0,
+            overflowY: "auto",
+            zIndex: 3000,
+          }}
+        >
+          <div
+            className="modal"
+            style={{
+              maxWidth: "800px",
+              width: "90%",
+              background: "#1e293b",
+              color: "#fff",
+              position: "relative",
+            }}
+          >
+            <button
+              type="button"
+              className="close-btn"
+              onClick={() => {
+                setShowVideoEditor(false);
+                if (editingTarget && editingTarget !== "global") restoreMasterPreview();
+                setEditingTarget(null);
+              }}
+            >
+              ×
+            </button>
+            <VideoEditor
+              file={mediaFile}
+              hideCreationWorkflows
+              onSave={result => {
+                const target = editingTarget || "global";
+                const fallbackName =
+                  target === "global" ? "master-content" : `${target}-content-edit`;
+                const normalizedResult = normalizeEditedAsset(result, fallbackName);
+
+                if (target !== "global") {
+                  if (normalizedResult?.url) {
+                    updatePlatformData(target, {
+                      file: normalizedResult,
+                      media_url: normalizedResult.url,
+                    });
+                  } else if (normalizedResult instanceof File || normalizedResult instanceof Blob) {
+                    updatePlatformData(target, { file: normalizedResult });
+                  }
+                  restoreMasterPreview();
+                  toast.success(`${getPlatformName(target)} edits saved.`);
+                } else if (normalizedResult) {
+                  processFileChange(normalizedResult);
+                  setGlobalFile(normalizedResult);
+                  toast.success("Edits applied.");
+                }
+
+                setShowVideoEditor(false);
+                setEditingTarget(null);
+              }}
+              onCancel={() => {
+                setShowVideoEditor(false);
+                if (editingTarget && editingTarget !== "global") restoreMasterPreview();
+                setEditingTarget(null);
+              }}
+            />
+          </div>
+        </div>
+      )}
+
       {showCropper && mediaFile && (
         <div
           className="modal-overlay open"

@@ -196,6 +196,17 @@ const ProfilePanel = ({
           <article className="overview-feature-card">
             <span className="overview-tool-icon overview-tool-icon--cyan">◇</span>
             <div>
+              <small>Campaign creation</small>
+              <h3>Smart Promo</h3>
+              <p>Create a master edit, social previews, and campaign visuals from one source.</p>
+            </div>
+            <button className="btn-secondary" onClick={() => onNavigate?.("smart_promo")}>
+              Open Smart Promo
+            </button>
+          </article>
+          <article className="overview-feature-card">
+            <span className="overview-tool-icon overview-tool-icon--cyan">◇</span>
+            <div>
               <small>Creative studio</small>
               <h3>Idea-to-Video</h3>
               <p>Build scenes, captions, voiceover direction, and a ready-to-publish render.</p>
