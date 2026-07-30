@@ -15,7 +15,6 @@ import toast from "react-hot-toast";
 // --- Hooks ---
 import { usePublishingState } from "./hooks/usePublishingState";
 import { useMediaProcessor } from "./hooks/useMediaProcessor";
-import { useSubscription } from "../../hooks/useSubscription";
 import { sanitizeUrl } from "../../utils/security";
 import { withWorkspaceHeaders } from "../../utils/workspace";
 import { revokeObjectUrlLater } from "../../utils/objectUrl";
@@ -34,8 +33,6 @@ import FacebookForm from "../../components/PlatformForms/FacebookForm";
 import LinkedInForm from "../../components/PlatformForms/LinkedInForm";
 import RedditForm from "../../components/PlatformForms/RedditForm";
 import BestTimeToPost from "../../components/BestTimeToPost";
-import VideoEditor from "../../components/VideoEditor";
-import ViralScanner from "../../components/ViralScanner";
 import ImageCropper from "../../components/ImageCropper";
 import PayPalSubscriptionPanel from "../../components/PayPalSubscriptionPanel";
 import { SafeImage, SafeVideo } from "../../components/SafeMedia";
@@ -60,25 +57,6 @@ const getPlatformName = platformId => {
 };
 
 const DEFAULT_SELECTED_PLATFORMS = ["tiktok", "youtube"];
-
-const buildClipLearningMetadata = clip => {
-  if (!clip || (!clip.id && !clip.scanSessionId)) return null;
-  const start = Math.max(0, Number(clip.start || 0));
-  const end = Math.max(start, Number(clip.end || start));
-  return {
-    version: 1,
-    scanSessionId: clip.scanSessionId || null,
-    clipId: String(clip.id || ""),
-    predictedScore: Number(clip.guidedScore ?? clip.score ?? clip.viralScore ?? 0),
-    scoreConfidence: Number(clip.scoreConfidence || 0),
-    strategyLabel: clip.strategyLabel || clip.campaignRole || null,
-    contentType: clip.contentType || "general",
-    start,
-    end,
-    duration: Math.max(0, Number(clip.duration || end - start)),
-    scoreBreakdown: clip.scoreBreakdown || null,
-  };
-};
 
 const buildMediaMeta = ({
   trimStart = 0,
@@ -142,16 +120,6 @@ const getBrowserPreviewFailureMessage = (file, mediaElement) => {
   }
 
   return `${sizePrefix}The browser could not decode this preview. The upload may still be possible, but for reliable preview/export use H.264 MP4 with AAC audio.`;
-};
-
-const normalizeEditedAsset = (result, fallbackName = "edited-media") => {
-  if (!result) return null;
-  if (result instanceof File) return result;
-  if (result instanceof Blob) {
-    const extension = result.type && result.type.startsWith("image/") ? ".png" : ".mp4";
-    return new File([result], `${fallbackName}${extension}`, { type: result.type || undefined });
-  }
-  return result;
 };
 
 const buildStructuredUploadError = (result, fallbackMessage, httpStatus) => {
@@ -1480,8 +1448,6 @@ const PlatformPreview = ({
 };
 
 const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
-  const { editing } = useSubscription();
-  const viralClipCost = editing?.features?.findViralClips?.creditCost || 8;
   // 1. Initialize State Logic
   const {
     // Global File (Raw)
@@ -1540,7 +1506,7 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
       if (initialFile.suggestedDescription) setGlobalDescription(initialFile.suggestedDescription);
       toast.success(
         initialFile.workflowAction === "find-viral-clips"
-          ? "Loaded the saved Cam Combiner master without another upload."
+          ? "Loaded the selected viral clip. Proceed to publish."
           : "Loaded generated video! Proceed to publish."
       );
     }
@@ -1761,8 +1727,6 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
     previewUrl,
     thumbnailUrl,
     type: mediaType,
-    showVideoEditor,
-    setShowVideoEditor,
     showCropper,
     setShowCropper,
     handleFileChange: processFileChange,
@@ -1789,40 +1753,13 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
   const [publishingPlatform, setPublishingPlatform] = useState(null);
   const [feedbackMessage, setFeedbackMessage] = useState("");
   const [fallbackPublishPlatform, setFallbackPublishPlatform] = useState(null);
-  const [editingTarget, setEditingTarget] = useState(null); // 'global' or platformId
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [upgradePlanId, setUpgradePlanId] = useState(null);
   const [upgradePromptMessage, setUpgradePromptMessage] = useState("");
   const [pendingPublishRequest, setPendingPublishRequest] = useState(null);
 
-  // --- Viral Scanner State ---
-  const [showViralScanner, setShowViralScanner] = useState(false);
-  const [viralScannerFile, setViralScannerFile] = useState(null);
-  const [videoEditorFileOverride, setVideoEditorFileOverride] = useState(null);
-  const [selectedPromoVisual, setSelectedPromoVisual] = useState(null);
-  const [selectedClipLearning, setSelectedClipLearning] = useState(null);
   const effectiveThumbnailUrl = thumbnailUrl || "";
   const safeThumbUrl = effectiveThumbnailUrl ? sanitizeUrl(effectiveThumbnailUrl) : "";
-
-  useEffect(() => {
-    if (initialFile?.workflowAction !== "find-viral-clips" || !initialFile?.renderJobId) return;
-    setEditingTarget("global");
-    setViralScannerFile(initialFile);
-    setShowViralScanner(true);
-  }, [initialFile]);
-
-  useEffect(() => {
-    setSelectedPromoVisual(null);
-    setSelectedClipLearning(null);
-  }, [globalFile]);
-
-  const restoreMasterPreview = () => {
-    if (globalFile) {
-      processFileChange(globalFile);
-      return;
-    }
-    resetMediaState();
-  };
 
   const getEffectiveMediaMetaForPlatform = platformId => {
     const platformOverrides = (platformData && platformData[platformId]) || {};
@@ -1846,12 +1783,7 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
     resetMediaState();
     setFeedbackMessage("");
     setFallbackPublishPlatform(null);
-    setEditingTarget(null);
-    setShowVideoEditor(false);
     setShowCropper(false);
-    setShowViralScanner(false);
-    setViralScannerFile(null);
-    setSelectedClipLearning(null);
     setIsPublishing(false);
     setPublishingPlatform(null);
   };
@@ -2053,47 +1985,6 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
         updatePlatformData(platformId, { file: newFile });
       },
 
-      // New props for AI Review & Viral Clips on Platform-Specific Files
-      onReviewAI: () => {
-        // Logic to open VideoEditor with the PLATFORM-SPECIFIC file or Global File
-        const fileToEdit = data.file || globalFile;
-
-        if (fileToEdit) {
-          console.log(`Reviewing AI for ${platformId}:`, fileToEdit.name);
-          // CRITICAL: Set editing target so VideoEditor knows which state to update on Save
-          setEditingTarget(platformId);
-
-          // CRITICAL: We must load the file into the state that VideoEditor reads.
-          // In UnifiedPublisher, 'mediaFile' seems to be the source for VideoEditor.
-          // If we are editing a platform-specific file, we might need a way to tell VideoEditor about it.
-          // Currently, VideoEditor takes 'file={mediaFile}'.
-          // So let's temporarily swap mediaFile (or ensure VideoEditor uses a different state if target is set).
-
-          processFileChange(fileToEdit);
-          setShowVideoEditor(true);
-        } else {
-          setFeedbackMessage("Please select a file first.");
-        }
-      },
-      onFindViralClips: () => {
-        // Determine which file to scan
-        const fileToScan = data.file || globalFile;
-
-        if (!fileToScan) {
-          setFeedbackMessage("Please select a file to scan.");
-          return;
-        }
-        if (fileToScan.type && !fileToScan.type.startsWith("video/")) {
-          setFeedbackMessage("Viral Scanner supports video files only.");
-          return;
-        }
-
-        console.log(`Starting Viral Scanner for ${platformId}`);
-        setEditingTarget(platformId);
-        setViralScannerFile(fileToScan);
-        setShowViralScanner(true);
-      },
-
       // 2. Global Features (Bounty / Protocol 7)
       bountyAmount,
       setBountyAmount, // Note: If a form changes bounty, it affects global state
@@ -2107,41 +1998,6 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
       // 3. State Management
       // The form calls this when the user types something specific (overriding global)
       onChange: newData => updatePlatformData(platformId, newData),
-    };
-
-    // Per-Platform PREVIEW Component (Moved outside)
-    // To ensure PlatformPreview receives all necessary props
-    const renderSelectedPromoVisualPanel = () => {
-      if (!selectedPromoVisual?.url) return null;
-      return (
-        <div className="selected-promo-visual-panel">
-          <div className="selected-promo-visual-copy">
-            <span>Selected thumbnail/poster</span>
-            <strong>
-              {selectedPromoVisual.hookText ||
-                selectedPromoVisual.label ||
-                selectedPromoVisual.type ||
-                "Promo visual"}
-            </strong>
-            <small>
-              This stays separate from the live video preview so your frame is not cropped.
-            </small>
-          </div>
-          <img
-            src={sanitizeUrl(selectedPromoVisual.url)}
-            alt="Selected promo thumbnail/poster"
-            style={{
-              width: "100%",
-              maxWidth: 220,
-              maxHeight: 220,
-              objectFit: "contain",
-              background: "#020617",
-              borderRadius: 10,
-              padding: 8,
-            }}
-          />
-        </div>
-      );
     };
 
     switch (platformId) {
@@ -2164,7 +2020,6 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
                 </div>
               </div>
               <div className="platform-preview-column">
-                {renderSelectedPromoVisualPanel()}
                 <PlatformPreview
                   label="TikTok Preview"
                   data={data}
@@ -2213,7 +2068,6 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
                 </div>
               </div>
               <div className="platform-preview-column">
-                {renderSelectedPromoVisualPanel()}
                 <PlatformPreview
                   thumbnailUrl={effectiveThumbnailUrl}
                   label="YouTube Preview"
@@ -2262,7 +2116,6 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
                 </div>
               </div>
               <div className="platform-preview-column">
-                {renderSelectedPromoVisualPanel()}
                 <PlatformPreview
                   thumbnailUrl={effectiveThumbnailUrl}
                   label="Instagram Preview"
@@ -2310,7 +2163,6 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
                 </div>
               </div>
               <div className="platform-preview-column">
-                {renderSelectedPromoVisualPanel()}
                 <PlatformPreview
                   thumbnailUrl={effectiveThumbnailUrl}
                   label="Facebook Preview"
@@ -2358,7 +2210,6 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
                 </div>
               </div>
               <div className="platform-preview-column">
-                {renderSelectedPromoVisualPanel()}
                 <PlatformPreview
                   thumbnailUrl={effectiveThumbnailUrl}
                   label="LinkedIn Preview"
@@ -2407,7 +2258,6 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
                 </div>
               </div>
               <div className="platform-preview-column">
-                {renderSelectedPromoVisualPanel()}
                 <PlatformPreview
                   thumbnailUrl={effectiveThumbnailUrl}
                   label="Reddit Preview"
@@ -2705,10 +2555,9 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
         isDryRun: false,
         meta: {
           ...(uploadMeta || {}),
-          ...(selectedClipLearning || fileToUpload?.clipLearning || mediaFile?.clipLearning
+          ...(fileToUpload?.clipLearning || mediaFile?.clipLearning
             ? {
-                clipLearning:
-                  selectedClipLearning || fileToUpload?.clipLearning || mediaFile?.clipLearning,
+                clipLearning: fileToUpload?.clipLearning || mediaFile?.clipLearning,
               }
             : {}),
         },
@@ -2768,7 +2617,7 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
     await publish(pending.platforms, pending.label, { skipUpgradePrompt: true });
   };
 
-  const modalOpen = showVideoEditor || showViralScanner || showCropper || showUpgradeModal;
+  const modalOpen = showCropper || showUpgradeModal;
   const isQueuedPublish = Boolean(scheduledTime);
   const selectedMediaName =
     (globalFile && typeof globalFile === "object" && globalFile.name) ||
@@ -2880,47 +2729,6 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
               {/* Media Tools */}
               {mediaFile && (
                 <div className="media-tools">
-                  <div style={{ display: "flex", gap: "10px", marginTop: "8px" }}>
-                    <button
-                      className="btn-secondary-sm"
-                      style={{ flex: 1 }}
-                      onClick={() => {
-                        setEditingTarget("global");
-                        setShowVideoEditor(true);
-                      }}
-                    >
-                      {mediaType === "image" ? "🎬 Create Slideshow" : "✨ Review AI Enhancements"}
-                    </button>
-
-                    {mediaType === "video" && (
-                      <button
-                        className="btn-secondary-sm"
-                        style={{ flex: 1, background: "#e94560", color: "white", border: "none" }}
-                        onClick={() => {
-                          setEditingTarget("global");
-                          setViralScannerFile(mediaFile);
-                          setShowViralScanner(true);
-                        }}
-                      >
-                        🔍 Find Viral Clips
-                      </button>
-                    )}
-                  </div>
-                  {mediaType === "video" && (
-                    <div
-                      style={{
-                        marginTop: "8px",
-                        color: "#94a3b8",
-                        fontSize: "0.78rem",
-                        lineHeight: 1.45,
-                      }}
-                    >
-                      Review AI Enhancements opens your included paid-plan editor tools. Find Viral
-                      Clips uses {viralClipCost} credits per analysis, and you can top up anytime if
-                      you use your monthly allowance early.
-                    </div>
-                  )}
-
                   {previewUrl && (
                     <div
                       className="preview-container"
@@ -3411,213 +3219,6 @@ const UnifiedPublisher = ({ onUpload, initialFile, embedded = false }) => {
       </div>
 
       {/* --- Modals --- */}
-      {showVideoEditor && (
-        <div
-          className="modal-overlay open"
-          style={{
-            position: "fixed",
-            top: 0,
-            right: 0,
-            bottom: 0,
-            left: 0,
-            overflowY: "auto",
-            zIndex: 3000,
-          }}
-        >
-          <div
-            className="modal"
-            style={{
-              maxWidth: "800px",
-              width: "90%",
-              background: "#1e293b",
-              color: "#fff",
-              position: "relative",
-            }}
-          >
-            <button
-              className="close-btn"
-              onClick={() => {
-                setShowVideoEditor(false);
-                if (editingTarget && editingTarget !== "global") {
-                  restoreMasterPreview();
-                }
-                setEditingTarget(null);
-              }}
-              style={{
-                position: "absolute",
-                top: 10,
-                right: 10,
-                zIndex: 100,
-                fontSize: "1.5rem",
-                background: "none",
-                border: "none",
-                color: "#fff",
-                cursor: "pointer",
-                padding: "0 8px",
-              }}
-            >
-              ×
-            </button>
-            <VideoEditor
-              file={videoEditorFileOverride || mediaFile}
-              onSave={async result => {
-                try {
-                  const target = editingTarget || "global";
-                  const fallbackName =
-                    target === "global" ? "master-content" : `${target}-content-edit`;
-                  const normalizedResult = normalizeEditedAsset(result, fallbackName);
-
-                  if (target !== "global") {
-                    if (normalizedResult && normalizedResult.url) {
-                      updatePlatformData(target, {
-                        file: normalizedResult,
-                        media_url: normalizedResult.url,
-                      });
-                    } else if (
-                      normalizedResult instanceof File ||
-                      normalizedResult instanceof Blob
-                    ) {
-                      updatePlatformData(target, {
-                        file: normalizedResult,
-                      });
-                    }
-                    restoreMasterPreview();
-                    toast.success(`${getPlatformName(target)} edits saved.`);
-                  } else if (normalizedResult && normalizedResult.url) {
-                    processFileChange(normalizedResult);
-                    setGlobalFile(normalizedResult);
-                    toast.success("Viral clip ready for scheduling!");
-                  } else if (normalizedResult instanceof File || normalizedResult instanceof Blob) {
-                    processFileChange(normalizedResult);
-                    setGlobalFile(normalizedResult);
-                    toast.success("Edits applied!");
-                  }
-                } catch (e) {
-                  console.error("Failed to load viral clip:", e);
-                  setFeedbackMessage("Error loading clip.");
-                }
-                setShowVideoEditor(false);
-                setVideoEditorFileOverride(null);
-                setEditingTarget(null);
-              }}
-              onCancel={() => {
-                setShowVideoEditor(false);
-                setVideoEditorFileOverride(null);
-                if (editingTarget && editingTarget !== "global") {
-                  restoreMasterPreview();
-                }
-                setEditingTarget(null);
-              }}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* --- VIRAL SCANNER MODAL --- */}
-      {showViralScanner && (
-        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 3000 }}>
-          <ViralScanner
-            file={viralScannerFile || mediaFile} // specific file or fallback
-            onUpgrade={() => {
-              setShowViralScanner(false);
-              setViralScannerFile(null);
-              setEditingTarget(null);
-              setUpgradePlanId("premium");
-              setUpgradePromptMessage(
-                "Find Viral Clips is available on Creator, Studio, and Agency plans. The video stayed on your device because AutoPromote checks access before uploading."
-              );
-              setShowUpgradeModal(true);
-            }}
-            onClose={() => {
-              setShowViralScanner(false);
-              setViralScannerFile(null);
-              setEditingTarget(null);
-            }}
-            onSelectClip={clip => {
-              setSelectedClipLearning(buildClipLearningMetadata(clip));
-              if (clip?.openStudio) {
-                const sourceFile = viralScannerFile || mediaFile;
-                const studioClip = {
-                  ...clip,
-                  id: clip.id || `viral-${Date.now()}`,
-                  start: Number(clip.start || 0),
-                  end: Number(clip.end || clip.start || 0),
-                  duration: Math.max(0, Number(clip.end || 0) - Number(clip.start || 0)),
-                  reason: clip.reason || "AI-detected viral moment",
-                  viralScore: clip.score || clip.viralScore,
-                };
-                let editorFile = sourceFile;
-                if (sourceFile instanceof File || sourceFile instanceof Blob) {
-                  try {
-                    editorFile = Object.assign(sourceFile, {
-                      openStudio: true,
-                      clips: [studioClip],
-                    });
-                  } catch (_) {
-                    editorFile = sourceFile;
-                  }
-                } else if (sourceFile && typeof sourceFile === "object") {
-                  editorFile = {
-                    ...sourceFile,
-                    openStudio: true,
-                    clips: [studioClip],
-                  };
-                } else {
-                  editorFile = {
-                    name: "viral-source.mp4",
-                    url: sourceFile || "",
-                    isRemote: true,
-                    openStudio: true,
-                    clips: [studioClip],
-                  };
-                }
-                setVideoEditorFileOverride(editorFile);
-                setShowViralScanner(false);
-                setViralScannerFile(null);
-                setShowVideoEditor(true);
-                setFeedbackMessage("Opened the selected viral clip window in Studio.");
-                return;
-              }
-
-              if (clip?.selectedVisual?.url || clip?.selectedThumbnailUrl) {
-                setSelectedPromoVisual(
-                  clip.selectedVisual || {
-                    url: clip.selectedThumbnailUrl,
-                    label: "Selected promo thumbnail",
-                    type: "thumbnail",
-                  }
-                );
-              }
-
-              if (editingTarget && editingTarget !== "global") {
-                updatePlatformData(editingTarget, {
-                  trimStart: clip.start,
-                  trimEnd: clip.end,
-                  selectedThumbnailUrl:
-                    clip.selectedThumbnailUrl || clip.selectedVisual?.url || null,
-                  selectedVisual: clip.selectedVisual || null,
-                });
-                setFeedbackMessage(
-                  `Saved clip + thumbnail package (${clip.start}s-${clip.end}s) for ${getPlatformName(editingTarget)}.`
-                );
-              } else {
-                // Apply globally if no specific target
-                setTrimStart(clip.start);
-                setTrimEnd(clip.end);
-                setFeedbackMessage(
-                  clip?.selectedVisual?.url || clip?.selectedThumbnailUrl
-                    ? `Global clip + thumbnail package applied: ${clip.start}s - ${clip.end}s`
-                    : `Global trim applied: ${clip.start}s - ${clip.end}s`
-                );
-              }
-              setShowViralScanner(false);
-              setViralScannerFile(null);
-              setEditingTarget(null);
-            }}
-          />
-        </div>
-      )}
-
       {showCropper && mediaFile && (
         <div
           className="modal-overlay open"
