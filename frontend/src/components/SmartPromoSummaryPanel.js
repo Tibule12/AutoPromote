@@ -41,8 +41,8 @@ const getSelectedPreset = (items, id) => items.find(item => item.id === id) || i
 // Client-side compression before upload — turns raw 4K/ProRes into web-friendly bitrates
 const BYTES_PER_MB = 1024 * 1024;
 const UPLOAD_COMPRESSION_THRESHOLD_BYTES = 80 * BYTES_PER_MB; // Compress files > 80 MB
-const UPLOAD_COMPRESSION_TARGET_BPS = 6_000_000;              // 6 Mbps video
-const UPLOAD_COMPRESSION_AUDIO_BPS = 128_000;                 // 128 Kbps audio
+const UPLOAD_COMPRESSION_TARGET_BPS = 6_000_000; // 6 Mbps video
+const UPLOAD_COMPRESSION_AUDIO_BPS = 128_000; // 128 Kbps audio
 
 const formatMediaBytes = bytes => {
   if (!bytes || bytes < 1024) return "0 KB";
@@ -51,14 +51,24 @@ const formatMediaBytes = bytes => {
 };
 
 const compressVideoBeforeUpload = async (file, onProgress) => {
-  const isVideo = String(file?.type || "").startsWith("video/") || /\.(mov|mp4|avi|mkv|webm|m4v|3gp)$/i.test(file.name || "");
+  const isVideo =
+    String(file?.type || "").startsWith("video/") ||
+    /\.(mov|mp4|avi|mkv|webm|m4v|3gp)$/i.test(file.name || "");
   if (!isVideo || file.size <= UPLOAD_COMPRESSION_THRESHOLD_BYTES) return null;
   if (typeof MediaRecorder === "undefined") return null;
 
-  const mimeTypes = ["video/webm;codecs=vp8,opus", "video/webm;codecs=vp9,opus", "video/webm;codecs=vp8", "video/webm"];
+  const mimeTypes = [
+    "video/webm;codecs=vp8,opus",
+    "video/webm;codecs=vp9,opus",
+    "video/webm;codecs=vp8",
+    "video/webm",
+  ];
   let mimeType = "";
   for (const mt of mimeTypes) {
-    if (MediaRecorder.isTypeSupported(mt)) { mimeType = mt; break; }
+    if (MediaRecorder.isTypeSupported(mt)) {
+      mimeType = mt;
+      break;
+    }
   }
   if (!mimeType) return null;
 
@@ -71,13 +81,24 @@ const compressVideoBeforeUpload = async (file, onProgress) => {
     applySafeMediaSource(video, objectUrl);
 
     let resolved = false;
-    const cleanup = () => { if (!resolved) { resolved = true; URL.revokeObjectURL(objectUrl); } };
-    const fail = () => { cleanup(); resolve(null); };
+    const cleanup = () => {
+      if (!resolved) {
+        resolved = true;
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+    const fail = () => {
+      cleanup();
+      resolve(null);
+    };
 
     video.onloadedmetadata = () => {
       try {
         const stream = video.captureStream();
-        if (!stream) { fail(); return; }
+        if (!stream) {
+          fail();
+          return;
+        }
 
         const recorder = new MediaRecorder(stream, {
           mimeType,
@@ -86,7 +107,9 @@ const compressVideoBeforeUpload = async (file, onProgress) => {
         });
 
         const chunks = [];
-        recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+        recorder.ondataavailable = e => {
+          if (e.data.size > 0) chunks.push(e.data);
+        };
 
         recorder.onstop = () => {
           const blob = new Blob(chunks, { type: mimeType });
@@ -99,7 +122,9 @@ const compressVideoBeforeUpload = async (file, onProgress) => {
           resolve({ file: compressedFile, originalSize: file.size, compressedSize: blob.size });
         };
 
-        recorder.onerror = () => { fail(); };
+        recorder.onerror = () => {
+          fail();
+        };
         recorder.start(1000);
         let lastPct = 0;
         const duration = video.duration || 1;
@@ -110,19 +135,28 @@ const compressVideoBeforeUpload = async (file, onProgress) => {
             if (typeof onProgress === "function") onProgress(pct);
           }
         };
-        video.onended = () => { recorder.stop(); };
+        video.onended = () => {
+          recorder.stop();
+        };
         video.play().catch(() => fail());
-      } catch (_) { fail(); }
+      } catch (_) {
+        fail();
+      }
     };
 
     video.onerror = () => fail();
-    setTimeout(() => { if (!resolved) fail(); }, 30000);
+    setTimeout(() => {
+      if (!resolved) fail();
+    }, 30000);
   });
 };
 
 const readLocalVideoDuration = file =>
   new Promise(resolve => {
-    if (!(file instanceof File || file instanceof Blob) || !String(file.type || "").startsWith("video/")) {
+    if (
+      !(file instanceof File || file instanceof Blob) ||
+      !String(file.type || "").startsWith("video/")
+    ) {
       resolve(0);
       return;
     }
@@ -145,11 +179,12 @@ const buildPromoDirectorBrief = ({ durationSeconds, style }) => {
       : durationSeconds >= 120
         ? "balanced visual edit"
         : "faster attention-retention edit";
-  const styleIntent = {
-    clean: "balanced reframes, polished movement, and measured pacing",
-    hype: "harder punch-ins, faster switches, and more visual pressure",
-    minimal: "longer holds, quieter movement, and cleaner presentation",
-  }[style.id] || style.summary;
+  const styleIntent =
+    {
+      clean: "balanced reframes, polished movement, and measured pacing",
+      hype: "harder punch-ins, faster switches, and more visual pressure",
+      minimal: "longer holds, quieter movement, and cleaner presentation",
+    }[style.id] || style.summary;
 
   return {
     title: `${durationSeconds}s ${style.label} Visual Edit`,
@@ -248,7 +283,9 @@ const normalizeIncomingPreview = analysis => {
     stage: status,
     progress: Number(analysis.progress || 0),
     detail: String(analysis.detail || "").trim(),
-    frameOffsetMs: Number.isFinite(Number(analysis.previewFrameOffsetMs || analysis.currentPreviewFrameOffsetMs))
+    frameOffsetMs: Number.isFinite(
+      Number(analysis.previewFrameOffsetMs || analysis.currentPreviewFrameOffsetMs)
+    )
       ? Number(analysis.previewFrameOffsetMs || analysis.currentPreviewFrameOffsetMs)
       : null,
     currentAction: null,
@@ -288,7 +325,10 @@ const resolveSegmentCursor = (timeline, offsetMs, fallbackPercent = 0) => {
   }, 0);
 
   if (!Number.isFinite(totalDuration) || totalDuration <= 0) {
-    const fallbackIndex = Math.max(0, Math.floor(((Number(fallbackPercent) || 0) / 100) * timeline.length - 1));
+    const fallbackIndex = Math.max(
+      0,
+      Math.floor(((Number(fallbackPercent) || 0) / 100) * timeline.length - 1)
+    );
     return {
       segmentIndex: Math.min(timeline.length - 1, Math.max(0, fallbackIndex)),
       segment: timeline[Math.min(timeline.length - 1, Math.max(0, fallbackIndex))] || timeline[0],
@@ -370,7 +410,8 @@ const extractPlannedTimeline = analysis => {
   const rawTimeline =
     (Array.isArray(analysis?.plannedEditTimeline) && analysis.plannedEditTimeline) ||
     (Array.isArray(analysis?.storyMasterClip?.segments) && analysis.storyMasterClip.segments) ||
-    (Array.isArray(analysis?.clipSuggestions?.[0]?.segments) && analysis.clipSuggestions[0].segments) ||
+    (Array.isArray(analysis?.clipSuggestions?.[0]?.segments) &&
+      analysis.clipSuggestions[0].segments) ||
     [];
 
   return rawTimeline
@@ -379,7 +420,9 @@ const extractPlannedTimeline = analysis => {
       id: segment.id || `${segment.editLabel || segment.visualMode || "edit"}-${index}`,
       start: Number(segment.start || 0),
       end: Number(segment.end || 0),
-      duration: Number(segment.duration || Math.max(0.2, Number(segment.end || 0) - Number(segment.start || 0))),
+      duration: Number(
+        segment.duration || Math.max(0.2, Number(segment.end || 0) - Number(segment.start || 0))
+      ),
       editLabel:
         segment.editLabel ||
         {
@@ -407,7 +450,9 @@ const extractPlannedTimeline = analysis => {
 };
 
 const buildFallbackTimelineFromEvents = (events = [], sourceDurationMs = 0) => {
-  const safeDurationMs = Number.isFinite(Number(sourceDurationMs)) ? Math.max(0, Number(sourceDurationMs)) : 0;
+  const safeDurationMs = Number.isFinite(Number(sourceDurationMs))
+    ? Math.max(0, Number(sourceDurationMs))
+    : 0;
   const normalizedEvents = Array.isArray(events)
     ? events
         .map(event => {
@@ -418,7 +463,13 @@ const buildFallbackTimelineFromEvents = (events = [], sourceDurationMs = 0) => {
             ...event,
             normalizedOffsetMs: Number.isFinite(rawOffsetMs) ? Math.max(0, rawOffsetMs) : null,
             label: String(event?.label || event?.action || "Smart edit").trim() || "Smart edit",
-            detail: String(event?.description || event?.detail || event?.label || event?.action || "Dynamic scene pacing").trim(),
+            detail: String(
+              event?.description ||
+                event?.detail ||
+                event?.label ||
+                event?.action ||
+                "Dynamic scene pacing"
+            ).trim(),
           };
         })
         .filter(event => Number.isFinite(event.normalizedOffsetMs))
@@ -441,10 +492,15 @@ const buildFallbackTimelineFromEvents = (events = [], sourceDurationMs = 0) => {
         start: segmentStartMs / 1000,
         end: segmentEndMs / 1000,
         duration: segmentDurationMs / 1000,
-        editLabel: index === 0 ? "Warmup scan" : index === segmentCount - 1 ? "Closing hold" : "Live visual move",
+        editLabel:
+          index === 0
+            ? "Warmup scan"
+            : index === segmentCount - 1
+              ? "Closing hold"
+              : "Live visual move",
         reason: `Estimated ${index % 2 ? "focus lock" : "frame push"} from live preview signal.`,
         visualMode: visualModes[index % visualModes.length],
-        audioEnergyDb: -34 + (Math.sin(position * Math.PI * 2) * 10),
+        audioEnergyDb: -34 + Math.sin(position * Math.PI * 2) * 10,
         motionScore: 0.18 + Math.max(0.01, Math.cos(position * Math.PI * 1.4) * 0.22),
         focusX: Math.min(0.92, Math.max(0.08, 0.35 + Math.sin(position * Math.PI * 2) * 0.32)),
         focusY: Math.min(0.92, Math.max(0.08, 0.65 - Math.cos(position * Math.PI * 2) * 0.25)),
@@ -472,11 +528,15 @@ const buildFallbackTimelineFromEvents = (events = [], sourceDurationMs = 0) => {
     }
   });
 
-  const totalMs = safeDurationMs > 0
-    ? safeDurationMs
-    : Math.max(2000, (points[points.length - 1]?.offsetMs || 0) + 1200);
+  const totalMs =
+    safeDurationMs > 0
+      ? safeDurationMs
+      : Math.max(2000, (points[points.length - 1]?.offsetMs || 0) + 1200);
   if (points.length === 1 || points[points.length - 1].offsetMs < totalMs - 120) {
-    points.push({ offsetMs: totalMs, sourceEvent: points[points.length - 1]?.sourceEvent || normalizedEvents[0] });
+    points.push({
+      offsetMs: totalMs,
+      sourceEvent: points[points.length - 1]?.sourceEvent || normalizedEvents[0],
+    });
   }
 
   const segments = [];
@@ -489,8 +549,17 @@ const buildFallbackTimelineFromEvents = (events = [], sourceDurationMs = 0) => {
     const sourceEvent = start.sourceEvent || {};
     const actionToken = String(sourceEvent.action || sourceEvent.label || "").toLowerCase();
     const isRenderingAction = actionToken.includes("render");
-    const isAnalysisAction = actionToken.includes("analyz") || actionToken.includes("queued") || actionToken.includes("wait");
-    const visualMode = isRenderingAction ? "tight" : isAnalysisAction ? "wide" : index % 2 === 0 ? "focus" : "wide";
+    const isAnalysisAction =
+      actionToken.includes("analyz") ||
+      actionToken.includes("queued") ||
+      actionToken.includes("wait");
+    const visualMode = isRenderingAction
+      ? "tight"
+      : isAnalysisAction
+        ? "wide"
+        : index % 2 === 0
+          ? "focus"
+          : "wide";
     const progress = (index + 1) / Math.max(2, points.length);
 
     segments.push({
@@ -513,7 +582,11 @@ const buildFallbackTimelineFromEvents = (events = [], sourceDurationMs = 0) => {
       zoomStart: isRenderingAction ? 1 : 0.97,
       zoomEnd: isRenderingAction ? 0.9 : 0.95,
       faceCount: 0,
-      framingVariant: isAnalysisAction ? "center" : index % 2 === 0 ? "asymmetric" : "slow_movement",
+      framingVariant: isAnalysisAction
+        ? "center"
+        : index % 2 === 0
+          ? "asymmetric"
+          : "slow_movement",
     });
   }
 
@@ -528,12 +601,7 @@ const buildVisualProgressSteps = analysis => {
   );
   return VISUAL_PROGRESS_STEPS.map((step, index) => ({
     ...step,
-    state:
-      index < activeIndex
-        ? "complete"
-        : index === activeIndex
-          ? "active"
-          : "pending",
+    state: index < activeIndex ? "complete" : index === activeIndex ? "active" : "pending",
   }));
 };
 
@@ -542,7 +610,7 @@ const buildWaveformBars = timeline => {
   if (!segments.length) {
     return Array.from({ length: 24 }, (_, index) => ({
       id: `idle-${index}`,
-      height: 0.24 + ((index % 5) * 0.08),
+      height: 0.24 + (index % 5) * 0.08,
       segmentId: null,
     }));
   }
@@ -551,14 +619,19 @@ const buildWaveformBars = timeline => {
   segments.forEach((segment, segmentIndex) => {
     const energy = Number(segment.audioEnergyDb ?? -34);
     const motion = Number(segment.motionScore ?? 0.18);
-    const duration = Number(segment.duration || Math.max(0.5, Number(segment.end || 0) - Number(segment.start || 0)));
+    const duration = Number(
+      segment.duration || Math.max(0.5, Number(segment.end || 0) - Number(segment.start || 0))
+    );
     const sampleCount = Math.max(1, Math.min(4, Math.round(duration / 1.6)));
     const baseHeight = Math.max(0.16, Math.min(1, (energy + 50) / 28));
     const motionLift = Math.max(0, Math.min(0.18, motion * 0.35));
     for (let sampleIndex = 0; sampleIndex < sampleCount; sampleIndex += 1) {
       bars.push({
         id: `${segment.id || `segment-${segmentIndex}`}-${sampleIndex}`,
-        height: Math.max(0.16, Math.min(1, baseHeight + motionLift - (sampleIndex % 2 === 0 ? 0.03 : -0.02))),
+        height: Math.max(
+          0.16,
+          Math.min(1, baseHeight + motionLift - (sampleIndex % 2 === 0 ? 0.03 : -0.02))
+        ),
         segmentId: segment.id || `segment-${segmentIndex}`,
       });
     }
@@ -579,10 +652,22 @@ const getPreviewViewportMeta = (segment, segmentProgress = 0) => {
     };
   }
 
-  const startFocusX = Math.max(0.18, Math.min(0.82, Number(segment.startFocusX ?? segment.focusX ?? 0.5)));
-  const endFocusX = Math.max(0.18, Math.min(0.82, Number(segment.endFocusX ?? segment.focusX ?? 0.5)));
-  const startFocusY = Math.max(0.22, Math.min(0.78, Number(segment.startFocusY ?? segment.focusY ?? 0.5)));
-  const endFocusY = Math.max(0.22, Math.min(0.78, Number(segment.endFocusY ?? segment.focusY ?? 0.5)));
+  const startFocusX = Math.max(
+    0.18,
+    Math.min(0.82, Number(segment.startFocusX ?? segment.focusX ?? 0.5))
+  );
+  const endFocusX = Math.max(
+    0.18,
+    Math.min(0.82, Number(segment.endFocusX ?? segment.focusX ?? 0.5))
+  );
+  const startFocusY = Math.max(
+    0.22,
+    Math.min(0.78, Number(segment.startFocusY ?? segment.focusY ?? 0.5))
+  );
+  const endFocusY = Math.max(
+    0.22,
+    Math.min(0.78, Number(segment.endFocusY ?? segment.focusY ?? 0.5))
+  );
   const zoomStart = Math.max(0.82, Math.min(1, Number(segment.zoomStart ?? segment.zoom ?? 1)));
   const zoomEnd = Math.max(0.82, Math.min(1, Number(segment.zoomEnd ?? segment.zoom ?? 1)));
   const t = clamp01(segmentProgress);
@@ -644,8 +729,7 @@ const describePreviewSegment = segment => {
       tight: "Punch In",
       focus: "Close Focus",
     }[meta.visualMode] || "Visual Reframe";
-  const focusHorizontal =
-    meta.focusX < 0.38 ? "left" : meta.focusX > 0.62 ? "right" : "center";
+  const focusHorizontal = meta.focusX < 0.38 ? "left" : meta.focusX > 0.62 ? "right" : "center";
   const focusVertical =
     meta.focusY < 0.38 ? "upper frame" : meta.focusY > 0.62 ? "lower frame" : "mid frame";
   const movementLabel =
@@ -663,9 +747,16 @@ const describePreviewSegment = segment => {
 };
 
 const normalizePromoAssets = clip => {
-  const visualAssets = Array.isArray(clip?.visualAssets) ? clip.visualAssets.filter(asset => asset?.url) : [];
+  const visualAssets = Array.isArray(clip?.visualAssets)
+    ? clip.visualAssets.filter(asset => asset?.url)
+    : [];
   return {
-    hookText: clip?.hookText || clip?.titleSuggestion || clip?.promoCaption || clip?.title || "Watch This Moment",
+    hookText:
+      clip?.hookText ||
+      clip?.titleSuggestion ||
+      clip?.promoCaption ||
+      clip?.title ||
+      "Watch This Moment",
     titleSuggestion: clip?.titleSuggestion || clip?.hookText || clip?.title || "Watch This Moment",
     subtitleText: clip?.subtitleText || clip?.promoCaption || clip?.title || "Full Clip Inside",
     captions: Array.isArray(clip?.captions) ? clip.captions : [],
@@ -682,10 +773,7 @@ const normalizePromoAssets = clip => {
 const getClipIdentity = (clip, index = 0) => clip?.id || clip?.url || `clip-${index}`;
 
 const getDefaultVisualAsset = clip =>
-  clip?.thumbnailOptions?.[0] ||
-  clip?.posterOptions?.[0] ||
-  clip?.visualAssets?.[0] ||
-  null;
+  clip?.thumbnailOptions?.[0] || clip?.posterOptions?.[0] || clip?.visualAssets?.[0] || null;
 
 const buildSourceFingerprint = ({ sourceFile, sourceUrl }) => {
   if (sourceFile instanceof File || sourceFile instanceof Blob) {
@@ -720,7 +808,8 @@ const fallbackPromoClips = analysis =>
 const normalizePromoLibraryClip = clip => ({
   id: clip.id || clip.url,
   url: clip.url,
-  title: clip.titleSuggestion || clip.hookText || clip.title || clip.promoCaption || "Smart Promo Clip",
+  title:
+    clip.titleSuggestion || clip.hookText || clip.title || clip.promoCaption || "Smart Promo Clip",
   promoCaption: clip.promoCaption || clip.title || "Smart Promo Clip",
   campaignRoleLabel: clip.campaignRoleLabel || null,
   storyMaster: Boolean(clip.storyMaster),
@@ -740,7 +829,12 @@ const normalizePromoAnalysisResults = analysis => {
   const normalizeAnalysisClip = (clip, fallbackId) => ({
     id: clip.id || clip.url || fallbackId,
     url: clip.url,
-    title: clip.titleSuggestion || clip.hookText || clip.title || clip.promoCaption || "Smart Promo Clip",
+    title:
+      clip.titleSuggestion ||
+      clip.hookText ||
+      clip.title ||
+      clip.promoCaption ||
+      "Smart Promo Clip",
     promoCaption: clip.promoCaption || clip.title || "Smart Promo Clip",
     campaignRoleLabel: clip.campaignRoleLabel || (clip.storyMaster ? "Master Visual Edit" : null),
     storyMaster: Boolean(clip.storyMaster),
@@ -755,10 +849,13 @@ const normalizePromoAnalysisResults = analysis => {
     ...normalizePromoAssets(clip),
   });
 
-  const storyMasterClip =
-    analysis?.storyMasterClip?.url ? normalizeAnalysisClip(analysis.storyMasterClip, "story-master") : null;
+  const storyMasterClip = analysis?.storyMasterClip?.url
+    ? normalizeAnalysisClip(analysis.storyMasterClip, "story-master")
+    : null;
   const derivedShorts = Array.isArray(analysis?.derivedShorts)
-    ? analysis.derivedShorts.filter(clip => clip?.url).map((clip, index) => normalizeAnalysisClip(clip, `derived-${index + 1}`))
+    ? analysis.derivedShorts
+        .filter(clip => clip?.url)
+        .map((clip, index) => normalizeAnalysisClip(clip, `derived-${index + 1}`))
     : [];
 
   if (storyMasterClip || derivedShorts.length) {
@@ -861,8 +958,7 @@ function SmartPromoSummaryPanel({
     () => getSelectedPreset(PROMO_OUTPUT_MODES, outputMode),
     [outputMode]
   );
-  const waitEstimate =
-    durationSeconds >= 180 ? "about 20-40 minutes" : "about 12-25 minutes";
+  const waitEstimate = durationSeconds >= 180 ? "about 20-40 minutes" : "about 12-25 minutes";
   const selectedStyle = useMemo(() => getSelectedPreset(PROMO_STYLES, styleId), [styleId]);
   const promoDirectorBrief = useMemo(
     () =>
@@ -1033,7 +1129,9 @@ function SmartPromoSummaryPanel({
   const applyAnalysisUpdate = analysis => {
     const plannedTimeline = extractPlannedTimeline(analysis);
     const sourceDurationSeconds = Number(
-      analysis?.sourceDurationSeconds || analysis?.sourceDuration || analysis?.source_duration_seconds
+      analysis?.sourceDurationSeconds ||
+        analysis?.sourceDuration ||
+        analysis?.source_duration_seconds
     );
     const timelineTotalMs = getTimelineTotalDurationMs(plannedTimeline);
     const nextStatus = buildStatusLabel(analysis);
@@ -1277,7 +1375,9 @@ function SmartPromoSummaryPanel({
       const token = await getFreshAuthToken(true);
       const estimate = await fetchCreditEstimate(token);
       if (creditBalance !== null && Number(creditBalance) < Number(estimate.credits || 0)) {
-        throw new Error(`You need ${estimate.credits} credits for this package. Current balance: ${creditBalance}.`);
+        throw new Error(
+          `You need ${estimate.credits} credits for this package. Current balance: ${creditBalance}.`
+        );
       }
       setPendingEstimate(estimate);
       setStatusText("Confirm the promo package estimate to start.");
@@ -1303,10 +1403,7 @@ function SmartPromoSummaryPanel({
     () => buildVisualProgressSteps(analysisDetails),
     [analysisDetails]
   );
-  const plannedTimeline = useMemo(
-    () => analysisDetails?.plannedTimeline || [],
-    [analysisDetails]
-  );
+  const plannedTimeline = useMemo(() => analysisDetails?.plannedTimeline || [], [analysisDetails]);
   const previewTimeline = useMemo(() => {
     if (plannedTimeline.length) return plannedTimeline;
     return buildFallbackTimelineFromEvents(
@@ -1321,9 +1418,10 @@ function SmartPromoSummaryPanel({
   const progressPercent = Math.max(0, Math.min(100, Number(analysisDetails?.progress || 0)));
   const activePreviewSegment = previewTimeline[activePreviewIndex] || previewTimeline[0] || null;
   const activeSegmentDurationMs = Number(activePreviewSegment?.duration || 0) * 1000;
-  const activeSegmentProgress = activeSegmentDurationMs > 0
-    ? Math.min(1, Math.max(0, activeSegmentOffsetMs / activeSegmentDurationMs))
-    : 0;
+  const activeSegmentProgress =
+    activeSegmentDurationMs > 0
+      ? Math.min(1, Math.max(0, activeSegmentOffsetMs / activeSegmentDurationMs))
+      : 0;
   const waveformBars = useMemo(() => buildWaveformBars(previewTimeline), [previewTimeline]);
   const previewViewportStyle = useMemo(
     () => buildPreviewViewportStyle(activePreviewSegment, activeSegmentProgress),
@@ -1381,13 +1479,20 @@ function SmartPromoSummaryPanel({
         ? liveOffsetUpdatedAtRef.current
         : Date.now();
       const progressedOffsetMs = anchorOffsetMs + Math.max(0, Date.now() - anchorAtMs);
-      const clampedOffsetMs = timelineTotalDurationMs > 0
-        ? progressedOffsetMs % timelineTotalDurationMs
-        : progressedOffsetMs;
+      const clampedOffsetMs =
+        timelineTotalDurationMs > 0
+          ? progressedOffsetMs % timelineTotalDurationMs
+          : progressedOffsetMs;
 
       if (Number.isFinite(clampedOffsetMs)) {
-        setLivePreviewOffsetMs(prev => (Math.abs(prev - clampedOffsetMs) > 6 ? clampedOffsetMs : prev));
-        const segmentCursor = resolveSegmentCursor(previewTimeline, clampedOffsetMs, progressPercent);
+        setLivePreviewOffsetMs(prev =>
+          Math.abs(prev - clampedOffsetMs) > 6 ? clampedOffsetMs : prev
+        );
+        const segmentCursor = resolveSegmentCursor(
+          previewTimeline,
+          clampedOffsetMs,
+          progressPercent
+        );
         const nextIndex = segmentCursor.segmentIndex;
         const nextOffset = segmentCursor.segmentOffsetMs || 0;
         setActivePreviewIndex(prev => (prev === nextIndex ? prev : nextIndex));
@@ -1406,7 +1511,13 @@ function SmartPromoSummaryPanel({
         livePreviewCursorRafRef.current = null;
       }
     };
-  }, [previewTimeline, isGenerating, analysisDetails?.status, progressPercent, timelineTotalDurationMs]);
+  }, [
+    previewTimeline,
+    isGenerating,
+    analysisDetails?.status,
+    progressPercent,
+    timelineTotalDurationMs,
+  ]);
 
   useEffect(() => {
     const status = String(analysisDetails?.status || "").toLowerCase();
@@ -1423,7 +1534,10 @@ function SmartPromoSummaryPanel({
 
     let isActive = true;
     const applyTimelineSeek = () => {
-      const sourceTimeMs = resolveSourceTimeFromTimelineOffset(previewTimeline, livePreviewOffsetMs);
+      const sourceTimeMs = resolveSourceTimeFromTimelineOffset(
+        previewTimeline,
+        livePreviewOffsetMs
+      );
       if (!Number.isFinite(sourceTimeMs) || sourceTimeMs < 0) return;
       let startedPlayback = false;
 
@@ -1439,7 +1553,10 @@ function SmartPromoSummaryPanel({
           video.playbackRate = 1;
         }
         const safeDurationMs = Number(video.duration || 0) * 1000;
-        const safeTime = Math.max(0, Math.min(sourceTimeMs / 1000, (safeDurationMs / 1000) * 0.995));
+        const safeTime = Math.max(
+          0,
+          Math.min(sourceTimeMs / 1000, (safeDurationMs / 1000) * 0.995)
+        );
         if (Math.abs((video.currentTime || 0) - safeTime) > 0.004) {
           video.currentTime = safeTime;
         }
@@ -1555,10 +1672,11 @@ function SmartPromoSummaryPanel({
       const objectUrl = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = objectUrl;
-      const safeName = (clip.titleSuggestion || clip.hookText || clip.promoCaption || "smart-promo-clip")
-        .replace(/[^a-zA-Z0-9._-]+/g, "-")
-        .replace(/-+/g, "-")
-        .replace(/^-|-$/g, "") || "smart-promo-clip";
+      const safeName =
+        (clip.titleSuggestion || clip.hookText || clip.promoCaption || "smart-promo-clip")
+          .replace(/[^a-zA-Z0-9._-]+/g, "-")
+          .replace(/-+/g, "-")
+          .replace(/^-|-$/g, "") || "smart-promo-clip";
       link.download = `${safeName}.mp4`;
       document.body.appendChild(link);
       link.click();
@@ -1601,7 +1719,9 @@ function SmartPromoSummaryPanel({
   };
 
   const handleDownloadVisuals = async clip => {
-    const assets = Array.isArray(clip?.visualAssets) ? clip.visualAssets.filter(asset => asset?.url) : [];
+    const assets = Array.isArray(clip?.visualAssets)
+      ? clip.visualAssets.filter(asset => asset?.url)
+      : [];
     if (!assets.length) return;
 
     const safeBaseName =
@@ -1639,297 +1759,235 @@ function SmartPromoSummaryPanel({
   };
 
   return (
-    <div className="promo-summary-overlay" role="dialog" aria-modal="true" aria-label="Smart Promo">
+    <div
+      className="promo-summary-overlay promo-summary-overlay--embedded"
+      role="region"
+      aria-label="Smart Promo"
+    >
       <div className="promo-summary-shell">
-        <div className="promo-summary-topline promo-summary-reveal" style={{ "--promo-delay": "40ms" }}>
-          <div className="promo-summary-header">
-            <span className="promo-summary-kicker">Smart Promo Studio</span>
-            <h3>Turn one long clip into a creator-ready visual system.</h3>
-            <p>AutoPromote keeps your audio intact, upgrades framing and movement, then delivers one master plus three social-first previews.</p>
+        <header
+          className="smart-promo-studio-header promo-summary-reveal"
+          style={{ "--promo-delay": "40ms" }}
+        >
+          <div>
+            <span className="promo-summary-kicker">Smart Promo</span>
+            <h2>Create a complete promo package</h2>
+            <p>
+              Choose the direction, preview the source, and generate four ready-to-publish cuts.
+            </p>
           </div>
-          <div className="promo-summary-header-actions">
-            <button type="button" className="promo-summary-secondary promo-summary-minor-action" onClick={onClose}>
-              Go back
-            </button>
-            <button type="button" className="promo-summary-close" onClick={onClose} aria-label="Close promo summary">
-              &times;
-            </button>
-          </div>
-        </div>
+          <button type="button" className="promo-summary-secondary" onClick={onClose}>
+            Change video
+          </button>
+        </header>
 
-        <div className="promo-summary-workbench">
-          <aside
-            className="promo-summary-workbench__rail promo-summary-reveal"
-            style={{ "--promo-delay": "85ms" }}
+        <nav className="smart-promo-studio-progress" aria-label="Smart Promo progress">
+          {SMART_PROMO_WORKFLOW.slice(0, 3).map((step, index) => (
+            <div
+              key={step.label}
+              className={
+                index < promoWorkflowStage
+                  ? "is-complete"
+                  : index === promoWorkflowStage
+                    ? "is-active"
+                    : ""
+              }
+            >
+              <span>{index < promoWorkflowStage ? "✓" : index + 1}</span>
+              <strong>{step.label}</strong>
+            </div>
+          ))}
+        </nav>
+
+        <div className="smart-promo-studio-workspace">
+          <main
+            className="smart-promo-studio-preview promo-summary-reveal"
+            style={{ "--promo-delay": "90ms" }}
           >
-            <nav className="promo-summary-workflow" aria-label="Smart Promo workflow">
-              <div className="promo-summary-workflow__intro">
-                <span>Workflow</span>
-                <strong>One source. Four controlled stages.</strong>
+            <div className="smart-promo-studio-section-head">
+              <div>
+                <span>Source preview</span>
+                <strong title={sourceSummary}>{sourceSummary}</strong>
               </div>
-              <ol>
-                {SMART_PROMO_WORKFLOW.map((step, index) => {
-                  const state =
-                    index < promoWorkflowStage
-                      ? "is-complete"
-                      : index === promoWorkflowStage
-                        ? "is-active"
-                        : "is-pending";
-                  return (
-                    <li key={step.label} className={state}>
-                      <span>{index < promoWorkflowStage ? "✓" : index + 1}</span>
-                      <div>
-                        <strong>{step.label}</strong>
-                        <small>{step.helper}</small>
-                      </div>
-                    </li>
-                  );
-                })}
-              </ol>
-            </nav>
+              <i>{sourcePreviewUrl ? "Ready" : "Waiting"}</i>
+            </div>
 
-            <section className="promo-summary-source-card">
-              <div className="promo-summary-source-card__head">
-                <span className="promo-summary-card-label">Source media</span>
-                <i>{sourcePreviewUrl ? "Ready" : "Waiting"}</i>
-              </div>
-              <div className="promo-summary-source-card__preview">
-                {sourcePreviewUrl ? (
-                  <SafeVideo src={sourcePreviewUrl} muted playsInline preload="metadata" />
-                ) : (
-                  <div>
-                    <span aria-hidden="true">▶</span>
-                    <small>Source preview unavailable</small>
-                  </div>
-                )}
-              </div>
-              <strong title={sourceSummary}>{sourceSummary}</strong>
-              <small>Original audio and source timing remain attached.</small>
-            </section>
-
-            <div className="promo-summary-meta">
-              <div className="promo-summary-pill">
-                <span>Estimate</span>
-                <strong>{displayedPromoCost} credits</strong>
-              </div>
-              <div className="promo-summary-pill">
-                <span>Balance</span>
-                <strong>{creditBalance ?? "..."}</strong>
-              </div>
-              <div className="promo-summary-pill">
-                <span>Output</span>
-                <strong>1 master + 3 previews</strong>
-              </div>
-              <div className="promo-summary-pill">
-                <span>Mode</span>
-                <strong>{selectedOutputMode.pill}</strong>
+            <div className="smart-promo-studio-stage">
+              {promoClips[0]?.url || sourcePreviewUrl ? (
+                <SafeVideo
+                  src={promoClips[0]?.url || sourcePreviewUrl}
+                  controls
+                  playsInline
+                  preload="metadata"
+                />
+              ) : (
+                <div className="promo-summary-canvas-empty">
+                  <span aria-hidden="true">✦</span>
+                  <strong>Your preview will appear here</strong>
+                  <small>Return and choose a source video to continue.</small>
+                </div>
+              )}
+              <div className="smart-promo-studio-stage-badge">
+                <span>{durationSeconds}s</span>
+                <span>{selectedStyle.label}</span>
+                <span>{selectedOutputMode.pill}</span>
               </div>
             </div>
 
-            <section className="promo-summary-card promo-summary-card-brief">
-              <span className="promo-summary-card-label">Creative director brief</span>
-              <div className="promo-summary-director-brief">
-                <div>
-                  <strong>{promoDirectorBrief.title}</strong>
-                  <p>{promoDirectorBrief.summary}</p>
-                </div>
+            <div className="smart-promo-studio-output-strip">
+              <div>
+                <span>01</span>
+                <strong>Master edit</strong>
+              </div>
+              <div>
+                <span>02</span>
+                <strong>Social preview</strong>
+              </div>
+              <div>
+                <span>03</span>
+                <strong>Story cut</strong>
+              </div>
+              <div>
+                <span>04</span>
+                <strong>Promo cut</strong>
+              </div>
+            </div>
+
+            <details className="smart-promo-studio-brief">
+              <summary>View creative brief</summary>
+              <div>
+                <strong>{promoDirectorBrief.title}</strong>
+                <p>{promoDirectorBrief.summary}</p>
                 <ul>
                   {promoDirectorBrief.bullets.map(item => (
                     <li key={item}>{item}</li>
                   ))}
                 </ul>
               </div>
-            </section>
-          </aside>
-
-          <main
-            className="promo-summary-workbench__canvas promo-summary-reveal"
-            style={{ "--promo-delay": "130ms" }}
-          >
-            <section className="promo-summary-canvas-card">
-              <div className="promo-summary-canvas-card__head">
-                <div>
-                  <span className="promo-summary-card-label">Director canvas</span>
-                  <strong>
-                    {promoClips.length
-                      ? "Your generated visual master is ready."
-                      : isGenerating
-                        ? "The visual director is building your timeline."
-                        : "Review the source before generation."}
-                  </strong>
-                </div>
-                <span className={`promo-summary-canvas-state ${isGenerating ? "is-live" : ""}`}>
-                  {isGenerating ? "Live generation" : promoClips.length ? "Output ready" : "Preview"}
-                </span>
-              </div>
-
-              <div className="promo-summary-canvas-stage">
-                {promoClips[0]?.url || sourcePreviewUrl ? (
-                  <SafeVideo
-                    src={promoClips[0]?.url || sourcePreviewUrl}
-                    controls
-                    playsInline
-                    preload="metadata"
-                  />
-                ) : (
-                  <div className="promo-summary-canvas-empty">
-                    <span aria-hidden="true">✦</span>
-                    <strong>Your visual edit will appear here</strong>
-                    <small>Select an output goal and style, then generate when you are ready.</small>
-                  </div>
-                )}
-                <div className="promo-summary-canvas-overlay">
-                  <span>{selectedOutputMode.pill}</span>
-                  <strong>{selectedStyle.label}</strong>
-                  <small>{durationSeconds}s visual story</small>
-                </div>
-              </div>
-
-              <div className="promo-summary-canvas-timeline">
-                <div>
-                  <span>Opening</span>
-                  <i style={{ width: "22%" }} />
-                </div>
-                <div>
-                  <span>Build</span>
-                  <i style={{ width: "48%" }} />
-                </div>
-                <div>
-                  <span>Payoff</span>
-                  <i style={{ width: "30%" }} />
-                </div>
-              </div>
-
-              <div className="promo-summary-canvas-footer">
-                <span>
-                  <i aria-hidden="true" />
-                  Audio stays attached to the source timeline
-                </span>
-                <small>{statusText || "Ready for your generation settings."}</small>
-              </div>
-            </section>
+            </details>
           </main>
 
           <aside
-            className="promo-summary-workbench__inspector promo-summary-reveal"
-            style={{ "--promo-delay": "175ms" }}
+            className="smart-promo-studio-controls promo-summary-reveal"
+            style={{ "--promo-delay": "140ms" }}
           >
-            <div className="promo-summary-inspector-head">
-              <span>Generation settings</span>
-              <strong>Build the output package</strong>
-              <small>Nothing is charged until you confirm the estimate.</small>
-            </div>
-
-            <div className="promo-summary-note-row">
-              <div className="promo-summary-note-card">
-                <span>Usage model</span>
-                <strong>Credit-based generation</strong>
-                <small>Monthly credits are consumed first, then available top-ups.</small>
-              </div>
-              <div className="promo-summary-note-card">
-                <span>Render ETA</span>
-                <strong>{waitEstimate}</strong>
-                <small>Keep this panel open while generation is running.</small>
+            <div className="smart-promo-studio-section-head">
+              <div>
+                <span>Creative direction</span>
+                <strong>How should the promo feel?</strong>
               </div>
             </div>
 
-            <div className="promo-summary-grid">
-              <section className="promo-summary-card promo-summary-card-wide">
-                <span className="promo-summary-card-label">Output goal</span>
-                <div className="promo-summary-mode-grid">
-                  {PROMO_OUTPUT_MODES.map(mode => (
-                    <button
-                      key={mode.id}
-                      type="button"
-                      className={`promo-summary-style-card ${
-                        outputMode === mode.id ? "is-active" : ""
-                      }`}
-                      onClick={() => setOutputMode(mode.id)}
-                    >
-                      <strong>{mode.label}</strong>
-                      <span>{mode.summary}</span>
-                    </button>
-                  ))}
-                </div>
-              </section>
+            <fieldset className="smart-promo-studio-fieldset">
+              <legend>Output goal</legend>
+              <div className="smart-promo-studio-mode-grid">
+                {PROMO_OUTPUT_MODES.map(mode => (
+                  <button
+                    key={mode.id}
+                    type="button"
+                    className={outputMode === mode.id ? "is-active" : ""}
+                    onClick={() => setOutputMode(mode.id)}
+                  >
+                    <strong>{mode.label}</strong>
+                    <span>{mode.summary}</span>
+                  </button>
+                ))}
+              </div>
+            </fieldset>
 
-              <section className="promo-summary-card">
-                <span className="promo-summary-card-label">Duration</span>
-                <div className="promo-summary-choice-row">
+            <div className="smart-promo-studio-options-row">
+              <fieldset className="smart-promo-studio-fieldset">
+                <legend>Duration</legend>
+                <div className="smart-promo-studio-segments">
                   {activeDurations.map(value => (
                     <button
                       key={value}
                       type="button"
-                      className={`promo-summary-choice ${
-                        durationSeconds === value ? "is-active" : ""
-                      }`}
+                      className={durationSeconds === value ? "is-active" : ""}
                       onClick={() => setDurationSeconds(value)}
                     >
                       {value}s
                     </button>
                   ))}
                 </div>
-              </section>
+              </fieldset>
 
-              <section className="promo-summary-card">
-                <span className="promo-summary-card-label">Style</span>
-                <div className="promo-summary-style-grid">
+              <fieldset className="smart-promo-studio-fieldset">
+                <legend>Style</legend>
+                <div className="smart-promo-studio-segments">
                   {PROMO_STYLES.map(style => (
                     <button
                       key={style.id}
                       type="button"
-                      className={`promo-summary-style-card ${
-                        styleId === style.id ? "is-active" : ""
-                      }`}
+                      className={styleId === style.id ? "is-active" : ""}
                       onClick={() => setStyleId(style.id)}
                     >
-                      <strong>{style.label}</strong>
-                      <span>{style.summary}</span>
+                      {style.label}
                     </button>
                   ))}
                 </div>
-              </section>
-
-              <section className="promo-summary-card promo-summary-generate-card">
-                <span className="promo-summary-card-label">Generation</span>
-                <div className="promo-summary-status">
-                  <strong>{statusText || "Ready to generate."}</strong>
-                  <span>
-                    Early platform failures are refunded. Completed outputs remain available until
-                    they expire.
-                  </span>
-                </div>
-                {errorText && <div className="promo-summary-error">{errorText}</div>}
-                {!canAfford && (
-                  <div className="promo-summary-error">
-                    You need {displayedPromoCost} credits for this feature.
-                  </div>
-                )}
-                <div className="promo-summary-action-row">
-                  <button
-                    type="button"
-                    className="promo-summary-primary"
-                    onClick={handleGenerate}
-                    disabled={isGenerating || isEstimating || !canAfford}
-                  >
-                    {isGenerating
-                      ? "Generating Edit..."
-                      : isEstimating
-                        ? "Estimating..."
-                        : "Generate Smart Promo"}
-                  </button>
-                  <button type="button" className="promo-summary-secondary" onClick={onClose}>
-                    Close
-                  </button>
-                </div>
-              </section>
+              </fieldset>
             </div>
+
+            <div className="smart-promo-studio-estimate">
+              <div>
+                <span>Package</span>
+                <strong>4 promo cuts</strong>
+              </div>
+              <div>
+                <span>Render time</span>
+                <strong>{waitEstimate}</strong>
+              </div>
+              <div>
+                <span>Cost</span>
+                <strong>{displayedPromoCost} credits</strong>
+              </div>
+            </div>
+
+            <div className="smart-promo-studio-balance">
+              <span>Available balance</span>
+              <strong>{creditBalance ?? "..."} credits</strong>
+            </div>
+
+            {statusText ? (
+              <div className="promo-summary-status">
+                <strong>{statusText}</strong>
+              </div>
+            ) : null}
+            {errorText && <div className="promo-summary-error">{errorText}</div>}
+            {!canAfford && (
+              <div className="promo-summary-error">
+                You need {displayedPromoCost} credits for this feature.
+              </div>
+            )}
+
+            <button
+              type="button"
+              className="promo-summary-primary smart-promo-studio-generate"
+              onClick={handleGenerate}
+              disabled={isGenerating || isEstimating || !canAfford}
+            >
+              {isGenerating
+                ? "Generating promo..."
+                : isEstimating
+                  ? "Checking estimate..."
+                  : "Generate promo package"}
+            </button>
+            <small className="smart-promo-studio-charge-note">
+              You will review the {displayedPromoCost}-credit estimate before generation starts.
+            </small>
           </aside>
         </div>
 
-        {(isGenerating || jobId || previewTimeline.length > 0) && (
-          <section className="promo-summary-live-shell promo-summary-reveal" style={{ "--promo-delay": "290ms" }}>
-            <aside className="promo-summary-live-sidebar promo-summary-reveal" style={{ "--promo-delay": "340ms" }}>
+        {(isGenerating || jobId) && (
+          <section
+            className="promo-summary-live-shell promo-summary-reveal"
+            style={{ "--promo-delay": "290ms" }}
+          >
+            <aside
+              className="promo-summary-live-sidebar promo-summary-reveal"
+              style={{ "--promo-delay": "340ms" }}
+            >
               <div className="promo-summary-live-sidebar-head">
                 <span className="promo-summary-card-label">Processing</span>
                 <strong>Live timeline is rendering now.</strong>
@@ -1949,7 +2007,10 @@ function SmartPromoSummaryPanel({
                   </div>
                 ))}
               </div>
-              <div className="promo-summary-live-progress promo-summary-reveal" style={{ "--promo-delay": "520ms" }}>
+              <div
+                className="promo-summary-live-progress promo-summary-reveal"
+                style={{ "--promo-delay": "520ms" }}
+              >
                 <div className="promo-summary-live-progress-head">
                   <strong>Overall Progress</strong>
                   <span>{progressPercent}%</span>
@@ -1959,14 +2020,20 @@ function SmartPromoSummaryPanel({
                 </div>
                 <small>{analysisDetails?.detail || statusText || "Preparing Smart Promo..."}</small>
               </div>
-              <div className="promo-summary-live-audio promo-summary-reveal" style={{ "--promo-delay": "580ms" }}>
+              <div
+                className="promo-summary-live-audio promo-summary-reveal"
+                style={{ "--promo-delay": "580ms" }}
+              >
                 <strong>Audio stays untouched</strong>
                 <span>Dialogue, pacing, and tone are preserved.</span>
                 <small>Only visual motion and framing are generated.</small>
               </div>
             </aside>
 
-            <div className="promo-summary-live-main promo-summary-reveal" style={{ "--promo-delay": "360ms" }}>
+            <div
+              className="promo-summary-live-main promo-summary-reveal"
+              style={{ "--promo-delay": "360ms" }}
+            >
               <div className="promo-summary-live-head">
                 <div>
                   <span className="promo-summary-card-label">Live scene previews</span>
@@ -1987,7 +2054,10 @@ function SmartPromoSummaryPanel({
               </div>
 
               <div className="promo-summary-live-preview-grid">
-                <article className="promo-summary-live-preview-card promo-summary-reveal" style={{ "--promo-delay": "430ms" }}>
+                <article
+                  className="promo-summary-live-preview-card promo-summary-reveal"
+                  style={{ "--promo-delay": "430ms" }}
+                >
                   <span className="promo-summary-card-label">Original Video</span>
                   <strong>Uploaded Source</strong>
                   <div className="promo-summary-live-preview-stage is-original">
@@ -2005,7 +2075,10 @@ function SmartPromoSummaryPanel({
                         />
                         {activePreviewSegment ? (
                           <>
-                            <div className="promo-summary-live-focus-box" style={previewFocusBoxStyle} />
+                            <div
+                              className="promo-summary-live-focus-box"
+                              style={previewFocusBoxStyle}
+                            />
                             <div className="promo-summary-live-original-overlay">
                               <strong>{activePreviewMeta.shotLabel}</strong>
                               <span>{activePreviewMeta.focusLabel}</span>
@@ -2014,14 +2087,21 @@ function SmartPromoSummaryPanel({
                         ) : null}
                       </>
                     ) : (
-                      <div className="promo-summary-live-preview-empty">Waiting for source preview...</div>
+                      <div className="promo-summary-live-preview-empty">
+                        Waiting for source preview...
+                      </div>
                     )}
                   </div>
                 </article>
 
-                <article className="promo-summary-live-preview-card promo-summary-reveal" style={{ "--promo-delay": "480ms" }}>
+                <article
+                  className="promo-summary-live-preview-card promo-summary-reveal"
+                  style={{ "--promo-delay": "480ms" }}
+                >
                   <span className="promo-summary-card-label">Smart Promo Preview</span>
-                  <strong>{activePreviewSegment?.editLabel || "Building virtual camera moves"}</strong>
+                  <strong>
+                    {activePreviewSegment?.editLabel || "Building virtual camera moves"}
+                  </strong>
                   <div className="promo-summary-live-preview-stage is-smart-promo">
                     {sourcePreviewUrl ? (
                       <div className="promo-summary-live-preview-viewport">
@@ -2038,12 +2118,17 @@ function SmartPromoSummaryPanel({
                         />
                       </div>
                     ) : (
-                      <div className="promo-summary-live-preview-empty">Preview camera moves will appear here.</div>
+                      <div className="promo-summary-live-preview-empty">
+                        Preview camera moves will appear here.
+                      </div>
                     )}
-                <div className="promo-summary-live-preview-overlay">
+                    <div className="promo-summary-live-preview-overlay">
                       <div className="promo-summary-live-preview-overlay-copy">
                         <strong>{activePreviewMeta?.shotLabel || "Smart Promo Preview"}</strong>
-                        <span>{activePreviewSegment?.reason || "Animated low-res preview while the final render completes."}</span>
+                        <span>
+                          {activePreviewSegment?.reason ||
+                            "Animated low-res preview while the final render completes."}
+                        </span>
                       </div>
                       {activePreviewMeta ? (
                         <div className="promo-summary-live-preview-overlay-metrics">
@@ -2056,7 +2141,10 @@ function SmartPromoSummaryPanel({
                 </article>
               </div>
 
-              <div className="promo-summary-live-waveform promo-summary-reveal" style={{ "--promo-delay": "650ms" }}>
+              <div
+                className="promo-summary-live-waveform promo-summary-reveal"
+                style={{ "--promo-delay": "650ms" }}
+              >
                 <div className="promo-summary-live-waveform-head">
                   <span className="promo-summary-card-label">Timeline Energy</span>
                   <small>Live sync feed from the visual director.</small>
@@ -2065,7 +2153,11 @@ function SmartPromoSummaryPanel({
                   {waveformBars.map(bar => (
                     <span
                       key={bar.id}
-                      className={bar.segmentId && bar.segmentId === activePreviewSegment?.id ? "is-active" : ""}
+                      className={
+                        bar.segmentId && bar.segmentId === activePreviewSegment?.id
+                          ? "is-active"
+                          : ""
+                      }
                       style={{ "--wave-height": String(bar.height) }}
                     />
                   ))}
@@ -2095,7 +2187,8 @@ function SmartPromoSummaryPanel({
                       </div>
                       <div className="promo-summary-live-segment-meta">
                         <span className="promo-summary-live-segment-time">
-                          {formatTimelineTime(segment.start)} &rarr; {formatTimelineTime(segment.end)}
+                          {formatTimelineTime(segment.start)} &rarr;{" "}
+                          {formatTimelineTime(segment.end)}
                         </span>
                         <strong>{segment.editLabel}</strong>
                         <small>{segment.reason}</small>
@@ -2105,7 +2198,8 @@ function SmartPromoSummaryPanel({
                 </div>
               ) : (
                 <div className="promo-summary-live-placeholder">
-                  Planned edits will appear here as soon as Smart Promo finishes analyzing motion, subjects, and audio energy.
+                  Planned edits will appear here as soon as Smart Promo finishes analyzing motion,
+                  subjects, and audio energy.
                 </div>
               )}
             </div>
@@ -2114,12 +2208,18 @@ function SmartPromoSummaryPanel({
 
         {pendingEstimate && (
           <div className="promo-summary-confirm-backdrop" role="presentation">
-            <div className="promo-summary-confirm promo-summary-reveal" role="dialog" aria-modal="true" aria-label="Confirm Smart Promo credits" style={{ "--promo-delay": "140ms" }}>
+            <div
+              className="promo-summary-confirm promo-summary-reveal"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Confirm Smart Promo credits"
+              style={{ "--promo-delay": "140ms" }}
+            >
               <span className="promo-summary-card-label">Confirm Smart Promo Package</span>
               <strong>{pendingEstimate.credits} Credits Required</strong>
               <p>
-                Credits cover video analysis, visual edit planning, output rendering, thumbnail/poster rendering,
-                and temporary processing/storage.
+                Credits cover video analysis, visual edit planning, output rendering,
+                thumbnail/poster rendering, and temporary processing/storage.
               </p>
               <div className="promo-summary-confirm-grid">
                 <span>Video Duration</span>
@@ -2160,153 +2260,185 @@ function SmartPromoSummaryPanel({
           </div>
         )}
 
-        <div className="promo-summary-results promo-summary-reveal" style={{ "--promo-delay": "700ms" }}>
-          <div className="promo-summary-results-head">
-            <div>
-              <strong>Smart Promo Results</strong>
-              <span>Ready-to-use clips from your generated timeline</span>
+        {(restoringClips || jobId || promoClips.length > 0) && (
+          <div
+            className="promo-summary-results promo-summary-reveal"
+            style={{ "--promo-delay": "700ms" }}
+          >
+            <div className="promo-summary-results-head">
+              <div>
+                <strong>Smart Promo Results</strong>
+                <span>Ready-to-use clips from your generated timeline</span>
+              </div>
+              <span>
+                {jobId
+                  ? `Job ${jobId}`
+                  : "You will get one continuous visual master edit first, then three previews cut from that same timeline."}
+              </span>
             </div>
-            <span>
-              {jobId
-                ? `Job ${jobId}`
-                : "You will get one continuous visual master edit first, then three previews cut from that same timeline."}
-            </span>
-          </div>
-          {promoClips.length > 0 && (
-            <div className="promo-summary-campaign-map">
-              <span>Visual edit map</span>
-              <strong>
-                Master visual edit &rarr; opening preview &rarr; middle preview &rarr; closing preview
-              </strong>
-            </div>
-          )}
-          {analysisDetails?.confidenceSummary ? (
-            <div className="promo-summary-campaign-map">
-              <span>Edit confidence</span>
-              <strong>
-                {analysisDetails.confidenceSummary.confidenceLabel || "Confidence pending"}
-                {analysisDetails.analysisReused ? " · Reused analysis" : " · Fresh analysis"}
-              </strong>
-              <small>
-                {analysisDetails.confidenceSummary.summary ||
-                  "Confidence is based on stable visual pacing, reframing coverage, and preserved audio continuity."}
-              </small>
-            </div>
-          ) : null}
-          {promoClips.length === 0 ? (
-            <div className="promo-summary-empty">
-              {restoringClips
-                ? "Checking for available Smart Promo outputs..."
-                : "We will generate one continuous visual edit first, then three previews from the same untouched audio timeline."}
-            </div>
-          ) : (
-            <div className="promo-summary-results-grid">
-              {promoClips.map((clip, index) => {
-                const selectedVisual = getSelectedVisualForClip(clip, index);
+            {promoClips.length > 0 && (
+              <div className="promo-summary-campaign-map">
+                <span>Visual edit map</span>
+                <strong>
+                  Master visual edit &rarr; opening preview &rarr; middle preview &rarr; closing
+                  preview
+                </strong>
+              </div>
+            )}
+            {analysisDetails?.confidenceSummary ? (
+              <div className="promo-summary-campaign-map">
+                <span>Edit confidence</span>
+                <strong>
+                  {analysisDetails.confidenceSummary.confidenceLabel || "Confidence pending"}
+                  {analysisDetails.analysisReused ? " · Reused analysis" : " · Fresh analysis"}
+                </strong>
+                <small>
+                  {analysisDetails.confidenceSummary.summary ||
+                    "Confidence is based on stable visual pacing, reframing coverage, and preserved audio continuity."}
+                </small>
+              </div>
+            ) : null}
+            {promoClips.length === 0 ? (
+              <div className="promo-summary-empty">
+                {restoringClips
+                  ? "Checking for available Smart Promo outputs..."
+                  : "We will generate one continuous visual edit first, then three previews from the same untouched audio timeline."}
+              </div>
+            ) : (
+              <div className="promo-summary-results-grid">
+                {promoClips.map((clip, index) => {
+                  const selectedVisual = getSelectedVisualForClip(clip, index);
                   return (
-                  <article
-                    key={clip.id || clip.url || index}
-                    className={`promo-summary-result-card ${clip.storyMaster ? "is-story-master" : ""} promo-summary-reveal`}
-                    style={{ "--promo-delay": `${820 + index * 80}ms` }}
-                  >
-                    {selectedVisual?.url ? (
-                      <div className="promo-summary-selected-package">
-                        <div className="promo-summary-selected-package-copy">
-                          <span>Selected visual package</span>
-                          <strong>{selectedVisual.hookText || clip.titleSuggestion || clip.hookText || "Ready to publish"}</strong>
-                          <small>
-                            This is the visual that will travel with the clip when you use it in the editor.
-                          </small>
+                    <article
+                      key={clip.id || clip.url || index}
+                      className={`promo-summary-result-card ${clip.storyMaster ? "is-story-master" : ""} promo-summary-reveal`}
+                      style={{ "--promo-delay": `${820 + index * 80}ms` }}
+                    >
+                      {selectedVisual?.url ? (
+                        <div className="promo-summary-selected-package">
+                          <div className="promo-summary-selected-package-copy">
+                            <span>Selected visual package</span>
+                            <strong>
+                              {selectedVisual.hookText ||
+                                clip.titleSuggestion ||
+                                clip.hookText ||
+                                "Ready to publish"}
+                            </strong>
+                            <small>
+                              This is the visual that will travel with the clip when you use it in
+                              the editor.
+                            </small>
+                          </div>
+                          <div className="promo-summary-selected-package-frame">
+                            <SafeImage
+                              src={selectedVisual.url}
+                              alt="Selected promo visual preview"
+                            />
+                          </div>
                         </div>
-                        <div className="promo-summary-selected-package-frame">
-                          <SafeImage src={selectedVisual.url} alt="Selected promo visual preview" />
-                        </div>
-                      </div>
-                    ) : null}
-                    {clip.url ? (
-                      <div className="promo-summary-video-shell">
-                        <SafeVideo src={clip.url} controls preload="metadata" />
-                      </div>
-                    ) : (
-                      <div className="promo-summary-video-shell promo-summary-video-shell-empty">
-                        <span>Video output is still preparing...</span>
-                      </div>
-                    )}
-                    <div className="promo-summary-result-copy">
-                      {clip.campaignRoleLabel ? (
-                        <div className="promo-summary-role-badge">{clip.campaignRoleLabel}</div>
                       ) : null}
-                      <strong>{clip.promoCaption || clip.title || `Smart Promo Output ${index + 1}`}</strong>
-                      <span>
-                        {(clip.duration || durationSeconds) ? `${Math.round(Number(clip.duration || durationSeconds))}s` : ""}
-                        {clip.confidenceLabel ? ` · ${clip.confidenceLabel}` : ""}
-                      </span>
-                      {clip.hookReason ? <small>{clip.hookReason}</small> : null}
-                      {clip.bestFor ? <small>Best for: {clip.bestFor}</small> : null}
-                      {clip.travelReason ? <small>Travel reason: {clip.travelReason}</small> : null}
-                      {clip.selectionWhy ? <small>{clip.selectionWhy}</small> : null}
-                      {clip.titleSuggestion || clip.hookText ? (
-                        <small>Hook: {clip.titleSuggestion || clip.hookText}</small>
-                      ) : null}
-                      <small>{formatExpiry(clip.expiresAt)}</small>
-                    </div>
-                    {clip.visualAssets?.length ? (
-                      <div className="promo-summary-assets">
-                        <div className="promo-summary-assets-head">
-                          <strong>Promo visuals</strong>
-                          <span>{clip.visualAssets.length} ready-made assets</span>
+                      {clip.url ? (
+                        <div className="promo-summary-video-shell">
+                          <SafeVideo src={clip.url} controls preload="metadata" />
                         </div>
-                        <div className="promo-summary-asset-grid">
-                          {clip.visualAssets.slice(0, 3).map(asset => (
-                            <button
-                              key={asset.id || asset.url}
-                              type="button"
-                              className={`promo-summary-asset-card ${
-                                selectedVisual?.url === asset.url ? "is-selected" : ""
-                              }`}
-                              onClick={() => handleSelectVisual(clip, index, asset)}
-                            >
-                              <SafeImage src={asset.url} alt={asset.label || asset.type || "Promo visual"} />
-                              <span>{selectedVisual?.url === asset.url ? "Selected" : asset.label || asset.type || "Visual"}</span>
-                            </button>
-                          ))}
+                      ) : (
+                        <div className="promo-summary-video-shell promo-summary-video-shell-empty">
+                          <span>Video output is still preparing...</span>
                         </div>
+                      )}
+                      <div className="promo-summary-result-copy">
+                        {clip.campaignRoleLabel ? (
+                          <div className="promo-summary-role-badge">{clip.campaignRoleLabel}</div>
+                        ) : null}
+                        <strong>
+                          {clip.promoCaption || clip.title || `Smart Promo Output ${index + 1}`}
+                        </strong>
+                        <span>
+                          {clip.duration || durationSeconds
+                            ? `${Math.round(Number(clip.duration || durationSeconds))}s`
+                            : ""}
+                          {clip.confidenceLabel ? ` · ${clip.confidenceLabel}` : ""}
+                        </span>
+                        {clip.hookReason ? <small>{clip.hookReason}</small> : null}
+                        {clip.bestFor ? <small>Best for: {clip.bestFor}</small> : null}
+                        {clip.travelReason ? (
+                          <small>Travel reason: {clip.travelReason}</small>
+                        ) : null}
+                        {clip.selectionWhy ? <small>{clip.selectionWhy}</small> : null}
+                        {clip.titleSuggestion || clip.hookText ? (
+                          <small>Hook: {clip.titleSuggestion || clip.hookText}</small>
+                        ) : null}
+                        <small>{formatExpiry(clip.expiresAt)}</small>
                       </div>
-                    ) : null}
-                    <div className="promo-summary-result-actions">
-                      <button type="button" className="promo-summary-secondary" onClick={() => handleDownload(clip)}>
-                        Download
-                      </button>
-                      {clip.visualAssets?.[0]?.url ? (
+                      {clip.visualAssets?.length ? (
+                        <div className="promo-summary-assets">
+                          <div className="promo-summary-assets-head">
+                            <strong>Promo visuals</strong>
+                            <span>{clip.visualAssets.length} ready-made assets</span>
+                          </div>
+                          <div className="promo-summary-asset-grid">
+                            {clip.visualAssets.slice(0, 3).map(asset => (
+                              <button
+                                key={asset.id || asset.url}
+                                type="button"
+                                className={`promo-summary-asset-card ${
+                                  selectedVisual?.url === asset.url ? "is-selected" : ""
+                                }`}
+                                onClick={() => handleSelectVisual(clip, index, asset)}
+                              >
+                                <SafeImage
+                                  src={asset.url}
+                                  alt={asset.label || asset.type || "Promo visual"}
+                                />
+                                <span>
+                                  {selectedVisual?.url === asset.url
+                                    ? "Selected"
+                                    : asset.label || asset.type || "Visual"}
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ) : null}
+                      <div className="promo-summary-result-actions">
                         <button
                           type="button"
                           className="promo-summary-secondary"
-                          onClick={() => handleDownloadVisuals(clip)}
+                          onClick={() => handleDownload(clip)}
                         >
-                          Download Visuals
+                          Download
                         </button>
-                      ) : null}
-                      <button
-                        type="button"
-                        className="promo-summary-primary"
-                        onClick={() =>
-                          onUseClip &&
-                          onUseClip({
-                            ...clip,
-                            selectedVisual,
-                            selectedThumbnailUrl: selectedVisual?.url || null,
-                          })
-                        }
-                      >
-                        Use Clip + Visual
-                      </button>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          )}
-        </div>
+                        {clip.visualAssets?.[0]?.url ? (
+                          <button
+                            type="button"
+                            className="promo-summary-secondary"
+                            onClick={() => handleDownloadVisuals(clip)}
+                          >
+                            Download Visuals
+                          </button>
+                        ) : null}
+                        <button
+                          type="button"
+                          className="promo-summary-primary"
+                          onClick={() =>
+                            onUseClip &&
+                            onUseClip({
+                              ...clip,
+                              selectedVisual,
+                              selectedThumbnailUrl: selectedVisual?.url || null,
+                            })
+                          }
+                        >
+                          Use Clip + Visual
+                        </button>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
         {/* Hidden elements for frame capture */}
         {sourcePreviewUrl ? (
           <SafeVideo
@@ -2318,10 +2450,7 @@ function SmartPromoSummaryPanel({
             style={{ display: "none" }}
           />
         ) : null}
-        <canvas
-          ref={captureCanvasRef}
-          style={{ display: "none" }}
-        />
+        <canvas ref={captureCanvasRef} style={{ display: "none" }} />
       </div>
     </div>
   );
