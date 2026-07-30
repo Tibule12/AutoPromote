@@ -3,6 +3,18 @@ import ViralScanner from "../components/ViralScanner";
 
 const DESTINATIONS = ["TikTok", "YouTube Shorts", "Instagram Reels"];
 
+const sanitizeVideoUrl = value => {
+  if (typeof value !== "string") return "";
+
+  try {
+    const parsed = new URL(value.trim(), window.location.origin);
+    if (!["blob:", "http:", "https:"].includes(parsed.protocol)) return "";
+    return encodeURI(parsed.href);
+  } catch {
+    return "";
+  }
+};
+
 const FindViralClipsPanel = ({ initialFile = null, onOpenPublisher, onUpgrade }) => {
   const [sourceFile, setSourceFile] = useState(initialFile);
   const [previewUrl, setPreviewUrl] = useState("");
@@ -22,12 +34,12 @@ const FindViralClipsPanel = ({ initialFile = null, onOpenPublisher, onUpgrade })
     }
 
     if (typeof sourceFile === "string") {
-      setPreviewUrl(sourceFile);
+      setPreviewUrl(sanitizeVideoUrl(sourceFile));
       return undefined;
     }
 
     if (sourceFile.url) {
-      setPreviewUrl(sourceFile.url);
+      setPreviewUrl(sanitizeVideoUrl(sourceFile.url));
       return undefined;
     }
 
@@ -37,7 +49,7 @@ const FindViralClipsPanel = ({ initialFile = null, onOpenPublisher, onUpgrade })
     }
 
     const nextPreviewUrl = URL.createObjectURL(sourceFile);
-    setPreviewUrl(nextPreviewUrl);
+    setPreviewUrl(sanitizeVideoUrl(nextPreviewUrl));
     return () => URL.revokeObjectURL(nextPreviewUrl);
   }, [sourceFile]);
 

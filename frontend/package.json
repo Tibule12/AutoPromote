@@ -36,6 +36,10 @@
     "@tootallnate/once": "3.0.1",
     "@grpc/grpc-js": "1.14.4",
     "shell-quote": "1.10.0",
+    "brace-expansion": "5.0.8",
+    "minimatch": {
+      "brace-expansion": "5.0.8"
+    },
     "qs": "6.15.2",
     "uuid": "^14.0.0",
     "ws": "8.21.0",
@@ -105,6 +109,7 @@
     "socket.io-client": "^4.8.3"
   },
   "scripts": {
+    "postinstall": "node ../scripts/patch-brace-expansion-compat.js",
     "start": "node scripts/start-react.js",
     "build": "react-scripts build",
     "format": "prettier --write \"src/**/*.{js,jsx,css}\"",
