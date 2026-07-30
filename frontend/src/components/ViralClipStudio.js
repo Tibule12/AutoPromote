@@ -5993,40 +5993,141 @@ const ViralClipStudio = ({
           </div>
         </div>
 
-        <nav className="studio-workflow-nav" aria-label="Viral Clip Studio workflow">
-          <div className="studio-workflow-nav__intro">
-            <span>Editing route</span>
-            <strong>Moment to finished short</strong>
-          </div>
-          <ol>
-            {VIRAL_STUDIO_WORKFLOW.map((step, index) => {
-              const state =
-                index < studioWorkflowStage
-                  ? "is-complete"
-                  : index === studioWorkflowStage
-                    ? "is-active"
-                    : "is-pending";
-              return (
-                <li key={step.label} className={state}>
-                  <span>{index < studioWorkflowStage ? "✓" : index + 1}</span>
-                  <div>
-                    <strong>{step.label}</strong>
-                    <small>{step.helper}</small>
-                  </div>
-                </li>
-              );
-            })}
-          </ol>
-          <div className="studio-workflow-nav__status">
-            <i aria-hidden="true" />
-            <span>
-              <strong>Live preview</strong>
-              <small>Changes stay local until render</small>
-            </span>
-          </div>
-        </nav>
-
         <div className="studio-layout">
+          <aside className="studio-project-rail" aria-label="Project navigator">
+            <div className="studio-project-rail__head">
+              <span>Project navigator</span>
+              <strong>Build the final short</strong>
+              <small>Select the source sequence and detected moment you want to edit.</small>
+            </div>
+
+            <nav className="studio-workflow-nav" aria-label="Viral Clip Studio workflow">
+              <div className="studio-workflow-nav__intro">
+                <span>Editing route</span>
+                <strong>Moment to finished short</strong>
+              </div>
+              <ol>
+                {VIRAL_STUDIO_WORKFLOW.map((step, index) => {
+                  const state =
+                    index < studioWorkflowStage
+                      ? "is-complete"
+                      : index === studioWorkflowStage
+                        ? "is-active"
+                        : "is-pending";
+                  return (
+                    <li key={step.label} className={state}>
+                      <span>{index < studioWorkflowStage ? "✓" : index + 1}</span>
+                      <div>
+                        <strong>{step.label}</strong>
+                        <small>{step.helper}</small>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ol>
+              <div className="studio-workflow-nav__status">
+                <i aria-hidden="true" />
+                <span>
+                  <strong>Live preview</strong>
+                  <small>Changes stay local until render</small>
+                </span>
+              </div>
+            </nav>
+
+            <section className="studio-project-list" aria-labelledby="studio-sequence-heading">
+              <div className="studio-project-list__heading">
+                <div>
+                  <span>Sequence</span>
+                  <strong id="studio-sequence-heading">Source clips</strong>
+                </div>
+                <i>{timeline.length}</i>
+              </div>
+              <div className="studio-project-list__items">
+                {timeline.map((clip, index) => (
+                  <button
+                    key={clip.id}
+                    type="button"
+                    className={`studio-project-item ${
+                      activeTimelineIndex === index ? "is-active" : ""
+                    }`}
+                    onClick={() => setActiveTimelineIndex(index)}
+                    aria-pressed={activeTimelineIndex === index}
+                  >
+                    <span>{String(index + 1).padStart(2, "0")}</span>
+                    <div>
+                      <strong>{`Source clip ${index + 1}`}</strong>
+                      <small>
+                        {clip.name
+                          ? `${clip.name} · ${
+                              clip.duration
+                                ? `${Math.round(clip.duration)} seconds`
+                                : clip.startRequest
+                                  ? "trimmed sequence"
+                                  : "duration loading"
+                            }`
+                          : clip.duration
+                            ? `${Math.round(clip.duration)} seconds`
+                            : clip.startRequest
+                              ? "Trimmed sequence"
+                              : "Duration loading"}
+                      </small>
+                    </div>
+                    <i aria-hidden="true">›</i>
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            <section className="studio-project-list" aria-labelledby="studio-moments-heading">
+              <div className="studio-project-list__heading">
+                <div>
+                  <span>Discovery</span>
+                  <strong id="studio-moments-heading">Detected moments</strong>
+                </div>
+                <i>{orderedClips.length}</i>
+              </div>
+              <div className="studio-project-list__items studio-project-list__items--moments">
+                {orderedClips.map((clip, index) => {
+                  const guidance = clipGuidanceById.get(clip.id);
+                  const isSelected = selectedClip?.id === clip.id;
+                  return (
+                    <button
+                      key={clip.id}
+                      type="button"
+                      className={`studio-project-item studio-project-moment ${
+                        isSelected ? "is-active" : ""
+                      }`}
+                      onClick={() => focusClipInEditor(clip, { boundary: "start", play: false })}
+                      aria-pressed={isSelected}
+                    >
+                      <span>#{index + 1}</span>
+                      <div>
+                        <strong>
+                          {normalizePlainText(
+                            clip.hookText || clip.reason || `Moment ${index + 1}`
+                          ).slice(0, 42)}
+                        </strong>
+                        <small>
+                          {Number(clip.start || 0).toFixed(1)}s–
+                          {Number(clip.end || 0).toFixed(1)}s
+                        </small>
+                      </div>
+                      <i>{guidance?.score ?? 0}</i>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+
+            <div className="studio-project-rail__footer">
+              <span>
+                <i aria-hidden="true" />
+                Local edit
+              </span>
+              <small>{overlays.length} layers · {addHook ? "Hook active" : "Hook not set"}</small>
+            </div>
+          </aside>
+
           <div className="phone-preview-container">
             <section className="studio-panel preview-panel">
               <div className="panel-heading">
