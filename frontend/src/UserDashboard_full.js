@@ -5,6 +5,7 @@ import "./UserDashboard.css";
 import ProfilePanel from "./UserDashboardTabs/ProfilePanel";
 import UploadPanel from "./UserDashboardTabs/UploadPanel";
 import ClipStudioWorkspace from "./UserDashboardTabs/ClipStudioWorkspace";
+import ViralClipStudioPanel from "./UserDashboardTabs/ViralClipStudioPanel";
 import SmartPromoPanel from "./UserDashboardTabs/SmartPromoPanel";
 import SchedulesPanel from "./UserDashboardTabs/SchedulesPanel";
 import AnalyticsPanel from "./UserDashboardTabs/AnalyticsPanel";
@@ -76,6 +77,12 @@ const DASHBOARD_PAGE_META = {
     description:
       "Analyse a finished video and review the moments most worth turning into short clips.",
   },
+  viral_clip_studio: {
+    eyebrow: "Create",
+    title: "Viral Clip Studio",
+    description:
+      "Edit detected moments on the full timeline, refine hooks, and render short clips.",
+  },
   smart_promo: {
     eyebrow: "Create",
     title: "Smart Promo",
@@ -140,6 +147,7 @@ const DASHBOARD_NAV_GROUPS = [
     items: [
       { id: "cam_combiner", label: "Cam Combiner", icon: "camera", desktopOnly: true },
       { id: "clip_studio", label: "Find Viral Clips", icon: "clips" },
+      { id: "viral_clip_studio", label: "Viral Clip Studio", icon: "clips" },
       { id: "smart_promo", label: "Smart Promo", icon: "sparkles" },
       { id: "idea_video", label: "Idea-to-Video", icon: "sparkles" },
     ],
@@ -438,6 +446,7 @@ const UserDashboard = ({
     analytics: "Analytics",
     cam_combiner: "Cam Combiner",
     clip_studio: "Find Viral Clips",
+    viral_clip_studio: "Viral Clip Studio",
     smart_promo: "Smart Promo",
     idea_video: "Creative Tools",
     security: "Security",
@@ -739,9 +748,7 @@ const UserDashboard = ({
 
   const handleNav = useCallback(
     (tab, options = {}) => {
-      const destinationTab = ["clips", "find_viral_clips", "viral_clip_studio"].includes(tab)
-        ? "clip_studio"
-        : tab;
+      const destinationTab = ["clips", "find_viral_clips"].includes(tab) ? "clip_studio" : tab;
       if (destinationTab === "wolf_hunt" && !ENABLE_WOLF_HUNT) {
         toast("🐺 Wolf Hunt is currently locked. Come back later!", { icon: "🔒" });
         return;
@@ -1769,6 +1776,18 @@ const UserDashboard = ({
               setSelectedFile(file);
               handleNav("upload");
               toast.success("Clip Studio render is ready to publish.");
+            }}
+          />
+        )}
+
+        {activeTab === "viral_clip_studio" && (
+          <ViralClipStudioPanel
+            initialFile={selectedFile}
+            onUpgrade={() => handleNav("billing")}
+            onOpenPublisher={file => {
+              setSelectedFile(file);
+              handleNav("upload");
+              toast.success("Viral Clip Studio render is ready to publish.");
             }}
           />
         )}

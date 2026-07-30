@@ -1492,6 +1492,214 @@ body.dashboard-mode {
   background: rgba(148, 163, 184, 0.14);
 }
 
+.ap-dashboard-redesign .viral-scanner-embedded {
+  display: grid;
+  gap: 10px;
+}
+
+.ap-dashboard-redesign .viral-scanner-embedded-video {
+  display: none;
+}
+
+.ap-dashboard-redesign .viral-inline-scan-state {
+  display: flex;
+  min-height: 92px;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid rgba(139, 92, 246, 0.24);
+  border-radius: 12px;
+  background: rgba(109, 74, 255, 0.06);
+}
+
+.ap-dashboard-redesign .viral-inline-scan-state > div {
+  display: grid;
+  flex: 1;
+  gap: 4px;
+}
+
+.ap-dashboard-redesign .viral-inline-scan-state strong {
+  color: var(--ap-text);
+  font-size: 0.78rem;
+}
+
+.ap-dashboard-redesign .viral-inline-scan-state small {
+  color: var(--ap-muted);
+  font-size: 0.68rem;
+}
+
+.ap-dashboard-redesign .viral-inline-scan-state > button {
+  min-height: 36px;
+  padding: 0 12px;
+}
+
+.ap-dashboard-redesign .viral-inline-scan-state.is-error {
+  border-color: rgba(248, 113, 113, 0.28);
+  background: rgba(127, 29, 29, 0.12);
+}
+
+.ap-dashboard-redesign .viral-inline-scan-state.is-complete {
+  border-color: rgba(34, 197, 94, 0.28);
+  background: rgba(34, 197, 94, 0.07);
+}
+
+.ap-dashboard-redesign .viral-inline-spinner {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  border: 3px solid rgba(139, 92, 246, 0.2);
+  border-top-color: #8b5cf6;
+  border-radius: 50%;
+  animation: ap-viral-spin 800ms linear infinite;
+}
+
+.ap-dashboard-redesign .viral-inline-progress {
+  height: 5px;
+  margin-top: 5px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.14);
+}
+
+.ap-dashboard-redesign .viral-inline-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #8b5cf6, #22d3ee);
+  transition: width 180ms ease;
+}
+
+.ap-dashboard-redesign .viral-inline-scan-state > b {
+  color: #c4b5fd;
+  font-size: 0.72rem;
+}
+
+.ap-dashboard-redesign .viral-inline-cancel {
+  width: fit-content;
+  padding: 0;
+  border: 0;
+  color: var(--ap-muted);
+  background: transparent;
+  font-size: 0.65rem;
+  cursor: pointer;
+}
+
+.ap-dashboard-redesign .viral-moment-list {
+  display: grid;
+  gap: 8px;
+}
+
+.ap-dashboard-redesign .viral-moment-list > article {
+  display: grid;
+  grid-template-columns: minmax(170px, 0.9fr) minmax(180px, 0.8fr) minmax(115px, 0.55fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 9px;
+  border: 1px solid var(--ap-border);
+  border-radius: 10px;
+  background: rgba(5, 13, 25, 0.52);
+}
+
+.ap-dashboard-redesign .viral-moment-list > article.selected {
+  border-color: rgba(139, 92, 246, 0.34);
+}
+
+.ap-dashboard-redesign .viral-moment-thumbnail {
+  position: relative;
+  display: flex;
+  min-height: 52px;
+  align-items: center;
+  overflow: hidden;
+  border-radius: 8px;
+  background: linear-gradient(90deg, rgba(109, 74, 255, 0.22), rgba(34, 211, 238, 0.1)), #0b1729;
+}
+
+.ap-dashboard-redesign .viral-moment-thumbnail::after {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  left: 42px;
+  height: 10px;
+  opacity: 0.55;
+  background: repeating-linear-gradient(
+    90deg,
+    #8b5cf6 0 2px,
+    transparent 2px 5px,
+    #22d3ee 5px 7px,
+    transparent 7px 10px
+  );
+  content: "";
+}
+
+.ap-dashboard-redesign .viral-moment-thumbnail span {
+  z-index: 1;
+  display: grid;
+  width: 28px;
+  height: 28px;
+  margin-left: 9px;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: rgba(109, 74, 255, 0.84);
+  font-size: 0.67rem;
+  font-weight: 800;
+}
+
+.ap-dashboard-redesign .viral-moment-copy,
+.ap-dashboard-redesign .viral-moment-confidence {
+  display: grid;
+  gap: 4px;
+}
+
+.ap-dashboard-redesign .viral-moment-copy strong {
+  color: var(--ap-text);
+  font-size: 0.72rem;
+}
+
+.ap-dashboard-redesign .viral-moment-copy small {
+  color: var(--ap-muted);
+  font-size: 0.64rem;
+}
+
+.ap-dashboard-redesign .viral-moment-confidence > span {
+  color: #4ade80;
+  font-size: 0.62rem;
+}
+
+.ap-dashboard-redesign .viral-moment-confidence > div {
+  display: flex;
+  gap: 3px;
+}
+
+.ap-dashboard-redesign .viral-moment-confidence i {
+  width: 4px;
+  height: 12px;
+  border-radius: 2px;
+  background: rgba(148, 163, 184, 0.16);
+}
+
+.ap-dashboard-redesign .viral-moment-confidence i.filled {
+  background: #22c55e;
+}
+
+.ap-dashboard-redesign .viral-moment-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.ap-dashboard-redesign .viral-moment-actions button {
+  min-height: 34px;
+  padding: 0 10px;
+  white-space: nowrap;
+  font-size: 0.64rem;
+}
+
+@keyframes ap-viral-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .ap-dashboard-redesign .viral-selected-moment {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
@@ -3282,5 +3490,13 @@ body.dashboard-mode {
 
   .ap-dashboard-redesign .viral-source-media-row {
     grid-template-columns: 1fr;
+  }
+
+  .ap-dashboard-redesign .viral-moment-list > article {
+    grid-template-columns: 1fr;
+  }
+
+  .ap-dashboard-redesign .viral-moment-actions button {
+    flex: 1;
   }
 }

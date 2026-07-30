@@ -168,11 +168,18 @@ test("Find Viral Clips uses the redesigned dashboard workflow", async ({ page })
   const sourceInput = page.locator('.find-viral-clips-panel input[type="file"]').first();
   await sourceInput.setInputFiles(require("path").join(__dirname, "test-assets", "test.mp4"));
   await expect(page.getByRole("button", { name: /Analyse video/i })).toBeEnabled();
+  await page.getByRole("button", { name: /Analyse video/i }).click();
+  await expect(page.locator(".viral-scanner-embedded")).toBeVisible();
+  await expect(page.locator(".viral-scanner-overlay")).toHaveCount(0);
 
   await expect(page.getByRole("button", { name: /TikTok/i })).toHaveAttribute(
     "aria-pressed",
     "true"
   );
+  const viralClipStudioNav = page.locator('nav li:has-text("Viral Clip Studio")');
+  await expect(viralClipStudioNav).toHaveCount(1);
+  await viralClipStudioNav.click();
+  await expect(page.getByRole("heading", { name: "Viral Clip Studio" })).toBeVisible();
   expect(analysisRequested).toBe(false);
 });
 

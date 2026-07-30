@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import ViralScanner from "../components/ViralScanner";
 import { SafeVideo } from "../components/SafeMedia";
 
@@ -21,13 +21,16 @@ const FindViralClipsPanel = ({ initialFile = null, onOpenStudio, onUpgrade }) =>
   const [previewUrl, setPreviewUrl] = useState("");
   const [scannerOpen, setScannerOpen] = useState(false);
   const [selectedClip, setSelectedClip] = useState(null);
+  const [suggestedClips, setSuggestedClips] = useState([]);
   const [targetLength, setTargetLength] = useState("30–60 seconds");
   const [captionLanguage, setCaptionLanguage] = useState("English");
   const [destinations, setDestinations] = useState(DESTINATIONS);
+  const sourceVideoRef = useRef(null);
 
   useEffect(() => {
     setSourceFile(initialFile || null);
     setSelectedClip(null);
+    setSuggestedClips([]);
   }, [initialFile]);
 
   useEffect(() => {
@@ -66,6 +69,17 @@ const FindViralClipsPanel = ({ initialFile = null, onOpenStudio, onUpgrade }) =>
     if (!file) return;
     setSourceFile(file);
     setSelectedClip(null);
+    setSuggestedClips([]);
+    setScannerOpen(false);
+  };
+
+  const previewClip = clip => {
+    const video = sourceVideoRef.current;
+    if (!video) return;
+    video.currentTime = Math.max(0, Number(clip?.start || 0));
+    const playback = video.play();
+    if (typeof playback?.catch === "function") playback.catch(() => {});
+    setSelectedClip(clip);
   };
 
   return (
@@ -79,7 +93,7 @@ const FindViralClipsPanel = ({ initialFile = null, onOpenStudio, onUpgrade }) =>
           <div className="viral-source-media-row">
             <div className={`viral-source-preview ${previewUrl ? "has-video" : ""}`}>
               {previewUrl ? (
-                <SafeVideo src={previewUrl} controls preload="metadata" />
+                <SafeVideo ref={sourceVideoRef} src={previewUrl} controls preload="metadata" />
               ) : (
                 <div className="viral-source-empty">
                   <span>▶</span>
@@ -182,29 +196,81 @@ const FindViralClipsPanel = ({ initialFile = null, onOpenStudio, onUpgrade }) =>
                 : "Suggestions require creator review before editing or publishing."}
             </small>
           </div>
-          {selectedClip && (
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={() => onOpenStudio?.(sourceFile, selectedClip)}
-            >
-              Edit selected clip
-            </button>
-          )}
         </div>
 
-        {selectedClip ? (
-          <article className="viral-selected-moment">
-            <span className="viral-score">{Math.round(selectedClip.score || 0)}%</span>
-            <div>
-              <strong>{selectedClip.reason || "AI-selected viral moment"}</strong>
-              <small>
-                {Number(selectedClip.start || 0).toFixed(1)}s –{" "}
-                {Number(selectedClip.end || selectedClip.start || 0).toFixed(1)}s
-              </small>
-            </div>
-            <span className="viral-moment-status">Ready for editing</span>
-          </article>
+        {scannerOpen && sourceFile ? (
+          <ViralScanner
+            file={sourceFile}
+            embedded
+            autoStart
+            onClose={() => setScannerOpen(false)}
+            onUpgrade={() => {
+              setScannerOpen(false);
+              onUpgrade?.();
+            }}
+            onResults={clips => {
+              setSuggestedClips(clips);
+              setSelectedClip(clips[0] || null);
+              setScannerOpen(false);
+            }}
+            onSelectClip={clip => {
+              setSuggestedClips(current =>
+                current.some(item => item.id === clip.id) ? current : [...current, clip]
+              );
+              setSelectedClip(clip);
+            }}
+          />
+        ) : suggestedClips.length ? (
+          <div className="viral-moment-list">
+            {suggestedClips.map((clip, index) => {
+              const score = Math.round(Number(clip.score || clip.guidedScore || 0));
+              const confidence = score >= 75 ? "High confidence" : "Medium confidence";
+              return (
+                <article
+                  key={clip.id || `${clip.start}-${clip.end}`}
+                  className={selectedClip?.id === clip.id ? "selected" : ""}
+                >
+                  <div className="viral-moment-thumbnail" aria-hidden="true">
+                    <span>{index + 1}</span>
+                    <i />
+                  </div>
+                  <div className="viral-moment-copy">
+                    <strong>
+                      {clip.hookText || clip.reason || `Suggested moment ${index + 1}`}
+                    </strong>
+                    <small>
+                      {Number(clip.start || 0).toFixed(1)}s –{" "}
+                      {Number(clip.end || clip.start || 0).toFixed(1)}s
+                    </small>
+                  </div>
+                  <div className="viral-moment-confidence">
+                    <span>{confidence}</span>
+                    <div aria-label={`${score}% confidence`}>
+                      {[20, 40, 60, 75, 90].map(threshold => (
+                        <i key={threshold} className={score >= threshold ? "filled" : ""} />
+                      ))}
+                    </div>
+                  </div>
+                  <div className="viral-moment-actions">
+                    <button
+                      type="button"
+                      className="btn-secondary"
+                      onClick={() => previewClip(clip)}
+                    >
+                      ▷ Preview
+                    </button>
+                    <button
+                      type="button"
+                      className="check-quality"
+                      onClick={() => onOpenStudio?.(sourceFile, clip)}
+                    >
+                      ✂ Create clip
+                    </button>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
         ) : (
           <div className="viral-suggestion-placeholders" aria-hidden="true">
             {[78, 62, 44].map((width, index) => (
@@ -219,21 +285,6 @@ const FindViralClipsPanel = ({ initialFile = null, onOpenStudio, onUpgrade }) =>
           </div>
         )}
       </section>
-
-      {scannerOpen && sourceFile && (
-        <ViralScanner
-          file={sourceFile}
-          onClose={() => setScannerOpen(false)}
-          onUpgrade={() => {
-            setScannerOpen(false);
-            onUpgrade?.();
-          }}
-          onSelectClip={clip => {
-            setSelectedClip(clip);
-            setScannerOpen(false);
-          }}
-        />
-      )}
     </section>
   );
 };

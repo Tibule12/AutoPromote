@@ -440,7 +440,15 @@ const ClipResultThumbnail = ({
   );
 };
 
-const ViralScanner = ({ file, onSelectClip, onClose, onUpgrade }) => {
+const ViralScanner = ({
+  file,
+  onSelectClip,
+  onClose,
+  onUpgrade,
+  embedded = false,
+  autoStart = false,
+  onResults,
+}) => {
   const videoRef = useRef(null);
   const videoSectionRef = useRef(null);
   const previewStopHandlerRef = useRef(null);
@@ -448,6 +456,10 @@ const ViralScanner = ({ file, onSelectClip, onClose, onUpgrade }) => {
   const loggedPreviewClipIdsRef = useRef(new Set());
   const sourceFingerprintRef = useRef("");
   const scanInFlightRef = useRef(false);
+  const autoStartedRef = useRef(false);
+  const startScanRef = useRef(null);
+  const deliveredResultsRef = useRef("");
+  const onResultsRef = useRef(onResults);
   const [isScanning, setIsScanning] = useState(false);
   const [scanProgress, setScanProgress] = useState(0);
   const [results, setResults] = useState([]);
@@ -463,6 +475,10 @@ const ViralScanner = ({ file, onSelectClip, onClose, onUpgrade }) => {
   const [cachedResultsReady, setCachedResultsReady] = useState(false);
   const [cacheLoadPending, setCacheLoadPending] = useState(false);
   const [learningMeta, setLearningMeta] = useState(null);
+
+  useEffect(() => {
+    onResultsRef.current = onResults;
+  }, [onResults]);
 
   // --- Credit System State ---
   const [creditBalance, setCreditBalance] = useState(null);
@@ -1215,6 +1231,138 @@ const ViralScanner = ({ file, onSelectClip, onClose, onUpgrade }) => {
       scanSessionId: scanSessionIdRef.current,
     });
   };
+
+  startScanRef.current = startScan;
+
+  useEffect(() => {
+    if (!embedded || !autoStart || autoStartedRef.current) return;
+    if (scanAccess.checking || cacheLoadPending || results.length || !scanAccess.allowed) return;
+
+    autoStartedRef.current = true;
+    void startScanRef.current?.();
+  }, [
+    autoStart,
+    cacheLoadPending,
+    embedded,
+    results.length,
+    scanAccess.allowed,
+    scanAccess.checking,
+  ]);
+
+  useEffect(() => {
+    if (!embedded || isScanning || !results.length || !onResultsRef.current) return;
+    const signature = results
+      .map(clip => `${clip.id}:${clip.start}:${clip.end}:${clip.score}`)
+      .join("|");
+    if (deliveredResultsRef.current === signature) return;
+
+    deliveredResultsRef.current = signature;
+    onResultsRef.current(results);
+  }, [embedded, isScanning, results]);
+
+  if (embedded) {
+    return (
+      <div className="viral-scanner-embedded" aria-live="polite">
+        {videoSrc ? (
+          <SafeVideo
+            ref={videoRef}
+            src={videoSrc}
+            className="viral-scanner-embedded-video"
+            muted
+            preload="metadata"
+          />
+        ) : null}
+
+        {scanAccess.checking || cacheLoadPending ? (
+          <div className="viral-inline-scan-state">
+            <span className="viral-inline-spinner" aria-hidden="true" />
+            <div>
+              <strong>Preparing Find Viral Clips</strong>
+              <small>Checking your plan and saved analysis before uploading anything.</small>
+            </div>
+          </div>
+        ) : !scanAccess.allowed ? (
+          <div className="viral-inline-scan-state is-error" role="alert">
+            <div>
+              <strong>Find Viral Clips is not available yet</strong>
+              <small>{scanAccess.message}</small>
+            </div>
+            {onUpgrade &&
+            ["VIRAL_SCAN_PLAN_REQUIRED", "VIRAL_SCAN_CREDITS_REQUIRED"].includes(
+              scanAccess.code
+            ) ? (
+              <button type="button" className="btn-secondary" onClick={onUpgrade}>
+                View plans
+              </button>
+            ) : (
+              <button type="button" className="btn-secondary" onClick={refreshScanAccess}>
+                Check again
+              </button>
+            )}
+          </div>
+        ) : isScanning ? (
+          <div className="viral-inline-scan-state is-scanning">
+            <span className="viral-inline-spinner" aria-hidden="true" />
+            <div>
+              <strong>
+                {scanPhase === "uploading" ? "Securely uploading video" : "Analysing viral moments"}
+              </strong>
+              <small>{statusMessage}</small>
+              <div className="viral-inline-progress" aria-hidden="true">
+                <span style={{ width: `${Math.max(4, scanProgress)}%` }} />
+              </div>
+            </div>
+            <b>{Math.round(scanProgress)}%</b>
+          </div>
+        ) : scanError ? (
+          <div className="viral-inline-scan-state is-error" role="alert">
+            <div>
+              <strong>Analysis could not finish</strong>
+              <small>{scanError}</small>
+            </div>
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => {
+                autoStartedRef.current = true;
+                void startScanRef.current?.({ forceFresh: true });
+              }}
+            >
+              Try again
+            </button>
+          </div>
+        ) : results.length ? (
+          <div className="viral-inline-scan-state is-complete">
+            <div>
+              <strong>Analysis complete</strong>
+              <small>{results.length} suggested moments are ready for review.</small>
+            </div>
+          </div>
+        ) : (
+          <div className="viral-inline-scan-state">
+            <div>
+              <strong>Ready to analyse</strong>
+              <small>No video is uploaded until the plan and credit check passes.</small>
+            </div>
+            <button
+              type="button"
+              className="check-quality"
+              onClick={() => {
+                autoStartedRef.current = true;
+                void startScanRef.current?.();
+              }}
+            >
+              Analyse video
+            </button>
+          </div>
+        )}
+
+        <button type="button" className="viral-inline-cancel" onClick={onClose}>
+          Cancel analysis
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="viral-scanner-overlay" onClick={onClose}>

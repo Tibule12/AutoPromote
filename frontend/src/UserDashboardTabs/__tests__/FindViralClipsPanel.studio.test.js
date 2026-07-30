@@ -6,16 +6,18 @@ jest.mock("../../components/ViralScanner", () => props => (
   <button
     type="button"
     onClick={() =>
-      props.onSelectClip({
-        id: "clip-1",
-        start: 4,
-        end: 24,
-        score: 91,
-        reason: "Strong opening reaction",
-      })
+      props.onResults([
+        {
+          id: "clip-1",
+          start: 4,
+          end: 24,
+          score: 91,
+          reason: "Strong opening reaction",
+        },
+      ])
     }
   >
-    Select detected moment
+    Finish scan
   </button>
 ));
 
@@ -26,8 +28,8 @@ describe("FindViralClipsPanel Viral Clip Studio handoff", () => {
     render(<FindViralClipsPanel initialFile={source} onOpenStudio={onOpenStudio} />);
 
     fireEvent.click(screen.getByRole("button", { name: /analyse video/i }));
-    fireEvent.click(screen.getByRole("button", { name: /select detected moment/i }));
-    fireEvent.click(screen.getByRole("button", { name: /edit selected clip/i }));
+    fireEvent.click(screen.getByRole("button", { name: /finish scan/i }));
+    fireEvent.click(screen.getByRole("button", { name: /create clip/i }));
 
     expect(onOpenStudio).toHaveBeenCalledWith(
       source,
