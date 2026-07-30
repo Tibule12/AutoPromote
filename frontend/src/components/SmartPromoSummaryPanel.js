@@ -1656,89 +1656,275 @@ function SmartPromoSummaryPanel({
           </div>
         </div>
 
-        <nav
-          className="promo-summary-workflow promo-summary-reveal"
-          style={{ "--promo-delay": "85ms" }}
-          aria-label="Smart Promo workflow"
-        >
-          <div className="promo-summary-workflow__intro">
-            <span>Workflow</span>
-            <strong>One source. Four controlled stages.</strong>
-          </div>
-          <ol>
-            {SMART_PROMO_WORKFLOW.map((step, index) => {
-              const state =
-                index < promoWorkflowStage
-                  ? "is-complete"
-                  : index === promoWorkflowStage
-                    ? "is-active"
-                    : "is-pending";
-              return (
-                <li key={step.label} className={state}>
-                  <span>{index < promoWorkflowStage ? "✓" : index + 1}</span>
+        <div className="promo-summary-workbench">
+          <aside
+            className="promo-summary-workbench__rail promo-summary-reveal"
+            style={{ "--promo-delay": "85ms" }}
+          >
+            <nav className="promo-summary-workflow" aria-label="Smart Promo workflow">
+              <div className="promo-summary-workflow__intro">
+                <span>Workflow</span>
+                <strong>One source. Four controlled stages.</strong>
+              </div>
+              <ol>
+                {SMART_PROMO_WORKFLOW.map((step, index) => {
+                  const state =
+                    index < promoWorkflowStage
+                      ? "is-complete"
+                      : index === promoWorkflowStage
+                        ? "is-active"
+                        : "is-pending";
+                  return (
+                    <li key={step.label} className={state}>
+                      <span>{index < promoWorkflowStage ? "✓" : index + 1}</span>
+                      <div>
+                        <strong>{step.label}</strong>
+                        <small>{step.helper}</small>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ol>
+            </nav>
+
+            <section className="promo-summary-source-card">
+              <div className="promo-summary-source-card__head">
+                <span className="promo-summary-card-label">Source media</span>
+                <i>{sourcePreviewUrl ? "Ready" : "Waiting"}</i>
+              </div>
+              <div className="promo-summary-source-card__preview">
+                {sourcePreviewUrl ? (
+                  <video src={sourcePreviewUrl} muted playsInline preload="metadata" />
+                ) : (
                   <div>
-                    <strong>{step.label}</strong>
-                    <small>{step.helper}</small>
+                    <span aria-hidden="true">▶</span>
+                    <small>Source preview unavailable</small>
                   </div>
-                </li>
-              );
-            })}
-          </ol>
-        </nav>
+                )}
+              </div>
+              <strong title={sourceSummary}>{sourceSummary}</strong>
+              <small>Original audio and source timing remain attached.</small>
+            </section>
 
-        <div className="promo-summary-hero-strip promo-summary-reveal" style={{ "--promo-delay": "120ms" }}>
-          <div className="promo-summary-meta">
-            <div className="promo-summary-pill">
-              <span>Source</span>
-              <strong>{sourceSummary}</strong>
+            <div className="promo-summary-meta">
+              <div className="promo-summary-pill">
+                <span>Estimate</span>
+                <strong>{displayedPromoCost} credits</strong>
+              </div>
+              <div className="promo-summary-pill">
+                <span>Balance</span>
+                <strong>{creditBalance ?? "..."}</strong>
+              </div>
+              <div className="promo-summary-pill">
+                <span>Output</span>
+                <strong>1 master + 3 previews</strong>
+              </div>
+              <div className="promo-summary-pill">
+                <span>Mode</span>
+                <strong>{selectedOutputMode.pill}</strong>
+              </div>
             </div>
-            <div className="promo-summary-pill">
-              <span>Estimate</span>
-              <strong>{displayedPromoCost} credits</strong>
+
+            <section className="promo-summary-card promo-summary-card-brief">
+              <span className="promo-summary-card-label">Creative director brief</span>
+              <div className="promo-summary-director-brief">
+                <div>
+                  <strong>{promoDirectorBrief.title}</strong>
+                  <p>{promoDirectorBrief.summary}</p>
+                </div>
+                <ul>
+                  {promoDirectorBrief.bullets.map(item => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            </section>
+          </aside>
+
+          <main
+            className="promo-summary-workbench__canvas promo-summary-reveal"
+            style={{ "--promo-delay": "130ms" }}
+          >
+            <section className="promo-summary-canvas-card">
+              <div className="promo-summary-canvas-card__head">
+                <div>
+                  <span className="promo-summary-card-label">Director canvas</span>
+                  <strong>
+                    {promoClips.length
+                      ? "Your generated visual master is ready."
+                      : isGenerating
+                        ? "The visual director is building your timeline."
+                        : "Review the source before generation."}
+                  </strong>
+                </div>
+                <span className={`promo-summary-canvas-state ${isGenerating ? "is-live" : ""}`}>
+                  {isGenerating ? "Live generation" : promoClips.length ? "Output ready" : "Preview"}
+                </span>
+              </div>
+
+              <div className="promo-summary-canvas-stage">
+                {promoClips[0]?.url || sourcePreviewUrl ? (
+                  <video
+                    src={promoClips[0]?.url || sourcePreviewUrl}
+                    controls
+                    playsInline
+                    preload="metadata"
+                  />
+                ) : (
+                  <div className="promo-summary-canvas-empty">
+                    <span aria-hidden="true">✦</span>
+                    <strong>Your visual edit will appear here</strong>
+                    <small>Select an output goal and style, then generate when you are ready.</small>
+                  </div>
+                )}
+                <div className="promo-summary-canvas-overlay">
+                  <span>{selectedOutputMode.pill}</span>
+                  <strong>{selectedStyle.label}</strong>
+                  <small>{durationSeconds}s visual story</small>
+                </div>
+              </div>
+
+              <div className="promo-summary-canvas-timeline">
+                <div>
+                  <span>Opening</span>
+                  <i style={{ width: "22%" }} />
+                </div>
+                <div>
+                  <span>Build</span>
+                  <i style={{ width: "48%" }} />
+                </div>
+                <div>
+                  <span>Payoff</span>
+                  <i style={{ width: "30%" }} />
+                </div>
+              </div>
+
+              <div className="promo-summary-canvas-footer">
+                <span>
+                  <i aria-hidden="true" />
+                  Audio stays attached to the source timeline
+                </span>
+                <small>{statusText || "Ready for your generation settings."}</small>
+              </div>
+            </section>
+          </main>
+
+          <aside
+            className="promo-summary-workbench__inspector promo-summary-reveal"
+            style={{ "--promo-delay": "175ms" }}
+          >
+            <div className="promo-summary-inspector-head">
+              <span>Generation settings</span>
+              <strong>Build the output package</strong>
+              <small>Nothing is charged until you confirm the estimate.</small>
             </div>
-            <div className="promo-summary-pill">
-              <span>Balance</span>
-              <strong>{creditBalance ?? "..."}</strong>
+
+            <div className="promo-summary-note-row">
+              <div className="promo-summary-note-card">
+                <span>Usage model</span>
+                <strong>Credit-based generation</strong>
+                <small>Monthly credits are consumed first, then available top-ups.</small>
+              </div>
+              <div className="promo-summary-note-card">
+                <span>Render ETA</span>
+                <strong>{waitEstimate}</strong>
+                <small>Keep this panel open while generation is running.</small>
+              </div>
             </div>
-            <div className="promo-summary-pill">
-              <span>Output</span>
-              <strong>1 master + 3 previews</strong>
+
+            <div className="promo-summary-grid">
+              <section className="promo-summary-card promo-summary-card-wide">
+                <span className="promo-summary-card-label">Output goal</span>
+                <div className="promo-summary-mode-grid">
+                  {PROMO_OUTPUT_MODES.map(mode => (
+                    <button
+                      key={mode.id}
+                      type="button"
+                      className={`promo-summary-style-card ${
+                        outputMode === mode.id ? "is-active" : ""
+                      }`}
+                      onClick={() => setOutputMode(mode.id)}
+                    >
+                      <strong>{mode.label}</strong>
+                      <span>{mode.summary}</span>
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              <section className="promo-summary-card">
+                <span className="promo-summary-card-label">Duration</span>
+                <div className="promo-summary-choice-row">
+                  {activeDurations.map(value => (
+                    <button
+                      key={value}
+                      type="button"
+                      className={`promo-summary-choice ${
+                        durationSeconds === value ? "is-active" : ""
+                      }`}
+                      onClick={() => setDurationSeconds(value)}
+                    >
+                      {value}s
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              <section className="promo-summary-card">
+                <span className="promo-summary-card-label">Style</span>
+                <div className="promo-summary-style-grid">
+                  {PROMO_STYLES.map(style => (
+                    <button
+                      key={style.id}
+                      type="button"
+                      className={`promo-summary-style-card ${
+                        styleId === style.id ? "is-active" : ""
+                      }`}
+                      onClick={() => setStyleId(style.id)}
+                    >
+                      <strong>{style.label}</strong>
+                      <span>{style.summary}</span>
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              <section className="promo-summary-card promo-summary-generate-card">
+                <span className="promo-summary-card-label">Generation</span>
+                <div className="promo-summary-status">
+                  <strong>{statusText || "Ready to generate."}</strong>
+                  <span>
+                    Early platform failures are refunded. Completed outputs remain available until
+                    they expire.
+                  </span>
+                </div>
+                {errorText && <div className="promo-summary-error">{errorText}</div>}
+                {!canAfford && (
+                  <div className="promo-summary-error">
+                    You need {displayedPromoCost} credits for this feature.
+                  </div>
+                )}
+                <div className="promo-summary-action-row">
+                  <button
+                    type="button"
+                    className="promo-summary-primary"
+                    onClick={handleGenerate}
+                    disabled={isGenerating || isEstimating || !canAfford}
+                  >
+                    {isGenerating
+                      ? "Generating Edit..."
+                      : isEstimating
+                        ? "Estimating..."
+                        : "Generate Smart Promo"}
+                  </button>
+                  <button type="button" className="promo-summary-secondary" onClick={onClose}>
+                    Close
+                  </button>
+                </div>
+              </section>
             </div>
-            <div className="promo-summary-pill">
-              <span>Mode</span>
-              <strong>{selectedOutputMode.pill}</strong>
-            </div>
-          </div>
-          <div className="promo-summary-note-row">
-            <div className="promo-summary-note-card promo-summary-reveal" style={{ "--promo-delay": "220ms" }}>
-              <span>Usage model</span>
-              <strong>Credit-based generation</strong>
-              <small>
-                Monthly credits are consumed first. Add credits whenever you need more promo runs.
-              </small>
-            </div>
-            <div className="promo-summary-note-card promo-summary-reveal" style={{ "--promo-delay": "260ms" }}>
-              <span>Render ETA</span>
-              <strong>{waitEstimate}</strong>
-              <small>Keep this panel open while generation is running.</small>
-            </div>
-          </div>
+          </aside>
         </div>
-
-        <section className="promo-summary-card promo-summary-card-brief promo-summary-reveal" style={{ "--promo-delay": "190ms" }}>
-          <span className="promo-summary-card-label">Creative Director Brief</span>
-          <div className="promo-summary-director-brief">
-            <div>
-              <strong>{promoDirectorBrief.title}</strong>
-              <p>{promoDirectorBrief.summary}</p>
-            </div>
-            <ul>
-              {promoDirectorBrief.bullets.map(item => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </div>
-        </section>
 
         {(isGenerating || jobId || previewTimeline.length > 0) && (
           <section className="promo-summary-live-shell promo-summary-reveal" style={{ "--promo-delay": "290ms" }}>
@@ -1924,87 +2110,6 @@ function SmartPromoSummaryPanel({
             </div>
           </section>
         )}
-
-        <div className="promo-summary-grid promo-summary-reveal" style={{ "--promo-delay": "610ms" }}>
-          <section className="promo-summary-card promo-summary-card-wide promo-summary-reveal" style={{ "--promo-delay": "420ms" }}>
-            <span className="promo-summary-card-label">Output Goal</span>
-            <div className="promo-summary-mode-grid">
-              {PROMO_OUTPUT_MODES.map(mode => (
-                <button
-                  key={mode.id}
-                  type="button"
-                  className={`promo-summary-style-card ${outputMode === mode.id ? "is-active" : ""}`}
-                  onClick={() => setOutputMode(mode.id)}
-                >
-                  <strong>{mode.label}</strong>
-                  <span>{mode.summary}</span>
-                </button>
-              ))}
-            </div>
-          </section>
-
-          <section className="promo-summary-card promo-summary-reveal" style={{ "--promo-delay": "470ms" }}>
-            <span className="promo-summary-card-label">Duration</span>
-            <div className="promo-summary-choice-row">
-              {activeDurations.map(value => (
-                <button
-                  key={value}
-                  type="button"
-                  className={`promo-summary-choice ${durationSeconds === value ? "is-active" : ""}`}
-                  onClick={() => setDurationSeconds(value)}
-                >
-                  {value}s
-                </button>
-              ))}
-            </div>
-          </section>
-
-          <section className="promo-summary-card promo-summary-reveal" style={{ "--promo-delay": "520ms" }}>
-            <span className="promo-summary-card-label">Style</span>
-            <div className="promo-summary-style-grid">
-              {PROMO_STYLES.map(style => (
-                <button
-                  key={style.id}
-                  type="button"
-                  className={`promo-summary-style-card ${styleId === style.id ? "is-active" : ""}`}
-                  onClick={() => setStyleId(style.id)}
-                >
-                  <strong>{style.label}</strong>
-                  <span>{style.summary}</span>
-                </button>
-              ))}
-            </div>
-          </section>
-
-          <section className="promo-summary-card promo-summary-reveal" style={{ "--promo-delay": "570ms" }}>
-            <span className="promo-summary-card-label">Status</span>
-            <div className="promo-summary-status">
-              <strong>{statusText || "Ready to generate."}</strong>
-              <span>
-                Credits are deducted before processing. Early platform failures are refunded; completed Smart Promo outputs stay available until they expire.
-              </span>
-            </div>
-            {errorText && <div className="promo-summary-error">{errorText}</div>}
-            {!canAfford && (
-              <div className="promo-summary-error">
-                You need {displayedPromoCost} credits for this feature.
-              </div>
-            )}
-            <div className="promo-summary-action-row">
-              <button
-                type="button"
-                className="promo-summary-primary"
-                onClick={handleGenerate}
-                disabled={isGenerating || isEstimating || !canAfford}
-              >
-                {isGenerating ? "Generating Edit..." : isEstimating ? "Estimating..." : "Generate Smart Promo"}
-              </button>
-              <button type="button" className="promo-summary-secondary" onClick={onClose}>
-                Close
-              </button>
-            </div>
-          </section>
-        </div>
 
         {pendingEstimate && (
           <div className="promo-summary-confirm-backdrop" role="presentation">
