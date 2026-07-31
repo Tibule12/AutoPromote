@@ -1590,6 +1590,8 @@ def transcribe_with_hints(file_path, *, word_timestamps=False, language=None, pr
         except Exception as exc:
             if env_flag("FASTER_WHISPER_STRICT", default=False):
                 raise
+            if whisper is None:
+                raise RuntimeError(f"faster-whisper transcription failed: {exc}") from exc
             logger.warning(
                 "faster-whisper unavailable; falling back to bundled openai-whisper: %s",
                 str(exc)[-500:],
@@ -9648,7 +9650,7 @@ def reset_worker():
 # Health Check
 @app.get("/")
 def read_root():
-    return {"status": "online", "worker_state": current_job_info, "service": "python_media_worker", "phase": 2, "whisper_ready": whisper is not None}
+    return {"status": "online", "worker_state": current_job_info, "service": "python_media_worker", "phase": 2, "whisper_ready": FasterWhisperModel is not None or whisper is not None}
 
 
 @app.get("/health")
@@ -9661,7 +9663,7 @@ def health_check():
         "maxVideoSeconds": MEDIA_WORKER_MAX_VIDEO_SECONDS,
         "maxFileMb": MEDIA_WORKER_MAX_FILE_MB,
         "tmpDir": os.path.abspath(os.path.join(os.path.dirname(__file__), "../tmp")),
-        "whisperReady": whisper is not None,
+        "whisperReady": FasterWhisperModel is not None or whisper is not None,
     }
 
 
@@ -11026,12 +11028,8 @@ async def add_captions(request: CropRequest):
     2. Transcribe with Whisper -> SRT/VTT
     3. Burn subtitles into video
     """
-    if whisper is None:
-         # Fallback mock for Phase 1 without whisper installed
-         logger.warning("Whisper check failed. Returning mock.")
-         # ... Mock logic ...
-         # But to truly implement Phase 2, we need real whisper.
-         raise HTTPException(status_code=501, detail="Whisper not installed on server")
+    if FasterWhisperModel is None and whisper is None:
+         raise HTTPException(status_code=501, detail="No transcription engine is installed")
 
     logger.info(f"Received caption request for {request.video_url}")
     
@@ -11053,13 +11051,8 @@ async def add_captions(request: CropRequest):
         # condition_on_previous_text=False prevents "hallucination loops"
         # initial_prompt guides context (Singing, Lyrics)
         update_firestore_job(job_id, {"status": "generating_captions", "progress": 20})
-        logger.info("Starting Whisper transcription (medium model)...")
-        model = get_whisper_model()
-        
-        # We REMOVED the 'initial_prompt' and 'condition_on_previous_text=False'
-        # Why? Because forcing "This is a music video" makes the AI hallucinate random lyrics if the audio is unclear.
-        # The 'medium' model is smart enough to figure it out on its own.
-        result = model.transcribe(input_path, fp16=False)
+        logger.info("Starting faster-whisper transcription...")
+        result = transcribe_with_hints(input_path)
 
         # 3. Create SRT File
         # Robust Hallucination Filter - more aggressive
@@ -11204,17 +11197,15 @@ async def analyze_clips(request: Dict[str, Any]):
             if not audio_present:
                 logger.info("Task [Whisper]: Skipped because source has no audio stream.")
                 return []
-            if get_whisper_model():
-                logger.info("Task [Whisper]: Starting (Translating to English for Analysis)...")
-                res = transcribe_with_hints(
-                    input_path,
-                    language=request.get("language") or "auto",
-                    prompt_hint=request.get("hint") or "Translate to English for clip analysis while preserving meaning.",
-                    task="translate",
-                )
-                logger.info("Task [Whisper]: Completed.")
-                return res.get("segments", [])
-            return []
+            logger.info("Task [Whisper]: Starting (Translating to English for Analysis)...")
+            res = transcribe_with_hints(
+                input_path,
+                language=request.get("language") or "auto",
+                prompt_hint=request.get("hint") or "Translate to English for clip analysis while preserving meaning.",
+                task="translate",
+            )
+            logger.info("Task [Whisper]: Completed.")
+            return res.get("segments", [])
 
         def run_scenedetect():
             logger.info("Task [SceneDetect]: Starting...")
@@ -26672,18 +26663,11 @@ async def _auto_generate_clips_impl(
                     return []
                 if not allow_full_transcription:
                     return []
-                model = get_whisper_model(model_name=promo_whisper_model_name)
-                if model:
-                    return model.transcribe(
-                        analysis_path, fp16=False, word_timestamps=False,
-                        condition_on_previous_text=False,
-                        temperature=0,
-                        compression_ratio_threshold=2.4,
-                        logprob_threshold=-0.9,
-                        no_speech_threshold=0.5,
-                        initial_prompt=build_transcription_prompt(),
-                    ).get("segments", [])
-                return []
+                return transcribe_with_hints(
+                    analysis_path,
+                    word_timestamps=False,
+                    model_name=promo_whisper_model_name,
+                ).get("segments", [])
 
             def run_scenedetect_local():
                 video = open_video(analysis_path)
@@ -27381,7 +27365,6 @@ async def _auto_generate_clips_impl(
                 if caption_style in CAPTION_STYLES and not visual_only_render:
 
                     # Generate captions
-                    model = get_whisper_model()
                     if clip.get("renderStrategy") == "promo_montage":
                         try:
                             w, h = get_video_dimensions(trimmed)
@@ -27405,9 +27388,9 @@ async def _auto_generate_clips_impl(
                         except Exception as story_caption_err:
                             logger.warning(f"Promo story captions failed for clip {idx}; falling back to captionless render: {story_caption_err}")
                             shutil.copy(trimmed, clip_output)
-                    elif model and has_audio_stream(trimmed):
+                    elif has_audio_stream(trimmed):
                         try:
-                            whisper_res = model.transcribe(trimmed, fp16=False, word_timestamps=True, condition_on_previous_text=False)
+                            whisper_res = transcribe_with_hints(trimmed, word_timestamps=True)
                             w, h = get_video_dimensions(trimmed)
                             ass_content = generate_ass_captions(whisper_res, caption_style, w, h)
                             ass_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_cap_{idx}.ass")
@@ -28209,14 +28192,14 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             try:
                 logger.info(f"Generating auto-captions (style={caption_style_name or 'legacy'}, animated={use_animated})...")
                 loop = asyncio.get_running_loop()
-                model = get_whisper_model()
-                if model:
-                    whisper_result = await loop.run_in_executor(None, lambda: model.transcribe(
-                        working_path,
-                        fp16=False,
-                        condition_on_previous_text=False,
-                        word_timestamps=use_animated,
-                    ))
+                if FasterWhisperModel is not None or whisper is not None:
+                    whisper_result = await loop.run_in_executor(
+                        None,
+                        lambda: transcribe_with_hints(
+                            working_path,
+                            word_timestamps=use_animated,
+                        ),
+                    )
                     segments = whisper_result.get("segments", [])
                     logger.info(f"Generated {len(segments)} caption segments (word_timestamps={use_animated})")
 

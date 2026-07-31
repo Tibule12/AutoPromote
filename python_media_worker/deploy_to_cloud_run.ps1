@@ -26,9 +26,12 @@ if (Test-Path "../service-account-key.json") {
     Write-Warning "No service account key found in parent directory. Worker may fail to auth with Firebase/GCP Storage."
 }
 
-# 1. Build the container image using Cloud Build
+# 1. Reuse the production image as a remote layer cache.
 Write-Host "Step 1: Building container image..." -ForegroundColor Yellow
-gcloud builds submit --tag gcr.io/$ProjectID/$ServiceName .
+gcloud builds submit `
+    --config cloudbuild.media-worker.yaml `
+    --substitutions "_IMAGE=gcr.io/$ProjectID/${ServiceName}:latest,_CACHE_IMAGE=gcr.io/$ProjectID/${ServiceName}:latest" `
+    .
 
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Build failed!"
@@ -52,7 +55,8 @@ gcloud run deploy $ServiceName `
     --timeout 300 `
     --concurrency 1 `
     --min-instances 0 `
-    --max-instances 3
+    --max-instances 3 `
+    --set-env-vars "NODE_ENV=production,WHISPER_ENGINE=faster,PROMO_WHISPER_MODEL=small,FASTER_WHISPER_DEVICE=cpu,FASTER_WHISPER_COMPUTE_TYPE=int8,FASTER_WHISPER_STRICT=true,ALLOW_RUNTIME_DEPENDENCY_INSTALL=false"
 
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Deployment failed!"

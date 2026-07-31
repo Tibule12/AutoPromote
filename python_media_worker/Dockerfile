@@ -1,15 +1,18 @@
-# Use official Python runtime
 FROM python:3.10-slim
 
 # Prevent prompts during package installation
-ENV DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_FRONTEND=noninteractive \
+    PORT=8080 \
+    WHISPER_ENGINE=faster \
+    PROMO_WHISPER_MODEL=small \
+    FASTER_WHISPER_DEVICE=cpu \
+    FASTER_WHISPER_COMPUTE_TYPE=int8 \
+    FASTER_WHISPER_STRICT=true \
+    ALLOW_RUNTIME_DEPENDENCY_INSTALL=false
 
 # Install system dependencies (For OpenCV + FFmpeg)
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
-    libsm6 \
-    libxext6 \
-    git \
     fonts-dejavu-core \
     && rm -rf /var/lib/apt/lists/*
 
@@ -20,11 +23,9 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Pre-download Whisper "small" model during build to avoid cold-start delay (~1GB)
-RUN python -c "import whisper; whisper.load_model('small')"
-
-# Pre-cache faster-whisper too; production Premium captions must not depend on
-# a live Hugging Face model lookup during user renders.
+# Cache only the production transcription engine. Bundling openai-whisper as a
+# second fallback added PyTorch and a duplicate model, making this image over
+# 4 GiB compressed.
 RUN python -c "from faster_whisper import WhisperModel; WhisperModel('small', device='cpu', compute_type='int8')"
 
 # Copy source code
@@ -34,7 +35,6 @@ COPY . .
 RUN mkdir -p /app/tmp
 
 # Cloud Run uses PORT env var (default 8080)
-ENV PORT=8080
 EXPOSE 8080
 
 # Start server (Using shell form to expand $PORT variable)

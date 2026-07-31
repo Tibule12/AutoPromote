@@ -2,11 +2,8 @@
 ffmpeg-python
 opencv-python-headless
 Pillow 
-librosa
 numpy
-soundfile
 scenedetect[opencv]
-tqdm
 
 # Web Framework (API Layer)
 fastapi
@@ -20,8 +17,7 @@ edge-tts
 moviepy==1.0.3
 imageio[ffmpeg]
 
-# Production Tools (Heavy but necessary)
+# Production Tools
 firebase-admin
-openai-whisper
 faster-whisper
 yt-dlp

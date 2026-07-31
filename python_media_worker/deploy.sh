@@ -24,9 +24,13 @@ cd "$SCRIPT_DIR"
 # Set the project
 gcloud config set project "$PROJECT_ID"
 
-# 1. Build the container image using Cloud Build
+# 1. Reuse the production image as a remote layer cache instead of creating a
+# separate multi-gigabyte Kaniko cache.
 echo "Step 1: Building container image via Cloud Build..."
-gcloud builds submit --tag "gcr.io/$PROJECT_ID/$SERVICE_NAME" .
+gcloud builds submit \
+    --config cloudbuild.media-worker.yaml \
+    --substitutions "_IMAGE=gcr.io/$PROJECT_ID/$SERVICE_NAME:latest,_CACHE_IMAGE=gcr.io/$PROJECT_ID/$SERVICE_NAME:latest" \
+    .
 
 # 2. Deploy to Cloud Run. Cam Combiner production uses the dedicated
 # deploy_cam_combiner.sh script; these defaults keep the shared worker safe.
@@ -45,7 +49,7 @@ gcloud run deploy "$SERVICE_NAME" \
     --concurrency 1 \
     --min-instances 0 \
     --max-instances 3 \
-    --set-env-vars "NODE_ENV=production,FIREBASE_STORAGE_BUCKET=autopromote-cc6d3.firebasestorage.app,MULTICAM_UPLOAD_FIREBASE=true,MULTICAM_MASTER_RETENTION_DAYS=7,ENABLE_LOCAL_MEDIA_OUTPUT_FALLBACK=false"
+    --set-env-vars "NODE_ENV=production,FIREBASE_STORAGE_BUCKET=autopromote-cc6d3.firebasestorage.app,MULTICAM_UPLOAD_FIREBASE=true,MULTICAM_MASTER_RETENTION_DAYS=7,ENABLE_LOCAL_MEDIA_OUTPUT_FALLBACK=false,WHISPER_ENGINE=faster,PROMO_WHISPER_MODEL=small,FASTER_WHISPER_DEVICE=cpu,FASTER_WHISPER_COMPUTE_TYPE=int8,FASTER_WHISPER_STRICT=true,ALLOW_RUNTIME_DEPENDENCY_INSTALL=false"
 
 echo "=========================================="
 echo "   Deployment SUCCESS!                    "
