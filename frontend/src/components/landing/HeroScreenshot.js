@@ -36,7 +36,7 @@ const HeroScreenshot = () => {
             <span className="ap-demo-toolbar-title">{activeDemo.label}</span>
           </div>
           <span className="ap-demo-badge">
-            {activeDemo.id === "dashboard" ? "2-minute walkthrough" : "12-second demo"}
+            {activeDemo.id === "dashboard" ? "1-minute walkthrough" : "12-second demo"}
           </span>
         </div>
 
