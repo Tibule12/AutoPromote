@@ -4024,7 +4024,7 @@ const ViralClipStudio = ({
       const thumbnailFrame = coverFrame ? { ...coverFrame, purpose: "thumbnail" } : null;
 
       setOverlays(newOverlays);
-      onSave(selectedClip, normalizedOverlays, {
+      await onSave(selectedClip, normalizedOverlays, {
         autoCaptions,
         captionStyle,
         smartCrop,
@@ -9218,6 +9218,24 @@ const ViralClipStudio = ({
                   ? `Saving... ${localExportProgress}%`
                   : "💾 Save Locally (Free)"}
               </button>
+              {isExporting && (
+                <button
+                  className="export-btn cancel-export-btn"
+                  onClick={() => {
+                    if (window.confirm("Cancel this render? You can retry after.")) {
+                      onCancel();
+                    }
+                  }}
+                  style={{
+                    background: "rgba(239, 68, 68, 0.15)",
+                    border: "1px solid rgba(239, 68, 68, 0.4)",
+                    color: "#f87171",
+                    marginTop: "8px",
+                  }}
+                >
+                  ✕ Cancel Render
+                </button>
+              )}
               <p style={{ fontSize: "0.72rem", color: "#94a3b8", margin: "6px 0 0 0", textAlign: "center" }}>
                 {isLocalExporting
                   ? "Recording your preview frame to a file..."

@@ -1008,7 +1008,9 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
   const handleViralRender = async (selectedClip, overlays, extraOptions = {}) => {
     setStatusMessage("Rendering your viral clip with overlays...");
     setProcessing(true);
-    setClipSuggestions(null); // Close studio but keep processing state
+    // Keep the studio open during render so the user sees progress inside the studio,
+    // not kicked back to the bare VideoEditor view.
+    abortRef.current = false;
 
     try {
       const auth = getAuth();
@@ -1193,9 +1195,12 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
 
         let attempts = 0;
         while (true) {
+          if (abortRef.current) throw new Error("Processing cancelled by user.");
           if (attempts > 300) throw new Error("Rendering timed out");
           await new Promise(r => setTimeout(r, 2000));
           attempts++;
+
+          if (abortRef.current) throw new Error("Processing cancelled by user.");
 
           let statusRes = await fetch(`${API_BASE_URL}/api/media/status/${jobId}`, {
             headers: { Authorization: `Bearer ${token}` },
@@ -1292,17 +1297,20 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
         if (onSave) {
           onSave(fakeFile);
         }
+        // Close the studio now that render succeeded
+        setClipSuggestions(null);
       } else {
         console.error("Rendering succeeded but no URL returned:", result);
         setStatusMessage("Error: Server returned success but no video URL.");
       }
     } catch (error) {
       console.error("Viral Render Error:", error);
+      const isCancelled = error.message === "Processing cancelled by user.";
       let msg = error.message;
       if (msg === "Failed to fetch") msg = "Network error. Is the backend running?";
-      setStatusMessage("Error rendering clip: " + msg);
-      // Do NOT re-open studio automatically, let user decide
-      // setClipSuggestions(options.clipSuggestions);
+      setStatusMessage(isCancelled ? "Rendering cancelled." : "Error rendering clip: " + msg);
+      // Keep the studio open on error/cancel so the user can retry or adjust settings
+      // (only close on explicit user cancel if they want to go back)
     } finally {
       setProcessing(false);
     }
@@ -1387,7 +1395,15 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
         clips={clipSuggestions}
         images={images}
         onSave={handleViralRender}
-        onCancel={() => setClipSuggestions(null)}
+        onCancel={() => {
+          if (processing) {
+            // Cancel the in-progress render instead of closing the studio
+            abortRef.current = true;
+            setStatusMessage("Cancelling...");
+          } else {
+            setClipSuggestions(null);
+          }
+        }}
         onStatusChange={setStatusMessage}
         // Pass down music state
         currentMusic={options.musicFile}
