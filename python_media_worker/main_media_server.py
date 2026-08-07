@@ -332,7 +332,10 @@ def get_faster_whisper_model(model_name=None):
             load_device,
             load_compute_type,
         )
-        return FasterWhisperModel(
+        model_cls = FasterWhisperModel
+        if model_cls is None:
+            raise RuntimeError("faster-whisper is not installed")
+        return model_cls(
             resolved_model_name,
             device=load_device,
             compute_type=load_compute_type,
@@ -9784,6 +9787,8 @@ async def detect_silence_intervals(input_path, threshold="-30dB", duration=0.5, 
     # We need to capture stderr
     result = await run_subprocess_async(cmd, check=False, stderr=subprocess.PIPE, text=True)
     output = result.stderr
+    if isinstance(output, bytes):
+        output = output.decode('utf-8', errors='replace')
     
     silence_starts = []
     silence_ends = []
