@@ -5,7 +5,7 @@ module.exports = {
     node: true,
     es2021: true,
   },
-  extends: ["react-app", "react-app/jest", "plugin:react/recommended"],
+  extends: ["react-app", "plugin:react/recommended"],
   plugins: ["react"],
   parserOptions: {
     ecmaVersion: 2021,
