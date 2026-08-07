@@ -31,7 +31,7 @@
     "form-data": "^3.0.5",
     "launch-editor": "2.14.1",
     "@babel/core": "7.29.7",
-    "socket.io-parser": "4.2.6",
+    "socket.io-parser": "4.2.7",
     "flatted": "3.4.2",
     "@tootallnate/once": "3.0.1",
     "@grpc/grpc-js": "1.14.4",
