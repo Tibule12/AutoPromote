@@ -6661,7 +6661,11 @@ const ViralClipStudio = ({
                           return (
                             <div
                               key={overlay.id}
-                              className={`draggable-overlay ${activeOverlayId === overlay.id ? "active" : ""} ${isFullscreen ? "broll-fullscreen" : ""} ${animClass}`}
+                              className={`draggable-overlay ${
+                                activeOverlayId === overlay.id && comparisonMode !== "split"
+                                  ? "active"
+                                  : ""
+                              } ${isFullscreen ? "broll-fullscreen" : ""} ${animClass}`}
                               style={{
                                 top: isFullscreen ? "0%" : `${overlay.y}%`,
                                 left: isFullscreen ? "0%" : `${overlay.x}%`,
@@ -6689,14 +6693,30 @@ const ViralClipStudio = ({
                                   ? `opacity ${anim.enterDuration}s ease, transform ${anim.enterDuration}s ease`
                                   : undefined,
                               }}
-                              onMouseDown={e => handleDragStart(e, overlay)}
-                              onTouchStart={e => handleDragStart(e, overlay)}
-                              onDoubleClick={() => {
-                                if (overlay.type === "text") {
-                                  const newText = window.prompt("Edit Text:", safeOverlayText);
-                                  if (newText !== null) updateOverlayText(overlay.id, newText);
-                                }
-                              }}
+                              onMouseDown={
+                                comparisonMode === "split"
+                                  ? undefined
+                                  : e => handleDragStart(e, overlay)
+                              }
+                              onTouchStart={
+                                comparisonMode === "split"
+                                  ? undefined
+                                  : e => handleDragStart(e, overlay)
+                              }
+                              onDoubleClick={
+                                comparisonMode === "split"
+                                  ? undefined
+                                  : () => {
+                                      if (overlay.type === "text") {
+                                        const newText = window.prompt(
+                                          "Edit Text:",
+                                          safeOverlayText
+                                        );
+                                        if (newText !== null)
+                                          updateOverlayText(overlay.id, newText);
+                                      }
+                                    }
+                              }
                             >
                               {overlay.type === "text" ? (
                                 overlay.bRollPlaceholder ? (
@@ -6765,150 +6785,152 @@ const ViralClipStudio = ({
                                 />
                               ) : null}
 
-                              {activeOverlayId === overlay.id && !isFullscreen && (
-                                <div className="overlay-controls">
-                                  <button
-                                    className="overlay-delete-btn"
-                                    onClick={e => {
-                                      e.stopPropagation();
-                                      deleteOverlay(overlay.id);
-                                    }}
-                                  >
-                                    &times;
-                                  </button>
-                                  {!isFullscreen &&
-                                    (overlay.type === "video" || overlay.type === "image") && (
-                                      <div
-                                        className="resize-handle"
-                                        onMouseDown={e => {
-                                          e.stopPropagation();
-                                        }}
-                                      >
-                                        <button
-                                          className="resize-btn"
-                                          onClick={e => {
+                              {comparisonMode !== "split" &&
+                                activeOverlayId === overlay.id &&
+                                !isFullscreen && (
+                                  <div className="overlay-controls">
+                                    <button
+                                      className="overlay-delete-btn"
+                                      onClick={e => {
+                                        e.stopPropagation();
+                                        deleteOverlay(overlay.id);
+                                      }}
+                                    >
+                                      &times;
+                                    </button>
+                                    {!isFullscreen &&
+                                      (overlay.type === "video" || overlay.type === "image") && (
+                                        <div
+                                          className="resize-handle"
+                                          onMouseDown={e => {
                                             e.stopPropagation();
-                                            e.preventDefault();
-                                            updateOverlaySize(overlay.id, "width", -5);
                                           }}
                                         >
-                                          W-
-                                        </button>
-                                        <button
-                                          className="resize-btn"
-                                          onClick={e => {
-                                            e.stopPropagation();
-                                            e.preventDefault();
-                                            updateOverlaySize(overlay.id, "width", 5);
-                                          }}
-                                        >
-                                          W+
-                                        </button>
-                                        <button
-                                          className="resize-btn"
-                                          onClick={e => {
-                                            e.stopPropagation();
-                                            e.preventDefault();
-                                            updateOverlaySize(overlay.id, "height", -5);
-                                          }}
-                                        >
-                                          H-
-                                        </button>
-                                        <button
-                                          className="resize-btn"
-                                          onClick={e => {
-                                            e.stopPropagation();
-                                            e.preventDefault();
-                                            updateOverlaySize(overlay.id, "height", 5);
-                                          }}
-                                        >
-                                          H+
-                                        </button>
-                                        <button
-                                          className="resize-btn"
-                                          onClick={e => {
-                                            e.stopPropagation();
-                                            e.preventDefault();
-                                            toggleOverlayAspectRatioLock(overlay.id);
-                                          }}
-                                          title={
-                                            overlay.aspectRatioLocked
-                                              ? "Unlock aspect ratio"
-                                              : "Lock aspect ratio"
-                                          }
-                                        >
-                                          {overlay.aspectRatioLocked ? "Lock" : "Free"}
-                                        </button>
-                                        <button
-                                          className="resize-btn"
-                                          onClick={e => {
-                                            e.stopPropagation();
-                                            e.preventDefault();
-                                            centerOverlay(overlay.id);
-                                          }}
-                                          title="Center overlay"
-                                        >
-                                          Center
-                                        </button>
-                                        <button
-                                          className="resize-btn"
-                                          onClick={e => {
-                                            e.stopPropagation();
-                                            e.preventDefault();
-                                            duplicateOverlay(overlay.id);
-                                          }}
-                                          title="Duplicate overlay"
-                                        >
-                                          Copy
-                                        </button>
-                                        <button
-                                          className="resize-btn"
-                                          onClick={e => {
-                                            e.stopPropagation();
-                                            e.preventDefault();
-                                            moveOverlay(overlay.id, "backward");
-                                          }}
-                                          title="Move layer backward"
-                                        >
-                                          Down
-                                        </button>
-                                        <button
-                                          className="resize-btn"
-                                          onClick={e => {
-                                            e.stopPropagation();
-                                            e.preventDefault();
-                                            moveOverlay(overlay.id, "forward");
-                                          }}
-                                          title="Move layer forward"
-                                        >
-                                          Up
-                                        </button>
-                                        <button
-                                          className="resize-btn"
-                                          onClick={e => {
-                                            e.stopPropagation();
-                                            e.preventDefault();
-                                            moveOverlay(overlay.id, "back");
-                                          }}
-                                          title="Send layer to back"
-                                        >
-                                          Back
-                                        </button>
-                                        <button
-                                          className="resize-btn"
-                                          onClick={e => {
-                                            e.stopPropagation();
-                                            e.preventDefault();
-                                            moveOverlay(overlay.id, "front");
-                                          }}
-                                          title="Bring layer to front"
-                                        >
-                                          Front
-                                        </button>
-                                      </div>
-                                    )}
-                                </div>
-                              )}
+                                          <button
+                                            className="resize-btn"
+                                            onClick={e => {
+                                              e.stopPropagation();
+                                              e.preventDefault();
+                                              updateOverlaySize(overlay.id, "width", -5);
+                                            }}
+                                          >
+                                            W-
+                                          </button>
+                                          <button
+                                            className="resize-btn"
+                                            onClick={e => {
+                                              e.stopPropagation();
+                                              e.preventDefault();
+                                              updateOverlaySize(overlay.id, "width", 5);
+                                            }}
+                                          >
+                                            W+
+                                          </button>
+                                          <button
+                                            className="resize-btn"
+                                            onClick={e => {
+                                              e.stopPropagation();
+                                              e.preventDefault();
+                                              updateOverlaySize(overlay.id, "height", -5);
+                                            }}
+                                          >
+                                            H-
+                                          </button>
+                                          <button
+                                            className="resize-btn"
+                                            onClick={e => {
+                                              e.stopPropagation();
+                                              e.preventDefault();
+                                              updateOverlaySize(overlay.id, "height", 5);
+                                            }}
+                                          >
+                                            H+
+                                          </button>
+                                          <button
+                                            className="resize-btn"
+                                            onClick={e => {
+                                              e.stopPropagation();
+                                              e.preventDefault();
+                                              toggleOverlayAspectRatioLock(overlay.id);
+                                            }}
+                                            title={
+                                              overlay.aspectRatioLocked
+                                                ? "Unlock aspect ratio"
+                                                : "Lock aspect ratio"
+                                            }
+                                          >
+                                            {overlay.aspectRatioLocked ? "Lock" : "Free"}
+                                          </button>
+                                          <button
+                                            className="resize-btn"
+                                            onClick={e => {
+                                              e.stopPropagation();
+                                              e.preventDefault();
+                                              centerOverlay(overlay.id);
+                                            }}
+                                            title="Center overlay"
+                                          >
+                                            Center
+                                          </button>
+                                          <button
+                                            className="resize-btn"
+                                            onClick={e => {
+                                              e.stopPropagation();
+                                              e.preventDefault();
+                                              duplicateOverlay(overlay.id);
+                                            }}
+                                            title="Duplicate overlay"
+                                          >
+                                            Copy
+                                          </button>
+                                          <button
+                                            className="resize-btn"
+                                            onClick={e => {
+                                              e.stopPropagation();
+                                              e.preventDefault();
+                                              moveOverlay(overlay.id, "backward");
+                                            }}
+                                            title="Move layer backward"
+                                          >
+                                            Down
+                                          </button>
+                                          <button
+                                            className="resize-btn"
+                                            onClick={e => {
+                                              e.stopPropagation();
+                                              e.preventDefault();
+                                              moveOverlay(overlay.id, "forward");
+                                            }}
+                                            title="Move layer forward"
+                                          >
+                                            Up
+                                          </button>
+                                          <button
+                                            className="resize-btn"
+                                            onClick={e => {
+                                              e.stopPropagation();
+                                              e.preventDefault();
+                                              moveOverlay(overlay.id, "back");
+                                            }}
+                                            title="Send layer to back"
+                                          >
+                                            Back
+                                          </button>
+                                          <button
+                                            className="resize-btn"
+                                            onClick={e => {
+                                              e.stopPropagation();
+                                              e.preventDefault();
+                                              moveOverlay(overlay.id, "front");
+                                            }}
+                                            title="Bring layer to front"
+                                          >
+                                            Front
+                                          </button>
+                                        </div>
+                                      )}
+                                  </div>
+                                )}
                             </div>
                           );
                         })}

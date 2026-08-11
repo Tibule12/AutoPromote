@@ -1271,6 +1271,16 @@ describe("ViralClipStudio timeline sequencing", () => {
       .querySelector("input");
     expect(Number(durationInput.value)).toBeLessThanOrEqual(12);
 
+    fireEvent.click(screen.getByRole("button", { name: "Picture-in-picture" }));
+    const previewShell = screen.getByTestId("hook-preview-frame").parentElement;
+    expect(previewShell.querySelector(".draggable-overlay.active")).not.toBeInTheDocument();
+    expect(previewShell.querySelector(".overlay-controls")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "After" }));
+    expect(previewShell.querySelector(".draggable-overlay.active")).toBeInTheDocument();
+    expect(previewShell.querySelector(".overlay-controls")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Split" }));
+
     const afterVideo = screen.getByTestId("studio-after-video");
     Object.defineProperty(afterVideo, "currentTime", {
       configurable: true,
