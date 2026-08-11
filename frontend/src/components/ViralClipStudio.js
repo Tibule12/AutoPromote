@@ -3290,6 +3290,64 @@ const ViralClipStudio = ({
         ? "Donor track leads while original audio ducks"
         : "Donor track mixes with original audio";
 
+  const getComparisonFocusSourceTime = preferredTool => {
+    const timedBRoll =
+      (activeOverlayIsVideoBRoll && activeOverlay) ||
+      overlays.find(
+        overlay =>
+          overlay.bRollMode &&
+          overlay.startTime !== undefined &&
+          Number(overlay.duration || 0) > 0
+      );
+    const shouldFocusBRoll = preferredTool === "broll" && timedBRoll;
+    const relativeFocusTime = shouldFocusBRoll
+      ? Number(timedBRoll.startTime || 0) + Math.min(0.35, Number(timedBRoll.duration || 0) * 0.15)
+      : addHook || preferredTool === "hook"
+        ? resolvedHookStart + Math.min(0.35, hookDuration * 0.15)
+        : timedBRoll
+          ? Number(timedBRoll.startTime || 0) + 0.2
+          : 0;
+    const boundedFocusTime = clampNumber(
+      relativeFocusTime,
+      0,
+      Math.max(0, Number(currentTimelineWindow.duration || 0) - 0.05),
+      0
+    );
+    return Number(currentTimelineWindow.start || 0) + boundedFocusTime;
+  };
+
+  const focusComparisonPreview = (preferredTool = studioInspectorTab, play = false) => {
+    const afterVideo = videoRef.current;
+    const beforeVideo = beforeVideoRef.current;
+    if (!afterVideo) return;
+
+    const targetTime = getComparisonFocusSourceTime(preferredTool);
+    afterVideo.pause();
+    beforeVideo?.pause();
+    try {
+      afterVideo.currentTime = targetTime;
+      if (beforeVideo) beforeVideo.currentTime = targetTime;
+      setVideoTime(targetTime);
+    } catch (error) {
+      console.log("Comparison preview seek skipped", error);
+    }
+    if (play) safePlayMediaElement(afterVideo);
+  };
+
+  const toggleComparisonPlayback = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    const windowEnd = Number(currentTimelineWindow.end || video.duration || 0);
+    if (video.paused) {
+      if (windowEnd > 0 && Number(video.currentTime || 0) >= windowEnd - 0.1) {
+        focusComparisonPreview(studioInspectorTab, false);
+      }
+      safePlayMediaElement(video);
+    } else {
+      video.pause();
+    }
+  };
+
   useEffect(() => {
     if (!addHook) return;
     if (!isGenericHookText(hookText)) return;
@@ -4992,18 +5050,34 @@ const ViralClipStudio = ({
     if (!video) return undefined;
 
     const syncPlaybackState = () => setIsPreviewPaused(video.paused);
+    const returnToEditedMoment = () => {
+      syncPlaybackState();
+      if (comparisonMode === "split" || comparisonMode === "after") {
+        focusComparisonPreview(studioInspectorTab, false);
+        setStudioActionMessage("Comparison ready at the edited moment. Press play to review it again.");
+      }
+    };
 
     video.addEventListener("play", syncPlaybackState);
     video.addEventListener("pause", syncPlaybackState);
-    video.addEventListener("ended", syncPlaybackState);
+    video.addEventListener("ended", returnToEditedMoment);
     syncPlaybackState();
 
     return () => {
       video.removeEventListener("play", syncPlaybackState);
       video.removeEventListener("pause", syncPlaybackState);
-      video.removeEventListener("ended", syncPlaybackState);
+      video.removeEventListener("ended", returnToEditedMoment);
     };
-  }, [activeTimelineIndex, timeline]);
+  }, [
+    activeTimelineIndex,
+    timeline,
+    comparisonMode,
+    studioInspectorTab,
+    activeOverlayId,
+    addHook,
+    resolvedHookStart,
+    hookDuration,
+  ]);
 
   useEffect(() => {
     const syncFullscreenState = () => {
@@ -6283,6 +6357,7 @@ const ViralClipStudio = ({
                       className={comparisonMode === mode ? "is-active" : ""}
                       onClick={() => {
                         setComparisonMode(mode);
+                        focusComparisonPreview(studioInspectorTab, false);
                         setStudioActionMessage(
                           mode === "split"
                             ? "Before and After are synchronized at the same frame."
@@ -6295,6 +6370,13 @@ const ViralClipStudio = ({
                     </button>
                   ))}
                 </div>
+                <button
+                  type="button"
+                  className="comparison-play-button"
+                  onClick={toggleComparisonPlayback}
+                >
+                  {isPreviewPaused ? "▶ Play comparison" : "❚❚ Pause comparison"}
+                </button>
               </div>
 
               <div className="preview-device-column">
@@ -6316,7 +6398,7 @@ const ViralClipStudio = ({
                       data-testid="studio-after-video"
                       className="studio-video"
                       autoPlay
-                      controls
+                      controls={comparisonMode === "after"}
                       playsInline
                       style={{
                         objectFit: effectiveVideoFit,
@@ -7547,6 +7629,7 @@ const ViralClipStudio = ({
                       setAddHook(true);
                       setComparisonMode("split");
                       previewHookSegment(false);
+                      window.setTimeout(() => focusComparisonPreview("hook", true), 0);
                       setStudioActionMessage(
                         "Hook applied. Compare the untouched source and edited opening side by side."
                       );
@@ -7703,13 +7786,8 @@ const ViralClipStudio = ({
                         type="button"
                         className="inspector-primary-action"
                         onClick={() => {
-                          const video = videoRef.current;
-                          if (video) {
-                            video.currentTime =
-                              Number(currentTimelineWindow.start || 0) + activeOverlayStartTime;
-                            safePlayMediaElement(video);
-                          }
                           setComparisonMode("split");
+                          focusComparisonPreview("broll", true);
                           setStudioActionMessage(
                             "B-roll applied and previewing at its exact cutaway point."
                           );
