@@ -1217,8 +1217,22 @@ describe("ViralClipStudio timeline sequencing", () => {
 
     expect(screen.getByRole("button", { name: "Split" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByTestId("before-preview-frame")).toBeInTheDocument();
-    expect(screen.getByTestId("studio-after-video")).toBeInTheDocument();
+    const afterVideo = screen.getByTestId("studio-after-video");
+    expect(afterVideo).toBeInTheDocument();
+    expect(afterVideo).not.toHaveAttribute("controls");
+    expect(screen.getByRole("button", { name: /Pause comparison|Play comparison/i })).toBeInTheDocument();
     expect(screen.getByLabelText("Untouched source preview").muted).toBe(true);
+
+    Object.defineProperty(afterVideo, "currentTime", {
+      configurable: true,
+      writable: true,
+      value: 20,
+    });
+    fireEvent.ended(afterVideo);
+    await waitFor(() => expect(afterVideo.currentTime).toBeLessThan(2));
+
+    fireEvent.click(screen.getByRole("button", { name: "After" }));
+    expect(afterVideo).toHaveAttribute("controls");
   });
 
   test("runs a podcast cutaway with original, overlay, and mixed audio modes", async () => {

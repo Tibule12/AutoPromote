@@ -3960,7 +3960,7 @@
 
 /* Viral Clip Studio production editor shell */
 .hook-broll-only-mode .studio-layout {
-  grid-template-columns: minmax(220px, 0.42fr) minmax(440px, 1.18fr) minmax(360px, 0.76fr);
+  grid-template-columns: minmax(190px, 0.34fr) minmax(560px, 1.4fr) minmax(330px, 0.66fr);
   grid-template-rows: minmax(0, 1fr);
 }
 
@@ -4355,10 +4355,27 @@
   box-shadow: 0 6px 18px rgba(88, 50, 218, 0.28);
 }
 
+.comparison-play-button {
+  min-height: 36px;
+  padding: 7px 12px;
+  border: 1px solid rgba(71, 214, 180, 0.24);
+  border-radius: 9px;
+  color: #8de6d0;
+  background: rgba(22, 133, 108, 0.1);
+  font-size: 0.58rem;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.comparison-play-button:hover {
+  color: #d9fff5;
+  background: rgba(22, 133, 108, 0.18);
+}
+
 .hook-broll-only-mode .preview-player-shell {
   display: grid;
   width: 100%;
-  max-width: 760px;
+  max-width: 920px;
   place-items: center;
   gap: 14px;
 }
@@ -4387,7 +4404,7 @@
 .comparison-split .before-preview-card,
 .comparison-split > [data-testid="hook-preview-frame"] {
   width: 100%;
-  max-width: 310px;
+  max-width: 360px;
 }
 
 .comparison-split .before-preview-card {
