@@ -1310,17 +1310,8 @@
 
 /* Screenshot-led product tour */
 
-.ap-hero {
-  grid-template-columns: minmax(0, 1fr) !important;
-  gap: clamp(24px, 3vw, 36px) !important;
-}
-
 .ap-hero-copy {
-  display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.65fr);
-  align-items: end;
-  gap: clamp(30px, 6vw, 86px);
-  padding: 6px 6px 0;
+  display: block;
 }
 
 .ap-hero-copy__intro,
@@ -1333,17 +1324,20 @@
 }
 
 .ap-hero-copy__intro h1 {
-  max-width: 14ch;
-  font-size: clamp(2.65rem, 5.4vw, 5rem);
-}
-
-.ap-hero-copy__actions {
-  padding-bottom: 7px;
+  max-width: 12ch;
+  font-size: clamp(2.4rem, 5vw, 4.65rem);
 }
 
 .ap-hero-copy__actions .ap-hero-subtext {
-  max-width: 38ch;
-  margin: 0;
+  max-width: 56ch;
+}
+
+.ap-screenshot-showcase {
+  margin-top: 16px;
+}
+
+.ap-screenshot-showcase > .ap-section-heading {
+  margin-bottom: 18px;
 }
 
 .ap-product-tour {
@@ -1567,12 +1561,6 @@
 }
 
 @media (max-width: 700px) {
-  .ap-hero-copy {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 20px;
-    padding-inline: 0;
-  }
-
   .ap-hero-copy__intro h1 {
     overflow-wrap: normal;
     font-size: clamp(2.2rem, 11.2vw, 3rem);

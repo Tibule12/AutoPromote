@@ -1,5 +1,5 @@
 import React from "react";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import WelcomePage from "../WelcomePage";
 import Features from "../Features";
 import About from "../About";
@@ -64,6 +64,19 @@ describe("public marketing pages", () => {
     window.HTMLElement.prototype.scrollIntoView = scrollIntoView;
     render(<WelcomePage onGetStarted={() => {}} onSignIn={() => {}} />);
 
+    const demoVideos = screen.getByLabelText(/AutoPromote demo videos/i);
+    expect(within(demoVideos).getByLabelText(/Updated Dashboard video demo/i)).toHaveAttribute(
+      "src",
+      "/demos/dashboard-demo.webm"
+    );
+
+    fireEvent.click(within(demoVideos).getByRole("tab", { name: /Cam Combiner/i }));
+    expect(within(demoVideos).getByLabelText(/Cam Combiner video demo/i)).toHaveAttribute(
+      "src",
+      "/demos/cam-combiner-demo.webm"
+    );
+
+    const productTour = screen.getByLabelText(/Choose a product screen/i);
     expect(screen.getByText(/Click through the workspace/i)).toBeInTheDocument();
     expect(screen.getByText(/Real product screens/i)).toBeInTheDocument();
     expect(screen.getByAltText(/Overview page in AutoPromote/i)).toHaveAttribute(
@@ -75,20 +88,20 @@ describe("public marketing pages", () => {
       screen.queryByText(/AI-assisted variations focus on stronger hooks/i)
     ).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("tab", { name: /Cam Combiner/i }));
+    fireEvent.click(within(productTour).getByRole("tab", { name: /Cam Combiner/i }));
     expect(screen.getByAltText(/Cam Combiner page in AutoPromote/i)).toHaveAttribute(
       "src",
       "/screenshots/dashboard/cam-combiner.jpg"
     );
     expect(screen.getByText(/Sync cameras, direct speakers/i)).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("tab", { name: /Viral Clip Studio/i }));
+    fireEvent.click(within(productTour).getByRole("tab", { name: /Viral Clip Studio/i }));
     expect(screen.getByAltText(/Viral Clip Studio page in AutoPromote/i)).toHaveAttribute(
       "src",
       "/screenshots/dashboard/viral-clip-studio.jpg"
     );
 
-    fireEvent.click(screen.getByRole("tab", { name: /Smart Promo/i }));
+    fireEvent.click(within(productTour).getByRole("tab", { name: /Smart Promo/i }));
     expect(screen.getByAltText(/Smart Promo page in AutoPromote/i)).toHaveAttribute(
       "src",
       "/screenshots/dashboard/smart-promo.jpg"
