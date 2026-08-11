@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import TopNav from "./components/landing/TopNav";
 import FeatureShowcase from "./components/landing/FeatureShowcase";
+import HeroScreenshot from "./components/landing/HeroScreenshot";
 import SectionHeading from "./components/landing/SectionHeading";
 import PricingSection from "./components/landing/PricingSection";
 import FinalCta from "./components/landing/FinalCta";
@@ -166,6 +167,15 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
               </div>
             </div>
           </div>
+          <HeroScreenshot />
+        </section>
+
+        <section className="ap-section ap-screenshot-showcase" aria-label="Inside AutoPromote">
+          <SectionHeading
+            eyebrow="Inside AutoPromote"
+            title="Explore every workspace."
+            copy="Choose a page and see the real interface with a short explanation."
+          />
           <FeatureShowcase />
         </section>
 
