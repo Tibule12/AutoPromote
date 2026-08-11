@@ -23,6 +23,20 @@ export const PRODUCT_SCREENS = [
     image: "/screenshots/dashboard/find-viral-clips.jpg",
   },
   {
+    id: "viral-clip-studio",
+    label: "Viral Clip Studio",
+    eyebrow: "Timeline editing",
+    title: "Refine detected moments, hooks, B-roll, captions, and export.",
+    image: "/screenshots/dashboard/viral-clip-studio.jpg",
+  },
+  {
+    id: "smart-promo",
+    label: "Smart Promo",
+    eyebrow: "Promotion studio",
+    title: "Build a polished master, social previews, and promotional visuals.",
+    image: "/screenshots/dashboard/smart-promo.jpg",
+  },
+  {
     id: "idea-to-video",
     label: "Idea-to-Video",
     eyebrow: "Creative studio",

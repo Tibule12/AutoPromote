@@ -137,29 +137,33 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
 
         <section className="ap-hero" id="top">
           <div className="ap-hero-copy">
-            <div className="ap-hero-status">
-              <span className="ap-hero-status__dot" aria-hidden="true" />
-              <span>Real product preview</span>
-              <small>11 redesigned pages</small>
+            <div className="ap-hero-copy__intro">
+              <div className="ap-hero-status">
+                <span className="ap-hero-status__dot" aria-hidden="true" />
+                <span>Real product preview</span>
+                <small>13 redesigned pages</small>
+              </div>
+              <h1>
+                See AutoPromote
+                <span> before you sign up.</span>
+              </h1>
             </div>
-            <h1>
-              See AutoPromote
-              <span> before you sign up.</span>
-            </h1>
-            <p className="ap-hero-subtext">
-              Real screens. Short explanations. One connected creator workspace.
-            </p>
-            <div className="ap-hero-ctas">
-              <button className="ap-btn ap-btn-primary" onClick={onGetStarted}>
-                Create free account
-              </button>
-              <button
-                className="ap-btn ap-btn-outline"
-                onClick={handleExploreScreens}
-                aria-label="Explore product screens"
-              >
-                Explore the screens
-              </button>
+            <div className="ap-hero-copy__actions">
+              <p className="ap-hero-subtext">
+                Real screens. Short explanations. One connected creator workspace.
+              </p>
+              <div className="ap-hero-ctas">
+                <button className="ap-btn ap-btn-primary" onClick={onGetStarted}>
+                  Create free account
+                </button>
+                <button
+                  className="ap-btn ap-btn-outline"
+                  onClick={handleExploreScreens}
+                  aria-label="Explore product screens"
+                >
+                  Explore the screens
+                </button>
+              </div>
             </div>
           </div>
           <FeatureShowcase />

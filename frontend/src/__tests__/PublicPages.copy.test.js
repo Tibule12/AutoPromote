@@ -82,6 +82,18 @@ describe("public marketing pages", () => {
     );
     expect(screen.getByText(/Sync cameras, direct speakers/i)).toBeInTheDocument();
 
+    fireEvent.click(screen.getByRole("tab", { name: /Viral Clip Studio/i }));
+    expect(screen.getByAltText(/Viral Clip Studio page in AutoPromote/i)).toHaveAttribute(
+      "src",
+      "/screenshots/dashboard/viral-clip-studio.jpg"
+    );
+
+    fireEvent.click(screen.getByRole("tab", { name: /Smart Promo/i }));
+    expect(screen.getByAltText(/Smart Promo page in AutoPromote/i)).toHaveAttribute(
+      "src",
+      "/screenshots/dashboard/smart-promo.jpg"
+    );
+
     fireEvent.click(screen.getByRole("button", { name: /Explore product screens/i }));
     expect(scrollIntoView).toHaveBeenCalled();
   });
