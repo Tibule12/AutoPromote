@@ -59,43 +59,30 @@ describe("public marketing pages", () => {
     expect(onGetStarted).toHaveBeenCalledTimes(1);
   });
 
-  test("welcome page explains current product state conservatively", () => {
+  test("welcome page shows real product screens with concise overlays", () => {
     const scrollIntoView = jest.fn();
     window.HTMLElement.prototype.scrollIntoView = scrollIntoView;
     render(<WelcomePage onGetStarted={() => {}} onSignIn={() => {}} />);
 
-    expect(screen.getByText(/What Works Today/i)).toBeInTheDocument();
-    expect(screen.getByText(/Availability Snapshot/i)).toBeInTheDocument();
-    expect(
-      screen.getAllByText(/Feature Availability|Availability Snapshot|What To Expect In Practice/i)
-        .length
-    ).toBeGreaterThan(0);
-    expect(
-      screen.getByText(/Upload, queue, and schedule content across connected platforms/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Click through the workspace/i)).toBeInTheDocument();
+    expect(screen.getByText(/Real product screens/i)).toBeInTheDocument();
+    expect(screen.getByAltText(/Overview page in AutoPromote/i)).toHaveAttribute(
+      "src",
+      "/screenshots/dashboard/overview.jpg"
+    );
     expect(screen.queryByText(/typically 3-7 hours/i)).not.toBeInTheDocument();
     expect(
       screen.queryByText(/AI-assisted variations focus on stronger hooks/i)
     ).not.toBeInTheDocument();
 
-    expect(screen.getByText(/See the new creator dashboard in action./i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Updated Dashboard video demo/i)).toHaveAttribute(
-      "src",
-      "/demos/dashboard-demo.webm"
-    );
-
     fireEvent.click(screen.getByRole("tab", { name: /Cam Combiner/i }));
-    expect(screen.getByText(/Two cameras in. One directed podcast out./i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Cam Combiner video demo/i)).toHaveAttribute(
+    expect(screen.getByAltText(/Cam Combiner page in AutoPromote/i)).toHaveAttribute(
       "src",
-      "/demos/cam-combiner-demo.webm"
+      "/screenshots/dashboard/cam-combiner.jpg"
     );
-    expect(screen.getByLabelText(/Cam Combiner video demo/i)).toHaveAttribute(
-      "poster",
-      "/demos/cam-combiner-demo-poster.jpg"
-    );
+    expect(screen.getByText(/Sync cameras, direct speakers/i)).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /Watch Demo/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Explore product screens/i }));
     expect(scrollIntoView).toHaveBeenCalled();
   });
 

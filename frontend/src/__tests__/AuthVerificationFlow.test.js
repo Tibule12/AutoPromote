@@ -4,6 +4,23 @@ import LoginForm from "../LoginForm";
 import RegisterForm from "../RegisterForm";
 
 describe("email verification onboarding", () => {
+  test("moves from the redesigned registration form to sign in", () => {
+    const onLogin = jest.fn();
+
+    render(
+      <RegisterForm
+        onRegister={() => {}}
+        onResendVerification={() => {}}
+        onLogin={onLogin}
+        onClose={() => {}}
+      />
+    );
+
+    expect(screen.getByRole("heading", { name: /Create your workspace/i })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Already have an account/i }));
+    expect(onLogin).toHaveBeenCalledTimes(1);
+  });
+
   test("keeps a new user on a clear verification screen and supports resend", async () => {
     const onRegister = jest.fn().mockResolvedValue({ verificationEmailSent: true });
     const onResendVerification = jest.fn().mockResolvedValue({ sent: true });
