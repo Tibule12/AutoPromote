@@ -2231,6 +2231,49 @@
 
 .render-destination-row {
   margin-bottom: 12px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  padding: 5px;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 14px;
+  background: rgba(8, 15, 28, 0.72);
+}
+
+.render-destination-row button {
+  min-width: 0;
+  min-height: 38px;
+  padding: 8px 6px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: rgba(226, 232, 240, 0.68);
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 750;
+  cursor: pointer;
+  transition:
+    color 0.16s ease,
+    background 0.16s ease,
+    border-color 0.16s ease,
+    transform 0.16s ease;
+}
+
+.render-destination-row button:hover:not(:disabled) {
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.render-destination-row button.is-active {
+  color: #fff;
+  border-color: rgba(129, 92, 246, 0.42);
+  background: linear-gradient(135deg, rgba(109, 40, 217, 0.34), rgba(14, 165, 233, 0.2));
+  box-shadow: 0 8px 18px rgba(76, 29, 149, 0.18);
+}
+
+.render-destination-row button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .editing-tools {
@@ -2511,22 +2554,6 @@
 .export-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 20px 40px rgba(251, 113, 133, 0.3);
-}
-
-.local-export-btn {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
-  box-shadow: 0 16px 36px rgba(16, 185, 129, 0.24) !important;
-  font-size: 0.92rem !important;
-  min-height: 48px !important;
-}
-
-.local-export-btn:hover {
-  box-shadow: 0 20px 40px rgba(16, 185, 129, 0.3) !important;
-}
-
-.local-export-btn:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
 }
 
 .clips-scroller::-webkit-scrollbar,
@@ -4933,6 +4960,10 @@
 }
 
 @media (max-width: 760px) {
+  .render-destination-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .preview-mode-switch {
     width: 100%;
   }

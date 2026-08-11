@@ -1352,10 +1352,7 @@ const ViralClipStudio = ({
   const [isExtractingAudio, setIsExtractingAudio] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [exportStatusLabel, setExportStatusLabel] = useState("Render Final Clip");
-  const [isLocalExporting, setIsLocalExporting] = useState(false);
-  const [localExportProgress, setLocalExportProgress] = useState(0);
-  const localRecorderRef = useRef(null);
-  const localChunksRef = useRef([]);
+  const [selectedExportDestination, setSelectedExportDestination] = useState("general");
   const loggedScannerEntryRef = useRef(new Set());
 
   const [timeline, setTimeline] = useState(() => {
@@ -4145,115 +4142,6 @@ const ViralClipStudio = ({
     } finally {
       setExportStatusLabel("Render Final Clip");
       setIsExporting(false);
-    }
-  };
-
-  // Client-side canvas export — no backend, no credits, instant local download
-  const handleLocalExport = () => {
-    const frame = phoneFrameRef.current;
-    if (!frame) {
-      toast.error("Preview frame not available. Try again.");
-      return;
-    }
-
-    const hasAiFeatures =
-      autoCaptions || smartCrop || silenceRemoval || removeWatermark || addHook || addMusic;
-    if (hasAiFeatures) {
-      const proceed = window.confirm(
-        "⚠️ AI features (captions, smart crop, silence removal, watermark removal, hook effects, music) " +
-          "will NOT be included in the local save. Only your visible overlays and current timeline will be captured.\n\n" +
-          'For full quality with AI features, use "Render Final Clip" instead.\n\nContinue with local save?'
-      );
-      if (!proceed) return;
-    }
-
-    if (typeof MediaRecorder === "undefined") {
-      toast.error("Your browser does not support local recording. Please use 'Render Final Clip'.");
-      return;
-    }
-
-    const mimeType =
-      ["video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus", "video/webm"].find(mt =>
-        MediaRecorder.isTypeSupported(mt)
-      ) || "video/webm";
-
-    setIsLocalExporting(true);
-    setLocalExportProgress(0);
-    localChunksRef.current = [];
-
-    try {
-      const stream = frame.captureStream(30);
-      const recorder = new MediaRecorder(stream, {
-        mimeType,
-        videoBitsPerSecond: 6000000,
-        audioBitsPerSecond: 128000,
-      });
-
-      localRecorderRef.current = recorder;
-
-      recorder.ondataavailable = e => {
-        if (e.data.size > 0) localChunksRef.current.push(e.data);
-      };
-
-      recorder.onstop = () => {
-        const blob = new Blob(localChunksRef.current, { type: mimeType });
-        const ext = mimeType.includes("webm") ? "webm" : "mp4";
-        const safeName =
-          (selectedClip?.id || "viral-clip")
-            .replace(/[^a-zA-Z0-9._-]+/g, "-")
-            .replace(/-+/g, "-")
-            .replace(/^-|-$/g, "") || "viral-clip";
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `${safeName}.${ext}`;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        setTimeout(() => URL.revokeObjectURL(url), 3000);
-
-        setIsLocalExporting(false);
-        setLocalExportProgress(100);
-        toast.success(`Saved "${safeName}.${ext}" to your device!`);
-
-        // Stop all tracks
-        stream.getTracks().forEach(track => track.stop());
-      };
-
-      recorder.onerror = () => {
-        setIsLocalExporting(false);
-        toast.error("Local recording failed. Try 'Render Final Clip' instead.");
-      };
-
-      // Record until the current timeline window end, then auto-stop
-      const clipDuration = Math.max(
-        1,
-        Number(currentTimelineWindow.end || 0) - Number(currentTimelineWindow.start || 0)
-      );
-      recorder.start(500);
-
-      // Progress updates
-      const startTime = Date.now();
-      const progressInterval = setInterval(() => {
-        const elapsed = (Date.now() - startTime) / 1000;
-        const pct = Math.min(99, Math.round((elapsed / clipDuration) * 100));
-        setLocalExportProgress(pct);
-      }, 200);
-
-      // Auto-stop after clip duration
-      setTimeout(
-        () => {
-          clearInterval(progressInterval);
-          if (recorder.state === "recording") {
-            recorder.stop();
-          }
-        },
-        clipDuration * 1000 + 500
-      );
-    } catch (err) {
-      console.error("Local export failed:", err);
-      setIsLocalExporting(false);
-      toast.error("Local export failed: " + (err.message || "Unknown error"));
     }
   };
 
@@ -10023,46 +9911,36 @@ const ViralClipStudio = ({
               <p className="panel-description">
                 Final export uses the hook treatment and B-roll layers you approved in Studio.
               </p>
-              <div className="clip-guidance-actions render-destination-row">
-                <button
-                  type="button"
-                  className="clip-action-btn"
-                  onClick={() => void handleExportRender("tiktok")}
-                  disabled={isExporting}
-                >
-                  Export TikTok
-                </button>
-                <button
-                  type="button"
-                  className="clip-action-btn"
-                  onClick={() => void handleExportRender("reels")}
-                  disabled={isExporting}
-                >
-                  Export Reels
-                </button>
-                <button
-                  type="button"
-                  className="clip-action-btn"
-                  onClick={() => void handleExportRender("shorts")}
-                  disabled={isExporting}
-                >
-                  Export Shorts
-                </button>
+              <div
+                className="render-destination-row"
+                role="radiogroup"
+                aria-label="Export destination"
+              >
+                {[
+                  { value: "general", label: "Download" },
+                  { value: "tiktok", label: "TikTok" },
+                  { value: "reels", label: "Reels" },
+                  { value: "shorts", label: "Shorts" },
+                ].map(destination => (
+                  <button
+                    key={destination.value}
+                    type="button"
+                    role="radio"
+                    aria-checked={selectedExportDestination === destination.value}
+                    className={selectedExportDestination === destination.value ? "is-active" : ""}
+                    onClick={() => setSelectedExportDestination(destination.value)}
+                    disabled={isExporting}
+                  >
+                    {destination.label}
+                  </button>
+                ))}
               </div>
               <button
                 className="export-btn"
-                onClick={() => void handleExportRender("general")}
-                disabled={isExporting || isLocalExporting}
+                onClick={() => void handleExportRender(selectedExportDestination)}
+                disabled={isExporting}
               >
                 {exportStatusLabel}
-              </button>
-              <button
-                className="export-btn local-export-btn"
-                onClick={handleLocalExport}
-                disabled={isExporting || isLocalExporting}
-                title="Capture the preview frame directly — no credits, no backend rendering. Overlays and timeline only."
-              >
-                {isLocalExporting ? `Saving... ${localExportProgress}%` : "💾 Save Locally (Free)"}
               </button>
               {isExporting && (
                 <button
@@ -10090,9 +9968,7 @@ const ViralClipStudio = ({
                   textAlign: "center",
                 }}
               >
-                {isLocalExporting
-                  ? "Recording your preview frame to a file..."
-                  : "Save Locally captures exactly what you see in the hook and B-roll preview."}
+                One render includes your hook, B-roll, audio rules, captions, and selected destination.
               </p>
             </section>
 
