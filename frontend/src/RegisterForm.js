@@ -3,9 +3,9 @@ import "./Auth.css";
 import { PUBLIC_SITE_URL } from "./config";
 
 const registerHighlights = [
-  "Create, edit, and package creator-ready content in one stack.",
-  "Turn one workflow into clips, thumbnails, and platform-specific outputs.",
-  "Build a sharper publishing system from day one.",
+  { index: "01", label: "Create", copy: "Open every production tool from one workspace." },
+  { index: "02", label: "Publish", copy: "Prepare each channel without rebuilding the post." },
+  { index: "03", label: "Measure", copy: "Keep the queue and performance in view." },
 ];
 
 const RegisterForm = ({ onRegister, onClose, onLogin, onResendVerification }) => {
@@ -107,9 +107,20 @@ const RegisterForm = ({ onRegister, onClose, onLogin, onResendVerification }) =>
 
   if (verificationState) {
     return (
-      <div className="auth-container auth-container--verification">
+      <div className="auth-container auth-container--register auth-container--verification">
         <section className="verification-card" aria-live="polite">
-          <div className="verification-card__icon">✉</div>
+          <div className="auth-brand-lockup auth-brand-lockup--verification">
+            <span className="auth-brand-lockup__mark" aria-hidden="true">
+              ▶
+            </span>
+            <span>
+              <strong>AutoPromote</strong>
+              <small>Creator OS</small>
+            </span>
+          </div>
+          <div className="verification-card__icon" aria-hidden="true">
+            ✉
+          </div>
           <div className="auth-form__eyebrow">One quick step</div>
           <h2>Verify your email</h2>
           <p>
@@ -145,94 +156,155 @@ const RegisterForm = ({ onRegister, onClose, onLogin, onResendVerification }) =>
   }
 
   return (
-    <div className="auth-container">
+    <div className="auth-container auth-container--register">
       <div className="auth-stage">
-        <section className="auth-stage__panel auth-stage__panel--brand auth-stage__panel--warm">
-          <div className="auth-stage__badge">Create Your Stack</div>
-          <h1 className="auth-stage__title">Start building a sharper creator system.</h1>
+        <section className="auth-stage__panel auth-stage__panel--brand">
+          <div className="auth-brand-lockup">
+            <span className="auth-brand-lockup__mark" aria-hidden="true">
+              ▶
+            </span>
+            <span>
+              <strong>AutoPromote</strong>
+              <small>Creator OS</small>
+            </span>
+          </div>
+          <div className="auth-stage__badge">
+            <i aria-hidden="true" />
+            Free creator workspace
+          </div>
+          <h1 className="auth-stage__title">Your content operation starts here.</h1>
           <p className="auth-stage__copy">
-            Open your AutoPromote account and move from scattered tools to a single command center
-            for creation, packaging, and publishing.
+            Create the account once. Your editing tools, publishing flow, and performance workspace
+            stay together from there.
           </p>
           <div className="auth-stage__highlights">
             {registerHighlights.map(item => (
-              <div key={item} className="auth-stage__highlight">
-                <span className="auth-stage__highlight-mark">+</span>
-                <span>{item}</span>
+              <div key={item.index} className="auth-stage__highlight">
+                <span className="auth-stage__highlight-mark">{item.index}</span>
+                <span>
+                  <strong>{item.label}</strong>
+                  <small>{item.copy}</small>
+                </span>
               </div>
             ))}
+          </div>
+          <div className="auth-register-preview" aria-hidden="true">
+            <div className="auth-register-preview__topline">
+              <span>Workspace setup</span>
+              <small>Ready in 2 steps</small>
+            </div>
+            <div className="auth-register-preview__flow">
+              <span className="is-complete">1</span>
+              <i />
+              <span>2</span>
+              <div>
+                <strong>Create account</strong>
+                <strong>Verify email</strong>
+              </div>
+            </div>
           </div>
         </section>
 
         <form onSubmit={handleSubmit} className="auth-form auth-form--modal">
           <div className="auth-form__header">
-            <div className="auth-form__eyebrow">Create Account</div>
-            <h2 className="auth-title auth-title--left">Launch Your Account</h2>
-            <p className="auth-subtitle">
-              Set up your profile and get into the platform with a cleaner first impression.
-            </p>
+            <div className="auth-form__topline">
+              <div className="auth-form__eyebrow">Create Account</div>
+              <span className="auth-form__secure">
+                <i aria-hidden="true" />
+                Secure signup
+              </span>
+            </div>
+            <h2 className="auth-title auth-title--left">Create your workspace</h2>
+            <p className="auth-subtitle">Four details. Then verify your email and you’re in.</p>
           </div>
           {error && <div className="error-message">{error}</div>}
           {success && <div className="success-message">{success}</div>}
 
           <div className="auth-form__fields">
             <div className="form-group">
-              <label className="form-label">Full Name</label>
-              <input
-                type="text"
-                name="name"
-                className="form-input"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="Enter your full name"
-                required
-                autoComplete="name"
-              />
+              <label className="form-label" htmlFor="register-name">
+                Full Name
+              </label>
+              <div className="auth-input-shell">
+                <span aria-hidden="true">◇</span>
+                <input
+                  id="register-name"
+                  type="text"
+                  name="name"
+                  className="form-input"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="Enter your full name"
+                  required
+                  autoComplete="name"
+                />
+              </div>
             </div>
 
             <div className="form-group">
-              <label className="form-label">Email</label>
-              <input
-                type="email"
-                name="email"
-                className="form-input"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="Enter your email"
-                required
-                autoComplete="email"
-              />
+              <label className="form-label" htmlFor="register-email">
+                Email
+              </label>
+              <div className="auth-input-shell">
+                <span aria-hidden="true">@</span>
+                <input
+                  id="register-email"
+                  type="email"
+                  name="email"
+                  className="form-input"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="Enter your email"
+                  required
+                  autoComplete="email"
+                />
+              </div>
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Password</label>
-              <input
-                type="password"
-                name="password"
-                className="form-input"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Create a password"
-                required
-                autoComplete="new-password"
-              />
-              <p className="password-requirements">Password must be at least 6 characters long</p>
-            </div>
+            <div className="auth-register-password-grid">
+              <div className="form-group">
+                <label className="form-label" htmlFor="register-password">
+                  Password
+                </label>
+                <div className="auth-input-shell">
+                  <span aria-hidden="true">◆</span>
+                  <input
+                    id="register-password"
+                    type="password"
+                    name="password"
+                    className="form-input"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="Create a password"
+                    required
+                    autoComplete="new-password"
+                  />
+                </div>
+              </div>
 
-            <div className="form-group">
-              <label className="form-label">Confirm Password</label>
-              <input
-                type="password"
-                name="confirmPassword"
-                className="form-input"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                placeholder="Confirm your password"
-                required
-                autoComplete="new-password"
-              />
+              <div className="form-group">
+                <label className="form-label" htmlFor="register-confirm-password">
+                  Confirm Password
+                </label>
+                <div className="auth-input-shell">
+                  <span aria-hidden="true">✓</span>
+                  <input
+                    id="register-confirm-password"
+                    type="password"
+                    name="confirmPassword"
+                    className="form-input"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    placeholder="Confirm your password"
+                    required
+                    autoComplete="new-password"
+                  />
+                </div>
+              </div>
             </div>
           </div>
+
+          <p className="password-requirements">Use at least 6 characters.</p>
 
           <button type="submit" disabled={isLoading} className="auth-button">
             {isLoading ? (
@@ -246,8 +318,8 @@ const RegisterForm = ({ onRegister, onClose, onLogin, onResendVerification }) =>
           </button>
 
           <div className="auth-form__note">
-            Your account becomes the home base for your content lab, packaging tools, and publishing
-            flow.
+            <span aria-hidden="true">✓</span>
+            <span>Firebase authentication protects your account and workspace access.</span>
           </div>
 
           <div className="auth-action-row">
@@ -265,7 +337,8 @@ const RegisterForm = ({ onRegister, onClose, onLogin, onResendVerification }) =>
             <button
               type="button"
               onClick={() => {
-                if (onClose) onClose();
+                if (onLogin) onLogin();
+                else if (onClose) onClose();
               }}
               className="auth-link auth-link--inline"
             >

@@ -10,9 +10,7 @@ const TopNav = ({ onSignIn }) => (
       </span>
     </a>
     <nav className="ap-nav-links" aria-label="Primary">
-      <a href="#features">Features</a>
-      <a href="#workflow">Workflow</a>
-      <a href="#proof">Proof</a>
+      <a href="#product-tour">Product Tour</a>
       <a href="#pricing">Pricing</a>
     </nav>
     <div className="ap-nav-actions">

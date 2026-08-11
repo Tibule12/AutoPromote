@@ -1,59 +1,13 @@
 import { useEffect, useState } from "react";
 import TopNav from "./components/landing/TopNav";
-import HeroScreenshot from "./components/landing/HeroScreenshot";
+import FeatureShowcase from "./components/landing/FeatureShowcase";
 import SectionHeading from "./components/landing/SectionHeading";
-import FeatureGrid from "./components/landing/FeatureGrid";
-import WorkflowSection from "./components/landing/WorkflowSection";
-import ProofSection from "./components/landing/ProofSection";
 import PricingSection from "./components/landing/PricingSection";
 import FinalCta from "./components/landing/FinalCta";
 import Footer from "./components/Footer";
-import {
-  exampleContent,
-  featureCards,
-  pricingCards,
-  proofChecklist,
-  workflowSteps,
-} from "./data/landingPageData";
+import { pricingCards } from "./data/landingPageData";
 import { WORKSPACE_ENDPOINTS } from "./config/workspaceApi";
 import "./WelcomePage.css";
-
-const availabilityCards = [
-  {
-    title: "Publishing queue and scheduling",
-    subtitle: "Upload, queue, and schedule content across connected platforms.",
-  },
-  {
-    title: "Editing and clip preparation",
-    subtitle: "Trim, caption, and format media inside the product before you publish.",
-  },
-  {
-    title: "Analytics and account depth",
-    subtitle:
-      "Reporting and posting depth vary by connected account permissions and platform APIs.",
-  },
-];
-
-const commandStages = [
-  {
-    index: "01",
-    label: "Create",
-    title: "Direct the source",
-    copy: "Combine cameras, shape ideas, or start from a finished recording.",
-  },
-  {
-    index: "02",
-    label: "Repurpose",
-    title: "Find the moments",
-    copy: "Turn long-form content into focused clips and promo-ready outputs.",
-  },
-  {
-    index: "03",
-    label: "Distribute",
-    title: "Publish with control",
-    copy: "Customize destinations, schedule the queue, and review performance.",
-  },
-];
 
 function getWorkspaceInviteParams() {
   if (typeof window === "undefined") return null;
@@ -166,8 +120,10 @@ const WorkspaceInviteNotice = ({ onCreateAccount, onSignIn }) => {
 };
 
 const WelcomePage = ({ onGetStarted, onSignIn }) => {
-  const handleWatchDemo = () => {
-    document.getElementById("demo-player")?.scrollIntoView({ behavior: "smooth", block: "center" });
+  const handleExploreScreens = () => {
+    document
+      .getElementById("product-tour")
+      ?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
 
   return (
@@ -183,93 +139,37 @@ const WelcomePage = ({ onGetStarted, onSignIn }) => {
           <div className="ap-hero-copy">
             <div className="ap-hero-status">
               <span className="ap-hero-status__dot" aria-hidden="true" />
-              <span>Creator workspace</span>
-              <small>One connected production loop</small>
+              <span>Real product preview</span>
+              <small>11 redesigned pages</small>
             </div>
             <h1>
-              Your content moves.
-              <br />
-              Your workflow should
-              <span> move with it.</span>
+              See AutoPromote
+              <span> before you sign up.</span>
             </h1>
             <p className="ap-hero-subtext">
-              Direct multi-camera recordings, surface strong moments, build promo cuts, and publish
-              across supported channels without stitching together five different tools.
+              Real screens. Short explanations. One connected creator workspace.
             </p>
             <div className="ap-hero-ctas">
               <button className="ap-btn ap-btn-primary" onClick={onGetStarted}>
-                Open your workspace
+                Create free account
               </button>
               <button
                 className="ap-btn ap-btn-outline"
-                onClick={handleWatchDemo}
-                aria-label="Watch Demo"
+                onClick={handleExploreScreens}
+                aria-label="Explore product screens"
               >
-                Watch the workflow
+                Explore the screens
               </button>
             </div>
-            <div className="ap-hero-proof" aria-label="Core AutoPromote workflows">
-              <span>Multi-camera direction</span>
-              <span>Viral moment discovery</span>
-              <span>Connected publishing</span>
-            </div>
           </div>
-          <HeroScreenshot />
+          <FeatureShowcase />
         </section>
-
-        <section className="ap-command-ribbon" aria-label="AutoPromote workflow overview">
-          <div className="ap-command-ribbon__intro">
-            <span>One operating system</span>
-            <strong>From source recording to published result.</strong>
-          </div>
-          <div className="ap-command-ribbon__stages">
-            {commandStages.map(stage => (
-              <article key={stage.index}>
-                <span>{stage.index}</span>
-                <div>
-                  <small>{stage.label}</small>
-                  <strong>{stage.title}</strong>
-                  <p>{stage.copy}</p>
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="ap-section" id="features">
-          <SectionHeading
-            eyebrow="Inside the workspace"
-            title="Five focused tools. One visual system."
-            copy="Every feature has a clear job, but the source media and decisions stay connected."
-          />
-          <FeatureGrid items={featureCards} />
-        </section>
-
-        <section className="ap-section" id="availability">
-          <SectionHeading
-            eyebrow="Availability Snapshot"
-            title="What Works Today"
-            copy="A clear view of the live product, its connected publishing support, and where platform permissions still matter."
-          />
-          <FeatureGrid items={availabilityCards} />
-        </section>
-
-        <section className="ap-section" id="workflow">
-          <SectionHeading
-            eyebrow="Workflow loop"
-            title="From upload to performance insights"
-            copy="A single pass keeps every step connected."
-          />
-          <WorkflowSection steps={workflowSteps} />
-        </section>
-
-        <ProofSection proofChecklist={proofChecklist} exampleContent={exampleContent} />
 
         <section className="ap-section" id="pricing">
           <SectionHeading
             eyebrow="Pricing"
-            title="Simple plans for every stage"
-            copy="Start quickly and scale with your output."
+            title="Choose the workspace that fits."
+            copy="Start free. Upgrade when your output grows."
           />
           <PricingSection cards={pricingCards} onGetStarted={onGetStarted} />
         </section>

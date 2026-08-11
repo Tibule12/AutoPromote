@@ -8,7 +8,7 @@ describe("landing page claims", () => {
     expect(screen.queryByText(/Viral Clip Studio/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Every upload is scored/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/45 min interview to 12/i)).not.toBeInTheDocument();
-    expect(screen.getByText("Idea-to-Video")).toBeInTheDocument();
-    expect(screen.getByText("Cross-Platform Publishing")).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: /Idea-to-Video/ })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: /Publisher/ })).toBeInTheDocument();
   });
 });
