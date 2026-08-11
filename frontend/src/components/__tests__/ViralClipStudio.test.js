@@ -1200,4 +1200,108 @@ describe("ViralClipStudio timeline sequencing", () => {
       })
     );
   });
+
+  test("opens with synchronized before and after comparison", async () => {
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={[{ id: "clip-1", start: 0, end: 20, duration: 20, reason: "Podcast hook" }]}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+        onStatusChange={jest.fn()}
+        currentMusic={null}
+        onMusicChange={jest.fn()}
+      />
+    );
+
+    expect(screen.getByRole("button", { name: "Split" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByTestId("before-preview-frame")).toBeInTheDocument();
+    expect(screen.getByTestId("studio-after-video")).toBeInTheDocument();
+    expect(screen.getByLabelText("Untouched source preview").muted).toBe(true);
+  });
+
+  test("runs a podcast cutaway with original, overlay, and mixed audio modes", async () => {
+    const createdVideos = setupVideoCreateElementMock();
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={[{ id: "clip-1", start: 0, end: 30, duration: 30, reason: "Podcast hook" }]}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+        onStatusChange={jest.fn()}
+        currentMusic={null}
+        onMusicChange={jest.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("tab", { name: /B-roll/i }));
+
+    const initialCreatedVideoCount = createdVideos.length;
+    fireEvent.change(screen.getByTestId("broll-video-input"), {
+      target: {
+        files: [new File(["cutaway"], "podcast-proof.mp4", { type: "video/mp4" })],
+      },
+    });
+
+    await waitFor(() => expect(createdVideos.length).toBeGreaterThan(initialCreatedVideoCount));
+    await act(async () => {
+      createdVideos[createdVideos.length - 1].onloadedmetadata();
+    });
+
+    expect((await screen.findAllByText("podcast-proof.mp4")).length).toBeGreaterThan(0);
+    const inspector = screen.getByTestId("clip-studio-inspector");
+    const durationInput = within(inspector)
+      .getByText("Duration")
+      .closest("label")
+      .querySelector("input");
+    expect(Number(durationInput.value)).toBeLessThanOrEqual(12);
+
+    const afterVideo = screen.getByTestId("studio-after-video");
+    Object.defineProperty(afterVideo, "currentTime", {
+      configurable: true,
+      writable: true,
+      value: 1,
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Use overlay" }));
+    fireEvent.timeUpdate(afterVideo);
+    await waitFor(() => expect(afterVideo.muted).toBe(true));
+
+    fireEvent.click(screen.getByRole("button", { name: "Mix both" }));
+    fireEvent.timeUpdate(afterVideo);
+    await waitFor(() => expect(afterVideo.muted).toBe(false));
+
+    fireEvent.click(screen.getByRole("button", { name: "Use overlay" }));
+    afterVideo.currentTime = 13;
+    fireEvent.timeUpdate(afterVideo);
+    await waitFor(() => expect(afterVideo.muted).toBe(false));
+    expect(screen.getAllByText(/Original audio returns automatically/i).length).toBeGreaterThan(0);
+  });
+
+  test("keeps uploaded background sound enabled with speech-aware ducking", async () => {
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={[{ id: "clip-1", start: 0, end: 20, duration: 20, reason: "Podcast hook" }]}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+        onStatusChange={jest.fn()}
+        currentMusic={null}
+        onMusicChange={jest.fn()}
+      />
+    );
+
+    fireEvent.change(screen.getByTestId("background-sound-input"), {
+      target: {
+        files: [new File(["music"], "warm-bed.mp3", { type: "audio/mpeg" })],
+      },
+    });
+
+    const inspector = screen.getByTestId("clip-studio-inspector");
+    await waitFor(() => {
+      expect(within(inspector).getByText("Music on")).toBeInTheDocument();
+      expect(within(inspector).getByText("warm-bed")).toBeInTheDocument();
+      expect(within(inspector).getByText("Duck under speech")).toBeInTheDocument();
+    });
+  });
 });
