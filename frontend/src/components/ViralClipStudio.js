@@ -382,10 +382,7 @@ const buildRecutVariants = (clip, context) => {
     return { start: safeStart, end: safeEnd, duration: safeEnd - safeStart };
   };
 
-  const curiosityBounds = boundedVariant(
-    start,
-    end - Math.min(1.2, duration * 0.06)
-  );
+  const curiosityBounds = boundedVariant(start, end - Math.min(1.2, duration * 0.06));
   const authorityBounds = boundedVariant(
     start + Math.min(0.55, duration * 0.08),
     end - Math.min(0.4, duration * 0.03)
@@ -474,7 +471,9 @@ const buildMomentFamilies = rankedEntries => {
 
     if (existingFamily) {
       existingFamily.members.push(entry);
-      existingFamily.semanticTokens = [...new Set([...existingFamily.semanticTokens, ...semanticTokens])];
+      existingFamily.semanticTokens = [
+        ...new Set([...existingFamily.semanticTokens, ...semanticTokens]),
+      ];
       existingFamily.anchorMidpoint =
         (existingFamily.anchorMidpoint * (existingFamily.members.length - 1) + midpoint) /
         existingFamily.members.length;
@@ -511,7 +510,9 @@ const buildMomentFamilies = rankedEntries => {
         clipIds: family.members.map(member => member.clip.id),
         members: family.members.sort(
           (left, right) =>
-            right.score - left.score || right.backendScore - left.backendScore || left.index - right.index
+            right.score - left.score ||
+            right.backendScore - left.backendScore ||
+            left.index - right.index
         ),
       };
     })
@@ -779,10 +780,9 @@ const buildClipGuidance = clip => {
   if (captionReadiness >= 68) bestFor.push("Best for caption-first cuts");
   if (!bestFor.length) bestFor.push("Best for balanced publishing");
 
-  const openingMove =
-    clip?.hookText
-      ? `Open with "${normalizePlainText(clip.hookText)}" and make the first beat impossible to ignore.`
-      : retentionPotential >= 74
+  const openingMove = clip?.hookText
+    ? `Open with "${normalizePlainText(clip.hookText)}" and make the first beat impossible to ignore.`
+    : retentionPotential >= 74
       ? "Open on the strongest beat and hit it with a fast curiosity hook."
       : thumbnailPotential >= 72
         ? "Lead with the clearest face or object frame and let the visual promise carry the intro."
@@ -826,10 +826,22 @@ const buildClipGuidance = clip => {
     openingMove,
     recutVariants,
     scoreBreakdown: [
-      { label: "Hook", value: clampNumber(Number(clip?.scoreBreakdown?.hook) || Math.round((signals.hook ? 70 : 34) + retentionPotential * 0.3), 0, 100, 0) },
+      {
+        label: "Hook",
+        value: clampNumber(
+          Number(clip?.scoreBreakdown?.hook) ||
+            Math.round((signals.hook ? 70 : 34) + retentionPotential * 0.3),
+          0,
+          100,
+          0
+        ),
+      },
       { label: "Retention", value: retentionPotential },
       { label: "Thumbnail", value: thumbnailPotential },
-      { label: "Captions", value: clampNumber(Number(clip?.scoreBreakdown?.speech) || captionReadiness, 0, 100, 0) },
+      {
+        label: "Captions",
+        value: clampNumber(Number(clip?.scoreBreakdown?.speech) || captionReadiness, 0, 100, 0),
+      },
       { label: "Conversion", value: conversionPotential },
       { label: "Story", value: semanticArcScore },
     ],
@@ -1286,6 +1298,11 @@ const ViralClipStudio = ({
   const [musicPreviewNeedsGesture, setMusicPreviewNeedsGesture] = useState(false);
   const [isBackgroundSoundPreviewing, setIsBackgroundSoundPreviewing] = useState(false);
   const [extractedAudio, setExtractedAudio] = useState(null);
+  const [studioInspectorTab, setStudioInspectorTab] = useState("hook");
+  const [comparisonMode, setComparisonMode] = useState("split");
+  const [studioActionMessage, setStudioActionMessage] = useState(
+    "Split preview is live. Edit on the right and compare the untouched source beside it."
+  );
 
   // ── Music Track State ──
   const [musicTrack, setMusicTrack] = useState(null); // { url, file, name, trimStart, trimEnd, fadeIn, fadeOut, loop, volume, ducking, duckingStrength, duckingMode }
@@ -1300,7 +1317,12 @@ const ViralClipStudio = ({
     { name: "Lo-Fi Chill", file: "lofi_chill.mp3", category: "lofi", emoji: "☕" },
     { name: "Hip Hop Beat", file: "hiphop_beat.mp3", category: "hiphop", emoji: "🎤" },
     { name: "Emotional Piano", file: "emotional_piano.mp3", category: "emotional", emoji: "🎹" },
-    { name: "Motivational Anthem", file: "motivational_anthem.mp3", category: "motivational", emoji: "🔥" },
+    {
+      name: "Motivational Anthem",
+      file: "motivational_anthem.mp3",
+      category: "motivational",
+      emoji: "🔥",
+    },
     { name: "Corporate Clean", file: "corporate_clean.mp3", category: "corporate", emoji: "💼" },
     { name: "Trap Banger", file: "trap_banger.mp3", category: "trap", emoji: "💎" },
     { name: "Acoustic Warm", file: "acoustic_warm.mp3", category: "acoustic", emoji: "🎸" },
@@ -1348,6 +1370,7 @@ const ViralClipStudio = ({
   const [canRedo, setCanRedo] = useState(false);
 
   const videoRef = useRef(null);
+  const beforeVideoRef = useRef(null);
   const audioRef = useRef(null);
   const smartCropForegroundVideoRef = useRef(null);
   const hookBackdropVideoRef = useRef(null);
@@ -1385,7 +1408,15 @@ const ViralClipStudio = ({
     return asset.url || asset.src || asset.downloadURL || asset.mediaUrl || asset.thumbnail || "";
   };
 
-  const cloneSnapshot = snapshot => JSON.parse(JSON.stringify(snapshot));
+  const cloneSnapshot = value => {
+    if (value === null || typeof value !== "object") return value;
+    if (typeof Blob !== "undefined" && value instanceof Blob) return value;
+    if (Array.isArray(value)) return value.map(cloneSnapshot);
+
+    return Object.fromEntries(
+      Object.entries(value).map(([key, nestedValue]) => [key, cloneSnapshot(nestedValue)])
+    );
+  };
 
   const releaseMusicPreviewObjectUrl = () => {
     if (musicPreviewObjectUrlRef.current) {
@@ -1565,6 +1596,7 @@ const ViralClipStudio = ({
     musicVolume,
     musicDucking,
     musicDuckingStrength,
+    musicTrack,
     extractedAudio,
     timeline,
     activeTimelineIndex,
@@ -1586,9 +1618,7 @@ const ViralClipStudio = ({
     setOverlays(snapshot.overlays || []);
     setActiveOverlayId(snapshot.activeOverlayId || null);
     setVideoFit(snapshot.videoFit || "contain");
-    setSafeFaceFraming(
-      snapshot.safeFaceFraming !== undefined ? !!snapshot.safeFaceFraming : true
-    );
+    setSafeFaceFraming(snapshot.safeFaceFraming !== undefined ? !!snapshot.safeFaceFraming : true);
     setFaceAnchorPreset(snapshot.faceAnchorPreset || "center");
     setAutoCaptions(!!snapshot.autoCaptions);
     setSmartCrop(!!snapshot.smartCrop);
@@ -1632,6 +1662,7 @@ const ViralClipStudio = ({
     setMusicVolume(Number(snapshot.musicVolume ?? 0.15));
     setMusicDucking(snapshot.musicDucking !== undefined ? !!snapshot.musicDucking : true);
     setMusicDuckingStrength(Number(snapshot.musicDuckingStrength ?? 0.35));
+    setMusicTrack(snapshot.musicTrack || null);
     setExtractedAudio(snapshot.extractedAudio || null);
     setTimeline(snapshot.timeline || []);
     setActiveTimelineIndex(Math.max(0, Number(snapshot.activeTimelineIndex || 0)));
@@ -1642,11 +1673,6 @@ const ViralClipStudio = ({
     setMusicSelection(currentMusic);
     setMusicSearchMode(!isPresetMusicSelection(currentMusic));
   }, [currentMusic]);
-
-  useEffect(() => {
-    if (addMusic) setAddMusic(false);
-    if (extractedAudio) setExtractedAudio(null);
-  }, [addMusic, extractedAudio]);
 
   useEffect(
     () => () => {
@@ -2653,11 +2679,11 @@ const ViralClipStudio = ({
 
   const activeOverlay = overlays.find(overlay => overlay.id === activeOverlayId) || null;
   const activeOverlayHasTiming = Boolean(
-    activeOverlay &&
-      activeOverlay.startTime !== undefined &&
-      activeOverlay.duration !== undefined
+    activeOverlay && activeOverlay.startTime !== undefined && activeOverlay.duration !== undefined
   );
-  const activeOverlayIsVideoBRoll = Boolean(activeOverlayHasTiming && activeOverlay?.type === "video");
+  const activeOverlayIsVideoBRoll = Boolean(
+    activeOverlayHasTiming && activeOverlay?.type === "video"
+  );
   const activeOverlayIsFullscreenBRoll = activeOverlayIsVideoBRoll;
   const activeOverlayStartTime = activeOverlayHasTiming ? Number(activeOverlay.startTime || 0) : 0;
   const activeOverlayDuration = activeOverlayHasTiming ? Number(activeOverlay.duration || 0) : 0;
@@ -2758,6 +2784,10 @@ const ViralClipStudio = ({
     setMusicPreviewStatusMessage(`Background sound ready: ${file.name}`);
     setMusicPreviewNeedsGesture(false);
     setIsBackgroundSoundPreviewing(false);
+    setStudioInspectorTab("sound");
+    setStudioActionMessage(
+      "Background sound is ready with speech-aware ducking, so dialogue stays clear."
+    );
     toast.success(`Added "${file.name}" as background music`);
     event.target.value = null;
   };
@@ -2783,6 +2813,10 @@ const ViralClipStudio = ({
     setMusicPreviewUrl("");
     setMusicPreviewStatus("idle");
     setMusicLibraryOpen(false);
+    setStudioInspectorTab("sound");
+    setStudioActionMessage(
+      `${preset.name} is ready with speech-aware ducking, so dialogue stays clear.`
+    );
     toast.success(`Selected "${preset.name}"`);
   };
 
@@ -2890,7 +2924,9 @@ const ViralClipStudio = ({
     ? momentFamilies.find(family => family.clipIds.includes(selectedClipGuidance.clip.id)) || null
     : null;
   const familySiblingEntries = selectedMomentFamily
-    ? selectedMomentFamily.members.filter(entry => entry.clip.id !== selectedClipGuidance?.clip?.id).slice(0, 3)
+    ? selectedMomentFamily.members
+        .filter(entry => entry.clip.id !== selectedClipGuidance?.clip?.id)
+        .slice(0, 3)
     : [];
   const campaignSet = buildCampaignSet(rankedClipGuidance, momentFamilies);
   const hookTemplateConfig = getHookTemplateConfig(hookTemplate);
@@ -3186,8 +3222,11 @@ const ViralClipStudio = ({
   }, [currentTimelineWindow.duration, hookMinDuration]);
 
   const presetMusicPreviewUrl =
-    addMusic && !musicSearchMode && !musicTrack?.url && musicSelection ? `/music/${musicSelection}` : "";
-  const effectiveMusicPreviewUrl = musicTrack?.url || (musicSearchMode ? musicPreviewUrl : presetMusicPreviewUrl);
+    addMusic && !musicSearchMode && !musicTrack?.url && musicSelection
+      ? `/music/${musicSelection}`
+      : "";
+  const effectiveMusicPreviewUrl =
+    musicTrack?.url || (musicSearchMode ? musicPreviewUrl : presetMusicPreviewUrl);
   const faceAnchorY =
     faceAnchorPreset === "face_top" ? 32 : faceAnchorPreset === "face_mid" ? 42 : 50;
   const safeObjectPosition = `${resolvedHookFocusPoint.x}% ${faceAnchorY}%`;
@@ -4122,8 +4161,8 @@ const ViralClipStudio = ({
     if (hasAiFeatures) {
       const proceed = window.confirm(
         "⚠️ AI features (captions, smart crop, silence removal, watermark removal, hook effects, music) " +
-        "will NOT be included in the local save. Only your visible overlays and current timeline will be captured.\n\n" +
-        "For full quality with AI features, use \"Render Final Clip\" instead.\n\nContinue with local save?"
+          "will NOT be included in the local save. Only your visible overlays and current timeline will be captured.\n\n" +
+          'For full quality with AI features, use "Render Final Clip" instead.\n\nContinue with local save?'
       );
       if (!proceed) return;
     }
@@ -4133,8 +4172,10 @@ const ViralClipStudio = ({
       return;
     }
 
-    const mimeType = ["video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus", "video/webm"]
-      .find(mt => MediaRecorder.isTypeSupported(mt)) || "video/webm";
+    const mimeType =
+      ["video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus", "video/webm"].find(mt =>
+        MediaRecorder.isTypeSupported(mt)
+      ) || "video/webm";
 
     setIsLocalExporting(true);
     setLocalExportProgress(0);
@@ -4157,10 +4198,11 @@ const ViralClipStudio = ({
       recorder.onstop = () => {
         const blob = new Blob(localChunksRef.current, { type: mimeType });
         const ext = mimeType.includes("webm") ? "webm" : "mp4";
-        const safeName = (selectedClip?.id || "viral-clip")
-          .replace(/[^a-zA-Z0-9._-]+/g, "-")
-          .replace(/-+/g, "-")
-          .replace(/^-|-$/g, "") || "viral-clip";
+        const safeName =
+          (selectedClip?.id || "viral-clip")
+            .replace(/[^a-zA-Z0-9._-]+/g, "-")
+            .replace(/-+/g, "-")
+            .replace(/^-|-$/g, "") || "viral-clip";
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
@@ -4199,13 +4241,15 @@ const ViralClipStudio = ({
       }, 200);
 
       // Auto-stop after clip duration
-      setTimeout(() => {
-        clearInterval(progressInterval);
-        if (recorder.state === "recording") {
-          recorder.stop();
-        }
-      }, clipDuration * 1000 + 500);
-
+      setTimeout(
+        () => {
+          clearInterval(progressInterval);
+          if (recorder.state === "recording") {
+            recorder.stop();
+          }
+        },
+        clipDuration * 1000 + 500
+      );
     } catch (err) {
       console.error("Local export failed:", err);
       setIsLocalExporting(false);
@@ -4693,6 +4737,55 @@ const ViralClipStudio = ({
   }, [activeTimelineIndex, timeline, selectedClip, isDragging]);
 
   useEffect(() => {
+    const afterVideo = videoRef.current;
+    const beforeVideo = beforeVideoRef.current;
+    if (!afterVideo || !beforeVideo || !currentTimelineClip) return undefined;
+
+    applySafeMediaSource(beforeVideo, currentTimelineClip.url);
+    beforeVideo.muted = true;
+    beforeVideo.defaultMuted = true;
+
+    const syncBeforePreview = () => {
+      const targetTime = Number(afterVideo.currentTime || currentTimelineWindow.start || 0);
+      if (
+        Number.isFinite(targetTime) &&
+        Math.abs(Number(beforeVideo.currentTime || 0) - targetTime) > 0.12
+      ) {
+        try {
+          beforeVideo.currentTime = targetTime;
+        } catch (error) {
+          console.log("Before preview seek skipped", error);
+        }
+      }
+      beforeVideo.playbackRate = afterVideo.playbackRate || 1;
+      if (afterVideo.paused) {
+        beforeVideo.pause();
+      } else {
+        safePlayMediaElement(beforeVideo);
+      }
+    };
+    const pauseBeforePreview = () => beforeVideo.pause();
+
+    afterVideo.addEventListener("play", syncBeforePreview);
+    afterVideo.addEventListener("timeupdate", syncBeforePreview);
+    afterVideo.addEventListener("seeking", syncBeforePreview);
+    afterVideo.addEventListener("seeked", syncBeforePreview);
+    afterVideo.addEventListener("ratechange", syncBeforePreview);
+    afterVideo.addEventListener("pause", pauseBeforePreview);
+    syncBeforePreview();
+
+    return () => {
+      afterVideo.removeEventListener("play", syncBeforePreview);
+      afterVideo.removeEventListener("timeupdate", syncBeforePreview);
+      afterVideo.removeEventListener("seeking", syncBeforePreview);
+      afterVideo.removeEventListener("seeked", syncBeforePreview);
+      afterVideo.removeEventListener("ratechange", syncBeforePreview);
+      afterVideo.removeEventListener("pause", pauseBeforePreview);
+      beforeVideo.pause();
+    };
+  }, [activeTimelineIndex, currentTimelineClip, currentTimelineWindow.start]);
+
+  useEffect(() => {
     const video = videoRef.current;
     const audio = audioRef.current;
     if (!audio) return;
@@ -4821,16 +4914,40 @@ const ViralClipStudio = ({
     );
 
     const baseGain = previewMuted ? 0 : clampAudioControl(previewVolume, 0, 1, 1);
+    const extractedMode = normalizeAudioMode(extractedAudio?.mode);
+    const extractedDuckingStrength = clampAudioControl(
+      extractedAudio?.duckingStrength,
+      0.15,
+      0.95,
+      0.45
+    );
+    const baseMuted =
+      previewMuted ||
+      muteOriginalAudio ||
+      (extractedAudio?.enabled !== false && extractedAudio?.url && extractedMode === "replace");
+    const restoredBaseGain =
+      extractedAudio?.enabled !== false && extractedAudio?.url && extractedMode === "duck_original"
+        ? clampAudioControl(1 - extractedDuckingStrength, 0.05, 1, 0.55) * baseGain
+        : baseGain;
 
     if (anyMuteMain) {
       video.muted = true;
       video.volume = 0;
     } else if (anyDucking) {
-      video.muted = false;
+      video.muted = baseMuted;
       video.volume = clampAudioControl(1 - duckingStrength, 0.05, 1, 0.55) * baseGain;
+    } else {
+      video.muted = !!baseMuted;
+      video.volume = baseMuted ? 0 : restoredBaseGain;
     }
-    // else: don't touch — let the main audio effect handle it
-  }, [previewTimelineTime, overlays, previewMuted, previewVolume]);
+  }, [
+    previewTimelineTime,
+    overlays,
+    previewMuted,
+    previewVolume,
+    muteOriginalAudio,
+    extractedAudio,
+  ]);
 
   useEffect(() => {
     applySafeMediaSource(
@@ -5068,7 +5185,8 @@ const ViralClipStudio = ({
       music.muted = false;
       music.defaultMuted = false;
       music.loop = true;
-      music.volume = clampAudioControl(musicTrack?.volume ?? musicVolume, 0.05, 0.6, 0.15) * previewGain;
+      music.volume =
+        clampAudioControl(musicTrack?.volume ?? musicVolume, 0.05, 0.6, 0.15) * previewGain;
       music.playbackRate = video.playbackRate || 1;
 
       const previewTimelineTime = clampAudioControl(
@@ -5165,7 +5283,8 @@ const ViralClipStudio = ({
     if (!musicTrack?.ducking || musicTrack.duckingMode !== "speech") {
       // Reset volume to track setting when not in speech mode
       const baseGain = previewMuted ? 0 : clampAudioControl(previewVolume, 0, 1, 1);
-      music.volume = clampAudioControl(musicTrack?.volume ?? musicVolume, 0.05, 0.6, 0.15) * baseGain;
+      music.volume =
+        clampAudioControl(musicTrack?.volume ?? musicVolume, 0.05, 0.6, 0.15) * baseGain;
       return;
     }
 
@@ -5196,7 +5315,16 @@ const ViralClipStudio = ({
         cancelAnimationFrame(speechDetectionRafRef.current);
       }
     };
-  }, [addMusic, effectiveMusicPreviewUrl, musicTrack?.ducking, musicTrack?.duckingMode, musicTrack?.volume, musicVolume, previewMuted, previewVolume]);
+  }, [
+    addMusic,
+    effectiveMusicPreviewUrl,
+    musicTrack?.ducking,
+    musicTrack?.duckingMode,
+    musicTrack?.volume,
+    musicVolume,
+    previewMuted,
+    previewVolume,
+  ]);
 
   const addTextOverlay = () => {
     // START TIME: Use current video playback time
@@ -5267,8 +5395,8 @@ const ViralClipStudio = ({
     )
       ? "broll"
       : window.confirm(
-          "Click OK for PIP OVERLAY (reaction, picture-in-picture).\nClick Cancel to APPEND to timeline."
-        )
+            "Click OK for PIP OVERLAY (reaction, picture-in-picture).\nClick Cancel to APPEND to timeline."
+          )
         ? "overlay"
         : "append";
 
@@ -5366,7 +5494,7 @@ const ViralClipStudio = ({
     });
   };
 
-  const buildVideoBRollOverlay = (file, src, startTime, duration) => ({
+  const buildVideoBRollOverlay = (file, src, startTime, duration, sourceDuration = 0) => ({
     id: createSecureId("overlay"),
     type: "video",
     src,
@@ -5381,6 +5509,7 @@ const ViralClipStudio = ({
     clipId: timeline[activeTimelineIndex]?.id || "main",
     startTime,
     duration,
+    sourceDuration,
     bRollMode: "fullscreen",
     animation: { enter: "fade", exit: "fade", enterDuration: 0.3, exitDuration: 0.3 },
     opacity: 1,
@@ -5394,7 +5523,27 @@ const ViralClipStudio = ({
   });
 
   // ── B-Roll video upload (fullscreen cutaways, auto-spread when multiple) ──
-  const handleBRollVideoUpload = event => {
+  const readLocalVideoDuration = src =>
+    new Promise(resolve => {
+      const probe = document.createElement("video");
+      let settled = false;
+      let timeoutId = null;
+      const finish = duration => {
+        if (settled) return;
+        settled = true;
+        if (timeoutId) window.clearTimeout(timeoutId);
+        probe.removeAttribute("src");
+        resolve(Number.isFinite(Number(duration)) ? Number(duration) : 0);
+      };
+      probe.preload = "metadata";
+      probe.onloadedmetadata = () => finish(probe.duration);
+      probe.onerror = () => finish(0);
+      probe.src = src;
+      timeoutId = window.setTimeout(() => finish(0), 4000);
+    });
+
+  const handleBRollVideoUpload = async event => {
+    const input = event.target;
     const files = Array.from(event.target.files || []);
     if (!files.length) return;
 
@@ -5407,7 +5556,12 @@ const ViralClipStudio = ({
 
     const duration = Math.max(
       0,
-      Number(currentTimelineWindow.duration || selectedClip?.duration || getClipDurationSeconds(selectedClip) || 0)
+      Number(
+        currentTimelineWindow.duration ||
+          selectedClip?.duration ||
+          getClipDurationSeconds(selectedClip) ||
+          0
+      )
     );
     const currentVideoTime = videoRef.current ? videoRef.current.currentTime : 0;
     const playheadTime =
@@ -5423,8 +5577,11 @@ const ViralClipStudio = ({
       1.6
     );
     const safeEnd = Math.max(0, previewDuration - fallbackShotDuration - 0.1);
-    const overlaysToAdd = videoFiles.map((file, index) => {
-      const url = URL.createObjectURL(file);
+    const localSources = videoFiles.map(file => ({ file, url: URL.createObjectURL(file) }));
+    const sourceDurations = await Promise.all(
+      localSources.map(source => readLocalVideoDuration(source.url))
+    );
+    const overlaysToAdd = localSources.map(({ file, url }, index) => {
       const evenStart =
         videoFiles.length === 1
           ? playheadTime
@@ -5435,20 +5592,27 @@ const ViralClipStudio = ({
           : clampNumber(evenStart, 0, safeEnd, evenStart);
       const shotDuration = Math.min(
         fallbackShotDuration,
-        Math.max(0.8, previewDuration - startTime)
+        Math.max(0.8, previewDuration - startTime),
+        sourceDurations[index] > 0 ? sourceDurations[index] : Number.POSITIVE_INFINITY
       );
-      return buildVideoBRollOverlay(file, url, startTime, shotDuration);
+      return buildVideoBRollOverlay(file, url, startTime, shotDuration, sourceDurations[index]);
     });
 
     setOverlays(prev => [...prev, ...overlaysToAdd]);
     setActiveOverlayId(overlaysToAdd[0]?.id || null);
+    setStudioInspectorTab("broll");
+    setStudioActionMessage(
+      overlaysToAdd.length === 1
+        ? "B-roll placed at the playhead. Set its layout, timing, and audio in one panel."
+        : `${overlaysToAdd.length} B-roll clips were distributed across the short. Fine-tune any block below.`
+    );
     toast.success(
       overlaysToAdd.length === 1
         ? "B-roll clip placed at the playhead."
         : `${overlaysToAdd.length} B-roll clips placed across the short.`
     );
 
-    event.target.value = null;
+    input.value = null;
   };
 
   const updateOverlayText = (id, newText) => {
@@ -5463,11 +5627,22 @@ const ViralClipStudio = ({
   // ── B-roll / cutaway overlay helpers ──
   const updateOverlayTimeRange = (id, startTime, duration) => {
     setOverlays(prev =>
-      prev.map(o =>
-        o.id === id
-          ? { ...o, startTime: Math.max(0, Number(startTime) || 0), duration: Math.max(0.1, Number(duration) || 0.1) }
-          : o
-      )
+      prev.map(o => {
+        if (o.id !== id) return o;
+        const nextStart = Math.max(0, Number(startTime) || 0);
+        const timelineRemaining = Math.max(
+          0.1,
+          Number(currentTimelineWindow.duration || 0) - nextStart
+        );
+        const sourceLimit =
+          Number(o.sourceDuration || 0) > 0 ? Number(o.sourceDuration) : Number.POSITIVE_INFINITY;
+        const nextDuration = Math.min(
+          Math.max(0.1, Number(duration) || 0.1),
+          timelineRemaining,
+          sourceLimit
+        );
+        return { ...o, startTime: nextStart, duration: nextDuration };
+      })
     );
   };
 
@@ -5502,7 +5677,14 @@ const ViralClipStudio = ({
     setOverlays(prev =>
       prev.map(o => {
         if (o.id !== id) return o;
-        const anim = { ...(o.animation || { enter: "fade", exit: "fade", enterDuration: 0.3, exitDuration: 0.3 }) };
+        const anim = {
+          ...(o.animation || {
+            enter: "fade",
+            exit: "fade",
+            enterDuration: 0.3,
+            exitDuration: 0.3,
+          }),
+        };
         if (animType === "enter" || animType === "exit") {
           anim[animType] = value;
         } else if (animType === "enterDuration" || animType === "exitDuration") {
@@ -5515,13 +5697,57 @@ const ViralClipStudio = ({
 
   const setOverlayOpacity = (id, value) => {
     setOverlays(prev =>
-      prev.map(o => (o.id === id ? { ...o, opacity: Math.max(0, Math.min(1, Number(value) || 1)) } : o))
+      prev.map(o =>
+        o.id === id ? { ...o, opacity: Math.max(0, Math.min(1, Number(value) || 1)) } : o
+      )
     );
   };
 
   const setOverlayAudioOption = (id, key, value) => {
+    setOverlays(prev => prev.map(o => (o.id === id ? { ...o, [key]: value } : o)));
+  };
+
+  const getOverlayAudioMode = overlay => {
+    if (!overlay?.useOverlayAudio) return "original";
+    return overlay.muteMainAudio ? "overlay" : "mix";
+  };
+
+  const setOverlayAudioMode = (id, mode) => {
     setOverlays(prev =>
-      prev.map(o => (o.id === id ? { ...o, [key]: value } : o))
+      prev.map(overlay => {
+        if (overlay.id !== id) return overlay;
+        if (mode === "overlay") {
+          return {
+            ...overlay,
+            useOverlayAudio: true,
+            muteMainAudio: true,
+            mixAudio: false,
+            audioDucking: false,
+          };
+        }
+        if (mode === "mix") {
+          return {
+            ...overlay,
+            useOverlayAudio: true,
+            muteMainAudio: false,
+            mixAudio: true,
+          };
+        }
+        return {
+          ...overlay,
+          useOverlayAudio: false,
+          muteMainAudio: false,
+          mixAudio: false,
+          audioDucking: false,
+        };
+      })
+    );
+    setStudioActionMessage(
+      mode === "overlay"
+        ? "Overlay audio is active only during this cutaway. Original audio returns automatically."
+        : mode === "mix"
+          ? "Original and overlay audio will play together during this cutaway."
+          : "The original source audio stays continuous through this cutaway."
     );
   };
 
@@ -5555,7 +5781,9 @@ const ViralClipStudio = ({
     if (!music.paused) {
       music.pause();
       setIsBackgroundSoundPreviewing(false);
-      setMusicPreviewStatusMessage(`Background sound paused: ${musicTrack?.name || currentMusicLabel}.`);
+      setMusicPreviewStatusMessage(
+        `Background sound paused: ${musicTrack?.name || currentMusicLabel}.`
+      );
       return;
     }
 
@@ -5605,7 +5833,9 @@ const ViralClipStudio = ({
     const playResult = music.play();
     setMusicPreviewStatus("ready");
     setMusicPreviewNeedsGesture(false);
-    setMusicPreviewStatusMessage(`Background sound is playing: ${musicTrack?.name || currentMusicLabel}.`);
+    setMusicPreviewStatusMessage(
+      `Background sound is playing: ${musicTrack?.name || currentMusicLabel}.`
+    );
     if (playResult && typeof playResult.catch === "function") {
       playResult.catch(error => {
         setIsBackgroundSoundPreviewing(false);
@@ -5668,13 +5898,24 @@ const ViralClipStudio = ({
     const profile = selectedClipGuidance?.audienceProfile?.id;
     const descriptor = selectedClipGuidance?.descriptorText || getClipDescriptorText(selectedClip);
 
-    if (role === "payoff" || /(before|after|result|reveal|transformation|outcome)/i.test(descriptor)) {
+    if (
+      role === "payoff" ||
+      /(before|after|result|reveal|transformation|outcome)/i.test(descriptor)
+    ) {
       return "payoff";
     }
-    if (role === "reaction" || profile === "reaction" || /(laugh|shock|face|reaction|crowd)/i.test(descriptor)) {
+    if (
+      role === "reaction" ||
+      profile === "reaction" ||
+      /(laugh|shock|face|reaction|crowd)/i.test(descriptor)
+    ) {
       return "reaction";
     }
-    if (role === "proof" || profile === "product" || /(proof|demo|screen|example|product|receipt)/i.test(descriptor)) {
+    if (
+      role === "proof" ||
+      profile === "product" ||
+      /(proof|demo|screen|example|product|receipt)/i.test(descriptor)
+    ) {
       return "proof";
     }
     return "detail";
@@ -5684,7 +5925,8 @@ const ViralClipStudio = ({
     const style = BROLL_SHOT_STYLES[styleKey] || BROLL_SHOT_STYLES.detail;
     const hook = normalizePlainText(selectedClip?.hookText || selectedClipGuidance?.hookText || "");
     const descriptor = selectedClipGuidance?.descriptorText || getClipDescriptorText(selectedClip);
-    const token = selectedClipGuidance?.semanticTokens?.[0] || getSemanticTokens(descriptor)[0] || "";
+    const token =
+      selectedClipGuidance?.semanticTokens?.[0] || getSemanticTokens(descriptor)[0] || "";
 
     if (hook && !isGenericHookText(hook)) {
       return {
@@ -6119,7 +6361,9 @@ const ViralClipStudio = ({
                 <i aria-hidden="true" />
                 Local edit
               </span>
-              <small>{overlays.length} layers · {addHook ? "Hook active" : "Hook not set"}</small>
+              <small>
+                {overlays.length} layers · {addHook ? "Hook active" : "Hook not set"}
+              </small>
             </div>
           </aside>
 
@@ -6143,10 +6387,30 @@ const ViralClipStudio = ({
                     <span className="panel-chip panel-chip-risk">Crop risk</span>
                   ) : null}
                 </div>
+                <div className="preview-mode-switch" aria-label="Preview comparison mode">
+                  {["before", "after", "split"].map(mode => (
+                    <button
+                      key={mode}
+                      type="button"
+                      className={comparisonMode === mode ? "is-active" : ""}
+                      onClick={() => {
+                        setComparisonMode(mode);
+                        setStudioActionMessage(
+                          mode === "split"
+                            ? "Before and After are synchronized at the same frame."
+                            : `${mode === "before" ? "Untouched source" : "Edited result"} preview is active.`
+                        );
+                      }}
+                      aria-pressed={comparisonMode === mode}
+                    >
+                      {mode === "split" ? "Split" : mode[0].toUpperCase() + mode.slice(1)}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div className="preview-device-column">
-                <div className="preview-player-shell">
+                <div className={`preview-player-shell comparison-${comparisonMode}`}>
                   <div
                     ref={phoneFrameRef}
                     data-testid="hook-preview-frame"
@@ -6158,8 +6422,10 @@ const ViralClipStudio = ({
                     onTouchMove={handleMouseMove}
                     onTouchEnd={handleDragEnd}
                   >
+                    <span className="preview-version-label is-after">After</span>
                     <video
                       ref={videoRef}
+                      data-testid="studio-after-video"
                       className="studio-video"
                       autoPlay
                       controls
@@ -6420,9 +6686,7 @@ const ViralClipStudio = ({
                           const safeOverlaySrc = getSafeMediaSource(overlay.src);
                           const isFullscreen = overlay.bRollMode === "fullscreen";
                           const anim = overlay.animation || {};
-                          const animClass = anim.enter
-                            ? `broll-anim-${anim.enter}`
-                            : "";
+                          const animClass = anim.enter ? `broll-anim-${anim.enter}` : "";
 
                           return (
                             <div
@@ -6449,7 +6713,8 @@ const ViralClipStudio = ({
                                     : "transparent",
                                 color: overlay.color,
                                 zIndex: isFullscreen ? 300 + index : 100 + index,
-                                opacity: overlay.opacity !== undefined ? overlay.opacity : undefined,
+                                opacity:
+                                  overlay.opacity !== undefined ? overlay.opacity : undefined,
                                 transition: anim.enterDuration
                                   ? `opacity ${anim.enterDuration}s ease, transform ${anim.enterDuration}s ease`
                                   : undefined,
@@ -6465,10 +6730,21 @@ const ViralClipStudio = ({
                             >
                               {overlay.type === "text" ? (
                                 overlay.bRollPlaceholder ? (
-                                  <div className={`broll-shot-card tone-${overlay.bRollTone || "detail"}`}>
-                                    <span>{normalizePlainText(overlay.bRollKicker || "B-ROLL")}</span>
-                                    <strong>{normalizePlainText(overlay.bRollTitle || safeOverlayText)}</strong>
-                                    <small>{normalizePlainText(overlay.bRollSubtitle || "Replace with matching footage when ready.")}</small>
+                                  <div
+                                    className={`broll-shot-card tone-${overlay.bRollTone || "detail"}`}
+                                  >
+                                    <span>
+                                      {normalizePlainText(overlay.bRollKicker || "B-ROLL")}
+                                    </span>
+                                    <strong>
+                                      {normalizePlainText(overlay.bRollTitle || safeOverlayText)}
+                                    </strong>
+                                    <small>
+                                      {normalizePlainText(
+                                        overlay.bRollSubtitle ||
+                                          "Replace with matching footage when ready."
+                                      )}
+                                    </small>
                                   </div>
                                 ) : overlay.isRainbow ? (
                                   <RainbowText
@@ -6494,12 +6770,21 @@ const ViralClipStudio = ({
                                 />
                               ) : safeOverlaySrc ? (
                                 <video
+                                  data-testid={`broll-preview-${overlay.id}`}
                                   ref={element => {
                                     applySafeMediaSource(element, safeOverlaySrc);
+                                    if (element) {
+                                      element.volume = clampAudioControl(
+                                        overlay.overlayAudioVolume,
+                                        0,
+                                        1,
+                                        0.7
+                                      );
+                                    }
                                   }}
                                   autoPlay
                                   loop
-                                  muted
+                                  muted={!overlay.useOverlayAudio || previewMuted}
                                   style={{
                                     width: "100%",
                                     height: "100%",
@@ -6521,141 +6806,161 @@ const ViralClipStudio = ({
                                   >
                                     &times;
                                   </button>
-                                  {!isFullscreen && (overlay.type === "video" || overlay.type === "image") && (
-                                    <div
-                                      className="resize-handle"
-                                      onMouseDown={e => {
-                                        e.stopPropagation();
-                                      }}
-                                    >
-                                      <button
-                                        className="resize-btn"
-                                        onClick={e => {
+                                  {!isFullscreen &&
+                                    (overlay.type === "video" || overlay.type === "image") && (
+                                      <div
+                                        className="resize-handle"
+                                        onMouseDown={e => {
                                           e.stopPropagation();
-                                          e.preventDefault();
-                                          updateOverlaySize(overlay.id, "width", -5);
                                         }}
                                       >
-                                        W-
-                                      </button>
-                                      <button
-                                        className="resize-btn"
-                                        onClick={e => {
-                                          e.stopPropagation();
-                                          e.preventDefault();
-                                          updateOverlaySize(overlay.id, "width", 5);
-                                        }}
-                                      >
-                                        W+
-                                      </button>
-                                      <button
-                                        className="resize-btn"
-                                        onClick={e => {
-                                          e.stopPropagation();
-                                          e.preventDefault();
-                                          updateOverlaySize(overlay.id, "height", -5);
-                                        }}
-                                      >
-                                        H-
-                                      </button>
-                                      <button
-                                        className="resize-btn"
-                                        onClick={e => {
-                                          e.stopPropagation();
-                                          e.preventDefault();
-                                          updateOverlaySize(overlay.id, "height", 5);
-                                        }}
-                                      >
-                                        H+
-                                      </button>
-                                      <button
-                                        className="resize-btn"
-                                        onClick={e => {
-                                          e.stopPropagation();
-                                          e.preventDefault();
-                                          toggleOverlayAspectRatioLock(overlay.id);
-                                        }}
-                                        title={
-                                          overlay.aspectRatioLocked
-                                            ? "Unlock aspect ratio"
-                                            : "Lock aspect ratio"
-                                        }
-                                      >
-                                        {overlay.aspectRatioLocked ? "Lock" : "Free"}
-                                      </button>
-                                      <button
-                                        className="resize-btn"
-                                        onClick={e => {
-                                          e.stopPropagation();
-                                          e.preventDefault();
-                                          centerOverlay(overlay.id);
-                                        }}
-                                        title="Center overlay"
-                                      >
-                                        Center
-                                      </button>
-                                      <button
-                                        className="resize-btn"
-                                        onClick={e => {
-                                          e.stopPropagation();
-                                          e.preventDefault();
-                                          duplicateOverlay(overlay.id);
-                                        }}
-                                        title="Duplicate overlay"
-                                      >
-                                        Copy
-                                      </button>
-                                      <button
-                                        className="resize-btn"
-                                        onClick={e => {
-                                          e.stopPropagation();
-                                          e.preventDefault();
-                                          moveOverlay(overlay.id, "backward");
-                                        }}
-                                        title="Move layer backward"
-                                      >
-                                        Down
-                                      </button>
-                                      <button
-                                        className="resize-btn"
-                                        onClick={e => {
-                                          e.stopPropagation();
-                                          e.preventDefault();
-                                          moveOverlay(overlay.id, "forward");
-                                        }}
-                                        title="Move layer forward"
-                                      >
-                                        Up
-                                      </button>
-                                      <button
-                                        className="resize-btn"
-                                        onClick={e => {
-                                          e.stopPropagation();
-                                          e.preventDefault();
-                                          moveOverlay(overlay.id, "back");
-                                        }}
-                                        title="Send layer to back"
-                                      >
-                                        Back
-                                      </button>
-                                      <button
-                                        className="resize-btn"
-                                        onClick={e => {
-                                          e.stopPropagation();
-                                          e.preventDefault();
-                                          moveOverlay(overlay.id, "front");
-                                        }}
-                                        title="Bring layer to front"
-                                      >
-                                        Front
-                                      </button>
-                                    </div>
-                                  )}
+                                        <button
+                                          className="resize-btn"
+                                          onClick={e => {
+                                            e.stopPropagation();
+                                            e.preventDefault();
+                                            updateOverlaySize(overlay.id, "width", -5);
+                                          }}
+                                        >
+                                          W-
+                                        </button>
+                                        <button
+                                          className="resize-btn"
+                                          onClick={e => {
+                                            e.stopPropagation();
+                                            e.preventDefault();
+                                            updateOverlaySize(overlay.id, "width", 5);
+                                          }}
+                                        >
+                                          W+
+                                        </button>
+                                        <button
+                                          className="resize-btn"
+                                          onClick={e => {
+                                            e.stopPropagation();
+                                            e.preventDefault();
+                                            updateOverlaySize(overlay.id, "height", -5);
+                                          }}
+                                        >
+                                          H-
+                                        </button>
+                                        <button
+                                          className="resize-btn"
+                                          onClick={e => {
+                                            e.stopPropagation();
+                                            e.preventDefault();
+                                            updateOverlaySize(overlay.id, "height", 5);
+                                          }}
+                                        >
+                                          H+
+                                        </button>
+                                        <button
+                                          className="resize-btn"
+                                          onClick={e => {
+                                            e.stopPropagation();
+                                            e.preventDefault();
+                                            toggleOverlayAspectRatioLock(overlay.id);
+                                          }}
+                                          title={
+                                            overlay.aspectRatioLocked
+                                              ? "Unlock aspect ratio"
+                                              : "Lock aspect ratio"
+                                          }
+                                        >
+                                          {overlay.aspectRatioLocked ? "Lock" : "Free"}
+                                        </button>
+                                        <button
+                                          className="resize-btn"
+                                          onClick={e => {
+                                            e.stopPropagation();
+                                            e.preventDefault();
+                                            centerOverlay(overlay.id);
+                                          }}
+                                          title="Center overlay"
+                                        >
+                                          Center
+                                        </button>
+                                        <button
+                                          className="resize-btn"
+                                          onClick={e => {
+                                            e.stopPropagation();
+                                            e.preventDefault();
+                                            duplicateOverlay(overlay.id);
+                                          }}
+                                          title="Duplicate overlay"
+                                        >
+                                          Copy
+                                        </button>
+                                        <button
+                                          className="resize-btn"
+                                          onClick={e => {
+                                            e.stopPropagation();
+                                            e.preventDefault();
+                                            moveOverlay(overlay.id, "backward");
+                                          }}
+                                          title="Move layer backward"
+                                        >
+                                          Down
+                                        </button>
+                                        <button
+                                          className="resize-btn"
+                                          onClick={e => {
+                                            e.stopPropagation();
+                                            e.preventDefault();
+                                            moveOverlay(overlay.id, "forward");
+                                          }}
+                                          title="Move layer forward"
+                                        >
+                                          Up
+                                        </button>
+                                        <button
+                                          className="resize-btn"
+                                          onClick={e => {
+                                            e.stopPropagation();
+                                            e.preventDefault();
+                                            moveOverlay(overlay.id, "back");
+                                          }}
+                                          title="Send layer to back"
+                                        >
+                                          Back
+                                        </button>
+                                        <button
+                                          className="resize-btn"
+                                          onClick={e => {
+                                            e.stopPropagation();
+                                            e.preventDefault();
+                                            moveOverlay(overlay.id, "front");
+                                          }}
+                                          title="Bring layer to front"
+                                        >
+                                          Front
+                                        </button>
+                                      </div>
+                                    )}
                                 </div>
                               )}
                             </div>
                           );
                         })}
+                    </div>
+                  </div>
+                  <div className="before-preview-card" data-testid="before-preview-frame">
+                    <span className="preview-version-label is-before">Before</span>
+                    <div className="phone-frame phone-frame-before">
+                      <video
+                        ref={beforeVideoRef}
+                        className="studio-video"
+                        muted
+                        playsInline
+                        preload="auto"
+                        aria-label="Untouched source preview"
+                        style={{
+                          objectFit: effectiveVideoFit,
+                          objectPosition: safeObjectPosition,
+                          width: "100%",
+                          height: "100%",
+                        }}
+                      />
                     </div>
                   </div>
                 </div>
@@ -6689,6 +6994,77 @@ const ViralClipStudio = ({
                         ? "Use this when the visual story is stronger than the raw source sound."
                         : "Keep live voice, reactions, and ambient energy when they help the hook land."}
                     </span>
+                  </div>
+                </div>
+                <div className="studio-compact-timeline" aria-label="Hook and B-roll timeline">
+                  <div className="compact-timeline-head">
+                    <div>
+                      <strong>Live edit timeline</strong>
+                      <span>
+                        {formatPreviewTimePrecise(trimAwareCurrentTime)} /{" "}
+                        {formatPreviewTimePrecise(currentTimelineWindow.duration)}
+                      </span>
+                    </div>
+                    <span className="compact-timeline-sync">● Synced</span>
+                  </div>
+                  <div className="compact-timeline-row">
+                    <span>Hook</span>
+                    <div className="compact-timeline-track">
+                      <i
+                        className="compact-timeline-playhead"
+                        style={{ left: `${hookPlayheadLeft}%` }}
+                      />
+                      {addHook ? (
+                        <button
+                          type="button"
+                          className="compact-timeline-block is-hook"
+                          style={{
+                            left: `${hookSelectionLeft}%`,
+                            width: `${Math.max(3, hookSelectionWidth)}%`,
+                          }}
+                          onClick={() => {
+                            setStudioInspectorTab("hook");
+                            previewHookSegment(false);
+                          }}
+                        >
+                          Opening hook
+                        </button>
+                      ) : null}
+                    </div>
+                  </div>
+                  <div className="compact-timeline-row">
+                    <span>B-roll</span>
+                    <div className="compact-timeline-track">
+                      <i
+                        className="compact-timeline-playhead"
+                        style={{ left: `${hookPlayheadLeft}%` }}
+                      />
+                      {overlays
+                        .filter(overlay => overlay.bRollMode && overlay.startTime !== undefined)
+                        .map((overlay, index) => {
+                          const timelineDuration = Math.max(
+                            0.1,
+                            Number(currentTimelineWindow.duration || 0)
+                          );
+                          const left = (Number(overlay.startTime || 0) / timelineDuration) * 100;
+                          const width = (Number(overlay.duration || 0) / timelineDuration) * 100;
+                          return (
+                            <button
+                              key={overlay.id}
+                              type="button"
+                              className={`compact-timeline-block is-broll ${activeOverlayId === overlay.id ? "is-active" : ""}`}
+                              style={{ left: `${left}%`, width: `${Math.max(3, width)}%` }}
+                              onClick={() => {
+                                setActiveOverlayId(overlay.id);
+                                setStudioInspectorTab("broll");
+                              }}
+                              title={overlay.file?.name || `B-roll ${index + 1}`}
+                            >
+                              {overlay.file?.name || `Cutaway ${index + 1}`}
+                            </button>
+                          );
+                        })}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -6814,8 +7190,8 @@ const ViralClipStudio = ({
                         title="Auto-Generate Captions"
                         onClick={async e => {
                           e.stopPropagation();
-    if (
-      !window.confirm(
+                          if (
+                            !window.confirm(
                               `Generate captions for ${clip.name || "this clip"}?\n(This uses AI to detect speech and may need manual cleanup, especially for mixed South African languages. It might take 10-30s.)`
                             )
                           )
@@ -7155,369 +7531,790 @@ const ViralClipStudio = ({
           </div>
 
           <div className="studio-sidebar">
+            <section
+              className="studio-panel clip-inspector-panel"
+              data-testid="clip-studio-inspector"
+            >
+              <div className="clip-inspector-tabs" role="tablist" aria-label="Clip Studio tools">
+                {[
+                  { id: "hook", label: "Hook", icon: "✦" },
+                  { id: "broll", label: "B-roll", icon: "▣" },
+                  { id: "sound", label: "Sound", icon: "♫" },
+                ].map(tab => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={studioInspectorTab === tab.id}
+                    className={studioInspectorTab === tab.id ? "is-active" : ""}
+                    onClick={() => setStudioInspectorTab(tab.id)}
+                  >
+                    <span>{tab.icon}</span>
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
+              {studioInspectorTab === "hook" ? (
+                <div className="clip-inspector-body" role="tabpanel">
+                  <div className="inspector-heading-row">
+                    <div>
+                      <span className="panel-kicker">Opening moment</span>
+                      <h4>Make the first seconds impossible to skip</h4>
+                    </div>
+                    <span className={`inspector-status-dot ${addHook ? "is-ready" : ""}`}>
+                      {addHook ? "Live" : "Off"}
+                    </span>
+                  </div>
+
+                  <div className="inspector-ai-card">
+                    <div>
+                      <span>AI hook suggestion</span>
+                      <strong>{currentHookSuggestion.textSuggestion || normalizedHookText}</strong>
+                      <small>
+                        {hookAnalysisStatus === "ready"
+                          ? hookAnalysisMessage || "Strong opening range detected."
+                          : "Finds the sharpest visual and spoken opening in this moment."}
+                      </small>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={runSmartHookSuggestion}
+                      disabled={hookAnalysisStatus === "analyzing"}
+                    >
+                      {hookAnalysisStatus === "analyzing" ? "Finding…" : "Try another"}
+                    </button>
+                  </div>
+
+                  <label className="inspector-field">
+                    <span>Hook text</span>
+                    <textarea
+                      value={hookText}
+                      onChange={event => setHookText(normalizeHookText(event.target.value))}
+                      rows={3}
+                      maxLength={120}
+                      placeholder="Give viewers a reason to stay"
+                    />
+                    <small>
+                      {hookText.length}/120 · keep it clear enough to read in one glance
+                    </small>
+                  </label>
+
+                  <div className="inspector-field">
+                    <span>Motion preset</span>
+                    <div className="inspector-choice-grid is-three">
+                      {[
+                        ["blur_reveal", "Blur Reveal"],
+                        ["zoom_focus", "Zoom Focus"],
+                        ["freeze_text", "Freeze frame"],
+                      ].map(([value, label]) => (
+                        <button
+                          key={value}
+                          type="button"
+                          className={hookTemplate === value ? "is-active" : ""}
+                          onClick={() => {
+                            setAddHook(true);
+                            applyHookTemplate(value);
+                            setStudioActionMessage(`${label} is live in the After preview.`);
+                          }}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <label className="inspector-range">
+                    <span>
+                      <b>Duration</b>
+                      <strong>{hookDuration.toFixed(1)}s</strong>
+                    </span>
+                    <input
+                      type="range"
+                      min={hookMinDuration}
+                      max={hookMaxDuration}
+                      step={0.1}
+                      value={hookDuration}
+                      onChange={event => setHookDuration(Number(event.target.value))}
+                    />
+                  </label>
+
+                  <div className="inspector-inline-actions">
+                    <button type="button" onClick={() => previewHookSegment(false)}>
+                      Preview once
+                    </button>
+                    <button
+                      type="button"
+                      className={hookFocusMode ? "is-active" : ""}
+                      onClick={() => setHookFocusMode(value => !value)}
+                    >
+                      {hookFocusMode ? "Tap preview now" : "Select focal point"}
+                    </button>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="inspector-primary-action"
+                    onClick={() => {
+                      setAddHook(true);
+                      setComparisonMode("split");
+                      previewHookSegment(false);
+                      setStudioActionMessage(
+                        "Hook applied. Compare the untouched source and edited opening side by side."
+                      );
+                    }}
+                  >
+                    ✦ Apply Hook
+                  </button>
+                </div>
+              ) : null}
+
+              {studioInspectorTab === "broll" ? (
+                <div className="clip-inspector-body" role="tabpanel">
+                  <div className="inspector-heading-row">
+                    <div>
+                      <span className="panel-kicker">Cutaway layer</span>
+                      <h4>Show the proof while the story keeps moving</h4>
+                    </div>
+                    <span className="inspector-status-dot is-ready">
+                      {overlays.filter(overlay => overlay.bRollMode).length} clips
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="inspector-upload-card"
+                    onClick={() => brollVideoInputRef.current?.click()}
+                  >
+                    <span>＋</span>
+                    <div>
+                      <strong>Upload B-roll</strong>
+                      <small>MP4, MOV, WEBM · placed at the playhead</small>
+                    </div>
+                  </button>
+
+                  {activeOverlayIsVideoBRoll ? (
+                    <>
+                      <div className="inspector-selected-asset">
+                        <video
+                          ref={element => applySafeMediaSource(element, activeOverlaySafeSrc)}
+                          muted
+                          playsInline
+                          preload="metadata"
+                        />
+                        <div>
+                          <span>Selected cutaway</span>
+                          <strong>{activeOverlayDisplayName}</strong>
+                          <small>
+                            {activeOverlayStartTime.toFixed(1)}s–{activeOverlayEndTime.toFixed(1)}s
+                          </small>
+                        </div>
+                      </div>
+
+                      <div className="inspector-time-grid">
+                        <label>
+                          <span>Start</span>
+                          <input
+                            type="number"
+                            min={0}
+                            step={0.1}
+                            value={activeOverlayStartTime.toFixed(1)}
+                            onChange={event =>
+                              updateOverlayTimeRange(
+                                activeOverlay.id,
+                                Number(event.target.value),
+                                activeOverlayDuration
+                              )
+                            }
+                          />
+                        </label>
+                        <label>
+                          <span>Duration</span>
+                          <input
+                            type="number"
+                            min={0.1}
+                            step={0.1}
+                            value={activeOverlayDuration.toFixed(1)}
+                            onChange={event =>
+                              updateOverlayTimeRange(
+                                activeOverlay.id,
+                                activeOverlayStartTime,
+                                Number(event.target.value)
+                              )
+                            }
+                          />
+                        </label>
+                      </div>
+
+                      <div className="inspector-field">
+                        <span>Layout</span>
+                        <div className="inspector-choice-grid is-three">
+                          {[
+                            ["fullscreen", "Full screen"],
+                            ["pip", "Picture-in-picture"],
+                            ["sideBySide", "Side by side"],
+                          ].map(([value, label]) => (
+                            <button
+                              key={value}
+                              type="button"
+                              className={activeOverlay.bRollMode === value ? "is-active" : ""}
+                              onClick={() => setOverlayBRollMode(activeOverlay.id, value)}
+                            >
+                              {label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="inspector-field">
+                        <span>Cutaway audio</span>
+                        <div className="inspector-choice-grid is-three audio-mode-grid">
+                          {[
+                            ["original", "Keep original"],
+                            ["overlay", "Use overlay"],
+                            ["mix", "Mix both"],
+                          ].map(([value, label]) => (
+                            <button
+                              key={value}
+                              type="button"
+                              className={
+                                getOverlayAudioMode(activeOverlay) === value ? "is-active" : ""
+                              }
+                              onClick={() => setOverlayAudioMode(activeOverlay.id, value)}
+                            >
+                              {label}
+                            </button>
+                          ))}
+                        </div>
+                        <small className="inspector-reassurance">
+                          ✓ Original audio returns automatically after the cutaway.
+                        </small>
+                      </div>
+
+                      {getOverlayAudioMode(activeOverlay) === "mix" ? (
+                        <label className="inspector-check-row">
+                          <input
+                            type="checkbox"
+                            checked={!!activeOverlay.audioDucking}
+                            onChange={event =>
+                              setOverlayAudioOption(
+                                activeOverlay.id,
+                                "audioDucking",
+                                event.target.checked
+                              )
+                            }
+                          />
+                          <span>
+                            <strong>Duck original under overlay</strong>
+                            <small>Keeps both sources clear when voices overlap.</small>
+                          </span>
+                        </label>
+                      ) : null}
+
+                      <button
+                        type="button"
+                        className="inspector-primary-action"
+                        onClick={() => {
+                          const video = videoRef.current;
+                          if (video) {
+                            video.currentTime =
+                              Number(currentTimelineWindow.start || 0) + activeOverlayStartTime;
+                            safePlayMediaElement(video);
+                          }
+                          setComparisonMode("split");
+                          setStudioActionMessage(
+                            "B-roll applied and previewing at its exact cutaway point."
+                          );
+                        }}
+                      >
+                        ▣ Apply B-roll
+                      </button>
+                    </>
+                  ) : (
+                    <div className="inspector-empty-state">
+                      <span>▣</span>
+                      <strong>No B-roll selected</strong>
+                      <small>Upload a clip or select a cutaway block in the timeline.</small>
+                    </div>
+                  )}
+                </div>
+              ) : null}
+
+              {studioInspectorTab === "sound" ? (
+                <div className="clip-inspector-body" role="tabpanel">
+                  <div className="inspector-heading-row">
+                    <div>
+                      <span className="panel-kicker">Sound mix</span>
+                      <h4>Keep speech clear and energy consistent</h4>
+                    </div>
+                    <span className={`inspector-status-dot ${addMusic ? "is-ready" : ""}`}>
+                      {addMusic ? "Music on" : "Voice only"}
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="inspector-upload-card"
+                    onClick={() => quickMusicFileInputRef.current?.click()}
+                  >
+                    <span>♫</span>
+                    <div>
+                      <strong>
+                        {addMusic && musicTrack ? musicTrack.name : "Add background sound"}
+                      </strong>
+                      <small>
+                        {addMusic ? "Click to replace this track" : "MP3, WAV, OGG, M4A or AAC"}
+                      </small>
+                    </div>
+                  </button>
+
+                  {addMusic && musicTrack ? (
+                    <>
+                      <label className="inspector-range">
+                        <span>
+                          <b>Background volume</b>
+                          <strong>{Math.round((musicTrack.volume ?? musicVolume) * 100)}%</strong>
+                        </span>
+                        <input
+                          type="range"
+                          min={5}
+                          max={60}
+                          step={1}
+                          value={Math.round((musicTrack.volume ?? musicVolume) * 100)}
+                          onChange={event => {
+                            const value = Number(event.target.value) / 100;
+                            setMusicVolume(value);
+                            setMusicTrackField("volume", value);
+                          }}
+                        />
+                      </label>
+
+                      <label className="inspector-check-row">
+                        <input
+                          type="checkbox"
+                          checked={musicTrack.ducking ?? true}
+                          onChange={event => setMusicTrackField("ducking", event.target.checked)}
+                        />
+                        <span>
+                          <strong>Duck under speech</strong>
+                          <small>Music lowers automatically while someone is talking.</small>
+                        </span>
+                      </label>
+
+                      <div className="inspector-inline-actions">
+                        <button type="button" onClick={toggleBackgroundSoundPreview}>
+                          {isBackgroundSoundPreviewing ? "Stop sound" : "Preview sound"}
+                        </button>
+                        <button type="button" onClick={removeMusic}>
+                          Remove
+                        </button>
+                      </div>
+                    </>
+                  ) : null}
+
+                  <label className="inspector-check-row">
+                    <input
+                      type="checkbox"
+                      checked={!muteOriginalAudio}
+                      onChange={event => setMuteOriginalAudio(!event.target.checked)}
+                    />
+                    <span>
+                      <strong>Keep original audio</strong>
+                      <small>Voice and room sound remain present outside cutaway rules.</small>
+                    </span>
+                  </label>
+
+                  <div className="sound-flow-summary">
+                    <span>Source voice</span>
+                    <i>→</i>
+                    <span>B-roll rules</span>
+                    <i>→</i>
+                    <span>Background ducking</span>
+                  </div>
+                </div>
+              ) : null}
+
+              <div className="clip-inspector-feedback" role="status">
+                <span>✓</span>
+                <p>{studioActionMessage}</p>
+              </div>
+            </section>
             {/* ── B-Roll / Overlay Timeline Track ── */}
             <section className="studio-panel broll-timeline-panel">
-            <div className="panel-heading compact">
-              <div>
-                <span className="panel-kicker">B-Roll</span>
-                <h4>Main · Hook · B-Roll</h4>
-                <p className="panel-description">
-                  Upload clips to place real cutaways, or add a placeholder beat while planning.
-                </p>
-              </div>
-            </div>
-            <div className="broll-sound-panel">
-              <div className="broll-sound-panel-header">
+              <div className="panel-heading compact">
                 <div>
-                  <span className="panel-kicker">Background Sound</span>
-                  <strong>{addMusic && musicTrack ? musicTrack.name || "Custom sound" : "No sound uploaded"}</strong>
+                  <span className="panel-kicker">B-Roll</span>
+                  <h4>Main · Hook · B-Roll</h4>
+                  <p className="panel-description">
+                    Upload clips to place real cutaways, or add a placeholder beat while planning.
+                  </p>
                 </div>
-                {addMusic && musicTrack ? (
-                  <span className="broll-sound-state">
-                    {isBackgroundSoundPreviewing ? "Playing" : "Ready"}
-                  </span>
+              </div>
+              <div className="broll-sound-panel">
+                <div className="broll-sound-panel-header">
+                  <div>
+                    <span className="panel-kicker">Background Sound</span>
+                    <strong>
+                      {addMusic && musicTrack
+                        ? musicTrack.name || "Custom sound"
+                        : "No sound uploaded"}
+                    </strong>
+                  </div>
+                  {addMusic && musicTrack ? (
+                    <span className="broll-sound-state">
+                      {isBackgroundSoundPreviewing ? "Playing" : "Ready"}
+                    </span>
+                  ) : null}
+                </div>
+                <input
+                  type="file"
+                  ref={quickMusicFileInputRef}
+                  data-testid="background-sound-input"
+                  accept="audio/*,.mp3,.wav,.ogg,.m4a,.aac"
+                  style={{ display: "none" }}
+                  onChange={handleMusicFileUpload}
+                />
+                <div className="broll-sound-actions">
+                  <button
+                    type="button"
+                    className="clip-action-btn broll-sound-btn"
+                    onClick={() => quickMusicFileInputRef.current?.click()}
+                  >
+                    {addMusic && musicTrack ? "Change Background Sound" : "Upload Background Sound"}
+                  </button>
+                  {addMusic && musicTrack ? (
+                    <>
+                      <button
+                        type="button"
+                        className="clip-action-btn broll-sound-active-btn"
+                        onClick={toggleBackgroundSoundPreview}
+                        title="Play or pause background sound preview"
+                      >
+                        {isBackgroundSoundPreviewing ? "Stop Sound" : "Preview Sound"}
+                      </button>
+                      <button
+                        type="button"
+                        className="clip-action-btn broll-sound-active-btn"
+                        onClick={removeMusic}
+                        title="Remove background sound"
+                      >
+                        Remove Sound
+                      </button>
+                    </>
+                  ) : null}
+                </div>
+                <SafeAudio
+                  ref={musicPreviewRef}
+                  className={`broll-sound-player ${addMusic && effectiveMusicPreviewUrl ? "" : "empty"}`}
+                  controls={addMusic && !!effectiveMusicPreviewUrl}
+                  preload="auto"
+                  src={addMusic ? effectiveMusicPreviewUrl : undefined}
+                />
+                {addMusic && musicPreviewStatusMessage ? (
+                  <p className="broll-sound-message">{musicPreviewStatusMessage}</p>
                 ) : null}
               </div>
-              <input
-                type="file"
-                ref={quickMusicFileInputRef}
-                accept="audio/*,.mp3,.wav,.ogg,.m4a,.aac"
-                style={{ display: "none" }}
-                onChange={handleMusicFileUpload}
-              />
-              <div className="broll-sound-actions">
+              <div className="broll-timeline-tracks">
+                {/* Track: Main Video */}
+                <div className="broll-track-row">
+                  <span className="broll-track-label">🎬 Main</span>
+                  <div className="broll-track-bar">
+                    <div
+                      className="broll-main-block"
+                      style={{ width: "100%" }}
+                      title="Main A-roll video"
+                    />
+                  </div>
+                </div>
+
+                {/* Track: Captions */}
+                <div className="broll-track-row">
+                  <span className="broll-track-label">💬 Captions</span>
+                  <div className="broll-track-bar">
+                    <div
+                      className="broll-captions-block"
+                      style={{ width: "100%" }}
+                      title="Auto-captions track"
+                    />
+                  </div>
+                </div>
+
+                {/* Track: B-Roll Overlays */}
+                <div className="broll-track-row">
+                  <span className="broll-track-label">🎞️ B-Roll</span>
+                  <div className="broll-track-bar" style={{ position: "relative" }}>
+                    {/* Playhead */}
+                    <div
+                      className="broll-playhead"
+                      style={{
+                        left: currentTimelineWindow.duration
+                          ? `${Math.min(100, (previewTimelineTime / currentTimelineWindow.duration) * 100)}%`
+                          : "0%",
+                      }}
+                    />
+                    {/* Overlay blocks */}
+                    {overlays
+                      .filter(o => o.startTime !== undefined && o.duration !== undefined)
+                      .map(o => {
+                        const leftPct = currentTimelineWindow.duration
+                          ? (Number(o.startTime) / currentTimelineWindow.duration) * 100
+                          : 0;
+                        const widthPct = currentTimelineWindow.duration
+                          ? (Number(o.duration) / currentTimelineWindow.duration) * 100
+                          : 0;
+                        const isActive = activeOverlayId === o.id;
+                        const label =
+                          o.type === "text"
+                            ? (o.text || "").slice(0, 8) || "Text"
+                            : o.type === "video"
+                              ? "🎥"
+                              : "🖼️";
+                        return (
+                          <div
+                            key={o.id}
+                            className={`broll-overlay-block ${isActive ? "active" : ""} ${o.bRollMode === "fullscreen" ? "fullscreen" : ""}`}
+                            style={{
+                              left: `${leftPct}%`,
+                              width: `${Math.max(1, widthPct)}%`,
+                              opacity: o.opacity !== undefined ? o.opacity : 1,
+                            }}
+                            onClick={() => setActiveOverlayId(o.id)}
+                            title={`${label} — ${Number(o.startTime).toFixed(1)}s → ${(Number(o.startTime) + Number(o.duration)).toFixed(1)}s${o.bRollMode ? ` (${o.bRollMode})` : ""}`}
+                          >
+                            <span className="broll-overlay-block-label">{label}</span>
+                          </div>
+                        );
+                      })}
+                    {/* Empty state */}
+                    {overlays.filter(o => o.startTime !== undefined && o.duration !== undefined)
+                      .length === 0 && (
+                      <div className="broll-empty-hint">
+                        Add a B-roll beat or upload a B-roll video
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Track: Audio */}
+                <div className="broll-track-row">
+                  <span className="broll-track-label">🔊 Audio</span>
+                  <div className="broll-track-bar" style={{ position: "relative" }}>
+                    {/* Main audio */}
+                    <div
+                      className="broll-audio-block"
+                      style={{
+                        width: muteOriginalAudio ? "0%" : "100%",
+                        opacity: muteOriginalAudio ? 0.25 : 0.55,
+                        height: addMusic ? "45%" : "100%",
+                        top: addMusic ? 0 : undefined,
+                      }}
+                      title={muteOriginalAudio ? "Main audio muted" : "Main audio active"}
+                    />
+                    {/* Music track overlay */}
+                    {addMusic && (
+                      <div
+                        className="broll-audio-block broll-music-block"
+                        style={{
+                          width: "100%",
+                          height: "55%",
+                          bottom: 0,
+                          opacity: 0.7,
+                          background: "linear-gradient(135deg, #a78bfa, #7c3aed)",
+                        }}
+                        title={`Music: ${musicTrack?.name || "Active"} · Vol: ${Math.round((musicTrack?.volume ?? musicVolume) * 100)}% · Ducking: ${musicTrack?.ducking ? (musicTrack.duckingMode === "speech" ? "Speech-aware" : "Constant") : "Off"}`}
+                      />
+                    )}
+                    {/* Music fade indicators */}
+                    {addMusic && musicTrack && (
+                      <>
+                        <div
+                          style={{
+                            position: "absolute",
+                            left: 0,
+                            top: 0,
+                            bottom: 0,
+                            width: `${Math.min(100, ((musicTrack.fadeIn || 0.5) / (currentTimelineWindow.duration || 1)) * 100)}%`,
+                            background:
+                              "linear-gradient(90deg, rgba(255,255,255,0.15), transparent)",
+                            pointerEvents: "none",
+                            zIndex: 2,
+                          }}
+                          title={`Fade In: ${musicTrack.fadeIn}s`}
+                        />
+                        <div
+                          style={{
+                            position: "absolute",
+                            right: 0,
+                            top: 0,
+                            bottom: 0,
+                            width: `${Math.min(100, ((musicTrack.fadeOut || 0.5) / (currentTimelineWindow.duration || 1)) * 100)}%`,
+                            background:
+                              "linear-gradient(270deg, rgba(255,255,255,0.15), transparent)",
+                            pointerEvents: "none",
+                            zIndex: 2,
+                          }}
+                          title={`Fade Out: ${musicTrack.fadeOut}s`}
+                        />
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+              {/* Quick actions */}
+              <div className="broll-timeline-actions">
                 <button
                   type="button"
-                  className="clip-action-btn broll-sound-btn"
-                  onClick={() => quickMusicFileInputRef.current?.click()}
+                  className="clip-action-btn"
+                  onClick={() => {
+                    const suggestions = suggestBRollMoments();
+                    if (suggestions.length === 0) {
+                      toast.info("Clip too short for B-roll suggestions.");
+                      return;
+                    }
+                    addBRollSuggestionOverlay(suggestions[0]);
+                  }}
                 >
-                  {addMusic && musicTrack ? "Change Background Sound" : "Upload Background Sound"}
+                  Add Placeholder Beat
                 </button>
-                {addMusic && musicTrack ? (
-                  <>
-                    <button
-                      type="button"
-                      className="clip-action-btn broll-sound-active-btn"
-                      onClick={toggleBackgroundSoundPreview}
-                      title="Play or pause background sound preview"
-                    >
-                      {isBackgroundSoundPreviewing ? "Stop Sound" : "Preview Sound"}
-                    </button>
-                    <button
-                      type="button"
-                      className="clip-action-btn broll-sound-active-btn"
-                      onClick={removeMusic}
-                      title="Remove background sound"
-                    >
-                      Remove Sound
-                    </button>
-                  </>
-                ) : null}
-              </div>
-              <SafeAudio
-                ref={musicPreviewRef}
-                className={`broll-sound-player ${addMusic && effectiveMusicPreviewUrl ? "" : "empty"}`}
-                controls={addMusic && !!effectiveMusicPreviewUrl}
-                preload="auto"
-                src={addMusic ? effectiveMusicPreviewUrl : undefined}
-              />
-              {addMusic && musicPreviewStatusMessage ? (
-                <p className="broll-sound-message">{musicPreviewStatusMessage}</p>
-              ) : null}
-            </div>
-            <div className="broll-timeline-tracks">
-              {/* Track: Main Video */}
-              <div className="broll-track-row">
-                <span className="broll-track-label">🎬 Main</span>
-                <div className="broll-track-bar">
-                  <div
-                    className="broll-main-block"
-                    style={{ width: "100%" }}
-                    title="Main A-roll video"
-                  />
-                </div>
+                <button
+                  type="button"
+                  className="clip-action-btn"
+                  onClick={() => {
+                    const currentVideoTime = videoRef.current ? videoRef.current.currentTime : 0;
+                    let relativeStartTime = currentVideoTime;
+                    if (selectedClip && activeTimelineIndex === 0) {
+                      relativeStartTime = Math.max(0, currentVideoTime - (selectedClip.start || 0));
+                    }
+                    const newOverlay = buildBRollOverlay({
+                      ...getBRollSuggestionCopy(getBRollStyleForClip()),
+                      style: getBRollStyleForClip(),
+                      time: relativeStartTime,
+                      duration: 1.8,
+                    });
+                    setOverlays(prev => [...prev, newOverlay]);
+                    setActiveOverlayId(newOverlay.id);
+                    toast.success("B-roll beat added at playhead.");
+                  }}
+                >
+                  Add Beat at Playhead
+                </button>
+                <input
+                  type="file"
+                  ref={brollVideoInputRef}
+                  data-testid="broll-video-input"
+                  accept="video/*"
+                  multiple
+                  style={{ display: "none" }}
+                  onChange={handleBRollVideoUpload}
+                />
+                <button
+                  type="button"
+                  className="clip-action-btn broll-upload-btn"
+                  onClick={() => brollVideoInputRef.current?.click()}
+                >
+                  📹 Upload B-Roll Clips
+                </button>
               </div>
 
-              {/* Track: Captions */}
-              <div className="broll-track-row">
-                <span className="broll-track-label">💬 Captions</span>
-                <div className="broll-track-bar">
-                  <div className="broll-captions-block" style={{ width: "100%" }} title="Auto-captions track" />
-                </div>
-              </div>
-
-              {/* Track: B-Roll Overlays */}
-              <div className="broll-track-row">
-                <span className="broll-track-label">🎞️ B-Roll</span>
-                <div className="broll-track-bar" style={{ position: "relative" }}>
-                  {/* Playhead */}
-                  <div
-                    className="broll-playhead"
-                    style={{
-                      left: currentTimelineWindow.duration
-                        ? `${Math.min(100, (previewTimelineTime / currentTimelineWindow.duration) * 100)}%`
-                        : "0%",
-                    }}
-                  />
-                  {/* Overlay blocks */}
-                  {overlays
-                    .filter(o => o.startTime !== undefined && o.duration !== undefined)
-                    .map(o => {
-                      const leftPct = currentTimelineWindow.duration
-                        ? (Number(o.startTime) / currentTimelineWindow.duration) * 100
-                        : 0;
-                      const widthPct = currentTimelineWindow.duration
-                        ? (Number(o.duration) / currentTimelineWindow.duration) * 100
-                        : 0;
-                      const isActive = activeOverlayId === o.id;
-                      const label =
-                        o.type === "text"
-                          ? (o.text || "").slice(0, 8) || "Text"
-                          : o.type === "video"
-                            ? "🎥"
-                            : "🖼️";
-                      return (
-                        <div
-                          key={o.id}
-                          className={`broll-overlay-block ${isActive ? "active" : ""} ${o.bRollMode === "fullscreen" ? "fullscreen" : ""}`}
-                          style={{
-                            left: `${leftPct}%`,
-                            width: `${Math.max(1, widthPct)}%`,
-                            opacity: o.opacity !== undefined ? o.opacity : 1,
-                          }}
-                          onClick={() => setActiveOverlayId(o.id)}
-                          title={`${label} — ${Number(o.startTime).toFixed(1)}s → ${(Number(o.startTime) + Number(o.duration)).toFixed(1)}s${o.bRollMode ? ` (${o.bRollMode})` : ""}`}
-                        >
-                          <span className="broll-overlay-block-label">{label}</span>
-                        </div>
-                      );
-                    })}
-                  {/* Empty state */}
-                  {overlays.filter(o => o.startTime !== undefined && o.duration !== undefined).length === 0 && (
-                    <div className="broll-empty-hint">Add a B-roll beat or upload a B-roll video</div>
-                  )}
-                </div>
-              </div>
-
-              {/* Track: Audio */}
-              <div className="broll-track-row">
-                <span className="broll-track-label">🔊 Audio</span>
-                <div className="broll-track-bar" style={{ position: "relative" }}>
-                  {/* Main audio */}
-                  <div
-                    className="broll-audio-block"
-                    style={{
-                      width: muteOriginalAudio ? "0%" : "100%",
-                      opacity: muteOriginalAudio ? 0.25 : 0.55,
-                      height: addMusic ? "45%" : "100%",
-                      top: addMusic ? 0 : undefined,
-                    }}
-                    title={muteOriginalAudio ? "Main audio muted" : "Main audio active"}
-                  />
-                  {/* Music track overlay */}
-                  {addMusic && (
-                    <div
-                      className="broll-audio-block broll-music-block"
-                      style={{
-                        width: "100%",
-                        height: "55%",
-                        bottom: 0,
-                        opacity: 0.7,
-                        background: "linear-gradient(135deg, #a78bfa, #7c3aed)",
-                      }}
-                      title={`Music: ${musicTrack?.name || "Active"} · Vol: ${Math.round((musicTrack?.volume ?? musicVolume) * 100)}% · Ducking: ${musicTrack?.ducking ? (musicTrack.duckingMode === "speech" ? "Speech-aware" : "Constant") : "Off"}`}
-                    />
-                  )}
-                  {/* Music fade indicators */}
-                  {addMusic && musicTrack && (
-                    <>
-                      <div
-                        style={{
-                          position: "absolute",
-                          left: 0,
-                          top: 0,
-                          bottom: 0,
-                          width: `${Math.min(100, ((musicTrack.fadeIn || 0.5) / (currentTimelineWindow.duration || 1)) * 100)}%`,
-                          background: "linear-gradient(90deg, rgba(255,255,255,0.15), transparent)",
-                          pointerEvents: "none",
-                          zIndex: 2,
-                        }}
-                        title={`Fade In: ${musicTrack.fadeIn}s`}
-                      />
-                      <div
-                        style={{
-                          position: "absolute",
-                          right: 0,
-                          top: 0,
-                          bottom: 0,
-                          width: `${Math.min(100, ((musicTrack.fadeOut || 0.5) / (currentTimelineWindow.duration || 1)) * 100)}%`,
-                          background: "linear-gradient(270deg, rgba(255,255,255,0.15), transparent)",
-                          pointerEvents: "none",
-                          zIndex: 2,
-                        }}
-                        title={`Fade Out: ${musicTrack.fadeOut}s`}
-                      />
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-            {/* Quick actions */}
-            <div className="broll-timeline-actions">
-              <button
-                type="button"
-                className="clip-action-btn"
-                onClick={() => {
-                  const suggestions = suggestBRollMoments();
-                  if (suggestions.length === 0) {
-                    toast.info("Clip too short for B-roll suggestions.");
-                    return;
-                  }
-                  addBRollSuggestionOverlay(suggestions[0]);
-                }}
-              >
-                Add Placeholder Beat
-              </button>
-              <button
-                type="button"
-                className="clip-action-btn"
-                onClick={() => {
-                  const currentVideoTime = videoRef.current ? videoRef.current.currentTime : 0;
-                  let relativeStartTime = currentVideoTime;
-                  if (selectedClip && activeTimelineIndex === 0) {
-                    relativeStartTime = Math.max(0, currentVideoTime - (selectedClip.start || 0));
-                  }
-                  const newOverlay = buildBRollOverlay({
-                    ...getBRollSuggestionCopy(getBRollStyleForClip()),
-                    style: getBRollStyleForClip(),
-                    time: relativeStartTime,
-                    duration: 1.8,
-                  });
-                  setOverlays(prev => [...prev, newOverlay]);
-                  setActiveOverlayId(newOverlay.id);
-                  toast.success("B-roll beat added at playhead.");
-                }}
-              >
-                Add Beat at Playhead
-              </button>
-              <input
-                type="file"
-                ref={brollVideoInputRef}
-                accept="video/*"
-                multiple
-                style={{ display: "none" }}
-                onChange={handleBRollVideoUpload}
-              />
-              <button
-                type="button"
-                className="clip-action-btn broll-upload-btn"
-                onClick={() => brollVideoInputRef.current?.click()}
-              >
-                📹 Upload B-Roll Clips
-              </button>
-            </div>
-
-            {(() => {
-              const brollVideoOverlays = overlays.filter(
-                overlay => overlay.type === "video" && overlay.bRollMode
-              );
-              if (!brollVideoOverlays.length) return null;
-              return (
-                <div className="broll-clip-library">
-                  <div className="broll-clip-library-header">
-                    <span>Uploaded B-roll clips</span>
-                    <strong>{brollVideoOverlays.length}</strong>
-                  </div>
-                  <div className="broll-clip-grid">
-                    {brollVideoOverlays.map((overlay, index) => {
-                      const safeSrc = getSafeMediaSource(overlay.src);
-                      const isActive = activeOverlayId === overlay.id;
-                      const label =
-                        overlay.file?.name ||
-                        overlay.name ||
-                        `B-roll clip ${index + 1}`;
-                      return (
-                        <div
-                          key={overlay.id}
-                          className={`broll-clip-card ${isActive ? "active" : ""}`}
-                          onClick={() => selectBRollOverlay(overlay)}
-                        >
-                          <div className="broll-clip-preview">
-                            {safeSrc ? (
-                              <video
-                                ref={element => {
-                                  applySafeMediaSource(element, safeSrc);
+              {(() => {
+                const brollVideoOverlays = overlays.filter(
+                  overlay => overlay.type === "video" && overlay.bRollMode
+                );
+                if (!brollVideoOverlays.length) return null;
+                return (
+                  <div className="broll-clip-library">
+                    <div className="broll-clip-library-header">
+                      <span>Uploaded B-roll clips</span>
+                      <strong>{brollVideoOverlays.length}</strong>
+                    </div>
+                    <div className="broll-clip-grid">
+                      {brollVideoOverlays.map((overlay, index) => {
+                        const safeSrc = getSafeMediaSource(overlay.src);
+                        const isActive = activeOverlayId === overlay.id;
+                        const label =
+                          overlay.file?.name || overlay.name || `B-roll clip ${index + 1}`;
+                        return (
+                          <div
+                            key={overlay.id}
+                            className={`broll-clip-card ${isActive ? "active" : ""}`}
+                            onClick={() => selectBRollOverlay(overlay)}
+                          >
+                            <div className="broll-clip-preview">
+                              {safeSrc ? (
+                                <video
+                                  ref={element => {
+                                    applySafeMediaSource(element, safeSrc);
+                                  }}
+                                  controls
+                                  muted
+                                  playsInline
+                                  preload="metadata"
+                                />
+                              ) : (
+                                <span>No preview</span>
+                              )}
+                            </div>
+                            <div className="broll-clip-meta">
+                              <strong title={label}>{label}</strong>
+                              <span>
+                                {Number(overlay.startTime || 0).toFixed(1)}s ·{" "}
+                                {Number(overlay.duration || 0).toFixed(1)}s
+                              </span>
+                            </div>
+                            <div className="broll-clip-actions">
+                              <button
+                                type="button"
+                                className="mini-toggle-btn"
+                                onClick={event => {
+                                  event.stopPropagation();
+                                  selectBRollOverlay(overlay);
                                 }}
-                                controls
-                                muted
-                                playsInline
-                                preload="metadata"
-                              />
-                            ) : (
-                              <span>No preview</span>
-                            )}
+                              >
+                                Select
+                              </button>
+                              <button
+                                type="button"
+                                className="mini-toggle-btn"
+                                onClick={event => {
+                                  event.stopPropagation();
+                                  deleteOverlay(overlay.id);
+                                }}
+                              >
+                                Remove
+                              </button>
+                            </div>
                           </div>
-                          <div className="broll-clip-meta">
-                            <strong title={label}>{label}</strong>
-                            <span>
-                              {Number(overlay.startTime || 0).toFixed(1)}s ·{" "}
-                              {Number(overlay.duration || 0).toFixed(1)}s
-                            </span>
-                          </div>
-                          <div className="broll-clip-actions">
-                            <button
-                              type="button"
-                              className="mini-toggle-btn"
-                              onClick={event => {
-                                event.stopPropagation();
-                                selectBRollOverlay(overlay);
-                              }}
-                            >
-                              Select
-                            </button>
-                            <button
-                              type="button"
-                              className="mini-toggle-btn"
-                              onClick={event => {
-                                event.stopPropagation();
-                                deleteOverlay(overlay.id);
-                              }}
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              );
-            })()}
+                );
+              })()}
 
-            {/* B-roll suggestions list */}
-            {(() => {
-              const suggestions = suggestBRollMoments();
-              if (suggestions.length === 0) return null;
-              return (
-                <div className="broll-suggestions">
-                  <span className="broll-suggestions-title">B-roll Shot Beats</span>
-                  {suggestions.map((s, i) => (
-                    <button
-                      key={i}
-                      type="button"
-                      className="broll-suggestion-chip"
-                      onClick={() => addBRollSuggestionOverlay(s)}
-                    >
-                      <strong>{s.time.toFixed(1)}s</strong> — {s.kicker}
-                      <span className="broll-suggestion-reason">{s.reason}</span>
-                    </button>
-                  ))}
-                </div>
-              );
-            })()}
-          </section>
+              {/* B-roll suggestions list */}
+              {(() => {
+                const suggestions = suggestBRollMoments();
+                if (suggestions.length === 0) return null;
+                return (
+                  <div className="broll-suggestions">
+                    <span className="broll-suggestions-title">B-roll Shot Beats</span>
+                    {suggestions.map((s, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        className="broll-suggestion-chip"
+                        onClick={() => addBRollSuggestionOverlay(s)}
+                      >
+                        <strong>{s.time.toFixed(1)}s</strong> — {s.kicker}
+                        <span className="broll-suggestion-reason">{s.reason}</span>
+                      </button>
+                    ))}
+                  </div>
+                );
+              })()}
+            </section>
 
-          <section className="studio-panel workflow-summary-panel">
+            <section className="studio-panel workflow-summary-panel">
               <div className="panel-heading compact">
                 <div>
                   <span className="panel-kicker">Workflow</span>
@@ -7562,9 +8359,7 @@ const ViralClipStudio = ({
                       <span className="campaign-set-label">{item.label}</span>
                       <strong>{item.entry.momentFamilyLabel}</strong>
                       <span className="campaign-set-summary">{item.summary}</span>
-                      <span className="campaign-set-score">
-                        Viral Score {item.entry.score}
-                      </span>
+                      <span className="campaign-set-score">Viral Score {item.entry.score}</span>
                     </button>
                   ))}
                 </div>
@@ -7578,7 +8373,8 @@ const ViralClipStudio = ({
                     <span className="panel-kicker">Moment Families</span>
                     <h4>Clusters, not duplicates</h4>
                     <p className="panel-description">
-                      Similar highlights are grouped so the best angle wins without flooding the list.
+                      Similar highlights are grouped so the best angle wins without flooding the
+                      list.
                     </p>
                   </div>
                 </div>
@@ -7682,14 +8478,15 @@ const ViralClipStudio = ({
                     <strong>Packaging move</strong>
                     <p>{selectedClipGuidance.openingMove}</p>
                     <div className="clip-guidance-storyline">
-                      <span className="clip-guidance-storyline-label">
-                        Why this can travel
-                      </span>
+                      <span className="clip-guidance-storyline-label">Why this can travel</span>
                       <p>{selectedClipGuidance.travelReason}</p>
                     </div>
                     <div className="clip-guidance-scoreboard">
                       {selectedClipGuidance.scoreBreakdown.slice(0, 6).map(entry => (
-                        <div key={`${selectedClip.id}-${entry.label}`} className="clip-guidance-score-item">
+                        <div
+                          key={`${selectedClip.id}-${entry.label}`}
+                          className="clip-guidance-score-item"
+                        >
                           <span>{entry.label}</span>
                           <div className="clip-guidance-score-track">
                             <span
@@ -8916,7 +9713,13 @@ const ViralClipStudio = ({
                     </label>
 
                     {/* ── Background Music ── */}
-                    <div style={{ marginTop: "12px", borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: "10px" }}>
+                    <div
+                      style={{
+                        marginTop: "12px",
+                        borderTop: "1px solid rgba(255,255,255,0.08)",
+                        paddingTop: "10px",
+                      }}
+                    >
                       <label style={{ ...sidebarCheckboxLabelStyle, marginBottom: "4px" }}>
                         <input
                           type="checkbox"
@@ -8940,17 +9743,19 @@ const ViralClipStudio = ({
                       {addMusic && (
                         <div style={{ marginTop: "8px", paddingLeft: "4px" }}>
                           {/* Current track info */}
-                          <div style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "6px",
-                            padding: "6px 8px",
-                            background: "rgba(16,185,129,0.1)",
-                            borderRadius: "8px",
-                            marginBottom: "8px",
-                            fontSize: "0.75rem",
-                            color: "#d1fae5",
-                          }}>
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "6px",
+                              padding: "6px 8px",
+                              background: "rgba(16,185,129,0.1)",
+                              borderRadius: "8px",
+                              marginBottom: "8px",
+                              fontSize: "0.75rem",
+                              color: "#d1fae5",
+                            }}
+                          >
                             <span>🎵</span>
                             <span style={{ flex: 1, fontWeight: 600 }}>
                               {musicTrack?.name || musicSelection?.replace(".mp3", "") || "Custom"}
@@ -8984,15 +9789,17 @@ const ViralClipStudio = ({
 
                           {/* Preset Library */}
                           {musicLibraryOpen && (
-                            <div style={{
-                              display: "grid",
-                              gridTemplateColumns: "1fr 1fr",
-                              gap: "4px",
-                              marginBottom: "8px",
-                              maxHeight: "160px",
-                              overflowY: "auto",
-                              paddingRight: "2px",
-                            }}>
+                            <div
+                              style={{
+                                display: "grid",
+                                gridTemplateColumns: "1fr 1fr",
+                                gap: "4px",
+                                marginBottom: "8px",
+                                maxHeight: "160px",
+                                overflowY: "auto",
+                                paddingRight: "2px",
+                              }}
+                            >
                               {MUSIC_PRESETS.map(preset => (
                                 <button
                                   key={preset.file}
@@ -9034,7 +9841,9 @@ const ViralClipStudio = ({
 
                           {/* Music Volume */}
                           <label className="studio-slider-label" style={{ marginBottom: "6px" }}>
-                            <span>🎚️ Music Vol: {Math.round((musicTrack?.volume ?? musicVolume) * 100)}%</span>
+                            <span>
+                              🎚️ Music Vol: {Math.round((musicTrack?.volume ?? musicVolume) * 100)}%
+                            </span>
                             <input
                               type="range"
                               min={1}
@@ -9072,14 +9881,22 @@ const ViralClipStudio = ({
                                 max={3}
                                 step={0.1}
                                 value={musicTrack?.fadeOut ?? 0.5}
-                                onChange={e => setMusicTrackField("fadeOut", Number(e.target.value))}
+                                onChange={e =>
+                                  setMusicTrackField("fadeOut", Number(e.target.value))
+                                }
                                 style={{ width: "100%" }}
                               />
                             </label>
                           </div>
 
                           {/* Loop */}
-                          <label style={{ ...sidebarCheckboxLabelStyle, marginBottom: "6px", fontSize: "0.75rem" }}>
+                          <label
+                            style={{
+                              ...sidebarCheckboxLabelStyle,
+                              marginBottom: "6px",
+                              fontSize: "0.75rem",
+                            }}
+                          >
                             <input
                               type="checkbox"
                               checked={musicTrack?.loop ?? true}
@@ -9090,12 +9907,26 @@ const ViralClipStudio = ({
                           </label>
 
                           {/* Ducking */}
-                          <div style={{ marginTop: "8px", borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: "8px" }}>
-                            <span style={{ fontSize: "0.73rem", color: "#94a3b8", fontWeight: 700 }}>
+                          <div
+                            style={{
+                              marginTop: "8px",
+                              borderTop: "1px solid rgba(255,255,255,0.08)",
+                              paddingTop: "8px",
+                            }}
+                          >
+                            <span
+                              style={{ fontSize: "0.73rem", color: "#94a3b8", fontWeight: 700 }}
+                            >
                               🔊 Auto-Ducking
                             </span>
 
-                            <label style={{ ...sidebarCheckboxLabelStyle, marginTop: "4px", fontSize: "0.75rem" }}>
+                            <label
+                              style={{
+                                ...sidebarCheckboxLabelStyle,
+                                marginTop: "4px",
+                                fontSize: "0.75rem",
+                              }}
+                            >
                               <input
                                 type="checkbox"
                                 checked={musicTrack?.ducking ?? true}
@@ -9125,9 +9956,13 @@ const ViralClipStudio = ({
                                   ))}
                                 </div>
 
-                                <label className="studio-slider-label" style={{ marginBottom: "4px" }}>
+                                <label
+                                  className="studio-slider-label"
+                                  style={{ marginBottom: "4px" }}
+                                >
                                   <span>
-                                    Duck Strength: {Math.round((musicTrack?.duckingStrength ?? 0.4) * 100)}%
+                                    Duck Strength:{" "}
+                                    {Math.round((musicTrack?.duckingStrength ?? 0.4) * 100)}%
                                   </span>
                                   <input
                                     type="range"
@@ -9135,12 +9970,23 @@ const ViralClipStudio = ({
                                     max={90}
                                     step={5}
                                     value={Math.round((musicTrack?.duckingStrength ?? 0.4) * 100)}
-                                    onChange={e => setMusicTrackField("duckingStrength", Number(e.target.value) / 100)}
+                                    onChange={e =>
+                                      setMusicTrackField(
+                                        "duckingStrength",
+                                        Number(e.target.value) / 100
+                                      )
+                                    }
                                     style={{ width: "100%" }}
                                   />
                                 </label>
 
-                                <div style={{ ...sidebarBodyTextStyle, fontSize: "0.65rem", marginTop: "2px" }}>
+                                <div
+                                  style={{
+                                    ...sidebarBodyTextStyle,
+                                    fontSize: "0.65rem",
+                                    marginTop: "2px",
+                                  }}
+                                >
                                   {musicTrack?.duckingMode === "speech"
                                     ? "Music lowers smoothly when speech is detected and rises during silence."
                                     : "Music stays at a constant reduced level throughout the clip."}
@@ -9153,7 +9999,9 @@ const ViralClipStudio = ({
                     </div>
 
                     {/* Original audio context */}
-                    <div style={{ ...sidebarBodyTextStyle, marginTop: "10px", fontSize: "0.68rem" }}>
+                    <div
+                      style={{ ...sidebarBodyTextStyle, marginTop: "10px", fontSize: "0.68rem" }}
+                    >
                       {muteOriginalAudio
                         ? "Only background music will be heard."
                         : addMusic
@@ -9214,9 +10062,7 @@ const ViralClipStudio = ({
                 disabled={isExporting || isLocalExporting}
                 title="Capture the preview frame directly — no credits, no backend rendering. Overlays and timeline only."
               >
-                {isLocalExporting
-                  ? `Saving... ${localExportProgress}%`
-                  : "💾 Save Locally (Free)"}
+                {isLocalExporting ? `Saving... ${localExportProgress}%` : "💾 Save Locally (Free)"}
               </button>
               {isExporting && (
                 <button
@@ -9236,7 +10082,14 @@ const ViralClipStudio = ({
                   ✕ Cancel Render
                 </button>
               )}
-              <p style={{ fontSize: "0.72rem", color: "#94a3b8", margin: "6px 0 0 0", textAlign: "center" }}>
+              <p
+                style={{
+                  fontSize: "0.72rem",
+                  color: "#94a3b8",
+                  margin: "6px 0 0 0",
+                  textAlign: "center",
+                }}
+              >
                 {isLocalExporting
                   ? "Recording your preview frame to a file..."
                   : "Save Locally captures exactly what you see in the hook and B-roll preview."}
@@ -9270,16 +10123,14 @@ const ViralClipStudio = ({
                       (overlay.type === "text"
                         ? overlay.text || "Text layer"
                         : `${overlay.type === "image" ? "Image" : "Video"} layer`);
-                    const modeLabel =
-                      isVideoBRoll
-                        ? "Cutaway"
-                        : isTimedLayer
-                          ? "Timed layer"
-                          : "Free layer";
-                    const label =
-                      isVideoBRoll
-                        ? `B-roll: ${overlayName}`
-                        : overlay.type === "text"
+                    const modeLabel = isVideoBRoll
+                      ? "Cutaway"
+                      : isTimedLayer
+                        ? "Timed layer"
+                        : "Free layer";
+                    const label = isVideoBRoll
+                      ? `B-roll: ${overlayName}`
+                      : overlay.type === "text"
                         ? `Text: ${(overlay.text || "").slice(0, 16) || "Untitled"}`
                         : `${overlay.type === "image" ? "Image" : "Video"} Overlay`;
                     const detail = isTimedLayer
@@ -9379,30 +10230,50 @@ const ViralClipStudio = ({
                   {/* ── B-Roll Time Range ── */}
                   {activeOverlayHasTiming && (
                     <>
-                      <label className="studio-slider-label" style={{ fontWeight: 700, color: "#fbbf24" }}>
+                      <label
+                        className="studio-slider-label"
+                        style={{ fontWeight: 700, color: "#fbbf24" }}
+                      >
                         <span>⏱ Start: {Number(activeOverlay.startTime).toFixed(1)}s</span>
                         <input
                           type="range"
                           min={0}
-                          max={Math.max(0, (currentTimelineWindow.duration || 10) - (activeOverlay.duration || 0.5))}
+                          max={Math.max(
+                            0,
+                            (currentTimelineWindow.duration || 10) - (activeOverlay.duration || 0.5)
+                          )}
                           step={0.1}
                           value={activeOverlay.startTime}
                           onChange={e =>
-                            updateOverlayTimeRange(activeOverlay.id, Number(e.target.value), activeOverlay.duration)
+                            updateOverlayTimeRange(
+                              activeOverlay.id,
+                              Number(e.target.value),
+                              activeOverlay.duration
+                            )
                           }
                           style={{ width: "100%" }}
                         />
                       </label>
-                      <label className="studio-slider-label" style={{ fontWeight: 700, color: "#fbbf24" }}>
+                      <label
+                        className="studio-slider-label"
+                        style={{ fontWeight: 700, color: "#fbbf24" }}
+                      >
                         <span>⏱ Duration: {Number(activeOverlay.duration).toFixed(1)}s</span>
                         <input
                           type="range"
                           min={0.3}
-                          max={Math.max(0.5, (currentTimelineWindow.duration || 10) - (activeOverlay.startTime || 0))}
+                          max={Math.max(
+                            0.5,
+                            (currentTimelineWindow.duration || 10) - (activeOverlay.startTime || 0)
+                          )}
                           step={0.1}
                           value={activeOverlay.duration}
                           onChange={e =>
-                            updateOverlayTimeRange(activeOverlay.id, activeOverlay.startTime, Number(e.target.value))
+                            updateOverlayTimeRange(
+                              activeOverlay.id,
+                              activeOverlay.startTime,
+                              Number(e.target.value)
+                            )
                           }
                           style={{ width: "100%" }}
                         />
@@ -9502,62 +10373,79 @@ const ViralClipStudio = ({
                         max={100}
                         step={5}
                         value={Math.round((activeOverlay.opacity ?? 1) * 100)}
-                        onChange={e => setOverlayOpacity(activeOverlay.id, Number(e.target.value) / 100)}
+                        onChange={e =>
+                          setOverlayOpacity(activeOverlay.id, Number(e.target.value) / 100)
+                        }
                         style={{ width: "100%" }}
                       />
                     </label>
                   )}
 
                   {/* ── Animation ── */}
-                  {activeOverlayHasTiming && !activeOverlayIsVideoBRoll && activeOverlay.animation && (
-                    <div style={{ marginTop: "8px" }}>
-                      <span style={{ fontSize: "12px", color: "#94a3b8", fontWeight: 600 }}>✨ Animation</span>
-                      <div style={{ display: "flex", gap: "6px", marginTop: "4px", flexWrap: "wrap" }}>
-                        <select
-                          value={activeOverlay.animation.enter || "fade"}
-                          onChange={e => setOverlayAnimation(activeOverlay.id, "enter", e.target.value)}
+                  {activeOverlayHasTiming &&
+                    !activeOverlayIsVideoBRoll &&
+                    activeOverlay.animation && (
+                      <div style={{ marginTop: "8px" }}>
+                        <span style={{ fontSize: "12px", color: "#94a3b8", fontWeight: 600 }}>
+                          ✨ Animation
+                        </span>
+                        <div
                           style={{
-                            padding: "3px 6px",
-                            borderRadius: "6px",
-                            border: "1px solid #444",
-                            background: "#1a1a2e",
-                            color: "#fff",
-                            fontSize: "11px",
-                            flex: 1,
+                            display: "flex",
+                            gap: "6px",
+                            marginTop: "4px",
+                            flexWrap: "wrap",
                           }}
                         >
-                          <option value="none">No Enter</option>
-                          <option value="fade">Fade In</option>
-                          <option value="slideLeft">Slide ←</option>
-                          <option value="slideRight">Slide →</option>
-                          <option value="slideUp">Slide ↑</option>
-                          <option value="slideDown">Slide ↓</option>
-                          <option value="zoom">Zoom In</option>
-                        </select>
-                        <select
-                          value={activeOverlay.animation.exit || "fade"}
-                          onChange={e => setOverlayAnimation(activeOverlay.id, "exit", e.target.value)}
-                          style={{
-                            padding: "3px 6px",
-                            borderRadius: "6px",
-                            border: "1px solid #444",
-                            background: "#1a1a2e",
-                            color: "#fff",
-                            fontSize: "11px",
-                            flex: 1,
-                          }}
-                        >
-                          <option value="none">No Exit</option>
-                          <option value="fade">Fade Out</option>
-                          <option value="slideLeft">Slide ←</option>
-                          <option value="slideRight">Slide →</option>
-                          <option value="slideUp">Slide ↑</option>
-                          <option value="slideDown">Slide ↓</option>
-                          <option value="zoom">Zoom Out</option>
-                        </select>
+                          <select
+                            value={activeOverlay.animation.enter || "fade"}
+                            onChange={e =>
+                              setOverlayAnimation(activeOverlay.id, "enter", e.target.value)
+                            }
+                            style={{
+                              padding: "3px 6px",
+                              borderRadius: "6px",
+                              border: "1px solid #444",
+                              background: "#1a1a2e",
+                              color: "#fff",
+                              fontSize: "11px",
+                              flex: 1,
+                            }}
+                          >
+                            <option value="none">No Enter</option>
+                            <option value="fade">Fade In</option>
+                            <option value="slideLeft">Slide ←</option>
+                            <option value="slideRight">Slide →</option>
+                            <option value="slideUp">Slide ↑</option>
+                            <option value="slideDown">Slide ↓</option>
+                            <option value="zoom">Zoom In</option>
+                          </select>
+                          <select
+                            value={activeOverlay.animation.exit || "fade"}
+                            onChange={e =>
+                              setOverlayAnimation(activeOverlay.id, "exit", e.target.value)
+                            }
+                            style={{
+                              padding: "3px 6px",
+                              borderRadius: "6px",
+                              border: "1px solid #444",
+                              background: "#1a1a2e",
+                              color: "#fff",
+                              fontSize: "11px",
+                              flex: 1,
+                            }}
+                          >
+                            <option value="none">No Exit</option>
+                            <option value="fade">Fade Out</option>
+                            <option value="slideLeft">Slide ←</option>
+                            <option value="slideRight">Slide →</option>
+                            <option value="slideUp">Slide ↑</option>
+                            <option value="slideDown">Slide ↓</option>
+                            <option value="zoom">Zoom Out</option>
+                          </select>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
                   {/* ── Audio Options ── */}
                   {activeOverlayHasTiming && activeOverlay.type === "video" && (
@@ -9567,7 +10455,13 @@ const ViralClipStudio = ({
                         <input
                           type="checkbox"
                           checked={activeOverlay.muteMainAudio || false}
-                          onChange={e => setOverlayAudioOption(activeOverlay.id, "muteMainAudio", e.target.checked)}
+                          onChange={e =>
+                            setOverlayAudioOption(
+                              activeOverlay.id,
+                              "muteMainAudio",
+                              e.target.checked
+                            )
+                          }
                         />
                         Mute main audio during overlay
                       </label>
@@ -9575,7 +10469,13 @@ const ViralClipStudio = ({
                         <input
                           type="checkbox"
                           checked={activeOverlay.useOverlayAudio || false}
-                          onChange={e => setOverlayAudioOption(activeOverlay.id, "useOverlayAudio", e.target.checked)}
+                          onChange={e =>
+                            setOverlayAudioOption(
+                              activeOverlay.id,
+                              "useOverlayAudio",
+                              e.target.checked
+                            )
+                          }
                         />
                         Use overlay audio
                       </label>
@@ -9585,19 +10485,34 @@ const ViralClipStudio = ({
                             <input
                               type="checkbox"
                               checked={activeOverlay.audioDucking || false}
-                              onChange={e => setOverlayAudioOption(activeOverlay.id, "audioDucking", e.target.checked)}
+                              onChange={e =>
+                                setOverlayAudioOption(
+                                  activeOverlay.id,
+                                  "audioDucking",
+                                  e.target.checked
+                                )
+                              }
                             />
                             Duck main audio
                           </label>
                           <label className="studio-slider-label" style={{ marginTop: "4px" }}>
-                            <span>Overlay Vol: {Math.round((activeOverlay.overlayAudioVolume ?? 0.7) * 100)}%</span>
+                            <span>
+                              Overlay Vol:{" "}
+                              {Math.round((activeOverlay.overlayAudioVolume ?? 0.7) * 100)}%
+                            </span>
                             <input
                               type="range"
                               min={0}
                               max={100}
                               step={5}
                               value={Math.round((activeOverlay.overlayAudioVolume ?? 0.7) * 100)}
-                              onChange={e => setOverlayAudioOption(activeOverlay.id, "overlayAudioVolume", Number(e.target.value) / 100)}
+                              onChange={e =>
+                                setOverlayAudioOption(
+                                  activeOverlay.id,
+                                  "overlayAudioVolume",
+                                  Number(e.target.value) / 100
+                                )
+                              }
                               style={{ width: "100%" }}
                             />
                           </label>
