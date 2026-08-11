@@ -1183,8 +1183,9 @@ describe("ViralClipStudio timeline sequencing", () => {
 
     expect(screen.getByLabelText(/^Add Hook$/i)).toBeChecked();
 
+    fireEvent.click(screen.getByRole("radio", { name: "TikTok" }));
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: /Export TikTok/i }));
+      fireEvent.click(screen.getByRole("button", { name: /Render Final Clip/i }));
     });
 
     await waitFor(() => {
@@ -1303,5 +1304,40 @@ describe("ViralClipStudio timeline sequencing", () => {
       expect(within(inspector).getByText("warm-bed")).toBeInTheDocument();
       expect(within(inspector).getByText("Duck under speech")).toBeInTheDocument();
     });
+  });
+
+  test("uses one reliable render action for the selected export destination", async () => {
+    const onSave = jest.fn(() => Promise.resolve());
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={[{ id: "clip-1", start: 0, end: 20, duration: 20, reason: "Podcast hook" }]}
+        onSave={onSave}
+        onCancel={jest.fn()}
+        onStatusChange={jest.fn()}
+        currentMusic={null}
+        onMusicChange={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByRole("button", { name: /Save Locally/i })).not.toBeInTheDocument();
+    const destinationPicker = screen.getByRole("radiogroup", { name: "Export destination" });
+    expect(within(destinationPicker).getByRole("radio", { name: "Download" })).toHaveAttribute(
+      "aria-checked",
+      "true"
+    );
+
+    fireEvent.click(within(destinationPicker).getByRole("radio", { name: "TikTok" }));
+    expect(within(destinationPicker).getByRole("radio", { name: "TikTok" })).toHaveAttribute(
+      "aria-checked",
+      "true"
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /Render Final Clip/i }));
+    });
+
+    await waitFor(() => expect(onSave).toHaveBeenCalled());
+    expect(onSave.mock.calls[0][2].exportDestination).toBe("tiktok");
   });
 });
