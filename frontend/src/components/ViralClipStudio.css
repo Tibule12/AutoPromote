@@ -4416,6 +4416,17 @@
   height: min(52vh, 550px);
 }
 
+/* Split is a clean presentation comparison, not an overlay editing surface. */
+.comparison-split .draggable-overlay {
+  pointer-events: none;
+}
+
+.comparison-split .overlay-controls,
+.comparison-split .resize-handle,
+.comparison-split .overlay-delete-btn {
+  display: none !important;
+}
+
 .phone-frame-before {
   width: 100%;
 }
