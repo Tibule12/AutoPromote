@@ -5880,6 +5880,10 @@ const ViralClipStudio = ({
     }
 
     const playResult = music.play();
+    // Reflect the user's play action immediately. Relying only on the media
+    // element's `play` event can leave the inspector stuck on "Preview sound"
+    // in browsers that delay or omit that event for object URLs.
+    setIsBackgroundSoundPreviewing(true);
     setMusicPreviewStatus("ready");
     setMusicPreviewNeedsGesture(false);
     setMusicPreviewStatusMessage(
