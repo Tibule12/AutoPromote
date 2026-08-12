@@ -74,6 +74,18 @@ const clampNumber = (value, minimum, maximum, fallback) => {
   return Math.max(minimum, Math.min(maximum, numeric));
 };
 
+const getAudioFadeGain = (timelineTime, timelineDuration, fadeIn, fadeOut) => {
+  const safeTime = Math.max(0, Number(timelineTime) || 0);
+  const safeDuration = Math.max(0, Number(timelineDuration) || 0);
+  const safeFadeIn = Math.max(0, Number(fadeIn) || 0);
+  const safeFadeOut = Math.max(0, Number(fadeOut) || 0);
+  const fadeInGain = safeFadeIn > 0 ? Math.min(1, safeTime / safeFadeIn) : 1;
+  const remaining = Math.max(0, safeDuration - safeTime);
+  const fadeOutGain =
+    safeFadeOut > 0 && safeDuration > 0 ? Math.min(1, remaining / safeFadeOut) : 1;
+  return Math.max(0, Math.min(fadeInGain, fadeOutGain));
+};
+
 const normalizeAudioMode = value => {
   const normalized = String(value || "mix")
     .trim()
@@ -87,33 +99,54 @@ const isPresetMusicSelection = value => /\.mp3$/i.test(String(value || "").trim(
 const HOOK_TEMPLATES = {
   blur_reveal: {
     label: "Blur Reveal",
-    description: "Blurred backdrop, strong contrast, and a clean reveal into the main shot.",
+    description: "A sharp blur-to-clear reveal with high-contrast text that lands immediately.",
     duration: 3,
     blurBackground: true,
     darkOverlay: true,
     freezeFrame: false,
-    zoomScale: 1.08,
+    zoomScale: 1.1,
     textAnimation: "slide-up",
   },
   zoom_focus: {
     label: "Zoom Focus",
-    description: "Push the frame forward fast when the opening already has motion.",
+    description: "A fast focal push with extra contrast for energetic spoken openings.",
     duration: 3,
     blurBackground: false,
     darkOverlay: true,
     freezeFrame: false,
-    zoomScale: 1.1,
+    zoomScale: 1.16,
     textAnimation: "fade-in",
   },
   freeze_text: {
     label: "Freeze + Text",
-    description: "Hold the opening frame, hit the viewer with the message, then release.",
+    description: "A confident freeze, headline hit, then a smooth release back into motion.",
     duration: 3.2,
     blurBackground: true,
     darkOverlay: true,
     freezeFrame: true,
-    zoomScale: 1.04,
+    zoomScale: 1.08,
     textAnimation: "fade-in",
+  },
+};
+
+const BROLL_CADENCE_PRESETS = {
+  sparse: {
+    label: "Sparse",
+    interval: 18,
+    maxBeats: 12,
+    helper: "Leaves longer stretches on the speaker.",
+  },
+  balanced: {
+    label: "Balanced",
+    interval: 10,
+    maxBeats: 24,
+    helper: "Adds proof without interrupting the conversation.",
+  },
+  frequent: {
+    label: "Frequent",
+    interval: 6,
+    maxBeats: 32,
+    helper: "Keeps a fast visual rhythm for high-energy clips.",
   },
 };
 
@@ -1298,6 +1331,7 @@ const ViralClipStudio = ({
   const [musicPreviewNeedsGesture, setMusicPreviewNeedsGesture] = useState(false);
   const [isBackgroundSoundPreviewing, setIsBackgroundSoundPreviewing] = useState(false);
   const [extractedAudio, setExtractedAudio] = useState(null);
+  const [bRollCadence, setBRollCadence] = useState("balanced");
   const [studioInspectorTab, setStudioInspectorTab] = useState("hook");
   const [comparisonMode, setComparisonMode] = useState("split");
   const [studioActionMessage, setStudioActionMessage] = useState(
@@ -1595,6 +1629,7 @@ const ViralClipStudio = ({
     musicDuckingStrength,
     musicTrack,
     extractedAudio,
+    bRollCadence,
     timeline,
     activeTimelineIndex,
   });
@@ -1661,6 +1696,7 @@ const ViralClipStudio = ({
     setMusicDuckingStrength(Number(snapshot.musicDuckingStrength ?? 0.35));
     setMusicTrack(snapshot.musicTrack || null);
     setExtractedAudio(snapshot.extractedAudio || null);
+    setBRollCadence(snapshot.bRollCadence || "balanced");
     setTimeline(snapshot.timeline || []);
     setActiveTimelineIndex(Math.max(0, Number(snapshot.activeTimelineIndex || 0)));
   };
@@ -2833,7 +2869,7 @@ const ViralClipStudio = ({
       musicPreviewRef.current.removeAttribute("src");
       musicPreviewRef.current.load();
     }
-    toast.info("Background music removed");
+    toast("Background music removed");
   };
 
   // ── Speech-aware auto-ducking (Web Audio API) ──
@@ -2985,13 +3021,13 @@ const ViralClipStudio = ({
         ? 1
         : 0;
   const hookTextIntroProgress = isHookWithinPreviewWindow
-    ? clampNumber((previewTimelineTime - resolvedHookStart) / 0.35, 0, 1, 0)
+    ? clampNumber((previewTimelineTime - resolvedHookStart) / 0.24, 0, 1, 0)
     : 0;
   const isZoomFocusTemplate = hookTemplate === "zoom_focus";
   const isBlurRevealTemplate = hookTemplate === "blur_reveal";
   const isFreezeTextTemplate = hookTemplate === "freeze_text";
   const freezeReleaseProgress = hookFreezeFrame
-    ? clampNumber((hookProgress - 0.78) / 0.22, 0, 1, 0)
+    ? clampNumber((hookProgress - 0.72) / 0.28, 0, 1, 0)
     : 1;
   const resolvedHookFocusPoint = normalizeHookFocusPoint(hookFocusPoint);
   const hasCustomHookFocusPoint =
@@ -2999,7 +3035,7 @@ const ViralClipStudio = ({
     Math.abs(resolvedHookFocusPoint.y - DEFAULT_HOOK_FOCUS_POINT.y) > 1;
   const hookZoomTarget = Math.max(
     hookZoomScale,
-    isZoomFocusTemplate ? hookZoomScale + 0.06 : hookZoomScale
+    isZoomFocusTemplate ? hookZoomScale + 0.08 : hookZoomScale
   );
   const effectiveHookZoomTarget =
     hookFreezeFrame && hasCustomHookFocusPoint ? Math.max(hookZoomTarget, 1.12) : hookZoomTarget;
@@ -3013,7 +3049,7 @@ const ViralClipStudio = ({
     showHookPreview && hookBlurBackground
       ? Math.max(
           0,
-          (isBlurRevealTemplate ? 14 : 10) - hookProgress * (isBlurRevealTemplate ? 10.5 : 7.5)
+          (isBlurRevealTemplate ? 18 : 11) - hookProgress * (isBlurRevealTemplate ? 16 : 8.5)
         ) * hookOutroOpacity
       : 0;
   const hookVideoBrightness = showHookPreview && hookDarkOverlay ? 0.66 + hookProgress * 0.24 : 1;
@@ -3295,13 +3331,11 @@ const ViralClipStudio = ({
       (activeOverlayIsVideoBRoll && activeOverlay) ||
       overlays.find(
         overlay =>
-          overlay.bRollMode &&
-          overlay.startTime !== undefined &&
-          Number(overlay.duration || 0) > 0
+          overlay.bRollMode && overlay.startTime !== undefined && Number(overlay.duration || 0) > 0
       );
     const shouldFocusBRoll = preferredTool === "broll" && timedBRoll;
     const relativeFocusTime = shouldFocusBRoll
-      ? Number(timedBRoll.startTime || 0) + Math.min(0.35, Number(timedBRoll.duration || 0) * 0.15)
+      ? Number(timedBRoll.startTime || 0)
       : addHook || preferredTool === "hook"
         ? resolvedHookStart + Math.min(0.35, hookDuration * 0.15)
         : timedBRoll
@@ -5054,7 +5088,9 @@ const ViralClipStudio = ({
       syncPlaybackState();
       if (comparisonMode === "split" || comparisonMode === "after") {
         focusComparisonPreview(studioInspectorTab, false);
-        setStudioActionMessage("Comparison ready at the edited moment. Press play to review it again.");
+        setStudioActionMessage(
+          "Comparison ready at the edited moment. Press play to review it again."
+        );
       }
     };
 
@@ -5144,23 +5180,33 @@ const ViralClipStudio = ({
       }
 
       const previewGain = previewMuted ? 0 : clampAudioControl(previewVolume, 0, 1, 1);
-      music.muted = false;
-      music.defaultMuted = false;
-      music.loop = true;
-      music.volume =
-        clampAudioControl(musicTrack?.volume ?? musicVolume, 0.05, 0.6, 0.15) * previewGain;
-      music.playbackRate = video.playbackRate || 1;
-
       const previewTimelineTime = clampAudioControl(
         getPreviewTimelineTime(video.currentTime || 0),
         0,
         36000,
         0
       );
+      const fadeGain = getAudioFadeGain(
+        previewTimelineTime,
+        currentTimelineWindow.duration,
+        musicTrack?.fadeIn,
+        musicTrack?.fadeOut
+      );
+      music.muted = false;
+      music.defaultMuted = false;
+      music.loop = musicTrack?.loop !== false;
+      music.volume =
+        clampAudioControl(musicTrack?.volume ?? musicVolume, 0.05, 0.6, 0.15) *
+        previewGain *
+        fadeGain;
+      music.playbackRate = video.playbackRate || 1;
+
       const musicDuration = Number(music.duration || 0);
       const targetTime =
         Number.isFinite(musicDuration) && musicDuration > 0.25
-          ? previewTimelineTime % musicDuration
+          ? musicTrack?.loop !== false
+            ? previewTimelineTime % musicDuration
+            : Math.min(previewTimelineTime, Math.max(0, musicDuration - 0.05))
           : previewTimelineTime;
       if (Number.isFinite(targetTime) && Math.abs((music.currentTime || 0) - targetTime) > 0.35) {
         try {
@@ -5231,6 +5277,10 @@ const ViralClipStudio = ({
     effectiveMusicPreviewUrl,
     musicSearchMode,
     musicVolume,
+    musicTrack?.fadeIn,
+    musicTrack?.fadeOut,
+    musicTrack?.loop,
+    currentTimelineWindow.duration,
     previewMuted,
     previewVolume,
     activeTimelineIndex,
@@ -5245,8 +5295,20 @@ const ViralClipStudio = ({
     if (!musicTrack?.ducking || musicTrack.duckingMode !== "speech") {
       // Reset volume to track setting when not in speech mode
       const baseGain = previewMuted ? 0 : clampAudioControl(previewVolume, 0, 1, 1);
+      const previewTimelineTime = clampAudioControl(
+        getPreviewTimelineTime(videoRef.current?.currentTime || 0),
+        0,
+        36000,
+        0
+      );
+      const fadeGain = getAudioFadeGain(
+        previewTimelineTime,
+        currentTimelineWindow.duration,
+        musicTrack?.fadeIn,
+        musicTrack?.fadeOut
+      );
       music.volume =
-        clampAudioControl(musicTrack?.volume ?? musicVolume, 0.05, 0.6, 0.15) * baseGain;
+        clampAudioControl(musicTrack?.volume ?? musicVolume, 0.05, 0.6, 0.15) * baseGain * fadeGain;
       return;
     }
 
@@ -5261,8 +5323,20 @@ const ViralClipStudio = ({
 
     const duckLoop = () => {
       const speechEnergy = getSpeechEnergyLevel();
+      const previewTimelineTime = clampAudioControl(
+        getPreviewTimelineTime(videoRef.current?.currentTime || 0),
+        0,
+        36000,
+        0
+      );
+      const fadeGain = getAudioFadeGain(
+        previewTimelineTime,
+        currentTimelineWindow.duration,
+        musicTrack?.fadeIn,
+        musicTrack?.fadeOut
+      );
       // Smooth transition: target volume inversely proportional to speech energy
-      const targetVolume = maxMusicVol * (1 - speechEnergy * duckingStrength);
+      const targetVolume = maxMusicVol * fadeGain * (1 - speechEnergy * duckingStrength);
       // Smooth ramp (0.08 = ~60ms smoothing)
       const smoothed = lastDuckedVolume + (targetVolume - lastDuckedVolume) * 0.08;
       music.volume = clampAudioControl(smoothed, 0, 0.6, 0.02);
@@ -5283,6 +5357,10 @@ const ViralClipStudio = ({
     musicTrack?.ducking,
     musicTrack?.duckingMode,
     musicTrack?.volume,
+    musicTrack?.duckingStrength,
+    musicTrack?.fadeIn,
+    musicTrack?.fadeOut,
+    currentTimelineWindow.duration,
     musicVolume,
     previewMuted,
     previewVolume,
@@ -5765,19 +5843,28 @@ const ViralClipStudio = ({
 
     music.muted = false;
     music.defaultMuted = false;
-    music.loop = true;
-    music.volume =
-      clampAudioControl(musicTrack?.volume ?? musicVolume, 0.05, 0.6, 0.15) *
-      clampAudioControl(previewVolume, 0, 1, 1);
-
     const video = videoRef.current;
     const previewTimelineTime = video
       ? clampAudioControl(getPreviewTimelineTime(video.currentTime || 0), 0, 36000, 0)
       : 0;
+    const fadeGain = getAudioFadeGain(
+      previewTimelineTime,
+      currentTimelineWindow.duration,
+      musicTrack?.fadeIn,
+      musicTrack?.fadeOut
+    );
+    music.loop = musicTrack?.loop !== false;
+    music.volume =
+      clampAudioControl(musicTrack?.volume ?? musicVolume, 0.05, 0.6, 0.15) *
+      clampAudioControl(previewVolume, 0, 1, 1) *
+      fadeGain;
+
     const musicDuration = Number(music.duration || 0);
     const targetTime =
       Number.isFinite(musicDuration) && musicDuration > 0.25
-        ? previewTimelineTime % musicDuration
+        ? musicTrack?.loop !== false
+          ? previewTimelineTime % musicDuration
+          : Math.min(previewTimelineTime, Math.max(0, musicDuration - 0.05))
         : previewTimelineTime;
 
     if (Number.isFinite(targetTime) && music.readyState >= 1) {
@@ -5916,6 +6003,8 @@ const ViralClipStudio = ({
     const suggestions = [];
     const safeStart = 1.5;
     const safeEnd = Math.max(safeStart + 1, duration - 1);
+    const usableDuration = Math.max(1, safeEnd - safeStart);
+    const cadence = BROLL_CADENCE_PRESETS[bRollCadence] || BROLL_CADENCE_PRESETS.balanced;
 
     const baseStyle = getBRollStyleForClip();
     const sequence = [
@@ -5924,7 +6013,10 @@ const ViralClipStudio = ({
       baseStyle === "payoff" ? "proof" : "payoff",
       "detail",
     ];
-    const targetCount = duration >= 18 ? 4 : duration >= 10 ? 3 : 2;
+    const targetCount = Math.max(
+      2,
+      Math.min(cadence.maxBeats, Math.ceil(usableDuration / cadence.interval))
+    );
     const spacing = (safeEnd - safeStart) / Math.max(1, targetCount);
 
     for (let index = 0; index < targetCount; index += 1) {
@@ -5957,7 +6049,41 @@ const ViralClipStudio = ({
       });
     }
 
-    return suggestions.slice(0, 4);
+    return suggestions;
+  };
+
+  const addBRollPlan = () => {
+    const suggestions = suggestBRollMoments();
+    if (!suggestions.length) {
+      toast("Clip too short for a B-roll plan.");
+      return;
+    }
+
+    const occupiedTimes = overlays
+      .filter(overlay => overlay.bRollMode && overlay.startTime !== undefined)
+      .map(overlay => Number(overlay.startTime || 0));
+    const missingSuggestions = suggestions.filter(
+      suggestion => !occupiedTimes.some(time => Math.abs(time - suggestion.time) < 0.45)
+    );
+
+    if (!missingSuggestions.length) {
+      setStudioActionMessage("This edit window already has B-roll coverage at every planned beat.");
+      toast("B-roll plan is already covered.");
+      return;
+    }
+
+    const plannedOverlays = missingSuggestions.map((suggestion, index) => ({
+      ...buildBRollOverlay(suggestion),
+      id: `${createSecureId("overlay")}-plan-${index}-${Math.round(suggestion.time * 10)}`,
+    }));
+    setOverlays(prev => [...prev, ...plannedOverlays]);
+    setActiveOverlayId(plannedOverlays[0]?.id || null);
+    setStudioActionMessage(
+      `${plannedOverlays.length} B-roll beats planned across ${formatPreviewTimePrecise(
+        currentTimelineWindow.duration
+      )}. Replace each placeholder with matching footage when ready.`
+    );
+    toast.success(`${plannedOverlays.length} B-roll beats added to the plan.`);
   };
 
   // --- Dragging Logic ---
@@ -7614,6 +7740,9 @@ const ViralClipStudio = ({
                         </button>
                       ))}
                     </div>
+                    <small className="inspector-preset-note">
+                      {hookTemplateConfig.description}
+                    </small>
                   </div>
 
                   <label className="inspector-range">
@@ -7674,6 +7803,39 @@ const ViralClipStudio = ({
                     </span>
                   </div>
 
+                  <div className="inspector-field broll-cadence-control">
+                    <span>B-roll pacing</span>
+                    <div className="inspector-choice-grid is-three">
+                      {Object.entries(BROLL_CADENCE_PRESETS).map(([value, preset]) => (
+                        <button
+                          key={value}
+                          type="button"
+                          className={bRollCadence === value ? "is-active" : ""}
+                          onClick={() => {
+                            setBRollCadence(value);
+                            setStudioActionMessage(
+                              `${preset.label} B-roll pacing selected. ${preset.helper}`
+                            );
+                          }}
+                        >
+                          {preset.label}
+                        </button>
+                      ))}
+                    </div>
+                    <small>
+                      {suggestBRollMoments().length} suggested beats across{" "}
+                      {formatPreviewTimePrecise(currentTimelineWindow.duration)} ·{" "}
+                      {BROLL_CADENCE_PRESETS[bRollCadence].helper}
+                    </small>
+                    <button
+                      type="button"
+                      className="inspector-secondary-action"
+                      onClick={addBRollPlan}
+                    >
+                      Plan whole clip
+                    </button>
+                  </div>
+
                   <button
                     type="button"
                     className="inspector-upload-card"
@@ -7682,7 +7844,7 @@ const ViralClipStudio = ({
                     <span>＋</span>
                     <div>
                       <strong>Upload B-roll</strong>
-                      <small>MP4, MOV, WEBM · placed at the playhead</small>
+                      <small>One or multiple MP4, MOV or WEBM files</small>
                     </div>
                   </button>
 
@@ -7785,22 +7947,77 @@ const ViralClipStudio = ({
                       </div>
 
                       {getOverlayAudioMode(activeOverlay) === "mix" ? (
-                        <label className="inspector-check-row">
+                        <>
+                          <label className="inspector-check-row">
+                            <input
+                              type="checkbox"
+                              checked={!!activeOverlay.audioDucking}
+                              onChange={event =>
+                                setOverlayAudioOption(
+                                  activeOverlay.id,
+                                  "audioDucking",
+                                  event.target.checked
+                                )
+                              }
+                            />
+                            <span>
+                              <strong>Duck original under overlay</strong>
+                              <small>Keeps both sources clear when voices overlap.</small>
+                            </span>
+                          </label>
+                          {activeOverlay.audioDucking ? (
+                            <label className="inspector-range">
+                              <span>
+                                <b>Original ducking</b>
+                                <strong>
+                                  {Math.round((activeOverlay.audioDuckingStrength ?? 0.35) * 100)}%
+                                </strong>
+                              </span>
+                              <input
+                                aria-label="Original ducking strength"
+                                type="range"
+                                min={10}
+                                max={90}
+                                step={5}
+                                value={Math.round(
+                                  (activeOverlay.audioDuckingStrength ?? 0.35) * 100
+                                )}
+                                onChange={event =>
+                                  setOverlayAudioOption(
+                                    activeOverlay.id,
+                                    "audioDuckingStrength",
+                                    Number(event.target.value) / 100
+                                  )
+                                }
+                              />
+                            </label>
+                          ) : null}
+                        </>
+                      ) : null}
+
+                      {getOverlayAudioMode(activeOverlay) !== "original" ? (
+                        <label className="inspector-range">
+                          <span>
+                            <b>Overlay volume</b>
+                            <strong>
+                              {Math.round((activeOverlay.overlayAudioVolume ?? 0.7) * 100)}%
+                            </strong>
+                          </span>
                           <input
-                            type="checkbox"
-                            checked={!!activeOverlay.audioDucking}
+                            aria-label="B-roll overlay volume"
+                            type="range"
+                            min={0}
+                            max={100}
+                            step={5}
+                            value={Math.round((activeOverlay.overlayAudioVolume ?? 0.7) * 100)}
                             onChange={event =>
                               setOverlayAudioOption(
                                 activeOverlay.id,
-                                "audioDucking",
-                                event.target.checked
+                                "overlayAudioVolume",
+                                Number(event.target.value) / 100
                               )
                             }
                           />
-                          <span>
-                            <strong>Duck original under overlay</strong>
-                            <small>Keeps both sources clear when voices overlap.</small>
-                          </span>
                         </label>
                       ) : null}
 
@@ -7809,7 +8026,7 @@ const ViralClipStudio = ({
                         className="inspector-primary-action"
                         onClick={() => {
                           setComparisonMode("split");
-                          focusComparisonPreview("broll", true);
+                          focusComparisonPreview("broll", false);
                           setStudioActionMessage(
                             "B-roll applied and previewing at its exact cutaway point."
                           );
@@ -7886,6 +8103,80 @@ const ViralClipStudio = ({
                         <span>
                           <strong>Duck under speech</strong>
                           <small>Music lowers automatically while someone is talking.</small>
+                        </span>
+                      </label>
+
+                      {musicTrack.ducking ? (
+                        <label className="inspector-range">
+                          <span>
+                            <b>Speech ducking</b>
+                            <strong>
+                              {Math.round((musicTrack.duckingStrength ?? 0.4) * 100)}%
+                            </strong>
+                          </span>
+                          <input
+                            aria-label="Speech ducking strength"
+                            type="range"
+                            min={15}
+                            max={90}
+                            step={5}
+                            value={Math.round((musicTrack.duckingStrength ?? 0.4) * 100)}
+                            onChange={event =>
+                              setMusicTrackField(
+                                "duckingStrength",
+                                Number(event.target.value) / 100
+                              )
+                            }
+                          />
+                        </label>
+                      ) : null}
+
+                      <div className="inspector-dual-range">
+                        <label className="inspector-range">
+                          <span>
+                            <b>Fade in</b>
+                            <strong>{(musicTrack.fadeIn ?? 0.5).toFixed(1)}s</strong>
+                          </span>
+                          <input
+                            aria-label="Music fade in"
+                            type="range"
+                            min={0}
+                            max={5}
+                            step={0.1}
+                            value={musicTrack.fadeIn ?? 0.5}
+                            onChange={event =>
+                              setMusicTrackField("fadeIn", Number(event.target.value))
+                            }
+                          />
+                        </label>
+                        <label className="inspector-range">
+                          <span>
+                            <b>Fade out</b>
+                            <strong>{(musicTrack.fadeOut ?? 0.5).toFixed(1)}s</strong>
+                          </span>
+                          <input
+                            aria-label="Music fade out"
+                            type="range"
+                            min={0}
+                            max={5}
+                            step={0.1}
+                            value={musicTrack.fadeOut ?? 0.5}
+                            onChange={event =>
+                              setMusicTrackField("fadeOut", Number(event.target.value))
+                            }
+                          />
+                        </label>
+                      </div>
+
+                      <label className="inspector-check-row">
+                        <input
+                          type="checkbox"
+                          checked={musicTrack.loop ?? true}
+                          onChange={event => setMusicTrackField("loop", event.target.checked)}
+                        />
+                        <span>
+                          <strong>Loop for the full clip</strong>
+                          <small>Repeats shorter tracks across long podcast edits.</small>
                         </span>
                       </label>
 
@@ -7993,6 +8284,7 @@ const ViralClipStudio = ({
                 </div>
                 <SafeAudio
                   ref={musicPreviewRef}
+                  data-testid="background-sound-preview"
                   className={`broll-sound-player ${addMusic && effectiveMusicPreviewUrl ? "" : "empty"}`}
                   controls={addMusic && !!effectiveMusicPreviewUrl}
                   preload="auto"
@@ -8156,7 +8448,7 @@ const ViralClipStudio = ({
                   onClick={() => {
                     const suggestions = suggestBRollMoments();
                     if (suggestions.length === 0) {
-                      toast.info("Clip too short for B-roll suggestions.");
+                      toast("Clip too short for B-roll suggestions.");
                       return;
                     }
                     addBRollSuggestionOverlay(suggestions[0]);
@@ -8285,8 +8577,11 @@ const ViralClipStudio = ({
                 if (suggestions.length === 0) return null;
                 return (
                   <div className="broll-suggestions">
-                    <span className="broll-suggestions-title">B-roll Shot Beats</span>
-                    {suggestions.map((s, i) => (
+                    <span className="broll-suggestions-title">
+                      B-roll Shot Beats · showing {Math.min(8, suggestions.length)} of{" "}
+                      {suggestions.length}
+                    </span>
+                    {suggestions.slice(0, 8).map((s, i) => (
                       <button
                         key={i}
                         type="button"
@@ -10068,7 +10363,8 @@ const ViralClipStudio = ({
                   textAlign: "center",
                 }}
               >
-                One render includes your hook, B-roll, audio rules, captions, and selected destination.
+                One render includes your hook, B-roll, audio rules, captions, and selected
+                destination.
               </p>
             </section>
 
