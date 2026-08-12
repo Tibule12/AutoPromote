@@ -1405,6 +1405,21 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(keepOriginalAudio).not.toBeChecked();
     fireEvent.click(keepOriginalAudio);
 
+    const musicPreview = screen.getByTestId("background-sound-preview");
+    Object.defineProperty(musicPreview, "paused", {
+      configurable: true,
+      writable: true,
+      value: true,
+    });
+    fireEvent.click(within(inspector).getByRole("button", { name: "Preview sound" }));
+    expect(musicPreview.play).toHaveBeenCalled();
+    expect(within(inspector).getByRole("button", { name: "Stop sound" })).toBeInTheDocument();
+
+    musicPreview.paused = false;
+    fireEvent.click(within(inspector).getByRole("button", { name: "Stop sound" }));
+    expect(musicPreview.pause).toHaveBeenCalled();
+    expect(within(inspector).getByRole("button", { name: "Preview sound" })).toBeInTheDocument();
+
     expect(() =>
       fireEvent.click(within(inspector).getByRole("button", { name: "Remove" }))
     ).not.toThrow();
