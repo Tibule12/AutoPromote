@@ -255,6 +255,12 @@ describe("ViralClipStudio timeline sequencing", () => {
 
     expect(screen.getByLabelText(/^Add Hook$/i)).toBeChecked();
     expect(screen.getByRole("button", { name: /Select Hook Segment/i })).toBeInTheDocument();
+
+    const inspector = screen.getByTestId("clip-studio-inspector");
+    fireEvent.click(within(inspector).getByRole("button", { name: "Zoom Focus" }));
+    expect(within(inspector).getByText(/fast focal push with extra contrast/i)).toBeInTheDocument();
+    fireEvent.click(within(inspector).getByRole("button", { name: "Freeze frame" }));
+    expect(within(inspector).getByText(/confident freeze, headline hit/i)).toBeInTheDocument();
   });
 
   test("dragging the selected hook range does not toggle selection mode", () => {
@@ -1220,7 +1226,9 @@ describe("ViralClipStudio timeline sequencing", () => {
     const afterVideo = screen.getByTestId("studio-after-video");
     expect(afterVideo).toBeInTheDocument();
     expect(afterVideo).not.toHaveAttribute("controls");
-    expect(screen.getByRole("button", { name: /Pause comparison|Play comparison/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /Pause comparison|Play comparison/i })
+    ).toBeInTheDocument();
     expect(screen.getByLabelText("Untouched source preview").muted).toBe(true);
 
     Object.defineProperty(afterVideo, "currentTime", {
@@ -1251,6 +1259,13 @@ describe("ViralClipStudio timeline sequencing", () => {
 
     fireEvent.click(screen.getByRole("tab", { name: /B-roll/i }));
 
+    const inspector = screen.getByTestId("clip-studio-inspector");
+    expect(within(inspector).getByRole("button", { name: "Balanced" })).toHaveClass("is-active");
+    fireEvent.click(within(inspector).getByRole("button", { name: "Frequent" }));
+    expect(within(inspector).getByText(/5 suggested beats across/i)).toBeInTheDocument();
+    fireEvent.click(within(inspector).getByRole("button", { name: /Plan whole clip/i }));
+    expect(screen.getByText(/5 B-roll beats planned across/i)).toBeInTheDocument();
+
     const initialCreatedVideoCount = createdVideos.length;
     fireEvent.change(screen.getByTestId("broll-video-input"), {
       target: {
@@ -1264,12 +1279,16 @@ describe("ViralClipStudio timeline sequencing", () => {
     });
 
     expect((await screen.findAllByText("podcast-proof.mp4")).length).toBeGreaterThan(0);
-    const inspector = screen.getByTestId("clip-studio-inspector");
     const durationInput = within(inspector)
       .getByText("Duration")
       .closest("label")
       .querySelector("input");
     expect(Number(durationInput.value)).toBeLessThanOrEqual(12);
+    const startInput = within(inspector).getByText("Start").closest("label").querySelector("input");
+    fireEvent.change(startInput, { target: { value: "4.0" } });
+    fireEvent.blur(startInput);
+    fireEvent.change(durationInput, { target: { value: "3.0" } });
+    fireEvent.blur(durationInput);
 
     fireEvent.click(screen.getByRole("button", { name: "Picture-in-picture" }));
     const previewShell = screen.getByTestId("hook-preview-frame").parentElement;
@@ -1288,6 +1307,10 @@ describe("ViralClipStudio timeline sequencing", () => {
       value: 1,
     });
 
+    fireEvent.click(within(inspector).getByRole("button", { name: /Apply B-roll/i }));
+    await waitFor(() => expect(afterVideo.currentTime).toBe(4));
+    expect(screen.getByText(/exact cutaway point/i)).toBeInTheDocument();
+
     fireEvent.click(screen.getByRole("button", { name: "Use overlay" }));
     fireEvent.timeUpdate(afterVideo);
     await waitFor(() => expect(afterVideo.muted).toBe(true));
@@ -1296,12 +1319,28 @@ describe("ViralClipStudio timeline sequencing", () => {
     fireEvent.timeUpdate(afterVideo);
     await waitFor(() => expect(afterVideo.muted).toBe(false));
 
+    const duckOriginal = within(inspector).getByRole("checkbox", {
+      name: /Duck original under overlay/i,
+    });
+    fireEvent.click(duckOriginal);
+    const originalDucking = within(inspector).getByRole("slider", {
+      name: /Original ducking strength/i,
+    });
+    fireEvent.change(originalDucking, { target: { value: "55" } });
+    expect(originalDucking).toHaveValue("55");
+
+    const overlayVolume = within(inspector).getByRole("slider", {
+      name: /B-roll overlay volume/i,
+    });
+    fireEvent.change(overlayVolume, { target: { value: "80" } });
+    expect(overlayVolume).toHaveValue("80");
+
     fireEvent.click(screen.getByRole("button", { name: "Use overlay" }));
     afterVideo.currentTime = 13;
     fireEvent.timeUpdate(afterVideo);
     await waitFor(() => expect(afterVideo.muted).toBe(false));
     expect(screen.getAllByText(/Original audio returns automatically/i).length).toBeGreaterThan(0);
-  });
+  }, 15000);
 
   test("keeps uploaded background sound enabled with speech-aware ducking", async () => {
     render(
@@ -1328,7 +1367,66 @@ describe("ViralClipStudio timeline sequencing", () => {
       expect(within(inspector).getByText("warm-bed")).toBeInTheDocument();
       expect(within(inspector).getByText("Duck under speech")).toBeInTheDocument();
     });
-  });
+
+    const duckUnderSpeech = within(inspector).getByRole("checkbox", {
+      name: /Duck under speech/i,
+    });
+    const keepOriginalAudio = within(inspector).getByRole("checkbox", {
+      name: /Keep original audio/i,
+    });
+    expect(duckUnderSpeech).toBeChecked();
+    expect(keepOriginalAudio).toBeChecked();
+
+    const duckingStrength = within(inspector).getByRole("slider", {
+      name: /Speech ducking strength/i,
+    });
+    fireEvent.change(duckingStrength, { target: { value: "65" } });
+    expect(duckingStrength).toHaveValue("65");
+
+    const fadeIn = within(inspector).getByRole("slider", { name: /Music fade in/i });
+    const fadeOut = within(inspector).getByRole("slider", { name: /Music fade out/i });
+    fireEvent.change(fadeIn, { target: { value: "1.2" } });
+    fireEvent.change(fadeOut, { target: { value: "1.5" } });
+    expect(fadeIn).toHaveValue("1.2");
+    expect(fadeOut).toHaveValue("1.5");
+
+    const loopTrack = within(inspector).getByRole("checkbox", {
+      name: /Loop for the full clip/i,
+    });
+    expect(loopTrack).toBeChecked();
+    fireEvent.click(loopTrack);
+    expect(loopTrack).not.toBeChecked();
+    fireEvent.click(loopTrack);
+
+    fireEvent.click(duckUnderSpeech);
+    expect(duckUnderSpeech).not.toBeChecked();
+    fireEvent.click(duckUnderSpeech);
+    fireEvent.click(keepOriginalAudio);
+    expect(keepOriginalAudio).not.toBeChecked();
+    fireEvent.click(keepOriginalAudio);
+
+    expect(() =>
+      fireEvent.click(within(inspector).getByRole("button", { name: "Remove" }))
+    ).not.toThrow();
+    expect(
+      within(inspector).getByRole("button", { name: /Add background sound/i })
+    ).toBeInTheDocument();
+
+    fireEvent.change(screen.getByTestId("background-sound-input"), {
+      target: {
+        files: [new File(["music-again"], "warm-bed.mp3", { type: "audio/mpeg" })],
+      },
+    });
+
+    await waitFor(() => expect(within(inspector).getByText("Music on")).toBeInTheDocument());
+    expect(within(inspector).getByRole("checkbox", { name: /Duck under speech/i })).toBeChecked();
+    expect(within(inspector).getByRole("checkbox", { name: /Keep original audio/i })).toBeChecked();
+    expect(
+      within(inspector).getByRole("checkbox", { name: /Loop for the full clip/i })
+    ).toBeChecked();
+    expect(within(inspector).getByRole("slider", { name: /Music fade in/i })).toHaveValue("0.5");
+    expect(within(inspector).getByRole("slider", { name: /Music fade out/i })).toHaveValue("0.5");
+  }, 15000);
 
   test("uses one reliable render action for the selected export destination", async () => {
     const onSave = jest.fn(() => Promise.resolve());
