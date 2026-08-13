@@ -48,7 +48,7 @@ import useCinematicEffects from "../hooks/useCinematicEffects";
 import CinematicEffectsPanel from "./CinematicEffectsPanel";
 import { useSubscription } from "../hooks/useSubscription";
 import PayPalSubscriptionPanel from "./PayPalSubscriptionPanel";
-import { SafeAudio, SafeVideo } from "./SafeMedia";
+import { SafeAudio, SafeImage, SafeVideo } from "./SafeMedia";
 import { uploadMulticamSourceResumable } from "../utils/multicamResumableUpload";
 
 const MULTICAM_MAX_SOURCES = 6;
@@ -9523,7 +9523,7 @@ function MultiCamCombiner({
                           }}
                         >
                           {isImageSource(rawProofSource) ? (
-                            <img
+                            <SafeImage
                               src={getSourceMediaUrl(rawProofSource)}
                               alt={rawProofSource.label || "Raw camera"}
                               draggable="false"

@@ -5748,7 +5748,10 @@ const ViralClipStudio = ({
       probe.preload = "metadata";
       probe.onloadedmetadata = () => finish(probe.duration);
       probe.onerror = () => finish(0);
-      probe.src = src;
+      if (!applySafeMediaSource(probe, src)) {
+        finish(0);
+        return;
+      }
       timeoutId = window.setTimeout(() => finish(0), 4000);
     });
 

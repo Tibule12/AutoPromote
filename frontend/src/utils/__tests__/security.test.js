@@ -13,9 +13,12 @@ describe("security media URLs", () => {
 
   test("rejects unsafe javascript URLs", () => {
     const image = document.createElement("img");
+    const video = document.createElement("video");
 
     expect(applySafeMediaSource(image, "javascript:alert(1)")).toBe(false);
     expect(image.hasAttribute("src")).toBe(false);
+    expect(applySafeMediaSource(video, 'javascript:<img src=x onerror="alert(1)">')).toBe(false);
+    expect(video.hasAttribute("src")).toBe(false);
   });
 
   test("does not write media URLs onto non-media elements", () => {
