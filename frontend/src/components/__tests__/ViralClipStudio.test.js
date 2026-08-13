@@ -1443,6 +1443,61 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(within(inspector).getByRole("slider", { name: /Music fade out/i })).toHaveValue("0.5");
   }, 15000);
 
+  test("previews Creative Director captions and pacing without starting a render", async () => {
+    const onSave = jest.fn();
+    global.fetch.mockResolvedValue({
+      ok: true,
+      json: jest.fn(() => Promise.resolve({ silences: [] })),
+    });
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={[
+          {
+            id: "clip-1",
+            start: 0,
+            end: 20,
+            duration: 20,
+            reason: "This one mistake is killing your growth",
+          },
+        ]}
+        onSave={onSave}
+        onCancel={jest.fn()}
+        onStatusChange={jest.fn()}
+        currentMusic={null}
+        onMusicChange={jest.fn()}
+      />
+    );
+
+    const afterVideo = screen.getByTestId("studio-after-video");
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("make-it-hit-button"));
+      await Promise.resolve();
+    });
+
+    expect(screen.getByTestId("live-caption-preview")).toBeInTheDocument();
+    expect(afterVideo.playbackRate).toBeCloseTo(1.15);
+    expect(onSave).not.toHaveBeenCalled();
+
+    const inspector = screen.getByTestId("clip-studio-inspector");
+    fireEvent.click(within(inspector).getByRole("tab", { name: /Captions/i }));
+    expect(within(inspector).getByRole("checkbox", { name: /Preview captions/i })).toBeChecked();
+
+    fireEvent.change(within(inspector).getByRole("textbox", { name: /Caption copy/i }), {
+      target: { value: "STOP SCROLLING — THIS CHANGES EVERYTHING" },
+    });
+    expect(screen.getByTestId("live-caption-preview")).toHaveTextContent(/STOP SCROLLING/i);
+
+    fireEvent.click(within(inspector).getByRole("button", { name: "Neon Glow" }));
+    expect(screen.getByTestId("live-caption-preview")).toHaveClass("caption-style-glow");
+
+    fireEvent.click(within(inspector).getByRole("tab", { name: /Pacing/i }));
+    fireEvent.click(within(inspector).getByRole("button", { name: "1.5×" }));
+    expect(afterVideo.playbackRate).toBeCloseTo(1.5);
+    expect(within(inspector).getAllByText("1.50×").length).toBeGreaterThan(0);
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
   test("uses one reliable render action for the selected export destination", async () => {
     const onSave = jest.fn(() => Promise.resolve());
     render(
