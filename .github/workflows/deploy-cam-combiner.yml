@@ -161,11 +161,13 @@ jobs:
             --tag "${CAPTION_IMAGE}" \
             .
 
-          docker run --rm "${FAST_IMAGE}" python -m unittest \
-            test_multicam_chunking \
-            test_multicam_job_runner_retry
-          docker run --rm "${CAPTION_IMAGE}" python -m unittest \
-            test_multicam_checkpoint_integration
+          # The production images intentionally copy this directory into /app.
+          # Recreate the repository package name inside each disposable test
+          # container so package-qualified imports exercise the image's code.
+          docker run --rm --workdir / "${FAST_IMAGE}" sh -c \
+            'ln -s /app /python_media_worker && python -m unittest python_media_worker.test_multicam_chunking python_media_worker.test_multicam_job_runner_retry'
+          docker run --rm --workdir / "${CAPTION_IMAGE}" sh -c \
+            'ln -s /app /python_media_worker && python -m unittest python_media_worker.test_multicam_checkpoint_integration'
 
           cleanup_containers() {
             docker rm --force cam-fast-smoke cam-caption-smoke >/dev/null 2>&1 || true

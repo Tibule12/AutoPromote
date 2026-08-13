@@ -54,6 +54,20 @@ class CamCombinerReleaseContractTests(unittest.TestCase):
         image_field = "spec.template.spec.template.spec.containers[0].image"
         self.assertEqual(self.workflow.count(image_field), 4)
 
+    def test_container_tests_preserve_repository_package_imports(self):
+        self.assertEqual(
+            self.workflow.count("ln -s /app /python_media_worker"),
+            2,
+        )
+        self.assertIn(
+            "python_media_worker.test_multicam_chunking",
+            self.workflow,
+        )
+        self.assertIn(
+            "python_media_worker.test_multicam_checkpoint_integration",
+            self.workflow,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
