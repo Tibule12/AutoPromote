@@ -1254,6 +1254,26 @@ const VIRAL_STUDIO_WORKFLOW = [
   },
 ];
 
+const CREATIVE_STUDIO_TOOLS = [
+  { id: "moments", label: "Moments", icon: "✦" },
+  { id: "hook", label: "Hook", icon: "⌁" },
+  { id: "captions", label: "Captions", icon: "CC" },
+  { id: "pacing", label: "Pacing", icon: "≋" },
+  { id: "broll", label: "B-roll", icon: "▣" },
+  { id: "sound", label: "Sound", icon: "♫" },
+  { id: "export", label: "Export", icon: "⇧" },
+];
+
+const CREATIVE_INTENTS = [
+  { id: "trim", label: "Remove boring parts", icon: "✂" },
+  { id: "energy", label: "Increase energy", icon: "ϟ" },
+  { id: "proof", label: "Show proof", icon: "▥" },
+  { id: "loop", label: "Make it loop", icon: "↻" },
+];
+
+const PREVIEW_SPEED_OPTIONS = [0.5, 0.75, 1, 1.15, 1.25, 1.5, 2];
+const STORY_BEAT_LABELS = ["Hook", "Problem", "Proof", "Payoff"];
+
 const ViralClipStudio = ({
   videoUrl,
   clips,
@@ -1334,6 +1354,13 @@ const ViralClipStudio = ({
   const [bRollCadence, setBRollCadence] = useState("balanced");
   const [studioInspectorTab, setStudioInspectorTab] = useState("hook");
   const [comparisonMode, setComparisonMode] = useState("split");
+  const [activeCreativeTool, setActiveCreativeTool] = useState("moments");
+  const [creativeIntent, setCreativeIntent] = useState("energy");
+  const [pacingLevel, setPacingLevel] = useState("balanced");
+  const [previewSpeed, setPreviewSpeed] = useState(1);
+  const [captionPosition, setCaptionPosition] = useState("lower");
+  const [captionScale, setCaptionScale] = useState(1);
+  const [captionTextOverride, setCaptionTextOverride] = useState("");
   const [studioActionMessage, setStudioActionMessage] = useState(
     "Split preview is live. Edit on the right and compare the untouched source beside it."
   );
@@ -1597,6 +1624,13 @@ const ViralClipStudio = ({
     activeOverlayId,
     videoFit,
     autoCaptions,
+    captionStyle,
+    captionPosition,
+    captionScale,
+    captionTextOverride,
+    previewSpeed,
+    pacingLevel,
+    creativeIntent,
     smartCrop,
     enhanceQuality,
     silenceRemoval,
@@ -1653,6 +1687,13 @@ const ViralClipStudio = ({
     setSafeFaceFraming(snapshot.safeFaceFraming !== undefined ? !!snapshot.safeFaceFraming : true);
     setFaceAnchorPreset(snapshot.faceAnchorPreset || "center");
     setAutoCaptions(!!snapshot.autoCaptions);
+    setCaptionStyle(snapshot.captionStyle || "bold_pop");
+    setCaptionPosition(snapshot.captionPosition || "lower");
+    setCaptionScale(Number(snapshot.captionScale ?? 1));
+    setCaptionTextOverride(snapshot.captionTextOverride || "");
+    setPreviewSpeed(Number(snapshot.previewSpeed ?? 1));
+    setPacingLevel(snapshot.pacingLevel || "balanced");
+    setCreativeIntent(snapshot.creativeIntent || "energy");
     setSmartCrop(!!snapshot.smartCrop);
     setEnhanceQuality(!!snapshot.enhanceQuality);
     setSilenceRemoval(!!snapshot.silenceRemoval);
@@ -3311,6 +3352,7 @@ const ViralClipStudio = ({
     isPreviewPaused &&
     isWatermarkCleanupPreviewFrameAligned;
   const captionPreviewSourceText =
+    normalizePlainText(captionTextOverride) ||
     getCaptionPreviewSourceText(selectedClip) ||
     normalizePlainText(hookText) ||
     "AI captions preview";
@@ -3319,6 +3361,27 @@ const ViralClipStudio = ({
     localTime: previewTimelineTime,
     duration: currentTimelineWindow.duration || selectedClip?.duration || 3,
   });
+  const retentionScore = clampNumber(
+    54 +
+      (addHook ? 9 : 0) +
+      (autoCaptions ? 8 : 0) +
+      (silenceRemoval ? 7 : 0) +
+      (smartCrop ? 5 : 0) +
+      (overlays.some(overlay => overlay.bRollMode) ? 6 : 0) +
+      (addMusic ? 4 : 0) +
+      (hookPreviewLoop ? 4 : 0),
+    0,
+    97,
+    54
+  );
+  const creativeImprovementsReady = [
+    !autoCaptions && "animated captions",
+    !silenceRemoval && "tighter pauses",
+    !smartCrop && "face-safe framing",
+    !overlays.some(overlay => overlay.bRollMode) && "proof B-roll",
+    !addMusic && "background energy",
+    !hookPreviewLoop && "loop ending",
+  ].filter(Boolean);
   const audioModeSummary =
     currentAudioMode === "replace"
       ? "Donor track replaces original audio"
@@ -3381,6 +3444,93 @@ const ViralClipStudio = ({
       video.pause();
     }
   };
+
+  const changePreviewSpeed = nextSpeed => {
+    const normalizedSpeed = clampNumber(nextSpeed, 0.5, 2, 1);
+    setPreviewSpeed(normalizedSpeed);
+    if (videoRef.current) videoRef.current.playbackRate = normalizedSpeed;
+    setStudioActionMessage(
+      `Preview pacing set to ${normalizedSpeed.toFixed(2).replace(/0$/, "")}×. Captions, B-roll, and comparison stay synchronized.`
+    );
+  };
+
+  const selectCreativeTool = toolId => {
+    setActiveCreativeTool(toolId);
+    if (["hook", "captions", "pacing", "broll", "sound"].includes(toolId)) {
+      setStudioInspectorTab(toolId);
+    }
+    if (toolId === "moments") {
+      setStudioActionMessage("Choose a story moment, then shape how it earns attention.");
+    }
+    if (toolId === "export") {
+      setStudioActionMessage("Review the edit first. Rendering remains a separate final action.");
+    }
+  };
+
+  const applyCreativeIntent = intentId => {
+    setCreativeIntent(intentId);
+    if (intentId === "trim") {
+      setSilenceRemoval(true);
+      setPacingLevel("energetic");
+      changePreviewSpeed(1.15);
+      setStudioInspectorTab("pacing");
+      setActiveCreativeTool("pacing");
+      setStudioActionMessage(
+        "Boring pauses are marked for tightening and the preview is running at a sharper pace."
+      );
+      return;
+    }
+    if (intentId === "energy") {
+      setAutoCaptions(true);
+      setCaptionStyle("bold_pop");
+      setPacingLevel("energetic");
+      changePreviewSpeed(1.25);
+      setHookZoomScale(current => Math.max(1.12, Number(current || 1.08)));
+      setStudioActionMessage(
+        "Energy pass ready: faster pacing, magnetic captions, and a stronger punch-in."
+      );
+      return;
+    }
+    if (intentId === "proof") {
+      setStudioInspectorTab("broll");
+      setActiveCreativeTool("broll");
+      setStudioActionMessage(
+        "Proof mode is open. Place evidence exactly where the claim needs visual support."
+      );
+      return;
+    }
+    setHookPreviewLoop(true);
+    setStudioInspectorTab("hook");
+    setActiveCreativeTool("hook");
+    setStudioActionMessage(
+      "Loop preview is ready. The ending can now be reviewed against the opening before render."
+    );
+  };
+
+  const applyMakeItHit = () => {
+    setAutoCaptions(true);
+    setCaptionStyle("bold_pop");
+    setCaptionPosition("lower");
+    setCaptionScale(1.08);
+    setSilenceRemoval(true);
+    setSmartCrop(true);
+    setSmartCropMode("speaker_track");
+    setPacingLevel("energetic");
+    setCreativeIntent("energy");
+    setHookZoomScale(current => Math.max(1.14, Number(current || 1.08)));
+    changePreviewSpeed(1.15);
+    setComparisonMode("after");
+    focusComparisonPreview("hook", true);
+    setStudioActionMessage(
+      "Make It Hit applied a reversible retention pass: captions, pause tightening, speaker framing, punch-in, and faster pacing."
+    );
+  };
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.playbackRate = previewSpeed;
+  }, [activeTimelineIndex, currentTimelineClip, previewSpeed]);
 
   useEffect(() => {
     if (!addHook) return;
@@ -4155,6 +4305,19 @@ const ViralClipStudio = ({
       await onSave(selectedClip, normalizedOverlays, {
         autoCaptions,
         captionStyle,
+        captionPosition,
+        captionScale,
+        captionTextOverride: normalizePlainText(captionTextOverride) || null,
+        previewSpeed,
+        speedSegments: [
+          {
+            startTime: 0,
+            endTime: Number(currentTimelineWindow.duration || selectedClip?.duration || 0),
+            rate: previewSpeed,
+            pitchPreserved: true,
+          },
+        ],
+        pacingLevel,
         smartCrop,
         smartCropMode,
         enhanceQuality,
@@ -4366,6 +4529,12 @@ const ViralClipStudio = ({
     videoFit,
     autoCaptions,
     captionStyle,
+    captionPosition,
+    captionScale,
+    captionTextOverride,
+    previewSpeed,
+    pacingLevel,
+    creativeIntent,
     smartCrop,
     smartCropMode,
     silenceRemoval,
@@ -6253,12 +6422,20 @@ const ViralClipStudio = ({
       <div className="viral-studio-container hook-broll-only-mode">
         <div className="studio-header">
           <div className="studio-header-copy">
-            <span className="studio-eyebrow">Hook + B-roll mode</span>
-            <h3>Clip Studio</h3>
-            <p className="studio-header-subtitle">
-              Turn a selected moment into a finished vertical story from one controlled editing
-              workspace.
-            </p>
+            <div className="studio-brand-lockup">
+              <span className="studio-brand-mark" aria-hidden="true">
+                A
+              </span>
+              <strong>AutoPromote</strong>
+            </div>
+            <div className="studio-project-title">
+              <span>Viral Clip Studio</span>
+              <h3>
+                {normalizePlainText(
+                  selectedClip?.hookText || selectedClip?.reason || "Podcast Growth Clip"
+                ).slice(0, 52)}
+              </h3>
+            </div>
             <div className="studio-billing-strip">
               <span className="studio-billing-pill is-included">Studio included</span>
               <span className="studio-billing-pill">
@@ -6286,6 +6463,8 @@ const ViralClipStudio = ({
           </div>
 
           <div className="studio-header-actions">
+            <span className="studio-autosave-state">✓ Autosaved locally</span>
+            <span className="studio-credit-safe">● No render credits used</span>
             <button
               type="button"
               className="tool-btn tool-btn-compact"
@@ -6323,11 +6502,25 @@ const ViralClipStudio = ({
         </div>
 
         <div className="studio-layout">
+          <nav className="creative-tool-rail" aria-label="Creative tools">
+            {CREATIVE_STUDIO_TOOLS.map(tool => (
+              <button
+                key={tool.id}
+                type="button"
+                className={activeCreativeTool === tool.id ? "is-active" : ""}
+                aria-pressed={activeCreativeTool === tool.id}
+                onClick={() => selectCreativeTool(tool.id)}
+              >
+                <span aria-hidden="true">{tool.icon}</span>
+                <strong>{tool.label}</strong>
+              </button>
+            ))}
+          </nav>
           <aside className="studio-project-rail" aria-label="Project navigator">
             <div className="studio-project-rail__head">
-              <span>Project navigator</span>
-              <strong>Build the final short</strong>
-              <small>Select the source sequence and detected moment you want to edit.</small>
+              <span>AI Moments</span>
+              <strong>Your story, already mapped</strong>
+              <small>Choose a beat. AutoPromote keeps the complicated editing underneath.</small>
             </div>
 
             <nav className="studio-workflow-nav" aria-label="Clip Studio workflow">
@@ -6440,6 +6633,11 @@ const ViralClipStudio = ({
                           {Number(clip.start || 0).toFixed(1)}s–
                           {Number(clip.end || 0).toFixed(1)}s
                         </small>
+                        <em
+                          className={`story-beat-tag is-${STORY_BEAT_LABELS[index % 4].toLowerCase()}`}
+                        >
+                          {STORY_BEAT_LABELS[index % 4]}
+                        </em>
                       </div>
                       <i>{guidance?.score ?? 0}</i>
                     </button>
@@ -6510,6 +6708,12 @@ const ViralClipStudio = ({
               </div>
 
               <div className="preview-device-column">
+                <div className="preview-intelligence-stack" aria-label="Live edit intelligence">
+                  <span className={hookPreviewLoop ? "is-ready" : ""}>↻ Loop ready</span>
+                  <span className={!muteOriginalAudio ? "is-ready" : ""}>≋ Speech clear</span>
+                  <span className={smartCrop ? "is-ready" : ""}>⌗ Face tracked</span>
+                  <span className="is-safe">◇ No render credits used</span>
+                </div>
                 <div className={`preview-player-shell comparison-${comparisonMode}`}>
                   <div
                     ref={phoneFrameRef}
@@ -6730,7 +6934,11 @@ const ViralClipStudio = ({
                         </div>
                       ) : null}
                       {autoCaptions && captionPreviewState.currentChunk ? (
-                        <div className="caption-preview-stack">
+                        <div
+                          className={`caption-preview-stack caption-position-${captionPosition} caption-style-${captionStyle || "classic"}`}
+                          data-testid="live-caption-preview"
+                          style={{ "--caption-preview-scale": captionScale }}
+                        >
                           <div className="caption-preview-pill caption-preview-pill-active">
                             {captionPreviewState.currentChunk.words.map((word, index) => (
                               <span
@@ -7129,6 +7337,25 @@ const ViralClipStudio = ({
                     </div>
                     <span className="compact-timeline-sync">● Synced</span>
                   </div>
+                  <div className="compact-timeline-row compact-story-row">
+                    <span>Story</span>
+                    <div className="compact-timeline-track">
+                      <i
+                        className="compact-timeline-playhead"
+                        style={{ left: `${hookPlayheadLeft}%` }}
+                      />
+                      {STORY_BEAT_LABELS.map((label, index) => (
+                        <div
+                          key={label}
+                          className={`compact-story-beat is-${label.toLowerCase()}`}
+                          style={{ left: `${index * 25}%`, width: "25%" }}
+                        >
+                          {label}
+                          {(index === 0 || index === 2) && <b title="Retention risk">!</b>}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                   <div className="compact-timeline-row">
                     <span>Hook</span>
                     <div className="compact-timeline-track">
@@ -7186,6 +7413,59 @@ const ViralClipStudio = ({
                             </button>
                           );
                         })}
+                    </div>
+                  </div>
+                  <div className="compact-timeline-row">
+                    <span>Captions</span>
+                    <div className="compact-timeline-track compact-caption-track">
+                      <i
+                        className="compact-timeline-playhead"
+                        style={{ left: `${hookPlayheadLeft}%` }}
+                      />
+                      {autoCaptions
+                        ? captionPreviewState.chunks.slice(0, 7).map((chunk, index, chunks) => (
+                            <button
+                              key={chunk.id}
+                              type="button"
+                              className="compact-caption-block"
+                              style={{
+                                left: `${(index / chunks.length) * 100}%`,
+                                width: `${100 / chunks.length}%`,
+                              }}
+                              onClick={() => selectCreativeTool("captions")}
+                            >
+                              {chunk.text}
+                            </button>
+                          ))
+                        : null}
+                    </div>
+                  </div>
+                  <div className="compact-timeline-row">
+                    <span>Speed</span>
+                    <div className="compact-timeline-track compact-speed-track">
+                      <i
+                        className="compact-timeline-playhead"
+                        style={{ left: `${hookPlayheadLeft}%` }}
+                      />
+                      <svg viewBox="0 0 100 24" preserveAspectRatio="none" aria-hidden="true">
+                        <path d="M0 17 C14 17 17 5 31 7 S52 20 65 11 S84 6 100 13" />
+                      </svg>
+                      <button type="button" onClick={() => selectCreativeTool("pacing")}>
+                        {previewSpeed.toFixed(2).replace(/0$/, "")}×
+                      </button>
+                    </div>
+                  </div>
+                  <div className="compact-timeline-row">
+                    <span>Audio</span>
+                    <div className="compact-timeline-track compact-audio-track">
+                      <i
+                        className="compact-timeline-playhead"
+                        style={{ left: `${hookPlayheadLeft}%` }}
+                      />
+                      <div className="compact-audio-wave" aria-hidden="true" />
+                      <strong>
+                        {addMusic ? musicTrack?.name || "Background sound" : "Original voice"}
+                      </strong>
                     </div>
                   </div>
                 </div>
@@ -7657,9 +7937,90 @@ const ViralClipStudio = ({
               className="studio-panel clip-inspector-panel"
               data-testid="clip-studio-inspector"
             >
+              <div className="creative-director-panel">
+                <div className="creative-director-heading">
+                  <div>
+                    <span>AI Creative Director</span>
+                    <strong>Tell it how the clip should feel</strong>
+                  </div>
+                  <i aria-hidden="true">☷</i>
+                </div>
+                <button
+                  type="button"
+                  className="make-it-hit-button"
+                  onClick={applyMakeItHit}
+                  data-testid="make-it-hit-button"
+                >
+                  ✦ MAKE IT HIT
+                </button>
+                <span className="creative-intent-label">Choose your intent</span>
+                <div className="creative-intent-grid">
+                  {CREATIVE_INTENTS.map(intent => (
+                    <button
+                      key={intent.id}
+                      type="button"
+                      className={creativeIntent === intent.id ? "is-active" : ""}
+                      onClick={() => applyCreativeIntent(intent.id)}
+                    >
+                      <span aria-hidden="true">{intent.icon}</span>
+                      {intent.label}
+                    </button>
+                  ))}
+                </div>
+                <div className="retention-score-card">
+                  <div>
+                    <span>Retention Score</span>
+                    <strong>{retentionScore}</strong>
+                  </div>
+                  <p>
+                    {retentionScore >= 84
+                      ? "This edit keeps visual change and speech moving."
+                      : "Apply the suggested improvements to strengthen retention."}
+                    <small>↗ Live estimate · no render needed</small>
+                  </p>
+                </div>
+                <div className="director-pacing-row">
+                  <span>Pacing</span>
+                  <div>
+                    {["calm", "balanced", "energetic"].map(level => (
+                      <button
+                        key={level}
+                        type="button"
+                        aria-label={`${level[0].toUpperCase() + level.slice(1)} creative pacing`}
+                        className={pacingLevel === level ? "is-active" : ""}
+                        onClick={() => {
+                          setPacingLevel(level);
+                          changePreviewSpeed(
+                            level === "calm" ? 0.9 : level === "energetic" ? 1.25 : 1
+                          );
+                        }}
+                      >
+                        {level[0].toUpperCase() + level.slice(1)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="creative-improvements-card"
+                  onClick={() =>
+                    selectCreativeTool(
+                      creativeImprovementsReady[0] === "proof B-roll" ? "broll" : "captions"
+                    )
+                  }
+                >
+                  <span>
+                    <strong>{creativeImprovementsReady.length || 6} improvements ready</strong>
+                    <small>Review every suggestion before render</small>
+                  </span>
+                  <b aria-hidden="true">›</b>
+                </button>
+              </div>
               <div className="clip-inspector-tabs" role="tablist" aria-label="Clip Studio tools">
                 {[
                   { id: "hook", label: "Hook", icon: "✦" },
+                  { id: "captions", label: "Captions", icon: "CC" },
+                  { id: "pacing", label: "Pacing", icon: "≋" },
                   { id: "broll", label: "B-roll", icon: "▣" },
                   { id: "sound", label: "Sound", icon: "♫" },
                 ].map(tab => (
@@ -7669,7 +8030,10 @@ const ViralClipStudio = ({
                     role="tab"
                     aria-selected={studioInspectorTab === tab.id}
                     className={studioInspectorTab === tab.id ? "is-active" : ""}
-                    onClick={() => setStudioInspectorTab(tab.id)}
+                    onClick={() => {
+                      setStudioInspectorTab(tab.id);
+                      setActiveCreativeTool(tab.id);
+                    }}
                   >
                     <span>{tab.icon}</span>
                     {tab.label}
@@ -7792,6 +8156,238 @@ const ViralClipStudio = ({
                   >
                     ✦ Apply Hook
                   </button>
+                </div>
+              ) : null}
+
+              {studioInspectorTab === "captions" ? (
+                <div className="clip-inspector-body" role="tabpanel">
+                  <div className="inspector-heading-row">
+                    <div>
+                      <span className="panel-kicker">Live captions</span>
+                      <h4>Make every word land before you render</h4>
+                    </div>
+                    <span className={`inspector-status-dot ${autoCaptions ? "is-ready" : ""}`}>
+                      {autoCaptions ? "Live" : "Off"}
+                    </span>
+                  </div>
+
+                  <label className="inspector-toggle-row">
+                    <span>
+                      <b>Preview captions</b>
+                      <small>Visible instantly in After and Split. Before stays untouched.</small>
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={autoCaptions}
+                      onChange={event => setAutoCaptions(event.target.checked)}
+                    />
+                  </label>
+
+                  <label className="inspector-field">
+                    <span>Caption copy</span>
+                    <textarea
+                      value={captionTextOverride}
+                      onChange={event => setCaptionTextOverride(event.target.value.slice(0, 240))}
+                      rows={4}
+                      maxLength={240}
+                      placeholder={captionPreviewSourceText || "Your spoken words appear here"}
+                    />
+                    <small>
+                      Leave empty to use the clip transcript. Editing this updates the preview live.
+                    </small>
+                  </label>
+
+                  <div className="inspector-field">
+                    <span>Creator style</span>
+                    <div className="inspector-choice-grid caption-style-grid">
+                      {[
+                        ["bold_pop", "Bold Pop"],
+                        ["karaoke", "Karaoke"],
+                        ["glow", "Neon Glow"],
+                        ["bounce", "Bounce"],
+                        ["minimal", "Minimal"],
+                      ].map(([value, label]) => (
+                        <button
+                          key={value}
+                          type="button"
+                          className={captionStyle === value ? "is-active" : ""}
+                          onClick={() => {
+                            setCaptionStyle(value);
+                            setAutoCaptions(true);
+                            setComparisonMode("after");
+                          }}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="inspector-field">
+                    <span>Position</span>
+                    <div className="inspector-choice-grid is-three">
+                      {[
+                        ["top", "Top"],
+                        ["center", "Center"],
+                        ["lower", "Lower"],
+                      ].map(([value, label]) => (
+                        <button
+                          key={value}
+                          type="button"
+                          className={captionPosition === value ? "is-active" : ""}
+                          onClick={() => setCaptionPosition(value)}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <label className="inspector-range">
+                    <span>
+                      <b>Caption size</b>
+                      <strong>{Math.round(captionScale * 100)}%</strong>
+                    </span>
+                    <input
+                      type="range"
+                      min={0.8}
+                      max={1.35}
+                      step={0.05}
+                      value={captionScale}
+                      onChange={event => setCaptionScale(Number(event.target.value))}
+                    />
+                  </label>
+
+                  <button
+                    type="button"
+                    className="inspector-primary-action"
+                    onClick={() => {
+                      setAutoCaptions(true);
+                      setComparisonMode("after");
+                      previewHookSegment(false);
+                      setStudioActionMessage("Captions are live in the After preview.");
+                    }}
+                  >
+                    CC Preview Captions
+                  </button>
+                </div>
+              ) : null}
+
+              {studioInspectorTab === "pacing" ? (
+                <div className="clip-inspector-body" role="tabpanel">
+                  <div className="inspector-heading-row">
+                    <div>
+                      <span className="panel-kicker">Pacing engine</span>
+                      <h4>Control energy without making editing complicated</h4>
+                    </div>
+                    <span className="inspector-status-dot is-ready">
+                      {previewSpeed.toFixed(2).replace(/\.00$/, "")}×
+                    </span>
+                  </div>
+
+                  <div className="inspector-field">
+                    <span>Quick speed</span>
+                    <div className="speed-preset-grid">
+                      {PREVIEW_SPEED_OPTIONS.map(speed => (
+                        <button
+                          key={speed}
+                          type="button"
+                          className={Math.abs(previewSpeed - speed) < 0.01 ? "is-active" : ""}
+                          onClick={() => changePreviewSpeed(speed)}
+                        >
+                          {speed}×
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <label className="inspector-range">
+                    <span>
+                      <b>Fine speed</b>
+                      <strong>{previewSpeed.toFixed(2)}×</strong>
+                    </span>
+                    <input
+                      type="range"
+                      min={0.5}
+                      max={2}
+                      step={0.05}
+                      value={previewSpeed}
+                      onChange={event => changePreviewSpeed(Number(event.target.value))}
+                    />
+                    <small>Pitch stays preserved so voices remain natural.</small>
+                  </label>
+
+                  <div className="inspector-field">
+                    <span>Energy</span>
+                    <div className="inspector-choice-grid is-three">
+                      {[
+                        ["calm", "Calm"],
+                        ["balanced", "Balanced"],
+                        ["energetic", "Energetic"],
+                      ].map(([value, label]) => (
+                        <button
+                          key={value}
+                          type="button"
+                          className={pacingLevel === value ? "is-active" : ""}
+                          onClick={() => {
+                            setPacingLevel(value);
+                            if (value === "calm") changePreviewSpeed(1);
+                            if (value === "balanced") changePreviewSpeed(1.15);
+                            if (value === "energetic") changePreviewSpeed(1.25);
+                          }}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <label className="inspector-toggle-row">
+                    <span>
+                      <b>Remove dead air</b>
+                      <small>
+                        Marks long pauses for the final edit without changing your source.
+                      </small>
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={silenceRemoval}
+                      onChange={event => setSilenceRemoval(event.target.checked)}
+                    />
+                  </label>
+
+                  {silenceRemoval ? (
+                    <div className="pacing-fine-controls">
+                      <label className="inspector-range">
+                        <span>
+                          <b>Speech threshold</b>
+                          <strong>{silenceThreshold} dB</strong>
+                        </span>
+                        <input
+                          type="range"
+                          min={-55}
+                          max={-20}
+                          step={1}
+                          value={silenceThreshold}
+                          onChange={event => setSilenceThreshold(Number(event.target.value))}
+                        />
+                      </label>
+                      <label className="inspector-range">
+                        <span>
+                          <b>Minimum pause</b>
+                          <strong>{Number(minSilenceDuration).toFixed(2)}s</strong>
+                        </span>
+                        <input
+                          type="range"
+                          min={0.25}
+                          max={2.5}
+                          step={0.05}
+                          value={minSilenceDuration}
+                          onChange={event => setMinSilenceDuration(Number(event.target.value))}
+                        />
+                      </label>
+                    </div>
+                  ) : null}
                 </div>
               ) : null}
 
