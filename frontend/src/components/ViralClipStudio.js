@@ -16,7 +16,7 @@ import html2canvas from "html2canvas"; // For rendering styled captions
 import { trackClipWorkflowEvent } from "../utils/clipWorkflowAnalytics";
 import { playMediaSafely } from "../utils/mediaPlayback";
 import toast from "react-hot-toast";
-import { SafeAudio } from "./SafeMedia";
+import { SafeAudio, SafeImage, SafeVideo } from "./SafeMedia";
 import "./ViralClipStudio.css"; // We'll create this CSS next
 
 const RAINBOW_COLORS = [
@@ -7894,7 +7894,7 @@ const ViralClipStudio = ({
                         style={{ left: `${hookPlayheadLeft}%` }}
                       />
                       {liveTimelineSource ? (
-                        <video
+                        <SafeVideo
                           src={liveTimelineSource}
                           muted
                           playsInline
@@ -8063,9 +8063,9 @@ const ViralClipStudio = ({
                               ).toFixed(1)}s · ${overlay.bRollMode}`}
                             >
                               {mediaSource && overlay.type === "image" ? (
-                                <img src={mediaSource} alt="" />
+                                <SafeImage src={mediaSource} alt="" />
                               ) : mediaSource ? (
-                                <video
+                                <SafeVideo
                                   src={mediaSource}
                                   muted
                                   playsInline
