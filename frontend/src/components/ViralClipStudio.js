@@ -4469,6 +4469,8 @@ const ViralClipStudio = ({
     const auth = getAuth();
     const user = auth.currentUser;
     if (!user) throw new Error("Please login first");
+    const token = await user.getIdToken();
+    const sourceUploadPromises = new Map();
 
     const exportSegments = await Promise.all(
       timeline.map(async clip => {
@@ -4487,9 +4489,24 @@ const ViralClipStudio = ({
           const extension =
             clip.file?.name?.split(".").pop() || sourceFile.type?.split("/").pop() || "mp4";
           const fileName = `${Date.now()}_${clip.id}.${extension}`;
-          const storageRef = ref(storage, `timeline/${user.uid}/${fileName}`);
-          await uploadBytes(storageRef, sourceFile);
-          clipUrl = await getDownloadURL(storageRef);
+          const sourceKey = clip.sourceClipId || clip.url || clip.id;
+          if (!sourceUploadPromises.has(sourceKey)) {
+            sourceUploadPromises.set(
+              sourceKey,
+              uploadSourceFileViaBackend({
+                file: sourceFile,
+                token,
+                mediaType: "video",
+                fileName,
+                onProgress: (transferred, total) => {
+                  const percent = total > 0 ? Math.round((transferred / total) * 100) : 0;
+                  setExportStatusLabel(`Uploading source ${percent}%`);
+                },
+              })
+            );
+          }
+          const uploadResult = await sourceUploadPromises.get(sourceKey);
+          clipUrl = uploadResult.url;
         }
 
         const window = getTimelineClipWindow(clip);
@@ -4625,7 +4642,7 @@ const ViralClipStudio = ({
     }
 
     setIsExporting(true);
-    setExportStatusLabel("Rendering Captions...");
+    setExportStatusLabel("Preparing media...");
 
     const auth = getAuth();
     if (!auth.currentUser) {
@@ -4636,7 +4653,9 @@ const ViralClipStudio = ({
     }
 
     try {
+      const token = await auth.currentUser.getIdToken();
       const exportTimeline = await buildExportTimeline();
+      setExportStatusLabel("Uploading edit layers...");
       const newOverlays = await Promise.all(
         overlays.map(async overlay => {
           let fileToUpload = overlay.file;
@@ -4692,9 +4711,22 @@ const ViralClipStudio = ({
                 ? fileToUpload.name.split(".").pop()
                 : "bin";
             const fileName = `${createSecureId("overlay")}.${ext}`;
-            const storageRef = ref(storage, `overlays/${auth.currentUser.uid}/${fileName}`);
-            await uploadBytes(storageRef, fileToUpload);
-            const url = await getDownloadURL(storageRef);
+            const uploadResult = await uploadSourceFileViaBackend({
+              file: fileToUpload,
+              token,
+              mediaType:
+                finalOverlay.type === "video"
+                  ? "video"
+                  : finalOverlay.type === "image"
+                    ? "image"
+                    : "audio",
+              fileName,
+              onProgress: (transferred, total) => {
+                const percent = total > 0 ? Math.round((transferred / total) * 100) : 0;
+                setExportStatusLabel(`Uploading layers ${percent}%`);
+              },
+            });
+            const url = uploadResult.url;
 
             finalOverlay.src = url;
             finalOverlay.isLocal = false;
@@ -4704,6 +4736,27 @@ const ViralClipStudio = ({
           return finalOverlay;
         })
       );
+
+      let exportedMusicUrl = musicTrack?.url || null;
+      if (
+        addMusic &&
+        musicTrack?.file instanceof Blob &&
+        (!exportedMusicUrl || exportedMusicUrl.startsWith("blob:"))
+      ) {
+        const musicExtension = musicTrack.file.name?.split(".").pop() || "mp3";
+        const musicUpload = await uploadSourceFileViaBackend({
+          file: musicTrack.file,
+          token,
+          mediaType: "audio",
+          fileName: `${createSecureId("music")}.${musicExtension}`,
+          onProgress: (transferred, total) => {
+            const percent = total > 0 ? Math.round((transferred / total) * 100) : 0;
+            setExportStatusLabel(`Uploading sound ${percent}%`);
+          },
+        });
+        exportedMusicUrl = musicUpload.url;
+        setMusicTrack(previous => (previous ? { ...previous, url: exportedMusicUrl } : previous));
+      }
 
       const normalizedOverlays = normalizeOverlaysForExport(exportTimeline, newOverlays);
       const persistedHookFocusPoint = addHook ? normalizeHookFocusPoint(hookFocusPoint) : null;
@@ -4721,6 +4774,7 @@ const ViralClipStudio = ({
       const thumbnailFrame = coverFrame ? { ...coverFrame, purpose: "thumbnail" } : null;
 
       setOverlays(newOverlays);
+      setExportStatusLabel("Starting render...");
       await onSave(selectedClip, normalizedOverlays, {
         autoCaptions,
         captionStyle,
@@ -4799,8 +4853,8 @@ const ViralClipStudio = ({
         hookZoomScale,
         hookTextAnimation,
         addMusic: addMusic && !!musicTrack,
-        musicFile: musicTrack?.file || null,
-        musicUrl: musicTrack?.url || null,
+        musicFile: null,
+        musicUrl: exportedMusicUrl,
         musicName: musicTrack?.name || null,
         musicSelection: musicTrack ? "custom" : musicSelection,
         isSearch: musicTrack ? true : musicSearchMode,

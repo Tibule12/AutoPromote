@@ -103,7 +103,13 @@ export async function uploadTemporaryVideoSource({ file, purpose, onProgress }) 
   };
 }
 
-async function uploadSourceFileViaFirebase({ file, mediaType, fileName, onProgress }) {
+async function uploadSourceFileViaFirebase({
+  file,
+  mediaType,
+  fileName,
+  onProgress,
+  timeoutMs,
+}) {
   const user = auth.currentUser;
   if (!user?.uid) {
     throw new Error("Please sign in again before uploading.");
@@ -123,6 +129,20 @@ async function uploadSourceFileViaFirebase({ file, mediaType, fileName, onProgre
       },
     });
 
+    let settled = false;
+    const finish = callback => value => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeoutId);
+      callback(value);
+    };
+    const timeoutId = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      if (typeof task.cancel === "function") task.cancel();
+      reject(new Error("Media upload timed out. Check your connection and retry."));
+    }, timeoutMs);
+
     task.on(
       "state_changed",
       state => {
@@ -130,8 +150,8 @@ async function uploadSourceFileViaFirebase({ file, mediaType, fileName, onProgre
           onProgress(state.bytesTransferred, state.totalBytes || file.size || 0);
         }
       },
-      reject,
-      () => resolve(task.snapshot)
+      finish(reject),
+      () => finish(resolve)(task.snapshot)
     );
   });
 
@@ -146,7 +166,14 @@ async function uploadSourceFileViaFirebase({ file, mediaType, fileName, onProgre
   };
 }
 
-async function uploadSourceFileViaBackendRequest({ file, token, mediaType, fileName, onProgress }) {
+async function uploadSourceFileViaBackendRequest({
+  file,
+  token,
+  mediaType,
+  fileName,
+  onProgress,
+  timeoutMs,
+}) {
   if (!(file instanceof Blob)) {
     throw new Error("Upload requires a File or Blob.");
   }
@@ -160,6 +187,8 @@ async function uploadSourceFileViaBackendRequest({ file, token, mediaType, fileN
   uploadUrl.searchParams.set("fileName", fileName || file.name || "untitled");
 
   let response;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
   try {
     response = await fetch(uploadUrl.toString(), {
       method: "POST",
@@ -168,9 +197,15 @@ async function uploadSourceFileViaBackendRequest({ file, token, mediaType, fileN
         "Content-Type": file.type || "application/octet-stream",
       },
       body: file,
+      signal: controller.signal,
     });
   } catch (error) {
+    if (error?.name === "AbortError") {
+      throw new Error("Media upload timed out. Check your connection and retry.");
+    }
     throw buildBackendUploadError(error);
+  } finally {
+    clearTimeout(timeoutId);
   }
 
   const result = await response.json().catch(() => null);
@@ -186,7 +221,14 @@ async function uploadSourceFileViaBackendRequest({ file, token, mediaType, fileN
   return result;
 }
 
-export async function uploadSourceFileViaBackend({ file, token, mediaType, fileName, onProgress }) {
+export async function uploadSourceFileViaBackend({
+  file,
+  token,
+  mediaType,
+  fileName,
+  onProgress,
+  timeoutMs = 180000,
+}) {
   if (!(file instanceof Blob)) {
     throw new Error("Upload requires a File or Blob.");
   }
@@ -198,6 +240,7 @@ export async function uploadSourceFileViaBackend({ file, token, mediaType, fileN
       mediaType: normalizedMediaType,
       fileName,
       onProgress,
+      timeoutMs,
     });
   } catch (firebaseError) {
     console.warn("Firebase resumable upload failed, falling back to backend upload:", firebaseError);
@@ -207,6 +250,7 @@ export async function uploadSourceFileViaBackend({ file, token, mediaType, fileN
       mediaType: normalizedMediaType,
       fileName,
       onProgress,
+      timeoutMs,
     });
   }
 }

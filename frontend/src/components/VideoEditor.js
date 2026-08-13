@@ -1023,15 +1023,22 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
       // If it's a blob, we must upload it first.
       let finalVideoUrl = videoSrc;
       if (videoSrc.startsWith("blob:")) {
-        setStatusMessage("Uploading local video to cloud for processing...");
-        const blob = await fetch(videoSrc).then(r => r.blob());
-        const auth = getAuth();
-        const storage = getStorage();
-        const fileName = `temp_uploads/${auth.currentUser.uid}/${Date.now()}_source.mp4`;
-        const fileRef = ref(storage, fileName);
-        await uploadBytes(fileRef, blob);
-        finalVideoUrl = await getDownloadURL(fileRef);
-        console.log("Uploaded local blob to:", finalVideoUrl);
+        const uploadedTimelineSource = extraOptions.timelineSegments?.find(segment =>
+          /^https?:/i.test(segment?.url || "")
+        )?.url;
+        if (uploadedTimelineSource) {
+          finalVideoUrl = uploadedTimelineSource;
+        } else {
+          setStatusMessage("Uploading local video to cloud for processing...");
+          const blob = await fetch(videoSrc).then(r => r.blob());
+          const auth = getAuth();
+          const storage = getStorage();
+          const fileName = `temp_uploads/${auth.currentUser.uid}/${Date.now()}_source.mp4`;
+          const fileRef = ref(storage, fileName);
+          await uploadBytes(fileRef, blob);
+          finalVideoUrl = await getDownloadURL(fileRef);
+          console.log("Uploaded local blob to:", finalVideoUrl);
+        }
       }
 
       const payload = buildViralRenderData({

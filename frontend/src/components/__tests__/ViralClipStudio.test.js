@@ -1,7 +1,7 @@
 import React from "react";
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import ViralClipStudio from "../ViralClipStudio";
-import { getDownloadURL, uploadBytes } from "firebase/storage";
+import { uploadSourceFileViaBackend } from "../../utils/sourceUpload";
 
 jest.mock("../../utils/clipWorkflowAnalytics", () => ({
   trackClipWorkflowEvent: jest.fn(() => Promise.resolve(true)),
@@ -45,6 +45,10 @@ describe("ViralClipStudio timeline sequencing", () => {
   let consoleErrorSpy;
 
   beforeEach(() => {
+    uploadSourceFileViaBackend.mockImplementation(({ file, onProgress }) => {
+      onProgress?.(file?.size || 1, file?.size || 1);
+      return Promise.resolve({ url: "https://example.com/mock.mp4" });
+    });
     window.confirm = jest.fn(() => false);
     window.alert = jest.fn();
     window.prompt = jest.fn(() => null);
@@ -978,12 +982,14 @@ describe("ViralClipStudio timeline sequencing", () => {
       expect(screen.getAllByText("proof-cutaway.mp4").length).toBeGreaterThan(0);
     });
 
-    uploadBytes.mockClear();
+    uploadSourceFileViaBackend.mockClear();
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /Render Final Clip/i }));
     });
-    await waitFor(() => expect(uploadBytes).toHaveBeenCalled());
-    expect(uploadBytes.mock.calls.some(([, payload]) => payload === uploadedFile)).toBe(true);
+    await waitFor(() => expect(uploadSourceFileViaBackend).toHaveBeenCalled());
+    expect(
+      uploadSourceFileViaBackend.mock.calls.some(([options]) => options.file === uploadedFile)
+    ).toBe(true);
   }, 15000);
 
   test("undoes and redoes Make It Hit as one reversible edit", async () => {
@@ -1085,7 +1091,6 @@ describe("ViralClipStudio timeline sequencing", () => {
 
   test("materializes blob-backed main timeline clips before export", async () => {
     const onSave = jest.fn();
-    getDownloadURL.mockResolvedValue("https://example.com/mock.mp4");
     global.fetch = jest.fn(url => {
       if (url === "blob:http://localhost:3001/source-video") {
         return Promise.resolve({
@@ -1117,8 +1122,7 @@ describe("ViralClipStudio timeline sequencing", () => {
     });
 
     const timelineSegments = onSave.mock.calls[0][2].timelineSegments;
-    expect(uploadBytes).toHaveBeenCalledTimes(1);
-    expect(getDownloadURL).toHaveBeenCalledTimes(1);
+    expect(uploadSourceFileViaBackend).toHaveBeenCalledTimes(1);
     expect(timelineSegments).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
