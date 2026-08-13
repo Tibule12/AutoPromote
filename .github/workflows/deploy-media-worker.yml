@@ -91,11 +91,9 @@ jobs:
         run: |
           set -euo pipefail
           IMAGE="gcr.io/${PROJECT_ID}/${SERVICE_NAME}:${GITHUB_SHA}"
-          CACHE_IMAGE="gcr.io/${PROJECT_ID}/${SERVICE_NAME}:latest"
-          gcloud builds submit \
-            --config cloudbuild.media-worker.yaml \
-            --substitutions "_IMAGE=${IMAGE},_CACHE_IMAGE=${CACHE_IMAGE}" \
-            .
+          gcloud auth configure-docker gcr.io --quiet
+          docker build --tag "${IMAGE}" .
+          docker push "${IMAGE}"
           echo "IMAGE=${IMAGE}" >> "${GITHUB_ENV}"
 
       - name: Deploy candidate with zero production traffic
