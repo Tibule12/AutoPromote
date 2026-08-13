@@ -5,17 +5,17 @@ on:
   push:
     branches:
       - main
+    # main_media_server.py and viral_render_contract.py are shared with the Viral
+    # Media Worker, so watching them redeployed Cam Combiner for unrelated edits.
+    # For a Cam-specific change in either shared file, run this workflow manually.
     paths:
-      - .github/workflows/deploy-cam-combiner.yml
       - python_media_worker/.dockerignore
       - python_media_worker/Dockerfile.cam-combiner
       - python_media_worker/Dockerfile.cam-combiner-fast
       - python_media_worker/requirements.cam-combiner.txt
       - python_media_worker/requirements.cam-combiner-fast.txt
-      - python_media_worker/main_media_server.py
       - python_media_worker/multicam_chunking.py
       - python_media_worker/multicam_job_runner.py
-      - python_media_worker/viral_render_contract.py
       - python_media_worker/assets/**
 
 permissions:
