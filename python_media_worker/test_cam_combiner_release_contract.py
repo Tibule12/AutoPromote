@@ -19,6 +19,12 @@ class CamCombinerReleaseContractTests(unittest.TestCase):
         ):
             self.assertIn(component, self.workflow)
 
+    def test_automatic_deploy_runs_only_after_main_merge(self):
+        branch_trigger = self.workflow.split("paths:", 1)[0]
+        self.assertIn("      - main", branch_trigger)
+        self.assertNotIn("agent/autopromote-dashboard-redesign", branch_trigger)
+        self.assertIn("workflow_dispatch:", branch_trigger)
+
     def test_images_are_immutable_and_both_variants_are_built(self):
         self.assertIn("cam-combiner-worker-fast:${GITHUB_SHA}", self.workflow)
         self.assertIn("cam-combiner-worker:${GITHUB_SHA}", self.workflow)
