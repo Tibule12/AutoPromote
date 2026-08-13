@@ -170,6 +170,69 @@ export const getProductionProofRenderWindow = (durationSeconds, preferredStartSe
   };
 };
 
+export const buildCamCombinerProofMoments = (switches = [], durationSeconds = 0) => {
+  const duration = Math.max(0, Number(durationSeconds) || 0);
+  if (!duration) return [];
+  const safeSwitches = Array.isArray(switches)
+    ? switches
+        .map(item => ({ ...item, startTime: Math.max(0, Number(item?.startTime) || 0) }))
+        .sort((a, b) => a.startTime - b.startTime)
+    : [];
+  const pickTime = (preferredIndex, fallbackRatio) => {
+    const switchTime = safeSwitches[preferredIndex]?.startTime;
+    return Math.min(
+      duration,
+      Math.max(0, Number.isFinite(switchTime) ? switchTime : duration * fallbackRatio)
+    );
+  };
+  const middleIndex = Math.max(1, Math.floor(safeSwitches.length / 2));
+  const finalIndex = Math.max(1, safeSwitches.length - 1);
+  return [
+    {
+      id: "speaker-cut",
+      label: "Speaker cut",
+      caption: "Active speaker takes the frame",
+      time: pickTime(1, 0.24),
+    },
+    {
+      id: "reaction-caught",
+      label: "Reaction caught",
+      caption: "The listener stays in the moment",
+      time: pickTime(middleIndex, 0.52),
+    },
+    {
+      id: "shared-moment",
+      label: "Shared moment",
+      caption: "Both sides of the story stay visible",
+      time: pickTime(finalIndex, 0.76),
+    },
+  ];
+};
+
+export const getCamCombinerProofReceipt = ({
+  switches = [],
+  reactionOverlayEnabled = false,
+  hasExternalCleanAudio = false,
+  syncTone = "warning",
+} = {}) => [
+  {
+    id: "cuts",
+    value: `${Math.max(0, Array.isArray(switches) ? switches.length : 0)} camera cuts`,
+  },
+  {
+    id: "reactions",
+    value: reactionOverlayEnabled ? "Smart reactions" : "Reactions off",
+  },
+  {
+    id: "audio",
+    value: hasExternalCleanAudio ? "Clean audio" : "Camera audio",
+  },
+  {
+    id: "sync",
+    value: syncTone === "good" ? "Sync locked" : "Sync pending",
+  },
+];
+
 export const getRenderOutputUrl = render =>
   render?.output_url ||
   render?.outputUrl ||
@@ -2110,6 +2173,10 @@ function MultiCamCombiner({
   );
   const [autoDirectorSummary, setAutoDirectorSummary] = useState(null);
   const [studioMode, setStudioMode] = useState("combine");
+  const [proofMode, setProofMode] = useState("compare");
+  const [proofReveal, setProofReveal] = useState(50);
+  const [proofFullscreen, setProofFullscreen] = useState(false);
+  const [renderPanelOpen, setRenderPanelOpen] = useState(false);
   const [flowEditStyleId, setFlowEditStyleId] = useState(FLOW_EDIT_STYLE_PRESETS[1].id);
   const [flowImageStoryTemplateId, setFlowImageStoryTemplateId] = useState(
     IMAGE_STORY_TEMPLATE_PRESETS[0].id
@@ -2509,6 +2576,7 @@ function MultiCamCombiner({
   const scrollContainerRef = useRef(null);
   const previewPanelRef = useRef(null);
   const previewStageRef = useRef(null);
+  const rawProofVideoRef = useRef(null);
   const autoDirectorSignatureRef = useRef("");
   const audioAnalysisCacheRef = useRef(new Map());
   const previewVideoRefs = useRef({});
@@ -2582,6 +2650,8 @@ function MultiCamCombiner({
     () => sources.filter(source => Boolean(getSourceMediaUrl(source))),
     [sources]
   );
+  const programPreviewSources = readySources.length ? readySources : loadedVisualSources;
+  const rawProofSource = programPreviewSources[0] || null;
   const multicamDraftKey = useMemo(() => buildMulticamDraftKey(sources), [sources]);
   const flowFrameQualityByCameraId = useMemo(
     () =>
@@ -2694,6 +2764,10 @@ function MultiCamCombiner({
         timelineDuration || 0
       ),
     [readySources, sources, switches, timelineDuration]
+  );
+  const proofMoments = useMemo(
+    () => buildCamCombinerProofMoments(normalizedSwitches, timelineDuration),
+    [normalizedSwitches, timelineDuration]
   );
   const activeFlowSegments = useMemo(
     () =>
@@ -4337,6 +4411,37 @@ function MultiCamCombiner({
     externalAudioMixMode,
     externalAudioSourceProxy,
   ]);
+
+  useEffect(() => {
+    if (!rawProofSource || !isVideoSource(rawProofSource)) return;
+    const mappedTime = getSourceTimelineTime(
+      rawProofSource,
+      playhead,
+      timelineBounds.timelineStart
+    );
+    const isInRange = isSourceAvailableAtTime(rawProofSource, mappedTime);
+    syncMediaElement(rawProofVideoRef.current, mappedTime, isPlaying && isInRange, {
+      muted: true,
+      volume: 0,
+      playbackRate: 1,
+      driftThreshold: hasExternalCleanAudio ? 0.28 : DRIFT_THRESHOLD_SECONDS,
+      softDriftThreshold: 0.04,
+    });
+  }, [rawProofSource, playhead, isPlaying, timelineBounds.timelineStart, hasExternalCleanAudio]);
+
+  useEffect(() => {
+    if (!proofFullscreen) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    const handleKeyDown = event => {
+      if (event.key === "Escape") setProofFullscreen(false);
+    };
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [proofFullscreen]);
 
   useEffect(() => {
     return () => {
@@ -6784,6 +6889,16 @@ function MultiCamCombiner({
     cleanAudioSyncJob,
     shouldUseBackendCleanAudioSync,
   ]);
+  const proofReceipt = useMemo(
+    () =>
+      getCamCombinerProofReceipt({
+        switches: normalizedSwitches,
+        reactionOverlayEnabled,
+        hasExternalCleanAudio,
+        syncTone: previewSyncState.tone,
+      }),
+    [normalizedSwitches, reactionOverlayEnabled, hasExternalCleanAudio, previewSyncState.tone]
+  );
 
   const ensureProgramOutputCleanAudioSync = async () => {
     if (!hasExternalCleanAudio) return true;
@@ -9295,27 +9410,81 @@ function MultiCamCombiner({
               </div>
 
               <div className="nle-studio-hero-grid">
-                <article className="nle-studio-program-card is-hero">
+                <article
+                  className={`nle-studio-program-card is-hero nle-proof-experience ${proofFullscreen ? "is-fullscreen" : ""}`}
+                >
                   <div className="nle-studio-monitor-head">
-                    <span className="nle-studio-monitor-label">Program Output</span>
-                    <span className="nle-studio-preview-pill">Preview only</span>
+                    <div className="nle-proof-heading">
+                      <span className="nle-studio-monitor-label">Proof Mode</span>
+                      <small>See what AutoPromote changed at the exact same moment.</small>
+                    </div>
+                    <div className="nle-proof-heading-actions">
+                      <span className="nle-studio-preview-pill">No credits used</span>
+                      <button
+                        type="button"
+                        className="nle-proof-fullscreen-btn"
+                        onClick={() => setProofFullscreen(current => !current)}
+                      >
+                        {proofFullscreen ? "Exit proof" : "Full-screen proof"}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="nle-proof-mode-switcher" aria-label="Proof preview mode">
+                    {[
+                      { id: "raw", label: "Raw" },
+                      { id: "directed", label: "Auto Directed" },
+                      { id: "compare", label: "Compare" },
+                    ].map(option => (
+                      <button
+                        key={option.id}
+                        type="button"
+                        className={proofMode === option.id ? "is-active" : ""}
+                        onClick={() => setProofMode(option.id)}
+                        aria-pressed={proofMode === option.id}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
                   </div>
                   <div className="nle-preview-shell nle-studio-program-shell">
-                    <div
-                      ref={previewStageRef}
-                      className={`nle-preview-stage is-layout-${previewMulticamLayoutMode} is-reaction-${previewReactionSide} ${focusPickerActive ? "is-focus-picking" : ""} ${previewStageMoodClass}`}
-                      style={studioProgramStageStyle}
-                    >
-                      {readySources.map(source => {
-                        const previewClassName = `nle-preview-video ${source.id === activeCameraId ? "is-active" : ""} ${
-                          source.id === previewSecondaryCameraId ||
-                          previewReactionCameraIds.includes(source.id)
-                            ? "is-secondary"
-                            : ""
-                        }`;
-                        if (isImageSource(source)) {
+                    <div className="nle-proof-stage" style={studioProgramStageStyle}>
+                      <div
+                        ref={previewStageRef}
+                        className={`nle-preview-stage nle-proof-directed-layer is-layout-${previewMulticamLayoutMode} is-reaction-${previewReactionSide} ${focusPickerActive ? "is-focus-picking" : ""} ${previewStageMoodClass}`}
+                        style={{
+                          position: "absolute",
+                          inset: 0,
+                          width: "100%",
+                          height: "100%",
+                          maxWidth: "none",
+                        }}
+                      >
+                        {programPreviewSources.map(source => {
+                          const previewClassName = `nle-preview-video ${source.id === activeCameraId ? "is-active" : ""} ${
+                            source.id === previewSecondaryCameraId ||
+                            previewReactionCameraIds.includes(source.id)
+                              ? "is-secondary"
+                              : ""
+                          }`;
+                          if (isImageSource(source)) {
+                            return (
+                              <img
+                                key={`preview-${source.id}`}
+                                ref={node => {
+                                  previewVideoRefs.current[source.id] = node;
+                                  if (node) {
+                                    applySafeMediaSource(node, getSourceMediaUrl(source));
+                                  }
+                                }}
+                                className={previewClassName}
+                                alt={source.label || source.name || "Story visual"}
+                                draggable="false"
+                                style={previewVideoStylesByCameraId[source.id]}
+                              />
+                            );
+                          }
                           return (
-                            <img
+                            <video
                               key={`preview-${source.id}`}
                               ref={node => {
                                 previewVideoRefs.current[source.id] = node;
@@ -9324,37 +9493,87 @@ function MultiCamCombiner({
                                 }
                               }}
                               className={previewClassName}
-                              alt={source.label || source.name || "Story visual"}
-                              draggable="false"
+                              playsInline
+                              muted
+                              preload="metadata"
                               style={previewVideoStylesByCameraId[source.id]}
                             />
                           );
-                        }
-                        return (
-                          <video
-                            key={`preview-${source.id}`}
-                            ref={node => {
-                              previewVideoRefs.current[source.id] = node;
-                              if (node) {
-                                applySafeMediaSource(node, getSourceMediaUrl(source));
-                              }
-                            }}
-                            className={previewClassName}
-                            playsInline
-                            muted
-                            style={previewVideoStylesByCameraId[source.id]}
-                          />
-                        );
-                      })}
-                      {!readySources.length ? (
-                        <div className="nle-empty-state">
-                          <strong>Load your first visual to start.</strong>
-                          <span>Program Output appears here once cameras are ready.</span>
+                        })}
+                        {!programPreviewSources.length ? (
+                          <div className="nle-empty-state">
+                            <strong>Your transformation will play here.</strong>
+                            <span>
+                              Add a camera to compare the raw recording with Auto Director.
+                            </span>
+                          </div>
+                        ) : null}
+                        {!isSingleSourceWorkflow &&
+                          previewMulticamLayoutMode === "split-vertical" &&
+                          previewSecondaryCamera && <div className="nle-preview-split-divider" />}
+                      </div>
+                      {rawProofSource && proofMode !== "directed" ? (
+                        <div
+                          className="nle-proof-raw-layer"
+                          style={{
+                            clipPath:
+                              proofMode === "compare"
+                                ? `inset(0 ${100 - proofReveal}% 0 0)`
+                                : "inset(0 0 0 0)",
+                          }}
+                        >
+                          {isImageSource(rawProofSource) ? (
+                            <img
+                              src={getSourceMediaUrl(rawProofSource)}
+                              alt={rawProofSource.label || "Raw camera"}
+                              draggable="false"
+                            />
+                          ) : (
+                            <video
+                              ref={node => {
+                                rawProofVideoRef.current = node;
+                                if (node) {
+                                  applySafeMediaSource(node, getSourceMediaUrl(rawProofSource));
+                                }
+                              }}
+                              playsInline
+                              muted
+                              preload="metadata"
+                            />
+                          )}
                         </div>
                       ) : null}
-                      {!isSingleSourceWorkflow &&
-                        previewMulticamLayoutMode === "split-vertical" &&
-                        previewSecondaryCamera && <div className="nle-preview-split-divider" />}
+                      {rawProofSource ? (
+                        <>
+                          {proofMode !== "directed" ? (
+                            <span className="nle-proof-label is-raw">Raw camera</span>
+                          ) : null}
+                          {proofMode !== "raw" ? (
+                            <span className="nle-proof-label is-directed">Auto directed</span>
+                          ) : null}
+                        </>
+                      ) : null}
+                      {proofMode === "compare" && rawProofSource ? (
+                        <>
+                          <input
+                            className="nle-proof-reveal-input"
+                            type="range"
+                            min="8"
+                            max="92"
+                            step="1"
+                            value={proofReveal}
+                            onChange={event => setProofReveal(Number(event.target.value))}
+                            aria-label="Compare raw and auto directed reveal"
+                          />
+                          <div
+                            className="nle-proof-divider"
+                            style={{ left: `${proofReveal}%` }}
+                            aria-hidden="true"
+                          >
+                            <span>↔</span>
+                          </div>
+                        </>
+                      ) : null}
                     </div>
                   </div>
                   <div className="nle-layout-preview-strip">
@@ -9521,164 +9740,211 @@ function MultiCamCombiner({
                       </div>
                     </div>
                   </div>
-                </article>
-
-                <aside className="nle-render-ready-card">
-                  <span className="nle-eyebrow">Render Ready</span>
-                  <strong>{multicamRenderCreditEstimate} cr</strong>
-                  <div
-                    className="nle-render-tier-group is-compact"
-                    aria-label="Cam Combiner render pricing"
-                  >
-                    {MULTICAM_RENDER_TIERS.map(tier => (
-                      <button
-                        key={tier.id}
-                        type="button"
-                        className={`nle-render-tier ${multicamRenderTier === tier.id ? "is-active" : ""}`}
-                        onClick={() => setMulticamRenderTier(tier.id)}
-                      >
-                        <span>{tier.eyebrow}</span>
-                        <strong>{tier.label}</strong>
-                      </button>
-                    ))}
-                  </div>
-                  <div className="nle-render-finishing" aria-label="Final finishing passes">
-                    <label className="nle-render-finish-toggle">
-                      <input
-                        type="checkbox"
-                        checked={multicamBurnCaptions}
-                        onChange={event => setMulticamBurnCaptions(event.target.checked)}
-                      />
-                      <span>
-                        <strong>Burn captions</strong>
-                        <small>Full Whisper + video pass</small>
-                      </span>
-                    </label>
-                    <label className="nle-render-finish-toggle">
-                      <input
-                        type="checkbox"
-                        checked={multicamBrandWatermark}
-                        onChange={event => setMulticamBrandWatermark(event.target.checked)}
-                      />
-                      <span>
-                        <strong>Brand watermark</strong>
-                        <small>Final overlay pass</small>
-                      </span>
-                    </label>
-                    <label className="nle-render-finish-toggle">
-                      <input
-                        type="checkbox"
-                        checked={multicamGenerateThumbnail}
-                        onChange={event => setMulticamGenerateThumbnail(event.target.checked)}
-                      />
-                      <span>
-                        <strong>Thumbnail</strong>
-                        <small>Poster frame only</small>
-                      </span>
-                    </label>
-                  </div>
-                  {hasExternalCleanAudio && readySources.length >= 2 ? (
-                    <div
-                      className={`nle-render-channel-map ${
-                        directorChannelMapConfirmed ? "is-confirmed" : "needs-confirmation"
-                      }`}
-                    >
-                      <strong>
-                        {directorChannelMapConfirmed
-                          ? "Speaker mapping confirmed"
-                          : "Confirm speaker mapping to unlock render"}
-                      </strong>
-                      <span>
-                        Left:{" "}
-                        {getExportSourceLabel(
-                          externalAudioSpeakerChannelsSwapped ? readySources[1] : readySources[0],
-                          externalAudioSpeakerChannelsSwapped ? 1 : 0
-                        )}
-                        {" · "}
-                        Right:{" "}
-                        {getExportSourceLabel(
-                          externalAudioSpeakerChannelsSwapped ? readySources[0] : readySources[1],
-                          externalAudioSpeakerChannelsSwapped ? 0 : 1
-                        )}
-                      </span>
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={directorChannelMapConfirmed}
-                          onChange={event =>
-                            setConfirmedDirectorChannelMapKey(
-                              event.target.checked ? directorChannelMapKey : ""
-                            )
-                          }
-                        />
-                        <span>I confirm these speakers</span>
-                      </label>
+                  {proofMoments.length ? (
+                    <div className="nle-proof-moments" aria-label="Transformation moments">
+                      {proofMoments.map((moment, index) => (
+                        <button
+                          key={moment.id}
+                          type="button"
+                          className={Math.abs(playhead - moment.time) < 0.75 ? "is-current" : ""}
+                          onClick={() => handleSeek(moment.time)}
+                        >
+                          <span className={`nle-proof-moment-visual is-moment-${index + 1}`}>
+                            <em>{index + 1}</em>
+                          </span>
+                          <span className="nle-proof-moment-copy">
+                            <strong>{moment.label}</strong>
+                            <small>{moment.caption}</small>
+                          </span>
+                          <time>{formatDurationLabel(moment.time)}</time>
+                        </button>
+                      ))}
                     </div>
                   ) : null}
-                  <button
-                    className="nle-btn nle-render-primary-btn"
-                    type="button"
-                    onClick={handleServerExport}
-                    disabled={
-                      isExporting ||
-                      cleanAudioSyncIsRunning ||
-                      syncingCameraId === "external-clean-audio" ||
-                      !canExportProject ||
-                      isSingleSourceWorkflow ||
-                      (hasExternalCleanAudio &&
-                        readySources.length >= 2 &&
-                        !directorChannelMapConfirmed)
-                    }
-                  >
-                    {getMulticamRenderButtonLabel({
-                      mode: cloudRenderMode,
-                      isSyncing:
-                        cleanAudioSyncIsRunning || syncingCameraId === "external-clean-audio",
-                      isPending: serverExportPending,
-                      needsChannelConfirmation:
-                        hasExternalCleanAudio &&
-                        readySources.length >= 2 &&
-                        !directorChannelMapConfirmed,
-                    })}
-                  </button>
-                  <div className="nle-render-proof-list">
-                    <div className={`nle-proof-item ${hasExternalCleanAudio ? "is-done" : ""}`}>
-                      <span>{hasExternalCleanAudio ? "✓" : "1"}</span>
-                      <strong>
-                        {hasExternalCleanAudio
-                          ? "External clean audio locked"
-                          : "Upload external clean audio"}
-                      </strong>
-                    </div>
-                    <div
-                      className={`nle-proof-item ${previewSyncState.tone === "good" ? "is-done" : ""}`}
-                    >
-                      <span>{previewSyncState.tone === "good" ? "✓" : "2"}</span>
-                      <strong>Auto sync proof</strong>
-                    </div>
-                    <div
-                      className={`nle-proof-item ${previewSyncState.tone === "good" ? "is-done" : ""}`}
-                    >
-                      <span>{previewSyncState.tone === "good" ? "✓" : "3"}</span>
-                      <strong>Start · Middle · End verified</strong>
-                    </div>
-                    <div className={`nle-proof-item ${readySources.length >= 2 ? "is-done" : ""}`}>
-                      <span>{readySources.length >= 2 ? "✓" : "4"}</span>
-                      <strong>Reaction overlay optional</strong>
-                    </div>
+                  <div className="nle-proof-receipt" aria-label="Current proof receipt">
+                    {proofReceipt.map((item, index) => (
+                      <div key={item.id} className={`is-${item.id}`}>
+                        <span>{index + 1}</span>
+                        <strong>{item.value}</strong>
+                      </div>
+                    ))}
                   </div>
-                  <div className="nle-studio-credit-note is-simple">
+                </article>
+
+                <aside
+                  className={`nle-render-ready-card nle-proof-render-card ${renderPanelOpen ? "is-open" : ""}`}
+                >
+                  <button
+                    type="button"
+                    className="nle-proof-render-summary"
+                    onClick={() => setRenderPanelOpen(current => !current)}
+                    aria-expanded={renderPanelOpen}
+                  >
                     <span>
-                      Balance: {Number(credits?.remaining ?? 0).toFixed(0)} cr. Preview included.
-                      Clean-audio sync is {cleanAudioSyncCreditEstimate} cr when needed.
+                      <small>Ready when you are</small>
+                      <strong>No credits used in preview</strong>
                     </span>
-                    <button
-                      className="nle-mini-paypal-btn"
-                      type="button"
-                      onClick={() => setBillingPanelOpen(true)}
+                    <em>{renderPanelOpen ? "Hide render" : "Review render"}</em>
+                  </button>
+                  <div className="nle-proof-render-details">
+                    <span className="nle-eyebrow">Render Ready</span>
+                    <strong>{multicamRenderCreditEstimate} cr</strong>
+                    <div
+                      className="nle-render-tier-group is-compact"
+                      aria-label="Cam Combiner render pricing"
                     >
-                      Buy credits
+                      {MULTICAM_RENDER_TIERS.map(tier => (
+                        <button
+                          key={tier.id}
+                          type="button"
+                          className={`nle-render-tier ${multicamRenderTier === tier.id ? "is-active" : ""}`}
+                          onClick={() => setMulticamRenderTier(tier.id)}
+                        >
+                          <span>{tier.eyebrow}</span>
+                          <strong>{tier.label}</strong>
+                        </button>
+                      ))}
+                    </div>
+                    <div className="nle-render-finishing" aria-label="Final finishing passes">
+                      <label className="nle-render-finish-toggle">
+                        <input
+                          type="checkbox"
+                          checked={multicamBurnCaptions}
+                          onChange={event => setMulticamBurnCaptions(event.target.checked)}
+                        />
+                        <span>
+                          <strong>Burn captions</strong>
+                          <small>Full Whisper + video pass</small>
+                        </span>
+                      </label>
+                      <label className="nle-render-finish-toggle">
+                        <input
+                          type="checkbox"
+                          checked={multicamBrandWatermark}
+                          onChange={event => setMulticamBrandWatermark(event.target.checked)}
+                        />
+                        <span>
+                          <strong>Brand watermark</strong>
+                          <small>Final overlay pass</small>
+                        </span>
+                      </label>
+                      <label className="nle-render-finish-toggle">
+                        <input
+                          type="checkbox"
+                          checked={multicamGenerateThumbnail}
+                          onChange={event => setMulticamGenerateThumbnail(event.target.checked)}
+                        />
+                        <span>
+                          <strong>Thumbnail</strong>
+                          <small>Poster frame only</small>
+                        </span>
+                      </label>
+                    </div>
+                    {hasExternalCleanAudio && readySources.length >= 2 ? (
+                      <div
+                        className={`nle-render-channel-map ${
+                          directorChannelMapConfirmed ? "is-confirmed" : "needs-confirmation"
+                        }`}
+                      >
+                        <strong>
+                          {directorChannelMapConfirmed
+                            ? "Speaker mapping confirmed"
+                            : "Confirm speaker mapping to unlock render"}
+                        </strong>
+                        <span>
+                          Left:{" "}
+                          {getExportSourceLabel(
+                            externalAudioSpeakerChannelsSwapped ? readySources[1] : readySources[0],
+                            externalAudioSpeakerChannelsSwapped ? 1 : 0
+                          )}
+                          {" · "}
+                          Right:{" "}
+                          {getExportSourceLabel(
+                            externalAudioSpeakerChannelsSwapped ? readySources[0] : readySources[1],
+                            externalAudioSpeakerChannelsSwapped ? 0 : 1
+                          )}
+                        </span>
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={directorChannelMapConfirmed}
+                            onChange={event =>
+                              setConfirmedDirectorChannelMapKey(
+                                event.target.checked ? directorChannelMapKey : ""
+                              )
+                            }
+                          />
+                          <span>I confirm these speakers</span>
+                        </label>
+                      </div>
+                    ) : null}
+                    <button
+                      className="nle-btn nle-render-primary-btn"
+                      type="button"
+                      onClick={handleServerExport}
+                      disabled={
+                        isExporting ||
+                        cleanAudioSyncIsRunning ||
+                        syncingCameraId === "external-clean-audio" ||
+                        !canExportProject ||
+                        isSingleSourceWorkflow ||
+                        (hasExternalCleanAudio &&
+                          readySources.length >= 2 &&
+                          !directorChannelMapConfirmed)
+                      }
+                    >
+                      {getMulticamRenderButtonLabel({
+                        mode: cloudRenderMode,
+                        isSyncing:
+                          cleanAudioSyncIsRunning || syncingCameraId === "external-clean-audio",
+                        isPending: serverExportPending,
+                        needsChannelConfirmation:
+                          hasExternalCleanAudio &&
+                          readySources.length >= 2 &&
+                          !directorChannelMapConfirmed,
+                      })}
                     </button>
+                    <div className="nle-render-proof-list">
+                      <div className={`nle-proof-item ${hasExternalCleanAudio ? "is-done" : ""}`}>
+                        <span>{hasExternalCleanAudio ? "✓" : "1"}</span>
+                        <strong>
+                          {hasExternalCleanAudio
+                            ? "External clean audio locked"
+                            : "Upload external clean audio"}
+                        </strong>
+                      </div>
+                      <div
+                        className={`nle-proof-item ${previewSyncState.tone === "good" ? "is-done" : ""}`}
+                      >
+                        <span>{previewSyncState.tone === "good" ? "✓" : "2"}</span>
+                        <strong>Auto sync proof</strong>
+                      </div>
+                      <div
+                        className={`nle-proof-item ${previewSyncState.tone === "good" ? "is-done" : ""}`}
+                      >
+                        <span>{previewSyncState.tone === "good" ? "✓" : "3"}</span>
+                        <strong>Start · Middle · End verified</strong>
+                      </div>
+                      <div
+                        className={`nle-proof-item ${readySources.length >= 2 ? "is-done" : ""}`}
+                      >
+                        <span>{readySources.length >= 2 ? "✓" : "4"}</span>
+                        <strong>Reaction overlay optional</strong>
+                      </div>
+                    </div>
+                    <div className="nle-studio-credit-note is-simple">
+                      <span>
+                        Balance: {Number(credits?.remaining ?? 0).toFixed(0)} cr. Preview included.
+                        Clean-audio sync is {cleanAudioSyncCreditEstimate} cr when needed.
+                      </span>
+                      <button
+                        className="nle-mini-paypal-btn"
+                        type="button"
+                        onClick={() => setBillingPanelOpen(true)}
+                      >
+                        Buy credits
+                      </button>
+                    </div>
                   </div>
                 </aside>
               </div>
@@ -9742,6 +10008,7 @@ function MultiCamCombiner({
                             className="nle-thumbnail-video"
                             playsInline
                             muted
+                            preload="metadata"
                           />
                         ) : (
                           <div className="nle-thumbnail-placeholder">Load visual</div>
