@@ -1,0 +1,385 @@
+name: Deploy Cam Combiner
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - agent/autopromote-dashboard-redesign
+    paths:
+      - .github/workflows/deploy-cam-combiner.yml
+      - python_media_worker/.dockerignore
+      - python_media_worker/Dockerfile.cam-combiner
+      - python_media_worker/Dockerfile.cam-combiner-fast
+      - python_media_worker/requirements.cam-combiner.txt
+      - python_media_worker/requirements.cam-combiner-fast.txt
+      - python_media_worker/main_media_server.py
+      - python_media_worker/multicam_chunking.py
+      - python_media_worker/multicam_job_runner.py
+      - python_media_worker/viral_render_contract.py
+      - python_media_worker/assets/**
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: cam-combiner-production
+  cancel-in-progress: false
+
+env:
+  PROJECT_ID: autopromote-cc6d3
+  REGION: us-central1
+  SERVICE_NAME: cam-combiner-worker
+  FAST_JOB_NAME: cam-combiner-render-fast-job
+  CAPTION_JOB_NAME: cam-combiner-render-job
+  JOB_SERVICE_ACCOUNT: cam-combiner-job@autopromote-cc6d3.iam.gserviceaccount.com
+  QA_SECRET_NAME: multicam-qa-receipt-secret
+  CALLBACK_SECRET_NAME: multicam-job-callback-secret
+  TASK_SECRET_NAME: cam-combiner-task-secret
+  WIF_PROVIDER: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+  WIF_SERVICE_ACCOUNT: ${{ secrets.GCP_DEPLOY_SERVICE_ACCOUNT }}
+  LEGACY_CREDENTIALS: ${{ secrets.FIREBASE_ADMIN_SERVICE_ACCOUNT }}
+
+jobs:
+  deploy:
+    name: Build, verify and release Cam Combiner
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout requested revision
+        uses: actions/checkout@v4
+
+      - name: Install FFmpeg test dependency
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes ffmpeg
+
+      - name: Verify release contract and chunk planner
+        run: |
+          python -m unittest \
+            python_media_worker.test_cam_combiner_release_contract \
+            python_media_worker.test_multicam_chunking
+
+      - name: Validate Google Cloud identity configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -n "${WIF_PROVIDER}" && -n "${WIF_SERVICE_ACCOUNT}" ]]; then
+            echo "Using keyless Google Workload Identity Federation."
+            exit 0
+          fi
+          if [[ -n "${LEGACY_CREDENTIALS}" ]]; then
+            echo "Using the existing repository service account."
+            exit 0
+          fi
+          echo "No Google Cloud deploy identity is configured."
+          exit 1
+
+      - name: Authenticate with Workload Identity
+        if: ${{ env.WIF_PROVIDER != '' && env.WIF_SERVICE_ACCOUNT != '' }}
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ env.WIF_PROVIDER }}
+          service_account: ${{ env.WIF_SERVICE_ACCOUNT }}
+
+      - name: Authenticate with existing service account fallback
+        if: ${{ env.WIF_PROVIDER == '' || env.WIF_SERVICE_ACCOUNT == '' }}
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ env.LEGACY_CREDENTIALS }}
+
+      - name: Install Google Cloud CLI
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+
+      - name: Verify deployment identity and private health access
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEPLOY_ACCOUNT=$(gcloud auth list --filter=status:ACTIVE --format='value(account)')
+          test -n "${DEPLOY_ACCOUNT}"
+          gcloud config set project "${PROJECT_ID}"
+          gcloud run services add-iam-policy-binding "${SERVICE_NAME}" \
+            --project "${PROJECT_ID}" \
+            --region "${REGION}" \
+            --member "serviceAccount:${DEPLOY_ACCOUNT}" \
+            --role roles/run.invoker \
+            --quiet
+
+      - name: Capture current production release
+        id: previous
+        shell: bash
+        run: |
+          set -euo pipefail
+          gcloud run services describe "${SERVICE_NAME}" \
+            --project "${PROJECT_ID}" \
+            --region "${REGION}" \
+            --format=json > /tmp/cam-service-before.json
+          PREVIOUS_REVISION=$(python - <<'PY'
+          import json
+          data = json.load(open('/tmp/cam-service-before.json'))
+          traffic = data.get('status', {}).get('traffic', [])
+          serving = [item for item in traffic if int(item.get('percent') or 0) == 100]
+          revision = serving[0].get('revisionName') if serving else None
+          print(revision or data.get('status', {}).get('latestReadyRevisionName') or '')
+          PY
+          )
+          PREVIOUS_FAST_IMAGE=$(gcloud run jobs describe "${FAST_JOB_NAME}" \
+            --project "${PROJECT_ID}" --region "${REGION}" \
+            --format='value(spec.template.template.spec.containers[0].image)')
+          PREVIOUS_CAPTION_IMAGE=$(gcloud run jobs describe "${CAPTION_JOB_NAME}" \
+            --project "${PROJECT_ID}" --region "${REGION}" \
+            --format='value(spec.template.template.spec.containers[0].image)')
+          test -n "${PREVIOUS_REVISION}"
+          test -n "${PREVIOUS_FAST_IMAGE}"
+          test -n "${PREVIOUS_CAPTION_IMAGE}"
+          echo "revision=${PREVIOUS_REVISION}" >> "${GITHUB_OUTPUT}"
+          echo "fast_image=${PREVIOUS_FAST_IMAGE}" >> "${GITHUB_OUTPUT}"
+          echo "caption_image=${PREVIOUS_CAPTION_IMAGE}" >> "${GITHUB_OUTPUT}"
+
+      - name: Build and test immutable images
+        working-directory: python_media_worker
+        shell: bash
+        run: |
+          set -euo pipefail
+          FAST_IMAGE="gcr.io/${PROJECT_ID}/cam-combiner-worker-fast:${GITHUB_SHA}"
+          CAPTION_IMAGE="gcr.io/${PROJECT_ID}/cam-combiner-worker:${GITHUB_SHA}"
+          CAPTION_CACHE_IMAGE="gcr.io/${PROJECT_ID}/cam-combiner-worker:latest"
+
+          gcloud auth configure-docker gcr.io --quiet
+          docker pull "${CAPTION_CACHE_IMAGE}"
+          docker build \
+            --file Dockerfile.cam-combiner-fast \
+            --tag "${FAST_IMAGE}" \
+            .
+          docker build \
+            --build-arg "MULTICAM_MODEL_CACHE_IMAGE=${CAPTION_CACHE_IMAGE}" \
+            --file Dockerfile.cam-combiner \
+            --tag "${CAPTION_IMAGE}" \
+            .
+
+          docker run --rm "${FAST_IMAGE}" python -m unittest \
+            test_multicam_chunking \
+            test_multicam_job_runner_retry
+          docker run --rm "${CAPTION_IMAGE}" python -m unittest \
+            test_multicam_checkpoint_integration
+
+          cleanup_containers() {
+            docker rm --force cam-fast-smoke cam-caption-smoke >/dev/null 2>&1 || true
+          }
+          trap cleanup_containers EXIT
+          docker run --detach --name cam-fast-smoke --publish 127.0.0.1:18080:8080 "${FAST_IMAGE}"
+          docker run --detach --name cam-caption-smoke --publish 127.0.0.1:18081:8080 "${CAPTION_IMAGE}"
+          for port in 18080 18081; do
+            healthy=0
+            for attempt in $(seq 1 30); do
+              if curl --fail --silent --show-error --max-time 10 "http://127.0.0.1:${port}/health" > "/tmp/cam-${port}-health.json"; then
+                python -c 'import json,sys; assert json.load(open(sys.argv[1]))["status"] == "ok"' "/tmp/cam-${port}-health.json"
+                healthy=1
+                break
+              fi
+              sleep 2
+            done
+            if [[ "${healthy}" != "1" ]]; then
+              docker logs cam-fast-smoke || true
+              docker logs cam-caption-smoke || true
+              exit 1
+            fi
+          done
+          cleanup_containers
+          trap - EXIT
+
+          docker push "${FAST_IMAGE}"
+          docker push "${CAPTION_IMAGE}"
+          docker tag "${FAST_IMAGE}" "gcr.io/${PROJECT_ID}/cam-combiner-worker-fast:latest"
+          docker tag "${CAPTION_IMAGE}" "${CAPTION_CACHE_IMAGE}"
+          docker push "gcr.io/${PROJECT_ID}/cam-combiner-worker-fast:latest"
+          docker push "${CAPTION_CACHE_IMAGE}"
+          echo "FAST_IMAGE=${FAST_IMAGE}" >> "${GITHUB_ENV}"
+          echo "CAPTION_IMAGE=${CAPTION_IMAGE}" >> "${GITHUB_ENV}"
+
+      - name: Deploy private zero-traffic candidate
+        id: candidate
+        shell: bash
+        env:
+          TAG: candidate-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          set -euo pipefail
+          gcloud run deploy "${SERVICE_NAME}" \
+            --project "${PROJECT_ID}" \
+            --image "${FAST_IMAGE}" \
+            --platform managed \
+            --execution-environment gen2 \
+            --region "${REGION}" \
+            --no-allow-unauthenticated \
+            --memory 8Gi \
+            --cpu 4 \
+            --cpu-throttling \
+            --cpu-boost \
+            --timeout 3600 \
+            --concurrency 1 \
+            --min-instances 0 \
+            --max-instances 3 \
+            --no-traffic \
+            --tag "${TAG}" \
+            --set-env-vars "NODE_ENV=production,FIREBASE_STORAGE_BUCKET=autopromote-cc6d3.firebasestorage.app,MULTICAM_INGEST_BUCKET=autopromote-cc6d3.firebasestorage.app,MULTICAM_UPLOAD_FIREBASE=true,MULTICAM_MASTER_RETENTION_DAYS=7,MULTICAM_BETA_MAX_SECONDS=10800,MULTICAM_BETA_MAX_SEGMENTS=900,MULTICAM_RENDER_CHECKPOINTS_ENABLED=true,MULTICAM_RENDER_CHECKPOINT_SECONDS=300,MULTICAM_CHECKPOINT_DURATION_TOLERANCE_SECONDS=0.10,MULTICAM_EXECUTION_MODE=cloud_run_jobs,MULTICAM_FAST_NO_CAPTIONS=1,MULTICAM_CARD_CANVAS_STYLE=black,ENABLE_LOCAL_MEDIA_OUTPUT_FALLBACK=false,MULTICAM_REUSE_VIDEO_ONLY_SYNC_AUDIT=1,ALLOW_RUNTIME_DEPENDENCY_INSTALL=false" \
+            --set-secrets "MULTICAM_QA_RECEIPT_SECRET=${QA_SECRET_NAME}:latest,MEDIA_WORKER_TASK_SECRET=${TASK_SECRET_NAME}:latest"
+
+          gcloud run services describe "${SERVICE_NAME}" \
+            --project "${PROJECT_ID}" --region "${REGION}" \
+            --format=json > /tmp/cam-service-candidate.json
+          REVISION=$(python -c 'import json; print(json.load(open("/tmp/cam-service-candidate.json"))["status"]["latestCreatedRevisionName"])')
+          CANDIDATE_URL=$(python -c 'import json,os; data=json.load(open("/tmp/cam-service-candidate.json")); tag=os.environ["TAG"]; print(next(item["url"] for item in data["status"].get("traffic",[]) if item.get("tag")==tag))')
+          SERVICE_URL=$(python -c 'import json; print(json.load(open("/tmp/cam-service-candidate.json"))["status"]["url"])')
+          echo "revision=${REVISION}" >> "${GITHUB_OUTPUT}"
+          echo "candidate_url=${CANDIDATE_URL}" >> "${GITHUB_OUTPUT}"
+          echo "service_url=${SERVICE_URL}" >> "${GITHUB_OUTPUT}"
+          echo "tag=${TAG}" >> "${GITHUB_OUTPUT}"
+
+      - name: Verify authenticated candidate health
+        shell: bash
+        env:
+          CANDIDATE_URL: ${{ steps.candidate.outputs.candidate_url }}
+          SERVICE_URL: ${{ steps.candidate.outputs.service_url }}
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 18); do
+            ID_TOKEN=$(gcloud auth print-identity-token --audiences="${SERVICE_URL}")
+            if curl --fail --silent --show-error --max-time 30 \
+              --header "Authorization: Bearer ${ID_TOKEN}" \
+              "${CANDIDATE_URL}/health" > /tmp/cam-candidate-health.json; then
+              python - <<'PY'
+          import json
+          health = json.load(open('/tmp/cam-candidate-health.json'))
+          assert health.get('status') == 'ok', health
+          assert health.get('service') == 'python_media_worker', health
+          print(json.dumps(health, indent=2))
+          PY
+              exit 0
+            fi
+            echo "Private candidate is still starting (${attempt}/18)."
+            sleep 10
+          done
+          echo "Candidate health failed. Production traffic and jobs remain on the previous release."
+          exit 1
+
+      - name: Update job definitions without executing renders
+        shell: bash
+        run: |
+          set -euo pipefail
+          gcloud run jobs deploy "${CAPTION_JOB_NAME}" \
+            --project "${PROJECT_ID}" \
+            --region "${REGION}" \
+            --image "${CAPTION_IMAGE}" \
+            --service-account "${JOB_SERVICE_ACCOUNT}" \
+            --command python3 \
+            --args multicam_job_runner.py \
+            --cpu 8 \
+            --memory 8Gi \
+            --tasks 1 \
+            --parallelism 1 \
+            --max-retries 0 \
+            --task-timeout 4h \
+            --set-env-vars "NODE_ENV=production,FIREBASE_STORAGE_BUCKET=autopromote-cc6d3.firebasestorage.app,MULTICAM_INGEST_BUCKET=autopromote-cc6d3.firebasestorage.app,MULTICAM_UPLOAD_FIREBASE=true,MULTICAM_MASTER_RETENTION_DAYS=7,MULTICAM_BETA_MAX_SECONDS=10800,MULTICAM_BETA_MAX_SEGMENTS=900,MULTICAM_RENDER_CHECKPOINTS_ENABLED=true,MULTICAM_RENDER_CHECKPOINT_SECONDS=300,MULTICAM_CHECKPOINT_DURATION_TOLERANCE_SECONDS=0.10,ENABLE_LOCAL_MEDIA_OUTPUT_FALLBACK=false,MULTICAM_REUSE_VIDEO_ONLY_SYNC_AUDIT=1,MULTICAM_SOURCE_PREP_CONCURRENCY=2,MULTICAM_VISUAL_PROXY_CONCURRENCY=2,MULTICAM_SEGMENT_RENDER_CONCURRENCY=2,MULTICAM_X264_THREADS=4,MULTICAM_REACTION_INSERT_INTERVAL_SECONDS=40,MULTICAM_JOB_MAX_RETRIES=0,MULTICAM_CARD_CANVAS_STYLE=black,WHISPER_ENGINE=faster,FASTER_WHISPER_DEVICE=cpu,FASTER_WHISPER_COMPUTE_TYPE=int8,ALLOW_RUNTIME_DEPENDENCY_INSTALL=false,MULTICAM_JOB_CALLBACK_URL=https://api.autopromote.org/api/media/internal/multicam-job-failed" \
+            --set-secrets "MULTICAM_QA_RECEIPT_SECRET=${QA_SECRET_NAME}:latest,MULTICAM_JOB_CALLBACK_SECRET=${CALLBACK_SECRET_NAME}:latest,MEDIA_WORKER_TASK_SECRET=${TASK_SECRET_NAME}:latest"
+
+          gcloud run jobs deploy "${FAST_JOB_NAME}" \
+            --project "${PROJECT_ID}" \
+            --region "${REGION}" \
+            --image "${FAST_IMAGE}" \
+            --service-account "${JOB_SERVICE_ACCOUNT}" \
+            --command python3 \
+            --args multicam_job_runner.py \
+            --cpu 8 \
+            --memory 8Gi \
+            --tasks 1 \
+            --parallelism 1 \
+            --max-retries 0 \
+            --task-timeout 4h \
+            --set-env-vars "NODE_ENV=production,FIREBASE_STORAGE_BUCKET=autopromote-cc6d3.firebasestorage.app,MULTICAM_INGEST_BUCKET=autopromote-cc6d3.firebasestorage.app,MULTICAM_UPLOAD_FIREBASE=true,MULTICAM_MASTER_RETENTION_DAYS=7,MULTICAM_BETA_MAX_SECONDS=10800,MULTICAM_BETA_MAX_SEGMENTS=900,MULTICAM_RENDER_CHECKPOINTS_ENABLED=true,MULTICAM_RENDER_CHECKPOINT_SECONDS=300,MULTICAM_CHECKPOINT_DURATION_TOLERANCE_SECONDS=0.10,ENABLE_LOCAL_MEDIA_OUTPUT_FALLBACK=false,MULTICAM_REUSE_VIDEO_ONLY_SYNC_AUDIT=1,MULTICAM_SOURCE_PREP_CONCURRENCY=2,MULTICAM_VISUAL_PROXY_CONCURRENCY=2,MULTICAM_SEGMENT_RENDER_CONCURRENCY=2,MULTICAM_X264_THREADS=4,MULTICAM_REACTION_INSERT_INTERVAL_SECONDS=40,MULTICAM_JOB_MAX_RETRIES=0,MULTICAM_FAST_NO_CAPTIONS=1,MULTICAM_CARD_CANVAS_STYLE=black,ALLOW_RUNTIME_DEPENDENCY_INSTALL=false,MULTICAM_JOB_CALLBACK_URL=https://api.autopromote.org/api/media/internal/multicam-job-failed" \
+            --set-secrets "MULTICAM_QA_RECEIPT_SECRET=${QA_SECRET_NAME}:latest,MULTICAM_JOB_CALLBACK_SECRET=${CALLBACK_SECRET_NAME}:latest,MEDIA_WORKER_TASK_SECRET=${TASK_SECRET_NAME}:latest"
+
+      - name: Verify job definitions use the immutable release
+        shell: bash
+        run: |
+          set -euo pipefail
+          FAST_DEPLOYED=$(gcloud run jobs describe "${FAST_JOB_NAME}" \
+            --project "${PROJECT_ID}" --region "${REGION}" \
+            --format='value(spec.template.template.spec.containers[0].image)')
+          CAPTION_DEPLOYED=$(gcloud run jobs describe "${CAPTION_JOB_NAME}" \
+            --project "${PROJECT_ID}" --region "${REGION}" \
+            --format='value(spec.template.template.spec.containers[0].image)')
+          [[ "${FAST_DEPLOYED}" == *"${GITHUB_SHA}"* ]]
+          [[ "${CAPTION_DEPLOYED}" == *"${GITHUB_SHA}"* ]]
+
+      - name: Promote verified service revision
+        shell: bash
+        env:
+          REVISION: ${{ steps.candidate.outputs.revision }}
+        run: |
+          set -euo pipefail
+          gcloud run services update-traffic "${SERVICE_NAME}" \
+            --project "${PROJECT_ID}" \
+            --region "${REGION}" \
+            --to-revisions "${REVISION}=100"
+
+      - name: Verify private production service
+        shell: bash
+        env:
+          REVISION: ${{ steps.candidate.outputs.revision }}
+          SERVICE_URL: ${{ steps.candidate.outputs.service_url }}
+        run: |
+          set -euo pipefail
+          LIVE_REVISION=$(gcloud run services describe "${SERVICE_NAME}" \
+            --project "${PROJECT_ID}" --region "${REGION}" \
+            --format='value(status.latestReadyRevisionName)')
+          test "${LIVE_REVISION}" = "${REVISION}"
+          ID_TOKEN=$(gcloud auth print-identity-token --audiences="${SERVICE_URL}")
+          curl --fail --silent --show-error --max-time 30 \
+            --header "Authorization: Bearer ${ID_TOKEN}" \
+            "${SERVICE_URL}/health" > /tmp/cam-production-health.json
+          python - <<'PY'
+          import json
+          health = json.load(open('/tmp/cam-production-health.json'))
+          assert health.get('status') == 'ok', health
+          print(json.dumps(health, indent=2))
+          PY
+          echo "Cam Combiner revision ${REVISION} is healthy. Job definitions were updated but not executed."
+
+      - name: Roll back all Cam Combiner components after failure
+        if: ${{ failure() && steps.previous.outputs.revision != '' }}
+        continue-on-error: true
+        shell: bash
+        env:
+          PREVIOUS_REVISION: ${{ steps.previous.outputs.revision }}
+          PREVIOUS_FAST_IMAGE: ${{ steps.previous.outputs.fast_image }}
+          PREVIOUS_CAPTION_IMAGE: ${{ steps.previous.outputs.caption_image }}
+        run: |
+          set -euo pipefail
+          if [[ -n "${PREVIOUS_CAPTION_IMAGE}" ]]; then
+            gcloud run jobs update "${CAPTION_JOB_NAME}" \
+              --project "${PROJECT_ID}" --region "${REGION}" \
+              --image "${PREVIOUS_CAPTION_IMAGE}"
+          fi
+          if [[ -n "${PREVIOUS_FAST_IMAGE}" ]]; then
+            gcloud run jobs update "${FAST_JOB_NAME}" \
+              --project "${PROJECT_ID}" --region "${REGION}" \
+              --image "${PREVIOUS_FAST_IMAGE}"
+          fi
+          gcloud run services update-traffic "${SERVICE_NAME}" \
+            --project "${PROJECT_ID}" --region "${REGION}" \
+            --to-revisions "${PREVIOUS_REVISION}=100"
+
+      - name: Remove temporary candidate tag
+        if: ${{ always() && steps.candidate.outputs.tag != '' }}
+        continue-on-error: true
+        shell: bash
+        env:
+          TAG: ${{ steps.candidate.outputs.tag }}
+        run: |
+          gcloud run services update-traffic "${SERVICE_NAME}" \
+            --project "${PROJECT_ID}" --region "${REGION}" \
+            --remove-tags "${TAG}"
