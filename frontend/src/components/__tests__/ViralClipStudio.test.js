@@ -1525,11 +1525,28 @@ describe("ViralClipStudio timeline sequencing", () => {
       "true"
     );
 
+    fireEvent.click(screen.getByRole("button", { name: /Show proof/i }));
+    const inspector = screen.getByTestId("clip-studio-inspector");
+    fireEvent.click(within(inspector).getByRole("tab", { name: /Pacing/i }));
+    fireEvent.click(within(inspector).getByRole("button", { name: "1.5×" }));
+
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /Render Final Clip/i }));
     });
 
     await waitFor(() => expect(onSave).toHaveBeenCalled());
-    expect(onSave.mock.calls[0][2].exportDestination).toBe("tiktok");
+    expect(onSave.mock.calls[0][2]).toEqual(
+      expect.objectContaining({
+        exportDestination: "tiktok",
+        creativeIntent: "proof",
+        previewSpeed: 1.5,
+        speedSegments: [
+          expect.objectContaining({
+            rate: 1.5,
+            pitchPreserved: true,
+          }),
+        ],
+      })
+    );
   });
 });

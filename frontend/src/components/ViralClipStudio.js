@@ -4318,6 +4318,7 @@ const ViralClipStudio = ({
           },
         ],
         pacingLevel,
+        creativeIntent,
         smartCrop,
         smartCropMode,
         enhanceQuality,

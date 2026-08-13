@@ -1,0 +1,168 @@
+name: Deploy Viral Media Worker
+
+on:
+  workflow_dispatch:
+  # Bootstrap this workflow once from the active Studio branch. After it reaches
+  # the default branch, production deployments are manual workflow dispatches.
+  push:
+    branches:
+      - agent/autopromote-dashboard-redesign
+    paths:
+      - .github/workflows/deploy-media-worker.yml
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: media-worker-production
+  cancel-in-progress: false
+
+env:
+  PROJECT_ID: autopromote-cc6d3
+  REGION: us-central1
+  SERVICE_NAME: media-worker-v1
+  WIF_PROVIDER: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+  WIF_SERVICE_ACCOUNT: ${{ secrets.GCP_DEPLOY_SERVICE_ACCOUNT }}
+  LEGACY_CREDENTIALS: ${{ secrets.FIREBASE_ADMIN_SERVICE_ACCOUNT }}
+
+jobs:
+  deploy:
+    name: Build, verify and promote Cloud Run revision
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+
+    steps:
+      - name: Checkout requested revision
+        uses: actions/checkout@v4
+
+      - name: Install FFmpeg test dependency
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes ffmpeg
+
+      - name: Verify Viral Clip render contract
+        run: python -m unittest python_media_worker.test_viral_render_contract
+
+      - name: Validate Google Cloud identity configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -n "${WIF_PROVIDER}" && -n "${WIF_SERVICE_ACCOUNT}" ]]; then
+            echo "Using keyless Google Workload Identity Federation."
+            exit 0
+          fi
+          if [[ -n "${LEGACY_CREDENTIALS}" ]]; then
+            echo "Workload Identity is not configured; using the existing repository service account for this deployment."
+            exit 0
+          fi
+          echo "No Google Cloud deploy identity is configured."
+          echo "Add GCP_WORKLOAD_IDENTITY_PROVIDER and GCP_DEPLOY_SERVICE_ACCOUNT as repository secrets."
+          exit 1
+
+      - name: Authenticate with Workload Identity
+        if: ${{ env.WIF_PROVIDER != '' && env.WIF_SERVICE_ACCOUNT != '' }}
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ env.WIF_PROVIDER }}
+          service_account: ${{ env.WIF_SERVICE_ACCOUNT }}
+
+      - name: Authenticate with existing service account fallback
+        if: ${{ env.WIF_PROVIDER == '' || env.WIF_SERVICE_ACCOUNT == '' }}
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ env.LEGACY_CREDENTIALS }}
+
+      - name: Install Google Cloud CLI
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+
+      - name: Verify deployment identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          gcloud auth list --filter=status:ACTIVE --format='value(account)'
+          gcloud config set project "${PROJECT_ID}"
+
+      - name: Build immutable worker image
+        working-directory: python_media_worker
+        shell: bash
+        run: |
+          set -euo pipefail
+          IMAGE="gcr.io/${PROJECT_ID}/${SERVICE_NAME}:${GITHUB_SHA}"
+          gcloud auth configure-docker gcr.io --quiet
+          docker build --tag "${IMAGE}" .
+          docker push "${IMAGE}"
+          echo "IMAGE=${IMAGE}" >> "${GITHUB_ENV}"
+
+      - name: Deploy candidate with zero production traffic
+        id: candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          gcloud run deploy "${SERVICE_NAME}" \
+            --image "${IMAGE}" \
+            --platform managed \
+            --execution-environment gen2 \
+            --region "${REGION}" \
+            --allow-unauthenticated \
+            --memory 4Gi \
+            --cpu 4 \
+            --cpu-boost \
+            --timeout 900 \
+            --concurrency 1 \
+            --min-instances 0 \
+            --max-instances 3 \
+            --no-traffic \
+            --tag "${TAG}" \
+            --set-env-vars "NODE_ENV=production,FIREBASE_STORAGE_BUCKET=autopromote-cc6d3.firebasestorage.app,MULTICAM_UPLOAD_FIREBASE=true,MULTICAM_MASTER_RETENTION_DAYS=7,ENABLE_LOCAL_MEDIA_OUTPUT_FALLBACK=false,WHISPER_ENGINE=faster,PROMO_WHISPER_MODEL=small,FASTER_WHISPER_DEVICE=cpu,FASTER_WHISPER_COMPUTE_TYPE=int8,FASTER_WHISPER_STRICT=true,ALLOW_RUNTIME_DEPENDENCY_INSTALL=false"
+
+          gcloud run services describe "${SERVICE_NAME}" \
+            --region "${REGION}" \
+            --format=json > /tmp/media-worker-service.json
+          REVISION=$(python -c 'import json; print(json.load(open("/tmp/media-worker-service.json"))["status"]["latestCreatedRevisionName"])')
+          CANDIDATE_URL=$(python -c 'import json,os; data=json.load(open("/tmp/media-worker-service.json")); tag=os.environ["TAG"]; print(next(item["url"] for item in data["status"].get("traffic",[]) if item.get("tag")==tag))')
+          echo "revision=${REVISION}" >> "${GITHUB_OUTPUT}"
+          echo "candidate_url=${CANDIDATE_URL}" >> "${GITHUB_OUTPUT}"
+        env:
+          TAG: candidate-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: Verify candidate health
+        shell: bash
+        env:
+          CANDIDATE_URL: ${{ steps.candidate.outputs.candidate_url }}
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 18); do
+            if curl --fail --silent --show-error --max-time 30 "${CANDIDATE_URL}/status" > /tmp/media-worker-status.json; then
+              python -m json.tool /tmp/media-worker-status.json
+              exit 0
+            fi
+            echo "Candidate is still starting (${attempt}/18)."
+            sleep 10
+          done
+          echo "Candidate health verification failed; production traffic was not changed."
+          exit 1
+
+      - name: Promote verified revision to production
+        shell: bash
+        env:
+          REVISION: ${{ steps.candidate.outputs.revision }}
+        run: |
+          set -euo pipefail
+          gcloud run services update-traffic "${SERVICE_NAME}" \
+            --region "${REGION}" \
+            --to-revisions "${REVISION}=100"
+
+      - name: Verify production service
+        shell: bash
+        env:
+          REVISION: ${{ steps.candidate.outputs.revision }}
+        run: |
+          set -euo pipefail
+          SERVICE_URL=$(gcloud run services describe "${SERVICE_NAME}" --region "${REGION}" --format='value(status.url)')
+          LIVE_REVISION=$(gcloud run services describe "${SERVICE_NAME}" --region "${REGION}" --format='value(status.latestReadyRevisionName)')
+          test "${LIVE_REVISION}" = "${REVISION}"
+          curl --fail --silent --show-error --max-time 30 "${SERVICE_URL}/status" | python -m json.tool
+          echo "Cloud Run revision ${REVISION} is healthy at ${SERVICE_URL}."
