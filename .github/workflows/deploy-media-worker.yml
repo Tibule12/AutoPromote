@@ -36,6 +36,11 @@ jobs:
       - name: Checkout requested revision
         uses: actions/checkout@v4
 
+      - name: Install FFmpeg test dependency
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes ffmpeg
+
       - name: Verify Viral Clip render contract
         run: python -m unittest python_media_worker.test_viral_render_contract
 
