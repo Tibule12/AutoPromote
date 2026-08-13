@@ -957,6 +957,25 @@ class VideoEditingService {
             viralData.captionStyle ||
             viralData.renderDefaults?.caption_style ||
             payload.caption_style,
+          caption_position:
+            viralData.caption_position || viralData.captionPosition || "lower",
+          caption_scale: Number(
+            viralData.caption_scale ?? viralData.captionScale ?? 1
+          ),
+          caption_text_override:
+            viralData.caption_text_override ?? viralData.captionTextOverride ?? null,
+          preview_speed: Number(
+            viralData.preview_speed ?? viralData.previewSpeed ?? 1
+          ),
+          speed_segments: Array.isArray(
+            viralData.speed_segments || viralData.speedSegments
+          )
+            ? viralData.speed_segments || viralData.speedSegments
+            : [],
+          pacing_level:
+            viralData.pacing_level || viralData.pacingLevel || null,
+          creative_intent:
+            viralData.creative_intent || viralData.creativeIntent || null,
           smart_crop:
             viralData.smart_crop !== undefined
               ? !!viralData.smart_crop

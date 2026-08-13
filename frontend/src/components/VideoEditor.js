@@ -16,6 +16,7 @@ import useCinematicEffects from "../hooks/useCinematicEffects";
 import CinematicEffectsPanel from "./CinematicEffectsPanel";
 import { useSubscription } from "../hooks/useSubscription";
 import { playMediaSafely } from "../utils/mediaPlayback";
+import { buildViralRenderData } from "./viralRenderPayload";
 
 const DESKTOP_EDITING_TOOL_QUERY = "(min-width: 900px) and (hover: hover) and (pointer: fine)";
 
@@ -1033,36 +1034,12 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
         console.log("Uploaded local blob to:", finalVideoUrl);
       }
 
-      // Prepare payload
-      const timelineSegments =
-        Array.isArray(extraOptions.timelineSegments) && extraOptions.timelineSegments.length > 0
-          ? extraOptions.timelineSegments
-          : [
-              {
-                id: "main",
-                url: finalVideoUrl,
-                start_time: selectedClip.start,
-                end_time: selectedClip.end,
-                duration: selectedClip.end - selectedClip.start,
-              },
-            ];
-      const totalDuration = timelineSegments.reduce(
-        (sum, segment) => sum + Math.max(0, Number(segment.duration || 0)),
-        0
-      );
-      const payload = {
-        video_url: finalVideoUrl,
-        start_time: 0,
-        end_time: totalDuration || selectedClip.end - selectedClip.start,
-        overlays: overlays,
-        auto_captions: !!extraOptions.autoCaptions,
-        timeline_segments: timelineSegments,
-        background_audio: extraOptions.backgroundAudio || null,
-        hook_focus_point: extraOptions.hookFocusPoint || null,
-        cover_frame: extraOptions.coverFrame || null,
-        thumbnail_frame: extraOptions.thumbnailFrame || extraOptions.coverFrame || null,
-        // smart_crop: !!extraOptions.smartCrop, // Backend supports this? Check Python worker.
-      };
+      const payload = buildViralRenderData({
+        finalVideoUrl,
+        selectedClip,
+        overlays,
+        extraOptions,
+      });
 
       // NOTE: backend 'mediaRoutes.js' expects 'fileUrl' and 'options'.
       // But 'videoEditingService.js' puts 'payload' inside 'options.viralData'.
@@ -1844,9 +1821,8 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
               </div>
               {!desktopToolsAvailable ? (
                 <div className="studio-launch-desktop-note">
-                  Clip Studio and Cam Combiner are optimized for laptop and desktop editing.
-                  You can still use mobile-friendly tools here, then finish timeline work on a
-                  computer.
+                  Clip Studio and Cam Combiner are optimized for laptop and desktop editing. You can
+                  still use mobile-friendly tools here, then finish timeline work on a computer.
                 </div>
               ) : null}
               <div className="studio-launch-actions">

@@ -50,6 +50,27 @@ except ImportError:
         multicam_chunk_plan_fingerprint,
     )
 
+try:
+    from .viral_render_contract import (
+        build_caption_override_transcript,
+        build_speed_filter_complex,
+        map_timeline_time,
+        normalize_speed_plan,
+        resolve_caption_layout,
+        speed_plan_changes_timing,
+        speed_plan_output_duration,
+    )
+except ImportError:
+    from viral_render_contract import (
+        build_caption_override_transcript,
+        build_speed_filter_complex,
+        map_timeline_time,
+        normalize_speed_plan,
+        resolve_caption_layout,
+        speed_plan_changes_timing,
+        speed_plan_output_duration,
+    )
+
 # Fix asyncio event loop policy for Windows (Enable Proactor for Subprocesses)
 if sys.platform == 'win32':
     asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
@@ -4231,12 +4252,23 @@ CAPTION_STYLES = {
 }
 
 
-def generate_ass_captions(whisper_result, style_name="bold_pop", video_width=1080, video_height=1920):
+def generate_ass_captions(
+    whisper_result,
+    style_name="bold_pop",
+    video_width=1080,
+    video_height=1920,
+    caption_position="lower",
+    caption_scale=1.0,
+):
     """
     Generate ASS (Advanced SubStation Alpha) subtitle file content
     with word-level animated captions from Whisper's word_timestamps output.
     """
-    style = CAPTION_STYLES.get(style_name, CAPTION_STYLES["bold_pop"])
+    style = resolve_caption_layout(
+        caption_position,
+        caption_scale,
+        CAPTION_STYLES.get(style_name, CAPTION_STYLES["bold_pop"]),
+    )
     segments = whisper_result.get("segments", [])
 
     # ASS header
@@ -4305,7 +4337,8 @@ def generate_ass_captions(whisper_result, style_name="bold_pop", video_width=108
                     w_dur_cs = max(1, int((word["end"] - word["start"]) * 100))
                     word_text = _escape_ass(word.get("word", "").strip())
                     if word_text:
-                        text_parts.append(f"{{\\kf{w_dur_cs}}}{word_text}")
+                        spacer = "" if not text_parts else " "
+                        text_parts.append(f"{spacer}{{\\kf{w_dur_cs}}}{word_text}")
                 if text_parts:
                     line = "".join(text_parts)
                     ass_lines.append(f"Dialogue: 0,{start_ass},{end_ass},Default,,0,0,0,,{line}")
@@ -27752,6 +27785,13 @@ class ViralTimelineSegment(BaseModel):
     end_time: float
     duration: Optional[float] = None
 
+class ViralSpeedSegment(BaseModel):
+    id: Optional[Union[str, int]] = None
+    start_time: float = 0.0
+    end_time: float
+    rate: float = 1.0
+    pitch_preserved: bool = True
+
 class BackgroundAudioTrack(BaseModel):
     url: str
     trim_start: float = 0.0
@@ -27781,6 +27821,13 @@ class RenderViralRequest(BaseModel):
     overlays: List[ViralOverlay] = []
     auto_captions: bool = False
     caption_style: str = ""  # "", "bold_pop", "karaoke", "glow", "bounce", "minimal"
+    caption_position: str = "lower"
+    caption_scale: float = 1.0
+    caption_text_override: Optional[str] = None
+    preview_speed: float = 1.0
+    speed_segments: Optional[List[ViralSpeedSegment]] = None
+    pacing_level: Optional[str] = None
+    creative_intent: Optional[str] = None
     smart_crop: bool = False
     smart_crop_mode: str = "center"  # "center", "speaker_track", "ai_director"
     visual_enhance: bool = False  # Use Smart Promo dynamic visual pipeline (face zoom, movement tracking, reframing)
@@ -27834,6 +27881,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
     output_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_viral.mp4")
     thumbnail_output_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_thumbnail.jpg")
     downloaded_background_audio_path = None
+    speed_adjusted_path = None
 
     # Initial async update
     if request.async_mode:
@@ -28189,15 +28237,77 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 logger.error(f"Smart Crop failed: {e}. Proceeding with original aspect ratio.")
                 # Fallback to trimmed_path
 
+        # 2.75. Apply the Studio speed plan before captions and overlays so
+        # transcription, caption timing, B-roll, and audio share one final clock.
+        pre_speed_duration = get_media_duration(working_path) or max(
+            0.0, float(request.end_time) - float(request.start_time)
+        )
+        speed_plan = normalize_speed_plan(
+            pre_speed_duration,
+            request.speed_segments,
+            request.preview_speed,
+        )
+        rendered_timeline_duration = speed_plan_output_duration(speed_plan)
+        if speed_plan_changes_timing(speed_plan):
+            speed_adjusted_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_speed.mp4")
+            speed_has_audio = has_audio_stream(working_path)
+            speed_filter = build_speed_filter_complex(speed_plan, speed_has_audio)
+            speed_cmd = [
+                "ffmpeg",
+                "-i",
+                working_path,
+                "-filter_complex",
+                speed_filter,
+                "-map",
+                "[v_speed]",
+            ]
+            if speed_has_audio:
+                speed_cmd.extend(["-map", "[a_speed]", "-c:a", "aac", "-b:a", "160k"])
+            else:
+                speed_cmd.append("-an")
+            speed_cmd.extend(
+                [
+                    "-c:v",
+                    "libx264",
+                    "-preset",
+                    "veryfast",
+                    "-pix_fmt",
+                    "yuv420p",
+                    "-movflags",
+                    "+faststart",
+                    "-y",
+                    speed_adjusted_path,
+                ]
+            )
+            logger.info(
+                "Applying %s Viral Clip speed range(s): %.3fs -> %.3fs",
+                len(speed_plan),
+                pre_speed_duration,
+                rendered_timeline_duration,
+            )
+            await run_subprocess_async(speed_cmd, check=True, job_context=job_id)
+            working_path = speed_adjusted_path
+
+        def rendered_timeline_time(source_time):
+            return map_timeline_time(speed_plan, source_time)
+
         # 3. Auto-Captions (Optional) — supports animated ASS styles
         ass_subtitle_path = None
         if request.auto_captions:
             caption_style_name = str(request.caption_style or "").strip().lower()
+            if request.caption_text_override and caption_style_name not in CAPTION_STYLES:
+                caption_style_name = "bold_pop"
             use_animated = caption_style_name in CAPTION_STYLES
             try:
                 logger.info(f"Generating auto-captions (style={caption_style_name or 'legacy'}, animated={use_animated})...")
                 loop = asyncio.get_running_loop()
-                if FasterWhisperModel is not None or whisper is not None:
+                if request.caption_text_override:
+                    whisper_result = build_caption_override_transcript(
+                        request.caption_text_override,
+                        get_media_duration(working_path) or rendered_timeline_duration,
+                    )
+                    logger.info("Using creator-supplied caption copy instead of transcription")
+                elif FasterWhisperModel is not None or whisper is not None:
                     whisper_result = await loop.run_in_executor(
                         None,
                         lambda: transcribe_with_hints(
@@ -28205,13 +28315,24 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                             word_timestamps=use_animated,
                         ),
                     )
-                    segments = whisper_result.get("segments", [])
+                else:
+                    whisper_result = {"segments": []}
+
+                segments = whisper_result.get("segments", [])
+                if segments:
                     logger.info(f"Generated {len(segments)} caption segments (word_timestamps={use_animated})")
 
                     if use_animated and segments:
                         # Generate ASS subtitle file with animated word-level captions
                         w, h = get_video_dimensions(working_path)
-                        ass_content = generate_ass_captions(whisper_result, caption_style_name, w, h)
+                        ass_content = generate_ass_captions(
+                            whisper_result,
+                            caption_style_name,
+                            w,
+                            h,
+                            caption_position=request.caption_position,
+                            caption_scale=request.caption_scale,
+                        )
                         ass_subtitle_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_captions.ass")
                         with open(ass_subtitle_path, "w", encoding="utf-8") as f:
                             f.write(ass_content)
@@ -28228,11 +28349,18 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                                 continue
                             start = float(seg['start'])
                             end = float(seg['end'])
+                            caption_y = {
+                                "top": 15,
+                                "center": 50,
+                                "middle": 50,
+                                "lower": 85,
+                                "bottom": 85,
+                            }.get(str(request.caption_position or "lower").lower(), 85)
                             ov = ViralOverlay(
                                 id=f"auto_{seg['id']}",
                                 type='text',
                                 text=txt,
-                                x=50, y=85,
+                                x=50, y=caption_y,
                                 bg="black@0.5",
                                 color="yellow",
                                 start_time=start,
@@ -28256,13 +28384,17 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             current_v_label = "v_captions"
 
         if request.add_hook and request.hook_text:
+            rendered_hook_start = rendered_timeline_time(request.hook_start_time)
+            rendered_hook_end = rendered_timeline_time(
+                float(request.hook_start_time) + float(request.hook_intro_seconds)
+            )
             hook_chain = build_hook_filter_chain(
                 request.hook_text,
-                request.hook_intro_seconds,
+                max(0.05, rendered_hook_end - rendered_hook_start),
                 width_val=base_width,
                 height_val=base_height,
                 template=request.hook_template,
-                hook_start_time=request.hook_start_time,
+                hook_start_time=rendered_hook_start,
                 blur_background=request.hook_blur_background,
                 dark_overlay=request.hook_dark_overlay,
                 freeze_frame=request.hook_freeze_frame,
@@ -28283,8 +28415,10 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         def get_overlay_enable_expr(overlay):
             if overlay.start_time is None or overlay.duration is None:
                 return ""
-            rel_start = max(0.0, float(overlay.start_time))
-            rel_end = rel_start + max(0.05, float(overlay.duration))
+            source_start = max(0.0, float(overlay.start_time))
+            source_end = source_start + max(0.05, float(overlay.duration))
+            rel_start = rendered_timeline_time(source_start)
+            rel_end = max(rel_start + 0.05, rendered_timeline_time(source_end))
             return f":enable='between(t,{rel_start:.3f},{rel_end:.3f})'"
 
         def get_overlay_xy_expr(overlay):
@@ -28563,8 +28697,10 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 and (getattr(overlay, "muteMainAudio", False) or getattr(overlay, "audioDucking", False))
             ]
             for duck_index, overlay in enumerate(ducking_overlays):
-                rel_start = max(0.0, float(overlay.start_time))
-                rel_end = rel_start + max(0.05, float(overlay.duration))
+                source_start = max(0.0, float(overlay.start_time))
+                source_end = source_start + max(0.05, float(overlay.duration))
+                rel_start = rendered_timeline_time(source_start)
+                rel_end = max(rel_start + 0.05, rendered_timeline_time(source_end))
                 if getattr(overlay, "muteMainAudio", False):
                     gain = 0.0
                 else:
@@ -28580,8 +28716,12 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         for audio_index, (overlay_input_idx, overlay) in enumerate(overlay_audio_specs):
             if overlay.start_time is None or overlay.duration is None:
                 continue
-            delay_ms = max(0, int(float(overlay.start_time) * 1000))
-            audio_duration = max(0.05, float(overlay.duration))
+            source_start = max(0.0, float(overlay.start_time))
+            source_end = source_start + max(0.05, float(overlay.duration))
+            rendered_start = rendered_timeline_time(source_start)
+            rendered_end = max(rendered_start + 0.05, rendered_timeline_time(source_end))
+            delay_ms = max(0, int(rendered_start * 1000))
+            audio_duration = rendered_end - rendered_start
             volume = clamp_float(float(getattr(overlay, "overlayAudioVolume", 0.7) or 0.7), 0.0, 1.5)
             output_label = f"overlay_audio_{audio_index}"
             audio_filter_chain.append(
@@ -28728,9 +28868,9 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
 
             if cover_frame_request:
                 requested_timeline_time = clamp_float(
-                    float(cover_frame_request.timelineTime or 0.0),
+                    rendered_timeline_time(float(cover_frame_request.timelineTime or 0.0)),
                     0.0,
-                    max(0.0, float(request.end_time or 0.0) - float(request.start_time or 0.0)),
+                    rendered_timeline_duration,
                 )
                 thumbnail_seek_time = round(max(0.0, requested_timeline_time), 3)
                 try:
@@ -28797,6 +28937,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     or "AUTOPROMOTE"
                 ) if brand_watermark_enabled else None,
                 "audio_proof": audio_proof,
+                "duration": get_media_duration(output_path) or rendered_timeline_duration,
+                "speed_plan": speed_plan,
             }
             
             if request.async_mode:
@@ -28822,6 +28964,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         if os.path.exists(input_path): os.remove(input_path)
         if downloaded_background_audio_path and os.path.exists(downloaded_background_audio_path):
             os.remove(downloaded_background_audio_path)
+        if speed_adjusted_path and os.path.exists(speed_adjusted_path):
+            os.remove(speed_adjusted_path)
         if os.path.exists(thumbnail_output_path):
             os.remove(thumbnail_output_path)
 
