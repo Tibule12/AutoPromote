@@ -49,6 +49,21 @@ describe("viralRenderPayload", () => {
         ],
         pacingLevel: "energetic",
         creativeIntent: "increase_energy",
+        creativePlan: {
+          version: 1,
+          enabled: true,
+          intensity: "bold",
+          fallback: "clean",
+          effects: [
+            {
+              id: "signature-effect",
+              preset: "motion_sculpture",
+              intensity: "bold",
+              start_time: 0,
+              end_time: 40,
+            },
+          ],
+        },
         smartCrop: true,
         smartCropMode: "face",
         enhanceQuality: false,
@@ -116,6 +131,11 @@ describe("viralRenderPayload", () => {
         ],
         pacing_level: "energetic",
         creative_intent: "increase_energy",
+        creative_plan: expect.objectContaining({
+          enabled: true,
+          intensity: "bold",
+          fallback: "clean",
+        }),
         smart_crop: true,
         smart_crop_mode: "face",
         visual_enhance: false,

@@ -6,6 +6,7 @@ import unittest
 
 from python_media_worker.viral_render_contract import (
     build_caption_override_transcript,
+    build_segment_transition_filters,
     build_speed_filter_complex,
     map_timeline_time,
     normalize_speed_plan,
@@ -59,6 +60,27 @@ class ViralRenderContractTests(unittest.TestCase):
         self.assertEqual(transcript["segments"][0]["text"], "Say this exactly")
         self.assertEqual(len(transcript["segments"][0]["words"]), 3)
         self.assertAlmostEqual(transcript["segments"][0]["words"][-1]["end"], 3.0)
+
+    def test_builds_visual_join_and_audio_safe_edges(self):
+        soft = build_segment_transition_filters(
+            3,
+            transition_in="soft_dip",
+            transition_out="energy_flash",
+            transition_duration=0.18,
+            has_audio=True,
+        )
+        clean = build_segment_transition_filters(
+            3,
+            transition_in="clean_cut",
+            transition_duration=0.02,
+            has_audio=True,
+        )
+
+        self.assertIn("color=black", soft["video_filters"][0])
+        self.assertIn("color=white", soft["video_filters"][1])
+        self.assertEqual(len(soft["audio_filters"]), 2)
+        self.assertEqual(clean["video_filters"], [])
+        self.assertEqual(len(clean["audio_filters"]), 1)
 
     def test_ffmpeg_speed_filter_preserves_audio_and_changes_duration(self):
         with tempfile.TemporaryDirectory() as temp_dir:

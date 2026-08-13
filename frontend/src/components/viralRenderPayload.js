@@ -89,6 +89,7 @@ export const buildViralRenderData = ({
   addDefined(payload, "preview_speed", extraOptions.previewSpeed, Number);
   addDefined(payload, "pacing_level", extraOptions.pacingLevel);
   addDefined(payload, "creative_intent", extraOptions.creativeIntent);
+  addDefined(payload, "creative_plan", extraOptions.creativePlan);
 
   if (isDefined(extraOptions.speedSegments)) {
     payload.speed_segments = normalizeSpeedSegmentsForRender(extraOptions.speedSegments);

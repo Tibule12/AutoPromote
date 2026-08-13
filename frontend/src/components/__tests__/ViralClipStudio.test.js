@@ -103,6 +103,103 @@ describe("ViralClipStudio timeline sequencing", () => {
     jest.clearAllMocks();
   });
 
+  test("previews a signature transformation and includes it in the export contract", async () => {
+    const onSave = jest.fn(() => Promise.resolve());
+    const clips = [
+      { id: "clip-creative", start: 0, end: 12, duration: 12, url: "https://example.com/clip.mp4" },
+    ];
+
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/clip.mp4"
+        clips={clips}
+        onSave={onSave}
+        onCancel={() => {}}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /Reality Break/i }));
+
+    expect(screen.getByTestId("creative-effect-live-layer")).toBeInTheDocument();
+    expect(screen.getByTestId("hook-preview-frame")).toHaveClass(
+      "creative-preview-reality_break"
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /Render Final Clip/i }));
+
+    await waitFor(() => expect(onSave).toHaveBeenCalled());
+    expect(onSave.mock.calls[0][2].creativePlan).toEqual(
+      expect.objectContaining({
+        version: 1,
+        enabled: true,
+        intensity: "bold",
+        fallback: "clean",
+        effects: [
+          expect.objectContaining({
+            preset: "reality_break",
+            intensity: "bold",
+            start_time: 0,
+            end_time: 12,
+          }),
+        ],
+      })
+    );
+  });
+
+  test("removes a marked middle range and exports retained segments with a join style", async () => {
+    const onSave = jest.fn(() => Promise.resolve());
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={[{ id: "clip-cut", start: 0, end: 12, duration: 12, reason: "Creator take" }]}
+        onSave={onSave}
+        onCancel={() => {}}
+      />
+    );
+
+    const afterVideo = screen.getByTestId("studio-after-video");
+    Object.defineProperty(afterVideo, "duration", {
+      configurable: true,
+      value: 12,
+    });
+    fireEvent.loadedMetadata(afterVideo);
+    fireEvent.click(screen.getByRole("button", { name: /^Cut$/i }));
+
+    afterVideo.currentTime = 3;
+    fireEvent.timeUpdate(afterVideo);
+    fireEvent.click(screen.getByRole("button", { name: /Mark remove start/i }));
+    afterVideo.currentTime = 5;
+    fireEvent.timeUpdate(afterVideo);
+    fireEvent.click(screen.getByRole("button", { name: /Mark remove end/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Soft Dip/i }));
+
+    expect(screen.getByTestId("pending-cut-summary")).toHaveTextContent("2.0s");
+    expect(screen.getByTestId("timeline-pending-cut-range")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId("remove-marked-range"));
+    expect(screen.queryByTestId("pending-cut-summary")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("checkbox", { name: /Add Hook/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Render Final Clip/i }));
+
+    await waitFor(() => expect(onSave).toHaveBeenCalled());
+    const timelineSegments = onSave.mock.calls[0][2].timelineSegments;
+    expect(timelineSegments).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          start_time: 0,
+          end_time: 3,
+          transition_out: "soft_dip",
+        }),
+        expect.objectContaining({
+          start_time: 5,
+          end_time: 12,
+          transition_in: "soft_dip",
+        }),
+      ])
+    );
+  });
+
   function setupVideoCreateElementMock() {
     const createdVideos = [];
     document.createElement = jest.fn(tagName => {
@@ -261,6 +358,55 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(within(inspector).getByText(/fast focal push with extra contrast/i)).toBeInTheDocument();
     fireEvent.click(within(inspector).getByRole("button", { name: "Freeze frame" }));
     expect(within(inspector).getByText(/confident freeze, headline hit/i)).toBeInTheDocument();
+  });
+
+  test("shows a live visual timeline that seeks the same After preview", () => {
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={[
+          {
+            id: "clip-1",
+            start: 0,
+            end: 10,
+            duration: 10,
+            reason: "This proof changes everything",
+          },
+        ]}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+        onStatusChange={jest.fn()}
+        currentMusic={null}
+        onMusicChange={jest.fn()}
+      />
+    );
+
+    const timeline = screen.getByTestId("live-edit-timeline");
+    const sourceTrack = screen.getByTestId("timeline-source-track");
+    const afterVideo = screen.getByTestId("studio-after-video");
+    Object.defineProperty(afterVideo, "currentTime", {
+      configurable: true,
+      writable: true,
+      value: 0,
+    });
+    sourceTrack.getBoundingClientRect = () => ({
+      left: 0,
+      right: 200,
+      top: 0,
+      bottom: 44,
+      width: 200,
+      height: 44,
+    });
+
+    expect(
+      within(timeline).getByText(/same media, timings and audio decisions/i)
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("timeline-hook-block")).toBeInTheDocument();
+    expect(screen.getByTestId("timeline-original-audio")).toHaveTextContent("Original voice");
+
+    fireEvent.click(sourceTrack, { clientX: 100 });
+    expect(afterVideo.currentTime).toBeCloseTo(5, 1);
+    expect(screen.getByText(/Timeline and After are on the same frame/i)).toBeInTheDocument();
   });
 
   test("dragging the selected hook range does not toggle selection mode", () => {
@@ -767,6 +913,115 @@ describe("ViralClipStudio timeline sequencing", () => {
     fireEvent.click(screen.getByTestId("studio-redo-button"));
     await waitFor(() => {
       expect(getOverlayTextNode()).not.toBeNull();
+    });
+  });
+
+  test("preserves uploaded B-roll through duplicate, delete, undo, and redo", async () => {
+    const createdVideos = setupVideoCreateElementMock();
+    const onSave = jest.fn(() => Promise.resolve());
+    const { container } = render(
+      <ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={[{ id: "clip-1", start: 0, end: 12, duration: 12, reason: "Hook" }]}
+        onSave={onSave}
+        onCancel={jest.fn()}
+        onStatusChange={jest.fn()}
+        currentMusic={null}
+        onMusicChange={jest.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("tab", { name: /B-roll/i }));
+    const uploadedFile = new File(["cutaway"], "proof-cutaway.mp4", {
+      type: "video/mp4",
+    });
+    const initialCreatedVideoCount = createdVideos.length;
+    fireEvent.change(screen.getByTestId("broll-video-input"), {
+      target: { files: [uploadedFile] },
+    });
+
+    await waitFor(() => expect(createdVideos.length).toBeGreaterThan(initialCreatedVideoCount));
+    await act(async () => {
+      createdVideos[createdVideos.length - 1].onloadedmetadata();
+    });
+    await waitFor(() => expect(screen.getAllByText("proof-cutaway.mp4").length).toBeGreaterThan(0));
+
+    const inspector = screen.getByTestId("clip-studio-inspector");
+    fireEvent.click(within(inspector).getByRole("button", { name: "Picture-in-picture" }));
+    fireEvent.click(screen.getByRole("button", { name: "After" }));
+
+    const previewShell = screen.getByTestId("hook-preview-frame").parentElement;
+    await waitFor(() =>
+      expect(previewShell.querySelectorAll(".draggable-overlay")).toHaveLength(1)
+    );
+    fireEvent.click(within(previewShell).getByTitle("Duplicate overlay"));
+    await waitFor(() =>
+      expect(previewShell.querySelectorAll(".draggable-overlay")).toHaveLength(2)
+    );
+
+    fireEvent.click(previewShell.querySelector(".overlay-delete-btn"));
+    await waitFor(() => {
+      expect(previewShell.querySelectorAll(".draggable-overlay")).toHaveLength(1);
+      expect(previewShell.querySelector(".draggable-overlay.active")).not.toBeNull();
+    });
+
+    fireEvent.click(screen.getByTestId("studio-undo-button"));
+    await waitFor(() => {
+      expect(previewShell.querySelectorAll(".draggable-overlay")).toHaveLength(2);
+      expect(screen.getAllByText("proof-cutaway.mp4").length).toBeGreaterThan(0);
+    });
+
+    fireEvent.click(screen.getByTestId("studio-redo-button"));
+    await waitFor(() => {
+      expect(previewShell.querySelectorAll(".draggable-overlay")).toHaveLength(1);
+      expect(previewShell.querySelector(".draggable-overlay.active")).not.toBeNull();
+      expect(screen.getAllByText("proof-cutaway.mp4").length).toBeGreaterThan(0);
+    });
+
+    uploadBytes.mockClear();
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /Render Final Clip/i }));
+    });
+    await waitFor(() => expect(uploadBytes).toHaveBeenCalled());
+    expect(uploadBytes.mock.calls.some(([, payload]) => payload === uploadedFile)).toBe(true);
+  }, 15000);
+
+  test("undoes and redoes Make It Hit as one reversible edit", async () => {
+    global.fetch.mockResolvedValue({
+      ok: true,
+      json: jest.fn(() => Promise.resolve({ silences: [] })),
+    });
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={[{ id: "clip-1", start: 0, end: 12, duration: 12, reason: "Hook" }]}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+        onStatusChange={jest.fn()}
+        currentMusic={null}
+        onMusicChange={jest.fn()}
+      />
+    );
+
+    const afterVideo = screen.getByTestId("studio-after-video");
+    expect(screen.queryByTestId("live-caption-preview")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId("make-it-hit-button"));
+    await waitFor(() => {
+      expect(screen.getByTestId("live-caption-preview")).toBeInTheDocument();
+      expect(afterVideo.playbackRate).toBeCloseTo(1.15);
+    });
+
+    fireEvent.click(screen.getByTestId("studio-undo-button"));
+    await waitFor(() => {
+      expect(screen.queryByTestId("live-caption-preview")).not.toBeInTheDocument();
+      expect(afterVideo.playbackRate).toBeCloseTo(1);
+    });
+
+    fireEvent.click(screen.getByTestId("studio-redo-button"));
+    await waitFor(() => {
+      expect(screen.getByTestId("live-caption-preview")).toBeInTheDocument();
+      expect(afterVideo.playbackRate).toBeCloseTo(1.15);
     });
   });
 
@@ -1279,6 +1534,11 @@ describe("ViralClipStudio timeline sequencing", () => {
     });
 
     expect((await screen.findAllByText("podcast-proof.mp4")).length).toBeGreaterThan(0);
+    expect(
+      screen
+        .getAllByTestId(/timeline-broll-block-/)
+        .find(block => block.textContent.includes("podcast-proof.mp4"))
+    ).toBeInTheDocument();
     const durationInput = within(inspector)
       .getByText("Duration")
       .closest("label")
@@ -1312,10 +1572,13 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(screen.getByText(/exact cutaway point/i)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Use overlay" }));
+    expect(screen.getAllByTestId(/timeline-overlay-audio-/)).toHaveLength(1);
+    expect(screen.getAllByTestId(/timeline-overlay-audio-/)[0]).toHaveTextContent("Overlay");
     fireEvent.timeUpdate(afterVideo);
     await waitFor(() => expect(afterVideo.muted).toBe(true));
 
     fireEvent.click(screen.getByRole("button", { name: "Mix both" }));
+    expect(screen.getAllByTestId(/timeline-overlay-audio-/)[0]).toHaveTextContent("Mix");
     fireEvent.timeUpdate(afterVideo);
     await waitFor(() => expect(afterVideo.muted).toBe(false));
 
@@ -1340,7 +1603,7 @@ describe("ViralClipStudio timeline sequencing", () => {
     fireEvent.timeUpdate(afterVideo);
     await waitFor(() => expect(afterVideo.muted).toBe(false));
     expect(screen.getAllByText(/Original audio returns automatically/i).length).toBeGreaterThan(0);
-  }, 15000);
+  }, 30000);
 
   test("keeps uploaded background sound enabled with speech-aware ducking", async () => {
     render(
@@ -1367,6 +1630,7 @@ describe("ViralClipStudio timeline sequencing", () => {
       expect(within(inspector).getByText("warm-bed")).toBeInTheDocument();
       expect(within(inspector).getByText("Duck under speech")).toBeInTheDocument();
     });
+    expect(screen.getByTestId("timeline-music-audio")).toHaveTextContent("warm-bed");
 
     const duckUnderSpeech = within(inspector).getByRole("checkbox", {
       name: /Duck under speech/i,

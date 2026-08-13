@@ -727,6 +727,8 @@ class VideoEditingService {
             viralData.pacing_level || viralData.pacingLevel || null,
           creative_intent:
             viralData.creative_intent || viralData.creativeIntent || null,
+          creative_plan:
+            viralData.creative_plan || viralData.creativePlan || null,
           smart_crop:
             viralData.smart_crop !== undefined
               ? !!viralData.smart_crop

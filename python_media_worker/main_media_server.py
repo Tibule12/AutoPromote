@@ -53,6 +53,7 @@ except ImportError:
 try:
     from .viral_render_contract import (
         build_caption_override_transcript,
+        build_segment_transition_filters,
         build_speed_filter_complex,
         map_timeline_time,
         normalize_speed_plan,
@@ -63,6 +64,7 @@ try:
 except ImportError:
     from viral_render_contract import (
         build_caption_override_transcript,
+        build_segment_transition_filters,
         build_speed_filter_complex,
         map_timeline_time,
         normalize_speed_plan,
@@ -70,6 +72,11 @@ except ImportError:
         speed_plan_changes_timing,
         speed_plan_output_duration,
     )
+
+try:
+    from .viral_creative_effects import build_creative_filter_complex, normalize_creative_plan
+except ImportError:
+    from viral_creative_effects import build_creative_filter_complex, normalize_creative_plan
 
 # Fix asyncio event loop policy for Windows (Enable Proactor for Subprocesses)
 if sys.platform == 'win32':
@@ -27784,6 +27791,9 @@ class ViralTimelineSegment(BaseModel):
     start_time: float = 0.0
     end_time: float
     duration: Optional[float] = None
+    transition_in: Optional[str] = None
+    transition_out: Optional[str] = None
+    transition_duration: Optional[float] = None
 
 class ViralSpeedSegment(BaseModel):
     id: Optional[Union[str, int]] = None
@@ -27814,6 +27824,20 @@ class CoverFrameRequest(BaseModel):
     strategy: Optional[str] = None
     purpose: Optional[str] = None
 
+class ViralCreativeEffect(BaseModel):
+    id: Optional[str] = None
+    preset: str
+    intensity: Optional[str] = None
+    start_time: float = 0.0
+    end_time: Optional[float] = None
+
+class ViralCreativePlan(BaseModel):
+    version: int = 1
+    enabled: bool = False
+    intensity: str = "bold"
+    fallback: str = "clean"
+    effects: Optional[List[ViralCreativeEffect]] = None
+
 class RenderViralRequest(BaseModel):
     video_url: str
     start_time: float
@@ -27828,6 +27852,7 @@ class RenderViralRequest(BaseModel):
     speed_segments: Optional[List[ViralSpeedSegment]] = None
     pacing_level: Optional[str] = None
     creative_intent: Optional[str] = None
+    creative_plan: Optional[ViralCreativePlan] = None
     smart_crop: bool = False
     smart_crop_mode: str = "center"  # "center", "speaker_track", "ai_director"
     visual_enhance: bool = False  # Use Smart Promo dynamic visual pipeline (face zoom, movement tracking, reframing)
@@ -27882,6 +27907,12 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
     thumbnail_output_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_thumbnail.jpg")
     downloaded_background_audio_path = None
     speed_adjusted_path = None
+    creative_adjusted_path = None
+    creative_receipt = {
+        "status": "not_requested",
+        "fallback": "clean",
+        "effects": [],
+    }
 
     # Initial async update
     if request.async_mode:
@@ -27944,36 +27975,31 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     "scale=1080:1920:force_original_aspect_ratio=decrease,"
                     "pad=1080:1920:(ow-iw)/2:(oh-ih)/2"
                 )
-                await run_subprocess_async(
-                    [
-                        "ffmpeg",
-                        "-ss",
-                        str(segment.start_time),
-                        "-i",
-                        segment_source_path,
-                        "-t",
-                        str(segment_duration),
-                        "-vf",
-                        normalize_vf,
-                        "-map",
-                        "0:v:0",
-                        "-map",
-                        "0:a?",
-                        "-c:v",
-                        "libx264",
-                        "-preset",
-                        "ultrafast",
-                        "-c:a",
-                        "aac",
-                        "-pix_fmt",
-                        "yuv420p",
-                        "-movflags",
-                        "+faststart",
-                        "-y",
-                        segment_output_path,
-                    ],
-                    check=True,
+                transition_filters = build_segment_transition_filters(
+                    segment_duration,
+                    segment.transition_in,
+                    segment.transition_out,
+                    segment.transition_duration,
+                    has_audio=has_audio_stream(segment_source_path),
                 )
+                video_filters = [normalize_vf]
+                video_filters.extend(transition_filters["video_filters"])
+                audio_filters = transition_filters["audio_filters"]
+                segment_cmd = [
+                    "ffmpeg", "-ss", str(segment.start_time), "-i", segment_source_path,
+                    "-t", str(segment_duration), "-vf", ",".join(video_filters),
+                    "-map", "0:v:0", "-map", "0:a?",
+                ]
+                if audio_filters and has_audio_stream(segment_source_path):
+                    segment_cmd.extend(["-af", ",".join(audio_filters)])
+                segment_cmd.extend(
+                    [
+                        "-c:v", "libx264", "-preset", "ultrafast", "-c:a", "aac",
+                        "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-y",
+                        segment_output_path,
+                    ]
+                )
+                await run_subprocess_async(segment_cmd, check=True)
                 segment_paths.append(segment_output_path)
 
             if not segment_paths:
@@ -28290,6 +28316,49 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
 
         def rendered_timeline_time(source_time):
             return map_timeline_time(speed_plan, source_time)
+
+        # 2.85. Signature creative effects run as a protected intermediate.
+        # A bad advanced effect must never destroy an otherwise valid Studio export.
+        creative_plan = normalize_creative_plan(request.creative_plan, rendered_timeline_duration)
+        if creative_plan["enabled"]:
+            creative_adjusted_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_creative.mp4")
+            creative_filter, creative_output_label, requested_effects = build_creative_filter_complex(
+                creative_plan
+            )
+            try:
+                creative_cmd = [
+                    "ffmpeg", "-i", working_path,
+                    "-filter_complex", creative_filter,
+                    "-map", f"[{creative_output_label}]",
+                    "-map", "0:a?",
+                    "-c:v", "libx264", "-preset", "veryfast", "-crf", "20",
+                    "-pix_fmt", "yuv420p", "-c:a", "copy",
+                    "-movflags", "+faststart", "-y", creative_adjusted_path,
+                ]
+                logger.info(
+                    "Applying %s protected Viral Clip creative effect(s)",
+                    len(requested_effects),
+                )
+                await run_subprocess_async(creative_cmd, check=True, job_context=job_id)
+                if not os.path.exists(creative_adjusted_path):
+                    raise RuntimeError("creative effect intermediate was not produced")
+                working_path = creative_adjusted_path
+                creative_receipt = {
+                    "status": "applied",
+                    "fallback": "clean",
+                    "effects": requested_effects,
+                }
+            except Exception as creative_error:
+                logger.warning(
+                    "Creative effect stage failed; continuing with clean render: %s",
+                    creative_error,
+                )
+                creative_receipt = {
+                    "status": "clean_fallback",
+                    "fallback": "clean",
+                    "effects": requested_effects,
+                    "reason": str(creative_error),
+                }
 
         # 3. Auto-Captions (Optional) — supports animated ASS styles
         ass_subtitle_path = None
@@ -28939,6 +29008,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 "audio_proof": audio_proof,
                 "duration": get_media_duration(output_path) or rendered_timeline_duration,
                 "speed_plan": speed_plan,
+                "creative_receipt": creative_receipt,
             }
             
             if request.async_mode:
@@ -28966,6 +29036,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             os.remove(downloaded_background_audio_path)
         if speed_adjusted_path and os.path.exists(speed_adjusted_path):
             os.remove(speed_adjusted_path)
+        if creative_adjusted_path and os.path.exists(creative_adjusted_path):
+            os.remove(creative_adjusted_path)
         if os.path.exists(thumbnail_output_path):
             os.remove(thumbnail_output_path)
 

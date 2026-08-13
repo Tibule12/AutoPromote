@@ -9,6 +9,7 @@ from typing import Any, Dict, Iterable, List, Mapping, Optional
 
 MIN_SPEED_RATE = 0.5
 MAX_SPEED_RATE = 2.0
+SUPPORTED_JOIN_TRANSITIONS = {"clean_cut", "soft_dip", "energy_flash"}
 
 
 def _read(item: Any, *names: str, default: Any = None) -> Any:
@@ -175,6 +176,57 @@ def build_speed_filter_complex(
             f"{''.join(video_labels)}concat=n={len(normalized)}:v=1:a=0[v_speed]"
         )
     return ";".join(filters)
+
+
+def build_segment_transition_filters(
+    duration: Any,
+    transition_in: Any = None,
+    transition_out: Any = None,
+    transition_duration: Any = 0.0,
+    has_audio: bool = True,
+) -> Dict[str, Any]:
+    """Build bounded per-segment join filters used before timeline concat."""
+
+    safe_duration = max(0.05, _finite_number(duration, 0.05))
+    incoming = str(transition_in or "").strip().lower()
+    outgoing = str(transition_out or "").strip().lower()
+    if incoming not in SUPPORTED_JOIN_TRANSITIONS:
+        incoming = ""
+    if outgoing not in SUPPORTED_JOIN_TRANSITIONS:
+        outgoing = ""
+    requested_duration = max(0.0, _finite_number(transition_duration, 0.0))
+    visual_duration = min(requested_duration, safe_duration / 3.0, 0.35)
+    edge_duration = min(0.035, visual_duration or 0.02)
+    video_filters: List[str] = []
+    audio_filters: List[str] = []
+
+    if visual_duration >= 0.01:
+        incoming_color = "white" if incoming == "energy_flash" else "black"
+        outgoing_color = "white" if outgoing == "energy_flash" else "black"
+        if incoming in {"soft_dip", "energy_flash"}:
+            video_filters.append(
+                f"fade=t=in:st=0:d={visual_duration:.3f}:color={incoming_color}"
+            )
+        if outgoing in {"soft_dip", "energy_flash"}:
+            video_filters.append(
+                f"fade=t=out:st={max(0.0, safe_duration - visual_duration):.3f}:"
+                f"d={visual_duration:.3f}:color={outgoing_color}"
+            )
+
+    if has_audio and incoming:
+        audio_filters.append(f"afade=t=in:st=0:d={edge_duration:.3f}")
+    if has_audio and outgoing:
+        audio_filters.append(
+            f"afade=t=out:st={max(0.0, safe_duration - edge_duration):.3f}:d={edge_duration:.3f}"
+        )
+
+    return {
+        "transition_in": incoming or None,
+        "transition_out": outgoing or None,
+        "visual_duration": visual_duration,
+        "video_filters": video_filters,
+        "audio_filters": audio_filters,
+    }
 
 
 def resolve_caption_layout(position: Any, scale: Any, base_style: Mapping[str, Any]) -> Dict[str, Any]:

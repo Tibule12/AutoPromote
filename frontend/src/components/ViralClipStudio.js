@@ -1256,6 +1256,7 @@ const VIRAL_STUDIO_WORKFLOW = [
 
 const CREATIVE_STUDIO_TOOLS = [
   { id: "moments", label: "Moments", icon: "✦" },
+  { id: "cut", label: "Cut", icon: "✂" },
   { id: "hook", label: "Hook", icon: "⌁" },
   { id: "captions", label: "Captions", icon: "CC" },
   { id: "pacing", label: "Pacing", icon: "≋" },
@@ -1270,6 +1271,160 @@ const CREATIVE_INTENTS = [
   { id: "proof", label: "Show proof", icon: "▥" },
   { id: "loop", label: "Make it loop", icon: "↻" },
 ];
+
+const SIGNATURE_CREATIVE_STYLES = [
+  {
+    id: "auto_story",
+    label: "Auto Story",
+    icon: "✦",
+    helper: "Choreograph an opening break, movement build and transformed payoff automatically.",
+  },
+  {
+    id: "motion_sculpture",
+    label: "Motion Sculpture",
+    icon: "≋",
+    helper: "Echo movement, shape momentum and make action feel physical.",
+  },
+  {
+    id: "reality_break",
+    label: "Reality Break",
+    icon: "◇",
+    helper: "Split ordinary footage into a dimensional, cinematic moment.",
+  },
+  {
+    id: "tracked_reveal",
+    label: "Tracked Reveal",
+    icon: "◐",
+    helper: "Let movement reveal the transformed colour world underneath.",
+  },
+];
+
+const CREATIVE_INTENSITIES = [
+  { id: "clean", label: "Clean" },
+  { id: "bold", label: "Bold" },
+  { id: "unreal", label: "Unreal" },
+];
+
+const CREATOR_CONTENT_PROFILES = [
+  {
+    id: "auto",
+    label: "Auto",
+    helper: "Let AutoPromote balance clarity, movement and payoff.",
+    preset: "auto_story",
+    intensity: "bold",
+    transition: "soft_dip",
+    pacing: "balanced",
+    speed: 1,
+  },
+  {
+    id: "talk_story",
+    label: "Talk / Story",
+    helper: "Natural jump cuts, clear speech and captions that do not fight the face.",
+    preset: "tracked_reveal",
+    intensity: "clean",
+    transition: "clean_cut",
+    pacing: "balanced",
+    speed: 1.05,
+  },
+  {
+    id: "beauty_fashion",
+    label: "Beauty / Fashion",
+    helper: "Polished reveals, colour transformation and softer joins.",
+    preset: "tracked_reveal",
+    intensity: "bold",
+    transition: "soft_dip",
+    pacing: "balanced",
+    speed: 1,
+  },
+  {
+    id: "fitness_dance",
+    label: "Fitness / Dance",
+    helper: "Movement echoes, beat-ready pacing and energetic joins.",
+    preset: "motion_sculpture",
+    intensity: "unreal",
+    transition: "energy_flash",
+    pacing: "energetic",
+    speed: 1.15,
+  },
+  {
+    id: "food_diy",
+    label: "Food / DIY",
+    helper: "Keep the useful steps, remove waiting, then reveal the result.",
+    preset: "tracked_reveal",
+    intensity: "bold",
+    transition: "clean_cut",
+    pacing: "energetic",
+    speed: 1.1,
+  },
+  {
+    id: "travel_lifestyle",
+    label: "Travel / Lifestyle",
+    helper: "Cinematic scene changes with room for locations to breathe.",
+    preset: "reality_break",
+    intensity: "bold",
+    transition: "soft_dip",
+    pacing: "balanced",
+    speed: 1,
+  },
+  {
+    id: "gaming_tech",
+    label: "Gaming / Tech",
+    helper: "Fast proof moments, screen energy and punchy transitions.",
+    preset: "reality_break",
+    intensity: "unreal",
+    transition: "energy_flash",
+    pacing: "energetic",
+    speed: 1.15,
+  },
+];
+
+const JOIN_TRANSITIONS = [
+  { id: "auto", label: "Auto", helper: "Uses the creator mode recommendation." },
+  { id: "clean_cut", label: "Clean Cut", helper: "Instant join with an audio-safe edge." },
+  { id: "soft_dip", label: "Soft Dip", helper: "A short cinematic breath between moments." },
+  { id: "energy_flash", label: "Energy Flash", helper: "A fast bright hit for action and reveals." },
+];
+
+const buildSignatureCreativeEffects = ({ preset, intensity, duration }) => {
+  const safeDuration = Math.max(0.1, Number(duration || 0));
+  if (preset !== "auto_story") {
+    return [
+      {
+        id: "signature-effect",
+        preset,
+        intensity,
+        start_time: 0,
+        end_time: safeDuration,
+      },
+    ];
+  }
+
+  const openingEnd = Math.min(safeDuration, Math.max(0.7, safeDuration * 0.22));
+  const buildEnd = Math.min(safeDuration, Math.max(openingEnd + 0.1, safeDuration * 0.68));
+  return [
+    {
+      id: "signature-opening",
+      preset: "reality_break",
+      intensity,
+      start_time: 0,
+      end_time: openingEnd,
+    },
+    {
+      id: "signature-build",
+      preset: "motion_sculpture",
+      intensity,
+      start_time: openingEnd,
+      end_time: buildEnd,
+    },
+    {
+      id: "signature-payoff",
+      preset: "tracked_reveal",
+      intensity,
+      start_time: buildEnd,
+      end_time: safeDuration,
+    },
+  ].filter(effect => effect.end_time - effect.start_time >= 0.05);
+};
 
 const PREVIEW_SPEED_OPTIONS = [0.5, 0.75, 1, 1.15, 1.25, 1.5, 2];
 const STORY_BEAT_LABELS = ["Hook", "Problem", "Proof", "Payoff"];
@@ -1356,6 +1511,13 @@ const ViralClipStudio = ({
   const [comparisonMode, setComparisonMode] = useState("split");
   const [activeCreativeTool, setActiveCreativeTool] = useState("moments");
   const [creativeIntent, setCreativeIntent] = useState("energy");
+  const [creativeEffectsEnabled, setCreativeEffectsEnabled] = useState(false);
+  const [creativePreset, setCreativePreset] = useState("auto_story");
+  const [creativeIntensity, setCreativeIntensity] = useState("bold");
+  const [contentProfile, setContentProfile] = useState("auto");
+  const [cutRangeStart, setCutRangeStart] = useState(null);
+  const [cutRangeEnd, setCutRangeEnd] = useState(null);
+  const [joinTransition, setJoinTransition] = useState("auto");
   const [pacingLevel, setPacingLevel] = useState("balanced");
   const [previewSpeed, setPreviewSpeed] = useState(1);
   const [captionPosition, setCaptionPosition] = useState("lower");
@@ -1449,6 +1611,7 @@ const ViralClipStudio = ({
   const undoStackRef = useRef([]);
   const redoStackRef = useRef([]);
   const lastSnapshotRef = useRef(null);
+  const lastSnapshotSignatureRef = useRef(null);
   const isRestoringHistoryRef = useRef(false);
   const previewPlaybackIntentRef = useRef(true);
   const phoneFrameRef = useRef(null);
@@ -1475,6 +1638,20 @@ const ViralClipStudio = ({
       Object.entries(value).map(([key, nestedValue]) => [key, cloneSnapshot(nestedValue)])
     );
   };
+
+  const serializeSnapshot = value =>
+    JSON.stringify(value, (_key, nestedValue) => {
+      if (typeof Blob !== "undefined" && nestedValue instanceof Blob) {
+        return {
+          __mediaType: typeof File !== "undefined" && nestedValue instanceof File ? "File" : "Blob",
+          name: nestedValue.name || "",
+          size: nestedValue.size,
+          type: nestedValue.type,
+          lastModified: nestedValue.lastModified || 0,
+        };
+      }
+      return nestedValue;
+    });
 
   const releaseMusicPreviewObjectUrl = () => {
     if (musicPreviewObjectUrlRef.current) {
@@ -1623,6 +1800,8 @@ const ViralClipStudio = ({
     overlays,
     activeOverlayId,
     videoFit,
+    safeFaceFraming,
+    faceAnchorPreset,
     autoCaptions,
     captionStyle,
     captionPosition,
@@ -1631,7 +1810,15 @@ const ViralClipStudio = ({
     previewSpeed,
     pacingLevel,
     creativeIntent,
+    creativeEffectsEnabled,
+    creativePreset,
+    creativeIntensity,
+    contentProfile,
+    cutRangeStart,
+    cutRangeEnd,
+    joinTransition,
     smartCrop,
+    smartCropMode,
     enhanceQuality,
     silenceRemoval,
     silenceThreshold,
@@ -1675,14 +1862,19 @@ const ViralClipStudio = ({
 
   const applyEditorSnapshot = snapshot => {
     const normalizedClips = snapshot.orderedClips || [];
+    const normalizedOverlays = snapshot.overlays || [];
     setOrderedClips(normalizedClips);
     setSelectedClip(
       normalizedClips.find(clip => clip.id === snapshot.selectedClipId) ||
         normalizedClips[0] ||
         null
     );
-    setOverlays(snapshot.overlays || []);
-    setActiveOverlayId(snapshot.activeOverlayId || null);
+    setOverlays(normalizedOverlays);
+    setActiveOverlayId(
+      normalizedOverlays.some(overlay => overlay.id === snapshot.activeOverlayId)
+        ? snapshot.activeOverlayId
+        : normalizedOverlays[normalizedOverlays.length - 1]?.id || null
+    );
     setVideoFit(snapshot.videoFit || "contain");
     setSafeFaceFraming(snapshot.safeFaceFraming !== undefined ? !!snapshot.safeFaceFraming : true);
     setFaceAnchorPreset(snapshot.faceAnchorPreset || "center");
@@ -1694,7 +1886,23 @@ const ViralClipStudio = ({
     setPreviewSpeed(Number(snapshot.previewSpeed ?? 1));
     setPacingLevel(snapshot.pacingLevel || "balanced");
     setCreativeIntent(snapshot.creativeIntent || "energy");
+    setCreativeEffectsEnabled(!!snapshot.creativeEffectsEnabled);
+    setCreativePreset(snapshot.creativePreset || "auto_story");
+    setCreativeIntensity(snapshot.creativeIntensity || "bold");
+    setContentProfile(snapshot.contentProfile || "auto");
+    setCutRangeStart(
+      snapshot.cutRangeStart !== undefined && snapshot.cutRangeStart !== null
+        ? Number(snapshot.cutRangeStart)
+        : null
+    );
+    setCutRangeEnd(
+      snapshot.cutRangeEnd !== undefined && snapshot.cutRangeEnd !== null
+        ? Number(snapshot.cutRangeEnd)
+        : null
+    );
+    setJoinTransition(snapshot.joinTransition || "auto");
     setSmartCrop(!!snapshot.smartCrop);
+    setSmartCropMode(snapshot.smartCropMode || "center");
     setEnhanceQuality(!!snapshot.enhanceQuality);
     setSilenceRemoval(!!snapshot.silenceRemoval);
     setSilenceThreshold(Number(snapshot.silenceThreshold ?? -35));
@@ -2261,6 +2469,7 @@ const ViralClipStudio = ({
     redoStackRef.current.push(currentSnapshot);
     isRestoringHistoryRef.current = true;
     applyEditorSnapshot(cloneSnapshot(previousSnapshot));
+    setStudioActionMessage("Undo restored the previous edit, including uploaded media.");
     syncHistoryAvailability();
   };
 
@@ -2272,6 +2481,7 @@ const ViralClipStudio = ({
     undoStackRef.current.push(currentSnapshot);
     isRestoringHistoryRef.current = true;
     applyEditorSnapshot(cloneSnapshot(nextSnapshot));
+    setStudioActionMessage("Redo restored the next edit, including uploaded media.");
     syncHistoryAvailability();
   };
 
@@ -2545,6 +2755,35 @@ const ViralClipStudio = ({
     const boundedTime = Math.max(0, Number(targetTime) || 0);
     video.currentTime = boundedTime;
     setVideoTime(boundedTime);
+  };
+
+  const seekLiveEditTimeline = event => {
+    const trackBounds = event.currentTarget.getBoundingClientRect();
+    const duration = Math.max(0, Number(currentTimelineWindow.duration || 0));
+    if (!duration || !trackBounds.width) return;
+
+    const progress = clampNumber((event.clientX - trackBounds.left) / trackBounds.width, 0, 1, 0);
+    const targetTime = Number(currentTimelineWindow.start || 0) + progress * duration;
+    jumpToSourceTime(targetTime);
+    setStudioActionMessage(
+      `Preview moved to ${formatPreviewTimePrecise(progress * duration)}. Timeline and After are on the same frame.`
+    );
+  };
+
+  const seekLiveEditTimelineItem = (localTime, toolId, overlayId = null) => {
+    const duration = Math.max(0, Number(currentTimelineWindow.duration || 0));
+    const boundedLocalTime = clampNumber(localTime, 0, duration || Number(localTime || 0), 0);
+
+    if (overlayId) setActiveOverlayId(overlayId);
+    if (toolId) {
+      setStudioInspectorTab(toolId);
+      setActiveCreativeTool(toolId);
+    }
+
+    jumpToSourceTime(Number(currentTimelineWindow.start || 0) + boundedLocalTime);
+    setStudioActionMessage(
+      `${toolId === "broll" ? "B-roll" : toolId === "hook" ? "Hook" : "Edit"} selected at ${formatPreviewTimePrecise(boundedLocalTime)} in the After preview.`
+    );
   };
 
   const focusClipInEditor = (clip, options = {}) => {
@@ -2961,6 +3200,35 @@ const ViralClipStudio = ({
     0,
     Number(videoTime || 0) - Number(currentTimelineWindow.start || 0)
   );
+  const activeContentProfile =
+    CREATOR_CONTENT_PROFILES.find(profile => profile.id === contentProfile) ||
+    CREATOR_CONTENT_PROFILES[0];
+  const resolvedJoinTransition =
+    joinTransition === "auto" ? activeContentProfile.transition : joinTransition;
+  const cutRangeIsReady =
+    cutRangeStart !== null &&
+    cutRangeEnd !== null &&
+    Math.abs(Number(cutRangeEnd) - Number(cutRangeStart)) >= 0.15;
+  const normalizedPendingCutRange = cutRangeIsReady
+    ? {
+        start: Math.min(Number(cutRangeStart), Number(cutRangeEnd)),
+        end: Math.max(Number(cutRangeStart), Number(cutRangeEnd)),
+      }
+    : null;
+  const liveCreativeEffects = buildSignatureCreativeEffects({
+    preset: creativePreset,
+    intensity: creativeIntensity,
+    duration: currentTimelineWindow.duration || selectedClip?.duration || 0,
+  });
+  const activeLiveCreativeEffect =
+    liveCreativeEffects.find(
+      effect =>
+        previewTimelineTime >= effect.start_time && previewTimelineTime <= effect.end_time
+    ) || liveCreativeEffects[0];
+  const creativeEffectIsLive = creativeEffectsEnabled && comparisonMode !== "before";
+  const creativePreviewClass = creativeEffectIsLive
+    ? `creative-preview-${activeLiveCreativeEffect?.preset || "motion_sculpture"} creative-intensity-${creativeIntensity}`
+    : "";
   const normalizedHookText = normalizeHookText(hookText);
   const hasHookText = !!normalizedHookText;
   const fallbackHookSuggestion = buildFallbackHookRange(
@@ -3213,6 +3481,26 @@ const ViralClipStudio = ({
   const hookPlayheadLeft = currentTimelineWindow.duration
     ? (trimAwareCurrentTime / Math.max(0.0001, currentTimelineWindow.duration)) * 100
     : 0;
+  const previewJoinTransition = String(
+    currentTimelineClip?.transitionIn || currentTimelineClip?.transitionOut || ""
+  ).trim();
+  const previewJoinDuration = Math.max(
+    0.02,
+    Number(currentTimelineClip?.transitionDuration || 0.02)
+  );
+  const previewJoinInOpacity = currentTimelineClip?.transitionIn
+    ? clampNumber(1 - trimAwareCurrentTime / previewJoinDuration, 0, 1, 0)
+    : 0;
+  const previewJoinOutOpacity = currentTimelineClip?.transitionOut
+    ? clampNumber(
+        (trimAwareCurrentTime - Math.max(0, trimAwareDuration - previewJoinDuration)) /
+          previewJoinDuration,
+        0,
+        1,
+        0
+      )
+    : 0;
+  const previewJoinOpacity = Math.max(previewJoinInOpacity, previewJoinOutOpacity);
 
   useEffect(() => {
     const nextDuration = Number(hookEnd - resolvedHookStart || 0);
@@ -3361,6 +3649,25 @@ const ViralClipStudio = ({
     localTime: previewTimelineTime,
     duration: currentTimelineWindow.duration || selectedClip?.duration || 3,
   });
+  const liveTimelineDuration = Math.max(
+    0.1,
+    Number(currentTimelineWindow.duration || selectedClip?.duration || 0)
+  );
+  const liveTimelineBRoll = overlays.filter(
+    overlay =>
+      overlay.bRollMode && overlay.startTime !== undefined && Number(overlay.duration || 0) > 0
+  );
+  const liveTimelineCaptionDuration = captionPreviewState.chunks.length
+    ? liveTimelineDuration / captionPreviewState.chunks.length
+    : 0;
+  const liveTimelineSource = getSafeMediaSource(currentTimelineClip?.url || videoUrl);
+  const liveTimelineEditCount =
+    Number(addHook) +
+    Number(creativeEffectsEnabled) +
+    Number(autoCaptions) +
+    Number(previewSpeed !== 1 || silenceRemoval) +
+    liveTimelineBRoll.length +
+    Number(addMusic || muteOriginalAudio);
   const retentionScore = clampNumber(
     54 +
       (addHook ? 9 : 0) +
@@ -3454,9 +3761,115 @@ const ViralClipStudio = ({
     );
   };
 
+  const applyContentProfile = profileId => {
+    const profile =
+      CREATOR_CONTENT_PROFILES.find(item => item.id === profileId) ||
+      CREATOR_CONTENT_PROFILES[0];
+    setContentProfile(profile.id);
+    setCreativePreset(profile.preset);
+    setCreativeIntensity(profile.intensity);
+    setCreativeEffectsEnabled(true);
+    setJoinTransition(profile.transition);
+    setPacingLevel(profile.pacing);
+    changePreviewSpeed(profile.speed);
+    setStudioActionMessage(
+      `${profile.label} guidance is ready. You can still change every suggestion before render.`
+    );
+  };
+
+  const markCutBoundary = boundary => {
+    const markedTime = Number(trimAwareCurrentTime.toFixed(2));
+    if (boundary === "start") {
+      setCutRangeStart(markedTime);
+      if (cutRangeEnd !== null && Number(cutRangeEnd) <= markedTime) setCutRangeEnd(null);
+      setStudioActionMessage(
+        `Removal starts at ${formatPreviewTimePrecise(markedTime)}. Play or seek to where the useful video returns.`
+      );
+      return;
+    }
+    setCutRangeEnd(markedTime);
+    setStudioActionMessage(
+      `Removal ends at ${formatPreviewTimePrecise(markedTime)}. Preview or remove the highlighted range.`
+    );
+  };
+
+  const clearPendingCutRange = () => {
+    setCutRangeStart(null);
+    setCutRangeEnd(null);
+  };
+
+  const removePendingCutRange = () => {
+    if (!normalizedPendingCutRange || !currentTimelineClip) return;
+
+    const sourceWindow = getTimelineClipWindow(currentTimelineClip);
+    const localDuration = Number(sourceWindow.duration || 0);
+    const localStart = clampNumber(normalizedPendingCutRange.start, 0, localDuration, 0);
+    const localEnd = clampNumber(normalizedPendingCutRange.end, 0, localDuration, localDuration);
+    const minimumKeptEdge = 0.12;
+    if (
+      localEnd - localStart < 0.15 ||
+      localStart < minimumKeptEdge ||
+      localDuration - localEnd < minimumKeptEdge
+    ) {
+      setStudioActionMessage(
+        "Choose a middle section to remove. Use Clip start or Clip end below for trimming an edge."
+      );
+      return;
+    }
+
+    const absoluteCutStart = Number(sourceWindow.start || 0) + localStart;
+    const absoluteCutEnd = Number(sourceWindow.start || 0) + localEnd;
+    const sourceClipId = currentTimelineClip.sourceClipId || currentTimelineClip.id;
+    const transitionDuration =
+      resolvedJoinTransition === "energy_flash"
+        ? 0.12
+        : resolvedJoinTransition === "soft_dip"
+          ? 0.18
+          : 0.02;
+    const retainedBefore = {
+      ...currentTimelineClip,
+      id: createSecureId("kept-before"),
+      sourceClipId,
+      startRequest: Number(sourceWindow.start || 0),
+      endRequest: absoluteCutStart,
+      transitionOut: resolvedJoinTransition,
+      transitionDuration,
+    };
+    const retainedAfter = {
+      ...currentTimelineClip,
+      id: createSecureId("kept-after"),
+      sourceClipId,
+      startRequest: absoluteCutEnd,
+      endRequest: Number(sourceWindow.end || 0),
+      transitionIn: resolvedJoinTransition,
+      transitionDuration,
+    };
+
+    setTimeline(previous => [
+      ...previous.slice(0, activeTimelineIndex),
+      retainedBefore,
+      retainedAfter,
+      ...previous.slice(activeTimelineIndex + 1),
+    ]);
+    setCutRangeStart(null);
+    setCutRangeEnd(null);
+    setHookPreviewLoop(false);
+    setTrimPreviewLoop(false);
+    setComparisonMode("split");
+    if (videoRef.current) {
+      const previewStart = Math.max(Number(sourceWindow.start || 0), absoluteCutStart - 0.65);
+      videoRef.current.currentTime = previewStart;
+      setVideoTime(previewStart);
+      safePlayMediaElement(videoRef.current);
+    }
+    setStudioActionMessage(
+      `${(localEnd - localStart).toFixed(1)}s removed. Preview is playing across the ${JOIN_TRANSITIONS.find(item => item.id === resolvedJoinTransition)?.label || "clean"} join. Undo restores it.`
+    );
+  };
+
   const selectCreativeTool = toolId => {
     setActiveCreativeTool(toolId);
-    if (["hook", "captions", "pacing", "broll", "sound"].includes(toolId)) {
+    if (["cut", "hook", "captions", "pacing", "broll", "sound"].includes(toolId)) {
       setStudioInspectorTab(toolId);
     }
     if (toolId === "moments") {
@@ -3517,12 +3930,15 @@ const ViralClipStudio = ({
     setSmartCropMode("speaker_track");
     setPacingLevel("energetic");
     setCreativeIntent("energy");
+    setCreativeEffectsEnabled(true);
+    setCreativePreset("auto_story");
+    setCreativeIntensity("bold");
     setHookZoomScale(current => Math.max(1.14, Number(current || 1.08)));
     changePreviewSpeed(1.15);
     setComparisonMode("after");
     focusComparisonPreview("hook", true);
     setStudioActionMessage(
-      "Make It Hit applied a reversible retention pass: captions, pause tightening, speaker framing, punch-in, and faster pacing."
+      "Make It Hit applied a reversible Auto Story: cinematic opening, movement build, transformed payoff, captions, tighter pacing and face-safe framing."
     );
   };
 
@@ -4079,11 +4495,14 @@ const ViralClipStudio = ({
         const window = getTimelineClipWindow(clip);
         return {
           id: clip.id,
-          source_clip_id: clip.id,
+          source_clip_id: clip.sourceClipId || clip.id,
           url: clipUrl,
           start_time: window.start,
           end_time: window.end,
           duration: window.duration,
+          transition_in: clip.transitionIn || null,
+          transition_out: clip.transitionOut || null,
+          transition_duration: Number(clip.transitionDuration || 0),
         };
       })
     );
@@ -4319,6 +4738,19 @@ const ViralClipStudio = ({
         ],
         pacingLevel,
         creativeIntent,
+        creativePlan: {
+          version: 1,
+          enabled: creativeEffectsEnabled,
+          intensity: creativeIntensity,
+          fallback: "clean",
+          effects: creativeEffectsEnabled
+            ? buildSignatureCreativeEffects({
+                preset: creativePreset,
+                intensity: creativeIntensity,
+                duration: currentTimelineWindow.duration || selectedClip?.duration || 0,
+              })
+            : [],
+        },
         smartCrop,
         smartCropMode,
         enhanceQuality,
@@ -4489,10 +4921,11 @@ const ViralClipStudio = ({
 
   useEffect(() => {
     const snapshot = cloneSnapshot(getEditorSnapshot());
-    const serializedSnapshot = JSON.stringify(snapshot);
+    const serializedSnapshot = serializeSnapshot(snapshot);
 
     if (lastSnapshotRef.current === null) {
-      lastSnapshotRef.current = serializedSnapshot;
+      lastSnapshotRef.current = snapshot;
+      lastSnapshotSignatureRef.current = serializedSnapshot;
       syncHistoryAvailability();
       return;
     }
@@ -4503,24 +4936,26 @@ const ViralClipStudio = ({
       return;
     }
 
-    if (serializedSnapshot === lastSnapshotRef.current) {
+    if (serializedSnapshot === lastSnapshotSignatureRef.current) {
       syncHistoryAvailability();
       return;
     }
 
     if (isRestoringHistoryRef.current) {
       isRestoringHistoryRef.current = false;
-      lastSnapshotRef.current = serializedSnapshot;
+      lastSnapshotRef.current = snapshot;
+      lastSnapshotSignatureRef.current = serializedSnapshot;
       syncHistoryAvailability();
       return;
     }
 
-    undoStackRef.current.push(JSON.parse(lastSnapshotRef.current));
+    undoStackRef.current.push(cloneSnapshot(lastSnapshotRef.current));
     if (undoStackRef.current.length > 50) {
       undoStackRef.current.shift();
     }
     redoStackRef.current = [];
-    lastSnapshotRef.current = serializedSnapshot;
+    lastSnapshotRef.current = snapshot;
+    lastSnapshotSignatureRef.current = serializedSnapshot;
     syncHistoryAvailability();
   }, [
     orderedClips,
@@ -4528,6 +4963,8 @@ const ViralClipStudio = ({
     overlays,
     activeOverlayId,
     videoFit,
+    safeFaceFraming,
+    faceAnchorPreset,
     autoCaptions,
     captionStyle,
     captionPosition,
@@ -4536,8 +4973,16 @@ const ViralClipStudio = ({
     previewSpeed,
     pacingLevel,
     creativeIntent,
+    creativeEffectsEnabled,
+    creativePreset,
+    creativeIntensity,
+    contentProfile,
+    cutRangeStart,
+    cutRangeEnd,
+    joinTransition,
     smartCrop,
     smartCropMode,
+    enhanceQuality,
     silenceRemoval,
     silenceThreshold,
     minSilenceDuration,
@@ -4557,6 +5002,7 @@ const ViralClipStudio = ({
     hookZoomScale,
     hookTextAnimation,
     hookPreviewLoop,
+    hookFocusPoint,
     addMusic,
     muteOriginalAudio,
     musicSelection,
@@ -4565,7 +5011,9 @@ const ViralClipStudio = ({
     musicVolume,
     musicDucking,
     musicDuckingStrength,
+    musicTrack,
     extractedAudio,
+    bRollCadence,
     timeline,
     activeTimelineIndex,
     isDragging,
@@ -5709,6 +6157,7 @@ const ViralClipStudio = ({
     type: "video",
     src,
     file,
+    name: file?.name || "B-roll clip",
     isLocal: true,
     x: 50,
     y: 50,
@@ -5834,7 +6283,12 @@ const ViralClipStudio = ({
   };
 
   const deleteOverlay = id => {
-    setOverlays(overlays.filter(o => o.id !== id));
+    const nextOverlays = overlays.filter(overlay => overlay.id !== id);
+    setOverlays(nextOverlays);
+    setActiveOverlayId(currentId => {
+      if (currentId !== id) return currentId;
+      return nextOverlays[nextOverlays.length - 1]?.id || null;
+    });
   };
 
   // ── B-roll / cutaway overlay helpers ──
@@ -6722,7 +7176,7 @@ const ViralClipStudio = ({
                   <div
                     ref={phoneFrameRef}
                     data-testid="hook-preview-frame"
-                    className={`phone-frame ${hookFocusMode ? "hook-focus-enabled" : ""}`}
+                    className={`phone-frame ${hookFocusMode ? "hook-focus-enabled" : ""} ${creativePreviewClass}`}
                     onClick={handlePreviewFrameClick}
                     onMouseMove={handleMouseMove}
                     onMouseUp={handleDragEnd}
@@ -6755,6 +7209,26 @@ const ViralClipStudio = ({
                         willChange: "transform, opacity, filter",
                       }}
                     />
+                    {creativeEffectIsLive ? (
+                      <div
+                        className="creative-effect-live-layer"
+                        aria-hidden="true"
+                        data-testid="creative-effect-live-layer"
+                      >
+                        <span />
+                        <span />
+                        <span />
+                      </div>
+                    ) : null}
+                    {previewJoinOpacity > 0 &&
+                    ["soft_dip", "energy_flash"].includes(previewJoinTransition) ? (
+                      <div
+                        className={`join-transition-preview is-${previewJoinTransition}`}
+                        style={{ opacity: previewJoinOpacity }}
+                        aria-hidden="true"
+                        data-testid="join-transition-preview"
+                      />
+                    ) : null}
                     {shouldShowWatermarkCleanupOnVideo ? (
                       <img
                         ref={watermarkCleanupPreviewImageRef}
@@ -7330,7 +7804,11 @@ const ViralClipStudio = ({
                     </span>
                   </div>
                 </div>
-                <div className="studio-compact-timeline" aria-label="Hook and B-roll timeline">
+                <div
+                  className="studio-compact-timeline"
+                  aria-label="After preview edit timeline"
+                  data-testid="live-edit-timeline"
+                >
                   <div className="compact-timeline-head">
                     <div>
                       <strong>Live edit timeline</strong>
@@ -7339,30 +7817,66 @@ const ViralClipStudio = ({
                         {formatPreviewTimePrecise(currentTimelineWindow.duration)}
                       </span>
                     </div>
-                    <span className="compact-timeline-sync">● Synced</span>
+                    <span className="compact-timeline-sync">
+                      <i aria-hidden="true" /> After preview · {liveTimelineEditCount} live edits
+                    </span>
                   </div>
-                  <div className="compact-timeline-row compact-story-row">
-                    <span>Story</span>
-                    <div className="compact-timeline-track">
+                  <p className="compact-timeline-trust-copy">
+                    These are the same media, timings and audio decisions shown in After. Click a
+                    track to inspect that exact frame.
+                  </p>
+
+                  <div className="compact-timeline-row compact-source-row">
+                    <span>Video</span>
+                    <button
+                      type="button"
+                      className="compact-timeline-track compact-source-track"
+                      onClick={seekLiveEditTimeline}
+                      aria-label="Seek source video timeline"
+                      data-testid="timeline-source-track"
+                    >
                       <i
                         className="compact-timeline-playhead"
                         style={{ left: `${hookPlayheadLeft}%` }}
                       />
-                      {STORY_BEAT_LABELS.map((label, index) => (
-                        <div
-                          key={label}
-                          className={`compact-story-beat is-${label.toLowerCase()}`}
-                          style={{ left: `${index * 25}%`, width: "25%" }}
+                      {liveTimelineSource ? (
+                        <video
+                          src={liveTimelineSource}
+                          muted
+                          playsInline
+                          preload="metadata"
+                          tabIndex={-1}
+                          aria-hidden="true"
+                        />
+                      ) : null}
+                      <span className="compact-source-scrim" aria-hidden="true" />
+                      {normalizedPendingCutRange ? (
+                        <span
+                          className="pending-cut-range-overlay"
+                          style={{
+                            left: `${(normalizedPendingCutRange.start / liveTimelineDuration) * 100}%`,
+                            width: `${((normalizedPendingCutRange.end - normalizedPendingCutRange.start) / liveTimelineDuration) * 100}%`,
+                          }}
+                          data-testid="timeline-pending-cut-range"
                         >
-                          {label}
-                          {(index === 0 || index === 2) && <b title="Retention risk">!</b>}
-                        </div>
-                      ))}
-                    </div>
+                          Remove
+                        </span>
+                      ) : null}
+                      <span className="compact-source-beats" aria-hidden="true">
+                        {STORY_BEAT_LABELS.map(label => (
+                          <i key={label}>{label}</i>
+                        ))}
+                      </span>
+                    </button>
                   </div>
+
                   <div className="compact-timeline-row">
                     <span>Hook</span>
-                    <div className="compact-timeline-track">
+                    <div
+                      className="compact-timeline-track compact-seek-track"
+                      onClick={seekLiveEditTimeline}
+                      role="presentation"
+                    >
                       <i
                         className="compact-timeline-playhead"
                         style={{ left: `${hookPlayheadLeft}%` }}
@@ -7375,102 +7889,324 @@ const ViralClipStudio = ({
                             left: `${hookSelectionLeft}%`,
                             width: `${Math.max(3, hookSelectionWidth)}%`,
                           }}
-                          onClick={() => {
-                            setStudioInspectorTab("hook");
-                            previewHookSegment(false);
+                          data-testid="timeline-hook-block"
+                          aria-label="Inspect opening hook in live timeline"
+                          onClick={event => {
+                            event.stopPropagation();
+                            seekLiveEditTimelineItem(resolvedHookStart, "hook");
+                          }}
+                          title={`${hookTemplateConfig.label || "Opening hook"} · ${hookDuration.toFixed(1)} seconds`}
+                        >
+                          <b>✦ {hookTemplateConfig.label || "Opening hook"}</b>
+                          <small>{hookDuration.toFixed(1)}s</small>
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          className="compact-timeline-empty-action"
+                          onClick={event => {
+                            event.stopPropagation();
+                            selectCreativeTool("hook");
                           }}
                         >
-                          Opening hook
+                          + Add opening hook
                         </button>
-                      ) : null}
+                      )}
                     </div>
                   </div>
+
                   <div className="compact-timeline-row">
-                    <span>B-roll</span>
-                    <div className="compact-timeline-track">
+                    <span>Magic</span>
+                    <div
+                      className="compact-timeline-track compact-creative-track"
+                      onClick={seekLiveEditTimeline}
+                      role="presentation"
+                    >
                       <i
                         className="compact-timeline-playhead"
                         style={{ left: `${hookPlayheadLeft}%` }}
                       />
-                      {overlays
-                        .filter(overlay => overlay.bRollMode && overlay.startTime !== undefined)
-                        .map((overlay, index) => {
-                          const timelineDuration = Math.max(
-                            0.1,
-                            Number(currentTimelineWindow.duration || 0)
+                      {creativeEffectsEnabled ? (
+                        liveCreativeEffects.map(effect => {
+                          const left = (effect.start_time / liveTimelineDuration) * 100;
+                          const width =
+                            ((effect.end_time - effect.start_time) / liveTimelineDuration) * 100;
+                          const style = SIGNATURE_CREATIVE_STYLES.find(
+                            item => item.id === effect.preset
                           );
-                          const left = (Number(overlay.startTime || 0) / timelineDuration) * 100;
-                          const width = (Number(overlay.duration || 0) / timelineDuration) * 100;
+                          return (
+                            <button
+                              key={effect.id}
+                              type="button"
+                              className={`compact-creative-block is-${effect.preset}`}
+                              style={{ left: `${left}%`, width: `${Math.max(3, width)}%` }}
+                              onClick={event => {
+                                event.stopPropagation();
+                                seekLiveEditTimelineItem(effect.start_time, null);
+                              }}
+                              data-testid={`timeline-creative-block-${effect.id}`}
+                              title={`${style?.label || effect.preset} · ${effect.start_time.toFixed(1)}s–${effect.end_time.toFixed(1)}s`}
+                            >
+                              <b>{style?.icon || "✦"}</b>
+                              <span>{style?.label || effect.preset.replace(/_/g, " ")}</span>
+                            </button>
+                          );
+                        })
+                      ) : (
+                        <button
+                          type="button"
+                          className="compact-timeline-empty-action"
+                          onClick={event => {
+                            event.stopPropagation();
+                            setCreativeEffectsEnabled(true);
+                            setCreativePreset("auto_story");
+                            setComparisonMode("split");
+                          }}
+                        >
+                          + Add signature transformation
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="compact-timeline-row">
+                    <span>B-roll</span>
+                    <div
+                      className="compact-timeline-track compact-broll-track"
+                      onClick={seekLiveEditTimeline}
+                      role="presentation"
+                    >
+                      <i
+                        className="compact-timeline-playhead"
+                        style={{ left: `${hookPlayheadLeft}%` }}
+                      />
+                      {liveTimelineBRoll.length ? (
+                        liveTimelineBRoll.map((overlay, index) => {
+                          const left =
+                            (Number(overlay.startTime || 0) / liveTimelineDuration) * 100;
+                          const width =
+                            (Number(overlay.duration || 0) / liveTimelineDuration) * 100;
+                          const mediaSource = getSafeMediaSource(overlay.src);
+                          const displayName =
+                            overlay.file?.name || overlay.name || `B-roll ${index + 1}`;
                           return (
                             <button
                               key={overlay.id}
                               type="button"
                               className={`compact-timeline-block is-broll ${activeOverlayId === overlay.id ? "is-active" : ""}`}
                               style={{ left: `${left}%`, width: `${Math.max(3, width)}%` }}
-                              onClick={() => {
-                                setActiveOverlayId(overlay.id);
-                                setStudioInspectorTab("broll");
+                              data-testid={`timeline-broll-block-${overlay.id}`}
+                              onClick={event => {
+                                event.stopPropagation();
+                                seekLiveEditTimelineItem(
+                                  Number(overlay.startTime || 0),
+                                  "broll",
+                                  overlay.id
+                                );
                               }}
-                              title={overlay.file?.name || `B-roll ${index + 1}`}
+                              title={`${displayName} · ${Number(overlay.startTime || 0).toFixed(1)}s–${(
+                                Number(overlay.startTime || 0) + Number(overlay.duration || 0)
+                              ).toFixed(1)}s · ${overlay.bRollMode}`}
                             >
-                              {overlay.file?.name || `Cutaway ${index + 1}`}
+                              {mediaSource && overlay.type === "image" ? (
+                                <img src={mediaSource} alt="" />
+                              ) : mediaSource ? (
+                                <video
+                                  src={mediaSource}
+                                  muted
+                                  playsInline
+                                  preload="metadata"
+                                  tabIndex={-1}
+                                  aria-hidden="true"
+                                />
+                              ) : null}
+                              <span>
+                                <b>{displayName}</b>
+                                <small>
+                                  {overlay.bRollMode === "fullscreen"
+                                    ? "Cutaway"
+                                    : overlay.bRollMode === "sideBySide"
+                                      ? "Split"
+                                      : "PIP"}
+                                </small>
+                              </span>
                             </button>
                           );
-                        })}
+                        })
+                      ) : (
+                        <button
+                          type="button"
+                          className="compact-timeline-empty-action"
+                          onClick={event => {
+                            event.stopPropagation();
+                            selectCreativeTool("broll");
+                          }}
+                        >
+                          + Add proof B-roll
+                        </button>
+                      )}
                     </div>
                   </div>
+
                   <div className="compact-timeline-row">
-                    <span>Captions</span>
-                    <div className="compact-timeline-track compact-caption-track">
+                    <span>Words</span>
+                    <div
+                      className="compact-timeline-track compact-caption-track"
+                      onClick={seekLiveEditTimeline}
+                      role="presentation"
+                    >
                       <i
                         className="compact-timeline-playhead"
                         style={{ left: `${hookPlayheadLeft}%` }}
                       />
-                      {autoCaptions
-                        ? captionPreviewState.chunks.slice(0, 7).map((chunk, index, chunks) => (
-                            <button
-                              key={chunk.id}
-                              type="button"
-                              className="compact-caption-block"
-                              style={{
-                                left: `${(index / chunks.length) * 100}%`,
-                                width: `${100 / chunks.length}%`,
-                              }}
-                              onClick={() => selectCreativeTool("captions")}
-                            >
-                              {chunk.text}
-                            </button>
-                          ))
-                        : null}
+                      {autoCaptions ? (
+                        captionPreviewState.chunks.map((chunk, index, chunks) => (
+                          <button
+                            key={chunk.id}
+                            type="button"
+                            className={`compact-caption-block ${
+                              captionPreviewState.currentChunk?.id === chunk.id ? "is-current" : ""
+                            }`}
+                            style={{
+                              left: `${(index / chunks.length) * 100}%`,
+                              width: `${100 / chunks.length}%`,
+                            }}
+                            data-testid="timeline-caption-block"
+                            onClick={event => {
+                              event.stopPropagation();
+                              seekLiveEditTimelineItem(
+                                index * liveTimelineCaptionDuration,
+                                "captions"
+                              );
+                            }}
+                          >
+                            {chunk.text}
+                          </button>
+                        ))
+                      ) : (
+                        <button
+                          type="button"
+                          className="compact-timeline-empty-action"
+                          onClick={event => {
+                            event.stopPropagation();
+                            selectCreativeTool("captions");
+                          }}
+                        >
+                          + Turn on live captions
+                        </button>
+                      )}
                     </div>
                   </div>
+
                   <div className="compact-timeline-row">
                     <span>Speed</span>
-                    <div className="compact-timeline-track compact-speed-track">
+                    <div
+                      className="compact-timeline-track compact-speed-track"
+                      onClick={seekLiveEditTimeline}
+                      role="presentation"
+                    >
                       <i
                         className="compact-timeline-playhead"
                         style={{ left: `${hookPlayheadLeft}%` }}
                       />
-                      <svg viewBox="0 0 100 24" preserveAspectRatio="none" aria-hidden="true">
-                        <path d="M0 17 C14 17 17 5 31 7 S52 20 65 11 S84 6 100 13" />
-                      </svg>
-                      <button type="button" onClick={() => selectCreativeTool("pacing")}>
-                        {previewSpeed.toFixed(2).replace(/0$/, "")}×
+                      <button
+                        type="button"
+                        className="compact-speed-block"
+                        onClick={event => {
+                          event.stopPropagation();
+                          selectCreativeTool("pacing");
+                        }}
+                        data-testid="timeline-speed-block"
+                      >
+                        <b>{previewSpeed.toFixed(2).replace(/0$/, "")}×</b>
+                        <span>{pacingLevel} pacing</span>
+                        {silenceRemoval ? <small>Silence tightening on</small> : null}
                       </button>
                     </div>
                   </div>
+
                   <div className="compact-timeline-row">
                     <span>Audio</span>
-                    <div className="compact-timeline-track compact-audio-track">
+                    <div
+                      className="compact-timeline-track compact-audio-track"
+                      onClick={seekLiveEditTimeline}
+                      role="presentation"
+                    >
                       <i
                         className="compact-timeline-playhead"
                         style={{ left: `${hookPlayheadLeft}%` }}
                       />
-                      <div className="compact-audio-wave" aria-hidden="true" />
-                      <strong>
-                        {addMusic ? musicTrack?.name || "Background sound" : "Original voice"}
-                      </strong>
+                      <div
+                        className={`compact-audio-lane is-voice ${
+                          muteOriginalAudio ? "is-muted" : ""
+                        }`}
+                        data-testid="timeline-original-audio"
+                      >
+                        <i className="compact-audio-wave" aria-hidden="true" />
+                        <span>{muteOriginalAudio ? "Original muted" : "Original voice"}</span>
+                      </div>
+                      {liveTimelineBRoll
+                        .filter(overlay => getOverlayAudioMode(overlay) !== "original")
+                        .map(overlay => {
+                          const left =
+                            (Number(overlay.startTime || 0) / liveTimelineDuration) * 100;
+                          const width =
+                            (Number(overlay.duration || 0) / liveTimelineDuration) * 100;
+                          const overlayAudioMode = getOverlayAudioMode(overlay);
+                          return (
+                            <button
+                              key={`audio-${overlay.id}`}
+                              type="button"
+                              className={`compact-overlay-audio is-${overlayAudioMode}`}
+                              style={{ left: `${left}%`, width: `${Math.max(3, width)}%` }}
+                              onClick={event => {
+                                event.stopPropagation();
+                                seekLiveEditTimelineItem(
+                                  Number(overlay.startTime || 0),
+                                  "broll",
+                                  overlay.id
+                                );
+                              }}
+                              data-testid={`timeline-overlay-audio-${overlay.id}`}
+                            >
+                              {overlayAudioMode === "mix" ? "Mix" : "Overlay"}
+                            </button>
+                          );
+                        })}
+                      {addMusic ? (
+                        <button
+                          type="button"
+                          className="compact-audio-lane is-music"
+                          onClick={event => {
+                            event.stopPropagation();
+                            selectCreativeTool("sound");
+                          }}
+                          data-testid="timeline-music-audio"
+                          title={`${musicTrack?.name || currentMusicLabel} · ${Math.round(
+                            (musicTrack?.volume ?? musicVolume) * 100
+                          )}%${musicTrack?.ducking ? " · speech ducking" : ""}`}
+                        >
+                          <i className="compact-audio-wave" aria-hidden="true" />
+                          <span>{musicTrack?.name || currentMusicLabel || "Background sound"}</span>
+                        </button>
+                      ) : null}
                     </div>
+                  </div>
+
+                  <div className="compact-timeline-footer">
+                    <span>
+                      <i className="is-hook" /> Hook
+                    </span>
+                    <span>
+                      <i className="is-broll" /> B-roll
+                    </span>
+                    <span>
+                      <i className="is-caption" /> Captions
+                    </span>
+                    <span>
+                      <i className="is-creative" /> Signature effect
+                    </span>
+                    <strong>Preview and timeline share one edit state</strong>
                   </div>
                 </div>
               </div>
@@ -7957,6 +8693,87 @@ const ViralClipStudio = ({
                 >
                   ✦ MAKE IT HIT
                 </button>
+                <div className="creator-mode-guide">
+                  <div className="creator-mode-guide__heading">
+                    <span>What are you making?</span>
+                    <small>Pick the closest style. Every suggestion remains editable.</small>
+                  </div>
+                  <div className="creator-mode-grid">
+                    {CREATOR_CONTENT_PROFILES.map(profile => (
+                      <button
+                        key={profile.id}
+                        type="button"
+                        className={contentProfile === profile.id ? "is-active" : ""}
+                        onClick={() => applyContentProfile(profile.id)}
+                        title={profile.helper}
+                      >
+                        {profile.label}
+                      </button>
+                    ))}
+                  </div>
+                  <p>{activeContentProfile.helper}</p>
+                </div>
+                <div className="signature-effects-panel">
+                  <div className="signature-effects-heading">
+                    <span>Signature transformation</span>
+                    <button
+                      type="button"
+                      className={creativeEffectsEnabled ? "is-on" : ""}
+                      aria-pressed={creativeEffectsEnabled}
+                      onClick={() => {
+                        setCreativeEffectsEnabled(current => !current);
+                        setStudioActionMessage(
+                          creativeEffectsEnabled
+                            ? "Signature transformation removed. The clean edit stays untouched."
+                            : "Signature transformation is live in After and protected by clean fallback on export."
+                        );
+                      }}
+                    >
+                      {creativeEffectsEnabled ? "On" : "Off"}
+                    </button>
+                  </div>
+                  <div className="signature-style-grid">
+                    {SIGNATURE_CREATIVE_STYLES.map(style => (
+                      <button
+                        key={style.id}
+                        type="button"
+                        className={creativePreset === style.id ? "is-active" : ""}
+                        onClick={() => {
+                          setCreativePreset(style.id);
+                          setCreativeEffectsEnabled(true);
+                          setComparisonMode("split");
+                          setStudioActionMessage(
+                            `${style.label} is live. Before and After remain synchronized.`
+                          );
+                        }}
+                        title={style.helper}
+                      >
+                        <span aria-hidden="true">{style.icon}</span>
+                        <strong>{style.label}</strong>
+                      </button>
+                    ))}
+                  </div>
+                  <div className="signature-intensity-row" aria-label="Creative intensity">
+                    {CREATIVE_INTENSITIES.map(level => (
+                      <button
+                        key={level.id}
+                        type="button"
+                        className={creativeIntensity === level.id ? "is-active" : ""}
+                        aria-pressed={creativeIntensity === level.id}
+                        onClick={() => {
+                          setCreativeIntensity(level.id);
+                          setCreativeEffectsEnabled(true);
+                        }}
+                      >
+                        {level.label}
+                      </button>
+                    ))}
+                  </div>
+                  <small>
+                    One tap, editable intensity, clean fallback. Original and overlay audio stay
+                    independent.
+                  </small>
+                </div>
                 <span className="creative-intent-label">Choose your intent</span>
                 <div className="creative-intent-grid">
                   {CREATIVE_INTENTS.map(intent => (
@@ -8022,6 +8839,7 @@ const ViralClipStudio = ({
               </div>
               <div className="clip-inspector-tabs" role="tablist" aria-label="Clip Studio tools">
                 {[
+                  { id: "cut", label: "Cut", icon: "✂" },
                   { id: "hook", label: "Hook", icon: "✦" },
                   { id: "captions", label: "Captions", icon: "CC" },
                   { id: "pacing", label: "Pacing", icon: "≋" },
@@ -8044,6 +8862,103 @@ const ViralClipStudio = ({
                   </button>
                 ))}
               </div>
+
+              {studioInspectorTab === "cut" ? (
+                <div className="clip-inspector-body cut-inspector-body" role="tabpanel">
+                  <div className="inspector-heading-row">
+                    <div>
+                      <span className="panel-kicker">Remove unwanted parts</span>
+                      <h4>Play, mark, remove, preview</h4>
+                    </div>
+                    <span className={`inspector-status-dot ${cutRangeIsReady ? "is-ready" : ""}`}>
+                      {cutRangeIsReady ? "Ready" : "Choose range"}
+                    </span>
+                  </div>
+
+                  <div className="cut-how-it-works">
+                    <span><b>1</b> Play to the bad part</span>
+                    <span><b>2</b> Mark start and end</span>
+                    <span><b>3</b> Remove and preview the join</span>
+                  </div>
+
+                  <div className="cut-mark-actions">
+                    <button type="button" onClick={() => markCutBoundary("start")}>
+                      [ Mark remove start
+                      <small>{cutRangeStart === null ? "At playhead" : formatPreviewTimePrecise(cutRangeStart)}</small>
+                    </button>
+                    <button type="button" onClick={() => markCutBoundary("end")}>
+                      Mark remove end ]
+                      <small>{cutRangeEnd === null ? "At playhead" : formatPreviewTimePrecise(cutRangeEnd)}</small>
+                    </button>
+                  </div>
+
+                  {normalizedPendingCutRange ? (
+                    <div className="pending-cut-summary" data-testid="pending-cut-summary">
+                      <span>
+                        Removing {formatPreviewTimePrecise(normalizedPendingCutRange.start)}–
+                        {formatPreviewTimePrecise(normalizedPendingCutRange.end)}
+                      </span>
+                      <strong>
+                        {(normalizedPendingCutRange.end - normalizedPendingCutRange.start).toFixed(1)}s
+                      </strong>
+                    </div>
+                  ) : null}
+
+                  <div className="inspector-field">
+                    <span>How should the remaining parts meet?</span>
+                    <div className="join-transition-grid">
+                      {JOIN_TRANSITIONS.map(transition => (
+                        <button
+                          key={transition.id}
+                          type="button"
+                          className={joinTransition === transition.id ? "is-active" : ""}
+                          onClick={() => setJoinTransition(transition.id)}
+                          title={transition.helper}
+                        >
+                          {transition.label}
+                        </button>
+                      ))}
+                    </div>
+                    <small>
+                      {JOIN_TRANSITIONS.find(item => item.id === joinTransition)?.helper}
+                      {joinTransition === "auto"
+                        ? ` Recommended here: ${JOIN_TRANSITIONS.find(item => item.id === resolvedJoinTransition)?.label}.`
+                        : ""}
+                    </small>
+                  </div>
+
+                  <div className="inspector-inline-actions">
+                    <button type="button" onClick={clearPendingCutRange} disabled={!cutRangeIsReady}>
+                      Clear marks
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!normalizedPendingCutRange || !videoRef.current) return;
+                        const sourceStart = Number(currentTimelineWindow.start || 0);
+                        videoRef.current.currentTime = sourceStart + Math.max(0, normalizedPendingCutRange.start - 0.65);
+                        setVideoTime(videoRef.current.currentTime);
+                        safePlayMediaElement(videoRef.current);
+                        setStudioActionMessage("Previewing the lead-in. Remove the range to hear the finished join.");
+                      }}
+                      disabled={!cutRangeIsReady}
+                    >
+                      Preview lead-in
+                    </button>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="inspector-primary-action is-danger-safe"
+                    onClick={removePendingCutRange}
+                    disabled={!cutRangeIsReady}
+                    data-testid="remove-marked-range"
+                  >
+                    ✂ Remove marked part & preview join
+                  </button>
+                  <p className="cut-safety-copy">Non-destructive: Undo brings the removed part back.</p>
+                </div>
+              ) : null}
 
               {studioInspectorTab === "hook" ? (
                 <div className="clip-inspector-body" role="tabpanel">
