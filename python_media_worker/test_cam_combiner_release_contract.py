@@ -50,6 +50,10 @@ class CamCombinerReleaseContractTests(unittest.TestCase):
         self.assertIn("gcloud run jobs update", rollback)
         self.assertIn("gcloud run services update-traffic", rollback)
 
+    def test_job_image_lookup_uses_cloud_run_job_resource_shape(self):
+        image_field = "spec.template.spec.template.spec.containers[0].image"
+        self.assertEqual(self.workflow.count(image_field), 4)
+
 
 if __name__ == "__main__":
     unittest.main()

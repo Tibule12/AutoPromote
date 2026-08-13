@@ -129,10 +129,10 @@ jobs:
           )
           PREVIOUS_FAST_IMAGE=$(gcloud run jobs describe "${FAST_JOB_NAME}" \
             --project "${PROJECT_ID}" --region "${REGION}" \
-            --format='value(spec.template.template.spec.containers[0].image)')
+            --format='value(spec.template.spec.template.spec.containers[0].image)')
           PREVIOUS_CAPTION_IMAGE=$(gcloud run jobs describe "${CAPTION_JOB_NAME}" \
             --project "${PROJECT_ID}" --region "${REGION}" \
-            --format='value(spec.template.template.spec.containers[0].image)')
+            --format='value(spec.template.spec.template.spec.containers[0].image)')
           test -n "${PREVIOUS_REVISION}"
           test -n "${PREVIOUS_FAST_IMAGE}"
           test -n "${PREVIOUS_CAPTION_IMAGE}"
@@ -308,10 +308,10 @@ jobs:
           set -euo pipefail
           FAST_DEPLOYED=$(gcloud run jobs describe "${FAST_JOB_NAME}" \
             --project "${PROJECT_ID}" --region "${REGION}" \
-            --format='value(spec.template.template.spec.containers[0].image)')
+            --format='value(spec.template.spec.template.spec.containers[0].image)')
           CAPTION_DEPLOYED=$(gcloud run jobs describe "${CAPTION_JOB_NAME}" \
             --project "${PROJECT_ID}" --region "${REGION}" \
-            --format='value(spec.template.template.spec.containers[0].image)')
+            --format='value(spec.template.spec.template.spec.containers[0].image)')
           [[ "${FAST_DEPLOYED}" == *"${GITHUB_SHA}"* ]]
           [[ "${CAPTION_DEPLOYED}" == *"${GITHUB_SHA}"* ]]
 
