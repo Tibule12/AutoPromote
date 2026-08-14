@@ -19,6 +19,51 @@ import toast from "react-hot-toast";
 import { SafeAudio, SafeImage, SafeVideo } from "./SafeMedia";
 import "./ViralClipStudio.css"; // We'll create this CSS next
 
+const TimelineVideoThumbnail = ({ src, previewTime, style }) => {
+  const thumbnailRef = useRef(null);
+
+  useEffect(() => {
+    const video = thumbnailRef.current;
+    if (!video) return undefined;
+
+    const showRequestedFrame = () => {
+      const duration = Number(video.duration || 0);
+      const requestedTime = Math.max(0, Number(previewTime || 0));
+      const targetTime =
+        duration > 0 ? Math.min(requestedTime, Math.max(0, duration - 0.04)) : requestedTime;
+      if (!Number.isFinite(targetTime)) return;
+      try {
+        video.currentTime = targetTime;
+      } catch (error) {
+        console.log("Timeline thumbnail seek skipped", error);
+      }
+    };
+
+    video.addEventListener("loadedmetadata", showRequestedFrame);
+    video.addEventListener("durationchange", showRequestedFrame);
+    if (video.readyState >= 1) showRequestedFrame();
+
+    return () => {
+      video.removeEventListener("loadedmetadata", showRequestedFrame);
+      video.removeEventListener("durationchange", showRequestedFrame);
+    };
+  }, [previewTime, src]);
+
+  return (
+    <SafeVideo
+      ref={thumbnailRef}
+      src={src}
+      muted
+      playsInline
+      preload="metadata"
+      tabIndex={-1}
+      aria-hidden="true"
+      className="compact-filmstrip-frame"
+      style={style}
+    />
+  );
+};
+
 const RAINBOW_COLORS = [
   "#FF9AA2", // Soft Red
   "#FFB7B2", // Salmon
@@ -1382,7 +1427,11 @@ const JOIN_TRANSITIONS = [
   { id: "auto", label: "Auto", helper: "Uses the creator mode recommendation." },
   { id: "clean_cut", label: "Clean Cut", helper: "Instant join with an audio-safe edge." },
   { id: "soft_dip", label: "Soft Dip", helper: "A short cinematic breath between moments." },
-  { id: "energy_flash", label: "Energy Flash", helper: "A fast bright hit for action and reveals." },
+  {
+    id: "energy_flash",
+    label: "Energy Flash",
+    helper: "A fast bright hit for action and reveals.",
+  },
 ];
 
 const buildSignatureCreativeEffects = ({ preset, intensity, duration }) => {
@@ -1603,6 +1652,8 @@ const ViralClipStudio = ({
   const musicPreviewBufferRef = useRef(null);
   const musicPreviewSourceRef = useRef(null);
   const musicPreviewSourceStateRef = useRef({ offset: 0, playbackRate: 1 });
+  const backgroundSoundPreviewSuppressedRef = useRef(false);
+  const overlayMediaRefsRef = useRef(new Map());
   const imageInputRef = useRef(null);
   const brollVideoInputRef = useRef(null);
   const quickMusicFileInputRef = useRef(null);
@@ -1622,6 +1673,7 @@ const ViralClipStudio = ({
   const hookPreviewSequenceRef = useRef({ active: false });
   const hookAnalysisRequestRef = useRef(0);
   const pendingClipActionRef = useRef(null);
+  const pendingTimelineSeekRef = useRef(null);
 
   const normalizeAssetUrl = asset => {
     if (!asset) return "";
@@ -2496,10 +2548,7 @@ const ViralClipStudio = ({
   }) => {
     if (!src) return;
     const currentVideoTime = videoRef.current ? videoRef.current.currentTime : 0;
-    let relativeStartTime = currentVideoTime;
-    if (selectedClip && activeTimelineIndex === 0) {
-      relativeStartTime = Math.max(0, currentVideoTime - (selectedClip.start || 0));
-    }
+    const relativeStartTime = getPreviewTimelineTime(currentVideoTime);
 
     const newOverlay = {
       id: createSecureId("overlay"),
@@ -2757,22 +2806,40 @@ const ViralClipStudio = ({
     setVideoTime(boundedTime);
   };
 
+  const jumpToOutputTimelineTime = outputTime => {
+    const position = resolveOutputTimelinePosition(outputTime);
+    if (!position) return;
+
+    setActiveTimelineIndex(position.index);
+    const video = videoRef.current;
+    if (!video) return;
+    if (position.clip?.url && video.src !== position.clip.url) {
+      applySafeMediaSource(video, position.clip.url);
+    }
+    try {
+      video.currentTime = position.sourceTime;
+      setVideoTime(position.sourceTime);
+    } catch (error) {
+      console.log("Output timeline seek skipped", error);
+    }
+  };
+
   const seekLiveEditTimeline = event => {
     const trackBounds = event.currentTarget.getBoundingClientRect();
-    const duration = Math.max(0, Number(currentTimelineWindow.duration || 0));
+    const duration = Math.max(0, getTimelineDuration());
     if (!duration || !trackBounds.width) return;
 
     const progress = clampNumber((event.clientX - trackBounds.left) / trackBounds.width, 0, 1, 0);
-    const targetTime = Number(currentTimelineWindow.start || 0) + progress * duration;
-    jumpToSourceTime(targetTime);
+    const targetTime = progress * duration;
+    jumpToOutputTimelineTime(targetTime);
     setStudioActionMessage(
       `Preview moved to ${formatPreviewTimePrecise(progress * duration)}. Timeline and After are on the same frame.`
     );
   };
 
-  const seekLiveEditTimelineItem = (localTime, toolId, overlayId = null) => {
-    const duration = Math.max(0, Number(currentTimelineWindow.duration || 0));
-    const boundedLocalTime = clampNumber(localTime, 0, duration || Number(localTime || 0), 0);
+  const seekLiveEditTimelineItem = (outputTime, toolId, overlayId = null) => {
+    const duration = Math.max(0, getTimelineDuration());
+    const boundedOutputTime = clampNumber(outputTime, 0, duration || Number(outputTime || 0), 0);
 
     if (overlayId) setActiveOverlayId(overlayId);
     if (toolId) {
@@ -2780,9 +2847,9 @@ const ViralClipStudio = ({
       setActiveCreativeTool(toolId);
     }
 
-    jumpToSourceTime(Number(currentTimelineWindow.start || 0) + boundedLocalTime);
+    jumpToOutputTimelineTime(boundedOutputTime);
     setStudioActionMessage(
-      `${toolId === "broll" ? "B-roll" : toolId === "hook" ? "Hook" : "Edit"} selected at ${formatPreviewTimePrecise(boundedLocalTime)} in the After preview.`
+      `${toolId === "broll" ? "B-roll" : toolId === "hook" ? "Hook" : "Edit"} selected at ${formatPreviewTimePrecise(boundedOutputTime)} in the After preview.`
     );
   };
 
@@ -3047,6 +3114,47 @@ const ViralClipStudio = ({
     return elapsed + Math.min(localTime, localDuration || localTime);
   };
 
+  const getTimelineDuration = () =>
+    timeline.reduce(
+      (total, clip) => total + Math.max(0, Number(getTimelineClipWindow(clip).duration || 0)),
+      0
+    );
+
+  const getTimelineOffsetForIndex = index =>
+    timeline
+      .slice(0, Math.max(0, Number(index) || 0))
+      .reduce(
+        (total, clip) => total + Math.max(0, Number(getTimelineClipWindow(clip).duration || 0)),
+        0
+      );
+
+  const resolveOutputTimelinePosition = outputTime => {
+    const totalDuration = getTimelineDuration();
+    const boundedTime = clampNumber(outputTime, 0, totalDuration || Number(outputTime || 0), 0);
+    let elapsed = 0;
+
+    for (let index = 0; index < timeline.length; index += 1) {
+      const clip = timeline[index];
+      const clipWindow = getTimelineClipWindow(clip);
+      const clipDuration = Math.max(0, Number(clipWindow.duration || 0));
+      const isLastClip = index === timeline.length - 1;
+      if (boundedTime < elapsed + clipDuration || isLastClip) {
+        const localTime = clampNumber(boundedTime - elapsed, 0, clipDuration, 0);
+        return {
+          index,
+          clip,
+          clipWindow,
+          outputTime: boundedTime,
+          sourceTime: Number(clipWindow.start || 0) + localTime,
+          localTime,
+        };
+      }
+      elapsed += clipDuration;
+    }
+
+    return null;
+  };
+
   const normalizeBackgroundAudioForExport = audioTrack => {
     if (!audioTrack?.url || audioTrack.enabled === false) return null;
 
@@ -3088,6 +3196,7 @@ const ViralClipStudio = ({
       duckingMode: "speech",
     });
     setMusicSelection("custom");
+    backgroundSoundPreviewSuppressedRef.current = false;
     setAddMusic(true);
     setMusicSearchMode(false);
     releaseMusicPreviewObjectUrl();
@@ -3121,6 +3230,7 @@ const ViralClipStudio = ({
       duckingMode: "speech",
     });
     setMusicSelection(preset.file);
+    backgroundSoundPreviewSuppressedRef.current = false;
     setAddMusic(true);
     setMusicSearchMode(false);
     setMusicPreviewUrl("");
@@ -3196,10 +3306,13 @@ const ViralClipStudio = ({
   const currentTimelineClip = timeline[activeTimelineIndex] || null;
   const currentTimelineWindow = getTimelineClipWindow(currentTimelineClip);
   const currentAudioMode = normalizeAudioMode(extractedAudio?.mode);
-  const previewTimelineTime = Math.max(
+  const previewClipTime = Math.max(
     0,
     Number(videoTime || 0) - Number(currentTimelineWindow.start || 0)
   );
+  const previewTimelineTime = getPreviewTimelineTime(videoTime);
+  const outputTimelineDuration = Math.max(0.1, getTimelineDuration());
+  const currentTimelineOffset = getTimelineOffsetForIndex(activeTimelineIndex);
   const activeContentProfile =
     CREATOR_CONTENT_PROFILES.find(profile => profile.id === contentProfile) ||
     CREATOR_CONTENT_PROFILES[0];
@@ -3222,8 +3335,7 @@ const ViralClipStudio = ({
   });
   const activeLiveCreativeEffect =
     liveCreativeEffects.find(
-      effect =>
-        previewTimelineTime >= effect.start_time && previewTimelineTime <= effect.end_time
+      effect => previewClipTime >= effect.start_time && previewClipTime <= effect.end_time
     ) || liveCreativeEffects[0];
   const creativeEffectIsLive = creativeEffectsEnabled && comparisonMode !== "before";
   const creativePreviewClass = creativeEffectIsLive
@@ -3317,20 +3429,18 @@ const ViralClipStudio = ({
   const hookDuration = Math.max(0.1, hookEnd - resolvedHookStart);
   const hookLeadOut = 0.45;
   const isHookWithinPreviewWindow =
-    addHook &&
-    previewTimelineTime >= resolvedHookStart &&
-    previewTimelineTime <= hookEnd + hookLeadOut;
+    addHook && previewClipTime >= resolvedHookStart && previewClipTime <= hookEnd + hookLeadOut;
   const hookProgress = isHookWithinPreviewWindow
-    ? clampNumber((previewTimelineTime - resolvedHookStart) / Math.max(hookDuration, 0.01), 0, 1, 0)
+    ? clampNumber((previewClipTime - resolvedHookStart) / Math.max(hookDuration, 0.01), 0, 1, 0)
     : 0;
   const hookOutroOpacity =
-    previewTimelineTime > hookEnd
-      ? clampNumber(1 - (previewTimelineTime - hookEnd) / hookLeadOut, 0, 1, 0)
-      : previewTimelineTime >= resolvedHookStart
+    previewClipTime > hookEnd
+      ? clampNumber(1 - (previewClipTime - hookEnd) / hookLeadOut, 0, 1, 0)
+      : previewClipTime >= resolvedHookStart
         ? 1
         : 0;
   const hookTextIntroProgress = isHookWithinPreviewWindow
-    ? clampNumber((previewTimelineTime - resolvedHookStart) / 0.24, 0, 1, 0)
+    ? clampNumber((previewClipTime - resolvedHookStart) / 0.24, 0, 1, 0)
     : 0;
   const isZoomFocusTemplate = hookTemplate === "zoom_focus";
   const isBlurRevealTemplate = hookTemplate === "blur_reveal";
@@ -3646,21 +3756,45 @@ const ViralClipStudio = ({
     "AI captions preview";
   const captionPreviewState = getCaptionPreviewState({
     text: captionPreviewSourceText,
-    localTime: previewTimelineTime,
+    localTime: previewClipTime,
     duration: currentTimelineWindow.duration || selectedClip?.duration || 3,
   });
-  const liveTimelineDuration = Math.max(
-    0.1,
-    Number(currentTimelineWindow.duration || selectedClip?.duration || 0)
-  );
+  const liveTimelineDuration = outputTimelineDuration;
   const liveTimelineBRoll = overlays.filter(
     overlay =>
       overlay.bRollMode && overlay.startTime !== undefined && Number(overlay.duration || 0) > 0
   );
   const liveTimelineCaptionDuration = captionPreviewState.chunks.length
-    ? liveTimelineDuration / captionPreviewState.chunks.length
+    ? Math.max(0.1, Number(currentTimelineWindow.duration || 0)) / captionPreviewState.chunks.length
     : 0;
   const liveTimelineSource = getSafeMediaSource(currentTimelineClip?.url || videoUrl);
+  const liveTimelinePlayheadLeft =
+    (clampNumber(previewTimelineTime, 0, liveTimelineDuration, 0) / liveTimelineDuration) * 100;
+  const liveTimelineFilmstripFrames = timeline.flatMap((clip, clipIndex) => {
+    const window = getTimelineClipWindow(clip);
+    const duration = Math.max(0, Number(window.duration || 0));
+    const source = getSafeMediaSource(clip.url);
+    if (!duration || !source) return [];
+    const clipOffset = getTimelineOffsetForIndex(clipIndex);
+    const frameCount = Math.max(1, Math.min(6, Math.round((duration / liveTimelineDuration) * 12)));
+    return Array.from({ length: frameCount }, (_, frameIndex) => ({
+      id: `${clip.id}-filmstrip-${frameIndex}`,
+      src: source,
+      previewTime: Number(window.start || 0) + ((frameIndex + 0.5) / frameCount) * duration,
+      left: ((clipOffset + (frameIndex / frameCount) * duration) / liveTimelineDuration) * 100,
+      width: (duration / frameCount / liveTimelineDuration) * 100,
+      isJoin: frameIndex === 0 && clipIndex > 0,
+    }));
+  });
+  const activeSideBySideOverlay = overlays.find(overlay => {
+    const start = Number(overlay.startTime ?? overlay.start_time ?? -1);
+    const end = start + Number(overlay.duration || 0);
+    return (
+      overlay.bRollMode === "sideBySide" &&
+      previewTimelineTime >= start &&
+      previewTimelineTime < end
+    );
+  });
   const liveTimelineEditCount =
     Number(addHook) +
     Number(creativeEffectsEnabled) +
@@ -3704,20 +3838,14 @@ const ViralClipStudio = ({
           overlay.bRollMode && overlay.startTime !== undefined && Number(overlay.duration || 0) > 0
       );
     const shouldFocusBRoll = preferredTool === "broll" && timedBRoll;
-    const relativeFocusTime = shouldFocusBRoll
+    const outputFocusTime = shouldFocusBRoll
       ? Number(timedBRoll.startTime || 0)
       : addHook || preferredTool === "hook"
-        ? resolvedHookStart + Math.min(0.35, hookDuration * 0.15)
+        ? currentTimelineOffset + resolvedHookStart + Math.min(0.35, hookDuration * 0.15)
         : timedBRoll
           ? Number(timedBRoll.startTime || 0) + 0.2
-          : 0;
-    const boundedFocusTime = clampNumber(
-      relativeFocusTime,
-      0,
-      Math.max(0, Number(currentTimelineWindow.duration || 0) - 0.05),
-      0
-    );
-    return Number(currentTimelineWindow.start || 0) + boundedFocusTime;
+          : currentTimelineOffset;
+    return resolveOutputTimelinePosition(outputFocusTime);
   };
 
   const focusComparisonPreview = (preferredTool = studioInspectorTab, play = false) => {
@@ -3725,13 +3853,21 @@ const ViralClipStudio = ({
     const beforeVideo = beforeVideoRef.current;
     if (!afterVideo) return;
 
-    const targetTime = getComparisonFocusSourceTime(preferredTool);
+    const target = getComparisonFocusSourceTime(preferredTool);
+    if (!target) return;
     afterVideo.pause();
     beforeVideo?.pause();
+    setActiveTimelineIndex(target.index);
     try {
-      afterVideo.currentTime = targetTime;
-      if (beforeVideo) beforeVideo.currentTime = targetTime;
-      setVideoTime(targetTime);
+      if (target.clip?.url && afterVideo.src !== target.clip.url) {
+        applySafeMediaSource(afterVideo, target.clip.url);
+      }
+      afterVideo.currentTime = target.sourceTime;
+      if (beforeVideo) {
+        applySafeMediaSource(beforeVideo, target.clip?.url);
+        beforeVideo.currentTime = target.sourceTime;
+      }
+      setVideoTime(target.sourceTime);
     } catch (error) {
       console.log("Comparison preview seek skipped", error);
     }
@@ -3763,8 +3899,7 @@ const ViralClipStudio = ({
 
   const applyContentProfile = profileId => {
     const profile =
-      CREATOR_CONTENT_PROFILES.find(item => item.id === profileId) ||
-      CREATOR_CONTENT_PROFILES[0];
+      CREATOR_CONTENT_PROFILES.find(item => item.id === profileId) || CREATOR_CONTENT_PROFILES[0];
     setContentProfile(profile.id);
     setCreativePreset(profile.preset);
     setCreativeIntensity(profile.intensity);
@@ -3819,6 +3954,9 @@ const ViralClipStudio = ({
 
     const absoluteCutStart = Number(sourceWindow.start || 0) + localStart;
     const absoluteCutEnd = Number(sourceWindow.start || 0) + localEnd;
+    const outputCutStart = getTimelineOffsetForIndex(activeTimelineIndex) + localStart;
+    const outputCutEnd = outputCutStart + (localEnd - localStart);
+    const removedDuration = outputCutEnd - outputCutStart;
     const sourceClipId = currentTimelineClip.sourceClipId || currentTimelineClip.id;
     const transitionDuration =
       resolvedJoinTransition === "energy_flash"
@@ -3845,23 +3983,45 @@ const ViralClipStudio = ({
       transitionDuration,
     };
 
+    pendingTimelineSeekRef.current = {
+      index: activeTimelineIndex,
+      sourceTime: Math.max(Number(sourceWindow.start || 0), absoluteCutStart - 0.65),
+      play: true,
+    };
     setTimeline(previous => [
       ...previous.slice(0, activeTimelineIndex),
       retainedBefore,
       retainedAfter,
       ...previous.slice(activeTimelineIndex + 1),
     ]);
+    setOverlays(previous =>
+      previous.flatMap(overlay => {
+        const start = Number(overlay.startTime ?? overlay.start_time);
+        const duration = Number(overlay.duration || 0);
+        if (!Number.isFinite(start) || duration <= 0) return [overlay];
+        const end = start + duration;
+        if (end <= outputCutStart) return [overlay];
+        if (start >= outputCutEnd) {
+          return [{ ...overlay, startTime: Math.max(0, start - removedDuration) }];
+        }
+
+        const retainedDuration =
+          Math.max(0, outputCutStart - start) + Math.max(0, end - outputCutEnd);
+        if (retainedDuration < 0.1) return [];
+        return [
+          {
+            ...overlay,
+            startTime: Math.min(start, outputCutStart),
+            duration: retainedDuration,
+          },
+        ];
+      })
+    );
     setCutRangeStart(null);
     setCutRangeEnd(null);
     setHookPreviewLoop(false);
     setTrimPreviewLoop(false);
     setComparisonMode("split");
-    if (videoRef.current) {
-      const previewStart = Math.max(Number(sourceWindow.start || 0), absoluteCutStart - 0.65);
-      videoRef.current.currentTime = previewStart;
-      setVideoTime(previewStart);
-      safePlayMediaElement(videoRef.current);
-    }
     setStudioActionMessage(
       `${(localEnd - localStart).toFixed(1)}s removed. Preview is playing across the ${JOIN_TRANSITIONS.find(item => item.id === resolvedJoinTransition)?.label || "clean"} join. Undo restores it.`
     );
@@ -5361,7 +5521,11 @@ const ViralClipStudio = ({
     if (videoRef.current && timeline[activeTimelineIndex]) {
       const clip = timeline[activeTimelineIndex];
       const clipWindow = getTimelineClipWindow(clip);
-      const targetStart = Number(clipWindow.start || 0);
+      const pendingSeek = pendingTimelineSeekRef.current;
+      const hasPendingSeek = pendingSeek?.index === activeTimelineIndex;
+      const targetStart = hasPendingSeek
+        ? Number(pendingSeek.sourceTime || clipWindow.start || 0)
+        : Number(clipWindow.start || 0);
 
       // 1. Handle SRC changes
       // Use property .src for comparison as it is always absolute, just like our Firebase URLs
@@ -5384,6 +5548,13 @@ const ViralClipStudio = ({
             safePlayMediaElement(videoRef.current);
           }
         }
+      }
+
+      if (hasPendingSeek) {
+        pendingTimelineSeekRef.current = null;
+        videoRef.current.currentTime = targetStart;
+        setVideoTime(targetStart);
+        if (pendingSeek.play) safePlayMediaElement(videoRef.current);
       }
     }
   }, [activeTimelineIndex, timeline, selectedClip, isDragging]);
@@ -5554,7 +5725,7 @@ const ViralClipStudio = ({
       if (o.startTime === undefined || o.duration === undefined) return false;
       return (
         previewTimelineTime >= Number(o.startTime) &&
-        previewTimelineTime <= Number(o.startTime) + Number(o.duration)
+        previewTimelineTime < Number(o.startTime) + Number(o.duration)
       );
     });
 
@@ -5600,6 +5771,74 @@ const ViralClipStudio = ({
     muteOriginalAudio,
     extractedAudio,
   ]);
+
+  useEffect(() => {
+    const sourceVideo = videoRef.current;
+    if (!sourceVideo) return undefined;
+
+    const syncOverlayMedia = () => {
+      const outputTime = getPreviewTimelineTime(sourceVideo.currentTime || 0);
+      overlayMediaRefsRef.current.forEach((overlayVideo, overlayId) => {
+        const overlay = overlays.find(item => String(item.id) === String(overlayId));
+        if (!overlay || overlay.type !== "video") {
+          overlayVideo.pause();
+          return;
+        }
+
+        const start = Number(overlay.startTime ?? overlay.start_time ?? 0);
+        const configuredDuration = Math.max(0, Number(overlay.duration || 0));
+        const active =
+          configuredDuration > 0 && outputTime >= start && outputTime < start + configuredDuration;
+        if (!active) {
+          overlayVideo.pause();
+          return;
+        }
+
+        const mediaDuration = Number(overlayVideo.duration || overlay.sourceDuration || 0);
+        const elapsed = Math.max(0, outputTime - start);
+        const targetTime = mediaDuration > 0.1 ? elapsed % mediaDuration : elapsed;
+        overlayVideo.playbackRate = sourceVideo.playbackRate || 1;
+        overlayVideo.muted = !overlay.useOverlayAudio || previewMuted;
+        overlayVideo.defaultMuted = overlayVideo.muted;
+        overlayVideo.volume = clampAudioControl(overlay.overlayAudioVolume, 0, 1, 0.7);
+
+        if (
+          Number.isFinite(targetTime) &&
+          Math.abs(Number(overlayVideo.currentTime || 0) - targetTime) > 0.18
+        ) {
+          try {
+            overlayVideo.currentTime = targetTime;
+          } catch (error) {
+            console.log("B-roll preview seek skipped", error);
+          }
+        }
+
+        if (sourceVideo.paused) {
+          overlayVideo.pause();
+        } else {
+          safePlayMediaElement(overlayVideo);
+        }
+      });
+    };
+
+    sourceVideo.addEventListener("play", syncOverlayMedia);
+    sourceVideo.addEventListener("pause", syncOverlayMedia);
+    sourceVideo.addEventListener("seeking", syncOverlayMedia);
+    sourceVideo.addEventListener("seeked", syncOverlayMedia);
+    sourceVideo.addEventListener("timeupdate", syncOverlayMedia);
+    sourceVideo.addEventListener("ratechange", syncOverlayMedia);
+    syncOverlayMedia();
+
+    return () => {
+      sourceVideo.removeEventListener("play", syncOverlayMedia);
+      sourceVideo.removeEventListener("pause", syncOverlayMedia);
+      sourceVideo.removeEventListener("seeking", syncOverlayMedia);
+      sourceVideo.removeEventListener("seeked", syncOverlayMedia);
+      sourceVideo.removeEventListener("timeupdate", syncOverlayMedia);
+      sourceVideo.removeEventListener("ratechange", syncOverlayMedia);
+      overlayMediaRefsRef.current.forEach(media => media.pause());
+    };
+  }, [activeTimelineIndex, overlays, previewMuted, timeline]);
 
   useEffect(() => {
     applySafeMediaSource(
@@ -5812,6 +6051,12 @@ const ViralClipStudio = ({
     const syncMusicPreview = () => {
       if (!video || !effectiveMusicPreviewUrl) return;
 
+      if (backgroundSoundPreviewSuppressedRef.current) {
+        stopMusicPreviewBufferPlayback();
+        music?.pause();
+        return;
+      }
+
       if (musicSearchMode) {
         syncMusicPreviewGain();
 
@@ -5860,7 +6105,7 @@ const ViralClipStudio = ({
       );
       const fadeGain = getAudioFadeGain(
         previewTimelineTime,
-        currentTimelineWindow.duration,
+        outputTimelineDuration,
         musicTrack?.fadeIn,
         musicTrack?.fadeOut
       );
@@ -5952,7 +6197,7 @@ const ViralClipStudio = ({
     musicTrack?.fadeIn,
     musicTrack?.fadeOut,
     musicTrack?.loop,
-    currentTimelineWindow.duration,
+    outputTimelineDuration,
     previewMuted,
     previewVolume,
     activeTimelineIndex,
@@ -5975,7 +6220,7 @@ const ViralClipStudio = ({
       );
       const fadeGain = getAudioFadeGain(
         previewTimelineTime,
-        currentTimelineWindow.duration,
+        outputTimelineDuration,
         musicTrack?.fadeIn,
         musicTrack?.fadeOut
       );
@@ -6003,7 +6248,7 @@ const ViralClipStudio = ({
       );
       const fadeGain = getAudioFadeGain(
         previewTimelineTime,
-        currentTimelineWindow.duration,
+        outputTimelineDuration,
         musicTrack?.fadeIn,
         musicTrack?.fadeOut
       );
@@ -6032,7 +6277,7 @@ const ViralClipStudio = ({
     musicTrack?.duckingStrength,
     musicTrack?.fadeIn,
     musicTrack?.fadeOut,
-    currentTimelineWindow.duration,
+    outputTimelineDuration,
     musicVolume,
     previewMuted,
     previewVolume,
@@ -6052,13 +6297,7 @@ const ViralClipStudio = ({
     // However, if we trim the video (start=10, end=20), the backend trims FIRST.
     // So 0.0 in the output is 10.0 in the source.
     // We need to calculate the relative start time.
-    let relativeStartTime = currentVideoTime;
-
-    if (selectedClip && activeTimelineIndex === 0) {
-      // If we are trimming, the output starts at selectedClip.start.
-      // So if user is at 15s and clip starts at 10s, the text should appear at 5s in the output.
-      relativeStartTime = Math.max(0, currentVideoTime - (selectedClip.start || 0));
-    }
+    const relativeStartTime = getPreviewTimelineTime(currentVideoTime);
 
     const newOverlay = {
       id: Date.now(),
@@ -6270,20 +6509,9 @@ const ViralClipStudio = ({
       return;
     }
 
-    const duration = Math.max(
-      0,
-      Number(
-        currentTimelineWindow.duration ||
-          selectedClip?.duration ||
-          getClipDurationSeconds(selectedClip) ||
-          0
-      )
-    );
+    const duration = Math.max(0, getTimelineDuration());
     const currentVideoTime = videoRef.current ? videoRef.current.currentTime : 0;
-    const playheadTime =
-      selectedClip && activeTimelineIndex === 0
-        ? Math.max(0, currentVideoTime - (selectedClip.start || 0))
-        : Math.max(0, currentVideoTime - Number(currentTimelineWindow.start || 0));
+    const playheadTime = getPreviewTimelineTime(currentVideoTime);
     const previewDuration = Math.max(duration, videoFiles.length * 2);
     const slotDuration = previewDuration / Math.max(1, videoFiles.length);
     const fallbackShotDuration = clampNumber(
@@ -6351,17 +6579,8 @@ const ViralClipStudio = ({
       prev.map(o => {
         if (o.id !== id) return o;
         const nextStart = Math.max(0, Number(startTime) || 0);
-        const timelineRemaining = Math.max(
-          0.1,
-          Number(currentTimelineWindow.duration || 0) - nextStart
-        );
-        const sourceLimit =
-          Number(o.sourceDuration || 0) > 0 ? Number(o.sourceDuration) : Number.POSITIVE_INFINITY;
-        const nextDuration = Math.min(
-          Math.max(0.1, Number(duration) || 0.1),
-          timelineRemaining,
-          sourceLimit
-        );
+        const timelineRemaining = Math.max(0.1, getTimelineDuration() - nextStart);
+        const nextDuration = Math.min(Math.max(0.1, Number(duration) || 0.1), timelineRemaining);
         return { ...o, startTime: nextStart, duration: nextDuration };
       })
     );
@@ -6391,6 +6610,13 @@ const ViralClipStudio = ({
           y: modeLayout.y,
         };
       })
+    );
+    const selectedOverlay = overlays.find(overlay => overlay.id === id);
+    if (selectedOverlay?.startTime !== undefined) {
+      seekLiveEditTimelineItem(Number(selectedOverlay.startTime || 0), "broll", id);
+    }
+    setStudioActionMessage(
+      `${mode === "fullscreen" ? "Full-screen cutaway" : mode === "sideBySide" ? "True side-by-side" : "Picture-in-picture"} applied at ${formatPreviewTimePrecise(Number(selectedOverlay?.startTime || 0))}.`
     );
   };
 
@@ -6499,7 +6725,9 @@ const ViralClipStudio = ({
       return;
     }
 
-    if (!music.paused) {
+    if (isBackgroundSoundPreviewing || !music.paused) {
+      backgroundSoundPreviewSuppressedRef.current = true;
+      stopMusicPreviewBufferPlayback();
       music.pause();
       setIsBackgroundSoundPreviewing(false);
       setMusicPreviewStatusMessage(
@@ -6507,6 +6735,8 @@ const ViralClipStudio = ({
       );
       return;
     }
+
+    backgroundSoundPreviewSuppressedRef.current = false;
 
     const sourceApplied = applySafeMediaSource(music, effectiveMusicPreviewUrl);
     if (!sourceApplied) {
@@ -6530,7 +6760,7 @@ const ViralClipStudio = ({
       : 0;
     const fadeGain = getAudioFadeGain(
       previewTimelineTime,
-      currentTimelineWindow.duration,
+      outputTimelineDuration,
       musicTrack?.fadeIn,
       musicTrack?.fadeOut
     );
@@ -7249,7 +7479,7 @@ const ViralClipStudio = ({
                       style={{
                         objectFit: effectiveVideoFit,
                         objectPosition: safeObjectPosition,
-                        width: "100%",
+                        width: activeSideBySideOverlay ? "50%" : "100%",
                         height: "100%",
                         background: "transparent",
                         position: "relative",
@@ -7259,7 +7489,7 @@ const ViralClipStudio = ({
                         opacity: hookPrimaryVideoOpacity,
                         filter: `blur(${(hookVideoBlur + smartCropBackgroundBlur).toFixed(2)}px) brightness(${(hookVideoBrightness * smartCropBackgroundBrightness * previewClarityBrightness).toFixed(3)}) contrast(${(hookVideoContrast * previewClarityContrast).toFixed(3)}) saturate(${(hookVideoSaturate * previewClaritySaturate).toFixed(3)})${previewClarityHalo}`,
                         transition:
-                          "transform 150ms linear, opacity 160ms linear, filter 160ms linear",
+                          "width 180ms ease, transform 150ms linear, opacity 160ms linear, filter 160ms linear",
                         willChange: "transform, opacity, filter",
                       }}
                     />
@@ -7506,7 +7736,8 @@ const ViralClipStudio = ({
                       {overlays
                         .filter(o => {
                           const currentClipId = timeline[activeTimelineIndex]?.id;
-                          const belongsToClip = !o.clipId || o.clipId === currentClipId;
+                          const belongsToClip =
+                            !!o.bRollMode || !o.clipId || o.clipId === currentClipId;
                           if (!belongsToClip) return false;
 
                           const overlayStart =
@@ -7516,7 +7747,7 @@ const ViralClipStudio = ({
                           if (overlayStart !== undefined && o.duration !== undefined) {
                             return (
                               previewTimelineTime >= Number(overlayStart) &&
-                              previewTimelineTime <= Number(overlayStart) + Number(o.duration)
+                              previewTimelineTime < Number(overlayStart) + Number(o.duration)
                             );
                           }
                           return true;
@@ -7535,7 +7766,9 @@ const ViralClipStudio = ({
                                 activeOverlayId === overlay.id && comparisonMode !== "split"
                                   ? "active"
                                   : ""
-                              } ${isFullscreen ? "broll-fullscreen" : ""} ${animClass}`}
+                              } ${isFullscreen ? "broll-fullscreen" : ""} ${
+                                overlay.bRollMode === "sideBySide" ? "broll-side-by-side" : ""
+                              } ${animClass}`}
                               style={{
                                 top: isFullscreen ? "0%" : `${overlay.y}%`,
                                 left: isFullscreen ? "0%" : `${overlay.x}%`,
@@ -7587,6 +7820,10 @@ const ViralClipStudio = ({
                                       }
                                     }
                               }
+                              onClick={event => {
+                                event.stopPropagation();
+                                if (comparisonMode !== "split") setActiveOverlayId(overlay.id);
+                              }}
                             >
                               {overlay.type === "text" ? (
                                 overlay.bRollPlaceholder ? (
@@ -7634,16 +7871,17 @@ const ViralClipStudio = ({
                                   ref={element => {
                                     applySafeMediaSource(element, safeOverlaySrc);
                                     if (element) {
+                                      overlayMediaRefsRef.current.set(String(overlay.id), element);
                                       element.volume = clampAudioControl(
                                         overlay.overlayAudioVolume,
                                         0,
                                         1,
                                         0.7
                                       );
+                                    } else {
+                                      overlayMediaRefsRef.current.delete(String(overlay.id));
                                     }
                                   }}
-                                  autoPlay
-                                  loop
                                   muted={!overlay.useOverlayAudio || previewMuted}
                                   style={{
                                     width: "100%",
@@ -7866,9 +8104,9 @@ const ViralClipStudio = ({
                   <div className="compact-timeline-head">
                     <div>
                       <strong>Live edit timeline</strong>
-                      <span>
-                        {formatPreviewTimePrecise(trimAwareCurrentTime)} /{" "}
-                        {formatPreviewTimePrecise(currentTimelineWindow.duration)}
+                      <span data-testid="timeline-output-time">
+                        {formatPreviewTimePrecise(previewTimelineTime)} /{" "}
+                        {formatPreviewTimePrecise(liveTimelineDuration)}
                       </span>
                     </div>
                     <span className="compact-timeline-sync">
@@ -7891,24 +8129,27 @@ const ViralClipStudio = ({
                     >
                       <i
                         className="compact-timeline-playhead"
-                        style={{ left: `${hookPlayheadLeft}%` }}
+                        style={{ left: `${liveTimelinePlayheadLeft}%` }}
                       />
-                      {liveTimelineSource ? (
-                        <SafeVideo
-                          src={liveTimelineSource}
-                          muted
-                          playsInline
-                          preload="metadata"
-                          tabIndex={-1}
-                          aria-hidden="true"
-                        />
-                      ) : null}
+                      <span className="compact-source-filmstrip" aria-hidden="true">
+                        {liveTimelineFilmstripFrames.map(frame => (
+                          <TimelineVideoThumbnail
+                            key={frame.id}
+                            src={frame.src}
+                            previewTime={frame.previewTime}
+                            style={{
+                              left: `${frame.left}%`,
+                              width: `${frame.width}%`,
+                            }}
+                          />
+                        ))}
+                      </span>
                       <span className="compact-source-scrim" aria-hidden="true" />
                       {normalizedPendingCutRange ? (
                         <span
                           className="pending-cut-range-overlay"
                           style={{
-                            left: `${(normalizedPendingCutRange.start / liveTimelineDuration) * 100}%`,
+                            left: `${((currentTimelineOffset + normalizedPendingCutRange.start) / liveTimelineDuration) * 100}%`,
                             width: `${((normalizedPendingCutRange.end - normalizedPendingCutRange.start) / liveTimelineDuration) * 100}%`,
                           }}
                           data-testid="timeline-pending-cut-range"
@@ -7924,6 +8165,15 @@ const ViralClipStudio = ({
                     </button>
                   </div>
 
+                  <div className="compact-timeline-ruler" aria-hidden="true">
+                    <span />
+                    {Array.from({ length: 6 }, (_, index) => (
+                      <i key={`timeline-tick-${index}`}>
+                        {formatPreviewTimePrecise((index / 5) * liveTimelineDuration)}
+                      </i>
+                    ))}
+                  </div>
+
                   <div className="compact-timeline-row">
                     <span>Hook</span>
                     <div
@@ -7933,21 +8183,24 @@ const ViralClipStudio = ({
                     >
                       <i
                         className="compact-timeline-playhead"
-                        style={{ left: `${hookPlayheadLeft}%` }}
+                        style={{ left: `${liveTimelinePlayheadLeft}%` }}
                       />
                       {addHook ? (
                         <button
                           type="button"
                           className="compact-timeline-block is-hook"
                           style={{
-                            left: `${hookSelectionLeft}%`,
-                            width: `${Math.max(3, hookSelectionWidth)}%`,
+                            left: `${((currentTimelineOffset + resolvedHookStart) / liveTimelineDuration) * 100}%`,
+                            width: `${Math.max(3, (hookDuration / liveTimelineDuration) * 100)}%`,
                           }}
                           data-testid="timeline-hook-block"
                           aria-label="Inspect opening hook in live timeline"
                           onClick={event => {
                             event.stopPropagation();
-                            seekLiveEditTimelineItem(resolvedHookStart, "hook");
+                            seekLiveEditTimelineItem(
+                              currentTimelineOffset + resolvedHookStart,
+                              "hook"
+                            );
                           }}
                           title={`${hookTemplateConfig.label || "Opening hook"} · ${hookDuration.toFixed(1)} seconds`}
                         >
@@ -7978,11 +8231,13 @@ const ViralClipStudio = ({
                     >
                       <i
                         className="compact-timeline-playhead"
-                        style={{ left: `${hookPlayheadLeft}%` }}
+                        style={{ left: `${liveTimelinePlayheadLeft}%` }}
                       />
                       {creativeEffectsEnabled ? (
                         liveCreativeEffects.map(effect => {
-                          const left = (effect.start_time / liveTimelineDuration) * 100;
+                          const left =
+                            ((currentTimelineOffset + effect.start_time) / liveTimelineDuration) *
+                            100;
                           const width =
                             ((effect.end_time - effect.start_time) / liveTimelineDuration) * 100;
                           const style = SIGNATURE_CREATIVE_STYLES.find(
@@ -7996,7 +8251,10 @@ const ViralClipStudio = ({
                               style={{ left: `${left}%`, width: `${Math.max(3, width)}%` }}
                               onClick={event => {
                                 event.stopPropagation();
-                                seekLiveEditTimelineItem(effect.start_time, null);
+                                seekLiveEditTimelineItem(
+                                  currentTimelineOffset + effect.start_time,
+                                  null
+                                );
                               }}
                               data-testid={`timeline-creative-block-${effect.id}`}
                               title={`${style?.label || effect.preset} · ${effect.start_time.toFixed(1)}s–${effect.end_time.toFixed(1)}s`}
@@ -8032,7 +8290,7 @@ const ViralClipStudio = ({
                     >
                       <i
                         className="compact-timeline-playhead"
-                        style={{ left: `${hookPlayheadLeft}%` }}
+                        style={{ left: `${liveTimelinePlayheadLeft}%` }}
                       />
                       {liveTimelineBRoll.length ? (
                         liveTimelineBRoll.map((overlay, index) => {
@@ -8111,7 +8369,7 @@ const ViralClipStudio = ({
                     >
                       <i
                         className="compact-timeline-playhead"
-                        style={{ left: `${hookPlayheadLeft}%` }}
+                        style={{ left: `${liveTimelinePlayheadLeft}%` }}
                       />
                       {autoCaptions ? (
                         captionPreviewState.chunks.map((chunk, index, chunks) => (
@@ -8122,14 +8380,14 @@ const ViralClipStudio = ({
                               captionPreviewState.currentChunk?.id === chunk.id ? "is-current" : ""
                             }`}
                             style={{
-                              left: `${(index / chunks.length) * 100}%`,
-                              width: `${100 / chunks.length}%`,
+                              left: `${((currentTimelineOffset + index * liveTimelineCaptionDuration) / liveTimelineDuration) * 100}%`,
+                              width: `${(liveTimelineCaptionDuration / liveTimelineDuration) * 100}%`,
                             }}
                             data-testid="timeline-caption-block"
                             onClick={event => {
                               event.stopPropagation();
                               seekLiveEditTimelineItem(
-                                index * liveTimelineCaptionDuration,
+                                currentTimelineOffset + index * liveTimelineCaptionDuration,
                                 "captions"
                               );
                             }}
@@ -8161,7 +8419,7 @@ const ViralClipStudio = ({
                     >
                       <i
                         className="compact-timeline-playhead"
-                        style={{ left: `${hookPlayheadLeft}%` }}
+                        style={{ left: `${liveTimelinePlayheadLeft}%` }}
                       />
                       <button
                         type="button"
@@ -8188,7 +8446,7 @@ const ViralClipStudio = ({
                     >
                       <i
                         className="compact-timeline-playhead"
-                        style={{ left: `${hookPlayheadLeft}%` }}
+                        style={{ left: `${liveTimelinePlayheadLeft}%` }}
                       />
                       <div
                         className={`compact-audio-lane is-voice ${
@@ -8930,19 +9188,33 @@ const ViralClipStudio = ({
                   </div>
 
                   <div className="cut-how-it-works">
-                    <span><b>1</b> Play to the bad part</span>
-                    <span><b>2</b> Mark start and end</span>
-                    <span><b>3</b> Remove and preview the join</span>
+                    <span>
+                      <b>1</b> Play to the bad part
+                    </span>
+                    <span>
+                      <b>2</b> Mark start and end
+                    </span>
+                    <span>
+                      <b>3</b> Remove and preview the join
+                    </span>
                   </div>
 
                   <div className="cut-mark-actions">
                     <button type="button" onClick={() => markCutBoundary("start")}>
                       [ Mark remove start
-                      <small>{cutRangeStart === null ? "At playhead" : formatPreviewTimePrecise(cutRangeStart)}</small>
+                      <small>
+                        {cutRangeStart === null
+                          ? "At playhead"
+                          : formatPreviewTimePrecise(cutRangeStart)}
+                      </small>
                     </button>
                     <button type="button" onClick={() => markCutBoundary("end")}>
                       Mark remove end ]
-                      <small>{cutRangeEnd === null ? "At playhead" : formatPreviewTimePrecise(cutRangeEnd)}</small>
+                      <small>
+                        {cutRangeEnd === null
+                          ? "At playhead"
+                          : formatPreviewTimePrecise(cutRangeEnd)}
+                      </small>
                     </button>
                   </div>
 
@@ -8953,7 +9225,10 @@ const ViralClipStudio = ({
                         {formatPreviewTimePrecise(normalizedPendingCutRange.end)}
                       </span>
                       <strong>
-                        {(normalizedPendingCutRange.end - normalizedPendingCutRange.start).toFixed(1)}s
+                        {(normalizedPendingCutRange.end - normalizedPendingCutRange.start).toFixed(
+                          1
+                        )}
+                        s
                       </strong>
                     </div>
                   ) : null}
@@ -8982,7 +9257,11 @@ const ViralClipStudio = ({
                   </div>
 
                   <div className="inspector-inline-actions">
-                    <button type="button" onClick={clearPendingCutRange} disabled={!cutRangeIsReady}>
+                    <button
+                      type="button"
+                      onClick={clearPendingCutRange}
+                      disabled={!cutRangeIsReady}
+                    >
                       Clear marks
                     </button>
                     <button
@@ -8990,10 +9269,13 @@ const ViralClipStudio = ({
                       onClick={() => {
                         if (!normalizedPendingCutRange || !videoRef.current) return;
                         const sourceStart = Number(currentTimelineWindow.start || 0);
-                        videoRef.current.currentTime = sourceStart + Math.max(0, normalizedPendingCutRange.start - 0.65);
+                        videoRef.current.currentTime =
+                          sourceStart + Math.max(0, normalizedPendingCutRange.start - 0.65);
                         setVideoTime(videoRef.current.currentTime);
                         safePlayMediaElement(videoRef.current);
-                        setStudioActionMessage("Previewing the lead-in. Remove the range to hear the finished join.");
+                        setStudioActionMessage(
+                          "Previewing the lead-in. Remove the range to hear the finished join."
+                        );
                       }}
                       disabled={!cutRangeIsReady}
                     >
@@ -9010,7 +9292,9 @@ const ViralClipStudio = ({
                   >
                     ✂ Remove marked part & preview join
                   </button>
-                  <p className="cut-safety-copy">Non-destructive: Undo brings the removed part back.</p>
+                  <p className="cut-safety-copy">
+                    Non-destructive: Undo brings the removed part back.
+                  </p>
                 </div>
               ) : null}
 
@@ -9900,8 +10184,8 @@ const ViralClipStudio = ({
                     <div
                       className="broll-playhead"
                       style={{
-                        left: currentTimelineWindow.duration
-                          ? `${Math.min(100, (previewTimelineTime / currentTimelineWindow.duration) * 100)}%`
+                        left: liveTimelineDuration
+                          ? `${Math.min(100, (previewTimelineTime / liveTimelineDuration) * 100)}%`
                           : "0%",
                       }}
                     />
@@ -9909,11 +10193,11 @@ const ViralClipStudio = ({
                     {overlays
                       .filter(o => o.startTime !== undefined && o.duration !== undefined)
                       .map(o => {
-                        const leftPct = currentTimelineWindow.duration
-                          ? (Number(o.startTime) / currentTimelineWindow.duration) * 100
+                        const leftPct = liveTimelineDuration
+                          ? (Number(o.startTime) / liveTimelineDuration) * 100
                           : 0;
-                        const widthPct = currentTimelineWindow.duration
-                          ? (Number(o.duration) / currentTimelineWindow.duration) * 100
+                        const widthPct = liveTimelineDuration
+                          ? (Number(o.duration) / liveTimelineDuration) * 100
                           : 0;
                         const isActive = activeOverlayId === o.id;
                         const label =
@@ -9986,7 +10270,7 @@ const ViralClipStudio = ({
                             left: 0,
                             top: 0,
                             bottom: 0,
-                            width: `${Math.min(100, ((musicTrack.fadeIn || 0.5) / (currentTimelineWindow.duration || 1)) * 100)}%`,
+                            width: `${Math.min(100, ((musicTrack.fadeIn || 0.5) / liveTimelineDuration) * 100)}%`,
                             background:
                               "linear-gradient(90deg, rgba(255,255,255,0.15), transparent)",
                             pointerEvents: "none",
@@ -10000,7 +10284,7 @@ const ViralClipStudio = ({
                             right: 0,
                             top: 0,
                             bottom: 0,
-                            width: `${Math.min(100, ((musicTrack.fadeOut || 0.5) / (currentTimelineWindow.duration || 1)) * 100)}%`,
+                            width: `${Math.min(100, ((musicTrack.fadeOut || 0.5) / liveTimelineDuration) * 100)}%`,
                             background:
                               "linear-gradient(270deg, rgba(255,255,255,0.15), transparent)",
                             pointerEvents: "none",
@@ -12083,10 +12367,7 @@ const ViralClipStudio = ({
                         <input
                           type="range"
                           min={0}
-                          max={Math.max(
-                            0,
-                            (currentTimelineWindow.duration || 10) - (activeOverlay.duration || 0.5)
-                          )}
+                          max={Math.max(0, liveTimelineDuration - (activeOverlay.duration || 0.5))}
                           step={0.1}
                           value={activeOverlay.startTime}
                           onChange={e =>
@@ -12107,10 +12388,7 @@ const ViralClipStudio = ({
                         <input
                           type="range"
                           min={0.3}
-                          max={Math.max(
-                            0.5,
-                            (currentTimelineWindow.duration || 10) - (activeOverlay.startTime || 0)
-                          )}
+                          max={Math.max(0.5, liveTimelineDuration - (activeOverlay.startTime || 0))}
                           step={0.1}
                           value={activeOverlay.duration}
                           onChange={e =>

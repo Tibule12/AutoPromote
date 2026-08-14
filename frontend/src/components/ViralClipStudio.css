@@ -3619,6 +3619,24 @@
   display: block;
 }
 
+.draggable-overlay.broll-side-by-side {
+  max-width: none;
+  padding: 0;
+  border-radius: 0;
+  background: #000;
+  box-shadow: -1px 0 0 rgba(255, 255, 255, 0.16);
+  overflow: hidden;
+}
+
+.draggable-overlay.broll-side-by-side video,
+.draggable-overlay.broll-side-by-side img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover !important;
+  border-radius: 0 !important;
+}
+
 .broll-badge {
   position: absolute;
   top: 10px;
@@ -4578,21 +4596,33 @@
 }
 
 .compact-source-track {
-  height: 44px;
+  height: 62px;
   padding: 0;
   border-color: rgba(125, 150, 185, 0.18);
   cursor: ew-resize;
+  background: #07111f;
 }
 
-.compact-source-track > video {
+.compact-source-filmstrip {
   position: absolute;
   inset: 0;
-  width: 100%;
+  display: block;
+  overflow: hidden;
+}
+
+.compact-source-filmstrip .compact-filmstrip-frame {
+  position: absolute;
+  top: 0;
+  bottom: 0;
   height: 100%;
   object-fit: cover;
-  opacity: 0.58;
-  filter: saturate(0.92) contrast(1.08);
+  opacity: 0.88;
+  filter: saturate(1.08) contrast(1.12) brightness(1.08);
   pointer-events: none;
+}
+
+.compact-source-filmstrip .compact-filmstrip-frame + .compact-filmstrip-frame {
+  border-left: 1px solid rgba(220, 231, 246, 0.34);
 }
 
 .compact-source-scrim {
@@ -4617,6 +4647,33 @@
   height: 17px;
   background: linear-gradient(180deg, transparent, rgba(1, 7, 14, 0.86));
   pointer-events: none;
+}
+
+.compact-timeline-ruler {
+  display: grid;
+  grid-template-columns: 45px repeat(6, 1fr);
+  gap: 9px;
+  align-items: center;
+  min-height: 15px;
+  margin-top: -7px;
+}
+
+.compact-timeline-ruler i {
+  position: relative;
+  color: #74869d;
+  font-size: 0.44rem;
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+}
+
+.compact-timeline-ruler i::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: 0;
+  width: 1px;
+  height: 5px;
+  background: rgba(172, 191, 216, 0.45);
 }
 
 .compact-source-beats i {
@@ -6071,8 +6128,12 @@
 }
 
 .join-transition-preview.is-energy_flash {
-  background:
-    radial-gradient(circle at center, #fff 0 22%, rgba(196, 239, 255, 0.94) 44%, rgba(153, 72, 255, 0.68) 100%);
+  background: radial-gradient(
+    circle at center,
+    #fff 0 22%,
+    rgba(196, 239, 255, 0.94) 44%,
+    rgba(153, 72, 255, 0.68) 100%
+  );
   mix-blend-mode: screen;
 }
 
@@ -6106,7 +6167,13 @@
 }
 
 .creative-preview-tracked_reveal .creative-effect-live-layer {
-  background: linear-gradient(92deg, transparent 0 42%, rgba(43, 230, 208, 0.24) 50%, rgba(156, 62, 255, 0.18) 58%, transparent 66%);
+  background: linear-gradient(
+    92deg,
+    transparent 0 42%,
+    rgba(43, 230, 208, 0.24) 50%,
+    rgba(156, 62, 255, 0.18) 58%,
+    transparent 66%
+  );
   background-size: 240% 100%;
   animation: creative-reveal-sweep 2.2s ease-in-out infinite;
 }
@@ -6125,18 +6192,33 @@
 }
 
 @keyframes creative-motion-sweep {
-  0%, 100% { transform: translateX(-34%) skewX(-8deg); }
-  50% { transform: translateX(34%) skewX(8deg); }
+  0%,
+  100% {
+    transform: translateX(-34%) skewX(-8deg);
+  }
+  50% {
+    transform: translateX(34%) skewX(8deg);
+  }
 }
 
 @keyframes creative-break-pulse {
-  from { opacity: 0.52; transform: scale(0.992); }
-  to { opacity: 0.92; transform: scale(1.015); }
+  from {
+    opacity: 0.52;
+    transform: scale(0.992);
+  }
+  to {
+    opacity: 0.92;
+    transform: scale(1.015);
+  }
 }
 
 @keyframes creative-reveal-sweep {
-  from { background-position: 105% 0; }
-  to { background-position: -105% 0; }
+  from {
+    background-position: 105% 0;
+  }
+  to {
+    background-position: -105% 0;
+  }
 }
 
 .creative-intent-grid {
@@ -6446,8 +6528,11 @@
   border-right: 1px solid #ff718d;
   border-left: 1px solid #ff718d;
   color: #ffe5e9;
-  background:
-    repeating-linear-gradient(-45deg, rgba(255, 75, 108, 0.42) 0 5px, rgba(123, 25, 50, 0.48) 5px 10px);
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(255, 75, 108, 0.42) 0 5px,
+    rgba(123, 25, 50, 0.48) 5px 10px
+  );
   font-size: 0.45rem;
   font-weight: 900;
   text-transform: uppercase;
