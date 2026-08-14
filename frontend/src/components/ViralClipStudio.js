@@ -1492,6 +1492,9 @@ const ViralClipStudio = ({
   onCancel,
   onStatusChange,
   renderStatus,
+  renderedOutput,
+  onDownloadRendered,
+  onUseRendered,
   currentMusic,
   onMusicChange,
 }) => {
@@ -1633,11 +1636,21 @@ const ViralClipStudio = ({
   const [exportStatusLabel, setExportStatusLabel] = useState("Render Final Clip");
   const [selectedExportDestination, setSelectedExportDestination] = useState("general");
   const loggedScannerEntryRef = useRef(new Set());
+  const renderedOutputUrl = getSafeMediaSource(renderedOutput?.previewUrl || renderedOutput?.url);
 
   useEffect(() => {
     if (!isExporting || !renderStatus) return;
     setExportStatusLabel(renderStatus);
   }, [isExporting, renderStatus]);
+
+  useEffect(() => {
+    if (!renderedOutputUrl) return;
+    setComparisonMode("after");
+    setExportStatusLabel("Render Again");
+    setStudioActionMessage(
+      "Render complete. After is now playing the finished video, not the live edit simulation."
+    );
+  }, [renderedOutputUrl]);
 
   const [timeline, setTimeline] = useState(() => {
     // Initial timeline is just the main video URL, effectively one clip
@@ -3428,7 +3441,8 @@ const ViralClipStudio = ({
     liveCreativeEffects.find(
       effect => previewClipTime >= effect.start_time && previewClipTime <= effect.end_time
     ) || liveCreativeEffects[0];
-  const creativeEffectIsLive = creativeEffectsEnabled && comparisonMode !== "before";
+  const creativeEffectIsLive =
+    creativeEffectsEnabled && comparisonMode !== "before" && !renderedOutputUrl;
   const beatEchoPreviewIsLive =
     creativeEffectIsLive && activeLiveCreativeEffect?.preset === "beat_echo";
   const creativePreviewClass = creativeEffectIsLive
@@ -3980,10 +3994,13 @@ const ViralClipStudio = ({
     beforeVideo?.pause();
     setActiveTimelineIndex(target.index);
     try {
-      if (target.clip?.url && afterVideo.src !== target.clip.url) {
-        applySafeMediaSource(afterVideo, target.clip.url);
+      const afterSource = renderedOutputUrl || target.clip?.url;
+      if (afterSource && afterVideo.src !== afterSource) {
+        applySafeMediaSource(afterVideo, afterSource);
       }
-      afterVideo.currentTime = target.sourceTime;
+      afterVideo.currentTime = renderedOutputUrl
+        ? clampNumber(target.outputTime || 0, 0, afterVideo.duration || Infinity, 0)
+        : target.sourceTime;
       if (beforeVideo) {
         applySafeMediaSource(beforeVideo, target.clip?.url);
         beforeVideo.currentTime = target.sourceTime;
@@ -5658,15 +5675,18 @@ const ViralClipStudio = ({
       const clipWindow = getTimelineClipWindow(clip);
       const pendingSeek = pendingTimelineSeekRef.current;
       const hasPendingSeek = pendingSeek?.index === activeTimelineIndex;
-      const targetStart = hasPendingSeek
-        ? Number(pendingSeek.sourceTime || clipWindow.start || 0)
-        : Number(clipWindow.start || 0);
+      const targetStart = renderedOutputUrl
+        ? 0
+        : hasPendingSeek
+          ? Number(pendingSeek.sourceTime || clipWindow.start || 0)
+          : Number(clipWindow.start || 0);
 
       // 1. Handle SRC changes
       // Use property .src for comparison as it is always absolute, just like our Firebase URLs
       const currentSrc = videoRef.current.src;
-      if (currentSrc !== clip.url && clip.url) {
-        videoRef.current.src = clip.url;
+      const afterSource = renderedOutputUrl || clip.url;
+      if (currentSrc !== afterSource && afterSource) {
+        videoRef.current.src = afterSource;
         // Reset to start
         videoRef.current.currentTime = targetStart;
         if (previewPlaybackIntentRef.current) {
@@ -5692,7 +5712,7 @@ const ViralClipStudio = ({
         if (pendingSeek.play) safePlayMediaElement(videoRef.current);
       }
     }
-  }, [activeTimelineIndex, timeline, selectedClip, isDragging]);
+  }, [activeTimelineIndex, timeline, selectedClip, isDragging, renderedOutputUrl]);
 
   useEffect(() => {
     const afterVideo = videoRef.current;
@@ -7699,7 +7719,7 @@ const ViralClipStudio = ({
                   <div
                     ref={phoneFrameRef}
                     data-testid="hook-preview-frame"
-                    className={`phone-frame ${hookFocusMode ? "hook-focus-enabled" : ""} ${creativePreviewClass}`}
+                    className={`phone-frame ${hookFocusMode ? "hook-focus-enabled" : ""} ${creativePreviewClass} ${renderedOutputUrl ? "has-rendered-output" : ""}`}
                     onClick={handlePreviewFrameClick}
                     onMouseMove={handleMouseMove}
                     onMouseUp={handleDragEnd}
@@ -7707,7 +7727,9 @@ const ViralClipStudio = ({
                     onTouchMove={handleMouseMove}
                     onTouchEnd={handleDragEnd}
                   >
-                    <span className="preview-version-label is-after">After</span>
+                    <span className="preview-version-label is-after">
+                      {renderedOutputUrl ? "Rendered" : "After"}
+                    </span>
                     <video
                       ref={videoRef}
                       data-testid="studio-after-video"
@@ -7716,11 +7738,21 @@ const ViralClipStudio = ({
                       controls={comparisonMode === "after"}
                       playsInline
                       style={{
-                        objectFit: activeSideBySideOverlay ? "cover" : effectiveVideoFit,
-                        objectPosition: activeSideBySideOverlay
-                          ? sideBySideObjectPosition
-                          : safeObjectPosition,
-                        width: activeSideBySideOverlay ? "50%" : "100%",
+                        objectFit: renderedOutputUrl
+                          ? "contain"
+                          : activeSideBySideOverlay
+                            ? "cover"
+                            : effectiveVideoFit,
+                        objectPosition: renderedOutputUrl
+                          ? "center center"
+                          : activeSideBySideOverlay
+                            ? sideBySideObjectPosition
+                            : safeObjectPosition,
+                        width: renderedOutputUrl
+                          ? "100%"
+                          : activeSideBySideOverlay
+                            ? "50%"
+                            : "100%",
                         height: "100%",
                         background: "transparent",
                         position: activeSideBySideOverlay ? "absolute" : "relative",
@@ -7729,11 +7761,15 @@ const ViralClipStudio = ({
                         transformOrigin: activeSideBySideOverlay
                           ? "center center"
                           : hookTransformOrigin,
-                        transform: activeSideBySideOverlay
+                        transform: renderedOutputUrl
                           ? "scale(1)"
-                          : `scale(${(hookVisualScale * smartCropBackgroundScale).toFixed(3)})`,
-                        opacity: hookPrimaryVideoOpacity,
-                        filter: `blur(${(hookVideoBlur + smartCropBackgroundBlur).toFixed(2)}px) brightness(${(hookVideoBrightness * smartCropBackgroundBrightness * previewClarityBrightness).toFixed(3)}) contrast(${(hookVideoContrast * previewClarityContrast).toFixed(3)}) saturate(${(hookVideoSaturate * previewClaritySaturate).toFixed(3)})${previewClarityHalo}`,
+                          : activeSideBySideOverlay
+                            ? "scale(1)"
+                            : `scale(${(hookVisualScale * smartCropBackgroundScale).toFixed(3)})`,
+                        opacity: renderedOutputUrl ? 1 : hookPrimaryVideoOpacity,
+                        filter: renderedOutputUrl
+                          ? "none"
+                          : `blur(${(hookVideoBlur + smartCropBackgroundBlur).toFixed(2)}px) brightness(${(hookVideoBrightness * smartCropBackgroundBrightness * previewClarityBrightness).toFixed(3)}) contrast(${(hookVideoContrast * previewClarityContrast).toFixed(3)}) saturate(${(hookVideoSaturate * previewClaritySaturate).toFixed(3)})${previewClarityHalo}`,
                         transition:
                           "width 180ms ease, transform 150ms linear, opacity 160ms linear, filter 160ms linear",
                         willChange: "transform, opacity, filter",
@@ -12469,6 +12505,26 @@ const ViralClipStudio = ({
               <p className="panel-description">
                 Final export uses the hook treatment and B-roll layers you approved in Studio.
               </p>
+              {renderedOutputUrl ? (
+                <div
+                  className="rendered-output-ready"
+                  role="status"
+                  data-testid="rendered-output-ready"
+                >
+                  <div>
+                    <strong>Rendered video ready</strong>
+                    <span>The finished file is loaded in After above.</span>
+                  </div>
+                  <div className="rendered-output-actions">
+                    <button type="button" onClick={onDownloadRendered}>
+                      Download Rendered Clip
+                    </button>
+                    <button type="button" onClick={onUseRendered}>
+                      Use in Publisher
+                    </button>
+                  </div>
+                </div>
+              ) : null}
               <div
                 className="render-destination-row"
                 role="radiogroup"

@@ -208,6 +208,43 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(screen.getByRole("button", { name: /Rendering Clip... 42%/i })).toBeDisabled();
   });
 
+  test("loads a completed render into After and exposes explicit output actions", async () => {
+    const onDownloadRendered = jest.fn();
+    const onUseRendered = jest.fn();
+    const props = {
+      videoUrl: "https://example.com/source.mp4",
+      clips: [{ id: "clip-output", start: 0, end: 8, duration: 8 }],
+      onSave: jest.fn(() => Promise.resolve()),
+      onCancel: jest.fn(),
+      onDownloadRendered,
+      onUseRendered,
+    };
+    const { rerender } = render(<ViralClipStudio {...props} />);
+
+    rerender(
+      <ViralClipStudio
+        {...props}
+        renderedOutput={{
+          url: "https://example.com/rendered.mp4",
+          previewUrl: "https://example.com/rendered.mp4?preview=1",
+        }}
+      />
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId("studio-after-video").src).toContain("rendered.mp4?preview=1")
+    );
+    expect(screen.getByRole("button", { name: "After" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByTestId("rendered-output-ready")).toHaveTextContent(
+      "The finished file is loaded in After above."
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Download Rendered Clip" }));
+    fireEvent.click(screen.getByRole("button", { name: "Use in Publisher" }));
+    expect(onDownloadRendered).toHaveBeenCalledTimes(1);
+    expect(onUseRendered).toHaveBeenCalledTimes(1);
+  });
+
   test("removes a marked middle range and exports retained segments with a join style", async () => {
     const onSave = jest.fn(() => Promise.resolve());
     render(

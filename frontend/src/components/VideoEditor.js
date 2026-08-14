@@ -107,6 +107,7 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
   const effectivePackages = topUpPacks.length > 0 ? topUpPacks : CREDIT_PACKAGES;
 
   const [processedFile, setProcessedFile] = useState(null);
+  const [viralRenderedFile, setViralRenderedFile] = useState(null);
   const [desktopToolsAvailable, setDesktopToolsAvailable] = useState(canUseDesktopEditingTools);
   // Wait until the media source is ready before mounting Studio. Mounting it with
   // an empty source and immediately replacing that source aborts Firefox's fetch.
@@ -147,7 +148,8 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
   };
 
   const handleDownloadVideo = async () => {
-    if (!videoSrc) {
+    const downloadSource = processedFile?.url || videoSrc;
+    if (!downloadSource) {
       setStatusMessage("No processed video is available to download yet.");
       return;
     }
@@ -168,7 +170,7 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
         return;
       }
 
-      const response = await fetch(videoSrc, { mode: "cors" });
+      const response = await fetch(downloadSource, { mode: "cors" });
       if (!response.ok) {
         throw new Error(`Download failed with status ${response.status}`);
       }
@@ -185,7 +187,7 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
       setStatusMessage("Download started.");
     } catch (error) {
       console.warn("Direct download failed, opening video in a new tab instead.", error);
-      window.open(sanitizeUrl(videoSrc), "_blank", "noopener,noreferrer");
+      window.open(sanitizeUrl(downloadSource), "_blank", "noopener,noreferrer");
       setStatusMessage("Opened the processed video in a new tab.");
     }
   };
@@ -915,6 +917,7 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
           : 30;
 
     setStatusMessage("");
+    setViralRenderedFile(null);
     setClipSuggestions([
       {
         id: "full-video",
@@ -1023,6 +1026,7 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
 
   const handleViralRender = async (selectedClip, overlays, extraOptions = {}) => {
     setStatusMessage("Rendering your viral clip with overlays...");
+    setViralRenderedFile(null);
     setProcessing(true);
     // Keep the studio open during render so the user sees progress inside the studio,
     // not kicked back to the bare VideoEditor view.
@@ -1329,7 +1333,11 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
             break;
           }
 
-          setStatusMessage(`Rendering Clip... ${statusData.progress || 0}%`);
+          const progress = Number.isFinite(Number(statusData.progress))
+            ? Math.max(0, Math.min(99, Number(statusData.progress)))
+            : 0;
+          const detail = String(statusData.detail || "").trim();
+          setStatusMessage(`Rendering Clip... ${progress}%${detail ? ` · ${detail}` : ""}`);
         }
       }
       // Update the main editor with the final rendered clip
@@ -1345,7 +1353,6 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
           : renderedUrl.includes("?")
             ? `${renderedUrl}&t=${Date.now()}`
             : `${renderedUrl}?t=${Date.now()}`;
-        setVideoSrc(urlWithCacheBuster);
         const fakeFile = {
           name: `viral_clip_rendered.mp4`,
           type: "video/mp4",
@@ -1378,20 +1385,15 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
               : null,
         };
         setProcessedFile(fakeFile);
+        setViralRenderedFile({ ...fakeFile, previewUrl: urlWithCacheBuster });
         setStatusMessage(
           fakeFile.audioProof?.verified
-            ? "Viral clip rendered with verified audio. Auto-saving..."
+            ? "Viral clip rendered with verified audio. Review it in After."
             : fakeFile.audioProof?.expected === false
-              ? "Viral clip rendered without audio as requested. Auto-saving..."
-              : "Viral clip rendered. Auto-saving..."
+              ? "Viral clip rendered without audio as requested. Review it in After."
+              : "Viral clip rendered. Review it in After."
         );
-
-        // Automatically save back to parent if onSave is provided
-        if (onSave) {
-          onSave(fakeFile);
-        }
-        // Close the studio now that render succeeded
-        setClipSuggestions(null);
+        return fakeFile;
       } else {
         console.error("Rendering succeeded but no URL returned:", result);
         setStatusMessage("Error: Server returned success but no video URL.");
@@ -1499,6 +1501,13 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
         }}
         onStatusChange={setStatusMessage}
         renderStatus={statusMessage}
+        renderedOutput={viralRenderedFile}
+        onDownloadRendered={handleDownloadVideo}
+        onUseRendered={() => {
+          if (!viralRenderedFile) return;
+          onSave?.(viralRenderedFile);
+          setClipSuggestions(null);
+        }}
         // Pass down music state
         currentMusic={options.musicFile}
         onMusicChange={(newMusic, isSearchMode) => {

@@ -27914,10 +27914,23 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         "effects": [],
     }
 
+    def report_progress(progress: int, detail: str):
+        if not request.async_mode:
+            return
+        try:
+            update_firestore_job(
+                job_id,
+                {
+                    "status": "processing",
+                    "progress": max(0, min(99, int(progress))),
+                    "detail": detail,
+                },
+            )
+        except Exception as progress_error:
+            logger.warning(f"Could not publish viral render progress for {job_id}: {progress_error}")
+
     # Initial async update
-    if request.async_mode:
-         try: update_firestore_job(job_id, {"status": "processing", "progress": 0})
-         except: pass
+    report_progress(2, "Preparing source")
 
     try:
         # 1. Download/Prepare Main Video (Async)
@@ -27936,6 +27949,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
              raise HTTPException(status_code=400, detail=err_msg)
 
         source_has_audio = has_audio_stream(input_path)
+        report_progress(15, "Source downloaded and verified")
 
         # 2. Pre-trim to duration or assemble timeline sequence
         timeline_segments = request.timeline_segments or []
@@ -28052,6 +28066,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     "-t", str(duration), "-c:v", "libx264", "-y", trimmed_path
                 ], check=True)
         
+        report_progress(30, "Timeline prepared")
+
         # 2.45. Visual Enhance — Smart Promo dynamic reframing pipeline
         working_path = trimmed_path
         if request.visual_enhance:
@@ -28903,10 +28919,12 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
 
              cmd.extend(["-shortest", "-c:v", "libx264", "-movflags", "+faststart", "-y", output_path])
         
+        report_progress(75, "Rendering final video")
         logger.info(f"Running FFmpeg: {' '.join(cmd)}")
         await run_subprocess_async(cmd, check=True)
 
         if os.path.exists(output_path):
+            report_progress(90, "Verifying rendered video and audio")
             audio_expected = bool(
                 (source_has_audio and not request.mute_audio)
                 or overlay_audio_specs
@@ -28917,6 +28935,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 raise RuntimeError(
                     "Final viral clip failed audio verification; the silent output was rejected"
                 )
+            report_progress(95, "Uploading finished video")
             public_url = upload_file_to_firebase(output_path)
             if not public_url:
                 raise RuntimeError("Final viral clip could not be published")
@@ -28982,6 +29001,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             
             result_data = {
                 "status": "completed", 
+                "progress": 100,
+                "detail": "Render complete",
                 "job_id": job_id, 
                 "output_path": output_path,
                 "output_url": public_url,

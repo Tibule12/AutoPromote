@@ -45,6 +45,32 @@ class ViralRenderContractTests(unittest.TestCase):
             )
         )
 
+    def test_viral_renderer_publishes_real_progress_checkpoints(self):
+        worker_source = Path(__file__).with_name("main_media_server.py").read_text(
+            encoding="utf-8"
+        )
+        worker_tree = ast.parse(worker_source)
+        render_function = next(
+            node
+            for node in worker_tree.body
+            if isinstance(node, ast.AsyncFunctionDef)
+            and node.name == "render_viral_clip_impl"
+        )
+        progress_values = {
+            int(call.args[0].value)
+            for call in ast.walk(render_function)
+            if isinstance(call, ast.Call)
+            and isinstance(call.func, ast.Name)
+            and call.func.id == "report_progress"
+            and call.args
+            and isinstance(call.args[0], ast.Constant)
+            and isinstance(call.args[0].value, int)
+        }
+
+        self.assertTrue({2, 15, 30, 75, 90, 95}.issubset(progress_values))
+        self.assertIn('"progress": 100', worker_source)
+        self.assertIn('"detail": "Render complete"', worker_source)
+
     def test_normalizes_speed_segments_and_fills_timeline_gaps(self):
         plan = normalize_speed_plan(
             10,

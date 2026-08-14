@@ -2080,6 +2080,7 @@ router.get("/status/:jobId", async (req, res) => {
       status,
       stage: data.stage,
       progress: data.progress,
+      detail: data.detail || data.result?.detail || null,
       renderSpecVersion: data.renderSpecVersion || data.result?.renderSpecVersion || null,
       totalDurationSeconds: data.totalDurationSeconds || data.result?.totalDurationSeconds || 0,
       checkpointSeconds: data.checkpointSeconds || data.result?.checkpointSeconds || 0,

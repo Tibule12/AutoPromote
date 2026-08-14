@@ -86,6 +86,7 @@ describe("mediaRoutes render approval", () => {
       userId: "user-1",
       type: "multicam_render",
       status: "completed",
+      detail: "Render complete",
       output_url: "https://cdn.example.com/held.mp4",
       renderSpecVersion: 2,
       totalDurationSeconds: 2640,
@@ -123,6 +124,7 @@ describe("mediaRoutes render approval", () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.body.status).toBe("completed");
+    expect(response.body.detail).toBe("Render complete");
     expect(response.body.approvalStatus).toBe("approved");
     expect(response.body.reviewRequired).toBe(false);
     expect(response.body.output_url).toBe("https://cdn.example.com/held.mp4");
@@ -141,9 +143,7 @@ describe("mediaRoutes render approval", () => {
     });
     expect(response.body.renderCheckpoint.chunks).toBeUndefined();
     expect(response.body.manifestUrl).toBe("https://cdn.example.com/multicam-job-1.json");
-    expect(response.body.manifestStoragePath).toBe(
-      "processed/manifests/multicam_job-1.json"
-    );
+    expect(response.body.manifestStoragePath).toBe("processed/manifests/multicam_job-1.json");
   });
 
   it("approves a held render and exposes the approved output URL", async () => {

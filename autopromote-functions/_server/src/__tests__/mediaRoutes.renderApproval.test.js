@@ -76,6 +76,7 @@ describe("mediaRoutes render approval", () => {
       userId: "user-1",
       type: "multicam_render",
       status: "completed",
+      detail: "Render complete",
       output_url: "https://cdn.example.com/held.mp4",
       result: {
         url: "https://cdn.example.com/held.mp4",
@@ -88,6 +89,7 @@ describe("mediaRoutes render approval", () => {
     const response = await request(buildApp()).get("/api/media/status/job-1");
 
     expect(response.statusCode).toBe(200);
+    expect(response.body.detail).toBe("Render complete");
     expect(response.body.status).toBe("needs_review");
     expect(response.body.approvalStatus).toBe("needs_review");
     expect(response.body.output_url).toBeNull();

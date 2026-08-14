@@ -1090,6 +1090,7 @@ router.get("/status/:jobId", async (req, res) => {
       status,
       stage: data.stage,
       progress: data.progress,
+      detail: data.detail || data.result?.detail || null,
       result: sanitizedResult, // Node worker result, gated until approval
       output_url: approvalView.output_url, // Python worker result, gated until approval
       audio_url: data.audio_url,
