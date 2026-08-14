@@ -4,6 +4,7 @@
 
 const axios = require("axios");
 const admin = require("firebase-admin");
+const crypto = require("crypto");
 const db = admin.firestore();
 const fs = require("fs");
 const { queueAudioExtractionTask } = require("./mediaWorkerTaskQueue");
@@ -153,27 +154,57 @@ class VideoEditingService {
    * Start an async video processing job
    * Returns a jobId immediately for polling.
    */
-  async startProcessingJob(videoUrl, options, userId) {
-    const jobId = uuidv4();
+  async startProcessingJob(videoUrl, options, userId, requestOptions = {}) {
+    const renderRequestId = String(requestOptions.renderRequestId || "").trim();
+    const jobId = renderRequestId
+      ? `viral_${crypto
+          .createHash("sha256")
+          .update(`${userId}:${renderRequestId}`)
+          .digest("hex")
+          .slice(0, 40)}`
+      : uuidv4();
     console.log(`[VideoEditing] Starting Async Job ${jobId} for User ${userId}`);
 
     try {
-      await db.collection("video_edits").doc(jobId).set({
+      const jobRef = db.collection("video_edits").doc(jobId);
+      const jobData = {
         jobId,
         userId,
         videoUrl,
         options,
+        ...(renderRequestId ? { renderRequestId } : {}),
         status: "queued",
         progress: 0,
         createdAt: new Date().toISOString(),
-      });
+      };
+      let created = true;
 
-      // Start background processing without awaiting
-      this.processJobBackground(jobId, videoUrl, options, userId).catch(err => {
-        console.error(`[VideoEditing] Background Job ${jobId} Failed (uncaught):`, err);
-      });
+      if (renderRequestId) {
+        created = await db.runTransaction(async transaction => {
+          const existing = await transaction.get(jobRef);
+          if (existing.exists) {
+            const existingData = existing.data() || {};
+            if (existingData.userId !== userId) {
+              throw new Error("Render request belongs to a different user");
+            }
+            return false;
+          }
+          transaction.set(jobRef, jobData);
+          return true;
+        });
+      } else {
+        await jobRef.set(jobData);
+      }
 
-      return { jobId };
+      if (created) {
+        // Start background processing without awaiting. A retry with the same
+        // renderRequestId returns this durable job instead of dispatching twice.
+        this.processJobBackground(jobId, videoUrl, options, userId).catch(err => {
+          console.error(`[VideoEditing] Background Job ${jobId} Failed (uncaught):`, err);
+        });
+      }
+
+      return { jobId, deduplicated: !created };
     } catch (error) {
       console.error("Failed to start job:", error);
       throw new Error("Failed to queue video processing job");
@@ -185,17 +216,20 @@ class VideoEditingService {
     console.log(`[VideoEditing] Starting multicam render job ${jobId} for User ${userId}`);
 
     try {
-      await db.collection("video_edits").doc(jobId).set({
-        jobId,
-        userId,
-        type: "multicam_render",
-        multicamRequest,
-        creditReceipt: multicamRequest?.creditReceipt || null,
-        retentionDays: MULTICAM_MASTER_RETENTION_DAYS,
-        status: "queued",
-        progress: 0,
-        createdAt: new Date().toISOString(),
-      });
+      await db
+        .collection("video_edits")
+        .doc(jobId)
+        .set({
+          jobId,
+          userId,
+          type: "multicam_render",
+          multicamRequest,
+          creditReceipt: multicamRequest?.creditReceipt || null,
+          retentionDays: MULTICAM_MASTER_RETENTION_DAYS,
+          status: "queued",
+          progress: 0,
+          createdAt: new Date().toISOString(),
+        });
 
       this.processMulticamJobBackground(jobId, multicamRequest, userId).catch(err => {
         console.error(`[VideoEditing] Multicam Job ${jobId} Failed (uncaught):`, err);
@@ -435,16 +469,24 @@ class VideoEditingService {
       external_audio_mix_mode: multicamRequest?.externalAudio?.mix_mode || "external_only",
       external_audio_cache_key: multicamRequest?.externalAudio?.cache_key || null,
       externalAudio: multicamRequest?.externalAudio || null,
-      brand_watermark: multicamRequest?.brandWatermark === true || multicamRequest?.brand_watermark === true,
-      brandWatermark: multicamRequest?.brandWatermark === true || multicamRequest?.brand_watermark === true,
-      burn_captions: multicamRequest?.burnCaptions === true || multicamRequest?.burn_captions === true,
-      burnCaptions: multicamRequest?.burnCaptions === true || multicamRequest?.burn_captions === true,
-      caption_style: multicamRequest?.captionStyle || multicamRequest?.caption_style || "podcast_clean",
-      captionStyle: multicamRequest?.captionStyle || multicamRequest?.caption_style || "podcast_clean",
+      brand_watermark:
+        multicamRequest?.brandWatermark === true || multicamRequest?.brand_watermark === true,
+      brandWatermark:
+        multicamRequest?.brandWatermark === true || multicamRequest?.brand_watermark === true,
+      burn_captions:
+        multicamRequest?.burnCaptions === true || multicamRequest?.burn_captions === true,
+      burnCaptions:
+        multicamRequest?.burnCaptions === true || multicamRequest?.burn_captions === true,
+      caption_style:
+        multicamRequest?.captionStyle || multicamRequest?.caption_style || "podcast_clean",
+      captionStyle:
+        multicamRequest?.captionStyle || multicamRequest?.caption_style || "podcast_clean",
       watermark_text: multicamRequest?.watermarkText || "AutoPromote Cam Combiner",
       watermarkText: multicamRequest?.watermarkText || "AutoPromote Cam Combiner",
-      generate_thumbnail: multicamRequest?.generateThumbnail === true || multicamRequest?.generate_thumbnail === true,
-      generateThumbnail: multicamRequest?.generateThumbnail === true || multicamRequest?.generate_thumbnail === true,
+      generate_thumbnail:
+        multicamRequest?.generateThumbnail === true || multicamRequest?.generate_thumbnail === true,
+      generateThumbnail:
+        multicamRequest?.generateThumbnail === true || multicamRequest?.generate_thumbnail === true,
       plan_only: multicamRequest?.planOnly === true || multicamRequest?.plan_only === true,
       planOnly: multicamRequest?.planOnly === true || multicamRequest?.plan_only === true,
       job_id: jobId,
@@ -468,7 +510,9 @@ class VideoEditingService {
         `[VideoEditing] Falling back to local Cam Combiner worker. Primary worker: ${CAM_COMBINER_WORKER_URL}`
       );
       try {
-        return await axios.post(`${LOCAL_CAM_COMBINER_WORKER_URL}${endpoint}`, payload, { timeout });
+        return await axios.post(`${LOCAL_CAM_COMBINER_WORKER_URL}${endpoint}`, payload, {
+          timeout,
+        });
       } catch (fallbackError) {
         const fallbackDetail = getWorkerErrorDetail(fallbackError);
         fallbackError.workerDetail = fallbackDetail;
@@ -524,7 +568,9 @@ class VideoEditingService {
     };
 
     if (failures.length) {
-      const error = new Error(`Server proof failed before paid render: ${failures.map(item => `${item.gate}=${item.status}`).join(", ")}`);
+      const error = new Error(
+        `Server proof failed before paid render: ${failures.map(item => `${item.gate}=${item.status}`).join(", ")}`
+      );
       error.serverProof = receipt;
       throw error;
     }
@@ -708,27 +754,17 @@ class VideoEditingService {
             viralData.captionStyle ||
             viralData.renderDefaults?.caption_style ||
             payload.caption_style,
-          caption_position:
-            viralData.caption_position || viralData.captionPosition || "lower",
-          caption_scale: Number(
-            viralData.caption_scale ?? viralData.captionScale ?? 1
-          ),
+          caption_position: viralData.caption_position || viralData.captionPosition || "lower",
+          caption_scale: Number(viralData.caption_scale ?? viralData.captionScale ?? 1),
           caption_text_override:
             viralData.caption_text_override ?? viralData.captionTextOverride ?? null,
-          preview_speed: Number(
-            viralData.preview_speed ?? viralData.previewSpeed ?? 1
-          ),
-          speed_segments: Array.isArray(
-            viralData.speed_segments || viralData.speedSegments
-          )
+          preview_speed: Number(viralData.preview_speed ?? viralData.previewSpeed ?? 1),
+          speed_segments: Array.isArray(viralData.speed_segments || viralData.speedSegments)
             ? viralData.speed_segments || viralData.speedSegments
             : [],
-          pacing_level:
-            viralData.pacing_level || viralData.pacingLevel || null,
-          creative_intent:
-            viralData.creative_intent || viralData.creativeIntent || null,
-          creative_plan:
-            viralData.creative_plan || viralData.creativePlan || null,
+          pacing_level: viralData.pacing_level || viralData.pacingLevel || null,
+          creative_intent: viralData.creative_intent || viralData.creativeIntent || null,
+          creative_plan: viralData.creative_plan || viralData.creativePlan || null,
           smart_crop:
             viralData.smart_crop !== undefined
               ? !!viralData.smart_crop
@@ -812,7 +848,8 @@ class VideoEditingService {
           hook_focus_point: viralData.hook_focus_point || null,
           cover_frame: viralData.cover_frame || null,
           thumbnail_frame: viralData.thumbnail_frame || viralData.cover_frame || null,
-          brand_watermark: viralData.brand_watermark !== false && viralData.brandWatermark !== false,
+          brand_watermark:
+            viralData.brand_watermark !== false && viralData.brandWatermark !== false,
           brandWatermark: viralData.brand_watermark !== false && viralData.brandWatermark !== false,
           watermark_text: viralData.watermark_text || viralData.watermarkText || "AUTOPROMOTE",
           watermarkText: viralData.watermark_text || viralData.watermarkText || "AUTOPROMOTE",
@@ -1186,18 +1223,20 @@ class VideoEditingService {
         ...(externalAudio && typeof externalAudio === "object" ? externalAudio : {}),
         url: external_audio_url,
         offset_seconds: Number(external_audio_offset_seconds || 0),
-        sync_trim_start: Number(
-          externalAudio?.sync_trim_start ??
-            externalAudio?.upload_trim_start ??
-            external_audio_sync_trim_start ??
-            0
-        ) || 0,
-        sync_trim_duration: Number(
-          externalAudio?.sync_trim_duration ??
-            externalAudio?.upload_trim_duration ??
-            external_audio_sync_trim_duration ??
-            0
-        ) || 0,
+        sync_trim_start:
+          Number(
+            externalAudio?.sync_trim_start ??
+              externalAudio?.upload_trim_start ??
+              external_audio_sync_trim_start ??
+              0
+          ) || 0,
+        sync_trim_duration:
+          Number(
+            externalAudio?.sync_trim_duration ??
+              externalAudio?.upload_trim_duration ??
+              external_audio_sync_trim_duration ??
+              0
+          ) || 0,
       },
       timeline_start: Number(timeline_start || 0),
       timelineStart: Number(timeline_start || 0),
@@ -1213,10 +1252,10 @@ class VideoEditingService {
         timeout: 120000,
       });
     } catch (error) {
-      const workerDetail = error.response?.data?.detail || error.response?.data?.message || error.message;
-      const message = typeof workerDetail === "string"
-        ? workerDetail
-        : JSON.stringify(workerDetail);
+      const workerDetail =
+        error.response?.data?.detail || error.response?.data?.message || error.message;
+      const message =
+        typeof workerDetail === "string" ? workerDetail : JSON.stringify(workerDetail);
       const wrappedError = new Error(message || "Multicam preflight worker failed");
       wrappedError.statusCode = error.response?.status;
       wrappedError.workerDetail = workerDetail;
@@ -1254,10 +1293,18 @@ class VideoEditingService {
         outputStoragePath: result.output_storage_path || result.outputStoragePath || null,
         thumbnailStoragePath: result.thumbnail_storage_path || result.thumbnailStoragePath || null,
         expiresAt: result.expires_at || result.expiresAt || getMulticamExpiryIso(),
-        renderTier: result.render_tier || multicamRequest?.renderTier || multicamRequest?.render_tier || "premium",
+        renderTier:
+          result.render_tier ||
+          multicamRequest?.renderTier ||
+          multicamRequest?.render_tier ||
+          "premium",
         renderReceipt: result.render_receipt || null,
         syncPreflight: result.sync_preflight || null,
-        brandWatermark: result.brand_watermark || result.brandWatermark || result.render_receipt?.brand_watermark || null,
+        brandWatermark:
+          result.brand_watermark ||
+          result.brandWatermark ||
+          result.render_receipt?.brand_watermark ||
+          null,
         thumbnail: result.thumbnail || result.render_receipt?.thumbnail || null,
         message: "Multi-camera render completed",
       };

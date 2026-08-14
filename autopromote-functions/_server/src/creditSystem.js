@@ -1,4 +1,5 @@
 const { db } = require("./firebaseAdmin");
+const crypto = require("crypto");
 const { normalizePlanId, resolvePlan } = require("./config/subscriptionPlans");
 const { getEffectiveTierSnapshot } = require("./services/billingService");
 
@@ -41,11 +42,12 @@ const shouldBypassEditingCredits = operation =>
  * Get the current credit breakdown for a user.
  * Returns { monthlyRemaining, topUpBalance, totalAvailable, monthlyAllocation, monthKey }
  */
-const getCreditBreakdown = async (userId) => {
+const getCreditBreakdown = async userId => {
   const monthKey = new Date().toISOString().slice(0, 7);
   const [userSnap, creditLedgerSnap] = await Promise.all([
     db.collection("users").doc(userId).get(),
-    db.collection("credit_usage")
+    db
+      .collection("credit_usage")
       .where("userId", "==", userId)
       .where("monthKey", "==", monthKey)
       .get(),
@@ -73,9 +75,7 @@ const getCreditBreakdown = async (userId) => {
     monthlyUsed,
     monthlyAllocation: localCreditBypass ? LOCAL_TEST_CREDIT_BALANCE : monthlyAllocation,
     topUpBalance,
-    totalAvailable: localCreditBypass
-      ? LOCAL_TEST_CREDIT_BALANCE
-      : monthlyRemaining + topUpBalance,
+    totalAvailable: localCreditBypass ? LOCAL_TEST_CREDIT_BALANCE : monthlyRemaining + topUpBalance,
     monthKey,
     tier,
     localCreditBypass,
@@ -87,7 +87,9 @@ const getCreditBreakdown = async (userId) => {
  * Priority: monthly allocation first, then top-up balance.
  * Records a ledger entry for monthly tracking.
  */
-const deductCredits = async (userId, amount, operation = "unknown") => {
+const deductCredits = async (userId, amount, operation = "unknown", metadata = {}) => {
+  const idempotencyKey =
+    typeof metadata?.idempotencyKey === "string" ? metadata.idempotencyKey.trim() : "";
   if (Number(amount || 0) > 0 && shouldBypassEditingCredits(operation)) {
     console.log(
       `[credits] Local editing credit bypass active for ${operation}. User ${userId}, skipped ${amount} credits.`
@@ -111,6 +113,16 @@ const deductCredits = async (userId, amount, operation = "unknown") => {
   const userRef = db.collection("users").doc(userId);
   const billingRef = db.collection("user_billing").doc(userId);
   const monthKey = new Date().toISOString().slice(0, 7);
+  const idempotentLedgerRef = idempotencyKey
+    ? db
+        .collection("credit_usage")
+        .doc(
+          `idem_${crypto
+            .createHash("sha256")
+            .update(`${userId}:${monthKey}:${idempotencyKey}`)
+            .digest("hex")}`
+        )
+    : null;
 
   try {
     return await db.runTransaction(async transaction => {
@@ -131,15 +143,38 @@ const deductCredits = async (userId, amount, operation = "unknown") => {
       const plan = resolvePlan(tier);
       const monthlyAllocation = plan.features.monthlyCredits || 0;
 
+      if (idempotentLedgerRef) {
+        const priorChargeDoc = await transaction.get(idempotentLedgerRef);
+        if (priorChargeDoc.exists) {
+          const priorCharge = priorChargeDoc.data() || {};
+          return {
+            success: true,
+            remaining: priorCharge.remainingAfter,
+            monthlyRemaining: priorCharge.monthlyRemainingAfter,
+            topUpBalance: priorCharge.topUpBalanceAfter,
+            deducted: priorCharge.amount,
+            fromMonthly: priorCharge.fromMonthly,
+            fromTopUp: priorCharge.fromTopUp,
+            monthKey,
+            operation,
+            source: priorCharge.source || "idempotent_replay",
+            duplicate: true,
+            idempotencyKey,
+          };
+        }
+      }
+
       // Count monthly usage from ledger (use transaction-safe query)
-      const ledgerQuery = db.collection("credit_usage")
+      const ledgerQuery = db
+        .collection("credit_usage")
         .where("userId", "==", userId)
         .where("monthKey", "==", monthKey);
       const ledgerSnap = await transaction.get(ledgerQuery);
 
       let monthlyUsed = 0;
       ledgerSnap.forEach(doc => {
-        monthlyUsed += doc.data().amount || 0;
+        const entry = doc.data() || {};
+        monthlyUsed += entry.amount || 0;
       });
 
       const monthlyRemaining = Math.max(0, monthlyAllocation - monthlyUsed);
@@ -170,8 +205,10 @@ const deductCredits = async (userId, amount, operation = "unknown") => {
         });
       }
 
+      const newTotal = totalAvailable - amount;
+
       // Record ledger entry for monthly tracking
-      const ledgerRef = db.collection("credit_usage").doc();
+      const ledgerRef = idempotentLedgerRef || db.collection("credit_usage").doc();
       transaction.set(ledgerRef, {
         userId,
         amount,
@@ -180,9 +217,12 @@ const deductCredits = async (userId, amount, operation = "unknown") => {
         operation,
         monthKey,
         createdAt: new Date().toISOString(),
+        ...(idempotencyKey ? { idempotencyKey } : {}),
+        remainingAfter: newTotal,
+        monthlyRemainingAfter: monthlyRemaining - fromMonthly,
+        topUpBalanceAfter: topUpBalance - fromTopUp,
+        source: fromTopUp > 0 ? "monthly+topup" : "monthly",
       });
-
-      const newTotal = totalAvailable - amount;
 
       return {
         success: true,
@@ -195,6 +235,7 @@ const deductCredits = async (userId, amount, operation = "unknown") => {
         monthKey,
         operation,
         source: fromTopUp > 0 ? "monthly+topup" : "monthly",
+        ...(idempotencyKey ? { idempotencyKey } : {}),
       };
     });
   } catch (error) {
@@ -203,12 +244,7 @@ const deductCredits = async (userId, amount, operation = "unknown") => {
   }
 };
 
-const refundCredits = async (
-  userId,
-  refund,
-  operation = "refund",
-  metadata = {}
-) => {
+const refundCredits = async (userId, refund, operation = "refund", metadata = {}) => {
   const amount = Math.max(0, Number(refund?.deducted ?? refund?.amount ?? 0) || 0);
   const fromMonthly = Math.max(0, Number(refund?.fromMonthly || 0) || 0);
   const fromTopUp = Math.max(0, Number(refund?.fromTopUp || 0) || 0);

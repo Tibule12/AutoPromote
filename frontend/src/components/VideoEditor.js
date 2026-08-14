@@ -17,6 +17,13 @@ import CinematicEffectsPanel from "./CinematicEffectsPanel";
 import { useSubscription } from "../hooks/useSubscription";
 import { playMediaSafely } from "../utils/mediaPlayback";
 import { buildViralRenderData } from "./viralRenderPayload";
+import {
+  RENDER_STATUS_TIMEOUT_MS,
+  RENDER_SUBMISSION_TIMEOUT_MS,
+  createRenderRequestId,
+  fetchWithRenderTimeout,
+  waitForRenderRetry,
+} from "../utils/renderRequest";
 
 const DESKTOP_EDITING_TOOL_QUERY = "(min-width: 900px) and (hover: hover) and (pointer: fine)";
 
@@ -61,6 +68,14 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
   const [processing, setProcessing] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
   const abortRef = useRef(false);
+  const activeRenderRequestRef = useRef(null);
+  const viralRenderAttemptRef = useRef(null);
+
+  const cancelActiveProcessing = () => {
+    abortRef.current = true;
+    activeRenderRequestRef.current?.abort();
+    setStatusMessage("Cancelling...");
+  };
 
   const formatBalance = balance => {
     if (balance === null || typeof balance === "undefined") return 0;
@@ -1048,126 +1063,180 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
         extraOptions,
       });
 
+      const { timelineSegments: requestTimelineSegments, ...requestRenderOptions } = extraOptions;
+      const requestFingerprint = JSON.stringify({
+        source: videoSrc,
+        clipId: selectedClip?.id || null,
+        start: selectedClip?.start || 0,
+        end: selectedClip?.end || 0,
+        overlays,
+        renderOptions: requestRenderOptions,
+        timelineSegments: Array.isArray(requestTimelineSegments)
+          ? requestTimelineSegments.map(({ url: _uploadedUrl, ...segment }) => segment)
+          : null,
+      });
+      if (viralRenderAttemptRef.current?.fingerprint !== requestFingerprint) {
+        viralRenderAttemptRef.current = {
+          fingerprint: requestFingerprint,
+          requestId: createRenderRequestId(),
+        };
+      }
+      const renderRequestId = viralRenderAttemptRef.current.requestId;
+
       // NOTE: backend 'mediaRoutes.js' expects 'fileUrl' and 'options'.
       // But 'videoEditingService.js' puts 'payload' inside 'options.viralData'.
       // So detailed fields go into 'payload' (viralData).
       // Let's pass smartCrop in both places to be safe if backend logic varies.
 
-      const response = await fetch(`${API_BASE_URL}/api/media/process`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          fileUrl: finalVideoUrl,
-          renderJobId: file?.renderJobId || null,
-          options: {
-            ...options,
-            ...(extraOptions.addMusic !== undefined ? { addMusic: !!extraOptions.addMusic } : {}),
-            ...(extraOptions.musicFile !== undefined ? { musicFile: extraOptions.musicFile } : {}),
-            ...(extraOptions.isSearch !== undefined ? { isSearch: !!extraOptions.isSearch } : {}),
-            ...(extraOptions.safeSearch !== undefined
-              ? { safeSearch: !!extraOptions.safeSearch }
-              : {}),
-            ...(extraOptions.musicVolume !== undefined
-              ? { musicVolume: Number(extraOptions.musicVolume) }
-              : {}),
-            ...(extraOptions.musicDucking !== undefined
-              ? { musicDucking: !!extraOptions.musicDucking }
-              : {}),
-            ...(extraOptions.musicDuckingStrength !== undefined
-              ? { musicDuckingStrength: Number(extraOptions.musicDuckingStrength) }
-              : {}),
-            ...(extraOptions.muteAudio !== undefined
-              ? { muteAudio: !!extraOptions.muteAudio }
-              : {}),
-            ...(extraOptions.silenceRemoval !== undefined
-              ? { silenceRemoval: !!extraOptions.silenceRemoval }
-              : {}),
-            ...(extraOptions.silenceThreshold !== undefined
-              ? { silenceThreshold: Number(extraOptions.silenceThreshold) }
-              : {}),
-            ...(extraOptions.minSilenceDuration !== undefined
-              ? { minSilenceDuration: Number(extraOptions.minSilenceDuration) }
-              : {}),
-            ...(extraOptions.removeWatermark !== undefined
-              ? { removeWatermark: !!extraOptions.removeWatermark }
-              : {}),
-            ...(extraOptions.watermarkMode !== undefined
-              ? { watermarkMode: extraOptions.watermarkMode }
-              : {}),
-            ...(extraOptions.manualWatermarkRegions !== undefined
-              ? { manualWatermarkRegions: extraOptions.manualWatermarkRegions }
-              : {}),
-            ...(extraOptions.addHook !== undefined ? { addHook: !!extraOptions.addHook } : {}),
-            ...(extraOptions.hookText !== undefined ? { hookText: extraOptions.hookText } : {}),
-            ...(extraOptions.hookIntroSeconds !== undefined
-              ? { hookIntroSeconds: Number(extraOptions.hookIntroSeconds) }
-              : {}),
-            ...(extraOptions.hookTemplate !== undefined
-              ? { hookTemplate: extraOptions.hookTemplate }
-              : {}),
-            ...(extraOptions.hookStartTime !== undefined
-              ? { hookStartTime: Number(extraOptions.hookStartTime) }
-              : {}),
-            ...(extraOptions.hookBlurBackground !== undefined
-              ? { hookBlurBackground: !!extraOptions.hookBlurBackground }
-              : {}),
-            ...(extraOptions.hookDarkOverlay !== undefined
-              ? { hookDarkOverlay: !!extraOptions.hookDarkOverlay }
-              : {}),
-            ...(extraOptions.hookFreezeFrame !== undefined
-              ? { hookFreezeFrame: !!extraOptions.hookFreezeFrame }
-              : {}),
-            ...(extraOptions.hookZoomScale !== undefined
-              ? { hookZoomScale: Number(extraOptions.hookZoomScale) }
-              : {}),
-            ...(extraOptions.hookTextAnimation !== undefined
-              ? { hookTextAnimation: extraOptions.hookTextAnimation }
-              : {}),
-            ...(extraOptions.hookFocusPoint !== undefined
-              ? { hookFocusPoint: extraOptions.hookFocusPoint }
-              : {}),
-            ...(extraOptions.coverFrame !== undefined
-              ? { coverFrame: extraOptions.coverFrame }
-              : {}),
-            ...(extraOptions.thumbnailFrame !== undefined
-              ? { thumbnailFrame: extraOptions.thumbnailFrame }
-              : {}),
-            ...(extraOptions.enhanceQuality !== undefined
-              ? { enhanceQuality: !!extraOptions.enhanceQuality }
-              : {}),
-            ...(extraOptions.hookEndTime !== undefined
-              ? { hookEndTime: Number(extraOptions.hookEndTime) }
-              : {}),
-            ...(extraOptions.hookSourceStartTime !== undefined
-              ? { hookSourceStartTime: Number(extraOptions.hookSourceStartTime) }
-              : {}),
-            ...(extraOptions.hookSourceEndTime !== undefined
-              ? { hookSourceEndTime: Number(extraOptions.hookSourceEndTime) }
-              : {}),
-            ...(extraOptions.exportDestination !== undefined
-              ? { exportDestination: extraOptions.exportDestination }
-              : {}),
-            renderViral: true,
-            analyzeClips: false,
-            viralData: payload,
-            // Pass simple flags at top level if needed by other services
-            smartCrop: !!extraOptions.smartCrop,
-          },
-        }),
-      });
+      let response;
+      for (let submissionAttempt = 0; submissionAttempt < 2; submissionAttempt += 1) {
+        try {
+          response = await fetchWithRenderTimeout(
+            `${API_BASE_URL}/api/media/process`,
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                fileUrl: finalVideoUrl,
+                renderJobId: file?.renderJobId || null,
+                renderRequestId,
+                options: {
+                  ...options,
+                  ...(extraOptions.addMusic !== undefined
+                    ? { addMusic: !!extraOptions.addMusic }
+                    : {}),
+                  ...(extraOptions.musicFile !== undefined
+                    ? { musicFile: extraOptions.musicFile }
+                    : {}),
+                  ...(extraOptions.isSearch !== undefined
+                    ? { isSearch: !!extraOptions.isSearch }
+                    : {}),
+                  ...(extraOptions.safeSearch !== undefined
+                    ? { safeSearch: !!extraOptions.safeSearch }
+                    : {}),
+                  ...(extraOptions.musicVolume !== undefined
+                    ? { musicVolume: Number(extraOptions.musicVolume) }
+                    : {}),
+                  ...(extraOptions.musicDucking !== undefined
+                    ? { musicDucking: !!extraOptions.musicDucking }
+                    : {}),
+                  ...(extraOptions.musicDuckingStrength !== undefined
+                    ? { musicDuckingStrength: Number(extraOptions.musicDuckingStrength) }
+                    : {}),
+                  ...(extraOptions.muteAudio !== undefined
+                    ? { muteAudio: !!extraOptions.muteAudio }
+                    : {}),
+                  ...(extraOptions.silenceRemoval !== undefined
+                    ? { silenceRemoval: !!extraOptions.silenceRemoval }
+                    : {}),
+                  ...(extraOptions.silenceThreshold !== undefined
+                    ? { silenceThreshold: Number(extraOptions.silenceThreshold) }
+                    : {}),
+                  ...(extraOptions.minSilenceDuration !== undefined
+                    ? { minSilenceDuration: Number(extraOptions.minSilenceDuration) }
+                    : {}),
+                  ...(extraOptions.removeWatermark !== undefined
+                    ? { removeWatermark: !!extraOptions.removeWatermark }
+                    : {}),
+                  ...(extraOptions.watermarkMode !== undefined
+                    ? { watermarkMode: extraOptions.watermarkMode }
+                    : {}),
+                  ...(extraOptions.manualWatermarkRegions !== undefined
+                    ? { manualWatermarkRegions: extraOptions.manualWatermarkRegions }
+                    : {}),
+                  ...(extraOptions.addHook !== undefined
+                    ? { addHook: !!extraOptions.addHook }
+                    : {}),
+                  ...(extraOptions.hookText !== undefined
+                    ? { hookText: extraOptions.hookText }
+                    : {}),
+                  ...(extraOptions.hookIntroSeconds !== undefined
+                    ? { hookIntroSeconds: Number(extraOptions.hookIntroSeconds) }
+                    : {}),
+                  ...(extraOptions.hookTemplate !== undefined
+                    ? { hookTemplate: extraOptions.hookTemplate }
+                    : {}),
+                  ...(extraOptions.hookStartTime !== undefined
+                    ? { hookStartTime: Number(extraOptions.hookStartTime) }
+                    : {}),
+                  ...(extraOptions.hookBlurBackground !== undefined
+                    ? { hookBlurBackground: !!extraOptions.hookBlurBackground }
+                    : {}),
+                  ...(extraOptions.hookDarkOverlay !== undefined
+                    ? { hookDarkOverlay: !!extraOptions.hookDarkOverlay }
+                    : {}),
+                  ...(extraOptions.hookFreezeFrame !== undefined
+                    ? { hookFreezeFrame: !!extraOptions.hookFreezeFrame }
+                    : {}),
+                  ...(extraOptions.hookZoomScale !== undefined
+                    ? { hookZoomScale: Number(extraOptions.hookZoomScale) }
+                    : {}),
+                  ...(extraOptions.hookTextAnimation !== undefined
+                    ? { hookTextAnimation: extraOptions.hookTextAnimation }
+                    : {}),
+                  ...(extraOptions.hookFocusPoint !== undefined
+                    ? { hookFocusPoint: extraOptions.hookFocusPoint }
+                    : {}),
+                  ...(extraOptions.coverFrame !== undefined
+                    ? { coverFrame: extraOptions.coverFrame }
+                    : {}),
+                  ...(extraOptions.thumbnailFrame !== undefined
+                    ? { thumbnailFrame: extraOptions.thumbnailFrame }
+                    : {}),
+                  ...(extraOptions.enhanceQuality !== undefined
+                    ? { enhanceQuality: !!extraOptions.enhanceQuality }
+                    : {}),
+                  ...(extraOptions.hookEndTime !== undefined
+                    ? { hookEndTime: Number(extraOptions.hookEndTime) }
+                    : {}),
+                  ...(extraOptions.hookSourceStartTime !== undefined
+                    ? { hookSourceStartTime: Number(extraOptions.hookSourceStartTime) }
+                    : {}),
+                  ...(extraOptions.hookSourceEndTime !== undefined
+                    ? { hookSourceEndTime: Number(extraOptions.hookSourceEndTime) }
+                    : {}),
+                  ...(extraOptions.exportDestination !== undefined
+                    ? { exportDestination: extraOptions.exportDestination }
+                    : {}),
+                  renderViral: true,
+                  analyzeClips: false,
+                  viralData: payload,
+                  // Pass simple flags at top level if needed by other services
+                  smartCrop: !!extraOptions.smartCrop,
+                },
+              }),
+            },
+            {
+              timeoutMs: RENDER_SUBMISSION_TIMEOUT_MS,
+              timeoutMessage: "The render service did not acknowledge the job within 45 seconds.",
+              controllerRef: activeRenderRequestRef,
+            }
+          );
+          break;
+        } catch (submissionError) {
+          const retryable =
+            submissionError?.code === "RENDER_REQUEST_TIMEOUT" ||
+            submissionError?.message === "Failed to fetch";
+          if (!retryable || submissionAttempt === 1 || abortRef.current) throw submissionError;
+          setStatusMessage("Render service is slow. Retrying safely without another charge...");
+          await waitForRenderRetry();
+        }
+      }
 
       if (!response.ok) {
         const debugText = await response.text();
         console.error("Backend Error Text:", debugText);
+        let backendMessage = "Rendering failed";
         try {
           const errJson = JSON.parse(debugText);
-          throw new Error(errJson.detail || errJson.message || "Rendering failed");
-        } catch (e) {
-          throw new Error(`Rendering failed: ${response.status} ${response.statusText}`);
-        }
+          backendMessage = errJson.detail || errJson.details || errJson.message || backendMessage;
+        } catch (_parseError) {}
+        throw new Error(
+          `${backendMessage} (${response.status}${response.statusText ? ` ${response.statusText}` : ""})`
+        );
       }
 
       let result = await response.json();
@@ -1175,9 +1244,14 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
       // ASYNC POLLING (Viral Clip Render)
       if (result.jobId) {
         const jobId = result.jobId;
+        viralRenderAttemptRef.current = {
+          ...viralRenderAttemptRef.current,
+          jobId,
+        };
         setStatusMessage("Queued for Rendering...");
 
         let attempts = 0;
+        let consecutiveStatusFailures = 0;
         while (true) {
           if (abortRef.current) throw new Error("Processing cancelled by user.");
           if (attempts > 300) throw new Error("Rendering timed out");
@@ -1186,28 +1260,62 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
 
           if (abortRef.current) throw new Error("Processing cancelled by user.");
 
-          let statusRes = await fetch(`${API_BASE_URL}/api/media/status/${jobId}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
+          let statusRes;
+          try {
+            statusRes = await fetchWithRenderTimeout(
+              `${API_BASE_URL}/api/media/status/${jobId}`,
+              { headers: { Authorization: `Bearer ${token}` } },
+              {
+                timeoutMs: RENDER_STATUS_TIMEOUT_MS,
+                timeoutMessage: "The render status service did not respond within 15 seconds.",
+                controllerRef: activeRenderRequestRef,
+              }
+            );
+          } catch (statusError) {
+            if (abortRef.current) throw statusError;
+            consecutiveStatusFailures += 1;
+            if (consecutiveStatusFailures >= 5) {
+              throw new Error(
+                "The render is still queued, but status checks are unavailable. Retry to recover the same job safely."
+              );
+            }
+            setStatusMessage(
+              `Render status connection interrupted. Retrying (${consecutiveStatusFailures}/5)...`
+            );
+            continue;
+          }
 
           // Handle Token Expiry (401)
           if (statusRes.status === 401) {
             console.warn("Token expired during viral render polling, refreshing...");
             try {
               token = await user.getIdToken(true);
-              statusRes = await fetch(`${API_BASE_URL}/api/media/status/${jobId}`, {
-                headers: { Authorization: `Bearer ${token}` },
-              });
+              statusRes = await fetchWithRenderTimeout(
+                `${API_BASE_URL}/api/media/status/${jobId}`,
+                { headers: { Authorization: `Bearer ${token}` } },
+                {
+                  timeoutMs: RENDER_STATUS_TIMEOUT_MS,
+                  controllerRef: activeRenderRequestRef,
+                }
+              );
             } catch (err) {
               console.error("Token refresh failed:", err);
               throw new Error("Authentication session expired.");
             }
           }
 
-          if (!statusRes.ok) continue;
+          if (!statusRes.ok) {
+            consecutiveStatusFailures += 1;
+            if (consecutiveStatusFailures >= 5) {
+              throw new Error(`Render status checks failed repeatedly (${statusRes.status}).`);
+            }
+            continue;
+          }
+          consecutiveStatusFailures = 0;
           const statusData = await statusRes.json();
 
           if (statusData.status === "failed") {
+            viralRenderAttemptRef.current = null;
             throw new Error(statusData.error || "Rendering failed on server");
           }
 
@@ -1227,6 +1335,7 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
       // Update the main editor with the final rendered clip
       const renderedUrl = result.url || result.output_url || result.outputUrl;
       if (renderedUrl) {
+        viralRenderAttemptRef.current = null;
         const isSignedUrl =
           renderedUrl.includes("Signature") ||
           renderedUrl.includes("token=") ||
@@ -1295,6 +1404,7 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
       setStatusMessage(isCancelled ? "Rendering cancelled." : "Error rendering clip: " + msg);
       // Keep the studio open on error/cancel so the user can retry or adjust settings
       // (only close on explicit user cancel if they want to go back)
+      throw error;
     } finally {
       setProcessing(false);
     }
@@ -1382,8 +1492,7 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
         onCancel={() => {
           if (processing) {
             // Cancel the in-progress render instead of closing the studio
-            abortRef.current = true;
-            setStatusMessage("Cancelling...");
+            cancelActiveProcessing();
           } else {
             setClipSuggestions(null);
           }
@@ -1878,8 +1987,7 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
                     className="cancel-btn"
                     style={{ marginLeft: "12px", padding: "4px 12px", fontSize: "0.8rem" }}
                     onClick={() => {
-                      abortRef.current = true;
-                      setStatusMessage("Cancelling...");
+                      cancelActiveProcessing();
                     }}
                   >
                     Cancel Processing
