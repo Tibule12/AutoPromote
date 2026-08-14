@@ -2453,16 +2453,29 @@ const ViralClipStudio = ({
     safePlayMediaElement(video);
   };
 
+  const pauseSynchronizedPreview = () => {
+    previewPlaybackIntentRef.current = false;
+    videoRef.current?.pause();
+    beforeVideoRef.current?.pause();
+    audioRef.current?.pause();
+    hookBackdropVideoRef.current?.pause();
+    hookFreezeVideoRef.current?.pause();
+    smartCropForegroundVideoRef.current?.pause();
+    musicPreviewRef.current?.pause();
+    stopMusicPreviewBufferPlayback();
+    overlayMediaRefsRef.current.forEach(media => media.pause());
+  };
+
   const togglePreviewPlayback = () => {
     const video = videoRef.current;
     if (!video) return;
 
     if (video.paused) {
+      backgroundSoundPreviewSuppressedRef.current = false;
       previewPlaybackIntentRef.current = true;
       safePlayMediaElement(video);
     } else {
-      previewPlaybackIntentRef.current = false;
-      video.pause();
+      pauseSynchronizedPreview();
     }
   };
 
@@ -2586,6 +2599,20 @@ const ViralClipStudio = ({
   const clampOverlayDimension = value => Math.max(10, Math.min(100, Number(value) || 10));
   const clampOverlayCoordinate = value => Math.max(0, Math.min(100, Number(value) || 0));
 
+  const clampOverlayPlacement = overlay => {
+    const width = clampOverlayDimension(overlay.width ?? 40);
+    const height = clampOverlayDimension(overlay.height ?? 30);
+    const halfWidth = width / 2;
+    const halfHeight = height / 2;
+    return {
+      ...overlay,
+      width,
+      height,
+      x: clampNumber(overlay.x, halfWidth, 100 - halfWidth, 50),
+      y: clampNumber(overlay.y, halfHeight, 100 - halfHeight, 50),
+    };
+  };
+
   const getOverlayAspectRatio = overlay => {
     const storedRatio = Number(overlay.aspectRatio);
     if (Number.isFinite(storedRatio) && storedRatio > 0) return storedRatio;
@@ -2609,27 +2636,27 @@ const ViralClipStudio = ({
         if (overlay.aspectRatioLocked && (overlay.type === "video" || overlay.type === "image")) {
           const ratio = getOverlayAspectRatio(overlay);
           if (dimension === "width") {
-            return {
+            return clampOverlayPlacement({
               ...overlay,
               width: nextValue,
               height: clampOverlayDimension(nextValue / ratio),
-            };
+            });
           }
 
-          return {
+          return clampOverlayPlacement({
             ...overlay,
             height: nextValue,
             width: clampOverlayDimension(nextValue * ratio),
-          };
+          });
         }
 
         const nextWidth = dimension === "width" ? nextValue : currentWidth;
         const nextHeight = dimension === "height" ? nextValue : currentHeight;
-        return {
+        return clampOverlayPlacement({
           ...overlay,
           [dimension]: nextValue,
           aspectRatio: nextWidth / Math.max(nextHeight, 1),
-        };
+        });
       })
     );
   };
@@ -2810,8 +2837,19 @@ const ViralClipStudio = ({
     const position = resolveOutputTimelinePosition(outputTime);
     if (!position) return;
 
-    setActiveTimelineIndex(position.index);
+    hookPreviewSequenceRef.current = { active: false };
+    setHookPreviewLoop(false);
+    setTrimPreviewLoop(false);
     const video = videoRef.current;
+    pendingTimelineSeekRef.current =
+      position.index === activeTimelineIndex
+        ? null
+        : {
+            index: position.index,
+            sourceTime: position.sourceTime,
+            play: Boolean(video && !video.paused && previewPlaybackIntentRef.current),
+          };
+    setActiveTimelineIndex(position.index);
     if (!video) return;
     if (position.clip?.url && video.src !== position.clip.url) {
       applySafeMediaSource(video, position.clip.url);
@@ -3028,7 +3066,10 @@ const ViralClipStudio = ({
     setOverlays(prev =>
       prev.map(overlay =>
         overlay.id === id
-          ? { ...overlay, [axis]: clampOverlayCoordinate(Number(overlay[axis] ?? 50) + delta) }
+          ? clampOverlayPlacement({
+              ...overlay,
+              [axis]: clampOverlayCoordinate(Number(overlay[axis] ?? 50) + delta),
+            })
           : overlay
       )
     );
@@ -3312,6 +3353,8 @@ const ViralClipStudio = ({
   );
   const previewTimelineTime = getPreviewTimelineTime(videoTime);
   const outputTimelineDuration = Math.max(0.1, getTimelineDuration());
+  const outputPlaybackDuration = outputTimelineDuration / Math.max(0.01, previewSpeed);
+  const previewPlaybackTime = previewTimelineTime / Math.max(0.01, previewSpeed);
   const currentTimelineOffset = getTimelineOffsetForIndex(activeTimelineIndex);
   const activeContentProfile =
     CREATOR_CONTENT_PROFILES.find(profile => profile.id === contentProfile) ||
@@ -3429,7 +3472,10 @@ const ViralClipStudio = ({
   const hookDuration = Math.max(0.1, hookEnd - resolvedHookStart);
   const hookLeadOut = 0.45;
   const isHookWithinPreviewWindow =
-    addHook && previewClipTime >= resolvedHookStart && previewClipTime <= hookEnd + hookLeadOut;
+    addHook &&
+    activeTimelineIndex === 0 &&
+    previewClipTime >= resolvedHookStart &&
+    previewClipTime <= hookEnd + hookLeadOut;
   const hookProgress = isHookWithinPreviewWindow
     ? clampNumber((previewClipTime - resolvedHookStart) / Math.max(hookDuration, 0.01), 0, 1, 0)
     : 0;
@@ -3760,6 +3806,23 @@ const ViralClipStudio = ({
     duration: currentTimelineWindow.duration || selectedClip?.duration || 3,
   });
   const liveTimelineDuration = outputTimelineDuration;
+  const liveTimelineCutMarkers = timeline.slice(0, -1).flatMap((clip, index) => {
+    const nextClip = timeline[index + 1];
+    const currentWindow = getTimelineClipWindow(clip);
+    const nextWindow = getTimelineClipWindow(nextClip);
+    const sameSource =
+      (clip.sourceClipId && clip.sourceClipId === nextClip?.sourceClipId) ||
+      (!!clip.url && clip.url === nextClip?.url);
+    const removedDuration = Number(nextWindow.start || 0) - Number(currentWindow.end || 0);
+    if (!sameSource || removedDuration < 0.05) return [];
+    return [
+      {
+        id: `cut-${clip.id}-${nextClip.id}`,
+        outputTime: getTimelineOffsetForIndex(index + 1),
+        removedDuration,
+      },
+    ];
+  });
   const liveTimelineBRoll = overlays.filter(
     overlay =>
       overlay.bRollMode && overlay.startTime !== undefined && Number(overlay.duration || 0) > 0
@@ -3800,6 +3863,7 @@ const ViralClipStudio = ({
     Number(creativeEffectsEnabled) +
     Number(autoCaptions) +
     Number(previewSpeed !== 1 || silenceRemoval) +
+    liveTimelineCutMarkers.length +
     liveTimelineBRoll.length +
     Number(addMusic || muteOriginalAudio);
   const retentionScore = clampNumber(
@@ -3841,7 +3905,7 @@ const ViralClipStudio = ({
     const outputFocusTime = shouldFocusBRoll
       ? Number(timedBRoll.startTime || 0)
       : addHook || preferredTool === "hook"
-        ? currentTimelineOffset + resolvedHookStart + Math.min(0.35, hookDuration * 0.15)
+        ? resolvedHookStart + Math.min(0.35, hookDuration * 0.15)
         : timedBRoll
           ? Number(timedBRoll.startTime || 0) + 0.2
           : currentTimelineOffset;
@@ -3882,9 +3946,11 @@ const ViralClipStudio = ({
       if (windowEnd > 0 && Number(video.currentTime || 0) >= windowEnd - 0.1) {
         focusComparisonPreview(studioInspectorTab, false);
       }
+      backgroundSoundPreviewSuppressedRef.current = false;
+      previewPlaybackIntentRef.current = true;
       safePlayMediaElement(video);
     } else {
-      video.pause();
+      pauseSynchronizedPreview();
     }
   };
 
@@ -5349,7 +5415,14 @@ const ViralClipStudio = ({
 
     const handlePlay = () => {
       const currentClip = timeline[activeTimelineIndex];
-      if (!currentClip || !addHook || hookPreviewLoop || trimPreviewLoop) return;
+      if (
+        !currentClip ||
+        activeTimelineIndex !== 0 ||
+        !addHook ||
+        hookPreviewLoop ||
+        trimPreviewLoop
+      )
+        return;
 
       const currentWindow = getTimelineClipWindow(currentClip);
       const startTime = Number(currentWindow.start || 0);
@@ -5431,7 +5504,12 @@ const ViralClipStudio = ({
         return;
       }
 
-      if (addHook && hookPreviewLoop && absoluteHookEnd > absoluteHookStart + 0.05) {
+      if (
+        activeTimelineIndex === 0 &&
+        addHook &&
+        hookPreviewLoop &&
+        absoluteHookEnd > absoluteHookStart + 0.05
+      ) {
         if (video.currentTime < absoluteHookStart || video.currentTime >= absoluteHookEnd) {
           video.currentTime = absoluteHookStart;
           if (previewPlaybackIntentRef.current) {
@@ -5878,6 +5956,7 @@ const ViralClipStudio = ({
     const syncHookMedia = () => {
       const isHookVisibleNow =
         addHook &&
+        activeTimelineIndex === 0 &&
         normalizedHookText &&
         video.currentTime >= absoluteHookStart &&
         video.currentTime <= absoluteHookEnd + hookLeadOut;
@@ -6457,7 +6536,7 @@ const ViralClipStudio = ({
     width: 100,
     height: 100,
     aspectRatioLocked: true,
-    aspectRatio: 9 / 16,
+    aspectRatio: 1,
     clipId: timeline[activeTimelineIndex]?.id || "main",
     startTime,
     duration,
@@ -6600,7 +6679,7 @@ const ViralClipStudio = ({
           x: o.x || 50,
           y: o.y || 50,
         };
-        return {
+        return clampOverlayPlacement({
           ...o,
           bRollMode: mode || undefined,
           coverMainVideo: mode === "fullscreen",
@@ -6608,7 +6687,13 @@ const ViralClipStudio = ({
           height: modeLayout.height,
           x: modeLayout.x,
           y: modeLayout.y,
-        };
+          aspectRatio:
+            mode === "pip"
+              ? modeLayout.width / modeLayout.height
+              : mode === "sideBySide"
+                ? 0.5
+                : 1,
+        });
       })
     );
     const selectedOverlay = overlays.find(overlay => overlay.id === id);
@@ -7078,7 +7163,11 @@ const ViralClipStudio = ({
         return prev;
       }
 
-      return prev.map(o => (o.id === dragItem.current ? { ...o, x: percentX, y: percentY } : o));
+      return prev.map(o =>
+        o.id === dragItem.current
+          ? clampOverlayPlacement({ ...o, x: percentX, y: percentY })
+          : o
+      );
     });
   };
 
@@ -7677,6 +7766,14 @@ const ViralClipStudio = ({
                           data-testid="hook-preview-banner"
                           className={`hook-preview-banner hook-preview-banner-${hookTemplate.replace(/_/g, "-")} hook-preview-banner-position-${hookBannerSide} hook-preview-banner-subject-${hookBannerSubjectType} hook-text-${hookTextAnimation}`}
                           style={{
+                            "--hook-copy-scale":
+                              normalizedHookText.length > 54
+                                ? 0.68
+                                : normalizedHookText.length > 38
+                                  ? 0.8
+                                  : normalizedHookText.length > 26
+                                    ? 0.9
+                                    : 1,
                             opacity: hookOutroOpacity * Math.max(0.35, hookTextIntroProgress),
                             top: hookBannerTop,
                             left: `${hookBannerAnchorX}%`,
@@ -7725,12 +7822,12 @@ const ViralClipStudio = ({
                           ) : null}
                         </div>
                       ) : null}
-                      {silenceRemoval ? (
+                      {silenceRemoval && !showHookPreview ? (
                         <div className="silence-preview-indicator">
                           <span />
                           <span />
                           <span />
-                          <strong>Long pauses will be tightened</strong>
+                          <strong>Pacing · pauses tightened</strong>
                         </div>
                       ) : null}
                       {overlays
@@ -8105,8 +8202,8 @@ const ViralClipStudio = ({
                     <div>
                       <strong>Live edit timeline</strong>
                       <span data-testid="timeline-output-time">
-                        {formatPreviewTimePrecise(previewTimelineTime)} /{" "}
-                        {formatPreviewTimePrecise(liveTimelineDuration)}
+                        {formatPreviewTimePrecise(previewPlaybackTime)} /{" "}
+                        {formatPreviewTimePrecise(outputPlaybackDuration)}
                       </span>
                     </div>
                     <span className="compact-timeline-sync">
@@ -8157,6 +8254,20 @@ const ViralClipStudio = ({
                           Remove
                         </span>
                       ) : null}
+                      {liveTimelineCutMarkers.map(marker => (
+                        <span
+                          key={marker.id}
+                          className="compact-cut-marker"
+                          style={{
+                            left: `${(marker.outputTime / liveTimelineDuration) * 100}%`,
+                          }}
+                          data-testid="timeline-applied-cut"
+                          title={`${marker.removedDuration.toFixed(1)} seconds removed here`}
+                          aria-hidden="true"
+                        >
+                          CUT
+                        </span>
+                      ))}
                       <span className="compact-source-beats" aria-hidden="true">
                         {STORY_BEAT_LABELS.map(label => (
                           <i key={label}>{label}</i>
@@ -8169,7 +8280,9 @@ const ViralClipStudio = ({
                     <span />
                     {Array.from({ length: 6 }, (_, index) => (
                       <i key={`timeline-tick-${index}`}>
-                        {formatPreviewTimePrecise((index / 5) * liveTimelineDuration)}
+                        {formatPreviewTimePrecise(
+                          ((index / 5) * liveTimelineDuration) / Math.max(0.01, previewSpeed)
+                        )}
                       </i>
                     ))}
                   </div>
@@ -8190,17 +8303,14 @@ const ViralClipStudio = ({
                           type="button"
                           className="compact-timeline-block is-hook"
                           style={{
-                            left: `${((currentTimelineOffset + resolvedHookStart) / liveTimelineDuration) * 100}%`,
+                            left: `${(resolvedHookStart / liveTimelineDuration) * 100}%`,
                             width: `${Math.max(3, (hookDuration / liveTimelineDuration) * 100)}%`,
                           }}
                           data-testid="timeline-hook-block"
                           aria-label="Inspect opening hook in live timeline"
                           onClick={event => {
                             event.stopPropagation();
-                            seekLiveEditTimelineItem(
-                              currentTimelineOffset + resolvedHookStart,
-                              "hook"
-                            );
+                            seekLiveEditTimelineItem(resolvedHookStart, "hook");
                           }}
                           title={`${hookTemplateConfig.label || "Opening hook"} · ${hookDuration.toFixed(1)} seconds`}
                         >
@@ -8432,6 +8542,7 @@ const ViralClipStudio = ({
                       >
                         <b>{previewSpeed.toFixed(2).replace(/0$/, "")}×</b>
                         <span>{pacingLevel} pacing</span>
+                        <small>{formatPreviewTimePrecise(outputPlaybackDuration)} output</small>
                         {silenceRemoval ? <small>Silence tightening on</small> : null}
                       </button>
                     </div>

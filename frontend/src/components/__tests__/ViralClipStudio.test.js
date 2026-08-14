@@ -181,10 +181,28 @@ describe("ViralClipStudio timeline sequencing", () => {
     fireEvent.click(screen.getByTestId("remove-marked-range"));
     expect(screen.queryByTestId("pending-cut-summary")).not.toBeInTheDocument();
     expect(screen.getByTestId("timeline-output-time")).toHaveTextContent("0:10.0");
+    expect(screen.getByTestId("timeline-applied-cut")).toHaveAttribute(
+      "title",
+      "2.0 seconds removed here"
+    );
     expect(
       screen.getByTestId("timeline-source-track").querySelectorAll(".compact-filmstrip-frame")
         .length
     ).toBeGreaterThan(1);
+
+    const sourceTrack = screen.getByTestId("timeline-source-track");
+    sourceTrack.getBoundingClientRect = () => ({
+      left: 0,
+      right: 200,
+      top: 0,
+      bottom: 62,
+      width: 200,
+      height: 62,
+    });
+    fireEvent.click(sourceTrack, { clientX: 190 });
+    expect(afterVideo.currentTime).toBeGreaterThan(5);
+    fireEvent.click(screen.getByTestId("timeline-hook-block"));
+    expect(afterVideo.currentTime).toBeCloseTo(0.8, 1);
 
     fireEvent.click(screen.getByRole("checkbox", { name: /Add Hook/i }));
     fireEvent.click(screen.getByRole("button", { name: /Render Final Clip/i }));
@@ -205,7 +223,7 @@ describe("ViralClipStudio timeline sequencing", () => {
         }),
       ])
     );
-  });
+  }, 15000);
 
   function setupVideoCreateElementMock() {
     const createdVideos = [];
@@ -1574,6 +1592,17 @@ describe("ViralClipStudio timeline sequencing", () => {
     fireEvent.click(screen.getByRole("button", { name: "After" }));
     expect(previewShell.querySelector(".draggable-overlay.active")).toBeInTheDocument();
     expect(previewShell.querySelector(".overlay-controls")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "W+" }));
+    fireEvent.click(screen.getByRole("button", { name: "H+" }));
+    const resizedOverlay = previewShell.querySelector(".draggable-overlay.active");
+    const overlayLeft = Number.parseFloat(resizedOverlay.style.left);
+    const overlayTop = Number.parseFloat(resizedOverlay.style.top);
+    const overlayWidth = Number.parseFloat(resizedOverlay.style.width);
+    const overlayHeight = Number.parseFloat(resizedOverlay.style.height);
+    expect(overlayLeft - overlayWidth / 2).toBeGreaterThanOrEqual(0);
+    expect(overlayLeft + overlayWidth / 2).toBeLessThanOrEqual(100);
+    expect(overlayTop - overlayHeight / 2).toBeGreaterThanOrEqual(0);
+    expect(overlayTop + overlayHeight / 2).toBeLessThanOrEqual(100);
     fireEvent.click(screen.getByRole("button", { name: "Split" }));
 
     const afterVideo = screen.getByTestId("studio-after-video");
@@ -1704,6 +1733,19 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(musicPreview.pause).toHaveBeenCalled();
     expect(within(inspector).getByRole("button", { name: "Preview sound" })).toBeInTheDocument();
 
+    const afterVideo = screen.getByTestId("studio-after-video");
+    Object.defineProperty(afterVideo, "paused", {
+      configurable: true,
+      writable: true,
+      value: true,
+    });
+    musicPreview.paused = true;
+    const musicPlayCallsAfterStop = musicPreview.play.mock.calls.length;
+    fireEvent.click(screen.getByRole("button", { name: /Play comparison|Pause comparison/i }));
+    afterVideo.paused = false;
+    fireEvent.play(afterVideo);
+    expect(musicPreview.play.mock.calls.length).toBeGreaterThan(musicPlayCallsAfterStop);
+
     expect(() =>
       fireEvent.click(within(inspector).getByRole("button", { name: "Remove" }))
     ).not.toThrow();
@@ -1761,6 +1803,7 @@ describe("ViralClipStudio timeline sequencing", () => {
 
     expect(screen.getByTestId("live-caption-preview")).toBeInTheDocument();
     expect(afterVideo.playbackRate).toBeCloseTo(1.15);
+    expect(screen.getByTestId("timeline-output-time")).toHaveTextContent("0:17.4");
     expect(onSave).not.toHaveBeenCalled();
 
     const inspector = screen.getByTestId("clip-studio-inspector");
