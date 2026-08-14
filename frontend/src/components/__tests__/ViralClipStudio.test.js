@@ -1276,6 +1276,17 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(container.querySelector(".hook-segment-readout")?.textContent).not.toContain(
       "0:00.80 to 0:03.80"
     );
+
+    const firstSuggestedCopy = hookTextArea.value;
+    const inspector = screen.getByTestId("clip-studio-inspector");
+    await act(async () => {
+      fireEvent.click(within(inspector).getByRole("button", { name: /Try another/i }));
+    });
+    await waitFor(() => {
+      expect(within(inspector).getByRole("button", { name: /Try another/i })).not.toBeDisabled();
+    });
+    const suggestionCard = within(inspector).getByText("AI hook suggestion").closest("div");
+    expect(suggestionCard.querySelector("strong").textContent).not.toBe(firstSuggestedCopy);
   });
 
   test("selected hook segment plays as the opening during normal playback", async () => {
@@ -1541,7 +1552,9 @@ describe("ViralClipStudio timeline sequencing", () => {
     fireEvent.click(screen.getByRole("tab", { name: /B-roll/i }));
 
     const inspector = screen.getByTestId("clip-studio-inspector");
-    expect(within(inspector).getByRole("button", { name: "Balanced" })).toHaveClass("is-active");
+    const balancedPacingButton = within(inspector).getByRole("button", { name: "Balanced" });
+    expect(balancedPacingButton).toHaveClass("is-active");
+    expect(balancedPacingButton).toHaveAttribute("aria-pressed", "true");
     fireEvent.click(within(inspector).getByRole("button", { name: "Frequent" }));
     expect(within(inspector).getByText(/5 suggested beats across/i)).toBeInTheDocument();
     fireEvent.click(within(inspector).getByRole("button", { name: /Plan whole clip/i }));
@@ -1653,6 +1666,46 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(screen.queryByTestId(/broll-preview-/)).not.toBeInTheDocument();
     expect(screen.getAllByText(/Original audio returns automatically/i).length).toBeGreaterThan(0);
   }, 30000);
+
+  test("recognizes uploaded B-roll that already covers the suggested beats", async () => {
+    const createdVideos = setupVideoCreateElementMock();
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={[{ id: "clip-1", start: 0, end: 20, duration: 20, reason: "Creator story" }]}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+        onStatusChange={jest.fn()}
+        currentMusic={null}
+        onMusicChange={jest.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("tab", { name: /B-roll/i }));
+    const inspector = screen.getByTestId("clip-studio-inspector");
+    const initialCreatedVideoCount = createdVideos.length;
+    fireEvent.change(screen.getByTestId("broll-video-input"), {
+      target: {
+        files: [
+          new File(["fitness"], "fitness.mp4", { type: "video/mp4" }),
+          new File(["cooking"], "cooking.mp4", { type: "video/mp4" }),
+        ],
+      },
+    });
+
+    await waitFor(() => expect(createdVideos.length).toBe(initialCreatedVideoCount + 2));
+    await act(async () => {
+      createdVideos.slice(-2).forEach(video => video.onloadedmetadata());
+    });
+    await waitFor(() => {
+      expect(screen.getAllByTestId(/timeline-broll-block-/)).toHaveLength(2);
+    });
+
+    expect(within(inspector).getByText(/2 already covered/i)).toBeInTheDocument();
+    fireEvent.click(within(inspector).getByRole("button", { name: /Plan whole clip/i }));
+    expect(screen.getAllByTestId(/timeline-broll-block-/)).toHaveLength(2);
+    expect(screen.getByText(/already covered by real footage/i)).toBeInTheDocument();
+  });
 
   test("keeps uploaded background sound enabled with speech-aware ducking", async () => {
     render(
@@ -1816,6 +1869,10 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(screen.getByTestId("live-caption-preview")).toHaveTextContent(/STOP SCROLLING/i);
 
     fireEvent.click(within(inspector).getByRole("button", { name: "Neon Glow" }));
+    expect(within(inspector).getByRole("button", { name: "Neon Glow" })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
     expect(screen.getByTestId("live-caption-preview")).toHaveClass("caption-style-glow");
 
     fireEvent.click(within(inspector).getByRole("tab", { name: /Pacing/i }));

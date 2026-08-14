@@ -1672,6 +1672,7 @@ const ViralClipStudio = ({
   const hookPlayheadDragRef = useRef(null);
   const hookPreviewSequenceRef = useRef({ active: false });
   const hookAnalysisRequestRef = useRef(0);
+  const hookSuggestionCycleRef = useRef(0);
   const pendingClipActionRef = useRef(null);
   const pendingTimelineSeekRef = useRef(null);
 
@@ -2211,6 +2212,8 @@ const ViralClipStudio = ({
 
     const clipWindow = getTimelineClipWindow(clip);
     const requestId = Date.now();
+    const suggestionAttempt = hookSuggestionCycleRef.current;
+    hookSuggestionCycleRef.current += 1;
     hookAnalysisRequestRef.current = requestId;
     setHookAnalysisStatus("analyzing");
     setHookAnalysisMessage(
@@ -2312,7 +2315,7 @@ const ViralClipStudio = ({
         .filter(duration => duration <= Math.min(HOOK_MAX_SEGMENT_DURATION, fullWindowDuration))
         .map(duration => Number(duration.toFixed(2)));
 
-      let bestWindow = null;
+      const candidateWindows = [];
       scoredSamples.forEach(sample => {
         candidateDurations.forEach(duration => {
           const windowEnd = sample.time + duration;
@@ -2336,19 +2339,34 @@ const ViralClipStudio = ({
           const totalScore =
             score + sceneCuts * 1.2 + motionAverage * 1.4 + focusEnergy * 0.6 + earlyBias;
 
-          if (!bestWindow || totalScore > bestWindow.score) {
-            bestWindow = {
-              startTime: sample.time,
-              endTime: windowEnd,
-              duration,
-              score: totalScore,
-              motionAverage,
-              focusEnergy,
-              sceneCuts,
-            };
-          }
+          candidateWindows.push({
+            startTime: sample.time,
+            endTime: windowEnd,
+            duration,
+            score: totalScore,
+            motionAverage,
+            focusEnergy,
+            sceneCuts,
+          });
         });
       });
+
+      const distinctCandidates = candidateWindows
+        .sort((left, right) => right.score - left.score)
+        .filter(
+          (candidate, index, candidates) =>
+            !candidates
+              .slice(0, index)
+              .some(
+                prior =>
+                  Math.abs(prior.startTime - candidate.startTime) < 0.55 &&
+                  Math.abs(prior.duration - candidate.duration) < 0.55
+              )
+        )
+        .slice(0, 4);
+      const bestWindow = distinctCandidates.length
+        ? distinctCandidates[suggestionAttempt % distinctCandidates.length]
+        : null;
 
       if (!bestWindow) {
         throw new Error("The clip was too short to suggest a hook segment.");
@@ -2374,7 +2392,7 @@ const ViralClipStudio = ({
           : bestWindow.motionAverage > averageMotion + 0.02
             ? "Detected the strongest sustained movement and visual contrast in this window."
             : "Detected the most visually stable attention peak near the opening of the clip.";
-      const suggestedCopy =
+      const preferredCopy =
         bestWindow.sceneCuts > 0
           ? currentHookCopySuggestions.find(copy => /flip|changes|matters/i.test(copy)) ||
             currentHookCopySuggestions[0]
@@ -2382,6 +2400,23 @@ const ViralClipStudio = ({
             ? currentHookCopySuggestions.find(copy => /blink|watch|fast/i.test(copy)) ||
               currentHookCopySuggestions[0]
             : currentHookCopySuggestions[0];
+      const preferredCopyIndex = Math.max(0, currentHookCopySuggestions.indexOf(preferredCopy));
+      let suggestedCopy =
+        currentHookCopySuggestions[
+          (preferredCopyIndex + suggestionAttempt) % Math.max(1, currentHookCopySuggestions.length)
+        ] || preferredCopy;
+      const currentSuggestedCopy = normalizeHookText(
+        hookSuggestedRange?.textSuggestion || hookText
+      );
+      if (
+        currentHookCopySuggestions.length > 1 &&
+        normalizeHookText(suggestedCopy) === currentSuggestedCopy
+      ) {
+        suggestedCopy =
+          currentHookCopySuggestions[
+            (preferredCopyIndex + suggestionAttempt + 1) % currentHookCopySuggestions.length
+          ];
+      }
 
       if (hookAnalysisRequestRef.current !== requestId) return;
 
@@ -3677,6 +3712,7 @@ const ViralClipStudio = ({
 
   useEffect(() => {
     setHookSuggestedRange(null);
+    hookSuggestionCycleRef.current = 0;
     setHookAnalysisStatus("idle");
     setHookAnalysisMessage("");
     setHookSelectionMode(false);
@@ -3748,6 +3784,12 @@ const ViralClipStudio = ({
   const faceAnchorY =
     faceAnchorPreset === "face_top" ? 32 : faceAnchorPreset === "face_mid" ? 42 : 50;
   const safeObjectPosition = `${resolvedHookFocusPoint.x}% ${faceAnchorY}%`;
+  const sideBySideObjectPosition = `${resolvedHookFocusPoint.x}% ${clampNumber(
+    resolvedHookFocusPoint.y,
+    24,
+    58,
+    42
+  )}%`;
   const effectiveVideoFit = safeFaceFraming ? "contain" : smartCrop ? "cover" : videoFit;
   const showCropRiskIndicator =
     !safeFaceFraming &&
@@ -6688,11 +6730,7 @@ const ViralClipStudio = ({
           x: modeLayout.x,
           y: modeLayout.y,
           aspectRatio:
-            mode === "pip"
-              ? modeLayout.width / modeLayout.height
-              : mode === "sideBySide"
-                ? 0.5
-                : 1,
+            mode === "pip" ? modeLayout.width / modeLayout.height : mode === "sideBySide" ? 0.5 : 1,
         });
       })
     );
@@ -7052,23 +7090,52 @@ const ViralClipStudio = ({
     return suggestions;
   };
 
-  const addBRollPlan = () => {
+  const isBRollSuggestionCovered = (suggestion, overlayList = overlays) =>
+    overlayList.some(overlay => {
+      if (!overlay.bRollMode || overlay.startTime === undefined) return false;
+
+      const overlayStart = Number(overlay.startTime || 0);
+      const overlayDuration = Math.max(0, Number(overlay.duration || 0));
+      const overlayEnd = overlayStart + overlayDuration;
+      const suggestionTime = Number(suggestion.time || 0);
+      const coverageTolerance = 0.35;
+
+      return (
+        suggestionTime >= overlayStart - coverageTolerance &&
+        suggestionTime <= overlayEnd + coverageTolerance
+      );
+    });
+
+  const getBRollPlanStatus = () => {
     const suggestions = suggestBRollMoments();
+    const coveredSuggestions = suggestions.filter(suggestion =>
+      isBRollSuggestionCovered(suggestion)
+    );
+    const missingSuggestions = suggestions.filter(
+      suggestion => !isBRollSuggestionCovered(suggestion)
+    );
+
+    return {
+      suggestions,
+      coveredCount: coveredSuggestions.length,
+      missingSuggestions,
+    };
+  };
+
+  const bRollPlanStatus = getBRollPlanStatus();
+
+  const addBRollPlan = () => {
+    const { suggestions, coveredCount, missingSuggestions } = getBRollPlanStatus();
     if (!suggestions.length) {
       toast("Clip too short for a B-roll plan.");
       return;
     }
 
-    const occupiedTimes = overlays
-      .filter(overlay => overlay.bRollMode && overlay.startTime !== undefined)
-      .map(overlay => Number(overlay.startTime || 0));
-    const missingSuggestions = suggestions.filter(
-      suggestion => !occupiedTimes.some(time => Math.abs(time - suggestion.time) < 0.45)
-    );
-
     if (!missingSuggestions.length) {
-      setStudioActionMessage("This edit window already has B-roll coverage at every planned beat.");
-      toast("B-roll plan is already covered.");
+      setStudioActionMessage(
+        `All ${coveredCount} planned B-roll ${coveredCount === 1 ? "beat is" : "beats are"} already covered by real footage.`
+      );
+      toast("B-roll coverage is complete.");
       return;
     }
 
@@ -7079,11 +7146,13 @@ const ViralClipStudio = ({
     setOverlays(prev => [...prev, ...plannedOverlays]);
     setActiveOverlayId(plannedOverlays[0]?.id || null);
     setStudioActionMessage(
-      `${plannedOverlays.length} B-roll beats planned across ${formatPreviewTimePrecise(
+      `${plannedOverlays.length} B-roll ${plannedOverlays.length === 1 ? "beat" : "beats"} planned across ${formatPreviewTimePrecise(
         currentTimelineWindow.duration
-      )}. Replace each placeholder with matching footage when ready.`
+      )}. ${coveredCount ? `${coveredCount} ${coveredCount === 1 ? "beat was" : "beats were"} already covered by uploaded footage. ` : ""}Replace ${plannedOverlays.length === 1 ? "the placeholder" : "each placeholder"} with matching footage when ready.`
     );
-    toast.success(`${plannedOverlays.length} B-roll beats added to the plan.`);
+    toast.success(
+      `${plannedOverlays.length} B-roll ${plannedOverlays.length === 1 ? "beat" : "beats"} added to the plan.`
+    );
   };
 
   // --- Dragging Logic ---
@@ -7164,9 +7233,7 @@ const ViralClipStudio = ({
       }
 
       return prev.map(o =>
-        o.id === dragItem.current
-          ? clampOverlayPlacement({ ...o, x: percentX, y: percentY })
-          : o
+        o.id === dragItem.current ? clampOverlayPlacement({ ...o, x: percentX, y: percentY }) : o
       );
     });
   };
@@ -7566,15 +7633,22 @@ const ViralClipStudio = ({
                       controls={comparisonMode === "after"}
                       playsInline
                       style={{
-                        objectFit: effectiveVideoFit,
-                        objectPosition: safeObjectPosition,
+                        objectFit: activeSideBySideOverlay ? "cover" : effectiveVideoFit,
+                        objectPosition: activeSideBySideOverlay
+                          ? sideBySideObjectPosition
+                          : safeObjectPosition,
                         width: activeSideBySideOverlay ? "50%" : "100%",
                         height: "100%",
                         background: "transparent",
-                        position: "relative",
+                        position: activeSideBySideOverlay ? "absolute" : "relative",
+                        inset: activeSideBySideOverlay ? "0 auto 0 0" : undefined,
                         zIndex: 10,
-                        transformOrigin: hookTransformOrigin,
-                        transform: `scale(${(hookVisualScale * smartCropBackgroundScale).toFixed(3)})`,
+                        transformOrigin: activeSideBySideOverlay
+                          ? "center center"
+                          : hookTransformOrigin,
+                        transform: activeSideBySideOverlay
+                          ? "scale(1)"
+                          : `scale(${(hookVisualScale * smartCropBackgroundScale).toFixed(3)})`,
                         opacity: hookPrimaryVideoOpacity,
                         filter: `blur(${(hookVideoBlur + smartCropBackgroundBlur).toFixed(2)}px) brightness(${(hookVideoBrightness * smartCropBackgroundBrightness * previewClarityBrightness).toFixed(3)}) contrast(${(hookVideoContrast * previewClarityContrast).toFixed(3)}) saturate(${(hookVideoSaturate * previewClaritySaturate).toFixed(3)})${previewClarityHalo}`,
                         transition:
@@ -9466,6 +9540,7 @@ const ViralClipStudio = ({
                           key={value}
                           type="button"
                           className={hookTemplate === value ? "is-active" : ""}
+                          aria-pressed={hookTemplate === value}
                           onClick={() => {
                             setAddHook(true);
                             applyHookTemplate(value);
@@ -9579,6 +9654,7 @@ const ViralClipStudio = ({
                           key={value}
                           type="button"
                           className={captionStyle === value ? "is-active" : ""}
+                          aria-pressed={captionStyle === value}
                           onClick={() => {
                             setCaptionStyle(value);
                             setAutoCaptions(true);
@@ -9603,6 +9679,7 @@ const ViralClipStudio = ({
                           key={value}
                           type="button"
                           className={captionPosition === value ? "is-active" : ""}
+                          aria-pressed={captionPosition === value}
                           onClick={() => setCaptionPosition(value)}
                         >
                           {label}
@@ -9661,6 +9738,7 @@ const ViralClipStudio = ({
                           key={speed}
                           type="button"
                           className={Math.abs(previewSpeed - speed) < 0.01 ? "is-active" : ""}
+                          aria-pressed={Math.abs(previewSpeed - speed) < 0.01}
                           onClick={() => changePreviewSpeed(speed)}
                         >
                           {speed}×
@@ -9697,6 +9775,7 @@ const ViralClipStudio = ({
                           key={value}
                           type="button"
                           className={pacingLevel === value ? "is-active" : ""}
+                          aria-pressed={pacingLevel === value}
                           onClick={() => {
                             setPacingLevel(value);
                             if (value === "calm") changePreviewSpeed(1);
@@ -9779,6 +9858,7 @@ const ViralClipStudio = ({
                           key={value}
                           type="button"
                           className={bRollCadence === value ? "is-active" : ""}
+                          aria-pressed={bRollCadence === value}
                           onClick={() => {
                             setBRollCadence(value);
                             setStudioActionMessage(
@@ -9791,8 +9871,14 @@ const ViralClipStudio = ({
                       ))}
                     </div>
                     <small>
-                      {suggestBRollMoments().length} suggested beats across{" "}
+                      {bRollPlanStatus.suggestions.length} suggested beats across{" "}
                       {formatPreviewTimePrecise(currentTimelineWindow.duration)} ·{" "}
+                      {bRollPlanStatus.coveredCount
+                        ? `${bRollPlanStatus.coveredCount} already covered · `
+                        : ""}
+                      {bRollPlanStatus.missingSuggestions.length
+                        ? `${bRollPlanStatus.missingSuggestions.length} open · `
+                        : "Coverage complete · "}
                       {BROLL_CADENCE_PRESETS[bRollCadence].helper}
                     </small>
                     <button
@@ -9881,6 +9967,7 @@ const ViralClipStudio = ({
                               key={value}
                               type="button"
                               className={activeOverlay.bRollMode === value ? "is-active" : ""}
+                              aria-pressed={activeOverlay.bRollMode === value}
                               onClick={() => setOverlayBRollMode(activeOverlay.id, value)}
                             >
                               {label}
@@ -9903,6 +9990,7 @@ const ViralClipStudio = ({
                               className={
                                 getOverlayAudioMode(activeOverlay) === value ? "is-active" : ""
                               }
+                              aria-pressed={getOverlayAudioMode(activeOverlay) === value}
                               onClick={() => setOverlayAudioMode(activeOverlay.id, value)}
                             >
                               {label}

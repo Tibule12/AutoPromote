@@ -6,6 +6,7 @@ const CONTROL_OR_SPACE_PATTERN = new RegExp(
   `[${String.fromCharCode(0)}-${String.fromCharCode(31)}${String.fromCharCode(127)}\\s]+`,
   "g"
 );
+let fallbackIdSequence = 0;
 
 export function stripUnsafeCharacters(value) {
   return String(value ?? "")
@@ -105,7 +106,8 @@ export function createSecureId(prefix = "id") {
     return `${safePrefix}-${suffix}`;
   }
 
-  return `${safePrefix}-${Date.now().toString(36)}`;
+  fallbackIdSequence = (fallbackIdSequence + 1) % Number.MAX_SAFE_INTEGER;
+  return `${safePrefix}-${Date.now().toString(36)}-${fallbackIdSequence.toString(36)}`;
 }
 
 // Validate redirect URLs to prevent open redirect attacks.
