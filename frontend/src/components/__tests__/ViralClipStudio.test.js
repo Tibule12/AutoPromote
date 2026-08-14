@@ -180,6 +180,34 @@ describe("ViralClipStudio timeline sequencing", () => {
     ]);
   });
 
+  test("shows backend retry and render progress inside the Studio export controls", async () => {
+    const onSave = jest.fn(() => new Promise(() => {}));
+    const props = {
+      videoUrl: "https://example.com/dance.mp4",
+      clips: [{ id: "clip-progress", start: 0, end: 8, duration: 8 }],
+      onSave,
+      onCancel: jest.fn(),
+    };
+    const { rerender } = render(<ViralClipStudio {...props} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Render Final Clip/i }));
+    await waitFor(() => expect(onSave).toHaveBeenCalled());
+
+    rerender(
+      <ViralClipStudio
+        {...props}
+        renderStatus="Render service is slow. Retrying safely without another charge..."
+      />
+    );
+
+    expect(
+      screen.getByRole("button", { name: /Retrying safely without another charge/i })
+    ).toBeDisabled();
+
+    rerender(<ViralClipStudio {...props} renderStatus="Rendering Clip... 42%" />);
+    expect(screen.getByRole("button", { name: /Rendering Clip... 42%/i })).toBeDisabled();
+  });
+
   test("removes a marked middle range and exports retained segments with a join style", async () => {
     const onSave = jest.fn(() => Promise.resolve());
     render(

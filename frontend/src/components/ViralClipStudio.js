@@ -1491,6 +1491,7 @@ const ViralClipStudio = ({
   onSave,
   onCancel,
   onStatusChange,
+  renderStatus,
   currentMusic,
   onMusicChange,
 }) => {
@@ -1632,6 +1633,11 @@ const ViralClipStudio = ({
   const [exportStatusLabel, setExportStatusLabel] = useState("Render Final Clip");
   const [selectedExportDestination, setSelectedExportDestination] = useState("general");
   const loggedScannerEntryRef = useRef(new Set());
+
+  useEffect(() => {
+    if (!isExporting || !renderStatus) return;
+    setExportStatusLabel(renderStatus);
+  }, [isExporting, renderStatus]);
 
   const [timeline, setTimeline] = useState(() => {
     // Initial timeline is just the main video URL, effectively one clip

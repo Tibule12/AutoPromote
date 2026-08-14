@@ -1498,6 +1498,7 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
           }
         }}
         onStatusChange={setStatusMessage}
+        renderStatus={statusMessage}
         // Pass down music state
         currentMusic={options.musicFile}
         onMusicChange={(newMusic, isSearchMode) => {
