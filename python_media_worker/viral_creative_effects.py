@@ -12,6 +12,7 @@ from typing import Any, Dict, Iterable, List, Mapping, Tuple
 
 
 SUPPORTED_CREATIVE_PRESETS = {
+    "beat_echo",
     "motion_sculpture",
     "reality_break",
     "tracked_reveal",
@@ -121,6 +122,82 @@ def _motion_sculpture_filter(
     )
 
 
+def _beat_echo_filter(
+    input_label: str, output_label: str, effect: Mapping[str, Any], index: int
+) -> str:
+    """Build visible time-sliced movement echoes while preserving the clean base frame.
+
+    Each ghost is a real delayed frame from the source, not a decorative overlay. The
+    staggered timing makes fast movement readable as a sequence and works without
+    changing the audio stream.
+    """
+
+    intensity = effect["intensity"]
+    echo_count = {"clean": 3, "bold": 4, "unreal": 5}[intensity]
+    delay_step = {"clean": 0.07, "bold": 0.085, "unreal": 0.10}[intensity]
+    shift_step = {"clean": 3, "bold": 6, "unreal": 9}[intensity]
+    alpha_start = {"clean": 0.19, "bold": 0.25, "unreal": 0.31}[intensity]
+    start = float(effect["start_time"])
+    end = float(effect["end_time"])
+
+    delayed_labels = [f"creative_echo_delayed_{index}_{echo}" for echo in range(echo_count)]
+    reference_labels = [f"creative_echo_reference_{index}_{echo}" for echo in range(echo_count)]
+    split_labels = "".join(
+        f"[{delayed_labels[echo]}][{reference_labels[echo]}]" for echo in range(echo_count)
+    )
+    filters = [
+        f"[{input_label}]split={echo_count * 2 + 1}"
+        f"[creative_echo_base_{index}]"
+        + split_labels
+    ]
+
+    composite_label = f"creative_echo_base_{index}"
+    hue_angles = [300, 185, 255, 25]
+
+    for echo_index, (delayed_label, reference_label) in enumerate(
+        zip(delayed_labels, reference_labels), start=1
+    ):
+        delay = delay_step * echo_index
+        alpha = max(0.16, alpha_start * 2.5 * (1 - (echo_index - 1) / (echo_count + 1)))
+        horizontal_shift = shift_step * echo_index
+        delayed_color_source = f"creative_echo_color_source_{index}_{echo_index}"
+        delayed_mask_source = f"creative_echo_mask_source_{index}_{echo_index}"
+        colored_label = f"creative_echo_colored_{index}_{echo_index}"
+        mask_label = f"creative_echo_mask_{index}_{echo_index}"
+        echo_label = f"creative_echo_ghost_{index}_{echo_index}"
+        next_composite = (
+            output_label
+            if echo_index == echo_count
+            else f"creative_echo_mix_{index}_{echo_index}"
+        )
+
+        filters.append(
+            f"[{delayed_label}]setpts=PTS+{delay:.3f}/TB,split=2"
+            f"[{delayed_color_source}][{delayed_mask_source}]"
+        )
+        filters.append(
+            f"[{delayed_color_source}]hue=h={hue_angles[(echo_index - 1) % len(hue_angles)]}:s=1.75,"
+            f"eq=contrast=1.12:saturation=1.42,format=rgba[{colored_label}]"
+        )
+        filters.append(
+            f"[{reference_label}][{delayed_mask_source}]blend=all_mode=difference:shortest=1,"
+            f"format=gray,lut=y='if(gt(val,14),min(255,(val-14)*6),0)',"
+            f"boxblur=2:1[{mask_label}]"
+        )
+        filters.append(
+            f"[{colored_label}][{mask_label}]alphamerge,"
+            f"colorchannelmixer=aa={alpha:.3f}[{echo_label}]"
+        )
+        filters.append(
+            f"[{composite_label}][{echo_label}]overlay="
+            f"x=-{horizontal_shift}:y=0:eof_action=pass:repeatlast=0:format=auto:"
+            f"enable='between(t,{start:.3f},{end:.3f})'[{next_composite}]"
+        )
+        composite_label = next_composite
+
+    return ";".join(filters)
+
+
 def _reality_break_filter(
     input_label: str, output_label: str, effect: Mapping[str, Any], index: int
 ) -> str:
@@ -180,7 +257,9 @@ def build_creative_filter_complex(plan: Mapping[str, Any]) -> Tuple[str, str, Li
     for index, effect in enumerate(effects):
         output_label = f"creative_{index}"
         preset = effect["preset"]
-        if preset == "motion_sculpture":
+        if preset == "beat_echo":
+            filters.append(_beat_echo_filter(input_label, output_label, effect, index))
+        elif preset == "motion_sculpture":
             filters.append(_motion_sculpture_filter(input_label, output_label, effect, index))
         elif preset == "reality_break":
             filters.append(_reality_break_filter(input_label, output_label, effect, index))

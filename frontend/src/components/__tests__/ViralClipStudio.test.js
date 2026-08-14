@@ -148,6 +148,38 @@ describe("ViralClipStudio timeline sequencing", () => {
     );
   });
 
+  test("uses delayed source frames for Beat Echo preview and export", async () => {
+    const onSave = jest.fn(() => Promise.resolve());
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/dance.mp4"
+        clips={[
+          {
+            id: "clip-dance",
+            start: 0,
+            end: 8,
+            duration: 8,
+            url: "https://example.com/dance.mp4",
+          },
+        ]}
+        onSave={onSave}
+        onCancel={jest.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /Beat Echo/i }));
+
+    const previewLayer = screen.getByTestId("beat-echo-preview-layer");
+    expect(previewLayer.querySelectorAll("video")).toHaveLength(3);
+    expect(screen.getByTestId("hook-preview-frame")).toHaveClass("creative-preview-beat_echo");
+
+    fireEvent.click(screen.getByRole("button", { name: /Render Final Clip/i }));
+    await waitFor(() => expect(onSave).toHaveBeenCalled());
+    expect(onSave.mock.calls[0][2].creativePlan.effects).toEqual([
+      expect.objectContaining({ preset: "beat_echo", start_time: 0, end_time: 8 }),
+    ]);
+  });
+
   test("removes a marked middle range and exports retained segments with a join style", async () => {
     const onSave = jest.fn(() => Promise.resolve());
     render(

@@ -6176,6 +6176,66 @@
   opacity: 0.32;
 }
 
+.beat-echo-preview-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 18;
+  overflow: hidden;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+.beat-echo-preview-layer video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.16;
+  transform: translateX(-8px);
+  filter: saturate(1.55) contrast(1.08) hue-rotate(290deg);
+}
+
+.beat-echo-preview-layer video:nth-child(2) {
+  opacity: 0.13;
+  transform: translateX(-16px);
+  filter: saturate(1.65) contrast(1.1) hue-rotate(175deg);
+}
+
+.beat-echo-preview-layer video:nth-child(3) {
+  opacity: 0.1;
+  transform: translateX(-24px);
+  filter: saturate(1.72) contrast(1.12) hue-rotate(35deg);
+}
+
+.beat-echo-preview-layer.is-clean video {
+  opacity: 0.09;
+}
+
+.beat-echo-preview-layer.is-unreal video {
+  opacity: 0.22;
+  transform: translateX(-13px);
+}
+
+.beat-echo-preview-layer.is-unreal video:nth-child(2) {
+  opacity: 0.18;
+  transform: translateX(-26px);
+}
+
+.beat-echo-preview-layer.is-unreal video:nth-child(3) {
+  opacity: 0.14;
+  transform: translateX(-39px);
+}
+
+.creative-preview-beat_echo .creative-effect-live-layer {
+  background: linear-gradient(
+    90deg,
+    rgba(199, 65, 255, 0.12),
+    transparent 24%,
+    transparent 72%,
+    rgba(36, 220, 255, 0.11)
+  );
+}
+
 .creative-preview-motion_sculpture .creative-effect-live-layer span:nth-child(1) {
   background: linear-gradient(105deg, transparent 34%, rgba(54, 222, 255, 0.24), transparent 61%);
   animation: creative-motion-sweep 1.8s ease-in-out infinite;

@@ -60,6 +60,28 @@ class ViralCreativeEffectsTests(unittest.TestCase):
         self.assertEqual(output_label, "creative_2")
         self.assertEqual(len(receipt), 3)
 
+    def test_builds_real_delayed_frames_for_beat_echo(self):
+        plan = normalize_creative_plan(
+            {
+                "enabled": True,
+                "intensity": "bold",
+                "effects": [
+                    {"preset": "beat_echo", "start_time": 0.25, "end_time": 2.75},
+                ],
+            },
+            3,
+        )
+        graph, output_label, receipt = build_creative_filter_complex(plan)
+
+        self.assertIn("split=9", graph)
+        self.assertIn("setpts=PTS+0.085/TB", graph)
+        self.assertIn("colorchannelmixer=", graph)
+        self.assertIn("all_mode=difference", graph)
+        self.assertIn("alphamerge", graph)
+        self.assertIn("overlay=", graph)
+        self.assertEqual(output_label, "creative_0")
+        self.assertEqual(receipt[0]["preset"], "beat_echo")
+
     def test_signature_pack_renders_video_and_keeps_audio_mappable(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             source_path = os.path.join(temp_dir, "source.mp4")

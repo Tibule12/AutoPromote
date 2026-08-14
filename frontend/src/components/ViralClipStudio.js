@@ -1331,6 +1331,12 @@ const SIGNATURE_CREATIVE_STYLES = [
     helper: "Echo movement, shape momentum and make action feel physical.",
   },
   {
+    id: "beat_echo",
+    label: "Beat Echo",
+    icon: "◫",
+    helper: "Turn real delayed frames into colour-sliced movement echoes on every beat.",
+  },
+  {
     id: "reality_break",
     label: "Reality Break",
     icon: "◇",
@@ -1385,7 +1391,7 @@ const CREATOR_CONTENT_PROFILES = [
     id: "fitness_dance",
     label: "Fitness / Dance",
     helper: "Movement echoes, beat-ready pacing and energetic joins.",
-    preset: "motion_sculpture",
+    preset: "beat_echo",
     intensity: "unreal",
     transition: "energy_flash",
     pacing: "energetic",
@@ -1644,6 +1650,7 @@ const ViralClipStudio = ({
   const smartCropForegroundVideoRef = useRef(null);
   const hookBackdropVideoRef = useRef(null);
   const hookFreezeVideoRef = useRef(null);
+  const beatEchoVideoRefsRef = useRef([]);
   const musicPreviewRef = useRef(null);
   const watermarkCleanupPreviewImageRef = useRef(null);
   const musicPreviewObjectUrlRef = useRef(null);
@@ -3416,6 +3423,8 @@ const ViralClipStudio = ({
       effect => previewClipTime >= effect.start_time && previewClipTime <= effect.end_time
     ) || liveCreativeEffects[0];
   const creativeEffectIsLive = creativeEffectsEnabled && comparisonMode !== "before";
+  const beatEchoPreviewIsLive =
+    creativeEffectIsLive && activeLiveCreativeEffect?.preset === "beat_echo";
   const creativePreviewClass = creativeEffectIsLive
     ? `creative-preview-${activeLiveCreativeEffect?.preset || "motion_sculpture"} creative-intensity-${creativeIntensity}`
     : "";
@@ -5971,6 +5980,9 @@ const ViralClipStudio = ({
     );
     applySafeMediaSource(hookBackdropVideoRef.current, currentTimelineClip?.url);
     applySafeMediaSource(hookFreezeVideoRef.current, currentTimelineClip?.url);
+    beatEchoVideoRefsRef.current.forEach(element =>
+      applySafeMediaSource(element, beatEchoPreviewIsLive ? currentTimelineClip?.url : null)
+    );
     applySafeMediaSource(audioRef.current, extractedAudio?.url);
     applySafeMediaSource(
       musicPreviewRef.current,
@@ -5983,7 +5995,72 @@ const ViralClipStudio = ({
     musicSearchMode,
     shouldShowWatermarkCleanupOnVideo,
     smartCrop,
+    beatEchoPreviewIsLive,
     watermarkCleanupPreview,
+  ]);
+
+  useEffect(() => {
+    const sourceVideo = videoRef.current;
+    const echoVideos = beatEchoVideoRefsRef.current.filter(Boolean);
+    if (!sourceVideo || !beatEchoPreviewIsLive || !echoVideos.length) {
+      echoVideos.forEach(video => video.pause());
+      return undefined;
+    }
+
+    const delayStep =
+      creativeIntensity === "clean" ? 0.07 : creativeIntensity === "unreal" ? 0.1 : 0.085;
+    const effectStart =
+      Number(currentTimelineWindow.start || 0) + Number(activeLiveCreativeEffect?.start_time || 0);
+
+    const syncBeatEchoPreview = () => {
+      echoVideos.forEach((echoVideo, index) => {
+        const targetTime = Math.max(
+          effectStart,
+          Number(sourceVideo.currentTime || 0) - delayStep * (index + 1)
+        );
+        echoVideo.playbackRate = sourceVideo.playbackRate || 1;
+        echoVideo.muted = true;
+        echoVideo.defaultMuted = true;
+
+        if (Math.abs(Number(echoVideo.currentTime || 0) - targetTime) > 0.045) {
+          try {
+            echoVideo.currentTime = targetTime;
+          } catch (error) {
+            console.log("Beat Echo preview seek skipped", error);
+          }
+        }
+
+        if (sourceVideo.paused) {
+          echoVideo.pause();
+        } else {
+          safePlayMediaElement(echoVideo);
+        }
+      });
+    };
+
+    sourceVideo.addEventListener("play", syncBeatEchoPreview);
+    sourceVideo.addEventListener("pause", syncBeatEchoPreview);
+    sourceVideo.addEventListener("seeking", syncBeatEchoPreview);
+    sourceVideo.addEventListener("seeked", syncBeatEchoPreview);
+    sourceVideo.addEventListener("timeupdate", syncBeatEchoPreview);
+    sourceVideo.addEventListener("ratechange", syncBeatEchoPreview);
+    syncBeatEchoPreview();
+
+    return () => {
+      sourceVideo.removeEventListener("play", syncBeatEchoPreview);
+      sourceVideo.removeEventListener("pause", syncBeatEchoPreview);
+      sourceVideo.removeEventListener("seeking", syncBeatEchoPreview);
+      sourceVideo.removeEventListener("seeked", syncBeatEchoPreview);
+      sourceVideo.removeEventListener("timeupdate", syncBeatEchoPreview);
+      sourceVideo.removeEventListener("ratechange", syncBeatEchoPreview);
+      echoVideos.forEach(video => video.pause());
+    };
+  }, [
+    activeLiveCreativeEffect?.start_time,
+    beatEchoPreviewIsLive,
+    creativeIntensity,
+    currentTimelineClip,
+    currentTimelineWindow.start,
   ]);
 
   useEffect(() => {
@@ -7656,6 +7733,30 @@ const ViralClipStudio = ({
                         willChange: "transform, opacity, filter",
                       }}
                     />
+                    {beatEchoPreviewIsLive && !activeSideBySideOverlay ? (
+                      <div
+                        className={`beat-echo-preview-layer is-${creativeIntensity}`}
+                        aria-hidden="true"
+                        data-testid="beat-echo-preview-layer"
+                      >
+                        {[0, 1, 2].map(index => (
+                          <video
+                            key={`beat-echo-preview-${index}`}
+                            ref={element => {
+                              beatEchoVideoRefsRef.current[index] = element;
+                            }}
+                            muted
+                            playsInline
+                            preload="auto"
+                            tabIndex={-1}
+                            style={{
+                              objectFit: effectiveVideoFit,
+                              objectPosition: safeObjectPosition,
+                            }}
+                          />
+                        ))}
+                      </div>
+                    ) : null}
                     {creativeEffectIsLive ? (
                       <div
                         className="creative-effect-live-layer"
