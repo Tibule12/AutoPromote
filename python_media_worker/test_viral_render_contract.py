@@ -1,5 +1,7 @@
+import ast
 import json
 import os
+from pathlib import Path
 import subprocess
 import tempfile
 import unittest
@@ -16,6 +18,33 @@ from python_media_worker.viral_render_contract import (
 
 
 class ViralRenderContractTests(unittest.TestCase):
+    def test_viral_renderer_materializes_remote_sources_before_ffmpeg_edits(self):
+        worker_source = Path(__file__).with_name("main_media_server.py").read_text(
+            encoding="utf-8"
+        )
+        worker_tree = ast.parse(worker_source)
+        render_function = next(
+            node
+            for node in worker_tree.body
+            if isinstance(node, ast.AsyncFunctionDef)
+            and node.name == "render_viral_clip_impl"
+        )
+        materialize_calls = [
+            node
+            for node in ast.walk(render_function)
+            if isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id == "materialize_video_input"
+        ]
+
+        self.assertGreaterEqual(len(materialize_calls), 2)
+        self.assertTrue(
+            all(
+                any(keyword.arg == "keep_audio" for keyword in call.keywords)
+                for call in materialize_calls
+            )
+        )
+
     def test_normalizes_speed_segments_and_fills_timeline_gaps(self):
         plan = normalize_speed_plan(
             10,

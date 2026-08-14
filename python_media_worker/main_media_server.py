@@ -27922,10 +27922,11 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
     try:
         # 1. Download/Prepare Main Video (Async)
         try:
-            if request.video_url.startswith("http"):
-                 await run_subprocess_async(["ffmpeg", "-user_agent", "Mozilla/5.0", "-i", request.video_url, "-c", "copy", "-y", input_path], check=True)
-            else:
-                 shutil.copy(request.video_url, input_path)
+            input_path = await materialize_video_input(
+                request.video_url,
+                input_path,
+                keep_audio=True,
+            )
         except Exception as e:
              err_msg = f"Failed to load video: {str(e)}"
              logger.error(err_msg)
@@ -27953,23 +27954,12 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
 
                 if segment.url == request.video_url:
                     segment_source_path = input_path
-                elif str(segment.url).startswith("http"):
-                    await run_subprocess_async(
-                        [
-                            "ffmpeg",
-                            "-user_agent",
-                            "Mozilla/5.0",
-                            "-i",
-                            segment.url,
-                            "-c",
-                            "copy",
-                            "-y",
-                            segment_source_path,
-                        ],
-                        check=True,
-                    )
                 else:
-                    shutil.copy(segment.url, segment_source_path)
+                    segment_source_path = await materialize_video_input(
+                        segment.url,
+                        segment_source_path,
+                        keep_audio=True,
+                    )
 
                 normalize_vf = (
                     "scale=1080:1920:force_original_aspect_ratio=decrease,"

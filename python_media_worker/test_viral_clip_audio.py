@@ -1,5 +1,6 @@
 import asyncio
 import os
+import shutil
 import subprocess
 import tempfile
 import unittest
@@ -70,6 +71,47 @@ class ViralClipAudioTests(unittest.TestCase):
                         )
                         if candidate and os.path.exists(candidate):
                             os.remove(candidate)
+
+    def test_viral_render_materializes_remote_source_with_http_fallback_helper(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            source_path = os.path.join(temp_dir, "source.mp4")
+            self.make_source(source_path)
+            request = worker.RenderViralRequest(
+                video_url="https://firebasestorage.googleapis.com/source.mp4?token=test",
+                start_time=0,
+                end_time=1.5,
+                overlays=[],
+            )
+
+            async def fake_materialize(_url, local_path, **_options):
+                shutil.copy(source_path, local_path)
+                return local_path
+
+            result = None
+            try:
+                with (
+                    mock.patch.object(
+                        worker,
+                        "materialize_video_input",
+                        side_effect=fake_materialize,
+                    ) as materialize,
+                    mock.patch.object(
+                        worker,
+                        "upload_file_to_firebase",
+                        return_value="https://storage.example.com/viral.mp4",
+                    ),
+                ):
+                    result = asyncio.run(worker.render_viral_clip_impl(request))
+
+                self.assertEqual(result["status"], "completed")
+                materialize.assert_awaited_once_with(
+                    request.video_url,
+                    mock.ANY,
+                    keep_audio=True,
+                )
+            finally:
+                if result and result.get("output_path") and os.path.exists(result["output_path"]):
+                    os.remove(result["output_path"])
 
 
 if __name__ == "__main__":
