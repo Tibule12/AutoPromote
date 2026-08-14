@@ -71,13 +71,23 @@ export function applySafeMediaSource(element, url) {
 
   const safeUrl = sanitizeMediaUrl(url);
   const safeAttributeUrl = safeUrl ? encodeSafeAttributeUrl(safeUrl) : "";
+  const isPlayableMedia = element.tagName === "AUDIO" || element.tagName === "VIDEO";
+  const reloadPlayableMedia = () => {
+    if (isPlayableMedia && typeof element.load === "function") {
+      element.load();
+    }
+  };
   if (!safeAttributeUrl) {
-    element.removeAttribute("src");
+    if (element.hasAttribute("src")) {
+      element.removeAttribute("src");
+      reloadPlayableMedia();
+    }
     return false;
   }
 
   if (element.getAttribute("src") !== safeAttributeUrl) {
     element.setAttribute("src", safeAttributeUrl);
+    reloadPlayableMedia();
   }
 
   return true;
