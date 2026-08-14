@@ -125,9 +125,7 @@ describe("ViralClipStudio timeline sequencing", () => {
     fireEvent.click(screen.getByRole("button", { name: /Reality Break/i }));
 
     expect(screen.getByTestId("creative-effect-live-layer")).toBeInTheDocument();
-    expect(screen.getByTestId("hook-preview-frame")).toHaveClass(
-      "creative-preview-reality_break"
-    );
+    expect(screen.getByTestId("hook-preview-frame")).toHaveClass("creative-preview-reality_break");
 
     fireEvent.click(screen.getByRole("button", { name: /Render Final Clip/i }));
 
@@ -182,6 +180,11 @@ describe("ViralClipStudio timeline sequencing", () => {
 
     fireEvent.click(screen.getByTestId("remove-marked-range"));
     expect(screen.queryByTestId("pending-cut-summary")).not.toBeInTheDocument();
+    expect(screen.getByTestId("timeline-output-time")).toHaveTextContent("0:10.0");
+    expect(
+      screen.getByTestId("timeline-source-track").querySelectorAll(".compact-filmstrip-frame")
+        .length
+    ).toBeGreaterThan(1);
 
     fireEvent.click(screen.getByRole("checkbox", { name: /Add Hook/i }));
     fireEvent.click(screen.getByRole("button", { name: /Render Final Clip/i }));
@@ -407,6 +410,7 @@ describe("ViralClipStudio timeline sequencing", () => {
     ).toBeInTheDocument();
     expect(screen.getByTestId("timeline-hook-block")).toBeInTheDocument();
     expect(screen.getByTestId("timeline-original-audio")).toHaveTextContent("Original voice");
+    expect(sourceTrack.querySelectorAll(".compact-filmstrip-frame").length).toBeGreaterThan(1);
 
     fireEvent.click(sourceTrack, { clientX: 100 });
     expect(afterVideo.currentTime).toBeCloseTo(5, 1);
@@ -1554,7 +1558,15 @@ describe("ViralClipStudio timeline sequencing", () => {
     fireEvent.change(durationInput, { target: { value: "3.0" } });
     fireEvent.blur(durationInput);
 
+    const studioAfterVideo = screen.getByTestId("studio-after-video");
+    fireEvent.click(screen.getByRole("button", { name: "Side by side" }));
+    expect(studioAfterVideo).toHaveStyle({ width: "50%" });
+    expect(
+      screen.getByTestId("hook-preview-frame").querySelector(".broll-side-by-side")
+    ).toBeInTheDocument();
+
     fireEvent.click(screen.getByRole("button", { name: "Picture-in-picture" }));
+    expect(studioAfterVideo).toHaveStyle({ width: "100%" });
     const previewShell = screen.getByTestId("hook-preview-frame").parentElement;
     expect(previewShell.querySelector(".draggable-overlay.active")).not.toBeInTheDocument();
     expect(previewShell.querySelector(".overlay-controls")).not.toBeInTheDocument();
@@ -1574,6 +1586,9 @@ describe("ViralClipStudio timeline sequencing", () => {
     fireEvent.click(within(inspector).getByRole("button", { name: /Apply B-roll/i }));
     await waitFor(() => expect(afterVideo.currentTime).toBe(4));
     expect(screen.getByText(/exact cutaway point/i)).toBeInTheDocument();
+    const bRollPreview = screen.getByTestId(/broll-preview-/);
+    expect(bRollPreview).not.toHaveAttribute("autoplay");
+    expect(bRollPreview).not.toHaveAttribute("loop");
 
     fireEvent.click(screen.getByRole("button", { name: "Use overlay" }));
     expect(screen.getAllByTestId(/timeline-overlay-audio-/)).toHaveLength(1);
@@ -1606,6 +1621,7 @@ describe("ViralClipStudio timeline sequencing", () => {
     afterVideo.currentTime = 13;
     fireEvent.timeUpdate(afterVideo);
     await waitFor(() => expect(afterVideo.muted).toBe(false));
+    expect(screen.queryByTestId(/broll-preview-/)).not.toBeInTheDocument();
     expect(screen.getAllByText(/Original audio returns automatically/i).length).toBeGreaterThan(0);
   }, 30000);
 
