@@ -97,6 +97,14 @@ const DEFAULT_HOOK_TEXT = "THIS CHANGES FAST";
 const HOOK_MIN_SEGMENT_DURATION = 2;
 const HOOK_MAX_SEGMENT_DURATION = 5;
 
+const SOUND_EFFECT_PRESETS = [
+  { id: "whoosh", name: "Whoosh", emoji: "💨", duration: 0.8, tone: "sweep" },
+  { id: "impact", name: "Impact", emoji: "💥", duration: 0.65, tone: "impact" },
+  { id: "pop", name: "Pop", emoji: "🫧", duration: 0.28, tone: "pop" },
+  { id: "click", name: "Click", emoji: "🖱️", duration: 0.16, tone: "click" },
+  { id: "riser", name: "Riser", emoji: "🚀", duration: 1.5, tone: "riser" },
+];
+
 const GENERIC_HOOK_TEXTS = new Set([
   "WAIT FOR IT...",
   "WAIT FOR IT",
@@ -938,6 +946,84 @@ const formatPreviewTimePrecise = value => {
   return `${minutes}:${seconds}`;
 };
 
+const formatEditorDuration = value => {
+  const totalSeconds = Math.max(0, Number(value) || 0);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  const secondsLabel = seconds.toFixed(seconds % 1 ? 1 : 0).padStart(2, "0");
+  return hours > 0
+    ? `${hours}:${String(minutes).padStart(2, "0")}:${secondsLabel}`
+    : `${minutes}:${secondsLabel}`;
+};
+
+const parseEditorDuration = value => {
+  const raw = String(value ?? "")
+    .trim()
+    .toLowerCase();
+  if (!raw) return null;
+
+  if (raw.includes(":")) {
+    const parts = raw.split(":").map(Number);
+    if (parts.some(part => !Number.isFinite(part) || part < 0) || parts.length > 3) return null;
+    if (parts.length === 2) return parts[0] * 60 + parts[1];
+    if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+  }
+
+  const unitPattern = /(\d+(?:\.\d+)?)\s*(hrs|hr|h|mins|min|m|secs|sec|s)/g;
+  const unitMatches = [...raw.matchAll(unitPattern)];
+  if (unitMatches.length) {
+    const remaining = raw.replace(unitPattern, "").trim();
+    if (remaining) return null;
+    return unitMatches.reduce((total, match) => {
+      const amount = Number(match[1]);
+      const unit = match[2];
+      if (unit.startsWith("h")) return total + amount * 3600;
+      if (unit.startsWith("m")) return total + amount * 60;
+      return total + amount;
+    }, 0);
+  }
+
+  const numeric = Number(raw);
+  return Number.isFinite(numeric) && numeric >= 0 ? numeric : null;
+};
+
+const normalizeBRollEndBehavior = value =>
+  ["return", "loop", "hold"].includes(String(value || "").toLowerCase())
+    ? String(value).toLowerCase()
+    : "return";
+
+const getOverlayAvailableSourceDuration = overlay => {
+  if (!overlay || overlay.type !== "video") return Number.POSITIVE_INFINITY;
+  const sourceDuration = Math.max(0, Number(overlay.sourceDuration || 0));
+  if (!sourceDuration) return Number.POSITIVE_INFINITY;
+  const sourceStart = clampNumber(
+    overlay.sourceStartTime,
+    0,
+    Math.max(0, sourceDuration - 0.05),
+    0
+  );
+  return Math.max(0.05, sourceDuration - sourceStart);
+};
+
+const getOverlayVisibleDuration = overlay => {
+  const configuredDuration = Math.max(0, Number(overlay?.duration || 0));
+  if (!overlay || overlay.type !== "video") return configuredDuration;
+  if (normalizeBRollEndBehavior(overlay.sourceEndBehavior) !== "return") {
+    return configuredDuration;
+  }
+  return Math.min(configuredDuration, getOverlayAvailableSourceDuration(overlay));
+};
+
+const getOverlayAudibleDuration = overlay => {
+  const configuredDuration = Math.max(0, Number(overlay?.duration || 0));
+  if (!overlay || overlay.type !== "video") return configuredDuration;
+  if (normalizeBRollEndBehavior(overlay.sourceEndBehavior) === "loop") {
+    return configuredDuration;
+  }
+  return Math.min(configuredDuration, getOverlayAvailableSourceDuration(overlay));
+};
+
 const waitForVideoEvent = (video, successEvent, failureEvent = "error") =>
   new Promise((resolve, reject) => {
     const handleSuccess = () => {
@@ -1548,6 +1634,7 @@ const ViralClipStudio = ({
   const [previewMuted, setPreviewMuted] = useState(false);
   const [previewVolume, setPreviewVolume] = useState(1);
   const [isPreviewFullscreen, setIsPreviewFullscreen] = useState(false);
+  const [soloPreviewOverlayId, setSoloPreviewOverlayId] = useState(null);
   const [addMusic, setAddMusic] = useState(false);
   const [muteOriginalAudio, setMuteOriginalAudio] = useState(false);
   const [musicSelection, setMusicSelection] = useState(currentMusic || "upbeat_pop.mp3");
@@ -1588,8 +1675,12 @@ const ViralClipStudio = ({
 
   // ── Music Track State ──
   const [musicTrack, setMusicTrack] = useState(null); // { url, file, name, trimStart, trimEnd, fadeIn, fadeOut, loop, volume, ducking, duckingStrength, duckingMode }
+  const [soundEffects, setSoundEffects] = useState([]);
+  const [activeSoundEffectId, setActiveSoundEffectId] = useState(null);
+  const [previewingSoundEffectId, setPreviewingSoundEffectId] = useState(null);
   const [musicLibraryOpen, setMusicLibraryOpen] = useState(false);
   const musicFileInputRef = useRef(null);
+  const soundEffectFileInputRef = useRef(null);
   const speechAnalyserRef = useRef(null);
   const speechDetectionRafRef = useRef(null);
 
@@ -1671,6 +1762,12 @@ const ViralClipStudio = ({
   const hookFreezeVideoRef = useRef(null);
   const beatEchoVideoRefsRef = useRef([]);
   const musicPreviewRef = useRef(null);
+  const soundEffectAudioRefsRef = useRef(new Map());
+  const soundEffectAudioContextRef = useRef(null);
+  const soundEffectNodesRef = useRef(new Set());
+  const triggeredSoundEffectsRef = useRef(new Set());
+  const soundEffectPreviewTimeoutRef = useRef(null);
+  const soundEffectObjectUrlsRef = useRef(new Set());
   const watermarkCleanupPreviewImageRef = useRef(null);
   const musicPreviewObjectUrlRef = useRef(null);
   const musicPreviewAudioContextRef = useRef(null);
@@ -1928,6 +2025,8 @@ const ViralClipStudio = ({
     musicDucking,
     musicDuckingStrength,
     musicTrack,
+    soundEffects,
+    activeSoundEffectId,
     extractedAudio,
     bRollCadence,
     timeline,
@@ -2023,6 +2122,8 @@ const ViralClipStudio = ({
     setMusicDucking(snapshot.musicDucking !== undefined ? !!snapshot.musicDucking : true);
     setMusicDuckingStrength(Number(snapshot.musicDuckingStrength ?? 0.35));
     setMusicTrack(snapshot.musicTrack || null);
+    setSoundEffects(Array.isArray(snapshot.soundEffects) ? snapshot.soundEffects : []);
+    setActiveSoundEffectId(snapshot.activeSoundEffectId || null);
     setExtractedAudio(snapshot.extractedAudio || null);
     setBRollCadence(snapshot.bRollCadence || "balanced");
     setTimeline(snapshot.timeline || []);
@@ -2041,6 +2142,21 @@ const ViralClipStudio = ({
       if (musicPreviewAudioContextRef.current) {
         musicPreviewAudioContextRef.current.close().catch(() => {});
       }
+      soundEffectAudioRefsRef.current.forEach(audio => audio?.pause());
+      soundEffectNodesRef.current.forEach(node => {
+        try {
+          node.stop?.();
+          node.disconnect?.();
+        } catch (error) {
+          // The node may already have completed naturally.
+        }
+      });
+      soundEffectNodesRef.current.clear();
+      if (soundEffectAudioContextRef.current) {
+        soundEffectAudioContextRef.current.close().catch(() => {});
+      }
+      soundEffectObjectUrlsRef.current.forEach(url => URL.revokeObjectURL(url));
+      soundEffectObjectUrlsRef.current.clear();
       releaseMusicPreviewObjectUrl();
     },
     []
@@ -2524,6 +2640,7 @@ const ViralClipStudio = ({
     smartCropForegroundVideoRef.current?.pause();
     musicPreviewRef.current?.pause();
     stopMusicPreviewBufferPlayback();
+    stopSoundEffectPlayback();
     overlayMediaRefsRef.current.forEach(media => media.pause());
   };
 
@@ -2623,6 +2740,14 @@ const ViralClipStudio = ({
     if (!src) return;
     const currentVideoTime = videoRef.current ? videoRef.current.currentTime : 0;
     const relativeStartTime = getPreviewTimelineTime(currentVideoTime);
+    const defaultPlacement =
+      bRollMode === "fullscreen"
+        ? { x: 50, y: 50, width: 100, height: 100 }
+        : bRollMode === "sideBySide"
+          ? { x: 75, y: 50, width: 50, height: 100 }
+          : bRollMode === "pip"
+            ? { x: 76, y: 24, width, height }
+            : { x: 50, y: 50, width, height };
 
     const newOverlay = {
       id: createSecureId("overlay"),
@@ -2630,10 +2755,10 @@ const ViralClipStudio = ({
       src,
       file,
       isLocal,
-      x: 50,
-      y: 50,
-      width,
-      height,
+      x: defaultPlacement.x,
+      y: defaultPlacement.y,
+      width: defaultPlacement.width,
+      height: defaultPlacement.height,
       aspectRatioLocked: type === "video" || type === "image",
       aspectRatio: height ? width / height : 1,
       clipId: timeline[activeTimelineIndex]?.id || "main",
@@ -2645,6 +2770,10 @@ const ViralClipStudio = ({
         ? { enter: "fade", exit: "fade", enterDuration: 0.3, exitDuration: 0.3 }
         : undefined,
       opacity: bRollMode ? 1.0 : undefined,
+      mediaFit: type === "image" ? "cover" : "contain",
+      borderRadius: type === "image" ? 16 : 12,
+      shadow: type === "image" ? "soft" : "none",
+      rotation: 0,
       coverMainVideo: bRollMode === "fullscreen",
       muteMainAudio: false,
       useOverlayAudio: false,
@@ -2655,6 +2784,7 @@ const ViralClipStudio = ({
     };
     setOverlays(prev => [...prev, newOverlay]);
     setActiveOverlayId(newOverlay.id);
+    return newOverlay;
   };
 
   const clampOverlayDimension = value => Math.max(10, Math.min(100, Number(value) || 10));
@@ -3166,10 +3296,21 @@ const ViralClipStudio = ({
   const activeOverlayIsVideoBRoll = Boolean(
     activeOverlayHasTiming && activeOverlay?.type === "video"
   );
-  const activeOverlayIsFullscreenBRoll = activeOverlayIsVideoBRoll;
+  const activeOverlayIsTimedMedia = Boolean(
+    activeOverlayHasTiming && ["video", "image"].includes(activeOverlay?.type)
+  );
+  const activeOverlayIsFullscreenBRoll = Boolean(
+    activeOverlayIsTimedMedia && activeOverlay?.bRollMode === "fullscreen"
+  );
   const activeOverlayStartTime = activeOverlayHasTiming ? Number(activeOverlay.startTime || 0) : 0;
   const activeOverlayDuration = activeOverlayHasTiming ? Number(activeOverlay.duration || 0) : 0;
   const activeOverlayEndTime = activeOverlayStartTime + activeOverlayDuration;
+  const activeOverlayVisibleDuration = activeOverlayHasTiming
+    ? getOverlayVisibleDuration(activeOverlay)
+    : 0;
+  const activeOverlayAvailableSourceDuration = activeOverlayIsVideoBRoll
+    ? getOverlayAvailableSourceDuration(activeOverlay)
+    : Number.POSITIVE_INFINITY;
   const activeOverlaySafeSrc = activeOverlay ? getSafeMediaSource(activeOverlay.src) : "";
   const activeOverlayDisplayName = activeOverlay
     ? activeOverlay.file?.name ||
@@ -3364,6 +3505,249 @@ const ViralClipStudio = ({
     toast("Background music removed");
   };
 
+  const getSoundEffectDuration = effect =>
+    clampAudioControl(effect?.duration, 0.05, 15, effect?.builtIn ? 0.6 : 2);
+
+  const stopSynthesizedSoundEffects = () => {
+    soundEffectNodesRef.current.forEach(node => {
+      try {
+        node.stop?.();
+        node.disconnect?.();
+      } catch (error) {
+        // A scheduled Web Audio node can finish before the UI asks it to stop.
+      }
+    });
+    soundEffectNodesRef.current.clear();
+  };
+
+  const stopSoundEffectPlayback = (clearPreviewState = true) => {
+    if (soundEffectPreviewTimeoutRef.current) {
+      window.clearTimeout(soundEffectPreviewTimeoutRef.current);
+      soundEffectPreviewTimeoutRef.current = null;
+    }
+    soundEffectAudioRefsRef.current.forEach(audio => {
+      if (!audio) return;
+      audio.pause();
+    });
+    stopSynthesizedSoundEffects();
+    triggeredSoundEffectsRef.current.clear();
+    if (clearPreviewState) setPreviewingSoundEffectId(null);
+  };
+
+  const ensureSoundEffectAudioContext = () => {
+    if (soundEffectAudioContextRef.current) return soundEffectAudioContextRef.current;
+    const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextCtor) return null;
+    soundEffectAudioContextRef.current = new AudioContextCtor();
+    return soundEffectAudioContextRef.current;
+  };
+
+  const playBuiltInSoundEffect = async (effect, elapsed = 0) => {
+    const audioContext = ensureSoundEffectAudioContext();
+    if (!audioContext) {
+      setStudioActionMessage("This browser cannot preview synthesized sound effects.");
+      return false;
+    }
+    if (audioContext.state === "suspended") await audioContext.resume();
+
+    const duration = Math.max(0.05, getSoundEffectDuration(effect) - Math.max(0, elapsed));
+    const startAt = audioContext.currentTime + 0.01;
+    const volume =
+      clampAudioControl(effect.volume, 0, 1, 0.8) *
+      (previewMuted ? 0 : clampAudioControl(previewVolume, 0, 1, 1));
+    const gain = audioContext.createGain();
+    gain.gain.setValueAtTime(0.0001, startAt);
+    gain.gain.exponentialRampToValueAtTime(Math.max(0.0001, volume), startAt + 0.018);
+    gain.gain.exponentialRampToValueAtTime(0.0001, startAt + duration);
+    gain.connect(audioContext.destination);
+
+    const registerNode = node => {
+      soundEffectNodesRef.current.add(node);
+      node.addEventListener?.("ended", () => soundEffectNodesRef.current.delete(node), {
+        once: true,
+      });
+      return node;
+    };
+
+    if (effect.tone === "sweep" || effect.tone === "riser") {
+      const frameCount = Math.max(1, Math.floor(audioContext.sampleRate * duration));
+      const buffer = audioContext.createBuffer(1, frameCount, audioContext.sampleRate);
+      const channel = buffer.getChannelData(0);
+      for (let index = 0; index < frameCount; index += 1) {
+        channel[index] = (Math.random() * 2 - 1) * (1 - index / frameCount);
+      }
+      const noise = registerNode(audioContext.createBufferSource());
+      const filter = audioContext.createBiquadFilter();
+      noise.buffer = buffer;
+      filter.type = "bandpass";
+      filter.Q.value = effect.tone === "riser" ? 2.5 : 1.2;
+      const low = effect.tone === "riser" ? 180 : 1200;
+      const high = effect.tone === "riser" ? 4200 : 350;
+      filter.frequency.setValueAtTime(low, startAt);
+      filter.frequency.exponentialRampToValueAtTime(high, startAt + duration);
+      noise.connect(filter);
+      filter.connect(gain);
+      noise.start(startAt);
+      noise.stop(startAt + duration);
+    } else {
+      const oscillator = registerNode(audioContext.createOscillator());
+      oscillator.type =
+        effect.tone === "impact" ? "sine" : effect.tone === "click" ? "square" : "triangle";
+      const startFrequency = effect.tone === "impact" ? 150 : effect.tone === "click" ? 1100 : 620;
+      const endFrequency = effect.tone === "impact" ? 42 : effect.tone === "click" ? 420 : 240;
+      oscillator.frequency.setValueAtTime(startFrequency, startAt);
+      oscillator.frequency.exponentialRampToValueAtTime(endFrequency, startAt + duration);
+      oscillator.connect(gain);
+      oscillator.start(startAt);
+      oscillator.stop(startAt + duration);
+    }
+
+    soundEffectNodesRef.current.add(gain);
+    window.setTimeout(
+      () => {
+        soundEffectNodesRef.current.delete(gain);
+        try {
+          gain.disconnect();
+        } catch (error) {
+          // Already disconnected.
+        }
+      },
+      Math.ceil(duration * 1000) + 100
+    );
+    return true;
+  };
+
+  const addSoundEffectPreset = preset => {
+    const startTime = clampNumber(previewTimelineTime, 0, outputTimelineDuration, 0);
+    const effect = {
+      id: createSecureId("sfx"),
+      name: preset.name,
+      emoji: preset.emoji,
+      tone: preset.tone,
+      builtIn: true,
+      url: null,
+      file: null,
+      startTime,
+      duration: preset.duration,
+      trimStart: 0,
+      volume: 0.8,
+      fadeIn: 0.02,
+      fadeOut: Math.min(0.18, preset.duration / 3),
+      enabled: true,
+    };
+    setSoundEffects(previous => [...previous, effect]);
+    setActiveSoundEffectId(effect.id);
+    setStudioInspectorTab("sound");
+    setActiveCreativeTool("sound");
+    seekLiveEditTimelineItem(startTime, "sound");
+    setStudioActionMessage(
+      `${preset.name} added at ${formatPreviewTimePrecise(startTime)}. It is visible on the SFX lane and plays in After and Split.`
+    );
+  };
+
+  const handleSoundEffectUpload = event => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("audio/") && !file.name.match(/\.(mp3|wav|ogg|m4a|aac)$/i)) {
+      toast.error("Please select an audio effect (MP3, WAV, OGG, M4A, AAC).");
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    soundEffectObjectUrlsRef.current.add(url);
+    const startTime = clampNumber(previewTimelineTime, 0, outputTimelineDuration, 0);
+    const effect = {
+      id: createSecureId("sfx"),
+      name: normalizePlainText(file.name.replace(/\.[^.]+$/, "")) || "Custom effect",
+      emoji: "🔊",
+      tone: "custom",
+      builtIn: false,
+      url,
+      file,
+      startTime,
+      duration: 2,
+      trimStart: 0,
+      volume: 0.8,
+      fadeIn: 0.02,
+      fadeOut: 0.12,
+      enabled: true,
+    };
+    setSoundEffects(previous => [...previous, effect]);
+    setActiveSoundEffectId(effect.id);
+    setStudioInspectorTab("sound");
+    setActiveCreativeTool("sound");
+    seekLiveEditTimelineItem(startTime, "sound");
+    setStudioActionMessage(
+      `${effect.name} added at ${formatPreviewTimePrecise(startTime)}. Set its exact timing, trim, fades, and volume below.`
+    );
+    event.target.value = null;
+  };
+
+  const updateSoundEffect = (id, updates) => {
+    setSoundEffects(previous =>
+      previous.map(effect => {
+        if (effect.id !== id) return effect;
+        const next = { ...effect, ...updates };
+        next.startTime = clampNumber(next.startTime, 0, outputTimelineDuration, 0);
+        next.duration = clampAudioControl(next.duration, 0.05, 15, 0.6);
+        next.trimStart = clampAudioControl(next.trimStart, 0, 36000, 0);
+        next.volume = clampAudioControl(next.volume, 0, 1, 0.8);
+        next.fadeIn = clampAudioControl(next.fadeIn, 0, next.duration, 0.02);
+        next.fadeOut = clampAudioControl(next.fadeOut, 0, next.duration, 0.12);
+        return next;
+      })
+    );
+  };
+
+  const removeSoundEffect = id => {
+    const effect = soundEffects.find(item => item.id === id);
+    soundEffectAudioRefsRef.current.get(id)?.pause();
+    soundEffectAudioRefsRef.current.delete(id);
+    setSoundEffects(previous => previous.filter(item => item.id !== id));
+    setActiveSoundEffectId(current => (current === id ? null : current));
+    setPreviewingSoundEffectId(current => (current === id ? null : current));
+    setStudioActionMessage(`${effect?.name || "Sound effect"} removed. Undo restores it.`);
+  };
+
+  const toggleSoundEffectPreview = async effect => {
+    if (!effect) return;
+    if (previewingSoundEffectId === effect.id) {
+      stopSoundEffectPlayback();
+      setStudioActionMessage(`${effect.name} preview stopped.`);
+      return;
+    }
+
+    stopSoundEffectPlayback(false);
+    setPreviewingSoundEffectId(effect.id);
+    const duration = getSoundEffectDuration(effect);
+    if (effect.builtIn) {
+      const started = await playBuiltInSoundEffect(effect, 0);
+      if (!started) {
+        setPreviewingSoundEffectId(null);
+        return;
+      }
+    } else {
+      const audio = soundEffectAudioRefsRef.current.get(effect.id);
+      if (!audio) {
+        setPreviewingSoundEffectId(null);
+        return;
+      }
+      try {
+        audio.currentTime = clampAudioControl(effect.trimStart, 0, audio.duration || 36000, 0);
+        audio.volume = clampAudioControl(effect.volume, 0, 1, 0.8);
+        safePlayMediaElement(audio);
+      } catch (error) {
+        console.log("Sound effect preview skipped", error);
+      }
+    }
+    setStudioActionMessage(`${effect.name} preview is playing at the configured mix level.`);
+    soundEffectPreviewTimeoutRef.current = window.setTimeout(
+      () => {
+        stopSoundEffectPlayback();
+      },
+      Math.ceil(duration * 1000)
+    );
+  };
+
   // ── Speech-aware auto-ducking (Web Audio API) ──
   const startSpeechDetection = () => {
     if (!videoRef.current) return null;
@@ -3414,6 +3798,10 @@ const ViralClipStudio = ({
   );
   const previewTimelineTime = getPreviewTimelineTime(videoTime);
   const outputTimelineDuration = Math.max(0.1, getTimelineDuration());
+  const activeOverlayTimelineRemaining = Math.max(
+    0.1,
+    outputTimelineDuration - activeOverlayStartTime
+  );
   const outputPlaybackDuration = outputTimelineDuration / Math.max(0.01, previewSpeed);
   const previewPlaybackTime = previewTimelineTime / Math.max(0.01, previewSpeed);
   const currentTimelineOffset = getTimelineOffsetForIndex(activeTimelineIndex);
@@ -3832,6 +4220,7 @@ const ViralClipStudio = ({
     : musicSelection
       ? musicSelection.replace(/\.mp3$/i, "").replace(/_/g, " ")
       : "None";
+  const activeSoundEffect = soundEffects.find(effect => effect.id === activeSoundEffectId) || null;
   const musicPreviewStatusLabel =
     musicPreviewStatus === "processing"
       ? "Processing"
@@ -3922,7 +4311,7 @@ const ViralClipStudio = ({
   });
   const activeSideBySideOverlay = overlays.find(overlay => {
     const start = Number(overlay.startTime ?? overlay.start_time ?? -1);
-    const end = start + Number(overlay.duration || 0);
+    const end = start + getOverlayVisibleDuration(overlay);
     return (
       overlay.bRollMode === "sideBySide" &&
       previewTimelineTime >= start &&
@@ -3936,6 +4325,7 @@ const ViralClipStudio = ({
     Number(previewSpeed !== 1 || silenceRemoval) +
     liveTimelineCutMarkers.length +
     liveTimelineBRoll.length +
+    soundEffects.length +
     Number(addMusic || muteOriginalAudio);
   const retentionScore = clampNumber(
     54 +
@@ -4028,6 +4418,37 @@ const ViralClipStudio = ({
     }
   };
 
+  const setPreviewFillMode = mode => {
+    if (mode === "cover") {
+      setSafeFaceFraming(false);
+      setVideoFit("cover");
+      setStudioActionMessage(
+        "Fill canvas is active. The preview has no side gaps; drag the focal point if the crop hides something important."
+      );
+      return;
+    }
+    setVideoFit("contain");
+    setSafeFaceFraming(true);
+    setStudioActionMessage("Fit full frame is active. The entire source stays visible.");
+  };
+
+  const togglePreviewFullscreen = async () => {
+    try {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen?.();
+        return;
+      }
+      if (!phoneFrameRef.current?.requestFullscreen) {
+        setStudioActionMessage("Fullscreen is not supported by this browser.");
+        return;
+      }
+      await phoneFrameRef.current.requestFullscreen();
+    } catch (error) {
+      console.log("Preview fullscreen request skipped", error);
+      setStudioActionMessage("The browser blocked fullscreen. Click the preview, then try again.");
+    }
+  };
+
   const changePreviewSpeed = nextSpeed => {
     const normalizedSpeed = clampNumber(nextSpeed, 0.5, 2, 1);
     setPreviewSpeed(normalizedSpeed);
@@ -4081,14 +4502,8 @@ const ViralClipStudio = ({
     const localStart = clampNumber(normalizedPendingCutRange.start, 0, localDuration, 0);
     const localEnd = clampNumber(normalizedPendingCutRange.end, 0, localDuration, localDuration);
     const minimumKeptEdge = 0.12;
-    if (
-      localEnd - localStart < 0.15 ||
-      localStart < minimumKeptEdge ||
-      localDuration - localEnd < minimumKeptEdge
-    ) {
-      setStudioActionMessage(
-        "Choose a middle section to remove. Use Clip start or Clip end below for trimming an edge."
-      );
+    if (localEnd - localStart < 0.15 || localEnd - localStart >= localDuration - 0.05) {
+      setStudioActionMessage("Choose at least 0.15 seconds, but leave some video to keep.");
       return;
     }
 
@@ -4122,16 +4537,21 @@ const ViralClipStudio = ({
       transitionIn: resolvedJoinTransition,
       transitionDuration,
     };
+    const retainedSegments = [];
+    if (localStart >= minimumKeptEdge) retainedSegments.push(retainedBefore);
+    if (localDuration - localEnd >= minimumKeptEdge) retainedSegments.push(retainedAfter);
 
     pendingTimelineSeekRef.current = {
       index: activeTimelineIndex,
-      sourceTime: Math.max(Number(sourceWindow.start || 0), absoluteCutStart - 0.65),
+      sourceTime:
+        localStart < minimumKeptEdge
+          ? absoluteCutEnd
+          : Math.max(Number(sourceWindow.start || 0), absoluteCutStart - 0.65),
       play: true,
     };
     setTimeline(previous => [
       ...previous.slice(0, activeTimelineIndex),
-      retainedBefore,
-      retainedAfter,
+      ...retainedSegments,
       ...previous.slice(activeTimelineIndex + 1),
     ]);
     setOverlays(previous =>
@@ -4151,6 +4571,28 @@ const ViralClipStudio = ({
         return [
           {
             ...overlay,
+            startTime: Math.min(start, outputCutStart),
+            duration: retainedDuration,
+          },
+        ];
+      })
+    );
+    setSoundEffects(previous =>
+      previous.flatMap(effect => {
+        const start = Number(effect.startTime || 0);
+        const duration = getSoundEffectDuration(effect);
+        const end = start + duration;
+        if (end <= outputCutStart) return [effect];
+        if (start >= outputCutEnd) {
+          return [{ ...effect, startTime: Math.max(0, start - removedDuration) }];
+        }
+
+        const retainedDuration =
+          Math.max(0, outputCutStart - start) + Math.max(0, end - outputCutEnd);
+        if (retainedDuration < 0.05) return [];
+        return [
+          {
+            ...effect,
             startTime: Math.min(start, outputCutStart),
             duration: retainedDuration,
           },
@@ -5058,6 +5500,42 @@ const ViralClipStudio = ({
         setMusicTrack(previous => (previous ? { ...previous, url: exportedMusicUrl } : previous));
       }
 
+      const exportedSoundEffects = await Promise.all(
+        soundEffects
+          .filter(effect => effect.enabled !== false)
+          .map(async effect => {
+            let effectUrl = effect.url || null;
+            if (effect.file instanceof Blob && (!effectUrl || effectUrl.startsWith("blob:"))) {
+              const extension = effect.file.name?.split(".").pop() || "wav";
+              const upload = await uploadSourceFileViaBackend({
+                file: effect.file,
+                token,
+                mediaType: "audio",
+                fileName: `${createSecureId("sfx")}.${extension}`,
+                onProgress: (transferred, total) => {
+                  const percent = total > 0 ? Math.round((transferred / total) * 100) : 0;
+                  setExportStatusLabel(`Uploading sound effects ${percent}%`);
+                },
+              });
+              effectUrl = upload.url;
+            }
+            return {
+              id: effect.id,
+              name: effect.name,
+              builtIn: !!effect.builtIn,
+              tone: effect.tone || null,
+              url: effectUrl,
+              startTime: Number(effect.startTime || 0),
+              duration: getSoundEffectDuration(effect),
+              trimStart: Number(effect.trimStart || 0),
+              volume: clampAudioControl(effect.volume, 0, 1, 0.8),
+              fadeIn: Number(effect.fadeIn || 0),
+              fadeOut: Number(effect.fadeOut || 0),
+              enabled: true,
+            };
+          })
+      );
+
       const normalizedOverlays = normalizeOverlaysForExport(exportTimeline, newOverlays);
       const persistedHookFocusPoint = addHook ? normalizeHookFocusPoint(hookFocusPoint) : null;
       const coverFrame = addHook
@@ -5166,6 +5644,7 @@ const ViralClipStudio = ({
         musicFadeIn: musicTrack?.fadeIn ?? 0.5,
         musicFadeOut: musicTrack?.fadeOut ?? 0.5,
         musicLoop: musicTrack?.loop ?? true,
+        soundEffects: exportedSoundEffects,
         muteAudio: muteOriginalAudio,
         timelineSegments: exportTimeline,
         backgroundAudio: null,
@@ -5366,6 +5845,8 @@ const ViralClipStudio = ({
     musicDucking,
     musicDuckingStrength,
     musicTrack,
+    soundEffects,
+    activeSoundEffectId,
     extractedAudio,
     bRollCadence,
     timeline,
@@ -5434,6 +5915,9 @@ const ViralClipStudio = ({
     musicVolume,
     musicDucking,
     musicDuckingStrength,
+    musicTrack,
+    soundEffects,
+    activeSoundEffectId,
     extractedAudio,
     timeline,
     activeTimelineIndex,
@@ -5878,9 +6362,10 @@ const ViralClipStudio = ({
     // Find active B-roll overlays at current time
     const activeBRoll = overlays.filter(o => {
       if (o.startTime === undefined || o.duration === undefined) return false;
+      const audibleDuration = getOverlayAudibleDuration(o);
       return (
         previewTimelineTime >= Number(o.startTime) &&
-        previewTimelineTime < Number(o.startTime) + Number(o.duration)
+        previewTimelineTime < Number(o.startTime) + audibleDuration
       );
     });
 
@@ -5934,6 +6419,7 @@ const ViralClipStudio = ({
     const syncOverlayMedia = () => {
       const outputTime = getPreviewTimelineTime(sourceVideo.currentTime || 0);
       overlayMediaRefsRef.current.forEach((overlayVideo, overlayId) => {
+        if (String(soloPreviewOverlayId) === String(overlayId)) return;
         const overlay = overlays.find(item => String(item.id) === String(overlayId));
         if (!overlay || overlay.type !== "video") {
           overlayVideo.pause();
@@ -5942,8 +6428,9 @@ const ViralClipStudio = ({
 
         const start = Number(overlay.startTime ?? overlay.start_time ?? 0);
         const configuredDuration = Math.max(0, Number(overlay.duration || 0));
+        const visibleDuration = getOverlayVisibleDuration(overlay);
         const active =
-          configuredDuration > 0 && outputTime >= start && outputTime < start + configuredDuration;
+          visibleDuration > 0 && outputTime >= start && outputTime < start + visibleDuration;
         if (!active) {
           overlayVideo.pause();
           return;
@@ -5951,9 +6438,26 @@ const ViralClipStudio = ({
 
         const mediaDuration = Number(overlayVideo.duration || overlay.sourceDuration || 0);
         const elapsed = Math.max(0, outputTime - start);
-        const targetTime = mediaDuration > 0.1 ? elapsed % mediaDuration : elapsed;
+        const sourceStart = clampNumber(
+          overlay.sourceStartTime,
+          0,
+          Math.max(0, mediaDuration - 0.05),
+          0
+        );
+        const availableSourceDuration = Math.max(0.05, mediaDuration - sourceStart);
+        const sourceEndBehavior = normalizeBRollEndBehavior(overlay.sourceEndBehavior);
+        const hasReachedSourceEnd = mediaDuration > 0.1 && elapsed >= availableSourceDuration;
+        const targetTime =
+          mediaDuration <= 0.1
+            ? elapsed
+            : sourceEndBehavior === "loop"
+              ? sourceStart + (elapsed % availableSourceDuration)
+              : sourceStart + Math.min(elapsed, Math.max(0, availableSourceDuration - 0.04));
         overlayVideo.playbackRate = sourceVideo.playbackRate || 1;
-        overlayVideo.muted = !overlay.useOverlayAudio || previewMuted;
+        overlayVideo.muted =
+          !overlay.useOverlayAudio ||
+          previewMuted ||
+          (sourceEndBehavior === "hold" && hasReachedSourceEnd);
         overlayVideo.defaultMuted = overlayVideo.muted;
         overlayVideo.volume = clampAudioControl(overlay.overlayAudioVolume, 0, 1, 0.7);
 
@@ -5968,7 +6472,7 @@ const ViralClipStudio = ({
           }
         }
 
-        if (sourceVideo.paused) {
+        if (sourceVideo.paused || (sourceEndBehavior === "hold" && hasReachedSourceEnd)) {
           overlayVideo.pause();
         } else {
           safePlayMediaElement(overlayVideo);
@@ -5993,7 +6497,7 @@ const ViralClipStudio = ({
       sourceVideo.removeEventListener("ratechange", syncOverlayMedia);
       overlayMediaRefsRef.current.forEach(media => media.pause());
     };
-  }, [activeTimelineIndex, overlays, previewMuted, timeline]);
+  }, [activeTimelineIndex, overlays, previewMuted, soloPreviewOverlayId, timeline]);
 
   useEffect(() => {
     applySafeMediaSource(
@@ -6429,6 +6933,94 @@ const ViralClipStudio = ({
     selectedClip,
   ]);
 
+  // Keep the SFX lane locked to the edited output timeline during After/Split playback.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || renderedOutputUrl) return undefined;
+
+    const pauseTimelineEffects = () => {
+      soundEffectAudioRefsRef.current.forEach(audio => audio?.pause());
+      stopSynthesizedSoundEffects();
+      triggeredSoundEffectsRef.current.clear();
+    };
+
+    const syncSoundEffects = () => {
+      const outputTime = clampNumber(
+        getPreviewTimelineTime(video.currentTime || 0),
+        0,
+        outputTimelineDuration,
+        0
+      );
+      const previewGain = previewMuted ? 0 : clampAudioControl(previewVolume, 0, 1, 1);
+
+      soundEffects.forEach(effect => {
+        const start = Number(effect.startTime || 0);
+        const duration = getSoundEffectDuration(effect);
+        const elapsed = outputTime - start;
+        const isActive = effect.enabled !== false && elapsed >= 0 && elapsed < duration;
+        const audio = soundEffectAudioRefsRef.current.get(effect.id);
+
+        if (!isActive || video.paused) {
+          audio?.pause();
+          if (!isActive) triggeredSoundEffectsRef.current.delete(effect.id);
+          return;
+        }
+
+        const fadeGain = getAudioFadeGain(elapsed, duration, effect.fadeIn, effect.fadeOut);
+        if (effect.builtIn) {
+          if (!triggeredSoundEffectsRef.current.has(effect.id)) {
+            triggeredSoundEffectsRef.current.add(effect.id);
+            void playBuiltInSoundEffect(effect, elapsed).catch(error => {
+              console.log("Sound effect playback prevented", error);
+            });
+          }
+          return;
+        }
+
+        if (!audio || !effect.url) return;
+        const targetTime = Number(effect.trimStart || 0) + elapsed;
+        audio.volume = clampAudioControl(effect.volume, 0, 1, 0.8) * previewGain * fadeGain;
+        audio.playbackRate = video.playbackRate || 1;
+        if (Math.abs(Number(audio.currentTime || 0) - targetTime) > 0.18) {
+          try {
+            audio.currentTime = targetTime;
+          } catch (error) {
+            console.log("Sound effect seek skipped", error);
+          }
+        }
+        safePlayMediaElement(audio);
+      });
+    };
+
+    video.addEventListener("play", syncSoundEffects);
+    video.addEventListener("timeupdate", syncSoundEffects);
+    video.addEventListener("seeking", syncSoundEffects);
+    video.addEventListener("seeked", syncSoundEffects);
+    video.addEventListener("ratechange", syncSoundEffects);
+    video.addEventListener("pause", pauseTimelineEffects);
+    video.addEventListener("ended", pauseTimelineEffects);
+    syncSoundEffects();
+
+    return () => {
+      video.removeEventListener("play", syncSoundEffects);
+      video.removeEventListener("timeupdate", syncSoundEffects);
+      video.removeEventListener("seeking", syncSoundEffects);
+      video.removeEventListener("seeked", syncSoundEffects);
+      video.removeEventListener("ratechange", syncSoundEffects);
+      video.removeEventListener("pause", pauseTimelineEffects);
+      video.removeEventListener("ended", pauseTimelineEffects);
+      pauseTimelineEffects();
+    };
+  }, [
+    soundEffects,
+    outputTimelineDuration,
+    previewMuted,
+    previewVolume,
+    renderedOutputUrl,
+    activeTimelineIndex,
+    timeline,
+  ]);
+
   // ── Speech-aware auto-ducking for music preview ──
   useEffect(() => {
     const music = musicPreviewRef.current;
@@ -6641,14 +7233,22 @@ const ViralClipStudio = ({
       return;
     }
 
-    addOverlayAsset({
+    const imageOverlay = addOverlayAsset({
       type: "image",
       src: URL.createObjectURL(file),
       file,
       isLocal: true,
-      width: 35,
-      height: 35,
+      width: 42,
+      height: 32,
+      bRollMode: "pip",
     });
+
+    setStudioInspectorTab("broll");
+    setComparisonMode("after");
+    if (imageOverlay) jumpToOutputTimelineTime(Number(imageOverlay.startTime || 0));
+    setStudioActionMessage(
+      "Image placed at the playhead as a timed picture-in-picture layer. Choose a layout, motion and crop below."
+    );
 
     event.target.value = null;
   };
@@ -6660,13 +7260,17 @@ const ViralClipStudio = ({
       return;
     }
 
-    addOverlayAsset({
+    const imageOverlay = addOverlayAsset({
       type: "image",
       src,
       isLocal: false,
-      width: 35,
-      height: 35,
+      width: 42,
+      height: 32,
+      bRollMode: "pip",
     });
+    setStudioInspectorTab("broll");
+    setComparisonMode("after");
+    if (imageOverlay) jumpToOutputTimelineTime(Number(imageOverlay.startTime || 0));
   };
 
   const buildVideoBRollOverlay = (file, src, startTime, duration, sourceDuration = 0) => ({
@@ -6685,7 +7289,9 @@ const ViralClipStudio = ({
     clipId: timeline[activeTimelineIndex]?.id || "main",
     startTime,
     duration,
+    sourceStartTime: 0,
     sourceDuration,
+    sourceEndBehavior: "return",
     bRollMode: "fullscreen",
     animation: { enter: "fade", exit: "fade", enterDuration: 0.3, exitDuration: 0.3 },
     opacity: 1,
@@ -6769,6 +7375,10 @@ const ViralClipStudio = ({
     setOverlays(prev => [...prev, ...overlaysToAdd]);
     setActiveOverlayId(overlaysToAdd[0]?.id || null);
     setStudioInspectorTab("broll");
+    setComparisonMode("after");
+    if (overlaysToAdd[0]) {
+      jumpToOutputTimelineTime(Number(overlaysToAdd[0].startTime || 0));
+    }
     setStudioActionMessage(
       overlaysToAdd.length === 1
         ? "B-roll placed at the playhead. Set its layout, timing, and audio in one panel."
@@ -6807,6 +7417,52 @@ const ViralClipStudio = ({
         const nextDuration = Math.min(Math.max(0.1, Number(duration) || 0.1), timelineRemaining);
         return { ...o, startTime: nextStart, duration: nextDuration };
       })
+    );
+  };
+
+  const applyOverlayDuration = (overlay, requestedDuration, label = "") => {
+    if (!overlay) return;
+    const requested = Math.max(0.1, Number(requestedDuration) || 0.1);
+    const remaining = Math.max(0.1, getTimelineDuration() - Number(overlay.startTime || 0));
+    const applied = Math.min(requested, remaining);
+    updateOverlayTimeRange(overlay.id, overlay.startTime || 0, applied);
+    setStudioActionMessage(
+      requested > remaining
+        ? `${label || "Duration"} was limited to ${formatEditorDuration(applied)}, the remaining output time.`
+        : `${overlay.type === "image" ? "Image" : "B-roll"} duration set to ${formatEditorDuration(applied)}.`
+    );
+  };
+
+  const commitOverlayDurationText = (overlay, value) => {
+    const parsed = parseEditorDuration(value);
+    if (parsed === null || parsed < 0.1) {
+      setStudioActionMessage("Enter a duration like 10, 1:00, 2m or 5:00.");
+      return;
+    }
+    applyOverlayDuration(overlay, parsed);
+  };
+
+  const setOverlaySourceEndBehavior = (id, behavior) => {
+    const normalized = normalizeBRollEndBehavior(behavior);
+    setOverlayStyleOption(id, "sourceEndBehavior", normalized);
+    setStudioActionMessage(
+      normalized === "loop"
+        ? "Shorter B-roll will loop until the configured cutaway ends."
+        : normalized === "hold"
+          ? "The final B-roll frame will hold while the original voice returns."
+          : "The original video and voice will return when the B-roll source footage ends."
+    );
+  };
+
+  const rememberOverlaySourceDuration = (id, duration) => {
+    const safeDuration = Math.max(0, Number(duration || 0));
+    if (!safeDuration) return;
+    setOverlays(prev =>
+      prev.map(overlay =>
+        overlay.id === id && Math.abs(Number(overlay.sourceDuration || 0) - safeDuration) > 0.05
+          ? { ...overlay, sourceDuration: safeDuration }
+          : overlay
+      )
     );
   };
 
@@ -6876,6 +7532,12 @@ const ViralClipStudio = ({
     );
   };
 
+  const setOverlayStyleOption = (id, key, value) => {
+    setOverlays(prev =>
+      prev.map(overlay => (overlay.id === id ? { ...overlay, [key]: value } : overlay))
+    );
+  };
+
   const setOverlayAudioOption = (id, key, value) => {
     setOverlays(prev => prev.map(o => (o.id === id ? { ...o, [key]: value } : o)));
   };
@@ -6921,6 +7583,71 @@ const ViralClipStudio = ({
         : mode === "mix"
           ? "Original and overlay audio will play together during this cutaway."
           : "The original source audio stays continuous through this cutaway."
+    );
+  };
+
+  const placeOverlayAtPlayhead = overlay => {
+    if (!overlay) return;
+    const playhead = clampNumber(previewTimelineTime, 0, liveTimelineDuration, 0);
+    updateOverlayTimeRange(overlay.id, playhead, overlay.duration || 3);
+    setActiveOverlayId(overlay.id);
+    jumpToOutputTimelineTime(playhead);
+    setStudioActionMessage(
+      `${overlay.type === "image" ? "Image" : "B-roll"} moved exactly to the playhead at ${formatPreviewTimePrecise(playhead)}.`
+    );
+  };
+
+  const previewOverlayInTimeline = overlay => {
+    if (!overlay) return;
+    setSoloPreviewOverlayId(null);
+    setComparisonMode("after");
+    seekLiveEditTimelineItem(Number(overlay.startTime || 0), "broll", overlay.id);
+    window.requestAnimationFrame(() => {
+      previewPlaybackIntentRef.current = true;
+      safePlayMediaElement(videoRef.current);
+    });
+    setStudioActionMessage(
+      `Playing the complete ${overlay.type === "image" ? "image insert" : "B-roll cutaway"} in context from ${formatPreviewTimePrecise(overlay.startTime)}.`
+    );
+  };
+
+  const toggleSoloOverlayPreview = overlay => {
+    if (!overlay || overlay.type !== "video") return;
+    const media = overlayMediaRefsRef.current.get(String(overlay.id));
+    if (soloPreviewOverlayId === overlay.id) {
+      media?.pause();
+      setSoloPreviewOverlayId(null);
+      setStudioActionMessage("B-roll-only preview paused. The source remains paused.");
+      return;
+    }
+
+    pauseSynchronizedPreview();
+    jumpToOutputTimelineTime(Number(overlay.startTime || 0));
+    setSoloPreviewOverlayId(overlay.id);
+    window.requestAnimationFrame(() => {
+      const selectedMedia = overlayMediaRefsRef.current.get(String(overlay.id));
+      if (!selectedMedia) {
+        setSoloPreviewOverlayId(null);
+        setStudioActionMessage("Move to the cutaway cue, then try B-roll-only preview again.");
+        return;
+      }
+      try {
+        selectedMedia.currentTime = clampAudioControl(
+          overlay.sourceStartTime,
+          0,
+          selectedMedia.duration || 36000,
+          0
+        );
+      } catch (error) {
+        console.log("B-roll-only seek skipped", error);
+      }
+      selectedMedia.muted = false;
+      selectedMedia.defaultMuted = false;
+      selectedMedia.volume = clampAudioControl(overlay.overlayAudioVolume, 0, 1, 0.7);
+      safePlayMediaElement(selectedMedia);
+    });
+    setStudioActionMessage(
+      "B-roll-only preview is playing. The original video and original audio are paused."
     );
   };
 
@@ -7706,6 +8433,33 @@ const ViralClipStudio = ({
                 >
                   {isPreviewPaused ? "▶ Play comparison" : "❚❚ Pause comparison"}
                 </button>
+                <div className="preview-display-controls" aria-label="Preview display controls">
+                  <button
+                    type="button"
+                    className={effectiveVideoFit === "contain" ? "is-active" : ""}
+                    aria-pressed={effectiveVideoFit === "contain"}
+                    onClick={() => setPreviewFillMode("contain")}
+                    title="Show the entire source frame"
+                  >
+                    Fit full
+                  </button>
+                  <button
+                    type="button"
+                    className={effectiveVideoFit === "cover" ? "is-active" : ""}
+                    aria-pressed={effectiveVideoFit === "cover"}
+                    onClick={() => setPreviewFillMode("cover")}
+                    title="Fill the vertical canvas without side gaps"
+                  >
+                    Fill canvas
+                  </button>
+                  <button
+                    type="button"
+                    data-testid="preview-fullscreen-button"
+                    onClick={() => void togglePreviewFullscreen()}
+                  >
+                    {isPreviewFullscreen ? "Exit fullscreen" : "Fullscreen"}
+                  </button>
+                </div>
               </div>
 
               <div className="preview-device-column">
@@ -8061,7 +8815,8 @@ const ViralClipStudio = ({
                           if (overlayStart !== undefined && o.duration !== undefined) {
                             return (
                               previewTimelineTime >= Number(overlayStart) &&
-                              previewTimelineTime < Number(overlayStart) + Number(o.duration)
+                              previewTimelineTime <
+                                Number(overlayStart) + getOverlayVisibleDuration(o)
                             );
                           }
                           return true;
@@ -8174,8 +8929,18 @@ const ViralClipStudio = ({
                                   style={{
                                     width: "100%",
                                     height: "100%",
-                                    objectFit: isFullscreen ? "cover" : "contain",
-                                    borderRadius: isFullscreen ? "0" : "12px",
+                                    objectFit:
+                                      overlay.mediaFit === "stretch"
+                                        ? "fill"
+                                        : overlay.mediaFit || (isFullscreen ? "cover" : "contain"),
+                                    borderRadius: isFullscreen
+                                      ? "0"
+                                      : `${Number(overlay.borderRadius ?? 16)}px`,
+                                    boxShadow:
+                                      !isFullscreen && overlay.shadow !== "none"
+                                        ? "0 16px 36px rgba(0, 0, 0, 0.42)"
+                                        : "none",
+                                    transform: `rotate(${Number(overlay.rotation || 0)}deg)`,
                                     pointerEvents: "none",
                                   }}
                                 />
@@ -8197,6 +8962,12 @@ const ViralClipStudio = ({
                                     }
                                   }}
                                   muted={!overlay.useOverlayAudio || previewMuted}
+                                  onLoadedMetadata={event =>
+                                    rememberOverlaySourceDuration(
+                                      overlay.id,
+                                      event.currentTarget.duration
+                                    )
+                                  }
                                   style={{
                                     width: "100%",
                                     height: "100%",
@@ -8768,7 +9539,7 @@ const ViralClipStudio = ({
                   <div className="compact-timeline-row">
                     <span>Audio</span>
                     <div
-                      className="compact-timeline-track compact-audio-track"
+                      className={`compact-timeline-track compact-audio-track ${soundEffects.length ? "has-sfx" : ""}`}
                       onClick={seekLiveEditTimeline}
                       role="presentation"
                     >
@@ -8830,6 +9601,33 @@ const ViralClipStudio = ({
                           <span>{musicTrack?.name || currentMusicLabel || "Background sound"}</span>
                         </button>
                       ) : null}
+                      {soundEffects.map(effect => {
+                        const left = (Number(effect.startTime || 0) / liveTimelineDuration) * 100;
+                        const width = (getSoundEffectDuration(effect) / liveTimelineDuration) * 100;
+                        return (
+                          <button
+                            key={`sfx-${effect.id}`}
+                            type="button"
+                            className={`compact-sfx-audio ${activeSoundEffectId === effect.id ? "is-active" : ""} ${effect.enabled === false ? "is-disabled" : ""}`}
+                            style={{
+                              left: `${left}%`,
+                              width: `${Math.max(2.4, width)}%`,
+                              top: addMusic ? "54px" : "29px",
+                            }}
+                            onClick={event => {
+                              event.stopPropagation();
+                              setActiveSoundEffectId(effect.id);
+                              seekLiveEditTimelineItem(Number(effect.startTime || 0), "sound");
+                            }}
+                            data-testid={`timeline-sfx-${effect.id}`}
+                            title={`${effect.name} · ${formatPreviewTimePrecise(effect.startTime)} · ${Math.round(effect.volume * 100)}%`}
+                          >
+                            <span>
+                              {effect.emoji || "🔊"} {effect.name}
+                            </span>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 
@@ -9546,6 +10344,56 @@ const ViralClipStudio = ({
                     </button>
                   </div>
 
+                  <div className="inspector-time-grid cut-exact-range">
+                    <label>
+                      <span>Remove from</span>
+                      <input
+                        aria-label="Remove from time"
+                        type="number"
+                        min={0}
+                        max={trimAwareDuration}
+                        step={0.05}
+                        placeholder="0.00"
+                        value={cutRangeStart === null ? "" : cutRangeStart}
+                        onChange={event =>
+                          setCutRangeStart(
+                            event.target.value === ""
+                              ? null
+                              : clampNumber(event.target.value, 0, trimAwareDuration, 0)
+                          )
+                        }
+                      />
+                    </label>
+                    <label>
+                      <span>Remove to</span>
+                      <input
+                        aria-label="Remove to time"
+                        type="number"
+                        min={0}
+                        max={trimAwareDuration}
+                        step={0.05}
+                        placeholder={trimAwareDuration.toFixed(2)}
+                        value={cutRangeEnd === null ? "" : cutRangeEnd}
+                        onChange={event =>
+                          setCutRangeEnd(
+                            event.target.value === ""
+                              ? null
+                              : clampNumber(
+                                  event.target.value,
+                                  0,
+                                  trimAwareDuration,
+                                  trimAwareDuration
+                                )
+                          )
+                        }
+                      />
+                    </label>
+                  </div>
+                  <p className="cut-exact-help">
+                    Enter the exact bad section. The red range appears on the video timeline before
+                    anything is removed.
+                  </p>
+
                   {normalizedPendingCutRange ? (
                     <div className="pending-cut-summary" data-testid="pending-cut-summary">
                       <span>
@@ -9985,8 +10833,8 @@ const ViralClipStudio = ({
                 <div className="clip-inspector-body" role="tabpanel">
                   <div className="inspector-heading-row">
                     <div>
-                      <span className="panel-kicker">Cutaway layer</span>
-                      <h4>Show the proof while the story keeps moving</h4>
+                      <span className="panel-kicker">Visual layers</span>
+                      <h4>Place video or images exactly where the story needs them</h4>
                     </div>
                     <span className="inspector-status-dot is-ready">
                       {overlays.filter(overlay => overlay.bRollMode).length} clips
@@ -10045,22 +10893,68 @@ const ViralClipStudio = ({
                     </div>
                   </button>
 
-                  {activeOverlayIsVideoBRoll ? (
+                  <button
+                    type="button"
+                    className="inspector-upload-card"
+                    onClick={() => imageInputRef.current?.click()}
+                  >
+                    <span>🖼</span>
+                    <div>
+                      <strong>Attach an image</strong>
+                      <small>Timed full screen, picture-in-picture or side by side</small>
+                    </div>
+                  </button>
+
+                  {activeOverlayIsTimedMedia ? (
                     <>
                       <div className="inspector-selected-asset">
-                        <video
-                          ref={element => applySafeMediaSource(element, activeOverlaySafeSrc)}
-                          muted
-                          playsInline
-                          preload="metadata"
-                        />
+                        {activeOverlay.type === "video" ? (
+                          <video
+                            ref={element => applySafeMediaSource(element, activeOverlaySafeSrc)}
+                            muted
+                            playsInline
+                            preload="metadata"
+                          />
+                        ) : (
+                          <img
+                            ref={element => applySafeMediaSource(element, activeOverlaySafeSrc)}
+                            alt="Selected visual insert"
+                          />
+                        )}
                         <div>
-                          <span>Selected cutaway</span>
+                          <span>
+                            Selected {activeOverlay.type === "image" ? "image" : "cutaway"}
+                          </span>
                           <strong>{activeOverlayDisplayName}</strong>
                           <small>
-                            {activeOverlayStartTime.toFixed(1)}s–{activeOverlayEndTime.toFixed(1)}s
+                            {formatEditorDuration(activeOverlayStartTime)}–
+                            {formatEditorDuration(activeOverlayEndTime)}
                           </small>
                         </div>
+                      </div>
+
+                      <div className="inspector-inline-actions broll-placement-actions">
+                        <button type="button" onClick={() => placeOverlayAtPlayhead(activeOverlay)}>
+                          Place at playhead
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => previewOverlayInTimeline(activeOverlay)}
+                        >
+                          Play in timeline
+                        </button>
+                        {activeOverlay.type === "video" ? (
+                          <button
+                            type="button"
+                            className={soloPreviewOverlayId === activeOverlay.id ? "is-active" : ""}
+                            data-testid="preview-broll-only"
+                            onClick={() => toggleSoloOverlayPreview(activeOverlay)}
+                          >
+                            {soloPreviewOverlayId === activeOverlay.id
+                              ? "Pause B-roll only"
+                              : "Play B-roll only"}
+                          </button>
+                        ) : null}
                       </div>
 
                       <div className="inspector-time-grid">
@@ -10081,22 +10975,152 @@ const ViralClipStudio = ({
                           />
                         </label>
                         <label>
-                          <span>Duration</span>
+                          <span>Duration (MM:SS)</span>
                           <input
-                            type="number"
-                            min={0.1}
+                            key={`${activeOverlay.id}-${activeOverlayDuration}`}
+                            aria-label="B-roll duration"
+                            type="text"
+                            inputMode="decimal"
+                            defaultValue={formatEditorDuration(activeOverlayDuration)}
+                            placeholder="2:00 or 120"
+                            onBlur={event =>
+                              commitOverlayDurationText(activeOverlay, event.target.value)
+                            }
+                            onKeyDown={event => {
+                              if (event.key === "Enter") event.currentTarget.blur();
+                            }}
+                          />
+                        </label>
+                      </div>
+
+                      <div className="broll-duration-editor">
+                        <div
+                          className="broll-duration-presets"
+                          aria-label="B-roll duration presets"
+                        >
+                          {[
+                            [5, "5 sec"],
+                            [10, "10 sec"],
+                            [30, "30 sec"],
+                            [60, "60 sec"],
+                            [120, "2 min"],
+                            [300, "5 min"],
+                          ].map(([seconds, label]) => (
+                            <button
+                              key={seconds}
+                              type="button"
+                              aria-label={`Set duration to ${label}`}
+                              onClick={() => applyOverlayDuration(activeOverlay, seconds, label)}
+                            >
+                              {label}
+                            </button>
+                          ))}
+                          <button
+                            type="button"
+                            onClick={() =>
+                              applyOverlayDuration(
+                                activeOverlay,
+                                activeOverlayTimelineRemaining,
+                                "To end"
+                              )
+                            }
+                          >
+                            To end
+                          </button>
+                        </div>
+                        <small>
+                          Up to {formatEditorDuration(activeOverlayTimelineRemaining)} remains after
+                          this start point. Type seconds, MM:SS, “2m” or “5:00”.
+                        </small>
+                      </div>
+
+                      {activeOverlay.type === "video" ? (
+                        <label className="inspector-range">
+                          <span>
+                            <b>Use B-roll from</b>
+                            <strong>
+                              {Number(activeOverlay.sourceStartTime || 0).toFixed(1)}s
+                            </strong>
+                          </span>
+                          <input
+                            aria-label="B-roll source start"
+                            type="range"
+                            min={0}
+                            max={Math.max(0, Number(activeOverlay.sourceDuration || 0) - 0.05)}
                             step={0.1}
-                            value={activeOverlayDuration.toFixed(1)}
+                            value={Number(activeOverlay.sourceStartTime || 0)}
                             onChange={event =>
-                              updateOverlayTimeRange(
+                              setOverlayStyleOption(
                                 activeOverlay.id,
-                                activeOverlayStartTime,
+                                "sourceStartTime",
                                 Number(event.target.value)
                               )
                             }
                           />
+                          <small>Choose which moment inside the uploaded B-roll should play.</small>
                         </label>
-                      </div>
+                      ) : null}
+
+                      {activeOverlay.type === "video" ? (
+                        <div className="inspector-field broll-source-end-control">
+                          <span>When B-roll footage ends</span>
+                          <div className="inspector-choice-grid is-three">
+                            {[
+                              ["return", "Return to original"],
+                              ["loop", "Loop B-roll"],
+                              ["hold", "Hold last frame"],
+                            ].map(([value, label]) => (
+                              <button
+                                key={value}
+                                type="button"
+                                className={
+                                  normalizeBRollEndBehavior(activeOverlay.sourceEndBehavior) ===
+                                  value
+                                    ? "is-active"
+                                    : ""
+                                }
+                                aria-pressed={
+                                  normalizeBRollEndBehavior(activeOverlay.sourceEndBehavior) ===
+                                  value
+                                }
+                                onClick={() => setOverlaySourceEndBehavior(activeOverlay.id, value)}
+                              >
+                                {label}
+                              </button>
+                            ))}
+                          </div>
+                          <small className="inspector-reassurance">
+                            {Number.isFinite(activeOverlayAvailableSourceDuration) ? (
+                              activeOverlayDuration > activeOverlayAvailableSourceDuration ? (
+                                <>
+                                  Source has{" "}
+                                  {formatEditorDuration(activeOverlayAvailableSourceDuration)}{" "}
+                                  available. “
+                                  {normalizeBRollEndBehavior(activeOverlay.sourceEndBehavior) ===
+                                  "loop"
+                                    ? "Loop"
+                                    : normalizeBRollEndBehavior(activeOverlay.sourceEndBehavior) ===
+                                        "hold"
+                                      ? "Hold"
+                                      : "Return"}
+                                  ” controls the remaining{" "}
+                                  {formatEditorDuration(
+                                    activeOverlayDuration - activeOverlayAvailableSourceDuration
+                                  )}
+                                  .
+                                </>
+                              ) : (
+                                <>
+                                  This source covers the complete{" "}
+                                  {formatEditorDuration(activeOverlayVisibleDuration)} cutaway.
+                                </>
+                              )
+                            ) : (
+                              "Source length will be detected from the uploaded video."
+                            )}
+                          </small>
+                        </div>
+                      ) : null}
 
                       <div className="inspector-field">
                         <span>Layout</span>
@@ -10119,33 +11143,36 @@ const ViralClipStudio = ({
                         </div>
                       </div>
 
-                      <div className="inspector-field">
-                        <span>Cutaway audio</span>
-                        <div className="inspector-choice-grid is-three audio-mode-grid">
-                          {[
-                            ["original", "Keep original"],
-                            ["overlay", "Use overlay"],
-                            ["mix", "Mix both"],
-                          ].map(([value, label]) => (
-                            <button
-                              key={value}
-                              type="button"
-                              className={
-                                getOverlayAudioMode(activeOverlay) === value ? "is-active" : ""
-                              }
-                              aria-pressed={getOverlayAudioMode(activeOverlay) === value}
-                              onClick={() => setOverlayAudioMode(activeOverlay.id, value)}
-                            >
-                              {label}
-                            </button>
-                          ))}
+                      {activeOverlay.type === "video" ? (
+                        <div className="inspector-field">
+                          <span>Cutaway audio</span>
+                          <div className="inspector-choice-grid is-three audio-mode-grid">
+                            {[
+                              ["original", "Keep original"],
+                              ["overlay", "Use overlay"],
+                              ["mix", "Mix both"],
+                            ].map(([value, label]) => (
+                              <button
+                                key={value}
+                                type="button"
+                                className={
+                                  getOverlayAudioMode(activeOverlay) === value ? "is-active" : ""
+                                }
+                                aria-pressed={getOverlayAudioMode(activeOverlay) === value}
+                                onClick={() => setOverlayAudioMode(activeOverlay.id, value)}
+                              >
+                                {label}
+                              </button>
+                            ))}
+                          </div>
+                          <small className="inspector-reassurance">
+                            ✓ Original audio returns automatically after the cutaway.
+                          </small>
                         </div>
-                        <small className="inspector-reassurance">
-                          ✓ Original audio returns automatically after the cutaway.
-                        </small>
-                      </div>
+                      ) : null}
 
-                      {getOverlayAudioMode(activeOverlay) === "mix" ? (
+                      {activeOverlay.type === "video" &&
+                      getOverlayAudioMode(activeOverlay) === "mix" ? (
                         <>
                           <label className="inspector-check-row">
                             <input
@@ -10194,7 +11221,8 @@ const ViralClipStudio = ({
                         </>
                       ) : null}
 
-                      {getOverlayAudioMode(activeOverlay) !== "original" ? (
+                      {activeOverlay.type === "video" &&
+                      getOverlayAudioMode(activeOverlay) !== "original" ? (
                         <label className="inspector-range">
                           <span>
                             <b>Overlay volume</b>
@@ -10220,6 +11248,125 @@ const ViralClipStudio = ({
                         </label>
                       ) : null}
 
+                      {activeOverlay.type === "image" ? (
+                        <>
+                          <div className="inspector-field">
+                            <span>Image crop</span>
+                            <div className="inspector-choice-grid is-three">
+                              {[
+                                ["cover", "Fill frame"],
+                                ["contain", "Show all"],
+                                ["stretch", "Stretch"],
+                              ].map(([value, label]) => (
+                                <button
+                                  key={value}
+                                  type="button"
+                                  className={
+                                    (activeOverlay.mediaFit || "cover") === value ? "is-active" : ""
+                                  }
+                                  aria-pressed={(activeOverlay.mediaFit || "cover") === value}
+                                  onClick={() =>
+                                    setOverlayStyleOption(activeOverlay.id, "mediaFit", value)
+                                  }
+                                >
+                                  {label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                          <label className="inspector-range">
+                            <span>
+                              <b>Corner roundness</b>
+                              <strong>{Math.round(activeOverlay.borderRadius ?? 16)}px</strong>
+                            </span>
+                            <input
+                              aria-label="Image corner roundness"
+                              type="range"
+                              min={0}
+                              max={40}
+                              step={1}
+                              value={activeOverlay.borderRadius ?? 16}
+                              onChange={event =>
+                                setOverlayStyleOption(
+                                  activeOverlay.id,
+                                  "borderRadius",
+                                  Number(event.target.value)
+                                )
+                              }
+                            />
+                          </label>
+                          <label className="inspector-range">
+                            <span>
+                              <b>Rotation</b>
+                              <strong>{Math.round(activeOverlay.rotation || 0)}°</strong>
+                            </span>
+                            <input
+                              aria-label="Image rotation"
+                              type="range"
+                              min={-20}
+                              max={20}
+                              step={1}
+                              value={activeOverlay.rotation || 0}
+                              onChange={event =>
+                                setOverlayStyleOption(
+                                  activeOverlay.id,
+                                  "rotation",
+                                  Number(event.target.value)
+                                )
+                              }
+                            />
+                          </label>
+                          <label className="inspector-range">
+                            <span>
+                              <b>Opacity</b>
+                              <strong>{Math.round((activeOverlay.opacity ?? 1) * 100)}%</strong>
+                            </span>
+                            <input
+                              aria-label="Image opacity"
+                              type="range"
+                              min={10}
+                              max={100}
+                              step={5}
+                              value={Math.round((activeOverlay.opacity ?? 1) * 100)}
+                              onChange={event =>
+                                setOverlayOpacity(
+                                  activeOverlay.id,
+                                  Number(event.target.value) / 100
+                                )
+                              }
+                            />
+                          </label>
+                          <div className="inspector-field">
+                            <span>Entrance motion</span>
+                            <div className="inspector-choice-grid is-three">
+                              {[
+                                ["fade", "Fade"],
+                                ["slideUp", "Slide up"],
+                                ["zoom", "Zoom"],
+                              ].map(([value, label]) => (
+                                <button
+                                  key={value}
+                                  type="button"
+                                  className={
+                                    (activeOverlay.animation?.enter || "fade") === value
+                                      ? "is-active"
+                                      : ""
+                                  }
+                                  aria-pressed={
+                                    (activeOverlay.animation?.enter || "fade") === value
+                                  }
+                                  onClick={() =>
+                                    setOverlayAnimation(activeOverlay.id, "enter", value)
+                                  }
+                                >
+                                  {label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </>
+                      ) : null}
+
                       <button
                         type="button"
                         className="inspector-primary-action"
@@ -10227,11 +11374,11 @@ const ViralClipStudio = ({
                           setComparisonMode("split");
                           focusComparisonPreview("broll", false);
                           setStudioActionMessage(
-                            "B-roll applied and previewing at its exact cutaway point."
+                            `${activeOverlay.type === "image" ? "Image" : "B-roll"} applied and previewing at its exact timeline position.`
                           );
                         }}
                       >
-                        ▣ Apply B-roll
+                        ▣ Apply {activeOverlay.type === "image" ? "image" : "B-roll"}
                       </button>
                     </>
                   ) : (
@@ -10390,6 +11537,244 @@ const ViralClipStudio = ({
                     </>
                   ) : null}
 
+                  <section className="sound-effects-section" aria-label="Sound effects">
+                    <div className="sound-effects-heading">
+                      <div>
+                        <span className="panel-kicker">Sound effects</span>
+                        <strong>Punch up cuts, reveals and proof moments</strong>
+                      </div>
+                      <span className="sound-effect-count">{soundEffects.length} placed</span>
+                    </div>
+
+                    <div className="sound-effect-preset-grid">
+                      {SOUND_EFFECT_PRESETS.map(preset => (
+                        <button
+                          key={preset.id}
+                          type="button"
+                          className="sound-effect-preset"
+                          onClick={() => addSoundEffectPreset(preset)}
+                          data-testid={`sound-effect-preset-${preset.id}`}
+                          aria-label={`Add ${preset.name} at playhead`}
+                        >
+                          <span>{preset.emoji}</span>
+                          <strong>{preset.name}</strong>
+                          <small>+ at playhead</small>
+                        </button>
+                      ))}
+                      <button
+                        type="button"
+                        className="sound-effect-preset is-upload"
+                        onClick={() => soundEffectFileInputRef.current?.click()}
+                      >
+                        <span>＋</span>
+                        <strong>Upload</strong>
+                        <small>Your own SFX</small>
+                      </button>
+                    </div>
+                    <input
+                      type="file"
+                      ref={soundEffectFileInputRef}
+                      data-testid="sound-effect-input"
+                      accept="audio/*,.mp3,.wav,.ogg,.m4a,.aac"
+                      style={{ display: "none" }}
+                      onChange={handleSoundEffectUpload}
+                    />
+
+                    {soundEffects.length ? (
+                      <div className="sound-effect-list" aria-label="Placed sound effects">
+                        {soundEffects.map(effect => (
+                          <button
+                            key={effect.id}
+                            type="button"
+                            className={`sound-effect-chip ${activeSoundEffectId === effect.id ? "is-active" : ""}`}
+                            onClick={() => {
+                              setActiveSoundEffectId(effect.id);
+                              seekLiveEditTimelineItem(Number(effect.startTime || 0), "sound");
+                            }}
+                          >
+                            <span>{effect.emoji || "🔊"}</span>
+                            <b>{effect.name}</b>
+                            <small>{formatPreviewTimePrecise(effect.startTime)}</small>
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="sound-effect-empty">
+                        Put the playhead on a cut, reveal or caption hit, then add an effect.
+                      </p>
+                    )}
+
+                    {activeSoundEffect ? (
+                      <div className="sound-effect-editor-card" data-testid="sound-effect-editor">
+                        <div className="sound-effect-editor-title">
+                          <span>{activeSoundEffect.emoji || "🔊"}</span>
+                          <div>
+                            <strong>{activeSoundEffect.name}</strong>
+                            <small>
+                              {activeSoundEffect.builtIn
+                                ? "Built-in · instant preview"
+                                : "Uploaded effect"}
+                            </small>
+                          </div>
+                          <label className="sound-effect-enable">
+                            <input
+                              type="checkbox"
+                              checked={activeSoundEffect.enabled !== false}
+                              onChange={event =>
+                                updateSoundEffect(activeSoundEffect.id, {
+                                  enabled: event.target.checked,
+                                })
+                              }
+                            />
+                            On
+                          </label>
+                        </div>
+
+                        <div className="inspector-time-grid sound-effect-time-grid">
+                          <label>
+                            <span>Start</span>
+                            <input
+                              data-testid="sound-effect-start"
+                              type="number"
+                              min={0}
+                              max={outputTimelineDuration}
+                              step={0.05}
+                              value={Number(activeSoundEffect.startTime || 0).toFixed(2)}
+                              onChange={event =>
+                                updateSoundEffect(activeSoundEffect.id, {
+                                  startTime: Number(event.target.value),
+                                })
+                              }
+                            />
+                          </label>
+                          <label>
+                            <span>Duration</span>
+                            <input
+                              data-testid="sound-effect-duration"
+                              type="number"
+                              min={0.05}
+                              max={15}
+                              step={0.05}
+                              value={getSoundEffectDuration(activeSoundEffect).toFixed(2)}
+                              onChange={event =>
+                                updateSoundEffect(activeSoundEffect.id, {
+                                  duration: Number(event.target.value),
+                                })
+                              }
+                            />
+                          </label>
+                          <label>
+                            <span>Trim start</span>
+                            <input
+                              type="number"
+                              min={0}
+                              step={0.05}
+                              value={Number(activeSoundEffect.trimStart || 0).toFixed(2)}
+                              disabled={activeSoundEffect.builtIn}
+                              onChange={event =>
+                                updateSoundEffect(activeSoundEffect.id, {
+                                  trimStart: Number(event.target.value),
+                                })
+                              }
+                            />
+                          </label>
+                        </div>
+
+                        <label className="inspector-range">
+                          <span>
+                            <b>Effect volume</b>
+                            <strong>{Math.round(activeSoundEffect.volume * 100)}%</strong>
+                          </span>
+                          <input
+                            data-testid="sound-effect-volume"
+                            type="range"
+                            min={0}
+                            max={100}
+                            step={1}
+                            value={Math.round(activeSoundEffect.volume * 100)}
+                            onChange={event =>
+                              updateSoundEffect(activeSoundEffect.id, {
+                                volume: Number(event.target.value) / 100,
+                              })
+                            }
+                          />
+                        </label>
+
+                        <div className="inspector-dual-range">
+                          <label className="inspector-range">
+                            <span>
+                              <b>Fade in</b>
+                              <strong>{Number(activeSoundEffect.fadeIn || 0).toFixed(2)}s</strong>
+                            </span>
+                            <input
+                              data-testid="sound-effect-fade-in"
+                              type="range"
+                              min={0}
+                              max={Math.min(2, getSoundEffectDuration(activeSoundEffect))}
+                              step={0.01}
+                              value={Number(activeSoundEffect.fadeIn || 0)}
+                              onChange={event =>
+                                updateSoundEffect(activeSoundEffect.id, {
+                                  fadeIn: Number(event.target.value),
+                                })
+                              }
+                            />
+                          </label>
+                          <label className="inspector-range">
+                            <span>
+                              <b>Fade out</b>
+                              <strong>{Number(activeSoundEffect.fadeOut || 0).toFixed(2)}s</strong>
+                            </span>
+                            <input
+                              data-testid="sound-effect-fade-out"
+                              type="range"
+                              min={0}
+                              max={Math.min(2, getSoundEffectDuration(activeSoundEffect))}
+                              step={0.01}
+                              value={Number(activeSoundEffect.fadeOut || 0)}
+                              onChange={event =>
+                                updateSoundEffect(activeSoundEffect.id, {
+                                  fadeOut: Number(event.target.value),
+                                })
+                              }
+                            />
+                          </label>
+                        </div>
+
+                        <div className="inspector-inline-actions">
+                          <button
+                            type="button"
+                            data-testid="sound-effect-preview"
+                            onClick={() => void toggleSoundEffectPreview(activeSoundEffect)}
+                          >
+                            {previewingSoundEffectId === activeSoundEffect.id
+                              ? "Stop SFX"
+                              : "Preview SFX"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              seekLiveEditTimelineItem(
+                                Number(activeSoundEffect.startTime || 0),
+                                "sound"
+                              );
+                              setComparisonMode("after");
+                            }}
+                          >
+                            Go to cue
+                          </button>
+                          <button
+                            type="button"
+                            data-testid="sound-effect-remove"
+                            onClick={() => removeSoundEffect(activeSoundEffect.id)}
+                          >
+                            Remove SFX
+                          </button>
+                        </div>
+                      </div>
+                    ) : null}
+                  </section>
+
                   <label className="inspector-check-row">
                     <input
                       type="checkbox"
@@ -10407,7 +11792,9 @@ const ViralClipStudio = ({
                     <i>→</i>
                     <span>B-roll rules</span>
                     <i>→</i>
-                    <span>Background ducking</span>
+                    <span>SFX hits</span>
+                    <i>→</i>
+                    <span>Music ducking</span>
                   </div>
                 </div>
               ) : null}
@@ -10489,6 +11876,37 @@ const ViralClipStudio = ({
                   preload="auto"
                   src={addMusic ? effectiveMusicPreviewUrl : undefined}
                 />
+                {soundEffects
+                  .filter(effect => !effect.builtIn && effect.url)
+                  .map(effect => (
+                    <SafeAudio
+                      key={effect.id}
+                      ref={element => {
+                        if (element) soundEffectAudioRefsRef.current.set(effect.id, element);
+                        else soundEffectAudioRefsRef.current.delete(effect.id);
+                      }}
+                      data-testid={`sound-effect-audio-${effect.id}`}
+                      preload="auto"
+                      src={effect.url}
+                      style={{ display: "none" }}
+                      onLoadedMetadata={event => {
+                        const availableDuration = Math.max(
+                          0.05,
+                          Number(event.currentTarget.duration || 0) - Number(effect.trimStart || 0)
+                        );
+                        if (Number.isFinite(availableDuration) && availableDuration > 0) {
+                          updateSoundEffect(effect.id, {
+                            duration: Math.min(getSoundEffectDuration(effect), availableDuration),
+                          });
+                        }
+                      }}
+                      onEnded={() =>
+                        setPreviewingSoundEffectId(current =>
+                          current === effect.id ? null : current
+                        )
+                      }
+                    />
+                  ))}
                 {addMusic && musicPreviewStatusMessage ? (
                   <p className="broll-sound-message">{musicPreviewStatusMessage}</p>
                 ) : null}
@@ -10636,6 +12054,29 @@ const ViralClipStudio = ({
                         />
                       </>
                     )}
+                    {soundEffects.map(effect => {
+                      const left = liveTimelineDuration
+                        ? (Number(effect.startTime || 0) / liveTimelineDuration) * 100
+                        : 0;
+                      const width = liveTimelineDuration
+                        ? (getSoundEffectDuration(effect) / liveTimelineDuration) * 100
+                        : 0;
+                      return (
+                        <button
+                          key={`broll-sfx-${effect.id}`}
+                          type="button"
+                          className={`broll-sfx-block ${activeSoundEffectId === effect.id ? "is-active" : ""}`}
+                          style={{ left: `${left}%`, width: `${Math.max(1.8, width)}%` }}
+                          onClick={() => {
+                            setActiveSoundEffectId(effect.id);
+                            seekLiveEditTimelineItem(Number(effect.startTime || 0), "sound");
+                          }}
+                          title={`${effect.name} sound effect at ${formatPreviewTimePrecise(effect.startTime)}`}
+                        >
+                          {effect.emoji || "🔊"}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -11360,6 +12801,7 @@ const ViralClipStudio = ({
               />
               <input
                 ref={imageInputRef}
+                data-testid="visual-image-input"
                 type="file"
                 accept="image/*"
                 style={{ display: "none" }}
