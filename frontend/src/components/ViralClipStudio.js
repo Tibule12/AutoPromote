@@ -1634,6 +1634,7 @@ const ViralClipStudio = ({
   const [previewMuted, setPreviewMuted] = useState(false);
   const [previewVolume, setPreviewVolume] = useState(1);
   const [isPreviewFullscreen, setIsPreviewFullscreen] = useState(false);
+  const [isAfterPreviewReady, setIsAfterPreviewReady] = useState(false);
   const [soloPreviewOverlayId, setSoloPreviewOverlayId] = useState(null);
   const [addMusic, setAddMusic] = useState(false);
   const [muteOriginalAudio, setMuteOriginalAudio] = useState(false);
@@ -2994,20 +2995,20 @@ const ViralClipStudio = ({
   };
 
   const safePlayMediaElement = mediaElement => {
-    if (!mediaElement || typeof mediaElement.play !== "function") return;
+    if (!mediaElement || typeof mediaElement.play !== "function") return Promise.resolve(false);
     const rawSource =
       (typeof mediaElement.currentSrc === "string" && mediaElement.currentSrc) ||
       (typeof mediaElement.src === "string" && mediaElement.src) ||
       "";
-    if (!rawSource.trim()) return;
+    if (!rawSource.trim()) return Promise.resolve(false);
     if (
       typeof HTMLMediaElement !== "undefined" &&
       mediaElement.networkState === HTMLMediaElement.NETWORK_NO_SOURCE
     ) {
-      return;
+      return Promise.resolve(false);
     }
 
-    void playMediaSafely(mediaElement, {
+    return playMediaSafely(mediaElement, {
       onUnexpectedError: error => {
         if (error?.name === "NotSupportedError") return;
         console.log("Auto-play prevented", error);
@@ -3079,6 +3080,23 @@ const ViralClipStudio = ({
     jumpToOutputTimelineTime(boundedOutputTime);
     setStudioActionMessage(
       `${toolId === "broll" ? "B-roll" : toolId === "hook" ? "Hook" : "Edit"} selected at ${formatPreviewTimePrecise(boundedOutputTime)} in the After preview.`
+    );
+  };
+
+  const selectLiveTimelineOverlay = overlayId => {
+    const selectedOverlay = overlays.find(overlay => String(overlay.id) === String(overlayId));
+    if (!selectedOverlay) return;
+
+    setSoloPreviewOverlayId(null);
+    setActiveOverlayId(selectedOverlay.id);
+    setStudioInspectorTab("broll");
+    setActiveCreativeTool("broll");
+    setComparisonMode("after");
+    jumpToOutputTimelineTime(Number(selectedOverlay.startTime || 0));
+    setStudioActionMessage(
+      `${selectedOverlay.type === "image" ? "Image" : "B-roll"} selected at ${formatPreviewTimePrecise(
+        selectedOverlay.startTime
+      )}. Edit controls are open in After.`
     );
   };
 
@@ -4433,18 +4451,38 @@ const ViralClipStudio = ({
   };
 
   const togglePreviewFullscreen = async () => {
-    try {
-      if (document.fullscreenElement) {
-        await document.exitFullscreen?.();
-        return;
+    const fullscreenElement = document.fullscreenElement;
+    if (isPreviewFullscreen || fullscreenElement) {
+      // Clear local state immediately so a browser that silently drops native
+      // fullscreen can never trap the rest of the editor behind an exit button.
+      setIsPreviewFullscreen(false);
+      try {
+        if (fullscreenElement) await document.exitFullscreen?.();
+        setStudioActionMessage("Fullscreen closed. All studio controls are available again.");
+      } catch (error) {
+        console.log("Preview fullscreen exit skipped", error);
+        setStudioActionMessage("Fullscreen state was reset. All studio controls are available.");
       }
+      return;
+    }
+
+    try {
       if (!phoneFrameRef.current?.requestFullscreen) {
+        setIsPreviewFullscreen(false);
         setStudioActionMessage("Fullscreen is not supported by this browser.");
         return;
       }
       await phoneFrameRef.current.requestFullscreen();
+      const enteredFullscreen = document.fullscreenElement === phoneFrameRef.current;
+      setIsPreviewFullscreen(enteredFullscreen);
+      if (!enteredFullscreen) {
+        setStudioActionMessage(
+          "The browser did not enter fullscreen. The editor remains fully available."
+        );
+      }
     } catch (error) {
       console.log("Preview fullscreen request skipped", error);
+      setIsPreviewFullscreen(false);
       setStudioActionMessage("The browser blocked fullscreen. Click the preview, then try again.");
     }
   };
@@ -6170,7 +6208,8 @@ const ViralClipStudio = ({
       const currentSrc = videoRef.current.src;
       const afterSource = renderedOutputUrl || clip.url;
       if (currentSrc !== afterSource && afterSource) {
-        videoRef.current.src = afterSource;
+        setIsAfterPreviewReady(false);
+        applySafeMediaSource(videoRef.current, afterSource);
         // Reset to start
         videoRef.current.currentTime = targetStart;
         if (previewPlaybackIntentRef.current) {
@@ -6208,6 +6247,10 @@ const ViralClipStudio = ({
     beforeVideo.defaultMuted = true;
 
     const syncBeforePreview = () => {
+      if (afterVideo.readyState < 2) {
+        beforeVideo.pause();
+        return;
+      }
       const targetTime = Number(afterVideo.currentTime || currentTimelineWindow.start || 0);
       if (
         Number.isFinite(targetTime) &&
@@ -6229,6 +6272,8 @@ const ViralClipStudio = ({
     const pauseBeforePreview = () => beforeVideo.pause();
 
     afterVideo.addEventListener("play", syncBeforePreview);
+    afterVideo.addEventListener("loadeddata", syncBeforePreview);
+    afterVideo.addEventListener("canplay", syncBeforePreview);
     afterVideo.addEventListener("timeupdate", syncBeforePreview);
     afterVideo.addEventListener("seeking", syncBeforePreview);
     afterVideo.addEventListener("seeked", syncBeforePreview);
@@ -6238,6 +6283,8 @@ const ViralClipStudio = ({
 
     return () => {
       afterVideo.removeEventListener("play", syncBeforePreview);
+      afterVideo.removeEventListener("loadeddata", syncBeforePreview);
+      afterVideo.removeEventListener("canplay", syncBeforePreview);
       afterVideo.removeEventListener("timeupdate", syncBeforePreview);
       afterVideo.removeEventListener("seeking", syncBeforePreview);
       afterVideo.removeEventListener("seeked", syncBeforePreview);
@@ -6495,9 +6542,15 @@ const ViralClipStudio = ({
       sourceVideo.removeEventListener("seeked", syncOverlayMedia);
       sourceVideo.removeEventListener("timeupdate", syncOverlayMedia);
       sourceVideo.removeEventListener("ratechange", syncOverlayMedia);
-      overlayMediaRefsRef.current.forEach(media => media.pause());
     };
   }, [activeTimelineIndex, overlays, previewMuted, soloPreviewOverlayId, timeline]);
+
+  useEffect(
+    () => () => {
+      overlayMediaRefsRef.current.forEach(media => media.pause());
+    },
+    []
+  );
 
   useEffect(() => {
     applySafeMediaSource(
@@ -6764,6 +6817,21 @@ const ViralClipStudio = ({
 
     return () => document.removeEventListener("fullscreenchange", syncFullscreenState);
   }, []);
+
+  useEffect(() => {
+    if (!isPreviewFullscreen) return undefined;
+
+    const verifyNativeFullscreen = window.setTimeout(() => {
+      if (document.fullscreenElement !== phoneFrameRef.current) {
+        setIsPreviewFullscreen(false);
+        setStudioActionMessage(
+          "Fullscreen ended outside the studio. All editor controls were restored."
+        );
+      }
+    }, 250);
+
+    return () => window.clearTimeout(verifyNativeFullscreen);
+  }, [isPreviewFullscreen]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -7472,7 +7540,7 @@ const ViralClipStudio = ({
         if (o.id !== id) return o;
         const modeLayout = {
           fullscreen: { width: 100, height: 100, x: 0, y: 0 },
-          pip: { width: 38, height: 28, x: 76, y: 22 },
+          pip: { width: 48, height: 34, x: 72, y: 22 },
           sideBySide: { width: 50, height: 100, x: 75, y: 50 },
         }[mode] || {
           width: o.width || 40,
@@ -7624,7 +7692,7 @@ const ViralClipStudio = ({
     pauseSynchronizedPreview();
     jumpToOutputTimelineTime(Number(overlay.startTime || 0));
     setSoloPreviewOverlayId(overlay.id);
-    window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(async () => {
       const selectedMedia = overlayMediaRefsRef.current.get(String(overlay.id));
       if (!selectedMedia) {
         setSoloPreviewOverlayId(null);
@@ -7644,7 +7712,13 @@ const ViralClipStudio = ({
       selectedMedia.muted = false;
       selectedMedia.defaultMuted = false;
       selectedMedia.volume = clampAudioControl(overlay.overlayAudioVolume, 0, 1, 0.7);
-      safePlayMediaElement(selectedMedia);
+      const didPlay = await safePlayMediaElement(selectedMedia);
+      if (!didPlay) {
+        setSoloPreviewOverlayId(null);
+        setStudioActionMessage(
+          "B-roll-only preview could not start. Press play again after the media finishes loading."
+        );
+      }
     });
     setStudioActionMessage(
       "B-roll-only preview is playing. The original video and original audio are paused."
@@ -8491,6 +8565,10 @@ const ViralClipStudio = ({
                       autoPlay
                       controls={comparisonMode === "after"}
                       playsInline
+                      preload="auto"
+                      onLoadStart={() => setIsAfterPreviewReady(false)}
+                      onLoadedData={() => setIsAfterPreviewReady(true)}
+                      onCanPlay={() => setIsAfterPreviewReady(true)}
                       style={{
                         objectFit: renderedOutputUrl
                           ? "contain"
@@ -8529,6 +8607,12 @@ const ViralClipStudio = ({
                         willChange: "transform, opacity, filter",
                       }}
                     />
+                    {!isAfterPreviewReady && !renderedOutputUrl ? (
+                      <div className="after-preview-loading" role="status" aria-live="polite">
+                        <span />
+                        Loading edited preview…
+                      </div>
+                    ) : null}
                     {beatEchoPreviewIsLive && !activeSideBySideOverlay ? (
                       <div
                         className={`beat-echo-preview-layer is-${creativeIntensity}`}
@@ -9408,11 +9492,7 @@ const ViralClipStudio = ({
                               data-testid={`timeline-broll-block-${overlay.id}`}
                               onClick={event => {
                                 event.stopPropagation();
-                                seekLiveEditTimelineItem(
-                                  Number(overlay.startTime || 0),
-                                  "broll",
-                                  overlay.id
-                                );
+                                selectLiveTimelineOverlay(overlay.id);
                               }}
                               title={`${displayName} · ${Number(overlay.startTime || 0).toFixed(1)}s–${(
                                 Number(overlay.startTime || 0) + Number(overlay.duration || 0)
