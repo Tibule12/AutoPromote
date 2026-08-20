@@ -1641,7 +1641,11 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(screen.getByTestId("before-preview-frame")).toBeInTheDocument();
     const afterVideo = screen.getByTestId("studio-after-video");
     expect(afterVideo).toBeInTheDocument();
+    expect(afterVideo).toHaveAttribute("preload", "auto");
     expect(afterVideo).not.toHaveAttribute("controls");
+    expect(screen.getByText("Loading edited preview…")).toBeInTheDocument();
+    fireEvent.loadedData(afterVideo);
+    expect(screen.queryByText("Loading edited preview…")).not.toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /Pause comparison|Play comparison/i })
     ).toBeInTheDocument();
@@ -1665,8 +1669,38 @@ describe("ViralClipStudio timeline sequencing", () => {
 
     const previewFrame = screen.getByTestId("hook-preview-frame");
     previewFrame.requestFullscreen = jest.fn(() => Promise.resolve());
-    fireEvent.click(screen.getByTestId("preview-fullscreen-button"));
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("preview-fullscreen-button"));
+    });
     expect(previewFrame.requestFullscreen).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId("preview-fullscreen-button")).toHaveTextContent("Fullscreen");
+    expect(screen.getByText(/browser did not enter fullscreen/i)).toBeInTheDocument();
+
+    const originalFullscreenDescriptor = Object.getOwnPropertyDescriptor(
+      document,
+      "fullscreenElement"
+    );
+    let nativeFullscreenElement = previewFrame;
+    Object.defineProperty(document, "fullscreenElement", {
+      configurable: true,
+      get: () => nativeFullscreenElement,
+    });
+    fireEvent(document, new Event("fullscreenchange"));
+    expect(screen.getByTestId("preview-fullscreen-button")).toHaveTextContent("Exit fullscreen");
+
+    // Some embedded browsers lose native fullscreen without dispatching another
+    // fullscreenchange event. The next click must still recover the editor.
+    nativeFullscreenElement = null;
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("preview-fullscreen-button"));
+    });
+    expect(screen.getByTestId("preview-fullscreen-button")).toHaveTextContent("Fullscreen");
+
+    if (originalFullscreenDescriptor) {
+      Object.defineProperty(document, "fullscreenElement", originalFullscreenDescriptor);
+    } else {
+      delete document.fullscreenElement;
+    }
   });
 
   test("runs a podcast cutaway with original, overlay, and mixed audio modes", async () => {
@@ -1729,6 +1763,10 @@ describe("ViralClipStudio timeline sequencing", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Picture-in-picture" }));
     expect(studioAfterVideo).toHaveStyle({ width: "100%" });
+    expect(screen.getByTestId(/broll-preview-/).closest(".draggable-overlay")).toHaveStyle({
+      width: "48%",
+      height: "34%",
+    });
     const previewShell = screen.getByTestId("hook-preview-frame").parentElement;
     fireEvent.click(screen.getByRole("button", { name: "Split" }));
     expect(previewShell.querySelector(".draggable-overlay.active")).not.toBeInTheDocument();
@@ -1770,6 +1808,9 @@ describe("ViralClipStudio timeline sequencing", () => {
       expect(bRollPreview.play).toHaveBeenCalled();
       expect(bRollPreview.muted).toBe(false);
     });
+    const pauseCallsAfterSoloStarted = bRollPreview.pause.mock.calls.length;
+    await act(async () => Promise.resolve());
+    expect(bRollPreview.pause).toHaveBeenCalledTimes(pauseCallsAfterSoloStarted);
     fireEvent.click(within(inspector).getByRole("button", { name: "Pause B-roll only" }));
     expect(bRollPreview.pause).toHaveBeenCalled();
 
@@ -1929,6 +1970,38 @@ describe("ViralClipStudio timeline sequencing", () => {
     const image = screen.getByAltText("Overlay");
     expect(image).toHaveStyle({ objectFit: "contain", transform: "rotate(8deg)" });
     expect(image.closest(".draggable-overlay")).toHaveStyle({ opacity: "0.7" });
+  });
+
+  test("selects the exact visual layer from the live timeline and opens After controls", () => {
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={[{ id: "clip-layer-selection", start: 0, end: 20, duration: 20 }]}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+      />
+    );
+
+    fireEvent.change(screen.getByTestId("visual-image-input"), {
+      target: { files: [new File(["first"], "first-proof.png", { type: "image/png" })] },
+    });
+    fireEvent.change(screen.getByTestId("visual-image-input"), {
+      target: { files: [new File(["second"], "second-proof.png", { type: "image/png" })] },
+    });
+
+    const inspector = screen.getByTestId("clip-studio-inspector");
+    expect(within(inspector).getByText("second-proof.png")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Split" }));
+
+    const firstLayer = screen
+      .getAllByTestId(/timeline-broll-block-/)
+      .find(block => block.textContent.includes("first-proof.png"));
+    fireEvent.click(firstLayer);
+
+    expect(firstLayer).toHaveClass("is-active");
+    expect(within(inspector).getByText("first-proof.png")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "After" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByText(/Image selected at/i)).toBeInTheDocument();
   });
 
   test("recognizes uploaded B-roll that already covers the suggested beats", async () => {
