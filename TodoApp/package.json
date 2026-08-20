@@ -17,11 +17,11 @@
     "expo": "~53.0.22",
     "expo-constants": "~17.1.8",
     "expo-status-bar": "~2.2.3",
-    "hono": "^4.12.32",
+    "hono": "^4.12.34",
     "react": "19.0.0",
     "react-native": "0.79.6",
     "react-native-webview": "13.16.1",
-    "undici": "^7.28.0"
+    "undici": "^7.29.0"
   },
   "devDependencies": {
     "@babel/core": "^7.29.7"
@@ -30,6 +30,7 @@
   "overrides": {
     "axios": "^1.18.1",
     "hono": "$hono",
+    "nanoid": "3.3.18",
     "protobufjs": "7.6.5",
     "form-data": "^4.0.6",
     "@hono/node-server": "^2.0.12",
@@ -43,14 +44,14 @@
     "node-forge": "1.4.0",
     "tar": "^7.5.22",
     "@expo/cli": {
-      "undici": "6.27.0"
+      "undici": "6.28.0"
     },
     "uuid": "^14.0.0",
     "ws": "8.21.0",
     "shell-quote": "1.10.0",
-    "brace-expansion": "5.0.8",
+    "brace-expansion": "5.0.9",
     "minimatch": {
-      "brace-expansion": "5.0.8"
+      "brace-expansion": "5.0.9"
     },
     "router": {
       "path-to-regexp": "8.4.0"

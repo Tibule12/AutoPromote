@@ -16,12 +16,12 @@
     "nth-check": "2.1.1",
     "postcss": "8.5.25",
     "fast-xml-parser": "$fast-xml-parser",
-    "fast-uri": "3.1.4",
+    "fast-uri": "3.1.5",
     "svgo": "2.8.3",
     "webpack-dev-server": "5.2.6",
     "http-proxy-middleware": "$http-proxy-middleware",
     "glob": "^11.1.0",
-    "js-yaml": "^4.3.0",
+    "js-yaml": "^4.3.1",
     "node-forge": "1.4.0",
     "serialize-javascript": "^7.0.5",
     "lodash": "^4.18.1",
@@ -36,9 +36,10 @@
     "@tootallnate/once": "3.0.1",
     "@grpc/grpc-js": "1.14.4",
     "shell-quote": "1.10.0",
-    "brace-expansion": "5.0.8",
+    "brace-expansion": "5.0.9",
+    "nanoid": "3.3.18",
     "minimatch": {
-      "brace-expansion": "5.0.8"
+      "brace-expansion": "5.0.9"
     },
     "qs": "6.15.2",
     "uuid": "^14.0.0",
@@ -71,7 +72,7 @@
       "brace-expansion": "2.1.3"
     },
     "minimatch@10": {
-      "brace-expansion": "5.0.8"
+      "brace-expansion": "5.0.9"
     },
     "cosmiconfig@6": {
       "yaml": "1.10.3"
@@ -88,10 +89,10 @@
     "@remotion/player": "^4.0.423",
     "@sentry/react": "^7.120.4",
     "@sentry/tracing": "^7.72.0",
-    "dompurify": "^3.4.12",
+    "dompurify": "^3.4.14",
     "fast-xml-parser": "^5.8.0",
     "firebase": "^12.2.1",
-    "hono": "^4.12.32",
+    "hono": "^4.12.34",
     "html2canvas": "^1.4.1",
     "idb": "^8.0.3",
     "multer": "^2.2.0",
