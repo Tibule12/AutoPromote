@@ -282,6 +282,22 @@ describe("ViralClipStudio timeline sequencing", () => {
       "title",
       "2.0 seconds removed here"
     );
+
+    await waitFor(() => expect(screen.getByTestId("studio-undo-button")).toBeEnabled());
+    fireEvent.click(screen.getByTestId("studio-undo-button"));
+    await waitFor(() => {
+      expect(screen.queryByTestId("timeline-applied-cut")).not.toBeInTheDocument();
+      expect(screen.getByTestId("timeline-output-time")).toHaveTextContent("0:12.0");
+    });
+    await waitFor(() => expect(screen.getByTestId("studio-redo-button")).toBeEnabled());
+    fireEvent.click(screen.getByTestId("studio-redo-button"));
+    await waitFor(() => {
+      expect(screen.getByTestId("timeline-applied-cut")).toHaveAttribute(
+        "title",
+        "2.0 seconds removed here"
+      );
+      expect(screen.getByTestId("timeline-output-time")).toHaveTextContent("0:10.0");
+    });
     expect(
       screen.getByTestId("timeline-source-track").querySelectorAll(".compact-filmstrip-frame")
         .length
@@ -1660,7 +1676,8 @@ describe("ViralClipStudio timeline sequencing", () => {
     await waitFor(() => expect(afterVideo.currentTime).toBeLessThan(2));
 
     fireEvent.click(screen.getByRole("button", { name: "After" }));
-    expect(afterVideo).toHaveAttribute("controls");
+    expect(afterVideo).not.toHaveAttribute("controls");
+    expect(screen.getByRole("slider", { name: "Edited output position" })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Fill canvas" }));
     expect(afterVideo).toHaveStyle({ objectFit: "cover" });
@@ -1668,13 +1685,14 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(afterVideo).toHaveStyle({ objectFit: "contain" });
 
     const previewFrame = screen.getByTestId("hook-preview-frame");
-    previewFrame.requestFullscreen = jest.fn(() => Promise.resolve());
+    previewFrame.requestFullscreen = jest.fn(() => Promise.reject(new Error("blocked")));
     await act(async () => {
       fireEvent.click(screen.getByTestId("preview-fullscreen-button"));
     });
     expect(previewFrame.requestFullscreen).toHaveBeenCalledTimes(1);
-    expect(screen.getByTestId("preview-fullscreen-button")).toHaveTextContent("Fullscreen");
-    expect(screen.getByText(/browser did not enter fullscreen/i)).toBeInTheDocument();
+    expect(screen.getByTestId("preview-fullscreen-button")).toHaveTextContent("Exit fullscreen");
+    expect(screen.getByRole("button", { name: "Exit preview" })).toBeInTheDocument();
+    expect(screen.getByText(/browser blocked native fullscreen/i)).toBeInTheDocument();
 
     const originalFullscreenDescriptor = Object.getOwnPropertyDescriptor(
       document,
@@ -1991,6 +2009,14 @@ describe("ViralClipStudio timeline sequencing", () => {
 
     const inspector = screen.getByTestId("clip-studio-inspector");
     expect(within(inspector).getByText("second-proof.png")).toBeInTheDocument();
+    const layeredBlocks = screen.getAllByTestId(/timeline-broll-block-/);
+    expect(layeredBlocks).toHaveLength(2);
+    expect(layeredBlocks[0].style.top).not.toBe(layeredBlocks[1].style.top);
+    const visibleImageLayers = screen
+      .getAllByAltText("Overlay")
+      .map(image => image.closest(".draggable-overlay"));
+    expect(visibleImageLayers[0].style.left).not.toBe(visibleImageLayers[1].style.left);
+    expect(visibleImageLayers[0].style.top).not.toBe(visibleImageLayers[1].style.top);
     fireEvent.click(screen.getByRole("button", { name: "Split" }));
 
     const firstLayer = screen
@@ -2204,6 +2230,7 @@ describe("ViralClipStudio timeline sequencing", () => {
       target: { value: "STOP SCROLLING — THIS CHANGES EVERYTHING" },
     });
     expect(screen.getByTestId("live-caption-preview")).toHaveTextContent(/STOP SCROLLING/i);
+    expect(screen.getAllByTestId("timeline-caption-block")[0]).toHaveStyle({ left: "0%" });
 
     fireEvent.click(within(inspector).getByRole("button", { name: "Neon Glow" }));
     expect(within(inspector).getByRole("button", { name: "Neon Glow" })).toHaveAttribute(
@@ -2212,10 +2239,21 @@ describe("ViralClipStudio timeline sequencing", () => {
     );
     expect(screen.getByTestId("live-caption-preview")).toHaveClass("caption-style-glow");
 
+    Object.defineProperty(afterVideo, "currentTime", {
+      configurable: true,
+      writable: true,
+      value: 12,
+    });
+    fireEvent.timeUpdate(afterVideo);
+    expect(screen.queryByTestId("live-caption-preview")).not.toBeInTheDocument();
+
     fireEvent.click(within(inspector).getByRole("tab", { name: /Pacing/i }));
     fireEvent.click(within(inspector).getByRole("button", { name: "1.5×" }));
     expect(afterVideo.playbackRate).toBeCloseTo(1.5);
     expect(within(inspector).getAllByText("1.50×").length).toBeGreaterThan(0);
+    fireEvent.click(within(inspector).getByRole("button", { name: "Energetic" }));
+    expect(afterVideo.playbackRate).toBeCloseTo(1.5);
+    expect(screen.getByText(/Playback speed remains 1.50×/i)).toBeInTheDocument();
     expect(onSave).not.toHaveBeenCalled();
   });
 

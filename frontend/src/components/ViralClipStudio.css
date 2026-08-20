@@ -1109,6 +1109,79 @@
   backdrop-filter: blur(10px);
 }
 
+.phone-frame.preview-expanded {
+  position: fixed !important;
+  inset: 12px !important;
+  z-index: 10000 !important;
+  width: auto !important;
+  max-width: none !important;
+  height: auto !important;
+  aspect-ratio: auto !important;
+  border-radius: 18px !important;
+  background: #020713 !important;
+  box-shadow:
+    0 0 0 9999px rgba(0, 3, 10, 0.94),
+    0 24px 80px rgba(0, 0, 0, 0.7) !important;
+}
+
+.preview-expanded-exit {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 12000;
+  min-height: 38px;
+  padding: 0 15px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(4, 10, 24, 0.88);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  font-size: 0.75rem;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.preview-custom-controls {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  left: 10px;
+  z-index: 620;
+  display: grid;
+  grid-template-columns: 32px minmax(80px, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 6px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  color: #edf3ff;
+  background: rgba(2, 7, 17, 0.82);
+  backdrop-filter: blur(12px);
+}
+
+.preview-custom-controls button {
+  width: 30px;
+  height: 28px;
+  border: 0;
+  border-radius: 7px;
+  color: #fff;
+  background: rgba(126, 67, 241, 0.88);
+  cursor: pointer;
+}
+
+.preview-custom-controls input {
+  width: 100%;
+  accent-color: #9c58ff;
+}
+
+.preview-custom-controls span {
+  color: #dce5f3;
+  font-size: 0.55rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 .overlay-delete-btn {
   width: 24px;
   height: 24px;
@@ -4842,6 +4915,7 @@
 .compact-timeline-block.is-broll {
   top: 4px;
   height: 38px;
+  min-width: 86px;
   padding: 0;
   border-color: rgba(38, 198, 220, 0.45);
   background: linear-gradient(90deg, rgba(15, 130, 158, 0.86), rgba(16, 88, 137, 0.82));
@@ -4849,6 +4923,15 @@
 
 .compact-broll-track {
   height: 46px;
+}
+
+.compact-broll-track.has-layer-lanes {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.compact-broll-track.has-layer-lanes .compact-timeline-block.is-broll {
+  height: 30px;
 }
 
 .compact-timeline-block.is-broll > video,
@@ -5521,6 +5604,24 @@
   color: inherit;
   text-align: left;
   cursor: pointer;
+}
+
+.visually-hidden-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.inspector-upload-card:focus-visible,
+.broll-sound-btn:focus-visible {
+  outline: 2px solid #a98bff;
+  outline-offset: 2px;
 }
 
 .inspector-upload-card > span {
