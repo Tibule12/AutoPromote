@@ -132,6 +132,7 @@ export const buildViralRenderData = ({
   addDefined(payload, "music_fade_in", extraOptions.musicFadeIn, Number);
   addDefined(payload, "music_fade_out", extraOptions.musicFadeOut, Number);
   addDefined(payload, "music_loop", extraOptions.musicLoop, Boolean);
+  addDefined(payload, "sound_effects", extraOptions.soundEffects);
   addDefined(payload, "mute_audio", extraOptions.muteAudio, Boolean);
   addDefined(payload, "export_destination", extraOptions.exportDestination);
 

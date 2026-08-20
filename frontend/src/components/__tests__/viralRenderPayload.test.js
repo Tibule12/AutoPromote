@@ -100,6 +100,21 @@ describe("viralRenderPayload", () => {
         musicFadeIn: 0.5,
         musicFadeOut: 0.75,
         musicLoop: true,
+        soundEffects: [
+          {
+            id: "sfx-1",
+            name: "Impact",
+            builtIn: true,
+            tone: "impact",
+            startTime: 4.5,
+            duration: 0.65,
+            trimStart: 0,
+            volume: 0.8,
+            fadeIn: 0.02,
+            fadeOut: 0.12,
+            enabled: true,
+          },
+        ],
         muteAudio: false,
         exportDestination: "shorts",
         timelineSegments: [{ id: "clip-1", duration: 40 }],
@@ -155,6 +170,14 @@ describe("viralRenderPayload", () => {
         music_volume: 0.18,
         music_ducking: true,
         music_loop: true,
+        sound_effects: [
+          expect.objectContaining({
+            id: "sfx-1",
+            tone: "impact",
+            startTime: 4.5,
+            duration: 0.65,
+          }),
+        ],
         mute_audio: false,
         export_destination: "shorts",
       })

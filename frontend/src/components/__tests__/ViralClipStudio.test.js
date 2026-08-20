@@ -322,6 +322,33 @@ describe("ViralClipStudio timeline sequencing", () => {
     );
   }, 15000);
 
+  test("accepts exact cut times and can trim an unwanted opening section", () => {
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={[{ id: "clip-edge-cut", start: 0, end: 12, duration: 12 }]}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+      />
+    );
+
+    const afterVideo = screen.getByTestId("studio-after-video");
+    Object.defineProperty(afterVideo, "duration", { configurable: true, value: 12 });
+    fireEvent.loadedMetadata(afterVideo);
+    fireEvent.click(screen.getByRole("button", { name: /^Cut$/i }));
+    fireEvent.change(screen.getByRole("spinbutton", { name: "Remove from time" }), {
+      target: { value: "0" },
+    });
+    fireEvent.change(screen.getByRole("spinbutton", { name: "Remove to time" }), {
+      target: { value: "2.5" },
+    });
+
+    expect(screen.getByTestId("timeline-pending-cut-range")).toHaveTextContent("Remove");
+    fireEvent.click(screen.getByTestId("remove-marked-range"));
+    expect(screen.getByTestId("timeline-output-time")).toHaveTextContent("0:9.50");
+    expect(screen.queryByTestId("pending-cut-summary")).not.toBeInTheDocument();
+  });
+
   function setupVideoCreateElementMock() {
     const createdVideos = [];
     document.createElement = jest.fn(tagName => {
@@ -1630,6 +1657,16 @@ describe("ViralClipStudio timeline sequencing", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "After" }));
     expect(afterVideo).toHaveAttribute("controls");
+
+    fireEvent.click(screen.getByRole("button", { name: "Fill canvas" }));
+    expect(afterVideo).toHaveStyle({ objectFit: "cover" });
+    fireEvent.click(screen.getByRole("button", { name: "Fit full" }));
+    expect(afterVideo).toHaveStyle({ objectFit: "contain" });
+
+    const previewFrame = screen.getByTestId("hook-preview-frame");
+    previewFrame.requestFullscreen = jest.fn(() => Promise.resolve());
+    fireEvent.click(screen.getByTestId("preview-fullscreen-button"));
+    expect(previewFrame.requestFullscreen).toHaveBeenCalledTimes(1);
   });
 
   test("runs a podcast cutaway with original, overlay, and mixed audio modes", async () => {
@@ -1675,11 +1712,8 @@ describe("ViralClipStudio timeline sequencing", () => {
         .getAllByTestId(/timeline-broll-block-/)
         .find(block => block.textContent.includes("podcast-proof.mp4"))
     ).toBeInTheDocument();
-    const durationInput = within(inspector)
-      .getByText("Duration")
-      .closest("label")
-      .querySelector("input");
-    expect(Number(durationInput.value)).toBeLessThanOrEqual(12);
+    const durationInput = within(inspector).getByLabelText("B-roll duration");
+    expect(durationInput.value).toBe("0:12");
     const startInput = within(inspector).getByText("Start").closest("label").querySelector("input");
     fireEvent.change(startInput, { target: { value: "4.0" } });
     fireEvent.blur(startInput);
@@ -1696,6 +1730,7 @@ describe("ViralClipStudio timeline sequencing", () => {
     fireEvent.click(screen.getByRole("button", { name: "Picture-in-picture" }));
     expect(studioAfterVideo).toHaveStyle({ width: "100%" });
     const previewShell = screen.getByTestId("hook-preview-frame").parentElement;
+    fireEvent.click(screen.getByRole("button", { name: "Split" }));
     expect(previewShell.querySelector(".draggable-overlay.active")).not.toBeInTheDocument();
     expect(previewShell.querySelector(".overlay-controls")).not.toBeInTheDocument();
 
@@ -1724,10 +1759,24 @@ describe("ViralClipStudio timeline sequencing", () => {
 
     fireEvent.click(within(inspector).getByRole("button", { name: /Apply B-roll/i }));
     await waitFor(() => expect(afterVideo.currentTime).toBe(4));
-    expect(screen.getByText(/exact cutaway point/i)).toBeInTheDocument();
+    expect(screen.getByText(/exact timeline position/i)).toBeInTheDocument();
     const bRollPreview = screen.getByTestId(/broll-preview-/);
     expect(bRollPreview).not.toHaveAttribute("autoplay");
     expect(bRollPreview).not.toHaveAttribute("loop");
+
+    fireEvent.click(within(inspector).getByRole("button", { name: "Play B-roll only" }));
+    await waitFor(() => {
+      expect(afterVideo.pause).toHaveBeenCalled();
+      expect(bRollPreview.play).toHaveBeenCalled();
+      expect(bRollPreview.muted).toBe(false);
+    });
+    fireEvent.click(within(inspector).getByRole("button", { name: "Pause B-roll only" }));
+    expect(bRollPreview.pause).toHaveBeenCalled();
+
+    afterVideo.currentTime = 6.5;
+    fireEvent.timeUpdate(afterVideo);
+    fireEvent.click(within(inspector).getByRole("button", { name: "Place at playhead" }));
+    expect(Number(startInput.value)).toBeCloseTo(6.5, 1);
 
     fireEvent.click(screen.getByRole("button", { name: "Use overlay" }));
     expect(screen.getAllByTestId(/timeline-overlay-audio-/)).toHaveLength(1);
@@ -1763,6 +1812,124 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(screen.queryByTestId(/broll-preview-/)).not.toBeInTheDocument();
     expect(screen.getAllByText(/Original audio returns automatically/i).length).toBeGreaterThan(0);
   }, 30000);
+
+  test("supports minute-long B-roll with explicit return, loop, and hold behavior", async () => {
+    const createdVideos = setupVideoCreateElementMock();
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/long-podcast.mp4"
+        clips={[
+          {
+            id: "long-podcast",
+            start: 0,
+            end: 360,
+            duration: 360,
+            reason: "Long podcast episode",
+          },
+        ]}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("tab", { name: /B-roll/i }));
+    const inspector = screen.getByTestId("clip-studio-inspector");
+    const createdBeforeUpload = createdVideos.length;
+    fireEvent.change(screen.getByTestId("broll-video-input"), {
+      target: {
+        files: [new File(["short-cutaway"], "twelve-second-cutaway.mp4", { type: "video/mp4" })],
+      },
+    });
+
+    await waitFor(() => expect(createdVideos.length).toBeGreaterThan(createdBeforeUpload));
+    await act(async () => {
+      createdVideos[createdVideos.length - 1].onloadedmetadata();
+    });
+    expect((await screen.findAllByText("twelve-second-cutaway.mp4")).length).toBeGreaterThan(0);
+
+    fireEvent.click(within(inspector).getByRole("button", { name: "Set duration to 2 min" }));
+    expect(within(inspector).getByLabelText("B-roll duration")).toHaveValue("2:00");
+    expect(within(inspector).getByText(/Source has 0:12 available/i)).toBeInTheDocument();
+
+    const afterVideo = screen.getByTestId("studio-after-video");
+    Object.defineProperty(afterVideo, "currentTime", {
+      configurable: true,
+      writable: true,
+      value: 13,
+    });
+
+    fireEvent.click(within(inspector).getByRole("button", { name: "Use overlay" }));
+    fireEvent.click(within(inspector).getByRole("button", { name: "Loop B-roll" }));
+    fireEvent.timeUpdate(afterVideo);
+    const loopingPreview = await screen.findByTestId(/broll-preview-/);
+    await waitFor(() => {
+      expect(loopingPreview.currentTime).toBeCloseTo(1, 0);
+      expect(afterVideo.muted).toBe(true);
+    });
+
+    fireEvent.click(within(inspector).getByRole("button", { name: "Hold last frame" }));
+    fireEvent.timeUpdate(afterVideo);
+    await waitFor(() => {
+      expect(screen.getByTestId(/broll-preview-/)).toBeInTheDocument();
+      expect(loopingPreview.pause).toHaveBeenCalled();
+      expect(loopingPreview.muted).toBe(true);
+      expect(afterVideo.muted).toBe(false);
+    });
+
+    fireEvent.click(within(inspector).getByRole("button", { name: "Return to original" }));
+    fireEvent.timeUpdate(afterVideo);
+    await waitFor(() => expect(screen.queryByTestId(/broll-preview-/)).not.toBeInTheDocument());
+    expect(afterVideo.muted).toBe(false);
+
+    fireEvent.click(within(inspector).getByRole("button", { name: "Set duration to 5 min" }));
+    expect(within(inspector).getByLabelText("B-roll duration")).toHaveValue("5:00");
+    const exactDurationInput = within(inspector).getByLabelText("B-roll duration");
+    fireEvent.change(exactDurationInput, { target: { value: "1:30" } });
+    fireEvent.blur(exactDurationInput);
+    expect(within(inspector).getByLabelText("B-roll duration")).toHaveValue("1:30");
+  }, 30000);
+
+  test("adds images as timed creative inserts with B-roll layouts and image controls", async () => {
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={[{ id: "clip-image", start: 0, end: 20, duration: 20 }]}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+      />
+    );
+
+    const afterVideo = screen.getByTestId("studio-after-video");
+    Object.defineProperty(afterVideo, "currentTime", {
+      configurable: true,
+      writable: true,
+      value: 7,
+    });
+    fireEvent.timeUpdate(afterVideo);
+    fireEvent.change(screen.getByTestId("visual-image-input"), {
+      target: { files: [new File(["image"], "proof-chart.png", { type: "image/png" })] },
+    });
+
+    const inspector = screen.getByTestId("clip-studio-inspector");
+    expect(within(inspector).getByText("proof-chart.png")).toBeInTheDocument();
+    expect(screen.getAllByTestId(/timeline-broll-block-/)).toHaveLength(1);
+    expect(screen.getAllByTestId(/timeline-broll-block-/)[0]).toHaveTextContent("PIP");
+
+    fireEvent.click(within(inspector).getByRole("button", { name: "Full screen" }));
+    expect(screen.getAllByTestId(/timeline-broll-block-/)[0]).toHaveTextContent("Cutaway");
+    fireEvent.click(within(inspector).getByRole("button", { name: "Picture-in-picture" }));
+    fireEvent.click(within(inspector).getByRole("button", { name: "Show all" }));
+    fireEvent.change(within(inspector).getByRole("slider", { name: "Image rotation" }), {
+      target: { value: "8" },
+    });
+    fireEvent.change(within(inspector).getByRole("slider", { name: "Image opacity" }), {
+      target: { value: "70" },
+    });
+
+    const image = screen.getByAltText("Overlay");
+    expect(image).toHaveStyle({ objectFit: "contain", transform: "rotate(8deg)" });
+    expect(image.closest(".draggable-overlay")).toHaveStyle({ opacity: "0.7" });
+  });
 
   test("recognizes uploaded B-roll that already covers the suggested beats", async () => {
     const createdVideos = setupVideoCreateElementMock();
@@ -2029,5 +2196,94 @@ describe("ViralClipStudio timeline sequencing", () => {
         ],
       })
     );
+  });
+
+  test("places and edits built-in sound effects on the live timeline with undo and redo", async () => {
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={[{ id: "clip-sfx", start: 0, end: 20, duration: 20, reason: "Creator hook" }]}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+      />
+    );
+
+    const afterVideo = screen.getByTestId("studio-after-video");
+    Object.defineProperty(afterVideo, "currentTime", {
+      configurable: true,
+      writable: true,
+      value: 4.25,
+    });
+    fireEvent.timeUpdate(afterVideo);
+
+    const inspector = screen.getByTestId("clip-studio-inspector");
+    fireEvent.click(within(inspector).getByRole("tab", { name: /Sound/i }));
+    fireEvent.click(screen.getByTestId("sound-effect-preset-whoosh"));
+
+    expect(screen.getByTestId("sound-effect-editor")).toBeInTheDocument();
+    expect(document.querySelector('[data-testid^="timeline-sfx-"]')).toBeInTheDocument();
+    expect(screen.getByTestId("sound-effect-start")).toHaveValue(4.25);
+
+    fireEvent.change(screen.getByTestId("sound-effect-duration"), {
+      target: { value: "1.2" },
+    });
+    expect(screen.getByTestId("sound-effect-duration")).toHaveValue(1.2);
+
+    await waitFor(() => expect(screen.getByTestId("studio-undo-button")).toBeEnabled());
+    fireEvent.click(screen.getByTestId("studio-undo-button"));
+    await waitFor(() => expect(screen.getByTestId("sound-effect-duration")).toHaveValue(0.8));
+    fireEvent.click(screen.getByTestId("studio-redo-button"));
+    await waitFor(() => expect(screen.getByTestId("sound-effect-duration")).toHaveValue(1.2));
+
+    fireEvent.change(screen.getByTestId("sound-effect-volume"), {
+      target: { value: "62" },
+    });
+    expect(screen.getByTestId("sound-effect-volume")).toHaveValue("62");
+  });
+
+  test("uploads a custom sound effect, previews it, and includes timed SFX in export options", async () => {
+    const onSave = jest.fn(() => Promise.resolve());
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={[{ id: "clip-sfx-export", start: 0, end: 20, duration: 20 }]}
+        onSave={onSave}
+        onCancel={jest.fn()}
+      />
+    );
+
+    const inspector = screen.getByTestId("clip-studio-inspector");
+    fireEvent.click(within(inspector).getByRole("tab", { name: /Sound/i }));
+    fireEvent.change(screen.getByTestId("sound-effect-input"), {
+      target: {
+        files: [new File(["impact"], "camera-impact.wav", { type: "audio/wav" })],
+      },
+    });
+
+    expect(within(inspector).getAllByText("camera-impact").length).toBeGreaterThan(0);
+    const effectAudio = screen.getByTestId(/sound-effect-audio-/);
+    Object.defineProperty(effectAudio, "paused", {
+      configurable: true,
+      writable: true,
+      value: true,
+    });
+    fireEvent.click(screen.getByTestId("sound-effect-preview"));
+    expect(effectAudio.play).toHaveBeenCalled();
+    expect(screen.getByTestId("sound-effect-preview")).toHaveTextContent("Stop SFX");
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /Render Final Clip/i }));
+    });
+    await waitFor(() => expect(onSave).toHaveBeenCalled());
+    expect(onSave.mock.calls[0][2].soundEffects).toEqual([
+      expect.objectContaining({
+        name: "camera-impact",
+        builtIn: false,
+        url: "https://example.com/mock.mp4",
+        startTime: 0,
+        duration: 2,
+        volume: 0.8,
+      }),
+    ]);
   });
 });
