@@ -1220,12 +1220,27 @@ const buildCaptionPreviewChunks = text => {
   return chunks;
 };
 
-const getCaptionPreviewState = ({ text, localTime, duration }) => {
+const getCaptionPreviewState = ({ text, localTime, duration, hideAfterEnd = false }) => {
   const chunks = buildCaptionPreviewChunks(text);
   if (!chunks.length)
-    return { chunks: [], currentChunk: null, nextChunk: null, activeWordIndex: 0 };
+    return {
+      chunks: [],
+      currentChunk: null,
+      nextChunk: null,
+      activeWordIndex: 0,
+      previewDuration: 0,
+    };
 
   const safeDuration = Math.max(Number(duration) || 0, chunks.length * 0.85, 1.8);
+  if (hideAfterEnd && Number(localTime || 0) >= safeDuration) {
+    return {
+      chunks,
+      currentChunk: null,
+      nextChunk: null,
+      activeWordIndex: 0,
+      previewDuration: safeDuration,
+    };
+  }
   const clampedTime = clampNumber(localTime, 0, safeDuration, 0);
   const chunkProgress = clampNumber(clampedTime / safeDuration, 0, 0.999, 0);
   const currentChunkIndex = Math.min(chunks.length - 1, Math.floor(chunkProgress * chunks.length));
@@ -1244,7 +1259,7 @@ const getCaptionPreviewState = ({ text, localTime, duration }) => {
     Math.floor(intraChunkProgress * currentChunk.words.length)
   );
 
-  return { chunks, currentChunk, nextChunk, activeWordIndex };
+  return { chunks, currentChunk, nextChunk, activeWordIndex, previewDuration: safeDuration };
 };
 
 const clampManualWatermarkRegion = region => {
@@ -1569,6 +1584,64 @@ const buildSignatureCreativeEffects = ({ preset, intensity, duration }) => {
 
 const PREVIEW_SPEED_OPTIONS = [0.5, 0.75, 1, 1.15, 1.25, 1.5, 2];
 const STORY_BEAT_LABELS = ["Hook", "Problem", "Proof", "Payoff"];
+const OVERLAY_PIP_SLOTS = [
+  { x: 76, y: 24 },
+  { x: 24, y: 76 },
+  { x: 24, y: 24 },
+  { x: 76, y: 76 },
+  { x: 50, y: 50 },
+];
+
+const timedRangesOverlap = (startA, durationA, startB, durationB) => {
+  const safeStartA = Number(startA || 0);
+  const safeStartB = Number(startB || 0);
+  const safeEndA = safeStartA + Math.max(0, Number(durationA || 0));
+  const safeEndB = safeStartB + Math.max(0, Number(durationB || 0));
+  return safeStartA < safeEndB && safeStartB < safeEndA;
+};
+
+const overlayRectsOverlap = (first, second, gutter = 4) => {
+  const firstHalfWidth = Math.max(1, Number(first.width || 0)) / 2;
+  const firstHalfHeight = Math.max(1, Number(first.height || 0)) / 2;
+  const secondHalfWidth = Math.max(1, Number(second.width || 0)) / 2;
+  const secondHalfHeight = Math.max(1, Number(second.height || 0)) / 2;
+  return (
+    Math.abs(Number(first.x || 0) - Number(second.x || 0)) <
+      firstHalfWidth + secondHalfWidth + gutter &&
+    Math.abs(Number(first.y || 0) - Number(second.y || 0)) <
+      firstHalfHeight + secondHalfHeight + gutter
+  );
+};
+
+const getCollisionSafePipPlacement = ({
+  overlays,
+  overlayId = null,
+  startTime,
+  duration,
+  width,
+  height,
+}) => {
+  const simultaneousPipOverlays = (overlays || []).filter(
+    overlay =>
+      String(overlay.id) !== String(overlayId) &&
+      overlay.bRollMode === "pip" &&
+      timedRangesOverlap(startTime, duration, overlay.startTime, overlay.duration)
+  );
+  const safeWidth = Math.max(10, Math.min(58, Number(width || 42)));
+  const safeHeight = Math.max(10, Math.min(58, Number(height || 32)));
+  const boundedSlot = slot => ({
+    x: clampNumber(slot.x, safeWidth / 2, 100 - safeWidth / 2, 50),
+    y: clampNumber(slot.y, safeHeight / 2, 100 - safeHeight / 2, 50),
+    width: safeWidth,
+    height: safeHeight,
+  });
+
+  return (
+    OVERLAY_PIP_SLOTS.map(boundedSlot).find(candidate =>
+      simultaneousPipOverlays.every(existing => !overlayRectsOverlap(candidate, existing))
+    ) || boundedSlot(OVERLAY_PIP_SLOTS[simultaneousPipOverlays.length % OVERLAY_PIP_SLOTS.length])
+  );
+};
 
 const ViralClipStudio = ({
   videoUrl,
@@ -1788,8 +1861,11 @@ const ViralClipStudio = ({
   const lastSnapshotRef = useRef(null);
   const lastSnapshotSignatureRef = useRef(null);
   const isRestoringHistoryRef = useRef(false);
+  const pendingHistoryBaselineRef = useRef(null);
+  const cutHistoryTransactionRef = useRef(null);
   const previewPlaybackIntentRef = useRef(true);
   const phoneFrameRef = useRef(null);
+  const nativePreviewFullscreenRef = useRef(false);
   const watermarkDragRef = useRef(null);
   const hookSegmentTrackRef = useRef(null);
   const hookSelectionDragRef = useRef(null);
@@ -2033,6 +2109,20 @@ const ViralClipStudio = ({
     timeline,
     activeTimelineIndex,
   });
+
+  const getHistoryRelevantSnapshot = snapshot => {
+    const {
+      selectedClipId: _selectedClipId,
+      activeOverlayId: _activeOverlayId,
+      activeWatermarkRegionId: _activeWatermarkRegionId,
+      activeSoundEffectId: _activeSoundEffectId,
+      activeTimelineIndex: _activeTimelineIndex,
+      cutRangeStart: _cutRangeStart,
+      cutRangeEnd: _cutRangeEnd,
+      ...editableSnapshot
+    } = snapshot;
+    return editableSnapshot;
+  };
 
   const syncHistoryAvailability = () => {
     setCanUndo(undoStackRef.current.length > 0);
@@ -2709,7 +2799,42 @@ const ViralClipStudio = ({
     if (!undoStackRef.current.length) return;
 
     const currentSnapshot = cloneSnapshot(getEditorSnapshot());
-    const previousSnapshot = undoStackRef.current.pop();
+    const currentSignature = serializeSnapshot(getHistoryRelevantSnapshot(currentSnapshot));
+    const cutTransaction = cutHistoryTransactionRef.current;
+    const currentTimelineSignature = serializeSnapshot(currentSnapshot.timeline || []);
+    if (cutTransaction?.appliedTimelineSignature === currentTimelineSignature) {
+      const baselineSignature = serializeSnapshot(
+        getHistoryRelevantSnapshot(cutTransaction.baseline)
+      );
+      let baselineIndex = -1;
+      for (let index = undoStackRef.current.length - 1; index >= 0; index -= 1) {
+        const candidateSignature = serializeSnapshot(
+          getHistoryRelevantSnapshot(undoStackRef.current[index])
+        );
+        if (candidateSignature === baselineSignature) {
+          baselineIndex = index;
+          break;
+        }
+      }
+      if (baselineIndex >= 0) undoStackRef.current.splice(baselineIndex);
+      redoStackRef.current.push(currentSnapshot);
+      isRestoringHistoryRef.current = true;
+      applyEditorSnapshot(cloneSnapshot(cutTransaction.baseline));
+      cutHistoryTransactionRef.current = null;
+      setStudioActionMessage("Undo restored the removed section and its synchronized media.");
+      syncHistoryAvailability();
+      return;
+    }
+    let previousSnapshot = null;
+    while (undoStackRef.current.length && !previousSnapshot) {
+      const candidate = undoStackRef.current.pop();
+      const candidateSignature = serializeSnapshot(getHistoryRelevantSnapshot(candidate));
+      if (candidateSignature !== currentSignature) previousSnapshot = candidate;
+    }
+    if (!previousSnapshot) {
+      syncHistoryAvailability();
+      return;
+    }
     redoStackRef.current.push(currentSnapshot);
     isRestoringHistoryRef.current = true;
     applyEditorSnapshot(cloneSnapshot(previousSnapshot));
@@ -2721,7 +2846,17 @@ const ViralClipStudio = ({
     if (!redoStackRef.current.length) return;
 
     const currentSnapshot = cloneSnapshot(getEditorSnapshot());
-    const nextSnapshot = redoStackRef.current.pop();
+    const currentSignature = serializeSnapshot(getHistoryRelevantSnapshot(currentSnapshot));
+    let nextSnapshot = null;
+    while (redoStackRef.current.length && !nextSnapshot) {
+      const candidate = redoStackRef.current.pop();
+      const candidateSignature = serializeSnapshot(getHistoryRelevantSnapshot(candidate));
+      if (candidateSignature !== currentSignature) nextSnapshot = candidate;
+    }
+    if (!nextSnapshot) {
+      syncHistoryAvailability();
+      return;
+    }
     undoStackRef.current.push(currentSnapshot);
     isRestoringHistoryRef.current = true;
     applyEditorSnapshot(cloneSnapshot(nextSnapshot));
@@ -2741,13 +2876,20 @@ const ViralClipStudio = ({
     if (!src) return;
     const currentVideoTime = videoRef.current ? videoRef.current.currentTime : 0;
     const relativeStartTime = getPreviewTimelineTime(currentVideoTime);
+    const pipPlacement = getCollisionSafePipPlacement({
+      overlays,
+      startTime: relativeStartTime,
+      duration: 3,
+      width,
+      height,
+    });
     const defaultPlacement =
       bRollMode === "fullscreen"
         ? { x: 50, y: 50, width: 100, height: 100 }
         : bRollMode === "sideBySide"
           ? { x: 75, y: 50, width: 50, height: 100 }
           : bRollMode === "pip"
-            ? { x: 76, y: 24, width, height }
+            ? pipPlacement
             : { x: 50, y: 50, width, height };
 
     const newOverlay = {
@@ -4273,15 +4415,26 @@ const ViralClipStudio = ({
     showWatermarkCleanupOnVideo &&
     isPreviewPaused &&
     isWatermarkCleanupPreviewFrameAligned;
+  const normalizedCaptionOverride = normalizePlainText(captionTextOverride);
   const captionPreviewSourceText =
-    normalizePlainText(captionTextOverride) ||
+    normalizedCaptionOverride ||
     getCaptionPreviewSourceText(selectedClip) ||
     normalizePlainText(hookText) ||
     "AI captions preview";
+  const manualCaptionChunkCount = buildCaptionPreviewChunks(normalizedCaptionOverride).length;
+  const manualCaptionPreviewDuration = Math.min(
+    Math.max(1.8, outputTimelineDuration || 1.8),
+    Math.max(2.4, manualCaptionChunkCount * 1.35)
+  );
+  const captionTrackOffset = normalizedCaptionOverride ? 0 : currentTimelineOffset;
+  const captionTrackDuration = normalizedCaptionOverride
+    ? manualCaptionPreviewDuration
+    : currentTimelineWindow.duration || selectedClip?.duration || 3;
   const captionPreviewState = getCaptionPreviewState({
     text: captionPreviewSourceText,
-    localTime: previewClipTime,
-    duration: currentTimelineWindow.duration || selectedClip?.duration || 3,
+    localTime: normalizedCaptionOverride ? previewTimelineTime : previewClipTime,
+    duration: captionTrackDuration,
+    hideAfterEnd: !!normalizedCaptionOverride,
   });
   const liveTimelineDuration = outputTimelineDuration;
   const liveTimelineCutMarkers = timeline.slice(0, -1).flatMap((clip, index) => {
@@ -4306,7 +4459,7 @@ const ViralClipStudio = ({
       overlay.bRollMode && overlay.startTime !== undefined && Number(overlay.duration || 0) > 0
   );
   const liveTimelineCaptionDuration = captionPreviewState.chunks.length
-    ? Math.max(0.1, Number(currentTimelineWindow.duration || 0)) / captionPreviewState.chunks.length
+    ? Math.max(0.1, Number(captionTrackDuration || 0)) / captionPreviewState.chunks.length
     : 0;
   const liveTimelineSource = getSafeMediaSource(currentTimelineClip?.url || videoUrl);
   const liveTimelinePlayheadLeft =
@@ -4450,40 +4603,53 @@ const ViralClipStudio = ({
     setStudioActionMessage("Fit full frame is active. The entire source stays visible.");
   };
 
+  const confirmAfterPreviewFrame = event => {
+    const video = event.currentTarget;
+    if (typeof video.requestVideoFrameCallback === "function") {
+      video.requestVideoFrameCallback(() => setIsAfterPreviewReady(true));
+      return;
+    }
+    setIsAfterPreviewReady(video.readyState >= 2);
+  };
+
   const togglePreviewFullscreen = async () => {
     const fullscreenElement = document.fullscreenElement;
     if (isPreviewFullscreen || fullscreenElement) {
-      // Clear local state immediately so a browser that silently drops native
-      // fullscreen can never trap the rest of the editor behind an exit button.
       setIsPreviewFullscreen(false);
       try {
         if (fullscreenElement) await document.exitFullscreen?.();
+        nativePreviewFullscreenRef.current = false;
         setStudioActionMessage("Fullscreen closed. All studio controls are available again.");
       } catch (error) {
-        console.log("Preview fullscreen exit skipped", error);
         setStudioActionMessage("Fullscreen state was reset. All studio controls are available.");
       }
       return;
     }
 
+    // Enter a reliable CSS-expanded preview immediately. Native fullscreen is
+    // an enhancement, not a requirement, so embedded browsers can never leave
+    // the editor trapped behind an inaccurate Exit fullscreen state.
+    setIsPreviewFullscreen(true);
+    setStudioActionMessage("Expanded preview is active. Press Escape or Exit preview to return.");
     try {
       if (!phoneFrameRef.current?.requestFullscreen) {
-        setIsPreviewFullscreen(false);
-        setStudioActionMessage("Fullscreen is not supported by this browser.");
+        setStudioActionMessage(
+          "Expanded preview is active. Native fullscreen is not supported by this browser."
+        );
         return;
       }
       await phoneFrameRef.current.requestFullscreen();
       const enteredFullscreen = document.fullscreenElement === phoneFrameRef.current;
-      setIsPreviewFullscreen(enteredFullscreen);
+      nativePreviewFullscreenRef.current = enteredFullscreen;
       if (!enteredFullscreen) {
         setStudioActionMessage(
-          "The browser did not enter fullscreen. The editor remains fully available."
+          "Expanded preview is active. The browser kept the editor inside this tab."
         );
       }
     } catch (error) {
-      console.log("Preview fullscreen request skipped", error);
-      setIsPreviewFullscreen(false);
-      setStudioActionMessage("The browser blocked fullscreen. Click the preview, then try again.");
+      setStudioActionMessage(
+        "Expanded preview is active. The browser blocked native fullscreen, but editing remains available."
+      );
     }
   };
 
@@ -4578,6 +4744,18 @@ const ViralClipStudio = ({
     const retainedSegments = [];
     if (localStart >= minimumKeptEdge) retainedSegments.push(retainedBefore);
     if (localDuration - localEnd >= minimumKeptEdge) retainedSegments.push(retainedAfter);
+
+    // This action updates the source timeline, overlays, SFX, marks, and
+    // playback position together. Store one explicit pre-cut checkpoint so a
+    // single Undo restores the complete edit instead of only the last cleared
+    // marker from the multi-state transaction.
+    const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
+    pendingHistoryBaselineRef.current = cutHistoryBaseline;
+    cutHistoryTransactionRef.current = {
+      baseline: cutHistoryBaseline,
+      appliedSignature: null,
+      appliedTimelineSignature: null,
+    };
 
     pendingTimelineSeekRef.current = {
       index: activeTimelineIndex,
@@ -5792,7 +5970,10 @@ const ViralClipStudio = ({
 
   useEffect(() => {
     const snapshot = cloneSnapshot(getEditorSnapshot());
-    const serializedSnapshot = serializeSnapshot(snapshot);
+    // Inspector selection and playhead navigation are not edits. Excluding
+    // them keeps Undo focused on visible media/timeline changes instead of
+    // silently undoing which layer happened to be selected.
+    const serializedSnapshot = serializeSnapshot(getHistoryRelevantSnapshot(snapshot));
 
     if (lastSnapshotRef.current === null) {
       lastSnapshotRef.current = snapshot;
@@ -5808,6 +5989,31 @@ const ViralClipStudio = ({
     }
 
     if (serializedSnapshot === lastSnapshotSignatureRef.current) {
+      syncHistoryAvailability();
+      return;
+    }
+
+    if (pendingHistoryBaselineRef.current) {
+      const baseline = pendingHistoryBaselineRef.current;
+      pendingHistoryBaselineRef.current = null;
+      const baselineSignature = serializeSnapshot(getHistoryRelevantSnapshot(baseline));
+      const currentUndoTop = undoStackRef.current[undoStackRef.current.length - 1];
+      const currentUndoTopSignature = currentUndoTop
+        ? serializeSnapshot(getHistoryRelevantSnapshot(currentUndoTop))
+        : null;
+      if (baselineSignature !== currentUndoTopSignature) {
+        undoStackRef.current.push(cloneSnapshot(baseline));
+        if (undoStackRef.current.length > 50) undoStackRef.current.shift();
+      }
+      redoStackRef.current = [];
+      lastSnapshotRef.current = snapshot;
+      lastSnapshotSignatureRef.current = serializedSnapshot;
+      if (cutHistoryTransactionRef.current) {
+        cutHistoryTransactionRef.current.appliedSignature = serializedSnapshot;
+        cutHistoryTransactionRef.current.appliedTimelineSignature = serializeSnapshot(
+          snapshot.timeline || []
+        );
+      }
       syncHistoryAvailability();
       return;
     }
@@ -6809,28 +7015,38 @@ const ViralClipStudio = ({
 
   useEffect(() => {
     const syncFullscreenState = () => {
-      setIsPreviewFullscreen(document.fullscreenElement === phoneFrameRef.current);
+      if (document.fullscreenElement === phoneFrameRef.current) {
+        nativePreviewFullscreenRef.current = true;
+        setIsPreviewFullscreen(true);
+        return;
+      }
+      // A real fullscreen exit (Escape/browser chrome) also exits the CSS
+      // fallback. A blocked request emits no fullscreenchange event, so the
+      // fallback remains available with its own always-visible exit button.
+      if (!document.fullscreenElement && nativePreviewFullscreenRef.current) {
+        nativePreviewFullscreenRef.current = false;
+        setIsPreviewFullscreen(false);
+      }
     };
 
     document.addEventListener("fullscreenchange", syncFullscreenState);
-    syncFullscreenState();
 
     return () => document.removeEventListener("fullscreenchange", syncFullscreenState);
   }, []);
 
   useEffect(() => {
     if (!isPreviewFullscreen) return undefined;
-
-    const verifyNativeFullscreen = window.setTimeout(() => {
-      if (document.fullscreenElement !== phoneFrameRef.current) {
-        setIsPreviewFullscreen(false);
-        setStudioActionMessage(
-          "Fullscreen ended outside the studio. All editor controls were restored."
-        );
+    const handleExpandedPreviewKey = event => {
+      if (event.key !== "Escape") return;
+      setIsPreviewFullscreen(false);
+      if (document.fullscreenElement) {
+        Promise.resolve(document.exitFullscreen?.()).catch(() => {});
       }
-    }, 250);
-
-    return () => window.clearTimeout(verifyNativeFullscreen);
+      nativePreviewFullscreenRef.current = false;
+      setStudioActionMessage("Expanded preview closed. All studio controls are available again.");
+    };
+    window.addEventListener("keydown", handleExpandedPreviewKey);
+    return () => window.removeEventListener("keydown", handleExpandedPreviewKey);
   }, [isPreviewFullscreen]);
 
   useEffect(() => {
@@ -7538,9 +7754,17 @@ const ViralClipStudio = ({
     setOverlays(prev =>
       prev.map(o => {
         if (o.id !== id) return o;
+        const pipPlacement = getCollisionSafePipPlacement({
+          overlays: prev,
+          overlayId: id,
+          startTime: o.startTime,
+          duration: o.duration,
+          width: 48,
+          height: 34,
+        });
         const modeLayout = {
           fullscreen: { width: 100, height: 100, x: 0, y: 0 },
-          pip: { width: 48, height: 34, x: 72, y: 22 },
+          pip: pipPlacement,
           sideBySide: { width: 50, height: 100, x: 75, y: 50 },
         }[mode] || {
           width: o.width || 40,
@@ -8504,6 +8728,7 @@ const ViralClipStudio = ({
                   type="button"
                   className="comparison-play-button"
                   onClick={toggleComparisonPlayback}
+                  aria-label={isPreviewPaused ? "Play comparison" : "Pause comparison"}
                 >
                   {isPreviewPaused ? "▶ Play comparison" : "❚❚ Pause comparison"}
                 </button>
@@ -8547,7 +8772,7 @@ const ViralClipStudio = ({
                   <div
                     ref={phoneFrameRef}
                     data-testid="hook-preview-frame"
-                    className={`phone-frame ${hookFocusMode ? "hook-focus-enabled" : ""} ${creativePreviewClass} ${renderedOutputUrl ? "has-rendered-output" : ""}`}
+                    className={`phone-frame ${isPreviewFullscreen ? "preview-expanded" : ""} ${hookFocusMode ? "hook-focus-enabled" : ""} ${creativePreviewClass} ${renderedOutputUrl ? "has-rendered-output" : ""}`}
                     onClick={handlePreviewFrameClick}
                     onMouseMove={handleMouseMove}
                     onMouseUp={handleDragEnd}
@@ -8563,12 +8788,13 @@ const ViralClipStudio = ({
                       data-testid="studio-after-video"
                       className="studio-video"
                       autoPlay
-                      controls={comparisonMode === "after"}
                       playsInline
                       preload="auto"
                       onLoadStart={() => setIsAfterPreviewReady(false)}
                       onLoadedData={() => setIsAfterPreviewReady(true)}
                       onCanPlay={() => setIsAfterPreviewReady(true)}
+                      onSeeking={() => setIsAfterPreviewReady(false)}
+                      onSeeked={confirmAfterPreviewFrame}
                       style={{
                         objectFit: renderedOutputUrl
                           ? "contain"
@@ -8612,6 +8838,18 @@ const ViralClipStudio = ({
                         <span />
                         Loading edited preview…
                       </div>
+                    ) : null}
+                    {isPreviewFullscreen ? (
+                      <button
+                        type="button"
+                        className="preview-expanded-exit"
+                        onClick={event => {
+                          event.stopPropagation();
+                          void togglePreviewFullscreen();
+                        }}
+                      >
+                        Exit preview
+                      </button>
                     ) : null}
                     {beatEchoPreviewIsLive && !activeSideBySideOverlay ? (
                       <div
@@ -9064,6 +9302,7 @@ const ViralClipStudio = ({
 
                               {comparisonMode !== "split" &&
                                 activeOverlayId === overlay.id &&
+                                isPreviewPaused &&
                                 !isFullscreen && (
                                   <div className="overlay-controls">
                                     <button
@@ -9212,6 +9451,45 @@ const ViralClipStudio = ({
                           );
                         })}
                     </div>
+                    {comparisonMode === "after" ? (
+                      <div
+                        className="preview-custom-controls"
+                        onMouseDown={event => event.stopPropagation()}
+                        onClick={event => event.stopPropagation()}
+                      >
+                        <button
+                          type="button"
+                          onClick={toggleComparisonPlayback}
+                          aria-label={
+                            isPreviewPaused ? "Play edited preview" : "Pause edited preview"
+                          }
+                        >
+                          {isPreviewPaused ? "▶" : "❚❚"}
+                        </button>
+                        <input
+                          type="range"
+                          min={0}
+                          max={Math.max(0.1, outputPlaybackDuration)}
+                          step={0.05}
+                          value={clampNumber(
+                            previewPlaybackTime,
+                            0,
+                            Math.max(0.1, outputPlaybackDuration),
+                            0
+                          )}
+                          onChange={event =>
+                            jumpToOutputTimelineTime(
+                              Number(event.target.value || 0) * Math.max(0.01, previewSpeed)
+                            )
+                          }
+                          aria-label="Edited output position"
+                        />
+                        <span>
+                          {formatPreviewTimePrecise(previewPlaybackTime)} /{" "}
+                          {formatPreviewTimePrecise(outputPlaybackDuration)}
+                        </span>
+                      </div>
+                    ) : null}
                   </div>
                   <div className="before-preview-card" data-testid="before-preview-frame">
                     <span className="preview-version-label is-before">Before</span>
@@ -9464,9 +9742,14 @@ const ViralClipStudio = ({
                   </div>
 
                   <div className="compact-timeline-row">
-                    <span>B-roll</span>
+                    <span>
+                      B-roll {liveTimelineBRoll.length ? `(${liveTimelineBRoll.length})` : ""}
+                    </span>
                     <div
-                      className="compact-timeline-track compact-broll-track"
+                      className={`compact-timeline-track compact-broll-track ${
+                        liveTimelineBRoll.length > 1 ? "has-layer-lanes" : ""
+                      }`}
+                      style={{ height: `${Math.max(46, liveTimelineBRoll.length * 34 + 8)}px` }}
                       onClick={seekLiveEditTimeline}
                       role="presentation"
                     >
@@ -9488,8 +9771,24 @@ const ViralClipStudio = ({
                               key={overlay.id}
                               type="button"
                               className={`compact-timeline-block is-broll ${activeOverlayId === overlay.id ? "is-active" : ""}`}
-                              style={{ left: `${left}%`, width: `${Math.max(3, width)}%` }}
+                              style={{
+                                left: `${left}%`,
+                                width: `${Math.max(3, width)}%`,
+                                top: `${4 + index * 34}px`,
+                                zIndex: activeOverlayId === overlay.id ? 3 : 2,
+                              }}
                               data-testid={`timeline-broll-block-${overlay.id}`}
+                              aria-label={`${overlay.type === "image" ? "Image" : "B-roll"}: ${displayName}, ${Number(
+                                overlay.startTime || 0
+                              ).toFixed(1)} to ${(
+                                Number(overlay.startTime || 0) + Number(overlay.duration || 0)
+                              ).toFixed(1)} seconds, ${
+                                overlay.bRollMode === "fullscreen"
+                                  ? "full-screen cutaway"
+                                  : overlay.bRollMode === "sideBySide"
+                                    ? "side by side"
+                                    : "picture in picture"
+                              }`}
                               onClick={event => {
                                 event.stopPropagation();
                                 selectLiveTimelineOverlay(overlay.id);
@@ -9518,6 +9817,9 @@ const ViralClipStudio = ({
                                     : overlay.bRollMode === "sideBySide"
                                       ? "Split"
                                       : "PIP"}
+                                  {` · ${Number(overlay.startTime || 0).toFixed(1)}–${(
+                                    Number(overlay.startTime || 0) + Number(overlay.duration || 0)
+                                  ).toFixed(1)}s`}
                                 </small>
                               </span>
                             </button>
@@ -9558,14 +9860,14 @@ const ViralClipStudio = ({
                               captionPreviewState.currentChunk?.id === chunk.id ? "is-current" : ""
                             }`}
                             style={{
-                              left: `${((currentTimelineOffset + index * liveTimelineCaptionDuration) / liveTimelineDuration) * 100}%`,
+                              left: `${((captionTrackOffset + index * liveTimelineCaptionDuration) / liveTimelineDuration) * 100}%`,
                               width: `${(liveTimelineCaptionDuration / liveTimelineDuration) * 100}%`,
                             }}
                             data-testid="timeline-caption-block"
                             onClick={event => {
                               event.stopPropagation();
                               seekLiveEditTimelineItem(
-                                currentTimelineOffset + index * liveTimelineCaptionDuration,
+                                captionTrackOffset + index * liveTimelineCaptionDuration,
                                 "captions"
                               );
                             }}
@@ -9602,6 +9904,7 @@ const ViralClipStudio = ({
                       <button
                         type="button"
                         className="compact-speed-block"
+                        aria-label={`${previewSpeed.toFixed(2)} times speed, ${pacingLevel} energy, ${formatPreviewTimePrecise(outputPlaybackDuration)} edited output${silenceRemoval ? ", silence tightening on" : ""}`}
                         onClick={event => {
                           event.stopPropagation();
                           selectCreativeTool("pacing");
@@ -10329,8 +10632,8 @@ const ViralClipStudio = ({
                         className={pacingLevel === level ? "is-active" : ""}
                         onClick={() => {
                           setPacingLevel(level);
-                          changePreviewSpeed(
-                            level === "calm" ? 0.9 : level === "energetic" ? 1.25 : 1
+                          setStudioActionMessage(
+                            `${level[0].toUpperCase() + level.slice(1)} creative energy selected. Playback speed remains ${previewSpeed.toFixed(2)}×.`
                           );
                         }}
                       >
@@ -10342,6 +10645,11 @@ const ViralClipStudio = ({
                 <button
                   type="button"
                   className="creative-improvements-card"
+                  aria-label={
+                    creativeImprovementsReady.length
+                      ? `${creativeImprovementsReady.length} creative improvements ready to review`
+                      : "All creative improvements applied"
+                  }
                   onClick={() =>
                     selectCreativeTool(
                       creativeImprovementsReady[0] === "proof B-roll" ? "broll" : "captions"
@@ -10349,8 +10657,16 @@ const ViralClipStudio = ({
                   }
                 >
                   <span>
-                    <strong>{creativeImprovementsReady.length || 6} improvements ready</strong>
-                    <small>Review every suggestion before render</small>
+                    <strong>
+                      {creativeImprovementsReady.length
+                        ? `${creativeImprovementsReady.length} improvements ready`
+                        : "All improvements applied"}
+                    </strong>
+                    <small>
+                      {creativeImprovementsReady.length
+                        ? "Review every suggestion before render"
+                        : "Your live edit currently meets the director checks"}
+                    </small>
                   </span>
                   <b aria-hidden="true">›</b>
                 </button>
@@ -10849,9 +11165,9 @@ const ViralClipStudio = ({
                           aria-pressed={pacingLevel === value}
                           onClick={() => {
                             setPacingLevel(value);
-                            if (value === "calm") changePreviewSpeed(1);
-                            if (value === "balanced") changePreviewSpeed(1.15);
-                            if (value === "energetic") changePreviewSpeed(1.25);
+                            setStudioActionMessage(
+                              `${label} energy selected. Playback speed remains ${previewSpeed.toFixed(2)}×; adjust it separately above.`
+                            );
                           }}
                         >
                           {label}
@@ -11483,10 +11799,17 @@ const ViralClipStudio = ({
                     </span>
                   </div>
 
-                  <button
-                    type="button"
+                  <label
+                    htmlFor="studio-background-sound-input"
+                    role="button"
+                    tabIndex={0}
                     className="inspector-upload-card"
-                    onClick={() => quickMusicFileInputRef.current?.click()}
+                    onKeyDown={event => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        quickMusicFileInputRef.current?.click();
+                      }
+                    }}
                   >
                     <span>♫</span>
                     <div>
@@ -11497,7 +11820,7 @@ const ViralClipStudio = ({
                         {addMusic ? "Click to replace this track" : "MP3, WAV, OGG, M4A or AAC"}
                       </small>
                     </div>
-                  </button>
+                  </label>
 
                   {addMusic && musicTrack ? (
                     <>
@@ -11912,21 +12235,29 @@ const ViralClipStudio = ({
                   ) : null}
                 </div>
                 <input
+                  id="studio-background-sound-input"
                   type="file"
                   ref={quickMusicFileInputRef}
                   data-testid="background-sound-input"
                   accept="audio/*,.mp3,.wav,.ogg,.m4a,.aac"
-                  style={{ display: "none" }}
+                  className="visually-hidden-file-input"
                   onChange={handleMusicFileUpload}
                 />
                 <div className="broll-sound-actions">
-                  <button
-                    type="button"
+                  <label
+                    htmlFor="studio-background-sound-input"
+                    role="button"
+                    tabIndex={0}
                     className="clip-action-btn broll-sound-btn"
-                    onClick={() => quickMusicFileInputRef.current?.click()}
+                    onKeyDown={event => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        quickMusicFileInputRef.current?.click();
+                      }
+                    }}
                   >
                     {addMusic && musicTrack ? "Change Background Sound" : "Upload Background Sound"}
-                  </button>
+                  </label>
                   {addMusic && musicTrack ? (
                     <>
                       <button
