@@ -45,8 +45,7 @@ describe("ViralClipStudioPanel", () => {
       <ViralClipStudioPanel initialFile={source} initialClip={clip} onOpenPublisher={() => {}} />
     );
 
-    const openButton = screen.getByRole("button", { name: /^open clip studio$/i });
-    expect(openButton).toBeDisabled();
+    expect(screen.getByRole("button", { name: /uploading source/i })).toBeDisabled();
 
     await waitFor(() =>
       expect(uploadSourceFileViaBackend).toHaveBeenCalledWith(
@@ -64,6 +63,7 @@ describe("ViralClipStudioPanel", () => {
     Object.defineProperty(preview, "duration", { configurable: true, value: 20 });
     fireEvent.loadedMetadata(preview);
 
+    const openButton = await screen.findByRole("button", { name: /^open clip studio$/i });
     await waitFor(() => expect(openButton).toBeEnabled());
     fireEvent.click(openButton);
 
