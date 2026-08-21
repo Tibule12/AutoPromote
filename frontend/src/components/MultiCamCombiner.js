@@ -185,14 +185,38 @@ const FIREBASE_RENDER_STORAGE_PATH_PATTERN =
 export const isFirebaseRenderStoragePath = value =>
   FIREBASE_RENDER_STORAGE_PATH_PATTERN.test(String(value || "").trim());
 
+export const extractFirebaseRenderStoragePath = value => {
+  const candidate = String(value || "").trim();
+  if (isFirebaseRenderStoragePath(candidate)) return candidate;
+  try {
+    const parsed = new URL(candidate);
+    const decodedPath = decodeURIComponent(parsed.pathname || "");
+    const objectApiMarker = "/o/";
+    const objectApiIndex = decodedPath.indexOf(objectApiMarker);
+    if (objectApiIndex >= 0) {
+      const storagePath = decodedPath.slice(objectApiIndex + objectApiMarker.length);
+      return isFirebaseRenderStoragePath(storagePath) ? storagePath : "";
+    }
+    const processedIndex = decodedPath.indexOf("/processed/");
+    if (processedIndex >= 0) {
+      const storagePath = decodedPath.slice(processedIndex + 1);
+      return isFirebaseRenderStoragePath(storagePath) ? storagePath : "";
+    }
+  } catch (_) {
+    // Non-URL values were already checked as direct storage paths.
+  }
+  return "";
+};
+
 const resolveFirebaseRenderUrl = async value => {
   const candidate = String(value || "").trim();
-  if (!isFirebaseRenderStoragePath(candidate)) return candidate;
+  const storagePath = extractFirebaseRenderStoragePath(candidate);
+  if (!storagePath) return candidate;
 
   try {
-    return await getDownloadURL(ref(getStorage(), candidate));
+    return await getDownloadURL(ref(getStorage(), storagePath));
   } catch (error) {
-    console.warn(`Could not resolve Firebase render path ${candidate}:`, error);
+    console.warn(`Could not resolve Firebase render path ${storagePath}:`, error);
     return "";
   }
 };
@@ -5627,6 +5651,7 @@ function MultiCamCombiner({
       let finalizingTimeoutId = null;
       let drawFrameId = null;
       let proxyStream = null;
+      let proxyAudioContext = null;
       const cleanup = () => {
         if (progressWatchdogId) {
           window.clearInterval(progressWatchdogId);
@@ -5647,6 +5672,8 @@ function MultiCamCombiner({
         }
         proxyStream?.getTracks().forEach(track => track.stop());
         proxyStream = null;
+        proxyAudioContext?.close().catch(() => {});
+        proxyAudioContext = null;
         if (!resolved) {
           resolved = true;
           URL.revokeObjectURL(objectUrl);
@@ -5657,7 +5684,7 @@ function MultiCamCombiner({
         resolve(null);
       };
 
-      const startRecording = () => {
+      const startRecording = async () => {
         try {
           const rawDuration = Number(video.duration) || 1;
           const trimStart = clampNumber(
@@ -5691,12 +5718,35 @@ function MultiCamCombiner({
             return;
           }
           const canvasStream = canvas.captureStream(EXPORT_FRAME_RATE);
-          const mediaStream =
-            typeof video.captureStream === "function" ? video.captureStream() : null;
-          const stream = new MediaStream([
-            ...canvasStream.getVideoTracks(),
-            ...((mediaStream && mediaStream.getAudioTracks()) || []),
-          ]);
+          let audioTracks = [];
+          if (options.includeAudio !== false) {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (AudioContextClass) {
+              try {
+                proxyAudioContext = new AudioContextClass();
+                await proxyAudioContext.resume?.();
+                const sourceNode = proxyAudioContext.createMediaElementSource(video);
+                const streamDestination = proxyAudioContext.createMediaStreamDestination();
+                const silentOutput = proxyAudioContext.createGain();
+                silentOutput.gain.value = 0;
+                sourceNode.connect(streamDestination);
+                sourceNode.connect(silentOutput);
+                silentOutput.connect(proxyAudioContext.destination);
+                audioTracks = streamDestination.stream.getAudioTracks();
+              } catch (audioCaptureError) {
+                console.warn(
+                  "Web Audio proxy capture unavailable; trying media capture:",
+                  audioCaptureError
+                );
+              }
+            }
+            if (!audioTracks.length) {
+              const mediaStream =
+                typeof video.captureStream === "function" ? video.captureStream() : null;
+              audioTracks = (mediaStream && mediaStream.getAudioTracks()) || [];
+            }
+          }
+          const stream = new MediaStream([...canvasStream.getVideoTracks(), ...audioTracks]);
           proxyStream = stream;
           if (!stream.getVideoTracks().length) {
             fail();
@@ -6090,6 +6140,7 @@ function MultiCamCombiner({
     label,
     mode = "auto",
     trimWindow = null,
+    videoProxyIncludeAudio = true,
   }) => {
     const hasTrimWindow =
       Number(trimWindow?.duration || 0) > 0.05 || Number(trimWindow?.start || 0) > 0.05;
@@ -6303,6 +6354,7 @@ function MultiCamCombiner({
         const compressed = await compressVideoFile(file, label, () => {}, {
           trimStart: trimWindow?.start || 0,
           trimDuration: trimWindow?.duration || 0,
+          includeAudio: videoProxyIncludeAudio,
         });
         if (compressed) {
           actualTrimStart = Number(compressed.trimStart ?? actualTrimStart) || 0;
@@ -8168,21 +8220,42 @@ function MultiCamCombiner({
               start: sourceTrimStart,
               duration: sourceTrimDuration,
             };
-            const uploaded = await uploadMediaForBackendSync({
-              user,
-              storage: proofProxyStorage,
-              file: source.file,
-              fallbackUrl: "",
-              folder: "temp/multicam",
-              label: `${getExportSourceLabel(source, index)} proof window`,
-              mode: "auto",
-              trimWindow,
-            });
+            const sourceLabel = getExportSourceLabel(source, index);
+            const [uploaded, syncAudioUpload] = await Promise.all([
+              uploadMediaForBackendSync({
+                user,
+                storage: proofProxyStorage,
+                file: source.file,
+                fallbackUrl: "",
+                folder: "temp/multicam",
+                label: `${sourceLabel} proof window`,
+                mode: "auto",
+                trimWindow,
+                // Firefox can stall forever when one MediaRecorder combines a
+                // canvas video track with captured element audio. Record the
+                // visual and sync-audio proxies independently in one pass each.
+                videoProxyIncludeAudio: !hasExternalCleanAudio,
+              }),
+              hasExternalCleanAudio
+                ? uploadMediaForBackendSync({
+                    user,
+                    storage: proofProxyStorage,
+                    file: source.file,
+                    fallbackUrl: "",
+                    folder: "temp/multicam-sync-audio",
+                    label: `${sourceLabel} proof sync audio`,
+                    mode: "audio_only",
+                    trimWindow,
+                  })
+                : Promise.resolve(null),
+            ]);
             return [
               source.id,
               {
                 url: uploaded.videoUrl || uploaded.url,
+                syncAudioUrl: syncAudioUpload?.syncAudioUrl || syncAudioUpload?.url || "",
                 cacheKey: buildRenderProxyCacheKey(source.file, trimWindow),
+                syncAudioCacheKey: buildSyncAudioCacheKey(source.file, trimWindow),
                 storagePath: "",
                 proofProxy: true,
               },
@@ -8458,12 +8531,15 @@ function MultiCamCombiner({
           const originalUpload = originalUploadsBySourceId.get(source.id);
           return {
             id: source.id,
-            url: originalUpload?.url,
+            url: originalUpload?.syncAudioUrl || originalUpload?.url,
             label: sourceLabel,
             offset_seconds: useProofProxyTimeline ? 0 : Number(source.offsetSeconds) || 0,
             sync_rate: getSourceSyncRate(source),
             syncRate: getSourceSyncRate(source),
-            cache_key: originalUpload?.cacheKey || buildBackendMediaCacheKey(source.file),
+            cache_key:
+              originalUpload?.syncAudioCacheKey ||
+              originalUpload?.cacheKey ||
+              buildBackendMediaCacheKey(source.file),
             storage_path: originalUpload?.storagePath || "",
             storagePath: originalUpload?.storagePath || "",
             upload_trim_start: 0,

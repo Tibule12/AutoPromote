@@ -1,5 +1,6 @@
 import {
   estimateMulticamRenderCredits,
+  extractFirebaseRenderStoragePath,
   getFullTimelineRenderWindow,
   getProductionProofRenderWindow,
   getMulticamRenderBillingUnits,
@@ -145,5 +146,15 @@ describe("MultiCamCombiner checkpoint render helpers", () => {
     expect(isFirebaseRenderStoragePath("processed/manifests/multicam_job-123.json")).toBe(true);
     expect(isFirebaseRenderStoragePath("https://cdn.example.com/multicam_job-123.mp4")).toBe(false);
     expect(isFirebaseRenderStoragePath("/local-output/multicam_job-123.mp4")).toBe(false);
+    expect(
+      extractFirebaseRenderStoragePath(
+        "https://firebasestorage.googleapis.com/v0/b/app/o/processed%2Fmulticam_job-123.mp4?alt=media"
+      )
+    ).toBe("processed/multicam_job-123.mp4");
+    expect(
+      extractFirebaseRenderStoragePath(
+        "https://storage.googleapis.com/app/processed/multicam_job-123.mp4?X-Goog-Signature=old"
+      )
+    ).toBe("processed/multicam_job-123.mp4");
   });
 });
