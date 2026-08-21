@@ -25,7 +25,29 @@ export const useMediaProcessor = (initialFile = null) => {
 
   // Handle new file selection
   const handleFileChange = newFile => {
-    // 1. Handle Remote File Object (e.g. from VideoEditor backend processing)
+    // 1. Handle a remote URL handed off by a cloud renderer. Keep the URL as
+    // the publishing source so the browser can preview it without re-uploading.
+    if (typeof newFile === "string" && /^https?:\/\//i.test(newFile)) {
+      let remotePath = newFile;
+      try {
+        remotePath = new URL(newFile).pathname;
+      } catch (_) {
+        // The protocol check above is enough to use the original URL safely.
+      }
+      setFile(newFile);
+      setSourceFiles([newFile]);
+      setType(/\.(?:avif|gif|jpe?g|png|webp)$/i.test(remotePath) ? "image" : "video");
+      setPreviewUrl(newFile);
+      setRotate(0);
+      setFlipH(false);
+      setFlipV(false);
+      setTrimStart(0);
+      setTrimEnd(0);
+      setSelectedFilter(null);
+      return;
+    }
+
+    // 2. Handle Remote File Object (e.g. from VideoEditor backend processing)
     if (newFile && newFile.url && !newFile.edit) {
       setFile(newFile);
       setSourceFiles([newFile]);
@@ -46,7 +68,7 @@ export const useMediaProcessor = (initialFile = null) => {
       return;
     }
 
-    // 2. If it's just a file object, load it (Standard File Input)
+    // 3. If it's just a file object, load it (Standard File Input)
     if (newFile instanceof File || newFile instanceof Blob) {
       setFile(newFile);
       setSourceFiles([newFile]); // Default to single file
