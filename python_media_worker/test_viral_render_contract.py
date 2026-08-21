@@ -102,24 +102,66 @@ class ViralRenderContractTests(unittest.TestCase):
         self.assertIn('"progress": 100', worker_source)
         self.assertIn('"detail": "Render complete"', worker_source)
 
-    def test_deploy_smoke_source_stays_inside_worker_tmp(self):
-        workflow_path = (
-            Path(__file__).parents[1]
-            / ".github"
-            / "workflows"
-            / "deploy-media-worker.yml"
+    def test_deploy_smoke_source_matches_worker_allowed_tmp(self):
+        repo_root = Path(__file__).parents[1]
+        worker_source = Path(__file__).with_name("main_media_server.py").read_text(
+            encoding="utf-8"
         )
-        workflow = workflow_path.read_text(encoding="utf-8")
+        worker_tree = ast.parse(worker_source)
+        materialize_function = next(
+            node
+            for node in worker_tree.body
+            if isinstance(node, ast.AsyncFunctionDef)
+            and node.name == "materialize_video_input"
+        )
+        allowed_assignment = next(
+            node
+            for node in ast.walk(materialize_function)
+            if isinstance(node, ast.Assign)
+            and any(
+                isinstance(target, ast.Name) and target.id == "allowed_dir"
+                for target in node.targets
+            )
+        )
+        allowed_join = next(
+            node
+            for node in ast.walk(allowed_assignment.value)
+            if isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr == "join"
+        )
+        allowed_suffix = [
+            arg.value
+            for arg in allowed_join.args
+            if isinstance(arg, ast.Constant) and isinstance(arg.value, str)
+        ]
 
+        dockerfile = (Path(__file__).parent / "Dockerfile").read_text(
+            encoding="utf-8"
+        )
+        workdir = next(
+            line.split(maxsplit=1)[1]
+            for line in dockerfile.splitlines()
+            if line.startswith("WORKDIR ")
+        )
+        allowed_dir = os.path.abspath(os.path.join(workdir, *allowed_suffix))
+        smoke_dir = os.path.join(allowed_dir, "viral-render-smoke")
+        workflow = (
+            repo_root / ".github" / "workflows" / "deploy-media-worker.yml"
+        ).read_text(encoding="utf-8")
+
+        self.assertEqual(allowed_suffix, ["..", "tmp"])
+        self.assertEqual(allowed_dir, "/tmp")
         self.assertIn(
-            "--volume /tmp/viral-render-smoke:/app/tmp/smoke:ro",
+            f"--volume /tmp/viral-render-smoke:{smoke_dir}:ro",
             workflow,
         )
         self.assertIn(
-            '"video_url": "/app/tmp/smoke/source.mp4"',
+            f'"video_url": "{smoke_dir}/source.mp4"',
             workflow,
         )
-        self.assertNotIn('"video_url": "/smoke/source.mp4"', workflow)
+        self.assertIn(f"RUN mkdir -p {allowed_dir}", dockerfile)
+        self.assertNotIn("/app/tmp/smoke", workflow)
 
     def test_normalizes_speed_segments_and_fills_timeline_gaps(self):
         plan = normalize_speed_plan(
