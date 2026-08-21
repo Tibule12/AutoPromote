@@ -5601,14 +5601,10 @@ function MultiCamCombiner({
           sourceNode.connect(silentOutput);
           silentOutput.connect(audioCtx.destination);
 
-          // Firefox exposes the original media tracks through mozCaptureStream.
-          // Prefer those tracks when present; its Web Audio destination can
-          // otherwise encode a correctly shaped but completely silent file.
-          capturedMediaStream = captureMediaElementStream(video);
-          const capturedAudioTracks = capturedMediaStream?.getAudioTracks() || [];
-          const recorderStream = capturedAudioTracks.length
-            ? new MediaStream(capturedAudioTracks)
-            : streamDestination.stream;
+          // Seed the recorder with Web Audio, then replace this track after
+          // playback starts if Firefox exposes a native captured audio track.
+          // mozCaptureStream often has no tracks at metadata time.
+          const recorderStream = new MediaStream(streamDestination.stream.getAudioTracks());
 
           const recorder = new MediaRecorder(recorderStream, {
             mimeType,
@@ -5714,6 +5710,12 @@ function MultiCamCombiner({
               Math.max(0.2, rawDuration - captureStartTime),
               duration
             );
+            capturedMediaStream = captureMediaElementStream(video);
+            const capturedAudioTracks = capturedMediaStream?.getAudioTracks() || [];
+            if (capturedAudioTracks.length) {
+              recorderStream.getAudioTracks().forEach(track => recorderStream.removeTrack(track));
+              capturedAudioTracks.forEach(track => recorderStream.addTrack(track));
+            }
             recorder.start(1000);
           };
           video.onplaying = () => startCapture();
