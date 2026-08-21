@@ -2433,7 +2433,11 @@ function MultiCamCombiner({
         (Array.isArray(data.renders) ? data.renders : []).map(resolveRenderDeliveryUrls)
       );
       setRecentRenders(resolvedRenders);
-      setRecentRendersStatus("");
+      setRecentRendersStatus(
+        resolvedRenders.length
+          ? ""
+          : "No saved Cam Combiner masters were returned. Refresh to check again."
+      );
     } catch (error) {
       console.warn("Could not load Cam Combiner renders", error);
       setRecentRendersStatus("Saved masters could not be loaded right now.");

@@ -1805,6 +1805,9 @@ router.get("/renders", async (req, res) => {
       .firestore()
       .collection("video_edits")
       .where("userId", "==", userId)
+      // Filter before limiting. Limiting the user's mixed job history first
+      // made completed Cam Combiner masters disappear for active accounts.
+      .where("type", "==", "multicam_render")
       .limit(Math.max(limit * 3, 50))
       .get();
 
