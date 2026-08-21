@@ -208,20 +208,34 @@ export const extractFirebaseRenderStoragePath = value => {
   return "";
 };
 
-const resolveFirebaseRenderUrl = async value => {
+const firebaseRenderUrlResolutionCache = new Map();
+
+export const resolveFirebaseRenderUrl = async value => {
   const candidate = String(value || "").trim();
   const storagePath = extractFirebaseRenderStoragePath(candidate);
   if (!storagePath) return candidate;
-
-  try {
-    return await getDownloadURL(ref(getStorage(), storagePath));
-  } catch (error) {
-    console.warn(`Could not resolve Firebase render path ${storagePath}:`, error);
-    return "";
+  if (firebaseRenderUrlResolutionCache.has(storagePath)) {
+    return firebaseRenderUrlResolutionCache.get(storagePath);
   }
+
+  const resolution = getDownloadURL(ref(getStorage(), storagePath)).catch(error => {
+    if (error?.code !== "storage/object-not-found") {
+      firebaseRenderUrlResolutionCache.delete(storagePath);
+      console.warn(`Could not resolve Firebase render path ${storagePath}:`, error);
+    }
+    return "";
+  });
+  firebaseRenderUrlResolutionCache.set(storagePath, resolution);
+  return resolution;
 };
 
-const resolveRenderDeliveryUrls = async render => {
+const replaceResolvedStorageCandidate = (value, selectedValue, resolvedValue) => {
+  const valuePath = extractFirebaseRenderStoragePath(value);
+  const selectedPath = extractFirebaseRenderStoragePath(selectedValue);
+  return valuePath && selectedPath && valuePath === selectedPath ? resolvedValue : value;
+};
+
+export const resolveRenderDeliveryUrls = async render => {
   if (!render || typeof render !== "object") return render;
   const outputCandidate = getRenderOutputUrl(render);
   const previewCandidate = render.previewUrl || render.heldOutputUrl || outputCandidate;
@@ -236,6 +250,11 @@ const resolveRenderDeliveryUrls = async render => {
     ...render,
     outputUrl,
     output_url: outputUrl,
+    approvedOutputUrl: replaceResolvedStorageCandidate(
+      render.approvedOutputUrl,
+      outputCandidate,
+      outputUrl
+    ),
     previewUrl,
     heldOutputUrl:
       render.heldOutputUrl && previewCandidate === render.heldOutputUrl
@@ -247,7 +266,17 @@ const resolveRenderDeliveryUrls = async render => {
       render.result && typeof render.result === "object"
         ? {
             ...render.result,
-            ...(outputUrl ? { url: outputUrl, output_url: outputUrl } : {}),
+            url: replaceResolvedStorageCandidate(render.result.url, outputCandidate, outputUrl),
+            outputUrl: replaceResolvedStorageCandidate(
+              render.result.outputUrl,
+              outputCandidate,
+              outputUrl
+            ),
+            output_url: replaceResolvedStorageCandidate(
+              render.result.output_url,
+              outputCandidate,
+              outputUrl
+            ),
           }
         : render.result,
   };
@@ -421,6 +450,30 @@ const RENDER_PROXY_UPLOAD_CACHE_STORE = "renderWindowProxyUploads";
 const SYNC_AUDIO_CACHE_TTL_MS = 2 * 24 * 60 * 60 * 1000;
 const RENDER_PROXY_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const RENDER_PROXY_UPLOAD_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+
+export const getVideoProxyMimeCandidates = includeAudio =>
+  includeAudio
+    ? [
+        "video/webm;codecs=vp8,opus",
+        "video/webm;codecs=vp9,opus",
+        "video/webm;codecs=vp8",
+        "video/webm;codecs=vp9",
+        "video/webm",
+      ]
+    : ["video/webm;codecs=vp8", "video/webm;codecs=vp9", "video/webm"];
+
+export const selectVideoProxyMimeType = (includeAudio, isTypeSupported) =>
+  getVideoProxyMimeCandidates(includeAudio).find(type => isTypeSupported(type)) || "";
+
+const captureMediaElementStream = mediaElement => {
+  const capture = mediaElement?.captureStream || mediaElement?.mozCaptureStream;
+  if (typeof capture !== "function") return null;
+  try {
+    return capture.call(mediaElement);
+  } catch (_) {
+    return null;
+  }
+};
 
 const openSyncAudioCacheDb = () =>
   new Promise(resolve => {
@@ -5423,10 +5476,13 @@ function MultiCamCombiner({
 
       let resolved = false;
       let audioCtx = null;
+      let capturedMediaStream = null;
       const cleanup = () => {
         if (resolved) return;
         resolved = true;
         URL.revokeObjectURL(objectUrl);
+        capturedMediaStream?.getTracks().forEach(track => track.stop());
+        capturedMediaStream = null;
         if (audioCtx) audioCtx.close().catch(() => {});
       };
       const fail = () => {
@@ -5466,7 +5522,16 @@ function MultiCamCombiner({
           sourceNode.connect(silentOutput);
           silentOutput.connect(audioCtx.destination);
 
-          const recorder = new MediaRecorder(streamDestination.stream, {
+          // Firefox exposes the original media tracks through mozCaptureStream.
+          // Prefer those tracks when present; its Web Audio destination can
+          // otherwise encode a correctly shaped but completely silent file.
+          capturedMediaStream = captureMediaElementStream(video);
+          const capturedAudioTracks = capturedMediaStream?.getAudioTracks() || [];
+          const recorderStream = capturedAudioTracks.length
+            ? new MediaStream(capturedAudioTracks)
+            : streamDestination.stream;
+
+          const recorder = new MediaRecorder(recorderStream, {
             mimeType,
             audioBitsPerSecond: VIDEO_SYNC_AUDIO_BPS,
           });
@@ -5613,21 +5678,6 @@ function MultiCamCombiner({
     // Check MediaRecorder support
     if (typeof MediaRecorder === "undefined") return null;
 
-    const mimeTypes = [
-      "video/webm;codecs=vp8,opus",
-      "video/webm;codecs=vp9,opus",
-      "video/webm;codecs=vp8",
-      "video/webm",
-    ];
-    let mimeType = "";
-    for (const mt of mimeTypes) {
-      if (MediaRecorder.isTypeSupported(mt)) {
-        mimeType = mt;
-        break;
-      }
-    }
-    if (!mimeType) return null;
-
     return new Promise(resolve => {
       const video = document.createElement("video");
       video.preload = "auto";
@@ -5741,8 +5791,7 @@ function MultiCamCombiner({
               }
             }
             if (!audioTracks.length) {
-              const mediaStream =
-                typeof video.captureStream === "function" ? video.captureStream() : null;
+              const mediaStream = captureMediaElementStream(video);
               audioTracks = (mediaStream && mediaStream.getAudioTracks()) || [];
             }
           }
@@ -5753,11 +5802,26 @@ function MultiCamCombiner({
             return;
           }
 
-          const recorder = new MediaRecorder(stream, {
+          // Firefox may report vp8+opus as supported for a video-only stream,
+          // then produce no data at all. Match the declared codecs to the
+          // tracks that are actually present before constructing the recorder.
+          const hasRecordedAudio = audioTracks.length > 0;
+          const mimeType = selectVideoProxyMimeType(hasRecordedAudio, type =>
+            MediaRecorder.isTypeSupported(type)
+          );
+          if (!mimeType) {
+            fail();
+            return;
+          }
+
+          const recorderOptions = {
             mimeType,
             videoBitsPerSecond: UPLOAD_COMPRESSION_TARGET_BPS,
-            audioBitsPerSecond: UPLOAD_COMPRESSION_AUDIO_BPS,
-          });
+          };
+          if (hasRecordedAudio) {
+            recorderOptions.audioBitsPerSecond = UPLOAD_COMPRESSION_AUDIO_BPS;
+          }
+          const recorder = new MediaRecorder(stream, recorderOptions);
 
           const chunks = [];
           let finalChunkRequested = false;
@@ -5849,7 +5913,12 @@ function MultiCamCombiner({
             }, 15000);
           };
 
-          recorder.start(1000);
+          try {
+            context.drawImage(video, 0, 0, proxyWidth, proxyHeight);
+          } catch (_) {
+            // The animation loop will draw as soon as the decoder has a frame.
+          }
+          recorder.start(250);
           recordingStarted = true;
           drawFrame();
           let lastPct = 0;
@@ -5857,7 +5926,9 @@ function MultiCamCombiner({
           let lastVideoTime = Number(video.currentTime) || trimStart;
           // Accurate estimate: target bitrate × duration (plus audio overhead)
           const estimatedBytes = Math.round(
-            ((UPLOAD_COMPRESSION_TARGET_BPS + UPLOAD_COMPRESSION_AUDIO_BPS) / 8) *
+            ((UPLOAD_COMPRESSION_TARGET_BPS +
+              (hasRecordedAudio ? UPLOAD_COMPRESSION_AUDIO_BPS : 0)) /
+              8) *
               recordingDuration *
               1.05
           );
@@ -6523,7 +6594,7 @@ function MultiCamCombiner({
 
   const buildRenderProxyCacheKey = (file, trimWindow = null) => {
     if (!file || !trimWindow) return "";
-    const proxyVersion = `v1-webm-${UPLOAD_COMPRESSION_TARGET_BPS}-${UPLOAD_COMPRESSION_AUDIO_BPS}`;
+    const proxyVersion = `v2-track-matched-webm-${UPLOAD_COMPRESSION_TARGET_BPS}-${UPLOAD_COMPRESSION_AUDIO_BPS}`;
     const trimStart = Math.max(0, Number(trimWindow?.start || 0) || 0);
     const trimDuration = Math.max(0, Number(trimWindow?.duration || 0) || 0);
     if (trimDuration <= 0.05) return "";

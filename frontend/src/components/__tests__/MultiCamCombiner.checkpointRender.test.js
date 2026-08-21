@@ -1,14 +1,20 @@
 import {
   estimateMulticamRenderCredits,
   extractFirebaseRenderStoragePath,
+  getVideoProxyMimeCandidates,
   getFullTimelineRenderWindow,
   getProductionProofRenderWindow,
   getMulticamRenderBillingUnits,
   getRenderCheckpointSummary,
   getRenderManifestLocation,
+  getRenderOutputUrl,
   isFirebaseRenderStoragePath,
   isAsyncRenderDeliveryReady,
+  resolveFirebaseRenderUrl,
+  resolveRenderDeliveryUrls,
+  selectVideoProxyMimeType,
 } from "../MultiCamCombiner";
+import { getDownloadURL } from "firebase/storage";
 
 jest.mock("firebase/auth", () => ({
   getAuth: jest.fn(() => ({ currentUser: null })),
@@ -33,6 +39,10 @@ jest.mock("../../hooks/useSubscription", () => ({
 jest.mock("../../hooks/useCinematicEffects", () => jest.fn(() => ({})));
 
 describe("MultiCamCombiner checkpoint render helpers", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it("submits a 44-minute project as one full timeline beginning at zero", () => {
     const renderWindow = getFullTimelineRenderWindow(44 * 60);
 
@@ -156,5 +166,37 @@ describe("MultiCamCombiner checkpoint render helpers", () => {
         "https://storage.googleapis.com/app/processed/multicam_job-123.mp4?X-Goog-Signature=old"
       )
     ).toBe("processed/multicam_job-123.mp4");
+  });
+
+  it("uses a video-only codec declaration when the proxy has no audio track", () => {
+    expect(getVideoProxyMimeCandidates(false)).toEqual([
+      "video/webm;codecs=vp8",
+      "video/webm;codecs=vp9",
+      "video/webm",
+    ]);
+    expect(
+      selectVideoProxyMimeType(false, type =>
+        ["video/webm;codecs=vp8,opus", "video/webm;codecs=vp8"].includes(type)
+      )
+    ).toBe("video/webm;codecs=vp8");
+    expect(getVideoProxyMimeCandidates(false).some(type => type.includes("opus"))).toBe(false);
+  });
+
+  it("clears and negative-caches confirmed missing Firebase render objects", async () => {
+    const missingPath = "processed/multicam_missing-checkpoint-test.mp4";
+    getDownloadURL.mockRejectedValueOnce(
+      Object.assign(new Error("missing"), { code: "storage/object-not-found" })
+    );
+
+    const resolved = await resolveRenderDeliveryUrls({
+      output_url: missingPath,
+      approvedOutputUrl: missingPath,
+      result: { url: missingPath, output_url: missingPath, outputUrl: missingPath },
+    });
+
+    expect(getRenderOutputUrl(resolved)).toBe("");
+    expect(resolved.result).toEqual({ url: "", output_url: "", outputUrl: "" });
+    await resolveFirebaseRenderUrl(missingPath);
+    expect(getDownloadURL).toHaveBeenCalledTimes(1);
   });
 });
