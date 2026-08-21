@@ -1689,36 +1689,17 @@ describe("ViralClipStudio timeline sequencing", () => {
     await act(async () => {
       fireEvent.click(screen.getByTestId("preview-fullscreen-button"));
     });
-    expect(previewFrame.requestFullscreen).toHaveBeenCalledTimes(1);
+    expect(previewFrame.requestFullscreen).not.toHaveBeenCalled();
     expect(screen.getByTestId("preview-fullscreen-button")).toHaveTextContent("Exit fullscreen");
     expect(screen.getByRole("button", { name: "Exit preview" })).toBeInTheDocument();
-    expect(screen.getByText(/browser blocked native fullscreen/i)).toBeInTheDocument();
-
-    const originalFullscreenDescriptor = Object.getOwnPropertyDescriptor(
-      document,
-      "fullscreenElement"
-    );
-    let nativeFullscreenElement = previewFrame;
-    Object.defineProperty(document, "fullscreenElement", {
-      configurable: true,
-      get: () => nativeFullscreenElement,
-    });
-    fireEvent(document, new Event("fullscreenchange"));
-    expect(screen.getByTestId("preview-fullscreen-button")).toHaveTextContent("Exit fullscreen");
-
-    // Some embedded browsers lose native fullscreen without dispatching another
-    // fullscreenchange event. The next click must still recover the editor.
-    nativeFullscreenElement = null;
     await act(async () => {
-      fireEvent.click(screen.getByTestId("preview-fullscreen-button"));
+      fireEvent.click(screen.getByRole("button", { name: "Exit preview" }));
     });
     expect(screen.getByTestId("preview-fullscreen-button")).toHaveTextContent("Fullscreen");
 
-    if (originalFullscreenDescriptor) {
-      Object.defineProperty(document, "fullscreenElement", originalFullscreenDescriptor);
-    } else {
-      delete document.fullscreenElement;
-    }
+    fireEvent.click(screen.getByTestId("preview-fullscreen-button"));
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(screen.getByTestId("preview-fullscreen-button")).toHaveTextContent("Fullscreen");
   });
 
   test("runs a podcast cutaway with original, overlay, and mixed audio modes", async () => {
@@ -2184,6 +2165,70 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(within(inspector).getByRole("slider", { name: /Music fade in/i })).toHaveValue("0.5");
     expect(within(inspector).getByRole("slider", { name: /Music fade out/i })).toHaveValue("0.5");
   }, 15000);
+
+  test("generates real timestamped speech captions and keeps every line editable", async () => {
+    const sourceBlob = new Blob(["creator-video"], { type: "video/mp4" });
+    global.fetch
+      .mockResolvedValueOnce({
+        ok: true,
+        blob: jest.fn(() => Promise.resolve(sourceBlob)),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: jest.fn(() =>
+          Promise.resolve({
+            language: "auto",
+            segments: [
+              { start: 1, end: 3, text: "Sawubona creators" },
+              { start: 4, end: 6.5, text: "This is the real transcript" },
+            ],
+          })
+        ),
+      });
+
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={[
+          {
+            id: "clip-1",
+            start: 0,
+            end: 20,
+            duration: 20,
+            reason: "Full source video loaded for manual editing",
+          },
+        ]}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+        onStatusChange={jest.fn()}
+      />
+    );
+
+    const inspector = screen.getByTestId("clip-studio-inspector");
+    fireEvent.click(within(inspector).getByRole("tab", { name: /Captions/i }));
+    fireEvent.click(within(inspector).getByRole("checkbox", { name: /Preview captions/i }));
+
+    await waitFor(() => {
+      expect(within(inspector).getByText(/2 timestamped captions ready/i)).toBeInTheDocument();
+    });
+    expect(screen.getAllByTestId("timeline-caption-block")).toHaveLength(2);
+    expect(screen.getAllByTestId("timeline-caption-block")[0]).toHaveStyle({
+      left: "5%",
+      width: "10%",
+    });
+    expect(within(inspector).queryByDisplayValue(/Full source video loaded/i)).toBeNull();
+
+    const firstCaption = within(inspector).getByRole("textbox", { name: "Caption 1 text" });
+    fireEvent.change(firstCaption, { target: { value: "Sawubona, Mzansi creators" } });
+    expect(screen.getByTestId("live-caption-preview")).toHaveTextContent(
+      /Sawubona, Mzansi creators/i
+    );
+
+    fireEvent.change(within(inspector).getByRole("spinbutton", { name: "Caption 1 start" }), {
+      target: { value: "2" },
+    });
+    expect(screen.getAllByTestId("timeline-caption-block")[0]).toHaveStyle({ left: "10%" });
+  });
 
   test("previews Creative Director captions and pacing without starting a render", async () => {
     const onSave = jest.fn();

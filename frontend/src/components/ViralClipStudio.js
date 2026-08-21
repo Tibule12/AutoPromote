@@ -1197,8 +1197,66 @@ const getWatermarkPreviewRegions = mode => {
   }
 };
 
-const getCaptionPreviewSourceText = clip =>
-  normalizePlainText(clip?.text || clip?.transcript || clip?.reason || "");
+const isGenericCaptionPlaceholder = value =>
+  /^(full source|source video).*(manual edit|loaded|ready)/i.test(normalizePlainText(value));
+
+const getCaptionPreviewSourceText = clip => {
+  const transcript = normalizePlainText(clip?.text || clip?.transcript || "");
+  if (transcript) return transcript;
+
+  const detectedMomentCopy = normalizePlainText(clip?.reason || "");
+  return isGenericCaptionPlaceholder(detectedMomentCopy) ? "" : detectedMomentCopy;
+};
+
+const normalizeCaptionSegments = segments =>
+  (Array.isArray(segments) ? segments : [])
+    .map((segment, index) => {
+      const start = Math.max(0, Number(segment?.start ?? segment?.start_time ?? 0));
+      const end = Math.max(start + 0.05, Number(segment?.end ?? segment?.end_time ?? start + 0.8));
+      const text = normalizePlainText(segment?.text || "");
+      if (!text) return null;
+      const words = text.split(/\s+/).filter(Boolean);
+      return {
+        id: segment?.id || `transcript-caption-${index}`,
+        start,
+        end,
+        duration: end - start,
+        text,
+        words,
+      };
+    })
+    .filter(Boolean);
+
+const getTimedCaptionPreviewState = ({ segments, sourceTime }) => {
+  const chunks = normalizeCaptionSegments(segments);
+  const safeTime = Math.max(0, Number(sourceTime || 0));
+  const currentIndex = chunks.findIndex(
+    segment => safeTime >= segment.start && safeTime < segment.end
+  );
+  const currentChunk = currentIndex >= 0 ? chunks[currentIndex] : null;
+  const nextChunk = currentIndex >= 0 ? chunks[currentIndex + 1] || null : null;
+  const activeWordIndex = currentChunk
+    ? Math.min(
+        currentChunk.words.length - 1,
+        Math.floor(
+          clampNumber(
+            (safeTime - currentChunk.start) / Math.max(currentChunk.duration, 0.05),
+            0,
+            0.999,
+            0
+          ) * currentChunk.words.length
+        )
+      )
+    : 0;
+
+  return {
+    chunks,
+    currentChunk,
+    nextChunk,
+    activeWordIndex,
+    previewDuration: chunks.length ? chunks[chunks.length - 1].end : 0,
+  };
+};
 
 const buildCaptionPreviewChunks = text => {
   const words = normalizePlainText(text).split(/\s+/).filter(Boolean).slice(0, 24);
@@ -1743,6 +1801,9 @@ const ViralClipStudio = ({
   const [captionPosition, setCaptionPosition] = useState("lower");
   const [captionScale, setCaptionScale] = useState(1);
   const [captionTextOverride, setCaptionTextOverride] = useState("");
+  const [captionSegments, setCaptionSegments] = useState([]);
+  const [captionGenerationStatus, setCaptionGenerationStatus] = useState("idle");
+  const [captionGenerationMessage, setCaptionGenerationMessage] = useState("");
   const [studioActionMessage, setStudioActionMessage] = useState(
     "Split preview is live. Edit on the right and compare the untouched source beside it."
   );
@@ -1865,7 +1926,6 @@ const ViralClipStudio = ({
   const cutHistoryTransactionRef = useRef(null);
   const previewPlaybackIntentRef = useRef(true);
   const phoneFrameRef = useRef(null);
-  const nativePreviewFullscreenRef = useRef(false);
   const watermarkDragRef = useRef(null);
   const hookSegmentTrackRef = useRef(null);
   const hookSelectionDragRef = useRef(null);
@@ -2060,6 +2120,7 @@ const ViralClipStudio = ({
     captionPosition,
     captionScale,
     captionTextOverride,
+    captionSegments,
     previewSpeed,
     pacingLevel,
     creativeIntent,
@@ -2152,6 +2213,7 @@ const ViralClipStudio = ({
     setCaptionPosition(snapshot.captionPosition || "lower");
     setCaptionScale(Number(snapshot.captionScale ?? 1));
     setCaptionTextOverride(snapshot.captionTextOverride || "");
+    setCaptionSegments(normalizeCaptionSegments(snapshot.captionSegments));
     setPreviewSpeed(Number(snapshot.previewSpeed ?? 1));
     setPacingLevel(snapshot.pacingLevel || "balanced");
     setCreativeIntent(snapshot.creativeIntent || "energy");
@@ -4416,11 +4478,9 @@ const ViralClipStudio = ({
     isPreviewPaused &&
     isWatermarkCleanupPreviewFrameAligned;
   const normalizedCaptionOverride = normalizePlainText(captionTextOverride);
+  const normalizedTimedCaptionSegments = normalizeCaptionSegments(captionSegments);
   const captionPreviewSourceText =
-    normalizedCaptionOverride ||
-    getCaptionPreviewSourceText(selectedClip) ||
-    normalizePlainText(hookText) ||
-    "AI captions preview";
+    normalizedCaptionOverride || getCaptionPreviewSourceText(selectedClip) || "";
   const manualCaptionChunkCount = buildCaptionPreviewChunks(normalizedCaptionOverride).length;
   const manualCaptionPreviewDuration = Math.min(
     Math.max(1.8, outputTimelineDuration || 1.8),
@@ -4430,12 +4490,18 @@ const ViralClipStudio = ({
   const captionTrackDuration = normalizedCaptionOverride
     ? manualCaptionPreviewDuration
     : currentTimelineWindow.duration || selectedClip?.duration || 3;
-  const captionPreviewState = getCaptionPreviewState({
-    text: captionPreviewSourceText,
-    localTime: normalizedCaptionOverride ? previewTimelineTime : previewClipTime,
-    duration: captionTrackDuration,
-    hideAfterEnd: !!normalizedCaptionOverride,
-  });
+  const captionPreviewState =
+    !normalizedCaptionOverride && normalizedTimedCaptionSegments.length
+      ? getTimedCaptionPreviewState({
+          segments: normalizedTimedCaptionSegments,
+          sourceTime: videoTime,
+        })
+      : getCaptionPreviewState({
+          text: captionPreviewSourceText,
+          localTime: normalizedCaptionOverride ? previewTimelineTime : previewClipTime,
+          duration: captionTrackDuration,
+          hideAfterEnd: !!normalizedCaptionOverride,
+        });
   const liveTimelineDuration = outputTimelineDuration;
   const liveTimelineCutMarkers = timeline.slice(0, -1).flatMap((clip, index) => {
     const nextClip = timeline[index + 1];
@@ -4458,9 +4524,34 @@ const ViralClipStudio = ({
     overlay =>
       overlay.bRollMode && overlay.startTime !== undefined && Number(overlay.duration || 0) > 0
   );
-  const liveTimelineCaptionDuration = captionPreviewState.chunks.length
+  const fallbackTimelineCaptionDuration = captionPreviewState.chunks.length
     ? Math.max(0.1, Number(captionTrackDuration || 0)) / captionPreviewState.chunks.length
     : 0;
+  const liveTimelineCaptionBlocks =
+    !normalizedCaptionOverride && normalizedTimedCaptionSegments.length
+      ? timeline.flatMap((clip, clipIndex) => {
+          const clipWindow = getTimelineClipWindow(clip);
+          const clipOffset = getTimelineOffsetForIndex(clipIndex);
+          return normalizedTimedCaptionSegments.flatMap(segment => {
+            const visibleStart = Math.max(segment.start, Number(clipWindow.start || 0));
+            const visibleEnd = Math.min(segment.end, Number(clipWindow.end || 0));
+            if (visibleEnd <= visibleStart) return [];
+            return [
+              {
+                ...segment,
+                blockId: `${clip.id}-${segment.id}`,
+                outputStart: clipOffset + visibleStart - Number(clipWindow.start || 0),
+                outputDuration: visibleEnd - visibleStart,
+              },
+            ];
+          });
+        })
+      : captionPreviewState.chunks.map((chunk, index) => ({
+          ...chunk,
+          blockId: chunk.id,
+          outputStart: captionTrackOffset + index * fallbackTimelineCaptionDuration,
+          outputDuration: fallbackTimelineCaptionDuration,
+        }));
   const liveTimelineSource = getSafeMediaSource(currentTimelineClip?.url || videoUrl);
   const liveTimelinePlayheadLeft =
     (clampNumber(previewTimelineTime, 0, liveTimelineDuration, 0) / liveTimelineDuration) * 100;
@@ -4603,6 +4694,130 @@ const ViralClipStudio = ({
     setStudioActionMessage("Fit full frame is active. The entire source stays visible.");
   };
 
+  const generateLiveTranscript = async () => {
+    if (captionGenerationStatus === "processing") return;
+
+    setCaptionGenerationStatus("processing");
+    setCaptionGenerationMessage("Listening for speech and building timestamped captions…");
+
+    try {
+      const auth = getAuth();
+      const user = auth.currentUser;
+      if (!user) throw new Error("Please log in before generating captions.");
+
+      const sourceUrl = getSafeMediaSource(currentTimelineClip?.url || videoUrl);
+      let sourceBlob =
+        selectedClip?.file instanceof Blob
+          ? selectedClip.file
+          : currentTimelineClip?.file instanceof Blob
+            ? currentTimelineClip.file
+            : null;
+
+      if (!sourceBlob && sourceUrl) {
+        const sourceResponse = await fetch(sourceUrl);
+        if (!sourceResponse.ok) throw new Error("The source video could not be opened.");
+        sourceBlob = await sourceResponse.blob();
+      }
+
+      if (!(sourceBlob instanceof Blob)) {
+        throw new Error("Reload the source video, then try captions again.");
+      }
+
+      let token = await user.getIdToken();
+      const formData = new FormData();
+      formData.append(
+        "file",
+        sourceBlob,
+        selectedClip?.file?.name || currentTimelineClip?.file?.name || "viral-studio-source.mp4"
+      );
+
+      let response = await fetch(`${API_BASE_URL}/api/media/transcribe`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+
+      if (response.status === 401) {
+        token = await user.getIdToken(true);
+        response = await fetch(`${API_BASE_URL}/api/media/transcribe`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData,
+        });
+      }
+
+      let payload = await response.json().catch(() => null);
+      if (!response.ok) {
+        throw new Error(payload?.error || payload?.message || "Caption transcription failed.");
+      }
+
+      if (payload?.jobId) {
+        for (let attempt = 0; attempt < 120; attempt += 1) {
+          await sleep(2000);
+          let statusResponse = await fetch(`${API_BASE_URL}/api/media/status/${payload.jobId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (statusResponse.status === 401) {
+            token = await user.getIdToken(true);
+            statusResponse = await fetch(`${API_BASE_URL}/api/media/status/${payload.jobId}`, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+          }
+          if (!statusResponse.ok) continue;
+          const statusPayload = await statusResponse.json();
+          if (statusPayload.status === "failed") {
+            throw new Error(statusPayload.error || "Caption transcription failed.");
+          }
+          if (statusPayload.status === "completed") {
+            payload = statusPayload.result || statusPayload;
+            break;
+          }
+          setCaptionGenerationMessage(
+            `Listening for speech… ${Math.round(Number(statusPayload.progress || 0))}%`
+          );
+        }
+      }
+
+      const nextSegments = normalizeCaptionSegments(payload?.segments).filter(segment => {
+        const text = segment.text.toLowerCase();
+        return ![
+          "music outro",
+          "music intro",
+          "background music",
+          "subtitles by",
+          "captioned by",
+          "transcribed by",
+          "copyright",
+          "all rights reserved",
+        ].some(blocked => text.includes(blocked));
+      });
+
+      if (!nextSegments.length) {
+        throw new Error("No clear speech was detected. You can still type captions manually.");
+      }
+
+      setCaptionSegments(nextSegments);
+      setCaptionTextOverride("");
+      setAutoCaptions(true);
+      setComparisonMode("after");
+      setCaptionGenerationStatus("ready");
+      setCaptionGenerationMessage(
+        `${nextSegments.length} timestamped caption${nextSegments.length === 1 ? "" : "s"} ready · language auto-detected`
+      );
+      if (videoRef.current) {
+        videoRef.current.currentTime = nextSegments[0].start;
+        setVideoTime(nextSegments[0].start);
+      }
+      setStudioActionMessage(
+        "Real speech captions are live. Edit any timestamped line before rendering."
+      );
+    } catch (error) {
+      setCaptionGenerationStatus("failed");
+      setCaptionGenerationMessage(error.message || "Caption transcription failed.");
+      setStudioActionMessage(error.message || "Caption transcription failed.");
+    }
+  };
+
   const confirmAfterPreviewFrame = event => {
     const video = event.currentTarget;
     if (typeof video.requestVideoFrameCallback === "function") {
@@ -4613,44 +4828,17 @@ const ViralClipStudio = ({
   };
 
   const togglePreviewFullscreen = async () => {
-    const fullscreenElement = document.fullscreenElement;
-    if (isPreviewFullscreen || fullscreenElement) {
+    if (isPreviewFullscreen) {
       setIsPreviewFullscreen(false);
-      try {
-        if (fullscreenElement) await document.exitFullscreen?.();
-        nativePreviewFullscreenRef.current = false;
-        setStudioActionMessage("Fullscreen closed. All studio controls are available again.");
-      } catch (error) {
-        setStudioActionMessage("Fullscreen state was reset. All studio controls are available.");
-      }
+      setStudioActionMessage("Fullscreen closed. All studio controls are available again.");
       return;
     }
 
-    // Enter a reliable CSS-expanded preview immediately. Native fullscreen is
-    // an enhancement, not a requirement, so embedded browsers can never leave
-    // the editor trapped behind an inaccurate Exit fullscreen state.
+    // Keep fullscreen inside the app. Native fullscreen is inconsistent in
+    // embedded/cloud browsers and can trap its own exit control behind the
+    // browser layer. This viewport-filling mode remains fully controllable.
     setIsPreviewFullscreen(true);
     setStudioActionMessage("Expanded preview is active. Press Escape or Exit preview to return.");
-    try {
-      if (!phoneFrameRef.current?.requestFullscreen) {
-        setStudioActionMessage(
-          "Expanded preview is active. Native fullscreen is not supported by this browser."
-        );
-        return;
-      }
-      await phoneFrameRef.current.requestFullscreen();
-      const enteredFullscreen = document.fullscreenElement === phoneFrameRef.current;
-      nativePreviewFullscreenRef.current = enteredFullscreen;
-      if (!enteredFullscreen) {
-        setStudioActionMessage(
-          "Expanded preview is active. The browser kept the editor inside this tab."
-        );
-      }
-    } catch (error) {
-      setStudioActionMessage(
-        "Expanded preview is active. The browser blocked native fullscreen, but editing remains available."
-      );
-    }
   };
 
   const changePreviewSpeed = nextSpeed => {
@@ -5775,6 +5963,12 @@ const ViralClipStudio = ({
         captionPosition,
         captionScale,
         captionTextOverride: normalizePlainText(captionTextOverride) || null,
+        captionSegments: normalizeCaptionSegments(captionSegments).map(segment => ({
+          id: segment.id,
+          startTime: segment.start,
+          endTime: segment.end,
+          text: segment.text,
+        })),
         previewSpeed,
         speedSegments: [
           {
@@ -6047,6 +6241,7 @@ const ViralClipStudio = ({
     captionPosition,
     captionScale,
     captionTextOverride,
+    captionSegments,
     previewSpeed,
     pacingLevel,
     creativeIntent,
@@ -7014,35 +7209,10 @@ const ViralClipStudio = ({
   ]);
 
   useEffect(() => {
-    const syncFullscreenState = () => {
-      if (document.fullscreenElement === phoneFrameRef.current) {
-        nativePreviewFullscreenRef.current = true;
-        setIsPreviewFullscreen(true);
-        return;
-      }
-      // A real fullscreen exit (Escape/browser chrome) also exits the CSS
-      // fallback. A blocked request emits no fullscreenchange event, so the
-      // fallback remains available with its own always-visible exit button.
-      if (!document.fullscreenElement && nativePreviewFullscreenRef.current) {
-        nativePreviewFullscreenRef.current = false;
-        setIsPreviewFullscreen(false);
-      }
-    };
-
-    document.addEventListener("fullscreenchange", syncFullscreenState);
-
-    return () => document.removeEventListener("fullscreenchange", syncFullscreenState);
-  }, []);
-
-  useEffect(() => {
     if (!isPreviewFullscreen) return undefined;
     const handleExpandedPreviewKey = event => {
       if (event.key !== "Escape") return;
       setIsPreviewFullscreen(false);
-      if (document.fullscreenElement) {
-        Promise.resolve(document.exitFullscreen?.()).catch(() => {});
-      }
-      nativePreviewFullscreenRef.current = false;
       setStudioActionMessage("Expanded preview closed. All studio controls are available again.");
     };
     window.addEventListener("keydown", handleExpandedPreviewKey);
@@ -9851,25 +10021,22 @@ const ViralClipStudio = ({
                         className="compact-timeline-playhead"
                         style={{ left: `${liveTimelinePlayheadLeft}%` }}
                       />
-                      {autoCaptions ? (
-                        captionPreviewState.chunks.map((chunk, index, chunks) => (
+                      {autoCaptions && liveTimelineCaptionBlocks.length ? (
+                        liveTimelineCaptionBlocks.map(chunk => (
                           <button
-                            key={chunk.id}
+                            key={chunk.blockId}
                             type="button"
                             className={`compact-caption-block ${
                               captionPreviewState.currentChunk?.id === chunk.id ? "is-current" : ""
                             }`}
                             style={{
-                              left: `${((captionTrackOffset + index * liveTimelineCaptionDuration) / liveTimelineDuration) * 100}%`,
-                              width: `${(liveTimelineCaptionDuration / liveTimelineDuration) * 100}%`,
+                              left: `${(chunk.outputStart / liveTimelineDuration) * 100}%`,
+                              width: `${(chunk.outputDuration / liveTimelineDuration) * 100}%`,
                             }}
                             data-testid="timeline-caption-block"
                             onClick={event => {
                               event.stopPropagation();
-                              seekLiveEditTimelineItem(
-                                captionTrackOffset + index * liveTimelineCaptionDuration,
-                                "captions"
-                              );
+                              seekLiveEditTimelineItem(chunk.outputStart, "captions");
                             }}
                           >
                             {chunk.text}
@@ -9884,7 +10051,7 @@ const ViralClipStudio = ({
                             selectCreativeTool("captions");
                           }}
                         >
-                          + Turn on live captions
+                          {autoCaptions ? "+ Generate or type captions" : "+ Turn on live captions"}
                         </button>
                       )}
                     </div>
@@ -11009,23 +11176,184 @@ const ViralClipStudio = ({
                     <input
                       type="checkbox"
                       checked={autoCaptions}
-                      onChange={event => setAutoCaptions(event.target.checked)}
+                      onChange={event => {
+                        const enabled = event.target.checked;
+                        setAutoCaptions(enabled);
+                        if (
+                          enabled &&
+                          !normalizedCaptionOverride &&
+                          !normalizedTimedCaptionSegments.length &&
+                          !captionPreviewSourceText
+                        ) {
+                          void generateLiveTranscript();
+                        }
+                      }}
                     />
                   </label>
 
+                  <div className="caption-transcript-actions">
+                    <button
+                      type="button"
+                      className="inspector-primary-action"
+                      data-testid="generate-live-transcript"
+                      disabled={captionGenerationStatus === "processing"}
+                      onClick={() => void generateLiveTranscript()}
+                    >
+                      {captionGenerationStatus === "processing"
+                        ? "Listening…"
+                        : captionSegments.length
+                          ? "Regenerate speech captions"
+                          : "Generate speech captions"}
+                    </button>
+                    <small>
+                      Auto-detects the spoken language and creates editable, timestamped lines. This
+                      does not render the video.
+                    </small>
+                    {captionGenerationMessage ? (
+                      <p
+                        className={`caption-generation-status is-${captionGenerationStatus}`}
+                        role="status"
+                      >
+                        {captionGenerationMessage}
+                      </p>
+                    ) : null}
+                  </div>
+
                   <label className="inspector-field">
-                    <span>Caption copy</span>
+                    <span>Quick manual caption</span>
                     <textarea
+                      aria-label="Caption copy"
                       value={captionTextOverride}
                       onChange={event => setCaptionTextOverride(event.target.value.slice(0, 240))}
                       rows={4}
                       maxLength={240}
-                      placeholder={captionPreviewSourceText || "Your spoken words appear here"}
+                      placeholder="Type a short caption, or generate the full spoken transcript above"
                     />
                     <small>
-                      Leave empty to use the clip transcript. Editing this updates the preview live.
+                      This short override updates the preview instantly. Leave it empty to use the
+                      full timestamped transcript.
                     </small>
                   </label>
+
+                  <div className="caption-segment-editor" data-testid="caption-segment-editor">
+                    <div className="caption-segment-heading">
+                      <span>Transcript lines</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const start = Math.max(0, Number(videoTime || 0));
+                          setCaptionSegments(previous => [
+                            ...previous,
+                            {
+                              id: createSecureId("caption-line"),
+                              start,
+                              end: start + 2,
+                              duration: 2,
+                              text: "New caption",
+                              words: ["New", "caption"],
+                            },
+                          ]);
+                          setCaptionTextOverride("");
+                          setAutoCaptions(true);
+                        }}
+                      >
+                        + Add line
+                      </button>
+                    </div>
+                    {captionSegments.length ? (
+                      <div className="caption-segment-list">
+                        {captionSegments.map((segment, index) => (
+                          <div className="caption-segment-row" key={segment.id}>
+                            <div className="caption-segment-time">
+                              <label>
+                                <span>In</span>
+                                <input
+                                  aria-label={`Caption ${index + 1} start`}
+                                  type="number"
+                                  min="0"
+                                  step="0.1"
+                                  value={Number(segment.start || 0).toFixed(1)}
+                                  onChange={event => {
+                                    const start = Math.max(0, Number(event.target.value || 0));
+                                    setCaptionSegments(previous =>
+                                      previous.map(item =>
+                                        item.id === segment.id
+                                          ? {
+                                              ...item,
+                                              start,
+                                              end: Math.max(start + 0.1, Number(item.end || 0)),
+                                            }
+                                          : item
+                                      )
+                                    );
+                                  }}
+                                />
+                              </label>
+                              <label>
+                                <span>Out</span>
+                                <input
+                                  aria-label={`Caption ${index + 1} end`}
+                                  type="number"
+                                  min="0.1"
+                                  step="0.1"
+                                  value={Number(segment.end || segment.start + 2).toFixed(1)}
+                                  onChange={event => {
+                                    const end = Math.max(
+                                      Number(segment.start || 0) + 0.1,
+                                      Number(event.target.value || 0)
+                                    );
+                                    setCaptionSegments(previous =>
+                                      previous.map(item =>
+                                        item.id === segment.id ? { ...item, end } : item
+                                      )
+                                    );
+                                  }}
+                                />
+                              </label>
+                            </div>
+                            <textarea
+                              aria-label={`Caption ${index + 1} text`}
+                              value={segment.text}
+                              rows={2}
+                              onChange={event => {
+                                const text = event.target.value;
+                                setCaptionSegments(previous =>
+                                  previous.map(item =>
+                                    item.id === segment.id
+                                      ? {
+                                          ...item,
+                                          text,
+                                          words: normalizePlainText(text)
+                                            .split(/\s+/)
+                                            .filter(Boolean),
+                                        }
+                                      : item
+                                  )
+                                );
+                              }}
+                            />
+                            <button
+                              type="button"
+                              className="caption-segment-delete"
+                              aria-label={`Delete caption ${index + 1}`}
+                              onClick={() =>
+                                setCaptionSegments(previous =>
+                                  previous.filter(item => item.id !== segment.id)
+                                )
+                              }
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="caption-segment-empty">
+                        No speech transcript yet. Generate it automatically or add a line at the
+                        playhead.
+                      </p>
+                    )}
+                  </div>
 
                   <div className="inspector-field">
                     <span>Creator style</span>
