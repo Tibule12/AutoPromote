@@ -31,8 +31,8 @@ RUN python -c "from faster_whisper import WhisperModel; WhisperModel('small', de
 # Copy source code
 COPY . .
 
-# Create tmp directory for video processing
-RUN mkdir -p /app/tmp
+# Create the shared tmp directory used by main_media_server.py
+RUN mkdir -p /tmp
 
 # Cloud Run uses PORT env var (default 8080)
 EXPOSE 8080
