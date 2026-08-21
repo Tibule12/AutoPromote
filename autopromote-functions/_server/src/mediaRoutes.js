@@ -1083,7 +1083,24 @@ router.get("/status/:jobId", async (req, res) => {
       approvalView.approvalStatus === "needs_review" || approvalView.approvalStatus === "rejected"
         ? approvalView.approvalStatus
         : data.status;
-    const sanitizedResult = sanitizeResultForApproval(data.result, approvalView);
+    const completedViralOutputUrl =
+      data.options?.renderViral === true && data.status === "completed"
+        ? data.outputUrl ||
+          data.output_url ||
+          data.result?.url ||
+          data.result?.output_url ||
+          data.result?.firebase_output_url ||
+          data.result?.downloadUrl ||
+          data.result?.download_url ||
+          null
+        : null;
+    const sanitizedResult = completedViralOutputUrl
+      ? {
+          ...(data.result || {}),
+          url: completedViralOutputUrl,
+          output_url: completedViralOutputUrl,
+        }
+      : sanitizeResultForApproval(data.result, approvalView);
 
     res.json({
       success: true,
@@ -1092,9 +1109,9 @@ router.get("/status/:jobId", async (req, res) => {
       progress: data.progress,
       detail: data.detail || data.result?.detail || null,
       result: sanitizedResult, // Node worker result, gated until approval
-      output_url: approvalView.output_url, // Python worker result, gated until approval
+      output_url: completedViralOutputUrl || approvalView.output_url, // Completed Viral Clip or gated Python worker result
       audio_url: data.audio_url,
-      outputUrl: approvalView.outputUrl, // Legacy Node worker result, gated until approval
+      outputUrl: completedViralOutputUrl || approvalView.outputUrl, // Completed Viral Clip or gated legacy result
       previewUrl: approvalView.previewUrl,
       heldOutputUrl: approvalView.heldOutputUrl,
       approvedOutputUrl: approvalView.approvedOutputUrl,
