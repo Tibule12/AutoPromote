@@ -27881,16 +27881,20 @@ class RenderViralRequest(BaseModel):
     template: str = ""  # preset template name from CLIP_TEMPLATES
 
 @app.post("/render-viral-clip")
-async def render_viral_clip(request: RenderViralRequest, background_tasks: BackgroundTasks):
+async def render_viral_clip(request: RenderViralRequest):
     """
-    Renders a clip with overlays (PiP, Text) and cuts it to specific time.
-    Supports basic Smart Crop (Center Focus) and Auto-Captions.
+    Render a clip with overlays (PiP, Text) and cut it to the requested time.
+
+    Async-mode progress is still persisted to Firestore for browser polling, but
+    the Cloud Run request deliberately remains open until the render reaches a
+    terminal state. FastAPI background tasks run after the HTTP response and can
+    lose CPU or be terminated on request-billed Cloud Run instances; that left
+    real renders permanently stuck after the 15% source-verification checkpoint.
     """
     if request.async_mode:
         job_id = request.job_id or str(uuid.uuid4())
-        logger.info(f"Queuing ASYNC viral render job {job_id}")
-        background_tasks.add_task(render_viral_clip_impl, request, job_id)
-        return {"status": "processing", "job_id": job_id, "mode": "async"}
+        logger.info(f"Running durable viral render request {job_id}")
+        return await render_viral_clip_impl(request, job_id)
 
     return await render_viral_clip_impl(request)
 

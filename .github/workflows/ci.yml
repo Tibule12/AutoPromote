@@ -59,6 +59,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Verify Viral Clip render lifecycle
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes ffmpeg
+          python -m unittest python_media_worker.test_viral_render_contract
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:

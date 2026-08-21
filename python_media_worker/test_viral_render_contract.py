@@ -45,6 +45,37 @@ class ViralRenderContractTests(unittest.TestCase):
             )
         )
 
+    def test_viral_render_endpoint_keeps_cloud_run_request_alive(self):
+        worker_source = Path(__file__).with_name("main_media_server.py").read_text(
+            encoding="utf-8"
+        )
+        worker_tree = ast.parse(worker_source)
+        endpoint = next(
+            node
+            for node in worker_tree.body
+            if isinstance(node, ast.AsyncFunctionDef)
+            and node.name == "render_viral_clip"
+        )
+        background_add_task_calls = [
+            node
+            for node in ast.walk(endpoint)
+            if isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr == "add_task"
+        ]
+        awaited_render_calls = [
+            node
+            for node in ast.walk(endpoint)
+            if isinstance(node, ast.Await)
+            and isinstance(node.value, ast.Call)
+            and isinstance(node.value.func, ast.Name)
+            and node.value.func.id == "render_viral_clip_impl"
+        ]
+
+        self.assertEqual(background_add_task_calls, [])
+        self.assertGreaterEqual(len(awaited_render_calls), 2)
+        self.assertTrue(any(len(node.value.args) >= 2 for node in awaited_render_calls))
+
     def test_viral_renderer_publishes_real_progress_checkpoints(self):
         worker_source = Path(__file__).with_name("main_media_server.py").read_text(
             encoding="utf-8"
