@@ -1,0 +1,38 @@
+name: Media Worker Viral Render Smoke
+
+on:
+  pull_request:
+    paths:
+      - python_media_worker/**
+      - .github/workflows/deploy-media-worker.yml
+      - .github/workflows/media-worker-render-smoke.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: media-worker-render-smoke-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  render-smoke:
+    name: Build image and complete a real Viral Clip render
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout requested revision
+        uses: actions/checkout@v4
+
+      - name: Install FFmpeg test dependency
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes ffmpeg
+
+      - name: Build immutable test image
+        working-directory: python_media_worker
+        run: docker build --tag "media-worker-render-smoke:${GITHUB_SHA}" .
+
+      - name: Render generated test media to completion
+        working-directory: python_media_worker
+        run: bash render_viral_smoke.sh "media-worker-render-smoke:${GITHUB_SHA}"
