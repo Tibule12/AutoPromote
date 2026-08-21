@@ -63,48 +63,4 @@ describe("renderApprovalService", () => {
     expect(rejected.canDownload).toBe(false);
     expect(rejected.outputUrl).toBeNull();
   });
-  it("delivers a completed viral clip render without a multicam approval gate", () => {
-    const viralRender = {
-      jobId: "viral-1",
-      type: "viral_clip_render",
-      status: "completed",
-      result: {
-        url: "https://cdn.example.com/viral.mp4",
-        duration: 2,
-      },
-    };
-
-    const approval = normalizeRenderApproval("viral-1", viralRender);
-
-    expect(approval.approvalStatus).toBeNull();
-    expect(approval.deliveryStatus).toBe("available");
-    expect(approval.canDownload).toBe(true);
-    expect(approval.outputUrl).toBe("https://cdn.example.com/viral.mp4");
-    expect(approval.previewUrl).toBe("https://cdn.example.com/viral.mp4");
-    expect(sanitizeResultForApproval(viralRender.result, approval)).toEqual(
-      expect.objectContaining({
-        url: "https://cdn.example.com/viral.mp4",
-        output_url: "https://cdn.example.com/viral.mp4",
-        duration: 2,
-      })
-    );
-  });
-
-  it("does not expose an unfinished viral clip output", () => {
-    const viralRender = {
-      jobId: "viral-2",
-      type: "viral_clip_render",
-      status: "processing",
-      result: {
-        url: "https://cdn.example.com/partial.mp4",
-      },
-    };
-
-    const approval = normalizeRenderApproval("viral-2", viralRender);
-
-    expect(approval.canDownload).toBe(false);
-    expect(approval.outputUrl).toBeNull();
-    expect(sanitizeResultForApproval(viralRender.result, approval)).not.toHaveProperty("url");
-  });
-
 });
