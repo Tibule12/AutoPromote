@@ -2368,6 +2368,7 @@ function MultiCamCombiner({
   const [multicamBrandWatermark, setMulticamBrandWatermark] = useState(false);
   const [multicamGenerateThumbnail, setMulticamGenerateThumbnail] = useState(false);
   const [cloudRenderMode, setCloudRenderMode] = useState("proof");
+  const [proofSourceMode, setProofSourceMode] = useState("small_proxy");
   const [proofRenderStartSeconds, setProofRenderStartSeconds] = useState(
     MULTICAM_PRODUCTION_PROOF_DEFAULT_START_SECONDS
   );
@@ -2498,6 +2499,7 @@ function MultiCamCombiner({
       setConfirmedDirectorChannelMapKey("");
       setApplyRecoveredChannelMapApproval(project.channelMapApproved === true);
       setCloudRenderMode("proof");
+      setProofSourceMode("existing_originals");
       setProofRenderStartSeconds(
         Math.min(MULTICAM_PRODUCTION_PROOF_DEFAULT_START_SECONDS, Math.max(0, duration - 60))
       );
@@ -2506,8 +2508,13 @@ function MultiCamCombiner({
       );
       setStatusMessage("Recovered the existing Firebase originals without uploading again.");
     } catch (error) {
-      setRecoverableProjectStatus(error.message || "Could not recover uploaded originals.");
-      toast.error(error.message || "Could not recover uploaded originals.");
+      const message = error.message || "Could not recover uploaded originals.";
+      setProofSourceMode("originals_once");
+      setRecoverableProjectStatus(message);
+      setStatusMessage(
+        `${message} Use “Originals: upload/reuse” to upload the missing files once after reviewing the transfer size.`
+      );
+      toast.error(message);
     }
   }, []);
 
@@ -6430,7 +6437,7 @@ function MultiCamCombiner({
         });
         if (!videoAudio?.file) {
           throw new Error(
-            `${label} camera audio could not be extracted in the browser. Please try Chrome/Edge or use a shorter camera file.`
+            `${label} camera audio could not be extracted in this browser. Choose “Originals: upload/reuse” for a reliable one-time upload, or use Chrome/Edge for small proof proxies.`
           );
         }
         await writeCachedSyncAudioFile(syncCacheKey, videoAudio.file, {
@@ -8253,7 +8260,9 @@ function MultiCamCombiner({
     // render-window proxy path for every proof camera. Mixing absolute-timeline
     // originals with zero-based proxies would make sync semantics ambiguous.
     const usePlannedProofProxies =
-      cloudRenderMode === "proof" && plannedProxyItems.some(item => !item.hasMatchingRenderProxy);
+      cloudRenderMode === "proof" &&
+      proofSourceMode === "small_proxy" &&
+      plannedProxyItems.some(item => !item.hasMatchingRenderProxy);
     const estimatedProofProxyBytesPerCamera = Math.ceil(
       (plannedRenderWindowDuration *
         (UPLOAD_COMPRESSION_TARGET_BPS + UPLOAD_COMPRESSION_AUDIO_BPS)) /
@@ -9295,7 +9304,9 @@ function MultiCamCombiner({
           </strong>
           <span>
             {cloudRenderMode === "proof"
-              ? "Uses the existing Firebase originals and the real production renderer. It does not upload the cameras again."
+              ? proofSourceMode === "small_proxy"
+                ? "Reuses retained Firebase originals when available. If none exist, it creates small 60-second proof proxies; Firefox may require the originals mode when camera audio cannot be read."
+                : "Reuses retained originals and uploads only missing originals once. The proof still renders only the selected 60 seconds; uploads are resumable and retained for 72 hours."
               : `Originals upload once, then the full timeline is submitted once. The server resumes internally in ${formatDurationLabel(MULTICAM_RENDER_CHECKPOINT_SECONDS)} checkpoints.`}
           </span>
         </div>
@@ -9323,6 +9334,40 @@ function MultiCamCombiner({
             Reuse my uploaded originals
           </button>
         </div>
+        {cloudRenderMode === "proof" ? (
+          <div className="nle-cloud-render-window-actions" aria-label="Proof source upload mode">
+            <button
+              type="button"
+              className={`nle-mini-btn ${proofSourceMode === "small_proxy" ? "is-active" : ""}`}
+              onClick={() => {
+                setProofSourceMode("small_proxy");
+                setRecoverableProjectStatus("");
+                setStatusMessage(
+                  "Small proof proxies selected. Firefox must be able to read each camera's scratch audio."
+                );
+              }}
+              disabled={isExporting || serverExportPending}
+            >
+              Small 60s proxies
+            </button>
+            <button
+              type="button"
+              className={`nle-mini-btn ${proofSourceMode !== "small_proxy" ? "is-active" : ""}`}
+              onClick={() => {
+                setProofSourceMode("originals_once");
+                setRecoverableProjectStatus(
+                  "Missing originals will upload once after you review and confirm the exact transfer size."
+                );
+                setStatusMessage(
+                  "Reliable originals mode selected. Nothing uploads until you review and confirm the transfer size."
+                );
+              }}
+              disabled={isExporting || serverExportPending}
+            >
+              Originals: upload/reuse
+            </button>
+          </div>
+        ) : null}
         {recoverableProjectStatus ? <span>{recoverableProjectStatus}</span> : null}
         <div className="nle-cloud-render-window-range">
           <div className="nle-cloud-render-window-times">
@@ -9335,7 +9380,9 @@ function MultiCamCombiner({
               {cloudRenderWindow.exceedsServerCap
                 ? "Shorten the project before server export"
                 : cloudRenderMode === "proof"
-                  ? `${MULTICAM_PRODUCTION_PROOF_CREDITS} credits · no re-upload`
+                  ? proofSourceMode === "small_proxy"
+                    ? `${MULTICAM_PRODUCTION_PROOF_CREDITS} credits · small proxies if needed`
+                    : `${MULTICAM_PRODUCTION_PROOF_CREDITS} credits · upload missing originals once`
                   : `${checkpointSummary.expectedCount} internal checkpoints`}
             </strong>
           </div>
