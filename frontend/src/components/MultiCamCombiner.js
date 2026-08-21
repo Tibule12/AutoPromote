@@ -179,6 +179,56 @@ export const getRenderOutputUrl = render =>
   render?.result?.outputUrl ||
   "";
 
+const FIREBASE_RENDER_STORAGE_PATH_PATTERN =
+  /^processed\/(?:multicam_|thumbnails\/multicam_|manifests\/multicam_)/i;
+
+export const isFirebaseRenderStoragePath = value =>
+  FIREBASE_RENDER_STORAGE_PATH_PATTERN.test(String(value || "").trim());
+
+const resolveFirebaseRenderUrl = async value => {
+  const candidate = String(value || "").trim();
+  if (!isFirebaseRenderStoragePath(candidate)) return candidate;
+
+  try {
+    return await getDownloadURL(ref(getStorage(), candidate));
+  } catch (error) {
+    console.warn(`Could not resolve Firebase render path ${candidate}:`, error);
+    return "";
+  }
+};
+
+const resolveRenderDeliveryUrls = async render => {
+  if (!render || typeof render !== "object") return render;
+  const outputCandidate = getRenderOutputUrl(render);
+  const previewCandidate = render.previewUrl || render.heldOutputUrl || outputCandidate;
+  const thumbnailCandidate = render.thumbnailUrl || render.thumbnail_url || "";
+  const [outputUrl, previewUrl, thumbnailUrl] = await Promise.all([
+    resolveFirebaseRenderUrl(outputCandidate),
+    resolveFirebaseRenderUrl(previewCandidate),
+    resolveFirebaseRenderUrl(thumbnailCandidate),
+  ]);
+
+  return {
+    ...render,
+    outputUrl,
+    output_url: outputUrl,
+    previewUrl,
+    heldOutputUrl:
+      render.heldOutputUrl && previewCandidate === render.heldOutputUrl
+        ? previewUrl
+        : render.heldOutputUrl,
+    thumbnailUrl: thumbnailUrl || null,
+    thumbnail_url: thumbnailUrl || null,
+    result:
+      render.result && typeof render.result === "object"
+        ? {
+            ...render.result,
+            ...(outputUrl ? { url: outputUrl, output_url: outputUrl } : {}),
+          }
+        : render.result,
+  };
+};
+
 export const getRenderManifestLocation = render =>
   render?.manifestUrl ||
   render?.manifest_url ||
@@ -2196,7 +2246,10 @@ function MultiCamCombiner({
       if (!response.ok || !data.success) {
         throw new Error(data.message || "Could not load saved masters");
       }
-      setRecentRenders(Array.isArray(data.renders) ? data.renders : []);
+      const resolvedRenders = await Promise.all(
+        (Array.isArray(data.renders) ? data.renders : []).map(resolveRenderDeliveryUrls)
+      );
+      setRecentRenders(resolvedRenders);
       setRecentRendersStatus("");
     } catch (error) {
       console.warn("Could not load Cam Combiner renders", error);
@@ -2343,11 +2396,12 @@ function MultiCamCombiner({
           const statusData = await statusRes.json().catch(() => ({}));
           if (!statusRes.ok || !statusData.success) return;
 
+          const resolvedStatusData = await resolveRenderDeliveryUrls(statusData);
           const normalizedStatus = {
-            ...statusData,
+            ...resolvedStatusData,
             renderSpecVersion:
-              statusData.renderSpecVersion ||
-              statusData.render_spec_version ||
+              resolvedStatusData.renderSpecVersion ||
+              resolvedStatusData.render_spec_version ||
               fallbackRenderSpecVersion,
           };
           const checkpoint = getRenderCheckpointSummary(normalizedStatus);
@@ -2370,15 +2424,15 @@ function MultiCamCombiner({
           );
 
           if (
-            statusData.status === "needs_review" ||
-            statusData.approvalStatus === "needs_review"
+            resolvedStatusData.status === "needs_review" ||
+            resolvedStatusData.approvalStatus === "needs_review"
           ) {
             stopPolling({ clearPersisted: true });
             setExportProgress(1);
             setPendingRenderReview({
-              ...statusData,
+              ...resolvedStatusData,
               jobId: renderJobId,
-              previewUrl: statusData.previewUrl || statusData.heldOutputUrl,
+              previewUrl: resolvedStatusData.previewUrl || resolvedStatusData.heldOutputUrl,
               duration:
                 statusData.result?.duration || statusData.totalDurationSeconds || fallbackDuration,
               manifestUrl: manifestLocation,
@@ -2391,7 +2445,7 @@ function MultiCamCombiner({
             return;
           }
 
-          if (statusData.status === "completed") {
+          if (resolvedStatusData.status === "completed") {
             const completedUrl = getRenderOutputUrl(normalizedStatus);
             const specVersion = Number(normalizedStatus.renderSpecVersion || 0);
             if (!isAsyncRenderDeliveryReady(normalizedStatus)) {
@@ -2437,12 +2491,15 @@ function MultiCamCombiner({
             return;
           }
 
-          if (statusData.status === "failed" || statusData.status === "proof_failed") {
+          if (
+            resolvedStatusData.status === "failed" ||
+            resolvedStatusData.status === "proof_failed"
+          ) {
             stopPolling({ clearPersisted: true });
             const failureMessage =
-              statusData.error ||
-              statusData.workerError ||
-              statusData.detail ||
+              resolvedStatusData.error ||
+              resolvedStatusData.workerError ||
+              resolvedStatusData.detail ||
               "Server render failed.";
             setStatusMessage(failureMessage);
             toast.error(failureMessage);
@@ -5568,6 +5625,8 @@ function MultiCamCombiner({
       let stopRequested = false;
       let progressWatchdogId = null;
       let finalizingTimeoutId = null;
+      let drawFrameId = null;
+      let proxyStream = null;
       const cleanup = () => {
         if (progressWatchdogId) {
           window.clearInterval(progressWatchdogId);
@@ -5582,6 +5641,12 @@ function MultiCamCombiner({
         } catch (_) {
           // Ignore cleanup failures from detached media elements.
         }
+        if (drawFrameId) {
+          window.cancelAnimationFrame(drawFrameId);
+          drawFrameId = null;
+        }
+        proxyStream?.getTracks().forEach(track => track.stop());
+        proxyStream = null;
         if (!resolved) {
           resolved = true;
           URL.revokeObjectURL(objectUrl);
@@ -5632,6 +5697,7 @@ function MultiCamCombiner({
             ...canvasStream.getVideoTracks(),
             ...((mediaStream && mediaStream.getAudioTracks()) || []),
           ]);
+          proxyStream = stream;
           if (!stream.getVideoTracks().length) {
             fail();
             return;
@@ -5644,12 +5710,17 @@ function MultiCamCombiner({
           });
 
           const chunks = [];
+          let finalChunkRequested = false;
           recorder.ondataavailable = e => {
             if (e.data.size > 0) chunks.push(e.data);
           };
 
-          recorder.onstop = () => {
+          const finalizeRecording = () => {
             if (resolved) return;
+            if (!chunks.length) {
+              fail();
+              return;
+            }
             const blob = new Blob(chunks, { type: mimeType });
             const compressedFile = new File([blob], file.name.replace(/\.[^.]+$/, ".webm"), {
               type: mimeType,
@@ -5666,11 +5737,12 @@ function MultiCamCombiner({
             });
           };
 
+          recorder.onstop = finalizeRecording;
+
           recorder.onerror = () => {
             fail();
           };
 
-          let drawFrameId = null;
           const drawFrame = () => {
             if (resolved || stopRequested) return;
             try {
@@ -5691,14 +5763,40 @@ function MultiCamCombiner({
               window.cancelAnimationFrame(drawFrameId);
               drawFrameId = null;
             }
+            // Firefox can leave MediaRecorder finalization pending when a captured
+            // media element is paused before stop(). Flush first, stop the recorder,
+            // and retain the already-complete timeslice chunks as a safe fallback.
+            try {
+              if (recorder.state === "recording") {
+                recorder.requestData();
+                finalChunkRequested = true;
+              }
+            } catch (_) {
+              // stop() still finalizes all chunks on browsers without requestData.
+            }
+            try {
+              recorder.stop();
+            } catch (_) {
+              if (chunks.length) finalizeRecording();
+              else fail();
+              return;
+            }
             video.pause();
-            recorder.stop();
             finalizingTimeoutId = window.setTimeout(() => {
               if (!resolved) {
-                console.warn("Browser video proxy finalization timed out.");
-                fail();
+                if (chunks.length) {
+                  console.warn(
+                    "Browser video proxy stop event timed out; using flushed recording chunks."
+                  );
+                  finalizeRecording();
+                } else {
+                  console.warn(
+                    `Browser video proxy finalization timed out${finalChunkRequested ? " after requesting the final chunk" : ""}.`
+                  );
+                  fail();
+                }
               }
-            }, 120000);
+            }, 15000);
           };
 
           recorder.start(1000);
@@ -8751,7 +8849,8 @@ function MultiCamCombiner({
         throw new Error(detailText);
       }
 
-      const data = await response.json();
+      const responseData = await response.json();
+      const data = await resolveRenderDeliveryUrls(responseData);
       if (!data.success && !getRenderOutputUrl(data)) {
         throw new Error(data.error || "Server render did not return a result.");
       }

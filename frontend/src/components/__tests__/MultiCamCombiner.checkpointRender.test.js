@@ -5,6 +5,7 @@ import {
   getMulticamRenderBillingUnits,
   getRenderCheckpointSummary,
   getRenderManifestLocation,
+  isFirebaseRenderStoragePath,
   isAsyncRenderDeliveryReady,
 } from "../MultiCamCombiner";
 
@@ -136,5 +137,13 @@ describe("MultiCamCombiner checkpoint render helpers", () => {
         outputUrl: "https://cdn.example.com/legacy.mp4",
       })
     ).toBe(true);
+  });
+
+  it("recognizes legacy Firebase render paths that must not be loaded as site-relative media", () => {
+    expect(isFirebaseRenderStoragePath("processed/multicam_job-123.mp4")).toBe(true);
+    expect(isFirebaseRenderStoragePath("processed/thumbnails/multicam_job-123.jpg")).toBe(true);
+    expect(isFirebaseRenderStoragePath("processed/manifests/multicam_job-123.json")).toBe(true);
+    expect(isFirebaseRenderStoragePath("https://cdn.example.com/multicam_job-123.mp4")).toBe(false);
+    expect(isFirebaseRenderStoragePath("/local-output/multicam_job-123.mp4")).toBe(false);
   });
 });
