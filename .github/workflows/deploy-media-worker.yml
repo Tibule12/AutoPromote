@@ -104,7 +104,7 @@ jobs:
           docker run --detach --rm \
             --name media-worker-render-smoke \
             --publish 18080:8080 \
-            --volume /tmp/viral-render-smoke:/smoke:ro \
+            --volume /tmp/viral-render-smoke:/app/tmp/smoke:ro \
             --env NODE_ENV=development \
             --env ENABLE_LOCAL_MEDIA_OUTPUT_FALLBACK=true \
             --env FIREBASE_STORAGE_BUCKET=autopromote-cc6d3.firebasestorage.app \
@@ -126,7 +126,7 @@ jobs:
           curl --fail --silent --show-error --max-time 300 \
             --header "Content-Type: application/json" \
             --data '{
-              "video_url": "/smoke/source.mp4",
+              "video_url": "/app/tmp/smoke/source.mp4",
               "start_time": 0,
               "end_time": 2,
               "auto_captions": false,
