@@ -127,4 +127,52 @@ describe("mediaRoutes render approval", () => {
     expect(statusResponse.body.canDownload).toBe(false);
     expect(statusResponse.body.output_url).toBeNull();
   });
+  it("returns the completed Viral Clip output URL without changing Cam Combiner approval", async () => {
+    docs.set("viral-job", {
+      userId: "user-1",
+      status: "completed",
+      progress: 100,
+      options: { renderViral: true },
+      result: {
+        url: "https://cdn.example.com/viral.mp4",
+        duration: 2,
+      },
+    });
+
+    const response = await request(buildApp()).get("/api/media/status/viral-job");
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body.status).toBe("completed");
+    expect(response.body.approvalStatus).toBeNull();
+    expect(response.body.output_url).toBe("https://cdn.example.com/viral.mp4");
+    expect(response.body.outputUrl).toBe("https://cdn.example.com/viral.mp4");
+    expect(response.body.result).toEqual(
+      expect.objectContaining({
+        url: "https://cdn.example.com/viral.mp4",
+        output_url: "https://cdn.example.com/viral.mp4",
+        duration: 2,
+      })
+    );
+  });
+
+  it("keeps unfinished Viral Clip output URLs hidden", async () => {
+    docs.set("viral-processing", {
+      userId: "user-1",
+      status: "processing",
+      progress: 75,
+      options: { renderViral: true },
+      result: {
+        url: "https://cdn.example.com/partial.mp4",
+      },
+    });
+
+    const response = await request(buildApp()).get("/api/media/status/viral-processing");
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body.status).toBe("processing");
+    expect(response.body.output_url).toBeNull();
+    expect(response.body.outputUrl).toBeNull();
+    expect(response.body.result.url).toBeUndefined();
+  });
+
 });
