@@ -28,7 +28,17 @@ export const fetchWithRenderTimeout = async (
   if (controllerRef) controllerRef.current = controller;
 
   try {
-    return await fetch(url, { ...options, signal: controller.signal });
+    const response = await fetch(url, { ...options, signal: controller.signal });
+    if (
+      !response ||
+      typeof response.ok !== "boolean" ||
+      typeof response.status !== "number"
+    ) {
+      const emptyResponseError = new Error("The render service returned no HTTP response.");
+      emptyResponseError.code = "RENDER_EMPTY_RESPONSE";
+      throw emptyResponseError;
+    }
+    return response;
   } catch (error) {
     if (timedOut) {
       const timeoutError = new Error(
