@@ -1,8 +1,10 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import VideoEditor from "../components/VideoEditor";
 import { SafeVideo } from "../components/SafeMedia";
 import { useSubscription } from "../hooks/useSubscription";
 import { sanitizeUrl } from "../utils/security";
+import { uploadSourceFileViaBackend } from "../utils/sourceUpload";
+import { getAuth } from "firebase/auth";
 
 const resolveSourceUrl = source => {
   if (typeof source === "string") return sanitizeUrl(source);
@@ -66,39 +68,125 @@ function ViralClipStudioPanel({
   onUpgrade,
 }) {
   const { canUseFeature } = useSubscription();
-  const [sourceFile, setSourceFile] = useState(initialFile);
+  const uploadRequestRef = useRef(0);
+  const [sourceFile, setSourceFile] = useState(null);
   const [selectedClip, setSelectedClip] = useState(initialClip);
   const [sourceDuration, setSourceDuration] = useState(0);
-  const [localPreviewUrl, setLocalPreviewUrl] = useState("");
-  const [studioSource, setStudioSource] = useState(() =>
-    autoOpen && initialFile ? createStudioSource(initialFile, initialClip, 0) : null
-  );
+  const [sourceState, setSourceState] = useState("idle");
+  const [sourceError, setSourceError] = useState("");
+  const [sourceUploadProgress, setSourceUploadProgress] = useState(0);
+  const [pendingSourceName, setPendingSourceName] = useState("");
+  const [studioSource, setStudioSource] = useState(null);
 
-  useEffect(() => {
-    setSourceFile(initialFile || null);
-    setSelectedClip(initialClip || null);
+  const prepareSource = useCallback(async incomingSource => {
+    const requestId = uploadRequestRef.current + 1;
+    uploadRequestRef.current = requestId;
+    setStudioSource(null);
     setSourceDuration(0);
-    setStudioSource(
-      autoOpen && initialFile ? createStudioSource(initialFile, initialClip, 0) : null
-    );
-  }, [autoOpen, initialClip, initialFile]);
+    setSourceError("");
+    setSourceUploadProgress(0);
+    setSourceFile(null);
 
-  useEffect(() => {
-    if (!(sourceFile instanceof Blob)) {
-      setLocalPreviewUrl("");
-      return undefined;
+    if (!incomingSource) {
+      setPendingSourceName("");
+      setSourceState("idle");
+      return;
     }
 
-    const objectUrl = URL.createObjectURL(sourceFile);
-    setLocalPreviewUrl(objectUrl);
-    return () => URL.revokeObjectURL(objectUrl);
-  }, [sourceFile]);
+    const incomingName =
+      incomingSource?.name || incomingSource?.fileName || "viral-studio-source.mp4";
+    setPendingSourceName(incomingName);
 
-  const previewUrl = localPreviewUrl || resolveSourceUrl(sourceFile);
+    if (!(incomingSource instanceof Blob)) {
+      const remoteUrl = resolveSourceUrl(incomingSource);
+      if (!remoteUrl) {
+        setSourceState("failed");
+        setSourceError("The selected source has no usable video URL.");
+        return;
+      }
+      setSourceFile(incomingSource);
+      setSourceState("validating");
+      return;
+    }
+
+    setSourceState("uploading");
+    try {
+      const user = getAuth().currentUser;
+      if (!user) throw new Error("Please sign in again before uploading.");
+      const token = await user.getIdToken();
+      const uploadResult = await uploadSourceFileViaBackend({
+        file: incomingSource,
+        token,
+        mediaType: "video",
+        fileName: incomingName,
+        onProgress: (transferred, total) => {
+          if (uploadRequestRef.current !== requestId) return;
+          const progress = total > 0 ? Math.round((transferred / total) * 100) : 0;
+          setSourceUploadProgress(Math.max(0, Math.min(100, progress)));
+        },
+      });
+
+      if (uploadRequestRef.current !== requestId) return;
+      if (!uploadResult?.url) {
+        throw new Error("The upload completed without a usable video URL.");
+      }
+
+      setSourceFile({
+        name: incomingName,
+        fileName: incomingName,
+        type: incomingSource.type || "video/mp4",
+        size: incomingSource.size || uploadResult.size || 0,
+        url: uploadResult.url,
+        storagePath: uploadResult.storagePath || null,
+        isRemote: true,
+      });
+      setSourceUploadProgress(100);
+      setSourceState("validating");
+    } catch (error) {
+      if (uploadRequestRef.current !== requestId) return;
+      setSourceState("failed");
+      setSourceError(error?.message || "The source video upload failed.");
+    }
+  }, []);
+
+  useEffect(() => {
+    setSelectedClip(initialClip || null);
+    void prepareSource(initialFile || null);
+  }, [initialClip, initialFile, prepareSource]);
+
+  useEffect(() => {
+    if (!autoOpen || sourceState !== "ready" || !sourceFile) return;
+    setStudioSource(createStudioSource(sourceFile, selectedClip, sourceDuration));
+  }, [autoOpen, selectedClip, sourceDuration, sourceFile, sourceState]);
+
+  const previewUrl = resolveSourceUrl(sourceFile);
   const sourceName = useMemo(
-    () => sourceFile?.name || sourceFile?.fileName || "No source video selected",
-    [sourceFile]
+    () =>
+      sourceFile?.name ||
+      sourceFile?.fileName ||
+      pendingSourceName ||
+      "No source video selected",
+    [pendingSourceName, sourceFile]
   );
+  const sourceStateMessage = useMemo(() => {
+    if (sourceState === "uploading") {
+      return `Uploading source video… ${sourceUploadProgress}%`;
+    }
+    if (sourceState === "validating") {
+      return "Validating the uploaded video preview…";
+    }
+    if (sourceState === "failed") {
+      return sourceError || "The selected video could not be loaded.";
+    }
+    if (sourceState === "ready") {
+      return selectedClip
+        ? `${Number(selectedClip.start || 0).toFixed(1)}s–${Number(
+            selectedClip.end || 0
+          ).toFixed(1)}s detected moment selected`
+        : "Full source uploaded and ready for manual editing";
+    }
+    return "Select a source to begin";
+  }, [selectedClip, sourceError, sourceState, sourceUploadProgress]);
 
   if (studioSource) {
     return (
@@ -135,12 +223,13 @@ function ViralClipStudioPanel({
               <input
                 type="file"
                 accept="video/*"
+                disabled={sourceState === "uploading"}
                 onChange={event => {
                   const [file] = Array.from(event.target.files || []);
+                  event.target.value = "";
                   if (!file) return;
-                  setSourceFile(file);
                   setSelectedClip(null);
-                  setSourceDuration(0);
+                  void prepareSource(file);
                 }}
               />
             </label>
@@ -152,13 +241,40 @@ function ViralClipStudioPanel({
                 src={previewUrl}
                 controls
                 preload="metadata"
-                onLoadedMetadata={event => setSourceDuration(event.currentTarget.duration || 0)}
+                onLoadedMetadata={event => {
+                  const duration = Number(event.currentTarget.duration || 0);
+                  if (!Number.isFinite(duration) || duration <= 0) {
+                    setSourceState("failed");
+                    setSourceError("The uploaded file has no readable video duration.");
+                    return;
+                  }
+                  setSourceDuration(duration);
+                  setSourceError("");
+                  setSourceState("ready");
+                }}
+                onError={() => {
+                  setSourceState("failed");
+                  setSourceError(
+                    "The uploaded video could not be played. Choose a valid MP4 or MOV file and retry."
+                  );
+                }}
               />
             ) : (
               <div className="viral-source-empty">
-                <span>▶</span>
-                <strong>Open the full timeline editor</strong>
-                <small>Use a detected moment or start manually from a finished video</small>
+                <span>{sourceState === "uploading" ? "↑" : "▶"}</span>
+                <strong>
+                  {sourceState === "uploading"
+                    ? "Uploading the real source video"
+                    : sourceState === "failed"
+                      ? "Video source not loaded"
+                      : "Open the full timeline editor"}
+                </strong>
+                <small>
+                  {sourceState === "uploading"
+                    ? `Keep this page open · ${sourceUploadProgress}%`
+                    : sourceError ||
+                      "Use a detected moment or start manually from a finished video"}
+                </small>
               </div>
             )}
           </div>
@@ -167,12 +283,8 @@ function ViralClipStudioPanel({
             <span aria-hidden="true">▣</span>
             <div>
               <strong>{sourceName}</strong>
-              <small>
-                {selectedClip
-                  ? `${Number(selectedClip.start || 0).toFixed(1)}s–${Number(selectedClip.end || 0).toFixed(1)}s detected moment selected`
-                  : sourceFile
-                    ? "Full source ready for manual editing"
-                    : "Select a source to begin"}
+              <small role={sourceState === "failed" ? "alert" : "status"}>
+                {sourceStateMessage}
               </small>
             </div>
           </div>
@@ -197,7 +309,7 @@ function ViralClipStudioPanel({
           <button
             type="button"
             className="check-quality viral-analyse-button"
-            disabled={!sourceFile}
+            disabled={!sourceFile || sourceState !== "ready"}
             onClick={() => {
               if (!canUseFeature("viralClipStudio")) {
                 onUpgrade?.();
@@ -206,7 +318,11 @@ function ViralClipStudioPanel({
               setStudioSource(createStudioSource(sourceFile, selectedClip, sourceDuration));
             }}
           >
-            Open Clip Studio
+            {sourceState === "uploading"
+              ? `Uploading source ${sourceUploadProgress}%`
+              : sourceState === "validating"
+                ? "Checking video preview…"
+                : "Open Clip Studio"}
           </button>
           <small className="viral-settings-note">
             Open the full timeline editor and keep the existing render pipeline.

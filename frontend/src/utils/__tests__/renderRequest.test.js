@@ -29,6 +29,17 @@ describe("render request safety", () => {
     await expect(request).rejects.toMatchObject({ code: "RENDER_REQUEST_TIMEOUT" });
   });
 
+  test("rejects an empty render response before callers read status", async () => {
+    global.fetch = jest.fn().mockResolvedValue(null);
+
+    await expect(
+      fetchWithRenderTimeout("https://example.com/render", {}, { timeoutMs: 1000 })
+    ).rejects.toMatchObject({
+      code: "RENDER_EMPTY_RESPONSE",
+      message: "The render service returned no HTTP response.",
+    });
+  });
+
   test("lets the active render request be cancelled", async () => {
     const controllerRef = { current: null };
     global.fetch = jest.fn((_url, options) => {
