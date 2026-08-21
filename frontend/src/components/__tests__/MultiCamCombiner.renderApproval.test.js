@@ -1,4 +1,5 @@
 import {
+  buildExportEditorHandoff,
   canDownloadApprovedRender,
   getMulticamRenderButtonLabel,
   getRecoveredPodcastOutputAspectRatio,
@@ -31,6 +32,47 @@ jest.mock("../../hooks/useSubscription", () => ({
 jest.mock("../../hooks/useCinematicEffects", () => jest.fn(() => ({})));
 
 describe("MultiCamCombiner render approval helpers", () => {
+  it("hands a server master to the editor as its real cloud URL", () => {
+    const masterUrl = "https://storage.example.com/multicam-master.mp4?token=abc";
+
+    expect(
+      buildExportEditorHandoff({
+        file: { name: "multicam-master-123.mp4" },
+        url: masterUrl,
+        duration: 60,
+        isServerRender: true,
+      })
+    ).toEqual({
+      file: masterUrl,
+      url: masterUrl,
+      name: "multicam-master-123.mp4",
+      type: "video/mp4",
+      isRemote: true,
+      duration: 60,
+      workflowAction: "refine-full-video",
+    });
+  });
+
+  it("keeps a browser-rendered master as a real local file", () => {
+    const localFile = new File(["video"], "browser-master.webm", { type: "video/webm" });
+
+    expect(
+      buildExportEditorHandoff({
+        file: localFile,
+        url: "blob:browser-master",
+        duration: 30,
+      })
+    ).toEqual({
+      file: localFile,
+      url: "blob:browser-master",
+      name: "browser-master.webm",
+      type: "video/webm",
+      isRemote: false,
+      duration: 30,
+      workflowAction: "refine-full-video",
+    });
+  });
+
   it("accepts cloud media URLs and rejects filesystem paths", () => {
     expect(
       isRecoverableMediaUrl(
@@ -56,9 +98,9 @@ describe("MultiCamCombiner render approval helpers", () => {
         needsChannelConfirmation: false,
       })
     ).toBe("Render 60-second Proof (15 cr)");
-    expect(
-      getMulticamRenderButtonLabel({ mode: "full", isSyncing: false, isPending: false })
-    ).toBe("Render Full Episode MP4");
+    expect(getMulticamRenderButtonLabel({ mode: "full", isSyncing: false, isPending: false })).toBe(
+      "Render Full Episode MP4"
+    );
     expect(
       getMulticamRenderButtonLabel({
         mode: "proof",

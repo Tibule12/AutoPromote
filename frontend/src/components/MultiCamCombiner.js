@@ -549,6 +549,27 @@ export const getReusableCloudOriginalUrl = (source, cachedOriginal = null) =>
     String(value || "").startsWith("http")
   ) || "";
 
+export const buildExportEditorHandoff = exportResult => {
+  if (!exportResult) return null;
+  const localFile =
+    exportResult.file instanceof File || exportResult.file instanceof Blob
+      ? exportResult.file
+      : null;
+  const remoteUrl = String(exportResult.url || "").startsWith("http") ? exportResult.url : "";
+  const file = localFile || remoteUrl;
+  if (!file) return null;
+
+  return {
+    file,
+    url: remoteUrl || exportResult.url || "",
+    name: localFile?.name || exportResult.file?.name || "multicam-master.mp4",
+    type: localFile?.type || "video/mp4",
+    isRemote: !localFile && Boolean(remoteUrl),
+    duration: exportResult.duration,
+    workflowAction: "refine-full-video",
+  };
+};
+
 const captureMediaElementStream = mediaElement => {
   const capture = mediaElement?.captureStream || mediaElement?.mozCaptureStream;
   if (typeof capture !== "function") return null;
@@ -2650,8 +2671,8 @@ function MultiCamCombiner({
             const completedPerformance = getRenderPerformanceReceipt(statusData);
             setStatusMessage(
               completedPerformance.workerSeconds
-                ? `Multi-camera render complete in ${formatDurationLabel(completedPerformance.workerSeconds)} worker time. Download ready.`
-                : "Multi-camera render and manifest complete. Download ready."
+                ? `Multi-camera render complete in ${formatDurationLabel(completedPerformance.workerSeconds)} worker time. Master ready to view.`
+                : "Multi-camera render and manifest complete. Master ready to view."
             );
             loadRecentRenders();
             setServerExportPending(false);
@@ -7703,11 +7724,13 @@ function MultiCamCombiner({
 
   const handleUseExportInEditor = () => {
     if (!exportResult || !onComplete) return;
-    onComplete({
-      file: exportResult.file,
-      duration: exportResult.duration,
-      workflowAction: "refine-full-video",
-    });
+    const handoff = buildExportEditorHandoff(exportResult);
+    if (!handoff) {
+      setStatusMessage("This master has no usable local file or cloud URL.");
+      toast.error("Could not open this master in the editor.");
+      return;
+    }
+    onComplete(handoff);
   };
 
   const handleLoadFileForCamera = (cameraId, file) => {
@@ -8136,7 +8159,7 @@ function MultiCamCombiner({
         file: exportFile,
         duration: timelineDuration,
       });
-      setStatusMessage("Browser render complete. Download the master or continue into the editor.");
+      setStatusMessage("Browser render complete. View the master or continue into the editor.");
     } catch (error) {
       console.error(error);
       setStatusMessage(error.message || "Browser export failed.");
@@ -9148,7 +9171,7 @@ function MultiCamCombiner({
           performanceTiming: data.performanceTiming || data.result?.performance_timing,
           executionTelemetry: data.executionTelemetry,
         });
-        setStatusMessage("Multi-camera render and manifest complete. Download ready.");
+        setStatusMessage("Multi-camera render and manifest complete. Master ready to view.");
       } else {
         const renderJobId = data.jobId;
         if (!renderJobId) {
@@ -9503,7 +9526,7 @@ function MultiCamCombiner({
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Download
+                  View
                 </a>
                 <button
                   type="button"
@@ -9531,7 +9554,7 @@ function MultiCamCombiner({
       <div className="nle-render-review-card">
         <div>
           <strong>Cam Combiner master ready</strong>
-          <span>This paid render is the final result. Preview, download, or clear it.</span>
+          <span>This paid render is the final result. Preview, open, or clear it.</span>
         </div>
         {qaWarnings.length ? (
           <ul>
@@ -9558,7 +9581,7 @@ function MultiCamCombiner({
               target="_blank"
               rel="noopener noreferrer"
             >
-              Download Master
+              View Master
             </a>
           ) : null}
           <button
@@ -10221,18 +10244,17 @@ function MultiCamCombiner({
                   <strong>Multicam master ready</strong>
                   <span>
                     {exportResult.isServerRender
-                      ? "Server render is available as MP4. Download it or continue into the editor."
-                      : "The browser render is available as WebM. Download it or continue into the editor."}
+                      ? "Server render is available as MP4. View it or continue into the editor."
+                      : "The browser render is available as WebM. View it or continue into the editor."}
                   </span>
                   <div className="nle-export-actions">
                     <a
                       className="nle-btn secondary"
                       href={exportResult.url}
-                      download={exportResult.file?.name || exportResult.file}
-                      target={exportResult.isServerRender ? "_blank" : undefined}
-                      rel={exportResult.isServerRender ? "noopener noreferrer" : undefined}
+                      target="_blank"
+                      rel="noopener noreferrer"
                     >
-                      Download Master
+                      View Master
                     </a>
                     <button className="nle-btn" type="button" onClick={handleUseExportInEditor}>
                       Use This Master
@@ -12311,8 +12333,8 @@ function MultiCamCombiner({
                       <strong>Multicam master ready</strong>
                       <span>
                         {exportResult.isServerRender
-                          ? "Server render is available as MP4. Preview below, then download or continue into the editor."
-                          : "The browser render is available as WebM. Preview below, then download or continue into the editor."}
+                          ? "Server render is available as MP4. Preview below, then open a larger view or continue into the editor."
+                          : "The browser render is available as WebM. Preview below, then open a larger view or continue into the editor."}
                       </span>
                       {exportResult.url ? (
                         <video
@@ -12335,11 +12357,10 @@ function MultiCamCombiner({
                         <a
                           className="nle-btn secondary"
                           href={exportResult.url}
-                          download={exportResult.file?.name || exportResult.file}
-                          target={exportResult.isServerRender ? "_blank" : undefined}
-                          rel={exportResult.isServerRender ? "noopener noreferrer" : undefined}
+                          target="_blank"
+                          rel="noopener noreferrer"
                         >
-                          Download Master
+                          View Master
                         </a>
                         <button className="nle-btn" type="button" onClick={handleUseExportInEditor}>
                           Use This Master

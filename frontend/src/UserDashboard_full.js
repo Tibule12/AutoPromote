@@ -1929,8 +1929,19 @@ const UserDashboard = ({
               toast.success("Opening Clip Studio with the saved master — no re-upload needed.");
             }}
             onUseExport={result => {
-              if (!result?.file) return;
-              setSelectedFile(result.file);
+              const publishAsset =
+                result?.file instanceof File || result?.file instanceof Blob
+                  ? result.file
+                  : typeof result?.file === "string" && result.file.startsWith("http")
+                    ? result.file
+                    : typeof result?.url === "string" && result.url.startsWith("http")
+                      ? result.url
+                      : "";
+              if (!publishAsset) {
+                toast.error("This Cam Combiner master has no usable file or cloud URL.");
+                return;
+              }
+              setSelectedFile(publishAsset);
               handleNav("upload");
               toast.success("Cam Combiner export is ready to publish.");
             }}
