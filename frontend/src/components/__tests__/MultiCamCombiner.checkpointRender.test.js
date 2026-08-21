@@ -2,6 +2,7 @@ import {
   estimateMulticamRenderCredits,
   extractFirebaseRenderStoragePath,
   getVideoProxyMimeCandidates,
+  getReusableCloudOriginalUrl,
   getFullTimelineRenderWindow,
   getProductionProofRenderWindow,
   getMulticamRenderBillingUnits,
@@ -225,5 +226,22 @@ describe("MultiCamCombiner checkpoint render helpers", () => {
       })
     ).resolves.toBe("https://storage.example.com/proof-camera-2.webm");
     expect(resolveDownloadUrl).toHaveBeenCalledTimes(2);
+  });
+
+  it("reuses an existing cloud original for proof sync before browser extraction", () => {
+    expect(
+      getReusableCloudOriginalUrl(
+        { cloudOriginalUrl: "https://storage.example.com/camera-1-original.mov" },
+        { url: "https://storage.example.com/cached-original.mov" }
+      )
+    ).toBe("https://storage.example.com/camera-1-original.mov");
+    expect(
+      getReusableCloudOriginalUrl(
+        {},
+        {
+          url: "https://storage.example.com/cached-original.mov",
+        }
+      )
+    ).toBe("https://storage.example.com/cached-original.mov");
   });
 });

@@ -544,6 +544,11 @@ export const getVideoProxyMimeCandidates = includeAudio =>
 export const selectVideoProxyMimeType = (includeAudio, isTypeSupported) =>
   getVideoProxyMimeCandidates(includeAudio).find(type => isTypeSupported(type)) || "";
 
+export const getReusableCloudOriginalUrl = (source, cachedOriginal = null) =>
+  [source?.cloudOriginalUrl, cachedOriginal?.url].find(value =>
+    String(value || "").startsWith("http")
+  ) || "";
+
 const captureMediaElementStream = mediaElement => {
   const capture = mediaElement?.captureStream || mediaElement?.mozCaptureStream;
   if (typeof capture !== "function") return null;
@@ -8371,6 +8376,24 @@ function MultiCamCombiner({
               duration: sourceTrimDuration,
             };
             const sourceLabel = getExportSourceLabel(source, index);
+            const cachedOriginal = source.file
+              ? await readCachedRenderProxyUpload(buildOriginalIngestCacheKey(source.file))
+              : null;
+            const reusableCloudOriginalUrl = getReusableCloudOriginalUrl(source, cachedOriginal);
+            const reusableCloudSync = reusableCloudOriginalUrl
+              ? {
+                  url: reusableCloudOriginalUrl,
+                  syncAudioUrl: reusableCloudOriginalUrl,
+                  cacheKey:
+                    source.cloudOriginalCacheKey ||
+                    cachedOriginal?.cacheKey ||
+                    buildOriginalIngestCacheKey(source.file),
+                  storagePath: source.cloudOriginalStoragePath || cachedOriginal?.storagePath || "",
+                  usesOriginal: true,
+                  trimStart: sourceTrimStart,
+                  trimDuration: sourceTrimDuration,
+                }
+              : null;
             const [uploaded, syncAudioUpload] = await Promise.all([
               uploadMediaForBackendSync({
                 user,
@@ -8387,7 +8410,8 @@ function MultiCamCombiner({
                 videoProxyIncludeAudio: !hasExternalCleanAudio,
               }),
               hasExternalCleanAudio
-                ? uploadMediaForBackendSync({
+                ? reusableCloudSync ||
+                  uploadMediaForBackendSync({
                     user,
                     storage: proofProxyStorage,
                     file: source.file,
@@ -8405,7 +8429,15 @@ function MultiCamCombiner({
                 url: uploaded.videoUrl || uploaded.url,
                 syncAudioUrl: syncAudioUpload?.syncAudioUrl || syncAudioUpload?.url || "",
                 cacheKey: buildRenderProxyCacheKey(source.file, trimWindow),
-                syncAudioCacheKey: buildSyncAudioCacheKey(source.file, trimWindow),
+                syncAudioCacheKey:
+                  syncAudioUpload?.cacheKey || buildSyncAudioCacheKey(source.file, trimWindow),
+                syncStoragePath: syncAudioUpload?.storagePath || "",
+                syncTrimStart: syncAudioUpload?.usesOriginal
+                  ? Number(syncAudioUpload.trimStart || 0)
+                  : 0,
+                syncTrimDuration: syncAudioUpload?.usesOriginal
+                  ? Number(syncAudioUpload.trimDuration || 0)
+                  : 0,
                 storagePath: "",
                 proofProxy: true,
               },
@@ -8690,10 +8722,10 @@ function MultiCamCombiner({
               originalUpload?.syncAudioCacheKey ||
               originalUpload?.cacheKey ||
               buildBackendMediaCacheKey(source.file),
-            storage_path: originalUpload?.storagePath || "",
-            storagePath: originalUpload?.storagePath || "",
-            upload_trim_start: 0,
-            upload_trim_duration: 0,
+            storage_path: originalUpload?.syncStoragePath || originalUpload?.storagePath || "",
+            storagePath: originalUpload?.syncStoragePath || originalUpload?.storagePath || "",
+            upload_trim_start: Number(originalUpload?.syncTrimStart || 0) || 0,
+            upload_trim_duration: Number(originalUpload?.syncTrimDuration || 0) || 0,
           };
         });
 
