@@ -208,6 +208,10 @@ async function uploadSourceFileViaBackendRequest({
     clearTimeout(timeoutId);
   }
 
+  if (!response || typeof response.ok !== "boolean") {
+    throw new Error("Upload service returned no HTTP response.");
+  }
+
   const result = await response.json().catch(() => null);
   if (!response.ok || !result?.url) {
     throw buildStructuredUploadError(result, "Failed to upload source media", response.status);
