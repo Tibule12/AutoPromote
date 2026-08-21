@@ -102,6 +102,25 @@ class ViralRenderContractTests(unittest.TestCase):
         self.assertIn('"progress": 100', worker_source)
         self.assertIn('"detail": "Render complete"', worker_source)
 
+    def test_deploy_smoke_source_stays_inside_worker_tmp(self):
+        workflow_path = (
+            Path(__file__).parents[1]
+            / ".github"
+            / "workflows"
+            / "deploy-media-worker.yml"
+        )
+        workflow = workflow_path.read_text(encoding="utf-8")
+
+        self.assertIn(
+            "--volume /tmp/viral-render-smoke:/app/tmp/smoke:ro",
+            workflow,
+        )
+        self.assertIn(
+            '"video_url": "/app/tmp/smoke/source.mp4"',
+            workflow,
+        )
+        self.assertNotIn('"video_url": "/smoke/source.mp4"', workflow)
+
     def test_normalizes_speed_segments_and_fills_timeline_gaps(self):
         plan = normalize_speed_plan(
             10,
