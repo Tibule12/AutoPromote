@@ -13,6 +13,7 @@ import {
   resolveFirebaseRenderUrl,
   resolveRenderDeliveryUrls,
   selectVideoProxyMimeType,
+  waitForResumableUploadDownloadUrl,
 } from "../MultiCamCombiner";
 import { getDownloadURL } from "firebase/storage";
 
@@ -198,5 +199,31 @@ describe("MultiCamCombiner checkpoint render helpers", () => {
     expect(resolved.result).toEqual({ url: "", output_url: "", outputUrl: "" });
     await resolveFirebaseRenderUrl(missingPath);
     expect(getDownloadURL).toHaveBeenCalledTimes(1);
+  });
+
+  it("recovers when Firebase reports 100 percent but omits the completion callback", async () => {
+    const task = {
+      on: jest.fn((_event, onProgress) => {
+        onProgress({ bytesTransferred: 21.5 * 1024 * 1024, totalBytes: 21.5 * 1024 * 1024 });
+      }),
+    };
+    const resolveDownloadUrl = jest
+      .fn()
+      .mockRejectedValueOnce(
+        Object.assign(new Error("not finalized"), { code: "storage/object-not-found" })
+      )
+      .mockResolvedValueOnce("https://storage.example.com/proof-camera-2.webm");
+
+    await expect(
+      waitForResumableUploadDownloadUrl({
+        task,
+        storageRef: { fullPath: "temp/multicam/camera-2.webm" },
+        resolveDownloadUrl,
+        recoveryDelayMs: 0,
+        pollIntervalMs: 0,
+        maxPollAttempts: 2,
+      })
+    ).resolves.toBe("https://storage.example.com/proof-camera-2.webm");
+    expect(resolveDownloadUrl).toHaveBeenCalledTimes(2);
   });
 });

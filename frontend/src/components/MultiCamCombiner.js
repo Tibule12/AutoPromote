@@ -282,6 +282,85 @@ export const resolveRenderDeliveryUrls = async render => {
   };
 };
 
+export const waitForResumableUploadDownloadUrl = ({
+  task,
+  storageRef,
+  resolveDownloadUrl = getDownloadURL,
+  onProgress = () => {},
+  recoveryDelayMs = 3000,
+  pollIntervalMs = 3000,
+  maxPollAttempts = 30,
+}) =>
+  new Promise((resolve, reject) => {
+    let settled = false;
+    let finalizationStarted = false;
+    let recoveryTimer = null;
+
+    const settle = (callback, value) => {
+      if (settled) return;
+      settled = true;
+      if (recoveryTimer) clearTimeout(recoveryTimer);
+      callback(value);
+    };
+
+    const pollForFinalizedObject = async () => {
+      if (settled || finalizationStarted) return;
+      finalizationStarted = true;
+      let lastError = null;
+      for (let attempt = 0; attempt < maxPollAttempts && !settled; attempt += 1) {
+        try {
+          const url = await resolveDownloadUrl(storageRef);
+          if (url) {
+            settle(resolve, url);
+            return;
+          }
+        } catch (error) {
+          lastError = error;
+          if (error?.code !== "storage/object-not-found") {
+            settle(reject, error);
+            return;
+          }
+        }
+        if (attempt + 1 < maxPollAttempts) {
+          await new Promise(waitResolve => setTimeout(waitResolve, pollIntervalMs));
+        }
+      }
+      const timeoutError = new Error(
+        "Firebase received every upload byte but did not finalize the object. Please retry the upload."
+      );
+      timeoutError.code = lastError?.code || "storage/finalization-timeout";
+      settle(reject, timeoutError);
+    };
+
+    const scheduleRecovery = () => {
+      if (settled || finalizationStarted || recoveryTimer) return;
+      if (recoveryDelayMs <= 0) {
+        pollForFinalizedObject();
+        return;
+      }
+      recoveryTimer = setTimeout(() => {
+        recoveryTimer = null;
+        pollForFinalizedObject();
+      }, recoveryDelayMs);
+    };
+
+    try {
+      task.on(
+        "state_changed",
+        snapshot => {
+          onProgress(snapshot);
+          const transferred = Number(snapshot?.bytesTransferred || 0);
+          const total = Number(snapshot?.totalBytes || 0);
+          if (total > 0 && transferred >= total) scheduleRecovery();
+        },
+        error => settle(reject, error),
+        pollForFinalizedObject
+      );
+    } catch (error) {
+      settle(reject, error);
+    }
+  });
+
 export const getRenderManifestLocation = render =>
   render?.manifestUrl ||
   render?.manifest_url ||
@@ -6483,38 +6562,36 @@ function MultiCamCombiner({
     const startTime = Date.now();
     const uploadPurpose =
       mode === "audio_only" ? "sync proxy" : trimWindow ? "render-window proxy" : "media";
-    await new Promise((resolve, reject) => {
-      const task = uploadBytesResumable(mediaRef, uploadFile, {
-        contentType: uploadFile.type || "application/octet-stream",
-      });
-      task.on(
-        "state_changed",
-        snapshot => {
-          const transferred = snapshot.bytesTransferred || 0;
-          const total = snapshot.totalBytes || uploadFile.size || 0;
-          const pct = total ? (transferred / total) * 100 : 0;
-          const elapsedSec = Math.max(1, (Date.now() - startTime) / 1000);
-          const speedBps = transferred / elapsedSec;
-          const speedStr =
-            speedBps > 1024 * 1024
-              ? `${(speedBps / (1024 * 1024)).toFixed(1)} MB/s`
-              : `${Math.round(speedBps / 1024)} KB/s`;
-          const remainingSec = speedBps > 0 ? (total - transferred) / speedBps : 0;
-          const eta =
-            remainingSec > 120
-              ? `~${Math.round(remainingSec / 60)} min left`
-              : remainingSec > 30
-                ? `~${Math.round(remainingSec)} sec left`
-                : "";
-          setStatusMessage(
-            `Uploading ${label || file.name || "media"} ${uploadPurpose} — ${formatMediaBytes(transferred)} / ${formatMediaBytes(total)} (${pct.toFixed(1)}%, ${speedStr}${eta ? `, ${eta}` : ""})...`
-          );
-        },
-        reject,
-        resolve
-      );
+    const task = uploadBytesResumable(mediaRef, uploadFile, {
+      contentType: uploadFile.type || "application/octet-stream",
     });
-    const directUrl = await getDownloadURL(mediaRef);
+    const directUrl = await waitForResumableUploadDownloadUrl({
+      task,
+      storageRef: mediaRef,
+      onProgress: snapshot => {
+        const transferred = snapshot.bytesTransferred || 0;
+        const total = snapshot.totalBytes || uploadFile.size || 0;
+        const pct = total ? (transferred / total) * 100 : 0;
+        const elapsedSec = Math.max(1, (Date.now() - startTime) / 1000);
+        const speedBps = transferred / elapsedSec;
+        const speedStr =
+          speedBps > 1024 * 1024
+            ? `${(speedBps / (1024 * 1024)).toFixed(1)} MB/s`
+            : `${Math.round(speedBps / 1024)} KB/s`;
+        const remainingSec = speedBps > 0 ? (total - transferred) / speedBps : 0;
+        const eta =
+          remainingSec > 120
+            ? `~${Math.round(remainingSec / 60)} min left`
+            : remainingSec > 30
+              ? `~${Math.round(remainingSec)} sec left`
+              : "";
+        setStatusMessage(
+          transferred >= total && total > 0
+            ? `Finalizing ${label || file.name || "media"} ${uploadPurpose} in Firebase...`
+            : `Uploading ${label || file.name || "media"} ${uploadPurpose} — ${formatMediaBytes(transferred)} / ${formatMediaBytes(total)} (${pct.toFixed(1)}%, ${speedStr}${eta ? `, ${eta}` : ""})...`
+        );
+      },
+    });
     if (shouldCreateVideoProxy && renderProxyCacheKey) {
       await writeCachedRenderProxyUpload(renderProxyCacheKey, {
         url: directUrl,
