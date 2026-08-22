@@ -150,6 +150,59 @@ class MulticamCheckpointIntegrationTests(unittest.TestCase):
                     expected_height=1080,
                 )
 
+    @unittest.skipUnless(shutil.which("ffmpeg"), "ffmpeg is required")
+    def test_checkpoint_duration_normalization_trims_accumulated_tail_frames(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            checkpoint_path = os.path.join(temp_dir, "checkpoint.mp4")
+            subprocess.run(
+                [
+                    "ffmpeg",
+                    "-hide_banner",
+                    "-loglevel",
+                    "error",
+                    "-f",
+                    "lavfi",
+                    "-i",
+                    "color=c=red:s=320x180:r=30:d=1.5",
+                    "-c:v",
+                    "libx264",
+                    "-profile:v",
+                    "baseline",
+                    "-pix_fmt",
+                    "yuv420p",
+                    "-an",
+                    "-y",
+                    checkpoint_path,
+                ],
+                check=True,
+            )
+
+            normalization = asyncio.run(
+                worker.normalize_multicam_checkpoint_duration(
+                    checkpoint_path,
+                    1.2,
+                    0,
+                    expected_width=320,
+                    expected_height=180,
+                    job_id="test-normalize-checkpoint",
+                )
+            )
+            validation = worker.validate_multicam_checkpoint_media(
+                checkpoint_path,
+                1.2,
+                0,
+                expected_width=320,
+                expected_height=180,
+            )
+
+            self.assertEqual(normalization["status"], "trimmed_accumulated_tail_frames")
+            self.assertAlmostEqual(normalization["before_duration_seconds"], 1.5, places=2)
+            self.assertTrue(validation["ok"])
+            self.assertLessEqual(
+                abs(validation["delta_seconds"]),
+                worker.MULTICAM_CHECKPOINT_DURATION_TOLERANCE_SECONDS,
+            )
+
     def test_worker_accepts_44_minutes_and_scales_segment_budget_per_checkpoint(self):
         request = worker.RenderMultiCamRequest(
             sources=[

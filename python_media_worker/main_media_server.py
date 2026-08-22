@@ -17998,6 +17998,75 @@ def validate_multicam_checkpoint_media(
         )
     return receipt
 
+
+async def normalize_multicam_checkpoint_duration(
+    checkpoint_path,
+    expected_duration,
+    chunk_index,
+    *,
+    expected_width,
+    expected_height,
+    job_id,
+):
+    """Trim accumulated segment tail frames before strict checkpoint validation."""
+    expected = max(0.0, float(expected_duration or 0.0))
+    actual = get_media_duration(checkpoint_path)
+    excess = actual - expected
+    if excess <= MULTICAM_CHECKPOINT_DURATION_TOLERANCE_SECONDS:
+        return {
+            "status": "not_required",
+            "before_duration_seconds": round(actual, 6),
+            "expected_duration_seconds": round(expected, 6),
+        }
+
+    normalized_path = f"{checkpoint_path}.duration-normalized.mp4"
+    try:
+        await run_subprocess_async(
+            [
+                "ffmpeg",
+                "-hide_banner",
+                "-loglevel",
+                "error",
+                "-i",
+                checkpoint_path,
+                "-map",
+                "0:v:0",
+                "-an",
+                "-t",
+                f"{expected:.6f}",
+                "-c:v",
+                "copy",
+                "-movflags",
+                "+faststart",
+                "-y",
+                normalized_path,
+            ],
+            check=True,
+            job_context=job_id,
+        )
+        validation = validate_multicam_checkpoint_media(
+            normalized_path,
+            expected,
+            chunk_index,
+            expected_width=expected_width,
+            expected_height=expected_height,
+        )
+        os.replace(normalized_path, checkpoint_path)
+        return {
+            "status": "trimmed_accumulated_tail_frames",
+            "before_duration_seconds": round(actual, 6),
+            "expected_duration_seconds": round(expected, 6),
+            "after_duration_seconds": validation["actual_duration_seconds"],
+            "removed_duration_seconds": round(
+                actual - float(validation["actual_duration_seconds"]),
+                6,
+            ),
+        }
+    finally:
+        if os.path.exists(normalized_path):
+            os.remove(normalized_path)
+
+
 def validate_multicam_output_streams(output_path, expected_duration, job_id):
     summary = probe_media_stream_summary(output_path)
     streams = summary.get("streams") or []
@@ -25104,6 +25173,14 @@ async def render_multicam_impl(
                         chunk_concat_list_path,
                         job_id,
                     )
+                    duration_normalization = await normalize_multicam_checkpoint_duration(
+                        chunk_output_path,
+                        chunk_duration,
+                        chunk_index,
+                        expected_width=output_width,
+                        expected_height=output_height,
+                        job_id=job_id,
+                    )
                     duration_receipt = validate_multicam_checkpoint_media(
                         chunk_output_path,
                         chunk_duration,
@@ -25111,6 +25188,7 @@ async def render_multicam_impl(
                         expected_width=output_width,
                         expected_height=output_height,
                     )
+                    duration_receipt["duration_normalization"] = duration_normalization
                     segment_duration_receipts.append(duration_receipt)
                     checkpoint_receipt = upload_multicam_checkpoint_object(
                         chunk_output_path,
@@ -25215,6 +25293,16 @@ async def render_multicam_impl(
             job_id,
         )
         if checkpointing_enabled:
+            stitch_receipt["duration_normalization"] = (
+                await normalize_multicam_checkpoint_duration(
+                    video_only_output_path,
+                    master_duration,
+                    "stitched-master",
+                    expected_width=output_width,
+                    expected_height=output_height,
+                    job_id=job_id,
+                )
+            )
             stitched_media_receipt = validate_multicam_checkpoint_media(
                 video_only_output_path,
                 master_duration,
