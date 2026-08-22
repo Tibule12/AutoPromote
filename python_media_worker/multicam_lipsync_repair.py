@@ -263,9 +263,12 @@ def main():
         job_ref.update(
             {
                 "outputUrl": url,
+                "outputStoragePath": output_path,
+                "output_storage_path": output_path,
                 "videoUrl": url,
                 "result.url": url,
                 "result.output_url": url,
+                "result.outputStoragePath": output_path,
                 "result.output_storage_path": output_path,
                 "result.lip_sync_repaired": True,
                 "result.lip_sync_repair": repair_receipt,

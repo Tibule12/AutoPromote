@@ -38,8 +38,14 @@ jest.mock("firebase-admin", () => ({
   ),
   storage: jest.fn(() => ({
     bucket: jest.fn(() => ({
+      name: "test.appspot.com",
       file: jest.fn(path => ({
-        exists: jest.fn(async () => [path === "processed/multicam_job-1.mp4"]),
+        exists: jest.fn(async () => [
+          [
+            "processed/multicam_job-1.mp4",
+            "processed/multicam_job-1-sync-repaired.mp4",
+          ].includes(path),
+        ]),
         getMetadata: jest.fn(async () => [
           { contentType: "video/mp4", size: Buffer.byteLength("master-video") },
         ]),
@@ -74,6 +80,14 @@ jest.mock("../services/videoEditingService", () => {
 
 jest.mock("../services/billingService", () => ({
   getEffectiveTierSnapshot: jest.fn().mockResolvedValue({ tierId: "premium" }),
+}));
+
+jest.mock("../utils/cleanupSource", () => ({
+  cleanupSourceFile: jest.fn(),
+  extractOwnedStoragePathFromUrl: jest.fn(value => {
+    if (typeof value !== "string" || !value.includes("/o/")) return null;
+    return decodeURIComponent(value.split("/o/")[1].split("?")[0]);
+  }),
 }));
 
 const mediaRoutes = require("../mediaRoutes");
@@ -161,6 +175,26 @@ describe("mediaRoutes render approval", () => {
     expect(response.headers["content-disposition"]).toBe(
       'attachment; filename="cam-combiner-job-1.mp4"'
     );
+    expect(response.body).toEqual(Buffer.from("master-video"));
+  });
+
+  it("downloads the live repaired URL when a legacy storage path is stale", async () => {
+    docs.set("job-1", {
+      ...docs.get("job-1"),
+      outputStoragePath: "processed/multicam_job-1-expired.mp4",
+      outputUrl:
+        "https://firebasestorage.googleapis.com/v0/b/test.appspot.com/o/processed%2Fmulticam_job-1-sync-repaired.mp4?alt=media&token=test",
+      output_url:
+        "https://firebasestorage.googleapis.com/v0/b/test.appspot.com/o/processed%2Fmulticam_job-1-sync-repaired.mp4?alt=media&token=test",
+      result: {
+        ...docs.get("job-1").result,
+        url: "https://firebasestorage.googleapis.com/v0/b/test.appspot.com/o/processed%2Fmulticam_job-1-sync-repaired.mp4?alt=media&token=test",
+      },
+    });
+
+    const response = await request(buildApp()).get("/api/media/render-jobs/job-1/download");
+
+    expect(response.statusCode).toBe(200);
     expect(response.body).toEqual(Buffer.from("master-video"));
   });
 

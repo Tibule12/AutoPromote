@@ -21,12 +21,15 @@ function extractStoragePathFromUrl(fileUrl) {
 function getMulticamStoragePaths(data = {}) {
   const result = data.result || {};
   const candidates = [
+    // The active delivery URL is authoritative. Recovery/repair flows can
+    // replace an object while a legacy top-level path still references the
+    // previous generation; download routes must try the live URL first.
+    extractStoragePathFromUrl(data.outputUrl || data.output_url || result.url || result.output_url),
     data.outputStoragePath,
     data.output_storage_path,
     data.storagePath,
     result.outputStoragePath,
     result.output_storage_path,
-    extractStoragePathFromUrl(data.outputUrl || data.output_url || result.url || result.output_url),
     data.thumbnailStoragePath,
     data.thumbnail_storage_path,
     result.thumbnailStoragePath,
