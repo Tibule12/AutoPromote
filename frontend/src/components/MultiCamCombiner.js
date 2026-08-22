@@ -50,7 +50,6 @@ import { useSubscription } from "../hooks/useSubscription";
 import PayPalSubscriptionPanel from "./PayPalSubscriptionPanel";
 import { SafeAudio, SafeVideo } from "./SafeMedia";
 import { uploadMulticamSourceResumable } from "../utils/multicamResumableUpload";
-import { revokeObjectUrlLater } from "../utils/objectUrl";
 
 const MULTICAM_MAX_SOURCES = 6;
 
@@ -9591,22 +9590,23 @@ function MultiCamCombiner({
                       setStatusMessage("Downloading the saved Cam Combiner master...");
                       const token = await getFirebaseIdTokenForRequest(user);
                       const response = await fetch(
-                        `${API_BASE_URL}/api/media/render-jobs/${encodeURIComponent(render.jobId)}/download`,
+                        `${API_BASE_URL}/api/media/render-jobs/${encodeURIComponent(render.jobId)}/download-url`,
                         { headers: { Authorization: `Bearer ${token}` } }
                       );
                       if (!response.ok) {
                         const errorData = await response.json().catch(() => ({}));
                         throw new Error(errorData.message || "Master download failed.");
                       }
-                      const blob = await response.blob();
-                      const objectUrl = URL.createObjectURL(blob);
+                      const download = await response.json();
+                      if (!download.downloadUrl) {
+                        throw new Error("Master download link was not returned.");
+                      }
                       const link = document.createElement("a");
-                      link.href = objectUrl;
-                      link.download = `cam-combiner-${render.jobId}.mp4`;
+                      link.href = download.downloadUrl;
+                      link.download = download.filename || `cam-combiner-${render.jobId}.mp4`;
                       document.body.appendChild(link);
                       link.click();
                       link.remove();
-                      revokeObjectUrlLater(objectUrl);
                       setStatusMessage("Master download started.");
                     } catch (error) {
                       setStatusMessage(error.message || "Master download failed.");

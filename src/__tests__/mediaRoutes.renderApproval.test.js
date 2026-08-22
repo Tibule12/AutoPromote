@@ -49,6 +49,11 @@ jest.mock("firebase-admin", () => ({
         getMetadata: jest.fn(async () => [
           { contentType: "video/mp4", size: Buffer.byteLength("master-video") },
         ]),
+        getSignedUrl: jest.fn(async options => [
+          `https://storage.example.com/${encodeURIComponent(path)}?disposition=${encodeURIComponent(
+            options.responseDisposition
+          )}`,
+        ]),
         createReadStream: jest.fn(() =>
           require("stream").Readable.from([Buffer.from("master-video")])
         ),
@@ -196,6 +201,19 @@ describe("mediaRoutes render approval", () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.body).toEqual(Buffer.from("master-video"));
+  });
+
+  it("returns a short-lived attachment URL for a native browser download", async () => {
+    const response = await request(buildApp()).get(
+      "/api/media/render-jobs/job-1/download-url"
+    );
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.filename).toBe("cam-combiner-job-1.mp4");
+    expect(response.body.downloadUrl).toContain("https://storage.example.com/");
+    expect(response.body.downloadUrl).toContain("attachment%3B%20filename");
+    expect(Date.parse(response.body.expiresAt)).toBeGreaterThan(Date.now());
   });
 
   it("approves a held render and exposes the approved output URL", async () => {

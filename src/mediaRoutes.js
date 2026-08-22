@@ -1845,54 +1845,111 @@ router.get("/renders", async (req, res) => {
   }
 });
 
+const getSafeMulticamDownloadName = jobId => {
+  const safeJobId =
+    String(jobId)
+      .replace(/[^A-Za-z0-9_-]/g, "")
+      .slice(0, 120) || "master";
+  return `cam-combiner-${safeJobId}.mp4`;
+};
+
+const findExistingMulticamMasterFile = async data => {
+  const paths = getMulticamStoragePaths(data).filter(path =>
+    path.startsWith("processed/multicam_")
+  );
+  const bucket = admin.storage().bucket();
+
+  for (const path of paths) {
+    const file = bucket.file(path);
+    const [exists] = await file.exists();
+    if (exists) return { file, path };
+  }
+
+  return null;
+};
+
+const resolveOwnedMulticamMaster = async (req, res) => {
+  const { jobId } = req.params;
+  const userId = req.user.uid;
+  const ref = admin.firestore().collection("video_edits").doc(jobId);
+  const doc = await ref.get();
+
+  if (!doc.exists) {
+    res.status(404).json({ success: false, message: "Render not found" });
+    return null;
+  }
+
+  const data = { ...(doc.data() || {}), jobId };
+  if (data.userId !== userId && !isAdminRequester(req.user)) {
+    res.status(403).json({ success: false, message: "Unauthorized access to render" });
+    return null;
+  }
+  if (!isMulticamRenderJob(data) || data.hiddenFromRenderLibrary === true) {
+    res.status(404).json({ success: false, message: "Saved master is unavailable" });
+    return null;
+  }
+
+  const approvalView = normalizeRenderApproval(jobId, data);
+  if (!approvalView.outputUrl) {
+    res.status(409).json({ success: false, message: "Master is not ready to download" });
+    return null;
+  }
+
+  const resolved = await findExistingMulticamMasterFile(data);
+  if (!resolved) {
+    res.status(410).json({ success: false, message: "Master file has expired" });
+    return null;
+  }
+
+  return { ...resolved, data, jobId };
+};
+
+router.get("/render-jobs/:jobId/download-url", async (req, res) => {
+  try {
+    const resolved = await resolveOwnedMulticamMaster(req, res);
+    if (!resolved) return;
+
+    const filename = getSafeMulticamDownloadName(resolved.jobId);
+    const signedUrlExpiresAt = Date.now() + 15 * 60 * 1000;
+    const [downloadUrl] = await resolved.file.getSignedUrl({
+      version: "v4",
+      action: "read",
+      expires: signedUrlExpiresAt,
+      responseDisposition: `attachment; filename="${filename}"`,
+      responseType: "video/mp4",
+    });
+
+    return res.json({
+      success: true,
+      downloadUrl,
+      filename,
+      expiresAt: new Date(signedUrlExpiresAt).toISOString(),
+    });
+  } catch (error) {
+    console.error("[MediaRoute] Failed to create saved master download URL:", error.message);
+    if (!res.headersSent) {
+      return res.status(500).json({
+        success: false,
+        message: error.message || "Could not prepare saved master download",
+      });
+    }
+    return res.end();
+  }
+});
+
 router.get("/render-jobs/:jobId/download", async (req, res) => {
   try {
-    const { jobId } = req.params;
-    const userId = req.user.uid;
-    const ref = admin.firestore().collection("video_edits").doc(jobId);
-    const doc = await ref.get();
+    const resolved = await resolveOwnedMulticamMaster(req, res);
+    if (!resolved) return;
 
-    if (!doc.exists) {
-      return res.status(404).json({ success: false, message: "Render not found" });
-    }
-
-    const data = { ...(doc.data() || {}), jobId };
-    if (data.userId !== userId && !isAdminRequester(req.user)) {
-      return res.status(403).json({ success: false, message: "Unauthorized access to render" });
-    }
-    if (!isMulticamRenderJob(data) || data.hiddenFromRenderLibrary === true) {
-      return res.status(404).json({ success: false, message: "Saved master is unavailable" });
-    }
-
-    const approvalView = normalizeRenderApproval(jobId, data);
-    if (!approvalView.outputUrl) {
-      return res.status(409).json({ success: false, message: "Master is not ready to download" });
-    }
-
-    const outputStoragePath = getMulticamStoragePaths(data).find(path =>
-      path.startsWith("processed/multicam_")
-    );
-    if (!outputStoragePath) {
-      return res.status(404).json({ success: false, message: "Master file was not found" });
-    }
-
-    const file = admin.storage().bucket().file(outputStoragePath);
-    const [exists] = await file.exists();
-    if (!exists) {
-      return res.status(410).json({ success: false, message: "Master file has expired" });
-    }
-
-    const [metadata] = await file.getMetadata();
-    const safeJobId =
-      String(jobId)
-        .replace(/[^A-Za-z0-9_-]/g, "")
-        .slice(0, 120) || "master";
+    const [metadata] = await resolved.file.getMetadata();
+    const filename = getSafeMulticamDownloadName(resolved.jobId);
     res.setHeader("Content-Type", metadata.contentType || "video/mp4");
-    res.setHeader("Content-Disposition", `attachment; filename="cam-combiner-${safeJobId}.mp4"`);
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
     res.setHeader("Cache-Control", "private, no-store, max-age=0");
     if (metadata.size) res.setHeader("Content-Length", String(metadata.size));
 
-    const stream = file.createReadStream();
+    const stream = resolved.file.createReadStream();
     stream.on("error", error => {
       console.error("[MediaRoute] Saved master download stream failed:", error.message);
       if (!res.headersSent) {
