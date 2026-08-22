@@ -1,0 +1,11 @@
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - --file
+      - Dockerfile.lipsync-repair
+      - --tag
+      - gcr.io/autopromote-cc6d3/multicam-lipsync-repair:latest
+      - .
+images:
+  - gcr.io/autopromote-cc6d3/multicam-lipsync-repair:latest

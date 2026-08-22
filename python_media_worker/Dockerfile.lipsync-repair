@@ -1,0 +1,6 @@
+FROM gcr.io/autopromote-cc6d3/cam-combiner-worker-fast@sha256:9f7601c2da32a68fb0f2138a2c0812a3dc8bc1ac8e237251d33906d874b614d9
+
+WORKDIR /app
+COPY multicam_lipsync_repair.py /app/multicam_lipsync_repair.py
+
+ENTRYPOINT ["python3", "/app/multicam_lipsync_repair.py"]

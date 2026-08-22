@@ -17941,6 +17941,23 @@ def validate_multicam_segment_duration(segment_path, expected_duration, segment_
     return receipt
 
 
+def multicam_timeline_frame_count(timeline_start, timeline_end, fps=30):
+    """Allocate CFR frames on the absolute master timeline.
+
+    Segment-local ``-t`` rounding gave every quarter-frame director cut an
+    extra half frame. Hundreds of individually valid segments then accumulated
+    up to a second of video lag inside a checkpoint. Using absolute frame
+    boundaries makes adjacent allocations telescope to the master frame count.
+    """
+    safe_fps = max(1, int(fps or 30))
+    start = float(timeline_start or 0.0)
+    end = max(start, float(timeline_end or start))
+    epsilon = 1e-7
+    start_frame = int(math.ceil((start * safe_fps) - epsilon))
+    end_frame = int(math.ceil((end * safe_fps) - epsilon))
+    return max(1, end_frame - start_frame)
+
+
 def validate_multicam_checkpoint_media(
     checkpoint_path,
     expected_duration,
@@ -19660,13 +19677,17 @@ async def render_multicam_layout_segment(
         filters.extend(multicam_overlay_card_filters("canvas", "splitcard0", side_margin, top_margin, card_width, card_height, "split_a", radius=card_radius))
         filters.extend(multicam_overlay_card_filters("split_a", "splitcard1", second_x, top_margin, card_width, card_height, "v", radius=card_radius))
 
+    target_frame_count = multicam_timeline_frame_count(
+        timeline_start,
+        float(timeline_start) + float(duration),
+    )
     cmd.extend([
         "-filter_complex",
         ";".join(filters),
         "-map",
         "[v]",
-        "-t",
-        str(max(0.02, float(duration))),
+        "-frames:v",
+        str(target_frame_count),
         *build_multicam_segment_encode_args(),
         "-an",
         "-movflags",
@@ -23205,6 +23226,7 @@ async def render_multicam_video_segment(
     segment_duration = max(0.0, segment_end - segment_start)
     if segment_duration <= 0.02:
         raise HTTPException(status_code=400, detail="Multicam segment duration is empty")
+    target_frame_count = multicam_timeline_frame_count(segment_start, segment_end)
 
     source = source_map.get(segment["camera_id"]) or prepared_sources[0]
     trim_start = float(segment["source_start"])
@@ -23315,8 +23337,8 @@ async def render_multicam_video_segment(
                 single_filter,
                 "-map",
                 "[v]",
-                "-t",
-                f"{segment_duration:.6f}",
+                "-frames:v",
+                str(target_frame_count),
                 *build_multicam_segment_encode_args(),
                 "-an",
                 "-movflags",

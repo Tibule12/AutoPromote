@@ -62,6 +62,17 @@ class FakeBucket:
 
 
 class MulticamCheckpointIntegrationTests(unittest.TestCase):
+    def test_absolute_frame_allocation_does_not_accumulate_half_frames(self):
+        boundaries = [0.0, 53.5, 57.25, 63.0, 85.75, 90.0, 300.0]
+        allocated = sum(
+            worker.multicam_timeline_frame_count(start, end)
+            for start, end in zip(boundaries, boundaries[1:])
+        )
+
+        self.assertEqual(allocated, 300 * 30)
+        self.assertEqual(worker.multicam_timeline_frame_count(53.5, 57.25), 113)
+        self.assertEqual(worker.multicam_timeline_frame_count(57.25, 63.0), 172)
+
     @unittest.skipUnless(shutil.which("ffmpeg"), "ffmpeg is required")
     def test_three_normalized_video_parts_stitch_with_monotonic_duration(self):
         with tempfile.TemporaryDirectory() as temp_dir:
