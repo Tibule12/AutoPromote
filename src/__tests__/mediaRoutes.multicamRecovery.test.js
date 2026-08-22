@@ -1,19 +1,37 @@
 const express = require("express");
 const request = require("supertest");
 
-const firestoreDocs = [];
+const mockFirestoreDocs = [];
 const mockRecoverMulticamUpload = jest.fn();
 
 jest.mock("firebase-admin", () => ({
   firestore: Object.assign(
     jest.fn(() => ({
-      collection: jest.fn(() => ({
-        where: jest.fn(() => ({
-          limit: jest.fn(() => ({
-            get: jest.fn(async () => ({ docs: firestoreDocs })),
+      collection: jest.fn(() => {
+        const filters = [];
+        let queryLimit = Infinity;
+        const query = {
+          where: jest.fn((field, operator, value) => {
+            filters.push({ field, operator, value });
+            return query;
+          }),
+          limit: jest.fn(value => {
+            queryLimit = Number(value) || Infinity;
+            return query;
+          }),
+          get: jest.fn(async () => ({
+            docs: mockFirestoreDocs
+              .filter(doc =>
+                filters.every(filter => {
+                  if (filter.operator !== "==") return true;
+                  return doc.data()?.[filter.field] === filter.value;
+                })
+              )
+              .slice(0, queryLimit),
           })),
-        })),
-      })),
+        };
+        return query;
+      }),
     })),
     {
       FieldValue: {
@@ -82,7 +100,7 @@ const cloudSources = [
 
 describe("mediaRoutes recoverable multicam project", () => {
   beforeEach(() => {
-    firestoreDocs.length = 0;
+    mockFirestoreDocs.length = 0;
     mockRecoverMulticamUpload.mockReset();
     mockRecoverMulticamUpload.mockImplementation(async ({ source }) => ({
       url: `https://firebasestorage.googleapis.com/v0/b/test/o/${encodeURIComponent(
@@ -94,7 +112,7 @@ describe("mediaRoutes recoverable multicam project", () => {
   });
 
   it("skips local-only jobs and returns rebuilt cloud URLs for the newest reusable job", async () => {
-    firestoreDocs.push(
+    mockFirestoreDocs.push(
       asFirestoreDoc("local-only-job", {
         userId: "user-1",
         type: "multicam_render",
@@ -153,7 +171,7 @@ describe("mediaRoutes recoverable multicam project", () => {
   });
 
   it("returns a clear 404 instead of exposing an unrecoverable filesystem path", async () => {
-    firestoreDocs.push(
+    mockFirestoreDocs.push(
       asFirestoreDoc("local-only-job", {
         userId: "user-1",
         type: "multicam_render",
@@ -173,5 +191,38 @@ describe("mediaRoutes recoverable multicam project", () => {
     expect(response.statusCode).toBe(404);
     expect(response.body.message).toBe("No reusable Firebase Cam Combiner originals were found");
     expect(mockRecoverMulticamUpload).not.toHaveBeenCalled();
+  });
+
+  it("finds reusable originals beyond fifty unrelated media jobs", async () => {
+    for (let index = 0; index < 60; index += 1) {
+      mockFirestoreDocs.push(
+        asFirestoreDoc(`unrelated-${index}`, {
+          userId: "user-1",
+          type: "audio_extraction",
+          status: "completed",
+          createdAt: `2026-08-20T10:${String(index % 60).padStart(2, "0")}:00.000Z`,
+        })
+      );
+    }
+    mockFirestoreDocs.push(
+      asFirestoreDoc("reusable-after-crowded-history", {
+        userId: "user-1",
+        type: "multicam_render",
+        status: "completed",
+        updatedAt: "2026-08-20T12:00:00.000Z",
+        multicamRequest: {
+          totalDurationSeconds: 3600,
+          outputAspectRatio: "16:9",
+          sources: cloudSources,
+        },
+      })
+    );
+
+    const response = await request(buildApp()).get("/api/media/multicam/recoverable-project");
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body.project.previousJobId).toBe("reusable-after-crowded-history");
+    expect(response.body.project.sources).toHaveLength(2);
+    expect(mockRecoverMulticamUpload).toHaveBeenCalledTimes(2);
   });
 });

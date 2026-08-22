@@ -1102,6 +1102,9 @@ router.get("/multicam/recoverable-project", async (req, res) => {
       .firestore()
       .collection("video_edits")
       .where("userId", "==", userId)
+      // Restrict the server query before applying its limit. Active users can
+      // have many unrelated media jobs ahead of a valid reusable camera upload.
+      .where("type", "==", "multicam_render")
       .limit(50)
       .get();
     const candidates = snapshot.docs
