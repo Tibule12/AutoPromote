@@ -203,6 +203,39 @@ class MulticamCheckpointIntegrationTests(unittest.TestCase):
                 worker.MULTICAM_CHECKPOINT_DURATION_TOLERANCE_SECONDS,
             )
 
+    @unittest.skipUnless(shutil.which("ffmpeg"), "ffmpeg is required")
+    def test_audio_bed_pads_short_clean_audio_to_master_duration(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            source_path = os.path.join(temp_dir, "short-clean-audio.wav")
+            output_path = os.path.join(temp_dir, "audio-bed.m4a")
+            subprocess.run(
+                [
+                    "ffmpeg",
+                    "-hide_banner",
+                    "-loglevel",
+                    "error",
+                    "-f",
+                    "lavfi",
+                    "-i",
+                    "sine=frequency=440:duration=0.3",
+                    "-y",
+                    source_path,
+                ],
+                check=True,
+            )
+
+            asyncio.run(
+                worker.render_multicam_audio_bed(
+                    source_path,
+                    output_path,
+                    0.0,
+                    1.0,
+                    "test-short-clean-audio",
+                )
+            )
+
+            self.assertAlmostEqual(worker.get_media_duration(output_path), 1.0, places=2)
+
     def test_worker_accepts_44_minutes_and_scales_segment_budget_per_checkpoint(self):
         request = worker.RenderMultiCamRequest(
             sources=[

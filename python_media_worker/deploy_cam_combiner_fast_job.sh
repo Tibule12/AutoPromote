@@ -31,7 +31,7 @@ gcloud run jobs deploy "$JOB_NAME" \
   --command python3 \
   --args multicam_job_runner.py \
   --cpu 8 \
-  --memory 8Gi \
+  --memory 12Gi \
   --tasks 1 \
   --parallelism 1 \
   --max-retries 0 \
