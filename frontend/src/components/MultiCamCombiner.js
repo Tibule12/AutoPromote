@@ -571,6 +571,49 @@ export const buildExportEditorHandoff = exportResult => {
   };
 };
 
+export const isFirebaseAuthNetworkError = error =>
+  error?.code === "auth/network-request-failed" ||
+  /auth\/network-request-failed|firebase.*network/i.test(String(error?.message || ""));
+
+const getCachedFirebaseIdToken = user => {
+  const candidates = [user?.accessToken, user?.stsTokenManager?.accessToken].filter(Boolean);
+  return (
+    candidates.find(token => {
+      try {
+        const encodedPayload = String(token).split(".")[1];
+        if (!encodedPayload) return false;
+        const normalized = encodedPayload.replace(/-/g, "+").replace(/_/g, "/");
+        const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
+        const payload = JSON.parse(atob(padded));
+        return Number(payload.exp || 0) * 1000 > Date.now() + 30_000;
+      } catch (_) {
+        return false;
+      }
+    }) || ""
+  );
+};
+
+export const getFirebaseIdTokenForRequest = async (user, { retryDelays = [300, 900] } = {}) => {
+  if (!user?.getIdToken) throw new Error("Sign in again before continuing.");
+  let lastError = null;
+
+  for (let attempt = 0; attempt <= retryDelays.length; attempt += 1) {
+    try {
+      return await user.getIdToken(false);
+    } catch (error) {
+      lastError = error;
+      if (!isFirebaseAuthNetworkError(error)) throw error;
+      const cachedToken = getCachedFirebaseIdToken(user);
+      if (cachedToken) return cachedToken;
+      if (attempt < retryDelays.length) {
+        await new Promise(resolve => window.setTimeout(resolve, retryDelays[attempt]));
+      }
+    }
+  }
+
+  throw lastError || new Error("Firebase authentication is temporarily unreachable.");
+};
+
 const captureMediaElementStream = mediaElement => {
   const capture = mediaElement?.captureStream || mediaElement?.mozCaptureStream;
   if (typeof capture !== "function") return null;
@@ -2423,7 +2466,7 @@ function MultiCamCombiner({
       const user = getAuth().currentUser;
       if (!user) return;
       setRecentRendersStatus("Loading saved masters...");
-      const token = await user.getIdToken();
+      const token = await getFirebaseIdTokenForRequest(user);
       const response = await fetch(`${API_BASE_URL}/api/media/renders?limit=8`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -2451,7 +2494,7 @@ function MultiCamCombiner({
       const user = getAuth().currentUser;
       if (!user) throw new Error("Sign in before recovering uploaded originals.");
       setRecoverableProjectStatus("Finding your uploaded camera originals...");
-      const token = await user.getIdToken();
+      const token = await getFirebaseIdTokenForRequest(user);
       const response = await fetch(`${API_BASE_URL}/api/media/multicam/recoverable-project`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -2536,6 +2579,16 @@ function MultiCamCombiner({
       setStatusMessage("Recovered the existing Firebase originals without uploading again.");
     } catch (error) {
       const message = error.message || "Could not recover uploaded originals.";
+      if (isFirebaseAuthNetworkError(error)) {
+        const networkMessage =
+          typeof navigator !== "undefined" && navigator.onLine === false
+            ? "You are offline. Your Firebase camera uploads are still stored; reconnect and press reuse again."
+            : "Firebase sign-in could not reach its network service. Your camera uploads were not deleted. Retry after disabling a blocking VPN/ad-blocker or restoring the connection.";
+        setRecoverableProjectStatus(networkMessage);
+        setStatusMessage(networkMessage);
+        toast.error(networkMessage);
+        return;
+      }
       setProofSourceMode("originals_once");
       setRecoverableProjectStatus(message);
       setStatusMessage(
@@ -9536,7 +9589,7 @@ function MultiCamCombiner({
                       if (!user) throw new Error("Sign in again before downloading this master.");
                       setDownloadingRenderId(render.jobId);
                       setStatusMessage("Downloading the saved Cam Combiner master...");
-                      const token = await user.getIdToken();
+                      const token = await getFirebaseIdTokenForRequest(user);
                       const response = await fetch(
                         `${API_BASE_URL}/api/media/render-jobs/${encodeURIComponent(render.jobId)}/download`,
                         { headers: { Authorization: `Bearer ${token}` } }

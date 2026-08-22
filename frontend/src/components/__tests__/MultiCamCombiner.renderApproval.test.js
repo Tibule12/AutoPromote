@@ -2,6 +2,7 @@ import {
   buildExportEditorHandoff,
   canDownloadApprovedRender,
   getMulticamRenderButtonLabel,
+  getFirebaseIdTokenForRequest,
   getRecoveredPodcastOutputAspectRatio,
   getRenderApprovalCopy,
   getRenderApprovalState,
@@ -32,6 +33,27 @@ jest.mock("../../hooks/useSubscription", () => ({
 jest.mock("../../hooks/useCinematicEffects", () => jest.fn(() => ({})));
 
 describe("MultiCamCombiner render approval helpers", () => {
+  it("uses an unexpired cached Firebase token during a temporary auth network failure", async () => {
+    const payload = btoa(JSON.stringify({ exp: Math.floor(Date.now() / 1000) + 3600 }))
+      .replace(/=/g, "")
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_");
+    const cachedToken = `header.${payload}.signature`;
+    const user = {
+      accessToken: cachedToken,
+      getIdToken: jest.fn().mockRejectedValue(
+        Object.assign(new Error("Firebase: Error (auth/network-request-failed)."), {
+          code: "auth/network-request-failed",
+        })
+      ),
+    };
+
+    await expect(getFirebaseIdTokenForRequest(user, { retryDelays: [] })).resolves.toBe(
+      cachedToken
+    );
+    expect(user.getIdToken).toHaveBeenCalledWith(false);
+  });
+
   it("hands a server master to the editor as its real cloud URL", () => {
     const masterUrl = "https://storage.example.com/multicam-master.mp4?token=abc";
 
