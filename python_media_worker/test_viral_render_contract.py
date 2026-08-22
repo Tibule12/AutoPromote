@@ -146,6 +146,9 @@ class ViralRenderContractTests(unittest.TestCase):
         )
         allowed_dir = os.path.abspath(os.path.join(workdir, *allowed_suffix))
         smoke_dir = os.path.join(allowed_dir, "viral-render-smoke")
+        smoke_script = (Path(__file__).parent / "render_viral_smoke.sh").read_text(
+            encoding="utf-8"
+        )
         workflow = (
             repo_root / ".github" / "workflows" / "deploy-media-worker.yml"
         ).read_text(encoding="utf-8")
@@ -153,15 +156,20 @@ class ViralRenderContractTests(unittest.TestCase):
         self.assertEqual(allowed_suffix, ["..", "tmp"])
         self.assertEqual(allowed_dir, "/tmp")
         self.assertIn(
-            f"--volume /tmp/viral-render-smoke:{smoke_dir}:ro",
-            workflow,
+            f'SMOKE_CONTAINER_DIR="{smoke_dir}"',
+            smoke_script,
         )
         self.assertIn(
-            f'"video_url": "{smoke_dir}/source.mp4"',
-            workflow,
+            '--volume "${SMOKE_HOST_DIR}:${SMOKE_CONTAINER_DIR}:ro"',
+            smoke_script,
         )
+        self.assertIn(
+            '${SMOKE_CONTAINER_DIR}/source.mp4',
+            smoke_script,
+        )
+        self.assertIn('bash render_viral_smoke.sh "${IMAGE}"', workflow)
         self.assertIn(f"RUN mkdir -p {allowed_dir}", dockerfile)
-        self.assertNotIn("/app/tmp/smoke", workflow)
+        self.assertNotIn("/app/tmp/smoke", smoke_script)
 
     def test_normalizes_speed_segments_and_fills_timeline_gaps(self):
         plan = normalize_speed_plan(
