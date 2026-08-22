@@ -50,6 +50,7 @@ import { useSubscription } from "../hooks/useSubscription";
 import PayPalSubscriptionPanel from "./PayPalSubscriptionPanel";
 import { SafeAudio, SafeVideo } from "./SafeMedia";
 import { uploadMulticamSourceResumable } from "../utils/multicamResumableUpload";
+import { revokeObjectUrlLater } from "../utils/objectUrl";
 
 const MULTICAM_MAX_SOURCES = 6;
 
@@ -2394,6 +2395,7 @@ function MultiCamCombiner({
     MULTICAM_PRODUCTION_PROOF_DEFAULT_START_SECONDS
   );
   const [recoverableProjectStatus, setRecoverableProjectStatus] = useState("");
+  const [downloadingRenderId, setDownloadingRenderId] = useState("");
   const [activeRenderJobId, setActiveRenderJobId] = useState("");
   const [activeRenderCheckpoint, setActiveRenderCheckpoint] = useState(null);
   const [activeRenderManifest, setActiveRenderManifest] = useState("");
@@ -9524,14 +9526,45 @@ function MultiCamCombiner({
                     Find viral clips · 8 cr
                   </button>
                 ) : null}
-                <a
+                <button
+                  type="button"
                   className="nle-mini-btn"
-                  href={downloadUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  disabled={sourceExpired || downloadingRenderId === render.jobId}
+                  onClick={async () => {
+                    try {
+                      const user = getAuth().currentUser;
+                      if (!user) throw new Error("Sign in again before downloading this master.");
+                      setDownloadingRenderId(render.jobId);
+                      setStatusMessage("Downloading the saved Cam Combiner master...");
+                      const token = await user.getIdToken();
+                      const response = await fetch(
+                        `${API_BASE_URL}/api/media/render-jobs/${encodeURIComponent(render.jobId)}/download`,
+                        { headers: { Authorization: `Bearer ${token}` } }
+                      );
+                      if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({}));
+                        throw new Error(errorData.message || "Master download failed.");
+                      }
+                      const blob = await response.blob();
+                      const objectUrl = URL.createObjectURL(blob);
+                      const link = document.createElement("a");
+                      link.href = objectUrl;
+                      link.download = `cam-combiner-${render.jobId}.mp4`;
+                      document.body.appendChild(link);
+                      link.click();
+                      link.remove();
+                      revokeObjectUrlLater(objectUrl);
+                      setStatusMessage("Master download started.");
+                    } catch (error) {
+                      setStatusMessage(error.message || "Master download failed.");
+                      toast.error(error.message || "Master download failed.");
+                    } finally {
+                      setDownloadingRenderId("");
+                    }
+                  }}
                 >
-                  View
-                </a>
+                  {downloadingRenderId === render.jobId ? "Downloading..." : "Download"}
+                </button>
                 <button
                   type="button"
                   className="nle-mini-btn is-danger"

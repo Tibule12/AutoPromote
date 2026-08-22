@@ -1842,6 +1842,75 @@ router.get("/renders", async (req, res) => {
   }
 });
 
+router.get("/render-jobs/:jobId/download", async (req, res) => {
+  try {
+    const { jobId } = req.params;
+    const userId = req.user.uid;
+    const ref = admin.firestore().collection("video_edits").doc(jobId);
+    const doc = await ref.get();
+
+    if (!doc.exists) {
+      return res.status(404).json({ success: false, message: "Render not found" });
+    }
+
+    const data = { ...(doc.data() || {}), jobId };
+    if (data.userId !== userId && !isAdminRequester(req.user)) {
+      return res.status(403).json({ success: false, message: "Unauthorized access to render" });
+    }
+    if (!isMulticamRenderJob(data) || data.hiddenFromRenderLibrary === true) {
+      return res.status(404).json({ success: false, message: "Saved master is unavailable" });
+    }
+
+    const approvalView = normalizeRenderApproval(jobId, data);
+    if (!approvalView.outputUrl) {
+      return res.status(409).json({ success: false, message: "Master is not ready to download" });
+    }
+
+    const outputStoragePath = getMulticamStoragePaths(data).find(path =>
+      path.startsWith("processed/multicam_")
+    );
+    if (!outputStoragePath) {
+      return res.status(404).json({ success: false, message: "Master file was not found" });
+    }
+
+    const file = admin.storage().bucket().file(outputStoragePath);
+    const [exists] = await file.exists();
+    if (!exists) {
+      return res.status(410).json({ success: false, message: "Master file has expired" });
+    }
+
+    const [metadata] = await file.getMetadata();
+    const safeJobId =
+      String(jobId)
+        .replace(/[^A-Za-z0-9_-]/g, "")
+        .slice(0, 120) || "master";
+    res.setHeader("Content-Type", metadata.contentType || "video/mp4");
+    res.setHeader("Content-Disposition", `attachment; filename="cam-combiner-${safeJobId}.mp4"`);
+    res.setHeader("Cache-Control", "private, no-store, max-age=0");
+    if (metadata.size) res.setHeader("Content-Length", String(metadata.size));
+
+    const stream = file.createReadStream();
+    stream.on("error", error => {
+      console.error("[MediaRoute] Saved master download stream failed:", error.message);
+      if (!res.headersSent) {
+        res.status(502).json({ success: false, message: "Master download failed" });
+      } else {
+        res.end();
+      }
+    });
+    stream.pipe(res);
+  } catch (error) {
+    console.error("[MediaRoute] Failed to download saved render:", error.message);
+    if (!res.headersSent) {
+      return res.status(500).json({
+        success: false,
+        message: error.message || "Could not download saved render",
+      });
+    }
+    return res.end();
+  }
+});
+
 router.delete("/render-jobs/:jobId", async (req, res) => {
   try {
     const { jobId } = req.params;

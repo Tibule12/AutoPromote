@@ -39,6 +39,13 @@ jest.mock("firebase-admin", () => ({
   storage: jest.fn(() => ({
     bucket: jest.fn(() => ({
       file: jest.fn(path => ({
+        exists: jest.fn(async () => [path === "processed/multicam_job-1.mp4"]),
+        getMetadata: jest.fn(async () => [
+          { contentType: "video/mp4", size: Buffer.byteLength("master-video") },
+        ]),
+        createReadStream: jest.fn(() =>
+          require("stream").Readable.from([Buffer.from("master-video")])
+        ),
         delete: jest.fn(async () => {
           deletedObjects.push(path);
         }),
@@ -144,6 +151,17 @@ describe("mediaRoutes render approval", () => {
     expect(response.body.renderCheckpoint.chunks).toBeUndefined();
     expect(response.body.manifestUrl).toBe("https://cdn.example.com/multicam-job-1.json");
     expect(response.body.manifestStoragePath).toBe("processed/manifests/multicam_job-1.json");
+  });
+
+  it("downloads an owned saved master as an attachment", async () => {
+    const response = await request(buildApp()).get("/api/media/render-jobs/job-1/download");
+
+    expect(response.statusCode).toBe(200);
+    expect(response.headers["content-type"]).toMatch(/^video\/mp4/);
+    expect(response.headers["content-disposition"]).toBe(
+      'attachment; filename="cam-combiner-job-1.mp4"'
+    );
+    expect(response.body).toEqual(Buffer.from("master-video"));
   });
 
   it("approves a held render and exposes the approved output URL", async () => {
