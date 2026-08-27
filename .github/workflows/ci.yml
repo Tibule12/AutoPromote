@@ -61,6 +61,8 @@ jobs:
         uses: actions/checkout@v4
       - name: Verify portable Viral Clip contracts
         run: |
+          sudo apt-get update
+          sudo apt-get install --yes ffmpeg
           python -m unittest \
             python_media_worker.test_viral_creative_effects \
             python_media_worker.test_viral_studio_plan
