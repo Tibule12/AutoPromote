@@ -948,6 +948,14 @@ class VideoEditingService {
         endpoint = "/render-viral-clip";
         payload = {
           ...payload,
+          // ViralClipStudio already produces the canonical worker contract.
+          // Preserve every reviewed/editorial field here instead of silently
+          // rebuilding a smaller legacy subset. The server-controlled source
+          // and job identity below still win over browser-supplied values.
+          ...viralData,
+          video_url: videoUrl,
+          job_id: jobId,
+          async_mode: !!jobId,
           start_time: startTime,
           end_time: endTime,
           auto_captions:
@@ -1247,6 +1255,30 @@ class VideoEditingService {
     }
   }
 
+  async planStoryVisuals(beats, userId, options = {}) {
+    const payload = {
+      beats: Array.isArray(beats) ? beats : [],
+      max_candidates: Math.max(1, Math.min(4, Number(options.maxCandidates || 3))),
+      request_id: String(options.requestId || ""),
+    };
+    try {
+      let response;
+      try {
+        response = await axios.post(`${MEDIA_WORKER_URL}/plan-story-visuals`, payload, {
+          timeout: 90000,
+        });
+      } catch (error) {
+        if (!shouldTryLocalWorker(error)) throw error;
+        response = await axios.post(`${LOCAL_MEDIA_WORKER_URL}/plan-story-visuals`, payload, {
+          timeout: 90000,
+        });
+      }
+      return response.data;
+    } catch (error) {
+      throw new Error(`Story visual planning failed: ${getWorkerErrorDetail(error)}`);
+    }
+  }
+
   /**
    * Render a specific clip from a larger video
    */
@@ -1311,7 +1343,7 @@ class VideoEditingService {
   /**
    * Start an async transcription job
    */
-  async startTranscriptionJob(videoUrl, userId) {
+  async startTranscriptionJob(videoUrl, userId, { translateToEnglish = false } = {}) {
     const jobId = uuidv4();
     try {
       // Store initial job state
@@ -1322,11 +1354,12 @@ class VideoEditingService {
         videoUrl,
         status: "queued",
         progress: 0,
+        translateToEnglish: !!translateToEnglish,
         createdAt: new Date().toISOString(),
       });
 
       // Start background task
-      this.processTranscriptionBackground(jobId, videoUrl).catch(err => {
+      this.processTranscriptionBackground(jobId, videoUrl, { translateToEnglish }).catch(err => {
         console.error(`[VideoTranscribe] Background Job ${jobId} Failed:`, err);
       });
 
@@ -1339,7 +1372,7 @@ class VideoEditingService {
   /**
    * Background processor for transcription
    */
-  async processTranscriptionBackground(jobId, videoUrl) {
+  async processTranscriptionBackground(jobId, videoUrl, { translateToEnglish = false } = {}) {
     const docRef = db.collection("video_edits").doc(jobId);
     try {
       await docRef.update({ status: "processing", progress: 10 });
@@ -1351,8 +1384,10 @@ class VideoEditingService {
         `${MEDIA_WORKER_URL}/transcribe`,
         {
           video_url: videoUrl,
-          language: "auto",
-          hint: "South African English accent possible. Preserve local names, slang, and code-switching.",
+          translate_to_english: !!translateToEnglish,
+          hint: translateToEnglish
+            ? "Multilingual South African podcast. Translate all spoken content into natural English."
+            : "Multilingual South African podcast. Preserve every language, local name, slang term, and code-switch exactly as spoken.",
         },
         {
           timeout: 600000, // 10 minutes
@@ -1364,7 +1399,13 @@ class VideoEditingService {
 
       await docRef.update({
         status: "completed",
-        result: { segments: result.segments },
+        result: {
+          segments: result.segments,
+          transcriptionQuality: result.transcription_quality || null,
+          detectedLanguages: result.detected_languages || [],
+          languageMode: result.language_mode ||
+            (translateToEnglish ? "translated_to_english" : "preserve_spoken_languages"),
+        },
         progress: 100,
         completedAt: new Date().toISOString(),
       });

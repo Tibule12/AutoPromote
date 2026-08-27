@@ -276,3 +276,108 @@ def build_caption_override_transcript(text: Any, duration: Any) -> Dict[str, Lis
             }
         ]
     }
+
+
+def build_edited_caption_transcript(caption_segments: Iterable[Any]) -> Dict[str, List[Dict[str, Any]]]:
+    """Preserve creator-reviewed caption text/timing and derive word timings for ASS."""
+    normalized = []
+    for index, item in enumerate(caption_segments or []):
+        text = re.sub(r"\s+", " ", str(_read(item, "text", default="") or "")).strip()
+        start = max(0.0, _finite_number(_read(item, "start_time", "startTime", "start"), 0.0))
+        end = _finite_number(_read(item, "end_time", "endTime", "end"), start)
+        if not text or end is None or end <= start:
+            continue
+        words = text.split()
+        word_duration = (end - start) / max(1, len(words))
+        normalized_segment = {
+                "id": _read(item, "id", default=index),
+                "start": start,
+                "end": end,
+                "text": text,
+                "words": [
+                    {
+                        "word": word,
+                        "start": start + word_index * word_duration,
+                        "end": min(end, start + (word_index + 1) * word_duration),
+                        "probability": 1.0,
+                    }
+                    for word_index, word in enumerate(words)
+                ],
+                "no_speech_prob": 0.0,
+            }
+        speaker = str(_read(item, "speaker", "speaker_id", "speakerId", default="") or "").strip()
+        speaker_label = str(
+            _read(item, "speaker_label", "speakerLabel", default="") or ""
+        ).strip()
+        language = str(
+            _read(item, "language", "language_code", "languageCode", default="") or ""
+        ).strip()
+        language_label = str(
+            _read(item, "language_label", "languageLabel", default="") or ""
+        ).strip()
+        languages = [
+            str(value or "").strip()
+            for value in (_read(item, "languages", default=[]) or [])
+            if str(value or "").strip()
+        ]
+        if speaker:
+            normalized_segment["speaker"] = speaker
+        if speaker_label:
+            normalized_segment["speakerLabel"] = speaker_label
+        if language:
+            normalized_segment["language"] = language
+        if language_label:
+            normalized_segment["languageLabel"] = language_label
+        if languages:
+            normalized_segment["languages"] = list(dict.fromkeys(languages))
+        caption_placement = str(
+            _read(item, "caption_placement", "captionPlacement", "placement", default="") or ""
+        ).strip()
+        caption_icon = str(
+            _read(item, "caption_icon", "captionIcon", "icon", default="") or ""
+        ).strip()
+        if caption_placement:
+            normalized_segment["captionPlacement"] = caption_placement
+        if caption_icon:
+            normalized_segment["captionIcon"] = caption_icon
+        normalized_segment["textReviewRequired"] = bool(
+            _read(item, "text_review_required", "textReviewRequired", default=False)
+        )
+        normalized_segment["textReviewed"] = bool(
+            _read(item, "text_reviewed", "textReviewed", default=False)
+        )
+        normalized_segment["reviewRequired"] = bool(
+            _read(item, "review_required", "reviewRequired", default=False)
+        )
+        normalized.append(normalized_segment)
+    normalized.sort(key=lambda segment: (segment["start"], segment["end"]))
+    return {"segments": normalized}
+
+
+def remap_caption_transcript_to_speed_plan(
+    transcript: Mapping[str, Any], speed_plan: Iterable[Mapping[str, float]]
+) -> Dict[str, List[Dict[str, Any]]]:
+    """Move creator-reviewed caption and word times onto the post-speed render clock."""
+    plan = list(speed_plan or [])
+    remapped = []
+    for segment in (transcript or {}).get("segments", []) or []:
+        start = map_timeline_time(plan, _read(segment, "start", default=0.0))
+        end = map_timeline_time(plan, _read(segment, "end", default=start))
+        if end <= start:
+            continue
+        remapped.append(
+            {
+                **segment,
+                "start": start,
+                "end": end,
+                "words": [
+                    {
+                        **word,
+                        "start": map_timeline_time(plan, _read(word, "start", default=start)),
+                        "end": map_timeline_time(plan, _read(word, "end", default=end)),
+                    }
+                    for word in (segment.get("words") or [])
+                ],
+            }
+        )
+    return {"segments": remapped}

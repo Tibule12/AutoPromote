@@ -19,6 +19,7 @@ import re  # Added for parsing silence output
 import hashlib
 import hmac
 import itertools
+import tempfile
 import urllib.request
 import urllib.parse
 import warnings
@@ -53,10 +54,12 @@ except ImportError:
 try:
     from .viral_render_contract import (
         build_caption_override_transcript,
+        build_edited_caption_transcript,
         build_segment_transition_filters,
         build_speed_filter_complex,
         map_timeline_time,
         normalize_speed_plan,
+        remap_caption_transcript_to_speed_plan,
         resolve_caption_layout,
         speed_plan_changes_timing,
         speed_plan_output_duration,
@@ -64,10 +67,12 @@ try:
 except ImportError:
     from viral_render_contract import (
         build_caption_override_transcript,
+        build_edited_caption_transcript,
         build_segment_transition_filters,
         build_speed_filter_complex,
         map_timeline_time,
         normalize_speed_plan,
+        remap_caption_transcript_to_speed_plan,
         resolve_caption_layout,
         speed_plan_changes_timing,
         speed_plan_output_duration,
@@ -75,8 +80,34 @@ except ImportError:
 
 try:
     from .viral_creative_effects import build_creative_filter_complex, normalize_creative_plan
+    from .motion_sculpture import render_motion_sculpture, validate_rendered_media
+    from .content_aware_reality import (
+        SceneUnderstandingError,
+        build_reality_captions,
+        build_grounded_scene_brief,
+        generate_studio_background_image,
+        generate_story_images,
+        generate_story_videos,
+        render_content_aware_reality,
+        search_story_video_candidates,
+        validate_scene_brief,
+    )
+    from .viral_studio_plan import build_studio_edit_plan, validate_studio_edit_plan
 except ImportError:
     from viral_creative_effects import build_creative_filter_complex, normalize_creative_plan
+    from motion_sculpture import render_motion_sculpture, validate_rendered_media
+    from content_aware_reality import (
+        SceneUnderstandingError,
+        build_reality_captions,
+        build_grounded_scene_brief,
+        generate_studio_background_image,
+        generate_story_images,
+        generate_story_videos,
+        render_content_aware_reality,
+        search_story_video_candidates,
+        validate_scene_brief,
+    )
+    from viral_studio_plan import build_studio_edit_plan, validate_studio_edit_plan
 
 # Fix asyncio event loop policy for Windows (Enable Proactor for Subprocesses)
 if sys.platform == 'win32':
@@ -202,17 +233,10 @@ try:
     import whisper
 except ImportError:
     whisper = None
-    allow_runtime_dependency_install = str(
-        os.getenv("ALLOW_RUNTIME_DEPENDENCY_INSTALL", "false" if os.getenv("K_SERVICE") else "true")
-    ).strip().lower() in {"1", "true", "yes", "on"}
-    if allow_runtime_dependency_install:
-        import logging
-        logging.getLogger("MediaWorker").warning("Whisper module not found. Installing...")
-        try:
-            subprocess.check_call([sys.executable, "-m", "pip", "install", "openai-whisper"])
-            import whisper
-        except Exception:
-            whisper = None
+    # Dependencies belong in the image/venv, never in an HTTP worker startup.
+    # Faster-Whisper is the configured primary engine; missing optional legacy
+    # Whisper must remain a visible capability status instead of downloading a
+    # multi-gigabyte Torch stack at runtime.
 
 try:
     from faster_whisper import WhisperModel as FasterWhisperModel
@@ -223,17 +247,6 @@ try:
     import yt_dlp
 except ImportError:
     yt_dlp = None
-    allow_runtime_dependency_install = str(
-        os.getenv("ALLOW_RUNTIME_DEPENDENCY_INSTALL", "false" if os.getenv("K_SERVICE") else "true")
-    ).strip().lower() in {"1", "true", "yes", "on"}
-    if allow_runtime_dependency_install:
-        import logging
-        logging.getLogger("MediaWorker").warning("yt_dlp module not found. Installing...")
-        try:
-            subprocess.check_call([sys.executable, "-m", "pip", "install", "yt-dlp"])
-            import yt_dlp
-        except Exception:
-            yt_dlp = None
 
 # Logging setup
 logging.basicConfig(level=logging.INFO)
@@ -363,11 +376,28 @@ def get_faster_whisper_model(model_name=None):
         model_cls = FasterWhisperModel
         if model_cls is None:
             raise RuntimeError("faster-whisper is not installed")
-        return model_cls(
-            resolved_model_name,
-            device=load_device,
-            compute_type=load_compute_type,
-        )
+        model_options = {
+            "device": load_device,
+            "compute_type": load_compute_type,
+        }
+        reality_model_name = str(
+            os.getenv("AUTOPROMOTE_REALITY_WHISPER_MODEL")
+            or "digiphyte/swivuriso-turbo"
+        ).strip().lower()
+        reality_revision = str(
+            os.getenv("AUTOPROMOTE_REALITY_WHISPER_REVISION") or ""
+        ).strip()
+        if resolved_model_name == reality_model_name and reality_revision:
+            model_options["revision"] = reality_revision
+        multicam_model_name = str(
+            os.getenv("MULTICAM_CAPTION_WHISPER_MODEL") or "digiphyte/swivuriso-turbo"
+        ).strip().lower()
+        multicam_revision = str(
+            os.getenv("MULTICAM_CAPTION_WHISPER_REVISION") or ""
+        ).strip()
+        if resolved_model_name == multicam_model_name and multicam_revision:
+            model_options["revision"] = multicam_revision
+        return model_cls(resolved_model_name, **model_options)
 
     try:
         loaded = load_faster_whisper_model(device, compute_type)
@@ -579,6 +609,66 @@ def get_media_duration(input_path):
         return max(0.0, float(result.stdout.strip()))
     except Exception:
         return 0.0
+
+
+def validate_final_viral_delivery(
+    output_path,
+    *,
+    expected_duration,
+    expected_audio,
+):
+    """Reject technically broken exports before they are published to a creator."""
+    media = validate_rendered_media(output_path, expected_audio=expected_audio)
+    actual_duration = float(media.get("duration") or 0.0)
+    target_duration = max(0.05, float(expected_duration or 0.0))
+    tolerance = max(0.45, target_duration * 0.035)
+    duration_delta = abs(actual_duration - target_duration)
+    if duration_delta > tolerance:
+        raise RuntimeError(
+            f"Final viral clip duration differs from the edit plan by {duration_delta:.2f}s"
+        )
+
+    black_probe = subprocess.run(
+        [
+            "ffmpeg", "-hide_banner", "-nostats", "-i", output_path,
+            "-vf", "blackdetect=d=0.30:pix_th=0.02:pic_th=0.985",
+            "-an", "-f", "null", "-",
+        ],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        check=False,
+    )
+    black_ranges = []
+    for match in re.finditer(
+        r"black_start:([0-9.]+)\s+black_end:([0-9.]+)\s+black_duration:([0-9.]+)",
+        black_probe.stderr or "",
+    ):
+        start, end, duration = (float(value) for value in match.groups())
+        black_ranges.append({"start": start, "end": end, "duration": duration})
+    unplanned_black = [
+        item
+        for item in black_ranges
+        if item["duration"] >= 0.30
+        and item["start"] > 0.12
+        and item["end"] < actual_duration - 0.12
+    ]
+    if unplanned_black:
+        raise RuntimeError("Final viral clip contains an unplanned black section")
+
+    return {
+        "status": "passed",
+        "media": media,
+        "duration": {
+            "expected": round(target_duration, 3),
+            "actual": round(actual_duration, 3),
+            "delta": round(duration_delta, 3),
+            "tolerance": round(tolerance, 3),
+        },
+        "audio_expected": bool(expected_audio),
+        "black_ranges": black_ranges,
+        "browser_delivery": "h264_yuv420p_faststart",
+    }
 
 
 def probe_media_stream_summary(input_path):
@@ -811,7 +901,16 @@ def detect_content_type(input_path, audio_energy=None):
     # 2. Audio energy pattern analysis
     if audio_energy and isinstance(audio_energy, list) and len(audio_energy) > 10:
         import numpy as np
-        energy_arr = np.array(audio_energy, dtype=np.float64)
+        energy_values = [
+            float(item[1]) if isinstance(item, (list, tuple)) and len(item) >= 2 else float(item)
+            for item in audio_energy
+        ]
+        # analyze_audio_energy returns dBFS windows. Classification thresholds
+        # operate on 0..1 activity, not on a 2-D array mixing timestamps and dB.
+        energy_arr = np.array(
+            [max(0.0, min(1.0, (db + 48.0) / 28.0)) for db in energy_values],
+            dtype=np.float64,
+        )
         mean_e = float(np.mean(energy_arr))
         std_e = float(np.std(energy_arr))
         high_energy_ratio = float(np.sum(energy_arr > mean_e + std_e) / max(1, len(energy_arr)))
@@ -1564,6 +1663,338 @@ def build_transcription_prompt(extra_hint=""):
     hint = str(extra_hint or "").strip()
     return f"{base} {hint}".strip()
 
+
+CAPTION_LANGUAGE_ALIASES = {
+    "en": "en",
+    "eng": "en",
+    "english": "en",
+    "xh": "xh",
+    "xho": "xh",
+    "xhosa": "xh",
+    "isixhosa": "xh",
+    "zu": "zu",
+    "zul": "zu",
+    "zulu": "zu",
+    "isizulu": "zu",
+    "mixed": "mixed",
+    "multilingual": "mixed",
+    "code-switched": "mixed",
+    "code_switched": "mixed",
+}
+
+CAPTION_LANGUAGE_LABELS = {
+    "en": "English",
+    "xh": "isiXhosa",
+    "zu": "isiZulu",
+    "mixed": "Mixed / code-switched",
+    "und": "Language needs review",
+}
+
+
+def normalize_caption_language(value):
+    """Keep only language labels the caption editor can honestly explain."""
+    normalized = re.sub(r"[^a-z_-]+", "", str(value or "").strip().lower())
+    return CAPTION_LANGUAGE_ALIASES.get(normalized, "und")
+
+
+def annotate_caption_identity_segments(transcription_segments, detected_language=None):
+    """Attach editable speaker/language evidence without inventing either value."""
+    global_language = normalize_caption_language(detected_language)
+    annotated = []
+    for index, segment in enumerate(transcription_segments or []):
+        updated = dict(segment or {})
+        raw_languages = (
+            updated.get("languages")
+            or updated.get("detected_languages")
+            or updated.get("detectedLanguages")
+            or []
+        )
+        if isinstance(raw_languages, str):
+            raw_languages = [raw_languages]
+        languages = []
+        for item in raw_languages:
+            normalized = normalize_caption_language(item)
+            if normalized != "und" and normalized not in languages:
+                languages.append(normalized)
+        primary_language = normalize_caption_language(
+            updated.get("language")
+            or updated.get("language_code")
+            or updated.get("languageCode")
+        )
+        if primary_language == "und" and global_language != "und":
+            primary_language = global_language
+        if not languages and primary_language != "und":
+            languages = [primary_language]
+        if len(languages) > 1:
+            primary_language = "mixed"
+
+        speaker = str(
+            updated.get("speaker")
+            or updated.get("speaker_id")
+            or updated.get("speakerId")
+            or "unknown"
+        ).strip() or "unknown"
+        speaker_label = str(
+            updated.get("speaker_label")
+            or updated.get("speakerLabel")
+            or (f"Speaker {speaker}" if speaker not in {"unknown", "und"} else "Speaker needs review")
+        ).strip()
+        word_probabilities = [
+            float(word.get("probability"))
+            for word in (updated.get("words") or [])
+            if word.get("probability") is not None
+        ]
+        transcript_confidence = clamp_float(
+            updated.get("transcriptConfidence") or 0.0,
+            0.0,
+            1.0,
+        )
+        text_review_required = bool(
+            updated.get("text_review_required")
+            or updated.get("textReviewRequired")
+            or primary_language in {"xh", "zu", "mixed"}
+            or (word_probabilities and min(word_probabilities) < 0.72)
+            or (transcript_confidence and transcript_confidence < 0.82)
+        )
+        text_reviewed = bool(
+            updated.get("text_reviewed") or updated.get("textReviewed")
+        )
+
+        updated.update(
+            {
+                "id": updated.get("id", index),
+                "speaker": speaker,
+                "speakerLabel": speaker_label,
+                "language": primary_language,
+                "languageLabel": CAPTION_LANGUAGE_LABELS.get(
+                    primary_language, CAPTION_LANGUAGE_LABELS["und"]
+                ),
+                "languages": languages,
+                "languageConfidence": round(
+                    clamp_float(
+                        updated.get("language_confidence")
+                        or updated.get("languageConfidence")
+                        or 0.0,
+                        0.0,
+                        1.0,
+                    ),
+                    3,
+                ),
+                "textReviewRequired": text_review_required,
+                "textReviewed": text_reviewed,
+                "reviewRequired": bool(
+                    updated.get("review_required")
+                    or updated.get("reviewRequired")
+                    or primary_language == "und"
+                    or speaker in {"unknown", "und"}
+                    or (text_review_required and not text_reviewed)
+                ),
+            }
+        )
+        annotated.append(updated)
+    return annotated
+
+
+def normalize_openai_diarized_transcription(payload):
+    """Convert diarized_json into the timestamp contract used by the editor."""
+    normalized = []
+    for index, segment in enumerate((payload or {}).get("segments") or []):
+        text = normalize_transcript_text(segment.get("text"))
+        start = max(0.0, float(segment.get("start", 0.0) or 0.0))
+        end = max(start + 0.05, float(segment.get("end", start + 0.8) or start + 0.8))
+        if not text:
+            continue
+        words = text.split()
+        word_duration = (end - start) / max(1, len(words))
+        speaker = str(segment.get("speaker") or "unknown").strip() or "unknown"
+        normalized.append(
+            {
+                "id": segment.get("id", index),
+                "start": start,
+                "end": end,
+                "text": text,
+                "speaker": speaker,
+                "speakerLabel": (
+                    f"Speaker {speaker}" if speaker not in {"unknown", "und"} else "Speaker needs review"
+                ),
+                "words": [
+                    {
+                        "word": word,
+                        "start": start + word_index * word_duration,
+                        "end": min(end, start + (word_index + 1) * word_duration),
+                        "probability": 1.0,
+                    }
+                    for word_index, word in enumerate(words)
+                ],
+                "avg_logprob": -0.25,
+                "no_speech_prob": 0.0,
+                "compression_ratio": 1.0,
+            }
+        )
+    return {
+        "text": normalize_transcript_text((payload or {}).get("text")),
+        "segments": normalized,
+        "duration": (payload or {}).get("duration"),
+        "language": None,
+        "engine": "openai-gpt-4o-transcribe-diarize",
+    }
+
+
+def classify_caption_segment_languages_with_openai(segments):
+    """Label transcript text only; never rewrite or translate creator-visible words."""
+    api_key = str(os.getenv("OPENAI_API_KEY") or os.getenv("OPENAI_KEY") or "").strip()
+    if not api_key or not segments:
+        return segments
+    try:
+        import requests
+
+        response = requests.post(
+            (os.getenv("OPENAI_API_BASE") or "https://api.openai.com")
+            + "/v1/chat/completions",
+            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+            json={
+                "model": os.getenv("CAPTION_LANGUAGE_CLASSIFIER_MODEL") or "gpt-4o-mini",
+                "temperature": 0,
+                "response_format": {"type": "json_object"},
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": (
+                            "Label each South African podcast transcript segment without changing its text. "
+                            "Allowed language codes are xh (isiXhosa), en (English), zu (isiZulu), mixed, or und. "
+                            "Use mixed when languages switch inside one segment. Return JSON only as "
+                            "{\"segments\":[{\"id\":...,\"language\":...,\"languages\":[...],\"confidence\":0..1}]}."
+                        ),
+                    },
+                    {
+                        "role": "user",
+                        "content": json.dumps(
+                            [
+                                {"id": segment.get("id", index), "text": segment.get("text", "")}
+                                for index, segment in enumerate(segments)
+                            ],
+                            ensure_ascii=False,
+                        ),
+                    },
+                ],
+            },
+            timeout=90,
+        )
+        response.raise_for_status()
+        message = response.json()["choices"][0]["message"]["content"]
+        classified = json.loads(message).get("segments") or []
+        labels = {str(item.get("id")): item for item in classified}
+        updated_segments = []
+        for index, segment in enumerate(segments):
+            updated = dict(segment)
+            label = labels.get(str(segment.get("id", index))) or {}
+            language = normalize_caption_language(label.get("language"))
+            languages = []
+            for item in label.get("languages") or []:
+                normalized = normalize_caption_language(item)
+                if normalized != "und" and normalized not in languages:
+                    languages.append(normalized)
+            if len(languages) > 1:
+                language = "mixed"
+            updated.update(
+                {
+                    "language": language,
+                    "languages": languages or ([language] if language != "und" else []),
+                    "languageConfidence": round(
+                        clamp_float(label.get("confidence", 0.0), 0.0, 1.0), 3
+                    ),
+                }
+            )
+            updated_segments.append(updated)
+        return updated_segments
+    except Exception as exc:
+        logger.warning("Caption language classification unavailable: %s", str(exc)[-500:])
+        return segments
+
+
+def transcribe_with_openai_diarization(file_path):
+    """Use the speaker-aware transcription API when this project is entitled to it."""
+    api_key = str(os.getenv("OPENAI_API_KEY") or os.getenv("OPENAI_KEY") or "").strip()
+    if not api_key:
+        raise RuntimeError("OPENAI_API_KEY is not configured for diarized captions")
+    import requests
+
+    audio_file = tempfile.NamedTemporaryFile(suffix=".mp3", delete=False)
+    audio_path = audio_file.name
+    audio_file.close()
+    try:
+        subprocess.run(
+            [
+                "ffmpeg",
+                "-y",
+                "-nostdin",
+                "-i",
+                file_path,
+                "-vn",
+                "-ac",
+                "1",
+                "-ar",
+                "16000",
+                "-c:a",
+                "libmp3lame",
+                "-b:a",
+                "96k",
+                audio_path,
+            ],
+            check=True,
+            capture_output=True,
+            timeout=180,
+        )
+        with open(audio_path, "rb") as audio_stream:
+            response = requests.post(
+                (os.getenv("OPENAI_API_BASE") or "https://api.openai.com")
+                + "/v1/audio/transcriptions",
+                headers={"Authorization": f"Bearer {api_key}"},
+                files={"file": ("podcast-clip.mp3", audio_stream, "audio/mpeg")},
+                data={
+                    "model": os.getenv("OPENAI_DIARIZED_TRANSCRIPTION_MODEL")
+                    or "gpt-4o-transcribe-diarize",
+                    "response_format": "diarized_json",
+                    "chunking_strategy": "auto",
+                },
+                timeout=600,
+            )
+        response.raise_for_status()
+        result = normalize_openai_diarized_transcription(response.json())
+        result["segments"] = classify_caption_segment_languages_with_openai(result["segments"])
+        return result
+    finally:
+        try:
+            if os.path.exists(audio_path):
+                os.remove(audio_path)
+        except OSError:
+            pass
+
+
+def transcribe_captions_with_provider(file_path, *, translate_to_english=False, prompt_hint=""):
+    provider = str(os.getenv("VIRAL_CAPTION_TRANSCRIPTION_PROVIDER") or "auto").strip().lower()
+    if not translate_to_english and provider in {"auto", "openai", "openai_diarize", "diarize"}:
+        try:
+            return transcribe_with_openai_diarization(file_path)
+        except Exception as exc:
+            if provider not in {"", "auto"}:
+                raise
+            logger.warning(
+                "Speaker-aware caption provider unavailable; using local evidence filter: %s",
+                str(exc)[-500:],
+            )
+    return transcribe_with_hints(
+        file_path,
+        word_timestamps=True,
+        prompt_hint=prompt_hint,
+        task="translate" if translate_to_english else "transcribe",
+        model_name=(
+            os.getenv("VIRAL_CAPTION_WHISPER_MODEL")
+            or os.getenv("MULTICAM_CAPTION_WHISPER_MODEL")
+            or "digiphyte/swivuriso-turbo"
+        ),
+    )
+
 def transcribe_with_hints(file_path, *, word_timestamps=False, language=None, prompt_hint="", task=None, model_name=None):
     normalized_language = normalize_transcription_language(language)
     engine = get_transcription_engine()
@@ -1609,6 +2040,13 @@ def transcribe_with_hints(file_path, *, word_timestamps=False, language=None, pr
                         "end": float(getattr(segment, "end", 0.0) or 0.0),
                         "text": str(getattr(segment, "text", "") or ""),
                         "words": words,
+                        "avg_logprob": float(getattr(segment, "avg_logprob", -1.1) or -1.1),
+                        "no_speech_prob": float(
+                            getattr(segment, "no_speech_prob", 0.0) or 0.0
+                        ),
+                        "compression_ratio": float(
+                            getattr(segment, "compression_ratio", 1.0) or 1.0
+                        ),
                     }
                 )
             return {
@@ -1660,6 +2098,58 @@ LOW_SIGNAL_TRANSCRIPT_TOKENS = {
 
 def normalize_transcript_text(value):
     return re.sub(r"\s+", " ", str(value or "").strip())
+
+
+def get_transcript_hallucination_reasons(segment):
+    text = normalize_transcript_text(segment.get("text"))
+    word_rows = [dict(word or {}) for word in (segment.get("words") or [])]
+    tokens = [
+        re.sub(r"[^\w'-]+", "", str(word.get("word") or "")).lower()
+        for word in word_rows
+    ] or [re.sub(r"[^\w'-]+", "", token).lower() for token in text.split()]
+    tokens = [token for token in tokens if token]
+    reasons = []
+    if not text or not tokens:
+        return ["empty_text"]
+
+    token_counts = {}
+    for token in tokens:
+        token_counts[token] = token_counts.get(token, 0) + 1
+    dominant_ratio = max(token_counts.values(), default=0) / max(1, len(tokens))
+    unique_ratio = len(token_counts) / max(1, len(tokens))
+    if len(tokens) >= 4 and dominant_ratio >= 0.75:
+        reasons.append("repeated_token")
+    if len(tokens) >= 8 and unique_ratio <= 0.35:
+        reasons.append("repeated_phrase")
+
+    timed_words = [
+        word
+        for word in word_rows
+        if word.get("start") is not None and word.get("end") is not None
+    ]
+    collapsed_words = sum(
+        1
+        for word in timed_words
+        if float(word.get("end") or 0.0) - float(word.get("start") or 0.0) <= 0.015
+    )
+    if len(timed_words) >= 5 and collapsed_words / len(timed_words) >= 0.5:
+        reasons.append("collapsed_timestamps")
+
+    start = max(0.0, float(segment.get("start") or 0.0))
+    end = max(start, float(segment.get("end") or start))
+    if len(tokens) >= 6 and end - start <= 0.2:
+        reasons.append("impossible_word_rate")
+
+    probabilities = [
+        float(word.get("probability"))
+        for word in word_rows
+        if word.get("probability") is not None
+    ]
+    if probabilities and len(tokens) >= 3:
+        average_probability = sum(probabilities) / len(probabilities)
+        if average_probability < 0.3:
+            reasons.append("low_word_confidence")
+    return reasons
 
 
 def estimate_transcript_segment_confidence(segment):
@@ -1725,6 +2215,18 @@ def estimate_transcript_segment_confidence(segment):
     if re.search(r"(.)\1{5,}", text):
         confidence -= 0.12
 
+    hallucination_reasons = get_transcript_hallucination_reasons(segment)
+    if "low_word_confidence" in hallucination_reasons:
+        confidence -= 0.28
+    if "repeated_token" in hallucination_reasons:
+        confidence -= 0.35
+    if "repeated_phrase" in hallucination_reasons:
+        confidence -= 0.28
+    if "collapsed_timestamps" in hallucination_reasons:
+        confidence -= 0.4
+    if "impossible_word_rate" in hallucination_reasons:
+        confidence -= 0.4
+
     return round(max(0.0, min(1.0, confidence)), 3)
 
 
@@ -1736,6 +2238,45 @@ def annotate_transcription_segments(transcription_segments):
         updated["transcriptConfidence"] = estimate_transcript_segment_confidence(updated)
         annotated.append(updated)
     return annotated
+
+
+def filter_caption_transcription_segments(transcription_segments):
+    annotated = annotate_transcription_segments(transcription_segments)
+    accepted = []
+    rejected = []
+    for index, segment in enumerate(annotated):
+        reasons = get_transcript_hallucination_reasons(segment)
+        confidence = float(segment.get("transcriptConfidence", 0.0) or 0.0)
+        if confidence < 0.52:
+            reasons = list(dict.fromkeys([*reasons, "low_segment_confidence"]))
+        if reasons:
+            rejected.append(
+                {
+                    "index": index,
+                    "start": float(segment.get("start", 0.0) or 0.0),
+                    "end": float(segment.get("end", 0.0) or 0.0),
+                    "confidence": confidence,
+                    "reasons": reasons,
+                }
+            )
+        else:
+            accepted.append(segment)
+
+    return {
+        "segments": accepted,
+        "quality": {
+            "status": (
+                "rejected"
+                if annotated and not accepted
+                else "review_required"
+                if rejected
+                else "ready"
+            ),
+            "accepted_segments": len(accepted),
+            "rejected_segments": len(rejected),
+            "rejections": rejected,
+        },
+    }
 
 
 def summarize_transcript_quality(transcription_segments, content_type="general"):
@@ -2276,6 +2817,9 @@ def build_short_hook_from_text(text, fallback="Watch This"):
     normalized = cleaned.lower()
 
     editorial_hooks = [
+        (("i can do this",), "THE MOMENT I CHOSE TO SING"),
+        (("egazini", "brothers and sisters"), "SINGING WAS IN MY BLOOD"),
+        (("timeline", "choir"), "THE CHOIR THAT CHANGED EVERYTHING"),
         (("fail", "scared"), "WHY ARE WE SO SCARED TO FAIL?"),
         (("failing", "scared"), "WHY ARE WE SO SCARED TO FAIL?"),
         (("stopped today", "soulmate"), "WHAT WOULD YOU REGRET MOST?"),
@@ -4186,6 +4730,20 @@ def build_delogo_filters(width, height, mode, duration=None, video_path=None, ma
 # ============================================================
 
 CAPTION_STYLES = {
+    "story_pop": {
+        "label": "Story Pop",
+        "fontname": "DejaVu Sans",
+        "primary_color": "&H00FFFFFF",
+        "outline_color": "&H00140A22",
+        "highlight_color": "&H003DB3FF",
+        "fontsize": 50,
+        "bold": True,
+        "outline": 4,
+        "shadow": 2,
+        "alignment": 2,
+        "margin_v": 108,
+        "animation": "story_pop",
+    },
     "bold_pop": {
         "label": "Bold Pop",
         "fontname": "DejaVu Sans",
@@ -4259,6 +4817,95 @@ CAPTION_STYLES = {
 }
 
 
+def resolve_story_caption_treatment(segment, index, video_width, video_height, font_size):
+    """Choose an intentional story-caption position, badge and accent per reviewed line."""
+    text = str(segment.get("text") or "").lower()
+    requested_placement = str(
+        segment.get("captionPlacement")
+        or segment.get("caption_placement")
+        or segment.get("placement")
+        or "auto"
+    ).strip().lower()
+    requested_icon = str(
+        segment.get("captionIcon")
+        or segment.get("caption_icon")
+        or segment.get("icon")
+        or "auto"
+    ).strip().lower()
+
+    if any(token in text for token in ("facebook", "scroll", "timeline", "online")):
+        concept = "phone"
+        auto_placement = "top_left"
+        scene_label = "ONLINE DISCOVERY"
+    elif any(token in text for token in ("cape town", "ekapa", "durban", "johannesburg")):
+        concept = "place"
+        auto_placement = "top_left"
+        scene_label = "PLACE MEMORY"
+    elif any(token in text for token in ("i can do this", "angivuke", "decide", "ngadecide")):
+        concept = "payoff"
+        auto_placement = "middle_left"
+        scene_label = "TURNING POINT"
+    elif any(token in text for token in ("choir", "sing", "ngiyocula", "egazini", "brothers and sisters")):
+        concept = "music"
+        auto_placement = "bottom_center"
+        scene_label = "MUSIC MEMORY"
+    else:
+        concept = "payoff" if index % 3 == 2 else "story"
+        auto_placement = ("bottom_left", "bottom_right", "top_left")[index % 3]
+        scene_label = "STORY BEAT"
+
+    placements = {
+        "top_left": (7, 0.075, 0.09),
+        "top_right": (9, 0.925, 0.09),
+        "middle_left": (4, 0.075, 0.48),
+        "middle_right": (6, 0.925, 0.48),
+        "bottom_left": (1, 0.075, 0.86),
+        "bottom_center": (2, 0.5, 0.86),
+        "bottom_right": (3, 0.925, 0.86),
+    }
+    placement = requested_placement if requested_placement in placements else auto_placement
+    alignment, x_ratio, y_ratio = placements[placement]
+    x = round(video_width * x_ratio)
+    y = round(video_height * y_ratio)
+    label_gap = max(28, round(font_size * 0.88))
+    if placement.startswith("top_"):
+        label_y = y
+        text_y = y + label_gap
+    elif placement.startswith("middle_"):
+        label_y = y - label_gap
+        text_y = y + round(label_gap * 0.18)
+    else:
+        label_y = y - label_gap
+        text_y = y
+
+    icon_by_concept = {
+        "phone": "⌕",
+        "music": "♪",
+        "place": "●",
+        "payoff": "✦",
+        "story": "◆",
+        "none": "",
+    }
+    icon_concept = concept if requested_icon == "auto" else requested_icon
+    icon = icon_by_concept.get(icon_concept, icon_by_concept[concept])
+    accent_by_concept = {
+        "phone": "&H00F5D06A",
+        "music": "&H00A86BFF",
+        "place": "&H006CE8FF",
+        "payoff": "&H0098F5A6",
+        "story": "&H003DB3FF",
+    }
+    accent = accent_by_concept.get(concept, accent_by_concept["story"])
+    return {
+        "placement": placement,
+        "text_override": f"{{\\an{alignment}\\pos({x},{text_y})\\q2}}",
+        "label_override": f"{{\\an{alignment}\\pos({x},{label_y})\\q2\\fad(110,150)}}",
+        "icon": icon,
+        "scene_label": scene_label,
+        "accent": accent,
+    }
+
+
 def generate_ass_captions(
     whisper_result,
     style_name="bold_pop",
@@ -4299,6 +4946,9 @@ def generate_ass_captions(
         f"{style['primary_color']},{style['outline_color']},&H80000000,"
         f"-1,0,0,0,100,100,0,0,1,{style['outline'] + 1},"
         f"{style['shadow']},{style['alignment']},40,40,{style['margin_v']},1",
+        f"Style: StoryLabel,{style['fontname']},{max(18, round(style['fontsize'] * 0.42))},"
+        "&H00FFFFFF,&H00FFFFFF,&H00140A22,&H700C0714,-1,0,0,0,100,100,1.2,0,3,"
+        f"2,0,2,40,40,{style['margin_v'] + round(style['fontsize'] * 1.18)},1",
         "",
         "[Events]",
         "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text",
@@ -4306,7 +4956,7 @@ def generate_ass_captions(
 
     hallucinations = {"thank you.", "thanks.", "bye.", "music.", "watching.", "mbc", "lbc", "you", "silence"}
 
-    for segment in segments:
+    for segment_index, segment in enumerate(segments):
         words = segment.get("words", [])
         seg_text = str(segment.get("text", "")).strip()
 
@@ -4325,8 +4975,34 @@ def generate_ass_captions(
                 ass_lines.append(f"Dialogue: 0,{start_ass},{end_ass},Default,,0,0,0,,{_escape_ass(clean)}")
             continue
 
+        story_treatment = None
+        if style["animation"] == "story_pop":
+            story_treatment = resolve_story_caption_treatment(
+                segment,
+                segment_index,
+                video_width,
+                video_height,
+                style["fontsize"],
+            )
+            speaker_label = str(
+                segment.get("speakerLabel") or segment.get("speaker_label") or "STORY"
+            ).strip().upper()
+            label_start = _seconds_to_ass_time(float(segment["start"]))
+            label_end = _seconds_to_ass_time(float(segment["end"]))
+            label_prefix = f"{story_treatment['icon']}  " if story_treatment["icon"] else ""
+            label = _escape_ass(
+                f"{label_prefix}{speaker_label} · {story_treatment['scene_label']}"
+            )
+            ass_lines.append(
+                f"Dialogue: 1,{label_start},{label_end},StoryLabel,,0,0,0,,"
+                f"{story_treatment['label_override']}{{\\c{story_treatment['accent']}}}{label}"
+            )
+
         # Build word groups (3-5 words per line for readability)
-        groups = _chunk_words(words, max_words=5)
+        groups = _chunk_words(
+            words,
+            max_words=4 if style["animation"] == "story_pop" else 5,
+        )
 
         for group in groups:
             if not group:
@@ -4337,7 +5013,31 @@ def generate_ass_captions(
             end_ass = _seconds_to_ass_time(group_end)
 
             # Build the animated text line
-            if style["animation"] == "karaoke_fill":
+            if style["animation"] == "story_pop":
+                for i, word in enumerate(group):
+                    w_start = _seconds_to_ass_time(word["start"])
+                    w_end = _seconds_to_ass_time(word["end"])
+                    parts = []
+                    for j, candidate in enumerate(group):
+                        candidate_text = _escape_ass(candidate.get("word", "").strip())
+                        if not candidate_text:
+                            continue
+                        if j == i:
+                            parts.append(
+                                f"{{\\c{story_treatment['accent']}\\fscx118\\fscy118\\bord{style['outline'] + 1}"
+                                f"\\t(70,210,\\fscx104\\fscy104)}}{candidate_text}"
+                                f"{{\\c{style['primary_color']}\\fscx100\\fscy100\\bord{style['outline']}}}"
+                            )
+                        else:
+                            parts.append(candidate_text)
+                    if parts:
+                        line = " ".join(parts)
+                        ass_lines.append(
+                            f"Dialogue: 2,{w_start},{w_end},Default,,0,0,0,,"
+                            f"{story_treatment['text_override']}{{\\fad(55,70)}}{line}"
+                        )
+
+            elif style["animation"] == "karaoke_fill":
                 # Karaoke: words fill with color as they're spoken
                 text_parts = []
                 for word in group:
@@ -5261,6 +5961,13 @@ def resolve_multicam_caption_request(request):
     return enabled, style
 
 
+def resolve_multicam_caption_translation_request(request):
+    """Only translation is user-selected; source-language transcription is automatic."""
+    camel_value = getattr(request, "translateCaptionsToEnglish", None)
+    snake_value = getattr(request, "translate_captions_to_english", False)
+    return bool(camel_value if camel_value is not None else snake_value)
+
+
 def _escape_drawtext_text(text):
     return str(text or "").replace("\\", "\\\\").replace(":", "\\:").replace("'", "\\'").replace("%", "\\%")
 
@@ -5588,6 +6295,7 @@ async def burn_multicam_word_captions(
     style_name="podcast_clean",
     render_segments=None,
     extra_video_filter=None,
+    translate_to_english=False,
 ):
     receipt = {
         "enabled": True,
@@ -5598,8 +6306,11 @@ async def burn_multicam_word_captions(
     }
     if not has_audio_stream(output_path):
         raise HTTPException(status_code=500, detail={"message": "Captions are mandatory but final render has no audio stream"})
-    if whisper is None:
-        raise HTTPException(status_code=500, detail={"message": "Captions are mandatory but Whisper is not available"})
+    transcription_engine = get_transcription_engine()
+    if transcription_engine == "faster" and FasterWhisperModel is None:
+        raise HTTPException(status_code=500, detail={"message": "Captions require Faster Whisper but it is unavailable"})
+    if transcription_engine == "openai" and whisper is None:
+        raise HTTPException(status_code=500, detail={"message": "Captions require OpenAI Whisper but it is unavailable"})
 
     loop = asyncio.get_event_loop()
     try:
@@ -5608,8 +6319,15 @@ async def burn_multicam_word_captions(
             lambda: transcribe_with_hints(
                 output_path,
                 word_timestamps=True,
-                prompt_hint="Podcast conversation. Preserve natural spoken wording for burned word-by-word captions.",
-                model_name=os.getenv("MULTICAM_CAPTION_WHISPER_MODEL") or None,
+                prompt_hint=(
+                    "Multilingual South African podcast. Speakers may switch between isiZulu, isiXhosa, "
+                    "Sesotho, Setswana, Xitsonga, isiNdebele, Tshivenda, English, and Afrikaans inside the "
+                    "same sentence. Preserve every language exactly as spoken; do not force one language."
+                    if not translate_to_english
+                    else "Multilingual South African podcast. Translate all spoken content into natural English captions."
+                ),
+                task="translate" if translate_to_english else "transcribe",
+                model_name=os.getenv("MULTICAM_CAPTION_WHISPER_MODEL") or "digiphyte/swivuriso-turbo",
             ),
         )
     except Exception as exc:
@@ -5699,6 +6417,8 @@ async def burn_multicam_word_captions(
         "applies_to_layouts": ["single_cam_pip", "pip_reaction", "shared_moment", "show_everyone"],
         "emotion_styles": ["normal", "hype", "laugh", "serious"],
         "extra_video_filter": bool(extra_video_filter),
+        "language_mode": "translated_to_english" if translate_to_english else "preserve_spoken_languages",
+        "transcription_engine": transcription_engine,
     })
     return receipt
 
@@ -6018,6 +6738,31 @@ def rerank_clip_candidates_with_ai(
         "trim candidate",
     }
 
+    def ai_hook_is_grounded(hook_value, candidate_value):
+        stop_words = {
+            "this", "that", "with", "from", "your", "what", "when", "where",
+            "have", "will", "into", "about", "they", "them", "their", "just",
+            "the", "and", "for", "you", "are", "was", "why", "how",
+        }
+        hook_tokens = [
+            token for token in re.findall(r"[a-z0-9']+", str(hook_value or "").lower())
+            if len(token) >= 3 and token not in stop_words
+        ]
+        evidence_tokens = [
+            token for token in re.findall(
+                r"[a-z0-9']+",
+                str(candidate_value.get("text") or candidate_value.get("transcript") or "").lower(),
+            )
+            if len(token) >= 3 and token not in stop_words
+        ]
+        if not hook_tokens or not evidence_tokens:
+            return False
+        return any(
+            left[:5] == right[:5]
+            for left in hook_tokens
+            for right in evidence_tokens
+        )
+
     for index, candidate in enumerate(shortlist):
         candidate_id = str(candidate.get("id") or f"candidate_{index}")
         candidate_ids[candidate_id] = index
@@ -6116,7 +6861,7 @@ def rerank_clip_candidates_with_ai(
                     current_reason = str(updated.get("reason") or "").strip()
                     if rerank["why"].lower() not in current_reason.lower():
                         updated["reason"] = f"{current_reason} + {rerank['why']}" if current_reason else rerank["why"]
-                if rerank["hook"]:
+                if rerank["hook"] and ai_hook_is_grounded(rerank["hook"], updated):
                     current_caption = str(updated.get("captionSuggestion") or "").strip()
                     should_prefer_packaged_hook = str(objective_label or "").strip().lower() == "find_viral_clips"
                     if (
@@ -6425,6 +7170,10 @@ def build_speaker_track_crop_filter(positions, src_width, src_height, target_asp
 
     crop_w = min(crop_w, src_width)
     crop_h = min(crop_h, src_height)
+    # H.264/yuv420p requires even crop dimensions. A 1920x1080 source at
+    # 9:16 otherwise produces 607px and fails during filter initialization.
+    crop_w = max(2, crop_w - (crop_w % 2))
+    crop_h = max(2, crop_h - (crop_h % 2))
 
     # Build sendcmd keyframes for dynamic crop position
     smoothed = smooth_positions(positions, window=7)
@@ -11162,6 +11911,32 @@ async def add_captions(request: CropRequest):
         if os.path.exists(subtitle_path): os.remove(subtitle_path)
 
 
+@app.post("/plan-story-visuals")
+async def plan_story_visuals(request: Dict[str, Any]):
+    beats = request.get("beats") or []
+    if not isinstance(beats, list) or not beats:
+        raise HTTPException(status_code=400, detail="At least one transcript-grounded story beat is required")
+    try:
+        planned = await asyncio.get_running_loop().run_in_executor(
+            None,
+            lambda: search_story_video_candidates(
+                beats,
+                max_candidates=int(request.get("max_candidates") or 3),
+            ),
+        )
+    except SceneUnderstandingError as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
+    except Exception as error:
+        logger.error("Licensed story footage search failed: %s", error)
+        raise HTTPException(status_code=502, detail="Licensed story footage search failed") from error
+    return {
+        "status": "completed",
+        "provider": "pexels",
+        "license": "Pexels License",
+        "beats": planned,
+    }
+
+
 @app.post("/analyze-clips")
 async def analyze_clips(request: Dict[str, Any]):
     """
@@ -11242,12 +12017,15 @@ async def analyze_clips(request: Dict[str, Any]):
             if not audio_present:
                 logger.info("Task [Whisper]: Skipped because source has no audio stream.")
                 return []
-            logger.info("Task [Whisper]: Starting (Translating to English for Analysis)...")
-            res = transcribe_with_hints(
+            logger.info("Task [Whisper]: Starting (preserving multilingual speech)...")
+            res = transcribe_captions_with_provider(
                 input_path,
-                language=request.get("language") or "auto",
-                prompt_hint=request.get("hint") or "Translate to English for clip analysis while preserving meaning.",
-                task="translate",
+                translate_to_english=False,
+                prompt_hint=(
+                    request.get("hint")
+                    or "Preserve every spoken language and all code-switching exactly as spoken. "
+                    "Do not translate. The source may contain isiXhosa, English, isiZulu, or other languages."
+                ),
             )
             logger.info("Task [Whisper]: Completed.")
             return res.get("segments", [])
@@ -11330,8 +12108,30 @@ async def analyze_clips(request: Dict[str, Any]):
         # Detect content type for caption intelligence
         content_type_info = detect_content_type(input_path, audio_energy)
         content_type_label = content_type_info.get("contentType", "general")
-        logger.info(f"Content type: {content_type_label} (conf={content_type_info.get('confidence')})")
         transcription_segments = annotate_transcription_segments(transcription_segments)
+        confident_speech_seconds = sum(
+            max(0.0, float(segment.get("end", 0.0) or 0.0) - float(segment.get("start", 0.0) or 0.0))
+            for segment in transcription_segments
+            if float(segment.get("transcriptConfidence", 0.0) or 0.0) >= 0.62
+        )
+        spoken_word_count = sum(
+            len(str(segment.get("text") or "").split())
+            for segment in transcription_segments
+        )
+        if (
+            content_type_label in {"general", "tutorial_demo"}
+            and audio_present
+            and confident_speech_seconds >= 8.0
+            and spoken_word_count >= 18
+        ):
+            content_type_label = "podcast_conversation"
+            content_type_info = {
+                **content_type_info,
+                "contentType": content_type_label,
+                "confidence": max(0.78, float(content_type_info.get("confidence", 0.0) or 0.0)),
+                "hints": list(dict.fromkeys([*(content_type_info.get("hints") or []), "sustained_confident_speech"])),
+            }
+        logger.info(f"Content type: {content_type_label} (conf={content_type_info.get('confidence')})")
         transcript_quality = summarize_transcript_quality(transcription_segments, content_type_label)
         logger.info(
             "Transcript quality: avg=%.2f reliable=%s ratio=%.2f mode=%s",
@@ -11381,8 +12181,25 @@ async def analyze_clips(request: Dict[str, Any]):
                 ]
                 
                 if scene_segments_txt:
-                    full_text = " ".join([s["text"].strip() for s in scene_segments_txt]).lower()
-                    scene_text = full_text[:150] + "..." if len(full_text) > 150 else full_text
+                    window_text_parts = []
+                    for transcript_segment in scene_segments_txt:
+                        timed_words = transcript_segment.get("words") or []
+                        selected_words = [
+                            str(word.get("word") or "").strip()
+                            for word in timed_words
+                            if (
+                                float(word.get("start", 0.0) or 0.0) < end_time_sec
+                                and float(word.get("end", 0.0) or 0.0) > start_time_sec
+                                and str(word.get("word") or "").strip()
+                            )
+                        ]
+                        window_text_parts.append(
+                            " ".join(selected_words)
+                            if selected_words
+                            else str(transcript_segment.get("text") or "").strip()
+                        )
+                    full_text = " ".join(window_text_parts).lower().strip()
+                    scene_text = full_text[:500] + "..." if len(full_text) > 500 else full_text
                     scene_transcript_confidence = round(
                         sum(float(s.get("transcriptConfidence", 0.0) or 0.0) for s in scene_segments_txt)
                         / max(1, len(scene_segments_txt)),
@@ -11474,6 +12291,8 @@ async def analyze_clips(request: Dict[str, Any]):
 
         for candidate in ranked_candidates:
             candidate["hasAudio"] = audio_present
+            candidate["audioMeasured"] = bool(audio_energy)
+            candidate["motionMeasured"] = bool(motion_scores)
             if not audio_present:
                 candidate["analysisMode"] = "visual_only"
                 candidate["reason"] = str(candidate.get("reason") or "").replace("No speech detected", "visual-only scan")
@@ -11502,6 +12321,10 @@ async def analyze_clips(request: Dict[str, Any]):
             candidate["renderDefaults"] = studio_package["renderDefaults"]
             candidate["viralClipStudioPackage"] = studio_package
             candidate["creativeWhy"] = studio_package["creativeWhy"]
+            candidate["studioEditPlan"] = build_studio_edit_plan(
+                candidate,
+                transcript_quality=transcript_quality,
+            )
 
         for index, candidate in enumerate(ranked_candidates[:8]):
             try:
@@ -11977,6 +12800,8 @@ class RenderMultiCamRequest(BaseModel):
     preSyncMinConfidence: Optional[float] = None
     burn_captions: Optional[bool] = None
     burnCaptions: Optional[bool] = None
+    translate_captions_to_english: bool = False
+    translateCaptionsToEnglish: Optional[bool] = None
     caption_style: str = "podcast_clean"
     captionStyle: Optional[str] = None
     brand_watermark: Optional[bool] = None
@@ -25489,6 +26314,7 @@ async def render_multicam_impl(
 
         burn_captions, caption_style = resolve_multicam_caption_request(request)
         burn_captions = bool(burn_captions and render_tier_profile.get("burn_captions"))
+        translate_captions_to_english = resolve_multicam_caption_translation_request(request)
         stage_started_at = time.perf_counter()
         if burn_captions:
             if request.async_mode:
@@ -25501,6 +26327,7 @@ async def render_multicam_impl(
                 style_name=caption_style,
                 render_segments=segments,
                 extra_video_filter=brand_watermark_filter,
+                translate_to_english=translate_captions_to_english,
             )
             if brand_watermark_enabled:
                 brand_watermark_receipt = {
@@ -27887,6 +28714,18 @@ class ViralOverlay(BaseModel):
     bRollKicker: Optional[str] = None
     bRollTitle: Optional[str] = None
     bRollSubtitle: Optional[str] = None
+    bRollConcept: Optional[str] = None
+    bRollSearchQuery: Optional[str] = None
+    bRollEvidenceQuote: Optional[str] = None
+    bRollCaptionSegmentId: Optional[Union[str, int]] = None
+    bRollApprovalStatus: Optional[str] = None
+    bRollConfidence: Optional[float] = None
+    bRollReviewRequired: bool = False
+    bRollProvider: Optional[str] = None
+    bRollSourcePage: Optional[str] = None
+    bRollLicense: Optional[str] = None
+    bRollCreator: Optional[str] = None
+    bRollSourceId: Optional[Union[str, int]] = None
     opacity: float = 1.0
     coverMainVideo: bool = False
     muteMainAudio: bool = False
@@ -27912,12 +28751,43 @@ class ViralSpeedSegment(BaseModel):
     rate: float = 1.0
     pitch_preserved: bool = True
 
+class ViralCaptionSegment(BaseModel):
+    id: Optional[Union[str, int]] = None
+    start_time: float = 0.0
+    end_time: float
+    text: str
+    speaker: Optional[str] = None
+    speaker_label: Optional[str] = None
+    language: Optional[str] = None
+    language_label: Optional[str] = None
+    languages: Optional[List[str]] = None
+    language_confidence: Optional[float] = None
+    text_review_required: bool = False
+    text_reviewed: bool = False
+    caption_placement: Optional[str] = None
+    caption_icon: Optional[str] = None
+    review_required: bool = False
+
 class BackgroundAudioTrack(BaseModel):
     url: str
     trim_start: float = 0.0
     volume: float = 0.7
     mode: str = "mix"
     ducking_strength: float = 0.45
+    enabled: bool = True
+
+class ViralSoundEffect(BaseModel):
+    id: Optional[Union[str, int]] = None
+    name: Optional[str] = None
+    builtIn: bool = False
+    tone: Optional[str] = None
+    url: Optional[str] = None
+    startTime: float = 0.0
+    duration: float = 0.6
+    trimStart: float = 0.0
+    volume: float = 0.8
+    fadeIn: float = 0.02
+    fadeOut: float = 0.12
     enabled: bool = True
 
 class HookFocusPoint(BaseModel):
@@ -27940,6 +28810,10 @@ class ViralCreativeEffect(BaseModel):
     intensity: Optional[str] = None
     start_time: float = 0.0
     end_time: Optional[float] = None
+    scene_brief: Optional[Dict[str, Any]] = None
+    story_assets: Optional[List[Dict[str, Any]]] = None
+    integration_surface: Optional[Dict[str, Any]] = None
+    composition_mode: str = "monitor"
 
 class ViralCreativePlan(BaseModel):
     version: int = 1
@@ -27948,21 +28822,175 @@ class ViralCreativePlan(BaseModel):
     fallback: str = "clean"
     effects: Optional[List[ViralCreativeEffect]] = None
 
+def build_finish_keyframe_expression(finish_plan, field, default_value, transform=None):
+    keyframes = []
+    for index, item in enumerate((finish_plan or {}).get("keyframes") or []):
+        values = item.get("values") or {}
+        try:
+            time_value = max(0.0, float(item.get("time", 0.0) or 0.0))
+            field_value = float(values.get(field, default_value))
+        except (TypeError, ValueError):
+            continue
+        if transform:
+            field_value = transform(field_value)
+        keyframes.append((time_value, field_value, index))
+    keyframes.sort(key=lambda entry: (entry[0], entry[2]))
+    if len(keyframes) < 2:
+        return None
+
+    def interval_expression(left, right):
+        left_time, left_value, _ = left
+        right_time, right_value, _ = right
+        duration = max(0.001, right_time - left_time)
+        return (
+            f"if(between(t\\,{left_time:.5f}\\,{right_time:.5f})\\,"
+            f"{left_value:.6f}+({right_value - left_value:.6f})*"
+            f"(t-{left_time:.5f})/{duration:.5f}\\,"
+        )
+
+    expression = f"{keyframes[-1][1]:.6f}"
+    for index in range(len(keyframes) - 2, -1, -1):
+        expression = interval_expression(keyframes[index], keyframes[index + 1]) + expression + ")"
+    first_time, first_value, _ = keyframes[0]
+    return f"if(lt(t\\,{first_time:.5f})\\,{first_value:.6f}\\,{expression})"
+
+def build_studio_finish_filter(finish_plan):
+    """Translate the browser Finish Rack into a conservative FFmpeg finishing pass."""
+    plan = finish_plan or {}
+    if not bool(plan.get("enabled")):
+        return ""
+
+    color = plan.get("color") or {}
+    texture = plan.get("texture") or {}
+    brightness = clamp_float(float(color.get("brightness", 1.0) or 1.0) - 1.0, -0.35, 0.35)
+    contrast = clamp_float(color.get("contrast", 1.0), 0.65, 1.75)
+    saturation = clamp_float(color.get("saturation", 1.0), 0.0, 1.8)
+    warmth = clamp_float(color.get("temperature", 0.0), -1.0, 1.0)
+    sharpness = clamp_float(color.get("sharpness", 0.0), 0.0, 1.0)
+    vignette = clamp_float(color.get("vignette", 0.0), 0.0, 0.85)
+    grain = clamp_float(texture.get("film_grain", 0.0), 0.0, 1.0)
+
+    brightness_expression = build_finish_keyframe_expression(
+        plan, "brightness", brightness + 1.0, lambda value: clamp_float(value - 1.0, -0.35, 0.35)
+    )
+    contrast_expression = build_finish_keyframe_expression(
+        plan, "contrast", contrast, lambda value: clamp_float(value, 0.65, 1.75)
+    )
+    saturation_expression = build_finish_keyframe_expression(
+        plan, "saturation", saturation, lambda value: clamp_float(value, 0.0, 1.8)
+    )
+    brightness_value = f"'{brightness_expression}'" if brightness_expression else f"{brightness:.4f}"
+    contrast_value = f"'{contrast_expression}'" if contrast_expression else f"{contrast:.4f}"
+    saturation_value = f"'{saturation_expression}'" if saturation_expression else f"{saturation:.4f}"
+    filters = [
+        f"eq=brightness={brightness_value}:contrast={contrast_value}:"
+        f"saturation={saturation_value}:eval=frame",
+    ]
+    if abs(warmth) > 0.005:
+        red_shift = warmth * 0.035
+        blue_shift = warmth * -0.035
+        filters.append(
+            "colorbalance="
+            f"rs={red_shift:.5f}:bs={blue_shift:.5f}:"
+            f"rm={red_shift * 0.65:.5f}:bm={blue_shift * 0.65:.5f}"
+        )
+    if sharpness > 0.005:
+        filters.append(f"unsharp=5:5:{sharpness * 0.65:.4f}:3:3:{sharpness * 0.18:.4f}")
+    if vignette > 0.005:
+        filters.append(f"vignette=angle=PI/{max(5.5, 17.0 - vignette * 10.0):.3f}:eval=frame")
+    if grain > 0.005:
+        filters.append(f"noise=alls={grain * 13.0:.3f}:allf=t")
+    chromatic = clamp_float(texture.get("chromatic_aberration", 0.0), 0.0, 1.0)
+    if chromatic > 0.005:
+        shift = max(1, int(round(chromatic * 9.0)))
+        filters.append(f"rgbashift=rh={shift}:bh={-shift}:edge=smear")
+    vhs_tracking = clamp_float(texture.get("vhs_tracking", 0.0), 0.0, 1.0)
+    if vhs_tracking > 0.005:
+        filters.append(f"noise=alls={2.0 + vhs_tracking * 16.0:.3f}:allf=t+u")
+        filters.append(
+            "drawbox=x=0:y='mod(t*170\\,ih)':w=iw:h="
+            f"{max(2, int(round(2 + vhs_tracking * 7)))}:"
+            f"color=white@{0.025 + vhs_tracking * 0.11:.3f}:t=fill"
+        )
+    light_leak = clamp_float(texture.get("light_leak", 0.0), 0.0, 1.0)
+    if light_leak > 0.005:
+        filters.append(
+            "colorbalance="
+            f"rh={light_leak * 0.12:.5f}:gh={light_leak * 0.035:.5f}:"
+            f"bh={light_leak * -0.075:.5f}"
+        )
+    filters.extend(["format=yuv420p", "setsar=1"])
+    return ",".join(filters)
+
+def build_studio_visualizer_filter(finish_plan, width, height):
+    """Build a transparent, speech-driven visualizer using the source audio."""
+    visualizer = (finish_plan or {}).get("visualizer") or {}
+    if not bool(visualizer.get("enabled")):
+        return ""
+    safe_width = max(160, int(width or 1080))
+    safe_height = max(160, int(height or 1920))
+    mode = str(visualizer.get("mode") or "wave").strip().lower()
+    if mode not in {"wave", "bars", "ring"}:
+        mode = "wave"
+    position = str(visualizer.get("position") or "bottom").strip().lower()
+    color = re.sub(r"[^0-9a-fA-F]", "", str(visualizer.get("color") or "4df6ff"))[-6:]
+    if len(color) != 6:
+        color = "4df6ff"
+    intensity = clamp_float(visualizer.get("intensity", 1.0), 0.25, 1.5)
+    frame_rate = 30
+
+    if mode == "ring":
+        size = min(max(180, int(safe_width * 0.34)), max(180, int(safe_height * 0.28)))
+        source = (
+            f"avectorscope=s={size}x{size}:mode=polar:draw=aaline:scale=sqrt:"
+            f"rc={int(42 * intensity)}:gc={int(190 * intensity)}:bc={int(220 * intensity)}:"
+            f"rate={frame_rate},format=rgba,colorkey=black:0.18:0.10"
+        )
+        x_expr = "(W-w)/2"
+        y_expr = "70" if position == "top" else "H-h-100"
+    else:
+        visual_height = max(96, int(safe_height * 0.09))
+        if mode == "bars":
+            source = (
+                f"showfreqs=s={safe_width}x{visual_height}:mode=bar:ascale=sqrt:"
+                f"fscale=log:colors=0x{color}:rate={frame_rate},"
+                "format=rgba,colorkey=black:0.18:0.10"
+            )
+        else:
+            source = (
+                f"showwaves=s={safe_width}x{visual_height}:mode=line:scale=sqrt:"
+                f"colors=0x{color}:rate={frame_rate},"
+                "format=rgba,colorkey=black:0.18:0.10"
+            )
+        x_expr = "0"
+        y_expr = "70" if position == "top" else "H-h-90"
+
+    return (
+        f"[0:a]asplit=2[a_visualizer_out][a_visualizer_feed];"
+        f"[a_visualizer_feed]{source}[visualizer_layer];"
+        f"[0:v][visualizer_layer]overlay=x={x_expr}:y={y_expr}:shortest=1[v_visualizer]"
+    )
+
 class RenderViralRequest(BaseModel):
     video_url: str
     start_time: float
     end_time: float
     overlays: List[ViralOverlay] = []
     auto_captions: bool = False
-    caption_style: str = ""  # "", "bold_pop", "karaoke", "glow", "bounce", "minimal"
+    caption_style: str = ""  # "", "story_pop", "bold_pop", "karaoke", "glow", "bounce", "minimal"
     caption_position: str = "lower"
     caption_scale: float = 1.0
     caption_text_override: Optional[str] = None
+    caption_segments: Optional[List[ViralCaptionSegment]] = None
+    translate_captions_to_english: bool = False
     preview_speed: float = 1.0
     speed_segments: Optional[List[ViralSpeedSegment]] = None
     pacing_level: Optional[str] = None
     creative_intent: Optional[str] = None
+    studio_plan: Optional[Dict[str, Any]] = None
+    professional_cleanup: bool = True
     creative_plan: Optional[ViralCreativePlan] = None
+    finish_plan: Optional[Dict[str, Any]] = None
     smart_crop: bool = False
     smart_crop_mode: str = "center"  # "center", "speaker_track", "ai_director"
     visual_enhance: bool = False  # Use Smart Promo dynamic visual pipeline (face zoom, movement tracking, reframing)
@@ -27982,6 +29010,27 @@ class RenderViralRequest(BaseModel):
     thumbnail_frame: Optional[CoverFrameRequest] = None
     timeline_segments: Optional[List[ViralTimelineSegment]] = None
     background_audio: Optional[BackgroundAudioTrack] = None
+    add_music: bool = False
+    music_url: Optional[str] = None
+    music_name: Optional[str] = None
+    music_selection: Optional[str] = None
+    is_search: bool = False
+    safe_search: bool = True
+    music_volume: float = 0.15
+    music_ducking: bool = True
+    music_ducking_strength: float = 0.35
+    music_ducking_mode: str = "speech"
+    music_fade_in: float = 0.5
+    music_fade_out: float = 0.5
+    music_loop: bool = True
+    sound_effects: Optional[List[ViralSoundEffect]] = None
+    silence_removal: bool = False
+    silence_threshold_db: float = -35.0
+    min_silence_duration: float = 0.75
+    remove_watermark: bool = False
+    watermark_mode: str = "adaptive"
+    watermark_regions: Optional[List[Dict[str, Any]]] = None
+    export_destination: str = "general"
     brand_watermark: Optional[bool] = None
     brandWatermark: Optional[bool] = None
     watermark_text: Optional[str] = None
@@ -28011,6 +29060,58 @@ async def render_viral_clip(request: RenderViralRequest):
 async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: str = None):
     logger.info(f"Rendering viral clip for {request.video_url} with {len(request.overlays)} overlays (SmartCrop={request.smart_crop}, AutoCaptions={request.auto_captions})")
 
+    unresolved_story_visuals = [
+        overlay for overlay in request.overlays if bool(overlay.bRollPlaceholder)
+    ]
+    if unresolved_story_visuals:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Replace or remove every planned B-roll placeholder before rendering; "
+                "planning evidence cannot be exported as footage"
+            ),
+        )
+
+    reviewed_caption_transcript = build_edited_caption_transcript(request.caption_segments)
+    studio_plan_validation = (
+        validate_studio_edit_plan(request.studio_plan)
+        if request.studio_plan
+        else {"valid": False, "errors": ["legacy_request_without_plan"]}
+    )
+    if request.studio_plan and not studio_plan_validation["valid"]:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "message": "Viral Clip Studio edit plan is invalid",
+                "studio_plan_validation": studio_plan_validation,
+            },
+        )
+    if (
+        request.auto_captions
+        and not str(request.caption_text_override or "").strip()
+        and not reviewed_caption_transcript.get("segments")
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Generate and review editable captions in Viral Clip Studio before rendering"
+            ),
+        )
+    if request.auto_captions and any(
+        bool(getattr(segment, "review_required", False))
+        or (
+            bool(getattr(segment, "text_review_required", False))
+            and not bool(getattr(segment, "text_reviewed", False))
+        )
+        for segment in (request.caption_segments or [])
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Finish the flagged speaker/language caption reviews before rendering"
+            ),
+        )
+
     job_id = provided_job_id or str(uuid.uuid4())
     SHARED_TMP_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../tmp"))
     if not os.path.exists(SHARED_TMP_DIR): os.makedirs(SHARED_TMP_DIR)
@@ -28020,8 +29121,14 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
     output_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_viral.mp4")
     thumbnail_output_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_thumbnail.jpg")
     downloaded_background_audio_path = None
+    downloaded_music_path = None
+    sound_effect_paths = []
     speed_adjusted_path = None
+    cleanup_path = None
     creative_adjusted_path = None
+    visualizer_path = None
+    creative_adjusted_paths = []
+    creative_environment_paths = []
     creative_receipt = {
         "status": "not_requested",
         "fallback": "clean",
@@ -28322,18 +29429,23 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 logger.warning(f"Visual enhancement failed: {viz_err}. Falling back to original aspect.")
                 # working_path stays as trimmed_path
 
-        # 2.5. Smart Crop (Vertical 9:16) - OPTIONAL (skipped if visual_enhance was used)
-        if request.smart_crop and not request.visual_enhance:
+        # 2.5. Smart Crop (Vertical 9:16). Short-form destinations always
+        # receive a platform-safe vertical canvas even when the creator leaves
+        # Smart Crop off; in that case the conservative center/safe-fit path is used.
+        vertical_destination = str(request.export_destination or "").strip().lower() in {
+            "tiktok", "reels", "shorts", "instagram_reels", "youtube_shorts"
+        }
+        if (request.smart_crop or vertical_destination) and not request.visual_enhance:
             cropped_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_cropped.mp4")
             crop_mode = str(request.smart_crop_mode or "center").strip().lower()
             try:
-                if crop_mode == "speaker_track":
+                if crop_mode in {"speaker_track", "ai_director"}:
                     logger.info("Applying Speaker-Tracking Smart Crop...")
                     src_w, src_h = get_video_dimensions(trimmed_path)
                     loop = asyncio.get_running_loop()
                     positions = await loop.run_in_executor(None, detect_speaker_positions, trimmed_path, 0.5)
 
-                    if src_w > src_h:
+                    if src_w > src_h and crop_mode != "ai_director":
                         logger.info("Landscape source detected; using safe vertical fit instead of destructive speaker crop")
                         await run_subprocess_async([
                             "ffmpeg", "-i", trimmed_path,
@@ -28382,6 +29494,70 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             except Exception as e:
                 logger.error(f"Smart Crop failed: {e}. Proceeding with original aspect ratio.")
                 # Fallback to trimmed_path
+
+        # 2.7. Establish a professional technical baseline before any creative
+        # transformation. This refines the captured pixels; it never invents a
+        # background, face, or story visual.
+        cleanup_receipt = {"status": "disabled"}
+        if request.professional_cleanup:
+            cleanup_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_professional_cleanup.mp4")
+            cleanup_has_audio = has_audio_stream(working_path) and not request.mute_audio
+            cleanup_cmd = [
+                "ffmpeg", "-i", working_path,
+                "-vf", build_quality_enhancement_filter_chain("safe_clean"),
+            ]
+            if cleanup_has_audio:
+                cleanup_cmd.extend(
+                    [
+                        "-af",
+                        "highpass=f=55,lowpass=f=16000,afftdn=nr=6:nf=-35,alimiter=limit=0.95",
+                        "-c:a", "aac", "-b:a", "192k",
+                    ]
+                )
+            else:
+                cleanup_cmd.append("-an")
+            cleanup_cmd.extend(
+                [
+                    "-c:v", "libx264", "-preset", "veryfast", "-crf", "19",
+                    "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-y", cleanup_path,
+                ]
+            )
+            report_progress(45, "Cleaning picture and speech")
+            await run_subprocess_async(cleanup_cmd, check=True, job_context=job_id)
+            cleanup_validation = validate_rendered_media(
+                cleanup_path,
+                expected_audio=cleanup_has_audio,
+            )
+            working_path = cleanup_path
+            cleanup_receipt = {
+                "status": "applied",
+                "profile": "safe_clean",
+                "video": "denoise_color_balance_face_safe_detail",
+                "audio": "band_limit_light_denoise_peak_protection" if cleanup_has_audio else "no_audio",
+                "validation": cleanup_validation,
+            }
+
+        # 2.72. Reproduce the creator's browser Finish Rack in the final file.
+        # The same normalized color values drive CSS preview and this restrained
+        # FFmpeg pass, preventing an attractive preview from disappearing at export.
+        finish_filter = build_studio_finish_filter(request.finish_plan)
+        if finish_filter:
+            finish_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_finish.mp4")
+            finish_has_audio = has_audio_stream(working_path)
+            finish_cmd = [
+                "ffmpeg", "-i", working_path,
+                "-vf", finish_filter,
+                "-c:v", "libx264", "-preset", "veryfast", "-crf", "19",
+                "-pix_fmt", "yuv420p",
+            ]
+            if finish_has_audio:
+                finish_cmd.extend(["-c:a", "copy"])
+            else:
+                finish_cmd.append("-an")
+            finish_cmd.extend(["-movflags", "+faststart", "-y", finish_path])
+            report_progress(49, "Applying creator color and finish")
+            await run_subprocess_async(finish_cmd, check=True, job_context=job_id)
+            working_path = finish_path
 
         # 2.75. Apply the Studio speed plan before captions and overlays so
         # transcription, caption timing, B-roll, and audio share one final clock.
@@ -28437,48 +29613,331 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         def rendered_timeline_time(source_time):
             return map_timeline_time(speed_plan, source_time)
 
-        # 2.85. Signature creative effects run as a protected intermediate.
-        # A bad advanced effect must never destroy an otherwise valid Studio export.
+        # 2.85. Signature creative effects run as validated intermediates. Motion
+        # Sculpture has its own subject-aware CPU stage; other signatures remain
+        # FFmpeg graphs. Keeping the stages sequential preserves the requested
+        # order in Auto Story without ever falling back to full-frame tmix.
         creative_plan = normalize_creative_plan(request.creative_plan, rendered_timeline_duration)
         if creative_plan["enabled"]:
-            creative_adjusted_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_creative.mp4")
-            creative_filter, creative_output_label, requested_effects = build_creative_filter_complex(
-                creative_plan
-            )
+            requested_effects = creative_plan["effects"]
+            creative_working_path = working_path
+            stage_receipts = []
             try:
-                creative_cmd = [
-                    "ffmpeg", "-i", working_path,
-                    "-filter_complex", creative_filter,
-                    "-map", f"[{creative_output_label}]",
-                    "-map", "0:a?",
-                    "-c:v", "libx264", "-preset", "veryfast", "-crf", "20",
-                    "-pix_fmt", "yuv420p", "-c:a", "copy",
-                    "-movflags", "+faststart", "-y", creative_adjusted_path,
-                ]
-                logger.info(
-                    "Applying %s protected Viral Clip creative effect(s)",
-                    len(requested_effects),
-                )
-                await run_subprocess_async(creative_cmd, check=True, job_context=job_id)
-                if not os.path.exists(creative_adjusted_path):
-                    raise RuntimeError("creative effect intermediate was not produced")
-                working_path = creative_adjusted_path
+                report_progress(52, "Sculpting subject motion")
+                for creative_index, effect in enumerate(requested_effects):
+                    creative_adjusted_path = os.path.join(
+                        SHARED_TMP_DIR,
+                        f"{job_id}_creative_{creative_index}.mp4",
+                    )
+                    creative_adjusted_paths.append(creative_adjusted_path)
+                    effect_plan = {
+                        **creative_plan,
+                        "effects": [effect],
+                    }
+                    logger.info(
+                        "Applying protected Viral Clip creative stage %s/%s (%s)",
+                        creative_index + 1,
+                        len(requested_effects),
+                        effect["preset"],
+                    )
+                    if effect["preset"] == "motion_sculpture":
+                        loop = asyncio.get_running_loop()
+                        studio_background_path = None
+                        studio_background_receipt = None
+                        if effect.get("intensity") == "unreal" and effect.get("studio_makeover", False):
+                            report_progress(48, "Designing a camera-matched podcast studio")
+                            studio_background_path = os.path.join(
+                                SHARED_TMP_DIR,
+                                f"{job_id}_studio_background_{creative_index}.png",
+                            )
+                            creative_environment_paths.append(studio_background_path)
+                            studio_background_receipt = await loop.run_in_executor(
+                                None,
+                                lambda: generate_studio_background_image(
+                                    creative_working_path,
+                                    studio_background_path,
+                                    approved_tmp_dir=SHARED_TMP_DIR,
+                                    timestamp=(
+                                        float(effect.get("start_time", 0.0) or 0.0)
+                                        + float(effect.get("end_time", 0.0) or 0.0)
+                                    ) / 2.0,
+                                ),
+                            )
+                            report_progress(51, "Compositing the real speakers into the new studio")
+                        stage_proof = await loop.run_in_executor(
+                            None,
+                            lambda source=creative_working_path,
+                            destination=creative_adjusted_path,
+                            timed_effect=effect,
+                            background=studio_background_path: render_motion_sculpture(
+                                source,
+                                destination,
+                                [timed_effect],
+                                approved_tmp_dir=SHARED_TMP_DIR,
+                                background_path=background,
+                            ),
+                        )
+                        if studio_background_receipt:
+                            stage_proof["studio_background"] = studio_background_receipt
+                    elif effect["preset"] == "reality_break":
+                        report_progress(48, "Understanding the selected story moment")
+                        loop = asyncio.get_running_loop()
+                        if reviewed_caption_transcript.get("segments"):
+                            transcript_result = {
+                                **remap_caption_transcript_to_speed_plan(
+                                    reviewed_caption_transcript,
+                                    speed_plan,
+                                ),
+                                "engine": "creator_reviewed_captions",
+                            }
+                            filtered_transcript = {
+                                "segments": transcript_result.get("segments") or [],
+                                "quality": {
+                                    "source": "creator_reviewed",
+                                    "reviewed": True,
+                                },
+                            }
+                            transcript_segments = transcript_result.get("segments") or []
+                        else:
+                            transcript_result = await loop.run_in_executor(
+                                None,
+                                lambda: transcribe_captions_with_provider(
+                                    creative_working_path,
+                                    translate_to_english=False,
+                                    prompt_hint=(
+                                        "Preserve every spoken language and code-switch exactly as spoken. "
+                                        "Do not translate or guess uncertain words."
+                                    ),
+                                ),
+                            )
+                            filtered_transcript = filter_caption_transcription_segments(
+                                transcript_result.get("segments") or []
+                            )
+                            transcript_segments = annotate_caption_identity_segments(
+                                filtered_transcript.get("segments") or [],
+                                detected_language=transcript_result.get("language"),
+                            )
+                        if not transcript_segments:
+                            raise SceneUnderstandingError(
+                                "Reality Break stopped because the multilingual transcript had no "
+                                "high-confidence evidence. Review captions before generating story visuals."
+                            )
+                        source_effect_start = max(0.0, float(effect["start_time"]))
+                        source_effect_end = max(
+                            source_effect_start + 0.05,
+                            float(effect["end_time"]),
+                        )
+                        supplied_scene_brief = effect.get("scene_brief")
+                        supplied_story_assets = effect.get("story_assets") or []
+                        if supplied_scene_brief and supplied_story_assets:
+                            scene_brief = validate_scene_brief(
+                                supplied_scene_brief,
+                                transcript_segments,
+                            )
+                        else:
+                            scene_brief = await loop.run_in_executor(
+                                None,
+                                lambda: build_grounded_scene_brief(
+                                    creative_working_path,
+                                    transcript_segments,
+                                    source_effect_start,
+                                    source_effect_end,
+                                ),
+                            )
+                        environment_stem = os.path.join(
+                            SHARED_TMP_DIR,
+                            f"{job_id}_reality_story_{creative_index}",
+                        )
+                        report_progress(50, "Finding moving visuals for each spoken story beat")
+                        story_assets = []
+                        story_video_receipts = []
+                        if supplied_story_assets:
+                            resolved_tmp = os.path.realpath(SHARED_TMP_DIR)
+                            for supplied_index, supplied_asset in enumerate(supplied_story_assets[:6]):
+                                supplied_path = os.path.realpath(
+                                    os.path.abspath(str(supplied_asset.get("path") or ""))
+                                )
+                                if os.path.commonpath([supplied_path, resolved_tmp]) != resolved_tmp:
+                                    raise ValueError(
+                                        "Approved Reality Break footage must be inside the worker tmp directory"
+                                    )
+                                supplied_validation = validate_rendered_media(
+                                    supplied_path,
+                                    expected_audio=False,
+                                )
+                                story_assets.append(
+                                    {
+                                        "path": supplied_path,
+                                        "start": max(
+                                            source_effect_start,
+                                            float(supplied_asset.get("start", source_effect_start) or source_effect_start),
+                                        ),
+                                        "end": min(
+                                            source_effect_end,
+                                            max(
+                                                source_effect_start + 0.05,
+                                                float(supplied_asset.get("end", source_effect_end) or source_effect_end),
+                                            ),
+                                        ),
+                                        "composition_mode": str(
+                                            supplied_asset.get("composition_mode")
+                                            or supplied_asset.get("compositionMode")
+                                            or "broll_cutaway"
+                                        ).strip().lower(),
+                                        "semantic_pan": bool(
+                                            supplied_asset.get("semantic_pan")
+                                            or supplied_asset.get("semanticPan")
+                                        ),
+                                    }
+                                )
+                                story_video_receipts.append(
+                                    {
+                                        "path": supplied_path,
+                                        "provider": "creator_approved_moving_footage",
+                                        "size": os.path.getsize(supplied_path),
+                                        "validation": supplied_validation,
+                                        "index": supplied_index,
+                                    }
+                                )
+                        else:
+                            story_video_receipts = await loop.run_in_executor(
+                                None,
+                                lambda: generate_story_videos(
+                                    scene_brief,
+                                    environment_stem,
+                                    approved_tmp_dir=SHARED_TMP_DIR,
+                                ),
+                            )
+                            for story_receipt in story_video_receipts:
+                                creative_environment_paths.append(story_receipt["path"])
+                                beat = story_receipt["beat"]
+                                story_assets.append(
+                                    {
+                                        "path": story_receipt["path"],
+                                        "start": float(effect.get("start_time", 0.0) or 0.0)
+                                        + max(0.0, float(beat.get("start", source_effect_start)) - source_effect_start),
+                                        "end": float(effect.get("start_time", 0.0) or 0.0)
+                                        + max(0.05, float(beat.get("end", source_effect_end)) - source_effect_start),
+                                    }
+                                )
+                        environment_path = story_video_receipts[0]["path"]
+                        report_progress(52, "Projecting timed story visuals into the real scene")
+                        stage_proof = await loop.run_in_executor(
+                            None,
+                            lambda: render_content_aware_reality(
+                                creative_working_path,
+                                creative_adjusted_path,
+                                environment_path,
+                                {
+                                    **effect,
+                                    "scene_brief": scene_brief,
+                                    "story_beats": scene_brief.get("story_beats") or [],
+                                    "story_assets": story_assets,
+                                    "integration_surface": scene_brief.get("integration_surface") or {},
+                                    # Captions are rendered once, after the visual stage, from
+                                    # creator-reviewed Studio lines. Reality Break must never burn
+                                    # its own fixed-position transcript boxes into the intermediate.
+                                    "captions": [],
+                                    "caption_languages": list(
+                                        dict.fromkeys(
+                                            language
+                                            for segment in transcript_segments
+                                            for language in (
+                                                segment.get("languages")
+                                                or [segment.get("language")]
+                                            )
+                                            if language and language != "und"
+                                        )
+                                    ),
+                                },
+                                approved_tmp_dir=SHARED_TMP_DIR,
+                            ),
+                        )
+                        stage_proof["understanding"] = scene_brief
+                        stage_proof["transcription_engine"] = transcript_result.get("engine")
+                        stage_proof["caption_quality"] = filtered_transcript.get("quality") or {}
+                        stage_proof["environment"] = {
+                            "provider": story_video_receipts[0]["provider"],
+                            "kind": "moving_video",
+                            "count": len(story_video_receipts),
+                            "size": sum(item["size"] for item in story_video_receipts),
+                        }
+                    else:
+                        creative_filter, creative_output_label, _stage_effects = (
+                            build_creative_filter_complex(effect_plan)
+                        )
+                        creative_cmd = [
+                            "ffmpeg", "-i", creative_working_path,
+                            "-filter_complex", creative_filter,
+                            "-map", f"[{creative_output_label}]",
+                            "-map", "0:a?",
+                            "-c:v", "libx264", "-preset", "veryfast", "-crf", "20",
+                            "-pix_fmt", "yuv420p", "-c:a", "copy",
+                            "-movflags", "+faststart", "-y", creative_adjusted_path,
+                        ]
+                        await run_subprocess_async(
+                            creative_cmd,
+                            check=True,
+                            job_context=job_id,
+                        )
+                        stage_proof = validate_rendered_media(
+                            creative_adjusted_path,
+                            expected_audio=has_audio_stream(creative_working_path),
+                        )
+                    creative_working_path = creative_adjusted_path
+                    stage_receipts.append(
+                        {
+                            "preset": effect["preset"],
+                            "intensity": effect["intensity"],
+                            "validation": stage_proof,
+                        }
+                    )
+
+                working_path = creative_working_path
                 creative_receipt = {
                     "status": "applied",
                     "fallback": "clean",
                     "effects": requested_effects,
+                    "stages": stage_receipts,
                 }
             except Exception as creative_error:
-                logger.warning(
-                    "Creative effect stage failed; continuing with clean render: %s",
-                    creative_error,
-                )
+                protected_presets = {"motion_sculpture", "reality_break"}
+                if any(effect["preset"] in protected_presets for effect in requested_effects):
+                    raise RuntimeError(
+                        "Subject-aware Signature render failed and no false clean result was returned: "
+                        f"{creative_error}"
+                    ) from creative_error
+                logger.warning("Creative effect stage failed; using clean fallback: %s", creative_error)
                 creative_receipt = {
                     "status": "clean_fallback",
                     "fallback": "clean",
                     "effects": requested_effects,
                     "reason": str(creative_error),
                 }
+
+        # 2.9. Burn the browser's speech-reactive visualizer into the exported
+        # file. The graph reads the real source voice and preserves that same
+        # audio stream for the final mix.
+        visualizer_filter = build_studio_visualizer_filter(
+            request.finish_plan,
+            *get_video_dimensions(working_path),
+        )
+        if visualizer_filter and has_audio_stream(working_path):
+            visualizer_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_visualizer.mp4")
+            report_progress(56, "Rendering the voice-reactive visualizer")
+            await run_subprocess_async(
+                [
+                    "ffmpeg", "-i", working_path,
+                    "-filter_complex", visualizer_filter,
+                    "-map", "[v_visualizer]", "-map", "[a_visualizer_out]",
+                    "-c:v", "libx264", "-preset", "veryfast", "-crf", "19",
+                    "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k",
+                    "-shortest", "-movflags", "+faststart", "-y", visualizer_path,
+                ],
+                check=True,
+                job_context=job_id,
+            )
+            working_path = visualizer_path
 
         # 3. Auto-Captions (Optional) — supports animated ASS styles
         ass_subtitle_path = None
@@ -28496,12 +29955,36 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         get_media_duration(working_path) or rendered_timeline_duration,
                     )
                     logger.info("Using creator-supplied caption copy instead of transcription")
+                elif reviewed_caption_transcript.get("segments"):
+                    whisper_result = remap_caption_transcript_to_speed_plan(
+                        reviewed_caption_transcript,
+                        speed_plan,
+                    )
+                    logger.info(
+                        "Using %s creator-reviewed timed caption lines; render-time transcription skipped",
+                        len(whisper_result.get("segments") or []),
+                    )
                 elif FasterWhisperModel is not None or whisper is not None:
                     whisper_result = await loop.run_in_executor(
                         None,
                         lambda: transcribe_with_hints(
                             working_path,
                             word_timestamps=use_animated,
+                            prompt_hint=(
+                                "Multilingual South African speech. Translate everything into natural English."
+                                if request.translate_captions_to_english
+                                else "Preserve all spoken languages and code-switching exactly as spoken."
+                            ),
+                            task=(
+                                "translate"
+                                if request.translate_captions_to_english
+                                else "transcribe"
+                            ),
+                            model_name=(
+                                os.getenv("VIRAL_CAPTION_WHISPER_MODEL")
+                                or os.getenv("MULTICAM_CAPTION_WHISPER_MODEL")
+                                or "digiphyte/swivuriso-turbo"
+                            ),
                         ),
                     )
                 else:
@@ -28872,9 +30355,34 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
              pass 
 
         background_audio = request.background_audio if request.background_audio and request.background_audio.enabled else None
+        studio_music_source = None
+        if request.add_music:
+            downloaded_music_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_studio_music.wav")
+            if str(request.music_url or "").strip():
+                studio_music_source = await materialize_audio_input(
+                    str(request.music_url).strip(),
+                    downloaded_music_path,
+                    sample_rate=48000,
+                )
+            else:
+                music_request = str(
+                    request.music_selection or request.music_name or "upbeat background music"
+                ).strip()
+                loop = asyncio.get_running_loop()
+                studio_music_source = await loop.run_in_executor(
+                    None,
+                    lambda: resolve_music_input(
+                        music_request,
+                        downloaded_music_path,
+                        is_search=bool(request.is_search),
+                        safe_search=bool(request.safe_search),
+                    ),
+                )
+
         audio_filter_chain = []
         has_main_audio = has_audio_stream(working_path) and not request.mute_audio
         audio_mix_labels = []
+        main_audio_mix_token = None
 
         if has_main_audio:
             main_audio_label = "0:a"
@@ -28900,7 +30408,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     f"[{main_audio_label}]volume={gain:.3f}:enable='between(t,{rel_start:.3f},{rel_end:.3f})'[{next_label}]"
                 )
                 main_audio_label = next_label
-            audio_mix_labels.append(f"[{main_audio_label}]")
+            main_audio_mix_token = f"[{main_audio_label}]"
+            audio_mix_labels.append(main_audio_mix_token)
 
         for audio_index, (overlay_input_idx, overlay) in enumerate(overlay_audio_specs):
             if overlay.start_time is None or overlay.duration is None:
@@ -28918,6 +30427,116 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 f"volume={volume:.3f},adelay={delay_ms}|{delay_ms}[{output_label}]"
             )
             audio_mix_labels.append(f"[{output_label}]")
+
+        if studio_music_source and os.path.exists(studio_music_source):
+            if request.music_loop:
+                inputs.extend(["-stream_loop", "-1"])
+            inputs.extend(["-i", studio_music_source])
+            studio_music_idx = input_idx
+            input_idx += 1
+            music_duration = max(0.1, float(rendered_timeline_duration or 0.1))
+            music_volume = clamp_float(request.music_volume, 0.0, 1.5)
+            fade_in = clamp_float(request.music_fade_in, 0.0, min(5.0, music_duration))
+            fade_out = clamp_float(request.music_fade_out, 0.0, min(5.0, music_duration))
+            music_filters = [
+                f"atrim=0:{music_duration:.3f}",
+                "asetpts=PTS-STARTPTS",
+                f"volume={music_volume:.3f}",
+            ]
+            if fade_in > 0.005:
+                music_filters.append(f"afade=t=in:st=0:d={fade_in:.3f}")
+            if fade_out > 0.005:
+                music_filters.append(
+                    f"afade=t=out:st={max(0.0, music_duration - fade_out):.3f}:d={fade_out:.3f}"
+                )
+            audio_filter_chain.append(
+                f"[{studio_music_idx}:a]{','.join(music_filters)}[studio_music_raw]"
+            )
+            studio_music_label = "[studio_music_raw]"
+            if request.music_ducking and main_audio_mix_token:
+                audio_filter_chain.append(
+                    f"{main_audio_mix_token}asplit=2[main_music_mix][music_sidechain]"
+                )
+                audio_mix_labels = [
+                    "[main_music_mix]" if label == main_audio_mix_token else label
+                    for label in audio_mix_labels
+                ]
+                main_audio_mix_token = "[main_music_mix]"
+                duck_strength = clamp_float(request.music_ducking_strength, 0.05, 0.95)
+                ratio = 2.0 + duck_strength * 14.0
+                audio_filter_chain.append(
+                    "[studio_music_raw][music_sidechain]sidechaincompress="
+                    f"threshold=0.025:ratio={ratio:.2f}:attack=18:release=280[music_ducked]"
+                )
+                studio_music_label = "[music_ducked]"
+            audio_mix_labels.append(studio_music_label)
+
+        for effect_index, effect in enumerate(request.sound_effects or []):
+            if not effect.enabled:
+                continue
+            effect_duration = clamp_float(effect.duration, 0.05, 15.0)
+            effect_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_sfx_{effect_index}.wav")
+            if str(effect.url or "").strip():
+                effect_path = await materialize_audio_input(
+                    str(effect.url).strip(),
+                    effect_path,
+                    sample_rate=48000,
+                )
+            elif effect.builtIn:
+                tone = str(effect.tone or "impact").strip().lower()
+                if tone in {"sweep", "riser"}:
+                    source = f"anoisesrc=color=pink:sample_rate=48000:duration={effect_duration:.3f}"
+                    synth_filter = "highpass=f=500,lowpass=f=6500"
+                else:
+                    frequency = 105 if tone == "impact" else 980 if tone == "click" else 520
+                    source = (
+                        f"sine=frequency={frequency}:sample_rate=48000:duration={effect_duration:.3f}"
+                    )
+                    synth_filter = "anull"
+                await run_subprocess_async(
+                    [
+                        "ffmpeg", "-f", "lavfi", "-i", source,
+                        "-af", synth_filter, "-c:a", "pcm_s16le", "-y", effect_path,
+                    ],
+                    check=True,
+                    job_context=job_id,
+                )
+            else:
+                continue
+            if not effect_path or not os.path.exists(effect_path):
+                raise RuntimeError(f"Sound effect {effect.name or effect.id or effect_index} could not be materialized")
+            sound_effect_paths.append(effect_path)
+            inputs.extend(["-i", effect_path])
+            effect_input_idx = input_idx
+            input_idx += 1
+            source_start = max(0.0, float(effect.startTime or 0.0))
+            rendered_start = rendered_timeline_time(source_start)
+            rendered_end = max(
+                rendered_start + 0.05,
+                rendered_timeline_time(source_start + effect_duration),
+            )
+            rendered_effect_duration = rendered_end - rendered_start
+            trim_start = max(0.0, float(effect.trimStart or 0.0))
+            fade_in = clamp_float(effect.fadeIn, 0.0, rendered_effect_duration / 2.0)
+            fade_out = clamp_float(effect.fadeOut, 0.0, rendered_effect_duration / 2.0)
+            effect_filters = [
+                f"atrim=start={trim_start:.3f}:duration={rendered_effect_duration:.3f}",
+                "asetpts=PTS-STARTPTS",
+                f"volume={clamp_float(effect.volume, 0.0, 1.5):.3f}",
+            ]
+            if fade_in > 0.005:
+                effect_filters.append(f"afade=t=in:st=0:d={fade_in:.3f}")
+            if fade_out > 0.005:
+                effect_filters.append(
+                    f"afade=t=out:st={max(0.0, rendered_effect_duration - fade_out):.3f}:d={fade_out:.3f}"
+                )
+            delay_ms = max(0, int(round(rendered_start * 1000)))
+            effect_filters.append(f"adelay={delay_ms}|{delay_ms}")
+            effect_label = f"studio_sfx_{effect_index}"
+            audio_filter_chain.append(
+                f"[{effect_input_idx}:a]{','.join(effect_filters)}[{effect_label}]"
+            )
+            audio_mix_labels.append(f"[{effect_label}]")
 
         if background_audio and background_audio.url:
             background_audio_source = str(background_audio.url).strip()
@@ -29043,12 +30662,20 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 (source_has_audio and not request.mute_audio)
                 or overlay_audio_specs
                 or (background_audio and background_audio.url)
+                or studio_music_source
+                or any(effect.enabled for effect in (request.sound_effects or []))
             )
             audio_proof = build_audio_delivery_proof(output_path, expected=audio_expected)
             if audio_expected and not audio_proof["verified"]:
                 raise RuntimeError(
                     "Final viral clip failed audio verification; the silent output was rejected"
                 )
+            final_quality_gate = validate_final_viral_delivery(
+                output_path,
+                expected_duration=rendered_timeline_duration,
+                expected_audio=audio_expected,
+            )
+            media_validation = final_quality_gate["media"]
             report_progress(95, "Uploading finished video")
             public_url = upload_file_to_firebase(output_path)
             if not public_url:
@@ -29131,9 +30758,13 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     or "AUTOPROMOTE"
                 ) if brand_watermark_enabled else None,
                 "audio_proof": audio_proof,
+                "media_validation": media_validation,
+                "final_quality_gate": final_quality_gate,
                 "duration": get_media_duration(output_path) or rendered_timeline_duration,
                 "speed_plan": speed_plan,
                 "creative_receipt": creative_receipt,
+                "professional_cleanup": cleanup_receipt,
+                "studio_plan_validation": studio_plan_validation,
             }
             
             if request.async_mode:
@@ -29159,10 +30790,23 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         if os.path.exists(input_path): os.remove(input_path)
         if downloaded_background_audio_path and os.path.exists(downloaded_background_audio_path):
             os.remove(downloaded_background_audio_path)
+        if visualizer_path and os.path.exists(visualizer_path):
+            os.remove(visualizer_path)
+        if downloaded_music_path and os.path.exists(downloaded_music_path):
+            os.remove(downloaded_music_path)
+        for sound_effect_path in sound_effect_paths:
+            if sound_effect_path and os.path.exists(sound_effect_path):
+                os.remove(sound_effect_path)
         if speed_adjusted_path and os.path.exists(speed_adjusted_path):
             os.remove(speed_adjusted_path)
-        if creative_adjusted_path and os.path.exists(creative_adjusted_path):
-            os.remove(creative_adjusted_path)
+        if cleanup_path and os.path.exists(cleanup_path):
+            os.remove(cleanup_path)
+        for creative_temp_path in creative_adjusted_paths:
+            if creative_temp_path and os.path.exists(creative_temp_path):
+                os.remove(creative_temp_path)
+        for environment_temp_path in creative_environment_paths:
+            if environment_temp_path and os.path.exists(environment_temp_path):
+                os.remove(environment_temp_path)
         if os.path.exists(thumbnail_output_path):
             os.remove(thumbnail_output_path)
 
@@ -29197,20 +30841,67 @@ async def transcribe_video(request: Dict[str, str]):
                  raise HTTPException(status_code=404, detail="File not found")
 
         # 2. Transcribe
-        result = transcribe_with_hints(
+        translate_to_english = str(
+            request.get("translate_to_english") or request.get("translateToEnglish") or ""
+        ).strip().lower() in {"1", "true", "yes", "on"}
+        result = transcribe_captions_with_provider(
             input_path,
-            word_timestamps=True,
-            language=request.get("language"),
-            prompt_hint=request.get("hint") or request.get("prompt_hint") or "",
+            translate_to_english=translate_to_english,
+            prompt_hint=(
+                request.get("hint")
+                or request.get("prompt_hint")
+                or (
+                    "Multilingual South African speech. Translate everything into natural English."
+                    if translate_to_english
+                    else "Preserve all spoken South African languages and code-switching exactly as spoken."
+                )
+            ),
         )
-        segments = result.get("segments", [])
+        caption_quality = filter_caption_transcription_segments(result.get("segments", []))
+        segments = annotate_caption_identity_segments(
+            caption_quality["segments"],
+            detected_language=result.get("language"),
+        )
+        caption_quality["quality"].update(
+            {
+                "speaker_aware": any(
+                    segment.get("speaker") not in {None, "", "unknown", "und"}
+                    for segment in segments
+                ),
+                "language_aware": any(
+                    segment.get("language") not in {None, "", "und"}
+                    for segment in segments
+                ),
+                "identity_review_segments": sum(
+                    1 for segment in segments if segment.get("reviewRequired")
+                ),
+                "transcription_engine": result.get("engine"),
+            }
+        )
         
         # Cleanup
         if input_path != video_url and os.path.exists(input_path):
             try: os.remove(input_path) 
             except: pass
             
-        return {"status": "completed", "segments": segments}
+        return {
+            "status": "completed",
+            "segments": segments,
+            "transcription_quality": caption_quality["quality"],
+            "language_mode": (
+                "translated_to_english"
+                if translate_to_english
+                else "preserve_spoken_languages"
+            ),
+            "detected_languages": sorted(
+                {
+                    language
+                    for segment in segments
+                    for language in (segment.get("languages") or [])
+                    if language not in {"", "und"}
+                }
+            ),
+        }
 
     except Exception as e:
         logger.error(f"Transcription failed: {e}")

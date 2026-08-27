@@ -868,7 +868,10 @@ router.post(
         // 3. Call Service (Async Job)
         try {
           // Old sync: const segments = await videoEditingService.transcribeVideo(url);
-          const job = await videoEditingService.startTranscriptionJob(url, userId);
+          const job = await videoEditingService.startTranscriptionJob(url, userId, {
+            translateToEnglish:
+              String(req.body?.translate_to_english || "").toLowerCase() === "true",
+          });
           res.json({ success: true, jobId: job.jobId, message: "Transcription started" });
         } catch (err) {
           res.status(500).json({ error: "Transcription service failed: " + err.message });
@@ -882,6 +885,48 @@ router.post(
     }
   }
 );
+
+router.post("/story-visuals/plan", async (req, res) => {
+  try {
+    const rawBeats = Array.isArray(req.body?.beats) ? req.body.beats : [];
+    if (!rawBeats.length || rawBeats.length > 6) {
+      return res.status(400).json({
+        success: false,
+        message: "Provide between one and six transcript-grounded story beats",
+      });
+    }
+    const beats = rawBeats.map((beat, index) => ({
+      id: String(beat?.id || `story-beat-${index + 1}`).slice(0, 120),
+      start: Math.max(0, Number(beat?.start ?? beat?.time ?? 0) || 0),
+      end: Math.max(0.05, Number(beat?.end ?? 0) || 0.05),
+      search_query: String(beat?.search_query || beat?.searchQuery || "")
+        .replace(/[<>\u0000-\u001f]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, 160),
+      evidence_quote: String(beat?.evidence_quote || beat?.evidenceQuote || "")
+        .replace(/[<>\u0000-\u001f]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, 240),
+      review_required: Boolean(beat?.review_required ?? beat?.reviewRequired),
+    }));
+    if (beats.some(beat => !beat.search_query || !beat.evidence_quote)) {
+      return res.status(400).json({
+        success: false,
+        message: "Every story beat needs exact transcript evidence and a moving-footage query",
+      });
+    }
+    const result = await videoEditingService.planStoryVisuals(beats, req.user.uid, {
+      maxCandidates: req.body?.max_candidates || req.body?.maxCandidates || 3,
+      requestId: uuidv4(),
+    });
+    return res.json({ success: true, ...result });
+  } catch (error) {
+    console.error("[MediaRoute] Story visual planning failed:", error.message);
+    return res.status(502).json({ success: false, message: error.message });
+  }
+});
 
 // Route: POST /api/media/process
 // Body: { fileUrl: "...", options: { smartCrop: true, silenceRemoval: true, ... } }

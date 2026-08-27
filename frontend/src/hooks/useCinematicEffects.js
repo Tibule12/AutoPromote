@@ -77,7 +77,7 @@ export const CINEMATIC_PRESETS = [
   },
 ];
 
-const DEFAULT_FX = {
+export const DEFAULT_CINEMATIC_FX = {
   preset: null,
   brightness: 1,
   contrast: 1,
@@ -99,6 +99,9 @@ const DEFAULT_FX = {
   overlayColor: "#000000",
   // Film grain
   filmGrain: 0, // 0–1
+  chromaticAberration: 0, // 0–1
+  vhsTracking: 0, // 0–1
+  lightLeak: 0, // 0–1
   // Letterbox (cinematic bars)
   letterbox: 0, // 0–15 (% of height per bar)
   // Fade
@@ -106,8 +109,26 @@ const DEFAULT_FX = {
   fadeOut: 0, // 0–3 seconds
 };
 
+export const buildCinematicCssFilter = (fx, blurActiveNow = false) => {
+  const parts = [];
+  if (fx.brightness !== 1) parts.push(`brightness(${Number(fx.brightness).toFixed(3)})`);
+  const effectiveContrast = Number(fx.contrast) * (1 + Number(fx.sharpness || 0) * 0.22);
+  if (effectiveContrast !== 1) parts.push(`contrast(${effectiveContrast.toFixed(3)})`);
+  if (fx.saturation !== 1) parts.push(`saturate(${Number(fx.saturation).toFixed(3)})`);
+  if (fx.temperature > 0) {
+    parts.push(`sepia(${(fx.temperature * 0.45).toFixed(3)})`);
+    parts.push(`saturate(${(1 + fx.temperature * 0.18).toFixed(3)})`);
+  } else if (fx.temperature < 0) {
+    const coolAmt = Math.abs(fx.temperature);
+    parts.push(`grayscale(${(coolAmt * 0.12).toFixed(3)})`);
+    parts.push(`hue-rotate(${(coolAmt * -18).toFixed(1)}deg)`);
+  }
+  if (blurActiveNow && fx.blurMode === "full") parts.push(`blur(${fx.blur}px)`);
+  return parts.join(" ");
+};
+
 export default function useCinematicEffects() {
-  const [fx, setFx] = useState(DEFAULT_FX);
+  const [fx, setFx] = useState(DEFAULT_CINEMATIC_FX);
   const [showPanel, setShowPanel] = useState(false);
   // Track current playback time for timed blur + fades
   const [currentTime, setCurrentTime] = useState(0);
@@ -121,7 +142,11 @@ export default function useCinematicEffects() {
   }, []);
 
   // Animation loop to track currentTime for timed effects
+  const needsPlaybackClock =
+    (fx.blur > 0 && fx.blurStart >= 0 && fx.blurEnd >= 0) || fx.fadeIn > 0 || fx.fadeOut > 0;
+
   useEffect(() => {
+    if (!needsPlaybackClock) return undefined;
     const tick = () => {
       const v = videoRefInternal.current;
       if (v) {
@@ -134,7 +159,7 @@ export default function useCinematicEffects() {
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-  }, []);
+  }, [needsPlaybackClock]);
 
   const applyPreset = preset => {
     setFx(prev => ({
@@ -159,7 +184,14 @@ export default function useCinematicEffects() {
     }));
   };
 
-  const resetFx = () => setFx(DEFAULT_FX);
+  const resetFx = () => setFx(DEFAULT_CINEMATIC_FX);
+
+  const replaceFx = nextFx => {
+    setFx({
+      ...DEFAULT_CINEMATIC_FX,
+      ...(nextFx || {}),
+    });
+  };
 
   // Is blur active right now? (handles timed blur)
   const blurActiveNow = useMemo(() => {
@@ -171,30 +203,7 @@ export default function useCinematicEffects() {
 
   // Build CSS filter string (NO blur here — blur is handled via overlay)
   const cssFilter = useMemo(() => {
-    const parts = [];
-
-    if (fx.brightness !== 1) parts.push(`brightness(${fx.brightness.toFixed(3)})`);
-
-    const effectiveContrast = fx.contrast * (1 + fx.sharpness * 0.22);
-    if (effectiveContrast !== 1) parts.push(`contrast(${effectiveContrast.toFixed(3)})`);
-
-    if (fx.saturation !== 1) parts.push(`saturate(${fx.saturation.toFixed(3)})`);
-
-    if (fx.temperature > 0) {
-      parts.push(`sepia(${(fx.temperature * 0.45).toFixed(3)})`);
-      parts.push(`saturate(${(1 + fx.temperature * 0.18).toFixed(3)})`);
-    } else if (fx.temperature < 0) {
-      const coolAmt = Math.abs(fx.temperature);
-      parts.push(`grayscale(${(coolAmt * 0.12).toFixed(3)})`);
-      parts.push(`hue-rotate(${(coolAmt * -18).toFixed(1)}deg)`);
-    }
-
-    // Full-video blur (only when blurMode is "full")
-    if (blurActiveNow && fx.blurMode === "full") {
-      parts.push(`blur(${fx.blur}px)`);
-    }
-
-    return parts.join(" ");
+    return buildCinematicCssFilter(fx, blurActiveNow);
   }, [
     fx.brightness,
     fx.contrast,
@@ -368,6 +377,9 @@ export default function useCinematicEffects() {
       !!fx.overlayType ||
       fx.sharpness > 0 ||
       fx.filmGrain > 0 ||
+      fx.chromaticAberration > 0 ||
+      fx.vhsTracking > 0 ||
+      fx.lightLeak > 0 ||
       fx.letterbox > 0 ||
       fx.fadeIn > 0 ||
       fx.fadeOut > 0,
@@ -381,6 +393,7 @@ export default function useCinematicEffects() {
     applyPreset,
     updateFx,
     resetFx,
+    replaceFx,
     mediaStyle,
     edgeBlurStyle,
     vignetteStyle,

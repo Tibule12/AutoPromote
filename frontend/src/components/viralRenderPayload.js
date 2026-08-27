@@ -44,6 +44,189 @@ export const normalizeSpeedSegmentsForRender = speedSegments => {
   }, []);
 };
 
+export const normalizeCaptionSegmentsForRender = captionSegments => {
+  if (!Array.isArray(captionSegments)) return [];
+  return captionSegments.reduce((segments, segment, index) => {
+    const startTime = toFiniteNumber(segment?.start_time ?? segment?.startTime ?? segment?.start);
+    const endTime = toFiniteNumber(segment?.end_time ?? segment?.endTime ?? segment?.end);
+    const text = String(segment?.text || "").trim();
+    if (startTime === null || endTime === null || startTime < 0 || endTime <= startTime || !text) {
+      return segments;
+    }
+    const normalized = {
+      id: segment?.id || `caption-${index + 1}`,
+      start_time: startTime,
+      end_time: endTime,
+      text,
+    };
+    const speaker = String(segment?.speaker ?? segment?.speaker_id ?? "").trim();
+    const speakerLabel = String(segment?.speakerLabel ?? segment?.speaker_label ?? "").trim();
+    const language = String(
+      segment?.language ?? segment?.language_code ?? segment?.languageCode ?? ""
+    ).trim();
+    const languageLabel = String(
+      segment?.languageLabel ?? segment?.language_label ?? ""
+    ).trim();
+    const languages = Array.isArray(segment?.languages)
+      ? Array.from(new Set(segment.languages.map(item => String(item || "").trim()).filter(Boolean)))
+      : [];
+    if (speaker) normalized.speaker = speaker;
+    if (speakerLabel) normalized.speaker_label = speakerLabel;
+    if (language) normalized.language = language;
+    if (languageLabel) normalized.language_label = languageLabel;
+    if (languages.length) normalized.languages = languages;
+    if (segment?.languageConfidence !== undefined || segment?.language_confidence !== undefined) {
+      normalized.language_confidence = Math.max(
+        0,
+        Math.min(
+          1,
+          Number(segment?.languageConfidence ?? segment?.language_confidence) || 0
+        )
+      );
+    }
+    if (segment?.reviewRequired !== undefined || segment?.review_required !== undefined) {
+      normalized.review_required = Boolean(
+        segment?.reviewRequired ?? segment?.review_required
+      );
+    }
+    if (segment?.textReviewRequired !== undefined || segment?.text_review_required !== undefined) {
+      normalized.text_review_required = Boolean(
+        segment?.textReviewRequired ?? segment?.text_review_required
+      );
+    }
+    if (segment?.textReviewed !== undefined || segment?.text_reviewed !== undefined) {
+      normalized.text_reviewed = Boolean(segment?.textReviewed ?? segment?.text_reviewed);
+    }
+    const captionPlacement = String(
+      segment?.captionPlacement ?? segment?.caption_placement ?? segment?.placement ?? ""
+    ).trim();
+    const captionIcon = String(
+      segment?.captionIcon ?? segment?.caption_icon ?? segment?.icon ?? ""
+    ).trim();
+    if (captionPlacement) normalized.caption_placement = captionPlacement;
+    if (captionIcon) normalized.caption_icon = captionIcon;
+    segments.push(normalized);
+    return segments;
+  }, []);
+};
+
+export const mapCaptionSegmentsToTimeline = ({
+  captionSegments,
+  timelineSegments,
+  fallbackSourceClipId = null,
+}) => {
+  const captions = (Array.isArray(captionSegments) ? captionSegments : []).flatMap(
+    (sourceSegment, index) => {
+      const normalized = normalizeCaptionSegmentsForRender([sourceSegment])[0];
+      if (!normalized) return [];
+      return [
+        {
+          ...normalized,
+          id: sourceSegment?.id || `caption-${index + 1}`,
+          source_clip_id:
+            sourceSegment?.source_clip_id ?? sourceSegment?.sourceClipId ?? fallbackSourceClipId,
+        },
+      ];
+    }
+  );
+  const timeline = Array.isArray(timelineSegments) ? timelineSegments : [];
+  if (!timeline.length) {
+    return captions.map(caption => {
+      const segment = { ...caption };
+      delete segment.source_clip_id;
+      return segment;
+    });
+  }
+
+  let outputOffset = 0;
+  const mapped = [];
+  timeline.forEach((clip, clipIndex) => {
+    const clipStart = toFiniteNumber(clip?.start_time ?? clip?.startTime ?? clip?.start);
+    const clipEnd = toFiniteNumber(clip?.end_time ?? clip?.endTime ?? clip?.end);
+    const clipDuration =
+      toFiniteNumber(clip?.duration) ??
+      (clipStart !== null && clipEnd !== null ? Math.max(0, clipEnd - clipStart) : 0);
+    const clipSourceId = clip?.source_clip_id ?? clip?.sourceClipId ?? clip?.id ?? null;
+
+    if (clipStart !== null && clipEnd !== null && clipEnd > clipStart) {
+      captions.forEach(caption => {
+        if (
+          caption.source_clip_id !== null &&
+          clipSourceId !== null &&
+          String(caption.source_clip_id) !== String(clipSourceId)
+        ) {
+          return;
+        }
+        const visibleStart = Math.max(caption.start_time, clipStart);
+        const visibleEnd = Math.min(caption.end_time, clipEnd);
+        if (visibleEnd <= visibleStart) return;
+        const captionMetadata = { ...caption };
+        delete captionMetadata.source_clip_id;
+        delete captionMetadata.start_time;
+        delete captionMetadata.end_time;
+        delete captionMetadata.id;
+        delete captionMetadata.text;
+        mapped.push({
+          ...captionMetadata,
+          id: `${caption.id}-timeline-${clipIndex + 1}`,
+          start_time: outputOffset + visibleStart - clipStart,
+          end_time: outputOffset + visibleEnd - clipStart,
+          text: caption.text,
+        });
+      });
+    }
+    outputOffset += Math.max(0, clipDuration || 0);
+  });
+
+  return mapped.sort((left, right) => left.start_time - right.start_time);
+};
+
+export const applySilenceKeepSegmentsToTimeline = ({
+  timelineSegments,
+  keepSegments,
+  sourceClipId,
+}) => {
+  const timeline = Array.isArray(timelineSegments) ? timelineSegments : [];
+  const normalizedKeepSegments = (Array.isArray(keepSegments) ? keepSegments : [])
+    .map(segment => ({
+      start: toFiniteNumber(segment?.start ?? segment?.start_time),
+      end: toFiniteNumber(segment?.end ?? segment?.end_time),
+    }))
+    .filter(segment => segment.start !== null && segment.end !== null && segment.end > segment.start)
+    .sort((left, right) => left.start - right.start);
+
+  if (!timeline.length || !normalizedKeepSegments.length || sourceClipId === null) {
+    return timeline;
+  }
+
+  return timeline.flatMap((segment, timelineIndex) => {
+    const segmentSourceId = segment?.source_clip_id ?? segment?.sourceClipId ?? segment?.id ?? null;
+    if (String(segmentSourceId) !== String(sourceClipId)) return [segment];
+
+    const segmentStart = toFiniteNumber(segment?.start_time ?? segment?.startTime ?? segment?.start);
+    const segmentEnd = toFiniteNumber(segment?.end_time ?? segment?.endTime ?? segment?.end);
+    if (segmentStart === null || segmentEnd === null || segmentEnd <= segmentStart) return [];
+
+    const intersections = normalizedKeepSegments
+      .map(keep => ({
+        start: Math.max(segmentStart, keep.start),
+        end: Math.min(segmentEnd, keep.end),
+      }))
+      .filter(keep => keep.end - keep.start > 0.01);
+
+    return intersections.map((keep, keepIndex) => ({
+      ...segment,
+      id: `${segment.id || `timeline-${timelineIndex + 1}`}-keep-${keepIndex + 1}`,
+      start_time: keep.start,
+      end_time: keep.end,
+      duration: keep.end - keep.start,
+      transition_in: keepIndex === 0 ? segment.transition_in || null : null,
+      transition_out:
+        keepIndex === intersections.length - 1 ? segment.transition_out || null : null,
+    }));
+  });
+};
+
 export const buildViralRenderData = ({
   finalVideoUrl,
   selectedClip,
@@ -86,10 +269,25 @@ export const buildViralRenderData = ({
   addDefined(payload, "caption_position", extraOptions.captionPosition);
   addDefined(payload, "caption_scale", extraOptions.captionScale, Number);
   addDefined(payload, "caption_text_override", extraOptions.captionTextOverride);
+  addDefined(
+    payload,
+    "caption_segments",
+    extraOptions.captionSegments,
+    normalizeCaptionSegmentsForRender
+  );
+  addDefined(
+    payload,
+    "translate_captions_to_english",
+    extraOptions.translateCaptionsToEnglish,
+    Boolean
+  );
   addDefined(payload, "preview_speed", extraOptions.previewSpeed, Number);
   addDefined(payload, "pacing_level", extraOptions.pacingLevel);
   addDefined(payload, "creative_intent", extraOptions.creativeIntent);
+  addDefined(payload, "studio_plan", extraOptions.studioPlan);
+  payload.professional_cleanup = extraOptions.professionalCleanup !== false;
   addDefined(payload, "creative_plan", extraOptions.creativePlan);
+  addDefined(payload, "finish_plan", extraOptions.finishPlan);
 
   if (isDefined(extraOptions.speedSegments)) {
     payload.speed_segments = normalizeSpeedSegmentsForRender(extraOptions.speedSegments);

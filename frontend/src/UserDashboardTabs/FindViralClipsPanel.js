@@ -23,7 +23,6 @@ const FindViralClipsPanel = ({ initialFile = null, onOpenStudio, onUpgrade }) =>
   const [selectedClip, setSelectedClip] = useState(null);
   const [suggestedClips, setSuggestedClips] = useState([]);
   const [targetLength, setTargetLength] = useState("30–60 seconds");
-  const [captionLanguage, setCaptionLanguage] = useState("English");
   const [destinations, setDestinations] = useState(DESTINATIONS);
   const sourceVideoRef = useRef(null);
 
@@ -162,18 +161,11 @@ const FindViralClipsPanel = ({ initialFile = null, onOpenStudio, onUpgrade }) =>
             </div>
           </div>
 
-          <label>
-            Caption language
-            <select
-              value={captionLanguage}
-              onChange={event => setCaptionLanguage(event.target.value)}
-            >
-              <option>English</option>
-              <option>isiXhosa</option>
-              <option>isiZulu</option>
-              <option>None</option>
-            </select>
-          </label>
+          <div className="viral-caption-language-note" role="note">
+            <strong>Multilingual captions</strong>
+            <span>Spoken languages and code-switching stay original by default.</span>
+            <small>English translation is optional inside the editable Clip Studio captions.</small>
+          </div>
 
           <button
             type="button"

@@ -1,5 +1,6 @@
 import { useContext, useMemo } from "react";
 import AuthContext from "../contexts/AuthContext";
+import { isRuntimeE2EEnabled } from "../utils/mediaAuth";
 
 const FREE_FALLBACK = {
   planId: "free",
@@ -57,7 +58,11 @@ export const useSubscription = () => {
   }, [profile]);
 
   const canUseFeature = feature =>
-    Boolean(normalized.editing?.features?.[feature]?.enabled || normalized.capabilities?.[feature]);
+    Boolean(
+      isRuntimeE2EEnabled() ||
+        normalized.editing?.features?.[feature]?.enabled ||
+        normalized.capabilities?.[feature]
+    );
   const requiresUpgrade = feature => !canUseFeature(feature);
 
   return {

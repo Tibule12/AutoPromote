@@ -2,13 +2,12 @@ name: Deploy Viral Media Worker
 
 on:
   workflow_dispatch:
-  # Bootstrap this workflow once from the active Studio branch. After it reaches
-  # the default branch, production deployments are manual workflow dispatches.
   push:
     branches:
-      - agent/autopromote-dashboard-redesign
+      - main
     paths:
       - .github/workflows/deploy-media-worker.yml
+      - python_media_worker/**
 
 permissions:
   contents: read
@@ -25,6 +24,7 @@ env:
   WIF_PROVIDER: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
   WIF_SERVICE_ACCOUNT: ${{ secrets.GCP_DEPLOY_SERVICE_ACCOUNT }}
   LEGACY_CREDENTIALS: ${{ secrets.FIREBASE_ADMIN_SERVICE_ACCOUNT }}
+  TASK_SECRET_NAME: cam-combiner-task-secret
 
 jobs:
   deploy:
@@ -41,8 +41,16 @@ jobs:
           sudo apt-get update
           sudo apt-get install --yes ffmpeg
 
-      - name: Verify Viral Clip render contract
-        run: python -m unittest python_media_worker.test_viral_render_contract
+      - name: Verify Viral Clip Studio worker contracts
+        run: |
+          python -m unittest \
+            python_media_worker.test_viral_render_contract \
+            python_media_worker.test_studio_finish \
+            python_media_worker.test_caption_quality \
+            python_media_worker.test_content_aware_reality \
+            python_media_worker.test_motion_sculpture \
+            python_media_worker.test_viral_creative_effects \
+            python_media_worker.test_viral_studio_plan
 
       - name: Validate Google Cloud identity configuration
         shell: bash
@@ -130,7 +138,26 @@ jobs:
               "start_time": 0,
               "end_time": 2,
               "auto_captions": false,
-              "smart_crop": false,
+              "smart_crop": true,
+              "smart_crop_mode": "ai_director",
+              "export_destination": "tiktok",
+              "professional_cleanup": true,
+              "finish_plan": {
+                "enabled": true,
+                "color": {"contrast": 1.08, "saturation": 1.05},
+                "texture": {"film_grain": 0.02, "chromatic_aberration": 0.02},
+                "visualizer": {"enabled": true, "mode": "wave", "position": "top"}
+              },
+              "sound_effects": [{
+                "id": "smoke-impact",
+                "name": "Impact",
+                "builtIn": true,
+                "tone": "impact",
+                "startTime": 0.5,
+                "duration": 0.4,
+                "volume": 0.2,
+                "enabled": true
+              }],
               "brand_watermark": false,
               "overlays": [],
               "async_mode": false
@@ -147,6 +174,16 @@ jobs:
               raise SystemExit(f"Real Viral Clip render did not complete: {result}")
           if int(result.get("progress") or 0) != 100:
               raise SystemExit(f"Real Viral Clip render did not reach 100%: {result}")
+          quality_gate = result.get("final_quality_gate") or {}
+          if quality_gate.get("status") != "passed":
+              raise SystemExit(f"Real Viral Clip quality gate failed: {quality_gate}")
+          media = result.get("media_validation") or {}
+          video = media.get("video") or {}
+          audio = media.get("audio") or {}
+          if (video.get("width"), video.get("height")) != (1080, 1920):
+              raise SystemExit(f"Vertical delivery dimensions are wrong: {video}")
+          if video.get("codec_name") != "h264" or audio.get("codec_name") != "aac":
+              raise SystemExit(f"Browser delivery codecs are wrong: {media}")
           output_path = str(result.get("output_path") or "")
           if not output_path:
               raise SystemExit(f"Real Viral Clip render returned no output path: {result}")
@@ -165,6 +202,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          PREVIOUS_REVISION=$(gcloud run services describe "${SERVICE_NAME}" \
+            --region "${REGION}" --format='value(status.latestReadyRevisionName)' 2>/dev/null || true)
           gcloud run deploy "${SERVICE_NAME}" \
             --image "${IMAGE}" \
             --platform managed \
@@ -180,6 +219,7 @@ jobs:
             --max-instances 3 \
             --no-traffic \
             --tag "${TAG}" \
+            --set-secrets "MEDIA_WORKER_TASK_SECRET=${TASK_SECRET_NAME}:latest" \
             --set-env-vars "NODE_ENV=production,FIREBASE_STORAGE_BUCKET=autopromote-cc6d3.firebasestorage.app,MULTICAM_UPLOAD_FIREBASE=true,MULTICAM_MASTER_RETENTION_DAYS=7,ENABLE_LOCAL_MEDIA_OUTPUT_FALLBACK=false,WHISPER_ENGINE=faster,PROMO_WHISPER_MODEL=small,FASTER_WHISPER_DEVICE=cpu,FASTER_WHISPER_COMPUTE_TYPE=int8,FASTER_WHISPER_STRICT=true,ALLOW_RUNTIME_DEPENDENCY_INSTALL=false"
 
           gcloud run services describe "${SERVICE_NAME}" \
@@ -189,25 +229,71 @@ jobs:
           CANDIDATE_URL=$(python -c 'import json,os; data=json.load(open("/tmp/media-worker-service.json")); tag=os.environ["TAG"]; print(next(item["url"] for item in data["status"].get("traffic",[]) if item.get("tag")==tag))')
           echo "revision=${REVISION}" >> "${GITHUB_OUTPUT}"
           echo "candidate_url=${CANDIDATE_URL}" >> "${GITHUB_OUTPUT}"
+          echo "previous_revision=${PREVIOUS_REVISION}" >> "${GITHUB_OUTPUT}"
         env:
           TAG: candidate-${{ github.run_id }}-${{ github.run_attempt }}
 
-      - name: Verify candidate health
+      - name: Verify candidate health and real render
         shell: bash
         env:
           CANDIDATE_URL: ${{ steps.candidate.outputs.candidate_url }}
         run: |
           set -euo pipefail
+          CANDIDATE_HEALTHY=false
           for attempt in $(seq 1 18); do
             if curl --fail --silent --show-error --max-time 30 "${CANDIDATE_URL}/status" > /tmp/media-worker-status.json; then
               python -m json.tool /tmp/media-worker-status.json
-              exit 0
+              CANDIDATE_HEALTHY=true
+              break
             fi
             echo "Candidate is still starting (${attempt}/18)."
             sleep 10
           done
-          echo "Candidate health verification failed; production traffic was not changed."
-          exit 1
+          if [[ "${CANDIDATE_HEALTHY}" != "true" ]]; then
+            echo "Candidate health verification failed; production traffic was not changed."
+            exit 1
+          fi
+          curl --fail --silent --show-error --max-time 600 \
+            --header "Content-Type: application/json" \
+            --data '{
+              "video_url": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+              "start_time": 0,
+              "end_time": 2,
+              "overlays": [],
+              "auto_captions": false,
+              "smart_crop": false,
+              "professional_cleanup": true,
+              "finish_plan": {
+                "enabled": true,
+                "color": {"contrast": 1.05, "saturation": 1.04},
+                "visualizer": {"enabled": true, "mode": "wave", "position": "top"}
+              },
+              "sound_effects": [{
+                "id": "candidate-impact",
+                "builtIn": true,
+                "tone": "impact",
+                "startTime": 0.5,
+                "duration": 0.35,
+                "volume": 0.15,
+                "enabled": true
+              }],
+              "brand_watermark": false,
+              "async_mode": false
+            }' \
+            "${CANDIDATE_URL}/render-viral-clip" > /tmp/media-worker-candidate-render.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          result = json.loads(Path("/tmp/media-worker-candidate-render.json").read_text())
+          if result.get("status") != "completed":
+              raise SystemExit(f"Candidate render did not complete: {result}")
+          if (result.get("final_quality_gate") or {}).get("status") != "passed":
+              raise SystemExit(f"Candidate render quality gate failed: {result}")
+          if not (result.get("audio_proof") or {}).get("verified"):
+              raise SystemExit(f"Candidate render audio proof failed: {result}")
+          print("Candidate completed a real video, visualizer and SFX render.")
+          PY
 
       - name: Promote verified revision to production
         shell: bash
@@ -230,3 +316,15 @@ jobs:
           test "${LIVE_REVISION}" = "${REVISION}"
           curl --fail --silent --show-error --max-time 30 "${SERVICE_URL}/status" | python -m json.tool
           echo "Cloud Run revision ${REVISION} is healthy at ${SERVICE_URL}."
+
+      - name: Roll back production traffic after a failed promotion check
+        if: ${{ failure() && steps.candidate.outputs.previous_revision != '' }}
+        shell: bash
+        env:
+          PREVIOUS_REVISION: ${{ steps.candidate.outputs.previous_revision }}
+        run: |
+          set -euo pipefail
+          gcloud run services update-traffic "${SERVICE_NAME}" \
+            --region "${REGION}" \
+            --to-revisions "${PREVIOUS_REVISION}=100"
+          echo "Rolled production traffic back to ${PREVIOUS_REVISION}."

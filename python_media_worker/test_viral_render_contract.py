@@ -5,19 +5,97 @@ from pathlib import Path
 import subprocess
 import tempfile
 import unittest
+import asyncio
 
 from python_media_worker.viral_render_contract import (
     build_caption_override_transcript,
+    build_edited_caption_transcript,
     build_segment_transition_filters,
     build_speed_filter_complex,
     map_timeline_time,
     normalize_speed_plan,
+    remap_caption_transcript_to_speed_plan,
     resolve_caption_layout,
     speed_plan_output_duration,
 )
 
+from fastapi import HTTPException
+from python_media_worker.main_media_server import (
+    RenderViralRequest,
+    build_speaker_track_crop_filter,
+    render_viral_clip_impl,
+)
+
 
 class ViralRenderContractTests(unittest.TestCase):
+    def test_vertical_speaker_crop_uses_encoder_safe_even_dimensions(self):
+        commands, crop_width, crop_height = build_speaker_track_crop_filter(
+            [(0.0, 0.68, 0.42), (0.5, 0.7, 0.43), (1.0, 0.72, 0.44)],
+            960,
+            540,
+            "9:16",
+        )
+
+        self.assertEqual(crop_width % 2, 0)
+        self.assertEqual(crop_height % 2, 0)
+        self.assertGreaterEqual(len(commands), 3)
+
+    def test_accepts_complete_studio_finish_audio_and_destination_contract(self):
+        request = RenderViralRequest(
+            video_url="https://example.com/source.mp4",
+            start_time=0,
+            end_time=5,
+            finish_plan={
+                "enabled": True,
+                "visualizer": {"enabled": True, "mode": "ring"},
+            },
+            add_music=True,
+            music_url="https://storage.example.com/music.wav",
+            music_volume=0.2,
+            sound_effects=[
+                {
+                    "id": "impact-1",
+                    "name": "Impact",
+                    "builtIn": True,
+                    "tone": "impact",
+                    "startTime": 1.5,
+                    "duration": 0.6,
+                }
+            ],
+            export_destination="tiktok",
+        )
+
+        self.assertTrue(request.finish_plan["visualizer"]["enabled"])
+        self.assertTrue(request.add_music)
+        self.assertEqual(request.sound_effects[0].tone, "impact")
+        self.assertEqual(request.export_destination, "tiktok")
+
+    def test_render_refuses_unresolved_broll_planning_placeholder(self):
+        request = RenderViralRequest(
+            video_url="https://example.com/source.mp4",
+            start_time=0,
+            end_time=5,
+            overlays=[
+                {
+                    "id": "planned-story-beat",
+                    "type": "text",
+                    "text": "STORY EVIDENCE",
+                    "x": 50,
+                    "y": 50,
+                    "start_time": 1,
+                    "duration": 1.5,
+                    "bRollMode": "fullscreen",
+                    "bRollPlaceholder": True,
+                }
+            ],
+        )
+
+        with self.assertRaises(HTTPException) as raised:
+            asyncio.run(render_viral_clip_impl(request))
+
+        self.assertEqual(raised.exception.status_code, 400)
+        self.assertIn("planning evidence", str(raised.exception.detail))
+
     def test_viral_renderer_materializes_remote_sources_before_ffmpeg_edits(self):
         worker_source = Path(__file__).with_name("main_media_server.py").read_text(
             encoding="utf-8"
@@ -205,8 +283,47 @@ class ViralRenderContractTests(unittest.TestCase):
         self.assertEqual(style["margin_v"], 0)
         self.assertEqual(style["fontsize"], 60)
         self.assertEqual(transcript["segments"][0]["text"], "Say this exactly")
+
+    def test_preserves_creator_edited_caption_lines_and_timings(self):
+        transcript = build_edited_caption_transcript(
+            [
+                {
+                    "id": "zu-en-1",
+                    "start_time": 1.2,
+                    "end_time": 3.4,
+                    "text": "Sawubona, welcome ekhaya",
+                    "caption_placement": "middle_left",
+                    "caption_icon": "payoff",
+                    "text_review_required": True,
+                    "text_reviewed": True,
+                }
+            ]
+        )
+        segment = transcript["segments"][0]
+        self.assertEqual(segment["text"], "Sawubona, welcome ekhaya")
+        self.assertEqual(segment["start"], 1.2)
+        self.assertEqual(segment["end"], 3.4)
+        self.assertEqual([word["word"] for word in segment["words"]], ["Sawubona,", "welcome", "ekhaya"])
         self.assertEqual(len(transcript["segments"][0]["words"]), 3)
-        self.assertAlmostEqual(transcript["segments"][0]["words"][-1]["end"], 3.0)
+        self.assertAlmostEqual(transcript["segments"][0]["words"][-1]["end"], 3.4)
+        self.assertEqual(segment["captionPlacement"], "middle_left")
+        self.assertEqual(segment["captionIcon"], "payoff")
+        self.assertTrue(segment["textReviewed"])
+
+    def test_remaps_reviewed_caption_times_after_speed_changes(self):
+        transcript = build_edited_caption_transcript(
+            [{"start_time": 2, "end_time": 4, "text": "Ngiyabonga kakhulu"}]
+        )
+        remapped = remap_caption_transcript_to_speed_plan(
+            transcript,
+            [{"start_time": 0, "end_time": 6, "rate": 2}],
+        )
+
+        segment = remapped["segments"][0]
+        self.assertEqual(segment["start"], 1)
+        self.assertEqual(segment["end"], 2)
+        self.assertEqual(segment["words"][0]["start"], 1)
+        self.assertEqual(segment["words"][-1]["end"], 2)
 
     def test_builds_visual_join_and_audio_safe_edges(self):
         soft = build_segment_transition_filters(

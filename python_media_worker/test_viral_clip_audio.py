@@ -6,10 +6,16 @@ import tempfile
 import unittest
 from unittest import mock
 
+from fastapi import HTTPException
 import python_media_worker.main_media_server as worker
 
 
 class ViralClipAudioTests(unittest.TestCase):
+    def approved_temp_dir(self):
+        shared_tmp = os.path.abspath(os.path.join(os.path.dirname(worker.__file__), "../tmp"))
+        os.makedirs(shared_tmp, exist_ok=True)
+        return tempfile.TemporaryDirectory(dir=shared_tmp)
+
     def make_source(self, output_path):
         subprocess.run(
             [
@@ -37,8 +43,38 @@ class ViralClipAudioTests(unittest.TestCase):
             check=True,
         )
 
+    def test_captioned_render_requires_creator_reviewed_lines(self):
+        request = worker.RenderViralRequest(
+            video_url="https://example.com/source.mp4",
+            start_time=0,
+            end_time=10,
+            overlays=[],
+            auto_captions=True,
+        )
+
+        with self.assertRaises(HTTPException) as raised:
+            asyncio.run(worker.render_viral_clip_impl(request))
+
+        self.assertEqual(raised.exception.status_code, 400)
+        self.assertIn("Generate and review editable captions", str(raised.exception.detail))
+
+    def test_captioned_render_rejects_an_empty_timed_line(self):
+        request = worker.RenderViralRequest(
+            video_url="https://example.com/source.mp4",
+            start_time=0,
+            end_time=10,
+            overlays=[],
+            auto_captions=True,
+            caption_segments=[{"start_time": 1, "end_time": 2, "text": "   "}],
+        )
+
+        with self.assertRaises(HTTPException) as raised:
+            asyncio.run(worker.render_viral_clip_impl(request))
+
+        self.assertEqual(raised.exception.status_code, 400)
+
     def test_viral_render_preserves_and_verifies_source_audio(self):
-        with tempfile.TemporaryDirectory() as temp_dir:
+        with self.approved_temp_dir() as temp_dir:
             source_path = os.path.join(temp_dir, "source.mp4")
             self.make_source(source_path)
             request = worker.RenderViralRequest(
@@ -73,7 +109,7 @@ class ViralClipAudioTests(unittest.TestCase):
                             os.remove(candidate)
 
     def test_viral_render_materializes_remote_source_with_http_fallback_helper(self):
-        with tempfile.TemporaryDirectory() as temp_dir:
+        with self.approved_temp_dir() as temp_dir:
             source_path = os.path.join(temp_dir, "source.mp4")
             self.make_source(source_path)
             request = worker.RenderViralRequest(
@@ -112,6 +148,85 @@ class ViralClipAudioTests(unittest.TestCase):
             finally:
                 if result and result.get("output_path") and os.path.exists(result["output_path"]):
                     os.remove(result["output_path"])
+
+    def test_motion_sculpture_failure_returns_an_honest_render_error(self):
+        with self.approved_temp_dir() as temp_dir:
+            source_path = os.path.join(temp_dir, "source.mp4")
+            self.make_source(source_path)
+            request = worker.RenderViralRequest(
+                video_url=source_path,
+                start_time=0,
+                end_time=1.5,
+                overlays=[],
+                creative_plan={
+                    "enabled": True,
+                    "intensity": "unreal",
+                    "effects": [
+                        {
+                            "preset": "motion_sculpture",
+                            "intensity": "unreal",
+                            "start_time": 0,
+                            "end_time": 1.5,
+                        }
+                    ],
+                },
+            )
+
+            with (
+                mock.patch.object(
+                    worker,
+                    "render_motion_sculpture",
+                    side_effect=RuntimeError("segmentation stage stopped"),
+                ),
+                mock.patch.object(worker, "upload_file_to_firebase") as upload,
+            ):
+                with self.assertRaises(HTTPException) as raised:
+                    asyncio.run(worker.render_viral_clip_impl(request))
+
+            self.assertIn("no false clean result", str(raised.exception.detail))
+            upload.assert_not_called()
+
+    def test_reality_break_low_confidence_returns_an_honest_render_error(self):
+        with self.approved_temp_dir() as temp_dir:
+            source_path = os.path.join(temp_dir, "source.mp4")
+            self.make_source(source_path)
+            request = worker.RenderViralRequest(
+                video_url=source_path,
+                start_time=0,
+                end_time=1.5,
+                overlays=[],
+                creative_plan={
+                    "enabled": True,
+                    "intensity": "unreal",
+                    "effects": [
+                        {
+                            "preset": "reality_break",
+                            "intensity": "unreal",
+                            "start_time": 0,
+                            "end_time": 1.5,
+                        }
+                    ],
+                },
+            )
+
+            with (
+                mock.patch.object(
+                    worker,
+                    "transcribe_captions_with_provider",
+                    return_value={"segments": [{"start": 0, "end": 1.5, "text": "unclear speech"}]},
+                ),
+                mock.patch.object(
+                    worker,
+                    "build_grounded_scene_brief",
+                    side_effect=RuntimeError("understanding confidence is too low"),
+                ),
+                mock.patch.object(worker, "upload_file_to_firebase") as upload,
+            ):
+                with self.assertRaises(HTTPException) as raised:
+                    asyncio.run(worker.render_viral_clip_impl(request))
+
+            self.assertIn("no false clean result", str(raised.exception.detail))
+            upload.assert_not_called()
 
 
 if __name__ == "__main__":

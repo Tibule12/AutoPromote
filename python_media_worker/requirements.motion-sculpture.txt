@@ -1,0 +1,3 @@
+# Installed with --no-deps by Dockerfile. Avoids the unused 350+ MiB JAX stack;
+# requirements.txt explicitly supplies the CPU graph runtime dependencies.
+mediapipe==0.10.21

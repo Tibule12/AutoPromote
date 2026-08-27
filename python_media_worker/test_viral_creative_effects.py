@@ -35,30 +35,88 @@ class ViralCreativeEffectsTests(unittest.TestCase):
                     "intensity": "unreal",
                     "start_time": 0.0,
                     "end_time": 2.0,
+                    "studio_makeover": False,
+                    "composition_mode": "monitor",
                 }
             ],
         )
 
-    def test_builds_all_signature_effects_into_one_graph(self):
-        plan = normalize_creative_plan(
+    def test_reality_break_preserves_supported_composition_and_bounds_unknown_mode(self):
+        background = normalize_creative_plan(
             {
                 "enabled": True,
-                "intensity": "bold",
                 "effects": [
-                    {"preset": "motion_sculpture", "start_time": 0, "end_time": 1},
-                    {"preset": "reality_break", "start_time": 1, "end_time": 2},
-                    {"preset": "tracked_reveal", "start_time": 2, "end_time": 3},
+                    {
+                        "preset": "reality_break",
+                        "start_time": 0,
+                        "end_time": 3,
+                        "composition_mode": "full_background",
+                    }
                 ],
             },
             3,
         )
-        graph, output_label, receipt = build_creative_filter_complex(plan)
+        invalid = normalize_creative_plan(
+            {
+                "enabled": True,
+                "effects": [
+                    {
+                        "preset": "reality_break",
+                        "start_time": 0,
+                        "end_time": 3,
+                        "composition_mode": "fake_people",
+                    }
+                ],
+            },
+            3,
+        )
 
-        self.assertIn("tmix=", graph)
-        self.assertIn("drawgrid=", graph)
-        self.assertIn("curves=preset=increase_contrast", graph)
-        self.assertEqual(output_label, "creative_2")
-        self.assertEqual(len(receipt), 3)
+        self.assertEqual(background["effects"][0]["composition_mode"], "full_background")
+        self.assertEqual(invalid["effects"][0]["composition_mode"], "monitor")
+
+        hybrid = normalize_creative_plan(
+            {
+                "enabled": True,
+                "effects": [
+                    {
+                        "preset": "reality_break",
+                        "start_time": 0,
+                        "end_time": 3,
+                        "composition_mode": "paced_hybrid",
+                    }
+                ],
+            },
+            3,
+        )
+        self.assertEqual(hybrid["effects"][0]["composition_mode"], "paced_hybrid")
+
+    def test_motion_sculpture_cannot_fall_back_to_a_full_frame_ffmpeg_graph(self):
+        plan = normalize_creative_plan(
+            {
+                "enabled": True,
+                "intensity": "unreal",
+                "effects": [
+                    {"preset": "motion_sculpture", "start_time": 0, "end_time": 1},
+                ],
+            },
+            1,
+        )
+        with self.assertRaisesRegex(ValueError, "subject-aware OpenCV"):
+            build_creative_filter_complex(plan)
+
+    def test_reality_break_cannot_fall_back_to_a_generic_ffmpeg_graph(self):
+        plan = normalize_creative_plan(
+            {
+                "enabled": True,
+                "intensity": "unreal",
+                "effects": [
+                    {"preset": "reality_break", "start_time": 0, "end_time": 1},
+                ],
+            },
+            1,
+        )
+        with self.assertRaisesRegex(ValueError, "evidence-grounded subject-aware"):
+            build_creative_filter_complex(plan)
 
     def test_builds_real_delayed_frames_for_beat_echo(self):
         plan = normalize_creative_plan(
@@ -101,9 +159,8 @@ class ViralCreativeEffectsTests(unittest.TestCase):
                     "enabled": True,
                     "intensity": "bold",
                     "effects": [
-                        {"preset": "motion_sculpture", "start_time": 0, "end_time": 1},
-                        {"preset": "reality_break", "start_time": 1, "end_time": 2},
-                        {"preset": "tracked_reveal", "start_time": 2, "end_time": 3},
+                        {"preset": "beat_echo", "start_time": 0, "end_time": 1.5},
+                        {"preset": "tracked_reveal", "start_time": 1.5, "end_time": 3},
                     ],
                 },
                 3,

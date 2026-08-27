@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import MultiCamCombiner from "../MultiCamCombiner";
 
 jest.mock("firebase/auth", () => ({
@@ -64,5 +64,26 @@ describe("MultiCamCombiner studio layout", () => {
     expect(screen.getByRole("button", { name: "Auto Direct Preview only" })).toBeInTheDocument();
     expect(screen.queryByText("Proof Mode")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Compare" })).not.toBeInTheDocument();
+  });
+
+  it("auto-preserves spoken languages and only offers optional English translation", () => {
+    render(
+      <MultiCamCombiner
+        primaryFile={{
+          url: "https://cdn.example.com/camera-one.jpg",
+          isRemote: true,
+          name: "camera-one.jpg",
+          type: "image/jpeg",
+        }}
+        onCancel={jest.fn()}
+        onComplete={jest.fn()}
+        onStatusChange={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByRole("checkbox", { name: /Translate captions to English/i })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("checkbox", { name: /Burn captions/i }));
+    expect(screen.getByRole("checkbox", { name: /Translate captions to English/i })).not.toBeChecked();
+    expect(screen.getByText(/Off keeps every spoken language as spoken/i)).toBeInTheDocument();
   });
 });

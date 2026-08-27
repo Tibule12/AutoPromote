@@ -4,7 +4,7 @@ import { SafeVideo } from "../components/SafeMedia";
 import { useSubscription } from "../hooks/useSubscription";
 import { sanitizeUrl } from "../utils/security";
 import { uploadSourceFileViaBackend } from "../utils/sourceUpload";
-import { getAuth } from "firebase/auth";
+import { getMediaAuthToken } from "../utils/mediaAuth";
 
 const resolveSourceUrl = source => {
   if (typeof source === "string") return sanitizeUrl(source);
@@ -111,9 +111,8 @@ function ViralClipStudioPanel({
 
     setSourceState("uploading");
     try {
-      const user = getAuth().currentUser;
-      if (!user) throw new Error("Please sign in again before uploading.");
-      const token = await user.getIdToken();
+      const token = await getMediaAuthToken();
+      if (!token) throw new Error("Please sign in again before uploading.");
       const uploadResult = await uploadSourceFileViaBackend({
         file: incomingSource,
         token,

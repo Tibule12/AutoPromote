@@ -61,6 +61,28 @@ describe("VideoEditingService Viral Clip payload", () => {
           ],
           pacing_level: "energetic",
           creative_intent: "proof",
+          caption_segments: [
+            {
+              id: "caption-1",
+              start_time: 0.4,
+              end_time: 2.8,
+              text: "Molo, welcome ekhaya",
+              languages: ["xh", "en"],
+              text_reviewed: true,
+            },
+          ],
+          translate_captions_to_english: false,
+          studio_plan: { version: 1, timeline: [] },
+          professional_cleanup: true,
+          creative_plan: { version: 1, enabled: true, effects: [] },
+          finish_plan: {
+            version: 1,
+            enabled: true,
+            color: { preset: "podcast_pro", contrast: 1.2 },
+            keyframes: [{ time: 0, values: { contrast: 1.2 } }],
+          },
+          sound_effects: [{ id: "impact-1", start_time: 1.5, duration: 0.6 }],
+          export_destination: "tiktok",
         },
       },
       "test-user"
@@ -84,6 +106,23 @@ describe("VideoEditingService Viral Clip payload", () => {
         ],
         pacing_level: "energetic",
         creative_intent: "proof",
+        caption_segments: [
+          expect.objectContaining({
+            id: "caption-1",
+            text: "Molo, welcome ekhaya",
+            languages: ["xh", "en"],
+          }),
+        ],
+        translate_captions_to_english: false,
+        studio_plan: { version: 1, timeline: [] },
+        professional_cleanup: true,
+        creative_plan: expect.objectContaining({ enabled: true }),
+        finish_plan: expect.objectContaining({
+          enabled: true,
+          color: expect.objectContaining({ preset: "podcast_pro" }),
+        }),
+        sound_effects: [expect.objectContaining({ id: "impact-1" })],
+        export_destination: "tiktok",
       }),
       expect.any(Object)
     );

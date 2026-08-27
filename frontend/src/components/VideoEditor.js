@@ -17,6 +17,7 @@ import CinematicEffectsPanel from "./CinematicEffectsPanel";
 import { useSubscription } from "../hooks/useSubscription";
 import { playMediaSafely } from "../utils/mediaPlayback";
 import { buildViralRenderData } from "./viralRenderPayload";
+import { getMediaAuthToken } from "../utils/mediaAuth";
 import {
   RENDER_STATUS_TIMEOUT_MS,
   RENDER_SUBMISSION_TIMEOUT_MS,
@@ -1035,8 +1036,8 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
     try {
       const auth = getAuth();
       const user = auth.currentUser;
-      if (!user) throw new Error("Please log in.");
-      let token = await user.getIdToken();
+      let token = await getMediaAuthToken();
+      if (!token) throw new Error("Please log in.");
 
       // FIX: Ensure videoSrc is a Real URL (Firebase/Cloud), not a Local Blob.
       // If it's a blob, we must upload it first.
@@ -1294,7 +1295,8 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
           if (statusRes.status === 401) {
             console.warn("Token expired during viral render polling, refreshing...");
             try {
-              token = await user.getIdToken(true);
+              token = await getMediaAuthToken(true);
+              if (!token) throw new Error("Authentication session expired.");
               statusRes = await fetchWithRenderTimeout(
                 `${API_BASE_URL}/api/media/status/${jobId}`,
                 { headers: { Authorization: `Bearer ${token}` } },

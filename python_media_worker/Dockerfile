@@ -5,6 +5,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PORT=8080 \
     WHISPER_ENGINE=faster \
     PROMO_WHISPER_MODEL=small \
+    AUTOPROMOTE_REALITY_WHISPER_MODEL=digiphyte/swivuriso-turbo \
+    AUTOPROMOTE_REALITY_WHISPER_REVISION=6e96700b527e49f2d48fdc55e632c7cb62029e91 \
     FASTER_WHISPER_DEVICE=cpu \
     FASTER_WHISPER_COMPUTE_TYPE=int8 \
     FASTER_WHISPER_STRICT=true \
@@ -14,6 +16,10 @@ ENV DEBIAN_FRONTEND=noninteractive \
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
     fonts-dejavu-core \
+    libegl1 \
+    libgles2 \
+    libgl1 \
+    libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
@@ -21,12 +27,16 @@ WORKDIR /app
 
 # Install Python dependencies
 COPY requirements.txt .
+COPY requirements.motion-sculpture.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --no-deps -r requirements.motion-sculpture.txt
+RUN python -c "import cv2, mediapipe as mp; assert hasattr(mp.solutions, 'selfie_segmentation'); print('Motion Sculpture CPU segmentation ready')"
 
 # Cache only the production transcription engine. Bundling openai-whisper as a
 # second fallback added PyTorch and a duplicate model, making this image over
 # 4 GiB compressed.
 RUN python -c "from faster_whisper import WhisperModel; WhisperModel('small', device='cpu', compute_type='int8')"
+RUN python -c "from faster_whisper import WhisperModel; WhisperModel('digiphyte/swivuriso-turbo', revision='6e96700b527e49f2d48fdc55e632c7cb62029e91', device='cpu', compute_type='int8')"
 
 # Copy source code
 COPY . .

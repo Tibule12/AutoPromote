@@ -32,6 +32,11 @@ jest.mock("../../utils/sourceUpload", () => ({
   uploadSourceFileViaBackend: jest.fn(),
 }));
 
+// This suite mounts the complete production editor for every interaction. The
+// denser Studio shell can legitimately take longer than Jest's 5s unit default
+// under jsdom even though the same workflow is fast in the browser E2E test.
+jest.setTimeout(30000);
+
 describe("ViralClipStudio timeline sequencing", () => {
   const originalConfirm = window.confirm;
   const originalAlert = window.alert;
@@ -42,6 +47,7 @@ describe("ViralClipStudio timeline sequencing", () => {
   const originalLoad = window.HTMLMediaElement.prototype.load;
   const originalFetch = global.fetch;
   const originalConsoleError = console.error;
+  const originalCanvasGetContext = window.HTMLCanvasElement.prototype.getContext;
   let consoleErrorSpy;
 
   beforeEach(() => {
@@ -68,6 +74,16 @@ describe("ViralClipStudio timeline sequencing", () => {
       value: jest.fn(),
     });
     global.fetch = jest.fn();
+    window.HTMLCanvasElement.prototype.getContext = jest.fn(() => ({
+      beginPath: jest.fn(),
+      clearRect: jest.fn(),
+      drawImage: jest.fn(),
+      fillRect: jest.fn(),
+      getImageData: jest.fn(() => ({ data: new Uint8ClampedArray(96 * 54 * 4) })),
+      lineTo: jest.fn(),
+      moveTo: jest.fn(),
+      stroke: jest.fn(),
+    }));
     document.createElement = jest.fn(tagName => {
       const element = originalCreateElement(tagName);
       if (tagName === "audio" || tagName === "video") {
@@ -103,8 +119,107 @@ describe("ViralClipStudio timeline sequencing", () => {
     window.HTMLMediaElement.prototype.pause = originalPause;
     window.HTMLMediaElement.prototype.load = originalLoad;
     global.fetch = originalFetch;
+    window.HTMLCanvasElement.prototype.getContext = originalCanvasGetContext;
     consoleErrorSpy?.mockRestore();
     jest.clearAllMocks();
+  });
+
+  test("uses Quick, Creator and Signature as views over one shared edit", () => {
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/clip.mp4"
+        clips={[
+          {
+            id: "clip-mode",
+            start: 0,
+            end: 12,
+            duration: 12,
+            url: "https://example.com/clip.mp4",
+          },
+        ]}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+      />
+    );
+
+    const workspace = screen.getByTestId("viral-studio-workspace");
+    expect(workspace).toHaveAttribute("data-workspace-mode", "creator");
+    expect(screen.getByRole("tab", { name: "Creator Studio" })).toHaveAttribute(
+      "aria-selected",
+      "true"
+    );
+
+    fireEvent.click(screen.getByRole("tab", { name: "Quick Create" }));
+    expect(workspace).toHaveAttribute("data-workspace-mode", "quick");
+    expect(
+      within(screen.getByRole("navigation", { name: "Creative tools" })).queryByRole("button", {
+        name: "Cut",
+      })
+    ).not.toBeInTheDocument();
+    expect(screen.getByText(/Nothing in your edit was removed/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("tab", { name: "Signature Lab" }));
+    expect(workspace).toHaveAttribute("data-workspace-mode", "signature");
+    expect(
+      within(screen.getByRole("navigation", { name: "Creative tools" })).getByRole("button", {
+        name: "Cut",
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Signature Lab is focused on transformation tuning/i)
+    ).toBeInTheDocument();
+  });
+
+  test("applies a Signature finish preset to After without touching Before", async () => {
+    const onSave = jest.fn(() => Promise.resolve());
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/clip.mp4"
+        clips={[
+          {
+            id: "finish-clip",
+            start: 0,
+            end: 12,
+            duration: 12,
+            url: "https://example.com/clip.mp4",
+          },
+        ]}
+        onSave={onSave}
+        onCancel={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByTestId("studio-finish-rack")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("tab", { name: "Signature Lab" }));
+    const rack = screen.getByTestId("studio-finish-rack");
+    fireEvent.click(within(rack).getByRole("button", { name: /Podcast Pro/i }));
+
+    expect(screen.getByTestId("studio-after-video").style.filter).toContain("brightness(1.050)");
+    expect(screen.getByLabelText("Untouched source preview").style.filter).not.toContain(
+      "brightness(1.050)"
+    );
+    expect(screen.getByText(/Podcast Pro is live in After/i)).toBeInTheDocument();
+    fireEvent.click(within(rack).getByRole("button", { name: /Add grade keyframe/i }));
+    expect(
+      within(rack).getByRole("button", { name: /Finish keyframe at 0.00 seconds/i })
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /Render Final Clip/i }));
+    await waitFor(() => expect(onSave).toHaveBeenCalled());
+    expect(onSave.mock.calls[0][2].finishPlan).toEqual(
+      expect.objectContaining({
+        enabled: true,
+        color: expect.objectContaining({ preset: "podcast_pro", contrast: 1.2 }),
+        keyframes: [
+          expect.objectContaining({
+            time: 0,
+            values: expect.objectContaining({ brightness: 1.05, contrast: 1.2 }),
+            interpolation: "linear",
+          }),
+        ],
+        magnetic_beats: expect.objectContaining({ enabled: true }),
+      })
+    );
   });
 
   test("previews a signature transformation and includes it in the export contract", async () => {
@@ -144,6 +259,49 @@ describe("ViralClipStudio timeline sequencing", () => {
             end_time: 12,
           }),
         ],
+      })
+    );
+    expect(onSave.mock.calls[0][2].addHook).toBe(false);
+    expect(onSave.mock.calls[0][2].autoCaptions).toBe(false);
+  });
+
+  test("keeps Motion Sculpture independent from Hook and shows its intensity target", async () => {
+    const onSave = jest.fn(() => Promise.resolve());
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/dance.mp4"
+        clips={[{ id: "clip-motion", start: 0, end: 8, duration: 8 }]}
+        onSave={onSave}
+        onCancel={jest.fn()}
+      />
+    );
+
+    expect(screen.getByLabelText(/^Add Hook$/i)).not.toBeChecked();
+    fireEvent.click(screen.getByRole("button", { name: /Motion Sculpture/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Unreal" }));
+
+    expect(screen.getByAltText(/Motion Sculpture unreal visual target/i)).toHaveAttribute(
+      "src",
+      "/assets/motion-sculpture/motion-sculpture-unreal-concept.png"
+    );
+    expect(screen.getByLabelText(/^Add Hook$/i)).not.toBeChecked();
+
+    fireEvent.click(screen.getByRole("button", { name: /Render Final Clip/i }));
+    await waitFor(() => expect(onSave).toHaveBeenCalled());
+    expect(onSave.mock.calls[0][2]).toEqual(
+      expect.objectContaining({
+        addHook: false,
+        autoCaptions: false,
+        creativePlan: expect.objectContaining({
+          enabled: true,
+          intensity: "unreal",
+          effects: [
+            expect.objectContaining({
+              preset: "motion_sculpture",
+              intensity: "unreal",
+            }),
+          ],
+        }),
       })
     );
   });
@@ -314,10 +472,11 @@ describe("ViralClipStudio timeline sequencing", () => {
     });
     fireEvent.click(sourceTrack, { clientX: 190 });
     expect(afterVideo.currentTime).toBeGreaterThan(5);
+    fireEvent.click(screen.getByRole("checkbox", { name: /Add Hook/i }));
     fireEvent.click(screen.getByTestId("timeline-hook-block"));
     expect(afterVideo.currentTime).toBeCloseTo(0.8, 1);
-
     fireEvent.click(screen.getByRole("checkbox", { name: /Add Hook/i }));
+
     fireEvent.click(screen.getByRole("button", { name: /Render Final Clip/i }));
 
     await waitFor(() => expect(onSave).toHaveBeenCalled());
@@ -502,7 +661,7 @@ describe("ViralClipStudio timeline sequencing", () => {
     }
   }
 
-  test("enables the hook controls on initial render", () => {
+  test("keeps Hook off initially and only enables it explicitly", () => {
     render(
       <ViralClipStudio
         videoUrl="https://example.com/source.mp4"
@@ -515,6 +674,8 @@ describe("ViralClipStudio timeline sequencing", () => {
       />
     );
 
+    expect(screen.getByLabelText(/^Add Hook$/i)).not.toBeChecked();
+    fireEvent.click(screen.getByLabelText(/^Add Hook$/i));
     expect(screen.getByLabelText(/^Add Hook$/i)).toBeChecked();
     expect(screen.getByRole("button", { name: /Select Hook Segment/i })).toBeInTheDocument();
 
@@ -566,7 +727,7 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(
       within(timeline).getByText(/same media, timings and audio decisions/i)
     ).toBeInTheDocument();
-    expect(screen.getByTestId("timeline-hook-block")).toBeInTheDocument();
+    expect(screen.queryByTestId("timeline-hook-block")).not.toBeInTheDocument();
     expect(screen.getByTestId("timeline-original-audio")).toHaveTextContent("Original voice");
     expect(sourceTrack.querySelectorAll(".compact-filmstrip-frame").length).toBeGreaterThan(1);
 
@@ -1085,10 +1246,18 @@ describe("ViralClipStudio timeline sequencing", () => {
   test("preserves uploaded B-roll through duplicate, delete, undo, and redo", async () => {
     const createdVideos = setupVideoCreateElementMock();
     const onSave = jest.fn(() => Promise.resolve());
-    const { container } = render(
+    render(
       <ViralClipStudio
         videoUrl="https://example.com/source.mp4"
-        clips={[{ id: "clip-1", start: 0, end: 12, duration: 12, reason: "Hook" }]}
+        clips={[
+          {
+            id: "clip-1",
+            start: 0,
+            end: 12,
+            duration: 12,
+            reason: "Hook",
+          },
+        ]}
         onSave={onSave}
         onCancel={jest.fn()}
         onStatusChange={jest.fn()}
@@ -1162,7 +1331,16 @@ describe("ViralClipStudio timeline sequencing", () => {
     render(
       <ViralClipStudio
         videoUrl="https://example.com/source.mp4"
-        clips={[{ id: "clip-1", start: 0, end: 12, duration: 12, reason: "Hook" }]}
+        clips={[
+          {
+            id: "clip-1",
+            start: 0,
+            end: 12,
+            duration: 12,
+            reason: "Hook",
+            text: "Actual creator speech for the caption preview",
+          },
+        ]}
         onSave={jest.fn()}
         onCancel={jest.fn()}
         onStatusChange={jest.fn()}
@@ -1177,7 +1355,7 @@ describe("ViralClipStudio timeline sequencing", () => {
     fireEvent.click(screen.getByTestId("make-it-hit-button"));
     await waitFor(() => {
       expect(screen.getByTestId("live-caption-preview")).toBeInTheDocument();
-      expect(afterVideo.playbackRate).toBeCloseTo(1.15);
+      expect(afterVideo.playbackRate).toBeCloseTo(1.05);
     });
 
     fireEvent.click(screen.getByTestId("studio-undo-button"));
@@ -1189,7 +1367,7 @@ describe("ViralClipStudio timeline sequencing", () => {
     fireEvent.click(screen.getByTestId("studio-redo-button"));
     await waitFor(() => {
       expect(screen.getByTestId("live-caption-preview")).toBeInTheDocument();
-      expect(afterVideo.playbackRate).toBeCloseTo(1.15);
+      expect(afterVideo.playbackRate).toBeCloseTo(1.05);
     });
   });
 
@@ -1621,6 +1799,12 @@ describe("ViralClipStudio timeline sequencing", () => {
 
     expect(screen.getByLabelText(/^Add Hook$/i)).toBeChecked();
 
+    const inspector = screen.getByTestId("clip-studio-inspector");
+    fireEvent.click(within(inspector).getByRole("tab", { name: /Captions/i }));
+    fireEvent.change(within(inspector).getByRole("textbox", { name: "Caption copy" }), {
+      target: { value: "A creator-reviewed hook caption" },
+    });
+
     fireEvent.click(screen.getByRole("radio", { name: "TikTok" }));
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /Render Final Clip/i }));
@@ -1723,9 +1907,13 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(balancedPacingButton).toHaveClass("is-active");
     expect(balancedPacingButton).toHaveAttribute("aria-pressed", "true");
     fireEvent.click(within(inspector).getByRole("button", { name: "Frequent" }));
-    expect(within(inspector).getByText(/5 suggested beats across/i)).toBeInTheDocument();
+    expect(within(inspector).getByText(/0 suggested beats across/i)).toBeInTheDocument();
+    expect(within(inspector).getByTestId("broll-evidence-empty")).toHaveTextContent(
+      /will keep the real speaker on screen/i
+    );
     fireEvent.click(within(inspector).getByRole("button", { name: /Plan whole clip/i }));
-    expect(screen.getByText(/5 B-roll beats planned across/i)).toBeInTheDocument();
+    expect(screen.getByText(/No literal B-roll evidence is available yet/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("tab", { name: /B-roll/i }));
 
     const initialCreatedVideoCount = createdVideos.length;
     fireEvent.change(screen.getByTestId("broll-video-input"), {
@@ -2045,10 +2233,10 @@ describe("ViralClipStudio timeline sequencing", () => {
       expect(screen.getAllByTestId(/timeline-broll-block-/)).toHaveLength(2);
     });
 
-    expect(within(inspector).getByText(/2 already covered/i)).toBeInTheDocument();
+    expect(within(inspector).getByText(/0 suggested beats across/i)).toBeInTheDocument();
     fireEvent.click(within(inspector).getByRole("button", { name: /Plan whole clip/i }));
     expect(screen.getAllByTestId(/timeline-broll-block-/)).toHaveLength(2);
-    expect(screen.getByText(/already covered by real footage/i)).toBeInTheDocument();
+    expect(screen.getByText(/No literal B-roll evidence is available yet/i)).toBeInTheDocument();
   });
 
   test("keeps uploaded background sound enabled with speech-aware ducking", async () => {
@@ -2206,11 +2394,20 @@ describe("ViralClipStudio timeline sequencing", () => {
 
     const inspector = screen.getByTestId("clip-studio-inspector");
     fireEvent.click(within(inspector).getByRole("tab", { name: /Captions/i }));
+    const translateToggle = within(inspector).getByRole("checkbox", {
+      name: /Translate captions to English/i,
+    });
+    expect(translateToggle).not.toBeChecked();
     fireEvent.click(within(inspector).getByRole("checkbox", { name: /Preview captions/i }));
 
     await waitFor(() => {
       expect(within(inspector).getByText(/2 timestamped captions ready/i)).toBeInTheDocument();
     });
+    const transcriptionRequest = global.fetch.mock.calls.find(([url]) =>
+      String(url).includes("/api/media/transcribe")
+    );
+    expect(transcriptionRequest).toBeTruthy();
+    expect(transcriptionRequest[1].body.get("translate_to_english")).toBe("false");
     expect(screen.getAllByTestId("timeline-caption-block")).toHaveLength(2);
     expect(screen.getAllByTestId("timeline-caption-block")[0]).toHaveStyle({
       left: "5%",
@@ -2228,6 +2425,201 @@ describe("ViralClipStudio timeline sequencing", () => {
       target: { value: "2" },
     });
     expect(screen.getAllByTestId("timeline-caption-block")[0]).toHaveStyle({ left: "10%" });
+
+    fireEvent.click(translateToggle);
+    expect(screen.queryAllByTestId("timeline-caption-block")).toHaveLength(0);
+    expect(within(inspector).getByText(/editable English translation/i)).toBeInTheDocument();
+  });
+
+  test("turns a reviewed spoken story beat into approved licensed moving footage", async () => {
+    const onSave = jest.fn(() => Promise.resolve());
+    global.fetch
+      .mockResolvedValueOnce({
+        ok: true,
+        blob: jest.fn(() => Promise.resolve(new Blob(["creator-video"], { type: "video/mp4" }))),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: jest.fn(() =>
+          Promise.resolve({
+            segments: [
+              {
+                id: "spoken-facebook-beat",
+                start: 2,
+                end: 6,
+                text: "Kwi-timeline yakhe bengibona abantu be-share amakwaya",
+                speaker: "guest",
+                language: "mixed",
+                languages: ["xh", "en", "zu"],
+                languageConfidence: 0.94,
+                textReviewRequired: true,
+                textReviewed: false,
+              },
+            ],
+          })
+        ),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: jest.fn(() =>
+          Promise.resolve({
+            success: true,
+            provider: "pexels",
+            beats: [
+              {
+                beat_id: "story-beat-spoken-facebook-beat-online_discovery",
+                status: "candidates_ready",
+                candidates: [
+                  {
+                    id: "pexels-854545",
+                    source_id: "854545",
+                    provider: "pexels",
+                    license: "Pexels License",
+                    creator: "Licensed creator",
+                    source_page: "https://www.pexels.com/video/854545/",
+                    video_url:
+                      "https://videos.pexels.com/video-files/854545/854545-hd_1920_1080_30fps.mp4",
+                    preview_image: "https://images.pexels.com/videos/854545/free-video-854545.jpg",
+                    width: 1920,
+                    height: 1080,
+                    duration: 20,
+                  },
+                ],
+              },
+            ],
+          })
+        ),
+      });
+
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={[{ id: "clip-1", start: 0, end: 12, duration: 12, reason: "Podcast story" }]}
+        onSave={onSave}
+        onCancel={jest.fn()}
+        onStatusChange={jest.fn()}
+      />
+    );
+
+    const inspector = screen.getByTestId("clip-studio-inspector");
+    fireEvent.click(within(inspector).getByRole("tab", { name: /Captions/i }));
+    fireEvent.click(within(inspector).getByRole("checkbox", { name: /Preview captions/i }));
+    await waitFor(() =>
+      expect(within(inspector).getByText(/1 timestamped caption ready/i)).toBeInTheDocument()
+    );
+    expect(within(inspector).getByText("Review wording")).toBeInTheDocument();
+    fireEvent.change(within(inspector).getByRole("combobox", { name: "Caption 1 placement" }), {
+      target: { value: "top_right" },
+    });
+    expect(screen.getByTestId("live-caption-preview")).toHaveClass("caption-placement-top_right");
+    fireEvent.click(within(inspector).getByRole("button", { name: "Approve wording" }));
+    expect(within(inspector).getByText("Verified")).toBeInTheDocument();
+
+    fireEvent.click(within(inspector).getByRole("tab", { name: /B-roll/i }));
+    await act(async () => {
+      fireEvent.click(within(inspector).getByRole("button", { name: /Plan whole clip/i }));
+    });
+
+    const approve = await screen.findByRole("button", { name: /Approve this footage/i });
+    fireEvent.click(approve);
+    expect(screen.getByText(/Approved licensed moving footage/i)).toBeInTheDocument();
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /Render Final Clip/i }));
+    });
+    await waitFor(() => expect(onSave).toHaveBeenCalled());
+    const exportedOverlays = onSave.mock.calls[0][1];
+    expect(exportedOverlays).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: "video",
+          bRollMode: "fullscreen",
+          bRollApprovalStatus: "creator_approved",
+          bRollProvider: "pexels",
+        }),
+      ])
+    );
+    expect(exportedOverlays.some(overlay => overlay.bRollPlaceholder)).toBe(false);
+  });
+
+  test("rejects low-confidence caption hallucinations instead of showing fake lines", async () => {
+    global.fetch
+      .mockResolvedValueOnce({
+        ok: true,
+        blob: jest.fn(() => Promise.resolve(new Blob(["creator-video"], { type: "video/mp4" }))),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: jest.fn(() =>
+          Promise.resolve({
+            segments: [],
+            transcriptionQuality: {
+              status: "rejected",
+              accepted_segments: 0,
+              rejected_segments: 3,
+            },
+          })
+        ),
+      });
+
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={[
+          {
+            id: "clip-1",
+            start: 0,
+            end: 20,
+            duration: 20,
+            reason: "Full source video loaded for manual editing",
+          },
+        ]}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+        onStatusChange={jest.fn()}
+      />
+    );
+
+    const inspector = screen.getByTestId("clip-studio-inspector");
+    fireEvent.click(within(inspector).getByRole("tab", { name: /Captions/i }));
+    fireEvent.click(within(inspector).getByRole("checkbox", { name: /Preview captions/i }));
+
+    await waitFor(() => {
+      expect(
+        within(inspector).getAllByText(/not confident enough to create honest captions/i)
+      ).not.toHaveLength(0);
+    });
+    expect(within(inspector).queryByRole("textbox", { name: /Caption 1 text/i })).toBeNull();
+  });
+
+  test("pauses a captioned render until editable timed lines exist", async () => {
+    const onSave = jest.fn(() => Promise.resolve());
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={[
+          {
+            id: "clip-1",
+            start: 0,
+            end: 20,
+            duration: 20,
+            reason: "Strong podcast exchange",
+          },
+        ]}
+        onSave={onSave}
+        onCancel={jest.fn()}
+      />
+    );
+
+    const inspector = screen.getByTestId("clip-studio-inspector");
+    fireEvent.click(within(inspector).getByRole("tab", { name: /Captions/i }));
+    fireEvent.click(within(inspector).getByRole("checkbox", { name: /Preview captions/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Render Final Clip/i }));
+
+    expect(onSave).not.toHaveBeenCalled();
+    expect(
+      within(inspector).getByText(/Generate captions, review every timestamped line/i)
+    ).toBeInTheDocument();
   });
 
   test("previews Creative Director captions and pacing without starting a render", async () => {
@@ -2246,6 +2638,7 @@ describe("ViralClipStudio timeline sequencing", () => {
             end: 20,
             duration: 20,
             reason: "This one mistake is killing your growth",
+            text: "This one mistake is killing your growth",
           },
         ]}
         onSave={onSave}
@@ -2263,8 +2656,8 @@ describe("ViralClipStudio timeline sequencing", () => {
     });
 
     expect(screen.getByTestId("live-caption-preview")).toBeInTheDocument();
-    expect(afterVideo.playbackRate).toBeCloseTo(1.15);
-    expect(screen.getByTestId("timeline-output-time")).toHaveTextContent("0:17.4");
+    expect(afterVideo.playbackRate).toBeCloseTo(1.05);
+    expect(screen.getByTestId("timeline-output-time")).toHaveTextContent("0:19.0");
     expect(onSave).not.toHaveBeenCalled();
 
     const inspector = screen.getByTestId("clip-studio-inspector");

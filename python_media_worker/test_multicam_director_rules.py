@@ -1,3 +1,4 @@
+import asyncio
 import json
 import os
 import tempfile
@@ -1717,6 +1718,65 @@ class MulticamDirectorRuleTests(unittest.TestCase):
         enabled, _style = worker.resolve_multicam_caption_request(request)
 
         self.assertFalse(enabled)
+
+    def test_multicam_captions_auto_preserve_languages_unless_translation_requested(self):
+        preserve_request = worker.RenderMultiCamRequest(
+            sources=[],
+            burnCaptions=True,
+        )
+        translate_request = worker.RenderMultiCamRequest(
+            sources=[],
+            burnCaptions=True,
+            translateCaptionsToEnglish=True,
+        )
+
+        self.assertFalse(worker.resolve_multicam_caption_translation_request(preserve_request))
+        self.assertTrue(worker.resolve_multicam_caption_translation_request(translate_request))
+
+    def test_multicam_translation_toggle_is_the_only_language_override(self):
+        transcript = {
+            "segments": [
+                {
+                    "start": 0.0,
+                    "end": 1.0,
+                    "text": "sawubona hello",
+                    "words": [
+                        {"start": 0.0, "end": 0.5, "word": "sawubona", "probability": 0.9},
+                        {"start": 0.5, "end": 1.0, "word": "hello", "probability": 0.9},
+                    ],
+                }
+            ]
+        }
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output_path = os.path.join(temp_dir, "output.mp4")
+            with open(output_path, "wb") as output_file:
+                output_file.write(b"proof")
+            with (
+                mock.patch.object(worker, "has_audio_stream", return_value=True),
+                mock.patch.object(worker, "get_transcription_engine", return_value="faster"),
+                mock.patch.object(worker, "FasterWhisperModel", object()),
+                mock.patch.object(worker, "transcribe_with_hints", return_value=transcript) as transcribe,
+                mock.patch.object(worker, "build_caption_word_speaker_assignments", return_value={}),
+                mock.patch.object(worker, "generate_multicam_word_highlight_ass", return_value="[Script Info]"),
+                mock.patch.object(worker, "run_subprocess_async", new=mock.AsyncMock()),
+                mock.patch.object(worker.os, "replace"),
+            ):
+                receipt = asyncio.run(
+                    worker.burn_multicam_word_captions(
+                        output_path,
+                        "job",
+                        1920,
+                        1080,
+                        translate_to_english=True,
+                    )
+                )
+
+            self.assertEqual(transcribe.call_args.kwargs["task"], "translate")
+            self.assertEqual(
+                transcribe.call_args.kwargs["model_name"],
+                "digiphyte/swivuriso-turbo",
+            )
+            self.assertEqual(receipt["language_mode"], "translated_to_english")
 
     def test_skipped_camera_audio_sync_audit_blocks_by_default(self):
         with self.assertRaises(worker.HTTPException):

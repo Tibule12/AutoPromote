@@ -6,6 +6,8 @@ FROM python:3.10-slim
 ENV DEBIAN_FRONTEND=noninteractive \
     PORT=8080 \
     WHISPER_ENGINE=faster \
+    MULTICAM_CAPTION_WHISPER_MODEL=digiphyte/swivuriso-turbo \
+    MULTICAM_CAPTION_WHISPER_REVISION=6e96700b527e49f2d48fdc55e632c7cb62029e91 \
     FASTER_WHISPER_DEVICE=cpu \
     FASTER_WHISPER_COMPUTE_TYPE=int8 \
     HF_HUB_DISABLE_XET=1 \
@@ -27,7 +29,7 @@ RUN pip install --no-cache-dir -r requirements.cam-combiner.txt
 # Reuse the already-proven production model instead of depending on a live
 # Hugging Face CDN download during every image rebuild.
 COPY --from=whisper_model_cache /root/.cache/huggingface /root/.cache/huggingface
-RUN HF_HUB_OFFLINE=1 python -c "from faster_whisper import WhisperModel; WhisperModel('small', device='cpu', compute_type='int8', local_files_only=True)"
+RUN python -c "from faster_whisper import WhisperModel; WhisperModel('digiphyte/swivuriso-turbo', revision='6e96700b527e49f2d48fdc55e632c7cb62029e91', device='cpu', compute_type='int8')"
 
 COPY . .
 RUN mkdir -p /app/tmp

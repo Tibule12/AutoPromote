@@ -27,6 +27,9 @@ describe("FindViralClipsPanel Viral Clip Studio handoff", () => {
     const onOpenStudio = jest.fn();
     render(<FindViralClipsPanel initialFile={source} onOpenStudio={onOpenStudio} />);
 
+    expect(screen.queryByLabelText(/Caption language/i)).not.toBeInTheDocument();
+    expect(screen.getByText(/code-switching stay original by default/i)).toBeInTheDocument();
+
     fireEvent.click(screen.getByRole("button", { name: /analyse video/i }));
     fireEvent.click(screen.getByRole("button", { name: /finish scan/i }));
     fireEvent.click(screen.getByRole("button", { name: /create clip/i }));

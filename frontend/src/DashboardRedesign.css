@@ -1438,6 +1438,28 @@ body.dashboard-mode {
   opacity: 1;
 }
 
+.ap-dashboard-redesign .viral-caption-language-note {
+  display: grid;
+  gap: 4px;
+  margin-top: 18px;
+  padding: 12px 13px;
+  border: 1px solid rgba(56, 189, 248, 0.22);
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.08), rgba(109, 74, 255, 0.08));
+}
+
+.ap-dashboard-redesign .viral-caption-language-note strong {
+  color: #e0f2fe;
+  font-size: 0.76rem;
+}
+
+.ap-dashboard-redesign .viral-caption-language-note span,
+.ap-dashboard-redesign .viral-caption-language-note small {
+  color: var(--ap-muted);
+  font-size: 0.69rem;
+  line-height: 1.45;
+}
+
 .ap-dashboard-redesign .viral-analyse-button {
   width: 100%;
   min-height: 44px;

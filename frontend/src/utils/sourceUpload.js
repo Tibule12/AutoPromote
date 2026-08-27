@@ -1,6 +1,7 @@
 import { API_ENDPOINTS } from "../config";
 import { auth, storage } from "../firebaseClient";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import { getRuntimeE2EToken } from "./mediaAuth";
 
 export const STORAGE_UPLOAD_LIMIT_MB = 500;
 const TEMPORARY_SOURCE_PREFIXES = Object.freeze({
@@ -238,6 +239,16 @@ export async function uploadSourceFileViaBackend({
   }
 
   const normalizedMediaType = mediaType || inferUploadMediaType(file);
+  if (getRuntimeE2EToken()) {
+    return uploadSourceFileViaBackendRequest({
+      file,
+      token: token || getRuntimeE2EToken(),
+      mediaType: normalizedMediaType,
+      fileName,
+      onProgress,
+      timeoutMs,
+    });
+  }
   try {
     return await uploadSourceFileViaFirebase({
       file,

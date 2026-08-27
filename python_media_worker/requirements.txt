@@ -1,9 +1,18 @@
 # Core Media Processing
 ffmpeg-python
-opencv-python-headless
+opencv-contrib-python==4.11.0.86
 Pillow 
-numpy
-scenedetect[opencv]
+numpy>=1.26,<2
+scenedetect
+
+# CPU person segmentation support. MediaPipe is installed without its optional
+# JAX/model-maker stack in Docker; the legacy Selfie Segmentation graph used by
+# Motion Sculpture only needs these runtime packages and its bundled TFLite model.
+absl-py
+attrs
+flatbuffers
+matplotlib<4
+protobuf>=4.25,<5
 
 # Web Framework (API Layer)
 fastapi

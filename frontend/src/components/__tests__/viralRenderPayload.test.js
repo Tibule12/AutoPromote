@@ -1,6 +1,102 @@
-import { buildViralRenderData, normalizeSpeedSegmentsForRender } from "../viralRenderPayload";
+import {
+  applySilenceKeepSegmentsToTimeline,
+  buildViralRenderData,
+  mapCaptionSegmentsToTimeline,
+  normalizeSpeedSegmentsForRender,
+} from "../viralRenderPayload";
 
 describe("viralRenderPayload", () => {
+  test("turns reviewed silence keep ranges into real export cuts", () => {
+    const timeline = applySilenceKeepSegmentsToTimeline({
+      timelineSegments: [
+        {
+          id: "podcast-main",
+          source_clip_id: "podcast",
+          url: "https://example.com/podcast.mp4",
+          start_time: 10,
+          end_time: 22,
+          duration: 12,
+          transition_in: "fade",
+          transition_out: "dip",
+        },
+        {
+          id: "reaction",
+          source_clip_id: "reaction",
+          start_time: 0,
+          end_time: 3,
+          duration: 3,
+        },
+      ],
+      keepSegments: [
+        { start: 0, end: 12 },
+        { start: 13.5, end: 18 },
+        { start: 19, end: 30 },
+      ],
+      sourceClipId: "podcast",
+    });
+
+    expect(timeline).toEqual([
+      expect.objectContaining({
+        id: "podcast-main-keep-1",
+        start_time: 10,
+        end_time: 12,
+        duration: 2,
+        transition_in: "fade",
+        transition_out: null,
+      }),
+      expect.objectContaining({
+        id: "podcast-main-keep-2",
+        start_time: 13.5,
+        end_time: 18,
+        duration: 4.5,
+        transition_in: null,
+        transition_out: null,
+      }),
+      expect.objectContaining({
+        id: "podcast-main-keep-3",
+        start_time: 19,
+        end_time: 22,
+        duration: 3,
+        transition_in: null,
+        transition_out: "dip",
+      }),
+      expect.objectContaining({ id: "reaction", duration: 3 }),
+    ]);
+  });
+
+  test("maps reviewed source captions through trims and reordered timeline cuts", () => {
+    const mapped = mapCaptionSegmentsToTimeline({
+      captionSegments: [
+        {
+          id: "caption-1",
+          sourceClipId: "podcast",
+          start: 11,
+          end: 15,
+          text: "Sawubona Mzansi",
+        },
+      ],
+      timelineSegments: [
+        { source_clip_id: "podcast", start_time: 14, end_time: 16, duration: 2 },
+        { source_clip_id: "podcast", start_time: 10, end_time: 12, duration: 2 },
+      ],
+    });
+
+    expect(mapped).toEqual([
+      {
+        id: "caption-1-timeline-1",
+        start_time: 0,
+        end_time: 1,
+        text: "Sawubona Mzansi",
+      },
+      {
+        id: "caption-1-timeline-2",
+        start_time: 3,
+        end_time: 4,
+        text: "Sawubona Mzansi",
+      },
+    ]);
+  });
+
   test("builds a safe default timeline payload", () => {
     const payload = buildViralRenderData({
       finalVideoUrl: "https://example.com/source.mp4",
@@ -15,6 +111,7 @@ describe("viralRenderPayload", () => {
       end_time: 15,
       overlays: [{ id: "overlay-1" }],
       auto_captions: true,
+      professional_cleanup: true,
       timeline_segments: [
         {
           id: "main",
@@ -42,6 +139,26 @@ describe("viralRenderPayload", () => {
         captionPosition: "middle",
         captionScale: 1.2,
         captionTextOverride: "Say this exactly",
+        captionSegments: [
+          {
+            id: "caption-1",
+            startTime: 1,
+            endTime: 3,
+            text: "Sawubona hello",
+            speaker: "guest",
+            speakerLabel: "Guest",
+            language: "mixed",
+            languageLabel: "Mixed / code-switched",
+            languages: ["zu", "en"],
+            languageConfidence: 0.93,
+            textReviewRequired: true,
+            textReviewed: true,
+            captionPlacement: "middle_left",
+            captionIcon: "payoff",
+            reviewRequired: false,
+          },
+        ],
+        translateCaptionsToEnglish: false,
         previewSpeed: 1.25,
         speedSegments: [
           { startTime: 0, endTime: 12, rate: 1.25, pitchPreserved: true },
@@ -63,6 +180,22 @@ describe("viralRenderPayload", () => {
               end_time: 40,
             },
           ],
+        },
+        finishPlan: {
+          version: 1,
+          enabled: true,
+          color: { preset: "podcast_pro", brightness: 1.05, contrast: 1.2 },
+          texture: { film_grain: 0.12 },
+          visualizer: { enabled: true, mode: "wave", source: "original_speech" },
+          keyframes: [
+            {
+              id: "finish-keyframe-1",
+              time: 2.25,
+              values: { brightness: 1.05, contrast: 1.2, saturation: 1.08 },
+              interpolation: "linear",
+            },
+          ],
+          magnetic_beats: { enabled: true, markers: [2.25, 4.5] },
         },
         smartCrop: true,
         smartCropMode: "face",
@@ -127,6 +260,26 @@ describe("viralRenderPayload", () => {
         caption_position: "middle",
         caption_scale: 1.2,
         caption_text_override: "Say this exactly",
+        caption_segments: [
+          {
+            id: "caption-1",
+            start_time: 1,
+            end_time: 3,
+            text: "Sawubona hello",
+            speaker: "guest",
+            speaker_label: "Guest",
+            language: "mixed",
+            language_label: "Mixed / code-switched",
+            languages: ["zu", "en"],
+            language_confidence: 0.93,
+            text_review_required: true,
+            text_reviewed: true,
+            caption_placement: "middle_left",
+            caption_icon: "payoff",
+            review_required: false,
+          },
+        ],
+        translate_captions_to_english: false,
         preview_speed: 1.25,
         speed_segments: [
           {
@@ -150,6 +303,19 @@ describe("viralRenderPayload", () => {
           enabled: true,
           intensity: "bold",
           fallback: "clean",
+        }),
+        finish_plan: expect.objectContaining({
+          enabled: true,
+          color: expect.objectContaining({ preset: "podcast_pro", contrast: 1.2 }),
+          visualizer: expect.objectContaining({ enabled: true, mode: "wave" }),
+          keyframes: [
+            expect.objectContaining({
+              id: "finish-keyframe-1",
+              time: 2.25,
+              interpolation: "linear",
+            }),
+          ],
+          magnetic_beats: { enabled: true, markers: [2.25, 4.5] },
         }),
         smart_crop: true,
         smart_crop_mode: "face",

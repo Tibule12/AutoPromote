@@ -2,7 +2,7 @@
 # Keep transcription, TTS, MoviePy, downloaders, and their model weights out of
 # this image: they add cold-start bytes but are never used by this render path.
 ffmpeg-python
-opencv-python-headless
+opencv-python-headless>=4.10,<5
 Pillow
 numpy
 

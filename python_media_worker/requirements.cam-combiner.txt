@@ -1,7 +1,7 @@
 # Caption-capable Cam Combiner runtime. General-worker TTS, MoviePy, download,
 # librosa, and imageio dependencies do not belong in this dedicated image.
 ffmpeg-python
-opencv-python-headless
+opencv-python-headless>=4.10,<5
 Pillow
 numpy
 

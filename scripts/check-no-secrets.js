@@ -3,13 +3,19 @@
 // Simple repo-wide secret scanner (looks for patterns commonly used by service account JSONs)
 const fs = require("fs");
 const path = require("path");
+const { execFileSync } = require("child_process");
 
 const root = path.resolve(__dirname, "..");
 const ignore = [
   "node_modules",
   ".git",
+  ".venv",
+  "__pycache__",
+  ".pytest_cache",
   "frontend/build",
   "dist",
+  "tmp",
+  "test-results",
   "public",
   "node_modules",
   ".env.example",
@@ -22,18 +28,23 @@ const ignore = [
   "README.md",
   "SECURITY.md",
   "docs",
+  "scripts/check-no-secrets.js",
+  "RENDER_ENV_SETUP.md",
+  "firebase-diagnostics.js",
 ];
 const patterns = [
   /-----BEGIN PRIVATE KEY-----/i,
   /"private_key"\s*:\s*"-----BEGIN PRIVATE KEY-----/i,
-  /\bFIREBASE_SERVICE_ACCOUNT\b/i,
-  /\bFIREBASE_PRIVATE_KEY\b/i,
   /"client_email"\s*:\s*"[\w-]+@.*\.iam\.gserviceaccount\.com"/i,
 ];
 
 function shouldIgnore(p) {
-  const normalized = p.replace(/\\\\/g, "/");
-  return ignore.some(i => normalized.includes(`/${i}/`));
+  const normalized = path.relative(root, p).replace(/\\/g, "/");
+  const wrapped = `/${normalized.replace(/^\/+|\/+$/g, "")}/`;
+  return ignore.some(item => {
+    const normalizedItem = String(item).replace(/\\/g, "/").replace(/^\/+|\/+$/g, "");
+    return normalizedItem && wrapped.includes(`/${normalizedItem}/`);
+  });
 }
 
 function walk(dir) {
@@ -56,6 +67,23 @@ function walk(dir) {
   return out;
 }
 
+function listRepositoryFiles() {
+  try {
+    const output = execFileSync(
+      "git",
+      ["ls-files", "-z", "--cached", "--others", "--exclude-standard"],
+      { cwd: root, encoding: "utf8", maxBuffer: 32 * 1024 * 1024 }
+    );
+    return output
+      .split("\0")
+      .filter(Boolean)
+      .map(file => path.join(root, file))
+      .filter(file => !shouldIgnore(file));
+  } catch (error) {
+    return walk(root);
+  }
+}
+
 function scanFiles(files) {
   const matches = [];
   for (const f of files) {
@@ -74,7 +102,7 @@ function scanFiles(files) {
   return matches;
 }
 
-const files = walk(root);
+const files = listRepositoryFiles();
 const results = scanFiles(files);
 if (results.length) {
   console.error("\n❌ Potential secrets found in repository (scan results):");

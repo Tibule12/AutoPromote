@@ -2429,6 +2429,7 @@ function MultiCamCombiner({
     return "premium";
   });
   const [multicamBurnCaptions, setMulticamBurnCaptions] = useState(false);
+  const [multicamTranslateCaptionsToEnglish, setMulticamTranslateCaptionsToEnglish] = useState(false);
   const [multicamBrandWatermark, setMulticamBrandWatermark] = useState(false);
   const [multicamGenerateThumbnail, setMulticamGenerateThumbnail] = useState(false);
   const [cloudRenderMode, setCloudRenderMode] = useState("proof");
@@ -9169,6 +9170,8 @@ function MultiCamCombiner({
           reaction_overlays: reactionOverlayEnabled,
           burnCaptions: multicamBurnCaptions,
           burn_captions: multicamBurnCaptions,
+          translateCaptionsToEnglish: multicamBurnCaptions && multicamTranslateCaptionsToEnglish,
+          translate_captions_to_english: multicamBurnCaptions && multicamTranslateCaptionsToEnglish,
           captionStyle: "podcast_clean",
           caption_style: "podcast_clean",
           brandWatermark: multicamBrandWatermark,
@@ -10071,6 +10074,19 @@ function MultiCamCombiner({
                         <small>Full Whisper + video pass</small>
                       </span>
                     </label>
+                    {multicamBurnCaptions && (
+                      <label className="nle-render-finish-toggle">
+                        <input
+                          type="checkbox"
+                          checked={multicamTranslateCaptionsToEnglish}
+                          onChange={event => setMulticamTranslateCaptionsToEnglish(event.target.checked)}
+                        />
+                        <span>
+                          <strong>Translate captions to English</strong>
+                          <small>Off keeps every spoken language as spoken</small>
+                        </span>
+                      </label>
+                    )}
                     <label className="nle-render-finish-toggle">
                       <input
                         type="checkbox"
