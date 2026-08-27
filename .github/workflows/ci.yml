@@ -9,9 +9,9 @@ permissions:
 on:
   workflow_dispatch: # Allow manual runs for debugging and CI rechecks
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   ci_debug_info:
@@ -59,17 +59,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Verify Viral Clip render lifecycle
+      - name: Verify portable Viral Clip contracts
         run: |
-          sudo apt-get update
-          sudo apt-get install --yes ffmpeg
-          python -m unittest python_media_worker.test_viral_render_contract
+          python -m unittest \
+            python_media_worker.test_viral_creative_effects \
+            python_media_worker.test_viral_studio_plan
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
       - name: Install root deps
         run: |
           npm ci
@@ -100,7 +100,7 @@ jobs:
       - name: Check installed grpc internals (root)
         run: |
           npm run check:grpc-install || true
-      
+
       - name: "Preflight & Unit Tests"
         # Only run preflight for PRs that originate from this repository (not forks), or non-PR events.
         if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
@@ -179,8 +179,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
       - name: Install deps
         run: npm ci
       - name: Run ESLint
