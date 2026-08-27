@@ -37,6 +37,11 @@ jobs:
           cache: "npm"
       - name: Install deps
         run: npm ci
+      - name: Install live-media test prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes ffmpeg
+          ffmpeg -version | head -n 1
       - name: Check for FIREBASE Admin service account (cloud vs emulator)
         id: check_firebase_secret
         shell: bash
