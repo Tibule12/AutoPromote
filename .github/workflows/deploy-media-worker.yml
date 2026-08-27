@@ -41,17 +41,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install --yes ffmpeg
 
-      - name: Verify Viral Clip Studio worker contracts
-        run: |
-          python -m unittest \
-            python_media_worker.test_viral_render_contract \
-            python_media_worker.test_studio_finish \
-            python_media_worker.test_caption_quality \
-            python_media_worker.test_content_aware_reality \
-            python_media_worker.test_motion_sculpture \
-            python_media_worker.test_viral_creative_effects \
-            python_media_worker.test_viral_studio_plan
-
       - name: Validate Google Cloud identity configuration
         shell: bash
         run: |
@@ -101,6 +90,21 @@ jobs:
           IMAGE="gcr.io/${PROJECT_ID}/${SERVICE_NAME}:${GITHUB_SHA}"
           gcloud auth configure-docker gcr.io --quiet
           docker build --tag "${IMAGE}" .
+
+          docker run --rm --entrypoint sh "${IMAGE}" -c '
+            set -eu
+            mkdir -p /tmp/worker-contracts/python_media_worker
+            cp -a /app/. /tmp/worker-contracts/python_media_worker/
+            cd /tmp/worker-contracts
+            python -m unittest \
+              python_media_worker.test_viral_render_contract \
+              python_media_worker.test_studio_finish \
+              python_media_worker.test_caption_quality \
+              python_media_worker.test_content_aware_reality \
+              python_media_worker.test_motion_sculpture \
+              python_media_worker.test_viral_creative_effects \
+              python_media_worker.test_viral_studio_plan
+          '
 
           mkdir -p /tmp/viral-render-smoke
           ffmpeg -v error \
