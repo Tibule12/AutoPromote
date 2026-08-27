@@ -180,6 +180,15 @@ class ViralRenderContractTests(unittest.TestCase):
         self.assertIn('"progress": 100', worker_source)
         self.assertIn('"detail": "Render complete"', worker_source)
 
+    def test_failed_visual_enhancement_still_reaches_smart_crop(self):
+        worker_source = Path(__file__).with_name("main_media_server.py").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("visual_enhance_applied = False", worker_source)
+        self.assertIn("not visual_enhance_applied", worker_source)
+        self.assertNotIn("and not request.visual_enhance", worker_source)
+
     def test_deploy_smoke_source_matches_worker_allowed_tmp(self):
         repo_root = Path(__file__).parents[1]
         worker_source = Path(__file__).with_name("main_media_server.py").read_text(

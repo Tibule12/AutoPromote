@@ -1118,6 +1118,31 @@ def _subject_punch_in(
     return resized[crop_y : crop_y + height, crop_x : crop_x + width].copy()
 
 
+def recover_transient_subject_matte(
+    segmenter: Any,
+    frame: np.ndarray,
+    previous_mask: Optional[np.ndarray],
+    consecutive_misses: int,
+    *,
+    max_consecutive_misses: int = 15,
+) -> tuple[np.ndarray, int, bool]:
+    """Bridge a brief detector miss without inventing or replacing the subject."""
+    try:
+        return segmenter.matte(frame, previous_mask), 0, False
+    except RuntimeError as error:
+        is_transient_subject_miss = "No human subject was detected" in str(error)
+        can_reuse_verified_matte = (
+            is_transient_subject_miss
+            and previous_mask is not None
+            and previous_mask.shape == frame.shape[:2]
+            and np.any(previous_mask)
+            and consecutive_misses < max_consecutive_misses
+        )
+        if not can_reuse_verified_matte:
+            raise
+        return previous_mask.copy(), consecutive_misses + 1, True
+
+
 def render_content_aware_reality(
     input_path: str,
     output_path: str,
@@ -1235,6 +1260,8 @@ def render_content_aware_reality(
     end = max(start, float(effect.get("end_time", frame_count / max(fps, 1.0)) or 0.0))
     media_duration = frame_count / max(fps, 1.0)
     previous_mask = None
+    consecutive_subject_misses = 0
+    subject_matte_recoveries = 0
     portal_quad = None
     captions = effect.get("captions") or []
     semantic_pan = bool(effect.get("semantic_pan") or effect.get("story_beats"))
@@ -1254,7 +1281,16 @@ def render_content_aware_reality(
     try:
         while frame is not None:
             timestamp = index / fps
-            person = segmenter.matte(frame, previous_mask)
+            person, consecutive_subject_misses, recovered_matte = (
+                recover_transient_subject_matte(
+                    segmenter,
+                    frame,
+                    previous_mask,
+                    consecutive_subject_misses,
+                )
+            )
+            if recovered_matte:
+                subject_matte_recoveries += 1
             previous_mask = person
             polished_frame = _polish_source_frame(frame, person, polish_strength)
             if start <= timestamp <= end:
@@ -1436,6 +1472,7 @@ def render_content_aware_reality(
             "fps": fps,
             "encoder": "libx264",
             "subject_pipeline": "mediapipe_selfie_segmentation_cpu",
+            "subject_matte_recoveries": subject_matte_recoveries,
             "composition": {
                 "monitor": "tracked_story_portal_inside_original_scene",
                 "full_background": "moving_story_background_behind_real_subject",

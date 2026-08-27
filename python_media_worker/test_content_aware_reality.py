@@ -16,6 +16,7 @@ from python_media_worker.content_aware_reality import (
     generate_environment_image,
     generate_story_images,
     relevant_transcript,
+    recover_transient_subject_matte,
     render_content_aware_reality,
     search_story_video_candidates,
     validate_scene_brief,
@@ -40,6 +41,34 @@ class ContentAwareRealityTests(unittest.TestCase):
         {"start": 4.0, "end": 8.0, "text": "mina ebengiva kakhulu egazini"},
         {"start": 8.0, "end": 12.0, "text": "abafowethu nodadewethu"},
     ]
+
+    def test_reuses_verified_matte_for_only_a_bounded_transient_miss(self):
+        frame = np.zeros((12, 8, 3), dtype=np.uint8)
+        previous = np.full((12, 8), 255, dtype=np.uint8)
+
+        class MissingSegmenter:
+            def matte(self, _frame, _previous):
+                raise RuntimeError("No human subject was detected in the current frame")
+
+        recovered, miss_count, used_previous = recover_transient_subject_matte(
+            MissingSegmenter(),
+            frame,
+            previous,
+            0,
+            max_consecutive_misses=1,
+        )
+
+        self.assertTrue(used_previous)
+        self.assertEqual(miss_count, 1)
+        np.testing.assert_array_equal(recovered, previous)
+        with self.assertRaisesRegex(RuntimeError, "No human subject"):
+            recover_transient_subject_matte(
+                MissingSegmenter(),
+                frame,
+                previous,
+                miss_count,
+                max_consecutive_misses=1,
+            )
 
     def make_source(self, path, duration=1.0):
         subprocess.run(

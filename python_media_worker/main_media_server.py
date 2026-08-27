@@ -29291,6 +29291,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
 
         # 2.45. Visual Enhance — Smart Promo dynamic reframing pipeline
         working_path = trimmed_path
+        visual_enhance_applied = False
         if request.visual_enhance:
             logger.info("Applying Smart Promo visual enhancement (dynamic reframing + motion tracking)")
             dyn_cropped_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_dyn_crop.mp4")
@@ -29411,6 +29412,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         timeout_seconds=MEDIA_WORKER_SUBPROCESS_TIMEOUT_SECONDS,
                     )
                     working_path = dyn_cropped_path
+                    visual_enhance_applied = True
                     logger.info("Smart Promo virtual multi-phone render complete")
                 else:
                     logger.info("Not enough virtual-phone segments for visual enhancement; falling back to safe vertical fit")
@@ -29425,6 +29427,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         check=True,
                     )
                     working_path = dyn_cropped_path
+                    visual_enhance_applied = True
             except Exception as viz_err:
                 logger.warning(f"Visual enhancement failed: {viz_err}. Falling back to original aspect.")
                 # working_path stays as trimmed_path
@@ -29435,7 +29438,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         vertical_destination = str(request.export_destination or "").strip().lower() in {
             "tiktok", "reels", "shorts", "instagram_reels", "youtube_shorts"
         }
-        if (request.smart_crop or vertical_destination) and not request.visual_enhance:
+        if (request.smart_crop or vertical_destination) and not visual_enhance_applied:
             cropped_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_cropped.mp4")
             crop_mode = str(request.smart_crop_mode or "center").strip().lower()
             try:
