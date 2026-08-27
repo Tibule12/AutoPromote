@@ -24,10 +24,26 @@ from python_media_worker.main_media_server import (
     RenderViralRequest,
     build_speaker_track_crop_filter,
     render_viral_clip_impl,
+    smooth_positions,
 )
 
 
 class ViralRenderContractTests(unittest.TestCase):
+    def test_speaker_smoothing_does_not_pan_through_a_hard_camera_cut(self):
+        positions = [
+            (0.0, 0.30, 0.34),
+            (0.5, 0.31, 0.34),
+            (1.0, 0.32, 0.35),
+            (1.5, 0.70, 0.29),
+            (2.0, 0.69, 0.28),
+            (2.5, 0.68, 0.29),
+        ]
+
+        smoothed = smooth_positions(positions, window=5)
+
+        self.assertLess(smoothed[2][1], 0.4)
+        self.assertGreater(smoothed[3][1], 0.6)
+
     def test_vertical_speaker_crop_uses_encoder_safe_even_dimensions(self):
         commands, crop_width, crop_height = build_speaker_track_crop_filter(
             [(0.0, 0.68, 0.42), (0.5, 0.7, 0.43), (1.0, 0.72, 0.44)],

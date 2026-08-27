@@ -27,6 +27,10 @@ import cv2  # OpenCV (Phase 1)
 import numpy as np
 import ffmpeg  # FFmpeg (Phase 1)
 from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageEnhance
+try:
+    import mediapipe as mp
+except ImportError:
+    mp = None
 import firebase_admin
 from firebase_admin import credentials, storage, firestore
 try:
@@ -4999,9 +5003,12 @@ def generate_ass_captions(
             )
 
         # Build word groups (3-5 words per line for readability)
+        story_group_size = 3 if style["fontsize"] >= 64 else 4
         groups = _chunk_words(
             words,
-            max_words=4 if style["animation"] == "story_pop" else 5,
+            max_words=(
+                story_group_size if style["animation"] == "story_pop" else 5
+            ),
         )
 
         for group in groups:
@@ -6963,12 +6970,21 @@ def _estimate_safe_zoom_ratio(width, height, face_count=0, lead_size_ratio=0.0, 
 
 def detect_speaker_positions(video_path, sample_interval=0.5, return_metadata=False):
     """
-    Use OpenCV Haar cascade face detection to track speaker positions
-    throughout the video. Returns a list of (timestamp, center_x_ratio, center_y_ratio) tuples.
+    Track real faces with MediaPipe and fall back to Haar when MediaPipe is absent.
+    Returns (timestamp, center_x_ratio, center_y_ratio) tuples.
     """
     face_cascade = _load_face_cascade()
-    if face_cascade is None:
-        logger.warning("No Haar cascade found for face detection")
+    face_detector = None
+    if mp is not None and hasattr(mp, "solutions"):
+        try:
+            face_detector = mp.solutions.face_detection.FaceDetection(
+                model_selection=1,
+                min_detection_confidence=0.35,
+            )
+        except Exception as detector_error:
+            logger.warning("MediaPipe face tracking unavailable: %s", detector_error)
+    if face_detector is None and face_cascade is None:
+        logger.warning("No face detector found for speaker tracking")
         return []
 
     cap = cv2.VideoCapture(video_path)
@@ -6999,15 +7015,46 @@ def detect_speaker_positions(video_path, sample_interval=0.5, return_metadata=Fa
         small = cv2.resize(frame, None, fx=scale, fy=scale, interpolation=cv2.INTER_AREA)
         gray = cv2.cvtColor(small, cv2.COLOR_BGR2GRAY)
 
-        faces = face_cascade.detectMultiScale(gray, scaleFactor=1.15, minNeighbors=4, minSize=(30, 30))
+        face_boxes = []
+        if face_detector is not None:
+            detection_result = face_detector.process(
+                cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            )
+            for detection in detection_result.detections or []:
+                relative_box = detection.location_data.relative_bounding_box
+                x = max(0.0, float(relative_box.xmin))
+                y = max(0.0, float(relative_box.ymin))
+                box_width = min(1.0 - x, max(0.0, float(relative_box.width)))
+                box_height = min(1.0 - y, max(0.0, float(relative_box.height)))
+                if box_width * box_height < 0.0015:
+                    continue
+                face_boxes.append(
+                    (
+                        x * width,
+                        y * height,
+                        box_width * width,
+                        box_height * height,
+                    )
+                )
+        if not face_boxes and face_cascade is not None:
+            haar_faces = face_cascade.detectMultiScale(
+                gray,
+                scaleFactor=1.15,
+                minNeighbors=4,
+                minSize=(30, 30),
+            )
+            face_boxes = [
+                (fx / scale, fy / scale, fw / scale, fh / scale)
+                for fx, fy, fw, fh in haar_faces
+            ]
 
-        if len(faces) > 0:
+        if face_boxes:
             detections = []
-            for fx, fy, fw, fh in faces:
-                cx = (fx + fw / 2) / scale / width
-                cy = (fy + fh / 2) / scale / height
-                face_w_ratio = (fw / scale) / max(width, 1)
-                face_h_ratio = (fh / scale) / max(height, 1)
+            for fx, fy, fw, fh in face_boxes:
+                cx = (fx + fw / 2) / width
+                cy = (fy + fh / 2) / height
+                face_w_ratio = fw / max(width, 1)
+                face_h_ratio = fh / max(height, 1)
                 area_ratio = face_w_ratio * face_h_ratio
                 center_weight = 1.0 - min(
                     1.0,
@@ -7109,6 +7156,8 @@ def detect_speaker_positions(video_path, sample_interval=0.5, return_metadata=Fa
             )
 
     cap.release()
+    if face_detector is not None:
+        face_detector.close()
     smoothed_positions = smooth_positions(positions, window=5)
     if not return_metadata:
         return smoothed_positions
@@ -7131,16 +7180,30 @@ def _frange(start, stop, step):
         val += step
 
 
-def smooth_positions(positions, window=5):
-    """Apply rolling average to smooth face tracking path."""
+def smooth_positions(positions, window=5, cut_threshold=0.16):
+    """Smooth tracking within a shot without drifting across hard camera cuts."""
     if len(positions) <= window:
         return positions
+
+    shot_ids = [0]
+    shot_id = 0
+    for previous, current in zip(positions, positions[1:]):
+        if (
+            abs(float(current[1]) - float(previous[1])) >= cut_threshold
+            or abs(float(current[2]) - float(previous[2])) >= cut_threshold
+        ):
+            shot_id += 1
+        shot_ids.append(shot_id)
 
     smoothed = []
     for i in range(len(positions)):
         start = max(0, i - window // 2)
         end = min(len(positions), i + window // 2 + 1)
-        window_slice = positions[start:end]
+        window_slice = [
+            position
+            for index, position in enumerate(positions[start:end], start=start)
+            if shot_ids[index] == shot_ids[i]
+        ]
         avg_x = sum(p[1] for p in window_slice) / len(window_slice)
         avg_y = sum(p[2] for p in window_slice) / len(window_slice)
         smoothed.append((positions[i][0], avg_x, avg_y))

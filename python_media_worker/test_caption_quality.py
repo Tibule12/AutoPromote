@@ -1,3 +1,4 @@
+import re
 import unittest
 
 from python_media_worker.main_media_server import (
@@ -9,6 +10,34 @@ from python_media_worker.main_media_server import (
 
 
 class CaptionQualityTests(unittest.TestCase):
+    def test_large_story_captions_never_exceed_three_words_per_line(self):
+        words = ["Mina", "ebengiyiva", "kakhulu", "egazini", "Brothers", "Sisters"]
+        ass = generate_ass_captions(
+            {
+                "segments": [
+                    {
+                        "start": 0.0,
+                        "end": 3.0,
+                        "text": " ".join(words),
+                        "words": [
+                            {"word": word, "start": index * 0.5, "end": (index + 1) * 0.5}
+                            for index, word in enumerate(words)
+                        ],
+                    }
+                ]
+            },
+            "story_pop",
+            1080,
+            1920,
+            caption_scale=1.38,
+        )
+
+        for line in ass.splitlines():
+            if not line.startswith("Dialogue: 2"):
+                continue
+            visible_text = re.sub(r"\{[^}]*\}", "", line.rsplit(",,", 1)[-1])
+            self.assertLessEqual(len(visible_text.split()), 3)
+
     def test_story_pop_captions_include_speaker_scene_badge_and_word_animation(self):
         ass = generate_ass_captions(
             {
