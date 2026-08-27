@@ -256,10 +256,10 @@ jobs:
             echo "Candidate health verification failed; production traffic was not changed."
             exit 1
           fi
-          curl --fail --silent --show-error --max-time 600 \
+          if ! curl --fail-with-body --silent --show-error --max-time 600 \
             --header "Content-Type: application/json" \
             --data '{
-              "video_url": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+              "video_url": "https://raw.githubusercontent.com/mediaelement/mediaelement-files/4d21a042353022326071acb0251ab75cd6bae114/big_buck_bunny.mp4",
               "start_time": 0,
               "end_time": 2,
               "overlays": [],
@@ -283,7 +283,10 @@ jobs:
               "brand_watermark": false,
               "async_mode": false
             }' \
-            "${CANDIDATE_URL}/render-viral-clip" > /tmp/media-worker-candidate-render.json
+            "${CANDIDATE_URL}/render-viral-clip" > /tmp/media-worker-candidate-render.json; then
+            python -m json.tool /tmp/media-worker-candidate-render.json || true
+            exit 1
+          fi
           python - <<'PY'
           import json
           from pathlib import Path
