@@ -10,7 +10,7 @@ from python_media_worker.main_media_server import (
 
 
 class CaptionQualityTests(unittest.TestCase):
-    def test_large_story_captions_never_exceed_three_words_per_line(self):
+    def test_large_story_captions_preserve_phrases_without_overflowing(self):
         words = ["Mina", "ebengiyiva", "kakhulu", "egazini", "Brothers", "Sisters"]
         ass = generate_ass_captions(
             {
@@ -36,9 +36,38 @@ class CaptionQualityTests(unittest.TestCase):
             if not line.startswith("Dialogue: 2"):
                 continue
             visible_text = re.sub(r"\{[^}]*\}", "", line.rsplit(",,", 1)[-1])
-            self.assertLessEqual(len(visible_text.split()), 3)
+            self.assertLessEqual(len(visible_text.split()), 4)
 
-    def test_story_pop_captions_include_speaker_scene_badge_and_word_animation(self):
+    def test_story_pop_does_not_leave_a_dangling_article_fragment(self):
+        words = "You know uhambe nathi through the entire journey".split()
+        ass = generate_ass_captions(
+            {
+                "segments": [
+                    {
+                        "start": 0.0,
+                        "end": 4.0,
+                        "text": " ".join(words),
+                        "words": [
+                            {"word": word, "start": index * 0.5, "end": (index + 1) * 0.5}
+                            for index, word in enumerate(words)
+                        ],
+                    }
+                ]
+            },
+            "story_pop",
+            1080,
+            1920,
+            caption_scale=1.3,
+        )
+
+        visible_lines = [
+            re.sub(r"\{[^}]*\}", "", line.rsplit(",,", 1)[-1])
+            for line in ass.splitlines()
+            if line.startswith("Dialogue: 2")
+        ]
+        self.assertFalse(any(line.strip().endswith(" the") for line in visible_lines))
+
+    def test_story_pop_captions_have_no_internal_story_badge_and_keep_a_stable_position(self):
         ass = generate_ass_captions(
             {
                 "segments": [
@@ -59,10 +88,10 @@ class CaptionQualityTests(unittest.TestCase):
             540,
         )
 
-        self.assertIn("GUEST · ONLINE DISCOVERY", ass)
-        self.assertIn("Style: StoryLabel", ass)
+        self.assertNotIn("GUEST · ONLINE DISCOVERY", ass)
+        self.assertNotIn("Style: StoryLabel", ass)
         self.assertIn("\\fscx118", ass)
-        self.assertIn("\\an7\\pos(72,", ass)
+        self.assertIn("\\an2\\pos(480,", ass)
 
     def test_story_pop_respects_creator_placement_and_uses_story_accent(self):
         ass = generate_ass_captions(
@@ -90,7 +119,7 @@ class CaptionQualityTests(unittest.TestCase):
         )
 
         self.assertIn("\\an9\\pos(1776,", ass)
-        self.assertIn("TURNING POINT", ass)
+        self.assertNotIn("TURNING POINT", ass)
         self.assertIn("&H0098F5A6", ass)
 
     def test_normalizes_diarized_segments_with_speaker_and_word_times(self):

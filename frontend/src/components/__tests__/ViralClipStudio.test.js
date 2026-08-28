@@ -195,6 +195,7 @@ describe("ViralClipStudio timeline sequencing", () => {
     fireEvent.click(within(rack).getByRole("button", { name: /Podcast Pro/i }));
 
     expect(screen.getByTestId("studio-after-video").style.filter).toContain("brightness(1.050)");
+    expect(screen.getByTestId("studio-after-video")).toHaveClass("main-video-frame-preview");
     expect(screen.getByLabelText("Untouched source preview").style.filter).not.toContain(
       "brightness(1.050)"
     );
@@ -209,6 +210,13 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(onSave.mock.calls[0][2].finishPlan).toEqual(
       expect.objectContaining({
         enabled: true,
+        main_frame: {
+          enabled: true,
+          shape: "round",
+          inset: 24,
+          border_radius: 52,
+          background: "soft_blur",
+        },
         color: expect.objectContaining({ preset: "podcast_pro", contrast: 1.2 }),
         keyframes: [
           expect.objectContaining({

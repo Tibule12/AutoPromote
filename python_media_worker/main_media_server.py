@@ -4821,8 +4821,10 @@ CAPTION_STYLES = {
 }
 
 
-def resolve_story_caption_treatment(segment, index, video_width, video_height, font_size):
-    """Choose an intentional story-caption position, badge and accent per reviewed line."""
+def resolve_story_caption_treatment(
+    segment, index, video_width, video_height, font_size, default_position="lower"
+):
+    """Choose a stable safe position and accent for a creator-reviewed line."""
     text = str(segment.get("text") or "").lower()
     requested_placement = str(
         segment.get("captionPlacement")
@@ -4830,33 +4832,24 @@ def resolve_story_caption_treatment(segment, index, video_width, video_height, f
         or segment.get("placement")
         or "auto"
     ).strip().lower()
-    requested_icon = str(
-        segment.get("captionIcon")
-        or segment.get("caption_icon")
-        or segment.get("icon")
-        or "auto"
-    ).strip().lower()
-
     if any(token in text for token in ("facebook", "scroll", "timeline", "online")):
         concept = "phone"
-        auto_placement = "top_left"
-        scene_label = "ONLINE DISCOVERY"
     elif any(token in text for token in ("cape town", "ekapa", "durban", "johannesburg")):
         concept = "place"
-        auto_placement = "top_left"
-        scene_label = "PLACE MEMORY"
     elif any(token in text for token in ("i can do this", "angivuke", "decide", "ngadecide")):
         concept = "payoff"
-        auto_placement = "middle_left"
-        scene_label = "TURNING POINT"
     elif any(token in text for token in ("choir", "sing", "ngiyocula", "egazini", "brothers and sisters")):
         concept = "music"
-        auto_placement = "bottom_center"
-        scene_label = "MUSIC MEMORY"
     else:
-        concept = "payoff" if index % 3 == 2 else "story"
-        auto_placement = ("bottom_left", "bottom_right", "top_left")[index % 3]
-        scene_label = "STORY BEAT"
+        concept = "story"
+
+    auto_placement = {
+        "top": "top_left",
+        "center": "middle_left",
+        "middle": "middle_left",
+        "lower": "bottom_center",
+        "bottom": "bottom_center",
+    }.get(str(default_position or "lower").strip().lower(), "bottom_center")
 
     placements = {
         "top_left": (7, 0.075, 0.09),
@@ -4871,27 +4864,6 @@ def resolve_story_caption_treatment(segment, index, video_width, video_height, f
     alignment, x_ratio, y_ratio = placements[placement]
     x = round(video_width * x_ratio)
     y = round(video_height * y_ratio)
-    label_gap = max(28, round(font_size * 0.88))
-    if placement.startswith("top_"):
-        label_y = y
-        text_y = y + label_gap
-    elif placement.startswith("middle_"):
-        label_y = y - label_gap
-        text_y = y + round(label_gap * 0.18)
-    else:
-        label_y = y - label_gap
-        text_y = y
-
-    icon_by_concept = {
-        "phone": "⌕",
-        "music": "♪",
-        "place": "●",
-        "payoff": "✦",
-        "story": "◆",
-        "none": "",
-    }
-    icon_concept = concept if requested_icon == "auto" else requested_icon
-    icon = icon_by_concept.get(icon_concept, icon_by_concept[concept])
     accent_by_concept = {
         "phone": "&H00F5D06A",
         "music": "&H00A86BFF",
@@ -4902,10 +4874,7 @@ def resolve_story_caption_treatment(segment, index, video_width, video_height, f
     accent = accent_by_concept.get(concept, accent_by_concept["story"])
     return {
         "placement": placement,
-        "text_override": f"{{\\an{alignment}\\pos({x},{text_y})\\q2}}",
-        "label_override": f"{{\\an{alignment}\\pos({x},{label_y})\\q2\\fad(110,150)}}",
-        "icon": icon,
-        "scene_label": scene_label,
+        "text_override": f"{{\\an{alignment}\\pos({x},{y})\\q2}}",
         "accent": accent,
     }
 
@@ -4950,9 +4919,6 @@ def generate_ass_captions(
         f"{style['primary_color']},{style['outline_color']},&H80000000,"
         f"-1,0,0,0,100,100,0,0,1,{style['outline'] + 1},"
         f"{style['shadow']},{style['alignment']},40,40,{style['margin_v']},1",
-        f"Style: StoryLabel,{style['fontname']},{max(18, round(style['fontsize'] * 0.42))},"
-        "&H00FFFFFF,&H00FFFFFF,&H00140A22,&H700C0714,-1,0,0,0,100,100,1.2,0,3,"
-        f"2,0,2,40,40,{style['margin_v'] + round(style['fontsize'] * 1.18)},1",
         "",
         "[Events]",
         "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text",
@@ -4987,27 +4953,24 @@ def generate_ass_captions(
                 video_width,
                 video_height,
                 style["fontsize"],
-            )
-            speaker_label = str(
-                segment.get("speakerLabel") or segment.get("speaker_label") or "STORY"
-            ).strip().upper()
-            label_start = _seconds_to_ass_time(float(segment["start"]))
-            label_end = _seconds_to_ass_time(float(segment["end"]))
-            label_prefix = f"{story_treatment['icon']}  " if story_treatment["icon"] else ""
-            label = _escape_ass(
-                f"{label_prefix}{speaker_label} · {story_treatment['scene_label']}"
-            )
-            ass_lines.append(
-                f"Dialogue: 1,{label_start},{label_end},StoryLabel,,0,0,0,,"
-                f"{story_treatment['label_override']}{{\\c{story_treatment['accent']}}}{label}"
+                default_position=caption_position,
             )
 
-        # Build word groups (3-5 words per line for readability)
-        story_group_size = 3 if style["fontsize"] >= 64 else 4
+        # Keep enough neighbouring words together to preserve a phrase. The
+        # previous three-word split produced fragments such as "nathi through
+        # the" even when the reviewed line itself was correct.
+        story_group_size = 4
+        story_max_chars = max(
+            20,
+            min(34, int(video_width / max(1.0, style["fontsize"] * 0.58))),
+        )
         groups = _chunk_words(
             words,
             max_words=(
                 story_group_size if style["animation"] == "story_pop" else 5
+            ),
+            max_chars=(
+                story_max_chars if style["animation"] == "story_pop" else None
             ),
         )
 
@@ -6907,8 +6870,8 @@ def rerank_clip_candidates_with_ai(
         return candidates
 
 
-def _chunk_words(words, max_words=5):
-    """Split words into display groups of max_words."""
+def _chunk_words(words, max_words=5, max_chars=None):
+    """Split words into readable groups without clipping long mixed-language lines."""
     groups = []
     current = []
     for w in words:
@@ -6917,6 +6880,15 @@ def _chunk_words(words, max_words=5):
             continue
         clean = re.sub(r"\[.*?\]|\(.*?\)", "", word_text).strip()
         if not clean:
+            continue
+        prospective_length = len(
+            " ".join(
+                [str(item.get("word", "")).strip() for item in [*current, w]]
+            )
+        )
+        if current and max_chars and prospective_length > int(max_chars):
+            groups.append(current)
+            current = [w]
             continue
         current.append(w)
         if len(current) >= max_words:
@@ -28994,6 +28966,42 @@ def build_studio_finish_filter(finish_plan):
     filters.extend(["format=yuv420p", "setsar=1"])
     return ",".join(filters)
 
+
+def build_main_video_frame_filter(finish_plan, width, height):
+    """Inset and round the actual edited video over a subdued moving backdrop."""
+    frame = (finish_plan or {}).get("main_frame") or (finish_plan or {}).get("mainFrame") or {}
+    if not bool(frame.get("enabled")):
+        return ""
+
+    safe_width = max(160, int(width or 1080))
+    safe_height = max(160, int(height or 1920))
+    requested_inset = frame.get("inset", 24)
+    inset = max(10, min(int(requested_inset or 24), min(safe_width, safe_height) // 10))
+    inner_width = max(2, safe_width - inset * 2)
+    inner_height = max(2, safe_height - inset * 2)
+    inner_width -= inner_width % 2
+    inner_height -= inner_height % 2
+    requested_radius = frame.get("border_radius", frame.get("borderRadius", 52))
+    radius = max(18, min(int(requested_radius or 52), inner_width // 4, inner_height // 4))
+    mask_path = multicam_rounded_mask_path(inner_width, inner_height, radius)
+    escaped_mask_path = str(mask_path).replace("\\", "\\\\").replace(":", "\\:")
+    blur_width = max(2, safe_width // 8)
+    blur_height = max(2, safe_height // 8)
+
+    return (
+        "[0:v]split=2[mainframe_bgsrc][mainframe_fgsrc];"
+        f"[mainframe_bgsrc]scale={blur_width}:{blur_height},boxblur=12:2,"
+        f"scale={safe_width}:{safe_height},eq=brightness=-0.24:saturation=0.72,"
+        "format=yuv420p[mainframe_bg];"
+        f"[mainframe_fgsrc]scale={inner_width}:{inner_height}:force_original_aspect_ratio=increase,"
+        f"crop={inner_width}:{inner_height},format=rgba[mainframe_fg];"
+        f"movie={escaped_mask_path},format=gray,loop=loop=-1:size=1:start=0,"
+        "setpts=N/30/TB[mainframe_mask];"
+        "[mainframe_fg][mainframe_mask]alphamerge[mainframe_round];"
+        f"[mainframe_bg][mainframe_round]overlay={inset}:{inset}:shortest=1,"
+        "format=yuv420p[v_main_frame]"
+    )
+
 def build_studio_visualizer_filter(finish_plan, width, height):
     """Build a transparent, speech-driven visualizer using the source audio."""
     visualizer = (finish_plan or {}).get("visualizer") or {}
@@ -30013,6 +30021,30 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 job_context=job_id,
             )
             working_path = visualizer_path
+
+        # Frame the actual edited source after visual treatment and before
+        # captions/overlays. The main video therefore has rounded edges for
+        # the full clip while creator text remains crisp above it.
+        main_frame_filter = build_main_video_frame_filter(
+            request.finish_plan,
+            *get_video_dimensions(working_path),
+        )
+        if main_frame_filter:
+            main_frame_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_main_frame.mp4")
+            report_progress(58, "Rounding the main video frame")
+            await run_subprocess_async(
+                [
+                    "ffmpeg", "-i", working_path,
+                    "-filter_complex", main_frame_filter,
+                    "-map", "[v_main_frame]", "-map", "0:a?",
+                    "-c:v", "libx264", "-preset", "veryfast", "-crf", "19",
+                    "-pix_fmt", "yuv420p", "-c:a", "copy",
+                    "-movflags", "+faststart", "-y", main_frame_path,
+                ],
+                check=True,
+                job_context=job_id,
+            )
+            working_path = main_frame_path
 
         # 3. Auto-Captions (Optional) — supports animated ASS styles
         ass_subtitle_path = None

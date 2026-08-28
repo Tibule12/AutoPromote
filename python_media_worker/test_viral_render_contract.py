@@ -23,6 +23,7 @@ from fastapi import HTTPException
 from python_media_worker.main_media_server import (
     RenderViralRequest,
     ViralOverlay,
+    build_main_video_frame_filter,
     build_speaker_track_crop_filter,
     multicam_rounded_card_filter,
     multicam_rounded_mask_path,
@@ -32,6 +33,26 @@ from python_media_worker.main_media_server import (
 
 
 class ViralRenderContractTests(unittest.TestCase):
+    def test_main_video_frame_rounds_the_actual_source_over_a_moving_backdrop(self):
+        frame_filter = build_main_video_frame_filter(
+            {
+                "enabled": True,
+                "main_frame": {
+                    "enabled": True,
+                    "shape": "round",
+                    "inset": 24,
+                    "border_radius": 52,
+                },
+            },
+            1080,
+            1920,
+        )
+
+        self.assertIn("rounded_1032x1872_r52.png", frame_filter)
+        self.assertIn("[mainframe_fg][mainframe_mask]alphamerge", frame_filter)
+        self.assertIn("overlay=24:24:shortest=1", frame_filter)
+        self.assertTrue(frame_filter.endswith("[v_main_frame]"))
+
     def test_round_broll_frame_contract_reaches_the_worker(self):
         overlay = ViralOverlay(
             id="round-pip",

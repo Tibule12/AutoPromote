@@ -349,6 +349,10 @@ test("runs the production Viral Clip Studio feature workflow with real playable 
   await finishRack.getByRole("button", { name: /Pulse ring/i }).click();
   await expect(page.getByTestId("studio-audio-visualizer")).toBeVisible();
   await expect(page.getByTestId("studio-after-video")).toHaveCSS("filter", /brightness/);
+  await expect(page.getByTestId("studio-after-video")).toHaveCSS(
+    "clip-path",
+    /inset\(2\.2% round 22px\)/
+  );
   await page.screenshot({
     path: path.join("test-results", "viral-clip-studio-live-signature.png"),
     fullPage: true,
@@ -468,6 +472,12 @@ test("runs the production Viral Clip Studio feature workflow with real playable 
   expect(viralData.finish_plan).toEqual(
     expect.objectContaining({
       enabled: true,
+      main_frame: expect.objectContaining({
+        enabled: true,
+        shape: "round",
+        inset: 24,
+        border_radius: 52,
+      }),
       color: expect.objectContaining({ preset: "podcast_pro", contrast: 1.2 }),
       visualizer: expect.objectContaining({ enabled: true, mode: "ring" }),
       keyframes: expect.arrayContaining([

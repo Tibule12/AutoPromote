@@ -296,6 +296,27 @@
   background: #000;
 }
 
+/* This is the actual source-video frame, not the outer phone/device shell. */
+.phone-frame:not(.has-rendered-output) .main-video-frame-preview,
+.phone-frame:not(.has-rendered-output) .smart-crop-foreground,
+.phone-frame:not(.has-rendered-output) .hook-preview-backdrop,
+.phone-frame:not(.has-rendered-output) .hook-preview-freeze {
+  clip-path: inset(2.2% round 22px);
+}
+
+.phone-frame:not(.has-rendered-output)::after {
+  content: "";
+  position: absolute;
+  inset: 2.2%;
+  z-index: 475;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 22px;
+  box-shadow:
+    0 16px 34px rgba(0, 0, 0, 0.34),
+    inset 0 0 18px rgba(255, 255, 255, 0.025);
+  pointer-events: none;
+}
+
 .after-preview-loading {
   position: absolute;
   inset: 0;
@@ -6383,15 +6404,6 @@
     0 10px 28px rgba(18, 7, 32, 0.48),
     0 0 22px rgba(102, 69, 255, 0.18);
   font-weight: 900;
-}
-
-.caption-style-story_pop .caption-preview-pill-active::before {
-  content: attr(data-story-badge);
-  display: block;
-  margin-bottom: 3px;
-  color: var(--caption-story-accent, #ffb33d);
-  font-size: 0.48em;
-  letter-spacing: 0.16em;
 }
 
 .caption-style-story_pop .caption-preview-word-active {

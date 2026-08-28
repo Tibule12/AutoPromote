@@ -1417,38 +1417,32 @@ const getTimedCaptionPreviewState = ({ segments, sourceTime }) => {
   };
 };
 
-const resolveCaptionStoryPreviewTreatment = (segment, index = 0) => {
+const resolveCaptionStoryPreviewTreatment = (segment, fallbackPosition = "lower") => {
   const text = normalizePlainText(segment?.text).toLowerCase();
   const requestedPlacement = normalizePlainText(segment?.captionPlacement || "auto").toLowerCase();
-  const requestedIcon = normalizePlainText(segment?.captionIcon || "auto").toLowerCase();
   let concept = "story";
-  let placement = ["bottom_left", "bottom_right", "top_left"][index % 3];
-  let label = "STORY BEAT";
+  let placement = {
+    top: "top_left",
+    center: "middle_left",
+    middle: "middle_left",
+    lower: "bottom_center",
+    bottom: "bottom_center",
+  }[fallbackPosition] || "bottom_center";
 
   if (/facebook|scroll|timeline|online/.test(text)) {
     concept = "phone";
-    placement = "top_left";
-    label = "ONLINE DISCOVERY";
   } else if (/cape town|ekapa|durban|johannesburg/.test(text)) {
     concept = "place";
-    placement = "top_left";
-    label = "PLACE MEMORY";
   } else if (/i can do this|angivuke|decide|ngadecide/.test(text)) {
     concept = "payoff";
-    placement = "middle_left";
-    label = "TURNING POINT";
   } else if (/choir|sing|ngiyocula|egazini|brothers and sisters/.test(text)) {
     concept = "music";
-    placement = "bottom_center";
-    label = "MUSIC MEMORY";
   }
 
   if (CAPTION_PLACEMENT_OPTIONS.some(option => option.value === requestedPlacement)) {
     placement = requestedPlacement === "auto" ? placement : requestedPlacement;
   }
 
-  const iconConcept = requestedIcon === "auto" ? concept : requestedIcon;
-  const icons = { phone: "⌕", music: "♪", place: "●", payoff: "✦", story: "◆", none: "" };
   const accents = {
     phone: "#6ad0f5",
     music: "#ff6ba8",
@@ -1456,12 +1450,9 @@ const resolveCaptionStoryPreviewTreatment = (segment, index = 0) => {
     payoff: "#a6f598",
     story: "#ffb33d",
   };
-  const speaker = normalizePlainText(segment?.speakerLabel || "STORY").toUpperCase();
-  const icon = icons[iconConcept] ?? icons[concept];
 
   return {
     placement,
-    badge: `${icon ? `${icon}  ` : ""}${speaker} · ${label}`,
     accent: accents[concept] || accents.story,
   };
 };
@@ -4819,7 +4810,7 @@ const ViralClipStudio = ({
     captionPreviewSegmentIndex >= 0
       ? resolveCaptionStoryPreviewTreatment(
           captionPreviewState.currentChunk,
-          captionPreviewSegmentIndex
+          captionPosition
         )
       : null;
   const liveTimelineDuration = outputTimelineDuration;
@@ -6569,7 +6560,14 @@ const ViralClipStudio = ({
         },
         finishPlan: {
           version: 1,
-          enabled: hasFinishEffects || podcastVisualizer.enabled || finishKeyframes.length > 0,
+          enabled: true,
+          main_frame: {
+            enabled: true,
+            shape: "round",
+            inset: 24,
+            border_radius: 52,
+            background: "soft_blur",
+          },
           color: {
             preset: finishFx.preset,
             brightness: finishFx.brightness,
@@ -9674,7 +9672,7 @@ const ViralClipStudio = ({
                     <video
                       ref={videoRef}
                       data-testid="studio-after-video"
-                      className="studio-video"
+                      className="studio-video main-video-frame-preview"
                       autoPlay
                       playsInline
                       preload="auto"
@@ -9995,7 +9993,6 @@ const ViralClipStudio = ({
                               : `caption-position-${captionPosition}`
                           } caption-style-${captionStyle || "classic"}`}
                           data-testid="live-caption-preview"
-                          data-story-badge={captionStoryPreviewTreatment?.badge || "◆  STORY"}
                           style={{
                             "--caption-preview-scale": captionScale,
                             "--caption-story-accent":
@@ -10004,7 +10001,6 @@ const ViralClipStudio = ({
                         >
                           <div
                             className="caption-preview-pill caption-preview-pill-active"
-                            data-story-badge={captionStoryPreviewTreatment?.badge || "◆  STORY"}
                           >
                             {captionPreviewState.currentChunk.words.map((word, index) => (
                               <span
