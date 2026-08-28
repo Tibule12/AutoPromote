@@ -19965,7 +19965,10 @@ def multicam_rounded_mask_path(width, height, radius):
     safe_width = max(2, int(width))
     safe_height = max(2, int(height))
     safe_radius = max(1, int(radius))
-    cache_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../tmp/multicam-mask-cache"))
+    # Cloud Run and the deployment smoke tests mount the application image
+    # read-only. Runtime-generated masks therefore belong in the platform's
+    # writable temporary directory, not beside the checked-out source.
+    cache_dir = os.path.join(tempfile.gettempdir(), "autopromote-multicam-mask-cache")
     os.makedirs(cache_dir, exist_ok=True)
     mask_path = os.path.join(cache_dir, f"rounded_{safe_width}x{safe_height}_r{safe_radius}.png")
     if not os.path.exists(mask_path):

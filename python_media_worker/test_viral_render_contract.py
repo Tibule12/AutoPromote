@@ -25,6 +25,7 @@ from python_media_worker.main_media_server import (
     ViralOverlay,
     build_speaker_track_crop_filter,
     multicam_rounded_card_filter,
+    multicam_rounded_mask_path,
     render_viral_clip_impl,
     smooth_positions,
 )
@@ -62,6 +63,11 @@ class ViralRenderContractTests(unittest.TestCase):
             "round_input", 180, 100, "round_output", radius=28
         )
         self.assertIn("rounded_180x100_r25.png", round_filter)
+        self.assertTrue(
+            str(multicam_rounded_mask_path(180, 100, 28)).startswith(
+                tempfile.gettempdir()
+            )
+        )
 
     def test_speaker_smoothing_does_not_pan_through_a_hard_camera_cut(self):
         positions = [
