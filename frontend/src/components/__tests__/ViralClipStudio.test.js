@@ -1950,10 +1950,13 @@ describe("ViralClipStudio timeline sequencing", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Picture-in-picture" }));
     expect(studioAfterVideo).toHaveStyle({ width: "100%" });
-    expect(screen.getByTestId(/broll-preview-/).closest(".draggable-overlay")).toHaveStyle({
-      width: "48%",
-      height: "34%",
-    });
+    const roundPipFrame = screen.getByTestId(/broll-preview-/).closest(".draggable-overlay");
+    expect(roundPipFrame.style.width).toBe("48%");
+    expect(roundPipFrame.style.height).toBe("34%");
+    expect(roundPipFrame.style.borderRadius).toBe("28px");
+    expect(roundPipFrame).toHaveClass("frame-shape-round");
+    expect(screen.getByTestId(/broll-preview-/)).toHaveStyle({ objectFit: "cover" });
+    expect(screen.getByRole("slider", { name: "Frame corner curve" })).toHaveValue("28");
     const previewShell = screen.getByTestId("hook-preview-frame").parentElement;
     fireEvent.click(screen.getByRole("button", { name: "Split" }));
     expect(previewShell.querySelector(".draggable-overlay.active")).not.toBeInTheDocument();
@@ -2146,6 +2149,9 @@ describe("ViralClipStudio timeline sequencing", () => {
     fireEvent.click(within(inspector).getByRole("button", { name: "Full screen" }));
     expect(screen.getAllByTestId(/timeline-broll-block-/)[0]).toHaveTextContent("Cutaway");
     fireEvent.click(within(inspector).getByRole("button", { name: "Picture-in-picture" }));
+    fireEvent.change(within(inspector).getByRole("slider", { name: "Frame corner curve" }), {
+      target: { value: "36" },
+    });
     fireEvent.click(within(inspector).getByRole("button", { name: "Show all" }));
     fireEvent.change(within(inspector).getByRole("slider", { name: "Image rotation" }), {
       target: { value: "8" },
@@ -2156,6 +2162,7 @@ describe("ViralClipStudio timeline sequencing", () => {
 
     const image = screen.getByAltText("Overlay");
     expect(image).toHaveStyle({ objectFit: "contain", transform: "rotate(8deg)" });
+    expect(image).toHaveStyle({ borderRadius: "36px" });
     expect(image.closest(".draggable-overlay")).toHaveStyle({ opacity: "0.7" });
   });
 
@@ -2594,6 +2601,7 @@ describe("ViralClipStudio timeline sequencing", () => {
 
   test("pauses a captioned render until editable timed lines exist", async () => {
     const onSave = jest.fn(() => Promise.resolve());
+    global.fetch.mockRejectedValue(new Error("Test transcription unavailable"));
     render(
       <ViralClipStudio
         videoUrl="https://example.com/source.mp4"
@@ -2620,6 +2628,11 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(
       within(inspector).getByText(/Generate captions, review every timestamped line/i)
     ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(within(inspector).getAllByText(/Test transcription unavailable/i)).not.toHaveLength(
+        0
+      );
+    });
   });
 
   test("previews Creative Director captions and pacing without starting a render", async () => {

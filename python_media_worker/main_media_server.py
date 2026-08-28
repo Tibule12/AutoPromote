@@ -28772,6 +28772,12 @@ class ViralOverlay(BaseModel):
     duration: Optional[float] = None
     bRollMode: Optional[str] = None
     b_roll_mode: Optional[str] = None
+    frameShape: Optional[str] = None
+    frame_shape: Optional[str] = None
+    borderRadius: Optional[float] = None
+    border_radius: Optional[float] = None
+    mediaFit: Optional[str] = None
+    media_fit: Optional[str] = None
     bRollPlaceholder: bool = False
     bRollTone: Optional[str] = None
     bRollKicker: Optional[str] = None
@@ -30164,32 +30170,99 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 return "0", "0"
             return f"(W*{overlay.x/100})-(w/2)", f"(H*{overlay.y/100})-(h/2)"
 
+        def get_overlay_frame_shape(overlay):
+            mode = get_broll_mode(overlay)
+            if mode == "fullscreen" or getattr(overlay, "coverMainVideo", False):
+                return "edge"
+            raw_shape = str(
+                getattr(overlay, "frameShape", None)
+                or getattr(overlay, "frame_shape", None)
+                or ""
+            ).strip().lower()
+            if raw_shape in {"circle", "round", "rounded"}:
+                # Older circle payloads are intentionally upgraded to the studio's
+                # polished rounded-rectangle treatment.
+                return "round"
+            return "round"
+
         def build_overlay_scale_filter(input_label, output_label, overlay):
             width_percent = float(overlay.width) if overlay.width is not None else None
             height_percent = float(overlay.height) if overlay.height is not None else None
             opacity = clamp_float(float(getattr(overlay, "opacity", 1.0) or 1.0), 0.0, 1.0)
+            media_fit = str(
+                getattr(overlay, "mediaFit", None)
+                or getattr(overlay, "media_fit", None)
+                or "cover"
+            ).strip().lower()
+            if media_fit not in {"contain", "cover", "stretch"}:
+                media_fit = "cover"
 
+            frame_shape = get_overlay_frame_shape(overlay)
             if get_broll_mode(overlay) == "fullscreen" or getattr(overlay, "coverMainVideo", False):
                 filter_body = (
                     f"[{input_label}]scale=w={base_width}:h={base_height}:"
                     f"force_original_aspect_ratio=increase,"
                     f"crop={base_width}:{base_height},setsar=1"
                 )
+                target_width = base_width
+                target_height = base_height
             else:
                 target_width = max(2, int(base_width * width_percent / 100.0)) if width_percent else -1
                 target_height = max(2, int(base_height * height_percent / 100.0)) if height_percent else -1
 
                 if target_width > 0 and target_height > 0:
-                    filter_body = (
-                        f"[{input_label}]scale=w={target_width}:h={target_height}:"
-                        f"force_original_aspect_ratio=decrease"
-                    )
+                    if media_fit == "stretch":
+                        filter_body = (
+                            f"[{input_label}]scale=w={target_width}:h={target_height},setsar=1"
+                        )
+                    elif media_fit == "contain":
+                        filter_body = (
+                            f"[{input_label}]scale=w={target_width}:h={target_height}:"
+                            f"force_original_aspect_ratio=decrease,"
+                            f"pad={target_width}:{target_height}:(ow-iw)/2:(oh-ih)/2:color=black,"
+                            f"setsar=1"
+                        )
+                    else:
+                        filter_body = (
+                            f"[{input_label}]scale=w={target_width}:h={target_height}:"
+                            f"force_original_aspect_ratio=increase,"
+                            f"crop={target_width}:{target_height},setsar=1"
+                        )
                 elif target_width > 0:
                     filter_body = f"[{input_label}]scale=w={target_width}:h=-1"
                 elif target_height > 0:
                     filter_body = f"[{input_label}]scale=w=-1:h={target_height}"
                 else:
                     filter_body = f"[{input_label}]scale=w=iw*0.3:h=-1"
+
+            if frame_shape == "round" and target_width > 0 and target_height > 0:
+                scaled_label = f"{output_label}scaled"
+                masked_label = output_label if opacity >= 0.999 else f"{output_label}masked"
+                requested_radius = (
+                    getattr(overlay, "borderRadius", None)
+                    or getattr(overlay, "border_radius", None)
+                    or min(target_width, target_height) * 0.12
+                )
+                radius = int(
+                    max(
+                        18,
+                        min(
+                            float(requested_radius),
+                            min(target_width, target_height) * 0.24,
+                        ),
+                    )
+                )
+                masked_filter = multicam_rounded_card_filter(
+                    scaled_label,
+                    target_width,
+                    target_height,
+                    masked_label,
+                    radius=radius,
+                )
+                result = f"{filter_body}[{scaled_label}];{masked_filter};"
+                if opacity < 0.999:
+                    result += f"[{masked_label}]colorchannelmixer=aa={opacity:.3f}[{output_label}];"
+                return result
 
             if opacity < 0.999:
                 filter_body += f",format=rgba,colorchannelmixer=aa={opacity:.3f}"
@@ -30668,12 +30741,16 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
 
         if audio_mix_labels:
             if len(audio_mix_labels) == 1:
-                audio_filter_chain.append(f"{audio_mix_labels[0]}anull[a_mix]")
+                audio_filter_chain.append(f"{audio_mix_labels[0]}anull[a_mix_unpadded]")
             else:
                 audio_filter_chain.append(
                     f"{''.join(audio_mix_labels)}amix=inputs={len(audio_mix_labels)}:"
-                    f"duration=first:dropout_transition=2:normalize=0[a_mix]"
+                    f"duration=first:dropout_transition=2:normalize=0[a_mix_unpadded]"
                 )
+            audio_filter_chain.append(
+                f"[a_mix_unpadded]apad=whole_dur={rendered_timeline_duration:.3f},"
+                f"atrim=0:{rendered_timeline_duration:.3f}[a_mix]"
+            )
 
         # Build Command
         cmd = ["ffmpeg"]
@@ -30716,7 +30793,16 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
              else:
                  cmd.extend(["-map", "0:a?", "-c:a", "aac", "-b:a", "160k"])
 
-             cmd.extend(["-shortest", "-c:v", "libx264", "-movflags", "+faststart", "-y", output_path])
+             cmd.extend([
+                 "-t",
+                 f"{rendered_timeline_duration:.3f}",
+                 "-c:v",
+                 "libx264",
+                 "-movflags",
+                 "+faststart",
+                 "-y",
+                 output_path,
+             ])
         
         report_progress(75, "Rendering final video")
         logger.info(f"Running FFmpeg: {' '.join(cmd)}")

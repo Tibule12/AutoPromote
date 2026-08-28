@@ -112,6 +112,41 @@ class MotionSculptureTests(unittest.TestCase):
             self.assertEqual(validation["audio"]["codec_name"], "aac")
             self.assertGreater(os.path.getsize(output), 1024)
 
+    def test_timed_effect_only_segments_frames_inside_its_window(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            source = os.path.join(temp_dir, "source.mp4")
+            output = os.path.join(temp_dir, "timed-motion.mp4")
+            self.make_source(source)
+            matte_calls = []
+
+            class CountingPersonSegmenter:
+                model_selection = 0
+
+                def __init__(self, **_kwargs):
+                    pass
+
+                def matte(self, frame, _previous_mask):
+                    matte_calls.append(1)
+                    return np.full(frame.shape[:2], 255, dtype=np.uint8)
+
+                def close(self):
+                    pass
+
+            with patch(
+                "python_media_worker.motion_sculpture.MediaPipePersonSegmenter",
+                CountingPersonSegmenter,
+            ):
+                receipt = render_motion_sculpture(
+                    source,
+                    output,
+                    [{"intensity": "clean", "start_time": 0.5, "end_time": 0.75}],
+                    approved_tmp_dir=temp_dir,
+                )
+
+            self.assertGreaterEqual(len(matte_calls), 2)
+            self.assertLess(len(matte_calls), receipt["frames"] // 2)
+            self.assertEqual(receipt["frames"], 15)
+
     def test_rejects_paths_outside_the_approved_temp_directory(self):
         with tempfile.TemporaryDirectory() as approved_dir, tempfile.TemporaryDirectory() as other_dir:
             source = os.path.join(other_dir, "source.mp4")

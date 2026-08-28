@@ -104,6 +104,20 @@ const normalizePlainText = value =>
     .replace(/[<>]/g, "")
     .trim();
 
+const normalizeOverlayFrameShape = (value, bRollMode = "pip") => {
+  if (bRollMode === "fullscreen") return "edge";
+  return "round";
+};
+
+const getOverlayFrameRadius = overlay => {
+  const shape = normalizeOverlayFrameShape(overlay?.frameShape, overlay?.bRollMode);
+  if (shape === "round") {
+    const radius = Math.max(12, Math.min(48, Number(overlay?.borderRadius ?? 28)));
+    return `${radius}px`;
+  }
+  return "0";
+};
+
 const CAPTION_LANGUAGE_OPTIONS = [
   { value: "und", label: "Language needs review" },
   { value: "xh", label: "isiXhosa" },
@@ -3234,8 +3248,9 @@ const ViralClipStudio = ({
         ? { enter: "fade", exit: "fade", enterDuration: 0.3, exitDuration: 0.3 }
         : undefined,
       opacity: bRollMode ? 1.0 : undefined,
-      mediaFit: type === "image" ? "cover" : "contain",
-      borderRadius: type === "image" ? 16 : 12,
+      mediaFit: bRollMode || type === "image" ? "cover" : "contain",
+      frameShape: bRollMode === "fullscreen" ? "edge" : "round",
+      borderRadius: 28,
       shadow: type === "image" ? "soft" : "none",
       rotation: 0,
       coverMainVideo: bRollMode === "fullscreen",
@@ -8347,6 +8362,8 @@ const ViralClipStudio = ({
     sourceDuration,
     sourceEndBehavior: "return",
     bRollMode: "fullscreen",
+    frameShape: "edge",
+    borderRadius: 28,
     animation: { enter: "fade", exit: "fade", enterDuration: 0.3, exitDuration: 0.3 },
     opacity: 1,
     coverMainVideo: true,
@@ -8590,6 +8607,9 @@ const ViralClipStudio = ({
           ...o,
           bRollMode: mode || undefined,
           coverMainVideo: mode === "fullscreen",
+          mediaFit: "cover",
+          frameShape: mode === "fullscreen" ? "edge" : "round",
+          borderRadius: mode === "fullscreen" ? 0 : Number(o.borderRadius || 28),
           width: modeLayout.width,
           height: modeLayout.height,
           x: modeLayout.x,
@@ -10041,6 +10061,12 @@ const ViralClipStudio = ({
                           const safeOverlayText = normalizePlainText(overlay.text);
                           const safeOverlaySrc = getSafeMediaSource(overlay.src);
                           const isFullscreen = overlay.bRollMode === "fullscreen";
+                          const isMediaOverlay = ["video", "image"].includes(overlay.type);
+                          const frameShape = normalizeOverlayFrameShape(
+                            overlay.frameShape,
+                            overlay.bRollMode
+                          );
+                          const frameRadius = getOverlayFrameRadius(overlay);
                           const anim = overlay.animation || {};
                           const animClass = anim.enter ? `broll-anim-${anim.enter}` : "";
 
@@ -10053,6 +10079,8 @@ const ViralClipStudio = ({
                                   : ""
                               } ${isFullscreen ? "broll-fullscreen" : ""} ${
                                 overlay.bRollMode === "sideBySide" ? "broll-side-by-side" : ""
+                              } ${isMediaOverlay ? "is-media-overlay" : ""} ${
+                                isMediaOverlay ? `frame-shape-${frameShape}` : ""
                               } ${animClass}`}
                               style={{
                                 top: isFullscreen ? "0%" : `${overlay.y}%`,
@@ -10077,6 +10105,7 @@ const ViralClipStudio = ({
                                 zIndex: isFullscreen ? 300 + index : 100 + index,
                                 opacity:
                                   overlay.opacity !== undefined ? overlay.opacity : undefined,
+                                borderRadius: isFullscreen ? "0" : frameRadius,
                                 transition: anim.enterDuration
                                   ? `opacity ${anim.enterDuration}s ease, transform ${anim.enterDuration}s ease`
                                   : undefined,
@@ -10149,9 +10178,7 @@ const ViralClipStudio = ({
                                       overlay.mediaFit === "stretch"
                                         ? "fill"
                                         : overlay.mediaFit || (isFullscreen ? "cover" : "contain"),
-                                    borderRadius: isFullscreen
-                                      ? "0"
-                                      : `${Number(overlay.borderRadius ?? 16)}px`,
+                                    borderRadius: isFullscreen ? "0" : frameRadius,
                                     boxShadow:
                                       !isFullscreen && overlay.shadow !== "none"
                                         ? "0 16px 36px rgba(0, 0, 0, 0.42)"
@@ -10187,8 +10214,11 @@ const ViralClipStudio = ({
                                   style={{
                                     width: "100%",
                                     height: "100%",
-                                    objectFit: isFullscreen ? "cover" : "contain",
-                                    borderRadius: isFullscreen ? "0" : "12px",
+                                    objectFit:
+                                      overlay.mediaFit === "stretch"
+                                        ? "fill"
+                                        : overlay.mediaFit || (isFullscreen ? "cover" : "contain"),
+                                    borderRadius: isFullscreen ? "0" : frameRadius,
                                     pointerEvents: "none",
                                   }}
                                 />
@@ -12879,6 +12909,36 @@ const ViralClipStudio = ({
                         </div>
                       </div>
 
+                      {activeOverlay.bRollMode !== "fullscreen" ? (
+                        <div className="inspector-field">
+                          <span>Rounded frame</span>
+                          <label className="inspector-range">
+                            <span>
+                              <b>Corner curve</b>
+                              <strong>{Number(activeOverlay.borderRadius ?? 28)}px</strong>
+                            </span>
+                            <input
+                              aria-label="Frame corner curve"
+                              type="range"
+                              min={12}
+                              max={48}
+                              step={1}
+                              value={Number(activeOverlay.borderRadius ?? 28)}
+                              onChange={event =>
+                                setOverlayStyleOption(
+                                  activeOverlay.id,
+                                  "borderRadius",
+                                  Number(event.target.value)
+                                )
+                              }
+                            />
+                          </label>
+                          <small className="inspector-reassurance">
+                            ✓ Smooth rounded corners match in preview and final export.
+                          </small>
+                        </div>
+                      ) : null}
+
                       {activeOverlay.type === "video" ? (
                         <div className="inspector-field">
                           <span>Cutaway audio</span>
@@ -13010,27 +13070,6 @@ const ViralClipStudio = ({
                               ))}
                             </div>
                           </div>
-                          <label className="inspector-range">
-                            <span>
-                              <b>Corner roundness</b>
-                              <strong>{Math.round(activeOverlay.borderRadius ?? 16)}px</strong>
-                            </span>
-                            <input
-                              aria-label="Image corner roundness"
-                              type="range"
-                              min={0}
-                              max={40}
-                              step={1}
-                              value={activeOverlay.borderRadius ?? 16}
-                              onChange={event =>
-                                setOverlayStyleOption(
-                                  activeOverlay.id,
-                                  "borderRadius",
-                                  Number(event.target.value)
-                                )
-                              }
-                            />
-                          </label>
                           <label className="inspector-range">
                             <span>
                               <b>Rotation</b>

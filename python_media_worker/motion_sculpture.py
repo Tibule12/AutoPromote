@@ -1061,11 +1061,11 @@ def render_motion_sculpture(
     written_frames = 0
     try:
         while frame is not None:
-            mask = person_segmenter.matte(frame, previous_mask)
-            previous_mask = mask
-            current_layer = _layer_from_frame(frame, mask)
             intensity = _active_intensity(normalized_effects, frame_index / fps)
             if intensity:
+                mask = person_segmenter.matte(frame, previous_mask)
+                previous_mask = mask
+                current_layer = _layer_from_frame(frame, mask)
                 rendered = _compose_motion_frame(
                     frame,
                     current_layer,
@@ -1075,7 +1075,13 @@ def render_motion_sculpture(
                     studio_plate=studio_plate,
                 )
             else:
+                # A timed signature effect must not pay for person segmentation
+                # across the rest of a long-form source. Clearing temporal state
+                # also prevents a silhouette from leaking into a later beat.
                 rendered = frame
+                current_layer = None
+                previous_mask = None
+                history.clear()
             if encoder.stdin is None:
                 raise RuntimeError("Motion Sculpture encoder pipe is unavailable")
             encoder.stdin.write(np.ascontiguousarray(rendered).tobytes())

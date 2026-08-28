@@ -403,8 +403,17 @@ test("runs the production Viral Clip Studio feature workflow with real playable 
   await expect(page.getByTestId(/timeline-broll-/)).toBeVisible();
   await inspector.getByRole("textbox", { name: "B-roll duration", exact: true }).fill("3.5");
   await inspector.getByRole("button", { name: "Picture-in-picture", exact: true }).click();
+  await expect(inspector.getByRole("slider", { name: "Frame corner curve" })).toHaveValue("28");
   await inspector.getByRole("button", { name: /Apply B-roll/i }).click();
-  await expect(page.getByTestId(/broll-preview-/)).toBeVisible();
+  const roundBrollPreview = page.getByTestId(/broll-preview-/);
+  await expect(roundBrollPreview).toBeVisible();
+  await expect(roundBrollPreview.locator("xpath=..")).toHaveClass(/frame-shape-round/);
+  await expect(roundBrollPreview).toHaveCSS("border-radius", "28px");
+  await expect(roundBrollPreview).toHaveCSS("object-fit", "cover");
+  await page.screenshot({
+    path: path.join("test-results", "viral-clip-studio-live-round-broll.png"),
+    fullPage: true,
+  });
 
   await toolRail.getByRole("button", { name: "Sound", exact: true }).click();
   await page.getByTestId("sound-effect-preset-whoosh").click();
@@ -472,7 +481,14 @@ test("runs the production Viral Clip Studio feature workflow with real playable 
   );
   expect(viralData.overlays).toEqual(
     expect.arrayContaining([
-      expect.objectContaining({ bRollMode: "pip", duration: 3.5, isLocal: false }),
+      expect.objectContaining({
+        bRollMode: "pip",
+        duration: 3.5,
+        isLocal: false,
+        frameShape: "round",
+        borderRadius: 28,
+        mediaFit: "cover",
+      }),
     ])
   );
   expect(viralData.sound_effects).toEqual(

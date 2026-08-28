@@ -108,6 +108,48 @@ class ViralClipAudioTests(unittest.TestCase):
                         if candidate and os.path.exists(candidate):
                             os.remove(candidate)
 
+    def test_sound_effect_mix_preserves_the_exact_requested_duration(self):
+        with self.approved_temp_dir() as temp_dir:
+            source_path = os.path.join(temp_dir, "source.mp4")
+            self.make_source(source_path)
+            request = worker.RenderViralRequest(
+                video_url=source_path,
+                start_time=0,
+                end_time=1.5,
+                overlays=[],
+                sound_effects=[
+                    {
+                        "id": "impact-proof",
+                        "builtIn": True,
+                        "tone": "impact",
+                        "startTime": 0.5,
+                        "duration": 0.25,
+                        "volume": 0.08,
+                        "enabled": True,
+                    }
+                ],
+            )
+
+            result = None
+            try:
+                with mock.patch.object(
+                    worker,
+                    "upload_file_to_firebase",
+                    return_value="https://storage.example.com/viral.mp4",
+                ):
+                    result = asyncio.run(worker.render_viral_clip_impl(request))
+
+                self.assertEqual(result["status"], "completed")
+                self.assertAlmostEqual(result["duration"], 1.5, delta=0.02)
+                self.assertAlmostEqual(
+                    result["audio_proof"]["duration_seconds"],
+                    1.5,
+                    delta=0.02,
+                )
+            finally:
+                if result and result.get("output_path") and os.path.exists(result["output_path"]):
+                    os.remove(result["output_path"])
+
     def test_viral_render_materializes_remote_source_with_http_fallback_helper(self):
         with self.approved_temp_dir() as temp_dir:
             source_path = os.path.join(temp_dir, "source.mp4")

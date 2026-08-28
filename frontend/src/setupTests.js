@@ -55,6 +55,27 @@ if (typeof HTMLCanvasElement !== "undefined") {
   };
 }
 
+// jsdom exposes media methods but throws "Not implemented" when components
+// correctly ask a changed source to load. Keep the test environment quiet and
+// deterministic while individual playback tests remain free to override these.
+if (typeof HTMLMediaElement !== "undefined") {
+  Object.defineProperty(HTMLMediaElement.prototype, "load", {
+    configurable: true,
+    writable: true,
+    value: jest.fn(),
+  });
+  Object.defineProperty(HTMLMediaElement.prototype, "play", {
+    configurable: true,
+    writable: true,
+    value: jest.fn(() => Promise.resolve()),
+  });
+  Object.defineProperty(HTMLMediaElement.prototype, "pause", {
+    configurable: true,
+    writable: true,
+    value: jest.fn(),
+  });
+}
+
 // Replace firebase client with a lightweight mock for jest environments (avoids node-specific fetch usage)
 jest.mock("./firebaseClient", () => ({
   auth: {

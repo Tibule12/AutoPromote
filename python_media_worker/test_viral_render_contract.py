@@ -22,13 +22,47 @@ from python_media_worker.viral_render_contract import (
 from fastapi import HTTPException
 from python_media_worker.main_media_server import (
     RenderViralRequest,
+    ViralOverlay,
     build_speaker_track_crop_filter,
+    multicam_rounded_card_filter,
     render_viral_clip_impl,
     smooth_positions,
 )
 
 
 class ViralRenderContractTests(unittest.TestCase):
+    def test_round_broll_frame_contract_reaches_the_worker(self):
+        overlay = ViralOverlay(
+            id="round-pip",
+            type="video",
+            src="https://example.com/broll.mp4",
+            x=74,
+            y=24,
+            width=42,
+            height=23.625,
+            bRollMode="pip",
+            frameShape="round",
+            borderRadius=28,
+            mediaFit="cover",
+        )
+
+        self.assertEqual(overlay.frameShape, "round")
+        self.assertEqual(overlay.borderRadius, 28)
+        self.assertEqual(overlay.mediaFit, "cover")
+
+        worker_source = Path(__file__).with_name("main_media_server.py").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn('return "round"', worker_source)
+        self.assertIn("multicam_rounded_card_filter(", worker_source)
+        self.assertIn('media_fit == "contain"', worker_source)
+        self.assertIn('media_fit == "stretch"', worker_source)
+
+        round_filter = multicam_rounded_card_filter(
+            "round_input", 180, 100, "round_output", radius=28
+        )
+        self.assertIn("rounded_180x100_r25.png", round_filter)
+
     def test_speaker_smoothing_does_not_pan_through_a_hard_camera_cut(self):
         positions = [
             (0.0, 0.30, 0.34),
