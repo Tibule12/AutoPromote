@@ -104,6 +104,24 @@ const normalizePlainText = value =>
     .replace(/[<>]/g, "")
     .trim();
 
+const AutoPromoteBrandLockup = ({ className = "", compact = false, ...props }) => (
+  <div
+    className={`autopromote-brand-lockup ${compact ? "is-compact" : ""} ${className}`.trim()}
+    aria-label="AutoPromote Viral Clip Studio watermark"
+    {...props}
+  >
+    <span className="autopromote-brand-mark" aria-hidden="true">
+      A
+    </span>
+    <span className="autopromote-brand-copy">
+      <strong>
+        Auto<span>Promote</span>
+      </strong>
+      <small>Viral Clip Studio</small>
+    </span>
+  </div>
+);
+
 const normalizeOverlayFrameShape = (value, bRollMode = "pip") => {
   if (bRollMode === "fullscreen") return "edge";
   return "round";
@@ -1981,6 +1999,12 @@ const ViralClipStudio = ({
   const [brandWatermarkText, setBrandWatermarkText] = useState(
     "AutoPromote · Viral Clip Studio"
   );
+  const [mainFrame, setMainFrame] = useState({
+    enabled: true,
+    insetPercent: 5,
+    radiusPercent: 10,
+    background: "studio_black",
+  });
   // Hooks are an independent edit. Selecting a Signature transformation must
   // never silently cover it with the default Blur Reveal treatment.
   const [addHook, setAddHook] = useState(false);
@@ -2135,6 +2159,12 @@ const ViralClipStudio = ({
   const [isExporting, setIsExporting] = useState(false);
   const [exportStatusLabel, setExportStatusLabel] = useState("Render Final Clip");
   const [selectedExportDestination, setSelectedExportDestination] = useState("general");
+  const [exportSettings, setExportSettings] = useState({
+    resolution: "1080p",
+    fps: "30",
+    codec: "h264",
+    quality: "high",
+  });
   const loggedScannerEntryRef = useRef(new Set());
   const renderedOutputUrl = getSafeMediaSource(renderedOutput?.previewUrl || renderedOutput?.url);
 
@@ -2425,6 +2455,8 @@ const ViralClipStudio = ({
     watermarkMode,
     brandWatermark,
     brandWatermarkText,
+    mainFrame,
+    exportSettings,
     manualWatermarkRegions,
     activeWatermarkRegionId,
     addHook,
@@ -2543,6 +2575,20 @@ const ViralClipStudio = ({
     setWatermarkMode(snapshot.watermarkMode || "adaptive");
     setBrandWatermark(snapshot.brandWatermark !== false);
     setBrandWatermarkText(snapshot.brandWatermarkText || "AutoPromote · Viral Clip Studio");
+    setMainFrame({
+      enabled: true,
+      insetPercent: 5,
+      radiusPercent: 10,
+      background: "studio_black",
+      ...(snapshot.mainFrame || {}),
+    });
+    setExportSettings({
+      resolution: "1080p",
+      fps: "30",
+      codec: "h264",
+      quality: "high",
+      ...(snapshot.exportSettings || {}),
+    });
     setManualWatermarkRegions(
       Array.isArray(snapshot.manualWatermarkRegions)
         ? snapshot.manualWatermarkRegions.map(clampManualWatermarkRegion)
@@ -5531,6 +5577,12 @@ const ViralClipStudio = ({
   const resetStudioFinish = () => {
     resetFinishFx();
     setPodcastVisualizer(current => ({ ...current, enabled: false }));
+    setMainFrame({
+      enabled: true,
+      insetPercent: 5,
+      radiusPercent: 10,
+      background: "studio_black",
+    });
     setStudioActionMessage("Finish & Motion reset. The underlying edit was not changed.");
   };
 
@@ -6666,11 +6718,11 @@ const ViralClipStudio = ({
           version: 1,
           enabled: true,
           main_frame: {
-            enabled: true,
+            enabled: mainFrame.enabled,
             shape: "round",
-            inset: 54,
-            border_radius: 116,
-            background: "studio_black",
+            inset_percent: mainFrame.insetPercent,
+            border_radius_percent: mainFrame.radiusPercent,
+            background: mainFrame.background,
           },
           color: {
             preset: finishFx.preset,
@@ -6784,6 +6836,7 @@ const ViralClipStudio = ({
         timelineSegments: exportTimeline,
         backgroundAudio: null,
         exportDestination: destination || "general",
+        outputSettings: exportSettings,
       });
     } catch (err) {
       if (scanSessionId) {
@@ -9760,6 +9813,19 @@ const ViralClipStudio = ({
                   </button>
                   <button
                     type="button"
+                    data-testid="main-footage-frame-toggle"
+                    className={mainFrame.enabled ? "is-active" : ""}
+                    aria-pressed={mainFrame.enabled}
+                    onClick={() => {
+                      setMainFrame(current => ({ ...current, enabled: !current.enabled }));
+                      setComparisonMode("after");
+                    }}
+                    title="Round the complete source footage in preview and export"
+                  >
+                    Rounded footage
+                  </button>
+                  <button
+                    type="button"
                     data-testid="preview-fullscreen-button"
                     onClick={() => void togglePreviewFullscreen()}
                   >
@@ -9780,6 +9846,14 @@ const ViralClipStudio = ({
                     ref={phoneFrameRef}
                     data-testid="hook-preview-frame"
                     className={`phone-frame ${smartCrop ? reframeAspectClass : ""} ${isPreviewFullscreen ? "preview-expanded" : ""} ${hookFocusMode ? "hook-focus-enabled" : ""} ${creativePreviewClass} ${renderedOutputUrl ? "has-rendered-output" : ""}`}
+                    style={{
+                      "--main-frame-inset": mainFrame.enabled
+                        ? `${mainFrame.insetPercent}%`
+                        : "0%",
+                      "--main-frame-radius": mainFrame.enabled
+                        ? `${mainFrame.radiusPercent}%`
+                        : "0px",
+                    }}
                     onClick={handlePreviewFrameClick}
                     onMouseMove={handleMouseMove}
                     onMouseUp={handleDragEnd}
@@ -9927,14 +10001,11 @@ const ViralClipStudio = ({
                       />
                     ) : null}
                     {brandWatermark && !renderedOutputUrl ? (
-                      <div
+                      <AutoPromoteBrandLockup
                         className="studio-brand-watermark-preview"
+                        compact
                         data-testid="brand-watermark-preview"
-                        aria-label={brandWatermarkText}
-                      >
-                        <strong>AutoPromote</strong>
-                        <span>Viral Clip Studio</span>
-                      </div>
+                      />
                     ) : null}
                     <video
                       ref={hookBackdropVideoRef}
@@ -11714,6 +11785,14 @@ const ViralClipStudio = ({
                     beatCount={musicBeatMarkers.length}
                     beatSnapEnabled={beatSnapEnabled}
                     onBeatSnapChange={setBeatSnapEnabled}
+                    mainFrame={mainFrame}
+                    onUpdateMainFrame={(field, value) => {
+                      setMainFrame(current => ({ ...current, [field]: value }));
+                      setComparisonMode("after");
+                      setStudioActionMessage(
+                        "Main footage frame updated in preview and final export."
+                      );
+                    }}
                   />
                 ) : null}
                 <span className="creative-intent-label">Choose your intent</span>
@@ -16172,7 +16251,7 @@ const ViralClipStudio = ({
                 <label>
                   <span>
                     <b>AutoPromote signature</b>
-                    <small>Safe-zone aware and moves between corners during export.</small>
+                    <small>Transparent logo lockup placed inside the export safe zone.</small>
                   </span>
                   <input
                     type="checkbox"
@@ -16182,10 +16261,11 @@ const ViralClipStudio = ({
                   />
                 </label>
                 {brandWatermark ? (
-                  <div className="export-branding-preview" data-testid="export-branding-preview">
-                    <strong>AutoPromote</strong>
-                    <span>Viral Clip Studio</span>
-                  </div>
+                  <AutoPromoteBrandLockup
+                    className="export-branding-preview"
+                    compact
+                    data-testid="export-branding-preview"
+                  />
                 ) : (
                   <small>Clean export selected. Availability follows the creator plan.</small>
                 )}
@@ -16233,6 +16313,75 @@ const ViralClipStudio = ({
                     {destination.label}
                   </button>
                 ))}
+              </div>
+              <div className="export-settings-grid" data-testid="export-settings-grid">
+                <label>
+                  <span>Resolution</span>
+                  <select
+                    aria-label="Export resolution"
+                    value={exportSettings.resolution}
+                    onChange={event =>
+                      setExportSettings(current => ({
+                        ...current,
+                        resolution: event.target.value,
+                      }))
+                    }
+                    disabled={isExporting}
+                  >
+                    <option value="720p">720p</option>
+                    <option value="1080p">1080p</option>
+                    <option value="2160p">4K</option>
+                    <option value="source">Source size</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Frame rate</span>
+                  <select
+                    aria-label="Export frame rate"
+                    value={exportSettings.fps}
+                    onChange={event =>
+                      setExportSettings(current => ({ ...current, fps: event.target.value }))
+                    }
+                    disabled={isExporting}
+                  >
+                    <option value="source">Source</option>
+                    {[24, 25, 30, 50, 60].map(fps => (
+                      <option key={fps} value={String(fps)}>
+                        {fps} fps
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  <span>Codec</span>
+                  <select
+                    aria-label="Export codec"
+                    value={exportSettings.codec}
+                    onChange={event =>
+                      setExportSettings(current => ({ ...current, codec: event.target.value }))
+                    }
+                    disabled={isExporting}
+                  >
+                    <option value="h264">H.264 · compatible</option>
+                    <option value="h265">H.265 · smaller</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Quality</span>
+                  <select
+                    aria-label="Export quality"
+                    value={exportSettings.quality}
+                    onChange={event =>
+                      setExportSettings(current => ({ ...current, quality: event.target.value }))
+                    }
+                    disabled={isExporting}
+                  >
+                    <option value="draft">Draft</option>
+                    <option value="balanced">Balanced</option>
+                    <option value="high">High</option>
+                    <option value="master">Master</option>
+                  </select>
+                </label>
               </div>
               <button
                 className="export-btn"

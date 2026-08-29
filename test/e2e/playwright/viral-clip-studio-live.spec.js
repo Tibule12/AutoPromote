@@ -351,7 +351,11 @@ test("runs the production Viral Clip Studio feature workflow with real playable 
   await expect(page.getByTestId("studio-after-video")).toHaveCSS("filter", /brightness/);
   await expect(page.getByTestId("studio-after-video")).toHaveCSS(
     "clip-path",
-    /inset\(5% round 34px\)/
+    /inset\(5% round 10%\)/
+  );
+  await expect(page.getByTestId("main-footage-frame-toggle")).toHaveAttribute(
+    "aria-pressed",
+    "true"
   );
   await page.screenshot({
     path: path.join("test-results", "viral-clip-studio-live-signature.png"),
@@ -473,6 +477,12 @@ test("runs the production Viral Clip Studio feature workflow with real playable 
   expect(viralData.smart_crop_mode).toBe("speaker_track");
   expect(viralData.brand_watermark).toBe(true);
   expect(viralData.watermark_text).toBe("AutoPromote · Viral Clip Studio");
+  expect(viralData.output_settings).toEqual({
+    resolution: "1080p",
+    fps: "30",
+    codec: "h264",
+    quality: "high",
+  });
   expect(viralData.translate_captions_to_english).toBe(true);
   expect(viralData.caption_segments[0].text).toContain("creator-reviewed");
   expect(viralData.caption_segments[0]).toEqual(
@@ -506,8 +516,8 @@ test("runs the production Viral Clip Studio feature workflow with real playable 
       main_frame: expect.objectContaining({
         enabled: true,
         shape: "round",
-        inset: 54,
-        border_radius: 116,
+        inset_percent: 5,
+        border_radius_percent: 10,
       }),
       color: expect.objectContaining({ preset: "podcast_pro", contrast: 1.2 }),
       visualizer: expect.objectContaining({ enabled: true, mode: "ring" }),

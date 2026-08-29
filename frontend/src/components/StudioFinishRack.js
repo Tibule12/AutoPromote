@@ -45,6 +45,8 @@ export default function StudioFinishRack({
   beatCount = 0,
   beatSnapEnabled = true,
   onBeatSnapChange,
+  mainFrame,
+  onUpdateMainFrame,
 }) {
   return (
     <section className="studio-finish-rack" data-testid="studio-finish-rack">
@@ -57,6 +59,64 @@ export default function StudioFinishRack({
           Reset
         </button>
       </div>
+
+      <details className="finish-rack-section" open>
+        <summary>
+          <span>Main footage frame</span>
+          <small>Preview = final export</small>
+        </summary>
+        <div className="main-frame-controls">
+          <label className="main-frame-toggle">
+            <span>
+              <b>Rounded footage</b>
+              <small>Rounds the entire source video, not only B-roll.</small>
+            </span>
+            <input
+              type="checkbox"
+              aria-label="Rounded main footage"
+              checked={mainFrame?.enabled !== false}
+              onChange={event => onUpdateMainFrame?.("enabled", event.target.checked)}
+            />
+          </label>
+          <div className="finish-rack-grid">
+            <Slider
+              label="Canvas margin"
+              value={Number(mainFrame?.insetPercent ?? 5)}
+              min={2}
+              max={12}
+              step={0.5}
+              onChange={value => onUpdateMainFrame?.("insetPercent", value)}
+              format={value => `${Number(value).toFixed(1)}%`}
+            />
+            <Slider
+              label="Corner curve"
+              value={Number(mainFrame?.radiusPercent ?? 10)}
+              min={4}
+              max={20}
+              step={0.5}
+              onChange={value => onUpdateMainFrame?.("radiusPercent", value)}
+              format={value => `${Number(value).toFixed(1)}%`}
+            />
+          </div>
+          <div className="main-frame-background" role="group" aria-label="Main frame background">
+            <span>Canvas</span>
+            <button
+              type="button"
+              className={mainFrame?.background === "studio_black" ? "is-active" : ""}
+              onClick={() => onUpdateMainFrame?.("background", "studio_black")}
+            >
+              True black
+            </button>
+            <button
+              type="button"
+              className={mainFrame?.background === "soft_blur" ? "is-active" : ""}
+              onClick={() => onUpdateMainFrame?.("background", "soft_blur")}
+            >
+              Soft blur
+            </button>
+          </div>
+        </div>
+      </details>
 
       <div className="finish-preset-strip" aria-label="Finish presets">
         {CINEMATIC_PRESETS.map(preset => (

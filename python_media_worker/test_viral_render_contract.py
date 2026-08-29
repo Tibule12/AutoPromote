@@ -25,12 +25,14 @@ from python_media_worker.main_media_server import (
     RenderViralRequest,
     ViralOverlay,
     apply_manual_reframe_keyframes,
+    build_viral_brand_watermark_asset,
     build_main_video_frame_filter,
     build_speaker_track_crop_filter,
     get_reframe_output_dimensions,
     multicam_rounded_card_filter,
     multicam_rounded_mask_path,
     render_viral_clip_impl,
+    resolve_viral_export_profile,
     smooth_positions,
 )
 
@@ -73,6 +75,52 @@ class ViralRenderContractTests(unittest.TestCase):
             360,
         )
         self.assertIn("scale=80:45,boxblur=10:2", small_frame_filter)
+
+        percentage_frame_filter = build_main_video_frame_filter(
+            {
+                "main_frame": {
+                    "enabled": True,
+                    "inset_percent": 5,
+                    "border_radius_percent": 10,
+                    "background": "studio_black",
+                }
+            },
+            1080,
+            1920,
+        )
+        self.assertIn("rounded_972x1812_r97.png", percentage_frame_filter)
+        self.assertIn("overlay=54:54:shortest=1", percentage_frame_filter)
+
+    def test_viral_watermark_is_a_transparent_logo_asset_not_boxed_text(self):
+        asset_path = build_viral_brand_watermark_asset(1080, 1920)
+        self.assertTrue(os.path.exists(asset_path))
+        from PIL import Image
+
+        with Image.open(asset_path) as asset:
+            self.assertEqual(asset.mode, "RGBA")
+            alpha = asset.getchannel("A")
+            self.assertEqual(alpha.getpixel((asset.width - 1, asset.height - 1)), 0)
+            self.assertGreater(alpha.getbbox()[2], asset.width // 2)
+
+    def test_viral_export_profile_preserves_aspect_and_creator_quality(self):
+        vertical = resolve_viral_export_profile(
+            {"resolution": "720p", "fps": "60", "codec": "h265", "quality": "master"},
+            1080,
+            1920,
+        )
+        self.assertEqual((vertical["width"], vertical["height"]), (720, 1280))
+        self.assertEqual(vertical["fps"], 60)
+        self.assertEqual(vertical["encoder"], "libx265")
+        self.assertEqual(vertical["crf"], 18)
+
+        landscape = resolve_viral_export_profile(
+            {"resolution": "1080p", "fps": "source", "codec": "h264", "quality": "high"},
+            1280,
+            720,
+        )
+        self.assertEqual((landscape["width"], landscape["height"]), (1920, 1080))
+        self.assertIsNone(landscape["fps"])
+        self.assertEqual(landscape["crf"], 19)
 
     def test_caption_coverage_gate_finds_spoken_ranges_missing_from_review(self):
         gaps = find_uncovered_caption_speech_ranges(

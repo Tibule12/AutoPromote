@@ -6050,6 +6050,267 @@ async def apply_multicam_brand_watermark(output_path, job_id, output_width, outp
     return receipt
 
 
+def build_viral_brand_watermark_asset(output_width, output_height, feature_label="VIRAL CLIP STUDIO"):
+    """Create the transparent AutoPromote logo lockup used by Viral Clip Studio."""
+    width = max(160, int(output_width or 1080))
+    height = max(160, int(output_height or 1920))
+    target_width = int(max(220, min(420, width * (0.27 if height >= width else 0.18))))
+    target_height = max(56, int(round(target_width * 0.245)))
+    cache_dir = os.path.join(tempfile.gettempdir(), "autopromote_brand_assets")
+    os.makedirs(cache_dir, exist_ok=True)
+    safe_feature = re.sub(
+        r"[^A-Z0-9]+",
+        "_",
+        str(feature_label or "VIRAL CLIP STUDIO").upper(),
+    ).strip("_")
+    asset_path = os.path.join(
+        cache_dir,
+        f"viral_v2_{target_width}x{target_height}_{safe_feature}.png",
+    )
+    if os.path.exists(asset_path):
+        return asset_path
+
+    scale = 3
+    asset_width = target_width * scale
+    asset_height = target_height * scale
+    canvas = Image.new("RGBA", (asset_width, asset_height), (0, 0, 0, 0))
+    mark_size = int(asset_height * 0.78)
+    mark_y = (asset_height - mark_size) // 2
+    mark_radius = max(18, int(mark_size * 0.24))
+
+    mark_mask = Image.new("L", (mark_size, mark_size), 0)
+    ImageDraw.Draw(mark_mask).rounded_rectangle(
+        (0, 0, mark_size - 1, mark_size - 1),
+        radius=mark_radius,
+        fill=255,
+    )
+    mark_gradient = Image.new("RGBA", (mark_size, mark_size), (0, 0, 0, 0))
+    gradient_draw = ImageDraw.Draw(mark_gradient)
+    start = (124, 58, 237)
+    end = (34, 211, 238)
+    for x in range(mark_size):
+        ratio = x / max(1, mark_size - 1)
+        color = tuple(
+            int(start[channel] + (end[channel] - start[channel]) * ratio)
+            for channel in range(3)
+        )
+        gradient_draw.line((x, 0, x, mark_size), fill=(*color, 255))
+    mark_gradient.putalpha(mark_mask)
+
+    shadow = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
+    shadow.paste((0, 0, 0, 175), (8 * scale, mark_y + 5 * scale), mark_mask)
+    shadow = shadow.filter(ImageFilter.GaussianBlur(radius=5 * scale))
+    canvas = Image.alpha_composite(canvas, shadow)
+    canvas.alpha_composite(mark_gradient, (0, mark_y))
+
+    draw = ImageDraw.Draw(canvas)
+    mark_font = promo_font(max(24, int(mark_size * 0.66)), True)
+    mark_bbox = draw.textbbox((0, 0), "A", font=mark_font, stroke_width=max(1, scale))
+    mark_text_width = mark_bbox[2] - mark_bbox[0]
+    mark_text_height = mark_bbox[3] - mark_bbox[1]
+    draw.text(
+        (
+            (mark_size - mark_text_width) / 2 - mark_bbox[0],
+            mark_y + (mark_size - mark_text_height) / 2 - mark_bbox[1] - scale,
+        ),
+        "A",
+        font=mark_font,
+        fill=(255, 255, 255, 255),
+        stroke_width=max(1, scale),
+        stroke_fill=(255, 255, 255, 255),
+    )
+
+    text_x = mark_size + 13 * scale
+    word_font = promo_font(max(22, int(asset_height * 0.34)), True)
+    feature_font = promo_font(max(10, int(asset_height * 0.135)), True)
+    word_y = int(asset_height * 0.16)
+    auto_text = "Auto"
+    promote_text = "Promote"
+    auto_bbox = draw.textbbox((0, 0), auto_text, font=word_font)
+    promote_x = text_x + auto_bbox[2] - auto_bbox[0]
+
+    draw.text((text_x + 2 * scale, word_y + 3 * scale), auto_text, font=word_font, fill=(0, 0, 0, 150))
+    draw.text((promote_x + 2 * scale, word_y + 3 * scale), promote_text, font=word_font, fill=(0, 0, 0, 150))
+    word_stroke = max(2, int(scale * 0.9))
+    draw.text(
+        (text_x, word_y),
+        auto_text,
+        font=word_font,
+        fill=(255, 255, 255, 250),
+        stroke_width=word_stroke,
+        stroke_fill=(3, 5, 9, 210),
+    )
+    draw.text(
+        (promote_x, word_y),
+        promote_text,
+        font=word_font,
+        fill=(196, 148, 255, 255),
+        stroke_width=word_stroke,
+        stroke_fill=(3, 5, 9, 210),
+    )
+
+    feature_text = str(feature_label or "VIRAL CLIP STUDIO").upper()
+    feature_y = int(asset_height * 0.61)
+    tracking = max(1, int(scale * 0.8))
+    cursor_x = text_x
+    for character in feature_text:
+        draw.text((cursor_x + scale, feature_y + 2 * scale), character, font=feature_font, fill=(0, 0, 0, 150))
+        draw.text(
+            (cursor_x, feature_y),
+            character,
+            font=feature_font,
+            fill=(126, 231, 248, 242),
+            stroke_width=max(1, scale // 2),
+            stroke_fill=(3, 5, 9, 205),
+        )
+        char_bbox = draw.textbbox((0, 0), character, font=feature_font)
+        cursor_x += max(1, char_bbox[2] - char_bbox[0]) + tracking
+
+    canvas = canvas.resize((target_width, target_height), Image.Resampling.LANCZOS)
+    canvas.save(asset_path, "PNG", optimize=True)
+    return asset_path
+
+
+def resolve_viral_export_profile(output_settings, source_width, source_height):
+    """Normalize creator-facing delivery choices into safe FFmpeg settings."""
+    settings = output_settings or {}
+    width = max(2, int(source_width or 1080))
+    height = max(2, int(source_height or 1920))
+    resolution = str(settings.get("resolution") or "source").strip().lower()
+    short_edge_by_resolution = {"720p": 720, "1080p": 1080, "2160p": 2160, "4k": 2160}
+    short_edge = short_edge_by_resolution.get(resolution)
+    output_width = width
+    output_height = height
+    if short_edge:
+        if width <= height:
+            output_width = short_edge
+            output_height = int(round(height * short_edge / max(1, width)))
+        else:
+            output_height = short_edge
+            output_width = int(round(width * short_edge / max(1, height)))
+    output_width = max(2, output_width - output_width % 2)
+    output_height = max(2, output_height - output_height % 2)
+
+    fps_raw = str(settings.get("fps") or "source").strip().lower()
+    fps = int(fps_raw) if fps_raw in {"24", "25", "30", "50", "60"} else None
+    codec = str(settings.get("codec") or "h264").strip().lower()
+    if codec not in {"h264", "h265"}:
+        codec = "h264"
+    quality = str(settings.get("quality") or "high").strip().lower()
+    if quality not in {"draft", "balanced", "high", "master"}:
+        quality = "high"
+    crf_by_quality = {"draft": 27, "balanced": 23, "high": 19, "master": 16}
+    crf = crf_by_quality[quality] + (2 if codec == "h265" else 0)
+    encoder = "libx265" if codec == "h265" else "libx264"
+    return {
+        "resolution": resolution,
+        "width": output_width,
+        "height": output_height,
+        "fps": fps,
+        "codec": codec,
+        "encoder": encoder,
+        "quality": quality,
+        "crf": crf,
+    }
+
+
+def build_viral_export_encode_args(profile):
+    args = [
+        "-c:v",
+        profile["encoder"],
+        "-preset",
+        "medium",
+        "-crf",
+        str(profile["crf"]),
+        "-pix_fmt",
+        "yuv420p",
+    ]
+    if profile["codec"] == "h265":
+        args.extend(["-tag:v", "hvc1"])
+    return args
+
+
+async def apply_viral_brand_watermark(
+    output_path,
+    job_id,
+    output_width,
+    output_height,
+    output_settings=None,
+):
+    """Burn the real transparent Viral Clip Studio logo into the finished file."""
+    asset_path = build_viral_brand_watermark_asset(output_width, output_height)
+    margin_x = max(24, int(int(output_width or 1080) * 0.05))
+    margin_y = max(24, int(int(output_height or 1920) * 0.035))
+    branded_output_path = os.path.join(
+        os.path.dirname(output_path),
+        f"{job_id}_viral_branded.mp4",
+    )
+    receipt = {
+        "enabled": True,
+        "status": "pending",
+        "asset": "autopromote_viral_clip_studio_lockup",
+        "placement": "top_right_safe_zone",
+        "style": "transparent_logo_lockup",
+    }
+    export_profile = resolve_viral_export_profile(
+        output_settings,
+        output_width,
+        output_height,
+    )
+    try:
+        await run_subprocess_async(
+            [
+                "ffmpeg",
+                "-nostdin",
+                "-i",
+                output_path,
+                "-loop",
+                "1",
+                "-i",
+                asset_path,
+                "-filter_complex",
+                (
+                    "[1:v]format=rgba,colorchannelmixer=aa=0.82[viral_brand];"
+                    f"[0:v][viral_brand]overlay=x=W-w-{margin_x}:y={margin_y}:"
+                    "eof_action=pass:shortest=1[viral_branded_video]"
+                ),
+                "-map",
+                "[viral_branded_video]",
+                "-map",
+                "0:a?",
+                *build_viral_export_encode_args(export_profile),
+                "-c:a",
+                "copy",
+                "-movflags",
+                "+faststart",
+                "-shortest",
+                "-y",
+                branded_output_path,
+            ],
+            check=True,
+            job_context=job_id,
+            timeout_seconds=MEDIA_WORKER_SUBPROCESS_TIMEOUT_SECONDS,
+        )
+        os.replace(branded_output_path, output_path)
+        receipt["status"] = "burned_in"
+        receipt["delivery"] = export_profile
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "message": "AutoPromote Viral Clip Studio watermark burn-in failed",
+                "error": str(exc),
+            },
+        )
+    finally:
+        try:
+            if os.path.exists(branded_output_path):
+                os.remove(branded_output_path)
+        except OSError:
+            pass
+    return receipt
+
+
 def pick_multicam_thumbnail_time(segments, duration):
     safe_duration = max(0.0, float(duration or 0.0))
     ordered = sorted(segments or [], key=lambda item: float(item.get("timeline_start", 0.0) or 0.0))
@@ -29087,7 +29348,12 @@ def build_main_video_frame_filter(finish_plan, width, height, content_crop=None)
 
     safe_width = max(160, int(width or 1080))
     safe_height = max(160, int(height or 1920))
-    requested_inset = frame.get("inset", 54)
+    requested_inset_percent = frame.get("inset_percent", frame.get("insetPercent"))
+    requested_inset = (
+        round(safe_width * clamp_float(requested_inset_percent, 2.0, 12.0) / 100.0)
+        if requested_inset_percent is not None
+        else frame.get("inset", 54)
+    )
     minimum_visible_inset = max(10, int(round(min(safe_width, safe_height) * 0.05)))
     inset = max(
         minimum_visible_inset,
@@ -29097,8 +29363,20 @@ def build_main_video_frame_filter(finish_plan, width, height, content_crop=None)
     inner_height = max(2, safe_height - inset * 2)
     inner_width -= inner_width % 2
     inner_height -= inner_height % 2
-    requested_radius = frame.get("border_radius", frame.get("borderRadius", 116))
-    minimum_visible_radius = max(24, int(round(min(safe_width, safe_height) * 0.1)))
+    requested_radius_percent = frame.get(
+        "border_radius_percent",
+        frame.get("borderRadiusPercent"),
+    )
+    requested_radius = (
+        round(
+            min(inner_width, inner_height)
+            * clamp_float(requested_radius_percent, 4.0, 20.0)
+            / 100.0
+        )
+        if requested_radius_percent is not None
+        else frame.get("border_radius", frame.get("borderRadius", 116))
+    )
+    minimum_visible_radius = max(24, int(round(min(safe_width, safe_height) * 0.04)))
     radius = max(
         minimum_visible_radius,
         min(int(requested_radius or 116), inner_width // 4, inner_height // 4),
@@ -29258,6 +29536,7 @@ class RenderViralRequest(BaseModel):
     watermark_mode: str = "adaptive"
     watermark_regions: Optional[List[Dict[str, Any]]] = None
     export_destination: str = "general"
+    output_settings: Optional[Dict[str, Any]] = None
     brand_watermark: Optional[bool] = None
     brandWatermark: Optional[bool] = None
     watermark_text: Optional[str] = None
@@ -30679,26 +30958,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             if brand_watermark_raw is None
             else bool(brand_watermark_raw)
         )
-        if brand_watermark_enabled:
-            brand_label = "brand_watermark"
-            brand_text = (
-                request.watermark_text
-                or request.watermarkText
-                or os.getenv("VIRAL_BRAND_WATERMARK_TEXT")
-                or "AutoPromote · Viral Clip Studio"
-            )
-            append_drawtext(
-                current_v_label,
-                brand_label,
-                brand_text,
-                x_expr="if(lt(mod(t\\,16)\\,8)\\,52\\,w-tw-52)",
-                y_expr="if(lt(mod(t\\,8)\\,4)\\,52\\,h-th-84)",
-                fontsize=str(max(24, int(base_height / 58))),
-                color="white@0.88",
-                box=True,
-                boxcolor="0x030509@0.52",
-            )
-            current_v_label = brand_label
+        # Branding is applied as a transparent logo asset after the edit graph.
+        # Never fall back to boxed drawtext for an AutoPromote platform mark.
 
         broll_tone_colors = {
             "proof": "0x091220@0.92",
@@ -31028,6 +31289,30 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 f"atrim=0:{rendered_timeline_duration:.3f}[a_mix]"
             )
 
+        delivery_profile = resolve_viral_export_profile(
+            request.output_settings,
+            base_width,
+            base_height,
+        )
+        delivery_filters = []
+        if (
+            delivery_profile["width"] != int(base_width)
+            or delivery_profile["height"] != int(base_height)
+        ):
+            delivery_filters.append(
+                f"scale={delivery_profile['width']}:{delivery_profile['height']}:flags=lanczos"
+            )
+        if delivery_profile["fps"]:
+            delivery_filters.append(f"fps={delivery_profile['fps']}")
+        if request.output_settings is not None and not delivery_filters:
+            delivery_filters.append("null")
+        if delivery_filters:
+            delivery_label = "delivery_output"
+            filter_chain.append(
+                f"[{current_v_label}]{','.join(delivery_filters)}[{delivery_label}]"
+            )
+            current_v_label = delivery_label
+
         # Build Command
         cmd = ["ffmpeg"]
         cmd.extend(inputs)
@@ -31069,22 +31354,26 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
              else:
                  cmd.extend(["-map", "0:a?", "-c:a", "aac", "-b:a", "160k"])
 
-             cmd.extend([
-                 "-t",
-                 f"{rendered_timeline_duration:.3f}",
-                 "-c:v",
-                 "libx264",
-                 "-movflags",
-                 "+faststart",
-                 "-y",
-                 output_path,
-             ])
+             cmd.extend(["-t", f"{rendered_timeline_duration:.3f}"])
+             cmd.extend(build_viral_export_encode_args(delivery_profile))
+             cmd.extend(["-movflags", "+faststart", "-y", output_path])
         
         report_progress(75, "Rendering final video")
         logger.info(f"Running FFmpeg: {' '.join(cmd)}")
         await run_subprocess_async(cmd, check=True)
 
         if os.path.exists(output_path):
+            brand_watermark_receipt = None
+            if brand_watermark_enabled:
+                output_width, output_height = get_video_dimensions(output_path)
+                report_progress(88, "Applying the AutoPromote signature")
+                brand_watermark_receipt = await apply_viral_brand_watermark(
+                    output_path,
+                    job_id,
+                    output_width,
+                    output_height,
+                    request.output_settings,
+                )
             report_progress(90, "Verifying rendered video and audio")
             audio_expected = bool(
                 (source_has_audio and not request.mute_audio)
@@ -31179,6 +31468,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 "cover_frame": cover_frame_result,
                 "thumbnail_frame": thumbnail_frame_result,
                 "brand_watermark": brand_watermark_enabled,
+                "brand_watermark_receipt": brand_watermark_receipt,
+                "output_settings": delivery_profile,
                 "watermark_text": (
                     request.watermark_text
                     or request.watermarkText

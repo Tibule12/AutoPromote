@@ -273,8 +273,8 @@ describe("ViralClipStudio timeline sequencing", () => {
         main_frame: {
           enabled: true,
           shape: "round",
-          inset: 54,
-          border_radius: 116,
+          inset_percent: 5,
+          border_radius_percent: 10,
           background: "studio_black",
         },
         color: expect.objectContaining({ preset: "podcast_pro", contrast: 1.2 }),

@@ -304,6 +304,7 @@ export const buildViralRenderData = ({
   addDefined(payload, "watermark_regions", extraOptions.manualWatermarkRegions);
   addDefined(payload, "brand_watermark", extraOptions.brandWatermark, Boolean);
   addDefined(payload, "watermark_text", extraOptions.brandWatermarkText);
+  addDefined(payload, "output_settings", extraOptions.outputSettings);
 
   addDefined(payload, "add_hook", extraOptions.addHook, Boolean);
   addDefined(payload, "hook_text", extraOptions.hookText);
