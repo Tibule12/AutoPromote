@@ -53,6 +53,13 @@ class ViralRenderContractTests(unittest.TestCase):
         self.assertIn("overlay=24:24:shortest=1", frame_filter)
         self.assertTrue(frame_filter.endswith("[v_main_frame]"))
 
+        small_frame_filter = build_main_video_frame_filter(
+            {"main_frame": {"enabled": True, "inset": 24, "border_radius": 52}},
+            640,
+            360,
+        )
+        self.assertIn("scale=80:45,boxblur=11:2", small_frame_filter)
+
     def test_round_broll_frame_contract_reaches_the_worker(self):
         overlay = ViralOverlay(
             id="round-pip",

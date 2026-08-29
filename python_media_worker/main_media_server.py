@@ -28987,10 +28987,14 @@ def build_main_video_frame_filter(finish_plan, width, height):
     escaped_mask_path = str(mask_path).replace("\\", "\\\\").replace(":", "\\:")
     blur_width = max(2, safe_width // 8)
     blur_height = max(2, safe_height // 8)
+    # boxblur validates its radius against the smaller chroma plane. A fixed
+    # radius of 12 works for vertical delivery but fails on 640x360 previews
+    # after the backdrop is reduced to 80x45.
+    blur_radius = max(1, min(12, blur_width // 4, blur_height // 4))
 
     return (
         "[0:v]split=2[mainframe_bgsrc][mainframe_fgsrc];"
-        f"[mainframe_bgsrc]scale={blur_width}:{blur_height},boxblur=12:2,"
+        f"[mainframe_bgsrc]scale={blur_width}:{blur_height},boxblur={blur_radius}:2,"
         f"scale={safe_width}:{safe_height},eq=brightness=-0.24:saturation=0.72,"
         "format=yuv420p[mainframe_bg];"
         f"[mainframe_fgsrc]scale={inner_width}:{inner_height}:force_original_aspect_ratio=increase,"
