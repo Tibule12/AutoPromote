@@ -188,6 +188,7 @@ export function ViralStudioHeader({
 const INSPECTOR_TABS = [
   { id: "cut", label: "Cut", icon: "✂" },
   { id: "hook", label: "Hook", icon: "✦" },
+  { id: "reframe", label: "Reframe", icon: "⌗" },
   { id: "captions", label: "Captions", icon: "CC" },
   { id: "pacing", label: "Pacing", icon: "≋" },
   { id: "broll", label: "B-roll", icon: "▣" },
@@ -197,7 +198,7 @@ const INSPECTOR_TABS = [
 export function StudioInspectorTabs({ mode, activeTab, onSelect }) {
   const visibleTabs =
     normalizeViralStudioWorkspaceMode(mode) === "quick"
-      ? INSPECTOR_TABS.filter(tab => ["hook", "captions", "broll"].includes(tab.id))
+      ? INSPECTOR_TABS.filter(tab => ["hook", "reframe", "captions", "broll"].includes(tab.id))
       : INSPECTOR_TABS;
 
   return (

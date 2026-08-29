@@ -1661,6 +1661,7 @@ const CREATIVE_STUDIO_TOOLS = [
   { id: "moments", label: "Moments", icon: "✦" },
   { id: "cut", label: "Cut", icon: "✂" },
   { id: "hook", label: "Hook", icon: "⌁" },
+  { id: "reframe", label: "Reframe", icon: "⌗" },
   { id: "captions", label: "Captions", icon: "CC" },
   { id: "pacing", label: "Pacing", icon: "≋" },
   { id: "broll", label: "B-roll", icon: "▣" },
@@ -1934,7 +1935,7 @@ const ViralClipStudio = ({
   const [autoCaptions, setAutoCaptions] = useState(false);
   const [captionStyle, setCaptionStyle] = useState("bold_pop");
   const [smartCrop, setSmartCrop] = useState(false);
-  const [smartCropMode, setSmartCropMode] = useState("center"); // "center" or "speaker_track"
+  const [smartCropMode, setSmartCropMode] = useState("speaker_track");
   const [enhanceQuality, setEnhanceQuality] = useState(false);
   const [silenceRemoval, setSilenceRemoval] = useState(false);
   const [silenceThreshold, setSilenceThreshold] = useState(-35);
@@ -2492,7 +2493,7 @@ const ViralClipStudio = ({
     );
     setJoinTransition(snapshot.joinTransition || "auto");
     setSmartCrop(!!snapshot.smartCrop);
-    setSmartCropMode(snapshot.smartCropMode || "center");
+    setSmartCropMode(snapshot.smartCropMode || "speaker_track");
     setEnhanceQuality(!!snapshot.enhanceQuality);
     setSilenceRemoval(!!snapshot.silenceRemoval);
     setSilenceThreshold(Number(snapshot.silenceThreshold ?? -35));
@@ -5415,7 +5416,7 @@ const ViralClipStudio = ({
 
   const selectCreativeTool = toolId => {
     setActiveCreativeTool(toolId);
-    if (["cut", "hook", "captions", "pacing", "broll", "sound"].includes(toolId)) {
+    if (["cut", "hook", "reframe", "captions", "pacing", "broll", "sound"].includes(toolId)) {
       setStudioInspectorTab(toolId);
     }
     if (toolId === "moments") {
@@ -6564,8 +6565,8 @@ const ViralClipStudio = ({
           main_frame: {
             enabled: true,
             shape: "round",
-            inset: 24,
-            border_radius: 52,
+            inset: 54,
+            border_radius: 116,
             background: "soft_blur",
           },
           color: {
@@ -11970,6 +11971,131 @@ const ViralClipStudio = ({
                     }}
                   >
                     ✦ Apply Hook
+                  </button>
+                </div>
+              ) : null}
+
+              {studioInspectorTab === "reframe" ? (
+                <div
+                  className="clip-inspector-body reframe-inspector-body"
+                  role="tabpanel"
+                  data-testid="auto-reframe-inspector"
+                >
+                  <div className="inspector-heading-row">
+                    <div>
+                      <span className="panel-kicker">Auto Reframe</span>
+                      <h4>Keep the subject inside the vertical edit</h4>
+                    </div>
+                    <span className={`inspector-status-dot ${smartCrop ? "is-ready" : ""}`}>
+                      {smartCrop ? "Enabled" : "Off"}
+                    </span>
+                  </div>
+
+                  <label className="inspector-toggle-row">
+                    <span>
+                      <b>Enable Auto Reframe</b>
+                      <small>
+                        Detects faces across the clip and moves the 9:16 crop to follow them.
+                      </small>
+                    </span>
+                    <input
+                      type="checkbox"
+                      data-testid="auto-reframe-toggle"
+                      checked={smartCrop}
+                      onChange={event => {
+                        const enabled = event.target.checked;
+                        setSmartCrop(enabled);
+                        if (enabled && smartCropMode === "center") {
+                          setSmartCropMode("speaker_track");
+                        }
+                        setComparisonMode("after");
+                        setStudioActionMessage(
+                          enabled
+                            ? "Auto Reframe enabled. The export analyzes the full face path instead of using a fixed center crop."
+                            : "Auto Reframe disabled. The source framing is preserved."
+                        );
+                      }}
+                    />
+                  </label>
+
+                  <div className="reframe-format-card">
+                    <span>Output frame</span>
+                    <strong>9:16 Vertical</strong>
+                    <small>TikTok · Reels · Shorts · 1080 × 1920</small>
+                  </div>
+
+                  <div className="inspector-field">
+                    <span>Framing behaviour</span>
+                    <div className="inspector-choice-grid is-two">
+                      <button
+                        type="button"
+                        data-testid="reframe-follow-subject"
+                        className={smartCropMode === "speaker_track" ? "is-active" : ""}
+                        aria-pressed={smartCropMode === "speaker_track"}
+                        onClick={() => {
+                          setSmartCrop(true);
+                          setSmartCropMode("speaker_track");
+                          setComparisonMode("after");
+                          setStudioActionMessage(
+                            "Follow Subject selected. Face positions drive the crop throughout the exported clip."
+                          );
+                        }}
+                      >
+                        Follow Subject
+                      </button>
+                      <button
+                        type="button"
+                        data-testid="reframe-preserve-frame"
+                        className={smartCropMode === "center" ? "is-active" : ""}
+                        aria-pressed={smartCropMode === "center"}
+                        onClick={() => {
+                          setSmartCrop(true);
+                          setSmartCropMode("center");
+                          setComparisonMode("after");
+                          setStudioActionMessage(
+                            "Preserve Full Frame selected. The complete source stays visible over a fitted background."
+                          );
+                        }}
+                      >
+                        Preserve Full Frame
+                      </button>
+                    </div>
+                    <small>
+                      {smartCropMode === "speaker_track"
+                        ? "Best for interviews, podcasts, tutorials, and moving presenters."
+                        : "Best for groups, demonstrations, screen recordings, and composed wide shots."}
+                    </small>
+                  </div>
+
+                  <div className="reframe-safety-card">
+                    <span aria-hidden="true">⌗</span>
+                    <div>
+                      <strong>
+                        {smartCropMode === "speaker_track"
+                          ? "Face path controls the crop"
+                          : "No important edge is cropped"}
+                      </strong>
+                      <small>
+                        {smartCropMode === "speaker_track"
+                          ? "The After canvas previews the vertical treatment. Export analyzes the complete face path; if it cannot find enough faces it falls back safely instead of guessing."
+                          : "The source keeps its composition while the vertical canvas is filled behind it."}
+                      </small>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="inspector-primary-action"
+                    onClick={() => {
+                      setSmartCrop(true);
+                      setComparisonMode("after");
+                      focusComparisonPreview("reframe", true);
+                      setStudioActionMessage(
+                        "Vertical framing preview is live. Follow Subject analyzes the complete face path during export; Preserve Full Frame keeps all source context."
+                      );
+                    }}
+                  >
+                    ▶ Preview Vertical Framing
                   </button>
                 </div>
               ) : null}

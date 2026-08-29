@@ -61,6 +61,7 @@ try:
         build_edited_caption_transcript,
         build_segment_transition_filters,
         build_speed_filter_complex,
+        find_uncovered_caption_speech_ranges,
         map_timeline_time,
         normalize_speed_plan,
         remap_caption_transcript_to_speed_plan,
@@ -74,6 +75,7 @@ except ImportError:
         build_edited_caption_transcript,
         build_segment_transition_filters,
         build_speed_filter_complex,
+        find_uncovered_caption_speech_ranges,
         map_timeline_time,
         normalize_speed_plan,
         remap_caption_transcript_to_speed_plan,
@@ -27349,16 +27351,7 @@ async def speaker_track_crop(request: Dict[str, Any]):
         logger.info(f"Detecting speaker positions in {input_path}...")
         positions = await loop.run_in_executor(None, detect_speaker_positions, input_path, 0.5)
 
-        if target_aspect == "9:16" and src_w > src_h:
-            logger.info("Landscape source detected; using safe vertical fit instead of destructive speaker crop")
-            await run_subprocess_async([
-                "ffmpeg", "-i", input_path,
-                "-filter_complex", build_safe_vertical_fit_filter("[0:v]", "[vout]"),
-                "-map", "[vout]", "-map", "0:a?",
-                "-c:v", "libx264", "-preset", "ultrafast", "-crf", "24",
-                "-c:a", "copy", "-y", output_path
-            ], check=True)
-        elif positions and len(positions) >= 3:
+        if positions and len(positions) >= 3:
             keyframes, crop_w, crop_h = build_speaker_track_crop_filter(positions, src_w, src_h, target_aspect)
             sendcmd_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_sendcmd.txt")
             with open(sendcmd_path, "w") as f:
@@ -28967,22 +28960,85 @@ def build_studio_finish_filter(finish_plan):
     return ",".join(filters)
 
 
-def build_main_video_frame_filter(finish_plan, width, height):
-    """Inset and round the actual edited video over a subdued moving backdrop."""
+async def detect_video_content_crop(input_path, width, height):
+    """Detect embedded black framing before applying the delivery-frame mask."""
+    safe_width = max(2, int(width or 0))
+    safe_height = max(2, int(height or 0))
+    if safe_width <= 2 or safe_height <= 2:
+        return None
+
+    duration = min(6.0, max(1.0, get_media_duration(input_path) or 6.0))
+    result = await run_subprocess_async(
+        [
+            "ffmpeg", "-hide_banner", "-i", input_path, "-t", str(duration),
+            "-vf", "cropdetect=24:2:0", "-an", "-f", "null", "-",
+        ],
+        check=False,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    output = result.stderr or ""
+    if isinstance(output, bytes):
+        output = output.decode("utf-8", errors="replace")
+
+    counts = {}
+    for match in re.finditer(r"crop=(\d+):(\d+):(\d+):(\d+)", output):
+        candidate = tuple(int(value) for value in match.groups())
+        crop_width, crop_height, crop_x, crop_y = candidate
+        if crop_width <= 0 or crop_height <= 0:
+            continue
+        if crop_x + crop_width > safe_width or crop_y + crop_height > safe_height:
+            continue
+        if crop_width * crop_height < safe_width * safe_height * 0.78:
+            continue
+        counts[candidate] = counts.get(candidate, 0) + 1
+
+    if not counts:
+        return None
+    candidate, occurrences = max(
+        counts.items(),
+        key=lambda item: (item[1], item[0][0] * item[0][1]),
+    )
+    if occurrences < 5:
+        return None
+    crop_width, crop_height, crop_x, crop_y = candidate
+    removed_x = safe_width - crop_width
+    removed_y = safe_height - crop_height
+    if removed_x < safe_width * 0.018 and removed_y < safe_height * 0.018:
+        return None
+    return {
+        "width": crop_width,
+        "height": crop_height,
+        "x": crop_x,
+        "y": crop_y,
+        "occurrences": occurrences,
+    }
+
+
+def build_main_video_frame_filter(finish_plan, width, height, content_crop=None):
+    """Inset and round the visible edited picture over a subdued moving backdrop."""
     frame = (finish_plan or {}).get("main_frame") or (finish_plan or {}).get("mainFrame") or {}
     if not bool(frame.get("enabled")):
         return ""
 
     safe_width = max(160, int(width or 1080))
     safe_height = max(160, int(height or 1920))
-    requested_inset = frame.get("inset", 24)
-    inset = max(10, min(int(requested_inset or 24), min(safe_width, safe_height) // 10))
+    requested_inset = frame.get("inset", 54)
+    minimum_visible_inset = max(10, int(round(min(safe_width, safe_height) * 0.05)))
+    inset = max(
+        minimum_visible_inset,
+        min(int(requested_inset or 54), min(safe_width, safe_height) // 10),
+    )
     inner_width = max(2, safe_width - inset * 2)
     inner_height = max(2, safe_height - inset * 2)
     inner_width -= inner_width % 2
     inner_height -= inner_height % 2
-    requested_radius = frame.get("border_radius", frame.get("borderRadius", 52))
-    radius = max(18, min(int(requested_radius or 52), inner_width // 4, inner_height // 4))
+    requested_radius = frame.get("border_radius", frame.get("borderRadius", 116))
+    minimum_visible_radius = max(24, int(round(min(safe_width, safe_height) * 0.1)))
+    radius = max(
+        minimum_visible_radius,
+        min(int(requested_radius or 116), inner_width // 4, inner_height // 4),
+    )
     mask_path = multicam_rounded_mask_path(inner_width, inner_height, radius)
     escaped_mask_path = str(mask_path).replace("\\", "\\\\").replace(":", "\\:")
     blur_width = max(2, safe_width // 8)
@@ -28994,12 +29050,20 @@ def build_main_video_frame_filter(finish_plan, width, height):
     # chroma radius to be less than (not equal to) half the chroma dimension.
     blur_radius = max(1, min(12, min(blur_width, blur_height) // 4 - 1))
 
+    crop_filter = ""
+    if content_crop:
+        crop_width = max(2, min(int(content_crop.get("width") or safe_width), safe_width))
+        crop_height = max(2, min(int(content_crop.get("height") or safe_height), safe_height))
+        crop_x = max(0, min(int(content_crop.get("x") or 0), safe_width - crop_width))
+        crop_y = max(0, min(int(content_crop.get("y") or 0), safe_height - crop_height))
+        crop_filter = f"crop={crop_width}:{crop_height}:{crop_x}:{crop_y},"
+
     return (
         "[0:v]split=2[mainframe_bgsrc][mainframe_fgsrc];"
-        f"[mainframe_bgsrc]scale={blur_width}:{blur_height},boxblur={blur_radius}:2,"
-        f"scale={safe_width}:{safe_height},eq=brightness=-0.24:saturation=0.72,"
+        f"[mainframe_bgsrc]{crop_filter}scale={blur_width}:{blur_height},boxblur={blur_radius}:2,"
+        f"scale={safe_width}:{safe_height},eq=brightness=-0.36:saturation=0.58,"
         "format=yuv420p[mainframe_bg];"
-        f"[mainframe_fgsrc]scale={inner_width}:{inner_height}:force_original_aspect_ratio=increase,"
+        f"[mainframe_fgsrc]{crop_filter}scale={inner_width}:{inner_height}:force_original_aspect_ratio=increase,"
         f"crop={inner_width}:{inner_height},format=rgba[mainframe_fg];"
         f"movie={escaped_mask_path},format=gray,loop=loop=-1:size=1:start=0,"
         "setpts=N/30/TB[mainframe_mask];"
@@ -29372,6 +29436,32 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     "ffmpeg", "-ss", str(request.start_time), "-i", input_path,
                     "-t", str(duration), "-c:v", "libx264", "-y", trimmed_path
                 ], check=True)
+
+        if (
+            request.auto_captions
+            and source_has_audio
+            and reviewed_caption_transcript.get("segments")
+        ):
+            caption_silences = await detect_silence_intervals(
+                trimmed_path,
+                threshold="-32dB",
+                duration=0.35,
+            )
+            caption_coverage_gaps = find_uncovered_caption_speech_ranges(
+                reviewed_caption_transcript.get("segments") or [],
+                caption_silences,
+                get_media_duration(trimmed_path)
+                or max(0.0, float(request.end_time) - float(request.start_time)),
+            )
+            if caption_coverage_gaps:
+                gap_summary = ", ".join(
+                    f"{gap['start']:.1f}-{gap['end']:.1f}s"
+                    for gap in caption_coverage_gaps[:5]
+                )
+                raise RuntimeError(
+                    "Caption review is incomplete: audible speech has no captions at "
+                    f"{gap_summary}. Return to the editable transcript and caption every spoken phrase."
+                )
         
         report_progress(30, "Timeline prepared")
 
@@ -29534,17 +29624,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     loop = asyncio.get_running_loop()
                     positions = await loop.run_in_executor(None, detect_speaker_positions, trimmed_path, 0.5)
 
-                    if src_w > src_h and crop_mode != "ai_director":
-                        logger.info("Landscape source detected; using safe vertical fit instead of destructive speaker crop")
-                        await run_subprocess_async([
-                            "ffmpeg", "-i", trimmed_path,
-                            "-filter_complex", build_safe_vertical_fit_filter("[0:v]", "[vout]"),
-                            "-map", "[vout]", "-map", "0:a?",
-                            "-c:v", "libx264", "-preset", "ultrafast", "-crf", "24",
-                            "-c:a", "copy", "-y", cropped_path
-                        ], check=True)
-                        working_path = cropped_path
-                    elif positions and len(positions) >= 3:
+                    if positions and len(positions) >= 3:
                         keyframes, crop_w, crop_h = build_speaker_track_crop_filter(positions, src_w, src_h, "9:16")
                         sendcmd_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_sendcmd.txt")
                         with open(sendcmd_path, "w") as f:
@@ -30031,9 +30111,22 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         # Frame the actual edited source after visual treatment and before
         # captions/overlays. The main video therefore has rounded edges for
         # the full clip while creator text remains crisp above it.
+        main_frame_width, main_frame_height = get_video_dimensions(working_path)
+        main_frame_content_crop = await detect_video_content_crop(
+            working_path,
+            main_frame_width,
+            main_frame_height,
+        )
+        if main_frame_content_crop:
+            logger.info(
+                "Removing embedded source border before rounding main picture: %s",
+                main_frame_content_crop,
+            )
         main_frame_filter = build_main_video_frame_filter(
             request.finish_plan,
-            *get_video_dimensions(working_path),
+            main_frame_width,
+            main_frame_height,
+            content_crop=main_frame_content_crop,
         )
         if main_frame_filter:
             main_frame_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_main_frame.mp4")

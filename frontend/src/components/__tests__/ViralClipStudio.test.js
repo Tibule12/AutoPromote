@@ -170,6 +170,46 @@ describe("ViralClipStudio timeline sequencing", () => {
     ).toBeInTheDocument();
   });
 
+  test("exposes functional Auto Reframe controls in the editor inspector", async () => {
+    const onSave = jest.fn(() => Promise.resolve());
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/wide-interview.mp4"
+        clips={[
+          {
+            id: "wide-interview",
+            start: 0,
+            end: 12,
+            duration: 12,
+            url: "https://example.com/wide-interview.mp4",
+          },
+        ]}
+        onSave={onSave}
+        onCancel={jest.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("tab", { name: /Reframe/i }));
+    expect(screen.getByTestId("auto-reframe-inspector")).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId("auto-reframe-toggle"));
+    expect(screen.getByTestId("auto-reframe-toggle")).toBeChecked();
+    expect(screen.getByTestId("reframe-follow-subject")).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
+    fireEvent.click(screen.getByTestId("reframe-preserve-frame"));
+    expect(screen.getByTestId("reframe-preserve-frame")).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
+    fireEvent.click(screen.getByTestId("reframe-follow-subject"));
+    fireEvent.click(screen.getByRole("button", { name: /Render Final Clip/i }));
+    await waitFor(() => expect(onSave).toHaveBeenCalled());
+    expect(onSave.mock.calls[0][2]).toEqual(
+      expect.objectContaining({ smartCrop: true, smartCropMode: "speaker_track" })
+    );
+  });
+
   test("applies a Signature finish preset to After without touching Before", async () => {
     const onSave = jest.fn(() => Promise.resolve());
     render(
@@ -213,8 +253,8 @@ describe("ViralClipStudio timeline sequencing", () => {
         main_frame: {
           enabled: true,
           shape: "round",
-          inset: 24,
-          border_radius: 52,
+          inset: 54,
+          border_radius: 116,
           background: "soft_blur",
         },
         color: expect.objectContaining({ preset: "podcast_pro", contrast: 1.2 }),

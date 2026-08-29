@@ -351,7 +351,7 @@ test("runs the production Viral Clip Studio feature workflow with real playable 
   await expect(page.getByTestId("studio-after-video")).toHaveCSS("filter", /brightness/);
   await expect(page.getByTestId("studio-after-video")).toHaveCSS(
     "clip-path",
-    /inset\(2\.2% round 22px\)/
+    /inset\(5% round 34px\)/
   );
   await page.screenshot({
     path: path.join("test-results", "viral-clip-studio-live-signature.png"),
@@ -368,6 +368,25 @@ test("runs the production Viral Clip Studio feature workflow with real playable 
   await enableHook.click();
   await expect(enableHook).not.toBeChecked();
   await expect(page.getByTestId("creative-effect-live-layer")).toBeVisible();
+
+  await toolRail.getByRole("button", { name: "Reframe", exact: true }).click();
+  await expect(inspector.getByTestId("auto-reframe-inspector")).toBeVisible();
+  await inspector.getByTestId("auto-reframe-toggle").click();
+  await expect(inspector.getByTestId("auto-reframe-toggle")).toBeChecked();
+  await inspector.getByTestId("reframe-preserve-frame").click();
+  await expect(inspector.getByTestId("reframe-preserve-frame")).toHaveAttribute(
+    "aria-pressed",
+    "true"
+  );
+  await inspector.getByTestId("reframe-follow-subject").click();
+  await expect(inspector.getByTestId("reframe-follow-subject")).toHaveAttribute(
+    "aria-pressed",
+    "true"
+  );
+  await page.screenshot({
+    path: path.join("test-results", "viral-clip-studio-live-auto-reframe.png"),
+    fullPage: true,
+  });
 
   await toolRail.getByRole("button", { name: "Captions", exact: true }).click();
   const translateToEnglish = inspector.getByRole("checkbox", {
@@ -442,6 +461,8 @@ test("runs the production Viral Clip Studio feature workflow with real playable 
   expect(appState.renderPayload).toBeTruthy();
   const viralData = appState.renderPayload.options.viralData;
   expect(viralData.export_destination).toBe("tiktok");
+  expect(viralData.smart_crop).toBe(true);
+  expect(viralData.smart_crop_mode).toBe("speaker_track");
   expect(viralData.translate_captions_to_english).toBe(true);
   expect(viralData.caption_segments[0].text).toContain("creator-reviewed");
   expect(viralData.caption_segments[0]).toEqual(
@@ -475,8 +496,8 @@ test("runs the production Viral Clip Studio feature workflow with real playable 
       main_frame: expect.objectContaining({
         enabled: true,
         shape: "round",
-        inset: 24,
-        border_radius: 52,
+        inset: 54,
+        border_radius: 116,
       }),
       color: expect.objectContaining({ preset: "podcast_pro", contrast: 1.2 }),
       visualizer: expect.objectContaining({ enabled: true, mode: "ring" }),

@@ -301,19 +301,19 @@
 .phone-frame:not(.has-rendered-output) .smart-crop-foreground,
 .phone-frame:not(.has-rendered-output) .hook-preview-backdrop,
 .phone-frame:not(.has-rendered-output) .hook-preview-freeze {
-  clip-path: inset(2.2% round 22px);
+  clip-path: inset(5% round 34px);
 }
 
 .phone-frame:not(.has-rendered-output)::after {
   content: "";
   position: absolute;
-  inset: 2.2%;
+  inset: 5%;
   z-index: 475;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 34px;
   box-shadow:
-    0 16px 34px rgba(0, 0, 0, 0.34),
-    inset 0 0 18px rgba(255, 255, 255, 0.025);
+    0 18px 42px rgba(0, 0, 0, 0.48),
+    inset 0 0 20px rgba(255, 255, 255, 0.04);
   pointer-events: none;
 }
 
@@ -5749,6 +5749,10 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.inspector-choice-grid.is-two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .inspector-choice-grid button {
   min-height: 38px;
   padding: 6px;
@@ -5766,6 +5770,68 @@
   color: #eeeaff;
   background: rgba(112, 78, 241, 0.16);
   box-shadow: inset 0 0 0 1px rgba(128, 98, 250, 0.08);
+}
+
+.reframe-format-card,
+.reframe-safety-card {
+  display: flex;
+  border: 1px solid rgba(73, 211, 220, 0.18);
+  border-radius: 11px;
+  background: linear-gradient(135deg, rgba(20, 122, 137, 0.12), rgba(7, 17, 30, 0.72));
+}
+
+.reframe-format-card {
+  flex-direction: column;
+  gap: 3px;
+  padding: 11px 12px;
+}
+
+.reframe-format-card > span {
+  color: #73dce3;
+  font-size: 0.52rem;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.reframe-format-card > strong {
+  color: #f3fbff;
+  font-size: 0.76rem;
+}
+
+.reframe-format-card > small,
+.reframe-safety-card small {
+  color: #8395aa;
+  font-size: 0.55rem;
+  line-height: 1.45;
+}
+
+.reframe-safety-card {
+  align-items: flex-start;
+  gap: 10px;
+  padding: 11px;
+}
+
+.reframe-safety-card > span {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  place-items: center;
+  border-radius: 9px;
+  color: #a7fbff;
+  background: rgba(52, 207, 219, 0.13);
+}
+
+.reframe-safety-card > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.reframe-safety-card strong {
+  color: #e8f9fb;
+  font-size: 0.62rem;
 }
 
 .inspector-range > span {

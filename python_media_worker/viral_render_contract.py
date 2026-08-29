@@ -354,6 +354,79 @@ def build_edited_caption_transcript(caption_segments: Iterable[Any]) -> Dict[str
     return {"segments": normalized}
 
 
+def find_uncovered_caption_speech_ranges(
+    caption_segments: Iterable[Mapping[str, Any]],
+    silence_intervals: Iterable[Iterable[float]],
+    duration: float,
+    *,
+    caption_padding: float = 0.18,
+    minimum_uncovered_duration: float = 1.1,
+) -> List[Dict[str, float]]:
+    """Return audible timeline ranges that have no caption coverage.
+
+    ``silence_intervals`` comes from FFmpeg's silencedetect filter. Treating
+    detected silence as valid uncovered time keeps the gate from demanding
+    subtitles during real pauses while still catching missing spoken phrases.
+    """
+    safe_duration = max(0.0, _finite_number(duration, 0.0) or 0.0)
+    if safe_duration <= 0.0:
+        return []
+
+    covered = []
+    for segment in caption_segments or []:
+        start = max(
+            0.0,
+            (_finite_number(_read(segment, "start", "start_time", "startTime"), 0.0) or 0.0)
+            - caption_padding,
+        )
+        end = min(
+            safe_duration,
+            (_finite_number(_read(segment, "end", "end_time", "endTime"), start) or start)
+            + caption_padding,
+        )
+        if end > start:
+            covered.append((start, end))
+
+    for interval in silence_intervals or []:
+        values = list(interval or [])
+        if len(values) < 2:
+            continue
+        start = max(0.0, _finite_number(values[0], 0.0) or 0.0)
+        end = min(safe_duration, _finite_number(values[1], start) or start)
+        if end > start:
+            covered.append((start, end))
+
+    covered.sort(key=lambda item: (item[0], item[1]))
+    merged = []
+    for start, end in covered:
+        if merged and start <= merged[-1][1] + 0.04:
+            merged[-1] = (merged[-1][0], max(merged[-1][1], end))
+        else:
+            merged.append((start, end))
+
+    gaps = []
+    cursor = 0.0
+    for start, end in merged:
+        if start - cursor >= minimum_uncovered_duration:
+            gaps.append(
+                {
+                    "start": round(cursor, 3),
+                    "end": round(start, 3),
+                    "duration": round(start - cursor, 3),
+                }
+            )
+        cursor = max(cursor, end)
+    if safe_duration - cursor >= minimum_uncovered_duration:
+        gaps.append(
+            {
+                "start": round(cursor, 3),
+                "end": round(safe_duration, 3),
+                "duration": round(safe_duration - cursor, 3),
+            }
+        )
+    return gaps
+
+
 def remap_caption_transcript_to_speed_plan(
     transcript: Mapping[str, Any], speed_plan: Iterable[Mapping[str, float]]
 ) -> Dict[str, List[Dict[str, Any]]]:

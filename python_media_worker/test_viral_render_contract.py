@@ -12,6 +12,7 @@ from python_media_worker.viral_render_contract import (
     build_edited_caption_transcript,
     build_segment_transition_filters,
     build_speed_filter_complex,
+    find_uncovered_caption_speech_ranges,
     map_timeline_time,
     normalize_speed_plan,
     remap_caption_transcript_to_speed_plan,
@@ -40,17 +41,19 @@ class ViralRenderContractTests(unittest.TestCase):
                 "main_frame": {
                     "enabled": True,
                     "shape": "round",
-                    "inset": 24,
-                    "border_radius": 52,
+                    "inset": 54,
+                    "border_radius": 116,
                 },
             },
             1080,
             1920,
+            content_crop={"width": 1080, "height": 1748, "x": 0, "y": 86},
         )
 
-        self.assertIn("rounded_1032x1872_r52.png", frame_filter)
+        self.assertIn("rounded_972x1812_r116.png", frame_filter)
+        self.assertIn("crop=1080:1748:0:86", frame_filter)
         self.assertIn("[mainframe_fg][mainframe_mask]alphamerge", frame_filter)
-        self.assertIn("overlay=24:24:shortest=1", frame_filter)
+        self.assertIn("overlay=54:54:shortest=1", frame_filter)
         self.assertTrue(frame_filter.endswith("[v_main_frame]"))
 
         small_frame_filter = build_main_video_frame_filter(
@@ -59,6 +62,20 @@ class ViralRenderContractTests(unittest.TestCase):
             360,
         )
         self.assertIn("scale=80:45,boxblur=10:2", small_frame_filter)
+
+    def test_caption_coverage_gate_finds_spoken_ranges_missing_from_review(self):
+        gaps = find_uncovered_caption_speech_ranges(
+            [
+                {"start": 0.1, "end": 4.6, "text": "first line"},
+                {"start": 8.0, "end": 10.0, "text": "later line"},
+            ],
+            [(4.8, 5.5), (7.4, 7.9)],
+            10.0,
+        )
+
+        self.assertEqual(len(gaps), 1)
+        self.assertAlmostEqual(gaps[0]["start"], 5.5, places=2)
+        self.assertAlmostEqual(gaps[0]["end"], 7.4, places=2)
 
     def test_round_broll_frame_contract_reaches_the_worker(self):
         overlay = ViralOverlay(
