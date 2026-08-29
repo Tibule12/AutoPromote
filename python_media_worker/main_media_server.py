@@ -28990,7 +28990,9 @@ def build_main_video_frame_filter(finish_plan, width, height):
     # boxblur validates its radius against the smaller chroma plane. A fixed
     # radius of 12 works for vertical delivery but fails on 640x360 previews
     # after the backdrop is reduced to 80x45.
-    blur_radius = max(1, min(12, blur_width // 4, blur_height // 4))
+    # Use a strict bound because older production FFmpeg builds require the
+    # chroma radius to be less than (not equal to) half the chroma dimension.
+    blur_radius = max(1, min(12, min(blur_width, blur_height) // 4 - 1))
 
     return (
         "[0:v]split=2[mainframe_bgsrc][mainframe_fgsrc];"

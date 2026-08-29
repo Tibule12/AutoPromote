@@ -58,7 +58,7 @@ class ViralRenderContractTests(unittest.TestCase):
             640,
             360,
         )
-        self.assertIn("scale=80:45,boxblur=11:2", small_frame_filter)
+        self.assertIn("scale=80:45,boxblur=10:2", small_frame_filter)
 
     def test_round_broll_frame_contract_reaches_the_worker(self):
         overlay = ViralOverlay(
