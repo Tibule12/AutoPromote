@@ -7184,6 +7184,63 @@ def smooth_positions(positions, window=5, cut_threshold=0.16):
     return smoothed
 
 
+REFRAME_OUTPUT_DIMENSIONS = {
+    "9:16": (1080, 1920),
+    "4:5": (1080, 1350),
+    "1:1": (1080, 1080),
+    "16:9": (1920, 1080),
+}
+
+
+def normalize_reframe_aspect(value):
+    normalized = str(value or "9:16").strip()
+    return normalized if normalized in REFRAME_OUTPUT_DIMENSIONS else "9:16"
+
+
+def get_reframe_output_dimensions(value):
+    return REFRAME_OUTPUT_DIMENSIONS[normalize_reframe_aspect(value)]
+
+
+def apply_manual_reframe_keyframes(positions, manual_keyframes):
+    """Blend editor corrections into detector samples at render time."""
+    normalized = []
+    for item in manual_keyframes or []:
+        try:
+            normalized.append(
+                (
+                    max(0.0, float(item.get("time", 0.0))),
+                    clamp_float(float(item.get("x", 50.0)) / 100.0, 0.05, 0.95),
+                    clamp_float(float(item.get("y", 50.0)) / 100.0, 0.08, 0.92),
+                )
+            )
+        except (AttributeError, TypeError, ValueError):
+            continue
+    normalized.sort(key=lambda item: item[0])
+    if not normalized:
+        return positions
+
+    def corrected_position(timestamp):
+        if timestamp <= normalized[0][0]:
+            return normalized[0][1], normalized[0][2]
+        if timestamp >= normalized[-1][0]:
+            return normalized[-1][1], normalized[-1][2]
+        for left, right in zip(normalized, normalized[1:]):
+            if left[0] <= timestamp <= right[0]:
+                progress = (timestamp - left[0]) / max(0.001, right[0] - left[0])
+                return (
+                    left[1] + ((right[1] - left[1]) * progress),
+                    left[2] + ((right[2] - left[2]) * progress),
+                )
+        return normalized[-1][1], normalized[-1][2]
+
+    corrected = []
+    for position in positions or []:
+        timestamp = float(position[0])
+        x_value, y_value = corrected_position(timestamp)
+        corrected.append((timestamp, x_value, y_value))
+    return corrected
+
+
 def build_speaker_track_crop_filter(positions, src_width, src_height, target_aspect="9:16"):
     """
     Build FFmpeg sendcmd filter for dynamic cropping that follows the speaker.
@@ -7192,7 +7249,7 @@ def build_speaker_track_crop_filter(positions, src_width, src_height, target_asp
         # Fallback to center crop
         return "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920"
 
-    aspect_map = {"9:16": (9, 16), "1:1": (1, 1), "16:9": (16, 9)}
+    aspect_map = {"9:16": (9, 16), "4:5": (4, 5), "1:1": (1, 1), "16:9": (16, 9)}
     aspect_w, aspect_h = aspect_map.get(target_aspect, (9, 16))
 
     # Calculate crop dimensions
@@ -7216,9 +7273,10 @@ def build_speaker_track_crop_filter(positions, src_width, src_height, target_asp
     smoothed = smooth_positions(positions, window=7)
     keyframes = []
     for t, cx, cy in smoothed:
-        # Center crop on face position
+        # Keep the face near the upper third for natural headroom instead of
+        # pinning it to the geometric center of a tall delivery frame.
         crop_x = int(cx * src_width - crop_w / 2)
-        crop_y = int(cy * src_height - crop_h / 2)
+        crop_y = int(cy * src_height - crop_h * 0.36)
         # Clamp to bounds
         crop_x = max(0, min(crop_x, src_width - crop_w))
         crop_y = max(0, min(crop_y, src_height - crop_h))
@@ -27335,7 +27393,8 @@ async def speaker_track_crop(request: Dict[str, Any]):
     if not video_url:
         raise HTTPException(status_code=400, detail="video_url is required")
 
-    target_aspect = str(request.get("target_aspect_ratio", "9:16")).strip()
+    target_aspect = normalize_reframe_aspect(request.get("target_aspect_ratio", "9:16"))
+    target_width, target_height = get_reframe_output_dimensions(target_aspect)
     job_id = str(uuid.uuid4())
     SHARED_TMP_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../tmp"))
     os.makedirs(SHARED_TMP_DIR, exist_ok=True)
@@ -27356,7 +27415,10 @@ async def speaker_track_crop(request: Dict[str, Any]):
             sendcmd_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_sendcmd.txt")
             with open(sendcmd_path, "w") as f:
                 f.write("\n".join(keyframes))
-            vf = f"sendcmd=f='{sendcmd_path}',crop={crop_w}:{crop_h}:0:0,scale=1080:1920"
+            vf = (
+                f"sendcmd=f='{sendcmd_path}',crop={crop_w}:{crop_h}:0:0,"
+                f"scale={target_width}:{target_height}:flags=lanczos,setsar=1"
+            )
             await run_subprocess_async([
                 "ffmpeg", "-i", input_path, "-vf", vf,
                 "-c:v", GPU_VIDEO_ENCODER, "-preset", GPU_PRESET, "-c:a", "copy", "-y", output_path
@@ -27365,7 +27427,9 @@ async def speaker_track_crop(request: Dict[str, Any]):
             logger.info("No faces detected, using safe vertical fit fallback")
             await run_subprocess_async([
                 "ffmpeg", "-i", input_path,
-                "-filter_complex", build_safe_vertical_fit_filter("[0:v]", "[vout]"),
+                "-filter_complex", build_safe_vertical_fit_filter(
+                    "[0:v]", "[vout]", target_width, target_height
+                ),
                 "-map", "[vout]", "-map", "0:a?",
                 "-c:v", "libx264", "-preset", "ultrafast", "-crf", "24",
                 "-c:a", "copy", "-y", output_path
@@ -29016,7 +29080,7 @@ async def detect_video_content_crop(input_path, width, height):
 
 
 def build_main_video_frame_filter(finish_plan, width, height, content_crop=None):
-    """Inset and round the visible edited picture over a subdued moving backdrop."""
+    """Inset and round the edited picture over the selected studio canvas."""
     frame = (finish_plan or {}).get("main_frame") or (finish_plan or {}).get("mainFrame") or {}
     if not bool(frame.get("enabled")):
         return ""
@@ -29041,6 +29105,7 @@ def build_main_video_frame_filter(finish_plan, width, height, content_crop=None)
     )
     mask_path = multicam_rounded_mask_path(inner_width, inner_height, radius)
     escaped_mask_path = str(mask_path).replace("\\", "\\\\").replace(":", "\\:")
+    background_mode = str(frame.get("background") or "studio_black").strip().lower()
     blur_width = max(2, safe_width // 8)
     blur_height = max(2, safe_height // 8)
     # boxblur validates its radius against the smaller chroma plane. A fixed
@@ -29058,12 +29123,24 @@ def build_main_video_frame_filter(finish_plan, width, height, content_crop=None)
         crop_y = max(0, min(int(content_crop.get("y") or 0), safe_height - crop_height))
         crop_filter = f"crop={crop_width}:{crop_height}:{crop_x}:{crop_y},"
 
+    if background_mode in {"soft_blur", "blur", "mirrored_blur"}:
+        source_prefix = "[0:v]split=2[mainframe_bgsrc][mainframe_fgsrc];"
+        background_filter = (
+            f"[mainframe_bgsrc]{crop_filter}scale={blur_width}:{blur_height},"
+            f"boxblur={blur_radius}:2,scale={safe_width}:{safe_height},"
+            "eq=brightness=-0.36:saturation=0.58,format=yuv420p[mainframe_bg];"
+        )
+    else:
+        source_prefix = "[0:v]split=2[mainframe_bgsrc][mainframe_fgsrc];"
+        background_filter = (
+            "[mainframe_bgsrc]drawbox=x=0:y=0:w=iw:h=ih:"
+            "color=0x030509:t=fill,format=yuv420p[mainframe_bg];"
+        )
+
     return (
-        "[0:v]split=2[mainframe_bgsrc][mainframe_fgsrc];"
-        f"[mainframe_bgsrc]{crop_filter}scale={blur_width}:{blur_height},boxblur={blur_radius}:2,"
-        f"scale={safe_width}:{safe_height},eq=brightness=-0.36:saturation=0.58,"
-        "format=yuv420p[mainframe_bg];"
-        f"[mainframe_fgsrc]{crop_filter}scale={inner_width}:{inner_height}:force_original_aspect_ratio=increase,"
+        source_prefix
+        + background_filter
+        + f"[mainframe_fgsrc]{crop_filter}scale={inner_width}:{inner_height}:force_original_aspect_ratio=increase,"
         f"crop={inner_width}:{inner_height},format=rgba[mainframe_fg];"
         f"movie={escaped_mask_path},format=gray,loop=loop=-1:size=1:start=0,"
         "setpts=N/30/TB[mainframe_mask];"
@@ -29277,6 +29354,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
     cleanup_path = None
     creative_adjusted_path = None
     visualizer_path = None
+    reframe_source_cleanup_path = None
     creative_adjusted_paths = []
     creative_environment_paths = []
     creative_receipt = {
@@ -29332,6 +29410,11 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         if normalized_segments:
             segment_paths = []
             concat_list_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_concat.txt")
+            timeline_canvas_width, timeline_canvas_height = get_video_dimensions(input_path)
+            timeline_canvas_width = max(2, int(timeline_canvas_width or 1920))
+            timeline_canvas_height = max(2, int(timeline_canvas_height or 1080))
+            timeline_canvas_width -= timeline_canvas_width % 2
+            timeline_canvas_height -= timeline_canvas_height % 2
             for index, segment in enumerate(normalized_segments):
                 segment_source_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_segment_src_{index}.mp4")
                 segment_output_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_segment_{index}.mp4")
@@ -29347,8 +29430,9 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     )
 
                 normalize_vf = (
-                    "scale=1080:1920:force_original_aspect_ratio=decrease,"
-                    "pad=1080:1920:(ow-iw)/2:(oh-ih)/2"
+                    f"scale={timeline_canvas_width}:{timeline_canvas_height}:"
+                    "force_original_aspect_ratio=decrease,"
+                    f"pad={timeline_canvas_width}:{timeline_canvas_height}:(ow-iw)/2:(oh-ih)/2"
                 )
                 transition_filters = build_segment_transition_filters(
                     segment_duration,
@@ -29465,24 +29549,66 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         
         report_progress(30, "Timeline prepared")
 
+        finish_reframe_plan = (request.finish_plan or {}).get("reframe") or {}
+        requested_reframe_aspect = normalize_reframe_aspect(
+            finish_reframe_plan.get("aspect") or "9:16"
+        )
+        reframe_target_width, reframe_target_height = get_reframe_output_dimensions(
+            requested_reframe_aspect
+        )
+        manual_reframe_keyframes = finish_reframe_plan.get("keyframes") or []
+
+        # Analyze the real picture, not letterbox/pillarbox pixels embedded in
+        # the uploaded file. This must happen before face tracking.
+        reframe_source_path = trimmed_path
+        if request.smart_crop:
+            source_frame_width, source_frame_height = get_video_dimensions(trimmed_path)
+            source_content_crop = await detect_video_content_crop(
+                trimmed_path,
+                source_frame_width,
+                source_frame_height,
+            )
+            if source_content_crop:
+                reframe_source_cleanup_path = os.path.join(
+                    SHARED_TMP_DIR, f"{job_id}_reframe_source.mp4"
+                )
+                source_crop_filter = (
+                    f"crop={source_content_crop['width']}:{source_content_crop['height']}:"
+                    f"{source_content_crop['x']}:{source_content_crop['y']},setsar=1"
+                )
+                await run_subprocess_async(
+                    [
+                        "ffmpeg", "-i", trimmed_path,
+                        "-vf", source_crop_filter,
+                        "-map", "0:v:0", "-map", "0:a?",
+                        "-c:v", "libx264", "-preset", "veryfast", "-crf", "18",
+                        "-pix_fmt", "yuv420p", "-c:a", "copy",
+                        "-movflags", "+faststart", "-y", reframe_source_cleanup_path,
+                    ],
+                    check=True,
+                    job_context=job_id,
+                )
+                reframe_source_path = reframe_source_cleanup_path
+                logger.info("Removed embedded source framing before subject analysis: %s", source_content_crop)
+
         # 2.45. Visual Enhance — Smart Promo dynamic reframing pipeline
-        working_path = trimmed_path
+        working_path = reframe_source_path
         visual_enhance_applied = False
         if request.visual_enhance:
             logger.info("Applying Smart Promo visual enhancement (dynamic reframing + motion tracking)")
             dyn_cropped_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_dyn_crop.mp4")
             try:
-                src_w, src_h = get_video_dimensions(trimmed_path)
+                src_w, src_h = get_video_dimensions(reframe_source_path)
                 clip_duration = request.end_time - request.start_time
                 style_hint = str(request.caption_style or "clean").strip().lower()
-                visual_source_path = trimmed_path
+                visual_source_path = reframe_source_path
 
                 try:
                     stabilization_transform_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_smart_promo_stabilize.trf")
                     stabilized_input_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_smart_promo_stabilized.mp4")
                     await run_subprocess_async(
                         [
-                            "ffmpeg", "-y", "-i", trimmed_path,
+                            "ffmpeg", "-y", "-i", reframe_source_path,
                             "-vf",
                             (
                                 "vidstabdetect=shakiness=8:accuracy=15:stepsize=6:"
@@ -29496,7 +29622,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     )
                     await run_subprocess_async(
                         [
-                            "ffmpeg", "-y", "-i", trimmed_path,
+                            "ffmpeg", "-y", "-i", reframe_source_path,
                             "-vf",
                             (
                                 f"vidstabtransform=input={stabilization_transform_path}:"
@@ -29530,15 +29656,16 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 # Convert subject positions to the format clean_visual_story_plan expects
                 subject_samples = [
                     {
-                        "time": float(p[0]),
-                        "x": float(p[1]),
-                        "y": float(p[2]),
-                        "faceCount": int(p[3]) if len(p) > 3 else 1,
-                        "sceneType": "lead" if len(p) <= 3 or int(p[3] if len(p) > 3 else 1) <= 2 else "group",
-                        "safeZoom": max(0.75, 1.0 - (float(p[3]) * 0.06 if len(p) > 3 else 0.06)),
+                        "time": float(p.get("time", 0.0)),
+                        "x": float(p.get("x", 0.5)),
+                        "y": float(p.get("y", 0.45)),
+                        "faceCount": int(p.get("faceCount", 1)),
+                        "sceneType": "lead" if int(p.get("faceCount", 1)) <= 2 else "group",
+                        "safeZoom": max(0.75, 1.0 - (float(p.get("faceCount", 1)) * 0.06)),
                         "leadSizeRatio": 0.06,
                     }
                     for p in subject_raw
+                    if isinstance(p, dict)
                 ] if subject_raw else []
 
                 motion_scores = []
@@ -29562,8 +29689,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     virtual_segments,
                     src_w,
                     src_h,
-                    target_width=1080,
-                    target_height=1920,
+                    target_width=reframe_target_width,
+                    target_height=reframe_target_height,
                 )
 
                 if virtual_filter and virtual_segments and len(virtual_segments) >= 2:
@@ -29575,7 +29702,9 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     with open(filter_script_path, "w") as f:
                         f.write(virtual_filter)
 
-                    encode_args = build_smart_promo_video_encode_args(1080, 1920)
+                    encode_args = build_smart_promo_video_encode_args(
+                        reframe_target_width, reframe_target_height
+                    )
                     await run_subprocess_async(
                         [
                             "ffmpeg", "-i", visual_source_path,
@@ -29594,8 +29723,10 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     logger.info("Not enough virtual-phone segments for visual enhancement; falling back to safe vertical fit")
                     await run_subprocess_async(
                         [
-                            "ffmpeg", "-i", trimmed_path,
-                            "-filter_complex", build_safe_vertical_fit_filter("[0:v]", "[vout]"),
+                            "ffmpeg", "-i", reframe_source_path,
+                            "-filter_complex", build_safe_vertical_fit_filter(
+                                "[0:v]", "[vout]", reframe_target_width, reframe_target_height
+                            ),
                             "-map", "[vout]", "-map", "0:a?",
                             "-c:v", "libx264", "-preset", "ultrafast", "-crf", "24",
                             "-c:a", "copy", "-y", dyn_cropped_path,
@@ -29608,8 +29739,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 logger.warning(f"Visual enhancement failed: {viz_err}. Falling back to original aspect.")
                 # working_path stays as trimmed_path
 
-        # 2.5. Smart Crop (Vertical 9:16). Short-form destinations always
-        # receive a platform-safe vertical canvas even when the creator leaves
+        # 2.5. Smart Crop. Short-form destinations always
+        # receive a platform-safe canvas even when the creator leaves
         # Smart Crop off; in that case the conservative center/safe-fit path is used.
         vertical_destination = str(request.export_destination or "").strip().lower() in {
             "tiktok", "reels", "shorts", "instagram_reels", "youtube_shorts"
@@ -29620,22 +29751,29 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             try:
                 if crop_mode in {"speaker_track", "ai_director"}:
                     logger.info("Applying Speaker-Tracking Smart Crop...")
-                    src_w, src_h = get_video_dimensions(trimmed_path)
+                    src_w, src_h = get_video_dimensions(reframe_source_path)
                     loop = asyncio.get_running_loop()
-                    positions = await loop.run_in_executor(None, detect_speaker_positions, trimmed_path, 0.5)
+                    positions = await loop.run_in_executor(
+                        None, detect_speaker_positions, reframe_source_path, 0.35
+                    )
 
                     if positions and len(positions) >= 3:
-                        keyframes, crop_w, crop_h = build_speaker_track_crop_filter(positions, src_w, src_h, "9:16")
+                        positions = apply_manual_reframe_keyframes(
+                            positions, manual_reframe_keyframes
+                        )
+                        keyframes, crop_w, crop_h = build_speaker_track_crop_filter(
+                            positions, src_w, src_h, requested_reframe_aspect
+                        )
                         sendcmd_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_sendcmd.txt")
                         with open(sendcmd_path, "w") as f:
                             f.write("\n".join(keyframes))
                         vf_track = (
                             f"sendcmd=f='{sendcmd_path}',"
                             f"crop={crop_w}:{crop_h}:0:0,"
-                            f"scale=1080:1920"
+                            f"scale={reframe_target_width}:{reframe_target_height}:flags=lanczos,setsar=1"
                         )
                         await run_subprocess_async([
-                            "ffmpeg", "-i", trimmed_path,
+                            "ffmpeg", "-i", reframe_source_path,
                             "-vf", vf_track,
                             "-c:v", GPU_VIDEO_ENCODER, "-preset", GPU_PRESET, "-c:a", "copy", "-y", cropped_path
                         ], check=True)
@@ -29643,18 +29781,22 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     else:
                         logger.info("Speaker tracking found no faces, falling back to safe vertical fit")
                         await run_subprocess_async([
-                            "ffmpeg", "-i", trimmed_path,
-                            "-filter_complex", build_safe_vertical_fit_filter("[0:v]", "[vout]"),
+                            "ffmpeg", "-i", reframe_source_path,
+                            "-filter_complex", build_safe_vertical_fit_filter(
+                                "[0:v]", "[vout]", reframe_target_width, reframe_target_height
+                            ),
                             "-map", "[vout]", "-map", "0:a?",
                             "-c:v", "libx264", "-preset", "ultrafast", "-crf", "24",
                             "-c:a", "copy", "-y", cropped_path
                         ], check=True)
                         working_path = cropped_path
                 else:
-                    logger.info("Applying Smart Crop safe vertical fit (9:16)...")
+                    logger.info("Applying Smart Crop safe fit (%s)...", requested_reframe_aspect)
                     await run_subprocess_async([
-                        "ffmpeg", "-i", trimmed_path,
-                        "-filter_complex", build_safe_vertical_fit_filter("[0:v]", "[vout]"),
+                        "ffmpeg", "-i", reframe_source_path,
+                        "-filter_complex", build_safe_vertical_fit_filter(
+                            "[0:v]", "[vout]", reframe_target_width, reframe_target_height
+                        ),
                         "-map", "[vout]", "-map", "0:a?",
                         "-c:v", "libx264", "-preset", "ultrafast", "-crf", "24",
                         "-c:a", "copy", "-y", cropped_path
@@ -30543,18 +30685,18 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 request.watermark_text
                 or request.watermarkText
                 or os.getenv("VIRAL_BRAND_WATERMARK_TEXT")
-                or "AUTOPROMOTE"
+                or "AutoPromote · Viral Clip Studio"
             )
             append_drawtext(
                 current_v_label,
                 brand_label,
                 brand_text,
-                x_expr="w-tw-44",
-                y_expr="44",
-                fontsize=str(max(32, int(base_height / 34))),
-                color="white",
+                x_expr="if(lt(mod(t\\,16)\\,8)\\,52\\,w-tw-52)",
+                y_expr="if(lt(mod(t\\,8)\\,4)\\,52\\,h-th-84)",
+                fontsize=str(max(24, int(base_height / 58))),
+                color="white@0.88",
                 box=True,
-                boxcolor="0xff2a26@0.92",
+                boxcolor="0x030509@0.52",
             )
             current_v_label = brand_label
 
@@ -31041,7 +31183,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     request.watermark_text
                     or request.watermarkText
                     or os.getenv("VIRAL_BRAND_WATERMARK_TEXT")
-                    or "AUTOPROMOTE"
+                    or "AutoPromote · Viral Clip Studio"
                 ) if brand_watermark_enabled else None,
                 "audio_proof": audio_proof,
                 "media_validation": media_validation,
@@ -31078,6 +31220,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             os.remove(downloaded_background_audio_path)
         if visualizer_path and os.path.exists(visualizer_path):
             os.remove(visualizer_path)
+        if reframe_source_cleanup_path and os.path.exists(reframe_source_cleanup_path):
+            os.remove(reframe_source_cleanup_path)
         if downloaded_music_path and os.path.exists(downloaded_music_path):
             os.remove(downloaded_music_path)
         for sound_effect_path in sound_effect_paths:

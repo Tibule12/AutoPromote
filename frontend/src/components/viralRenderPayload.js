@@ -302,6 +302,8 @@ export const buildViralRenderData = ({
   addDefined(payload, "remove_watermark", extraOptions.removeWatermark, Boolean);
   addDefined(payload, "watermark_mode", extraOptions.watermarkMode);
   addDefined(payload, "watermark_regions", extraOptions.manualWatermarkRegions);
+  addDefined(payload, "brand_watermark", extraOptions.brandWatermark, Boolean);
+  addDefined(payload, "watermark_text", extraOptions.brandWatermarkText);
 
   addDefined(payload, "add_hook", extraOptions.addHook, Boolean);
   addDefined(payload, "hook_text", extraOptions.hookText);

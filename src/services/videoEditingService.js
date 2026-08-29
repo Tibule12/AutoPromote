@@ -1070,8 +1070,14 @@ class VideoEditingService {
           brand_watermark:
             viralData.brand_watermark !== false && viralData.brandWatermark !== false,
           brandWatermark: viralData.brand_watermark !== false && viralData.brandWatermark !== false,
-          watermark_text: viralData.watermark_text || viralData.watermarkText || "AUTOPROMOTE",
-          watermarkText: viralData.watermark_text || viralData.watermarkText || "AUTOPROMOTE",
+          watermark_text:
+            viralData.watermark_text ||
+            viralData.watermarkText ||
+            "AutoPromote · Viral Clip Studio",
+          watermarkText:
+            viralData.watermark_text ||
+            viralData.watermarkText ||
+            "AutoPromote · Viral Clip Studio",
           overlays: (viralData.overlays || []).map(o => ({
             ...o,
             start_time:

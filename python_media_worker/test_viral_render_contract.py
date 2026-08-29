@@ -24,8 +24,10 @@ from fastapi import HTTPException
 from python_media_worker.main_media_server import (
     RenderViralRequest,
     ViralOverlay,
+    apply_manual_reframe_keyframes,
     build_main_video_frame_filter,
     build_speaker_track_crop_filter,
+    get_reframe_output_dimensions,
     multicam_rounded_card_filter,
     multicam_rounded_mask_path,
     render_viral_clip_impl,
@@ -34,7 +36,7 @@ from python_media_worker.main_media_server import (
 
 
 class ViralRenderContractTests(unittest.TestCase):
-    def test_main_video_frame_rounds_the_actual_source_over_a_moving_backdrop(self):
+    def test_main_video_frame_rounds_the_actual_source_over_a_dark_studio_canvas(self):
         frame_filter = build_main_video_frame_filter(
             {
                 "enabled": True,
@@ -52,12 +54,21 @@ class ViralRenderContractTests(unittest.TestCase):
 
         self.assertIn("rounded_972x1812_r116.png", frame_filter)
         self.assertIn("crop=1080:1748:0:86", frame_filter)
+        self.assertIn("color=0x030509:t=fill", frame_filter)
+        self.assertNotIn("boxblur", frame_filter)
         self.assertIn("[mainframe_fg][mainframe_mask]alphamerge", frame_filter)
         self.assertIn("overlay=54:54:shortest=1", frame_filter)
         self.assertTrue(frame_filter.endswith("[v_main_frame]"))
 
         small_frame_filter = build_main_video_frame_filter(
-            {"main_frame": {"enabled": True, "inset": 24, "border_radius": 52}},
+            {
+                "main_frame": {
+                    "enabled": True,
+                    "inset": 24,
+                    "border_radius": 52,
+                    "background": "soft_blur",
+                }
+            },
             640,
             360,
         )
@@ -140,6 +151,25 @@ class ViralRenderContractTests(unittest.TestCase):
         self.assertEqual(crop_width % 2, 0)
         self.assertEqual(crop_height % 2, 0)
         self.assertGreaterEqual(len(commands), 3)
+
+    def test_reframe_supports_editor_delivery_aspects(self):
+        self.assertEqual(get_reframe_output_dimensions("9:16"), (1080, 1920))
+        self.assertEqual(get_reframe_output_dimensions("4:5"), (1080, 1350))
+        self.assertEqual(get_reframe_output_dimensions("1:1"), (1080, 1080))
+        self.assertEqual(get_reframe_output_dimensions("16:9"), (1920, 1080))
+        self.assertEqual(get_reframe_output_dimensions("bad-value"), (1080, 1920))
+
+    def test_manual_reframe_corrections_interpolate_at_render_samples(self):
+        corrected = apply_manual_reframe_keyframes(
+            [(0.0, 0.2, 0.3), (1.0, 0.3, 0.4), (2.0, 0.4, 0.5)],
+            [
+                {"time": 0, "x": 20, "y": 30},
+                {"time": 2, "x": 80, "y": 50},
+            ],
+        )
+
+        self.assertAlmostEqual(corrected[1][1], 0.5)
+        self.assertAlmostEqual(corrected[1][2], 0.4)
 
     def test_accepts_complete_studio_finish_audio_and_destination_contract(self):
         request = RenderViralRequest(

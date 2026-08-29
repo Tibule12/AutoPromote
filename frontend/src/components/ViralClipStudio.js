@@ -154,6 +154,32 @@ const CAPTION_ICON_OPTIONS = [
   { value: "none", label: "No icon" },
 ];
 
+const REFRAME_ASPECT_OPTIONS = [
+  { value: "9:16", label: "9:16", helper: "TikTok · Reels · Shorts" },
+  { value: "4:5", label: "4:5", helper: "Instagram feed" },
+  { value: "1:1", label: "1:1", helper: "Square social" },
+  { value: "16:9", label: "16:9", helper: "YouTube · landscape" },
+];
+
+const interpolateReframeKeyframes = (keyframes, time) => {
+  const ordered = [...(keyframes || [])]
+    .filter(keyframe => Number.isFinite(Number(keyframe.time)))
+    .sort((left, right) => Number(left.time) - Number(right.time));
+  if (!ordered.length) return { x: 50, y: 50 };
+  const currentTime = Math.max(0, Number(time || 0));
+  if (currentTime <= Number(ordered[0].time)) return ordered[0];
+  if (currentTime >= Number(ordered[ordered.length - 1].time)) return ordered[ordered.length - 1];
+  const rightIndex = ordered.findIndex(keyframe => Number(keyframe.time) >= currentTime);
+  const right = ordered[rightIndex];
+  const left = ordered[Math.max(0, rightIndex - 1)];
+  const span = Math.max(0.001, Number(right.time) - Number(left.time));
+  const progress = clampNumber((currentTime - Number(left.time)) / span, 0, 1, 0);
+  return {
+    x: Number(left.x) + (Number(right.x) - Number(left.x)) * progress,
+    y: Number(left.y) + (Number(right.y) - Number(left.y)) * progress,
+  };
+};
+
 const normalizeCaptionLanguage = value => {
   const normalized = String(value || "")
     .trim()
@@ -1936,6 +1962,9 @@ const ViralClipStudio = ({
   const [captionStyle, setCaptionStyle] = useState("bold_pop");
   const [smartCrop, setSmartCrop] = useState(false);
   const [smartCropMode, setSmartCropMode] = useState("speaker_track");
+  const [reframeAspect, setReframeAspect] = useState("9:16");
+  const [reframeKeyframes, setReframeKeyframes] = useState([]);
+  const [activeReframeKeyframeId, setActiveReframeKeyframeId] = useState(null);
   const [enhanceQuality, setEnhanceQuality] = useState(false);
   const [silenceRemoval, setSilenceRemoval] = useState(false);
   const [silenceThreshold, setSilenceThreshold] = useState(-35);
@@ -1948,6 +1977,10 @@ const ViralClipStudio = ({
   const [isWatermarkCleanupPreviewLoading, setIsWatermarkCleanupPreviewLoading] = useState(false);
   const [watermarkCleanupPreviewError, setWatermarkCleanupPreviewError] = useState("");
   const [showWatermarkCleanupOnVideo, setShowWatermarkCleanupOnVideo] = useState(true);
+  const [brandWatermark, setBrandWatermark] = useState(true);
+  const [brandWatermarkText, setBrandWatermarkText] = useState(
+    "AutoPromote · Viral Clip Studio"
+  );
   // Hooks are an independent edit. Selecting a Signature transformation must
   // never silently cover it with the default Blur Reveal treatment.
   const [addHook, setAddHook] = useState(false);
@@ -2381,12 +2414,17 @@ const ViralClipStudio = ({
     joinTransition,
     smartCrop,
     smartCropMode,
+    reframeAspect,
+    reframeKeyframes,
+    activeReframeKeyframeId,
     enhanceQuality,
     silenceRemoval,
     silenceThreshold,
     minSilenceDuration,
     removeWatermark,
     watermarkMode,
+    brandWatermark,
+    brandWatermarkText,
     manualWatermarkRegions,
     activeWatermarkRegionId,
     addHook,
@@ -2494,12 +2532,17 @@ const ViralClipStudio = ({
     setJoinTransition(snapshot.joinTransition || "auto");
     setSmartCrop(!!snapshot.smartCrop);
     setSmartCropMode(snapshot.smartCropMode || "speaker_track");
+    setReframeAspect(snapshot.reframeAspect || "9:16");
+    setReframeKeyframes(Array.isArray(snapshot.reframeKeyframes) ? snapshot.reframeKeyframes : []);
+    setActiveReframeKeyframeId(snapshot.activeReframeKeyframeId || null);
     setEnhanceQuality(!!snapshot.enhanceQuality);
     setSilenceRemoval(!!snapshot.silenceRemoval);
     setSilenceThreshold(Number(snapshot.silenceThreshold ?? -35));
     setMinSilenceDuration(Number(snapshot.minSilenceDuration ?? 0.75));
     setRemoveWatermark(!!snapshot.removeWatermark);
     setWatermarkMode(snapshot.watermarkMode || "adaptive");
+    setBrandWatermark(snapshot.brandWatermark !== false);
+    setBrandWatermarkText(snapshot.brandWatermarkText || "AutoPromote · Viral Clip Studio");
     setManualWatermarkRegions(
       Array.isArray(snapshot.manualWatermarkRegions)
         ? snapshot.manualWatermarkRegions.map(clampManualWatermarkRegion)
@@ -4572,9 +4615,9 @@ const ViralClipStudio = ({
     10
   )}%`;
   const hookBannerTextAlign = hookBannerSide === "center" ? "center" : "left";
-  const smartCropBackgroundBlur = smartCrop ? 18 : 0;
-  const smartCropBackgroundBrightness = smartCrop ? 0.52 : 1;
-  const smartCropBackgroundScale = smartCrop ? 1.08 : 1;
+  const smartCropBackgroundBlur = 0;
+  const smartCropBackgroundBrightness = 1;
+  const smartCropBackgroundScale = 1;
   const trimAwareDuration = Math.max(0, Number(currentTimelineWindow.duration || 0));
   const trimAwareCurrentTime = clampNumber(
     Number(videoTime || 0) - Number(currentTimelineWindow.start || 0),
@@ -4719,6 +4762,19 @@ const ViralClipStudio = ({
     42
   )}%`;
   const effectiveVideoFit = safeFaceFraming ? "contain" : smartCrop ? "cover" : videoFit;
+  const activeReframePosition = interpolateReframeKeyframes(
+    reframeKeyframes,
+    previewTimelineTime
+  );
+  const activeReframeKeyframe =
+    reframeKeyframes.find(keyframe => keyframe.id === activeReframeKeyframeId) || null;
+  const reframeAspectClass = `reframe-aspect-${String(reframeAspect).replace(":", "-")}`;
+  const reframeObjectPosition = `${clampNumber(activeReframePosition.x, 5, 95, 50)}% ${clampNumber(
+    activeReframePosition.y,
+    8,
+    92,
+    50
+  )}%`;
   const showCropRiskIndicator =
     !safeFaceFraming &&
     (effectiveVideoFit === "cover" || smartCrop || hookFreezeFrame || isZoomFocusTemplate);
@@ -5503,6 +5559,53 @@ const ViralClipStudio = ({
   const removeFinishKeyframe = keyframeId => {
     setFinishKeyframes(current => current.filter(keyframe => keyframe.id !== keyframeId));
     setStudioActionMessage("Finish keyframe removed. Undo restores it.");
+  };
+
+  const addReframeKeyframeAtPlayhead = () => {
+    const time = Number(previewTimelineTime || 0);
+    const currentPosition = interpolateReframeKeyframes(reframeKeyframes, time);
+    const existing = reframeKeyframes.find(keyframe => Math.abs(Number(keyframe.time) - time) < 0.08);
+    const id = existing?.id || createSecureId("reframe-keyframe");
+    const keyframe = {
+      id,
+      time: Number(time.toFixed(3)),
+      x: clampNumber(currentPosition.x, 5, 95, 50),
+      y: clampNumber(currentPosition.y, 8, 92, 50),
+    };
+    setReframeKeyframes(current =>
+      [...current.filter(item => item.id !== id), keyframe].sort(
+        (left, right) => Number(left.time) - Number(right.time)
+      )
+    );
+    setActiveReframeKeyframeId(id);
+    setSmartCrop(true);
+    setSmartCropMode("speaker_track");
+    setStudioActionMessage(`Manual framing correction added at ${time.toFixed(2)}s.`);
+  };
+
+  const updateActiveReframeKeyframe = updates => {
+    if (!activeReframeKeyframeId) return;
+    setReframeKeyframes(current =>
+      current.map(keyframe =>
+        keyframe.id === activeReframeKeyframeId
+          ? {
+              ...keyframe,
+              ...updates,
+              x: clampNumber(updates.x ?? keyframe.x, 5, 95, 50),
+              y: clampNumber(updates.y ?? keyframe.y, 8, 92, 50),
+            }
+          : keyframe
+      )
+    );
+  };
+
+  const removeActiveReframeKeyframe = () => {
+    if (!activeReframeKeyframeId) return;
+    setReframeKeyframes(current =>
+      current.filter(keyframe => keyframe.id !== activeReframeKeyframeId)
+    );
+    setActiveReframeKeyframeId(null);
+    setStudioActionMessage("Manual framing correction removed. Auto tracking remains active.");
   };
 
   const applyCreativeIntent = intentId => {
@@ -6567,7 +6670,7 @@ const ViralClipStudio = ({
             shape: "round",
             inset: 54,
             border_radius: 116,
-            background: "soft_blur",
+            background: "studio_black",
           },
           color: {
             preset: finishFx.preset,
@@ -6602,6 +6705,16 @@ const ViralClipStudio = ({
             enabled: beatSnapEnabled,
             markers: musicBeatMarkers.map(marker => Number(marker.time || marker)).filter(Number.isFinite),
           },
+          reframe: {
+            enabled: smartCrop,
+            aspect: reframeAspect,
+            mode: smartCropMode,
+            keyframes: reframeKeyframes.map(keyframe => ({
+              time: Number(keyframe.time || 0),
+              x: clampNumber(keyframe.x, 5, 95, 50),
+              y: clampNumber(keyframe.y, 8, 92, 50),
+            })),
+          },
         },
         smartCrop,
         smartCropMode,
@@ -6611,6 +6724,8 @@ const ViralClipStudio = ({
         minSilenceDuration,
         removeWatermark,
         watermarkMode,
+        brandWatermark,
+        brandWatermarkText,
         manualWatermarkRegions: serializeManualWatermarkRegions(manualWatermarkRegions),
         addHook,
         hookText,
@@ -6868,12 +6983,17 @@ const ViralClipStudio = ({
     joinTransition,
     smartCrop,
     smartCropMode,
+    reframeAspect,
+    reframeKeyframes,
+    activeReframeKeyframeId,
     enhanceQuality,
     silenceRemoval,
     silenceThreshold,
     minSilenceDuration,
     removeWatermark,
     watermarkMode,
+    brandWatermark,
+    brandWatermarkText,
     manualWatermarkRegions,
     activeWatermarkRegionId,
     addHook,
@@ -9659,7 +9779,7 @@ const ViralClipStudio = ({
                   <div
                     ref={phoneFrameRef}
                     data-testid="hook-preview-frame"
-                    className={`phone-frame ${isPreviewFullscreen ? "preview-expanded" : ""} ${hookFocusMode ? "hook-focus-enabled" : ""} ${creativePreviewClass} ${renderedOutputUrl ? "has-rendered-output" : ""}`}
+                    className={`phone-frame ${smartCrop ? reframeAspectClass : ""} ${isPreviewFullscreen ? "preview-expanded" : ""} ${hookFocusMode ? "hook-focus-enabled" : ""} ${creativePreviewClass} ${renderedOutputUrl ? "has-rendered-output" : ""}`}
                     onClick={handlePreviewFrameClick}
                     onMouseMove={handleMouseMove}
                     onMouseUp={handleDragEnd}
@@ -9796,8 +9916,25 @@ const ViralClipStudio = ({
                         preload="auto"
                         muted
                         playsInline
-                        style={{ objectPosition: safeObjectPosition }}
+                        style={{
+                          objectFit: smartCropMode === "speaker_track" ? "cover" : "contain",
+                          objectPosition:
+                            smartCropMode === "speaker_track"
+                              ? reframeObjectPosition
+                              : safeObjectPosition,
+                          transform: smartCropMode === "speaker_track" ? "scale(1)" : "scale(0.92)",
+                        }}
                       />
+                    ) : null}
+                    {brandWatermark && !renderedOutputUrl ? (
+                      <div
+                        className="studio-brand-watermark-preview"
+                        data-testid="brand-watermark-preview"
+                        aria-label={brandWatermarkText}
+                      >
+                        <strong>AutoPromote</strong>
+                        <span>Viral Clip Studio</span>
+                      </div>
                     ) : null}
                     <video
                       ref={hookBackdropVideoRef}
@@ -10414,7 +10551,9 @@ const ViralClipStudio = ({
                   </div>
                   <div className="before-preview-card" data-testid="before-preview-frame">
                     <span className="preview-version-label is-before">Before</span>
-                    <div className="phone-frame phone-frame-before">
+                    <div
+                      className={`phone-frame phone-frame-before ${smartCrop ? reframeAspectClass : ""}`}
+                    >
                       <video
                         ref={beforeVideoRef}
                         className="studio-video"
@@ -12018,10 +12157,30 @@ const ViralClipStudio = ({
                     />
                   </label>
 
-                  <div className="reframe-format-card">
+                  <div className="inspector-field">
                     <span>Output frame</span>
-                    <strong>9:16 Vertical</strong>
-                    <small>TikTok · Reels · Shorts · 1080 × 1920</small>
+                    <div className="reframe-aspect-grid">
+                      {REFRAME_ASPECT_OPTIONS.map(option => (
+                        <button
+                          type="button"
+                          key={option.value}
+                          data-testid={`reframe-aspect-${option.value.replace(":", "-")}`}
+                          className={reframeAspect === option.value ? "is-active" : ""}
+                          aria-pressed={reframeAspect === option.value}
+                          onClick={() => {
+                            setReframeAspect(option.value);
+                            setSmartCrop(true);
+                            setComparisonMode("after");
+                            setStudioActionMessage(
+                              `${option.value} framing selected. Preview and export now use the same canvas.`
+                            );
+                          }}
+                        >
+                          <strong>{option.label}</strong>
+                          <small>{option.helper}</small>
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
                   <div className="inspector-field">
@@ -12083,6 +12242,81 @@ const ViralClipStudio = ({
                     </div>
                   </div>
 
+                  <div className="reframe-corrections-card">
+                    <div className="reframe-corrections-heading">
+                      <div>
+                        <strong>Framing corrections</strong>
+                        <small>Fix a bad automatic crop at the current playhead.</small>
+                      </div>
+                      <button
+                        type="button"
+                        data-testid="add-reframe-keyframe"
+                        onClick={addReframeKeyframeAtPlayhead}
+                      >
+                        + Add here
+                      </button>
+                    </div>
+                    {reframeKeyframes.length ? (
+                      <div className="reframe-keyframe-list" aria-label="Manual framing corrections">
+                        {reframeKeyframes.map((keyframe, index) => (
+                          <button
+                            type="button"
+                            key={keyframe.id}
+                            className={activeReframeKeyframeId === keyframe.id ? "is-active" : ""}
+                            onClick={() => {
+                              setActiveReframeKeyframeId(keyframe.id);
+                              seekLiveEditTimelineItem(keyframe.time, { play: false });
+                            }}
+                          >
+                            <span>{index + 1}</span>
+                            {Number(keyframe.time || 0).toFixed(2)}s
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <small className="reframe-empty-corrections">
+                        Auto tracking controls every shot until you add a correction.
+                      </small>
+                    )}
+                    {activeReframeKeyframe ? (
+                      <div className="reframe-keyframe-editor">
+                        <label>
+                          <span>Horizontal <b>{Math.round(activeReframeKeyframe.x)}%</b></span>
+                          <input
+                            type="range"
+                            min="5"
+                            max="95"
+                            value={activeReframeKeyframe.x}
+                            aria-label="Manual frame horizontal position"
+                            onChange={event =>
+                              updateActiveReframeKeyframe({ x: Number(event.target.value) })
+                            }
+                          />
+                        </label>
+                        <label>
+                          <span>Headroom <b>{Math.round(activeReframeKeyframe.y)}%</b></span>
+                          <input
+                            type="range"
+                            min="8"
+                            max="92"
+                            value={activeReframeKeyframe.y}
+                            aria-label="Manual frame vertical position"
+                            onChange={event =>
+                              updateActiveReframeKeyframe({ y: Number(event.target.value) })
+                            }
+                          />
+                        </label>
+                        <button
+                          type="button"
+                          className="reframe-remove-correction"
+                          onClick={removeActiveReframeKeyframe}
+                        >
+                          Remove correction
+                        </button>
+                      </div>
+                    ) : null}
+                  </div>
+
                   <button
                     type="button"
                     className="inspector-primary-action"
@@ -12095,7 +12329,7 @@ const ViralClipStudio = ({
                       );
                     }}
                   >
-                    ▶ Preview Vertical Framing
+                    ▶ Preview {reframeAspect} Framing
                   </button>
                 </div>
               ) : null}
@@ -15934,6 +16168,28 @@ const ViralClipStudio = ({
               <p className="panel-description">
                 Final export uses the hook treatment and B-roll layers you approved in Studio.
               </p>
+              <div className="export-branding-card">
+                <label>
+                  <span>
+                    <b>AutoPromote signature</b>
+                    <small>Safe-zone aware and moves between corners during export.</small>
+                  </span>
+                  <input
+                    type="checkbox"
+                    data-testid="brand-watermark-toggle"
+                    checked={brandWatermark}
+                    onChange={event => setBrandWatermark(event.target.checked)}
+                  />
+                </label>
+                {brandWatermark ? (
+                  <div className="export-branding-preview" data-testid="export-branding-preview">
+                    <strong>AutoPromote</strong>
+                    <span>Viral Clip Studio</span>
+                  </div>
+                ) : (
+                  <small>Clean export selected. Availability follows the creator plan.</small>
+                )}
+              </div>
               {renderedOutputUrl ? (
                 <div
                   className="rendered-output-ready"

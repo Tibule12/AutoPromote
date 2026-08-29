@@ -383,6 +383,14 @@ test("runs the production Viral Clip Studio feature workflow with real playable 
     "aria-pressed",
     "true"
   );
+  await inspector.getByTestId("reframe-aspect-4-5").click();
+  await expect(inspector.getByTestId("reframe-aspect-4-5")).toHaveAttribute(
+    "aria-pressed",
+    "true"
+  );
+  await inspector.getByTestId("add-reframe-keyframe").click();
+  await inspector.getByLabel("Manual frame horizontal position").fill("61");
+  await inspector.getByLabel("Manual frame vertical position").fill("35");
   await page.screenshot({
     path: path.join("test-results", "viral-clip-studio-live-auto-reframe.png"),
     fullPage: true,
@@ -463,6 +471,8 @@ test("runs the production Viral Clip Studio feature workflow with real playable 
   expect(viralData.export_destination).toBe("tiktok");
   expect(viralData.smart_crop).toBe(true);
   expect(viralData.smart_crop_mode).toBe("speaker_track");
+  expect(viralData.brand_watermark).toBe(true);
+  expect(viralData.watermark_text).toBe("AutoPromote · Viral Clip Studio");
   expect(viralData.translate_captions_to_english).toBe(true);
   expect(viralData.caption_segments[0].text).toContain("creator-reviewed");
   expect(viralData.caption_segments[0]).toEqual(
@@ -508,6 +518,14 @@ test("runs the production Viral Clip Studio feature workflow with real playable 
         }),
       ]),
       magnetic_beats: expect.objectContaining({ enabled: true }),
+      reframe: expect.objectContaining({
+        enabled: true,
+        aspect: "4:5",
+        mode: "speaker_track",
+        keyframes: expect.arrayContaining([
+          expect.objectContaining({ x: 61, y: 35 }),
+        ]),
+      }),
     })
   );
   expect(viralData.overlays).toEqual(

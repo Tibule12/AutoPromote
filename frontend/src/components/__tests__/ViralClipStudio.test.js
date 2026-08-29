@@ -203,11 +203,31 @@ describe("ViralClipStudio timeline sequencing", () => {
       "true"
     );
     fireEvent.click(screen.getByTestId("reframe-follow-subject"));
+    fireEvent.click(screen.getByTestId("reframe-aspect-4-5"));
+    expect(screen.getByTestId("reframe-aspect-4-5")).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(screen.getByTestId("add-reframe-keyframe"));
+    fireEvent.change(screen.getByLabelText("Manual frame horizontal position"), {
+      target: { value: "62" },
+    });
+    fireEvent.change(screen.getByLabelText("Manual frame vertical position"), {
+      target: { value: "36" },
+    });
     fireEvent.click(screen.getByRole("button", { name: /Render Final Clip/i }));
     await waitFor(() => expect(onSave).toHaveBeenCalled());
     expect(onSave.mock.calls[0][2]).toEqual(
-      expect.objectContaining({ smartCrop: true, smartCropMode: "speaker_track" })
+      expect.objectContaining({
+        smartCrop: true,
+        smartCropMode: "speaker_track",
+        brandWatermark: true,
+        brandWatermarkText: "AutoPromote · Viral Clip Studio",
+      })
     );
+    expect(onSave.mock.calls[0][2].finishPlan.reframe).toEqual({
+      enabled: true,
+      aspect: "4:5",
+      mode: "speaker_track",
+      keyframes: [{ time: 0, x: 62, y: 36 }],
+    });
   });
 
   test("applies a Signature finish preset to After without touching Before", async () => {
@@ -255,7 +275,7 @@ describe("ViralClipStudio timeline sequencing", () => {
           shape: "round",
           inset: 54,
           border_radius: 116,
-          background: "soft_blur",
+          background: "studio_black",
         },
         color: expect.objectContaining({ preset: "podcast_pro", contrast: 1.2 }),
         keyframes: [
