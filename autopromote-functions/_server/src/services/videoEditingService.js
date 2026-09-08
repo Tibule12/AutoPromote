@@ -764,6 +764,8 @@ class VideoEditingService {
             : [],
           pacing_level: viralData.pacing_level || viralData.pacingLevel || null,
           creative_intent: viralData.creative_intent || viralData.creativeIntent || null,
+          motion_graphics: viralData.motion_graphics || viralData.motionGraphics || null,
+          sound_effects: viralData.sound_effects || viralData.soundEffects || [],
           creative_plan: viralData.creative_plan || viralData.creativePlan || null,
           smart_crop:
             viralData.smart_crop !== undefined

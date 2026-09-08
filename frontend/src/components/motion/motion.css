@@ -1,0 +1,180 @@
+@font-face {
+  font-family: StudioMotion;
+  src: url("./fonts/StudioMotion-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-display: swap;
+}
+.studio-motion-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 120;
+  overflow: hidden;
+}
+.motion-panel {
+  color: #e2e8f0;
+}
+.motion-panel h4 {
+  font-size: 22px;
+  margin: 8px 0;
+}
+.motion-panel p {
+  font-size: 12px;
+  line-height: 1.55;
+  color: #aab7cc;
+}
+.motion-preset-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 16px 0;
+}
+.motion-panel button {
+  border: 1px solid #3b4263;
+  border-radius: 10px;
+  background: #161d32;
+  color: #f1f5f9;
+  padding: 10px;
+  cursor: pointer;
+  text-align: left;
+}
+.motion-panel button:hover,
+.motion-panel button[aria-pressed="true"] {
+  border-color: #b39aff;
+  background: #2a2450;
+}
+.motion-panel button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.motion-panel button:focus-visible,
+.motion-panel input:focus-visible,
+.motion-panel select:focus-visible {
+  outline: 2px solid #b39aff;
+  outline-offset: 2px;
+}
+.motion-preset-grid small {
+  display: block;
+  color: #aab7cc;
+  font-size: 11px;
+  line-height: 1.4;
+  margin-top: 5px;
+}
+.motion-scene-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.motion-editor {
+  border-top: 1px solid #343b59;
+  padding-top: 16px;
+}
+.motion-panel label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  color: #c4cde2;
+  margin: 8px 0;
+}
+.motion-panel input,
+.motion-panel select {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  color: #f8fafc;
+  background: #0b1020;
+  border: 1px solid #3b4263;
+  border-radius: 7px;
+  padding: 9px;
+  font: inherit;
+}
+.motion-panel input[type="color"] {
+  height: 37px;
+  padding: 4px;
+}
+.motion-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 10px;
+}
+.motion-editor details,
+.motion-editor fieldset {
+  border: 1px solid #343b59;
+  border-radius: 10px;
+  padding: 12px;
+  margin: 12px 0;
+  min-width: 0;
+}
+.motion-editor summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+}
+.motion-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.motion-actions button:first-child {
+  background: #7250c8;
+}
+.motion-timeline-track {
+  height: 30px !important;
+  position: relative;
+  overflow: hidden;
+}
+.motion-timeline-block {
+  position: absolute;
+  top: 2px;
+  height: 26px;
+  min-width: 8px;
+  max-width: 100%;
+  border: 1px solid #ac8bfa;
+  background: #483068;
+  color: #fff;
+  border-radius: 5px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 10px;
+}
+.clip-inspector-tabs:has([data-motion-tab]) {
+  display: flex;
+  flex-wrap: wrap;
+}
+@media (max-width: 600px) {
+  .motion-fields {
+    grid-template-columns: 1fr 1fr;
+  }
+  .motion-preset-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.studio-sound-waveform {
+  border: 1px solid #343b59;
+  background: #0b1020;
+  border-radius: 10px;
+  padding: 10px;
+  margin: 12px 0;
+}
+.studio-sound-waveform svg {
+  display: block;
+  width: 100%;
+  height: 64px;
+}
+.studio-sound-waveform label {
+  display: flex;
+  flex-direction: column;
+  font-size: 11px;
+  color: #aab7cc;
+  gap: 6px;
+}
+.studio-sound-waveform input {
+  width: 100%;
+  accent-color: #b39aff;
+}

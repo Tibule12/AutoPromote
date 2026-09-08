@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException, UploadFile, File, BackgroundTasks, R
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+import tempfile
 from typing import List, Optional, Union, Dict, Any
 import sys
 import time
@@ -77,6 +78,11 @@ try:
     from .viral_creative_effects import build_creative_filter_complex, normalize_creative_plan
 except ImportError:
     from viral_creative_effects import build_creative_filter_complex, normalize_creative_plan
+
+try:
+    from .viral_motion_graphics import render_motion_and_sound, validate_design
+except ImportError:
+    from viral_motion_graphics import render_motion_and_sound, validate_design
 
 # Fix asyncio event loop policy for Windows (Enable Proactor for Subprocesses)
 if sys.platform == 'win32':
@@ -27853,6 +27859,8 @@ class RenderViralRequest(BaseModel):
     pacing_level: Optional[str] = None
     creative_intent: Optional[str] = None
     creative_plan: Optional[ViralCreativePlan] = None
+    motion_graphics: Optional[Dict[str, Any]] = None
+    sound_effects: Optional[List[Dict[str, Any]]] = None
     smart_crop: bool = False
     smart_crop_mode: str = "center"  # "center", "speaker_track", "ai_director"
     visual_enhance: bool = False  # Use Smart Promo dynamic visual pipeline (face zoom, movement tracking, reframing)
@@ -27886,6 +27894,11 @@ async def render_viral_clip(request: RenderViralRequest, background_tasks: Backg
     Renders a clip with overlays (PiP, Text) and cuts it to specific time.
     Supports basic Smart Crop (Center Focus) and Auto-Captions.
     """
+    try:
+        validate_design(request.motion_graphics, request.sound_effects)
+    except ValueError as error:
+        raise HTTPException(status_code=422, detail=str(error))
+
     if request.async_mode:
         job_id = request.job_id or str(uuid.uuid4())
         logger.info(f"Queuing ASYNC viral render job {job_id}")
@@ -28923,12 +28936,36 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         logger.info(f"Running FFmpeg: {' '.join(cmd)}")
         await run_subprocess_async(cmd, check=True)
 
+        motion_receipt = {"version": 1, "motion_scenes": 0, "sound_cues": 0}
+        design_scenes, design_effects = validate_design(request.motion_graphics, request.sound_effects)
+        if design_scenes or design_effects:
+            report_progress(82, "Compositing motion graphics and sound cues")
+            with tempfile.TemporaryDirectory(prefix="viral-design-inputs-", dir=SHARED_TMP_DIR) as design_dir:
+                resolved_audio = {}
+                for effect in design_effects:
+                    if effect.get("builtIn") or effect.get("url") in resolved_audio:
+                        continue
+                    url = str(effect.get("url") or "")
+                    if not url.startswith("https://"):
+                        raise ValueError("Uploaded sound effects require an HTTPS media URL")
+                    resolved_audio[url] = await materialize_audio_input(
+                        url, os.path.join(design_dir, f"cue-{len(resolved_audio)}.wav"), sample_rate=48000
+                    )
+                designed_path = os.path.join(design_dir, "designed.mp4")
+                loop = asyncio.get_running_loop()
+                motion_receipt = await loop.run_in_executor(
+                    None, render_motion_and_sound, output_path, designed_path,
+                    request.motion_graphics, design_effects, speed_plan, resolved_audio
+                )
+                os.replace(designed_path, output_path)
+
         if os.path.exists(output_path):
             report_progress(90, "Verifying rendered video and audio")
             audio_expected = bool(
                 (source_has_audio and not request.mute_audio)
                 or overlay_audio_specs
                 or (background_audio and background_audio.url)
+                or motion_receipt["sound_cues"] > 0
             )
             audio_proof = build_audio_delivery_proof(output_path, expected=audio_expected)
             if audio_expected and not audio_proof["verified"]:
@@ -29020,6 +29057,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 "duration": get_media_duration(output_path) or rendered_timeline_duration,
                 "speed_plan": speed_plan,
                 "creative_receipt": creative_receipt,
+                "motion_receipt": motion_receipt,
             }
             
             if request.async_mode:

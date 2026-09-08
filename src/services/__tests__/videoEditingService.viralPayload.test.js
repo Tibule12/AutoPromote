@@ -1,9 +1,13 @@
 const mockPost = jest.fn();
 
-jest.mock("axios", () => ({ post: mockPost }));
-jest.mock("firebase-admin", () => ({
-  firestore: jest.fn(() => ({})),
-}));
+jest.mock("axios", () => ({ post: mockPost }), { virtual: true });
+jest.mock(
+  "firebase-admin",
+  () => ({
+    firestore: jest.fn(() => ({})),
+  }),
+  { virtual: true }
+);
 jest.mock("../mediaWorkerTaskQueue", () => ({
   queueAudioExtractionTask: jest.fn(),
 }));
@@ -61,6 +65,13 @@ describe("VideoEditingService Viral Clip payload", () => {
           ],
           pacing_level: "energetic",
           creative_intent: "proof",
+          motion_graphics: {
+            version: 1,
+            scenes: [{ id: "a", preset: "title", startTime: 2, duration: 3 }],
+          },
+          sound_effects: [
+            { id: "motion-sfx-a", builtIn: true, tone: "impact", startTime: 2, duration: 0.7 },
+          ],
         },
       },
       "test-user"
@@ -84,6 +95,13 @@ describe("VideoEditingService Viral Clip payload", () => {
         ],
         pacing_level: "energetic",
         creative_intent: "proof",
+        motion_graphics: {
+          version: 1,
+          scenes: [{ id: "a", preset: "title", startTime: 2, duration: 3 }],
+        },
+        sound_effects: [
+          { id: "motion-sfx-a", builtIn: true, tone: "impact", startTime: 2, duration: 0.7 },
+        ],
       }),
       expect.any(Object)
     );

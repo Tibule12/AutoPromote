@@ -7,7 +7,7 @@ import {
 } from "../utils/security";
 import { API_BASE_URL, API_ENDPOINTS } from "../config";
 import { uploadSourceFileViaBackend } from "../utils/sourceUpload";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { useSubscription } from "../hooks/useSubscription";
 import { storage } from "../firebaseClient";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -17,6 +17,11 @@ import { trackClipWorkflowEvent } from "../utils/clipWorkflowAnalytics";
 import { playMediaSafely } from "../utils/mediaPlayback";
 import toast from "react-hot-toast";
 import { SafeAudio, SafeImage, SafeVideo } from "./SafeMedia";
+import SoundWaveform from "./motion/SoundWaveform";
+import MotionPanel from "./motion/MotionPanel";
+import MotionCanvas from "./motion/MotionCanvas";
+import { motionCues, cutMotion, normalizeMotion } from "./motion/motionModel";
+import { DESIGN_SOUNDS, synthesizeEffect } from "./motion/soundDesign";
 import "./ViralClipStudio.css"; // We'll create this CSS next
 
 const TimelineVideoThumbnail = ({ src, previewTime, style }) => {
@@ -98,6 +103,7 @@ const HOOK_MIN_SEGMENT_DURATION = 2;
 const HOOK_MAX_SEGMENT_DURATION = 5;
 
 const SOUND_EFFECT_PRESETS = [
+  ...DESIGN_SOUNDS,
   { id: "whoosh", name: "Whoosh", emoji: "💨", duration: 0.8, tone: "sweep" },
   { id: "impact", name: "Impact", emoji: "💥", duration: 0.65, tone: "impact" },
   { id: "pop", name: "Pop", emoji: "🫧", duration: 0.28, tone: "pop" },
@@ -1466,6 +1472,7 @@ const CREATIVE_STUDIO_TOOLS = [
   { id: "pacing", label: "Pacing", icon: "≋" },
   { id: "broll", label: "B-roll", icon: "▣" },
   { id: "sound", label: "Sound", icon: "♫" },
+  { id: "motion", label: "Motion", icon: "◆" },
   { id: "export", label: "Export", icon: "⇧" },
 ];
 
@@ -1811,6 +1818,13 @@ const ViralClipStudio = ({
   // ── Music Track State ──
   const [musicTrack, setMusicTrack] = useState(null); // { url, file, name, trimStart, trimEnd, fadeIn, fadeOut, loop, volume, ducking, duckingStrength, duckingMode }
   const [soundEffects, setSoundEffects] = useState([]);
+  const [selectedMotionId, setSelectedMotionId] = useState(null);
+  const [motionScenes, setMotionScenes] = useState([]);
+  const linkedMotionCues = useMemo(() => motionCues(motionScenes), [motionScenes]);
+  const allSoundEffects = useMemo(
+    () => [...soundEffects, ...linkedMotionCues],
+    [soundEffects, linkedMotionCues]
+  );
   const [activeSoundEffectId, setActiveSoundEffectId] = useState(null);
   const [previewingSoundEffectId, setPreviewingSoundEffectId] = useState(null);
   const [musicLibraryOpen, setMusicLibraryOpen] = useState(false);
@@ -1900,6 +1914,7 @@ const ViralClipStudio = ({
   const soundEffectAudioRefsRef = useRef(new Map());
   const soundEffectAudioContextRef = useRef(null);
   const soundEffectNodesRef = useRef(new Set());
+  const soundEffectPlaybackEpochRef = useRef(0);
   const triggeredSoundEffectsRef = useRef(new Set());
   const soundEffectPreviewTimeoutRef = useRef(null);
   const soundEffectObjectUrlsRef = useRef(new Set());
@@ -2164,6 +2179,7 @@ const ViralClipStudio = ({
     musicDuckingStrength,
     musicTrack,
     soundEffects,
+    motionScenes,
     activeSoundEffectId,
     extractedAudio,
     bRollCadence,
@@ -2276,6 +2292,7 @@ const ViralClipStudio = ({
     setMusicDuckingStrength(Number(snapshot.musicDuckingStrength ?? 0.35));
     setMusicTrack(snapshot.musicTrack || null);
     setSoundEffects(Array.isArray(snapshot.soundEffects) ? snapshot.soundEffects : []);
+    setMotionScenes((snapshot.motionScenes || []).map(normalizeMotion));
     setActiveSoundEffectId(snapshot.activeSoundEffectId || null);
     setExtractedAudio(snapshot.extractedAudio || null);
     setBRollCadence(snapshot.bRollCadence || "balanced");
@@ -3731,6 +3748,7 @@ const ViralClipStudio = ({
     clampAudioControl(effect?.duration, 0.05, 15, effect?.builtIn ? 0.6 : 2);
 
   const stopSynthesizedSoundEffects = () => {
+    soundEffectPlaybackEpochRef.current += 1;
     soundEffectNodesRef.current.forEach(node => {
       try {
         node.stop?.();
@@ -3770,72 +3788,43 @@ const ViralClipStudio = ({
       setStudioActionMessage("This browser cannot preview synthesized sound effects.");
       return false;
     }
+    const playbackEpoch = soundEffectPlaybackEpochRef.current;
+    const wasPlaying = !videoRef.current?.paused;
     if (audioContext.state === "suspended") await audioContext.resume();
+    if (
+      playbackEpoch !== soundEffectPlaybackEpochRef.current ||
+      (wasPlaying && videoRef.current?.paused)
+    )
+      return false;
 
-    const duration = Math.max(0.05, getSoundEffectDuration(effect) - Math.max(0, elapsed));
-    const startAt = audioContext.currentTime + 0.01;
-    const volume =
+    const samples = synthesizeEffect(effect, 48000);
+    const offset = Math.max(0, elapsed);
+    if (offset >= samples.length / 48000) return false;
+    const buffer = audioContext.createBuffer(1, samples.length, 48000);
+    buffer.getChannelData(0).set(samples);
+    const source = audioContext.createBufferSource();
+    const gain = audioContext.createGain();
+    source.buffer = buffer;
+    // Cues share the pre-speed edit clock with graphics and uploaded SFX.
+    source.playbackRate.value = videoRef.current?.paused ? 1 : previewSpeed;
+    gain.gain.value =
       clampAudioControl(effect.volume, 0, 1, 0.8) *
       (previewMuted ? 0 : clampAudioControl(previewVolume, 0, 1, 1));
-    const gain = audioContext.createGain();
-    gain.gain.setValueAtTime(0.0001, startAt);
-    gain.gain.exponentialRampToValueAtTime(Math.max(0.0001, volume), startAt + 0.018);
-    gain.gain.exponentialRampToValueAtTime(0.0001, startAt + duration);
+    source.connect(gain);
     gain.connect(audioContext.destination);
-
-    const registerNode = node => {
-      soundEffectNodesRef.current.add(node);
-      node.addEventListener?.("ended", () => soundEffectNodesRef.current.delete(node), {
-        once: true,
-      });
-      return node;
-    };
-
-    if (effect.tone === "sweep" || effect.tone === "riser") {
-      const frameCount = Math.max(1, Math.floor(audioContext.sampleRate * duration));
-      const buffer = audioContext.createBuffer(1, frameCount, audioContext.sampleRate);
-      const channel = buffer.getChannelData(0);
-      for (let index = 0; index < frameCount; index += 1) {
-        channel[index] = (Math.random() * 2 - 1) * (1 - index / frameCount);
-      }
-      const noise = registerNode(audioContext.createBufferSource());
-      const filter = audioContext.createBiquadFilter();
-      noise.buffer = buffer;
-      filter.type = "bandpass";
-      filter.Q.value = effect.tone === "riser" ? 2.5 : 1.2;
-      const low = effect.tone === "riser" ? 180 : 1200;
-      const high = effect.tone === "riser" ? 4200 : 350;
-      filter.frequency.setValueAtTime(low, startAt);
-      filter.frequency.exponentialRampToValueAtTime(high, startAt + duration);
-      noise.connect(filter);
-      filter.connect(gain);
-      noise.start(startAt);
-      noise.stop(startAt + duration);
-    } else {
-      const oscillator = registerNode(audioContext.createOscillator());
-      oscillator.type =
-        effect.tone === "impact" ? "sine" : effect.tone === "click" ? "square" : "triangle";
-      const startFrequency = effect.tone === "impact" ? 150 : effect.tone === "click" ? 1100 : 620;
-      const endFrequency = effect.tone === "impact" ? 42 : effect.tone === "click" ? 420 : 240;
-      oscillator.frequency.setValueAtTime(startFrequency, startAt);
-      oscillator.frequency.exponentialRampToValueAtTime(endFrequency, startAt + duration);
-      oscillator.connect(gain);
-      oscillator.start(startAt);
-      oscillator.stop(startAt + duration);
-    }
-
+    soundEffectNodesRef.current.add(source);
     soundEffectNodesRef.current.add(gain);
-    window.setTimeout(
+    source.addEventListener?.(
+      "ended",
       () => {
+        soundEffectNodesRef.current.delete(source);
         soundEffectNodesRef.current.delete(gain);
-        try {
-          gain.disconnect();
-        } catch (error) {
-          // Already disconnected.
-        }
+        source.disconnect();
+        gain.disconnect();
       },
-      Math.ceil(duration * 1000) + 100
+      { once: true }
     );
+    source.start(audioContext.currentTime, offset);
     return true;
   };
 
@@ -4587,6 +4576,7 @@ const ViralClipStudio = ({
     Number(previewSpeed !== 1 || silenceRemoval) +
     liveTimelineCutMarkers.length +
     liveTimelineBRoll.length +
+    motionScenes.length +
     soundEffects.length +
     Number(addMusic || muteOriginalAudio);
   const retentionScore = clampNumber(
@@ -4981,6 +4971,7 @@ const ViralClipStudio = ({
         ];
       })
     );
+    setMotionScenes(previous => cutMotion(previous, outputCutStart, outputCutEnd));
     setSoundEffects(previous =>
       previous.flatMap(effect => {
         const start = Number(effect.startTime || 0);
@@ -5015,7 +5006,7 @@ const ViralClipStudio = ({
 
   const selectCreativeTool = toolId => {
     setActiveCreativeTool(toolId);
-    if (["cut", "hook", "captions", "pacing", "broll", "sound"].includes(toolId)) {
+    if (["cut", "hook", "captions", "pacing", "broll", "sound", "motion"].includes(toolId)) {
       setStudioInspectorTab(toolId);
     }
     if (toolId === "moments") {
@@ -5905,7 +5896,7 @@ const ViralClipStudio = ({
       }
 
       const exportedSoundEffects = await Promise.all(
-        soundEffects
+        allSoundEffects
           .filter(effect => effect.enabled !== false)
           .map(async effect => {
             let effectUrl = effect.url || null;
@@ -6055,6 +6046,7 @@ const ViralClipStudio = ({
         musicFadeOut: musicTrack?.fadeOut ?? 0.5,
         musicLoop: musicTrack?.loop ?? true,
         soundEffects: exportedSoundEffects,
+        motionGraphics: { version: 1, scenes: motionScenes.map(normalizeMotion) },
         muteAudio: muteOriginalAudio,
         timelineSegments: exportTimeline,
         backgroundAudio: null,
@@ -6285,6 +6277,7 @@ const ViralClipStudio = ({
     musicDuckingStrength,
     musicTrack,
     soundEffects,
+    motionScenes,
     activeSoundEffectId,
     extractedAudio,
     bRollCadence,
@@ -6356,6 +6349,7 @@ const ViralClipStudio = ({
     musicDuckingStrength,
     musicTrack,
     soundEffects,
+    motionScenes,
     activeSoundEffectId,
     extractedAudio,
     timeline,
@@ -7390,9 +7384,11 @@ const ViralClipStudio = ({
   // Keep the SFX lane locked to the edited output timeline during After/Split playback.
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || renderedOutputUrl) return undefined;
+    if (!video || renderedOutputUrl || comparisonMode === "before") return undefined;
 
+    let cueFrame;
     const pauseTimelineEffects = () => {
+      cancelAnimationFrame(cueFrame);
       soundEffectAudioRefsRef.current.forEach(audio => audio?.pause());
       stopSynthesizedSoundEffects();
       triggeredSoundEffectsRef.current.clear();
@@ -7407,7 +7403,7 @@ const ViralClipStudio = ({
       );
       const previewGain = previewMuted ? 0 : clampAudioControl(previewVolume, 0, 1, 1);
 
-      soundEffects.forEach(effect => {
+      allSoundEffects.forEach(effect => {
         const start = Number(effect.startTime || 0);
         const duration = getSoundEffectDuration(effect);
         const elapsed = outputTime - start;
@@ -7435,6 +7431,7 @@ const ViralClipStudio = ({
         const targetTime = Number(effect.trimStart || 0) + elapsed;
         audio.volume = clampAudioControl(effect.volume, 0, 1, 0.8) * previewGain * fadeGain;
         audio.playbackRate = video.playbackRate || 1;
+        audio.preservesPitch = false;
         if (Math.abs(Number(audio.currentTime || 0) - targetTime) > 0.18) {
           try {
             audio.currentTime = targetTime;
@@ -7446,27 +7443,41 @@ const ViralClipStudio = ({
       });
     };
 
-    video.addEventListener("play", syncSoundEffects);
+    const tickCues = () => {
+      syncSoundEffects();
+      if (!video.paused) cueFrame = requestAnimationFrame(tickCues);
+    };
+    const startCues = () => {
+      cancelAnimationFrame(cueFrame);
+      tickCues();
+    };
+    const seekCues = () => {
+      pauseTimelineEffects();
+      startCues();
+    };
+    video.addEventListener("play", startCues);
     video.addEventListener("timeupdate", syncSoundEffects);
-    video.addEventListener("seeking", syncSoundEffects);
-    video.addEventListener("seeked", syncSoundEffects);
+    video.addEventListener("seeking", seekCues);
+    video.addEventListener("seeked", startCues);
     video.addEventListener("ratechange", syncSoundEffects);
     video.addEventListener("pause", pauseTimelineEffects);
     video.addEventListener("ended", pauseTimelineEffects);
-    syncSoundEffects();
+    startCues();
 
     return () => {
-      video.removeEventListener("play", syncSoundEffects);
+      video.removeEventListener("play", startCues);
       video.removeEventListener("timeupdate", syncSoundEffects);
-      video.removeEventListener("seeking", syncSoundEffects);
-      video.removeEventListener("seeked", syncSoundEffects);
+      video.removeEventListener("seeking", seekCues);
+      video.removeEventListener("seeked", startCues);
       video.removeEventListener("ratechange", syncSoundEffects);
       video.removeEventListener("pause", pauseTimelineEffects);
       video.removeEventListener("ended", pauseTimelineEffects);
       pauseTimelineEffects();
     };
   }, [
-    soundEffects,
+    allSoundEffects,
+    comparisonMode,
+    previewSpeed,
     outputTimelineDuration,
     previewMuted,
     previewVolume,
@@ -9285,6 +9296,13 @@ const ViralClipStudio = ({
                           ) : null}
                         </div>
                       ) : null}
+                      {!renderedOutputUrl && motionScenes.length > 0 ? (
+                        <MotionCanvas
+                          scenes={motionScenes}
+                          time={previewTimelineTime}
+                          getTime={() => getPreviewTimelineTime(videoRef.current?.currentTime || 0)}
+                        />
+                      ) : null}
                       {silenceRemoval && !showHookPreview ? (
                         <div className="silence-preview-indicator">
                           <span />
@@ -10057,6 +10075,28 @@ const ViralClipStudio = ({
                     </div>
                   </div>
 
+                  {motionScenes.map(scene => (
+                    <div className="compact-timeline-row" key={scene.id}>
+                      <span>Motion</span>
+                      <div className="compact-timeline-track motion-timeline-track">
+                        <button
+                          type="button"
+                          className="motion-timeline-block"
+                          aria-label={`Inspect motion ${scene.text}`}
+                          style={{
+                            left: `${(100 * scene.startTime) / Math.max(0.1, liveTimelineDuration)}%`,
+                            width: `${(100 * scene.duration) / Math.max(0.1, liveTimelineDuration)}%`,
+                          }}
+                          onClick={() => {
+                            setSelectedMotionId(scene.id);
+                            seekLiveEditTimelineItem(scene.startTime, "motion");
+                          }}
+                        >
+                          ◆ {scene.text} {scene.sound !== "none" ? "♫" : ""}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                   <div className="compact-timeline-row">
                     <span>Speed</span>
                     <div
@@ -10846,12 +10886,14 @@ const ViralClipStudio = ({
                   { id: "pacing", label: "Pacing", icon: "≋" },
                   { id: "broll", label: "B-roll", icon: "▣" },
                   { id: "sound", label: "Sound", icon: "♫" },
+                  { id: "motion", label: "Motion", icon: "◆" },
                 ].map(tab => (
                   <button
                     key={tab.id}
                     type="button"
                     role="tab"
                     aria-selected={studioInspectorTab === tab.id}
+                    data-motion-tab={tab.id === "motion" ? "true" : undefined}
                     className={studioInspectorTab === tab.id ? "is-active" : ""}
                     onClick={() => {
                       setStudioInspectorTab(tab.id);
@@ -10863,6 +10905,22 @@ const ViralClipStudio = ({
                   </button>
                 ))}
               </div>
+
+              {studioInspectorTab === "motion" ? (
+                <MotionPanel
+                  scenes={motionScenes}
+                  onChange={setMotionScenes}
+                  focusId={selectedMotionId}
+                  onSelect={setSelectedMotionId}
+                  playhead={previewTimelineTime}
+                  duration={outputTimelineDuration}
+                  transcript={captionSegments}
+                  onSeek={(time, play = false) => {
+                    seekLiveEditTimelineItem(time, "motion");
+                    if (play) safePlayMediaElement(videoRef.current);
+                  }}
+                />
+              ) : null}
 
               {studioInspectorTab === "cut" ? (
                 <div className="clip-inspector-body cut-inspector-body" role="tabpanel">
@@ -12361,6 +12419,11 @@ const ViralClipStudio = ({
                           </label>
                         </div>
 
+                        <SoundWaveform
+                          effect={activeSoundEffect}
+                          playhead={previewTimelineTime}
+                          onSeek={time => seekLiveEditTimelineItem(time, "sound")}
+                        />
                         <div className="inspector-time-grid sound-effect-time-grid">
                           <label>
                             <span>Start</span>

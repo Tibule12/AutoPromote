@@ -1,6 +1,24 @@
 import { buildViralRenderData, normalizeSpeedSegmentsForRender } from "../viralRenderPayload";
 
 describe("viralRenderPayload", () => {
+  test("preserves versioned motion scenes and linked cues through the API contract", () => {
+    const motionGraphics = {
+      version: 1,
+      scenes: [{ id: "a", preset: "title", startTime: 3, duration: 4 }],
+    };
+    const soundEffects = [
+      { id: "motion-sfx-a", builtIn: true, tone: "impact", startTime: 3, duration: 0.7 },
+    ];
+    const payload = buildViralRenderData({
+      finalVideoUrl: "https://example.com/source.mp4",
+      selectedClip: { start: 0, end: 20 },
+      overlays: [],
+      extraOptions: { motionGraphics, soundEffects },
+    });
+    expect(payload.motion_graphics).toEqual(motionGraphics);
+    expect(payload.sound_effects).toEqual(soundEffects);
+  });
+
   test("builds a safe default timeline payload", () => {
     const payload = buildViralRenderData({
       finalVideoUrl: "https://example.com/source.mp4",

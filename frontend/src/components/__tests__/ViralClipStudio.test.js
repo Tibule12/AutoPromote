@@ -107,6 +107,48 @@ describe("ViralClipStudio timeline sequencing", () => {
     jest.clearAllMocks();
   });
 
+  test("motion scenes survive undo/redo and export their attached sound cues", async () => {
+    const onSave = jest.fn(() => Promise.resolve());
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/clip.mp4"
+        clips={[
+          {
+            id: "motion-source",
+            start: 0,
+            end: 20,
+            duration: 20,
+            url: "https://example.com/clip.mp4",
+          },
+        ]}
+        onSave={onSave}
+        onCancel={() => {}}
+      />
+    );
+    fireEvent.click(
+      screen
+        .getAllByRole("button", { name: /Motion/i })
+        .find(button => button.textContent.includes("Motion"))
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Add Number reveal" }));
+    expect(screen.getByTestId("motion-preview")).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText("Motion start"), { target: { value: "4" } });
+    fireEvent.change(screen.getByLabelText("Target number"), { target: { value: "5000" } });
+    fireEvent.click(screen.getByTestId("studio-undo-button"));
+    await waitFor(() => expect(screen.getByLabelText("Target number")).toHaveValue(100));
+    fireEvent.click(screen.getByTestId("studio-redo-button"));
+    await waitFor(() => expect(screen.getByLabelText("Target number")).toHaveValue(5000));
+    fireEvent.click(screen.getByRole("button", { name: /Render Final Clip/i }));
+    await waitFor(() => expect(onSave).toHaveBeenCalled());
+    const options = onSave.mock.calls[0][2];
+    expect(options.motionGraphics.scenes).toEqual([
+      expect.objectContaining({ preset: "counter", startTime: 4, value: 5000 }),
+    ]);
+    expect(options.soundEffects).toEqual([
+      expect.objectContaining({ builtIn: true, tone: "riser", startTime: 4 }),
+    ]);
+  });
+
   test("previews a signature transformation and includes it in the export contract", async () => {
     const onSave = jest.fn(() => Promise.resolve());
     const clips = [
