@@ -141,7 +141,7 @@ export function createMotion(preset, startTime, id, scenes = []) {
     sound: p.cue,
   });
 }
-export function motionPose(raw, time) {
+export function motionPose(raw, time, width = 1000, height = 1778) {
   const s = normalizeMotion(raw),
     local = time - s.startTime;
   if (!s.enabled || local < 0 || local >= s.duration) return null;
@@ -150,9 +150,21 @@ export function motionPose(raw, time) {
   const exit = ease((s.duration - local) / Math.min(0.3, s.duration / 3));
   let x = s.x + (s.endX - s.x) * progress,
     y = s.y + (s.endY - s.y) * progress;
+  let fit = 1;
   if (s.preset === "watermark") {
-    const safeX = Math.min(45, 3 + 24.3 * Math.max(s.scale, s.endScale));
-    const safeY = Math.min(35, 3 + 12 * Math.max(s.scale, s.endScale));
+    // Bound the visible brand (including rotation) in the actual video aspect ratio.
+    // Artwork extends +/-180 horizontally and at most 38 vertically from its pivot.
+    const angle = (Math.max(Math.abs(s.rotation), Math.abs(s.endRotation)) * Math.PI) / 180;
+    const xAngle = Math.min(angle, Math.atan2(38, 180));
+    const extentX = 180 * Math.cos(xAngle) + 38 * Math.sin(xAngle);
+    const extentY = 180 * Math.sin(angle) + 38 * Math.cos(angle);
+    const maxScale = 1.35 * Math.max(s.scale, s.endScale);
+    const halfX = (extentX * maxScale) / 10;
+    const halfY = (extentY * maxScale * width) / (10 * height);
+    // Leave 3% edge padding plus room for the 3% entrance movement.
+    fit = Math.min(1, 47 / halfX, 44 / halfY);
+    const safeX = 3 + halfX * fit;
+    const safeY = 6 + halfY * fit;
     const corners = [
       [safeX, safeY],
       [100 - safeX, safeY],
@@ -169,7 +181,7 @@ export function motionPose(raw, time) {
   return {
     x,
     y: y + (1 - enter) * 3,
-    scale: (s.scale + (s.endScale - s.scale) * progress) * (0.92 + 0.08 * enter),
+    scale: (s.scale + (s.endScale - s.scale) * progress) * (0.92 + 0.08 * enter) * fit,
     rotation: s.rotation + (s.endRotation - s.rotation) * progress,
     opacity: s.opacity * enter * exit,
     reveal: enter,

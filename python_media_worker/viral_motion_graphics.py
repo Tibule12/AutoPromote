@@ -93,7 +93,7 @@ def ease(value, kind="smooth"):
     return t if kind == "linear" else 1 - (1 - t) ** 4 if kind == "punch" else t * t * (3 - 2 * t)
 
 
-def motion_pose(s, time):
+def motion_pose(s, time, width=1000, height=1778):
     local = time - s["startTime"]
     if not s["enabled"] or local < 0 or local >= s["duration"]:
         return None
@@ -102,16 +102,25 @@ def motion_pose(s, time):
     leave = ease((s["duration"] - local) / min(.3, s["duration"] / 3))
     x = s["x"] + (s["endX"] - s["x"]) * progress
     y = s["y"] + (s["endY"] - s["y"]) * progress
+    fit = 1
     if s["preset"] == "watermark":
-        safe_x = min(45, 3 + 24.3 * max(s["scale"], s["endScale"]))
-        safe_y = min(35, 3 + 12 * max(s["scale"], s["endScale"]))
+        # Match the browser's rotated artwork bounds and entrance padding.
+        angle = math.radians(max(abs(s["rotation"]), abs(s["endRotation"])))
+        x_angle = min(angle, math.atan2(38, 180))
+        extent_x = 180 * math.cos(x_angle) + 38 * math.sin(x_angle)
+        extent_y = 180 * math.sin(angle) + 38 * math.cos(angle)
+        max_scale = 1.35 * max(s["scale"], s["endScale"])
+        half_x = extent_x * max_scale / 10
+        half_y = extent_y * max_scale * width / (10 * height)
+        fit = min(1, 47 / half_x, 44 / half_y)
+        safe_x, safe_y = 3 + half_x * fit, 6 + half_y * fit
         corners = ((safe_x, safe_y), (100-safe_x, safe_y), (100-safe_x, 100-safe_y), (safe_x, 100-safe_y), (safe_x, safe_y))
         phase = local / s["duration"] * 4
         i = min(3, math.floor(phase))
         f = ease((phase - i - .65) / .35)
         x, y = [corners[i][j] + (corners[i + 1][j] - corners[i][j]) * f for j in (0, 1)]
     return dict(x=x, y=y + (1 - enter) * 3,
-                scale=(s["scale"] + (s["endScale"] - s["scale"]) * progress) * (.92 + .08 * enter),
+                scale=(s["scale"] + (s["endScale"] - s["scale"]) * progress) * (.92 + .08 * enter) * fit,
                 rotation=s["rotation"] + (s["endRotation"] - s["rotation"]) * progress,
                 opacity=s["opacity"] * enter * leave, reveal=enter,
                 count=ease(local / min(1.5, s["duration"] * .65)),
@@ -174,7 +183,7 @@ def font(size):
 def draw_motion_frame(scenes, time, width, height):
     canvas = Image.new("RGBA", (width, height))
     for s in scenes:
-        pose = motion_pose(s, time)
+        pose = motion_pose(s, time, width, height)
         if not pose or pose["opacity"] <= 0:
             continue
         # Supersample the canonical card, then transform around its centre.

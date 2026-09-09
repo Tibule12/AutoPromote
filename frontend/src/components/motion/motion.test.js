@@ -30,6 +30,40 @@ test("poses are seekable and independent of playback history", () => {
   expect(motionPose(scene, 6)).toBeNull();
 });
 
+test.each([
+  [1920, 1080],
+  [1080, 1920],
+  [1080, 1080],
+  [2560, 1080],
+])(
+  "moving brand stays inside a %i by %i canvas through rotation and scale changes",
+  (width, height) => {
+    const scene = normalizeMotion({
+      preset: "watermark",
+      duration: 12,
+      scale: 0.8,
+      endScale: 1.4,
+      rotation: -45,
+      endRotation: 45,
+    });
+    for (let time = 0; time < 12; time += 0.1) {
+      const pose = motionPose(scene, time, width, height);
+      const angle = (pose.rotation * Math.PI) / 180;
+      const scale = (pose.scale * 1.35 * width) / 1000;
+      for (const x of [-180, 180]) {
+        for (const y of [-38, 28]) {
+          const px = (width * pose.x) / 100 + scale * (x * Math.cos(angle) - y * Math.sin(angle));
+          const py = (height * pose.y) / 100 + scale * (x * Math.sin(angle) + y * Math.cos(angle));
+          expect(px).toBeGreaterThanOrEqual(0);
+          expect(px).toBeLessThanOrEqual(width);
+          expect(py).toBeGreaterThanOrEqual(0);
+          expect(py).toBeLessThanOrEqual(height);
+        }
+      }
+    }
+  }
+);
+
 test("sound synthesis is deterministic and fades end cleanly", () => {
   const effect = { tone: "impact", duration: 0.3, fadeIn: 0.02, fadeOut: 0.1 };
   const a = synthesizeEffect(effect, 8000),

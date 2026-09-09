@@ -3806,7 +3806,7 @@ const ViralClipStudio = ({
     const gain = audioContext.createGain();
     source.buffer = buffer;
     // Cues share the pre-speed edit clock with graphics and uploaded SFX.
-    source.playbackRate.value = videoRef.current?.paused ? 1 : previewSpeed;
+    source.playbackRate.value = videoRef.current?.paused ? 1 : videoRef.current?.playbackRate || 1;
     gain.gain.value =
       clampAudioControl(effect.volume, 0, 1, 0.8) *
       (previewMuted ? 0 : clampAudioControl(previewVolume, 0, 1, 1));
@@ -7387,6 +7387,7 @@ const ViralClipStudio = ({
     if (!video || renderedOutputUrl || comparisonMode === "before") return undefined;
 
     let cueFrame;
+    let buffering = video.seeking || video.readyState < 3;
     const pauseTimelineEffects = () => {
       cancelAnimationFrame(cueFrame);
       soundEffectAudioRefsRef.current.forEach(audio => audio?.pause());
@@ -7395,6 +7396,7 @@ const ViralClipStudio = ({
     };
 
     const syncSoundEffects = () => {
+      if (buffering || video.seeking) return;
       const outputTime = clampNumber(
         getPreviewTimelineTime(video.currentTime || 0),
         0,
@@ -7445,31 +7447,43 @@ const ViralClipStudio = ({
 
     const tickCues = () => {
       syncSoundEffects();
-      if (!video.paused) cueFrame = requestAnimationFrame(tickCues);
+      if (!video.paused && !buffering && !video.seeking) cueFrame = requestAnimationFrame(tickCues);
     };
     const startCues = () => {
       cancelAnimationFrame(cueFrame);
       tickCues();
     };
-    const seekCues = () => {
+    const suspendCues = () => {
+      buffering = true;
+      pauseTimelineEffects();
+    };
+    const resumeCues = () => {
+      buffering = video.seeking || video.readyState < 3;
+      if (!buffering) startCues();
+    };
+    const retimeCues = () => {
       pauseTimelineEffects();
       startCues();
     };
-    video.addEventListener("play", startCues);
+    video.addEventListener("play", resumeCues);
+    video.addEventListener("playing", resumeCues);
+    video.addEventListener("waiting", suspendCues);
     video.addEventListener("timeupdate", syncSoundEffects);
-    video.addEventListener("seeking", seekCues);
-    video.addEventListener("seeked", startCues);
-    video.addEventListener("ratechange", syncSoundEffects);
+    video.addEventListener("seeking", suspendCues);
+    video.addEventListener("seeked", resumeCues);
+    video.addEventListener("ratechange", retimeCues);
     video.addEventListener("pause", pauseTimelineEffects);
     video.addEventListener("ended", pauseTimelineEffects);
     startCues();
 
     return () => {
-      video.removeEventListener("play", startCues);
+      video.removeEventListener("play", resumeCues);
+      video.removeEventListener("playing", resumeCues);
+      video.removeEventListener("waiting", suspendCues);
       video.removeEventListener("timeupdate", syncSoundEffects);
-      video.removeEventListener("seeking", seekCues);
-      video.removeEventListener("seeked", startCues);
-      video.removeEventListener("ratechange", syncSoundEffects);
+      video.removeEventListener("seeking", suspendCues);
+      video.removeEventListener("seeked", resumeCues);
+      video.removeEventListener("ratechange", retimeCues);
       video.removeEventListener("pause", pauseTimelineEffects);
       video.removeEventListener("ended", pauseTimelineEffects);
       pauseTimelineEffects();

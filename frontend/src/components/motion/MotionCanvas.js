@@ -83,7 +83,7 @@ export default function MotionCanvas({ scenes, getTime, time = 0 }) {
       role="img"
     >
       {scenes.map(scene => {
-        const pose = motionPose(scene, frame);
+        const pose = motionPose(scene, frame, size.w, size.h);
         if (!pose) return null;
         return (
           <g

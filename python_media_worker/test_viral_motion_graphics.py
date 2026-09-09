@@ -63,6 +63,18 @@ class MotionContractTests(unittest.TestCase):
             self.assertIsNotNone(draw_motion_frame([scene], 1, 360, 640).getbbox(), preset)
             self.assertIsNone(draw_motion_frame([scene], 3, 360, 640).getbbox(), preset)
 
+    def test_rotated_watermark_renders_without_clipping_in_every_aspect_ratio(self):
+        scene = normalize_motion(dict(preset="watermark", text="@AutoPromote", duration=12,
+                                      scale=1.4, endScale=1.4, rotation=-45, endRotation=45))
+        for width, height in ((640, 360), (360, 640), (480, 480), (840, 360)):
+            for time in (.2, 3, 6, 9, 11.8):
+                with self.subTest(width=width, height=height, time=time):
+                    left, top, right, bottom = draw_motion_frame([scene], time, width, height).getbbox()
+                    self.assertGreater(left, 0)
+                    self.assertGreater(top, 0)
+                    self.assertLess(right, width)
+                    self.assertLess(bottom, height)
+
     @unittest.skipUnless(shutil.which("node"), "Node required for browser contract parity")
     def test_browser_worker_pose_artwork_and_pcm_parity(self):
         root = Path(__file__).resolve().parents[1]
@@ -76,7 +88,9 @@ import {{synthesizeEffect}} from {json.dumps(sound.as_uri())};
 const scenes=MOTION_PRESETS.map(p=>normalizeMotion({{id:p.id,preset:p.id,text:"A STRONG IDEA",secondary:"THE OTHER IDEA",value:-125,prefix:"R",startTime:2,duration:4,x:30,endX:65,y:25,endY:70,rotation:-10,endRotation:20}}));
 const poses=scenes.map(s=>[2,2.15,3,4,5.9,6].map(t=>{{const pose=motionPose(s,t);return {{pose,art:pose?motionPrimitives(s,pose):null}};}}));
 const sounds={json.dumps(SOUNDS)}.map(tone=>{{const e={{tone,duration:.12,fadeIn:.01,fadeOut:.02}};const pcm=synthesizeEffect(e,8000);return {{e,pcm:Array.from(pcm)}};}});
-process.stdout.write(JSON.stringify({{scenes,poses,sounds}}));'''
+const brand=normalizeMotion({{preset:"watermark",duration:12,scale:1.4,endScale:1.4,rotation:-45,endRotation:45}});
+const brandPoses=[[1920,1080],[1080,1920],[1080,1080],[2560,1080]].flatMap(([w,h])=>[.2,3,6,9,11.8].map(t=>({{w,h,t,pose:motionPose(brand,t,w,h)}})));
+process.stdout.write(JSON.stringify({{scenes,poses,sounds,brand,brandPoses}}));'''
             browser = json.loads(subprocess.check_output(["node", "--input-type=module", "-e", code]))
         for index, scene in enumerate(browser["scenes"]):
             for frame, time in enumerate([2, 2.15, 3, 4, 5.9, 6]):
@@ -98,6 +112,10 @@ process.stdout.write(JSON.stringify({{scenes,poses,sounds}}));'''
                                 self.assertEqual(a[key], b[key])
         for sound in browser["sounds"]:
             np.testing.assert_allclose(synthesize_effect(sound["e"], 8000), sound["pcm"], atol=1e-7)
+        for sample in browser["brandPoses"]:
+            pose = motion_pose(browser["brand"], sample["t"], sample["w"], sample["h"])
+            for key in pose:
+                self.assertAlmostEqual(pose[key], sample["pose"][key], places=9)
 
 
 @unittest.skipUnless(shutil.which("ffmpeg") and shutil.which("ffprobe"), "FFmpeg required")

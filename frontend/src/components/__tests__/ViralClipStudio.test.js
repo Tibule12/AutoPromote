@@ -2396,6 +2396,96 @@ describe("ViralClipStudio timeline sequencing", () => {
     );
   });
 
+  test("sound cues stop for buffering and seeking, then resume at the video time and rate", async () => {
+    const originalContext = window.AudioContext;
+    const sources = [];
+    window.AudioContext = jest.fn(() => ({
+      state: "running",
+      currentTime: 0,
+      destination: {},
+      createBuffer: (_channels, count) => ({ getChannelData: () => new Float32Array(count) }),
+      createBufferSource: () => {
+        const source = {
+          playbackRate: { value: 1 },
+          connect: jest.fn(),
+          disconnect: jest.fn(),
+          start: jest.fn(),
+          stop: jest.fn(),
+          addEventListener: jest.fn(),
+        };
+        sources.push(source);
+        return source;
+      },
+      createGain: () => ({ gain: { value: 1 }, connect: jest.fn(), disconnect: jest.fn() }),
+      close: jest.fn(() => Promise.resolve()),
+    }));
+    let unmount;
+    try {
+      ({ unmount } = render(
+        <ViralClipStudio
+          videoUrl="https://example.com/source.mp4"
+          clips={[{ id: "clip-sfx-sync", start: 0, end: 20, duration: 20 }]}
+          onSave={jest.fn()}
+          onCancel={jest.fn()}
+        />
+      ));
+      const video = screen.getByTestId("studio-after-video");
+      Object.defineProperty(video, "paused", { configurable: true, writable: true, value: true });
+      Object.defineProperty(video, "seeking", { configurable: true, writable: true, value: false });
+      Object.defineProperty(video, "readyState", { configurable: true, writable: true, value: 4 });
+      fireEvent.click(
+        within(screen.getByTestId("clip-studio-inspector")).getByRole("tab", { name: /Sound/i })
+      );
+      fireEvent.click(screen.getByTestId("sound-effect-preset-whoosh"));
+      video.currentTime = 0.1;
+      video.paused = false;
+      fireEvent.playing(video);
+      expect(sources).toHaveLength(1);
+      expect(sources[0].start).toHaveBeenCalledWith(0, 0.1);
+
+      video.readyState = 2;
+      fireEvent.waiting(video);
+      expect(sources[0].stop).toHaveBeenCalled();
+      fireEvent.timeUpdate(video);
+      expect(sources).toHaveLength(1);
+      video.readyState = 4;
+      video.currentTime = 0.2;
+      fireEvent.playing(video);
+      expect(sources).toHaveLength(2);
+      expect(sources[1].start).toHaveBeenCalledWith(0, 0.2);
+
+      video.seeking = true;
+      fireEvent.seeking(video);
+      expect(sources[1].stop).toHaveBeenCalled();
+      video.currentTime = 0.4;
+      fireEvent.timeUpdate(video);
+      expect(sources).toHaveLength(2);
+      video.seeking = false;
+      fireEvent.seeked(video);
+      expect(sources).toHaveLength(3);
+      expect(sources[2].start).toHaveBeenCalledWith(0, 0.4);
+
+      video.playbackRate = 1.5;
+      fireEvent.rateChange(video);
+      const retimed = sources[sources.length - 1];
+      expect(sources.length).toBeGreaterThanOrEqual(4);
+      // The speed UI also synchronizes React state from ratechange. Only the
+      // newest source may remain active across that effect refresh.
+      sources.slice(0, -1).forEach(source => expect(source.stop).toHaveBeenCalled());
+      expect(retimed.playbackRate.value).toBe(1.5);
+      expect(retimed.start).toHaveBeenCalledWith(0, 0.4);
+      video.paused = true;
+      fireEvent.pause(video);
+      expect(retimed.stop).toHaveBeenCalled();
+      const pausedCount = sources.length;
+      fireEvent.timeUpdate(video);
+      expect(sources).toHaveLength(pausedCount);
+    } finally {
+      unmount?.();
+      window.AudioContext = originalContext;
+    }
+  });
+
   test("places and edits built-in sound effects on the live timeline with undo and redo", async () => {
     render(
       <ViralClipStudio

@@ -5,6 +5,11 @@ card, Speaker intro, Focus callout and Moving brand. Scenes have editable text,
 timing, accent, opacity, start/end transforms and easing. Moving brand supplies
 its own corner path. Position controls use canvas percentages.
 
+Moving brand measures the rotated artwork against the actual video aspect
+ratio in both preview and export. It keeps edge padding throughout its path,
+including its entrance, and fits oversized brands inside the canvas. Horizontal,
+vertical, square and ultrawide videos share the same geometry checks.
+
 Each scene can own a synthesized sound cue. Moving, duplicating, removing or
 cutting a scene also updates its cue. Standalone sounds retain their existing
 upload, trim, volume, fade and enable controls. The Sound inspector and linked
@@ -18,6 +23,10 @@ All `startTime`, `duration` and `soundOffset` values use edited timeline seconds
 wall time, so seeking is reversible. The renderer inverts the existing speed
 plan to evaluate poses and audio at the correct output time. SFX change pitch
 with playback speed; source speech uses the existing speed pipeline.
+
+Timeline sound previews stop while video is buffering or seeking. Once playback
+resumes, cues restart at the current edit-clock offset. A playback-rate change
+replaces active synthesized sources using the video's actual playback rate.
 
 The frontend exports `motion_graphics: {version: 1, scenes: [...]}` and the
 combined `sound_effects` array. Linked sound IDs are `motion-sfx-<scene id>`;
