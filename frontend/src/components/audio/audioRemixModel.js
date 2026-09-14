@@ -101,7 +101,25 @@ export const DEFAULT_AUDIO_REMIX = Object.freeze({
   reverb: 68,
   intensity: 70,
   keepPitch: false,
+  contentType: "auto",
+  target: "master",
+  outputGain: 0,
+  levelMatch: true,
+  quality: "studio",
 });
+
+export const AUDIO_CONTENT_TYPES = Object.freeze([
+  { id: "auto", name: "Auto", description: "Balanced protection" },
+  { id: "choir", name: "Choir", description: "Wide, clear harmonies" },
+  { id: "speech", name: "Speech", description: "Clean spoken voice" },
+  { id: "music", name: "Music", description: "Punch and movement" },
+]);
+
+export const AUDIO_REMIX_TARGETS = Object.freeze([
+  { id: "master", name: "Full Mix" },
+  { id: "voice", name: "Voice" },
+  { id: "music", name: "Music" },
+]);
 
 export function normalizeAudioRemix(value = {}) {
   const preset = AUDIO_REMIX_PRESETS.find(item => item.id === value.preset);
@@ -118,6 +136,13 @@ export function normalizeAudioRemix(value = {}) {
     reverb: bounded(value.reverb, 0, 100, base.reverb),
     intensity: bounded(value.intensity, 0, 100, base.intensity),
     keepPitch: value.keepPitch === true,
+    contentType: AUDIO_CONTENT_TYPES.some(item => item.id === value.contentType)
+      ? value.contentType
+      : "auto",
+    target: AUDIO_REMIX_TARGETS.some(item => item.id === value.target) ? value.target : "master",
+    outputGain: bounded(value.outputGain, -12, 6, 0),
+    levelMatch: value.levelMatch !== false,
+    quality: value.quality === "preview" ? "preview" : "studio",
   };
 }
 
@@ -144,5 +169,10 @@ export function audioRemixForRender(value) {
     reverb_mix: remix.reverb / 100,
     intensity: remix.intensity / 100,
     keep_pitch: remix.keepPitch,
+    content_type: remix.contentType,
+    target: remix.target,
+    output_gain_db: remix.outputGain,
+    level_match: remix.levelMatch,
+    quality: remix.quality,
   };
 }

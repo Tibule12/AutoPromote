@@ -1,5 +1,5 @@
-Warning: truncated output (original token count: 157084)
-Total output lines: 15396
+Warning: truncated output (original token count: 157649)
+Total output lines: 15449
 
 /* eslint-disable no-unused-vars, no-control-regex */
 import {
@@ -31,7 +31,10 @@ import {
   audioRemixForRender,
   normalizeAudioRemix,
 } from "./audio/audioRemixModel";
-import { updateAudioRemixPreview } from "./audio/audioRemixPreview";
+import {
+  subscribeAudioRemixMeter,
+  updateAudioRemixPreview,
+} from "./audio/audioRemixPreview";
 import "./audio/audioRemixTimeline.css";
 import "./ViralClipStudio.css"; // We'll create this CSS next
 
@@ -1208,7 +1211,546 @@ const getWatermarkPreviewRegions = mode => {
     case "adaptive":
     default:
       return [
-        { top: "4%", right: "4%", width:…137084 tokens truncated…                    </button>
+        { top: "4%", right: "4%", width: "24%", height: "8%", rotation: -2, opacity: 0.88 },
+        { bottom: "6%", left: "4%", width: "28%", height: "8%", rotation: 1.5, opacity: 0.9 },
+      ];
+  }
+};
+
+const isGenericCaptionPlaceholder = value =>
+  /^(full source|source video).*(manual edit|loaded|ready)/i.test(normalizePlainText(value));
+
+const getCaptionPreviewSourceText = clip => {
+  const transcript = normalizePlainText(clip?.text || clip?.transcript || "");
+  if (transcript) return transcript;
+
+  const detectedMomentCopy = normalizePlainText(clip?.reason || "");
+  return isGenericCaptionPlaceholder(detectedMomentCopy) ? "" : detectedMomentCopy;
+};
+
+const normalizeCaptionSegments = segments =>
+  (Array.isArray(segments) ? segments : [])
+    .map((segment, index) => {
+      const start = Math.max(0, Number(segment?.start ?? segment?.start_time ?? 0));
+      const end = Math.max(start + 0.05, Number(segment?.end ?? segment?.end_time ?? start + 0.8));
+      const text = normalizePlainText(segment?.text || "");
+      if (!text) return null;
+      const words = text.split(/\s+/).filter(Boolean);
+      return {
+        id: segment?.id || `transcript-caption-${index}`,
+        start,
+        end,
+        duration: end - start,
+        text,
+        words,
+      };
+    })
+    .filter(Boolean);
+
+const getTimedCaptionPreviewState = ({ segments, sourceTime }) => {
+  const chunks = normalizeCaptionSegments(segments);
+  const safeTime = Math.max(0, Number(sourceTime || 0));
+  const currentIndex = chunks.findIndex(
+    segment => safeTime >= segment.start && safeTime < segment.end
+  );
+  const currentChunk = currentIndex >= 0 ? chunks[currentIndex] : null;
+  const nextChunk = currentIndex >= 0 ? chunks[currentIndex + 1] || null : null;
+  const activeWordIndex = currentChunk
+    ? Math.min(
+        currentChunk.words.length - 1,
+        Math.floor(
+          clampNumber(
+            (safeTime - currentChunk.start) / Math.max(currentChunk.duration, 0.05),
+            0,
+            0.999,
+            0
+          ) * currentChunk.words.length
+        )
+      )
+    : 0;
+
+  return {
+    chunks,
+    currentChunk,
+    nextChunk,
+    activeWordIndex,
+    previewDuration: chunks.length ? chunks[chunks.length - 1].end : 0,
+  };
+};
+
+const buildCaptionPreviewChunks = text => {
+  const words = normalizePlainText(text).split(/\s+/).filter(Boolean).slice(0, 24);
+
+  if (!words.length) return [];
+
+  const wordsPerChunk = words.length >= 16 ? 4 : words.length >= 9 ? 3 : 2;
+  const chunks = [];
+
+  for (let index = 0; index < words.length; index += wordsPerChunk) {
+    const chunkWords = words.slice(index, index + wordsPerChunk);
+    chunks.push({
+      id: `caption-chunk-${index}`,
+      text: chunkWords.join(" "),
+      words: chunkWords,
+    });
+  }
+
+  return chunks;
+};
+
+const getCaptionPreviewState = ({ text, localTime, duration, hideAfterEnd = false }) => {
+  const chunks = buildCaptionPreviewChunks(text);
+  if (!chunks.length)
+    return {
+      chunks: [],
+      currentChunk: null,
+      nextChunk: null,
+      activeWordIndex: 0,
+      previewDuration: 0,
+    };
+
+  const safeDuration = Math.max(Number(duration) || 0, chunks.length * 0.85, 1.8);
+  if (hideAfterEnd && Number(localTime || 0) >= safeDuration) {
+    return {
+      chunks,
+      currentChunk: null,
+      nextChunk: null,
+      activeWordIndex: 0,
+      previewDuration: safeDuration,
+    };
+  }
+  const clampedTime = clampNumber(localTime, 0, safeDuration, 0);
+  const chunkProgress = clampNumber(clampedTime / safeDuration, 0, 0.999, 0);
+  const currentChunkIndex = Math.min(chunks.length - 1, Math.floor(chunkProgress * chunks.length));
+  const currentChunk = chunks[currentChunkIndex];
+  const nextChunk = chunks[currentChunkIndex + 1] || null;
+  const chunkStart = (safeDuration / chunks.length) * currentChunkIndex;
+  const chunkDuration = safeDuration / chunks.length;
+  const intraChunkProgress = clampNumber(
+    (clampedTime - chunkStart) / Math.max(chunkDuration, 0.01),
+    0,
+    0.999,
+    0
+  );
+  const activeWordIndex = Math.min(
+    currentChunk.words.length - 1,
+    Math.floor(intraChunkProgress * currentChunk.words.length)
+  );
+
+  return { chunks, currentChunk, nextChunk, activeWordIndex, previewDuration: safeDuration };
+};
+
+const clampManualWatermarkRegion = region => {
+  const width = clampNumber(region?.width, 8, 58, 24);
+  const height = clampNumber(region?.height, 4, 24, 8);
+  const left = clampNumber(region?.left, 0, 100 - width, 4);
+  const top = clampNumber(region?.top, 0, 100 - height, 4);
+
+  return {
+    id: region?.id || `watermark-${Date.now()}`,
+    left,
+    top,
+    width,
+    height,
+    rotation: clampNumber(region?.rotation, -12, 12, 0),
+    opacity: clampNumber(region?.opacity, 0.45, 1, 0.88),
+    track: region?.track !== false,
+    seedTime: clampNumber(region?.seedTime, 0, 36000, 0),
+  };
+};
+
+const createManualWatermarkRegion = () =>
+  clampManualWatermarkRegion({
+    id: createSecureId("watermark"),
+    left: 4,
+    top: 4,
+    width: 26,
+    height: 8,
+    rotation: 0,
+    opacity: 0.88,
+    track: true,
+    seedTime: 0,
+  });
+
+const toWatermarkPreviewStyle = region => ({
+  left: `${Number(region.left || 0)}%`,
+  top: `${Number(region.top || 0)}%`,
+  width: `${Number(region.width || 0)}%`,
+  height: `${Number(region.height || 0)}%`,
+  "--cleanup-rotation": `${Number(region.rotation || 0)}deg`,
+  "--cleanup-opacity": Number(region.opacity || 0.88),
+});
+
+const serializeManualWatermarkRegions = regions =>
+  (Array.isArray(regions) ? regions : []).map(region => ({
+    left: clampNumber(region?.left, 0, 100, 0),
+    top: clampNumber(region?.top, 0, 100, 0),
+    width: clampNumber(region?.width, 0, 100, 0),
+    height: clampNumber(region?.height, 0, 100, 0),
+    track: region?.track !== false,
+    seed_time: clampNumber(region?.seedTime, 0, 36000, 0),
+  }));
+
+const getAudioExtractionStageLabel = (stage, progress) => {
+  const normalizedStage = String(stage || "")
+    .trim()
+    .toLowerCase();
+  switch (normalizedStage) {
+    case "queued_for_dispatch":
+      return "Preparing extraction job...";
+    case "queued_for_worker":
+      return "Waiting for extraction worker...";
+    case "downloading_source":
+      return `Downloading donor video... ${Math.round(progress)}%`;
+    case "extracting_audio":
+      return `Extracting audio... ${Math.round(progress)}%`;
+    case "uploading_audio":
+      return `Uploading extracted audio... ${Math.round(progress)}%`;
+    case "completed":
+      return "Background audio added to the timeline.";
+    default:
+      return `Extracting audio... ${Math.round(progress)}%`;
+  }
+};
+
+const RainbowText = ({ text, offset = 0 }) => {
+  const safeText = normalizePlainText(text);
+  if (!safeText) return null;
+  return (
+    <span
+      style={{
+        display: "inline-block",
+        fontWeight: "900",
+        textShadow: "3px 3px 0 #000", // Thicker outline
+        WebkitTextStroke: "1.5px black", // Crisp outline
+        fontFamily: '"Comic Sans MS", "Chalkboard SE", "Marker Felt", sans-serif',
+        fontSize: "24px", // Bigger by default
+      }}
+    >
+      {safeText.split("").map((char, index) => (
+        <span
+          key={index}
+          style={{ color: RAINBOW_COLORS[(index + offset) % RAINBOW_COLORS.length] }}
+        >
+          {char}
+        </span>
+      ))}
+    </span>
+  );
+};
+
+const sidebarSectionTitleStyle = {
+  margin: "0 0 10px 0",
+  color: "#fff8ec",
+  fontWeight: 800,
+};
+
+const sidebarCheckboxLabelStyle = {
+  display: "block",
+  cursor: "pointer",
+  color: "#f8fafc",
+  fontWeight: 700,
+};
+
+const sidebarBodyTextStyle = {
+  fontSize: "13px",
+  color: "rgba(247, 248, 251, 0.74)",
+  fontWeight: 600,
+  lineHeight: 1.45,
+};
+
+const VIRAL_STUDIO_WORKFLOW = [
+  {
+    label: "Moments",
+    helper: "Choose the source clip",
+  },
+  {
+    label: "Hook",
+    helper: "Shape the opening seconds",
+  },
+  {
+    label: "B-roll",
+    helper: "Build the visual timeline",
+  },
+  {
+    label: "Export",
+    helper: "Review and render",
+  },
+];
+
+const CREATIVE_STUDIO_TOOLS = [
+  { id: "moments", label: "Moments", icon: "✦" },
+  { id: "cut", label: "Cut", icon: "✂" },
+  { id: "hook", label: "Hook", icon: "⌁" },
+  { id: "captions", label: "Captions", icon: "CC" },
+  { id: "pacing", label: "Pacing", icon: "≋" },
+  { id: "broll", label: "B-roll", icon: "▣" },
+  { id: "sound", label: "Sound", icon: "♫" },
+  { id: "motion", label: "Motion", icon: "◆" },
+  { id: "export", label: "Export", icon: "⇧" },
+];
+
+const CREATIVE_INTENTS = [
+  { id: "trim", label: "Remove boring parts", icon: "✂" },
+  { id: "energy", label: "Increase energy", icon: "ϟ" },
+  { id: "proof", label: "Show proof", icon: "▥" },
+  { id: "loop", label: "Make it loop", icon: "↻" },
+];
+
+const SIGNATURE_CREATIVE_STYLES = [
+  {
+    id: "auto_story",
+    label: "Auto Story",
+    icon: "✦",
+    helper: "Choreograph an opening break, movement build and transformed payoff automatically.",
+  },
+  {
+    id: "motion_sculpture",
+    label: "Motion Sculpture",
+    icon: "≋",
+    helper: "Echo movement, shape momentum and make action feel physical.",
+  },
+  {
+    id: "beat_echo",
+    label: "Beat Echo",
+    icon: "◫",
+    helper: "Turn real delayed frames into colour-sliced movement echoes on every beat.",
+  },
+  {
+    id: "reality_break",
+    label: "Reality Break",
+    icon: "◇",
+    helper: "Split ordinary footage into a dimensional, cinematic moment.",
+  },
+  {
+    id: "tracked_reveal",
+    label: "Tracked Reveal",
+    icon: "◐",
+    helper: "Let movement reveal the transformed colour world underneath.",
+  },
+];
+
+const CREATIVE_INTENSITIES = [
+  { id: "clean", label: "Clean" },
+  { id: "bold", label: "Bold" },
+  { id: "unreal", label: "Unreal" },
+];
+
+const CREATOR_CONTENT_PROFILES = [
+  {
+    id: "auto",
+    label: "Auto",
+    helper: "Let AutoPromote balance clarity, movement and payoff.",
+    preset: "auto_story",
+    intensity: "bold",
+    transition: "soft_dip",
+    pacing: "balanced",
+    speed: 1,
+  },
+  {
+    id: "talk_story",
+    label: "T…132649 tokens truncated…on}
+                          onChange={e => setHookTextAnimation(e.target.value)}
+                        >
+                          <option value="slide-up">Slide Up</option>
+                          <option value="fade-in">Fade In</option>
+                        </select>
+                      </label>
+                      <label className="studio-slider-label">
+                        <span>Zoom intensity {hookZoomScale.toFixed(2)}x</span>
+                        <input
+                          type="range"
+                          min={1}
+                          max={1.24}
+                          step={0.01}
+                          value={hookZoomScale}
+                          onChange={e => setHookZoomScale(Number(e.target.value))}
+                        />
+                      </label>
+                    </div>
+                    <label className="studio-slider-label">
+                      <span>Hook duration {hookDuration.toFixed(2)}s</span>
+                      <input
+                        type="range"
+                        min={hookMinDuration}
+                        max={hookMaxDuration}
+                        step={0.05}
+                        value={hookDuration}
+                        onChange={e => setHookDuration(Number(e.target.value))}
+                      />
+                    </label>
+                    <div className="hook-preset-card">
+                      <strong>Manual hook selection</strong>
+                      <div className="mini-toggle-row">
+                        <button
+                          type="button"
+                          className={`mini-toggle-btn ${hookPickMode ? "active" : ""}`}
+                          onClick={() => {
+                            setHookPickMode(prev => !prev);
+                            setHookSelectionMode(false);
+                            setHookFocusMode(false);
+                          }}
+                        >
+                          {hookPickMode ? "Choosing hook" : "Choose Hook"}
+                        </button>
+                        <button
+                          type="button"
+                          className={`mini-toggle-btn ${hookFocusMode ? "active" : ""}`}
+                          onClick={() => {
+                            setAddHook(true);
+                            setHookFocusMode(prev => !prev);
+                            setHookSelectionMode(false);
+                            setHookPickMode(false);
+                          }}
+                        >
+                          {hookFocusMode ? "Picking focus" : "Pick Focus"}
+                        </button>
+                        <button
+                          type="button"
+                          className="mini-toggle-btn"
+                          onClick={setCurrentTimeAsHook}
+                        >
+                          Set as Hook
+                        </button>
+                      </div>
+                      <p className="hook-manual-copy">
+                        Choose the exact opening moment on the timeline, then click the preview if
+                        you want the frozen frame to zoom toward a face or object.
+                      </p>
+                      <div className="hook-manual-readout">
+                        <span>Hook point {formatPreviewTimePrecise(trimAwareCurrentTime)}</span>
+                        <span>
+                          Focus target {Math.round(resolvedHookFocusPoint.x)}% x{" "}
+                          {Math.round(resolvedHookFocusPoint.y)}%
+                        </span>
+                      </div>
+                    </div>
+                    <div className="hook-segment-card">
+                      <div className="hook-segment-header">
+                        <div>
+                          <strong>Hook Source Span</strong>
+                          <p>
+                            This is the same opening hook, not a second one. It controls how much
+                            source footage the opening uses before the clip continues without
+                            replaying that hook section again.
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          className={`mini-toggle-btn ${hookSelectionMode ? "active" : ""}`}
+                          onClick={() => {
+                            setHookSelectionMode(prev => !prev);
+                            setHookPickMode(false);
+                            setHookFocusMode(false);
+                          }}
+                        >
+                          {hookSelectionMode ? "Selection active" : "Select Hook Segment"}
+                        </button>
+                      </div>
+                      <div
+                        ref={hookSegmentTrackRef}
+                        className={`hook-segment-track ${hookSelectionMode ? "selection-enabled" : ""} ${hookPickMode ? "playhead-enabled" : ""}`}
+                        onMouseDown={handleHookTrackPointerDown}
+                        role="presentation"
+                      >
+                        <span className="hook-segment-track-base" />
+                        <span
+                          className={`hook-segment-suggestion ${hookAnalysisStatus === "ready" ? "active" : ""}`}
+                          style={{
+                            left: `${hookSuggestionLeft}%`,
+                            width: `${Math.max(2, hookSuggestionWidth)}%`,
+                          }}
+                        />
+                        <span
+                          className="hook-segment-playhead"
+                          style={{ left: `${hookPlayheadLeft}%` }}
+                        />
+                        <button
+                          type="button"
+                          className={`hook-playhead-handle ${hookPickMode ? "active" : ""}`}
+                          style={{ left: `${hookPlayheadLeft}%` }}
+                          onMouseDown={hookPickMode ? beginHookPlayheadDrag : undefined}
+                          aria-label="Drag hook playhead"
+                        />
+                        <span
+                          className="hook-segment-marker"
+                          style={{ left: `${hookSelectionLeft}%` }}
+                        />
+                        <span
+                          className="hook-segment-selection"
+                          style={{
+                            left: `${hookSelectionLeft}%`,
+                            width: `${Math.max(3, hookSelectionWidth)}%`,
+                          }}
+                          onMouseDown={event => beginHookSegmentDrag(event, "range")}
+                          role="presentation"
+                        >
+                          <button
+                            type="button"
+                            className="hook-segment-handle hook-segment-handle-start"
+                            onMouseDown={event => beginHookSegmentDrag(event, "start")}
+                            aria-label="Adjust hook start"
+                          />
+                          <button
+                            type="button"
+                            className="hook-segment-handle hook-segment-handle-end"
+                            onMouseDown={event => beginHookSegmentDrag(event, "end")}
+                            aria-label="Adjust hook end"
+                          />
+                        </span>
+                      </div>
+                      <div className="hook-segment-readout">
+                        <span>
+                          Source range {formatPreviewTimePrecise(resolvedHookStart)} to{" "}
+                          {formatPreviewTimePrecise(hookEnd)}
+                        </span>
+                        <span>{hookDuration.toFixed(2)}s</span>
+                      </div>
+                      <div className="hook-segment-scrubbers">
+                        <label className="studio-slider-label">
+                          <span>Hook start {resolvedHookStart.toFixed(2)}s</span>
+                          <input
+                            type="range"
+                            min={0}
+                            max={Math.max(0.1, hookStartLimit)}
+                            step={0.01}
+                            value={resolvedHookStart}
+                            onChange={e =>
+                              setHookSegmentRange(Number(e.target.value), hookEnd, {
+                                preview: true,
+                              })
+                            }
+                          />
+                        </label>
+                        <label className="studio-slider-label">
+                          <span>Hook end {hookEnd.toFixed(2)}s</span>
+                          <input
+                            type="range"
+                            min={Math.min(
+                              hookEndMinimum,
+                              Math.max(0.1, Number(currentTimelineWindow.duration || 0))
+                            )}
+                            max={Math.max(
+                              hookEndMinimum,
+                              Number(currentTimelineWindow.duration || hookEndMaximum || 0.1)
+                            )}
+                            step={0.01}
+                            value={hookEnd}
+                            onChange={e =>
+                              setHookSegmentRange(resolvedHookStart, Number(e.target.value))
+                            }
+                          />
+                        </label>
+                      </div>
+                    </div>
+                    <div className="mini-toggle-row">
+                      <button
+                        type="button"
+                        className="mini-toggle-btn active"
+                        onClick={() => previewHookSegment(false)}
+                      >
+                        Preview hook once
+                      </button>
                       <button
                         type="button"
                         className={`mini-toggle-btn ${hookPreviewLoop ? "active" : ""}`}

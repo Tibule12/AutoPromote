@@ -17,6 +17,7 @@ feature can be ported into a newer Studio without merging the older screen.
 - Mount `AudioRemixPanel` in the Sound inspector.
 - Persist `audioRemix` in editor history.
 - Call `updateAudioRemixPreview` for live browser playback.
+- Subscribe to `subscribeAudioRemixMeter` for the live peak/clipping meter.
 - Send `audioRemixForRender(audioRemix)` as `audio_remix`.
 - Accept `audio_remix` in `RenderViralRequest` and call
   `render_audio_remix` after the base MP4 is rendered.
@@ -35,9 +36,19 @@ feature can be ported into a newer Studio without merging the older screen.
   "air_db": 1,
   "reverb_mix": 0.68,
   "intensity": 0.7,
-  "keep_pitch": false
+  "keep_pitch": false,
+  "content_type": "choir",
+  "target": "master",
+  "output_gain_db": 0,
+  "level_match": true,
+  "quality": "studio"
 }
 ```
 
 The existing Studio speed plan owns the video speed. The remix renderer owns
 independent pitch, EQ, reverb, limiting, and final AAC delivery.
+
+`target` supports `master`, `voice`, and `music`. Mastering runs after motion
+sound cues so the limiter protects the complete mix. Voice and music targeting
+run before the tracks are mixed. `content_type` supports `auto`, `choir`,
+`speech`, and `music`; each uses a different dynamics/protection chain.

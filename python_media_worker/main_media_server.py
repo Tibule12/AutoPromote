@@ -1,5 +1,5 @@
-Warning: truncated output (original token count: 330239)
-... 272380 bytes omitted ...
+Warning: truncated output (original token count: 330713)
+... 274274 bytes omitted ...
 
 from fastapi import FastAPI, HTTPException, UploadFile, File, BackgroundTasks, Request, Form
 from fastapi.responses import FileResponse
@@ -88,9 +88,17 @@ except ImportError:
     from viral_motion_graphics import render_motion_and_sound, validate_design
 
 try:
-    from .viral_audio_remix import normalize_audio_remix, render_audio_remix
+    from .viral_audio_remix import (
+        build_audio_remix_chain,
+        normalize_audio_remix,
+        render_audio_remix,
+    )
 except ImportError:
-    from viral_audio_remix import normalize_audio_remix, render_audio_remix
+    from viral_audio_remix import (
+        build_audio_remix_chain,
+        normalize_audio_remix,
+        render_audio_remix,
+    )
 
 # Fix asyncio event loop policy for Windows (Enable Proactor for Subprocesses)
 if sys.platform == 'win32':
@@ -1105,7 +1113,406 @@ async def materialize_video_input(video_url, local_path, keep_audio=False, max_l
 
 
 def get_local_media_cache_dir():
-    cache_dir = os.g…242152 tokens truncated…if ov_path:
+    cache_dir = os.getenv(
+        "LOCAL_MEDIA_JOB_CACHE_DIR",
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "../tmp/media-job-cache")),
+    )
+    os.makedirs(cache_dir, exist_ok=True)
+    return cache_dir
+
+
+def build_media_cache_key(source_url, cache_key=None):
+    raw_key = str(cache_key or source_url or "").strip()
+    return hashlib.sha256(raw_key.encode("utf-8")).hexdigest()[:32]
+
+
+def link_or_copy_cached_media(source_path, local_path):
+    """Create a cheap job-local reference to cached media, falling back to copy."""
+    source_abs = os.path.abspath(source_path)
+    local_abs = os.path.abspath(local_path)
+    if source_abs == local_abs:
+        return local_abs
+    os.makedirs(os.path.dirname(local_abs), exist_ok=True)
+    try:
+        if os.path.exists(local_abs):
+            os.remove(local_abs)
+        os.link(source_abs, local_abs)
+        return local_abs
+    except OSError:
+        shutil.copy2(source_abs, local_abs)
+        return local_abs
+
+
+async def materialize_cached_media_input(source_url, local_path, cache_key=None, keep_audio=False):
+    source = str(source_url or "").strip()
+    if not source:
+        raise HTTPException(status_code=400, detail="source_url is required")
+
+    cache_key_text = str(cache_key or source)
+    extension = os.path.splitext(cache_key_text.split("?")[0])[1] or os.path.splitext(local_path)[1] or ".bin"
+    cache_mode_key = f"{cache_key_text}:keep-audio" if keep_audio else cache_key_text
+    cache_path = os.path.join(get_local_media_cache_dir(), f"{build_media_cache_key(source, cache_mode_key)}{extension}")
+
+    if not IS_PRODUCTION_ENV and os.path.exists(cache_path) and os.path.getsize(cache_path) > 1024:
+        if keep_audio and not has_audio_stream(cache_path):
+            logger.warning(f"Ignoring cached media without required audio stream: {cache_path}")
+            try:
+                os.remove(cache_path)
+            except OSError:
+                pass
+        else:
+            logger.info(f"Using cached local media for clean-audio sync: {cache_path}")
+            return link_or_copy_cached_media(cache_path, local_path)
+
+    resolved_local_path = await materialize_video_input(source, local_path, keep_audio=keep_audio)
+    if keep_audio and not has_audio_stream(resolved_local_path):
+        raise HTTPException(status_code=422, detail="External clean-audio input has no audio stream after materialization")
+
+    if not IS_PRODUCTION_ENV and os.path.exists(resolved_local_path) and os.path.getsize(resolved_local_path) > 1024:
+        try:
+            shutil.copy2(resolved_local_path, cache_path)
+            logger.info(f"Cached local media for repeat dev sync tests: {cache_path}")
+        except Exception as cache_error:
+            logger.warning(f"Could not cache local media input: {cache_error}")
+
+    return resolved_local_path
+
+
+async def materialize_audio_input(source_url, local_path, sample_rate=None):
+    """Materialize any URL/local media as mono WAV for sync-only analysis."""
+    source = str(source_url or "").strip()
+    if not source:
+        raise HTTPException(status_code=400, detail="source_url is required")
+
+    resolved_local_path = local_path if local_path.lower().endswith(".wav") else f"{local_path}.wav"
+    os.makedirs(os.path.dirname(os.path.abspath(resolved_local_path)), exist_ok=True)
+
+    if source.startswith("http://") or source.startswith("https://"):
+        input_source = source
+    else:
+        if IS_PRODUCTION_ENV:
+            raise HTTPException(status_code=400, detail="Only http/https URLs are accepted for audio source_url")
+        absolute_source = os.path.abspath(source)
+        allowed_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "tmp"))
+        if not absolute_source.startswith(allowed_dir + os.sep):
+            raise HTTPException(status_code=400, detail="Local paths must be within the tmp directory")
+        if not os.path.exists(absolute_source):
+            raise HTTPException(status_code=404, detail=f"Input audio not found: {absolute_source}")
+        input_source = absolute_source
+
+    part_path = f"{resolved_local_path}.part.wav"
+    try:
+        if os.path.exists(part_path):
+            os.remove(part_path)
+    except OSError:
+        pass
+
+    cmd = ["ffmpeg", "-nostdin"]
+    if input_source.startswith("http://") or input_source.startswith("https://"):
+        cmd.extend(["-user_agent", "Mozilla/5.0", "-timeout", "30000000"])
+    cmd.extend([
+        "-i",
+        input_source,
+        "-vn",
+        "-ac",
+        "1",
+        "-ar",
+        str(sample_rate or MULTICAM_SYNC_SAMPLE_RATE),
+        "-acodec",
+        "pcm_s16le",
+        "-y",
+        part_path,
+    ])
+
+    try:
+        await run_subprocess_async(
+            cmd,
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        os.replace(part_path, resolved_local_path)
+        if not os.path.exists(resolved_local_path) or os.path.getsize(resolved_local_path) < 1024:
+            raise ValueError("audio materialization produced an empty or tiny file")
+        if not has_audio_stream(resolved_local_path):
+            raise ValueError("audio materialization produced a file without an audio stream")
+        duration = get_media_duration(resolved_local_path)
+        if duration <= 0.0:
+            raise ValueError("audio materialization produced a zero-duration file")
+        logger.info(
+            "Materialized sync audio %.1fs (%.1fMB): %s",
+            duration,
+            os.path.getsize(resolved_local_path) / 1024 / 1024,
+            resolved_local_path,
+        )
+        return resolved_local_path
+    except Exception as audio_error:
+        try:
+            if os.path.exists(part_path):
+                os.remove(part_path)
+        except OSError:
+            pass
+        raise HTTPException(status_code=422, detail=f"Could not materialize audio for sync: {audio_error}")
+
+
+async def materialize_cached_audio_input(source_url, local_path, cache_key=None, sample_rate=None):
+    source = str(source_url or "").strip()
+    if not source:
+        raise HTTPException(status_code=400, detail="source_url is required")
+
+    cache_key_text = str(cache_key or source)
+    cache_mode_key = f"{cache_key_text}:sync-audio:{sample_rate or MULTICAM_SYNC_SAMPLE_RATE}"
+    cache_path = os.path.join(
+        get_local_media_cache_dir(),
+        f"{build_media_cache_key(source, cache_mode_key)}.wav",
+    )
+
+    if not IS_PRODUCTION_ENV and os.path.exists(cache_path) and os.path.getsize(cache_path) > 1024:
+        if has_audio_stream(cache_path):
+            logger.info(f"Using cached local sync audio: {cache_path}")
+            return link_or_copy_cached_media(cache_path, local_path if local_path.endswith(".wav") else f"{local_path}.wav")
+        try:
+            os.remove(cache_path)
+        except OSError:
+            pass
+
+    resolved_local_path = await materialize_audio_input(source, local_path, sample_rate=sample_rate)
+
+    if not IS_PRODUCTION_ENV and os.path.exists(resolved_local_path) and os.path.getsize(resolved_local_path) > 1024:
+        try:
+            shutil.copy2(resolved_local_path, cache_path)
+            logger.info(f"Cached local sync audio for repeat dev tests: {cache_path}")
+        except Exception as cache_error:
+            logger.warning(f"Could not cache local sync audio input: {cache_error}")
+
+    return resolved_local_path
+
+
+def get_cfr_cache_dir():
+    """Persistent cache directory for normalized CFR sources — survives across renders."""
+    cache_dir = os.path.join(
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "../tmp/cfr-cache"))
+    )
+    os.makedirs(cache_dir, exist_ok=True)
+    return cache_dir
+
+
+def cfr_cache_key(source_url):
+    """Stable cache key from source URL."""
+    return hashlib.sha256(str(source_url or "").strip().encode("utf-8")).hexdigest()[:32]
+
+
+def cfr_cache_path_for(source_url, keep_audio=False):
+    """Full path to the CFR cache file for a given source URL (may not exist yet)."""
+    suffix = "_av" if keep_audio else ""
+    return os.path.join(get_cfr_cache_dir(), f"{cfr_cache_key(source_url)}{suffix}.mp4")
+
+
+def windowed_cfr_cache_path_for(source_url, source_start, duration, keep_audio=False, max_long_edge=None):
+    """Persistent CFR cache path for an explicit source-time window."""
+    source = str(source_url or "").strip()
+    try:
+        stat = os.stat(source) if source and not source.startswith(("http://", "https://")) else None
+    except OSError:
+        stat = None
+    identity = {
+        "source": source,
+        "start": round(max(0.0, float(source_start or 0.0)), 3),
+        "duration": round(max(0.02, float(duration or 0.0)), 3),
+        "keep_audio": bool(keep_audio),
+        "max_long_edge": int(float(max_long_edge or 0)),
+        "version": 1,
+    }
+    if stat is not None:
+        identity["size"] = int(stat.st_size)
+        identity["mtime_ns"] = int(getattr(stat, "st_mtime_ns", int(stat.st_mtime * 1_000_000_000)))
+    key = hashlib.sha256(json.dumps(identity, sort_keys=True).encode("utf-8")).hexdigest()[:32]
+    suffix = "_av" if keep_audio else ""
+    return os.path.join(get_cfr_cache_dir(), f"{key}_win{suffix}.mp4")
+
+
+def get_multicam_audio_analysis_cache_dir():
+    """Persistent lightweight audio cache used by Cam Combiner active-speaker scoring."""
+    cache_dir = os.getenv(
+        "MULTICAM_AUDIO_ANALYSIS_CACHE_DIR",
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "../tmp/multicam-audio-analysis-cache")),
+    )
+    os.makedirs(cache_dir, exist_ok=True)
+    return cache_dir
+
+
+def multicam_audio_analysis_cache_path_for(source_url):
+    return os.path.join(get_multicam_audio_analysis_cache_dir(), f"{cfr_cache_key(source_url)}.wav")
+
+
+async def materialize_multicam_audio_analysis_cache(source_url):
+    """
+    Keep active-speaker scoring independent from t…237152 tokens truncated…          word_timestamps=use_animated,
+                        ),
+                    )
+                else:
+                    whisper_result = {"segments": []}
+
+                segments = whisper_result.get("segments", [])
+                if segments:
+                    logger.info(f"Generated {len(segments)} caption segments (word_timestamps={use_animated})")
+
+                    if use_animated and segments:
+                        # Generate ASS subtitle file with animated word-level captions
+                        w, h = get_video_dimensions(working_path)
+                        ass_content = generate_ass_captions(
+                            whisper_result,
+                            caption_style_name,
+                            w,
+                            h,
+                            caption_position=request.caption_position,
+                            caption_scale=request.caption_scale,
+                        )
+                        ass_subtitle_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_captions.ass")
+                        with open(ass_subtitle_path, "w", encoding="utf-8") as f:
+                            f.write(ass_content)
+                        logger.info(f"ASS subtitle file written to {ass_subtitle_path}")
+                    else:
+                        # Legacy: add text overlays the old way
+                        hallucinations = ["Thank you.", "Thanks.", "Bye.", "Music.", "Watching.", "MBC", "LBC", "You", "Silence"]
+                        for seg in segments:
+                            txt = seg.get('text', '').strip()
+                            txt = txt.replace("[Music]", "").replace("(Music)", "").strip()
+                            if not txt or txt in hallucinations:
+                                continue
+                            if seg.get('no_speech_prob', 0) > 0.85:
+                                continue
+                            start = float(seg['start'])
+                            end = float(seg['end'])
+                            caption_y = {
+                                "top": 15,
+                                "center": 50,
+                                "middle": 50,
+                                "lower": 85,
+                                "bottom": 85,
+                            }.get(str(request.caption_position or "lower").lower(), 85)
+                            ov = ViralOverlay(
+                                id=f"auto_{seg['id']}",
+                                type='text',
+                                text=txt,
+                                x=50, y=caption_y,
+                                bg="black@0.5",
+                                color="yellow",
+                                start_time=start,
+                                duration=(end - start)
+                            )
+                            request.overlays.append(ov)
+            except Exception as e:
+                logger.error(f"Auto-caption generation failed: {e}")
+        
+        # Use working_path (either original trimmed or cropped version) as base for overlays
+        base_width, base_height = get_video_dimensions(working_path)
+        inputs = ["-i", working_path]
+        filter_chain = []
+        current_v_label = "0:v"
+        input_idx = 1
+
+        # If ASS captions were generated, apply them as a video filter
+        if ass_subtitle_path and os.path.exists(ass_subtitle_path):
+            safe_ass = ass_subtitle_path.replace("\\", "/").replace(":", "\\:")
+            filter_chain.append(f"[{current_v_label}]ass='{safe_ass}'[v_captions];")
+            current_v_label = "v_captions"
+
+        if request.add_hook and request.hook_text:
+            rendered_hook_start = rendered_timeline_time(request.hook_start_time)
+            rendered_hook_end = rendered_timeline_time(
+                float(request.hook_start_time) + float(request.hook_intro_seconds)
+            )
+            hook_chain = build_hook_filter_chain(
+                request.hook_text,
+                max(0.05, rendered_hook_end - rendered_hook_start),
+                width_val=base_width,
+                height_val=base_height,
+                template=request.hook_template,
+                hook_start_time=rendered_hook_start,
+                blur_background=request.hook_blur_background,
+                dark_overlay=request.hook_dark_overlay,
+                freeze_frame=request.hook_freeze_frame,
+                zoom_scale=request.hook_zoom_scale,
+                text_animation=request.hook_text_animation,
+            )
+            if hook_chain:
+                filter_chain.append(f"[{current_v_label}]{hook_chain}[v_hook];")
+                current_v_label = "v_hook"
+
+        def get_broll_mode(overlay):
+            return str(
+                getattr(overlay, "bRollMode", None)
+                or getattr(overlay, "b_roll_mode", None)
+                or ""
+            ).strip().lower()
+
+        def get_overlay_enable_expr(overlay):
+            if overlay.start_time is None or overlay.duration is None:
+                return ""
+            source_start = max(0.0, float(overlay.start_time))
+            source_end = source_start + max(0.05, float(overlay.duration))
+            rel_start = rendered_timeline_time(source_start)
+            rel_end = max(rel_start + 0.05, rendered_timeline_time(source_end))
+            return f":enable='between(t,{rel_start:.3f},{rel_end:.3f})'"
+
+        def get_overlay_xy_expr(overlay):
+            if get_broll_mode(overlay) == "fullscreen" or getattr(overlay, "coverMainVideo", False):
+                return "0", "0"
+            return f"(W*{overlay.x/100})-(w/2)", f"(H*{overlay.y/100})-(h/2)"
+
+        def build_overlay_scale_filter(input_label, output_label, overlay):
+            width_percent = float(overlay.width) if overlay.width is not None else None
+            height_percent = float(overlay.height) if overlay.height is not None else None
+            opacity = clamp_float(float(getattr(overlay, "opacity", 1.0) or 1.0), 0.0, 1.0)
+
+            if get_broll_mode(overlay) == "fullscreen" or getattr(overlay, "coverMainVideo", False):
+                filter_body = (
+                    f"[{input_label}]scale=w={base_width}:h={base_height}:"
+                    f"force_original_aspect_ratio=increase,"
+                    f"crop={base_width}:{base_height},setsar=1"
+                )
+            else:
+                target_width = max(2, int(base_width * width_percent / 100.0)) if width_percent else -1
+                target_height = max(2, int(base_height * height_percent / 100.0)) if height_percent else -1
+
+                if target_width > 0 and target_height > 0:
+                    filter_body = (
+                        f"[{input_label}]scale=w={target_width}:h={target_height}:"
+                        f"force_original_aspect_ratio=decrease"
+                    )
+                elif target_width > 0:
+                    filter_body = f"[{input_label}]scale=w={target_width}:h=-1"
+                elif target_height > 0:
+                    filter_body = f"[{input_label}]scale=w=-1:h={target_height}"
+                else:
+                    filter_body = f"[{input_label}]scale=w=iw*0.3:h=-1"
+
+            if opacity < 0.999:
+                filter_body += f",format=rgba,colorchannelmixer=aa={opacity:.3f}"
+            return f"{filter_body}[{output_label}];"
+
+        # Process Video Overlays
+        video_overlays = [o for o in request.overlays if o.type == 'video' and o.src]
+        overlay_audio_specs = []
+        
+        for ov in video_overlays: 
+            ov_path = ""
+            if ov.src.startswith("http"):
+                 ov_dl_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_ov_{input_idx}.mp4")
+                 # Async download
+                 # Force re-encode to ensure compatibility (copy might fail for webm -> mp4 container)
+                 # Use fast preset for speed
+                 await run_subprocess_async([
+                     "ffmpeg", "-i", ov.src, 
+                     "-c:v", "libx264", "-preset", "ultrafast",     # Re-encode video
+                     "-c:a", "aac",                                 # Re-encode audio
+                     "-y", ov_dl_path
+                 ], check=True)
+                 ov_path = ov_dl_path
+            
+            if ov_path:
                 # Add -stream_loop -1 to loop the overlay video indefinitely
                 inputs.extend(["-stream_loop", "-1", "-i", ov_path])
                 overlay_input_idx = input_idx
@@ -1340,6 +1747,16 @@ def get_local_media_cache_dir():
                     f"[{main_audio_label}]volume={gain:.3f}:enable='between(t,{rel_start:.3f},{rel_end:.3f})'[{next_label}]"
                 )
                 main_audio_label = next_label
+            if normalized_audio_remix["enabled"] and normalized_audio_remix["target"] == "voice":
+                remix_chain, _ = build_audio_remix_chain(normalized_audio_remix)
+                audio_filter_chain.append(
+                    f"[{main_audio_label}]{remix_chain}[main_audio_remixed]"
+                )
+                main_audio_label = "main_audio_remixed"
+                audio_remix_receipt = {
+                    **normalized_audio_remix,
+                    "status": "applied_inline",
+                }
             audio_mix_labels.append(f"[{main_audio_label}]")
 
         for audio_index, (overlay_input_idx, overlay) in enumerate(overlay_audio_specs):
@@ -1398,7 +1815,22 @@ def get_local_media_cache_dir():
                 if background_audio_mode not in {"mix", "replace", "duck_original"}:
                     background_audio_mode = "mix"
                 ducking_strength = clamp_float(background_audio.ducking_strength, 0.15, 0.95)
-                audio_filter_chain.append(f"[{background_audio_idx}:a]volume={bg_volume}[bg_track]")
+                if normalized_audio_remix["enabled"] and normalized_audio_remix["target"] == "music":
+                    remix_chain, _ = build_audio_remix_chain(normalized_audio_remix)
+                    audio_filter_chain.append(
+                        f"[{background_audio_idx}:a]volume={bg_volume}[bg_track_base]"
+                    )
+                    audio_filter_chain.append(
+                        f"[bg_track_base]{remix_chain}[bg_track]"
+                    )
+                    audio_remix_receipt = {
+                        **normalized_audio_remix,
+                        "status": "applied_inline",
+                    }
+                else:
+                    audio_filter_chain.append(
+                        f"[{background_audio_idx}:a]volume={bg_volume}[bg_track]"
+                    )
                 if background_audio_mode == "replace":
                     audio_mix_labels = ["[bg_track]"] + [
                         label for label in audio_mix_labels if label.startswith("[overlay_audio")
@@ -1433,13 +1865,19 @@ def get_local_media_cache_dir():
         # Build Command
         cmd = ["ffmpeg"]
         cmd.extend(inputs)
+        audio_bitrate = (
+            "256k"
+            if normalized_audio_remix["enabled"]
+            and normalized_audio_remix["quality"] == "studio"
+            else "160k"
+        )
 
         if not filter_chain and not audio_filter_chain:
              # Preserve the video stream, but normalize retained audio to AAC so
              # phone/browser playback cannot silently reject an unusual source codec.
              cmd.extend(["-map", "0:v:0"])
              if has_main_audio:
-                 cmd.extend(["-map", "0:a:0", "-c:v", "copy", "-c:a", "aac", "-b:a", "160k"])
+                 cmd.extend(["-map", "0:a:0", "-c:v", "copy", "-c:a", "aac", "-b:a", audio_bitrate])
              else:
                  cmd.extend(["-c:v", "copy", "-an"])
              cmd.extend(["-movflags", "+faststart", "-y", output_path])
@@ -1465,34 +1903,17 @@ def get_local_media_cache_dir():
                  cmd.extend(["-map", "0:v:0"])
 
              if audio_filter_chain:
-                 cmd.extend(["-map", "[a_mix]", "-c:a", "aac", "-b:a", "160k"])
+                 cmd.extend(["-map", "[a_mix]", "-c:a", "aac", "-b:a", audio_bitrate])
              elif request.mute_audio:
                  cmd.extend(["-an"])
              else:
-                 cmd.extend(["-map", "0:a?", "-c:a", "aac", "-b:a", "160k"])
+                 cmd.extend(["-map", "0:a?", "-c:a", "aac", "-b:a", audio_bitrate])
 
              cmd.extend(["-shortest", "-c:v", "libx264", "-movflags", "+faststart", "-y", output_path])
         
         report_progress(75, "Rendering final video")
         logger.info(f"Running FFmpeg: {' '.join(cmd)}")
         await run_subprocess_async(cmd, check=True)
-
-        normalized_audio_remix = normalize_audio_remix(request.audio_remix)
-        if normalized_audio_remix["enabled"]:
-            if not has_audio_stream(output_path):
-                raise ValueError("Remix Audio requires an audible source track")
-            report_progress(81, "Applying Remix Audio")
-            with tempfile.TemporaryDirectory(prefix="viral-audio-remix-", dir=SHARED_TMP_DIR) as remix_dir:
-                remixed_path = os.path.join(remix_dir, "remixed.mp4")
-                loop = asyncio.get_running_loop()
-                audio_remix_receipt = await loop.run_in_executor(
-                    None,
-                    render_audio_remix,
-                    output_path,
-                    remixed_path,
-                    normalized_audio_remix,
-                )
-                os.replace(remixed_path, output_path)
 
         motion_receipt = {"version": 1, "motion_scenes": 0, "sound_cues": 0}
         design_scenes, design_effects = validate_design(request.motion_graphics, request.sound_effects)
@@ -1517,6 +1938,27 @@ def get_local_media_cache_dir():
                 )
                 os.replace(designed_path, output_path)
 
+        if normalized_audio_remix["enabled"] and normalized_audio_remix["target"] == "master":
+            if not has_audio_stream(output_path):
+                raise ValueError("Remix Audio requires an audible source track")
+            report_progress(88, "Mastering Remix Audio")
+            with tempfile.TemporaryDirectory(prefix="viral-audio-remix-", dir=SHARED_TMP_DIR) as remix_dir:
+                remixed_path = os.path.join(remix_dir, "remixed.mp4")
+                loop = asyncio.get_running_loop()
+                audio_remix_receipt = await loop.run_in_executor(
+                    None,
+                    render_audio_remix,
+                    output_path,
+                    remixed_path,
+                    normalized_audio_remix,
+                )
+                os.replace(remixed_path, output_path)
+        elif normalized_audio_remix["enabled"] and audio_remix_receipt["status"] == "not_requested":
+            audio_remix_receipt = {
+                **normalized_audio_remix,
+                "status": "skipped_no_target_audio",
+            }
+
         if os.path.exists(output_path):
             report_progress(90, "Verifying rendered video and audio")
             audio_expected = bool(
@@ -1524,7 +1966,7 @@ def get_local_media_cache_dir():
                 or overlay_audio_specs
                 or (background_audio and background_audio.url)
                 or motion_receipt["sound_cues"] > 0
-                or audio_remix_receipt["status"] == "applied"
+                or str(audio_remix_receipt["status"]).startswith("applied")
             )
             audio_proof = build_audio_delivery_proof(output_path, expected=audio_expected)
             if audio_expected and not audio_proof["verified"]:

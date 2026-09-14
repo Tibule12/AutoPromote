@@ -2,6 +2,8 @@ import { normalizeAudioRemix } from "./audioRemixModel";
 
 const graphs = new WeakMap();
 
+const dbToGain = db => 10 ** (Number(db || 0) / 20);
+
 const setAudioParam = (param, value, context) => {
   if (!param) return;
   if (typeof param.setTargetAtTime === "function") {
@@ -49,12 +51,16 @@ export function ensureAudioRemixPreview(media) {
     const wet = context.createGain();
     const reverb = context.createConvolver();
     const compressor = context.createDynamicsCompressor();
+    const output = context.createGain();
+    const analyser = context.createAnalyser();
     reverb.buffer = createImpulse(context);
-    compressor.threshold.value = -12;
+    compressor.threshold.value = -16;
     compressor.knee.value = 12;
     compressor.ratio.value = 3;
     compressor.attack.value = 0.008;
     compressor.release.value = 0.22;
+    analyser.fftSize = 1024;
+    analyser.smoothingTimeConstant = 0.68;
 
     source.connect(bass);
     bass.connect(clarity);
@@ -64,8 +70,25 @@ export function ensureAudioRemixPreview(media) {
     reverb.connect(wet);
     dry.connect(compressor);
     wet.connect(compressor);
-    compressor.connect(context.destination);
-    const graph = { context, source, bass, clarity, air, dry, wet, reverb, compressor };
+    compressor.connect(output);
+    output.connect(analyser);
+    analyser.connect(context.destination);
+    const graph = {
+      context,
+      source,
+      bass,
+      clarity,
+      air,
+      dry,
+      wet,
+      reverb,
+      compressor,
+      output,
+      analyser,
+      meterSubscribers: new Set(),
+      meterFrame: null,
+      lastMeterAt: 0,
+    };
     graphs.set(media, graph);
     return graph;
   } catch (error) {
@@ -98,5 +121,70 @@ export async function updateAudioRemixPreview(media, value, bypass = false) {
   const wet = active ? (remix.reverb / 100) * amount * 0.72 : 0;
   setAudioParam(graph.wet.gain, wet, graph.context);
   setAudioParam(graph.dry.gain, active ? Math.max(0.62, 1 - wet * 0.34) : 1, graph.context);
+  const positiveEq =
+    Math.max(0, remix.bass) * 0.08 +
+    Math.max(0, remix.clarity) * 0.05 +
+    Math.max(0, remix.air) * 0.035;
+  const levelTrim = active && remix.levelMatch ? -Math.min(4.5, positiveEq + wet * 2.2) : 0;
+  setAudioParam(
+    graph.output.gain,
+    active ? dbToGain(remix.outputGain + levelTrim) : 1,
+    graph.context
+  );
+  const dynamics = {
+    choir: { threshold: -18, ratio: 2.2, attack: 0.018, release: 0.3 },
+    speech: { threshold: -22, ratio: 3.4, attack: 0.008, release: 0.18 },
+    music: { threshold: -14, ratio: 2.0, attack: 0.025, release: 0.24 },
+    auto: { threshold: -16, ratio: 2.5, attack: 0.012, release: 0.22 },
+  }[remix.contentType];
+  setAudioParam(graph.compressor.threshold, active ? dynamics.threshold : -3, graph.context);
+  setAudioParam(graph.compressor.ratio, active ? dynamics.ratio : 1, graph.context);
+  setAudioParam(graph.compressor.attack, dynamics.attack, graph.context);
+  setAudioParam(graph.compressor.release, dynamics.release, graph.context);
   return true;
+}
+
+const measureGraph = (graph, now) => {
+  if (!graph.meterSubscribers.size) {
+    graph.meterFrame = null;
+    return;
+  }
+  if (now - graph.lastMeterAt >= 80) {
+    const samples = new Float32Array(graph.analyser.fftSize);
+    graph.analyser.getFloatTimeDomainData(samples);
+    let peak = 0;
+    let energy = 0;
+    samples.forEach(sample => {
+      const absolute = Math.abs(sample);
+      peak = Math.max(peak, absolute);
+      energy += sample * sample;
+    });
+    const rms = Math.sqrt(energy / samples.length);
+    const reading = {
+      peakDb: Math.max(-60, 20 * Math.log10(Math.max(peak, 0.001))),
+      rmsDb: Math.max(-60, 20 * Math.log10(Math.max(rms, 0.001))),
+      clipping: peak >= 0.985,
+    };
+    graph.meterSubscribers.forEach(listener => listener(reading));
+    graph.lastMeterAt = now;
+  }
+  graph.meterFrame = window.requestAnimationFrame(next => measureGraph(graph, next));
+};
+
+export function subscribeAudioRemixMeter(media, listener) {
+  const graph = ensureAudioRemixPreview(media);
+  if (!graph || typeof listener !== "function" || !window.requestAnimationFrame) {
+    return () => {};
+  }
+  graph.meterSubscribers.add(listener);
+  if (graph.meterFrame === null) {
+    graph.meterFrame = window.requestAnimationFrame(now => measureGraph(graph, now));
+  }
+  return () => {
+    graph.meterSubscribers.delete(listener);
+    if (!graph.meterSubscribers.size && graph.meterFrame !== null) {
+      window.cancelAnimationFrame?.(graph.meterFrame);
+      graph.meterFrame = null;
+    }
+  };
 }

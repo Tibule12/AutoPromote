@@ -20,6 +20,9 @@ PRESETS = {
     "amapiano_space",
     "warm_vocal",
 }
+CONTENT_TYPES = {"auto", "choir", "speech", "music"}
+TARGETS = {"master", "voice", "music"}
+QUALITIES = {"preview", "studio"}
 
 
 def _read(value, *names, default=None):
@@ -53,6 +56,17 @@ def normalize_audio_remix(value=None):
     if preset not in PRESETS:
         raise ValueError("Unknown audio remix preset")
     keep_pitch = _read(value, "keep_pitch", "keepPitch", default=False) is True
+    content_type = str(
+        _read(value, "content_type", "contentType", default="auto") or "auto"
+    ).strip().lower()
+    if content_type not in CONTENT_TYPES:
+        raise ValueError("Unknown audio remix content type")
+    target = str(_read(value, "target", default="master") or "master").strip().lower()
+    if target not in TARGETS:
+        raise ValueError("Unknown audio remix target")
+    quality = str(_read(value, "quality", default="studio") or "studio").strip().lower()
+    if quality not in QUALITIES:
+        raise ValueError("Unknown audio remix quality")
     return {
         "version": 1,
         "enabled": enabled,
@@ -67,15 +81,62 @@ def normalize_audio_remix(value=None):
         "reverb_mix": _bound(_read(value, "reverb_mix", "reverb", default=0), 0, 1, 0),
         "intensity": _bound(_read(value, "intensity", default=1), 0, 1, 1),
         "keep_pitch": keep_pitch,
+        "content_type": content_type,
+        "target": target,
+        "output_gain_db": _bound(
+            _read(value, "output_gain_db", "outputGain", default=0), -12, 6, 0
+        ),
+        "level_match": _read(value, "level_match", "levelMatch", default=True) is not False,
+        "quality": quality,
     }
 
 
-def build_audio_remix_filter(value, input_label="0:a", output_label="remix_a"):
+def build_audio_remix_chain(value):
     remix = normalize_audio_remix(value)
     if not remix["enabled"]:
         return "", remix
     amount = remix["intensity"]
     filters = []
+    content_type = remix["content_type"]
+    if amount >= .01:
+        if content_type == "choir":
+            filters.extend(
+                [
+                    "highpass=f=55",
+                    f"equalizer=f=260:t=q:w=1.15:g={-2.4 * amount:.3f}",
+                    f"acompressor=threshold=0.16:ratio={1 + 1.2 * amount:.3f}:"
+                    "attack=22:release=320:makeup=1.04",
+                    "aformat=channel_layouts=stereo",
+                    f"extrastereo=m={1 + .18 * amount:.3f}:c=false",
+                ]
+            )
+        elif content_type == "speech":
+            filters.extend(
+                [
+                    "highpass=f=75",
+                    f"agate=threshold=0.025:ratio={1 + 1.8 * amount:.3f}:"
+                    f"range={max(.12, 1 - .82 * amount):.3f}:attack=8:release=220",
+                    f"deesser=i={.34 * amount:.3f}:m=.5:f=.52",
+                    f"acompressor=threshold=0.125:ratio={1 + 2.4 * amount:.3f}:"
+                    "attack=10:release=180:makeup=1.08",
+                ]
+            )
+        elif content_type == "music":
+            filters.extend(
+                [
+                    "highpass=f=30",
+                    f"acompressor=threshold=0.18:ratio={1 + amount:.3f}:"
+                    "attack=25:release=260:makeup=1.04",
+                ]
+            )
+        else:
+            filters.extend(
+                [
+                    "highpass=f=40",
+                    f"acompressor=threshold=0.16:ratio={1 + 1.35 * amount:.3f}:"
+                    "attack=16:release=230:makeup=1.04",
+                ]
+            )
     pitch = remix["pitch_semitones"] * amount
     if abs(pitch) >= .01:
         factor = 2 ** (pitch / 12)
@@ -107,8 +168,20 @@ def build_audio_remix_filter(value, input_label="0:a", output_label="remix_a"):
             f"aecho=0.82:{max(.48, 0.78 - reverb * .18):.3f}:"
             f"{delay_a}|{delay_b}:{decay_a:.3f}|{decay_b:.3f}"
         )
-    filters.extend(["highpass=f=28", "alimiter=limit=0.95:level=false:latency=true"])
-    return f"[{input_label}]{','.join(filters)}[{output_label}]", remix
+    if remix["level_match"]:
+        filters.extend(["loudnorm=I=-16:TP=-1.5:LRA=11", "aresample=48000"])
+    output_gain = 10 ** (remix["output_gain_db"] / 20)
+    if abs(remix["output_gain_db"]) >= .01:
+        filters.append(f"volume={output_gain:.8f}")
+    filters.append("alimiter=limit=0.95:level=false:latency=true")
+    return ",".join(filters), remix
+
+
+def build_audio_remix_filter(value, input_label="0:a", output_label="remix_a"):
+    chain, remix = build_audio_remix_chain(value)
+    if not chain:
+        return "", remix
+    return f"[{input_label}]{chain}[{output_label}]", remix
 
 
 def _run(command):
@@ -142,12 +215,13 @@ def render_audio_remix(source, destination, value):
     if not any(stream.get("codec_type") == "audio" for stream in info.get("streams", [])):
         raise ValueError("Audio Remix requires a source audio track")
     audio_filter, remix = build_audio_remix_filter(remix)
+    bitrate = "256k" if remix["quality"] == "studio" else "160k"
     _run(
         [
             "ffmpeg", "-v", "error", "-nostdin", "-i", str(source),
             "-filter_complex", audio_filter,
             "-map", "0:v:0", "-map", "[remix_a]", "-c:v", "copy",
-            "-c:a", "aac", "-b:a", "192k", "-shortest", "-movflags",
+            "-c:a", "aac", "-b:a", bitrate, "-ar", "48000", "-shortest", "-movflags",
             "+faststart", "-y", str(destination),
         ]
     )

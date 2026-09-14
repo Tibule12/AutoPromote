@@ -1,6 +1,8 @@
 import React from "react";
 import {
+  AUDIO_CONTENT_TYPES,
   AUDIO_REMIX_PRESETS,
+  AUDIO_REMIX_TARGETS,
   applyAudioRemixPreset,
   normalizeAudioRemix,
   patchAudioRemix,
@@ -9,7 +11,17 @@ import "./audioRemix.css";
 
 const signed = value => `${value > 0 ? "+" : ""}${Number(value).toFixed(0)}`;
 
-export default function AudioRemixPanel({ value, onChange, bypass, onBefore, onPreview }) {
+export default function AudioRemixPanel({
+  value,
+  onChange,
+  bypass,
+  onBefore,
+  onPreview,
+  meter = { peakDb: -60, rmsDb: -60, clipping: false },
+  loopActive = false,
+  onToggleLoop,
+  hasMusic = false,
+}) {
   const remix = normalizeAudioRemix(value);
   const patch = update => onChange(patchAudioRemix(remix, update));
   const step = (key, amount) => patch({ [key]: Number(remix[key]) + amount });
@@ -132,6 +144,74 @@ export default function AudioRemixPanel({ value, onChange, bypass, onBefore, onP
         })}
       </div>
 
+      <div className="audio-remix-advanced-grid">
+        <fieldset className="audio-remix-segments">
+          <legend>Protect source</legend>
+          <div>
+            {AUDIO_CONTENT_TYPES.map(type => (
+              <button
+                key={type.id}
+                type="button"
+                className={remix.contentType === type.id ? "is-active" : ""}
+                aria-pressed={remix.contentType === type.id}
+                title={type.description}
+                onClick={() => patch({ contentType: type.id })}
+              >
+                {type.name}
+              </button>
+            ))}
+          </div>
+        </fieldset>
+
+        <fieldset className="audio-remix-segments">
+          <legend>Apply to</legend>
+          <div>
+            {AUDIO_REMIX_TARGETS.map(target => (
+              <button
+                key={target.id}
+                type="button"
+                className={remix.target === target.id ? "is-active" : ""}
+                aria-pressed={remix.target === target.id}
+                disabled={target.id === "music" && !hasMusic}
+                title={target.id === "music" && !hasMusic ? "Add a music track first" : undefined}
+                onClick={() => patch({ target: target.id })}
+              >
+                {target.name}
+              </button>
+            ))}
+          </div>
+        </fieldset>
+      </div>
+
+      <div className="audio-remix-output-row">
+        <label>
+          <span>
+            <strong>Output Gain</strong>
+            <output>{signed(remix.outputGain)} dB</output>
+          </span>
+          <input
+            aria-label="Output gain"
+            type="range"
+            min={-12}
+            max={6}
+            step={0.5}
+            value={remix.outputGain}
+            onChange={event => patch({ outputGain: Number(event.target.value) })}
+          />
+        </label>
+        <div
+          className={`audio-remix-meter ${meter.clipping ? "is-clipping" : ""}`}
+          aria-label={`Output level ${Math.round(meter.peakDb)} decibels`}
+        >
+          <span>
+            <i
+              style={{ width: `${Math.max(0, Math.min(100, ((meter.peakDb + 60) / 60) * 100))}%` }}
+            />
+          </span>
+          <small>{meter.clipping ? "CLIP" : `${Math.round(meter.peakDb)} dB`}</small>
+        </div>
+      </div>
+
       <label className="audio-remix-toggle">
         <input
           aria-label="Keep Pitch"
@@ -145,6 +225,22 @@ export default function AudioRemixPanel({ value, onChange, bypass, onBefore, onP
         <span>
           <strong>Keep Pitch</strong>
           <small>Preserve the natural vocal tone</small>
+        </span>
+      </label>
+
+      <label className="audio-remix-toggle">
+        <input
+          aria-label="Level Match"
+          type="checkbox"
+          checked={remix.levelMatch}
+          onChange={event => patch({ levelMatch: event.target.checked })}
+        />
+        <span className="audio-remix-toggle-track">
+          <i />
+        </span>
+        <span>
+          <strong>Level Match</strong>
+          <small>Compare tone—not whichever version is louder</small>
         </span>
       </label>
 
@@ -172,8 +268,30 @@ export default function AudioRemixPanel({ value, onChange, bypass, onBefore, onP
           ▶ Preview Remix
         </button>
       </div>
+      <div className="audio-remix-utility-row">
+        <button
+          type="button"
+          className={loopActive ? "is-active" : ""}
+          aria-pressed={loopActive}
+          onClick={onToggleLoop}
+        >
+          ⟳ Loop 8s
+        </button>
+        <label>
+          Export
+          <select
+            aria-label="Remix export quality"
+            value={remix.quality}
+            onChange={event => patch({ quality: event.target.value })}
+          >
+            <option value="studio">Studio · 256 kbps</option>
+            <option value="preview">Preview · 160 kbps</option>
+          </select>
+        </label>
+      </div>
       <p className="audio-remix-note">
-        Live EQ, reverb and speed preview. Studio-quality pitch is finalized in export.
+        Live voice EQ, reverb and speed preview. Target isolation, precision pitch and mastering are
+        finalized in export.
       </p>
     </section>
   );

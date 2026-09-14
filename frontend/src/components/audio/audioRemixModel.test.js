@@ -33,6 +33,11 @@ describe("audioRemixModel", () => {
         pitch_semitones: -12,
         reverb_mix: 1,
         intensity: 0.75,
+        content_type: "auto",
+        target: "master",
+        output_gain_db: 0,
+        level_match: true,
+        quality: "studio",
       })
     );
   });
@@ -43,5 +48,25 @@ describe("audioRemixModel", () => {
       keepPitch: true,
     });
     expect(audioRemixForRender(value).pitch_semitones).toBe(0);
+  });
+
+  test("normalizes professional protection, targeting, gain and quality settings", () => {
+    const value = normalizeAudioRemix({
+      ...applyAudioRemixPreset("warm_vocal"),
+      contentType: "choir",
+      target: "voice",
+      outputGain: 40,
+      levelMatch: false,
+      quality: "preview",
+    });
+    expect(value).toEqual(
+      expect.objectContaining({
+        contentType: "choir",
+        target: "voice",
+        outputGain: 6,
+        levelMatch: false,
+        quality: "preview",
+      })
+    );
   });
 });

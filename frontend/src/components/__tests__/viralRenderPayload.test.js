@@ -16,6 +16,11 @@ describe("viralRenderPayload", () => {
       speed: 0.82,
       pitch_semitones: -3,
       reverb_mix: 0.68,
+      content_type: "choir",
+      target: "voice",
+      output_gain_db: -1,
+      level_match: true,
+      quality: "studio",
     };
     const payload = buildViralRenderData({
       finalVideoUrl: "https://example.com/source.mp4",
