@@ -72,6 +72,14 @@ describe("VideoEditingService Viral Clip payload", () => {
           sound_effects: [
             { id: "motion-sfx-a", builtIn: true, tone: "impact", startTime: 2, duration: 0.7 },
           ],
+          audio_remix: {
+            version: 1,
+            enabled: true,
+            preset: "slowed_reverb",
+            speed: 0.82,
+            pitch_semitones: -3,
+            reverb_mix: 0.68,
+          },
         },
       },
       "test-user"
@@ -102,6 +110,14 @@ describe("VideoEditingService Viral Clip payload", () => {
         sound_effects: [
           { id: "motion-sfx-a", builtIn: true, tone: "impact", startTime: 2, duration: 0.7 },
         ],
+        audio_remix: {
+          version: 1,
+          enabled: true,
+          preset: "slowed_reverb",
+          speed: 0.82,
+          pitch_semitones: -3,
+          reverb_mix: 0.68,
+        },
       }),
       expect.any(Object)
     );

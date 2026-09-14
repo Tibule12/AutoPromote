@@ -766,6 +766,7 @@ class VideoEditingService {
           creative_intent: viralData.creative_intent || viralData.creativeIntent || null,
           motion_graphics: viralData.motion_graphics || viralData.motionGraphics || null,
           sound_effects: viralData.sound_effects || viralData.soundEffects || [],
+          audio_remix: viralData.audio_remix || viralData.audioRemix || null,
           creative_plan: viralData.creative_plan || viralData.creativePlan || null,
           smart_crop:
             viralData.smart_crop !== undefined

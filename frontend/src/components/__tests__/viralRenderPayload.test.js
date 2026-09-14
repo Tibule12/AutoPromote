@@ -9,14 +9,23 @@ describe("viralRenderPayload", () => {
     const soundEffects = [
       { id: "motion-sfx-a", builtIn: true, tone: "impact", startTime: 3, duration: 0.7 },
     ];
+    const audioRemix = {
+      version: 1,
+      enabled: true,
+      preset: "slowed_reverb",
+      speed: 0.82,
+      pitch_semitones: -3,
+      reverb_mix: 0.68,
+    };
     const payload = buildViralRenderData({
       finalVideoUrl: "https://example.com/source.mp4",
       selectedClip: { start: 0, end: 20 },
       overlays: [],
-      extraOptions: { motionGraphics, soundEffects },
+      extraOptions: { motionGraphics, soundEffects, audioRemix },
     });
     expect(payload.motion_graphics).toEqual(motionGraphics);
     expect(payload.sound_effects).toEqual(soundEffects);
+    expect(payload.audio_remix).toEqual(audioRemix);
   });
 
   test("builds a safe default timeline payload", () => {
