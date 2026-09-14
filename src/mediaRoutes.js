@@ -1739,6 +1739,41 @@ router.post("/preview-silence", async (req, res) => {
   }
 });
 
+router.post("/preview-audio-remix", async (req, res) => {
+  const fileUrl = typeof req.body?.fileUrl === "string" ? req.body.fileUrl.trim() : "";
+  if (!fileUrl || !req.body?.audioRemix) {
+    return res.status(400).json({ message: "Video and Remix Audio settings are required" });
+  }
+
+  try {
+    const backgroundAudio = req.body?.backgroundAudio || null;
+    const response = await postToMediaWorker(
+      "/preview-audio-remix",
+      {
+        video_url: fileUrl,
+        start_time: Math.max(0, Number(req.body?.startTime || 0)),
+        duration: Math.min(8, Math.max(2, Number(req.body?.duration || 8))),
+        audio_remix: req.body.audioRemix,
+        background_audio_url:
+          typeof backgroundAudio?.url === "string" && backgroundAudio.url.startsWith("http")
+            ? backgroundAudio.url
+            : null,
+        background_volume: Number(backgroundAudio?.volume ?? 0.18),
+        background_trim_start: Number(backgroundAudio?.trimStart ?? 0),
+        include_voice: req.body?.includeVoice !== false,
+      },
+      120000
+    );
+    return res.json(response.data || {});
+  } catch (error) {
+    console.error("[MediaRoute] Exact Remix Audio preview error:", error.message);
+    return res.status(error.response?.status || 500).json({
+      message: "Exact Remix Audio preview failed",
+      details: error.response?.data?.detail || error.message,
+    });
+  }
+});
+
 router.post("/preview-watermark-cleanup", async (req, res) => {
   const fileUrl = typeof req.body?.fileUrl === "string" ? req.body.fileUrl.trim() : "";
   if (!fileUrl) {

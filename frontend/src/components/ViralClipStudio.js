@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 157649)
-Total output lines: 15449
-
 /* eslint-disable no-unused-vars, no-control-regex */
 import {
   applySafeMediaSource,
@@ -31,10 +28,7 @@ import {
   audioRemixForRender,
   normalizeAudioRemix,
 } from "./audio/audioRemixModel";
-import {
-  subscribeAudioRemixMeter,
-  updateAudioRemixPreview,
-} from "./audio/audioRemixPreview";
+import { subscribeAudioRemixMeter, updateAudioRemixPreview } from "./audio/audioRemixPreview";
 import "./audio/audioRemixTimeline.css";
 import "./ViralClipStudio.css"; // We'll create this CSS next
 
@@ -1549,7 +1543,13024 @@ const CREATOR_CONTENT_PROFILES = [
   },
   {
     id: "talk_story",
-    label: "T…132649 tokens truncated…on}
+    label: "Talk / Story",
+    helper: "Natural jump cuts, clear speech and captions that do not fight the face.",
+    preset: "tracked_reveal",
+    intensity: "clean",
+    transition: "clean_cut",
+    pacing: "balanced",
+    speed: 1.05,
+  },
+  {
+    id: "beauty_fashion",
+    label: "Beauty / Fashion",
+    helper: "Polished reveals, colour transformation and softer joins.",
+    preset: "tracked_reveal",
+    intensity: "bold",
+    transition: "soft_dip",
+    pacing: "balanced",
+    speed: 1,
+  },
+  {
+    id: "fitness_dance",
+    label: "Fitness / Dance",
+    helper: "Movement echoes, beat-ready pacing and energetic joins.",
+    preset: "beat_echo",
+    intensity: "unreal",
+    transition: "energy_flash",
+    pacing: "energetic",
+    speed: 1.15,
+  },
+  {
+    id: "food_diy",
+    label: "Food / DIY",
+    helper: "Keep the useful steps, remove waiting, then reveal the result.",
+    preset: "tracked_reveal",
+    intensity: "bold",
+    transition: "clean_cut",
+    pacing: "energetic",
+    speed: 1.1,
+  },
+  {
+    id: "travel_lifestyle",
+    label: "Travel / Lifestyle",
+    helper: "Cinematic scene changes with room for locations to breathe.",
+    preset: "reality_break",
+    intensity: "bold",
+    transition: "soft_dip",
+    pacing: "balanced",
+    speed: 1,
+  },
+  {
+    id: "gaming_tech",
+    label: "Gaming / Tech",
+    helper: "Fast proof moments, screen energy and punchy transitions.",
+    preset: "reality_break",
+    intensity: "unreal",
+    transition: "energy_flash",
+    pacing: "energetic",
+    speed: 1.15,
+  },
+];
+
+const JOIN_TRANSITIONS = [
+  { id: "auto", label: "Auto", helper: "Uses the creator mode recommendation." },
+  { id: "clean_cut", label: "Clean Cut", helper: "Instant join with an audio-safe edge." },
+  { id: "soft_dip", label: "Soft Dip", helper: "A short cinematic breath between moments." },
+  {
+    id: "energy_flash",
+    label: "Energy Flash",
+    helper: "A fast bright hit for action and reveals.",
+  },
+];
+
+const buildSignatureCreativeEffects = ({ preset, intensity, duration }) => {
+  const safeDuration = Math.max(0.1, Number(duration || 0));
+  if (preset !== "auto_story") {
+    return [
+      {
+        id: "signature-effect",
+        preset,
+        intensity,
+        start_time: 0,
+        end_time: safeDuration,
+      },
+    ];
+  }
+
+  const openingEnd = Math.min(safeDuration, Math.max(0.7, safeDuration * 0.22));
+  const buildEnd = Math.min(safeDuration, Math.max(openingEnd + 0.1, safeDuration * 0.68));
+  return [
+    {
+      id: "signature-opening",
+      preset: "reality_break",
+      intensity,
+      start_time: 0,
+      end_time: openingEnd,
+    },
+    {
+      id: "signature-build",
+      preset: "motion_sculpture",
+      intensity,
+      start_time: openingEnd,
+      end_time: buildEnd,
+    },
+    {
+      id: "signature-payoff",
+      preset: "tracked_reveal",
+      intensity,
+      start_time: buildEnd,
+      end_time: safeDuration,
+    },
+  ].filter(effect => effect.end_time - effect.start_time >= 0.05);
+};
+
+const PREVIEW_SPEED_OPTIONS = [0.5, 0.75, 1, 1.15, 1.25, 1.5, 2];
+const STORY_BEAT_LABELS = ["Hook", "Problem", "Proof", "Payoff"];
+const OVERLAY_PIP_SLOTS = [
+  { x: 76, y: 24 },
+  { x: 24, y: 76 },
+  { x: 24, y: 24 },
+  { x: 76, y: 76 },
+  { x: 50, y: 50 },
+];
+
+const timedRangesOverlap = (startA, durationA, startB, durationB) => {
+  const safeStartA = Number(startA || 0);
+  const safeStartB = Number(startB || 0);
+  const safeEndA = safeStartA + Math.max(0, Number(durationA || 0));
+  const safeEndB = safeStartB + Math.max(0, Number(durationB || 0));
+  return safeStartA < safeEndB && safeStartB < safeEndA;
+};
+
+const overlayRectsOverlap = (first, second, gutter = 4) => {
+  const firstHalfWidth = Math.max(1, Number(first.width || 0)) / 2;
+  const firstHalfHeight = Math.max(1, Number(first.height || 0)) / 2;
+  const secondHalfWidth = Math.max(1, Number(second.width || 0)) / 2;
+  const secondHalfHeight = Math.max(1, Number(second.height || 0)) / 2;
+  return (
+    Math.abs(Number(first.x || 0) - Number(second.x || 0)) <
+      firstHalfWidth + secondHalfWidth + gutter &&
+    Math.abs(Number(first.y || 0) - Number(second.y || 0)) <
+      firstHalfHeight + secondHalfHeight + gutter
+  );
+};
+
+const getCollisionSafePipPlacement = ({
+  overlays,
+  overlayId = null,
+  startTime,
+  duration,
+  width,
+  height,
+}) => {
+  const simultaneousPipOverlays = (overlays || []).filter(
+    overlay =>
+      String(overlay.id) !== String(overlayId) &&
+      overlay.bRollMode === "pip" &&
+      timedRangesOverlap(startTime, duration, overlay.startTime, overlay.duration)
+  );
+  const safeWidth = Math.max(10, Math.min(58, Number(width || 42)));
+  const safeHeight = Math.max(10, Math.min(58, Number(height || 32)));
+  const boundedSlot = slot => ({
+    x: clampNumber(slot.x, safeWidth / 2, 100 - safeWidth / 2, 50),
+    y: clampNumber(slot.y, safeHeight / 2, 100 - safeHeight / 2, 50),
+    width: safeWidth,
+    height: safeHeight,
+  });
+
+  return (
+    OVERLAY_PIP_SLOTS.map(boundedSlot).find(candidate =>
+      simultaneousPipOverlays.every(existing => !overlayRectsOverlap(candidate, existing))
+    ) || boundedSlot(OVERLAY_PIP_SLOTS[simultaneousPipOverlays.length % OVERLAY_PIP_SLOTS.length])
+  );
+};
+
+const ViralClipStudio = ({
+  videoUrl,
+  clips,
+  images = [],
+  onSave,
+  onCancel,
+  onStatusChange,
+  renderStatus,
+  renderedOutput,
+  onDownloadRendered,
+  onUseRendered,
+  currentMusic,
+  onMusicChange,
+}) => {
+  const [orderedClips, setOrderedClips] = useState(clips || []);
+  const [selectedClip, setSelectedClip] = useState((clips || [])[0]);
+  const [overlays, setOverlays] = useState([]);
+  const [activeOverlayId, setActiveOverlayId] = useState(null);
+  const [videoTime, setVideoTime] = useState(0);
+  const [videoFit, setVideoFit] = useState("contain"); // safe: 'contain' (no stretch), optional: 'cover' (may crop)
+  const [safeFaceFraming, setSafeFaceFraming] = useState(true);
+  const [faceAnchorPreset, setFaceAnchorPreset] = useState("center"); // center | face_top | face_mid
+
+  // New AI Options for users
+  const [autoCaptions, setAutoCaptions] = useState(false);
+  const [captionStyle, setCaptionStyle] = useState("bold_pop");
+  const [smartCrop, setSmartCrop] = useState(false);
+  const [smartCropMode, setSmartCropMode] = useState("center"); // "center" or "speaker_track"
+  const [enhanceQuality, setEnhanceQuality] = useState(false);
+  const [silenceRemoval, setSilenceRemoval] = useState(false);
+  const [silenceThreshold, setSilenceThreshold] = useState(-35);
+  const [minSilenceDuration, setMinSilenceDuration] = useState(0.75);
+  const [removeWatermark, setRemoveWatermark] = useState(false);
+  const [watermarkMode, setWatermarkMode] = useState("adaptive");
+  const [manualWatermarkRegions, setManualWatermarkRegions] = useState([]);
+  const [activeWatermarkRegionId, setActiveWatermarkRegionId] = useState(null);
+  const [watermarkCleanupPreview, setWatermarkCleanupPreview] = useState(null);
+  const [isWatermarkCleanupPreviewLoading, setIsWatermarkCleanupPreviewLoading] = useState(false);
+  const [watermarkCleanupPreviewError, setWatermarkCleanupPreviewError] = useState("");
+  const [showWatermarkCleanupOnVideo, setShowWatermarkCleanupOnVideo] = useState(true);
+  const [addHook, setAddHook] = useState(true);
+  const [hookText, setHookText] = useState(DEFAULT_HOOK_TEXT);
+  const [hookTemplate, setHookTemplate] = useState("blur_reveal");
+  const [hookIntroSeconds, setHookIntroSeconds] = useState(3);
+  const [hookStartTime, setHookStartTime] = useState(0.8);
+  const [hookEndTime, setHookEndTime] = useState(3.8);
+  const [hookBlurBackground, setHookBlurBackground] = useState(true);
+  const [hookDarkOverlay, setHookDarkOverlay] = useState(true);
+  const [hookFreezeFrame, setHookFreezeFrame] = useState(false);
+  const [hookZoomScale, setHookZoomScale] = useState(1.08);
+  const [hookTextAnimation, setHookTextAnimation] = useState("slide-up");
+  const [hookPreviewLoop, setHookPreviewLoop] = useState(false);
+  const [hookSelectionMode, setHookSelectionMode] = useState(false);
+  const [hookPickMode, setHookPickMode] = useState(false);
+  const [hookFocusMode, setHookFocusMode] = useState(false);
+  const [hookFocusPoint, setHookFocusPoint] = useState(DEFAULT_HOOK_FOCUS_POINT);
+  const [hookAnalysisStatus, setHookAnalysisStatus] = useState("idle");
+  const [hookAnalysisMessage, setHookAnalysisMessage] = useState("");
+  const [hookSuggestedRange, setHookSuggestedRange] = useState(null);
+  const [trimPreviewLoop, setTrimPreviewLoop] = useState(false);
+  const [isPreviewPaused, setIsPreviewPaused] = useState(false);
+  const [previewMuted, setPreviewMuted] = useState(false);
+  const [previewVolume, setPreviewVolume] = useState(1);
+  const [isPreviewFullscreen, setIsPreviewFullscreen] = useState(false);
+  const [isAfterPreviewReady, setIsAfterPreviewReady] = useState(false);
+  const [soloPreviewOverlayId, setSoloPreviewOverlayId] = useState(null);
+  const [addMusic, setAddMusic] = useState(false);
+  const [muteOriginalAudio, setMuteOriginalAudio] = useState(false);
+  const [musicSelection, setMusicSelection] = useState(currentMusic || "upbeat_pop.mp3");
+  const [musicSearchMode, setMusicSearchMode] = useState(() =>
+    currentMusic ? !isPresetMusicSelection(currentMusic) : false
+  );
+  const [safeSearch, setSafeSearch] = useState(true);
+  const [musicVolume, setMusicVolume] = useState(0.15);
+  const [musicDucking, setMusicDucking] = useState(true);
+  const [musicDuckingStrength, setMusicDuckingStrength] = useState(0.35);
+  const [silencePreview, setSilencePreview] = useState(null);
+  const [musicPreviewUrl, setMusicPreviewUrl] = useState("");
+  const [musicPreviewStatus, setMusicPreviewStatus] = useState("idle");
+  const [musicPreviewStatusMessage, setMusicPreviewStatusMessage] = useState("");
+  const [musicPreviewNeedsGesture, setMusicPreviewNeedsGesture] = useState(false);
+  const [isBackgroundSoundPreviewing, setIsBackgroundSoundPreviewing] = useState(false);
+  const [extractedAudio, setExtractedAudio] = useState(null);
+  const [bRollCadence, setBRollCadence] = useState("balanced");
+  const [studioInspectorTab, setStudioInspectorTab] = useState("hook");
+  const [comparisonMode, setComparisonMode] = useState("split");
+  const [activeCreativeTool, setActiveCreativeTool] = useState("moments");
+  const [creativeIntent, setCreativeIntent] = useState("energy");
+  const [creativeEffectsEnabled, setCreativeEffectsEnabled] = useState(false);
+  const [creativePreset, setCreativePreset] = useState("auto_story");
+  const [creativeIntensity, setCreativeIntensity] = useState("bold");
+  const [contentProfile, setContentProfile] = useState("auto");
+  const [cutRangeStart, setCutRangeStart] = useState(null);
+  const [cutRangeEnd, setCutRangeEnd] = useState(null);
+  const [joinTransition, setJoinTransition] = useState("auto");
+  const [pacingLevel, setPacingLevel] = useState("balanced");
+  const [previewSpeed, setPreviewSpeed] = useState(1);
+  const [captionPosition, setCaptionPosition] = useState("lower");
+  const [captionScale, setCaptionScale] = useState(1);
+  const [captionTextOverride, setCaptionTextOverride] = useState("");
+  const [captionSegments, setCaptionSegments] = useState([]);
+  const [captionGenerationStatus, setCaptionGenerationStatus] = useState("idle");
+  const [captionGenerationMessage, setCaptionGenerationMessage] = useState("");
+  const [studioActionMessage, setStudioActionMessage] = useState(
+    "Split preview is live. Edit on the right and compare the untouched source beside it."
+  );
+
+  // ── Music Track State ──
+  const [musicTrack, setMusicTrack] = useState(null); // { url, file, name, trimStart, trimEnd, fadeIn, fadeOut, loop, volume, ducking, duckingStrength, duckingMode }
+  const [soundEffects, setSoundEffects] = useState([]);
+  const [audioRemix, setAudioRemix] = useState(() => normalizeAudioRemix(DEFAULT_AUDIO_REMIX));
+  const [audioRemixBypass, setAudioRemixBypass] = useState(false);
+  const [audioRemixMeter, setAudioRemixMeter] = useState({
+    peakDb: -60,
+    rmsDb: -60,
+    clipping: false,
+  });
+  const [audioRemixLoop, setAudioRemixLoop] = useState(null);
+  const [exactAudioRemixPreview, setExactAudioRemixPreview] = useState({
+    status: "idle",
+    url: "",
+    error: "",
+    receipt: null,
+  });
+  const [selectedMotionId, setSelectedMotionId] = useState(null);
+  const [motionScenes, setMotionScenes] = useState([]);
+  const linkedMotionCues = useMemo(() => motionCues(motionScenes), [motionScenes]);
+  const allSoundEffects = useMemo(
+    () => [...soundEffects, ...linkedMotionCues],
+    [soundEffects, linkedMotionCues]
+  );
+  const [activeSoundEffectId, setActiveSoundEffectId] = useState(null);
+  const [previewingSoundEffectId, setPreviewingSoundEffectId] = useState(null);
+  const [musicLibraryOpen, setMusicLibraryOpen] = useState(false);
+  const musicFileInputRef = useRef(null);
+  const soundEffectFileInputRef = useRef(null);
+  const speechAnalyserRef = useRef(null);
+  const speechDetectionRafRef = useRef(null);
+
+  const MUSIC_PRESETS = [
+    { name: "Upbeat Pop", file: "upbeat_pop.mp3", category: "pop", emoji: "🎉" },
+    { name: "Cinematic Epic", file: "cinematic_epic.mp3", category: "cinematic", emoji: "🎬" },
+    { name: "Lo-Fi Chill", file: "lofi_chill.mp3", category: "lofi", emoji: "☕" },
+    { name: "Hip Hop Beat", file: "hiphop_beat.mp3", category: "hiphop", emoji: "🎤" },
+    { name: "Emotional Piano", file: "emotional_piano.mp3", category: "emotional", emoji: "🎹" },
+    {
+      name: "Motivational Anthem",
+      file: "motivational_anthem.mp3",
+      category: "motivational",
+      emoji: "🔥",
+    },
+    { name: "Corporate Clean", file: "corporate_clean.mp3", category: "corporate", emoji: "💼" },
+    { name: "Trap Banger", file: "trap_banger.mp3", category: "trap", emoji: "💎" },
+    { name: "Acoustic Warm", file: "acoustic_warm.mp3", category: "acoustic", emoji: "🎸" },
+    { name: "Retro Synthwave", file: "retro_synthwave.mp3", category: "retro", emoji: "🕹️" },
+    { name: "Orchestral Rise", file: "orchestral_rise.mp3", category: "orchestral", emoji: "🎻" },
+    { name: "Ambient Drone", file: "ambient_drone.mp3", category: "ambient", emoji: "🌌" },
+  ];
+
+  const { capabilities, credits, editing, canUseFeature, requiresUpgrade } = useSubscription();
+  const canUseWatermarkRemoval = canUseFeature("watermarkRemoval");
+  const canUseAudioExtract = canUseFeature("audioExtract");
+  const canUseMulticam = canUseFeature("multicam");
+  const clipFinderCost = editing?.features?.findViralClips?.creditCost || 8;
+  const clipRenderCost = editing?.features?.clipRender?.creditCost || 5;
+  const transcribeCost = editing?.features?.audioExtract?.creditCost || 3;
+  const showCreditWarning = (credits?.monthlyRemaining || 0) < 20;
+  const upgradeMessage = "Upgrade your subscription to unlock this feature.";
+
+  // Collapsible section state — start with AI Enhancements collapsed to reduce overwhelm
+  const [collapsedSections, setCollapsedSections] = useState({
+    aiEnhancements: true,
+    hookSettings: true,
+    musicAudio: true,
+  });
+  const toggleSection = key => setCollapsedSections(prev => ({ ...prev, [key]: !prev[key] }));
+  const [audioExtractionStatus, setAudioExtractionStatus] = useState("");
+  const [isExtractingAudio, setIsExtractingAudio] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportStatusLabel, setExportStatusLabel] = useState("Render Final Clip");
+  const [selectedExportDestination, setSelectedExportDestination] = useState("general");
+  const loggedScannerEntryRef = useRef(new Set());
+  const renderedOutputUrl = getSafeMediaSource(renderedOutput?.previewUrl || renderedOutput?.url);
+
+  useEffect(() => {
+    if (!isExporting || !renderStatus) return;
+    setExportStatusLabel(renderStatus);
+  }, [isExporting, renderStatus]);
+
+  useEffect(() => {
+    if (!renderedOutputUrl) return;
+    setComparisonMode("after");
+    setExportStatusLabel("Render Again");
+    setStudioActionMessage(
+      "Render complete. After is now playing the finished video, not the live edit simulation."
+    );
+  }, [renderedOutputUrl]);
+
+  const [timeline, setTimeline] = useState(() => {
+    // Initial timeline is just the main video URL, effectively one clip
+    return [{ id: "main", url: videoUrl, duration: 0, startRequest: null, endRequest: null }];
+  });
+  const [activeTimelineIndex, setActiveTimelineIndex] = useState(0);
+  const [draggedOverlayId, setDraggedOverlayId] = useState(null);
+  const [draggedTimelineClipId, setDraggedTimelineClipId] = useState(null);
+  const [draggedDetectedClipId, setDraggedDetectedClipId] = useState(null);
+  const [canUndo, setCanUndo] = useState(false);
+  const [canRedo, setCanRedo] = useState(false);
+
+  const videoRef = useRef(null);
+  const beforeVideoRef = useRef(null);
+  const audioRef = useRef(null);
+  const smartCropForegroundVideoRef = useRef(null);
+  const hookBackdropVideoRef = useRef(null);
+  const hookFreezeVideoRef = useRef(null);
+  const beatEchoVideoRefsRef = useRef([]);
+  const musicPreviewRef = useRef(null);
+  const exactAudioRemixPreviewRef = useRef(null);
+  const soundEffectAudioRefsRef = useRef(new Map());
+  const soundEffectAudioContextRef = useRef(null);
+  const soundEffectNodesRef = useRef(new Set());
+  const soundEffectPlaybackEpochRef = useRef(0);
+  const triggeredSoundEffectsRef = useRef(new Set());
+  const soundEffectPreviewTimeoutRef = useRef(null);
+  const soundEffectObjectUrlsRef = useRef(new Set());
+  const watermarkCleanupPreviewImageRef = useRef(null);
+  const musicPreviewObjectUrlRef = useRef(null);
+  const musicPreviewAudioContextRef = useRef(null);
+  const musicPreviewGainNodeRef = useRef(null);
+  const musicPreviewBufferRef = useRef(null);
+  const musicPreviewSourceRef = useRef(null);
+  const musicPreviewSourceStateRef = useRef({ offset: 0, playbackRate: 1 });
+  const backgroundSoundPreviewSuppressedRef = useRef(false);
+  const overlayMediaRefsRef = useRef(new Map());
+  const imageInputRef = useRef(null);
+  const brollVideoInputRef = useRef(null);
+  const quickMusicFileInputRef = useRef(null);
+  const audioSourceInputRef = useRef(null);
+  const previewSourceCacheRef = useRef(new Map());
+  const undoStackRef = useRef([]);
+  const redoStackRef = useRef([]);
+  const lastSnapshotRef = useRef(null);
+  const lastSnapshotSignatureRef = useRef(null);
+  const isRestoringHistoryRef = useRef(false);
+  const pendingHistoryBaselineRef = useRef(null);
+  const cutHistoryTransactionRef = useRef(null);
+  const previewPlaybackIntentRef = useRef(true);
+  const phoneFrameRef = useRef(null);
+  const watermarkDragRef = useRef(null);
+  const hookSegmentTrackRef = useRef(null);
+  const hookSelectionDragRef = useRef(null);
+  const hookPlayheadDragRef = useRef(null);
+  const hookPreviewSequenceRef = useRef({ active: false });
+  const hookAnalysisRequestRef = useRef(0);
+  const hookSuggestionCycleRef = useRef(0);
+  const pendingClipActionRef = useRef(null);
+  const pendingTimelineSeekRef = useRef(null);
+
+  const normalizeAssetUrl = asset => {
+    if (!asset) return "";
+    if (typeof asset === "string") return asset;
+    return asset.url || asset.src || asset.downloadURL || asset.mediaUrl || asset.thumbnail || "";
+  };
+
+  const cloneSnapshot = value => {
+    if (value === null || typeof value !== "object") return value;
+    if (typeof Blob !== "undefined" && value instanceof Blob) return value;
+    if (Array.isArray(value)) return value.map(cloneSnapshot);
+
+    return Object.fromEntries(
+      Object.entries(value).map(([key, nestedValue]) => [key, cloneSnapshot(nestedValue)])
+    );
+  };
+
+  const serializeSnapshot = value =>
+    JSON.stringify(value, (_key, nestedValue) => {
+      if (typeof Blob !== "undefined" && nestedValue instanceof Blob) {
+        return {
+          __mediaType: typeof File !== "undefined" && nestedValue instanceof File ? "File" : "Blob",
+          name: nestedValue.name || "",
+          size: nestedValue.size,
+          type: nestedValue.type,
+          lastModified: nestedValue.lastModified || 0,
+        };
+      }
+      return nestedValue;
+    });
+
+  const releaseMusicPreviewObjectUrl = () => {
+    if (musicPreviewObjectUrlRef.current) {
+      URL.revokeObjectURL(musicPreviewObjectUrlRef.current);
+      musicPreviewObjectUrlRef.current = null;
+    }
+  };
+
+  const materializeMusicPreviewUrl = async sourceUrl => {
+    const normalizedUrl = typeof sourceUrl === "string" ? sourceUrl.trim() : "";
+    if (!normalizedUrl) return "";
+
+    releaseMusicPreviewObjectUrl();
+
+    if (!normalizedUrl.startsWith("data:")) {
+      return normalizedUrl;
+    }
+
+    const response = await fetch(normalizedUrl);
+    const blob = await response.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    musicPreviewObjectUrlRef.current = objectUrl;
+    return objectUrl;
+  };
+
+  const stopMusicPreviewBufferPlayback = () => {
+    if (!musicPreviewSourceRef.current) return;
+
+    try {
+      musicPreviewSourceRef.current.stop();
+    } catch (error) {
+      console.log("Music preview buffer stop skipped", error);
+    }
+
+    try {
+      musicPreviewSourceRef.current.disconnect();
+    } catch (error) {
+      console.log("Music preview buffer disconnect skipped", error);
+    }
+
+    musicPreviewSourceRef.current = null;
+  };
+
+  const ensureMusicPreviewAudioContext = () => {
+    const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextCtor) {
+      throw new Error("This browser does not support Web Audio preview");
+    }
+
+    if (!musicPreviewAudioContextRef.current) {
+      const audioContext = new AudioContextCtor();
+      const gainNode = audioContext.createGain();
+      gainNode.connect(audioContext.destination);
+      musicPreviewAudioContextRef.current = audioContext;
+      musicPreviewGainNodeRef.current = gainNode;
+    }
+
+    return musicPreviewAudioContextRef.current;
+  };
+
+  const syncMusicPreviewGain = () => {
+    const gainNode = musicPreviewGainNodeRef.current;
+    if (!gainNode) return;
+
+    const previewGain = previewMuted ? 0 : clampAudioControl(previewVolume, 0, 1, 1);
+    const effectiveVol = musicTrack?.volume ?? musicVolume;
+    gainNode.gain.value = clampAudioControl(effectiveVol, 0.05, 0.6, 0.15) * previewGain;
+  };
+
+  const startMusicPreviewBufferPlayback = async (targetOffset, playbackRate = 1) => {
+    const audioBuffer = musicPreviewBufferRef.current;
+    if (!audioBuffer) return;
+
+    const audioContext = ensureMusicPreviewAudioContext();
+    if (audioContext.state === "suspended") {
+      await audioContext.resume();
+    }
+
+    stopMusicPreviewBufferPlayback();
+    syncMusicPreviewGain();
+
+    const source = audioContext.createBufferSource();
+    source.buffer = audioBuffer;
+    source.loop = true;
+    source.playbackRate.value = Number.isFinite(Number(playbackRate)) ? Number(playbackRate) : 1;
+    source.connect(musicPreviewGainNodeRef.current);
+    source.start(0, targetOffset % Math.max(audioBuffer.duration, 0.001));
+
+    musicPreviewSourceRef.current = source;
+    musicPreviewSourceStateRef.current = {
+      offset: targetOffset,
+      playbackRate: source.playbackRate.value,
+    };
+    setMusicPreviewNeedsGesture(false);
+    setMusicPreviewStatus("ready");
+    setMusicPreviewStatusMessage(`Preview audio is playing for ${currentMusicLabel}.`);
+  };
+
+  const ensurePreviewableClipUrl = async clip => {
+    if (!clip) return "";
+
+    const cacheKey = clip.id || clip.url || "main";
+    if (previewSourceCacheRef.current.has(cacheKey)) {
+      return previewSourceCacheRef.current.get(cacheKey);
+    }
+
+    if (typeof clip.url === "string" && /^https?:/i.test(clip.url)) {
+      previewSourceCacheRef.current.set(cacheKey, clip.url);
+      return clip.url;
+    }
+
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (!user) throw new Error("Please log in.");
+    const token = await user.getIdToken();
+
+    let sourceBlob = null;
+    let fileName = `${cacheKey}.mp4`;
+
+    if (clip.file instanceof Blob) {
+      sourceBlob = clip.file;
+      fileName = clip.file.name || fileName;
+    } else if (typeof clip.url === "string" && clip.url.startsWith("blob:")) {
+      const response = await fetch(clip.url);
+      sourceBlob = await response.blob();
+    }
+
+    if (!(sourceBlob instanceof Blob)) {
+      return typeof clip.url === "string" ? clip.url : "";
+    }
+
+    const uploadResult = await uploadSourceFileViaBackend({
+      file: sourceBlob,
+      token,
+      mediaType: "video",
+      fileName,
+    });
+
+    previewSourceCacheRef.current.set(cacheKey, uploadResult.url);
+    return uploadResult.url;
+  };
+
+  const getEditorSnapshot = () => ({
+    orderedClips,
+    selectedClipId: selectedClip?.id || null,
+    overlays,
+    activeOverlayId,
+    videoFit,
+    safeFaceFraming,
+    faceAnchorPreset,
+    autoCaptions,
+    captionStyle,
+    captionPosition,
+    captionScale,
+    captionTextOverride,
+    captionSegments,
+    previewSpeed,
+    pacingLevel,
+    creativeIntent,
+    creativeEffectsEnabled,
+    creativePreset,
+    creativeIntensity,
+    contentProfile,
+    cutRangeStart,
+    cutRangeEnd,
+    joinTransition,
+    smartCrop,
+    smartCropMode,
+    enhanceQuality,
+    silenceRemoval,
+    silenceThreshold,
+    minSilenceDuration,
+    removeWatermark,
+    watermarkMode,
+    manualWatermarkRegions,
+    activeWatermarkRegionId,
+    addHook,
+    hookText,
+    hookTemplate,
+    hookIntroSeconds,
+    hookStartTime,
+    hookEndTime,
+    hookBlurBackground,
+    hookDarkOverlay,
+    hookFreezeFrame,
+    hookZoomScale,
+    hookTextAnimation,
+    hookPreviewLoop,
+    hookFocusPoint,
+    addMusic,
+    muteOriginalAudio,
+    musicSelection,
+    musicSearchMode,
+    safeSearch,
+    musicVolume,
+    musicDucking,
+    musicDuckingStrength,
+    musicTrack,
+    soundEffects,
+    audioRemix,
+    motionScenes,
+    activeSoundEffectId,
+    extractedAudio,
+    bRollCadence,
+    timeline,
+    activeTimelineIndex,
+  });
+
+  const getHistoryRelevantSnapshot = snapshot => {
+    const {
+      selectedClipId: _selectedClipId,
+      activeOverlayId: _activeOverlayId,
+      activeWatermarkRegionId: _activeWatermarkRegionId,
+      activeSoundEffectId: _activeSoundEffectId,
+      activeTimelineIndex: _activeTimelineIndex,
+      cutRangeStart: _cutRangeStart,
+      cutRangeEnd: _cutRangeEnd,
+      ...editableSnapshot
+    } = snapshot;
+    return editableSnapshot;
+  };
+
+  const syncHistoryAvailability = () => {
+    setCanUndo(undoStackRef.current.length > 0);
+    setCanRedo(redoStackRef.current.length > 0);
+  };
+
+  const applyEditorSnapshot = snapshot => {
+    const normalizedClips = snapshot.orderedClips || [];
+    const normalizedOverlays = snapshot.overlays || [];
+    setOrderedClips(normalizedClips);
+    setSelectedClip(
+      normalizedClips.find(clip => clip.id === snapshot.selectedClipId) ||
+        normalizedClips[0] ||
+        null
+    );
+    setOverlays(normalizedOverlays);
+    setActiveOverlayId(
+      normalizedOverlays.some(overlay => overlay.id === snapshot.activeOverlayId)
+        ? snapshot.activeOverlayId
+        : normalizedOverlays[normalizedOverlays.length - 1]?.id || null
+    );
+    setVideoFit(snapshot.videoFit || "contain");
+    setSafeFaceFraming(snapshot.safeFaceFraming !== undefined ? !!snapshot.safeFaceFraming : true);
+    setFaceAnchorPreset(snapshot.faceAnchorPreset || "center");
+    setAutoCaptions(!!snapshot.autoCaptions);
+    setCaptionStyle(snapshot.captionStyle || "bold_pop");
+    setCaptionPosition(snapshot.captionPosition || "lower");
+    setCaptionScale(Number(snapshot.captionScale ?? 1));
+    setCaptionTextOverride(snapshot.captionTextOverride || "");
+    setCaptionSegments(normalizeCaptionSegments(snapshot.captionSegments));
+    setPreviewSpeed(Number(snapshot.previewSpeed ?? 1));
+    setPacingLevel(snapshot.pacingLevel || "balanced");
+    setCreativeIntent(snapshot.creativeIntent || "energy");
+    setCreativeEffectsEnabled(!!snapshot.creativeEffectsEnabled);
+    setCreativePreset(snapshot.creativePreset || "auto_story");
+    setCreativeIntensity(snapshot.creativeIntensity || "bold");
+    setContentProfile(snapshot.contentProfile || "auto");
+    setCutRangeStart(
+      snapshot.cutRangeStart !== undefined && snapshot.cutRangeStart !== null
+        ? Number(snapshot.cutRangeStart)
+        : null
+    );
+    setCutRangeEnd(
+      snapshot.cutRangeEnd !== undefined && snapshot.cutRangeEnd !== null
+        ? Number(snapshot.cutRangeEnd)
+        : null
+    );
+    setJoinTransition(snapshot.joinTransition || "auto");
+    setSmartCrop(!!snapshot.smartCrop);
+    setSmartCropMode(snapshot.smartCropMode || "center");
+    setEnhanceQuality(!!snapshot.enhanceQuality);
+    setSilenceRemoval(!!snapshot.silenceRemoval);
+    setSilenceThreshold(Number(snapshot.silenceThreshold ?? -35));
+    setMinSilenceDuration(Number(snapshot.minSilenceDuration ?? 0.75));
+    setRemoveWatermark(!!snapshot.removeWatermark);
+    setWatermarkMode(snapshot.watermarkMode || "adaptive");
+    setManualWatermarkRegions(
+      Array.isArray(snapshot.manualWatermarkRegions)
+        ? snapshot.manualWatermarkRegions.map(clampManualWatermarkRegion)
+        : []
+    );
+    setActiveWatermarkRegionId(snapshot.activeWatermarkRegionId || null);
+    setAddHook(!!snapshot.addHook);
+    setHookText(snapshot.hookText ?? DEFAULT_HOOK_TEXT);
+    setHookTemplate(snapshot.hookTemplate || "blur_reveal");
+    setHookIntroSeconds(Number(snapshot.hookIntroSeconds ?? 3));
+    setHookStartTime(Number(snapshot.hookStartTime ?? 0.8));
+    setHookEndTime(
+      Number(
+        snapshot.hookEndTime ??
+          Number(snapshot.hookStartTime ?? 0.8) + Number(snapshot.hookIntroSeconds ?? 3)
+      )
+    );
+    setHookBlurBackground(
+      snapshot.hookBlurBackground !== undefined ? !!snapshot.hookBlurBackground : true
+    );
+    setHookDarkOverlay(snapshot.hookDarkOverlay !== undefined ? !!snapshot.hookDarkOverlay : true);
+    setHookFreezeFrame(!!snapshot.hookFreezeFrame);
+    setHookZoomScale(Number(snapshot.hookZoomScale ?? 1.08));
+    setHookTextAnimation(snapshot.hookTextAnimation || "slide-up");
+    setHookFocusPoint(normalizeHookFocusPoint(snapshot.hookFocusPoint));
+    setHookPreviewLoop(!!snapshot.hookPreviewLoop);
+    setAddMusic(!!snapshot.addMusic);
+    setMuteOriginalAudio(!!snapshot.muteOriginalAudio);
+    setMusicSelection(snapshot.musicSelection || currentMusic || "upbeat_pop.mp3");
+    setMusicSearchMode(!!snapshot.musicSearchMode);
+    setSafeSearch(snapshot.safeSearch !== undefined ? !!snapshot.safeSearch : true);
+    setMusicVolume(Number(snapshot.musicVolume ?? 0.15));
+    setMusicDucking(snapshot.musicDucking !== undefined ? !!snapshot.musicDucking : true);
+    setMusicDuckingStrength(Number(snapshot.musicDuckingStrength ?? 0.35));
+    setMusicTrack(snapshot.musicTrack || null);
+    setSoundEffects(Array.isArray(snapshot.soundEffects) ? snapshot.soundEffects : []);
+    setAudioRemix(normalizeAudioRemix(snapshot.audioRemix || DEFAULT_AUDIO_REMIX));
+    setAudioRemixBypass(false);
+    setAudioRemixLoop(null);
+    setMotionScenes((snapshot.motionScenes || []).map(normalizeMotion));
+    setActiveSoundEffectId(snapshot.activeSoundEffectId || null);
+    setExtractedAudio(snapshot.extractedAudio || null);
+    setBRollCadence(snapshot.bRollCadence || "balanced");
+    setTimeline(snapshot.timeline || []);
+    setActiveTimelineIndex(Math.max(0, Number(snapshot.activeTimelineIndex || 0)));
+  };
+
+  useEffect(() => {
+    if (!currentMusic) return;
+    setMusicSelection(currentMusic);
+    setMusicSearchMode(!isPresetMusicSelection(currentMusic));
+  }, [currentMusic]);
+
+  useEffect(
+    () => () => {
+      stopMusicPreviewBufferPlayback();
+      if (musicPreviewAudioContextRef.current) {
+        musicPreviewAudioContextRef.current.close().catch(() => {});
+      }
+      soundEffectAudioRefsRef.current.forEach(audio => audio?.pause());
+      soundEffectNodesRef.current.forEach(node => {
+        try {
+          node.stop?.();
+          node.disconnect?.();
+        } catch (error) {
+          // The node may already have completed naturally.
+        }
+      });
+      soundEffectNodesRef.current.clear();
+      if (soundEffectAudioContextRef.current) {
+        soundEffectAudioContextRef.current.close().catch(() => {});
+      }
+      soundEffectObjectUrlsRef.current.forEach(url => URL.revokeObjectURL(url));
+      soundEffectObjectUrlsRef.current.clear();
+      releaseMusicPreviewObjectUrl();
+    },
+    []
+  );
+
+  const applyHookTemplate = templateKey => {
+    const template = getHookTemplateConfig(templateKey);
+    setHookTemplate(templateKey);
+    setHookBlurBackground(template.blurBackground);
+    setHookDarkOverlay(template.darkOverlay);
+    setHookFreezeFrame(template.freezeFrame);
+    setHookTextAnimation(template.textAnimation);
+  };
+
+  const setHookDuration = durationSeconds => {
+    const nextDuration = clampNumber(
+      durationSeconds,
+      hookMinDuration,
+      hookMaxDuration,
+      hookIntroSeconds || 3
+    );
+    setHookSegmentRange(resolvedHookStart, resolvedHookStart + nextDuration);
+  };
+
+  const seekHookTimelineTime = targetTime => {
+    const video = videoRef.current;
+    const boundedTime = clampNumber(
+      targetTime,
+      0,
+      Math.max(0, Number(currentTimelineWindow.duration || 0)),
+      0
+    );
+
+    if (!video) return;
+
+    video.currentTime = Number(currentTimelineWindow.start || 0) + boundedTime;
+    setVideoTime(video.currentTime);
+  };
+
+  const setCurrentTimeAsHook = () => {
+    const currentVideoTime = Number(videoRef.current?.currentTime || 0);
+    const localHookTime = Math.max(0, currentVideoTime - Number(currentTimelineWindow.start || 0));
+    const nextStart = clampNumber(localHookTime, 0, hookStartLimit, resolvedHookStart);
+    setAddHook(true);
+    applyHookTemplate("freeze_text");
+    setHookFreezeFrame(true);
+    setHookAnalysisStatus("ready");
+    setHookAnalysisMessage("Selected moment saved as the frozen opening hook.");
+    setHookSegmentRange(nextStart, nextStart + hookDuration, { preview: false });
+    setHookFocusMode(false);
+    setHookPickMode(false);
+  };
+
+  const handlePreviewFrameClick = event => {
+    setActiveOverlayId(null);
+    setActiveWatermarkRegionId(null);
+
+    if (!hookFocusMode || isDragging) return;
+
+    const frame = phoneFrameRef.current;
+    if (!frame) return;
+
+    const rect = frame.getBoundingClientRect();
+    const nextFocusPoint = normalizeHookFocusPoint({
+      x: ((event.clientX - rect.left) / Math.max(1, rect.width)) * 100,
+      y: ((event.clientY - rect.top) / Math.max(1, rect.height)) * 100,
+    });
+
+    setAddHook(true);
+    setHookFocusPoint(nextFocusPoint);
+    setHookFocusMode(false);
+    setHookZoomScale(current => Math.max(1.12, Number(current || 0)));
+    setHookAnalysisStatus("ready");
+    setHookAnalysisMessage("Focus target locked for the frozen opening frame.");
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
+  const setHookSegmentRange = (startTime, endTime, options = {}) => {
+    const clipDuration = Math.max(0, Number(currentTimelineWindow.duration || 0));
+    const minimumDuration = Math.min(
+      HOOK_MIN_SEGMENT_DURATION,
+      Math.max(0.25, clipDuration || HOOK_MIN_SEGMENT_DURATION)
+    );
+    const maximumDuration = Math.min(
+      HOOK_MAX_SEGMENT_DURATION,
+      Math.max(minimumDuration, clipDuration || HOOK_MAX_SEGMENT_DURATION)
+    );
+    const boundedStart = clampNumber(startTime, 0, Math.max(0, clipDuration - minimumDuration), 0);
+    const fallbackDuration = clampNumber(
+      endTime - startTime,
+      minimumDuration,
+      maximumDuration,
+      hookIntroSeconds || 3
+    );
+    const boundedEnd =
+      clipDuration > 0
+        ? clampNumber(
+            endTime,
+            Math.min(clipDuration, boundedStart + minimumDuration),
+            Math.min(clipDuration, boundedStart + maximumDuration),
+            Math.min(clipDuration, boundedStart + fallbackDuration)
+          )
+        : boundedStart + fallbackDuration;
+
+    setHookStartTime(Number(boundedStart.toFixed(2)));
+    setHookEndTime(Number(boundedEnd.toFixed(2)));
+    setHookIntroSeconds(Number(Math.max(0.25, boundedEnd - boundedStart).toFixed(2)));
+
+    if (options.textSuggestion && isGenericHookText(hookText)) {
+      setHookText(normalizeHookText(options.textSuggestion));
+    }
+
+    if (options.preview) {
+      const video = videoRef.current;
+      if (video) {
+        video.currentTime = Number(currentTimelineWindow.start || 0) + boundedStart;
+        setVideoTime(video.currentTime);
+      }
+    }
+  };
+
+  const beginHookSegmentDrag = (event, target) => {
+    const track = hookSegmentTrackRef.current;
+    if (!track || !currentTimelineWindow.duration) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    hookSelectionDragRef.current = {
+      target,
+      startClientX: event.clientX,
+      anchorStart: resolvedHookStart,
+      anchorEnd: hookEnd,
+      rect: track.getBoundingClientRect(),
+    };
+  };
+
+  const beginHookPlayheadDrag = event => {
+    const track = hookSegmentTrackRef.current;
+    if (!track || !currentTimelineWindow.duration) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    hookPlayheadDragRef.current = {
+      startClientX: event.clientX,
+      anchorTime: trimAwareCurrentTime,
+      rect: track.getBoundingClientRect(),
+    };
+  };
+
+  const handleHookTrackPointerDown = event => {
+    if (hookPickMode) {
+      const track = hookSegmentTrackRef.current;
+      if (!track || !currentTimelineWindow.duration) return;
+
+      const rect = track.getBoundingClientRect();
+      const ratio = clampNumber((event.clientX - rect.left) / Math.max(1, rect.width), 0, 1, 0);
+      const clickedTime = ratio * Number(currentTimelineWindow.duration || 0);
+      seekHookTimelineTime(clickedTime);
+      return;
+    }
+
+    if (!hookSelectionMode) return;
+
+    const track = hookSegmentTrackRef.current;
+    if (!track || !currentTimelineWindow.duration) return;
+
+    const rect = track.getBoundingClientRect();
+    const ratio = clampNumber((event.clientX - rect.left) / Math.max(1, rect.width), 0, 1, 0);
+    const clickedTime = ratio * Number(currentTimelineWindow.duration || 0);
+    const distanceToStart = Math.abs(clickedTime - resolvedHookStart);
+    const distanceToEnd = Math.abs(clickedTime - hookEnd);
+
+    if (clickedTime >= resolvedHookStart && clickedTime <= hookEnd) {
+      beginHookSegmentDrag(event, "range");
+      return;
+    }
+
+    setHookSegmentRange(
+      distanceToStart <= distanceToEnd ? clickedTime : resolvedHookStart,
+      distanceToStart <= distanceToEnd ? hookEnd : clickedTime,
+      { preview: true }
+    );
+  };
+
+  const runSmartHookSuggestion = async () => {
+    const clip = currentTimelineClip;
+    if (!clip) {
+      setHookAnalysisStatus("failed");
+      setHookAnalysisMessage("Select a clip before running hook analysis.");
+      return;
+    }
+
+    const clipWindow = getTimelineClipWindow(clip);
+    const requestId = Date.now();
+    const suggestionAttempt = hookSuggestionCycleRef.current;
+    hookSuggestionCycleRef.current += 1;
+    hookAnalysisRequestRef.current = requestId;
+    setHookAnalysisStatus("analyzing");
+    setHookAnalysisMessage(
+      "Scanning motion, scene changes, and visual contrast in the selected clip..."
+    );
+
+    let analysisUrl = clip.url;
+    let temporaryObjectUrl = "";
+
+    try {
+      if (clip.file instanceof Blob) {
+        temporaryObjectUrl = URL.createObjectURL(clip.file);
+        analysisUrl = temporaryObjectUrl;
+      }
+
+      if (!analysisUrl) {
+        throw new Error("This clip does not have a previewable source yet.");
+      }
+
+      const analysisVideo = document.createElement("video");
+      analysisVideo.muted = true;
+      analysisVideo.playsInline = true;
+      analysisVideo.preload = "auto";
+      analysisVideo.crossOrigin = "anonymous";
+      if (!applySafeMediaSource(analysisVideo, analysisUrl)) {
+        throw new Error("This clip source uses an unsupported preview URL.");
+      }
+
+      if (Number.isNaN(analysisVideo.duration) || !analysisVideo.duration) {
+        await waitForVideoEvent(analysisVideo, "loadedmetadata");
+      }
+
+      const sourceDuration = Number(analysisVideo.duration || clipWindow.end || 0);
+      const analysisStart = Math.max(0, Number(clipWindow.start || 0));
+      const fullWindowDuration = Math.max(0.25, Number(clipWindow.duration || sourceDuration || 0));
+      const analysisDuration = Math.min(fullWindowDuration, 18);
+      const analysisEnd = Math.min(
+        sourceDuration || analysisStart + analysisDuration,
+        analysisStart + analysisDuration
+      );
+      const sampleCount = Math.max(12, Math.min(34, Math.round(analysisDuration * 3.2)));
+      const step = Math.max(0.18, analysisDuration / Math.max(1, sampleCount - 1));
+      const canvas = document.createElement("canvas");
+      canvas.width = 96;
+      canvas.height = 54;
+      const context = canvas.getContext("2d", { willReadFrequently: true });
+
+      if (!context) {
+        throw new Error("The browser could not open a frame analysis context.");
+      }
+
+      const samples = [];
+      let previousFrame = null;
+
+      for (let sampleIndex = 0; sampleIndex < sampleCount; sampleIndex += 1) {
+        const targetTime = Math.min(analysisEnd, analysisStart + sampleIndex * step);
+        await seekAnalysisVideo(analysisVideo, targetTime);
+
+        const frameMetrics = captureHookAnalysisFrame(
+          context,
+          analysisVideo,
+          canvas.width,
+          canvas.height,
+          previousFrame
+        );
+
+        samples.push({ time: targetTime, ...frameMetrics });
+        previousFrame = frameMetrics.grayscale;
+      }
+
+      const motionValues = samples.map(sample => sample.motion || 0);
+      const averageMotion =
+        motionValues.reduce((sum, value) => sum + value, 0) / Math.max(1, motionValues.length);
+      const motionVariance =
+        motionValues.reduce((sum, value) => sum + Math.pow(value - averageMotion, 2), 0) /
+        Math.max(1, motionValues.length);
+      const motionDeviation = Math.sqrt(motionVariance);
+      const sceneCutThreshold = averageMotion + Math.max(0.045, motionDeviation * 1.15);
+
+      const scoredSamples = samples.map((sample, index) => {
+        const nextMotion = samples[index + 1]?.motion || sample.motion || 0;
+        const sceneCut = index > 0 && sample.motion > sceneCutThreshold;
+        const rise = Math.max(0, nextMotion - (samples[index - 1]?.motion || 0));
+
+        return {
+          ...sample,
+          sceneCut,
+          rise,
+          score:
+            (sample.motion || 0) * 1.35 +
+            (sample.centerMotion || 0) * 0.85 +
+            (sample.contrast || 0) * 0.48 +
+            rise * 0.8 +
+            (sceneCut ? 1.8 : 0),
+        };
+      });
+
+      const candidateDurations = [2, 2.4, 3, 3.6, 4.2, 5]
+        .filter(duration => duration <= Math.min(HOOK_MAX_SEGMENT_DURATION, fullWindowDuration))
+        .map(duration => Number(duration.toFixed(2)));
+
+      const candidateWindows = [];
+      scoredSamples.forEach(sample => {
+        candidateDurations.forEach(duration => {
+          const windowEnd = sample.time + duration;
+          if (windowEnd > analysisEnd + 0.02) return;
+
+          const windowSamples = scoredSamples.filter(
+            candidate => candidate.time >= sample.time && candidate.time <= windowEnd + 0.001
+          );
+          if (!windowSamples.length) return;
+
+          const score = windowSamples.reduce((sum, candidate) => sum + candidate.score, 0);
+          const motionAverage =
+            windowSamples.reduce((sum, candidate) => sum + candidate.motion, 0) /
+            windowSamples.length;
+          const sceneCuts = windowSamples.filter(candidate => candidate.sceneCut).length;
+          const focusEnergy =
+            windowSamples.reduce((sum, candidate) => sum + candidate.centerMotion, 0) /
+            windowSamples.length;
+          const earlyBias =
+            Math.max(0, 1 - (sample.time - analysisStart) / Math.max(1, analysisDuration)) * 0.35;
+          const totalScore =
+            score + sceneCuts * 1.2 + motionAverage * 1.4 + focusEnergy * 0.6 + earlyBias;
+
+          candidateWindows.push({
+            startTime: sample.time,
+            endTime: windowEnd,
+            duration,
+            score: totalScore,
+            motionAverage,
+            focusEnergy,
+            sceneCuts,
+          });
+        });
+      });
+
+      const distinctCandidates = candidateWindows
+        .sort((left, right) => right.score - left.score)
+        .filter(
+          (candidate, index, candidates) =>
+            !candidates
+              .slice(0, index)
+              .some(
+                prior =>
+                  Math.abs(prior.startTime - candidate.startTime) < 0.55 &&
+                  Math.abs(prior.duration - candidate.duration) < 0.55
+              )
+        )
+        .slice(0, 4);
+      const bestWindow = distinctCandidates.length
+        ? distinctCandidates[suggestionAttempt % distinctCandidates.length]
+        : null;
+
+      if (!bestWindow) {
+        throw new Error("The clip was too short to suggest a hook segment.");
+      }
+
+      const relativeStart = Math.max(0, bestWindow.startTime - analysisStart);
+      const relativeEnd = Math.min(fullWindowDuration, bestWindow.endTime - analysisStart);
+      const templateKey =
+        bestWindow.motionAverage > averageMotion + motionDeviation * 0.55
+          ? "zoom_focus"
+          : bestWindow.sceneCuts > 0
+            ? "freeze_text"
+            : "blur_reveal";
+      const confidenceLabel =
+        bestWindow.score >= 7.5
+          ? "High confidence"
+          : bestWindow.score >= 4.75
+            ? "Good confidence"
+            : "Useful lead";
+      const analysisReason =
+        bestWindow.sceneCuts > 0
+          ? "Detected a clean beat change with a visible motion spike in this window."
+          : bestWindow.motionAverage > averageMotion + 0.02
+            ? "Detected the strongest sustained movement and visual contrast in this window."
+            : "Detected the most visually stable attention peak near the opening of the clip.";
+      const preferredCopy =
+        bestWindow.sceneCuts > 0
+          ? currentHookCopySuggestions.find(copy => /flip|changes|matters/i.test(copy)) ||
+            currentHookCopySuggestions[0]
+          : bestWindow.motionAverage > averageMotion + 0.02
+            ? currentHookCopySuggestions.find(copy => /blink|watch|fast/i.test(copy)) ||
+              currentHookCopySuggestions[0]
+            : currentHookCopySuggestions[0];
+      const preferredCopyIndex = Math.max(0, currentHookCopySuggestions.indexOf(preferredCopy));
+      let suggestedCopy =
+        currentHookCopySuggestions[
+          (preferredCopyIndex + suggestionAttempt) % Math.max(1, currentHookCopySuggestions.length)
+        ] || preferredCopy;
+      const currentSuggestedCopy = normalizeHookText(
+        hookSuggestedRange?.textSuggestion || hookText
+      );
+      if (
+        currentHookCopySuggestions.length > 1 &&
+        normalizeHookText(suggestedCopy) === currentSuggestedCopy
+      ) {
+        suggestedCopy =
+          currentHookCopySuggestions[
+            (preferredCopyIndex + suggestionAttempt + 1) % currentHookCopySuggestions.length
+          ];
+      }
+
+      if (hookAnalysisRequestRef.current !== requestId) return;
+
+      setHookSuggestedRange({
+        startTime: Number(relativeStart.toFixed(2)),
+        endTime: Number(relativeEnd.toFixed(2)),
+        duration: Number((relativeEnd - relativeStart).toFixed(2)),
+        templateKey,
+        textSuggestion: normalizeHookText(suggestedCopy || DEFAULT_HOOK_TEXT),
+        confidenceLabel,
+        analysisSource: "video_scan",
+        score: bestWindow.score,
+        message: analysisReason,
+      });
+      setHookAnalysisStatus("ready");
+      setHookAnalysisMessage(`${confidenceLabel}. ${analysisReason}`);
+    } catch (error) {
+      console.error("Hook suggestion analysis failed", error);
+      if (hookAnalysisRequestRef.current !== requestId) return;
+
+      const fallbackRange = buildFallbackHookRange(selectedClip, clipWindow.duration);
+      setHookSuggestedRange(fallbackRange);
+      setHookAnalysisStatus("failed");
+      setHookAnalysisMessage(
+        `${error?.message || "Hook analysis failed."} Falling back to the existing metadata-based suggestion.`
+      );
+    } finally {
+      if (temporaryObjectUrl) {
+        URL.revokeObjectURL(temporaryObjectUrl);
+      }
+    }
+  };
+
+  const previewHookSegment = (shouldLoop, rangeOverride = null) => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const previewStart = Number(rangeOverride?.startTime ?? resolvedHookStart);
+    const previewEnd = Number(rangeOverride?.endTime ?? hookEnd);
+    const absoluteHookStart = Number(currentTimelineWindow.start || 0) + previewStart;
+    const absoluteHookEnd = Number(currentTimelineWindow.start || 0) + previewEnd;
+
+    setTrimPreviewLoop(false);
+    setHookPreviewLoop(!!shouldLoop);
+    hookPreviewSequenceRef.current =
+      shouldLoop || absoluteHookEnd <= absoluteHookStart + 0.05
+        ? { active: false }
+        : {
+            active: true,
+            mode: "manual-preview",
+            timelineIndex: activeTimelineIndex,
+            absoluteStart: absoluteHookStart,
+            absoluteEnd: absoluteHookEnd,
+          };
+    video.currentTime = absoluteHookStart;
+    previewPlaybackIntentRef.current = true;
+    safePlayMediaElement(video);
+  };
+
+  const previewTrimWindow = shouldLoop => {
+    const video = videoRef.current;
+    if (!video || !currentTimelineClip) return;
+
+    hookPreviewSequenceRef.current = { active: false };
+    setHookPreviewLoop(false);
+    setTrimPreviewLoop(!!shouldLoop);
+    video.currentTime = Number(currentTimelineWindow.start || 0);
+    previewPlaybackIntentRef.current = true;
+    safePlayMediaElement(video);
+  };
+
+  const pauseSynchronizedPreview = () => {
+    previewPlaybackIntentRef.current = false;
+    videoRef.current?.pause();
+    beforeVideoRef.current?.pause();
+    audioRef.current?.pause();
+    hookBackdropVideoRef.current?.pause();
+    hookFreezeVideoRef.current?.pause();
+    smartCropForegroundVideoRef.current?.pause();
+    musicPreviewRef.current?.pause();
+    stopMusicPreviewBufferPlayback();
+    stopSoundEffectPlayback();
+    overlayMediaRefsRef.current.forEach(media => media.pause());
+  };
+
+  const togglePreviewPlayback = () => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (video.paused) {
+      exactAudioRemixPreviewRef.current?.pause();
+      backgroundSoundPreviewSuppressedRef.current = false;
+      previewPlaybackIntentRef.current = true;
+      safePlayMediaElement(video);
+    } else {
+      pauseSynchronizedPreview();
+    }
+  };
+
+  const handleTrimAwareScrub = event => {
+    const video = videoRef.current;
+    if (!video || !currentTimelineClip) return;
+
+    const relativeTime = clampNumber(
+      event.target.value,
+      0,
+      Math.max(0, Number(currentTimelineWindow.duration || 0)),
+      0
+    );
+    video.currentTime = Number(currentTimelineWindow.start || 0) + relativeTime;
+    setVideoTime(video.currentTime);
+  };
+
+  const applyCurrentHookSuggestion = shouldLoopPreview => {
+    setHookSegmentRange(currentHookSuggestion.startTime, currentHookSuggestion.endTime, {
+      textSuggestion: currentHookSuggestion.textSuggestion,
+    });
+    previewHookSegment(shouldLoopPreview, {
+      startTime: currentHookSuggestion.startTime,
+      endTime: currentHookSuggestion.endTime,
+    });
+  };
+
+  const updateManualWatermarkRegion = (id, updates) => {
+    setManualWatermarkRegions(prev =>
+      prev.map(region =>
+        region.id === id ? clampManualWatermarkRegion({ ...region, ...updates }) : region
+      )
+    );
+  };
+
+  const addManualWatermarkRegion = preset => {
+    const nextRegion = clampManualWatermarkRegion({
+      ...createManualWatermarkRegion(),
+      seedTime: clampNumber(videoTime, 0, 36000, 0),
+      ...(preset || {}),
+    });
+    setManualWatermarkRegions(prev => [...prev, nextRegion]);
+    setActiveWatermarkRegionId(nextRegion.id);
+  };
+
+  const deleteManualWatermarkRegion = id => {
+    setManualWatermarkRegions(prev => prev.filter(region => region.id !== id));
+    setActiveWatermarkRegionId(currentId => (currentId === id ? null : currentId));
+  };
+
+  const handleUndo = () => {
+    if (!undoStackRef.current.length) return;
+
+    const currentSnapshot = cloneSnapshot(getEditorSnapshot());
+    const currentSignature = serializeSnapshot(getHistoryRelevantSnapshot(currentSnapshot));
+    const cutTransaction = cutHistoryTransactionRef.current;
+    const currentTimelineSignature = serializeSnapshot(currentSnapshot.timeline || []);
+    if (cutTransaction?.appliedTimelineSignature === currentTimelineSignature) {
+      const baselineSignature = serializeSnapshot(
+        getHistoryRelevantSnapshot(cutTransaction.baseline)
+      );
+      let baselineIndex = -1;
+      for (let index = undoStackRef.current.length - 1; index >= 0; index -= 1) {
+        const candidateSignature = serializeSnapshot(
+          getHistoryRelevantSnapshot(undoStackRef.current[index])
+        );
+        if (candidateSignature === baselineSignature) {
+          baselineIndex = index;
+          break;
+        }
+      }
+      if (baselineIndex >= 0) undoStackRef.current.splice(baselineIndex);
+      redoStackRef.current.push(currentSnapshot);
+      isRestoringHistoryRef.current = true;
+      applyEditorSnapshot(cloneSnapshot(cutTransaction.baseline));
+      cutHistoryTransactionRef.current = null;
+      setStudioActionMessage("Undo restored the removed section and its synchronized media.");
+      syncHistoryAvailability();
+      return;
+    }
+    let previousSnapshot = null;
+    while (undoStackRef.current.length && !previousSnapshot) {
+      const candidate = undoStackRef.current.pop();
+      const candidateSignature = serializeSnapshot(getHistoryRelevantSnapshot(candidate));
+      if (candidateSignature !== currentSignature) previousSnapshot = candidate;
+    }
+    if (!previousSnapshot) {
+      syncHistoryAvailability();
+      return;
+    }
+    redoStackRef.current.push(currentSnapshot);
+    isRestoringHistoryRef.current = true;
+    applyEditorSnapshot(cloneSnapshot(previousSnapshot));
+    setStudioActionMessage("Undo restored the previous edit, including uploaded media.");
+    syncHistoryAvailability();
+  };
+
+  const handleRedo = () => {
+    if (!redoStackRef.current.length) return;
+
+    const currentSnapshot = cloneSnapshot(getEditorSnapshot());
+    const currentSignature = serializeSnapshot(getHistoryRelevantSnapshot(currentSnapshot));
+    let nextSnapshot = null;
+    while (redoStackRef.current.length && !nextSnapshot) {
+      const candidate = redoStackRef.current.pop();
+      const candidateSignature = serializeSnapshot(getHistoryRelevantSnapshot(candidate));
+      if (candidateSignature !== currentSignature) nextSnapshot = candidate;
+    }
+    if (!nextSnapshot) {
+      syncHistoryAvailability();
+      return;
+    }
+    undoStackRef.current.push(currentSnapshot);
+    isRestoringHistoryRef.current = true;
+    applyEditorSnapshot(cloneSnapshot(nextSnapshot));
+    setStudioActionMessage("Redo restored the next edit, including uploaded media.");
+    syncHistoryAvailability();
+  };
+
+  const addOverlayAsset = ({
+    type,
+    src,
+    file = null,
+    isLocal = false,
+    width = 40,
+    height = 30,
+    bRollMode = null, // "fullscreen" | "pip" | "sideBySide" | null (legacy)
+  }) => {
+    if (!src) return;
+    const currentVideoTime = videoRef.current ? videoRef.current.currentTime : 0;
+    const relativeStartTime = getPreviewTimelineTime(currentVideoTime);
+    const pipPlacement = getCollisionSafePipPlacement({
+      overlays,
+      startTime: relativeStartTime,
+      duration: 3,
+      width,
+      height,
+    });
+    const defaultPlacement =
+      bRollMode === "fullscreen"
+        ? { x: 50, y: 50, width: 100, height: 100 }
+        : bRollMode === "sideBySide"
+          ? { x: 75, y: 50, width: 50, height: 100 }
+          : bRollMode === "pip"
+            ? pipPlacement
+            : { x: 50, y: 50, width, height };
+
+    const newOverlay = {
+      id: createSecureId("overlay"),
+      type,
+      src,
+      file,
+      isLocal,
+      x: defaultPlacement.x,
+      y: defaultPlacement.y,
+      width: defaultPlacement.width,
+      height: defaultPlacement.height,
+      aspectRatioLocked: type === "video" || type === "image",
+      aspectRatio: height ? width / height : 1,
+      clipId: timeline[activeTimelineIndex]?.id || "main",
+      // B-roll / cutaway fields
+      startTime: bRollMode ? relativeStartTime : undefined,
+      duration: bRollMode ? 3.0 : undefined,
+      bRollMode: bRollMode || undefined,
+      animation: bRollMode
+        ? { enter: "fade", exit: "fade", enterDuration: 0.3, exitDuration: 0.3 }
+        : undefined,
+      opacity: bRollMode ? 1.0 : undefined,
+      mediaFit: type === "image" ? "cover" : "contain",
+      borderRadius: type === "image" ? 16 : 12,
+      shadow: type === "image" ? "soft" : "none",
+      rotation: 0,
+      coverMainVideo: bRollMode === "fullscreen",
+      muteMainAudio: false,
+      useOverlayAudio: false,
+      mixAudio: false,
+      overlayAudioVolume: 0.7,
+      audioDucking: false,
+      audioDuckingStrength: 0.35,
+    };
+    setOverlays(prev => [...prev, newOverlay]);
+    setActiveOverlayId(newOverlay.id);
+    return newOverlay;
+  };
+
+  const clampOverlayDimension = value => Math.max(10, Math.min(100, Number(value) || 10));
+  const clampOverlayCoordinate = value => Math.max(0, Math.min(100, Number(value) || 0));
+
+  const clampOverlayPlacement = overlay => {
+    const width = clampOverlayDimension(overlay.width ?? 40);
+    const height = clampOverlayDimension(overlay.height ?? 30);
+    const halfWidth = width / 2;
+    const halfHeight = height / 2;
+    return {
+      ...overlay,
+      width,
+      height,
+      x: clampNumber(overlay.x, halfWidth, 100 - halfWidth, 50),
+      y: clampNumber(overlay.y, halfHeight, 100 - halfHeight, 50),
+    };
+  };
+
+  const getOverlayAspectRatio = overlay => {
+    const storedRatio = Number(overlay.aspectRatio);
+    if (Number.isFinite(storedRatio) && storedRatio > 0) return storedRatio;
+
+    const width = clampOverlayDimension(overlay.width ?? 40);
+    const height = clampOverlayDimension(overlay.height ?? 30);
+    return width / height;
+  };
+
+  const updateOverlaySize = (id, dimension, delta) => {
+    setOverlays(prev =>
+      prev.map(overlay => {
+        if (overlay.id !== id) return overlay;
+        const currentWidth = clampOverlayDimension(overlay.width ?? 40);
+        const currentHeight = clampOverlayDimension(overlay.height ?? 30);
+        const nextValue = clampOverlayDimension(
+          Number(overlay[dimension] ?? (dimension === "width" ? currentWidth : currentHeight)) +
+            delta
+        );
+
+        if (overlay.aspectRatioLocked && (overlay.type === "video" || overlay.type === "image")) {
+          const ratio = getOverlayAspectRatio(overlay);
+          if (dimension === "width") {
+            return clampOverlayPlacement({
+              ...overlay,
+              width: nextValue,
+              height: clampOverlayDimension(nextValue / ratio),
+            });
+          }
+
+          return clampOverlayPlacement({
+            ...overlay,
+            height: nextValue,
+            width: clampOverlayDimension(nextValue * ratio),
+          });
+        }
+
+        const nextWidth = dimension === "width" ? nextValue : currentWidth;
+        const nextHeight = dimension === "height" ? nextValue : currentHeight;
+        return clampOverlayPlacement({
+          ...overlay,
+          [dimension]: nextValue,
+          aspectRatio: nextWidth / Math.max(nextHeight, 1),
+        });
+      })
+    );
+  };
+
+  const toggleOverlayAspectRatioLock = id => {
+    setOverlays(prev =>
+      prev.map(overlay => {
+        if (overlay.id !== id) return overlay;
+        return {
+          ...overlay,
+          aspectRatioLocked: !overlay.aspectRatioLocked,
+          aspectRatio: getOverlayAspectRatio(overlay),
+        };
+      })
+    );
+  };
+
+  const moveOverlay = (id, direction) => {
+    setOverlays(prev => {
+      const currentIndex = prev.findIndex(overlay => overlay.id === id);
+      if (currentIndex === -1) return prev;
+
+      const reordered = [...prev];
+      const [overlay] = reordered.splice(currentIndex, 1);
+      let nextIndex = currentIndex;
+
+      if (direction === "forward") nextIndex = Math.min(reordered.length, currentIndex + 1);
+      if (direction === "backward") nextIndex = Math.max(0, currentIndex - 1);
+      if (direction === "front") nextIndex = reordered.length;
+      if (direction === "back") nextIndex = 0;
+
+      reordered.splice(nextIndex, 0, overlay);
+      return reordered;
+    });
+  };
+
+  const moveOverlayToIndex = (id, nextIndex) => {
+    setOverlays(prev => {
+      const currentIndex = prev.findIndex(overlay => overlay.id === id);
+      if (currentIndex === -1) return prev;
+
+      const boundedIndex = Math.max(0, Math.min(prev.length - 1, nextIndex));
+      if (currentIndex === boundedIndex) return prev;
+
+      const reordered = [...prev];
+      const [overlay] = reordered.splice(currentIndex, 1);
+      reordered.splice(boundedIndex, 0, overlay);
+      return reordered;
+    });
+  };
+
+  const moveTimelineClip = (clipId, direction) => {
+    setTimeline(prev => {
+      const currentIndex = prev.findIndex(clip => clip.id === clipId);
+      if (currentIndex === -1) return prev;
+
+      const reordered = [...prev];
+      const [clip] = reordered.splice(currentIndex, 1);
+      let nextIndex = currentIndex;
+
+      if (direction === "forward") nextIndex = Math.min(reordered.length, currentIndex + 1);
+      if (direction === "backward") nextIndex = Math.max(0, currentIndex - 1);
+      if (direction === "front") nextIndex = reordered.length;
+      if (direction === "back") nextIndex = 0;
+
+      reordered.splice(nextIndex, 0, clip);
+
+      setActiveTimelineIndex(prevActiveIndex => {
+        const activeClipId = prev[prevActiveIndex]?.id;
+        const resolvedIndex = reordered.findIndex(item => item.id === activeClipId);
+        return resolvedIndex >= 0 ? resolvedIndex : 0;
+      });
+
+      return reordered;
+    });
+  };
+
+  const moveTimelineClipToIndex = (clipId, nextIndex) => {
+    setTimeline(prev => {
+      const currentIndex = prev.findIndex(clip => clip.id === clipId);
+      if (currentIndex === -1) return prev;
+
+      const boundedIndex = Math.max(0, Math.min(prev.length - 1, nextIndex));
+      if (boundedIndex === currentIndex) return prev;
+
+      const reordered = [...prev];
+      const [clip] = reordered.splice(currentIndex, 1);
+      reordered.splice(boundedIndex, 0, clip);
+
+      setActiveTimelineIndex(prevActiveIndex => {
+        const activeClipId = prev[prevActiveIndex]?.id;
+        const resolvedIndex = reordered.findIndex(item => item.id === activeClipId);
+        return resolvedIndex >= 0 ? resolvedIndex : 0;
+      });
+
+      return reordered;
+    });
+  };
+
+  const reorderDetectedClips = updater => {
+    setOrderedClips(prev => {
+      const nextClips = updater(prev);
+      setSelectedClip(prevSelected => {
+        const selectedId = prevSelected?.id;
+        if (!selectedId) return nextClips[0] || null;
+        return nextClips.find(clip => clip.id === selectedId) || nextClips[0] || null;
+      });
+      return nextClips;
+    });
+  };
+
+  const moveDetectedClip = (clipId, direction) => {
+    reorderDetectedClips(prev => {
+      const currentIndex = prev.findIndex(clip => clip.id === clipId);
+      if (currentIndex === -1) return prev;
+
+      const reordered = [...prev];
+      const [clip] = reordered.splice(currentIndex, 1);
+      let nextIndex = currentIndex;
+
+      if (direction === "forward") nextIndex = Math.min(reordered.length, currentIndex + 1);
+      if (direction === "backward") nextIndex = Math.max(0, currentIndex - 1);
+      if (direction === "front") nextIndex = reordered.length;
+      if (direction === "back") nextIndex = 0;
+
+      reordered.splice(nextIndex, 0, clip);
+      return reordered;
+    });
+  };
+
+  const moveDetectedClipToIndex = (clipId, nextIndex) => {
+    reorderDetectedClips(prev => {
+      const currentIndex = prev.findIndex(clip => clip.id === clipId);
+      if (currentIndex === -1) return prev;
+
+      const boundedIndex = Math.max(0, Math.min(prev.length - 1, nextIndex));
+      if (currentIndex === boundedIndex) return prev;
+
+      const reordered = [...prev];
+      const [clip] = reordered.splice(currentIndex, 1);
+      reordered.splice(boundedIndex, 0, clip);
+      return reordered;
+    });
+  };
+
+  const safePlayMediaElement = mediaElement => {
+    if (!mediaElement || typeof mediaElement.play !== "function") return Promise.resolve(false);
+    const rawSource =
+      (typeof mediaElement.currentSrc === "string" && mediaElement.currentSrc) ||
+      (typeof mediaElement.src === "string" && mediaElement.src) ||
+      "";
+    if (!rawSource.trim()) return Promise.resolve(false);
+    if (
+      typeof HTMLMediaElement !== "undefined" &&
+      mediaElement.networkState === HTMLMediaElement.NETWORK_NO_SOURCE
+    ) {
+      return Promise.resolve(false);
+    }
+
+    return playMediaSafely(mediaElement, {
+      onUnexpectedError: error => {
+        if (error?.name === "NotSupportedError") return;
+        console.log("Auto-play prevented", error);
+      },
+    });
+  };
+
+  const jumpToSourceTime = targetTime => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const boundedTime = Math.max(0, Number(targetTime) || 0);
+    video.currentTime = boundedTime;
+    setVideoTime(boundedTime);
+  };
+
+  const jumpToOutputTimelineTime = outputTime => {
+    const position = resolveOutputTimelinePosition(outputTime);
+    if (!position) return;
+
+    hookPreviewSequenceRef.current = { active: false };
+    setHookPreviewLoop(false);
+    setTrimPreviewLoop(false);
+    const video = videoRef.current;
+    pendingTimelineSeekRef.current =
+      position.index === activeTimelineIndex
+        ? null
+        : {
+            index: position.index,
+            sourceTime: position.sourceTime,
+            play: Boolean(video && !video.paused && previewPlaybackIntentRef.current),
+          };
+    setActiveTimelineIndex(position.index);
+    if (!video) return;
+    if (position.clip?.url && video.src !== position.clip.url) {
+      applySafeMediaSource(video, position.clip.url);
+    }
+    try {
+      video.currentTime = position.sourceTime;
+      setVideoTime(position.sourceTime);
+    } catch (error) {
+      console.log("Output timeline seek skipped", error);
+    }
+  };
+
+  const seekLiveEditTimeline = event => {
+    const trackBounds = event.currentTarget.getBoundingClientRect();
+    const duration = Math.max(0, getTimelineDuration());
+    if (!duration || !trackBounds.width) return;
+
+    const progress = clampNumber((event.clientX - trackBounds.left) / trackBounds.width, 0, 1, 0);
+    const targetTime = progress * duration;
+    jumpToOutputTimelineTime(targetTime);
+    setStudioActionMessage(
+      `Preview moved to ${formatPreviewTimePrecise(progress * duration)}. Timeline and After are on the same frame.`
+    );
+  };
+
+  const seekLiveEditTimelineItem = (outputTime, toolId, overlayId = null) => {
+    const duration = Math.max(0, getTimelineDuration());
+    const boundedOutputTime = clampNumber(outputTime, 0, duration || Number(outputTime || 0), 0);
+
+    if (overlayId) setActiveOverlayId(overlayId);
+    if (toolId) {
+      setStudioInspectorTab(toolId);
+      setActiveCreativeTool(toolId);
+    }
+
+    jumpToOutputTimelineTime(boundedOutputTime);
+    setStudioActionMessage(
+      `${toolId === "broll" ? "B-roll" : toolId === "hook" ? "Hook" : "Edit"} selected at ${formatPreviewTimePrecise(boundedOutputTime)} in the After preview.`
+    );
+  };
+
+  const selectLiveTimelineOverlay = overlayId => {
+    const selectedOverlay = overlays.find(overlay => String(overlay.id) === String(overlayId));
+    if (!selectedOverlay) return;
+
+    setSoloPreviewOverlayId(null);
+    setActiveOverlayId(selectedOverlay.id);
+    setStudioInspectorTab("broll");
+    setActiveCreativeTool("broll");
+    setComparisonMode("after");
+    jumpToOutputTimelineTime(Number(selectedOverlay.startTime || 0));
+    setStudioActionMessage(
+      `${selectedOverlay.type === "image" ? "Image" : "B-roll"} selected at ${formatPreviewTimePrecise(
+        selectedOverlay.startTime
+      )}. Edit controls are open in After.`
+    );
+  };
+
+  const focusClipInEditor = (clip, options = {}) => {
+    if (!clip) return;
+
+    setSelectedClip(clip);
+    setActiveTimelineIndex(0);
+    setTrimPreviewLoop(false);
+    setHookPreviewLoop(false);
+
+    const boundaryTime =
+      options.boundary === "end" ? Number(clip.end || clip.start || 0) : Number(clip.start || 0);
+
+    const video = videoRef.current;
+    if (video) {
+      if (!applySafeMediaSource(video, videoUrl)) return;
+      video.currentTime = boundaryTime;
+      setVideoTime(boundaryTime);
+      if (options.play) {
+        previewPlaybackIntentRef.current = true;
+        safePlayMediaElement(video);
+      }
+    }
+  };
+
+  const applyGuidedHookToClip = (clip, options = {}) => {
+    if (!clip) return;
+
+    const clipWindowDuration = Math.max(0, getClipDurationSeconds(clip));
+    const suggestion = buildFallbackHookRange(clip, clipWindowDuration);
+    const guidance = clipGuidanceById.get(clip.id);
+
+    setAddHook(true);
+    applyHookTemplate(suggestion.templateKey);
+    setHookSuggestedRange(suggestion);
+    setHookAnalysisStatus("ready");
+    setHookAnalysisMessage("Previewing this clip with a suggested hook treatment.");
+    setHookSegmentRange(suggestion.startTime, suggestion.endTime, {
+      textSuggestion: guidance?.hookText || suggestion.textSuggestion,
+      preview: false,
+    });
+
+    if (options.preview !== false) {
+      previewHookSegment(false, {
+        startTime: suggestion.startTime,
+        endTime: suggestion.endTime,
+      });
+    }
+  };
+
+  const applyClipImprovements = clip => {
+    if (!clip) return;
+
+    const guidance = clipGuidanceById.get(clip.id);
+    const clipStart = Number(clip.start || 0);
+    const clipEnd = Number(clip.end || clipStart);
+    const clipDuration = Math.max(0, clipEnd - clipStart);
+    const shouldCutOpening =
+      (!guidance?.signals.speech || !guidance?.signals.hook) && clipDuration > 3.2;
+    const improvedStart = shouldCutOpening ? Math.min(clipEnd - 0.5, clipStart + 2) : clipStart;
+    const improvedEnd =
+      guidance?.signals.idealLength || clipDuration <= 25
+        ? clipEnd
+        : Math.min(clipEnd, improvedStart + 22);
+
+    setTimeline(prev =>
+      prev.map((item, index) =>
+        index === 0 && item.id === "main"
+          ? {
+              ...item,
+              startRequest: improvedStart,
+              endRequest: Math.max(improvedStart + 0.5, improvedEnd),
+            }
+          : item
+      )
+    );
+
+    setAutoCaptions(true);
+    if (!guidance?.signals.subject) {
+      setSmartCrop(true);
+    }
+    applyGuidedHookToClip(clip, { preview: true });
+    onStatusChange?.("Applied guided improvements to strengthen the selected clip.");
+  };
+
+  const applyClipVariant = (clip, variant) => {
+    if (!clip || !variant) return;
+
+    setTimeline(prev =>
+      prev.map((item, index) =>
+        index === 0 && item.id === "main"
+          ? {
+              ...item,
+              startRequest: variant.start,
+              endRequest: variant.end,
+            }
+          : item
+      )
+    );
+
+    setAutoCaptions(true);
+    if (variant.id !== "authority") {
+      setSmartCrop(true);
+    }
+
+    setAddHook(true);
+    applyHookTemplate(variant.templateKey || "blur_reveal");
+    setHookAnalysisStatus("ready");
+    setHookAnalysisMessage(`Loaded ${variant.label.toLowerCase()} for the selected moment.`);
+    setHookSegmentRange(
+      Math.max(0, Number(variant.start || 0) - Number(clip.start || 0)),
+      Math.max(
+        Math.max(0.5, Number(variant.end || 0) - Number(clip.start || 0)),
+        Math.max(0.6, Number(variant.end || 0) - Number(variant.start || 0))
+      ),
+      {
+        textSuggestion: variant.hookText || clipGuidanceById.get(clip.id)?.hookText,
+        preview: false,
+      }
+    );
+
+    focusClipInEditor(
+      {
+        ...clip,
+        start: variant.start,
+        end: variant.end,
+      },
+      { boundary: "start", play: false }
+    );
+
+    onStatusChange?.(`Applied ${variant.label} to give this moment a sharper editorial angle.`);
+  };
+
+  const handleClipAction = (clip, action) => {
+    if (!clip || !action) return;
+
+    if (action.type === "use") {
+      focusClipInEditor(clip, { boundary: "start", play: false });
+      return;
+    }
+
+    if (action.type === "jump") {
+      focusClipInEditor(clip, { boundary: action.boundary, play: false });
+      return;
+    }
+
+    if (selectedClip?.id !== clip.id) {
+      pendingClipActionRef.current = { clipId: clip.id, ...action };
+      focusClipInEditor(clip, { boundary: "start", play: false });
+      return;
+    }
+
+    if (action.type === "apply-hook") {
+      applyGuidedHookToClip(clip, { preview: true });
+      return;
+    }
+
+    if (action.type === "improve") {
+      applyClipImprovements(clip);
+      return;
+    }
+
+    if (action.type === "apply-variant") {
+      applyClipVariant(clip, action.variant);
+      return;
+    }
+
+    if (action.type === "export") {
+      pendingClipActionRef.current = null;
+      void handleExportRender(action.destination);
+    }
+  };
+
+  const updateOverlayPosition = (id, axis, delta) => {
+    setOverlays(prev =>
+      prev.map(overlay =>
+        overlay.id === id
+          ? clampOverlayPlacement({
+              ...overlay,
+              [axis]: clampOverlayCoordinate(Number(overlay[axis] ?? 50) + delta),
+            })
+          : overlay
+      )
+    );
+  };
+
+  const centerOverlay = id => {
+    setOverlays(prev =>
+      prev.map(overlay => (overlay.id === id ? { ...overlay, x: 50, y: 50 } : overlay))
+    );
+  };
+
+  const duplicateOverlay = id => {
+    setOverlays(prev => {
+      const overlay = prev.find(item => item.id === id);
+      if (!overlay) return prev;
+
+      const duplicate = {
+        ...overlay,
+        id: createSecureId("overlay"),
+        x: clampOverlayCoordinate(Number(overlay.x ?? 50) + 4),
+        y: clampOverlayCoordinate(Number(overlay.y ?? 50) + 4),
+      };
+
+      setActiveOverlayId(duplicate.id);
+      return [...prev, duplicate];
+    });
+  };
+
+  const activeOverlay = overlays.find(overlay => overlay.id === activeOverlayId) || null;
+  const activeOverlayHasTiming = Boolean(
+    activeOverlay && activeOverlay.startTime !== undefined && activeOverlay.duration !== undefined
+  );
+  const activeOverlayIsVideoBRoll = Boolean(
+    activeOverlayHasTiming && activeOverlay?.type === "video"
+  );
+  const activeOverlayIsTimedMedia = Boolean(
+    activeOverlayHasTiming && ["video", "image"].includes(activeOverlay?.type)
+  );
+  const activeOverlayIsFullscreenBRoll = Boolean(
+    activeOverlayIsTimedMedia && activeOverlay?.bRollMode === "fullscreen"
+  );
+  const activeOverlayStartTime = activeOverlayHasTiming ? Number(activeOverlay.startTime || 0) : 0;
+  const activeOverlayDuration = activeOverlayHasTiming ? Number(activeOverlay.duration || 0) : 0;
+  const activeOverlayEndTime = activeOverlayStartTime + activeOverlayDuration;
+  const activeOverlayVisibleDuration = activeOverlayHasTiming
+    ? getOverlayVisibleDuration(activeOverlay)
+    : 0;
+  const activeOverlayAvailableSourceDuration = activeOverlayIsVideoBRoll
+    ? getOverlayAvailableSourceDuration(activeOverlay)
+    : Number.POSITIVE_INFINITY;
+  const activeOverlaySafeSrc = activeOverlay ? getSafeMediaSource(activeOverlay.src) : "";
+  const activeOverlayDisplayName = activeOverlay
+    ? activeOverlay.file?.name ||
+      activeOverlay.name ||
+      (activeOverlay.type === "text"
+        ? activeOverlay.text || "Text layer"
+        : `${activeOverlay.type === "image" ? "Image" : "Video"} layer`)
+    : "";
+
+  const getTimelineClipWindow = clip => {
+    if (!clip) return { start: 0, end: 0, duration: 0 };
+    const isPrimaryClip = clip.id === "main" && selectedClip;
+    const start =
+      clip.startRequest !== null && clip.startRequest !== undefined
+        ? clip.startRequest
+        : isPrimaryClip
+          ? selectedClip.start
+          : 0;
+    const end =
+      clip.endRequest !== null && clip.endRequest !== undefined
+        ? clip.endRequest
+        : isPrimaryClip
+          ? selectedClip.end
+          : clip.duration || 0;
+    return {
+      start,
+      end,
+      duration: Math.max(0, end - start),
+    };
+  };
+
+  const getPreviewTimelineTime = sourceTime => {
+    let elapsed = 0;
+    for (let index = 0; index < activeTimelineIndex; index += 1) {
+      elapsed += Math.max(0, Number(getTimelineClipWindow(timeline[index]).duration || 0));
+    }
+
+    const currentClip = timeline[activeTimelineIndex];
+    const currentWindow = getTimelineClipWindow(currentClip);
+    const localStart = Number(currentWindow.start || 0);
+    const localDuration = Math.max(0, Number(currentWindow.duration || 0));
+    const localTime = Math.max(0, Number(sourceTime || 0) - localStart);
+
+    return elapsed + Math.min(localTime, localDuration || localTime);
+  };
+
+  const getTimelineDuration = () =>
+    timeline.reduce(
+      (total, clip) => total + Math.max(0, Number(getTimelineClipWindow(clip).duration || 0)),
+      0
+    );
+
+  const getTimelineOffsetForIndex = index =>
+    timeline
+      .slice(0, Math.max(0, Number(index) || 0))
+      .reduce(
+        (total, clip) => total + Math.max(0, Number(getTimelineClipWindow(clip).duration || 0)),
+        0
+      );
+
+  const resolveOutputTimelinePosition = outputTime => {
+    const totalDuration = getTimelineDuration();
+    const boundedTime = clampNumber(outputTime, 0, totalDuration || Number(outputTime || 0), 0);
+    let elapsed = 0;
+
+    for (let index = 0; index < timeline.length; index += 1) {
+      const clip = timeline[index];
+      const clipWindow = getTimelineClipWindow(clip);
+      const clipDuration = Math.max(0, Number(clipWindow.duration || 0));
+      const isLastClip = index === timeline.length - 1;
+      if (boundedTime < elapsed + clipDuration || isLastClip) {
+        const localTime = clampNumber(boundedTime - elapsed, 0, clipDuration, 0);
+        return {
+          index,
+          clip,
+          clipWindow,
+          outputTime: boundedTime,
+          sourceTime: Number(clipWindow.start || 0) + localTime,
+          localTime,
+        };
+      }
+      elapsed += clipDuration;
+    }
+
+    return null;
+  };
+
+  const normalizeBackgroundAudioForExport = audioTrack => {
+    if (!audioTrack?.url || audioTrack.enabled === false) return null;
+
+    return {
+      url: audioTrack.url,
+      trim_start: clampAudioControl(audioTrack.trimStart, 0, audioTrack.duration || 36000, 0),
+      volume: clampAudioControl(audioTrack.volume, 0, 1.5, 0.7),
+      mode: normalizeAudioMode(audioTrack.mode),
+      ducking_strength: clampAudioControl(audioTrack.duckingStrength, 0.15, 0.95, 0.45),
+      enabled: true,
+    };
+  };
+
+  // ── Music track helpers ──
+  const setMusicTrackField = (key, value) => {
+    setMusicTrack(prev => (prev ? { ...prev, [key]: value } : null));
+  };
+
+  const handleMusicFileUpload = event => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("audio/") && !file.name.match(/\.(mp3|wav|ogg|m4a|aac)$/i)) {
+      toast.error("Please select an audio file (MP3, WAV, OGG, M4A, AAC).");
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    setMusicTrack({
+      url,
+      file,
+      name: file.name.replace(/\.[^.]+$/, ""),
+      trimStart: 0,
+      trimEnd: null,
+      fadeIn: 0.5,
+      fadeOut: 0.5,
+      loop: true,
+      volume: 0.25,
+      ducking: true,
+      duckingStrength: 0.4,
+      duckingMode: "speech",
+    });
+    setMusicSelection("custom");
+    backgroundSoundPreviewSuppressedRef.current = false;
+    setAddMusic(true);
+    setMusicSearchMode(false);
+    releaseMusicPreviewObjectUrl();
+    setMusicPreviewUrl(url);
+    setPreviewMuted(false);
+    setMusicPreviewStatus("ready");
+    setMusicPreviewStatusMessage(`Background sound ready: ${file.name}`);
+    setMusicPreviewNeedsGesture(false);
+    setIsBackgroundSoundPreviewing(false);
+    setStudioInspectorTab("sound");
+    setStudioActionMessage(
+      "Background sound is ready with speech-aware ducking, so dialogue stays clear."
+    );
+    toast.success(`Added "${file.name}" as background music`);
+    event.target.value = null;
+  };
+
+  const selectPresetMusic = preset => {
+    setMusicTrack({
+      url: null,
+      file: null,
+      name: preset.name,
+      trimStart: 0,
+      trimEnd: null,
+      fadeIn: 0.5,
+      fadeOut: 0.5,
+      loop: true,
+      volume: 0.25,
+      ducking: true,
+      duckingStrength: 0.4,
+      duckingMode: "speech",
+    });
+    setMusicSelection(preset.file);
+    backgroundSoundPreviewSuppressedRef.current = false;
+    setAddMusic(true);
+    setMusicSearchMode(false);
+    setMusicPreviewUrl("");
+    setMusicPreviewStatus("idle");
+    setMusicLibraryOpen(false);
+    setStudioInspectorTab("sound");
+    setStudioActionMessage(
+      `${preset.name} is ready with speech-aware ducking, so dialogue stays clear.`
+    );
+    toast.success(`Selected "${preset.name}"`);
+  };
+
+  const removeMusic = () => {
+    setMusicTrack(null);
+    setAddMusic(false);
+    setMusicSelection("upbeat_pop.mp3");
+    setMusicSearchMode(false);
+    setMusicPreviewUrl("");
+    setMusicPreviewStatus("idle");
+    setMusicPreviewStatusMessage("");
+    setMusicPreviewNeedsGesture(false);
+    setIsBackgroundSoundPreviewing(false);
+    stopMusicPreviewBufferPlayback();
+    if (musicPreviewRef.current) {
+      musicPreviewRef.current.pause();
+      musicPreviewRef.current.removeAttribute("src");
+      musicPreviewRef.current.load();
+    }
+    toast("Background music removed");
+  };
+
+  const getSoundEffectDuration = effect =>
+    clampAudioControl(effect?.duration, 0.05, 15, effect?.builtIn ? 0.6 : 2);
+
+  const stopSynthesizedSoundEffects = () => {
+    soundEffectPlaybackEpochRef.current += 1;
+    soundEffectNodesRef.current.forEach(node => {
+      try {
+        node.stop?.();
+        node.disconnect?.();
+      } catch (error) {
+        // A scheduled Web Audio node can finish before the UI asks it to stop.
+      }
+    });
+    soundEffectNodesRef.current.clear();
+  };
+
+  const stopSoundEffectPlayback = (clearPreviewState = true) => {
+    if (soundEffectPreviewTimeoutRef.current) {
+      window.clearTimeout(soundEffectPreviewTimeoutRef.current);
+      soundEffectPreviewTimeoutRef.current = null;
+    }
+    soundEffectAudioRefsRef.current.forEach(audio => {
+      if (!audio) return;
+      audio.pause();
+    });
+    stopSynthesizedSoundEffects();
+    triggeredSoundEffectsRef.current.clear();
+    if (clearPreviewState) setPreviewingSoundEffectId(null);
+  };
+
+  const ensureSoundEffectAudioContext = () => {
+    if (soundEffectAudioContextRef.current) return soundEffectAudioContextRef.current;
+    const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextCtor) return null;
+    soundEffectAudioContextRef.current = new AudioContextCtor();
+    return soundEffectAudioContextRef.current;
+  };
+
+  const playBuiltInSoundEffect = async (effect, elapsed = 0) => {
+    const audioContext = ensureSoundEffectAudioContext();
+    if (!audioContext) {
+      setStudioActionMessage("This browser cannot preview synthesized sound effects.");
+      return false;
+    }
+    const playbackEpoch = soundEffectPlaybackEpochRef.current;
+    const wasPlaying = !videoRef.current?.paused;
+    if (audioContext.state === "suspended") await audioContext.resume();
+    if (
+      playbackEpoch !== soundEffectPlaybackEpochRef.current ||
+      (wasPlaying && videoRef.current?.paused)
+    )
+      return false;
+
+    const samples = synthesizeEffect(effect, 48000);
+    const offset = Math.max(0, elapsed);
+    if (offset >= samples.length / 48000) return false;
+    const buffer = audioContext.createBuffer(1, samples.length, 48000);
+    buffer.getChannelData(0).set(samples);
+    const source = audioContext.createBufferSource();
+    const gain = audioContext.createGain();
+    source.buffer = buffer;
+    // Cues share the pre-speed edit clock with graphics and uploaded SFX.
+    source.playbackRate.value = videoRef.current?.paused ? 1 : videoRef.current?.playbackRate || 1;
+    gain.gain.value =
+      clampAudioControl(effect.volume, 0, 1, 0.8) *
+      (previewMuted ? 0 : clampAudioControl(previewVolume, 0, 1, 1));
+    source.connect(gain);
+    gain.connect(audioContext.destination);
+    soundEffectNodesRef.current.add(source);
+    soundEffectNodesRef.current.add(gain);
+    source.addEventListener?.(
+      "ended",
+      () => {
+        soundEffectNodesRef.current.delete(source);
+        soundEffectNodesRef.current.delete(gain);
+        source.disconnect();
+        gain.disconnect();
+      },
+      { once: true }
+    );
+    source.start(audioContext.currentTime, offset);
+    return true;
+  };
+
+  const addSoundEffectPreset = preset => {
+    const startTime = clampNumber(previewTimelineTime, 0, outputTimelineDuration, 0);
+    const effect = {
+      id: createSecureId("sfx"),
+      name: preset.name,
+      emoji: preset.emoji,
+      tone: preset.tone,
+      builtIn: true,
+      url: null,
+      file: null,
+      startTime,
+      duration: preset.duration,
+      trimStart: 0,
+      volume: 0.8,
+      fadeIn: 0.02,
+      fadeOut: Math.min(0.18, preset.duration / 3),
+      enabled: true,
+    };
+    setSoundEffects(previous => [...previous, effect]);
+    setActiveSoundEffectId(effect.id);
+    setStudioInspectorTab("sound");
+    setActiveCreativeTool("sound");
+    seekLiveEditTimelineItem(startTime, "sound");
+    setStudioActionMessage(
+      `${preset.name} added at ${formatPreviewTimePrecise(startTime)}. It is visible on the SFX lane and plays in After and Split.`
+    );
+  };
+
+  const handleSoundEffectUpload = event => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("audio/") && !file.name.match(/\.(mp3|wav|ogg|m4a|aac)$/i)) {
+      toast.error("Please select an audio effect (MP3, WAV, OGG, M4A, AAC).");
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    soundEffectObjectUrlsRef.current.add(url);
+    const startTime = clampNumber(previewTimelineTime, 0, outputTimelineDuration, 0);
+    const effect = {
+      id: createSecureId("sfx"),
+      name: normalizePlainText(file.name.replace(/\.[^.]+$/, "")) || "Custom effect",
+      emoji: "🔊",
+      tone: "custom",
+      builtIn: false,
+      url,
+      file,
+      startTime,
+      duration: 2,
+      trimStart: 0,
+      volume: 0.8,
+      fadeIn: 0.02,
+      fadeOut: 0.12,
+      enabled: true,
+    };
+    setSoundEffects(previous => [...previous, effect]);
+    setActiveSoundEffectId(effect.id);
+    setStudioInspectorTab("sound");
+    setActiveCreativeTool("sound");
+    seekLiveEditTimelineItem(startTime, "sound");
+    setStudioActionMessage(
+      `${effect.name} added at ${formatPreviewTimePrecise(startTime)}. Set its exact timing, trim, fades, and volume below.`
+    );
+    event.target.value = null;
+  };
+
+  const updateSoundEffect = (id, updates) => {
+    setSoundEffects(previous =>
+      previous.map(effect => {
+        if (effect.id !== id) return effect;
+        const next = { ...effect, ...updates };
+        next.startTime = clampNumber(next.startTime, 0, outputTimelineDuration, 0);
+        next.duration = clampAudioControl(next.duration, 0.05, 15, 0.6);
+        next.trimStart = clampAudioControl(next.trimStart, 0, 36000, 0);
+        next.volume = clampAudioControl(next.volume, 0, 1, 0.8);
+        next.fadeIn = clampAudioControl(next.fadeIn, 0, next.duration, 0.02);
+        next.fadeOut = clampAudioControl(next.fadeOut, 0, next.duration, 0.12);
+        return next;
+      })
+    );
+  };
+
+  const removeSoundEffect = id => {
+    const effect = soundEffects.find(item => item.id === id);
+    soundEffectAudioRefsRef.current.get(id)?.pause();
+    soundEffectAudioRefsRef.current.delete(id);
+    setSoundEffects(previous => previous.filter(item => item.id !== id));
+    setActiveSoundEffectId(current => (current === id ? null : current));
+    setPreviewingSoundEffectId(current => (current === id ? null : current));
+    setStudioActionMessage(`${effect?.name || "Sound effect"} removed. Undo restores it.`);
+  };
+
+  const toggleSoundEffectPreview = async effect => {
+    if (!effect) return;
+    if (previewingSoundEffectId === effect.id) {
+      stopSoundEffectPlayback();
+      setStudioActionMessage(`${effect.name} preview stopped.`);
+      return;
+    }
+
+    stopSoundEffectPlayback(false);
+    setPreviewingSoundEffectId(effect.id);
+    const duration = getSoundEffectDuration(effect);
+    if (effect.builtIn) {
+      const started = await playBuiltInSoundEffect(effect, 0);
+      if (!started) {
+        setPreviewingSoundEffectId(null);
+        return;
+      }
+    } else {
+      const audio = soundEffectAudioRefsRef.current.get(effect.id);
+      if (!audio) {
+        setPreviewingSoundEffectId(null);
+        return;
+      }
+      try {
+        audio.currentTime = clampAudioControl(effect.trimStart, 0, audio.duration || 36000, 0);
+        audio.volume = clampAudioControl(effect.volume, 0, 1, 0.8);
+        safePlayMediaElement(audio);
+      } catch (error) {
+        console.log("Sound effect preview skipped", error);
+      }
+    }
+    setStudioActionMessage(`${effect.name} preview is playing at the configured mix level.`);
+    soundEffectPreviewTimeoutRef.current = window.setTimeout(
+      () => {
+        stopSoundEffectPlayback();
+      },
+      Math.ceil(duration * 1000)
+    );
+  };
+
+  // ── Speech-aware auto-ducking (Web Audio API) ──
+  const startSpeechDetection = () => {
+    if (!videoRef.current) return null;
+    try {
+      const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextCtor) return null;
+      const audioCtx = new AudioContextCtor();
+      const analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 256;
+      analyser.smoothingTimeConstant = 0.4;
+
+      // Try to connect — may fail if video already has a MediaElementSource
+      try {
+        const source = audioCtx.createMediaElementSource(videoRef.current);
+        source.connect(analyser);
+        analyser.connect(audioCtx.destination);
+        speechAnalyserRef.current = { ctx: audioCtx, analyser, source };
+      } catch (_connectErr) {
+        // Video already connected — use a workaround: create a silent stream analyser
+        // that reads from the video's volume indirectly via a gain node
+        analyser.connect(audioCtx.destination);
+        speechAnalyserRef.current = { ctx: audioCtx, analyser, source: null };
+      }
+      return analyser;
+    } catch (e) {
+      console.log("Speech detection setup skipped:", e);
+      return null;
+    }
+  };
+
+  const getSpeechEnergyLevel = () => {
+    const analyser = speechAnalyserRef.current?.analyser;
+    if (!analyser) return 0;
+    const data = new Uint8Array(analyser.frequencyBinCount);
+    analyser.getByteFrequencyData(data);
+    // Focus on speech range: ~85Hz–3000Hz (bins ~0–30 for 256 FFT at 44.1kHz)
+    const speechBins = data.slice(0, 18);
+    const avg = speechBins.reduce((s, v) => s + v, 0) / speechBins.length;
+    return Math.min(1, avg / 128); // normalize 0–1
+  };
+
+  const currentTimelineClip = timeline[activeTimelineIndex] || null;
+  const currentTimelineWindow = getTimelineClipWindow(currentTimelineClip);
+  const currentAudioMode = normalizeAudioMode(extractedAudio?.mode);
+  const previewClipTime = Math.max(
+    0,
+    Number(videoTime || 0) - Number(currentTimelineWindow.start || 0)
+  );
+  const previewTimelineTime = getPreviewTimelineTime(videoTime);
+  const outputTimelineDuration = Math.max(0.1, getTimelineDuration());
+  const activeOverlayTimelineRemaining = Math.max(
+    0.1,
+    outputTimelineDuration - activeOverlayStartTime
+  );
+  const outputPlaybackDuration = outputTimelineDuration / Math.max(0.01, previewSpeed);
+  const previewPlaybackTime = previewTimelineTime / Math.max(0.01, previewSpeed);
+  const currentTimelineOffset = getTimelineOffsetForIndex(activeTimelineIndex);
+  const activeContentProfile =
+    CREATOR_CONTENT_PROFILES.find(profile => profile.id === contentProfile) ||
+    CREATOR_CONTENT_PROFILES[0];
+  const resolvedJoinTransition =
+    joinTransition === "auto" ? activeContentProfile.transition : joinTransition;
+  const cutRangeIsReady =
+    cutRangeStart !== null &&
+    cutRangeEnd !== null &&
+    Math.abs(Number(cutRangeEnd) - Number(cutRangeStart)) >= 0.15;
+  const normalizedPendingCutRange = cutRangeIsReady
+    ? {
+        start: Math.min(Number(cutRangeStart), Number(cutRangeEnd)),
+        end: Math.max(Number(cutRangeStart), Number(cutRangeEnd)),
+      }
+    : null;
+  const liveCreativeEffects = buildSignatureCreativeEffects({
+    preset: creativePreset,
+    intensity: creativeIntensity,
+    duration: currentTimelineWindow.duration || selectedClip?.duration || 0,
+  });
+  const activeLiveCreativeEffect =
+    liveCreativeEffects.find(
+      effect => previewClipTime >= effect.start_time && previewClipTime <= effect.end_time
+    ) || liveCreativeEffects[0];
+  const creativeEffectIsLive =
+    creativeEffectsEnabled && comparisonMode !== "before" && !renderedOutputUrl;
+  const beatEchoPreviewIsLive =
+    creativeEffectIsLive && activeLiveCreativeEffect?.preset === "beat_echo";
+  const creativePreviewClass = creativeEffectIsLive
+    ? `creative-preview-${activeLiveCreativeEffect?.preset || "motion_sculpture"} creative-intensity-${creativeIntensity}`
+    : "";
+  const normalizedHookText = normalizeHookText(hookText);
+  const hasHookText = !!normalizedHookText;
+  const fallbackHookSuggestion = buildFallbackHookRange(
+    selectedClip,
+    currentTimelineWindow.duration
+  );
+  const currentHookSuggestion = hookSuggestedRange || fallbackHookSuggestion;
+  const currentHookCopySuggestions = getHookCopySuggestions(selectedClip);
+  const clipGuidanceEntries = orderedClips.map((clip, index) => {
+    const guidance = buildClipGuidance(clip);
+    return {
+      clip,
+      index,
+      ...guidance,
+    };
+  });
+  const rankedClipGuidance = [...clipGuidanceEntries].sort(
+    (left, right) =>
+      right.score - left.score || right.backendScore - left.backendScore || left.index - right.index
+  );
+  const momentFamilies = buildMomentFamilies(rankedClipGuidance);
+  const bestClipId = rankedClipGuidance[0]?.clip?.id || null;
+  const topFamilyKeys = new Set();
+  const familyHighlights = [];
+  momentFamilies.forEach(family => {
+    const entry = family.topEntry;
+    if (!entry || topFamilyKeys.has(entry.momentFamilyKey)) return;
+    topFamilyKeys.add(entry.momentFamilyKey);
+    familyHighlights.push(entry);
+  });
+  const topPickIds = new Set(familyHighlights.slice(0, 2).map(entry => entry.clip.id));
+  const clipGuidanceById = new Map(clipGuidanceEntries.map(entry => [entry.clip.id, entry]));
+  const selectedClipGuidance = selectedClip ? clipGuidanceById.get(selectedClip.id) || null : null;
+  const selectedMomentFamily = selectedClipGuidance
+    ? momentFamilies.find(family => family.clipIds.includes(selectedClipGuidance.clip.id)) || null
+    : null;
+  const familySiblingEntries = selectedMomentFamily
+    ? selectedMomentFamily.members
+        .filter(entry => entry.clip.id !== selectedClipGuidance?.clip?.id)
+        .slice(0, 3)
+    : [];
+  const campaignSet = buildCampaignSet(rankedClipGuidance, momentFamilies);
+  const hookTemplateConfig = getHookTemplateConfig(hookTemplate);
+  const hookMinDuration = Math.min(
+    HOOK_MIN_SEGMENT_DURATION,
+    Math.max(0.25, Number(currentTimelineWindow.duration || 0) || HOOK_MIN_SEGMENT_DURATION)
+  );
+  const hookMaxDuration = Math.min(
+    HOOK_MAX_SEGMENT_DURATION,
+    Math.max(
+      hookMinDuration,
+      Number(currentTimelineWindow.duration || 0) || HOOK_MAX_SEGMENT_DURATION
+    )
+  );
+  const hookStartLimit = Math.max(
+    0,
+    Math.max(0, Number(currentTimelineWindow.duration || 0)) - hookMinDuration
+  );
+  const resolvedHookStart = clampNumber(
+    hookStartTime,
+    0,
+    hookStartLimit,
+    currentHookSuggestion.startTime
+  );
+  const hookEndMinimum = Number(currentTimelineWindow.duration || 0)
+    ? Math.min(Number(currentTimelineWindow.duration || 0), resolvedHookStart + hookMinDuration)
+    : resolvedHookStart + hookMinDuration;
+  const hookEndMaximum = Number(currentTimelineWindow.duration || 0)
+    ? Math.min(Number(currentTimelineWindow.duration || 0), resolvedHookStart + hookMaxDuration)
+    : resolvedHookStart + hookMaxDuration;
+  const hookEnd = clampNumber(
+    hookEndTime,
+    hookEndMinimum,
+    Math.max(hookEndMinimum, hookEndMaximum),
+    Math.min(
+      hookEndMaximum,
+      resolvedHookStart +
+        clampNumber(
+          hookIntroSeconds,
+          hookMinDuration,
+          hookMaxDuration,
+          currentHookSuggestion.duration || 3
+        )
+    )
+  );
+  const hookDuration = Math.max(0.1, hookEnd - resolvedHookStart);
+  const hookLeadOut = 0.45;
+  const isHookWithinPreviewWindow =
+    addHook &&
+    activeTimelineIndex === 0 &&
+    previewClipTime >= resolvedHookStart &&
+    previewClipTime <= hookEnd + hookLeadOut;
+  const hookProgress = isHookWithinPreviewWindow
+    ? clampNumber((previewClipTime - resolvedHookStart) / Math.max(hookDuration, 0.01), 0, 1, 0)
+    : 0;
+  const hookOutroOpacity =
+    previewClipTime > hookEnd
+      ? clampNumber(1 - (previewClipTime - hookEnd) / hookLeadOut, 0, 1, 0)
+      : previewClipTime >= resolvedHookStart
+        ? 1
+        : 0;
+  const hookTextIntroProgress = isHookWithinPreviewWindow
+    ? clampNumber((previewClipTime - resolvedHookStart) / 0.24, 0, 1, 0)
+    : 0;
+  const isZoomFocusTemplate = hookTemplate === "zoom_focus";
+  const isBlurRevealTemplate = hookTemplate === "blur_reveal";
+  const isFreezeTextTemplate = hookTemplate === "freeze_text";
+  const freezeReleaseProgress = hookFreezeFrame
+    ? clampNumber((hookProgress - 0.72) / 0.28, 0, 1, 0)
+    : 1;
+  const resolvedHookFocusPoint = normalizeHookFocusPoint(hookFocusPoint);
+  const hasCustomHookFocusPoint =
+    Math.abs(resolvedHookFocusPoint.x - DEFAULT_HOOK_FOCUS_POINT.x) > 1 ||
+    Math.abs(resolvedHookFocusPoint.y - DEFAULT_HOOK_FOCUS_POINT.y) > 1;
+  const hookZoomTarget = Math.max(
+    hookZoomScale,
+    isZoomFocusTemplate ? hookZoomScale + 0.08 : hookZoomScale
+  );
+  const effectiveHookZoomTarget =
+    hookFreezeFrame && hasCustomHookFocusPoint ? Math.max(hookZoomTarget, 1.12) : hookZoomTarget;
+  const hookVisualScale = isHookWithinPreviewWindow
+    ? 1 +
+      Math.max(0, effectiveHookZoomTarget - 1) *
+        (hookFreezeFrame ? 0 : 1 - Math.pow(1 - hookProgress, 2))
+    : 1;
+  const showHookPreview = !!isHookWithinPreviewWindow;
+  const hookVideoBlur =
+    showHookPreview && hookBlurBackground
+      ? Math.max(
+          0,
+          (isBlurRevealTemplate ? 18 : 11) - hookProgress * (isBlurRevealTemplate ? 16 : 8.5)
+        ) * hookOutroOpacity
+      : 0;
+  const hookVideoBrightness = showHookPreview && hookDarkOverlay ? 0.66 + hookProgress * 0.24 : 1;
+  const hookVideoContrast = showHookPreview
+    ? 1 + hookOutroOpacity * (isZoomFocusTemplate ? 0.22 : 0.12)
+    : 1;
+  const hookVideoSaturate = showHookPreview
+    ? 1 + hookOutroOpacity * (isZoomFocusTemplate ? 0.24 : 0.14)
+    : 1;
+  const hookBackdropOpacity = hookBlurBackground
+    ? Math.max(
+        0,
+        (isBlurRevealTemplate ? 0.96 : 0.82) - hookProgress * (isBlurRevealTemplate ? 0.64 : 0.52)
+      ) * hookOutroOpacity
+    : 0;
+  const hookOverlayOpacity = hookDarkOverlay
+    ? ((isZoomFocusTemplate ? 0.28 : 0.18) +
+        (1 - hookProgress) * (isZoomFocusTemplate ? 0.3 : 0.24)) *
+      hookOutroOpacity
+    : 0;
+  const hookAccentOpacity = showHookPreview
+    ? (isZoomFocusTemplate ? 0.54 : isBlurRevealTemplate ? 0.46 : 0.38) * hookOutroOpacity
+    : 0;
+  const hookAccentTranslate = isBlurRevealTemplate
+    ? `${Math.round((1 - hookProgress) * 36)}px`
+    : `${Math.round((1 - hookProgress) * 16)}px`;
+  const hookBannerAccentOpacity = showHookPreview
+    ? (0.22 + hookTextIntroProgress * 0.48) * hookOutroOpacity
+    : 0;
+  const hookBannerScale = showHookPreview
+    ? 0.96 +
+      hookTextIntroProgress * (isFreezeTextTemplate ? 0.08 : isZoomFocusTemplate ? 0.06 : 0.04)
+    : 1;
+  const hookTextGlowOpacity = showHookPreview
+    ? (0.22 + (1 - hookProgress) * 0.26) * hookOutroOpacity
+    : 0;
+  const hookPrimaryVideoOpacity = showHookPreview
+    ? hookFreezeFrame
+      ? 0.02 + freezeReleaseProgress * 0.98
+      : hookBlurBackground
+        ? 0.9
+        : 1
+    : 1;
+  const hookFreezeOpacity =
+    showHookPreview && hookFreezeFrame ? hookOutroOpacity * (1 - freezeReleaseProgress * 0.92) : 0;
+  const hookVisualFocusPoint = showHookPreview ? resolvedHookFocusPoint : DEFAULT_HOOK_FOCUS_POINT;
+  const hookTransformOrigin = `${hookVisualFocusPoint.x}% ${hookVisualFocusPoint.y}%`;
+  const hookObjectPosition = `${hookVisualFocusPoint.x}% ${hookVisualFocusPoint.y}%`;
+  const hookBannerSubjectType = hasCustomHookFocusPoint
+    ? resolvedHookFocusPoint.y <= 42 && Math.abs(resolvedHookFocusPoint.x - 50) <= 18
+      ? "face"
+      : "object"
+    : "neutral";
+  const hookBannerSide = hasCustomHookFocusPoint
+    ? hookBannerSubjectType === "face"
+      ? resolvedHookFocusPoint.x >= 50
+        ? "left"
+        : "right"
+      : resolvedHookFocusPoint.x >= 64
+        ? "left"
+        : resolvedHookFocusPoint.x <= 36
+          ? "right"
+          : "center"
+    : "center";
+  const hookBannerAnchorX =
+    hookBannerSide === "left"
+      ? hookBannerSubjectType === "face"
+        ? 8
+        : 12
+      : hookBannerSide === "right"
+        ? hookBannerSubjectType === "face"
+          ? 92
+          : 88
+        : 50;
+  const hookBannerTranslateX =
+    hookBannerSide === "left" ? "0%" : hookBannerSide === "right" ? "-100%" : "-50%";
+  const hookBannerBaseTop =
+    resolvedHookFocusPoint.y <= 30
+      ? 7.5
+      : resolvedHookFocusPoint.y <= 42
+        ? 9.25
+        : resolvedHookFocusPoint.y <= 56
+          ? 11.25
+          : 12.75;
+  const hookBannerTemplateOffset = isFreezeTextTemplate ? 1.15 : isZoomFocusTemplate ? 0.55 : -0.35;
+  const hookBannerSubjectOffset =
+    hookBannerSubjectType === "face" ? -0.45 : hookBannerSubjectType === "object" ? 0.3 : 0;
+  const hookBannerTop = `${clampNumber(
+    hookBannerBaseTop + hookBannerTemplateOffset + hookBannerSubjectOffset,
+    7,
+    16,
+    10
+  )}%`;
+  const hookBannerTextAlign = hookBannerSide === "center" ? "center" : "left";
+  const smartCropBackgroundBlur = smartCrop ? 18 : 0;
+  const smartCropBackgroundBrightness = smartCrop ? 0.52 : 1;
+  const smartCropBackgroundScale = smartCrop ? 1.08 : 1;
+  const trimAwareDuration = Math.max(0, Number(currentTimelineWindow.duration || 0));
+  const trimAwareCurrentTime = clampNumber(
+    Number(videoTime || 0) - Number(currentTimelineWindow.start || 0),
+    0,
+    trimAwareDuration || Number(videoTime || 0),
+    0
+  );
+  const hookSelectionLeft = currentTimelineWindow.duration
+    ? (resolvedHookStart / Math.max(0.0001, currentTimelineWindow.duration)) * 100
+    : 0;
+  const hookSelectionWidth = currentTimelineWindow.duration
+    ? ((hookEnd - resolvedHookStart) / Math.max(0.0001, currentTimelineWindow.duration)) * 100
+    : 0;
+  const hookSuggestionLeft = currentTimelineWindow.duration
+    ? ((currentHookSuggestion.startTime || 0) / Math.max(0.0001, currentTimelineWindow.duration)) *
+      100
+    : 0;
+  const hookSuggestionWidth = currentTimelineWindow.duration
+    ? (((currentHookSuggestion.endTime || 0) - (currentHookSuggestion.startTime || 0)) /
+        Math.max(0.0001, currentTimelineWindow.duration)) *
+      100
+    : 0;
+  const hookPlayheadLeft = currentTimelineWindow.duration
+    ? (trimAwareCurrentTime / Math.max(0.0001, currentTimelineWindow.duration)) * 100
+    : 0;
+  const previewJoinTransition = String(
+    currentTimelineClip?.transitionIn || currentTimelineClip?.transitionOut || ""
+  ).trim();
+  const previewJoinDuration = Math.max(
+    0.02,
+    Number(currentTimelineClip?.transitionDuration || 0.02)
+  );
+  const previewJoinInOpacity = currentTimelineClip?.transitionIn
+    ? clampNumber(1 - trimAwareCurrentTime / previewJoinDuration, 0, 1, 0)
+    : 0;
+  const previewJoinOutOpacity = currentTimelineClip?.transitionOut
+    ? clampNumber(
+        (trimAwareCurrentTime - Math.max(0, trimAwareDuration - previewJoinDuration)) /
+          previewJoinDuration,
+        0,
+        1,
+        0
+      )
+    : 0;
+  const previewJoinOpacity = Math.max(previewJoinInOpacity, previewJoinOutOpacity);
+
+  useEffect(() => {
+    const nextDuration = Number(hookEnd - resolvedHookStart || 0);
+    if (Math.abs(Number(hookIntroSeconds || 0) - nextDuration) > 0.05) {
+      setHookIntroSeconds(Number(nextDuration.toFixed(2)));
+    }
+  }, [hookEnd, hookIntroSeconds, resolvedHookStart]);
+
+  useEffect(() => {
+    if (Math.abs(Number(hookStartTime || 0) - resolvedHookStart) > 0.05) {
+      setHookStartTime(Number(resolvedHookStart.toFixed(2)));
+    }
+
+    if (Math.abs(Number(hookEndTime || 0) - hookEnd) > 0.05) {
+      setHookEndTime(Number(hookEnd.toFixed(2)));
+    }
+  }, [hookEnd, hookEndTime, hookStartTime, resolvedHookStart]);
+
+  useEffect(() => {
+    setHookSuggestedRange(null);
+    hookSuggestionCycleRef.current = 0;
+    setHookAnalysisStatus("idle");
+    setHookAnalysisMessage("");
+    setHookSelectionMode(false);
+    setHookPickMode(false);
+    setHookFocusMode(false);
+    setHookFocusPoint(DEFAULT_HOOK_FOCUS_POINT);
+    hookPreviewSequenceRef.current = { active: false };
+  }, [activeTimelineIndex]);
+
+  useEffect(() => {
+    const handlePointerMove = event => {
+      const drag = hookSelectionDragRef.current;
+      const playheadDrag = hookPlayheadDragRef.current;
+
+      if (playheadDrag && currentTimelineWindow.duration) {
+        const trackWidth = Math.max(1, playheadDrag.rect.width);
+        const deltaRatio = (event.clientX - playheadDrag.startClientX) / trackWidth;
+        const deltaTime = deltaRatio * Number(currentTimelineWindow.duration || 0);
+        seekHookTimelineTime(playheadDrag.anchorTime + deltaTime);
+        return;
+      }
+
+      if (!drag || !currentTimelineWindow.duration) return;
+
+      const trackWidth = Math.max(1, drag.rect.width);
+      const deltaRatio = (event.clientX - drag.startClientX) / trackWidth;
+      const deltaTime = deltaRatio * Number(currentTimelineWindow.duration || 0);
+
+      if (drag.target === "start") {
+        setHookSegmentRange(drag.anchorStart + deltaTime, drag.anchorEnd);
+        return;
+      }
+
+      if (drag.target === "end") {
+        setHookSegmentRange(drag.anchorStart, drag.anchorEnd + deltaTime);
+        return;
+      }
+
+      const rangeDuration = Math.max(hookMinDuration, drag.anchorEnd - drag.anchorStart);
+      const boundedStart = clampNumber(
+        drag.anchorStart + deltaTime,
+        0,
+        Math.max(0, Number(currentTimelineWindow.duration || 0) - rangeDuration),
+        drag.anchorStart
+      );
+      setHookSegmentRange(boundedStart, boundedStart + rangeDuration);
+    };
+
+    const handlePointerUp = () => {
+      hookSelectionDragRef.current = null;
+      hookPlayheadDragRef.current = null;
+    };
+
+    window.addEventListener("mousemove", handlePointerMove);
+    window.addEventListener("mouseup", handlePointerUp);
+
+    return () => {
+      window.removeEventListener("mousemove", handlePointerMove);
+      window.removeEventListener("mouseup", handlePointerUp);
+    };
+  }, [currentTimelineWindow.duration, hookMinDuration]);
+
+  const presetMusicPreviewUrl =
+    addMusic && !musicSearchMode && !musicTrack?.url && musicSelection
+      ? `/music/${musicSelection}`
+      : "";
+  const effectiveMusicPreviewUrl =
+    musicTrack?.url || (musicSearchMode ? musicPreviewUrl : presetMusicPreviewUrl);
+  const faceAnchorY =
+    faceAnchorPreset === "face_top" ? 32 : faceAnchorPreset === "face_mid" ? 42 : 50;
+  const safeObjectPosition = `${resolvedHookFocusPoint.x}% ${faceAnchorY}%`;
+  const sideBySideObjectPosition = `${resolvedHookFocusPoint.x}% ${clampNumber(
+    resolvedHookFocusPoint.y,
+    24,
+    58,
+    42
+  )}%`;
+  const effectiveVideoFit = safeFaceFraming ? "contain" : smartCrop ? "cover" : videoFit;
+  const showCropRiskIndicator =
+    !safeFaceFraming &&
+    (effectiveVideoFit === "cover" || smartCrop || hookFreezeFrame || isZoomFocusTemplate);
+  const previewClarityBrightness = 1.025;
+  const previewClarityContrast = 1.08;
+  const previewClaritySaturate = 1.05;
+  const previewClarityHalo = " drop-shadow(0 0 0.45px rgba(255, 255, 255, 0.34))";
+  const currentMusicLabel = musicSearchMode
+    ? musicSelection || "Search query"
+    : musicSelection
+      ? musicSelection.replace(/\.mp3$/i, "").replace(/_/g, " ")
+      : "None";
+  const activeSoundEffect = soundEffects.find(effect => effect.id === activeSoundEffectId) || null;
+  const musicPreviewStatusLabel =
+    musicPreviewStatus === "processing"
+      ? "Processing"
+      : musicPreviewStatus === "ready"
+        ? "Ready"
+        : musicPreviewStatus === "failed"
+          ? "Failed"
+          : "Idle";
+  const watermarkPreviewRegions = removeWatermark ? getWatermarkPreviewRegions(watermarkMode) : [];
+  const resolvedWatermarkPreviewRegions =
+    removeWatermark && watermarkMode === "manual"
+      ? manualWatermarkRegions.map(region => ({
+          ...region,
+          style: toWatermarkPreviewStyle(region),
+          isManual: true,
+        }))
+      : watermarkPreviewRegions.map(region => ({
+          ...region,
+          style: {
+            ...region,
+            "--cleanup-rotation": `${Number(region.rotation || 0)}deg`,
+            "--cleanup-opacity": Number(region.opacity || 0.88),
+          },
+          isManual: false,
+        }));
+  const isWatermarkCleanupPreviewFrameAligned =
+    !!watermarkCleanupPreview &&
+    watermarkCleanupPreview.clipId === currentTimelineClip?.id &&
+    Math.abs(Number(videoTime || 0) - Number(watermarkCleanupPreview.previewTime || 0)) <= 0.2;
+  const shouldShowWatermarkCleanupOnVideo =
+    !!watermarkCleanupPreview?.cleanedImageUrl &&
+    showWatermarkCleanupOnVideo &&
+    isPreviewPaused &&
+    isWatermarkCleanupPreviewFrameAligned;
+  const normalizedCaptionOverride = normalizePlainText(captionTextOverride);
+  const normalizedTimedCaptionSegments = normalizeCaptionSegments(captionSegments);
+  const captionPreviewSourceText =
+    normalizedCaptionOverride || getCaptionPreviewSourceText(selectedClip) || "";
+  const manualCaptionChunkCount = buildCaptionPreviewChunks(normalizedCaptionOverride).length;
+  const manualCaptionPreviewDuration = Math.min(
+    Math.max(1.8, outputTimelineDuration || 1.8),
+    Math.max(2.4, manualCaptionChunkCount * 1.35)
+  );
+  const captionTrackOffset = normalizedCaptionOverride ? 0 : currentTimelineOffset;
+  const captionTrackDuration = normalizedCaptionOverride
+    ? manualCaptionPreviewDuration
+    : currentTimelineWindow.duration || selectedClip?.duration || 3;
+  const captionPreviewState =
+    !normalizedCaptionOverride && normalizedTimedCaptionSegments.length
+      ? getTimedCaptionPreviewState({
+          segments: normalizedTimedCaptionSegments,
+          sourceTime: videoTime,
+        })
+      : getCaptionPreviewState({
+          text: captionPreviewSourceText,
+          localTime: normalizedCaptionOverride ? previewTimelineTime : previewClipTime,
+          duration: captionTrackDuration,
+          hideAfterEnd: !!normalizedCaptionOverride,
+        });
+  const liveTimelineDuration = outputTimelineDuration;
+  const liveTimelineCutMarkers = timeline.slice(0, -1).flatMap((clip, index) => {
+    const nextClip = timeline[index + 1];
+    const currentWindow = getTimelineClipWindow(clip);
+    const nextWindow = getTimelineClipWindow(nextClip);
+    const sameSource =
+      (clip.sourceClipId && clip.sourceClipId === nextClip?.sourceClipId) ||
+      (!!clip.url && clip.url === nextClip?.url);
+    const removedDuration = Number(nextWindow.start || 0) - Number(currentWindow.end || 0);
+    if (!sameSource || removedDuration < 0.05) return [];
+    return [
+      {
+        id: `cut-${clip.id}-${nextClip.id}`,
+        outputTime: getTimelineOffsetForIndex(index + 1),
+        removedDuration,
+      },
+    ];
+  });
+  const liveTimelineBRoll = overlays.filter(
+    overlay =>
+      overlay.bRollMode && overlay.startTime !== undefined && Number(overlay.duration || 0) > 0
+  );
+  const fallbackTimelineCaptionDuration = captionPreviewState.chunks.length
+    ? Math.max(0.1, Number(captionTrackDuration || 0)) / captionPreviewState.chunks.length
+    : 0;
+  const liveTimelineCaptionBlocks =
+    !normalizedCaptionOverride && normalizedTimedCaptionSegments.length
+      ? timeline.flatMap((clip, clipIndex) => {
+          const clipWindow = getTimelineClipWindow(clip);
+          const clipOffset = getTimelineOffsetForIndex(clipIndex);
+          return normalizedTimedCaptionSegments.flatMap(segment => {
+            const visibleStart = Math.max(segment.start, Number(clipWindow.start || 0));
+            const visibleEnd = Math.min(segment.end, Number(clipWindow.end || 0));
+            if (visibleEnd <= visibleStart) return [];
+            return [
+              {
+                ...segment,
+                blockId: `${clip.id}-${segment.id}`,
+                outputStart: clipOffset + visibleStart - Number(clipWindow.start || 0),
+                outputDuration: visibleEnd - visibleStart,
+              },
+            ];
+          });
+        })
+      : captionPreviewState.chunks.map((chunk, index) => ({
+          ...chunk,
+          blockId: chunk.id,
+          outputStart: captionTrackOffset + index * fallbackTimelineCaptionDuration,
+          outputDuration: fallbackTimelineCaptionDuration,
+        }));
+  const liveTimelineSource = getSafeMediaSource(currentTimelineClip?.url || videoUrl);
+  const liveTimelinePlayheadLeft =
+    (clampNumber(previewTimelineTime, 0, liveTimelineDuration, 0) / liveTimelineDuration) * 100;
+  const liveTimelineFilmstripFrames = timeline.flatMap((clip, clipIndex) => {
+    const window = getTimelineClipWindow(clip);
+    const duration = Math.max(0, Number(window.duration || 0));
+    const source = getSafeMediaSource(clip.url);
+    if (!duration || !source) return [];
+    const clipOffset = getTimelineOffsetForIndex(clipIndex);
+    const frameCount = Math.max(1, Math.min(6, Math.round((duration / liveTimelineDuration) * 12)));
+    return Array.from({ length: frameCount }, (_, frameIndex) => ({
+      id: `${clip.id}-filmstrip-${frameIndex}`,
+      src: source,
+      previewTime: Number(window.start || 0) + ((frameIndex + 0.5) / frameCount) * duration,
+      left: ((clipOffset + (frameIndex / frameCount) * duration) / liveTimelineDuration) * 100,
+      width: (duration / frameCount / liveTimelineDuration) * 100,
+      isJoin: frameIndex === 0 && clipIndex > 0,
+    }));
+  });
+  const activeSideBySideOverlay = overlays.find(overlay => {
+    const start = Number(overlay.startTime ?? overlay.start_time ?? -1);
+    const end = start + getOverlayVisibleDuration(overlay);
+    return (
+      overlay.bRollMode === "sideBySide" &&
+      previewTimelineTime >= start &&
+      previewTimelineTime < end
+    );
+  });
+  const liveTimelineEditCount =
+    Number(addHook) +
+    Number(creativeEffectsEnabled) +
+    Number(autoCaptions) +
+    Number(previewSpeed !== 1 || silenceRemoval) +
+    liveTimelineCutMarkers.length +
+    liveTimelineBRoll.length +
+    motionScenes.length +
+    soundEffects.length +
+    Number(addMusic || muteOriginalAudio);
+  const retentionScore = clampNumber(
+    54 +
+      (addHook ? 9 : 0) +
+      (autoCaptions ? 8 : 0) +
+      (silenceRemoval ? 7 : 0) +
+      (smartCrop ? 5 : 0) +
+      (overlays.some(overlay => overlay.bRollMode) ? 6 : 0) +
+      (addMusic ? 4 : 0) +
+      (hookPreviewLoop ? 4 : 0),
+    0,
+    97,
+    54
+  );
+  const creativeImprovementsReady = [
+    !autoCaptions && "animated captions",
+    !silenceRemoval && "tighter pauses",
+    !smartCrop && "face-safe framing",
+    !overlays.some(overlay => overlay.bRollMode) && "proof B-roll",
+    !addMusic && "background energy",
+    !hookPreviewLoop && "loop ending",
+  ].filter(Boolean);
+  const audioModeSummary =
+    currentAudioMode === "replace"
+      ? "Donor track replaces original audio"
+      : currentAudioMode === "duck_original"
+        ? "Donor track leads while original audio ducks"
+        : "Donor track mixes with original audio";
+
+  const getComparisonFocusSourceTime = preferredTool => {
+    const timedBRoll =
+      (activeOverlayIsVideoBRoll && activeOverlay) ||
+      overlays.find(
+        overlay =>
+          overlay.bRollMode && overlay.startTime !== undefined && Number(overlay.duration || 0) > 0
+      );
+    const shouldFocusBRoll = preferredTool === "broll" && timedBRoll;
+    const outputFocusTime = shouldFocusBRoll
+      ? Number(timedBRoll.startTime || 0)
+      : addHook || preferredTool === "hook"
+        ? resolvedHookStart + Math.min(0.35, hookDuration * 0.15)
+        : timedBRoll
+          ? Number(timedBRoll.startTime || 0) + 0.2
+          : currentTimelineOffset;
+    return resolveOutputTimelinePosition(outputFocusTime);
+  };
+
+  const focusComparisonPreview = (preferredTool = studioInspectorTab, play = false) => {
+    const afterVideo = videoRef.current;
+    const beforeVideo = beforeVideoRef.current;
+    if (!afterVideo) return;
+
+    const target = getComparisonFocusSourceTime(preferredTool);
+    if (!target) return;
+    afterVideo.pause();
+    beforeVideo?.pause();
+    setActiveTimelineIndex(target.index);
+    try {
+      const afterSource = renderedOutputUrl || target.clip?.url;
+      if (afterSource && afterVideo.src !== afterSource) {
+        applySafeMediaSource(afterVideo, afterSource);
+      }
+      afterVideo.currentTime = renderedOutputUrl
+        ? clampNumber(target.outputTime || 0, 0, afterVideo.duration || Infinity, 0)
+        : target.sourceTime;
+      if (beforeVideo) {
+        applySafeMediaSource(beforeVideo, target.clip?.url);
+        beforeVideo.currentTime = target.sourceTime;
+      }
+      setVideoTime(target.sourceTime);
+    } catch (error) {
+      console.log("Comparison preview seek skipped", error);
+    }
+    if (play) safePlayMediaElement(afterVideo);
+  };
+
+  const toggleComparisonPlayback = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    const windowEnd = Number(currentTimelineWindow.end || video.duration || 0);
+    if (video.paused) {
+      if (windowEnd > 0 && Number(video.currentTime || 0) >= windowEnd - 0.1) {
+        focusComparisonPreview(studioInspectorTab, false);
+      }
+      backgroundSoundPreviewSuppressedRef.current = false;
+      previewPlaybackIntentRef.current = true;
+      safePlayMediaElement(video);
+    } else {
+      pauseSynchronizedPreview();
+    }
+  };
+
+  const setPreviewFillMode = mode => {
+    if (mode === "cover") {
+      setSafeFaceFraming(false);
+      setVideoFit("cover");
+      setStudioActionMessage(
+        "Fill canvas is active. The preview has no side gaps; drag the focal point if the crop hides something important."
+      );
+      return;
+    }
+    setVideoFit("contain");
+    setSafeFaceFraming(true);
+    setStudioActionMessage("Fit full frame is active. The entire source stays visible.");
+  };
+
+  const generateLiveTranscript = async () => {
+    if (captionGenerationStatus === "processing") return;
+
+    setCaptionGenerationStatus("processing");
+    setCaptionGenerationMessage("Listening for speech and building timestamped captions…");
+
+    try {
+      const auth = getAuth();
+      const user = auth.currentUser;
+      if (!user) throw new Error("Please log in before generating captions.");
+
+      const sourceUrl = getSafeMediaSource(currentTimelineClip?.url || videoUrl);
+      let sourceBlob =
+        selectedClip?.file instanceof Blob
+          ? selectedClip.file
+          : currentTimelineClip?.file instanceof Blob
+            ? currentTimelineClip.file
+            : null;
+
+      if (!sourceBlob && sourceUrl) {
+        const sourceResponse = await fetch(sourceUrl);
+        if (!sourceResponse.ok) throw new Error("The source video could not be opened.");
+        sourceBlob = await sourceResponse.blob();
+      }
+
+      if (!(sourceBlob instanceof Blob)) {
+        throw new Error("Reload the source video, then try captions again.");
+      }
+
+      let token = await user.getIdToken();
+      const formData = new FormData();
+      formData.append(
+        "file",
+        sourceBlob,
+        selectedClip?.file?.name || currentTimelineClip?.file?.name || "viral-studio-source.mp4"
+      );
+
+      let response = await fetch(`${API_BASE_URL}/api/media/transcribe`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+
+      if (response.status === 401) {
+        token = await user.getIdToken(true);
+        response = await fetch(`${API_BASE_URL}/api/media/transcribe`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData,
+        });
+      }
+
+      let payload = await response.json().catch(() => null);
+      if (!response.ok) {
+        throw new Error(payload?.error || payload?.message || "Caption transcription failed.");
+      }
+
+      if (payload?.jobId) {
+        for (let attempt = 0; attempt < 120; attempt += 1) {
+          await sleep(2000);
+          let statusResponse = await fetch(`${API_BASE_URL}/api/media/status/${payload.jobId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (statusResponse.status === 401) {
+            token = await user.getIdToken(true);
+            statusResponse = await fetch(`${API_BASE_URL}/api/media/status/${payload.jobId}`, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+          }
+          if (!statusResponse.ok) continue;
+          const statusPayload = await statusResponse.json();
+          if (statusPayload.status === "failed") {
+            throw new Error(statusPayload.error || "Caption transcription failed.");
+          }
+          if (statusPayload.status === "completed") {
+            payload = statusPayload.result || statusPayload;
+            break;
+          }
+          setCaptionGenerationMessage(
+            `Listening for speech… ${Math.round(Number(statusPayload.progress || 0))}%`
+          );
+        }
+      }
+
+      const nextSegments = normalizeCaptionSegments(payload?.segments).filter(segment => {
+        const text = segment.text.toLowerCase();
+        return ![
+          "music outro",
+          "music intro",
+          "background music",
+          "subtitles by",
+          "captioned by",
+          "transcribed by",
+          "copyright",
+          "all rights reserved",
+        ].some(blocked => text.includes(blocked));
+      });
+
+      if (!nextSegments.length) {
+        throw new Error("No clear speech was detected. You can still type captions manually.");
+      }
+
+      setCaptionSegments(nextSegments);
+      setCaptionTextOverride("");
+      setAutoCaptions(true);
+      setComparisonMode("after");
+      setCaptionGenerationStatus("ready");
+      setCaptionGenerationMessage(
+        `${nextSegments.length} timestamped caption${nextSegments.length === 1 ? "" : "s"} ready · language auto-detected`
+      );
+      if (videoRef.current) {
+        videoRef.current.currentTime = nextSegments[0].start;
+        setVideoTime(nextSegments[0].start);
+      }
+      setStudioActionMessage(
+        "Real speech captions are live. Edit any timestamped line before rendering."
+      );
+    } catch (error) {
+      setCaptionGenerationStatus("failed");
+      setCaptionGenerationMessage(error.message || "Caption transcription failed.");
+      setStudioActionMessage(error.message || "Caption transcription failed.");
+    }
+  };
+
+  const confirmAfterPreviewFrame = event => {
+    const video = event.currentTarget;
+    if (typeof video.requestVideoFrameCallback === "function") {
+      video.requestVideoFrameCallback(() => setIsAfterPreviewReady(true));
+      return;
+    }
+    setIsAfterPreviewReady(video.readyState >= 2);
+  };
+
+  const togglePreviewFullscreen = async () => {
+    if (isPreviewFullscreen) {
+      setIsPreviewFullscreen(false);
+      setStudioActionMessage("Fullscreen closed. All studio controls are available again.");
+      return;
+    }
+
+    // Keep fullscreen inside the app. Native fullscreen is inconsistent in
+    // embedded/cloud browsers and can trap its own exit control behind the
+    // browser layer. This viewport-filling mode remains fully controllable.
+    setIsPreviewFullscreen(true);
+    setStudioActionMessage("Expanded preview is active. Press Escape or Exit preview to return.");
+  };
+
+  const changePreviewSpeed = nextSpeed => {
+    const normalizedSpeed = clampNumber(nextSpeed, 0.5, 2, 1);
+    setPreviewSpeed(normalizedSpeed);
+    if (videoRef.current) videoRef.current.playbackRate = normalizedSpeed;
+    setStudioActionMessage(
+      `Preview pacing set to ${normalizedSpeed.toFixed(2).replace(/0$/, "")}×. Captions, B-roll, and comparison stay synchronized.`
+    );
+  };
+
+  const applyContentProfile = profileId => {
+    const profile =
+      CREATOR_CONTENT_PROFILES.find(item => item.id === profileId) || CREATOR_CONTENT_PROFILES[0];
+    setContentProfile(profile.id);
+    setCreativePreset(profile.preset);
+    setCreativeIntensity(profile.intensity);
+    setCreativeEffectsEnabled(true);
+    setJoinTransition(profile.transition);
+    setPacingLevel(profile.pacing);
+    changePreviewSpeed(profile.speed);
+    setStudioActionMessage(
+      `${profile.label} guidance is ready. You can still change every suggestion before render.`
+    );
+  };
+
+  const markCutBoundary = boundary => {
+    const markedTime = Number(trimAwareCurrentTime.toFixed(2));
+    if (boundary === "start") {
+      setCutRangeStart(markedTime);
+      if (cutRangeEnd !== null && Number(cutRangeEnd) <= markedTime) setCutRangeEnd(null);
+      setStudioActionMessage(
+        `Removal starts at ${formatPreviewTimePrecise(markedTime)}. Play or seek to where the useful video returns.`
+      );
+      return;
+    }
+    setCutRangeEnd(markedTime);
+    setStudioActionMessage(
+      `Removal ends at ${formatPreviewTimePrecise(markedTime)}. Preview or remove the highlighted range.`
+    );
+  };
+
+  const clearPendingCutRange = () => {
+    setCutRangeStart(null);
+    setCutRangeEnd(null);
+  };
+
+  const removePendingCutRange = () => {
+    if (!normalizedPendingCutRange || !currentTimelineClip) return;
+
+    const sourceWindow = getTimelineClipWindow(currentTimelineClip);
+    const localDuration = Number(sourceWindow.duration || 0);
+    const localStart = clampNumber(normalizedPendingCutRange.start, 0, localDuration, 0);
+    const localEnd = clampNumber(normalizedPendingCutRange.end, 0, localDuration, localDuration);
+    const minimumKeptEdge = 0.12;
+    if (localEnd - localStart < 0.15 || localEnd - localStart >= localDuration - 0.05) {
+      setStudioActionMessage("Choose at least 0.15 seconds, but leave some video to keep.");
+      return;
+    }
+
+    const absoluteCutStart = Number(sourceWindow.start || 0) + localStart;
+    const absoluteCutEnd = Number(sourceWindow.start || 0) + localEnd;
+    const outputCutStart = getTimelineOffsetForIndex(activeTimelineIndex) + localStart;
+    const outputCutEnd = outputCutStart + (localEnd - localStart);
+    const removedDuration = outputCutEnd - outputCutStart;
+    const sourceClipId = currentTimelineClip.sourceClipId || currentTimelineClip.id;
+    const transitionDuration =
+      resolvedJoinTransition === "energy_flash"
+        ? 0.12
+        : resolvedJoinTransition === "soft_dip"
+          ? 0.18
+          : 0.02;
+    const retainedBefore = {
+      ...currentTimelineClip,
+      id: createSecureId("kept-before"),
+      sourceClipId,
+      startRequest: Number(sourceWindow.start || 0),
+      endRequest: absoluteCutStart,
+      transitionOut: resolvedJoinTransition,
+      transitionDuration,
+    };
+    const retainedAfter = {
+      ...currentTimelineClip,
+      id: createSecureId("kept-after"),
+      sourceClipId,
+      startRequest: absoluteCutEnd,
+      endRequest: Number(sourceWindow.end || 0),
+      transitionIn: resolvedJoinTransition,
+      transitionDuration,
+    };
+    const retainedSegments = [];
+    if (localStart >= minimumKeptEdge) retainedSegments.push(retainedBefore);
+    if (localDuration - localEnd >= minimumKeptEdge) retainedSegments.push(retainedAfter);
+
+    // This action updates the source timeline, overlays, SFX, marks, and
+    // playback position together. Store one explicit pre-cut checkpoint so a
+    // single Undo restores the complete edit instead of only the last cleared
+    // marker from the multi-state transaction.
+    const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
+    pendingHistoryBaselineRef.current = cutHistoryBaseline;
+    cutHistoryTransactionRef.current = {
+      baseline: cutHistoryBaseline,
+      appliedSignature: null,
+      appliedTimelineSignature: null,
+    };
+
+    pendingTimelineSeekRef.current = {
+      index: activeTimelineIndex,
+      sourceTime:
+        localStart < minimumKeptEdge
+          ? absoluteCutEnd
+          : Math.max(Number(sourceWindow.start || 0), absoluteCutStart - 0.65),
+      play: true,
+    };
+    setTimeline(previous => [
+      ...previous.slice(0, activeTimelineIndex),
+      ...retainedSegments,
+      ...previous.slice(activeTimelineIndex + 1),
+    ]);
+    setOverlays(previous =>
+      previous.flatMap(overlay => {
+        const start = Number(overlay.startTime ?? overlay.start_time);
+        const duration = Number(overlay.duration || 0);
+        if (!Number.isFinite(start) || duration <= 0) return [overlay];
+        const end = start + duration;
+        if (end <= outputCutStart) return [overlay];
+        if (start >= outputCutEnd) {
+          return [{ ...overlay, startTime: Math.max(0, start - removedDuration) }];
+        }
+
+        const retainedDuration =
+          Math.max(0, outputCutStart - start) + Math.max(0, end - outputCutEnd);
+        if (retainedDuration < 0.1) return [];
+        return [
+          {
+            ...overlay,
+            startTime: Math.min(start, outputCutStart),
+            duration: retainedDuration,
+          },
+        ];
+      })
+    );
+    setMotionScenes(previous => cutMotion(previous, outputCutStart, outputCutEnd));
+    setSoundEffects(previous =>
+      previous.flatMap(effect => {
+        const start = Number(effect.startTime || 0);
+        const duration = getSoundEffectDuration(effect);
+        const end = start + duration;
+        if (end <= outputCutStart) return [effect];
+        if (start >= outputCutEnd) {
+          return [{ ...effect, startTime: Math.max(0, start - removedDuration) }];
+        }
+
+        const retainedDuration =
+          Math.max(0, outputCutStart - start) + Math.max(0, end - outputCutEnd);
+        if (retainedDuration < 0.05) return [];
+        return [
+          {
+            ...effect,
+            startTime: Math.min(start, outputCutStart),
+            duration: retainedDuration,
+          },
+        ];
+      })
+    );
+    setCutRangeStart(null);
+    setCutRangeEnd(null);
+    setHookPreviewLoop(false);
+    setTrimPreviewLoop(false);
+    setComparisonMode("split");
+    setStudioActionMessage(
+      `${(localEnd - localStart).toFixed(1)}s removed. Preview is playing across the ${JOIN_TRANSITIONS.find(item => item.id === resolvedJoinTransition)?.label || "clean"} join. Undo restores it.`
+    );
+  };
+
+  const selectCreativeTool = toolId => {
+    setActiveCreativeTool(toolId);
+    if (["cut", "hook", "captions", "pacing", "broll", "sound", "motion"].includes(toolId)) {
+      setStudioInspectorTab(toolId);
+    }
+    if (toolId === "moments") {
+      setStudioActionMessage("Choose a story moment, then shape how it earns attention.");
+    }
+    if (toolId === "export") {
+      setStudioActionMessage("Review the edit first. Rendering remains a separate final action.");
+    }
+  };
+
+  const applyCreativeIntent = intentId => {
+    setCreativeIntent(intentId);
+    if (intentId === "trim") {
+      setSilenceRemoval(true);
+      setPacingLevel("energetic");
+      changePreviewSpeed(1.15);
+      setStudioInspectorTab("pacing");
+      setActiveCreativeTool("pacing");
+      setStudioActionMessage(
+        "Boring pauses are marked for tightening and the preview is running at a sharper pace."
+      );
+      return;
+    }
+    if (intentId === "energy") {
+      setAutoCaptions(true);
+      setCaptionStyle("bold_pop");
+      setPacingLevel("energetic");
+      changePreviewSpeed(1.25);
+      setHookZoomScale(current => Math.max(1.12, Number(current || 1.08)));
+      setStudioActionMessage(
+        "Energy pass ready: faster pacing, magnetic captions, and a stronger punch-in."
+      );
+      return;
+    }
+    if (intentId === "proof") {
+      setStudioInspectorTab("broll");
+      setActiveCreativeTool("broll");
+      setStudioActionMessage(
+        "Proof mode is open. Place evidence exactly where the claim needs visual support."
+      );
+      return;
+    }
+    setHookPreviewLoop(true);
+    setStudioInspectorTab("hook");
+    setActiveCreativeTool("hook");
+    setStudioActionMessage(
+      "Loop preview is ready. The ending can now be reviewed against the opening before render."
+    );
+  };
+
+  const applyMakeItHit = () => {
+    setAutoCaptions(true);
+    setCaptionStyle("bold_pop");
+    setCaptionPosition("lower");
+    setCaptionScale(1.08);
+    setSilenceRemoval(true);
+    setSmartCrop(true);
+    setSmartCropMode("speaker_track");
+    setPacingLevel("energetic");
+    setCreativeIntent("energy");
+    setCreativeEffectsEnabled(true);
+    setCreativePreset("auto_story");
+    setCreativeIntensity("bold");
+    setHookZoomScale(current => Math.max(1.14, Number(current || 1.08)));
+    changePreviewSpeed(1.15);
+    setComparisonMode("after");
+    focusComparisonPreview("hook", true);
+    setStudioActionMessage(
+      "Make It Hit applied a reversible Auto Story: cinematic opening, movement build, transformed payoff, captions, tighter pacing and face-safe framing."
+    );
+  };
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (audioRemix.enabled) {
+      void updateAudioRemixPreview(video, audioRemix, audioRemixBypass);
+      return subscribeAudioRemixMeter(video, setAudioRemixMeter);
+    } else {
+      video.playbackRate = previewSpeed;
+      video.preservesPitch = true;
+      video.mozPreservesPitch = true;
+      video.webkitPreservesPitch = true;
+      setAudioRemixMeter({ peakDb: -60, rmsDb: -60, clipping: false });
+    }
+    return undefined;
+  }, [activeTimelineIndex, currentTimelineClip, previewSpeed, audioRemix, audioRemixBypass]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !audioRemixLoop) return undefined;
+    const keepLooping = () => {
+      if (
+        video.currentTime >= audioRemixLoop.end - 0.04 ||
+        video.currentTime < audioRemixLoop.start - 0.25
+      ) {
+        video.currentTime = audioRemixLoop.start;
+        safePlayMediaElement(video);
+      }
+    };
+    video.addEventListener("timeupdate", keepLooping);
+    return () => video.removeEventListener("timeupdate", keepLooping);
+  }, [audioRemixLoop, activeTimelineIndex, currentTimelineClip]);
+
+  useEffect(() => {
+    if (!addHook) return;
+    if (!isGenericHookText(hookText)) return;
+
+    const preferredHookText = currentHookCopySuggestions[0] || DEFAULT_HOOK_TEXT;
+    if (normalizeHookText(hookText) === preferredHookText) return;
+    setHookText(preferredHookText);
+  }, [addHook, currentHookCopySuggestions, hookText]);
+
+  useEffect(() => {
+    if (!addHook) {
+      setHookPreviewLoop(false);
+      hookPreviewSequenceRef.current = { active: false };
+    }
+  }, [addHook]);
+
+  useEffect(() => {
+    const music = musicPreviewRef.current;
+    if (!music) return undefined;
+
+    const markPlaying = () => setIsBackgroundSoundPreviewing(true);
+    const markStopped = () => setIsBackgroundSoundPreviewing(false);
+
+    music.addEventListener("play", markPlaying);
+    music.addEventListener("playing", markPlaying);
+    music.addEventListener("pause", markStopped);
+    music.addEventListener("ended", markStopped);
+    music.addEventListener("error", markStopped);
+    music.addEventListener("abort", markStopped);
+
+    return () => {
+      music.removeEventListener("play", markPlaying);
+      music.removeEventListener("playing", markPlaying);
+      music.removeEventListener("pause", markStopped);
+      music.removeEventListener("ended", markStopped);
+      music.removeEventListener("error", markStopped);
+      music.removeEventListener("abort", markStopped);
+    };
+  }, []);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    if (!silenceRemoval || !currentTimelineClip) {
+      setSilencePreview(null);
+      return undefined;
+    }
+
+    const loadSilencePreview = async () => {
+      try {
+        const auth = getAuth();
+        const user = auth.currentUser;
+        if (!user) return;
+        const token = await user.getIdToken();
+        const fileUrl = await ensurePreviewableClipUrl(currentTimelineClip);
+        if (!fileUrl) return;
+
+        const response = await fetch(`${API_BASE_URL}/api/media/preview-silence`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            fileUrl,
+            silenceThreshold,
+            minSilenceDuration,
+          }),
+        });
+
+        const payload = await response.json();
+        if (!isCancelled) {
+          setSilencePreview({
+            clipId: currentTimelineClip.id,
+            silenceSegments: payload.silence_segments || [],
+            keepSegments: payload.keep_segments || [],
+          });
+        }
+      } catch (error) {
+        console.error("Silence preview failed", error);
+        if (!isCancelled) setSilencePreview(null);
+      }
+    };
+
+    loadSilencePreview();
+    return () => {
+      isCancelled = true;
+    };
+  }, [silenceRemoval, silenceThreshold, minSilenceDuration, currentTimelineClip]);
+
+  useEffect(() => {
+    setWatermarkCleanupPreview(null);
+    setWatermarkCleanupPreviewError("");
+    setShowWatermarkCleanupOnVideo(true);
+  }, [removeWatermark, watermarkMode, currentTimelineClip?.id, manualWatermarkRegions]);
+
+  const handleGenerateWatermarkCleanupPreview = async () => {
+    if (!currentTimelineClip || !removeWatermark) return;
+    if (watermarkMode === "manual" && !manualWatermarkRegions.length) {
+      setWatermarkCleanupPreview(null);
+      setWatermarkCleanupPreviewError(
+        "Add at least one cleanup box before requesting a real preview."
+      );
+      return;
+    }
+
+    setIsWatermarkCleanupPreviewLoading(true);
+    setWatermarkCleanupPreviewError("");
+
+    try {
+      const auth = getAuth();
+      const user = auth.currentUser;
+      if (!user) throw new Error("Please login first");
+
+      const token = await user.getIdToken();
+      const fileUrl = await ensurePreviewableClipUrl(currentTimelineClip);
+      if (!fileUrl) throw new Error("No previewable source clip available");
+
+      const video = videoRef.current;
+      const previewStart = Number(currentTimelineWindow.start || 0);
+      const previewEnd = Number(
+        currentTimelineWindow.end || currentTimelineWindow.duration || previewStart
+      );
+      const previewTime = clampNumber(
+        Number(video?.currentTime ?? previewStart),
+        previewStart,
+        previewEnd || previewStart,
+        previewStart
+      );
+      const syncedManualRegions =
+        watermarkMode === "manual"
+          ? manualWatermarkRegions.map(region =>
+              region.track ? { ...region, seedTime: previewTime } : region
+            )
+          : manualWatermarkRegions;
+
+      if (watermarkMode === "manual") {
+        setManualWatermarkRegions(syncedManualRegions.map(clampManualWatermarkRegion));
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/media/preview-watermark-cleanup`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fileUrl,
+          watermarkMode,
+          manualWatermarkRegions:
+            watermarkMode === "manual" ? serializeManualWatermarkRegions(syncedManualRegions) : [],
+          previewTime,
+        }),
+      });
+
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(
+          payload?.details || payload?.message || "Failed to render watermark cleanup preview"
+        );
+      }
+
+      setWatermarkCleanupPreview({
+        clipId: currentTimelineClip.id,
+        mode: watermarkMode,
+        previewTime: Number(payload.preview_time ?? previewTime),
+        originalImageUrl: payload.original_image_url || "",
+        cleanedImageUrl: payload.cleaned_image_url || "",
+        filters: Array.isArray(payload.filters) ? payload.filters : [],
+      });
+      setShowWatermarkCleanupOnVideo(true);
+    } catch (error) {
+      console.error("Watermark cleanup preview failed", error);
+      setWatermarkCleanupPreview(null);
+      setWatermarkCleanupPreviewError(
+        error.message || "Failed to render watermark cleanup preview"
+      );
+    } finally {
+      setIsWatermarkCleanupPreviewLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    let isCancelled = false;
+    const abortController = new AbortController();
+
+    if (!addMusic || !musicSearchMode || !musicSelection.trim()) {
+      stopMusicPreviewBufferPlayback();
+      musicPreviewBufferRef.current = null;
+      releaseMusicPreviewObjectUrl();
+      setMusicPreviewUrl("");
+      setMusicPreviewNeedsGesture(false);
+      if (!addMusic) {
+        setMusicPreviewStatus("idle");
+        setMusicPreviewStatusMessage("");
+      } else if (!musicSearchMode) {
+        setMusicPreviewStatus("ready");
+        setMusicPreviewStatusMessage(
+          musicSelection ? `Preset ready: ${currentMusicLabel}` : "Choose a music preset."
+        );
+      } else {
+        setMusicPreviewStatus("idle");
+        setMusicPreviewStatusMessage("Enter a search query to load preview audio.");
+      }
+      return undefined;
+    }
+
+    const timeoutId = window.setTimeout(async () => {
+      try {
+        if (!isCancelled) {
+          setMusicPreviewStatus("processing");
+          setMusicPreviewStatusMessage(
+            `Searching and preparing preview audio for ${currentMusicLabel}...`
+          );
+        }
+        const auth = getAuth();
+        const user = auth.currentUser;
+        if (!user) return;
+        const token = await user.getIdToken();
+
+        const response = await fetch(`${API_BASE_URL}/api/media/preview-music`, {
+          method: "POST",
+          signal: abortController.signal,
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            musicFile: musicSelection,
+            isSearch: true,
+            safeSearch,
+            previewDuration: 20,
+          }),
+        });
+
+        if (!response.ok) throw new Error("Failed to load music preview");
+        const payload = await response.json();
+        const nextPreviewUrl = await materializeMusicPreviewUrl(payload.preview_url || "");
+        if (!nextPreviewUrl) {
+          throw new Error("Music search completed but no preview audio was returned");
+        }
+        if (!isCancelled) {
+          setMusicPreviewUrl(nextPreviewUrl);
+          setMusicPreviewNeedsGesture(false);
+          setMusicPreviewStatus("processing");
+          setMusicPreviewStatusMessage(`Preview found for ${currentMusicLabel}. Loading audio...`);
+        }
+      } catch (error) {
+        if (error?.name === "AbortError") {
+          return;
+        }
+        console.error("Music preview failed", error);
+        if (!isCancelled) {
+          releaseMusicPreviewObjectUrl();
+          setMusicPreviewUrl("");
+          setMusicPreviewStatus("failed");
+          setMusicPreviewStatusMessage(error.message || "Music preview failed");
+        }
+      }
+    }, 550);
+
+    return () => {
+      isCancelled = true;
+      abortController.abort();
+      window.clearTimeout(timeoutId);
+    };
+  }, [addMusic, musicSearchMode, musicSelection, safeSearch]);
+
+  useEffect(() => {
+    const music = musicPreviewRef.current;
+    if (!music) return;
+
+    if (!addMusic || !effectiveMusicPreviewUrl) {
+      stopMusicPreviewBufferPlayback();
+      musicPreviewBufferRef.current = null;
+      setMusicPreviewNeedsGesture(false);
+      return;
+    }
+
+    if (musicSearchMode) {
+      music.pause();
+      music.removeAttribute("src");
+      music.load();
+      setMusicPreviewNeedsGesture(false);
+      return;
+    }
+
+    music.pause();
+    music.load();
+    setMusicPreviewNeedsGesture(false);
+  }, [addMusic, effectiveMusicPreviewUrl, musicSearchMode]);
+
+  useEffect(() => {
+    if (!musicSearchMode) {
+      stopMusicPreviewBufferPlayback();
+      musicPreviewBufferRef.current = null;
+      return undefined;
+    }
+
+    if (!addMusic || !musicPreviewUrl) {
+      stopMusicPreviewBufferPlayback();
+      musicPreviewBufferRef.current = null;
+      return undefined;
+    }
+
+    let isCancelled = false;
+    const abortController = new AbortController();
+
+    const decodeMusicPreview = async () => {
+      try {
+        const audioContext = ensureMusicPreviewAudioContext();
+        const response = await fetch(musicPreviewUrl, { signal: abortController.signal });
+        const arrayBuffer = await response.arrayBuffer();
+        const decodedBuffer = await audioContext.decodeAudioData(arrayBuffer.slice(0));
+        if (isCancelled) return;
+
+        musicPreviewBufferRef.current = decodedBuffer;
+        setMusicPreviewStatus("ready");
+        setMusicPreviewStatusMessage(`Preview audio ready for ${currentMusicLabel}.`);
+      } catch (error) {
+        if (error?.name === "AbortError") return;
+
+        console.error("Music preview decode failed", error);
+        if (!isCancelled) {
+          musicPreviewBufferRef.current = null;
+          setMusicPreviewStatus("failed");
+          setMusicPreviewStatusMessage(error.message || "Preview audio could not be decoded.");
+        }
+      }
+    };
+
+    decodeMusicPreview();
+
+    return () => {
+      isCancelled = true;
+      abortController.abort();
+      stopMusicPreviewBufferPlayback();
+    };
+  }, [addMusic, musicSearchMode, musicPreviewUrl, currentMusicLabel]);
+
+  useEffect(() => {
+    const music = musicPreviewRef.current;
+    if (!music || !addMusic || musicSearchMode || !effectiveMusicPreviewUrl) return undefined;
+
+    const markReady = () => {
+      setMusicPreviewStatus("ready");
+      setMusicPreviewStatusMessage(`Preview audio ready for ${currentMusicLabel}.`);
+    };
+
+    const markPlaying = () => {
+      setMusicPreviewNeedsGesture(false);
+      setMusicPreviewStatus("ready");
+      setMusicPreviewStatusMessage(`Preview audio is playing for ${currentMusicLabel}.`);
+    };
+
+    const markFailed = () => {
+      setMusicPreviewStatus("failed");
+      setMusicPreviewStatusMessage(`Preview audio failed to load for ${currentMusicLabel}.`);
+    };
+
+    music.addEventListener("loadeddata", markReady);
+    music.addEventListener("canplay", markReady);
+    music.addEventListener("canplaythrough", markReady);
+    music.addEventListener("play", markPlaying);
+    music.addEventListener("playing", markPlaying);
+    music.addEventListener("error", markFailed);
+    music.addEventListener("stalled", markFailed);
+    music.addEventListener("abort", markFailed);
+
+    if (music.readyState >= 2) {
+      markReady();
+    }
+
+    return () => {
+      music.removeEventListener("loadeddata", markReady);
+      music.removeEventListener("canplay", markReady);
+      music.removeEventListener("canplaythrough", markReady);
+      music.removeEventListener("play", markPlaying);
+      music.removeEventListener("playing", markPlaying);
+      music.removeEventListener("error", markFailed);
+      music.removeEventListener("stalled", markFailed);
+      music.removeEventListener("abort", markFailed);
+    };
+  }, [addMusic, musicSearchMode, effectiveMusicPreviewUrl, currentMusicLabel]);
+
+  useEffect(() => {
+    const exactPreview = exactAudioRemixPreviewRef.current;
+    exactPreview?.pause();
+    backgroundSoundPreviewSuppressedRef.current = false;
+    setExactAudioRemixPreview(current =>
+      current.status === "idle" ? current : { status: "idle", url: "", error: "", receipt: null }
+    );
+  }, [audioRemix, activeTimelineIndex, currentTimelineClip?.id, musicTrack?.url]);
+
+  useEffect(() => {
+    const exactPreview = exactAudioRemixPreviewRef.current;
+    if (exactAudioRemixPreview.status !== "ready" || !exactAudioRemixPreview.url || !exactPreview) {
+      return undefined;
+    }
+    pauseSynchronizedPreview();
+    backgroundSoundPreviewSuppressedRef.current = true;
+    if (!applySafeMediaSource(exactPreview, exactAudioRemixPreview.url)) {
+      setExactAudioRemixPreview(current => ({
+        ...current,
+        status: "failed",
+        error: "The mastered preview URL was rejected by the browser.",
+      }));
+      return undefined;
+    }
+    exactPreview.load();
+    void safePlayMediaElement(exactPreview);
+    return undefined;
+  }, [exactAudioRemixPreview.status, exactAudioRemixPreview.url]);
+
+  const handleExactAudioRemixPreview = async () => {
+    if (!currentTimelineClip || !audioRemix.enabled) return;
+    if (exactAudioRemixPreview.status === "ready" && exactAudioRemixPreview.url) {
+      const exactPreview = exactAudioRemixPreviewRef.current;
+      if (exactPreview) {
+        pauseSynchronizedPreview();
+        backgroundSoundPreviewSuppressedRef.current = true;
+        exactPreview.currentTime = 0;
+        void safePlayMediaElement(exactPreview);
+        setStudioActionMessage("Replaying the exact mastered worker preview.");
+        return;
+      }
+    }
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (!user) {
+      setExactAudioRemixPreview({
+        status: "failed",
+        url: "",
+        error: "Please log in before rendering an exact audio preview.",
+        receipt: null,
+      });
+      return;
+    }
+
+    exactAudioRemixPreviewRef.current?.pause();
+    setExactAudioRemixPreview({ status: "rendering", url: "", error: "", receipt: null });
+    setAudioRemixBypass(false);
+    setComparisonMode("after");
+
+    try {
+      let token = await user.getIdToken();
+      const fileUrl = await ensurePreviewableClipUrl(currentTimelineClip);
+      if (!fileUrl) throw new Error("No previewable source clip is available.");
+
+      const windowStart = Math.max(0, Number(currentTimelineWindow.start || 0));
+      const windowEnd = Math.max(
+        windowStart + 0.5,
+        Number(
+          currentTimelineWindow.end || windowStart + Number(currentTimelineWindow.duration || 8)
+        )
+      );
+      const requestedStart = Number(
+        audioRemixLoop?.start ?? videoRef.current?.currentTime ?? windowStart
+      );
+      let previewStart = clampNumber(
+        requestedStart,
+        windowStart,
+        Math.max(windowStart, windowEnd - 0.5),
+        windowStart
+      );
+      let previewDuration = Math.min(8, Math.max(0.5, windowEnd - previewStart));
+      if (previewDuration < 2) {
+        previewStart = Math.max(windowStart, windowEnd - Math.min(8, windowEnd - windowStart));
+        previewDuration = Math.min(8, Math.max(2, windowEnd - previewStart));
+      }
+      setAudioRemixLoop({ start: previewStart, end: previewStart + previewDuration });
+
+      let backgroundAudioUrl = musicTrack?.url || "";
+      if (
+        addMusic &&
+        musicTrack?.file &&
+        (!backgroundAudioUrl || backgroundAudioUrl.startsWith("blob:"))
+      ) {
+        const extension = musicTrack.file.name?.split(".").pop() || "mp3";
+        const upload = await uploadSourceFileViaBackend({
+          file: musicTrack.file,
+          token,
+          mediaType: "audio",
+          fileName: `${createSecureId("remix-preview-music")}.${extension}`,
+        });
+        backgroundAudioUrl = upload.url;
+        setMusicTrack(previous => (previous ? { ...previous, url: backgroundAudioUrl } : previous));
+      }
+
+      if (audioRemix.target === "music" && !backgroundAudioUrl.startsWith("http")) {
+        throw new Error("Add an uploaded background music track before previewing Music only.");
+      }
+
+      const body = {
+        fileUrl,
+        startTime: previewStart,
+        duration: previewDuration,
+        audioRemix: audioRemixForRender(audioRemix),
+        includeVoice: !muteOriginalAudio,
+        backgroundAudio:
+          addMusic && backgroundAudioUrl.startsWith("http")
+            ? {
+                url: backgroundAudioUrl,
+                volume: musicTrack?.volume ?? musicVolume,
+                trimStart: musicTrack?.trimStart ?? 0,
+              }
+            : null,
+      };
+
+      let response = await fetch(`${API_BASE_URL}/api/media/preview-audio-remix`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
+      if (response.status === 401) {
+        token = await user.getIdToken(true);
+        response = await fetch(`${API_BASE_URL}/api/media/preview-audio-remix`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(body),
+        });
+      }
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || !payload?.preview_url) {
+        throw new Error(
+          payload?.details || payload?.message || "The worker could not render the audio preview."
+        );
+      }
+      setExactAudioRemixPreview({
+        status: "ready",
+        url: payload.preview_url,
+        error: "",
+        receipt: payload.receipt || null,
+      });
+      setStudioActionMessage(
+        `Exact ${previewDuration.toFixed(1)}s worker preview is ready and playing.`
+      );
+    } catch (error) {
+      console.error("Exact Remix Audio preview failed", error);
+      setExactAudioRemixPreview({
+        status: "failed",
+        url: "",
+        error: error.message || "Exact Remix Audio preview failed.",
+        receipt: null,
+      });
+      setStudioActionMessage(error.message || "Exact Remix Audio preview failed.");
+    }
+  };
+
+  const handleAudioSourceUpload = async event => {
+    const sourceFile = event.target.files && event.target.files[0];
+    if (!sourceFile) return;
+
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (!user) {
+      toast.error("Please login first");
+      event.target.value = "";
+      return;
+    }
+
+    setIsExtractingAudio(true);
+    setAudioExtractionStatus("Uploading source video...");
+    if (onStatusChange) onStatusChange("Uploading source video for audio extraction...");
+
+    try {
+      let token = await user.getIdToken();
+      const uploadResult = await uploadSourceFileViaBackend({
+        file: sourceFile,
+        token,
+        mediaType: "video",
+        fileName: sourceFile.name,
+      });
+
+      setAudioExtractionStatus("Queueing extraction...");
+      if (onStatusChange) onStatusChange("Queueing background-audio extraction...");
+
+      let response = await fetch(API_ENDPOINTS.MEDIA_EXTRACT_AUDIO, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fileUrl: uploadResult.url,
+          sourceLabel: sourceFile.name,
+        }),
+      });
+
+      if (response.status === 401) {
+        token = await user.getIdToken(true);
+        response = await fetch(API_ENDPOINTS.MEDIA_EXTRACT_AUDIO, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            fileUrl: uploadResult.url,
+            sourceLabel: sourceFile.name,
+          }),
+        });
+      }
+
+      const startPayload = await response.json().catch(() => null);
+      if (!response.ok || !startPayload?.jobId) {
+        throw new Error(
+          startPayload?.details || startPayload?.message || "Failed to start audio extraction"
+        );
+      }
+
+      const jobId = startPayload.jobId;
+      let attempts = 0;
+      while (attempts < 180) {
+        attempts += 1;
+        await sleep(2000);
+
+        let statusResponse = await fetch(`${API_BASE_URL}/api/media/status/${jobId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (statusResponse.status === 401) {
+          token = await user.getIdToken(true);
+          statusResponse = await fetch(`${API_BASE_URL}/api/media/status/${jobId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+        }
+
+        if (!statusResponse.ok) continue;
+        const statusPayload = await statusResponse.json();
+
+        if (statusPayload.status === "failed") {
+          throw new Error(statusPayload.error || "Audio extraction failed on the server");
+        }
+
+        if (statusPayload.status === "completed") {
+          const result = statusPayload.result || {};
+          const audioUrl = result.audioUrl || statusPayload.audio_url;
+          if (!audioUrl) {
+            throw new Error("Audio extraction completed but no audio URL was returned");
+          }
+
+          const audioDuration = clampAudioControl(result.audioDuration, 0, 36000, 0);
+          setExtractedAudio({
+            id: jobId,
+            url: audioUrl,
+            sourceVideoUrl: uploadResult.url,
+            sourceVideoName: sourceFile.name,
+            trimStart: 0,
+            volume: 0.7,
+            mode: "mix",
+            duckingStrength: 0.45,
+            enabled: true,
+            duration: audioDuration,
+            format: result.format || "mp3",
+          });
+          setAudioExtractionStatus("Background audio added to the timeline.");
+          if (onStatusChange)
+            onStatusChange("Background audio extracted and added to the timeline.");
+          return;
+        }
+
+        const progress = clampAudioControl(statusPayload.progress, 0, 100, 0);
+        const stageLabel = getAudioExtractionStageLabel(statusPayload.stage, progress);
+        setAudioExtractionStatus(stageLabel);
+        if (onStatusChange) onStatusChange(stageLabel);
+      }
+
+      throw new Error("Audio extraction timed out");
+    } catch (error) {
+      console.error("Audio extraction failed", error);
+      setAudioExtractionStatus(error.message || "Audio extraction failed");
+      if (onStatusChange)
+        onStatusChange(`Audio extraction failed: ${error.message || "Unknown error"}`);
+      toast.error(`Audio extraction failed: ${error.message || "Unknown error"}`);
+    } finally {
+      setIsExtractingAudio(false);
+      event.target.value = "";
+    }
+  };
+
+  const buildExportTimeline = async () => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (!user) throw new Error("Please login first");
+    const token = await user.getIdToken();
+    const sourceUploadPromises = new Map();
+
+    const exportSegments = await Promise.all(
+      timeline.map(async clip => {
+        let clipUrl = clip.url;
+        let sourceFile = clip.file instanceof Blob ? clip.file : null;
+
+        if (!sourceFile && typeof clip.url === "string" && clip.url.startsWith("blob:")) {
+          const response = await fetch(clip.url);
+          sourceFile = await response.blob();
+        }
+
+        if (
+          sourceFile &&
+          (clip.isLocal || (typeof clip.url === "string" && clip.url.startsWith("blob:")))
+        ) {
+          const extension =
+            clip.file?.name?.split(".").pop() || sourceFile.type?.split("/").pop() || "mp4";
+          const fileName = `${Date.now()}_${clip.id}.${extension}`;
+          const sourceKey = clip.sourceClipId || clip.url || clip.id;
+          if (!sourceUploadPromises.has(sourceKey)) {
+            sourceUploadPromises.set(
+              sourceKey,
+              uploadSourceFileViaBackend({
+                file: sourceFile,
+                token,
+                mediaType: "video",
+                fileName,
+                onProgress: (transferred, total) => {
+                  const percent = total > 0 ? Math.round((transferred / total) * 100) : 0;
+                  setExportStatusLabel(`Uploading source ${percent}%`);
+                },
+              })
+            );
+          }
+          const uploadResult = await sourceUploadPromises.get(sourceKey);
+          clipUrl = uploadResult.url;
+        }
+
+        const window = getTimelineClipWindow(clip);
+        return {
+          id: clip.id,
+          source_clip_id: clip.sourceClipId || clip.id,
+          url: clipUrl,
+          start_time: window.start,
+          end_time: window.end,
+          duration: window.duration,
+          transition_in: clip.transitionIn || null,
+          transition_out: clip.transitionOut || null,
+          transition_duration: Number(clip.transitionDuration || 0),
+        };
+      })
+    );
+
+    if (!addHook || !exportSegments[activeTimelineIndex]) {
+      return exportSegments;
+    }
+
+    const activeSegment = exportSegments[activeTimelineIndex];
+    const sourceWindow = getTimelineClipWindow(timeline[activeTimelineIndex]);
+    const hookSourceStart = Number(sourceWindow.start || 0) + resolvedHookStart;
+    const hookSourceEnd = Number(sourceWindow.start || 0) + hookEnd;
+    const hookSegmentDuration = Math.max(0.1, hookSourceEnd - hookSourceStart);
+
+    const beforeHookDuration = Math.max(0, hookSourceStart - Number(activeSegment.start_time || 0));
+    const afterHookDuration = Math.max(0, Number(activeSegment.end_time || 0) - hookSourceEnd);
+    const leadingSegments = exportSegments.slice(0, activeTimelineIndex);
+    const trailingSegments = exportSegments.slice(activeTimelineIndex + 1);
+    const hookAwareSegments = [
+      ...leadingSegments,
+      ...(beforeHookDuration > 0.05
+        ? [
+            {
+              ...activeSegment,
+              id: `${activeSegment.id}-before-hook`,
+              end_time: hookSourceStart,
+              duration: beforeHookDuration,
+            },
+          ]
+        : []),
+      ...(afterHookDuration > 0.05
+        ? [
+            {
+              ...activeSegment,
+              id: `${activeSegment.id}-after-hook`,
+              start_time: hookSourceEnd,
+              duration: afterHookDuration,
+            },
+          ]
+        : []),
+      ...trailingSegments,
+    ];
+
+    return [
+      {
+        id: `hook-intro-${activeSegment.id}`,
+        source_clip_id: activeSegment.source_clip_id || activeSegment.id,
+        url: activeSegment.url,
+        start_time: hookSourceStart,
+        end_time: hookSourceEnd,
+        duration: hookSegmentDuration,
+      },
+      ...hookAwareSegments,
+    ];
+  };
+
+  const normalizeOverlaysForExport = (exportTimeline, sourceOverlays) => {
+    const offsetByClipId = new Map();
+    let runningOffset = 0;
+    exportTimeline.forEach(segment => {
+      const sourceClipId = segment.source_clip_id || segment.id;
+      const nextMeta = {
+        offset: runningOffset,
+        start: segment.start_time || 0,
+        end: segment.end_time || 0,
+      };
+      const existing = offsetByClipId.get(sourceClipId) || [];
+      existing.push(nextMeta);
+      offsetByClipId.set(sourceClipId, existing);
+      runningOffset += Math.max(0, Number(segment.duration || 0));
+    });
+
+    return sourceOverlays.map(overlay => {
+      const previewStart =
+        overlay.startTime !== undefined && overlay.startTime !== null
+          ? overlay.startTime
+          : overlay.start_time;
+      const clipMetas = offsetByClipId.get(overlay.clipId || "main") || [];
+      const clipMeta = clipMetas.find(meta => {
+        if (previewStart === undefined || previewStart === null) return false;
+        return (
+          Number(previewStart) >= Number(meta.start || 0) &&
+          Number(previewStart) < Number(meta.end || 0)
+        );
+      }) ||
+        clipMetas[0] || {
+          offset: 0,
+          start: 0,
+          end: selectedClip ? selectedClip.end : 0,
+        };
+      const normalizedStart =
+        previewStart !== undefined && previewStart !== null
+          ? clipMeta.offset + Math.max(0, Number(previewStart) - Number(clipMeta.start || 0))
+          : undefined;
+
+      return {
+        ...overlay,
+        start_time: normalizedStart,
+        duration:
+          overlay.duration !== undefined && overlay.duration !== null
+            ? Number(overlay.duration)
+            : overlay.duration,
+      };
+    });
+  };
+
+  const handleExportRender = async destination => {
+    if (isExporting) return;
+
+    const scanSessionId = selectedClip?.scanSessionId || null;
+    const selectedClipId = selectedClip?.id ?? null;
+
+    if (scanSessionId) {
+      void trackClipWorkflowEvent("scanner_clip_export_started", {
+        scanSessionId,
+        clipId: String(selectedClipId),
+        score: Number(selectedClip?.guidedScore ?? selectedClip?.score ?? 0),
+        destination: destination || "general",
+      });
+    }
+
+    setIsExporting(true);
+    setExportStatusLabel("Preparing media...");
+
+    const auth = getAuth();
+    if (!auth.currentUser) {
+      toast.error("Please login first");
+      setIsExporting(false);
+      setExportStatusLabel("Render Final Clip");
+      return;
+    }
+
+    try {
+      const token = await auth.currentUser.getIdToken();
+      const exportTimeline = await buildExportTimeline();
+      setExportStatusLabel("Uploading edit layers...");
+      const newOverlays = await Promise.all(
+        overlays.map(async overlay => {
+          let fileToUpload = overlay.file;
+          let isNewBlob = false;
+          let finalOverlay = { ...overlay };
+
+          if (overlay.type === "text" && overlay.isRainbow) {
+            const tempContainer = document.createElement("div");
+            tempContainer.style.position = "absolute";
+            tempContainer.style.left = "-9999px";
+            tempContainer.style.background = "transparent";
+            tempContainer.style.padding = "20px";
+            tempContainer.style.fontFamily =
+              '"Comic Sans MS", "Chalkboard SE", "Marker Felt", sans-serif';
+            tempContainer.style.fontSize = "32px";
+            tempContainer.style.fontWeight = "900";
+            tempContainer.style.textShadow = "3px 3px 0 #000";
+            tempContainer.style.webkitTextStroke = "1.5px black";
+            tempContainer.style.whiteSpace = "pre-wrap";
+
+            const chars = (overlay.text || "").split("");
+            chars.forEach((char, idx) => {
+              const span = document.createElement("span");
+              span.textContent = char;
+              const offset = overlay.rainbowOffset || 0;
+              span.style.color = RAINBOW_COLORS[(idx + offset) % RAINBOW_COLORS.length];
+              tempContainer.appendChild(span);
+            });
+
+            document.body.appendChild(tempContainer);
+
+            try {
+              const canvas = await html2canvas(tempContainer, {
+                backgroundColor: null,
+                scale: 2,
+              });
+              const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
+              fileToUpload = blob;
+              isNewBlob = true;
+              finalOverlay.type = "image";
+              finalOverlay.text = undefined;
+            } catch (error) {
+              console.error("Failed to render caption:", error);
+            } finally {
+              document.body.removeChild(tempContainer);
+            }
+          }
+
+          if (fileToUpload && (isNewBlob || overlay.isLocal)) {
+            const ext = isNewBlob
+              ? "png"
+              : fileToUpload.name
+                ? fileToUpload.name.split(".").pop()
+                : "bin";
+            const fileName = `${createSecureId("overlay")}.${ext}`;
+            const uploadResult = await uploadSourceFileViaBackend({
+              file: fileToUpload,
+              token,
+              mediaType:
+                finalOverlay.type === "video"
+                  ? "video"
+                  : finalOverlay.type === "image"
+                    ? "image"
+                    : "audio",
+              fileName,
+              onProgress: (transferred, total) => {
+                const percent = total > 0 ? Math.round((transferred / total) * 100) : 0;
+                setExportStatusLabel(`Uploading layers ${percent}%`);
+              },
+            });
+            const url = uploadResult.url;
+
+            finalOverlay.src = url;
+            finalOverlay.isLocal = false;
+            finalOverlay.file = null;
+          }
+
+          return finalOverlay;
+        })
+      );
+
+      let exportedMusicUrl = musicTrack?.url || null;
+      if (
+        addMusic &&
+        musicTrack?.file instanceof Blob &&
+        (!exportedMusicUrl || exportedMusicUrl.startsWith("blob:"))
+      ) {
+        const musicExtension = musicTrack.file.name?.split(".").pop() || "mp3";
+        const musicUpload = await uploadSourceFileViaBackend({
+          file: musicTrack.file,
+          token,
+          mediaType: "audio",
+          fileName: `${createSecureId("music")}.${musicExtension}`,
+          onProgress: (transferred, total) => {
+            const percent = total > 0 ? Math.round((transferred / total) * 100) : 0;
+            setExportStatusLabel(`Uploading sound ${percent}%`);
+          },
+        });
+        exportedMusicUrl = musicUpload.url;
+        setMusicTrack(previous => (previous ? { ...previous, url: exportedMusicUrl } : previous));
+      }
+
+      const exportedSoundEffects = await Promise.all(
+        allSoundEffects
+          .filter(effect => effect.enabled !== false)
+          .map(async effect => {
+            let effectUrl = effect.url || null;
+            if (effect.file instanceof Blob && (!effectUrl || effectUrl.startsWith("blob:"))) {
+              const extension = effect.file.name?.split(".").pop() || "wav";
+              const upload = await uploadSourceFileViaBackend({
+                file: effect.file,
+                token,
+                mediaType: "audio",
+                fileName: `${createSecureId("sfx")}.${extension}`,
+                onProgress: (transferred, total) => {
+                  const percent = total > 0 ? Math.round((transferred / total) * 100) : 0;
+                  setExportStatusLabel(`Uploading sound effects ${percent}%`);
+                },
+              });
+              effectUrl = upload.url;
+            }
+            return {
+              id: effect.id,
+              name: effect.name,
+              builtIn: !!effect.builtIn,
+              tone: effect.tone || null,
+              url: effectUrl,
+              startTime: Number(effect.startTime || 0),
+              duration: getSoundEffectDuration(effect),
+              trimStart: Number(effect.trimStart || 0),
+              volume: clampAudioControl(effect.volume, 0, 1, 0.8),
+              fadeIn: Number(effect.fadeIn || 0),
+              fadeOut: Number(effect.fadeOut || 0),
+              enabled: true,
+            };
+          })
+      );
+
+      const normalizedOverlays = normalizeOverlaysForExport(exportTimeline, newOverlays);
+      const persistedHookFocusPoint = addHook ? normalizeHookFocusPoint(hookFocusPoint) : null;
+      const coverFrame = addHook
+        ? {
+            timelineTime: 0,
+            sourceTime: Number(currentTimelineWindow.start || 0) + resolvedHookStart,
+            clipId: currentTimelineClip?.id || selectedClip?.id || null,
+            focusPoint: persistedHookFocusPoint,
+            template: hookTemplate,
+            freezeFrame: hookFreezeFrame,
+            strategy: hookFreezeFrame ? "hook_freeze_frame" : "hook_intro_start",
+          }
+        : null;
+      const thumbnailFrame = coverFrame ? { ...coverFrame, purpose: "thumbnail" } : null;
+
+      setOverlays(newOverlays);
+      setExportStatusLabel("Starting render...");
+      await onSave(selectedClip, normalizedOverlays, {
+        autoCaptions,
+        captionStyle,
+        captionPosition,
+        captionScale,
+        captionTextOverride: normalizePlainText(captionTextOverride) || null,
+        captionSegments: normalizeCaptionSegments(captionSegments).map(segment => ({
+          id: segment.id,
+          startTime: segment.start,
+          endTime: segment.end,
+          text: segment.text,
+        })),
+        previewSpeed,
+        speedSegments: [
+          {
+            startTime: 0,
+            endTime: Number(currentTimelineWindow.duration || selectedClip?.duration || 0),
+            rate: previewSpeed,
+            pitchPreserved: true,
+          },
+        ],
+        pacingLevel,
+        creativeIntent,
+        creativePlan: {
+          version: 1,
+          enabled: creativeEffectsEnabled,
+          intensity: creativeIntensity,
+          fallback: "clean",
+          effects: creativeEffectsEnabled
+            ? buildSignatureCreativeEffects({
+                preset: creativePreset,
+                intensity: creativeIntensity,
+                duration: currentTimelineWindow.duration || selectedClip?.duration || 0,
+              })
+            : [],
+        },
+        smartCrop,
+        smartCropMode,
+        enhanceQuality,
+        silenceRemoval,
+        silenceThreshold,
+        minSilenceDuration,
+        removeWatermark,
+        watermarkMode,
+        manualWatermarkRegions: serializeManualWatermarkRegions(manualWatermarkRegions),
+        addHook,
+        hookText,
+        hookIntroSeconds: hookDuration,
+        hookTemplate,
+        hookStartTime: 0,
+        hookEndTime: hookDuration,
+        hookSourceStartTime: Number(currentTimelineWindow.start || 0) + resolvedHookStart,
+        hookSourceEndTime: Number(currentTimelineWindow.start || 0) + hookEnd,
+        hookFocusPoint: persistedHookFocusPoint,
+        coverFrame,
+        coverFrameTime: coverFrame ? Number(coverFrame.timelineTime || 0) : null,
+        coverFrameSourceTime: coverFrame ? Number(coverFrame.sourceTime || 0) : null,
+        thumbnailFrame,
+        thumbnailTime: thumbnailFrame ? Number(thumbnailFrame.timelineTime || 0) : null,
+        thumbnailSourceTime: thumbnailFrame ? Number(thumbnailFrame.sourceTime || 0) : null,
+        hook: {
+          startTime: 0,
+          endTime: hookDuration,
+          duration: hookDuration,
+          sourceStartTime: Number(currentTimelineWindow.start || 0) + resolvedHookStart,
+          sourceEndTime: Number(currentTimelineWindow.start || 0) + hookEnd,
+          template: hookTemplate,
+          text: normalizedHookText,
+          focusPoint: persistedHookFocusPoint,
+          coverFrame,
+          effects: {
+            blurBackground: hookBlurBackground,
+            darkOverlay: hookDarkOverlay,
+            freezeFrame: hookFreezeFrame,
+            zoomScale: hookZoomScale,
+            textAnimation: hookTextAnimation,
+          },
+        },
+        hookBlurBackground,
+        hookDarkOverlay,
+        hookFreezeFrame,
+        hookZoomScale,
+        hookTextAnimation,
+        addMusic: addMusic && !!musicTrack,
+        musicFile: null,
+        musicUrl: exportedMusicUrl,
+        musicName: musicTrack?.name || null,
+        musicSelection: musicTrack ? "custom" : musicSelection,
+        isSearch: musicTrack ? true : musicSearchMode,
+        safeSearch,
+        musicVolume: musicTrack?.volume ?? musicVolume,
+        musicDucking: musicTrack?.ducking ?? musicDucking,
+        musicDuckingStrength: musicTrack?.duckingStrength ?? musicDuckingStrength,
+        musicDuckingMode: musicTrack?.duckingMode || "speech",
+        musicFadeIn: musicTrack?.fadeIn ?? 0.5,
+        musicFadeOut: musicTrack?.fadeOut ?? 0.5,
+        musicLoop: musicTrack?.loop ?? true,
+        soundEffects: exportedSoundEffects,
+        audioRemix: audioRemixForRender(audioRemix),
+        motionGraphics: { version: 1, scenes: motionScenes.map(normalizeMotion) },
+        muteAudio: muteOriginalAudio,
+        timelineSegments: exportTimeline,
+        backgroundAudio: null,
+        exportDestination: destination || "general",
+      });
+    } catch (err) {
+      if (scanSessionId) {
+        void trackClipWorkflowEvent("scanner_clip_export_failed", {
+          scanSessionId,
+          clipId: String(selectedClipId),
+          destination: destination || "general",
+          message: err?.message || "Export failed",
+        });
+      }
+      toast.error("Export failed: " + err.message);
+    } finally {
+      setExportStatusLabel("Render Final Clip");
+      setIsExporting(false);
+    }
+  };
+
+  // Dragging State
+  const [isDragging, setIsDragging] = useState(false);
+  const dragItem = useRef(null);
+  const dragOffset = useRef({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const scanSessionId = selectedClip?.scanSessionId;
+    if (!scanSessionId || loggedScannerEntryRef.current.has(scanSessionId)) return;
+
+    loggedScannerEntryRef.current.add(scanSessionId);
+    void trackClipWorkflowEvent("scanner_clip_opened_in_editor", {
+      scanSessionId,
+      clipId: String(selectedClip?.id ?? "unknown"),
+      score: Number(selectedClip?.guidedScore ?? selectedClip?.score ?? 0),
+      improveInEditor: Boolean(selectedClip?.improveInEditor),
+    });
+  }, [selectedClip]);
+
+  // Handle video element duration load to set clip max duration
+  const handleLoadedMetadata = () => {
+    if (videoRef.current) {
+      const dur = videoRef.current.duration;
+      setTimeline(prev =>
+        prev.map((item, idx) =>
+          idx === activeTimelineIndex
+            ? {
+                ...item,
+                duration: dur,
+                endRequest:
+                  item.endRequest !== null && item.endRequest !== undefined ? item.endRequest : dur,
+                startRequest:
+                  item.startRequest !== null && item.startRequest !== undefined
+                    ? item.startRequest
+                    : 0,
+              }
+            : item
+        )
+      );
+    }
+  };
+
+  useEffect(() => {
+    setOrderedClips(clips || []);
+  }, [clips]);
+
+  useEffect(() => {
+    if (orderedClips && orderedClips.length > 0) {
+      if (!selectedClip || !orderedClips.some(clip => clip.id === selectedClip.id)) {
+        setSelectedClip(orderedClips[0]);
+      }
+      return;
+    }
+
+    if (selectedClip) {
+      setSelectedClip(null);
+    }
+  }, [orderedClips, selectedClip]);
+
+  useEffect(() => {
+    if (!selectedClip) return;
+
+    const pendingAction = pendingClipActionRef.current;
+    if (!pendingAction || pendingAction.clipId !== selectedClip.id) return;
+
+    pendingClipActionRef.current = null;
+
+    if (pendingAction.type === "apply-hook") {
+      applyGuidedHookToClip(selectedClip, { preview: true });
+      return;
+    }
+
+    if (pendingAction.type === "improve") {
+      applyClipImprovements(selectedClip);
+      return;
+    }
+
+    if (pendingAction.type === "apply-variant") {
+      applyClipVariant(selectedClip, pendingAction.variant);
+      return;
+    }
+
+    if (pendingAction.type === "export") {
+      void handleExportRender(pendingAction.destination);
+    }
+  }, [selectedClip]);
+
+  useEffect(() => {
+    const snapshot = cloneSnapshot(getEditorSnapshot());
+    // Inspector selection and playhead navigation are not edits. Excluding
+    // them keeps Undo focused on visible media/timeline changes instead of
+    // silently undoing which layer happened to be selected.
+    const serializedSnapshot = serializeSnapshot(getHistoryRelevantSnapshot(snapshot));
+
+    if (lastSnapshotRef.current === null) {
+      lastSnapshotRef.current = snapshot;
+      lastSnapshotSignatureRef.current = serializedSnapshot;
+      syncHistoryAvailability();
+      return;
+    }
+
+    // Dragging can emit many overlay updates per second. Record a single history snapshot
+    // when the drag completes instead of pushing one entry for every mouse move.
+    if (isDragging) {
+      return;
+    }
+
+    if (serializedSnapshot === lastSnapshotSignatureRef.current) {
+      syncHistoryAvailability();
+      return;
+    }
+
+    if (pendingHistoryBaselineRef.current) {
+      const baseline = pendingHistoryBaselineRef.current;
+      pendingHistoryBaselineRef.current = null;
+      const baselineSignature = serializeSnapshot(getHistoryRelevantSnapshot(baseline));
+      const currentUndoTop = undoStackRef.current[undoStackRef.current.length - 1];
+      const currentUndoTopSignature = currentUndoTop
+        ? serializeSnapshot(getHistoryRelevantSnapshot(currentUndoTop))
+        : null;
+      if (baselineSignature !== currentUndoTopSignature) {
+        undoStackRef.current.push(cloneSnapshot(baseline));
+        if (undoStackRef.current.length > 50) undoStackRef.current.shift();
+      }
+      redoStackRef.current = [];
+      lastSnapshotRef.current = snapshot;
+      lastSnapshotSignatureRef.current = serializedSnapshot;
+      if (cutHistoryTransactionRef.current) {
+        cutHistoryTransactionRef.current.appliedSignature = serializedSnapshot;
+        cutHistoryTransactionRef.current.appliedTimelineSignature = serializeSnapshot(
+          snapshot.timeline || []
+        );
+      }
+      syncHistoryAvailability();
+      return;
+    }
+
+    if (isRestoringHistoryRef.current) {
+      isRestoringHistoryRef.current = false;
+      lastSnapshotRef.current = snapshot;
+      lastSnapshotSignatureRef.current = serializedSnapshot;
+      syncHistoryAvailability();
+      return;
+    }
+
+    undoStackRef.current.push(cloneSnapshot(lastSnapshotRef.current));
+    if (undoStackRef.current.length > 50) {
+      undoStackRef.current.shift();
+    }
+    redoStackRef.current = [];
+    lastSnapshotRef.current = snapshot;
+    lastSnapshotSignatureRef.current = serializedSnapshot;
+    syncHistoryAvailability();
+  }, [
+    orderedClips,
+    selectedClip,
+    overlays,
+    activeOverlayId,
+    videoFit,
+    safeFaceFraming,
+    faceAnchorPreset,
+    autoCaptions,
+    captionStyle,
+    captionPosition,
+    captionScale,
+    captionTextOverride,
+    captionSegments,
+    previewSpeed,
+    pacingLevel,
+    creativeIntent,
+    creativeEffectsEnabled,
+    creativePreset,
+    creativeIntensity,
+    contentProfile,
+    cutRangeStart,
+    cutRangeEnd,
+    joinTransition,
+    smartCrop,
+    smartCropMode,
+    enhanceQuality,
+    silenceRemoval,
+    silenceThreshold,
+    minSilenceDuration,
+    removeWatermark,
+    watermarkMode,
+    manualWatermarkRegions,
+    activeWatermarkRegionId,
+    addHook,
+    hookText,
+    hookTemplate,
+    hookIntroSeconds,
+    hookStartTime,
+    hookEndTime,
+    hookBlurBackground,
+    hookDarkOverlay,
+    hookFreezeFrame,
+    hookZoomScale,
+    hookTextAnimation,
+    hookPreviewLoop,
+    hookFocusPoint,
+    addMusic,
+    muteOriginalAudio,
+    musicSelection,
+    musicSearchMode,
+    safeSearch,
+    musicVolume,
+    musicDucking,
+    musicDuckingStrength,
+    musicTrack,
+    soundEffects,
+    motionScenes,
+    activeSoundEffectId,
+    extractedAudio,
+    bRollCadence,
+    timeline,
+    activeTimelineIndex,
+    isDragging,
+  ]);
+
+  useEffect(() => {
+    const handleHistoryKeyDown = event => {
+      const targetTag = event.target?.tagName;
+      const isTypingTarget =
+        event.target?.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(targetTag);
+      if (isTypingTarget) return;
+
+      const isUndo =
+        (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "z" && !event.shiftKey;
+      const isRedoShortcut =
+        (event.metaKey || event.ctrlKey) &&
+        ((event.key.toLowerCase() === "z" && event.shiftKey) || event.key.toLowerCase() === "y");
+
+      if (isUndo) {
+        event.preventDefault();
+        handleUndo();
+      } else if (isRedoShortcut) {
+        event.preventDefault();
+        handleRedo();
+      }
+    };
+
+    window.addEventListener("keydown", handleHistoryKeyDown);
+    return () => window.removeEventListener("keydown", handleHistoryKeyDown);
+  }, [
+    orderedClips,
+    selectedClip,
+    overlays,
+    activeOverlayId,
+    videoFit,
+    autoCaptions,
+    captionStyle,
+    smartCrop,
+    smartCropMode,
+    silenceRemoval,
+    silenceThreshold,
+    minSilenceDuration,
+    removeWatermark,
+    watermarkMode,
+    manualWatermarkRegions,
+    activeWatermarkRegionId,
+    addHook,
+    hookText,
+    hookTemplate,
+    hookIntroSeconds,
+    hookStartTime,
+    hookEndTime,
+    hookBlurBackground,
+    hookDarkOverlay,
+    hookFreezeFrame,
+    hookZoomScale,
+    hookTextAnimation,
+    hookPreviewLoop,
+    addMusic,
+    muteOriginalAudio,
+    musicSelection,
+    musicSearchMode,
+    safeSearch,
+    musicVolume,
+    musicDucking,
+    musicDuckingStrength,
+    musicTrack,
+    soundEffects,
+    motionScenes,
+    activeSoundEffectId,
+    extractedAudio,
+    timeline,
+    activeTimelineIndex,
+  ]);
+
+  useEffect(() => {
+    if (!activeOverlayId) return undefined;
+
+    const handleKeyDown = event => {
+      const targetTag = event.target?.tagName;
+      const isTypingTarget =
+        event.target?.isContentEditable ||
+        ["INPUT", "TEXTAREA", "SELECT", "BUTTON"].includes(targetTag);
+      if (isTypingTarget) return;
+
+      const step = event.shiftKey ? 5 : 1;
+
+      if (event.key === "Delete" || event.key === "Backspace") {
+        event.preventDefault();
+        deleteOverlay(activeOverlayId);
+        return;
+      }
+
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setActiveOverlayId(null);
+        return;
+      }
+
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        updateOverlayPosition(activeOverlayId, "x", -step);
+      } else if (event.key === "ArrowRight") {
+        event.preventDefault();
+        updateOverlayPosition(activeOverlayId, "x", step);
+      } else if (event.key === "ArrowUp") {
+        event.preventDefault();
+        updateOverlayPosition(activeOverlayId, "y", -step);
+      } else if (event.key === "ArrowDown") {
+        event.preventDefault();
+        updateOverlayPosition(activeOverlayId, "y", step);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [activeOverlayId]);
+
+  // Playback Logic: Handle loop of single clip OR sequence of timeline
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handlePlay = () => {
+      const currentClip = timeline[activeTimelineIndex];
+      if (
+        !currentClip ||
+        activeTimelineIndex !== 0 ||
+        !addHook ||
+        hookPreviewLoop ||
+        trimPreviewLoop
+      )
+        return;
+
+      const currentWindow = getTimelineClipWindow(currentClip);
+      const startTime = Number(currentWindow.start || 0);
+      const absoluteHookStart = startTime + resolvedHookStart;
+      const absoluteHookEnd = startTime + hookEnd;
+
+      if (absoluteHookEnd <= absoluteHookStart + 0.05) return;
+      if (
+        hookPreviewSequenceRef.current.active ||
+        hookPreviewSequenceRef.current.phase === "skip-duplicate"
+      )
+        return;
+
+      const startingFromClipStart = Math.abs(video.currentTime - startTime) <= 0.12;
+      const startingFromHookStart = Math.abs(video.currentTime - absoluteHookStart) <= 0.12;
+
+      if (!startingFromClipStart && !startingFromHookStart) return;
+
+      hookPreviewSequenceRef.current = {
+        active: true,
+        mode: "opening-sequence",
+        phase: "opening",
+        timelineIndex: activeTimelineIndex,
+        absoluteStart: absoluteHookStart,
+        absoluteEnd: absoluteHookEnd,
+      };
+
+      if (startingFromClipStart) {
+        video.currentTime = absoluteHookStart;
+      }
+    };
+
+    const handleTimeUpdate = () => {
+      setVideoTime(video.currentTime);
+
+      const currentClip = timeline[activeTimelineIndex];
+      if (!currentClip) return;
+
+      const currentWindow = getTimelineClipWindow(currentClip);
+      const startTime = Number(currentWindow.start || 0);
+      const endTime = Number(currentWindow.end || video.duration || 0);
+      const absoluteHookStart = startTime + resolvedHookStart;
+      const absoluteHookEnd = startTime + hookEnd;
+      const hookPreviewSequence = hookPreviewSequenceRef.current;
+
+      if (hookPreviewSequence.active && hookPreviewSequence.timelineIndex === activeTimelineIndex) {
+        if (video.currentTime >= hookPreviewSequence.absoluteEnd - 0.02) {
+          const nextSequenceState =
+            hookPreviewSequence.mode === "opening-sequence"
+              ? {
+                  active: false,
+                  mode: "opening-sequence",
+                  phase: "skip-duplicate",
+                  timelineIndex: activeTimelineIndex,
+                  absoluteStart: absoluteHookStart,
+                  absoluteEnd: absoluteHookEnd,
+                }
+              : { active: false };
+          hookPreviewSequenceRef.current = nextSequenceState;
+          video.currentTime = startTime;
+          if (previewPlaybackIntentRef.current) {
+            safePlayMediaElement(video);
+          }
+          return;
+        }
+      }
+
+      if (
+        hookPreviewSequence.phase === "skip-duplicate" &&
+        hookPreviewSequence.timelineIndex === activeTimelineIndex &&
+        video.currentTime >= absoluteHookStart - 0.02 &&
+        video.currentTime < absoluteHookEnd - 0.02
+      ) {
+        hookPreviewSequenceRef.current = { active: false };
+        video.currentTime = absoluteHookEnd;
+        if (previewPlaybackIntentRef.current) {
+          safePlayMediaElement(video);
+        }
+        return;
+      }
+
+      if (
+        activeTimelineIndex === 0 &&
+        addHook &&
+        hookPreviewLoop &&
+        absoluteHookEnd > absoluteHookStart + 0.05
+      ) {
+        if (video.currentTime < absoluteHookStart || video.currentTime >= absoluteHookEnd) {
+          video.currentTime = absoluteHookStart;
+          if (previewPlaybackIntentRef.current) {
+            safePlayMediaElement(video);
+          }
+          return;
+        }
+      }
+
+      if (trimPreviewLoop && endTime > startTime + 0.05) {
+        if (video.currentTime < startTime || video.currentTime >= endTime) {
+          video.currentTime = startTime;
+          if (previewPlaybackIntentRef.current) {
+            safePlayMediaElement(video);
+          }
+          return;
+        }
+      }
+
+      if (
+        silenceRemoval &&
+        silencePreview?.clipId === currentClip.id &&
+        Array.isArray(silencePreview.silenceSegments)
+      ) {
+        const activeSilence = silencePreview.silenceSegments.find(segment => {
+          const segmentStart = Number(segment?.start || 0);
+          const segmentEnd = Number(segment?.end || 0);
+          return video.currentTime >= segmentStart && video.currentTime < segmentEnd;
+        });
+
+        if (activeSilence) {
+          const jumpTarget = Math.min(
+            endTime,
+            Math.max(startTime, Number(activeSilence.end || video.currentTime || 0))
+          );
+          if (jumpTarget > video.currentTime + 0.05) {
+            video.currentTime = jumpTarget;
+            return;
+          }
+        }
+      }
+
+      // If we reach the end of this clip's designated playtime
+      if (video.currentTime >= endTime) {
+        if (trimPreviewLoop) {
+          video.currentTime = startTime;
+          if (previewPlaybackIntentRef.current) {
+            safePlayMediaElement(video);
+          }
+          return;
+        }
+
+        // If there is a NEXT clip in timeline, play it
+        if (activeTimelineIndex < timeline.length - 1) {
+          const nextIndex = activeTimelineIndex + 1;
+          setActiveTimelineIndex(nextIndex);
+        } else {
+          // Sequence finished: Loop back to START of the sequence (Clip 1 / Main Video)
+          setActiveTimelineIndex(0);
+        }
+      }
+    };
+
+    video.addEventListener("play", handlePlay);
+    video.addEventListener("timeupdate", handleTimeUpdate);
+    video.addEventListener("loadedmetadata", handleLoadedMetadata);
+    return () => {
+      video.removeEventListener("play", handlePlay);
+      video.removeEventListener("timeupdate", handleTimeUpdate);
+      video.removeEventListener("loadedmetadata", handleLoadedMetadata);
+    };
+  }, [
+    addHook,
+    activeTimelineIndex,
+    hookEnd,
+    hookPreviewLoop,
+    resolvedHookStart,
+    selectedClip,
+    silencePreview,
+    silenceRemoval,
+    timeline,
+    trimPreviewLoop,
+  ]);
+
+  // Effect: Switch video Source when activeTimelineIndex changes OR Jump when selecting a viral clip
+  useEffect(() => {
+    if (videoRef.current && timeline[activeTimelineIndex]) {
+      const clip = timeline[activeTimelineIndex];
+      const clipWindow = getTimelineClipWindow(clip);
+      const pendingSeek = pendingTimelineSeekRef.current;
+      const hasPendingSeek = pendingSeek?.index === activeTimelineIndex;
+      const targetStart = renderedOutputUrl
+        ? 0
+        : hasPendingSeek
+          ? Number(pendingSeek.sourceTime || clipWindow.start || 0)
+          : Number(clipWindow.start || 0);
+
+      // 1. Handle SRC changes
+      // Use property .src for comparison as it is always absolute, just like our Firebase URLs
+      const currentSrc = videoRef.current.src;
+      const afterSource = renderedOutputUrl || clip.url;
+      if (currentSrc !== afterSource && afterSource) {
+        setIsAfterPreviewReady(false);
+        applySafeMediaSource(videoRef.current, afterSource);
+        // Reset to start
+        videoRef.current.currentTime = targetStart;
+        if (previewPlaybackIntentRef.current) {
+          safePlayMediaElement(videoRef.current);
+        }
+      }
+      // 2. Handle JUMP within the same file when the active timeline window changes
+      else {
+        // Only jump if we are far from the start time (prevents fighting with playback)
+        if (Math.abs(videoRef.current.currentTime - targetStart) > 0.5 && !isDragging) {
+          videoRef.current.currentTime = targetStart;
+          // Ensure playing
+          if (previewPlaybackIntentRef.current && videoRef.current.paused) {
+            safePlayMediaElement(videoRef.current);
+          }
+        }
+      }
+
+      if (hasPendingSeek) {
+        pendingTimelineSeekRef.current = null;
+        videoRef.current.currentTime = targetStart;
+        setVideoTime(targetStart);
+        if (pendingSeek.play) safePlayMediaElement(videoRef.current);
+      }
+    }
+  }, [activeTimelineIndex, timeline, selectedClip, isDragging, renderedOutputUrl]);
+
+  useEffect(() => {
+    const afterVideo = videoRef.current;
+    const beforeVideo = beforeVideoRef.current;
+    if (!afterVideo || !beforeVideo || !currentTimelineClip) return undefined;
+
+    applySafeMediaSource(beforeVideo, currentTimelineClip.url);
+    beforeVideo.muted = true;
+    beforeVideo.defaultMuted = true;
+
+    const syncBeforePreview = () => {
+      if (afterVideo.readyState < 2) {
+        beforeVideo.pause();
+        return;
+      }
+      const targetTime = Number(afterVideo.currentTime || currentTimelineWindow.start || 0);
+      if (
+        Number.isFinite(targetTime) &&
+        Math.abs(Number(beforeVideo.currentTime || 0) - targetTime) > 0.12
+      ) {
+        try {
+          beforeVideo.currentTime = targetTime;
+        } catch (error) {
+          console.log("Before preview seek skipped", error);
+        }
+      }
+      beforeVideo.playbackRate = afterVideo.playbackRate || 1;
+      if (afterVideo.paused) {
+        beforeVideo.pause();
+      } else {
+        safePlayMediaElement(beforeVideo);
+      }
+    };
+    const pauseBeforePreview = () => beforeVideo.pause();
+
+    afterVideo.addEventListener("play", syncBeforePreview);
+    afterVideo.addEventListener("loadeddata", syncBeforePreview);
+    afterVideo.addEventListener("canplay", syncBeforePreview);
+    afterVideo.addEventListener("timeupdate", syncBeforePreview);
+    afterVideo.addEventListener("seeking", syncBeforePreview);
+    afterVideo.addEventListener("seeked", syncBeforePreview);
+    afterVideo.addEventListener("ratechange", syncBeforePreview);
+    afterVideo.addEventListener("pause", pauseBeforePreview);
+    syncBeforePreview();
+
+    return () => {
+      afterVideo.removeEventListener("play", syncBeforePreview);
+      afterVideo.removeEventListener("loadeddata", syncBeforePreview);
+      afterVideo.removeEventListener("canplay", syncBeforePreview);
+      afterVideo.removeEventListener("timeupdate", syncBeforePreview);
+      afterVideo.removeEventListener("seeking", syncBeforePreview);
+      afterVideo.removeEventListener("seeked", syncBeforePreview);
+      afterVideo.removeEventListener("ratechange", syncBeforePreview);
+      afterVideo.removeEventListener("pause", pauseBeforePreview);
+      beforeVideo.pause();
+    };
+  }, [activeTimelineIndex, currentTimelineClip, currentTimelineWindow.start]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (!extractedAudio?.url) {
+      if (video) {
+        const effectiveMuted = muteOriginalAudio || previewMuted;
+        video.muted = effectiveMuted;
+        video.volume = effectiveMuted ? 0 : clampAudioControl(previewVolume, 0, 1, 1);
+      }
+      audio.pause();
+      audio.removeAttribute("src");
+      audio.load();
+      return;
+    }
+
+    const syncBackgroundAudio = () => {
+      if (!video || !extractedAudio?.url) return;
+
+      const audioMode = normalizeAudioMode(extractedAudio.mode);
+      const duckingStrength = clampAudioControl(extractedAudio.duckingStrength, 0.15, 0.95, 0.45);
+      const previewGain = previewMuted ? 0 : clampAudioControl(previewVolume, 0, 1, 1);
+      audio.volume = clampAudioControl(extractedAudio.volume, 0, 1, 0.7) * previewGain;
+      audio.playbackRate = video.playbackRate || 1;
+      const muteOriginal =
+        previewMuted ||
+        muteOriginalAudio ||
+        (extractedAudio.enabled !== false && audioMode === "replace");
+      video.muted = muteOriginal;
+      video.volume = muteOriginal
+        ? 0
+        : extractedAudio.enabled === false
+          ? previewGain
+          : audioMode === "duck_original"
+            ? clampAudioControl(1 - duckingStrength, 0.05, 1, 0.55) * previewGain
+            : audioMode === "replace"
+              ? 0
+              : previewGain;
+
+      if (extractedAudio.enabled === false) {
+        audio.pause();
+        return;
+      }
+
+      const previewTimelineTime = getPreviewTimelineTime(video.currentTime || 0);
+      const targetTime = clampAudioControl(
+        previewTimelineTime + Number(extractedAudio.trimStart || 0),
+        0,
+        (extractedAudio.duration || previewTimelineTime + Number(extractedAudio.trimStart || 0)) +
+          1,
+        0
+      );
+
+      if (Number.isFinite(targetTime) && Math.abs((audio.currentTime || 0) - targetTime) > 0.35) {
+        try {
+          audio.currentTime = targetTime;
+        } catch (error) {
+          console.log("Audio sync seek skipped", error);
+        }
+      }
+
+      if (video.paused) {
+        audio.pause();
+      } else {
+        safePlayMediaElement(audio);
+      }
+    };
+
+    const pauseBackgroundAudio = () => audio.pause();
+
+    if (video) {
+      video.addEventListener("play", syncBackgroundAudio);
+      video.addEventListener("pause", pauseBackgroundAudio);
+      video.addEventListener("seeking", syncBackgroundAudio);
+      video.addEventListener("seeked", syncBackgroundAudio);
+      video.addEventListener("timeupdate", syncBackgroundAudio);
+      video.addEventListener("loadedmetadata", syncBackgroundAudio);
+      video.addEventListener("ratechange", syncBackgroundAudio);
+    }
+
+    syncBackgroundAudio();
+
+    return () => {
+      if (video) {
+        video.removeEventListener("play", syncBackgroundAudio);
+        video.removeEventListener("pause", pauseBackgroundAudio);
+        video.removeEventListener("seeking", syncBackgroundAudio);
+        video.removeEventListener("seeked", syncBackgroundAudio);
+        video.removeEventListener("timeupdate", syncBackgroundAudio);
+        video.removeEventListener("loadedmetadata", syncBackgroundAudio);
+        video.removeEventListener("ratechange", syncBackgroundAudio);
+        video.muted = false;
+        video.volume = 1;
+      }
+      audio.pause();
+    };
+  }, [
+    extractedAudio,
+    activeTimelineIndex,
+    timeline,
+    selectedClip,
+    muteOriginalAudio,
+    previewMuted,
+    previewVolume,
+  ]);
+
+  // ── B-Roll overlay audio ducking ──
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    // Find active B-roll overlays at current time
+    const activeBRoll = overlays.filter(o => {
+      if (o.startTime === undefined || o.duration === undefined) return false;
+      const audibleDuration = getOverlayAudibleDuration(o);
+      return (
+        previewTimelineTime >= Number(o.startTime) &&
+        previewTimelineTime < Number(o.startTime) + audibleDuration
+      );
+    });
+
+    const anyMuteMain = activeBRoll.some(o => o.muteMainAudio);
+    const anyDucking = activeBRoll.some(o => o.audioDucking && o.useOverlayAudio);
+    const duckingStrength = activeBRoll.reduce(
+      (max, o) => Math.max(max, o.audioDuckingStrength || 0.35),
+      0
+    );
+
+    const baseGain = previewMuted ? 0 : clampAudioControl(previewVolume, 0, 1, 1);
+    const extractedMode = normalizeAudioMode(extractedAudio?.mode);
+    const extractedDuckingStrength = clampAudioControl(
+      extractedAudio?.duckingStrength,
+      0.15,
+      0.95,
+      0.45
+    );
+    const baseMuted =
+      previewMuted ||
+      muteOriginalAudio ||
+      (extractedAudio?.enabled !== false && extractedAudio?.url && extractedMode === "replace");
+    const restoredBaseGain =
+      extractedAudio?.enabled !== false && extractedAudio?.url && extractedMode === "duck_original"
+        ? clampAudioControl(1 - extractedDuckingStrength, 0.05, 1, 0.55) * baseGain
+        : baseGain;
+
+    if (anyMuteMain) {
+      video.muted = true;
+      video.volume = 0;
+    } else if (anyDucking) {
+      video.muted = baseMuted;
+      video.volume = clampAudioControl(1 - duckingStrength, 0.05, 1, 0.55) * baseGain;
+    } else {
+      video.muted = !!baseMuted;
+      video.volume = baseMuted ? 0 : restoredBaseGain;
+    }
+  }, [
+    previewTimelineTime,
+    overlays,
+    previewMuted,
+    previewVolume,
+    muteOriginalAudio,
+    extractedAudio,
+  ]);
+
+  useEffect(() => {
+    const sourceVideo = videoRef.current;
+    if (!sourceVideo) return undefined;
+
+    const syncOverlayMedia = () => {
+      const outputTime = getPreviewTimelineTime(sourceVideo.currentTime || 0);
+      overlayMediaRefsRef.current.forEach((overlayVideo, overlayId) => {
+        if (String(soloPreviewOverlayId) === String(overlayId)) return;
+        const overlay = overlays.find(item => String(item.id) === String(overlayId));
+        if (!overlay || overlay.type !== "video") {
+          overlayVideo.pause();
+          return;
+        }
+
+        const start = Number(overlay.startTime ?? overlay.start_time ?? 0);
+        const configuredDuration = Math.max(0, Number(overlay.duration || 0));
+        const visibleDuration = getOverlayVisibleDuration(overlay);
+        const active =
+          visibleDuration > 0 && outputTime >= start && outputTime < start + visibleDuration;
+        if (!active) {
+          overlayVideo.pause();
+          return;
+        }
+
+        const mediaDuration = Number(overlayVideo.duration || overlay.sourceDuration || 0);
+        const elapsed = Math.max(0, outputTime - start);
+        const sourceStart = clampNumber(
+          overlay.sourceStartTime,
+          0,
+          Math.max(0, mediaDuration - 0.05),
+          0
+        );
+        const availableSourceDuration = Math.max(0.05, mediaDuration - sourceStart);
+        const sourceEndBehavior = normalizeBRollEndBehavior(overlay.sourceEndBehavior);
+        const hasReachedSourceEnd = mediaDuration > 0.1 && elapsed >= availableSourceDuration;
+        const targetTime =
+          mediaDuration <= 0.1
+            ? elapsed
+            : sourceEndBehavior === "loop"
+              ? sourceStart + (elapsed % availableSourceDuration)
+              : sourceStart + Math.min(elapsed, Math.max(0, availableSourceDuration - 0.04));
+        overlayVideo.playbackRate = sourceVideo.playbackRate || 1;
+        overlayVideo.muted =
+          !overlay.useOverlayAudio ||
+          previewMuted ||
+          (sourceEndBehavior === "hold" && hasReachedSourceEnd);
+        overlayVideo.defaultMuted = overlayVideo.muted;
+        overlayVideo.volume = clampAudioControl(overlay.overlayAudioVolume, 0, 1, 0.7);
+
+        if (
+          Number.isFinite(targetTime) &&
+          Math.abs(Number(overlayVideo.currentTime || 0) - targetTime) > 0.18
+        ) {
+          try {
+            overlayVideo.currentTime = targetTime;
+          } catch (error) {
+            console.log("B-roll preview seek skipped", error);
+          }
+        }
+
+        if (sourceVideo.paused || (sourceEndBehavior === "hold" && hasReachedSourceEnd)) {
+          overlayVideo.pause();
+        } else {
+          safePlayMediaElement(overlayVideo);
+        }
+      });
+    };
+
+    sourceVideo.addEventListener("play", syncOverlayMedia);
+    sourceVideo.addEventListener("pause", syncOverlayMedia);
+    sourceVideo.addEventListener("seeking", syncOverlayMedia);
+    sourceVideo.addEventListener("seeked", syncOverlayMedia);
+    sourceVideo.addEventListener("timeupdate", syncOverlayMedia);
+    sourceVideo.addEventListener("ratechange", syncOverlayMedia);
+    syncOverlayMedia();
+
+    return () => {
+      sourceVideo.removeEventListener("play", syncOverlayMedia);
+      sourceVideo.removeEventListener("pause", syncOverlayMedia);
+      sourceVideo.removeEventListener("seeking", syncOverlayMedia);
+      sourceVideo.removeEventListener("seeked", syncOverlayMedia);
+      sourceVideo.removeEventListener("timeupdate", syncOverlayMedia);
+      sourceVideo.removeEventListener("ratechange", syncOverlayMedia);
+    };
+  }, [activeTimelineIndex, overlays, previewMuted, soloPreviewOverlayId, timeline]);
+
+  useEffect(
+    () => () => {
+      overlayMediaRefsRef.current.forEach(media => media.pause());
+    },
+    []
+  );
+
+  useEffect(() => {
+    applySafeMediaSource(
+      watermarkCleanupPreviewImageRef.current,
+      shouldShowWatermarkCleanupOnVideo ? watermarkCleanupPreview?.cleanedImageUrl : null
+    );
+    applySafeMediaSource(
+      smartCropForegroundVideoRef.current,
+      smartCrop ? currentTimelineClip?.url : null
+    );
+    applySafeMediaSource(hookBackdropVideoRef.current, currentTimelineClip?.url);
+    applySafeMediaSource(hookFreezeVideoRef.current, currentTimelineClip?.url);
+    beatEchoVideoRefsRef.current.forEach(element =>
+      applySafeMediaSource(element, beatEchoPreviewIsLive ? currentTimelineClip?.url : null)
+    );
+    applySafeMediaSource(audioRef.current, extractedAudio?.url);
+    applySafeMediaSource(
+      musicPreviewRef.current,
+      !musicSearchMode ? effectiveMusicPreviewUrl : null
+    );
+  }, [
+    currentTimelineClip,
+    effectiveMusicPreviewUrl,
+    extractedAudio,
+    musicSearchMode,
+    shouldShowWatermarkCleanupOnVideo,
+    smartCrop,
+    beatEchoPreviewIsLive,
+    watermarkCleanupPreview,
+  ]);
+
+  useEffect(() => {
+    const sourceVideo = videoRef.current;
+    const echoVideos = beatEchoVideoRefsRef.current.filter(Boolean);
+    if (!sourceVideo || !beatEchoPreviewIsLive || !echoVideos.length) {
+      echoVideos.forEach(video => video.pause());
+      return undefined;
+    }
+
+    const delayStep =
+      creativeIntensity === "clean" ? 0.07 : creativeIntensity === "unreal" ? 0.1 : 0.085;
+    const effectStart =
+      Number(currentTimelineWindow.start || 0) + Number(activeLiveCreativeEffect?.start_time || 0);
+
+    const syncBeatEchoPreview = () => {
+      echoVideos.forEach((echoVideo, index) => {
+        const targetTime = Math.max(
+          effectStart,
+          Number(sourceVideo.currentTime || 0) - delayStep * (index + 1)
+        );
+        echoVideo.playbackRate = sourceVideo.playbackRate || 1;
+        echoVideo.muted = true;
+        echoVideo.defaultMuted = true;
+
+        if (Math.abs(Number(echoVideo.currentTime || 0) - targetTime) > 0.045) {
+          try {
+            echoVideo.currentTime = targetTime;
+          } catch (error) {
+            console.log("Beat Echo preview seek skipped", error);
+          }
+        }
+
+        if (sourceVideo.paused) {
+          echoVideo.pause();
+        } else {
+          safePlayMediaElement(echoVideo);
+        }
+      });
+    };
+
+    sourceVideo.addEventListener("play", syncBeatEchoPreview);
+    sourceVideo.addEventListener("pause", syncBeatEchoPreview);
+    sourceVideo.addEventListener("seeking", syncBeatEchoPreview);
+    sourceVideo.addEventListener("seeked", syncBeatEchoPreview);
+    sourceVideo.addEventListener("timeupdate", syncBeatEchoPreview);
+    sourceVideo.addEventListener("ratechange", syncBeatEchoPreview);
+    syncBeatEchoPreview();
+
+    return () => {
+      sourceVideo.removeEventListener("play", syncBeatEchoPreview);
+      sourceVideo.removeEventListener("pause", syncBeatEchoPreview);
+      sourceVideo.removeEventListener("seeking", syncBeatEchoPreview);
+      sourceVideo.removeEventListener("seeked", syncBeatEchoPreview);
+      sourceVideo.removeEventListener("timeupdate", syncBeatEchoPreview);
+      sourceVideo.removeEventListener("ratechange", syncBeatEchoPreview);
+      echoVideos.forEach(video => video.pause());
+    };
+  }, [
+    activeLiveCreativeEffect?.start_time,
+    beatEchoPreviewIsLive,
+    creativeIntensity,
+    currentTimelineClip,
+    currentTimelineWindow.start,
+  ]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    const backdrop = hookBackdropVideoRef.current;
+    const freezeVideo = hookFreezeVideoRef.current;
+    if (!video) return;
+
+    const absoluteHookStart = Number(currentTimelineWindow.start || 0) + resolvedHookStart;
+    const absoluteHookEnd = Number(currentTimelineWindow.start || 0) + hookEnd;
+
+    const syncHookMedia = () => {
+      const isHookVisibleNow =
+        addHook &&
+        activeTimelineIndex === 0 &&
+        normalizedHookText &&
+        video.currentTime >= absoluteHookStart &&
+        video.currentTime <= absoluteHookEnd + hookLeadOut;
+
+      if (backdrop) {
+        backdrop.playbackRate = video.playbackRate || 1;
+        if (Math.abs((backdrop.currentTime || 0) - (video.currentTime || 0)) > 0.08) {
+          try {
+            backdrop.currentTime = video.currentTime || 0;
+          } catch (error) {
+            console.log("Hook backdrop seek skipped", error);
+          }
+        }
+
+        if (video.paused || !isHookVisibleNow || !hookBlurBackground) {
+          backdrop.pause();
+        } else {
+          safePlayMediaElement(backdrop);
+        }
+      }
+
+      if (freezeVideo) {
+        const freezeTarget = Number(currentTimelineWindow.start || 0) + resolvedHookStart;
+        if (Math.abs((freezeVideo.currentTime || 0) - freezeTarget) > 0.08) {
+          try {
+            freezeVideo.currentTime = freezeTarget;
+          } catch (error) {
+            console.log("Hook freeze seek skipped", error);
+          }
+        }
+        freezeVideo.pause();
+      }
+    };
+
+    video.addEventListener("play", syncHookMedia);
+    video.addEventListener("pause", syncHookMedia);
+    video.addEventListener("seeking", syncHookMedia);
+    video.addEventListener("seeked", syncHookMedia);
+    video.addEventListener("timeupdate", syncHookMedia);
+    video.addEventListener("loadedmetadata", syncHookMedia);
+    video.addEventListener("ratechange", syncHookMedia);
+
+    syncHookMedia();
+
+    return () => {
+      video.removeEventListener("play", syncHookMedia);
+      video.removeEventListener("pause", syncHookMedia);
+      video.removeEventListener("seeking", syncHookMedia);
+      video.removeEventListener("seeked", syncHookMedia);
+      video.removeEventListener("timeupdate", syncHookMedia);
+      video.removeEventListener("loadedmetadata", syncHookMedia);
+      video.removeEventListener("ratechange", syncHookMedia);
+      backdrop?.pause();
+      freezeVideo?.pause();
+    };
+  }, [
+    addHook,
+    activeTimelineIndex,
+    hookBlurBackground,
+    hookEnd,
+    hookFreezeFrame,
+    hookLeadOut,
+    normalizedHookText,
+    resolvedHookStart,
+    currentTimelineWindow.start,
+    timeline,
+  ]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    const foreground = smartCropForegroundVideoRef.current;
+    if (!video || !foreground || !smartCrop) return undefined;
+
+    const syncSmartCropPreview = () => {
+      foreground.playbackRate = video.playbackRate || 1;
+      if (Math.abs((foreground.currentTime || 0) - (video.currentTime || 0)) > 0.08) {
+        try {
+          foreground.currentTime = video.currentTime || 0;
+        } catch (error) {
+          console.log("Smart crop preview seek skipped", error);
+        }
+      }
+
+      if (video.paused) {
+        foreground.pause();
+      } else {
+        safePlayMediaElement(foreground);
+      }
+    };
+
+    video.addEventListener("play", syncSmartCropPreview);
+    video.addEventListener("pause", syncSmartCropPreview);
+    video.addEventListener("seeking", syncSmartCropPreview);
+    video.addEventListener("seeked", syncSmartCropPreview);
+    video.addEventListener("timeupdate", syncSmartCropPreview);
+    video.addEventListener("loadedmetadata", syncSmartCropPreview);
+    video.addEventListener("ratechange", syncSmartCropPreview);
+
+    syncSmartCropPreview();
+
+    return () => {
+      video.removeEventListener("play", syncSmartCropPreview);
+      video.removeEventListener("pause", syncSmartCropPreview);
+      video.removeEventListener("seeking", syncSmartCropPreview);
+      video.removeEventListener("seeked", syncSmartCropPreview);
+      video.removeEventListener("timeupdate", syncSmartCropPreview);
+      video.removeEventListener("loadedmetadata", syncSmartCropPreview);
+      video.removeEventListener("ratechange", syncSmartCropPreview);
+      foreground.pause();
+    };
+  }, [smartCrop, activeTimelineIndex, timeline, currentTimelineClip]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return undefined;
+
+    const syncPlaybackState = () => setIsPreviewPaused(video.paused);
+    const returnToEditedMoment = () => {
+      syncPlaybackState();
+      if (comparisonMode === "split" || comparisonMode === "after") {
+        focusComparisonPreview(studioInspectorTab, false);
+        setStudioActionMessage(
+          "Comparison ready at the edited moment. Press play to review it again."
+        );
+      }
+    };
+
+    video.addEventListener("play", syncPlaybackState);
+    video.addEventListener("pause", syncPlaybackState);
+    video.addEventListener("ended", returnToEditedMoment);
+    syncPlaybackState();
+
+    return () => {
+      video.removeEventListener("play", syncPlaybackState);
+      video.removeEventListener("pause", syncPlaybackState);
+      video.removeEventListener("ended", returnToEditedMoment);
+    };
+  }, [
+    activeTimelineIndex,
+    timeline,
+    comparisonMode,
+    studioInspectorTab,
+    activeOverlayId,
+    addHook,
+    resolvedHookStart,
+    hookDuration,
+  ]);
+
+  useEffect(() => {
+    if (!isPreviewFullscreen) return undefined;
+    const handleExpandedPreviewKey = event => {
+      if (event.key !== "Escape") return;
+      setIsPreviewFullscreen(false);
+      setStudioActionMessage("Expanded preview closed. All studio controls are available again.");
+    };
+    window.addEventListener("keydown", handleExpandedPreviewKey);
+    return () => window.removeEventListener("keydown", handleExpandedPreviewKey);
+  }, [isPreviewFullscreen]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    const music = musicPreviewRef.current;
+    if (!music && !musicSearchMode) return;
+
+    if (!addMusic || !effectiveMusicPreviewUrl) {
+      stopMusicPreviewBufferPlayback();
+      music?.pause();
+      return;
+    }
+
+    const syncMusicPreview = () => {
+      if (!video || !effectiveMusicPreviewUrl) return;
+
+      if (backgroundSoundPreviewSuppressedRef.current) {
+        stopMusicPreviewBufferPlayback();
+        music?.pause();
+        return;
+      }
+
+      if (musicSearchMode) {
+        syncMusicPreviewGain();
+
+        const previewTimelineTime = clampAudioControl(
+          getPreviewTimelineTime(video.currentTime || 0),
+          0,
+          36000,
+          0
+        );
+        const bufferDuration = Number(musicPreviewBufferRef.current?.duration || 0);
+        const targetTime =
+          Number.isFinite(bufferDuration) && bufferDuration > 0.25
+            ? previewTimelineTime % bufferDuration
+            : previewTimelineTime;
+
+        if (video.paused || !musicPreviewBufferRef.current) {
+          stopMusicPreviewBufferPlayback();
+          return;
+        }
+
+        const sourceState = musicPreviewSourceStateRef.current;
+        const needsResync =
+          !musicPreviewSourceRef.current ||
+          Math.abs(Number(sourceState.offset || 0) - targetTime) > 0.35 ||
+          Math.abs(Number(sourceState.playbackRate || 1) - Number(video.playbackRate || 1)) > 0.01;
+
+        if (needsResync) {
+          startMusicPreviewBufferPlayback(targetTime, video.playbackRate || 1).catch(error => {
+            console.log("Music preview buffer play prevented", error);
+            setMusicPreviewNeedsGesture(true);
+            setMusicPreviewStatus("failed");
+            setMusicPreviewStatusMessage(
+              error?.message || "Preview audio is ready but playback was blocked by the browser."
+            );
+          });
+        }
+        return;
+      }
+
+      const previewGain = previewMuted ? 0 : clampAudioControl(previewVolume, 0, 1, 1);
+      const previewTimelineTime = clampAudioControl(
+        getPreviewTimelineTime(video.currentTime || 0),
+        0,
+        36000,
+        0
+      );
+      const fadeGain = getAudioFadeGain(
+        previewTimelineTime,
+        outputTimelineDuration,
+        musicTrack?.fadeIn,
+        musicTrack?.fadeOut
+      );
+      music.muted = false;
+      music.defaultMuted = false;
+      music.loop = musicTrack?.loop !== false;
+      music.volume =
+        clampAudioControl(musicTrack?.volume ?? musicVolume, 0.05, 0.6, 0.15) *
+        previewGain *
+        fadeGain;
+      music.playbackRate = video.playbackRate || 1;
+
+      const musicDuration = Number(music.duration || 0);
+      const targetTime =
+        Number.isFinite(musicDuration) && musicDuration > 0.25
+          ? musicTrack?.loop !== false
+            ? previewTimelineTime % musicDuration
+            : Math.min(previewTimelineTime, Math.max(0, musicDuration - 0.05))
+          : previewTimelineTime;
+      if (Number.isFinite(targetTime) && Math.abs((music.currentTime || 0) - targetTime) > 0.35) {
+        try {
+          music.currentTime = targetTime;
+        } catch (error) {
+          console.log("Music preview seek skipped", error);
+        }
+      }
+
+      if (video.paused) {
+        music.pause();
+      } else {
+        try {
+          const playResult = music.play();
+          if (playResult && typeof playResult.catch === "function") {
+            playResult.catch(error => {
+              console.log("Music preview play prevented", error);
+              setMusicPreviewNeedsGesture(true);
+              setMusicPreviewStatus("failed");
+              setMusicPreviewStatusMessage(
+                error?.message || "Preview audio is ready but playback was blocked by the browser."
+              );
+            });
+          }
+        } catch (error) {
+          console.log("Music preview play prevented", error);
+          setMusicPreviewNeedsGesture(true);
+          setMusicPreviewStatus("failed");
+          setMusicPreviewStatusMessage(
+            error?.message || "Preview audio is ready but playback was blocked by the browser."
+          );
+        }
+      }
+    };
+
+    const pauseMusicPreview = () => {
+      stopMusicPreviewBufferPlayback();
+      music?.pause();
+    };
+
+    if (video) {
+      video.addEventListener("play", syncMusicPreview);
+      video.addEventListener("pause", pauseMusicPreview);
+      video.addEventListener("seeking", syncMusicPreview);
+      video.addEventListener("seeked", syncMusicPreview);
+      video.addEventListener("timeupdate", syncMusicPreview);
+      video.addEventListener("loadedmetadata", syncMusicPreview);
+      video.addEventListener("ratechange", syncMusicPreview);
+    }
+
+    syncMusicPreview();
+
+    return () => {
+      if (video) {
+        video.removeEventListener("play", syncMusicPreview);
+        video.removeEventListener("pause", pauseMusicPreview);
+        video.removeEventListener("seeking", syncMusicPreview);
+        video.removeEventListener("seeked", syncMusicPreview);
+        video.removeEventListener("timeupdate", syncMusicPreview);
+        video.removeEventListener("loadedmetadata", syncMusicPreview);
+        video.removeEventListener("ratechange", syncMusicPreview);
+      }
+      stopMusicPreviewBufferPlayback();
+      music?.pause();
+    };
+  }, [
+    addMusic,
+    effectiveMusicPreviewUrl,
+    musicSearchMode,
+    musicVolume,
+    musicTrack?.fadeIn,
+    musicTrack?.fadeOut,
+    musicTrack?.loop,
+    outputTimelineDuration,
+    previewMuted,
+    previewVolume,
+    activeTimelineIndex,
+    timeline,
+    selectedClip,
+  ]);
+
+  // Keep the SFX lane locked to the edited output timeline during After/Split playback.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || renderedOutputUrl || comparisonMode === "before") return undefined;
+
+    let cueFrame;
+    let buffering = video.seeking || video.readyState < 3;
+    const pauseTimelineEffects = () => {
+      cancelAnimationFrame(cueFrame);
+      soundEffectAudioRefsRef.current.forEach(audio => audio?.pause());
+      stopSynthesizedSoundEffects();
+      triggeredSoundEffectsRef.current.clear();
+    };
+
+    const syncSoundEffects = () => {
+      if (buffering || video.seeking) return;
+      const outputTime = clampNumber(
+        getPreviewTimelineTime(video.currentTime || 0),
+        0,
+        outputTimelineDuration,
+        0
+      );
+      const previewGain = previewMuted ? 0 : clampAudioControl(previewVolume, 0, 1, 1);
+
+      allSoundEffects.forEach(effect => {
+        const start = Number(effect.startTime || 0);
+        const duration = getSoundEffectDuration(effect);
+        const elapsed = outputTime - start;
+        const isActive = effect.enabled !== false && elapsed >= 0 && elapsed < duration;
+        const audio = soundEffectAudioRefsRef.current.get(effect.id);
+
+        if (!isActive || video.paused) {
+          audio?.pause();
+          if (!isActive) triggeredSoundEffectsRef.current.delete(effect.id);
+          return;
+        }
+
+        const fadeGain = getAudioFadeGain(elapsed, duration, effect.fadeIn, effect.fadeOut);
+        if (effect.builtIn) {
+          if (!triggeredSoundEffectsRef.current.has(effect.id)) {
+            triggeredSoundEffectsRef.current.add(effect.id);
+            void playBuiltInSoundEffect(effect, elapsed).catch(error => {
+              console.log("Sound effect playback prevented", error);
+            });
+          }
+          return;
+        }
+
+        if (!audio || !effect.url) return;
+        const targetTime = Number(effect.trimStart || 0) + elapsed;
+        audio.volume = clampAudioControl(effect.volume, 0, 1, 0.8) * previewGain * fadeGain;
+        audio.playbackRate = video.playbackRate || 1;
+        audio.preservesPitch = false;
+        if (Math.abs(Number(audio.currentTime || 0) - targetTime) > 0.18) {
+          try {
+            audio.currentTime = targetTime;
+          } catch (error) {
+            console.log("Sound effect seek skipped", error);
+          }
+        }
+        safePlayMediaElement(audio);
+      });
+    };
+
+    const tickCues = () => {
+      syncSoundEffects();
+      if (!video.paused && !buffering && !video.seeking) cueFrame = requestAnimationFrame(tickCues);
+    };
+    const startCues = () => {
+      cancelAnimationFrame(cueFrame);
+      tickCues();
+    };
+    const suspendCues = () => {
+      buffering = true;
+      pauseTimelineEffects();
+    };
+    const resumeCues = () => {
+      buffering = video.seeking || video.readyState < 3;
+      if (!buffering) startCues();
+    };
+    const retimeCues = () => {
+      pauseTimelineEffects();
+      startCues();
+    };
+    video.addEventListener("play", resumeCues);
+    video.addEventListener("playing", resumeCues);
+    video.addEventListener("waiting", suspendCues);
+    video.addEventListener("timeupdate", syncSoundEffects);
+    video.addEventListener("seeking", suspendCues);
+    video.addEventListener("seeked", resumeCues);
+    video.addEventListener("ratechange", retimeCues);
+    video.addEventListener("pause", pauseTimelineEffects);
+    video.addEventListener("ended", pauseTimelineEffects);
+    startCues();
+
+    return () => {
+      video.removeEventListener("play", resumeCues);
+      video.removeEventListener("playing", resumeCues);
+      video.removeEventListener("waiting", suspendCues);
+      video.removeEventListener("timeupdate", syncSoundEffects);
+      video.removeEventListener("seeking", suspendCues);
+      video.removeEventListener("seeked", resumeCues);
+      video.removeEventListener("ratechange", retimeCues);
+      video.removeEventListener("pause", pauseTimelineEffects);
+      video.removeEventListener("ended", pauseTimelineEffects);
+      pauseTimelineEffects();
+    };
+  }, [
+    allSoundEffects,
+    comparisonMode,
+    previewSpeed,
+    outputTimelineDuration,
+    previewMuted,
+    previewVolume,
+    renderedOutputUrl,
+    activeTimelineIndex,
+    timeline,
+  ]);
+
+  // ── Speech-aware auto-ducking for music preview ──
+  useEffect(() => {
+    const music = musicPreviewRef.current;
+    if (!music || !addMusic || !effectiveMusicPreviewUrl) return;
+    if (!musicTrack?.ducking || musicTrack.duckingMode !== "speech") {
+      // Reset volume to track setting when not in speech mode
+      const baseGain = previewMuted ? 0 : clampAudioControl(previewVolume, 0, 1, 1);
+      const previewTimelineTime = clampAudioControl(
+        getPreviewTimelineTime(videoRef.current?.currentTime || 0),
+        0,
+        36000,
+        0
+      );
+      const fadeGain = getAudioFadeGain(
+        previewTimelineTime,
+        outputTimelineDuration,
+        musicTrack?.fadeIn,
+        musicTrack?.fadeOut
+      );
+      music.volume =
+        clampAudioControl(musicTrack?.volume ?? musicVolume, 0.05, 0.6, 0.15) * baseGain * fadeGain;
+      return;
+    }
+
+    const analyser = speechAnalyserRef.current?.analyser || startSpeechDetection();
+    if (!analyser) return;
+
+    let lastDuckedVolume = music.volume;
+    const duckingStrength = musicTrack.duckingStrength ?? 0.4;
+    const baseVolume = clampAudioControl(musicTrack.volume ?? musicVolume, 0.05, 0.6, 0.15);
+    const baseGain = previewMuted ? 0 : clampAudioControl(previewVolume, 0, 1, 1);
+    const maxMusicVol = baseVolume * baseGain;
+
+    const duckLoop = () => {
+      const speechEnergy = getSpeechEnergyLevel();
+      const previewTimelineTime = clampAudioControl(
+        getPreviewTimelineTime(videoRef.current?.currentTime || 0),
+        0,
+        36000,
+        0
+      );
+      const fadeGain = getAudioFadeGain(
+        previewTimelineTime,
+        outputTimelineDuration,
+        musicTrack?.fadeIn,
+        musicTrack?.fadeOut
+      );
+      // Smooth transition: target volume inversely proportional to speech energy
+      const targetVolume = maxMusicVol * fadeGain * (1 - speechEnergy * duckingStrength);
+      // Smooth ramp (0.08 = ~60ms smoothing)
+      const smoothed = lastDuckedVolume + (targetVolume - lastDuckedVolume) * 0.08;
+      music.volume = clampAudioControl(smoothed, 0, 0.6, 0.02);
+      lastDuckedVolume = music.volume;
+      speechDetectionRafRef.current = requestAnimationFrame(duckLoop);
+    };
+
+    duckLoop();
+
+    return () => {
+      if (speechDetectionRafRef.current) {
+        cancelAnimationFrame(speechDetectionRafRef.current);
+      }
+    };
+  }, [
+    addMusic,
+    effectiveMusicPreviewUrl,
+    musicTrack?.ducking,
+    musicTrack?.duckingMode,
+    musicTrack?.volume,
+    musicTrack?.duckingStrength,
+    musicTrack?.fadeIn,
+    musicTrack?.fadeOut,
+    outputTimelineDuration,
+    musicVolume,
+    previewMuted,
+    previewVolume,
+  ]);
+
+  const addTextOverlay = () => {
+    // START TIME: Use current video playback time
+    // If paused, it's exact. If playing, it's roughly "now".
+    const currentVideoTime = videoRef.current ? videoRef.current.currentTime : 0;
+
+    // Adjust relative to the CLIP if we are in a multi-clip timeline?
+    // For now, let's assume global timeline time or clip-relative.
+    // The backend expects relative to the *output video* start (0.0).
+    // If we are editing a single clip, 0.0 is the start of that clip.
+    // If the user scrubbed to 5.0s, we want the text to appear at 5.0s.
+
+    // However, if we trim the video (start=10, end=20), the backend trims FIRST.
+    // So 0.0 in the output is 10.0 in the source.
+    // We need to calculate the relative start time.
+    const relativeStartTime = getPreviewTimelineTime(currentVideoTime);
+
+    const newOverlay = {
+      id: Date.now(),
+      type: "text",
+      text: "Double Click to Edit ✏️",
+      x: 50,
+      y: 50,
+      color: "#ffffff",
+      bg: "rgba(0,0,0,0.5)",
+      scale: 1,
+      isRainbow: true,
+      startTime: relativeStartTime,
+      duration: 3.0, // Default 3 seconds duration
+      clipId: timeline[activeTimelineIndex]?.id || "main",
+      // B-roll text overlay fields
+      bRollMode: undefined,
+      animation: { enter: "fade", exit: "fade", enterDuration: 0.3, exitDuration: 0.3 },
+      opacity: 1.0,
+      coverMainVideo: false,
+      muteMainAudio: false,
+      useOverlayAudio: false,
+      mixAudio: false,
+      overlayAudioVolume: 0.7,
+      audioDucking: false,
+      audioDuckingStrength: 0.35,
+    };
+    setOverlays([...overlays, newOverlay]);
+    setActiveOverlayId(newOverlay.id);
+  };
+
+  const addVideoLayer = event => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Basic check for video file
+    if (!file.type.startsWith("video/")) {
+      toast.error("Please select a valid video file.");
+      return;
+    }
+
+    const url = URL.createObjectURL(file);
+
+    // Ask user type: Overlay or B-Roll or Append?
+    const type = window.confirm(
+      "Click OK for B-ROLL OVERLAY (fullscreen cutaway, timed).\nClick Cancel for more options."
+    )
+      ? "broll"
+      : window.confirm(
+            "Click OK for PIP OVERLAY (reaction, picture-in-picture).\nClick Cancel to APPEND to timeline."
+          )
+        ? "overlay"
+        : "append";
+
+    if (type === "broll") {
+      addOverlayAsset({
+        type: "video",
+        src: url,
+        file,
+        isLocal: true,
+        width: 100,
+        height: 100,
+        bRollMode: "fullscreen",
+      });
+    } else if (type === "overlay") {
+      addOverlayAsset({
+        type: "video",
+        src: url,
+        file,
+        isLocal: true,
+        width: 40,
+        height: 30,
+      });
+    } else {
+      // Add to Timeline (Sequencing)
+      // Create temp video to get duration
+      const tempId = Date.now();
+      const tempVideo = document.createElement("video");
+      if (!applySafeMediaSource(tempVideo, url)) {
+        console.error("This clip source uses an unsupported preview URL.");
+        return;
+      }
+      tempVideo.preload = "metadata";
+
+      tempVideo.onloadedmetadata = () => {
+        const duration = tempVideo.duration;
+        setTimeline(prev =>
+          prev.map(item =>
+            item.id === tempId ? { ...item, duration: duration, endRequest: duration } : item
+          )
+        );
+      };
+
+      // Add immediately with 0 duration so user sees it right away
+      setTimeline(prev => [
+        ...prev,
+        {
+          id: tempId,
+          url: url,
+          duration: 0,
+          file: file,
+          name: file.name,
+          isLocal: true,
+        },
+      ]);
+    }
+
+    // Reset input so same file can be selected again if needed
+    event.target.value = null;
+  };
+
+  const addImageLayer = event => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select a valid image file.");
+      return;
+    }
+
+    const imageOverlay = addOverlayAsset({
+      type: "image",
+      src: URL.createObjectURL(file),
+      file,
+      isLocal: true,
+      width: 42,
+      height: 32,
+      bRollMode: "pip",
+    });
+
+    setStudioInspectorTab("broll");
+    setComparisonMode("after");
+    if (imageOverlay) jumpToOutputTimelineTime(Number(imageOverlay.startTime || 0));
+    setStudioActionMessage(
+      "Image placed at the playhead as a timed picture-in-picture layer. Choose a layout, motion and crop below."
+    );
+
+    event.target.value = null;
+  };
+
+  const addExistingImageOverlay = imageAsset => {
+    const src = normalizeAssetUrl(imageAsset);
+    if (!src) {
+      toast.error("This image could not be added as an overlay.");
+      return;
+    }
+
+    const imageOverlay = addOverlayAsset({
+      type: "image",
+      src,
+      isLocal: false,
+      width: 42,
+      height: 32,
+      bRollMode: "pip",
+    });
+    setStudioInspectorTab("broll");
+    setComparisonMode("after");
+    if (imageOverlay) jumpToOutputTimelineTime(Number(imageOverlay.startTime || 0));
+  };
+
+  const buildVideoBRollOverlay = (file, src, startTime, duration, sourceDuration = 0) => ({
+    id: createSecureId("overlay"),
+    type: "video",
+    src,
+    file,
+    name: file?.name || "B-roll clip",
+    isLocal: true,
+    x: 50,
+    y: 50,
+    width: 100,
+    height: 100,
+    aspectRatioLocked: true,
+    aspectRatio: 1,
+    clipId: timeline[activeTimelineIndex]?.id || "main",
+    startTime,
+    duration,
+    sourceStartTime: 0,
+    sourceDuration,
+    sourceEndBehavior: "return",
+    bRollMode: "fullscreen",
+    animation: { enter: "fade", exit: "fade", enterDuration: 0.3, exitDuration: 0.3 },
+    opacity: 1,
+    coverMainVideo: true,
+    muteMainAudio: false,
+    useOverlayAudio: false,
+    mixAudio: false,
+    overlayAudioVolume: 0.7,
+    audioDucking: false,
+    audioDuckingStrength: 0.35,
+  });
+
+  // ── B-Roll video upload (fullscreen cutaways, auto-spread when multiple) ──
+  const readLocalVideoDuration = src =>
+    new Promise(resolve => {
+      const probe = document.createElement("video");
+      let settled = false;
+      let timeoutId = null;
+      const finish = duration => {
+        if (settled) return;
+        settled = true;
+        if (timeoutId) window.clearTimeout(timeoutId);
+        probe.removeAttribute("src");
+        resolve(Number.isFinite(Number(duration)) ? Number(duration) : 0);
+      };
+      probe.preload = "metadata";
+      probe.onloadedmetadata = () => finish(probe.duration);
+      probe.onerror = () => finish(0);
+      if (!applySafeMediaSource(probe, src)) {
+        finish(0);
+        return;
+      }
+      timeoutId = window.setTimeout(() => finish(0), 4000);
+    });
+
+  const handleBRollVideoUpload = async event => {
+    const input = event.target;
+    const files = Array.from(event.target.files || []);
+    if (!files.length) return;
+
+    const videoFiles = files.filter(file => file.type.startsWith("video/"));
+    if (videoFiles.length !== files.length) {
+      toast.error("Please select valid video files for B-roll.");
+      event.target.value = null;
+      return;
+    }
+
+    const duration = Math.max(0, getTimelineDuration());
+    const currentVideoTime = videoRef.current ? videoRef.current.currentTime : 0;
+    const playheadTime = getPreviewTimelineTime(currentVideoTime);
+    const previewDuration = Math.max(duration, videoFiles.length * 2);
+    const slotDuration = previewDuration / Math.max(1, videoFiles.length);
+    const fallbackShotDuration = clampNumber(
+      slotDuration * 0.68,
+      0.8,
+      Math.max(0.9, slotDuration - 0.15),
+      1.6
+    );
+    const safeEnd = Math.max(0, previewDuration - fallbackShotDuration - 0.1);
+    const localSources = videoFiles.map(file => ({ file, url: URL.createObjectURL(file) }));
+    const sourceDurations = await Promise.all(
+      localSources.map(source => readLocalVideoDuration(source.url))
+    );
+    const overlaysToAdd = localSources.map(({ file, url }, index) => {
+      const evenStart =
+        videoFiles.length === 1
+          ? playheadTime
+          : index * slotDuration + Math.max(0, (slotDuration - fallbackShotDuration) / 2);
+      const startTime =
+        videoFiles.length === 1
+          ? Math.min(safeEnd || playheadTime, playheadTime)
+          : clampNumber(evenStart, 0, safeEnd, evenStart);
+      const shotDuration = Math.min(
+        fallbackShotDuration,
+        Math.max(0.8, previewDuration - startTime),
+        sourceDurations[index] > 0 ? sourceDurations[index] : Number.POSITIVE_INFINITY
+      );
+      return buildVideoBRollOverlay(file, url, startTime, shotDuration, sourceDurations[index]);
+    });
+
+    setOverlays(prev => [...prev, ...overlaysToAdd]);
+    setActiveOverlayId(overlaysToAdd[0]?.id || null);
+    setStudioInspectorTab("broll");
+    setComparisonMode("after");
+    if (overlaysToAdd[0]) {
+      jumpToOutputTimelineTime(Number(overlaysToAdd[0].startTime || 0));
+    }
+    setStudioActionMessage(
+      overlaysToAdd.length === 1
+        ? "B-roll placed at the playhead. Set its layout, timing, and audio in one panel."
+        : `${overlaysToAdd.length} B-roll clips were distributed across the short. Fine-tune any block below.`
+    );
+    toast.success(
+      overlaysToAdd.length === 1
+        ? "B-roll clip placed at the playhead."
+        : `${overlaysToAdd.length} B-roll clips placed across the short.`
+    );
+
+    input.value = null;
+  };
+
+  const updateOverlayText = (id, newText) => {
+    const safeText = normalizePlainText(newText);
+    setOverlays(overlays.map(o => (o.id === id ? { ...o, text: safeText } : o)));
+  };
+
+  const deleteOverlay = id => {
+    const nextOverlays = overlays.filter(overlay => overlay.id !== id);
+    setOverlays(nextOverlays);
+    setActiveOverlayId(currentId => {
+      if (currentId !== id) return currentId;
+      return nextOverlays[nextOverlays.length - 1]?.id || null;
+    });
+  };
+
+  // ── B-roll / cutaway overlay helpers ──
+  const updateOverlayTimeRange = (id, startTime, duration) => {
+    setOverlays(prev =>
+      prev.map(o => {
+        if (o.id !== id) return o;
+        const nextStart = Math.max(0, Number(startTime) || 0);
+        const timelineRemaining = Math.max(0.1, getTimelineDuration() - nextStart);
+        const nextDuration = Math.min(Math.max(0.1, Number(duration) || 0.1), timelineRemaining);
+        return { ...o, startTime: nextStart, duration: nextDuration };
+      })
+    );
+  };
+
+  const applyOverlayDuration = (overlay, requestedDuration, label = "") => {
+    if (!overlay) return;
+    const requested = Math.max(0.1, Number(requestedDuration) || 0.1);
+    const remaining = Math.max(0.1, getTimelineDuration() - Number(overlay.startTime || 0));
+    const applied = Math.min(requested, remaining);
+    updateOverlayTimeRange(overlay.id, overlay.startTime || 0, applied);
+    setStudioActionMessage(
+      requested > remaining
+        ? `${label || "Duration"} was limited to ${formatEditorDuration(applied)}, the remaining output time.`
+        : `${overlay.type === "image" ? "Image" : "B-roll"} duration set to ${formatEditorDuration(applied)}.`
+    );
+  };
+
+  const commitOverlayDurationText = (overlay, value) => {
+    const parsed = parseEditorDuration(value);
+    if (parsed === null || parsed < 0.1) {
+      setStudioActionMessage("Enter a duration like 10, 1:00, 2m or 5:00.");
+      return;
+    }
+    applyOverlayDuration(overlay, parsed);
+  };
+
+  const setOverlaySourceEndBehavior = (id, behavior) => {
+    const normalized = normalizeBRollEndBehavior(behavior);
+    setOverlayStyleOption(id, "sourceEndBehavior", normalized);
+    setStudioActionMessage(
+      normalized === "loop"
+        ? "Shorter B-roll will loop until the configured cutaway ends."
+        : normalized === "hold"
+          ? "The final B-roll frame will hold while the original voice returns."
+          : "The original video and voice will return when the B-roll source footage ends."
+    );
+  };
+
+  const rememberOverlaySourceDuration = (id, duration) => {
+    const safeDuration = Math.max(0, Number(duration || 0));
+    if (!safeDuration) return;
+    setOverlays(prev =>
+      prev.map(overlay =>
+        overlay.id === id && Math.abs(Number(overlay.sourceDuration || 0) - safeDuration) > 0.05
+          ? { ...overlay, sourceDuration: safeDuration }
+          : overlay
+      )
+    );
+  };
+
+  const setOverlayBRollMode = (id, mode) => {
+    setOverlays(prev =>
+      prev.map(o => {
+        if (o.id !== id) return o;
+        const pipPlacement = getCollisionSafePipPlacement({
+          overlays: prev,
+          overlayId: id,
+          startTime: o.startTime,
+          duration: o.duration,
+          width: 48,
+          height: 34,
+        });
+        const modeLayout = {
+          fullscreen: { width: 100, height: 100, x: 0, y: 0 },
+          pip: pipPlacement,
+          sideBySide: { width: 50, height: 100, x: 75, y: 50 },
+        }[mode] || {
+          width: o.width || 40,
+          height: o.height || 30,
+          x: o.x || 50,
+          y: o.y || 50,
+        };
+        return clampOverlayPlacement({
+          ...o,
+          bRollMode: mode || undefined,
+          coverMainVideo: mode === "fullscreen",
+          width: modeLayout.width,
+          height: modeLayout.height,
+          x: modeLayout.x,
+          y: modeLayout.y,
+          aspectRatio:
+            mode === "pip" ? modeLayout.width / modeLayout.height : mode === "sideBySide" ? 0.5 : 1,
+        });
+      })
+    );
+    const selectedOverlay = overlays.find(overlay => overlay.id === id);
+    if (selectedOverlay?.startTime !== undefined) {
+      seekLiveEditTimelineItem(Number(selectedOverlay.startTime || 0), "broll", id);
+    }
+    setStudioActionMessage(
+      `${mode === "fullscreen" ? "Full-screen cutaway" : mode === "sideBySide" ? "True side-by-side" : "Picture-in-picture"} applied at ${formatPreviewTimePrecise(Number(selectedOverlay?.startTime || 0))}.`
+    );
+  };
+
+  const setOverlayAnimation = (id, animType, value) => {
+    setOverlays(prev =>
+      prev.map(o => {
+        if (o.id !== id) return o;
+        const anim = {
+          ...(o.animation || {
+            enter: "fade",
+            exit: "fade",
+            enterDuration: 0.3,
+            exitDuration: 0.3,
+          }),
+        };
+        if (animType === "enter" || animType === "exit") {
+          anim[animType] = value;
+        } else if (animType === "enterDuration" || animType === "exitDuration") {
+          anim[animType] = Math.max(0.1, Math.min(2.0, Number(value) || 0.3));
+        }
+        return { ...o, animation: anim };
+      })
+    );
+  };
+
+  const setOverlayOpacity = (id, value) => {
+    setOverlays(prev =>
+      prev.map(o =>
+        o.id === id ? { ...o, opacity: Math.max(0, Math.min(1, Number(value) || 1)) } : o
+      )
+    );
+  };
+
+  const setOverlayStyleOption = (id, key, value) => {
+    setOverlays(prev =>
+      prev.map(overlay => (overlay.id === id ? { ...overlay, [key]: value } : overlay))
+    );
+  };
+
+  const setOverlayAudioOption = (id, key, value) => {
+    setOverlays(prev => prev.map(o => (o.id === id ? { ...o, [key]: value } : o)));
+  };
+
+  const getOverlayAudioMode = overlay => {
+    if (!overlay?.useOverlayAudio) return "original";
+    return overlay.muteMainAudio ? "overlay" : "mix";
+  };
+
+  const setOverlayAudioMode = (id, mode) => {
+    setOverlays(prev =>
+      prev.map(overlay => {
+        if (overlay.id !== id) return overlay;
+        if (mode === "overlay") {
+          return {
+            ...overlay,
+            useOverlayAudio: true,
+            muteMainAudio: true,
+            mixAudio: false,
+            audioDucking: false,
+          };
+        }
+        if (mode === "mix") {
+          return {
+            ...overlay,
+            useOverlayAudio: true,
+            muteMainAudio: false,
+            mixAudio: true,
+          };
+        }
+        return {
+          ...overlay,
+          useOverlayAudio: false,
+          muteMainAudio: false,
+          mixAudio: false,
+          audioDucking: false,
+        };
+      })
+    );
+    setStudioActionMessage(
+      mode === "overlay"
+        ? "Overlay audio is active only during this cutaway. Original audio returns automatically."
+        : mode === "mix"
+          ? "Original and overlay audio will play together during this cutaway."
+          : "The original source audio stays continuous through this cutaway."
+    );
+  };
+
+  const placeOverlayAtPlayhead = overlay => {
+    if (!overlay) return;
+    const playhead = clampNumber(previewTimelineTime, 0, liveTimelineDuration, 0);
+    updateOverlayTimeRange(overlay.id, playhead, overlay.duration || 3);
+    setActiveOverlayId(overlay.id);
+    jumpToOutputTimelineTime(playhead);
+    setStudioActionMessage(
+      `${overlay.type === "image" ? "Image" : "B-roll"} moved exactly to the playhead at ${formatPreviewTimePrecise(playhead)}.`
+    );
+  };
+
+  const previewOverlayInTimeline = overlay => {
+    if (!overlay) return;
+    setSoloPreviewOverlayId(null);
+    setComparisonMode("after");
+    seekLiveEditTimelineItem(Number(overlay.startTime || 0), "broll", overlay.id);
+    window.requestAnimationFrame(() => {
+      previewPlaybackIntentRef.current = true;
+      safePlayMediaElement(videoRef.current);
+    });
+    setStudioActionMessage(
+      `Playing the complete ${overlay.type === "image" ? "image insert" : "B-roll cutaway"} in context from ${formatPreviewTimePrecise(overlay.startTime)}.`
+    );
+  };
+
+  const toggleSoloOverlayPreview = overlay => {
+    if (!overlay || overlay.type !== "video") return;
+    const media = overlayMediaRefsRef.current.get(String(overlay.id));
+    if (soloPreviewOverlayId === overlay.id) {
+      media?.pause();
+      setSoloPreviewOverlayId(null);
+      setStudioActionMessage("B-roll-only preview paused. The source remains paused.");
+      return;
+    }
+
+    pauseSynchronizedPreview();
+    jumpToOutputTimelineTime(Number(overlay.startTime || 0));
+    setSoloPreviewOverlayId(overlay.id);
+    window.requestAnimationFrame(async () => {
+      const selectedMedia = overlayMediaRefsRef.current.get(String(overlay.id));
+      if (!selectedMedia) {
+        setSoloPreviewOverlayId(null);
+        setStudioActionMessage("Move to the cutaway cue, then try B-roll-only preview again.");
+        return;
+      }
+      try {
+        selectedMedia.currentTime = clampAudioControl(
+          overlay.sourceStartTime,
+          0,
+          selectedMedia.duration || 36000,
+          0
+        );
+      } catch (error) {
+        console.log("B-roll-only seek skipped", error);
+      }
+      selectedMedia.muted = false;
+      selectedMedia.defaultMuted = false;
+      selectedMedia.volume = clampAudioControl(overlay.overlayAudioVolume, 0, 1, 0.7);
+      const didPlay = await safePlayMediaElement(selectedMedia);
+      if (!didPlay) {
+        setSoloPreviewOverlayId(null);
+        setStudioActionMessage(
+          "B-roll-only preview could not start. Press play again after the media finishes loading."
+        );
+      }
+    });
+    setStudioActionMessage(
+      "B-roll-only preview is playing. The original video and original audio are paused."
+    );
+  };
+
+  const selectBRollOverlay = overlay => {
+    if (!overlay) return;
+    setOverlays(prev =>
+      prev.map(item =>
+        item.id === overlay.id && item.type === "video"
+          ? {
+              ...item,
+              bRollMode: "fullscreen",
+              coverMainVideo: true,
+              x: 50,
+              y: 50,
+              width: 100,
+              height: 100,
+            }
+          : item
+      )
+    );
+    setActiveOverlayId(overlay.id);
+  };
+
+  const toggleBackgroundSoundPreview = () => {
+    const music = musicPreviewRef.current;
+    if (!addMusic || !effectiveMusicPreviewUrl || !music) {
+      toast.error("Upload a background sound first.");
+      return;
+    }
+
+    if (isBackgroundSoundPreviewing || !music.paused) {
+      backgroundSoundPreviewSuppressedRef.current = true;
+      stopMusicPreviewBufferPlayback();
+      music.pause();
+      setIsBackgroundSoundPreviewing(false);
+      setMusicPreviewStatusMessage(
+        `Background sound paused: ${musicTrack?.name || currentMusicLabel}.`
+      );
+      return;
+    }
+
+    backgroundSoundPreviewSuppressedRef.current = false;
+
+    const sourceApplied = applySafeMediaSource(music, effectiveMusicPreviewUrl);
+    if (!sourceApplied) {
+      toast.error("This background sound cannot be previewed.");
+      setMusicPreviewStatus("failed");
+      setMusicPreviewStatusMessage("Background sound source could not be loaded.");
+      return;
+    }
+    if (music.readyState === 0) {
+      music.load();
+    }
+    if (previewMuted) {
+      setPreviewMuted(false);
+    }
+
+    music.muted = false;
+    music.defaultMuted = false;
+    const video = videoRef.current;
+    const previewTimelineTime = video
+      ? clampAudioControl(getPreviewTimelineTime(video.currentTime || 0), 0, 36000, 0)
+      : 0;
+    const fadeGain = getAudioFadeGain(
+      previewTimelineTime,
+      outputTimelineDuration,
+      musicTrack?.fadeIn,
+      musicTrack?.fadeOut
+    );
+    music.loop = musicTrack?.loop !== false;
+    music.volume =
+      clampAudioControl(musicTrack?.volume ?? musicVolume, 0.05, 0.6, 0.15) *
+      clampAudioControl(previewVolume, 0, 1, 1) *
+      fadeGain;
+
+    const musicDuration = Number(music.duration || 0);
+    const targetTime =
+      Number.isFinite(musicDuration) && musicDuration > 0.25
+        ? musicTrack?.loop !== false
+          ? previewTimelineTime % musicDuration
+          : Math.min(previewTimelineTime, Math.max(0, musicDuration - 0.05))
+        : previewTimelineTime;
+
+    if (Number.isFinite(targetTime) && music.readyState >= 1) {
+      try {
+        music.currentTime = targetTime;
+      } catch (error) {
+        console.log("Background sound preview seek skipped", error);
+      }
+    }
+
+    if (video?.paused) {
+      safePlayMediaElement(video);
+    }
+
+    const playResult = music.play();
+    // Reflect the user's play action immediately. Relying only on the media
+    // element's `play` event can leave the inspector stuck on "Preview sound"
+    // in browsers that delay or omit that event for object URLs.
+    setIsBackgroundSoundPreviewing(true);
+    setMusicPreviewStatus("ready");
+    setMusicPreviewNeedsGesture(false);
+    setMusicPreviewStatusMessage(
+      `Background sound is playing: ${musicTrack?.name || currentMusicLabel}.`
+    );
+    if (playResult && typeof playResult.catch === "function") {
+      playResult.catch(error => {
+        setIsBackgroundSoundPreviewing(false);
+        setMusicPreviewNeedsGesture(true);
+        setMusicPreviewStatus("failed");
+        setMusicPreviewStatusMessage(
+          error?.message || "Background sound playback was blocked by the browser."
+        );
+        toast.error("Background sound could not play. Click Preview Sound again.");
+      });
+    }
+  };
+
+  const buildBRollOverlay = suggestion => {
+    const style = BROLL_SHOT_STYLES[suggestion?.style] || BROLL_SHOT_STYLES.detail;
+    const title = normalizePlainText(suggestion?.title || style.title);
+    const subtitle = normalizePlainText(suggestion?.subtitle || style.subtitle);
+    const kicker = normalizePlainText(suggestion?.kicker || style.kicker);
+
+    return {
+      id: createSecureId("overlay"),
+      type: "text",
+      text: [kicker, title, subtitle].filter(Boolean).join(" | "),
+      x: 50,
+      y: 50,
+      color: "#ffffff",
+      bg: style.bg,
+      scale: 1,
+      isRainbow: false,
+      startTime: suggestion.time,
+      duration: suggestion.duration,
+      clipId: timeline[activeTimelineIndex]?.id || "main",
+      bRollMode: "fullscreen",
+      bRollPlaceholder: true,
+      bRollTone: style.tone,
+      bRollKicker: kicker,
+      bRollTitle: title,
+      bRollSubtitle: subtitle,
+      animation: { enter: "zoom", exit: "fade", enterDuration: 0.22, exitDuration: 0.22 },
+      opacity: 1,
+      coverMainVideo: true,
+      muteMainAudio: false,
+      useOverlayAudio: false,
+      mixAudio: false,
+      overlayAudioVolume: 0.7,
+      audioDucking: false,
+      audioDuckingStrength: 0.35,
+    };
+  };
+
+  const addBRollSuggestionOverlay = suggestion => {
+    const newOverlay = buildBRollOverlay(suggestion);
+    setOverlays(prev => [...prev, newOverlay]);
+    setActiveOverlayId(newOverlay.id);
+    toast.success(`B-roll beat added at ${suggestion.time.toFixed(1)}s`);
+  };
+
+  const getBRollStyleForClip = () => {
+    const role = selectedClipGuidance?.narrativeRole?.id;
+    const profile = selectedClipGuidance?.audienceProfile?.id;
+    const descriptor = selectedClipGuidance?.descriptorText || getClipDescriptorText(selectedClip);
+
+    if (
+      role === "payoff" ||
+      /(before|after|result|reveal|transformation|outcome)/i.test(descriptor)
+    ) {
+      return "payoff";
+    }
+    if (
+      role === "reaction" ||
+      profile === "reaction" ||
+      /(laugh|shock|face|reaction|crowd)/i.test(descriptor)
+    ) {
+      return "reaction";
+    }
+    if (
+      role === "proof" ||
+      profile === "product" ||
+      /(proof|demo|screen|example|product|receipt)/i.test(descriptor)
+    ) {
+      return "proof";
+    }
+    return "detail";
+  };
+
+  const getBRollSuggestionCopy = styleKey => {
+    const style = BROLL_SHOT_STYLES[styleKey] || BROLL_SHOT_STYLES.detail;
+    const hook = normalizePlainText(selectedClip?.hookText || selectedClipGuidance?.hookText || "");
+    const descriptor = selectedClipGuidance?.descriptorText || getClipDescriptorText(selectedClip);
+    const token =
+      selectedClipGuidance?.semanticTokens?.[0] || getSemanticTokens(descriptor)[0] || "";
+
+    if (hook && !isGenericHookText(hook)) {
+      return {
+        ...style,
+        title: hook.slice(0, 34),
+        subtitle: style.subtitle,
+      };
+    }
+
+    if (token) {
+      return {
+        ...style,
+        title: `${style.title}: ${token}`.slice(0, 34),
+        subtitle: style.subtitle,
+      };
+    }
+
+    return style;
+  };
+
+  // ── B-roll suggestion engine ──
+  const suggestBRollMoments = () => {
+    if (!selectedClip || !currentTimelineWindow.duration) return [];
+    const duration = currentTimelineWindow.duration;
+    const suggestions = [];
+    const safeStart = 1.5;
+    const safeEnd = Math.max(safeStart + 1, duration - 1);
+    const usableDuration = Math.max(1, safeEnd - safeStart);
+    const cadence = BROLL_CADENCE_PRESETS[bRollCadence] || BROLL_CADENCE_PRESETS.balanced;
+
+    const baseStyle = getBRollStyleForClip();
+    const sequence = [
+      baseStyle,
+      baseStyle === "reaction" ? "detail" : "reaction",
+      baseStyle === "payoff" ? "proof" : "payoff",
+      "detail",
+    ];
+    const targetCount = Math.max(
+      2,
+      Math.min(cadence.maxBeats, Math.ceil(usableDuration / cadence.interval))
+    );
+    const spacing = (safeEnd - safeStart) / Math.max(1, targetCount);
+
+    for (let index = 0; index < targetCount; index += 1) {
+      const styleKey = sequence[index % sequence.length];
+      const copy = getBRollSuggestionCopy(styleKey);
+      const time = Math.min(safeEnd - 0.8, safeStart + spacing * index + spacing * 0.38);
+      const remaining = safeEnd - time;
+      const shotDuration = clampNumber(
+        styleKey === "reaction" ? 1.4 : 1.8,
+        1.1,
+        Math.max(1.1, Math.min(2.4, remaining)),
+        1.6
+      );
+
+      suggestions.push({
+        time: Math.round(time * 10) / 10,
+        duration: Math.round(Math.min(shotDuration, remaining) * 10) / 10,
+        style: styleKey,
+        kicker: copy.kicker,
+        title: copy.title,
+        subtitle: copy.subtitle,
+        reason:
+          styleKey === "reaction"
+            ? "Cut to human response so the moment feels alive."
+            : styleKey === "payoff"
+              ? "Cut to the outcome so the viewer gets a visual reward."
+              : styleKey === "proof"
+                ? "Cut to evidence so the claim feels real."
+                : "Cut closer so the viewer sees the thing being talked about.",
+      });
+    }
+
+    return suggestions;
+  };
+
+  const isBRollSuggestionCovered = (suggestion, overlayList = overlays) =>
+    overlayList.some(overlay => {
+      if (!overlay.bRollMode || overlay.startTime === undefined) return false;
+
+      const overlayStart = Number(overlay.startTime || 0);
+      const overlayDuration = Math.max(0, Number(overlay.duration || 0));
+      const overlayEnd = overlayStart + overlayDuration;
+      const suggestionTime = Number(suggestion.time || 0);
+      const coverageTolerance = 0.35;
+
+      return (
+        suggestionTime >= overlayStart - coverageTolerance &&
+        suggestionTime <= overlayEnd + coverageTolerance
+      );
+    });
+
+  const getBRollPlanStatus = () => {
+    const suggestions = suggestBRollMoments();
+    const coveredSuggestions = suggestions.filter(suggestion =>
+      isBRollSuggestionCovered(suggestion)
+    );
+    const missingSuggestions = suggestions.filter(
+      suggestion => !isBRollSuggestionCovered(suggestion)
+    );
+
+    return {
+      suggestions,
+      coveredCount: coveredSuggestions.length,
+      missingSuggestions,
+    };
+  };
+
+  const bRollPlanStatus = getBRollPlanStatus();
+
+  const addBRollPlan = () => {
+    const { suggestions, coveredCount, missingSuggestions } = getBRollPlanStatus();
+    if (!suggestions.length) {
+      toast("Clip too short for a B-roll plan.");
+      return;
+    }
+
+    if (!missingSuggestions.length) {
+      setStudioActionMessage(
+        `All ${coveredCount} planned B-roll ${coveredCount === 1 ? "beat is" : "beats are"} already covered by real footage.`
+      );
+      toast("B-roll coverage is complete.");
+      return;
+    }
+
+    const plannedOverlays = missingSuggestions.map((suggestion, index) => ({
+      ...buildBRollOverlay(suggestion),
+      id: `${createSecureId("overlay")}-plan-${index}-${Math.round(suggestion.time * 10)}`,
+    }));
+    setOverlays(prev => [...prev, ...plannedOverlays]);
+    setActiveOverlayId(plannedOverlays[0]?.id || null);
+    setStudioActionMessage(
+      `${plannedOverlays.length} B-roll ${plannedOverlays.length === 1 ? "beat" : "beats"} planned across ${formatPreviewTimePrecise(
+        currentTimelineWindow.duration
+      )}. ${coveredCount ? `${coveredCount} ${coveredCount === 1 ? "beat was" : "beats were"} already covered by uploaded footage. ` : ""}Replace ${plannedOverlays.length === 1 ? "the placeholder" : "each placeholder"} with matching footage when ready.`
+    );
+    toast.success(
+      `${plannedOverlays.length} B-roll ${plannedOverlays.length === 1 ? "beat" : "beats"} added to the plan.`
+    );
+  };
+
+  // --- Dragging Logic ---
+  const handleMouseMove = e => {
+    if (!isDragging) return;
+
+    // Support both mouse and touch events
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+    // We must track mouse relative to the PHONE FRAME, not the window or element
+    const container = phoneFrameRef.current || e.currentTarget;
+    const bounds = container.getBoundingClientRect();
+
+    // Calculate mouse position relative to container
+    const relativeX = clientX - bounds.left;
+    const relativeY = clientY - bounds.top;
+
+    // Convert to percentage (0-100)
+    let percentX = (relativeX / bounds.width) * 100;
+    let percentY = (relativeY / bounds.height) * 100;
+
+    // Clamp to boundaries (0-100)
+    percentX = Math.max(0, Math.min(100, percentX));
+    percentY = Math.max(0, Math.min(100, percentY));
+
+    if (watermarkDragRef.current) {
+      const interaction = watermarkDragRef.current;
+      setManualWatermarkRegions(prev =>
+        prev.map(region => {
+          if (region.id !== interaction.id) return region;
+
+          if (interaction.mode === "resize") {
+            const deltaX = percentX - Number(interaction.startX || 0);
+            const deltaY = percentY - Number(interaction.startY || 0);
+            const direction = interaction.direction || "bottom-right";
+            const nextRegion = { ...region };
+
+            if (direction.includes("left")) {
+              nextRegion.left = Number(interaction.initialLeft || region.left || 0) + deltaX;
+              nextRegion.width = Number(interaction.initialWidth || region.width || 24) - deltaX;
+            } else {
+              nextRegion.width = Number(interaction.initialWidth || region.width || 24) + deltaX;
+            }
+
+            if (direction.includes("top")) {
+              nextRegion.top = Number(interaction.initialTop || region.top || 0) + deltaY;
+              nextRegion.height = Number(interaction.initialHeight || region.height || 8) - deltaY;
+            } else {
+              nextRegion.height = Number(interaction.initialHeight || region.height || 8) + deltaY;
+            }
+
+            return clampManualWatermarkRegion({
+              ...nextRegion,
+            });
+          }
+
+          return clampManualWatermarkRegion({
+            ...region,
+            left: percentX - Number(interaction.offsetX || 0),
+            top: percentY - Number(interaction.offsetY || 0),
+          });
+        })
+      );
+      return;
+    }
+
+    if (!dragItem.current) return;
+
+    setOverlays(prev => {
+      const currentOverlay = prev.find(o => o.id === dragItem.current);
+      if (!currentOverlay) return prev;
+
+      const currentX = Number(currentOverlay.x ?? 50);
+      const currentY = Number(currentOverlay.y ?? 50);
+      if (Math.abs(currentX - percentX) < 0.1 && Math.abs(currentY - percentY) < 0.1) {
+        return prev;
+      }
+
+      return prev.map(o =>
+        o.id === dragItem.current ? clampOverlayPlacement({ ...o, x: percentX, y: percentY }) : o
+      );
+    });
+  };
+
+  const handleDragStart = (e, overlay) => {
+    e.stopPropagation(); // Prevent video click
+    e.preventDefault(); // Prevent browser native drag
+    setActiveWatermarkRegionId(null);
+    setActiveOverlayId(overlay.id);
+    if (overlay.bRollMode === "fullscreen") {
+      return;
+    }
+    setIsDragging(true);
+    dragItem.current = overlay.id;
+  };
+
+  const handleWatermarkDragStart = (e, region) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    const frameBounds = phoneFrameRef.current?.getBoundingClientRect();
+    if (!frameBounds) return;
+
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const percentX = ((clientX - frameBounds.left) / frameBounds.width) * 100;
+    const percentY = ((clientY - frameBounds.top) / frameBounds.height) * 100;
+
+    setActiveOverlayId(null);
+    setActiveWatermarkRegionId(region.id);
+    setIsDragging(true);
+    watermarkDragRef.current = {
+      mode: "move",
+      id: region.id,
+      offsetX: percentX - Number(region.left || 0),
+      offsetY: percentY - Number(region.top || 0),
+    };
+  };
+
+  const handleWatermarkResizeStart = (e, region, direction = "bottom-right") => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    const frameBounds = phoneFrameRef.current?.getBoundingClientRect();
+    if (!frameBounds) return;
+
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const percentX = ((clientX - frameBounds.left) / frameBounds.width) * 100;
+    const percentY = ((clientY - frameBounds.top) / frameBounds.height) * 100;
+
+    setActiveOverlayId(null);
+    setActiveWatermarkRegionId(region.id);
+    setIsDragging(true);
+    watermarkDragRef.current = {
+      mode: "resize",
+      direction,
+      id: region.id,
+      startX: percentX,
+      startY: percentY,
+      initialLeft: Number(region.left || 0),
+      initialTop: Number(region.top || 0),
+      initialWidth: Number(region.width || 24),
+      initialHeight: Number(region.height || 8),
+    };
+  };
+
+  const handleDragEnd = () => {
+    setIsDragging(false);
+    dragItem.current = null;
+    watermarkDragRef.current = null;
+  };
+
+  const studioWorkflowStage = isExporting
+    ? 3
+    : overlays.some(overlay => overlay.bRollMode)
+      ? 2
+      : addHook
+        ? 1
+        : 0;
+
+  return (
+    <div className="viral-studio-overlay">
+      <div className="viral-studio-container hook-broll-only-mode">
+        <div className="studio-header">
+          <div className="studio-header-copy">
+            <div className="studio-brand-lockup">
+              <span className="studio-brand-mark" aria-hidden="true">
+                A
+              </span>
+              <strong>AutoPromote</strong>
+            </div>
+            <div className="studio-project-title">
+              <span>Viral Clip Studio</span>
+              <h3>
+                {normalizePlainText(
+                  selectedClip?.hookText || selectedClip?.reason || "Podcast Growth Clip"
+                ).slice(0, 52)}
+              </h3>
+            </div>
+            <div className="studio-billing-strip">
+              <span className="studio-billing-pill is-included">Studio included</span>
+              <span className="studio-billing-pill">
+                Scan {clipFinderCost} · Render {clipRenderCost} · Audio {transcribeCost} credits
+              </span>
+              <span className="studio-billing-pill is-balance">
+                {credits?.monthlyRemaining ?? 0} credits left · Top up anytime
+              </span>
+            </div>
+          </div>
+
+          <div className="studio-header-status">
+            <div className="studio-status-pill">
+              <span className="studio-status-label">Moments</span>
+              <strong>{orderedClips.length}</strong>
+            </div>
+            <div className="studio-status-pill">
+              <span className="studio-status-label">B-Roll</span>
+              <strong>{overlays.filter(overlay => overlay.bRollMode).length} beats</strong>
+            </div>
+            <div className="studio-status-pill">
+              <span className="studio-status-label">Hook</span>
+              <strong>{addHook ? "On" : "Off"}</strong>
+            </div>
+          </div>
+
+          <div className="studio-header-actions">
+            <span className="studio-autosave-state">✓ Autosaved locally</span>
+            <span className="studio-credit-safe">● No render credits used</span>
+            <button
+              type="button"
+              className="tool-btn tool-btn-compact"
+              onClick={handleUndo}
+              disabled={!canUndo}
+              data-testid="studio-undo-button"
+              title="Undo (Ctrl/Cmd+Z)"
+              style={{ opacity: canUndo ? 1 : 0.5 }}
+            >
+              ↶ Undo
+            </button>
+            <button
+              type="button"
+              className="tool-btn tool-btn-compact"
+              onClick={handleRedo}
+              disabled={!canRedo}
+              data-testid="studio-redo-button"
+              title="Redo (Ctrl/Cmd+Shift+Z or Ctrl/Cmd+Y)"
+              style={{ opacity: canRedo ? 1 : 0.5 }}
+            >
+              ↷ Redo
+            </button>
+            <button
+              type="button"
+              className="close-btn"
+              aria-label="Close Clip Studio"
+              title="Close studio"
+              onClick={() => {
+                if (window.confirm("Close the studio? Unsaved changes will be lost.")) onCancel();
+              }}
+            >
+              &times;
+            </button>
+          </div>
+        </div>
+
+        <div className="studio-layout">
+          <nav className="creative-tool-rail" aria-label="Creative tools">
+            {CREATIVE_STUDIO_TOOLS.map(tool => (
+              <button
+                key={tool.id}
+                type="button"
+                className={activeCreativeTool === tool.id ? "is-active" : ""}
+                aria-pressed={activeCreativeTool === tool.id}
+                onClick={() => selectCreativeTool(tool.id)}
+              >
+                <span aria-hidden="true">{tool.icon}</span>
+                <strong>{tool.label}</strong>
+              </button>
+            ))}
+          </nav>
+          <aside className="studio-project-rail" aria-label="Project navigator">
+            <div className="studio-project-rail__head">
+              <span>AI Moments</span>
+              <strong>Your story, already mapped</strong>
+              <small>Choose a beat. AutoPromote keeps the complicated editing underneath.</small>
+            </div>
+
+            <nav className="studio-workflow-nav" aria-label="Clip Studio workflow">
+              <div className="studio-workflow-nav__intro">
+                <span>Editing route</span>
+                <strong>Moment to finished short</strong>
+              </div>
+              <ol>
+                {VIRAL_STUDIO_WORKFLOW.map((step, index) => {
+                  const state =
+                    index < studioWorkflowStage
+                      ? "is-complete"
+                      : index === studioWorkflowStage
+                        ? "is-active"
+                        : "is-pending";
+                  return (
+                    <li key={step.label} className={state}>
+                      <span>{index < studioWorkflowStage ? "✓" : index + 1}</span>
+                      <div>
+                        <strong>{step.label}</strong>
+                        <small>{step.helper}</small>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ol>
+              <div className="studio-workflow-nav__status">
+                <i aria-hidden="true" />
+                <span>
+                  <strong>Live preview</strong>
+                  <small>Changes stay local until render</small>
+                </span>
+              </div>
+            </nav>
+
+            <section className="studio-project-list" aria-labelledby="studio-sequence-heading">
+              <div className="studio-project-list__heading">
+                <div>
+                  <span>Sequence</span>
+                  <strong id="studio-sequence-heading">Source clips</strong>
+                </div>
+                <i>{timeline.length}</i>
+              </div>
+              <div className="studio-project-list__items">
+                {timeline.map((clip, index) => (
+                  <button
+                    key={clip.id}
+                    type="button"
+                    className={`studio-project-item ${
+                      activeTimelineIndex === index ? "is-active" : ""
+                    }`}
+                    onClick={() => setActiveTimelineIndex(index)}
+                    aria-pressed={activeTimelineIndex === index}
+                  >
+                    <span>{String(index + 1).padStart(2, "0")}</span>
+                    <div>
+                      <strong>{`Source clip ${index + 1}`}</strong>
+                      <small>
+                        {clip.name
+                          ? `${clip.name} · ${
+                              clip.duration
+                                ? `${Math.round(clip.duration)} seconds`
+                                : clip.startRequest
+                                  ? "trimmed sequence"
+                                  : "duration loading"
+                            }`
+                          : clip.duration
+                            ? `${Math.round(clip.duration)} seconds`
+                            : clip.startRequest
+                              ? "Trimmed sequence"
+                              : "Duration loading"}
+                      </small>
+                    </div>
+                    <i aria-hidden="true">›</i>
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            <section className="studio-project-list" aria-labelledby="studio-moments-heading">
+              <div className="studio-project-list__heading">
+                <div>
+                  <span>Discovery</span>
+                  <strong id="studio-moments-heading">Detected moments</strong>
+                </div>
+                <i>{orderedClips.length}</i>
+              </div>
+              <div className="studio-project-list__items studio-project-list__items--moments">
+                {orderedClips.map((clip, index) => {
+                  const guidance = clipGuidanceById.get(clip.id);
+                  const isSelected = selectedClip?.id === clip.id;
+                  return (
+                    <button
+                      key={clip.id}
+                      type="button"
+                      className={`studio-project-item studio-project-moment ${
+                        isSelected ? "is-active" : ""
+                      }`}
+                      onClick={() => focusClipInEditor(clip, { boundary: "start", play: false })}
+                      aria-pressed={isSelected}
+                    >
+                      <span>#{index + 1}</span>
+                      <div>
+                        <strong>
+                          {normalizePlainText(
+                            clip.hookText || clip.reason || `Moment ${index + 1}`
+                          ).slice(0, 42)}
+                        </strong>
+                        <small>
+                          {Number(clip.start || 0).toFixed(1)}s–
+                          {Number(clip.end || 0).toFixed(1)}s
+                        </small>
+                        <em
+                          className={`story-beat-tag is-${STORY_BEAT_LABELS[index % 4].toLowerCase()}`}
+                        >
+                          {STORY_BEAT_LABELS[index % 4]}
+                        </em>
+                      </div>
+                      <i>{guidance?.score ?? 0}</i>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+
+            <div className="studio-project-rail__footer">
+              <span>
+                <i aria-hidden="true" />
+                Local edit
+              </span>
+              <small>
+                {overlays.length} layers · {addHook ? "Hook active" : "Hook not set"}
+              </small>
+            </div>
+          </aside>
+
+          <div className="phone-preview-container">
+            <section className="studio-panel preview-panel">
+              <div className="panel-heading">
+                <div>
+                  <span className="panel-kicker">Output canvas</span>
+                  <h4>Preview</h4>
+                  <p className="panel-description">
+                    What you see here is the hook, B-roll timing, and layer stack that will render.
+                  </p>
+                </div>
+                <div className="panel-chip-group">
+                  <span className="panel-chip">9:16 output</span>
+                  <span className="panel-chip">Clip {activeTimelineIndex + 1}</span>
+                  <span className="panel-chip">
+                    {effectiveVideoFit === "contain" ? "Safe full frame" : "Fill frame (may crop)"}
+                  </span>
+                  {showCropRiskIndicator ? (
+                    <span className="panel-chip panel-chip-risk">Crop risk</span>
+                  ) : null}
+                </div>
+                <div className="preview-mode-switch" aria-label="Preview comparison mode">
+                  {["before", "after", "split"].map(mode => (
+                    <button
+                      key={mode}
+                      type="button"
+                      className={comparisonMode === mode ? "is-active" : ""}
+                      onClick={() => {
+                        setComparisonMode(mode);
+                        focusComparisonPreview(studioInspectorTab, false);
+                        setStudioActionMessage(
+                          mode === "split"
+                            ? "Before and After are synchronized at the same frame."
+                            : `${mode === "before" ? "Untouched source" : "Edited result"} preview is active.`
+                        );
+                      }}
+                      aria-pressed={comparisonMode === mode}
+                    >
+                      {mode === "split" ? "Split" : mode[0].toUpperCase() + mode.slice(1)}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  className="comparison-play-button"
+                  onClick={toggleComparisonPlayback}
+                  aria-label={isPreviewPaused ? "Play comparison" : "Pause comparison"}
+                >
+                  {isPreviewPaused ? "▶ Play comparison" : "❚❚ Pause comparison"}
+                </button>
+                <div className="preview-display-controls" aria-label="Preview display controls">
+                  <button
+                    type="button"
+                    className={effectiveVideoFit === "contain" ? "is-active" : ""}
+                    aria-pressed={effectiveVideoFit === "contain"}
+                    onClick={() => setPreviewFillMode("contain")}
+                    title="Show the entire source frame"
+                  >
+                    Fit full
+                  </button>
+                  <button
+                    type="button"
+                    className={effectiveVideoFit === "cover" ? "is-active" : ""}
+                    aria-pressed={effectiveVideoFit === "cover"}
+                    onClick={() => setPreviewFillMode("cover")}
+                    title="Fill the vertical canvas without side gaps"
+                  >
+                    Fill canvas
+                  </button>
+                  <button
+                    type="button"
+                    data-testid="preview-fullscreen-button"
+                    onClick={() => void togglePreviewFullscreen()}
+                  >
+                    {isPreviewFullscreen ? "Exit fullscreen" : "Fullscreen"}
+                  </button>
+                </div>
+              </div>
+
+              <div className="preview-device-column">
+                <div className="preview-intelligence-stack" aria-label="Live edit intelligence">
+                  <span className={hookPreviewLoop ? "is-ready" : ""}>↻ Loop ready</span>
+                  <span className={!muteOriginalAudio ? "is-ready" : ""}>≋ Speech clear</span>
+                  <span className={smartCrop ? "is-ready" : ""}>⌗ Face tracked</span>
+                  <span className="is-safe">◇ No render credits used</span>
+                </div>
+                <div className={`preview-player-shell comparison-${comparisonMode}`}>
+                  <div
+                    ref={phoneFrameRef}
+                    data-testid="hook-preview-frame"
+                    className={`phone-frame ${isPreviewFullscreen ? "preview-expanded" : ""} ${hookFocusMode ? "hook-focus-enabled" : ""} ${creativePreviewClass} ${renderedOutputUrl ? "has-rendered-output" : ""}`}
+                    onClick={handlePreviewFrameClick}
+                    onMouseMove={handleMouseMove}
+                    onMouseUp={handleDragEnd}
+                    onMouseLeave={handleDragEnd}
+                    onTouchMove={handleMouseMove}
+                    onTouchEnd={handleDragEnd}
+                  >
+                    <span className="preview-version-label is-after">
+                      {renderedOutputUrl ? "Rendered" : "After"}
+                    </span>
+                    <video
+                      ref={videoRef}
+                      data-testid="studio-after-video"
+                      className="studio-video"
+                      autoPlay
+                      playsInline
+                      preload="auto"
+                      onLoadStart={() => setIsAfterPreviewReady(false)}
+                      onLoadedData={() => setIsAfterPreviewReady(true)}
+                      onCanPlay={() => setIsAfterPreviewReady(true)}
+                      onSeeking={() => setIsAfterPreviewReady(false)}
+                      onSeeked={confirmAfterPreviewFrame}
+                      style={{
+                        objectFit: renderedOutputUrl
+                          ? "contain"
+                          : activeSideBySideOverlay
+                            ? "cover"
+                            : effectiveVideoFit,
+                        objectPosition: renderedOutputUrl
+                          ? "center center"
+                          : activeSideBySideOverlay
+                            ? sideBySideObjectPosition
+                            : safeObjectPosition,
+                        width: renderedOutputUrl
+                          ? "100%"
+                          : activeSideBySideOverlay
+                            ? "50%"
+                            : "100%",
+                        height: "100%",
+                        background: "transparent",
+                        position: activeSideBySideOverlay ? "absolute" : "relative",
+                        inset: activeSideBySideOverlay ? "0 auto 0 0" : undefined,
+                        zIndex: 10,
+                        transformOrigin: activeSideBySideOverlay
+                          ? "center center"
+                          : hookTransformOrigin,
+                        transform: renderedOutputUrl
+                          ? "scale(1)"
+                          : activeSideBySideOverlay
+                            ? "scale(1)"
+                            : `scale(${(hookVisualScale * smartCropBackgroundScale).toFixed(3)})`,
+                        opacity: renderedOutputUrl ? 1 : hookPrimaryVideoOpacity,
+                        filter: renderedOutputUrl
+                          ? "none"
+                          : `blur(${(hookVideoBlur + smartCropBackgroundBlur).toFixed(2)}px) brightness(${(hookVideoBrightness * smartCropBackgroundBrightness * previewClarityBrightness).toFixed(3)}) contrast(${(hookVideoContrast * previewClarityContrast).toFixed(3)}) saturate(${(hookVideoSaturate * previewClaritySaturate).toFixed(3)})${previewClarityHalo}`,
+                        transition:
+                          "width 180ms ease, transform 150ms linear, opacity 160ms linear, filter 160ms linear",
+                        willChange: "transform, opacity, filter",
+                      }}
+                    />
+                    {!isAfterPreviewReady && !renderedOutputUrl ? (
+                      <div className="after-preview-loading" role="status" aria-live="polite">
+                        <span />
+                        Loading edited preview…
+                      </div>
+                    ) : null}
+                    {isPreviewFullscreen ? (
+                      <button
+                        type="button"
+                        className="preview-expanded-exit"
+                        onClick={event => {
+                          event.stopPropagation();
+                          void togglePreviewFullscreen();
+                        }}
+                      >
+                        Exit preview
+                      </button>
+                    ) : null}
+                    {beatEchoPreviewIsLive && !activeSideBySideOverlay ? (
+                      <div
+                        className={`beat-echo-preview-layer is-${creativeIntensity}`}
+                        aria-hidden="true"
+                        data-testid="beat-echo-preview-layer"
+                      >
+                        {[0, 1, 2].map(index => (
+                          <video
+                            key={`beat-echo-preview-${index}`}
+                            ref={element => {
+                              beatEchoVideoRefsRef.current[index] = element;
+                            }}
+                            muted
+                            playsInline
+                            preload="auto"
+                            tabIndex={-1}
+                            style={{
+                              objectFit: effectiveVideoFit,
+                              objectPosition: safeObjectPosition,
+                            }}
+                          />
+                        ))}
+                      </div>
+                    ) : null}
+                    {creativeEffectIsLive ? (
+                      <div
+                        className="creative-effect-live-layer"
+                        aria-hidden="true"
+                        data-testid="creative-effect-live-layer"
+                      >
+                        <span />
+                        <span />
+                        <span />
+                      </div>
+                    ) : null}
+                    {previewJoinOpacity > 0 &&
+                    ["soft_dip", "energy_flash"].includes(previewJoinTransition) ? (
+                      <div
+                        className={`join-transition-preview is-${previewJoinTransition}`}
+                        style={{ opacity: previewJoinOpacity }}
+                        aria-hidden="true"
+                        data-testid="join-transition-preview"
+                      />
+                    ) : null}
+                    {shouldShowWatermarkCleanupOnVideo ? (
+                      <img
+                        ref={watermarkCleanupPreviewImageRef}
+                        alt="Cleaned watermark preview on video"
+                        className="watermark-cleanup-video-overlay"
+                      />
+                    ) : null}
+                    {smartCrop ? (
+                      <video
+                        ref={smartCropForegroundVideoRef}
+                        className="smart-crop-foreground"
+                        preload="auto"
+                        muted
+                        playsInline
+                        style={{ objectPosition: safeObjectPosition }}
+                      />
+                    ) : null}
+                    <video
+                      ref={hookBackdropVideoRef}
+                      className="hook-preview-backdrop"
+                      preload="auto"
+                      muted
+                      playsInline
+                      style={{ opacity: hookBackdropOpacity, objectPosition: safeObjectPosition }}
+                    />
+                    <video
+                      ref={hookFreezeVideoRef}
+                      className="hook-preview-freeze"
+                      preload="auto"
+                      muted
+                      playsInline
+                      style={{
+                        opacity: hookFreezeOpacity,
+                        objectPosition: safeObjectPosition,
+                        transformOrigin: hookTransformOrigin,
+                        transform: `scale(${effectiveHookZoomTarget.toFixed(3)})`,
+                      }}
+                    />
+                    <audio ref={audioRef} preload="auto" style={{ display: "none" }} />
+
+                    <div
+                      className="video-bg-layer"
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        width: "100%",
+                        height: "100%",
+                        zIndex: 0,
+                        overflow: "hidden",
+                        background: "linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%)",
+                      }}
+                    />
+
+                    <div className="overlays-layer">
+                      {hookFocusMode ? (
+                        <div
+                          className={`hook-focus-target ${hookFocusMode ? "active" : ""}`}
+                          data-testid="hook-focus-target"
+                          style={{
+                            left: `${resolvedHookFocusPoint.x}%`,
+                            top: `${resolvedHookFocusPoint.y}%`,
+                          }}
+                        >
+                          <span className="hook-focus-target-dot" />
+                          <span className="hook-focus-target-label">
+                            {hookFocusMode ? "Tap face or object" : "Opening focus"}
+                          </span>
+                        </div>
+                      ) : null}
+                      {showHookPreview && hookDarkOverlay ? (
+                        <div
+                          className={`hook-preview-shade hook-preview-shade-${hookTemplate.replace(/_/g, "-")}`}
+                          style={{ opacity: hookOverlayOpacity }}
+                        />
+                      ) : null}
+                      {showHookPreview ? (
+                        <div
+                          className={`hook-preview-accent hook-preview-accent-${hookTemplate.replace(/_/g, "-")}`}
+                          style={{
+                            opacity: hookAccentOpacity,
+                            transform: `translate(-50%, ${hookAccentTranslate}) scale(${(0.94 + hookProgress * 0.08).toFixed(3)})`,
+                          }}
+                        />
+                      ) : null}
+                      {showHookPreview && isFreezeTextTemplate ? (
+                        <div className="hook-preview-bars" />
+                      ) : null}
+                      {removeWatermark
+                        ? resolvedWatermarkPreviewRegions.map((region, index) => (
+                            <div
+                              key={region.id || `watermark-preview-${index}`}
+                              className={`watermark-preview-cleanup ${region.isManual ? "watermark-preview-cleanup-manual" : ""} ${
+                                activeWatermarkRegionId === region.id ? "active" : ""
+                              }`}
+                              style={region.style}
+                              onMouseDown={
+                                region.isManual
+                                  ? e => handleWatermarkDragStart(e, region)
+                                  : undefined
+                              }
+                              onTouchStart={
+                                region.isManual
+                                  ? e => handleWatermarkDragStart(e, region)
+                                  : undefined
+                              }
+                              onClick={
+                                region.isManual
+                                  ? e => {
+                                      e.stopPropagation();
+                                      setActiveWatermarkRegionId(region.id);
+                                      setActiveOverlayId(null);
+                                    }
+                                  : undefined
+                              }
+                            >
+                              <span className="watermark-preview-feather" />
+                              <span className="watermark-preview-sheen" />
+                              {region.isManual && activeWatermarkRegionId === region.id ? (
+                                <>
+                                  <button
+                                    type="button"
+                                    className="watermark-preview-delete"
+                                    onClick={event => {
+                                      event.stopPropagation();
+                                      deleteManualWatermarkRegion(region.id);
+                                    }}
+                                    title="Delete cleanup box"
+                                    aria-label="Delete cleanup box"
+                                  >
+                                    ×
+                                  </button>
+                                  {[
+                                    { direction: "top-left", icon: "↖" },
+                                    { direction: "top-right", icon: "↗" },
+                                    { direction: "bottom-left", icon: "↙" },
+                                    { direction: "bottom-right", icon: "↘" },
+                                  ].map(handle => (
+                                    <button
+                                      key={handle.direction}
+                                      type="button"
+                                      className={`watermark-preview-resize watermark-preview-resize-${handle.direction}`}
+                                      onMouseDown={event =>
+                                        handleWatermarkResizeStart(event, region, handle.direction)
+                                      }
+                                      onTouchStart={event =>
+                                        handleWatermarkResizeStart(event, region, handle.direction)
+                                      }
+                                      title={`Resize cleanup box from ${handle.direction}`}
+                                      aria-label={`Resize cleanup box from ${handle.direction}`}
+                                    >
+                                      {handle.icon}
+                                    </button>
+                                  ))}
+                                </>
+                              ) : null}
+                            </div>
+                          ))
+                        : null}
+                      {showHookPreview && hasHookText ? (
+                        <div
+                          data-testid="hook-preview-banner"
+                          className={`hook-preview-banner hook-preview-banner-${hookTemplate.replace(/_/g, "-")} hook-preview-banner-position-${hookBannerSide} hook-preview-banner-subject-${hookBannerSubjectType} hook-text-${hookTextAnimation}`}
+                          style={{
+                            "--hook-copy-scale":
+                              normalizedHookText.length > 54
+                                ? 0.68
+                                : normalizedHookText.length > 38
+                                  ? 0.8
+                                  : normalizedHookText.length > 26
+                                    ? 0.9
+                                    : 1,
+                            opacity: hookOutroOpacity * Math.max(0.35, hookTextIntroProgress),
+                            top: hookBannerTop,
+                            left: `${hookBannerAnchorX}%`,
+                            textAlign: hookBannerTextAlign,
+                            transform: `translate(${hookBannerTranslateX}, ${Math.round((1 - hookTextIntroProgress) * 12)}px) scale(${hookBannerScale.toFixed(3)})`,
+                          }}
+                        >
+                          <span
+                            className="hook-preview-text-glow"
+                            style={{ opacity: hookTextGlowOpacity }}
+                          />
+                          <span
+                            className="hook-preview-banner-accent"
+                            style={{ opacity: hookBannerAccentOpacity }}
+                          />
+                          <div className="hook-preview-copy">{normalizedHookText}</div>
+                        </div>
+                      ) : null}
+                      {autoCaptions && captionPreviewState.currentChunk ? (
+                        <div
+                          className={`caption-preview-stack caption-position-${captionPosition} caption-style-${captionStyle || "classic"}`}
+                          data-testid="live-caption-preview"
+                          style={{ "--caption-preview-scale": captionScale }}
+                        >
+                          <div className="caption-preview-pill caption-preview-pill-active">
+                            {captionPreviewState.currentChunk.words.map((word, index) => (
+                              <span
+                                key={`${captionPreviewState.currentChunk.id}-${word}-${index}`}
+                                className={
+                                  index === captionPreviewState.activeWordIndex
+                                    ? "caption-preview-word caption-preview-word-active"
+                                    : "caption-preview-word"
+                                }
+                              >
+                                {word}
+                                {index < captionPreviewState.currentChunk.words.length - 1
+                                  ? " "
+                                  : ""}
+                              </span>
+                            ))}
+                          </div>
+                          {captionPreviewState.nextChunk ? (
+                            <div className="caption-preview-pill caption-preview-pill-next">
+                              {captionPreviewState.nextChunk.text}
+                            </div>
+                          ) : null}
+                        </div>
+                      ) : null}
+                      {!renderedOutputUrl && motionScenes.length > 0 ? (
+                        <MotionCanvas
+                          scenes={motionScenes}
+                          time={previewTimelineTime}
+                          getTime={() => getPreviewTimelineTime(videoRef.current?.currentTime || 0)}
+                        />
+                      ) : null}
+                      {silenceRemoval && !showHookPreview ? (
+                        <div className="silence-preview-indicator">
+                          <span />
+                          <span />
+                          <span />
+                          <strong>Pacing · pauses tightened</strong>
+                        </div>
+                      ) : null}
+                      {overlays
+                        .filter(o => {
+                          const currentClipId = timeline[activeTimelineIndex]?.id;
+                          const belongsToClip =
+                            !!o.bRollMode || !o.clipId || o.clipId === currentClipId;
+                          if (!belongsToClip) return false;
+
+                          const overlayStart =
+                            o.startTime !== undefined && o.startTime !== null
+                              ? o.startTime
+                              : o.start_time;
+                          if (overlayStart !== undefined && o.duration !== undefined) {
+                            return (
+                              previewTimelineTime >= Number(overlayStart) &&
+                              previewTimelineTime <
+                                Number(overlayStart) + getOverlayVisibleDuration(o)
+                            );
+                          }
+                          return true;
+                        })
+                        .map((overlay, index) => {
+                          const safeOverlayText = normalizePlainText(overlay.text);
+                          const safeOverlaySrc = getSafeMediaSource(overlay.src);
+                          const isFullscreen = overlay.bRollMode === "fullscreen";
+                          const anim = overlay.animation || {};
+                          const animClass = anim.enter ? `broll-anim-${anim.enter}` : "";
+
+                          return (
+                            <div
+                              key={overlay.id}
+                              className={`draggable-overlay ${
+                                activeOverlayId === overlay.id && comparisonMode !== "split"
+                                  ? "active"
+                                  : ""
+                              } ${isFullscreen ? "broll-fullscreen" : ""} ${
+                                overlay.bRollMode === "sideBySide" ? "broll-side-by-side" : ""
+                              } ${animClass}`}
+                              style={{
+                                top: isFullscreen ? "0%" : `${overlay.y}%`,
+                                left: isFullscreen ? "0%" : `${overlay.x}%`,
+                                width: isFullscreen
+                                  ? "100%"
+                                  : overlay.type === "video" || overlay.type === "image"
+                                    ? `${overlay.width || 35}%`
+                                    : "auto",
+                                height: isFullscreen
+                                  ? "100%"
+                                  : overlay.type === "video" || overlay.type === "image"
+                                    ? `${overlay.height || 35}%`
+                                    : "auto",
+                                backgroundColor:
+                                  overlay.type === "text"
+                                    ? isFullscreen
+                                      ? "rgba(0,0,0,0.92)" // near-opaque for B-Roll cutaways
+                                      : overlay.bg
+                                    : "transparent",
+                                color: overlay.color,
+                                zIndex: isFullscreen ? 300 + index : 100 + index,
+                                opacity:
+                                  overlay.opacity !== undefined ? overlay.opacity : undefined,
+                                transition: anim.enterDuration
+                                  ? `opacity ${anim.enterDuration}s ease, transform ${anim.enterDuration}s ease`
+                                  : undefined,
+                              }}
+                              onMouseDown={
+                                comparisonMode === "split"
+                                  ? undefined
+                                  : e => handleDragStart(e, overlay)
+                              }
+                              onTouchStart={
+                                comparisonMode === "split"
+                                  ? undefined
+                                  : e => handleDragStart(e, overlay)
+                              }
+                              onDoubleClick={
+                                comparisonMode === "split"
+                                  ? undefined
+                                  : () => {
+                                      if (overlay.type === "text") {
+                                        const newText = window.prompt(
+                                          "Edit Text:",
+                                          safeOverlayText
+                                        );
+                                        if (newText !== null)
+                                          updateOverlayText(overlay.id, newText);
+                                      }
+                                    }
+                              }
+                              onClick={event => {
+                                event.stopPropagation();
+                                if (comparisonMode !== "split") setActiveOverlayId(overlay.id);
+                              }}
+                            >
+                              {overlay.type === "text" ? (
+                                overlay.bRollPlaceholder ? (
+                                  <div
+                                    className={`broll-shot-card tone-${overlay.bRollTone || "detail"}`}
+                                  >
+                                    <span>
+                                      {normalizePlainText(overlay.bRollKicker || "B-ROLL")}
+                                    </span>
+                                    <strong>
+                                      {normalizePlainText(overlay.bRollTitle || safeOverlayText)}
+                                    </strong>
+                                    <small>
+                                      {normalizePlainText(
+                                        overlay.bRollSubtitle ||
+                                          "Replace with matching footage when ready."
+                                      )}
+                                    </small>
+                                  </div>
+                                ) : overlay.isRainbow ? (
+                                  <RainbowText
+                                    text={safeOverlayText}
+                                    offset={overlay.rainbowOffset || 0}
+                                  />
+                                ) : (
+                                  safeOverlayText
+                                )
+                              ) : overlay.type === "image" && safeOverlaySrc ? (
+                                <img
+                                  ref={element => {
+                                    applySafeMediaSource(element, safeOverlaySrc);
+                                  }}
+                                  alt="Overlay"
+                                  style={{
+                                    width: "100%",
+                                    height: "100%",
+                                    objectFit:
+                                      overlay.mediaFit === "stretch"
+                                        ? "fill"
+                                        : overlay.mediaFit || (isFullscreen ? "cover" : "contain"),
+                                    borderRadius: isFullscreen
+                                      ? "0"
+                                      : `${Number(overlay.borderRadius ?? 16)}px`,
+                                    boxShadow:
+                                      !isFullscreen && overlay.shadow !== "none"
+                                        ? "0 16px 36px rgba(0, 0, 0, 0.42)"
+                                        : "none",
+                                    transform: `rotate(${Number(overlay.rotation || 0)}deg)`,
+                                    pointerEvents: "none",
+                                  }}
+                                />
+                              ) : safeOverlaySrc ? (
+                                <video
+                                  data-testid={`broll-preview-${overlay.id}`}
+                                  ref={element => {
+                                    applySafeMediaSource(element, safeOverlaySrc);
+                                    if (element) {
+                                      overlayMediaRefsRef.current.set(String(overlay.id), element);
+                                      element.volume = clampAudioControl(
+                                        overlay.overlayAudioVolume,
+                                        0,
+                                        1,
+                                        0.7
+                                      );
+                                    } else {
+                                      overlayMediaRefsRef.current.delete(String(overlay.id));
+                                    }
+                                  }}
+                                  muted={!overlay.useOverlayAudio || previewMuted}
+                                  onLoadedMetadata={event =>
+                                    rememberOverlaySourceDuration(
+                                      overlay.id,
+                                      event.currentTarget.duration
+                                    )
+                                  }
+                                  style={{
+                                    width: "100%",
+                                    height: "100%",
+                                    objectFit: isFullscreen ? "cover" : "contain",
+                                    borderRadius: isFullscreen ? "0" : "12px",
+                                    pointerEvents: "none",
+                                  }}
+                                />
+                              ) : null}
+
+                              {comparisonMode !== "split" &&
+                                activeOverlayId === overlay.id &&
+                                isPreviewPaused &&
+                                !isFullscreen && (
+                                  <div className="overlay-controls">
+                                    <button
+                                      className="overlay-delete-btn"
+                                      onClick={e => {
+                                        e.stopPropagation();
+                                        deleteOverlay(overlay.id);
+                                      }}
+                                    >
+                                      &times;
+                                    </button>
+                                    {!isFullscreen &&
+                                      (overlay.type === "video" || overlay.type === "image") && (
+                                        <div
+                                          className="resize-handle"
+                                          onMouseDown={e => {
+                                            e.stopPropagation();
+                                          }}
+                                        >
+                                          <button
+                                            className="resize-btn"
+                                            onClick={e => {
+                                              e.stopPropagation();
+                                              e.preventDefault();
+                                              updateOverlaySize(overlay.id, "width", -5);
+                                            }}
+                                          >
+                                            W-
+                                          </button>
+                                          <button
+                                            className="resize-btn"
+                                            onClick={e => {
+                                              e.stopPropagation();
+                                              e.preventDefault();
+                                              updateOverlaySize(overlay.id, "width", 5);
+                                            }}
+                                          >
+                                            W+
+                                          </button>
+                                          <button
+                                            className="resize-btn"
+                                            onClick={e => {
+                                              e.stopPropagation();
+                                              e.preventDefault();
+                                              updateOverlaySize(overlay.id, "height", -5);
+                                            }}
+                                          >
+                                            H-
+                                          </button>
+                                          <button
+                                            className="resize-btn"
+                                            onClick={e => {
+                                              e.stopPropagation();
+                                              e.preventDefault();
+                                              updateOverlaySize(overlay.id, "height", 5);
+                                            }}
+                                          >
+                                            H+
+                                          </button>
+                                          <button
+                                            className="resize-btn"
+                                            onClick={e => {
+                                              e.stopPropagation();
+                                              e.preventDefault();
+                                              toggleOverlayAspectRatioLock(overlay.id);
+                                            }}
+                                            title={
+                                              overlay.aspectRatioLocked
+                                                ? "Unlock aspect ratio"
+                                                : "Lock aspect ratio"
+                                            }
+                                          >
+                                            {overlay.aspectRatioLocked ? "Lock" : "Free"}
+                                          </button>
+                                          <button
+                                            className="resize-btn"
+                                            onClick={e => {
+                                              e.stopPropagation();
+                                              e.preventDefault();
+                                              centerOverlay(overlay.id);
+                                            }}
+                                            title="Center overlay"
+                                          >
+                                            Center
+                                          </button>
+                                          <button
+                                            className="resize-btn"
+                                            onClick={e => {
+                                              e.stopPropagation();
+                                              e.preventDefault();
+                                              duplicateOverlay(overlay.id);
+                                            }}
+                                            title="Duplicate overlay"
+                                          >
+                                            Copy
+                                          </button>
+                                          <button
+                                            className="resize-btn"
+                                            onClick={e => {
+                                              e.stopPropagation();
+                                              e.preventDefault();
+                                              moveOverlay(overlay.id, "backward");
+                                            }}
+                                            title="Move layer backward"
+                                          >
+                                            Down
+                                          </button>
+                                          <button
+                                            className="resize-btn"
+                                            onClick={e => {
+                                              e.stopPropagation();
+                                              e.preventDefault();
+                                              moveOverlay(overlay.id, "forward");
+                                            }}
+                                            title="Move layer forward"
+                                          >
+                                            Up
+                                          </button>
+                                          <button
+                                            className="resize-btn"
+                                            onClick={e => {
+                                              e.stopPropagation();
+                                              e.preventDefault();
+                                              moveOverlay(overlay.id, "back");
+                                            }}
+                                            title="Send layer to back"
+                                          >
+                                            Back
+                                          </button>
+                                          <button
+                                            className="resize-btn"
+                                            onClick={e => {
+                                              e.stopPropagation();
+                                              e.preventDefault();
+                                              moveOverlay(overlay.id, "front");
+                                            }}
+                                            title="Bring layer to front"
+                                          >
+                                            Front
+                                          </button>
+                                        </div>
+                                      )}
+                                  </div>
+                                )}
+                            </div>
+                          );
+                        })}
+                    </div>
+                    {comparisonMode === "after" ? (
+                      <div
+                        className="preview-custom-controls"
+                        onMouseDown={event => event.stopPropagation()}
+                        onClick={event => event.stopPropagation()}
+                      >
+                        <button
+                          type="button"
+                          onClick={toggleComparisonPlayback}
+                          aria-label={
+                            isPreviewPaused ? "Play edited preview" : "Pause edited preview"
+                          }
+                        >
+                          {isPreviewPaused ? "▶" : "❚❚"}
+                        </button>
+                        <input
+                          type="range"
+                          min={0}
+                          max={Math.max(0.1, outputPlaybackDuration)}
+                          step={0.05}
+                          value={clampNumber(
+                            previewPlaybackTime,
+                            0,
+                            Math.max(0.1, outputPlaybackDuration),
+                            0
+                          )}
+                          onChange={event =>
+                            jumpToOutputTimelineTime(
+                              Number(event.target.value || 0) * Math.max(0.01, previewSpeed)
+                            )
+                          }
+                          aria-label="Edited output position"
+                        />
+                        <span>
+                          {formatPreviewTimePrecise(previewPlaybackTime)} /{" "}
+                          {formatPreviewTimePrecise(outputPlaybackDuration)}
+                        </span>
+                      </div>
+                    ) : null}
+                  </div>
+                  <div className="before-preview-card" data-testid="before-preview-frame">
+                    <span className="preview-version-label is-before">Before</span>
+                    <div className="phone-frame phone-frame-before">
+                      <video
+                        ref={beforeVideoRef}
+                        className="studio-video"
+                        muted
+                        playsInline
+                        preload="auto"
+                        aria-label="Untouched source preview"
+                        style={{
+                          objectFit: effectiveVideoFit,
+                          objectPosition: safeObjectPosition,
+                          width: "100%",
+                          height: "100%",
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="preview-signal-grid">
+                  <div className="signal-card">
+                    <span className="signal-label">Selected moment</span>
+                    <strong>
+                      {selectedClip ? `${Math.round(selectedClip.duration)}s hook` : "Full video"}
+                    </strong>
+                    <span>
+                      {selectedClip
+                        ? normalizePlainText(selectedClip.reason || "Primary detected moment")
+                        : "Choose a detected moment to bias the first clip."}
+                    </span>
+                  </div>
+                  <div className="signal-card">
+                    <span className="signal-label">Overlay stack</span>
+                    <strong>{overlays.length} active layers</strong>
+                    <span>
+                      {activeOverlay
+                        ? `Editing ${activeOverlay.type === "text" ? "text" : activeOverlay.type} overlay`
+                        : "Select a layer to fine-tune size and position."}
+                    </span>
+                  </div>
+                  <div className="signal-card">
+                    <span className="signal-label">Original audio</span>
+                    <strong>{muteOriginalAudio ? "Muted on export" : "Kept live"}</strong>
+                    <span>
+                      {muteOriginalAudio
+                        ? "Use this when the visual story is stronger than the raw source sound."
+                        : "Keep live voice, reactions, and ambient energy when they help the hook land."}
+                    </span>
+                  </div>
+                </div>
+                <div
+                  className="studio-compact-timeline"
+                  aria-label="After preview edit timeline"
+                  data-testid="live-edit-timeline"
+                >
+                  <div className="compact-timeline-head">
+                    <div>
+                      <strong>Live edit timeline</strong>
+                      <span data-testid="timeline-output-time">
+                        {formatPreviewTimePrecise(previewPlaybackTime)} /{" "}
+                        {formatPreviewTimePrecise(outputPlaybackDuration)}
+                      </span>
+                    </div>
+                    <span className="compact-timeline-sync">
+                      <i aria-hidden="true" /> After preview · {liveTimelineEditCount} live edits
+                    </span>
+                  </div>
+                  <p className="compact-timeline-trust-copy">
+                    These are the same media, timings and audio decisions shown in After. Click a
+                    track to inspect that exact frame.
+                  </p>
+
+                  <div className="compact-timeline-row compact-source-row">
+                    <span>Video</span>
+                    <button
+                      type="button"
+                      className="compact-timeline-track compact-source-track"
+                      onClick={seekLiveEditTimeline}
+                      aria-label="Seek source video timeline"
+                      data-testid="timeline-source-track"
+                    >
+                      <i
+                        className="compact-timeline-playhead"
+                        style={{ left: `${liveTimelinePlayheadLeft}%` }}
+                      />
+                      <span className="compact-source-filmstrip" aria-hidden="true">
+                        {liveTimelineFilmstripFrames.map(frame => (
+                          <TimelineVideoThumbnail
+                            key={frame.id}
+                            src={frame.src}
+                            previewTime={frame.previewTime}
+                            style={{
+                              left: `${frame.left}%`,
+                              width: `${frame.width}%`,
+                            }}
+                          />
+                        ))}
+                      </span>
+                      <span className="compact-source-scrim" aria-hidden="true" />
+                      {normalizedPendingCutRange ? (
+                        <span
+                          className="pending-cut-range-overlay"
+                          style={{
+                            left: `${((currentTimelineOffset + normalizedPendingCutRange.start) / liveTimelineDuration) * 100}%`,
+                            width: `${((normalizedPendingCutRange.end - normalizedPendingCutRange.start) / liveTimelineDuration) * 100}%`,
+                          }}
+                          data-testid="timeline-pending-cut-range"
+                        >
+                          Remove
+                        </span>
+                      ) : null}
+                      {liveTimelineCutMarkers.map(marker => (
+                        <span
+                          key={marker.id}
+                          className="compact-cut-marker"
+                          style={{
+                            left: `${(marker.outputTime / liveTimelineDuration) * 100}%`,
+                          }}
+                          data-testid="timeline-applied-cut"
+                          title={`${marker.removedDuration.toFixed(1)} seconds removed here`}
+                          aria-hidden="true"
+                        >
+                          CUT
+                        </span>
+                      ))}
+                      <span className="compact-source-beats" aria-hidden="true">
+                        {STORY_BEAT_LABELS.map(label => (
+                          <i key={label}>{label}</i>
+                        ))}
+                      </span>
+                    </button>
+                  </div>
+
+                  <div className="compact-timeline-ruler" aria-hidden="true">
+                    <span />
+                    {Array.from({ length: 6 }, (_, index) => (
+                      <i key={`timeline-tick-${index}`}>
+                        {formatPreviewTimePrecise(
+                          ((index / 5) * liveTimelineDuration) / Math.max(0.01, previewSpeed)
+                        )}
+                      </i>
+                    ))}
+                  </div>
+
+                  <div className="compact-timeline-row">
+                    <span>Hook</span>
+                    <div
+                      className="compact-timeline-track compact-seek-track"
+                      onClick={seekLiveEditTimeline}
+                      role="presentation"
+                    >
+                      <i
+                        className="compact-timeline-playhead"
+                        style={{ left: `${liveTimelinePlayheadLeft}%` }}
+                      />
+                      {addHook ? (
+                        <button
+                          type="button"
+                          className="compact-timeline-block is-hook"
+                          style={{
+                            left: `${(resolvedHookStart / liveTimelineDuration) * 100}%`,
+                            width: `${Math.max(3, (hookDuration / liveTimelineDuration) * 100)}%`,
+                          }}
+                          data-testid="timeline-hook-block"
+                          aria-label="Inspect opening hook in live timeline"
+                          onClick={event => {
+                            event.stopPropagation();
+                            seekLiveEditTimelineItem(resolvedHookStart, "hook");
+                          }}
+                          title={`${hookTemplateConfig.label || "Opening hook"} · ${hookDuration.toFixed(1)} seconds`}
+                        >
+                          <b>✦ {hookTemplateConfig.label || "Opening hook"}</b>
+                          <small>{hookDuration.toFixed(1)}s</small>
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          className="compact-timeline-empty-action"
+                          onClick={event => {
+                            event.stopPropagation();
+                            selectCreativeTool("hook");
+                          }}
+                        >
+                          + Add opening hook
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="compact-timeline-row">
+                    <span>Magic</span>
+                    <div
+                      className="compact-timeline-track compact-creative-track"
+                      onClick={seekLiveEditTimeline}
+                      role="presentation"
+                    >
+                      <i
+                        className="compact-timeline-playhead"
+                        style={{ left: `${liveTimelinePlayheadLeft}%` }}
+                      />
+                      {creativeEffectsEnabled ? (
+                        liveCreativeEffects.map(effect => {
+                          const left =
+                            ((currentTimelineOffset + effect.start_time) / liveTimelineDuration) *
+                            100;
+                          const width =
+                            ((effect.end_time - effect.start_time) / liveTimelineDuration) * 100;
+                          const style = SIGNATURE_CREATIVE_STYLES.find(
+                            item => item.id === effect.preset
+                          );
+                          return (
+                            <button
+                              key={effect.id}
+                              type="button"
+                              className={`compact-creative-block is-${effect.preset}`}
+                              style={{ left: `${left}%`, width: `${Math.max(3, width)}%` }}
+                              onClick={event => {
+                                event.stopPropagation();
+                                seekLiveEditTimelineItem(
+                                  currentTimelineOffset + effect.start_time,
+                                  null
+                                );
+                              }}
+                              data-testid={`timeline-creative-block-${effect.id}`}
+                              title={`${style?.label || effect.preset} · ${effect.start_time.toFixed(1)}s–${effect.end_time.toFixed(1)}s`}
+                            >
+                              <b>{style?.icon || "✦"}</b>
+                              <span>{style?.label || effect.preset.replace(/_/g, " ")}</span>
+                            </button>
+                          );
+                        })
+                      ) : (
+                        <button
+                          type="button"
+                          className="compact-timeline-empty-action"
+                          onClick={event => {
+                            event.stopPropagation();
+                            setCreativeEffectsEnabled(true);
+                            setCreativePreset("auto_story");
+                            setComparisonMode("split");
+                          }}
+                        >
+                          + Add signature transformation
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="compact-timeline-row">
+                    <span>
+                      B-roll {liveTimelineBRoll.length ? `(${liveTimelineBRoll.length})` : ""}
+                    </span>
+                    <div
+                      className={`compact-timeline-track compact-broll-track ${
+                        liveTimelineBRoll.length > 1 ? "has-layer-lanes" : ""
+                      }`}
+                      style={{ height: `${Math.max(46, liveTimelineBRoll.length * 34 + 8)}px` }}
+                      onClick={seekLiveEditTimeline}
+                      role="presentation"
+                    >
+                      <i
+                        className="compact-timeline-playhead"
+                        style={{ left: `${liveTimelinePlayheadLeft}%` }}
+                      />
+                      {liveTimelineBRoll.length ? (
+                        liveTimelineBRoll.map((overlay, index) => {
+                          const left =
+                            (Number(overlay.startTime || 0) / liveTimelineDuration) * 100;
+                          const width =
+                            (Number(overlay.duration || 0) / liveTimelineDuration) * 100;
+                          const mediaSource = getSafeMediaSource(overlay.src);
+                          const displayName =
+                            overlay.file?.name || overlay.name || `B-roll ${index + 1}`;
+                          return (
+                            <button
+                              key={overlay.id}
+                              type="button"
+                              className={`compact-timeline-block is-broll ${activeOverlayId === overlay.id ? "is-active" : ""}`}
+                              style={{
+                                left: `${left}%`,
+                                width: `${Math.max(3, width)}%`,
+                                top: `${4 + index * 34}px`,
+                                zIndex: activeOverlayId === overlay.id ? 3 : 2,
+                              }}
+                              data-testid={`timeline-broll-block-${overlay.id}`}
+                              aria-label={`${overlay.type === "image" ? "Image" : "B-roll"}: ${displayName}, ${Number(
+                                overlay.startTime || 0
+                              ).toFixed(1)} to ${(
+                                Number(overlay.startTime || 0) + Number(overlay.duration || 0)
+                              ).toFixed(1)} seconds, ${
+                                overlay.bRollMode === "fullscreen"
+                                  ? "full-screen cutaway"
+                                  : overlay.bRollMode === "sideBySide"
+                                    ? "side by side"
+                                    : "picture in picture"
+                              }`}
+                              onClick={event => {
+                                event.stopPropagation();
+                                selectLiveTimelineOverlay(overlay.id);
+                              }}
+                              title={`${displayName} · ${Number(overlay.startTime || 0).toFixed(1)}s–${(
+                                Number(overlay.startTime || 0) + Number(overlay.duration || 0)
+                              ).toFixed(1)}s · ${overlay.bRollMode}`}
+                            >
+                              {mediaSource && overlay.type === "image" ? (
+                                <SafeImage src={mediaSource} alt="" />
+                              ) : mediaSource ? (
+                                <SafeVideo
+                                  src={mediaSource}
+                                  muted
+                                  playsInline
+                                  preload="metadata"
+                                  tabIndex={-1}
+                                  aria-hidden="true"
+                                />
+                              ) : null}
+                              <span>
+                                <b>{displayName}</b>
+                                <small>
+                                  {overlay.bRollMode === "fullscreen"
+                                    ? "Cutaway"
+                                    : overlay.bRollMode === "sideBySide"
+                                      ? "Split"
+                                      : "PIP"}
+                                  {` · ${Number(overlay.startTime || 0).toFixed(1)}–${(
+                                    Number(overlay.startTime || 0) + Number(overlay.duration || 0)
+                                  ).toFixed(1)}s`}
+                                </small>
+                              </span>
+                            </button>
+                          );
+                        })
+                      ) : (
+                        <button
+                          type="button"
+                          className="compact-timeline-empty-action"
+                          onClick={event => {
+                            event.stopPropagation();
+                            selectCreativeTool("broll");
+                          }}
+                        >
+                          + Add proof B-roll
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="compact-timeline-row">
+                    <span>Words</span>
+                    <div
+                      className="compact-timeline-track compact-caption-track"
+                      onClick={seekLiveEditTimeline}
+                      role="presentation"
+                    >
+                      <i
+                        className="compact-timeline-playhead"
+                        style={{ left: `${liveTimelinePlayheadLeft}%` }}
+                      />
+                      {autoCaptions && liveTimelineCaptionBlocks.length ? (
+                        liveTimelineCaptionBlocks.map(chunk => (
+                          <button
+                            key={chunk.blockId}
+                            type="button"
+                            className={`compact-caption-block ${
+                              captionPreviewState.currentChunk?.id === chunk.id ? "is-current" : ""
+                            }`}
+                            style={{
+                              left: `${(chunk.outputStart / liveTimelineDuration) * 100}%`,
+                              width: `${(chunk.outputDuration / liveTimelineDuration) * 100}%`,
+                            }}
+                            data-testid="timeline-caption-block"
+                            onClick={event => {
+                              event.stopPropagation();
+                              seekLiveEditTimelineItem(chunk.outputStart, "captions");
+                            }}
+                          >
+                            {chunk.text}
+                          </button>
+                        ))
+                      ) : (
+                        <button
+                          type="button"
+                          className="compact-timeline-empty-action"
+                          onClick={event => {
+                            event.stopPropagation();
+                            selectCreativeTool("captions");
+                          }}
+                        >
+                          {autoCaptions ? "+ Generate or type captions" : "+ Turn on live captions"}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {motionScenes.map(scene => (
+                    <div className="compact-timeline-row" key={scene.id}>
+                      <span>Motion</span>
+                      <div className="compact-timeline-track motion-timeline-track">
+                        <button
+                          type="button"
+                          className="motion-timeline-block"
+                          aria-label={`Inspect motion ${scene.text}`}
+                          style={{
+                            left: `${(100 * scene.startTime) / Math.max(0.1, liveTimelineDuration)}%`,
+                            width: `${(100 * scene.duration) / Math.max(0.1, liveTimelineDuration)}%`,
+                          }}
+                          onClick={() => {
+                            setSelectedMotionId(scene.id);
+                            seekLiveEditTimelineItem(scene.startTime, "motion");
+                          }}
+                        >
+                          ◆ {scene.text} {scene.sound !== "none" ? "♫" : ""}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="compact-timeline-row">
+                    <span>Speed</span>
+                    <div
+                      className="compact-timeline-track compact-speed-track"
+                      onClick={seekLiveEditTimeline}
+                      role="presentation"
+                    >
+                      <i
+                        className="compact-timeline-playhead"
+                        style={{ left: `${liveTimelinePlayheadLeft}%` }}
+                      />
+                      <button
+                        type="button"
+                        className="compact-speed-block"
+                        aria-label={`${previewSpeed.toFixed(2)} times speed, ${pacingLevel} energy, ${formatPreviewTimePrecise(outputPlaybackDuration)} edited output${silenceRemoval ? ", silence tightening on" : ""}`}
+                        onClick={event => {
+                          event.stopPropagation();
+                          selectCreativeTool("pacing");
+                        }}
+                        data-testid="timeline-speed-block"
+                      >
+                        <b>{previewSpeed.toFixed(2).replace(/0$/, "")}×</b>
+                        <span>{pacingLevel} pacing</span>
+                        <small>{formatPreviewTimePrecise(outputPlaybackDuration)} output</small>
+                        {silenceRemoval ? <small>Silence tightening on</small> : null}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="compact-timeline-row audio-remix-timeline-row">
+                    <span>Voice</span>
+                    <div
+                      className="compact-timeline-track compact-audio-track is-voice-track"
+                      onClick={seekLiveEditTimeline}
+                      role="presentation"
+                    >
+                      <i
+                        className="compact-timeline-playhead"
+                        style={{ left: `${liveTimelinePlayheadLeft}%` }}
+                      />
+                      <div
+                        className={`compact-audio-lane is-voice ${
+                          muteOriginalAudio ? "is-muted" : ""
+                        }`}
+                        data-testid="timeline-original-audio"
+                      >
+                        <i className="compact-audio-wave" aria-hidden="true" />
+                        <span>{muteOriginalAudio ? "Original muted" : "Original voice"}</span>
+                      </div>
+                      {liveTimelineBRoll
+                        .filter(overlay => getOverlayAudioMode(overlay) !== "original")
+                        .map(overlay => {
+                          const left =
+                            (Number(overlay.startTime || 0) / liveTimelineDuration) * 100;
+                          const width =
+                            (Number(overlay.duration || 0) / liveTimelineDuration) * 100;
+                          const overlayAudioMode = getOverlayAudioMode(overlay);
+                          return (
+                            <button
+                              key={`audio-${overlay.id}`}
+                              type="button"
+                              className={`compact-overlay-audio is-${overlayAudioMode}`}
+                              style={{ left: `${left}%`, width: `${Math.max(3, width)}%` }}
+                              onClick={event => {
+                                event.stopPropagation();
+                                seekLiveEditTimelineItem(
+                                  Number(overlay.startTime || 0),
+                                  "broll",
+                                  overlay.id
+                                );
+                              }}
+                              data-testid={`timeline-overlay-audio-${overlay.id}`}
+                            >
+                              {overlayAudioMode === "mix" ? "Mix" : "Overlay"}
+                            </button>
+                          );
+                        })}
+                    </div>
+                  </div>
+
+                  <div className="compact-timeline-row audio-remix-timeline-row">
+                    <span>Music</span>
+                    <div
+                      className="compact-timeline-track compact-audio-track is-music-track"
+                      onClick={seekLiveEditTimeline}
+                      role="presentation"
+                    >
+                      <i
+                        className="compact-timeline-playhead"
+                        style={{ left: `${liveTimelinePlayheadLeft}%` }}
+                      />
+                      {addMusic ? (
+                        <button
+                          type="button"
+                          className="compact-audio-lane is-music"
+                          onClick={event => {
+                            event.stopPropagation();
+                            selectCreativeTool("sound");
+                          }}
+                          data-testid="timeline-music-audio"
+                          title={`${musicTrack?.name || currentMusicLabel} · ${Math.round(
+                            (musicTrack?.volume ?? musicVolume) * 100
+                          )}%${musicTrack?.ducking ? " · speech ducking" : ""}`}
+                        >
+                          <i className="compact-audio-wave" aria-hidden="true" />
+                          <span>{musicTrack?.name || currentMusicLabel || "Background sound"}</span>
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          className="compact-audio-lane is-music is-empty"
+                          onClick={event => {
+                            event.stopPropagation();
+                            selectCreativeTool("sound");
+                          }}
+                          data-testid="timeline-music-audio-empty"
+                        >
+                          <i className="compact-audio-wave" aria-hidden="true" />
+                          <span>No music selected</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="compact-timeline-row audio-remix-timeline-row">
+                    <span>SFX</span>
+                    <div
+                      className="compact-timeline-track compact-audio-track is-sfx-track"
+                      onClick={seekLiveEditTimeline}
+                      role="presentation"
+                    >
+                      <i
+                        className="compact-timeline-playhead"
+                        style={{ left: `${liveTimelinePlayheadLeft}%` }}
+                      />
+                      {soundEffects.length === 0 ? (
+                        <button
+                          type="button"
+                          className="compact-audio-lane is-sfx-empty"
+                          onClick={event => {
+                            event.stopPropagation();
+                            selectCreativeTool("sound");
+                          }}
+                        >
+                          <i className="compact-audio-wave" aria-hidden="true" />
+                          <span>Add sound effects</span>
+                        </button>
+                      ) : null}
+                      {soundEffects.map(effect => {
+                        const left = (Number(effect.startTime || 0) / liveTimelineDuration) * 100;
+                        const width = (getSoundEffectDuration(effect) / liveTimelineDuration) * 100;
+                        return (
+                          <button
+                            key={`sfx-${effect.id}`}
+                            type="button"
+                            className={`compact-sfx-audio ${activeSoundEffectId === effect.id ? "is-active" : ""} ${effect.enabled === false ? "is-disabled" : ""}`}
+                            style={{
+                              left: `${left}%`,
+                              width: `${Math.max(2.4, width)}%`,
+                            }}
+                            onClick={event => {
+                              event.stopPropagation();
+                              setActiveSoundEffectId(effect.id);
+                              seekLiveEditTimelineItem(Number(effect.startTime || 0), "sound");
+                            }}
+                            data-testid={`timeline-sfx-${effect.id}`}
+                            title={`${effect.name} · ${formatPreviewTimePrecise(effect.startTime)} · ${Math.round(effect.volume * 100)}%`}
+                          >
+                            <span>
+                              {effect.emoji || "🔊"} {effect.name}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="compact-timeline-footer">
+                    <span>
+                      <i className="is-hook" /> Hook
+                    </span>
+                    <span>
+                      <i className="is-broll" /> B-roll
+                    </span>
+                    <span>
+                      <i className="is-caption" /> Captions
+                    </span>
+                    <span>
+                      <i className="is-creative" /> Signature effect
+                    </span>
+                    <strong>Preview and timeline share one edit state</strong>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section className="studio-panel studio-timeline-container">
+              <div className="panel-heading compact">
+                <div>
+                  <span className="panel-kicker">Sequence</span>
+                  <h4>Timeline</h4>
+                </div>
+                <div className="panel-chip-group">
+                  <span className="panel-chip">{timeline.length} clips</span>
+                  <span className="panel-chip">Playing clip {activeTimelineIndex + 1}</span>
+                </div>
+              </div>
+              <div className="timeline-info">
+                <span>Drag to reorder the final sequence.</span>
+                <span>Add supporting footage when the primary cut needs help.</span>
+              </div>
+              <div className="timeline-scroll-area">
+                {timeline.map((clip, index) => (
+                  <div
+                    key={clip.id}
+                    data-testid={`timeline-clip-${clip.id}`}
+                    onClick={() => setActiveTimelineIndex(index)}
+                    draggable={timeline.length > 1}
+                    onDragStart={() => setDraggedTimelineClipId(clip.id)}
+                    onDragEnd={() => setDraggedTimelineClipId(null)}
+                    onDragOver={e => {
+                      e.preventDefault();
+                    }}
+                    onDrop={e => {
+                      e.preventDefault();
+                      if (draggedTimelineClipId === null || draggedTimelineClipId === clip.id)
+                        return;
+                      moveTimelineClipToIndex(draggedTimelineClipId, index);
+                      setDraggedTimelineClipId(null);
+                    }}
+                    className={`timeline-clip-thumb ${activeTimelineIndex === index ? "active" : ""}`}
+                    title={clip.name || `Clip ${index + 1}`}
+                    style={
+                      draggedTimelineClipId === clip.id
+                        ? { borderStyle: "dashed", borderColor: "#e52e71" }
+                        : undefined
+                    }
+                  >
+                    {/* If clip has a name, show first few chars, otherwise show index */}
+                    <span
+                      className="clip-thumb-label"
+                      style={{ fontSize: clip.name ? "12px" : "16px" }}
+                    >
+                      {clip.name
+                        ? clip.name.length > 8
+                          ? clip.name.substring(0, 6) + ".."
+                          : clip.name
+                        : index + 1}
+                    </span>
+
+                    {/* Tiny video preview if possible? Too heavy. Use duration. */}
+                    <span className="clip-dur-label">
+                      {clip.duration
+                        ? Math.round(clip.duration) + "s"
+                        : clip.startRequest
+                          ? "Trimmed"
+                          : "..."}
+                    </span>
+
+                    {/* Controls Row */}
+                    <div
+                      className="clip-mini-controls"
+                      style={{ display: "flex", gap: "4px", marginTop: "4px" }}
+                    >
+                      {timeline.length > 1 && (
+                        <>
+                          <button
+                            className="clip-caption-btn"
+                            title="Move clip earlier"
+                            data-testid={`timeline-move-left-${clip.id}`}
+                            onClick={e => {
+                              e.stopPropagation();
+                              moveTimelineClip(clip.id, "backward");
+                            }}
+                            disabled={index === 0}
+                            style={{
+                              fontSize: "10px",
+                              padding: "2px 5px",
+                              borderRadius: "4px",
+                              border: "1px solid #ccc",
+                              background: "#fff",
+                              cursor: index === 0 ? "default" : "pointer",
+                              opacity: index === 0 ? 0.5 : 1,
+                            }}
+                          >
+                            ←
+                          </button>
+                          <button
+                            className="clip-caption-btn"
+                            title="Move clip later"
+                            data-testid={`timeline-move-right-${clip.id}`}
+                            onClick={e => {
+                              e.stopPropagation();
+                              moveTimelineClip(clip.id, "forward");
+                            }}
+                            disabled={index === timeline.length - 1}
+                            style={{
+                              fontSize: "10px",
+                              padding: "2px 5px",
+                              borderRadius: "4px",
+                              border: "1px solid #ccc",
+                              background: "#fff",
+                              cursor: index === timeline.length - 1 ? "default" : "pointer",
+                              opacity: index === timeline.length - 1 ? 0.5 : 1,
+                            }}
+                          >
+                            →
+                          </button>
+                        </>
+                      )}
+                      {/* Auto-Caption Button */}
+                      <button
+                        className="clip-caption-btn"
+                        title="Auto-Generate Captions"
+                        onClick={async e => {
+                          e.stopPropagation();
+                          if (
+                            !window.confirm(
+                              `Generate captions for ${clip.name || "this clip"}?\n(This uses AI to detect speech and may need manual cleanup, especially for mixed South African languages. It might take 10-30s.)`
+                            )
+                          )
+                            return;
+
+                          // 1. Get file blob
+                          if (!clip.file) {
+                            toast.error(
+                              "Can only caption freshly uploaded files. (No file data found)"
+                            );
+                            return;
+                          }
+
+                          // 2. Upload to /api/media/transcribe
+                          const formData = new FormData();
+                          formData.append("file", clip.file);
+
+                          // Show loading state?
+                          e.target.innerText = "⏳ AI Listening...";
+                          e.target.disabled = true;
+
+                          try {
+                            const auth = getAuth();
+                            const user = auth.currentUser;
+                            const token = user ? await user.getIdToken() : null;
+
+                            // Use configured API BASE URL
+                            const res = await fetch(`${API_BASE_URL}/api/media/transcribe`, {
+                              method: "POST",
+                              headers: {
+                                Authorization: `Bearer ${token}`,
+                              },
+                              body: formData,
+                            });
+
+                            if (!res.ok) {
+                              const err = await res.json();
+                              throw new Error(err.error || "Upload failed");
+                            }
+
+                            let data = await res.json();
+
+                            // ASYNC POLLING (Transcription)
+                            if (data.jobId) {
+                              const jobId = data.jobId;
+                              e.target.innerText = "⏳ Transcribing...";
+
+                              let attempts = 0;
+                              while (true) {
+                                if (attempts > 120) throw new Error("Transcription timed out");
+                                await new Promise(r => setTimeout(r, 2000));
+                                attempts++;
+
+                                const sRes = await fetch(
+                                  `${API_BASE_URL}/api/media/status/${jobId}`,
+                                  {
+                                    headers: { Authorization: `Bearer ${token}` },
+                                  }
+                                );
+
+                                if (!sRes.ok) continue;
+                                const sData = await sRes.json();
+
+                                if (sData.status === "failed")
+                                  throw new Error(sData.error || "Transcription failed");
+                                if (sData.status === "completed") {
+                                  data = sData.result; // Expects { segments: [...] }
+                                  break;
+                                }
+                              }
+                            }
+
+                            // data.segments = [{ start: 0.0, end: 2.0, text: "Hello" }]
+                            if (!data.segments) throw new Error("No segments returned");
+
+                            const filteredSegments = data.segments.filter(seg => {
+                              const t = seg.text.toLowerCase().trim();
+
+                              // 1. Filter out known Whisper hallucinations/descriptions
+                              const invalidPhrases = [
+                                "music outro",
+                                "music intro",
+                                "background music",
+                                "subtitles by",
+                                "captioned by",
+                                "transcribed by",
+                                "copyright",
+                                "all rights reserved",
+                                "thank you",
+                              ];
+                              if (invalidPhrases.some(bad => t.includes(bad))) return false;
+
+                              // 2. Filter purely non-verbal brackets like [Music] or (Silence) or (Music Outro)
+                              if (
+                                (t.startsWith("[") && t.endsWith("]")) ||
+                                (t.startsWith("(") && t.endsWith(")"))
+                              )
+                                return false;
+
+                              // 3. Filter single junk characters or words
+                              if (t === "music" || t === "." || t === "you" || t.length < 2)
+                                return false;
+
+                              return true;
+                            });
+
+                            if (filteredSegments.length === 0) {
+                              toast(
+                                "Audio processed but no clear speech detected (music/noise filtered).",
+                                { icon: "🔇" }
+                              );
+                              return;
+                            }
+
+                            const newCaptions = filteredSegments.map((seg, i) => ({
+                              id: createSecureId("caption"),
+                              type: "text",
+                              text: seg.text.trim(),
+                              x: 50,
+                              y: i % 2 === 0 ? 80 : 75, // Slight vertical jitter for dynamic feel
+                              color: "#ffffff",
+                              bg: "rgba(0,0,0,0.6)",
+                              scale: 1,
+                              isRainbow: false,
+                              startTime:
+                                (clip.startRequest !== null && clip.startRequest !== undefined
+                                  ? clip.startRequest
+                                  : 0) + seg.start,
+                              duration: seg.end - seg.start,
+                              isCaption: true,
+                              clipId: clip.id,
+                              rainbowOffset: i * 3,
+                            }));
+
+                            setOverlays(prev => [...prev, ...newCaptions]);
+                            toast.success(
+                              "Captions generated via AI draft! Review the text before export."
+                            );
+                          } catch (err) {
+                            toast.error("Error generating captions: " + err.message);
+                          } finally {
+                            e.target.innerText = "💬 CC";
+                            e.target.disabled = false;
+                          }
+                        }}
+                        style={{
+                          fontSize: "10px",
+                          padding: "2px 5px",
+                          borderRadius: "4px",
+                          border: "1px solid #ccc",
+                          background: "#fff",
+                          cursor: "pointer",
+                        }}
+                      >
+                        💬 CC
+                      </button>
+
+                      {/* Delete Btn */}
+                      {timeline.length > 1 && (
+                        <button
+                          className="clip-delete-btn-mini"
+                          title="Remove Clip"
+                          onClick={e => {
+                            e.stopPropagation();
+                            const newTimeline = timeline.filter((_, i) => i !== index);
+                            setTimeline(newTimeline);
+                            if (activeTimelineIndex >= index)
+                              setActiveTimelineIndex(Math.max(0, activeTimelineIndex - 1));
+                          }}
+                          style={{
+                            fontSize: "10px",
+                            padding: "2px 5px",
+                            borderRadius: "4px",
+                            border: "1px solid #ff4757",
+                            color: "#ff4757",
+                            background: "#fff",
+                            cursor: "pointer",
+                          }}
+                        >
+                          🗑️
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                <label className="add-clip-btn" title="Add Video to Timeline">
+                  +
+                  <input
+                    data-testid="timeline-add-clip-input"
+                    type="file"
+                    accept="video/*"
+                    style={{ display: "none" }}
+                    onChange={addVideoLayer}
+                  />
+                </label>
+              </div>
+            </section>
+
+            {timeline[activeTimelineIndex] && (
+              <section className="studio-panel studio-trim-controls">
+                <div className="panel-heading compact">
+                  <div>
+                    <span className="panel-kicker">Timing</span>
+                    <h4>Trim active clip</h4>
+                    <p className="panel-description">
+                      Tighten the current clip window before it reaches render.
+                    </p>
+                  </div>
+                  <div className="panel-chip-group">
+                    <span className="panel-chip">
+                      Start {currentTimelineWindow.start.toFixed(1)}s
+                    </span>
+                    <span className="panel-chip">End {currentTimelineWindow.end.toFixed(1)}s</span>
+                    <span className="panel-chip">
+                      {currentTimelineWindow.duration.toFixed(1)}s live
+                    </span>
+                    {trimPreviewLoop ? <span className="panel-chip">Trim loop on</span> : null}
+                  </div>
+                </div>
+                <div className="slider-stack">
+                  <label className="studio-slider-label">
+                    <span>Clip start</span>
+                    <input
+                      type="range"
+                      min={0}
+                      max={(timeline[activeTimelineIndex].duration || 10) - 0.5}
+                      step={0.1}
+                      value={
+                        timeline[activeTimelineIndex].startRequest !== null &&
+                        timeline[activeTimelineIndex].startRequest !== undefined
+                          ? timeline[activeTimelineIndex].startRequest
+                          : 0
+                      }
+                      onChange={e => {
+                        const val = parseFloat(e.target.value);
+                        setTimeline(prev =>
+                          prev.map((item, i) =>
+                            i === activeTimelineIndex ? { ...item, startRequest: val } : item
+                          )
+                        );
+                        if (videoRef.current) {
+                          setHookPreviewLoop(false);
+                          setTrimPreviewLoop(true);
+                          videoRef.current.currentTime = val;
+                          safePlayMediaElement(videoRef.current);
+                        }
+                      }}
+                    />
+                  </label>
+                  <label className="studio-slider-label">
+                    <span>Clip end</span>
+                    <input
+                      type="range"
+                      min={
+                        (timeline[activeTimelineIndex].startRequest !== null &&
+                        timeline[activeTimelineIndex].startRequest !== undefined
+                          ? timeline[activeTimelineIndex].startRequest
+                          : 0) + 0.5
+                      }
+                      max={timeline[activeTimelineIndex].duration || 100}
+                      step={0.1}
+                      value={
+                        timeline[activeTimelineIndex].endRequest !== null &&
+                        timeline[activeTimelineIndex].endRequest !== undefined
+                          ? timeline[activeTimelineIndex].endRequest
+                          : timeline[activeTimelineIndex].duration || 10
+                      }
+                      onChange={e => {
+                        const val = parseFloat(e.target.value);
+                        setTimeline(prev =>
+                          prev.map((item, i) =>
+                            i === activeTimelineIndex ? { ...item, endRequest: val } : item
+                          )
+                        );
+                        if (videoRef.current) {
+                          setHookPreviewLoop(false);
+                          setTrimPreviewLoop(true);
+                          const previewTarget = Math.min(
+                            Math.max(
+                              Number(currentTimelineWindow.start || 0),
+                              videoRef.current.currentTime || 0
+                            ),
+                            Math.max(Number(currentTimelineWindow.start || 0), val - 0.05)
+                          );
+                          videoRef.current.currentTime = previewTarget;
+                          safePlayMediaElement(videoRef.current);
+                        }
+                      }}
+                    />
+                  </label>
+                </div>
+                <div className="mini-toggle-row">
+                  <button
+                    type="button"
+                    className="mini-toggle-btn active"
+                    onClick={() => previewTrimWindow(false)}
+                  >
+                    Preview trim once
+                  </button>
+                  <button
+                    type="button"
+                    className={`mini-toggle-btn ${trimPreviewLoop ? "active" : ""}`}
+                    onClick={() => previewTrimWindow(!trimPreviewLoop)}
+                  >
+                    {trimPreviewLoop ? "Stop trim loop" : "Loop trimmed clip"}
+                  </button>
+                </div>
+              </section>
+            )}
+
+            <section className="studio-panel studio-trim-controls audio-panel">
+              <div className="panel-heading compact">
+                <div>
+                  <span className="panel-kicker">Sound</span>
+                  <h4>Original audio control</h4>
+                  <p className="panel-description">
+                    Keep the source audio when it helps the clip, or mute it when the visual story
+                    is strong enough on its own.
+                  </p>
+                </div>
+              </div>
+              <label style={sidebarCheckboxLabelStyle}>
+                <input
+                  type="checkbox"
+                  checked={muteOriginalAudio}
+                  onChange={e => setMuteOriginalAudio(e.target.checked)}
+                  style={{ marginRight: "8px" }}
+                />
+                Mute Original Audio
+              </label>
+              <div style={{ ...sidebarBodyTextStyle, marginTop: "10px" }}>
+                {muteOriginalAudio
+                  ? "Original audio will be muted for export."
+                  : "Original audio stays active for preview and export."}
+              </div>
+            </section>
+          </div>
+
+          <div className="studio-sidebar">
+            <section
+              className="studio-panel clip-inspector-panel"
+              data-testid="clip-studio-inspector"
+            >
+              <div className="creative-director-panel">
+                <div className="creative-director-heading">
+                  <div>
+                    <span>AI Creative Director</span>
+                    <strong>Tell it how the clip should feel</strong>
+                  </div>
+                  <i aria-hidden="true">☷</i>
+                </div>
+                <button
+                  type="button"
+                  className="make-it-hit-button"
+                  onClick={applyMakeItHit}
+                  data-testid="make-it-hit-button"
+                >
+                  ✦ MAKE IT HIT
+                </button>
+                <div className="creator-mode-guide">
+                  <div className="creator-mode-guide__heading">
+                    <span>What are you making?</span>
+                    <small>Pick the closest style. Every suggestion remains editable.</small>
+                  </div>
+                  <div className="creator-mode-grid">
+                    {CREATOR_CONTENT_PROFILES.map(profile => (
+                      <button
+                        key={profile.id}
+                        type="button"
+                        className={contentProfile === profile.id ? "is-active" : ""}
+                        onClick={() => applyContentProfile(profile.id)}
+                        title={profile.helper}
+                      >
+                        {profile.label}
+                      </button>
+                    ))}
+                  </div>
+                  <p>{activeContentProfile.helper}</p>
+                </div>
+                <div className="signature-effects-panel">
+                  <div className="signature-effects-heading">
+                    <span>Signature transformation</span>
+                    <button
+                      type="button"
+                      className={creativeEffectsEnabled ? "is-on" : ""}
+                      aria-pressed={creativeEffectsEnabled}
+                      onClick={() => {
+                        setCreativeEffectsEnabled(current => !current);
+                        setStudioActionMessage(
+                          creativeEffectsEnabled
+                            ? "Signature transformation removed. The clean edit stays untouched."
+                            : "Signature transformation is live in After and protected by clean fallback on export."
+                        );
+                      }}
+                    >
+                      {creativeEffectsEnabled ? "On" : "Off"}
+                    </button>
+                  </div>
+                  <div className="signature-style-grid">
+                    {SIGNATURE_CREATIVE_STYLES.map(style => (
+                      <button
+                        key={style.id}
+                        type="button"
+                        className={creativePreset === style.id ? "is-active" : ""}
+                        onClick={() => {
+                          setCreativePreset(style.id);
+                          setCreativeEffectsEnabled(true);
+                          setComparisonMode("split");
+                          setStudioActionMessage(
+                            `${style.label} is live. Before and After remain synchronized.`
+                          );
+                        }}
+                        title={style.helper}
+                      >
+                        <span aria-hidden="true">{style.icon}</span>
+                        <strong>{style.label}</strong>
+                      </button>
+                    ))}
+                  </div>
+                  <div className="signature-intensity-row" aria-label="Creative intensity">
+                    {CREATIVE_INTENSITIES.map(level => (
+                      <button
+                        key={level.id}
+                        type="button"
+                        className={creativeIntensity === level.id ? "is-active" : ""}
+                        aria-pressed={creativeIntensity === level.id}
+                        onClick={() => {
+                          setCreativeIntensity(level.id);
+                          setCreativeEffectsEnabled(true);
+                        }}
+                      >
+                        {level.label}
+                      </button>
+                    ))}
+                  </div>
+                  <small>
+                    One tap, editable intensity, clean fallback. Original and overlay audio stay
+                    independent.
+                  </small>
+                </div>
+                <span className="creative-intent-label">Choose your intent</span>
+                <div className="creative-intent-grid">
+                  {CREATIVE_INTENTS.map(intent => (
+                    <button
+                      key={intent.id}
+                      type="button"
+                      className={creativeIntent === intent.id ? "is-active" : ""}
+                      onClick={() => applyCreativeIntent(intent.id)}
+                    >
+                      <span aria-hidden="true">{intent.icon}</span>
+                      {intent.label}
+                    </button>
+                  ))}
+                </div>
+                <div className="retention-score-card">
+                  <div>
+                    <span>Retention Score</span>
+                    <strong>{retentionScore}</strong>
+                  </div>
+                  <p>
+                    {retentionScore >= 84
+                      ? "This edit keeps visual change and speech moving."
+                      : "Apply the suggested improvements to strengthen retention."}
+                    <small>↗ Live estimate · no render needed</small>
+                  </p>
+                </div>
+                <div className="director-pacing-row">
+                  <span>Pacing</span>
+                  <div>
+                    {["calm", "balanced", "energetic"].map(level => (
+                      <button
+                        key={level}
+                        type="button"
+                        aria-label={`${level[0].toUpperCase() + level.slice(1)} creative pacing`}
+                        className={pacingLevel === level ? "is-active" : ""}
+                        onClick={() => {
+                          setPacingLevel(level);
+                          setStudioActionMessage(
+                            `${level[0].toUpperCase() + level.slice(1)} creative energy selected. Playback speed remains ${previewSpeed.toFixed(2)}×.`
+                          );
+                        }}
+                      >
+                        {level[0].toUpperCase() + level.slice(1)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="creative-improvements-card"
+                  aria-label={
+                    creativeImprovementsReady.length
+                      ? `${creativeImprovementsReady.length} creative improvements ready to review`
+                      : "All creative improvements applied"
+                  }
+                  onClick={() =>
+                    selectCreativeTool(
+                      creativeImprovementsReady[0] === "proof B-roll" ? "broll" : "captions"
+                    )
+                  }
+                >
+                  <span>
+                    <strong>
+                      {creativeImprovementsReady.length
+                        ? `${creativeImprovementsReady.length} improvements ready`
+                        : "All improvements applied"}
+                    </strong>
+                    <small>
+                      {creativeImprovementsReady.length
+                        ? "Review every suggestion before render"
+                        : "Your live edit currently meets the director checks"}
+                    </small>
+                  </span>
+                  <b aria-hidden="true">›</b>
+                </button>
+              </div>
+              <div className="clip-inspector-tabs" role="tablist" aria-label="Clip Studio tools">
+                {[
+                  { id: "cut", label: "Cut", icon: "✂" },
+                  { id: "hook", label: "Hook", icon: "✦" },
+                  { id: "captions", label: "Captions", icon: "CC" },
+                  { id: "pacing", label: "Pacing", icon: "≋" },
+                  { id: "broll", label: "B-roll", icon: "▣" },
+                  { id: "sound", label: "Sound", icon: "♫" },
+                  { id: "motion", label: "Motion", icon: "◆" },
+                ].map(tab => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={studioInspectorTab === tab.id}
+                    data-motion-tab={tab.id === "motion" ? "true" : undefined}
+                    className={studioInspectorTab === tab.id ? "is-active" : ""}
+                    onClick={() => {
+                      setStudioInspectorTab(tab.id);
+                      setActiveCreativeTool(tab.id);
+                    }}
+                  >
+                    <span>{tab.icon}</span>
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
+              {studioInspectorTab === "motion" ? (
+                <MotionPanel
+                  scenes={motionScenes}
+                  onChange={setMotionScenes}
+                  focusId={selectedMotionId}
+                  onSelect={setSelectedMotionId}
+                  playhead={previewTimelineTime}
+                  duration={outputTimelineDuration}
+                  transcript={captionSegments}
+                  onSeek={(time, play = false) => {
+                    seekLiveEditTimelineItem(time, "motion");
+                    if (play) safePlayMediaElement(videoRef.current);
+                  }}
+                />
+              ) : null}
+
+              {studioInspectorTab === "cut" ? (
+                <div className="clip-inspector-body cut-inspector-body" role="tabpanel">
+                  <div className="inspector-heading-row">
+                    <div>
+                      <span className="panel-kicker">Remove unwanted parts</span>
+                      <h4>Play, mark, remove, preview</h4>
+                    </div>
+                    <span className={`inspector-status-dot ${cutRangeIsReady ? "is-ready" : ""}`}>
+                      {cutRangeIsReady ? "Ready" : "Choose range"}
+                    </span>
+                  </div>
+
+                  <div className="cut-how-it-works">
+                    <span>
+                      <b>1</b> Play to the bad part
+                    </span>
+                    <span>
+                      <b>2</b> Mark start and end
+                    </span>
+                    <span>
+                      <b>3</b> Remove and preview the join
+                    </span>
+                  </div>
+
+                  <div className="cut-mark-actions">
+                    <button type="button" onClick={() => markCutBoundary("start")}>
+                      [ Mark remove start
+                      <small>
+                        {cutRangeStart === null
+                          ? "At playhead"
+                          : formatPreviewTimePrecise(cutRangeStart)}
+                      </small>
+                    </button>
+                    <button type="button" onClick={() => markCutBoundary("end")}>
+                      Mark remove end ]
+                      <small>
+                        {cutRangeEnd === null
+                          ? "At playhead"
+                          : formatPreviewTimePrecise(cutRangeEnd)}
+                      </small>
+                    </button>
+                  </div>
+
+                  <div className="inspector-time-grid cut-exact-range">
+                    <label>
+                      <span>Remove from</span>
+                      <input
+                        aria-label="Remove from time"
+                        type="number"
+                        min={0}
+                        max={trimAwareDuration}
+                        step={0.05}
+                        placeholder="0.00"
+                        value={cutRangeStart === null ? "" : cutRangeStart}
+                        onChange={event =>
+                          setCutRangeStart(
+                            event.target.value === ""
+                              ? null
+                              : clampNumber(event.target.value, 0, trimAwareDuration, 0)
+                          )
+                        }
+                      />
+                    </label>
+                    <label>
+                      <span>Remove to</span>
+                      <input
+                        aria-label="Remove to time"
+                        type="number"
+                        min={0}
+                        max={trimAwareDuration}
+                        step={0.05}
+                        placeholder={trimAwareDuration.toFixed(2)}
+                        value={cutRangeEnd === null ? "" : cutRangeEnd}
+                        onChange={event =>
+                          setCutRangeEnd(
+                            event.target.value === ""
+                              ? null
+                              : clampNumber(
+                                  event.target.value,
+                                  0,
+                                  trimAwareDuration,
+                                  trimAwareDuration
+                                )
+                          )
+                        }
+                      />
+                    </label>
+                  </div>
+                  <p className="cut-exact-help">
+                    Enter the exact bad section. The red range appears on the video timeline before
+                    anything is removed.
+                  </p>
+
+                  {normalizedPendingCutRange ? (
+                    <div className="pending-cut-summary" data-testid="pending-cut-summary">
+                      <span>
+                        Removing {formatPreviewTimePrecise(normalizedPendingCutRange.start)}–
+                        {formatPreviewTimePrecise(normalizedPendingCutRange.end)}
+                      </span>
+                      <strong>
+                        {(normalizedPendingCutRange.end - normalizedPendingCutRange.start).toFixed(
+                          1
+                        )}
+                        s
+                      </strong>
+                    </div>
+                  ) : null}
+
+                  <div className="inspector-field">
+                    <span>How should the remaining parts meet?</span>
+                    <div className="join-transition-grid">
+                      {JOIN_TRANSITIONS.map(transition => (
+                        <button
+                          key={transition.id}
+                          type="button"
+                          className={joinTransition === transition.id ? "is-active" : ""}
+                          onClick={() => setJoinTransition(transition.id)}
+                          title={transition.helper}
+                        >
+                          {transition.label}
+                        </button>
+                      ))}
+                    </div>
+                    <small>
+                      {JOIN_TRANSITIONS.find(item => item.id === joinTransition)?.helper}
+                      {joinTransition === "auto"
+                        ? ` Recommended here: ${JOIN_TRANSITIONS.find(item => item.id === resolvedJoinTransition)?.label}.`
+                        : ""}
+                    </small>
+                  </div>
+
+                  <div className="inspector-inline-actions">
+                    <button
+                      type="button"
+                      onClick={clearPendingCutRange}
+                      disabled={!cutRangeIsReady}
+                    >
+                      Clear marks
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!normalizedPendingCutRange || !videoRef.current) return;
+                        const sourceStart = Number(currentTimelineWindow.start || 0);
+                        videoRef.current.currentTime =
+                          sourceStart + Math.max(0, normalizedPendingCutRange.start - 0.65);
+                        setVideoTime(videoRef.current.currentTime);
+                        safePlayMediaElement(videoRef.current);
+                        setStudioActionMessage(
+                          "Previewing the lead-in. Remove the range to hear the finished join."
+                        );
+                      }}
+                      disabled={!cutRangeIsReady}
+                    >
+                      Preview lead-in
+                    </button>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="inspector-primary-action is-danger-safe"
+                    onClick={removePendingCutRange}
+                    disabled={!cutRangeIsReady}
+                    data-testid="remove-marked-range"
+                  >
+                    ✂ Remove marked part & preview join
+                  </button>
+                  <p className="cut-safety-copy">
+                    Non-destructive: Undo brings the removed part back.
+                  </p>
+                </div>
+              ) : null}
+
+              {studioInspectorTab === "hook" ? (
+                <div className="clip-inspector-body" role="tabpanel">
+                  <div className="inspector-heading-row">
+                    <div>
+                      <span className="panel-kicker">Opening moment</span>
+                      <h4>Make the first seconds impossible to skip</h4>
+                    </div>
+                    <span className={`inspector-status-dot ${addHook ? "is-ready" : ""}`}>
+                      {addHook ? "Live" : "Off"}
+                    </span>
+                  </div>
+
+                  <div className="inspector-ai-card">
+                    <div>
+                      <span>AI hook suggestion</span>
+                      <strong>{currentHookSuggestion.textSuggestion || normalizedHookText}</strong>
+                      <small>
+                        {hookAnalysisStatus === "ready"
+                          ? hookAnalysisMessage || "Strong opening range detected."
+                          : "Finds the sharpest visual and spoken opening in this moment."}
+                      </small>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={runSmartHookSuggestion}
+                      disabled={hookAnalysisStatus === "analyzing"}
+                    >
+                      {hookAnalysisStatus === "analyzing" ? "Finding…" : "Try another"}
+                    </button>
+                  </div>
+
+                  <label className="inspector-field">
+                    <span>Hook text</span>
+                    <textarea
+                      value={hookText}
+                      onChange={event => setHookText(normalizeHookText(event.target.value))}
+                      rows={3}
+                      maxLength={120}
+                      placeholder="Give viewers a reason to stay"
+                    />
+                    <small>
+                      {hookText.length}/120 · keep it clear enough to read in one glance
+                    </small>
+                  </label>
+
+                  <div className="inspector-field">
+                    <span>Motion preset</span>
+                    <div className="inspector-choice-grid is-three">
+                      {[
+                        ["blur_reveal", "Blur Reveal"],
+                        ["zoom_focus", "Zoom Focus"],
+                        ["freeze_text", "Freeze frame"],
+                      ].map(([value, label]) => (
+                        <button
+                          key={value}
+                          type="button"
+                          className={hookTemplate === value ? "is-active" : ""}
+                          aria-pressed={hookTemplate === value}
+                          onClick={() => {
+                            setAddHook(true);
+                            applyHookTemplate(value);
+                            setStudioActionMessage(`${label} is live in the After preview.`);
+                          }}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                    <small className="inspector-preset-note">
+                      {hookTemplateConfig.description}
+                    </small>
+                  </div>
+
+                  <label className="inspector-range">
+                    <span>
+                      <b>Duration</b>
+                      <strong>{hookDuration.toFixed(1)}s</strong>
+                    </span>
+                    <input
+                      type="range"
+                      min={hookMinDuration}
+                      max={hookMaxDuration}
+                      step={0.1}
+                      value={hookDuration}
+                      onChange={event => setHookDuration(Number(event.target.value))}
+                    />
+                  </label>
+
+                  <div className="inspector-inline-actions">
+                    <button type="button" onClick={() => previewHookSegment(false)}>
+                      Preview once
+                    </button>
+                    <button
+                      type="button"
+                      className={hookFocusMode ? "is-active" : ""}
+                      onClick={() => setHookFocusMode(value => !value)}
+                    >
+                      {hookFocusMode ? "Tap preview now" : "Select focal point"}
+                    </button>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="inspector-primary-action"
+                    onClick={() => {
+                      setAddHook(true);
+                      setComparisonMode("split");
+                      previewHookSegment(false);
+                      window.setTimeout(() => focusComparisonPreview("hook", true), 0);
+                      setStudioActionMessage(
+                        "Hook applied. Compare the untouched source and edited opening side by side."
+                      );
+                    }}
+                  >
+                    ✦ Apply Hook
+                  </button>
+                </div>
+              ) : null}
+
+              {studioInspectorTab === "captions" ? (
+                <div className="clip-inspector-body" role="tabpanel">
+                  <div className="inspector-heading-row">
+                    <div>
+                      <span className="panel-kicker">Live captions</span>
+                      <h4>Make every word land before you render</h4>
+                    </div>
+                    <span className={`inspector-status-dot ${autoCaptions ? "is-ready" : ""}`}>
+                      {autoCaptions ? "Live" : "Off"}
+                    </span>
+                  </div>
+
+                  <label className="inspector-toggle-row">
+                    <span>
+                      <b>Preview captions</b>
+                      <small>Visible instantly in After and Split. Before stays untouched.</small>
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={autoCaptions}
+                      onChange={event => {
+                        const enabled = event.target.checked;
+                        setAutoCaptions(enabled);
+                        if (
+                          enabled &&
+                          !normalizedCaptionOverride &&
+                          !normalizedTimedCaptionSegments.length &&
+                          !captionPreviewSourceText
+                        ) {
+                          void generateLiveTranscript();
+                        }
+                      }}
+                    />
+                  </label>
+
+                  <div className="caption-transcript-actions">
+                    <button
+                      type="button"
+                      className="inspector-primary-action"
+                      data-testid="generate-live-transcript"
+                      disabled={captionGenerationStatus === "processing"}
+                      onClick={() => void generateLiveTranscript()}
+                    >
+                      {captionGenerationStatus === "processing"
+                        ? "Listening…"
+                        : captionSegments.length
+                          ? "Regenerate speech captions"
+                          : "Generate speech captions"}
+                    </button>
+                    <small>
+                      Auto-detects the spoken language and creates editable, timestamped lines. This
+                      does not render the video.
+                    </small>
+                    {captionGenerationMessage ? (
+                      <p
+                        className={`caption-generation-status is-${captionGenerationStatus}`}
+                        role="status"
+                      >
+                        {captionGenerationMessage}
+                      </p>
+                    ) : null}
+                  </div>
+
+                  <label className="inspector-field">
+                    <span>Quick manual caption</span>
+                    <textarea
+                      aria-label="Caption copy"
+                      value={captionTextOverride}
+                      onChange={event => setCaptionTextOverride(event.target.value.slice(0, 240))}
+                      rows={4}
+                      maxLength={240}
+                      placeholder="Type a short caption, or generate the full spoken transcript above"
+                    />
+                    <small>
+                      This short override updates the preview instantly. Leave it empty to use the
+                      full timestamped transcript.
+                    </small>
+                  </label>
+
+                  <div className="caption-segment-editor" data-testid="caption-segment-editor">
+                    <div className="caption-segment-heading">
+                      <span>Transcript lines</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const start = Math.max(0, Number(videoTime || 0));
+                          setCaptionSegments(previous => [
+                            ...previous,
+                            {
+                              id: createSecureId("caption-line"),
+                              start,
+                              end: start + 2,
+                              duration: 2,
+                              text: "New caption",
+                              words: ["New", "caption"],
+                            },
+                          ]);
+                          setCaptionTextOverride("");
+                          setAutoCaptions(true);
+                        }}
+                      >
+                        + Add line
+                      </button>
+                    </div>
+                    {captionSegments.length ? (
+                      <div className="caption-segment-list">
+                        {captionSegments.map((segment, index) => (
+                          <div className="caption-segment-row" key={segment.id}>
+                            <div className="caption-segment-time">
+                              <label>
+                                <span>In</span>
+                                <input
+                                  aria-label={`Caption ${index + 1} start`}
+                                  type="number"
+                                  min="0"
+                                  step="0.1"
+                                  value={Number(segment.start || 0).toFixed(1)}
+                                  onChange={event => {
+                                    const start = Math.max(0, Number(event.target.value || 0));
+                                    setCaptionSegments(previous =>
+                                      previous.map(item =>
+                                        item.id === segment.id
+                                          ? {
+                                              ...item,
+                                              start,
+                                              end: Math.max(start + 0.1, Number(item.end || 0)),
+                                            }
+                                          : item
+                                      )
+                                    );
+                                  }}
+                                />
+                              </label>
+                              <label>
+                                <span>Out</span>
+                                <input
+                                  aria-label={`Caption ${index + 1} end`}
+                                  type="number"
+                                  min="0.1"
+                                  step="0.1"
+                                  value={Number(segment.end || segment.start + 2).toFixed(1)}
+                                  onChange={event => {
+                                    const end = Math.max(
+                                      Number(segment.start || 0) + 0.1,
+                                      Number(event.target.value || 0)
+                                    );
+                                    setCaptionSegments(previous =>
+                                      previous.map(item =>
+                                        item.id === segment.id ? { ...item, end } : item
+                                      )
+                                    );
+                                  }}
+                                />
+                              </label>
+                            </div>
+                            <textarea
+                              aria-label={`Caption ${index + 1} text`}
+                              value={segment.text}
+                              rows={2}
+                              onChange={event => {
+                                const text = event.target.value;
+                                setCaptionSegments(previous =>
+                                  previous.map(item =>
+                                    item.id === segment.id
+                                      ? {
+                                          ...item,
+                                          text,
+                                          words: normalizePlainText(text)
+                                            .split(/\s+/)
+                                            .filter(Boolean),
+                                        }
+                                      : item
+                                  )
+                                );
+                              }}
+                            />
+                            <button
+                              type="button"
+                              className="caption-segment-delete"
+                              aria-label={`Delete caption ${index + 1}`}
+                              onClick={() =>
+                                setCaptionSegments(previous =>
+                                  previous.filter(item => item.id !== segment.id)
+                                )
+                              }
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="caption-segment-empty">
+                        No speech transcript yet. Generate it automatically or add a line at the
+                        playhead.
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="inspector-field">
+                    <span>Creator style</span>
+                    <div className="inspector-choice-grid caption-style-grid">
+                      {[
+                        ["bold_pop", "Bold Pop"],
+                        ["karaoke", "Karaoke"],
+                        ["glow", "Neon Glow"],
+                        ["bounce", "Bounce"],
+                        ["minimal", "Minimal"],
+                      ].map(([value, label]) => (
+                        <button
+                          key={value}
+                          type="button"
+                          className={captionStyle === value ? "is-active" : ""}
+                          aria-pressed={captionStyle === value}
+                          onClick={() => {
+                            setCaptionStyle(value);
+                            setAutoCaptions(true);
+                            setComparisonMode("after");
+                          }}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="inspector-field">
+                    <span>Position</span>
+                    <div className="inspector-choice-grid is-three">
+                      {[
+                        ["top", "Top"],
+                        ["center", "Center"],
+                        ["lower", "Lower"],
+                      ].map(([value, label]) => (
+                        <button
+                          key={value}
+                          type="button"
+                          className={captionPosition === value ? "is-active" : ""}
+                          aria-pressed={captionPosition === value}
+                          onClick={() => setCaptionPosition(value)}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <label className="inspector-range">
+                    <span>
+                      <b>Caption size</b>
+                      <strong>{Math.round(captionScale * 100)}%</strong>
+                    </span>
+                    <input
+                      type="range"
+                      min={0.8}
+                      max={1.35}
+                      step={0.05}
+                      value={captionScale}
+                      onChange={event => setCaptionScale(Number(event.target.value))}
+                    />
+                  </label>
+
+                  <button
+                    type="button"
+                    className="inspector-primary-action"
+                    onClick={() => {
+                      setAutoCaptions(true);
+                      setComparisonMode("after");
+                      previewHookSegment(false);
+                      setStudioActionMessage("Captions are live in the After preview.");
+                    }}
+                  >
+                    CC Preview Captions
+                  </button>
+                </div>
+              ) : null}
+
+              {studioInspectorTab === "pacing" ? (
+                <div className="clip-inspector-body" role="tabpanel">
+                  <div className="inspector-heading-row">
+                    <div>
+                      <span className="panel-kicker">Pacing engine</span>
+                      <h4>Control energy without making editing complicated</h4>
+                    </div>
+                    <span className="inspector-status-dot is-ready">
+                      {previewSpeed.toFixed(2).replace(/\.00$/, "")}×
+                    </span>
+                  </div>
+
+                  <div className="inspector-field">
+                    <span>Quick speed</span>
+                    <div className="speed-preset-grid">
+                      {PREVIEW_SPEED_OPTIONS.map(speed => (
+                        <button
+                          key={speed}
+                          type="button"
+                          className={Math.abs(previewSpeed - speed) < 0.01 ? "is-active" : ""}
+                          aria-pressed={Math.abs(previewSpeed - speed) < 0.01}
+                          onClick={() => changePreviewSpeed(speed)}
+                        >
+                          {speed}×
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <label className="inspector-range">
+                    <span>
+                      <b>Fine speed</b>
+                      <strong>{previewSpeed.toFixed(2)}×</strong>
+                    </span>
+                    <input
+                      type="range"
+                      min={0.5}
+                      max={2}
+                      step={0.05}
+                      value={previewSpeed}
+                      onChange={event => changePreviewSpeed(Number(event.target.value))}
+                    />
+                    <small>Pitch stays preserved so voices remain natural.</small>
+                  </label>
+
+                  <div className="inspector-field">
+                    <span>Energy</span>
+                    <div className="inspector-choice-grid is-three">
+                      {[
+                        ["calm", "Calm"],
+                        ["balanced", "Balanced"],
+                        ["energetic", "Energetic"],
+                      ].map(([value, label]) => (
+                        <button
+                          key={value}
+                          type="button"
+                          className={pacingLevel === value ? "is-active" : ""}
+                          aria-pressed={pacingLevel === value}
+                          onClick={() => {
+                            setPacingLevel(value);
+                            setStudioActionMessage(
+                              `${label} energy selected. Playback speed remains ${previewSpeed.toFixed(2)}×; adjust it separately above.`
+                            );
+                          }}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <label className="inspector-toggle-row">
+                    <span>
+                      <b>Remove dead air</b>
+                      <small>
+                        Marks long pauses for the final edit without changing your source.
+                      </small>
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={silenceRemoval}
+                      onChange={event => setSilenceRemoval(event.target.checked)}
+                    />
+                  </label>
+
+                  {silenceRemoval ? (
+                    <div className="pacing-fine-controls">
+                      <label className="inspector-range">
+                        <span>
+                          <b>Speech threshold</b>
+                          <strong>{silenceThreshold} dB</strong>
+                        </span>
+                        <input
+                          type="range"
+                          min={-55}
+                          max={-20}
+                          step={1}
+                          value={silenceThreshold}
+                          onChange={event => setSilenceThreshold(Number(event.target.value))}
+                        />
+                      </label>
+                      <label className="inspector-range">
+                        <span>
+                          <b>Minimum pause</b>
+                          <strong>{Number(minSilenceDuration).toFixed(2)}s</strong>
+                        </span>
+                        <input
+                          type="range"
+                          min={0.25}
+                          max={2.5}
+                          step={0.05}
+                          value={minSilenceDuration}
+                          onChange={event => setMinSilenceDuration(Number(event.target.value))}
+                        />
+                      </label>
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
+
+              {studioInspectorTab === "broll" ? (
+                <div className="clip-inspector-body" role="tabpanel">
+                  <div className="inspector-heading-row">
+                    <div>
+                      <span className="panel-kicker">Visual layers</span>
+                      <h4>Place video or images exactly where the story needs them</h4>
+                    </div>
+                    <span className="inspector-status-dot is-ready">
+                      {overlays.filter(overlay => overlay.bRollMode).length} clips
+                    </span>
+                  </div>
+
+                  <div className="inspector-field broll-cadence-control">
+                    <span>B-roll pacing</span>
+                    <div className="inspector-choice-grid is-three">
+                      {Object.entries(BROLL_CADENCE_PRESETS).map(([value, preset]) => (
+                        <button
+                          key={value}
+                          type="button"
+                          className={bRollCadence === value ? "is-active" : ""}
+                          aria-pressed={bRollCadence === value}
+                          onClick={() => {
+                            setBRollCadence(value);
+                            setStudioActionMessage(
+                              `${preset.label} B-roll pacing selected. ${preset.helper}`
+                            );
+                          }}
+                        >
+                          {preset.label}
+                        </button>
+                      ))}
+                    </div>
+                    <small>
+                      {bRollPlanStatus.suggestions.length} suggested beats across{" "}
+                      {formatPreviewTimePrecise(currentTimelineWindow.duration)} ·{" "}
+                      {bRollPlanStatus.coveredCount
+                        ? `${bRollPlanStatus.coveredCount} already covered · `
+                        : ""}
+                      {bRollPlanStatus.missingSuggestions.length
+                        ? `${bRollPlanStatus.missingSuggestions.length} open · `
+                        : "Coverage complete · "}
+                      {BROLL_CADENCE_PRESETS[bRollCadence].helper}
+                    </small>
+                    <button
+                      type="button"
+                      className="inspector-secondary-action"
+                      onClick={addBRollPlan}
+                    >
+                      Plan whole clip
+                    </button>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="inspector-upload-card"
+                    onClick={() => brollVideoInputRef.current?.click()}
+                  >
+                    <span>＋</span>
+                    <div>
+                      <strong>Upload B-roll</strong>
+                      <small>One or multiple MP4, MOV or WEBM files</small>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    className="inspector-upload-card"
+                    onClick={() => imageInputRef.current?.click()}
+                  >
+                    <span>🖼</span>
+                    <div>
+                      <strong>Attach an image</strong>
+                      <small>Timed full screen, picture-in-picture or side by side</small>
+                    </div>
+                  </button>
+
+                  {activeOverlayIsTimedMedia ? (
+                    <>
+                      <div className="inspector-selected-asset">
+                        {activeOverlay.type === "video" ? (
+                          <video
+                            ref={element => applySafeMediaSource(element, activeOverlaySafeSrc)}
+                            muted
+                            playsInline
+                            preload="metadata"
+                          />
+                        ) : (
+                          <img
+                            ref={element => applySafeMediaSource(element, activeOverlaySafeSrc)}
+                            alt="Selected visual insert"
+                          />
+                        )}
+                        <div>
+                          <span>
+                            Selected {activeOverlay.type === "image" ? "image" : "cutaway"}
+                          </span>
+                          <strong>{activeOverlayDisplayName}</strong>
+                          <small>
+                            {formatEditorDuration(activeOverlayStartTime)}–
+                            {formatEditorDuration(activeOverlayEndTime)}
+                          </small>
+                        </div>
+                      </div>
+
+                      <div className="inspector-inline-actions broll-placement-actions">
+                        <button type="button" onClick={() => placeOverlayAtPlayhead(activeOverlay)}>
+                          Place at playhead
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => previewOverlayInTimeline(activeOverlay)}
+                        >
+                          Play in timeline
+                        </button>
+                        {activeOverlay.type === "video" ? (
+                          <button
+                            type="button"
+                            className={soloPreviewOverlayId === activeOverlay.id ? "is-active" : ""}
+                            data-testid="preview-broll-only"
+                            onClick={() => toggleSoloOverlayPreview(activeOverlay)}
+                          >
+                            {soloPreviewOverlayId === activeOverlay.id
+                              ? "Pause B-roll only"
+                              : "Play B-roll only"}
+                          </button>
+                        ) : null}
+                      </div>
+
+                      <div className="inspector-time-grid">
+                        <label>
+                          <span>Start</span>
+                          <input
+                            type="number"
+                            min={0}
+                            step={0.1}
+                            value={activeOverlayStartTime.toFixed(1)}
+                            onChange={event =>
+                              updateOverlayTimeRange(
+                                activeOverlay.id,
+                                Number(event.target.value),
+                                activeOverlayDuration
+                              )
+                            }
+                          />
+                        </label>
+                        <label>
+                          <span>Duration (MM:SS)</span>
+                          <input
+                            key={`${activeOverlay.id}-${activeOverlayDuration}`}
+                            aria-label="B-roll duration"
+                            type="text"
+                            inputMode="decimal"
+                            defaultValue={formatEditorDuration(activeOverlayDuration)}
+                            placeholder="2:00 or 120"
+                            onBlur={event =>
+                              commitOverlayDurationText(activeOverlay, event.target.value)
+                            }
+                            onKeyDown={event => {
+                              if (event.key === "Enter") event.currentTarget.blur();
+                            }}
+                          />
+                        </label>
+                      </div>
+
+                      <div className="broll-duration-editor">
+                        <div
+                          className="broll-duration-presets"
+                          aria-label="B-roll duration presets"
+                        >
+                          {[
+                            [5, "5 sec"],
+                            [10, "10 sec"],
+                            [30, "30 sec"],
+                            [60, "60 sec"],
+                            [120, "2 min"],
+                            [300, "5 min"],
+                          ].map(([seconds, label]) => (
+                            <button
+                              key={seconds}
+                              type="button"
+                              aria-label={`Set duration to ${label}`}
+                              onClick={() => applyOverlayDuration(activeOverlay, seconds, label)}
+                            >
+                              {label}
+                            </button>
+                          ))}
+                          <button
+                            type="button"
+                            onClick={() =>
+                              applyOverlayDuration(
+                                activeOverlay,
+                                activeOverlayTimelineRemaining,
+                                "To end"
+                              )
+                            }
+                          >
+                            To end
+                          </button>
+                        </div>
+                        <small>
+                          Up to {formatEditorDuration(activeOverlayTimelineRemaining)} remains after
+                          this start point. Type seconds, MM:SS, “2m” or “5:00”.
+                        </small>
+                      </div>
+
+                      {activeOverlay.type === "video" ? (
+                        <label className="inspector-range">
+                          <span>
+                            <b>Use B-roll from</b>
+                            <strong>
+                              {Number(activeOverlay.sourceStartTime || 0).toFixed(1)}s
+                            </strong>
+                          </span>
+                          <input
+                            aria-label="B-roll source start"
+                            type="range"
+                            min={0}
+                            max={Math.max(0, Number(activeOverlay.sourceDuration || 0) - 0.05)}
+                            step={0.1}
+                            value={Number(activeOverlay.sourceStartTime || 0)}
+                            onChange={event =>
+                              setOverlayStyleOption(
+                                activeOverlay.id,
+                                "sourceStartTime",
+                                Number(event.target.value)
+                              )
+                            }
+                          />
+                          <small>Choose which moment inside the uploaded B-roll should play.</small>
+                        </label>
+                      ) : null}
+
+                      {activeOverlay.type === "video" ? (
+                        <div className="inspector-field broll-source-end-control">
+                          <span>When B-roll footage ends</span>
+                          <div className="inspector-choice-grid is-three">
+                            {[
+                              ["return", "Return to original"],
+                              ["loop", "Loop B-roll"],
+                              ["hold", "Hold last frame"],
+                            ].map(([value, label]) => (
+                              <button
+                                key={value}
+                                type="button"
+                                className={
+                                  normalizeBRollEndBehavior(activeOverlay.sourceEndBehavior) ===
+                                  value
+                                    ? "is-active"
+                                    : ""
+                                }
+                                aria-pressed={
+                                  normalizeBRollEndBehavior(activeOverlay.sourceEndBehavior) ===
+                                  value
+                                }
+                                onClick={() => setOverlaySourceEndBehavior(activeOverlay.id, value)}
+                              >
+                                {label}
+                              </button>
+                            ))}
+                          </div>
+                          <small className="inspector-reassurance">
+                            {Number.isFinite(activeOverlayAvailableSourceDuration) ? (
+                              activeOverlayDuration > activeOverlayAvailableSourceDuration ? (
+                                <>
+                                  Source has{" "}
+                                  {formatEditorDuration(activeOverlayAvailableSourceDuration)}{" "}
+                                  available. “
+                                  {normalizeBRollEndBehavior(activeOverlay.sourceEndBehavior) ===
+                                  "loop"
+                                    ? "Loop"
+                                    : normalizeBRollEndBehavior(activeOverlay.sourceEndBehavior) ===
+                                        "hold"
+                                      ? "Hold"
+                                      : "Return"}
+                                  ” controls the remaining{" "}
+                                  {formatEditorDuration(
+                                    activeOverlayDuration - activeOverlayAvailableSourceDuration
+                                  )}
+                                  .
+                                </>
+                              ) : (
+                                <>
+                                  This source covers the complete{" "}
+                                  {formatEditorDuration(activeOverlayVisibleDuration)} cutaway.
+                                </>
+                              )
+                            ) : (
+                              "Source length will be detected from the uploaded video."
+                            )}
+                          </small>
+                        </div>
+                      ) : null}
+
+                      <div className="inspector-field">
+                        <span>Layout</span>
+                        <div className="inspector-choice-grid is-three">
+                          {[
+                            ["fullscreen", "Full screen"],
+                            ["pip", "Picture-in-picture"],
+                            ["sideBySide", "Side by side"],
+                          ].map(([value, label]) => (
+                            <button
+                              key={value}
+                              type="button"
+                              className={activeOverlay.bRollMode === value ? "is-active" : ""}
+                              aria-pressed={activeOverlay.bRollMode === value}
+                              onClick={() => setOverlayBRollMode(activeOverlay.id, value)}
+                            >
+                              {label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {activeOverlay.type === "video" ? (
+                        <div className="inspector-field">
+                          <span>Cutaway audio</span>
+                          <div className="inspector-choice-grid is-three audio-mode-grid">
+                            {[
+                              ["original", "Keep original"],
+                              ["overlay", "Use overlay"],
+                              ["mix", "Mix both"],
+                            ].map(([value, label]) => (
+                              <button
+                                key={value}
+                                type="button"
+                                className={
+                                  getOverlayAudioMode(activeOverlay) === value ? "is-active" : ""
+                                }
+                                aria-pressed={getOverlayAudioMode(activeOverlay) === value}
+                                onClick={() => setOverlayAudioMode(activeOverlay.id, value)}
+                              >
+                                {label}
+                              </button>
+                            ))}
+                          </div>
+                          <small className="inspector-reassurance">
+                            ✓ Original audio returns automatically after the cutaway.
+                          </small>
+                        </div>
+                      ) : null}
+
+                      {activeOverlay.type === "video" &&
+                      getOverlayAudioMode(activeOverlay) === "mix" ? (
+                        <>
+                          <label className="inspector-check-row">
+                            <input
+                              type="checkbox"
+                              checked={!!activeOverlay.audioDucking}
+                              onChange={event =>
+                                setOverlayAudioOption(
+                                  activeOverlay.id,
+                                  "audioDucking",
+                                  event.target.checked
+                                )
+                              }
+                            />
+                            <span>
+                              <strong>Duck original under overlay</strong>
+                              <small>Keeps both sources clear when voices overlap.</small>
+                            </span>
+                          </label>
+                          {activeOverlay.audioDucking ? (
+                            <label className="inspector-range">
+                              <span>
+                                <b>Original ducking</b>
+                                <strong>
+                                  {Math.round((activeOverlay.audioDuckingStrength ?? 0.35) * 100)}%
+                                </strong>
+                              </span>
+                              <input
+                                aria-label="Original ducking strength"
+                                type="range"
+                                min={10}
+                                max={90}
+                                step={5}
+                                value={Math.round(
+                                  (activeOverlay.audioDuckingStrength ?? 0.35) * 100
+                                )}
+                                onChange={event =>
+                                  setOverlayAudioOption(
+                                    activeOverlay.id,
+                                    "audioDuckingStrength",
+                                    Number(event.target.value) / 100
+                                  )
+                                }
+                              />
+                            </label>
+                          ) : null}
+                        </>
+                      ) : null}
+
+                      {activeOverlay.type === "video" &&
+                      getOverlayAudioMode(activeOverlay) !== "original" ? (
+                        <label className="inspector-range">
+                          <span>
+                            <b>Overlay volume</b>
+                            <strong>
+                              {Math.round((activeOverlay.overlayAudioVolume ?? 0.7) * 100)}%
+                            </strong>
+                          </span>
+                          <input
+                            aria-label="B-roll overlay volume"
+                            type="range"
+                            min={0}
+                            max={100}
+                            step={5}
+                            value={Math.round((activeOverlay.overlayAudioVolume ?? 0.7) * 100)}
+                            onChange={event =>
+                              setOverlayAudioOption(
+                                activeOverlay.id,
+                                "overlayAudioVolume",
+                                Number(event.target.value) / 100
+                              )
+                            }
+                          />
+                        </label>
+                      ) : null}
+
+                      {activeOverlay.type === "image" ? (
+                        <>
+                          <div className="inspector-field">
+                            <span>Image crop</span>
+                            <div className="inspector-choice-grid is-three">
+                              {[
+                                ["cover", "Fill frame"],
+                                ["contain", "Show all"],
+                                ["stretch", "Stretch"],
+                              ].map(([value, label]) => (
+                                <button
+                                  key={value}
+                                  type="button"
+                                  className={
+                                    (activeOverlay.mediaFit || "cover") === value ? "is-active" : ""
+                                  }
+                                  aria-pressed={(activeOverlay.mediaFit || "cover") === value}
+                                  onClick={() =>
+                                    setOverlayStyleOption(activeOverlay.id, "mediaFit", value)
+                                  }
+                                >
+                                  {label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                          <label className="inspector-range">
+                            <span>
+                              <b>Corner roundness</b>
+                              <strong>{Math.round(activeOverlay.borderRadius ?? 16)}px</strong>
+                            </span>
+                            <input
+                              aria-label="Image corner roundness"
+                              type="range"
+                              min={0}
+                              max={40}
+                              step={1}
+                              value={activeOverlay.borderRadius ?? 16}
+                              onChange={event =>
+                                setOverlayStyleOption(
+                                  activeOverlay.id,
+                                  "borderRadius",
+                                  Number(event.target.value)
+                                )
+                              }
+                            />
+                          </label>
+                          <label className="inspector-range">
+                            <span>
+                              <b>Rotation</b>
+                              <strong>{Math.round(activeOverlay.rotation || 0)}°</strong>
+                            </span>
+                            <input
+                              aria-label="Image rotation"
+                              type="range"
+                              min={-20}
+                              max={20}
+                              step={1}
+                              value={activeOverlay.rotation || 0}
+                              onChange={event =>
+                                setOverlayStyleOption(
+                                  activeOverlay.id,
+                                  "rotation",
+                                  Number(event.target.value)
+                                )
+                              }
+                            />
+                          </label>
+                          <label className="inspector-range">
+                            <span>
+                              <b>Opacity</b>
+                              <strong>{Math.round((activeOverlay.opacity ?? 1) * 100)}%</strong>
+                            </span>
+                            <input
+                              aria-label="Image opacity"
+                              type="range"
+                              min={10}
+                              max={100}
+                              step={5}
+                              value={Math.round((activeOverlay.opacity ?? 1) * 100)}
+                              onChange={event =>
+                                setOverlayOpacity(
+                                  activeOverlay.id,
+                                  Number(event.target.value) / 100
+                                )
+                              }
+                            />
+                          </label>
+                          <div className="inspector-field">
+                            <span>Entrance motion</span>
+                            <div className="inspector-choice-grid is-three">
+                              {[
+                                ["fade", "Fade"],
+                                ["slideUp", "Slide up"],
+                                ["zoom", "Zoom"],
+                              ].map(([value, label]) => (
+                                <button
+                                  key={value}
+                                  type="button"
+                                  className={
+                                    (activeOverlay.animation?.enter || "fade") === value
+                                      ? "is-active"
+                                      : ""
+                                  }
+                                  aria-pressed={
+                                    (activeOverlay.animation?.enter || "fade") === value
+                                  }
+                                  onClick={() =>
+                                    setOverlayAnimation(activeOverlay.id, "enter", value)
+                                  }
+                                >
+                                  {label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </>
+                      ) : null}
+
+                      <button
+                        type="button"
+                        className="inspector-primary-action"
+                        onClick={() => {
+                          setComparisonMode("split");
+                          focusComparisonPreview("broll", false);
+                          setStudioActionMessage(
+                            `${activeOverlay.type === "image" ? "Image" : "B-roll"} applied and previewing at its exact timeline position.`
+                          );
+                        }}
+                      >
+                        ▣ Apply {activeOverlay.type === "image" ? "image" : "B-roll"}
+                      </button>
+                    </>
+                  ) : (
+                    <div className="inspector-empty-state">
+                      <span>▣</span>
+                      <strong>No B-roll selected</strong>
+                      <small>Upload a clip or select a cutaway block in the timeline.</small>
+                    </div>
+                  )}
+                </div>
+              ) : null}
+
+              {studioInspectorTab === "sound" ? (
+                <div className="clip-inspector-body" role="tabpanel">
+                  <div className="inspector-heading-row">
+                    <div>
+                      <span className="panel-kicker">Sound mix</span>
+                      <h4>Keep speech clear and energy consistent</h4>
+                    </div>
+                    <span className={`inspector-status-dot ${addMusic ? "is-ready" : ""}`}>
+                      {addMusic ? "Music on" : "Voice only"}
+                    </span>
+                  </div>
+
+                  <AudioRemixPanel
+                    value={audioRemix}
+                    bypass={audioRemixBypass}
+                    meter={audioRemixMeter}
+                    loopActive={!!audioRemixLoop}
+                    hasMusic={addMusic && !!musicTrack}
+                    exactPreviewStatus={exactAudioRemixPreview.status}
+                    exactPreviewError={exactAudioRemixPreview.error}
+                    onChange={next => {
+                      const normalized = normalizeAudioRemix(next);
+                      setAudioRemix(normalized);
+                      setAudioRemixBypass(false);
+                      setPreviewSpeed(normalized.speed);
+                      setComparisonMode("after");
+                      setStudioActionMessage(
+                        `${normalized.preset.replaceAll("_", " ")} remix is live. EQ, reverb and speed are active in After.`
+                      );
+                    }}
+                    onBefore={() => {
+                      exactAudioRemixPreviewRef.current?.pause();
+                      backgroundSoundPreviewSuppressedRef.current = false;
+                      setAudioRemixBypass(true);
+                      setComparisonMode("after");
+                      safePlayMediaElement(videoRef.current);
+                      setStudioActionMessage("Before is playing with the original audio tone.");
+                    }}
+                    onPreview={handleExactAudioRemixPreview}
+                    onToggleLoop={() => {
+                      const video = videoRef.current;
+                      if (audioRemixLoop) {
+                        setAudioRemixLoop(null);
+                        setStudioActionMessage("Remix preview loop is off.");
+                        return;
+                      }
+                      const start = Math.max(0, Number(video?.currentTime || 0));
+                      const duration = Number(
+                        video?.duration || getClipDurationSeconds(currentTimelineClip) || 0
+                      );
+                      const end = Math.min(duration || start + 8, start + 8);
+                      setAudioRemixLoop({ start, end: Math.max(start + 0.5, end) });
+                      setAudioRemixBypass(false);
+                      safePlayMediaElement(video);
+                      setStudioActionMessage(
+                        `Looping ${formatPreviewTimePrecise(start)}–${formatPreviewTimePrecise(
+                          Math.max(start + 0.5, end)
+                        )} for an exact preset comparison.`
+                      );
+                    }}
+                  />
+
+                  {exactAudioRemixPreview.url ? (
+                    <SafeAudio
+                      ref={exactAudioRemixPreviewRef}
+                      data-testid="exact-audio-remix-preview"
+                      className="audio-remix-exact-player"
+                      controls
+                      preload="auto"
+                      src={exactAudioRemixPreview.url}
+                      onEnded={() => {
+                        backgroundSoundPreviewSuppressedRef.current = false;
+                        setStudioActionMessage("Exact Remix Audio preview finished.");
+                      }}
+                      onError={() => {
+                        backgroundSoundPreviewSuppressedRef.current = false;
+                        setExactAudioRemixPreview(current => ({
+                          ...current,
+                          status: "failed",
+                          error: "The mastered preview could not be played in this browser.",
+                        }));
+                      }}
+                    />
+                  ) : null}
+
+                  <label
+                    htmlFor="studio-background-sound-input"
+                    role="button"
+                    tabIndex={0}
+                    className="inspector-upload-card"
+                    onKeyDown={event => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        quickMusicFileInputRef.current?.click();
+                      }
+                    }}
+                  >
+                    <span>♫</span>
+                    <div>
+                      <strong>
+                        {addMusic && musicTrack ? musicTrack.name : "Add background sound"}
+                      </strong>
+                      <small>
+                        {addMusic ? "Click to replace this track" : "MP3, WAV, OGG, M4A or AAC"}
+                      </small>
+                    </div>
+                  </label>
+
+                  {addMusic && musicTrack ? (
+                    <>
+                      <label className="inspector-range">
+                        <span>
+                          <b>Background volume</b>
+                          <strong>{Math.round((musicTrack.volume ?? musicVolume) * 100)}%</strong>
+                        </span>
+                        <input
+                          type="range"
+                          min={5}
+                          max={60}
+                          step={1}
+                          value={Math.round((musicTrack.volume ?? musicVolume) * 100)}
+                          onChange={event => {
+                            const value = Number(event.target.value) / 100;
+                            setMusicVolume(value);
+                            setMusicTrackField("volume", value);
+                          }}
+                        />
+                      </label>
+
+                      <label className="inspector-check-row">
+                        <input
+                          type="checkbox"
+                          checked={musicTrack.ducking ?? true}
+                          onChange={event => setMusicTrackField("ducking", event.target.checked)}
+                        />
+                        <span>
+                          <strong>Duck under speech</strong>
+                          <small>Music lowers automatically while someone is talking.</small>
+                        </span>
+                      </label>
+
+                      {musicTrack.ducking ? (
+                        <label className="inspector-range">
+                          <span>
+                            <b>Speech ducking</b>
+                            <strong>
+                              {Math.round((musicTrack.duckingStrength ?? 0.4) * 100)}%
+                            </strong>
+                          </span>
+                          <input
+                            aria-label="Speech ducking strength"
+                            type="range"
+                            min={15}
+                            max={90}
+                            step={5}
+                            value={Math.round((musicTrack.duckingStrength ?? 0.4) * 100)}
+                            onChange={event =>
+                              setMusicTrackField(
+                                "duckingStrength",
+                                Number(event.target.value) / 100
+                              )
+                            }
+                          />
+                        </label>
+                      ) : null}
+
+                      <div className="inspector-dual-range">
+                        <label className="inspector-range">
+                          <span>
+                            <b>Fade in</b>
+                            <strong>{(musicTrack.fadeIn ?? 0.5).toFixed(1)}s</strong>
+                          </span>
+                          <input
+                            aria-label="Music fade in"
+                            type="range"
+                            min={0}
+                            max={5}
+                            step={0.1}
+                            value={musicTrack.fadeIn ?? 0.5}
+                            onChange={event =>
+                              setMusicTrackField("fadeIn", Number(event.target.value))
+                            }
+                          />
+                        </label>
+                        <label className="inspector-range">
+                          <span>
+                            <b>Fade out</b>
+                            <strong>{(musicTrack.fadeOut ?? 0.5).toFixed(1)}s</strong>
+                          </span>
+                          <input
+                            aria-label="Music fade out"
+                            type="range"
+                            min={0}
+                            max={5}
+                            step={0.1}
+                            value={musicTrack.fadeOut ?? 0.5}
+                            onChange={event =>
+                              setMusicTrackField("fadeOut", Number(event.target.value))
+                            }
+                          />
+                        </label>
+                      </div>
+
+                      <label className="inspector-check-row">
+                        <input
+                          type="checkbox"
+                          checked={musicTrack.loop ?? true}
+                          onChange={event => setMusicTrackField("loop", event.target.checked)}
+                        />
+                        <span>
+                          <strong>Loop for the full clip</strong>
+                          <small>Repeats shorter tracks across long podcast edits.</small>
+                        </span>
+                      </label>
+
+                      <div className="inspector-inline-actions">
+                        <button type="button" onClick={toggleBackgroundSoundPreview}>
+                          {isBackgroundSoundPreviewing ? "Stop sound" : "Preview sound"}
+                        </button>
+                        <button type="button" onClick={removeMusic}>
+                          Remove
+                        </button>
+                      </div>
+                    </>
+                  ) : null}
+
+                  <section className="sound-effects-section" aria-label="Sound effects">
+                    <div className="sound-effects-heading">
+                      <div>
+                        <span className="panel-kicker">Sound effects</span>
+                        <strong>Punch up cuts, reveals and proof moments</strong>
+                      </div>
+                      <span className="sound-effect-count">{soundEffects.length} placed</span>
+                    </div>
+
+                    <div className="sound-effect-preset-grid">
+                      {SOUND_EFFECT_PRESETS.map(preset => (
+                        <button
+                          key={preset.id}
+                          type="button"
+                          className="sound-effect-preset"
+                          onClick={() => addSoundEffectPreset(preset)}
+                          data-testid={`sound-effect-preset-${preset.id}`}
+                          aria-label={`Add ${preset.name} at playhead`}
+                        >
+                          <span>{preset.emoji}</span>
+                          <strong>{preset.name}</strong>
+                          <small>+ at playhead</small>
+                        </button>
+                      ))}
+                      <button
+                        type="button"
+                        className="sound-effect-preset is-upload"
+                        onClick={() => soundEffectFileInputRef.current?.click()}
+                      >
+                        <span>＋</span>
+                        <strong>Upload</strong>
+                        <small>Your own SFX</small>
+                      </button>
+                    </div>
+                    <input
+                      type="file"
+                      ref={soundEffectFileInputRef}
+                      data-testid="sound-effect-input"
+                      accept="audio/*,.mp3,.wav,.ogg,.m4a,.aac"
+                      style={{ display: "none" }}
+                      onChange={handleSoundEffectUpload}
+                    />
+
+                    {soundEffects.length ? (
+                      <div className="sound-effect-list" aria-label="Placed sound effects">
+                        {soundEffects.map(effect => (
+                          <button
+                            key={effect.id}
+                            type="button"
+                            className={`sound-effect-chip ${activeSoundEffectId === effect.id ? "is-active" : ""}`}
+                            onClick={() => {
+                              setActiveSoundEffectId(effect.id);
+                              seekLiveEditTimelineItem(Number(effect.startTime || 0), "sound");
+                            }}
+                          >
+                            <span>{effect.emoji || "🔊"}</span>
+                            <b>{effect.name}</b>
+                            <small>{formatPreviewTimePrecise(effect.startTime)}</small>
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="sound-effect-empty">
+                        Put the playhead on a cut, reveal or caption hit, then add an effect.
+                      </p>
+                    )}
+
+                    {activeSoundEffect ? (
+                      <div className="sound-effect-editor-card" data-testid="sound-effect-editor">
+                        <div className="sound-effect-editor-title">
+                          <span>{activeSoundEffect.emoji || "🔊"}</span>
+                          <div>
+                            <strong>{activeSoundEffect.name}</strong>
+                            <small>
+                              {activeSoundEffect.builtIn
+                                ? "Built-in · instant preview"
+                                : "Uploaded effect"}
+                            </small>
+                          </div>
+                          <label className="sound-effect-enable">
+                            <input
+                              type="checkbox"
+                              checked={activeSoundEffect.enabled !== false}
+                              onChange={event =>
+                                updateSoundEffect(activeSoundEffect.id, {
+                                  enabled: event.target.checked,
+                                })
+                              }
+                            />
+                            On
+                          </label>
+                        </div>
+
+                        <SoundWaveform
+                          effect={activeSoundEffect}
+                          playhead={previewTimelineTime}
+                          onSeek={time => seekLiveEditTimelineItem(time, "sound")}
+                        />
+                        <div className="inspector-time-grid sound-effect-time-grid">
+                          <label>
+                            <span>Start</span>
+                            <input
+                              data-testid="sound-effect-start"
+                              type="number"
+                              min={0}
+                              max={outputTimelineDuration}
+                              step={0.05}
+                              value={Number(activeSoundEffect.startTime || 0).toFixed(2)}
+                              onChange={event =>
+                                updateSoundEffect(activeSoundEffect.id, {
+                                  startTime: Number(event.target.value),
+                                })
+                              }
+                            />
+                          </label>
+                          <label>
+                            <span>Duration</span>
+                            <input
+                              data-testid="sound-effect-duration"
+                              type="number"
+                              min={0.05}
+                              max={15}
+                              step={0.05}
+                              value={getSoundEffectDuration(activeSoundEffect).toFixed(2)}
+                              onChange={event =>
+                                updateSoundEffect(activeSoundEffect.id, {
+                                  duration: Number(event.target.value),
+                                })
+                              }
+                            />
+                          </label>
+                          <label>
+                            <span>Trim start</span>
+                            <input
+                              type="number"
+                              min={0}
+                              step={0.05}
+                              value={Number(activeSoundEffect.trimStart || 0).toFixed(2)}
+                              disabled={activeSoundEffect.builtIn}
+                              onChange={event =>
+                                updateSoundEffect(activeSoundEffect.id, {
+                                  trimStart: Number(event.target.value),
+                                })
+                              }
+                            />
+                          </label>
+                        </div>
+
+                        <label className="inspector-range">
+                          <span>
+                            <b>Effect volume</b>
+                            <strong>{Math.round(activeSoundEffect.volume * 100)}%</strong>
+                          </span>
+                          <input
+                            data-testid="sound-effect-volume"
+                            type="range"
+                            min={0}
+                            max={100}
+                            step={1}
+                            value={Math.round(activeSoundEffect.volume * 100)}
+                            onChange={event =>
+                              updateSoundEffect(activeSoundEffect.id, {
+                                volume: Number(event.target.value) / 100,
+                              })
+                            }
+                          />
+                        </label>
+
+                        <div className="inspector-dual-range">
+                          <label className="inspector-range">
+                            <span>
+                              <b>Fade in</b>
+                              <strong>{Number(activeSoundEffect.fadeIn || 0).toFixed(2)}s</strong>
+                            </span>
+                            <input
+                              data-testid="sound-effect-fade-in"
+                              type="range"
+                              min={0}
+                              max={Math.min(2, getSoundEffectDuration(activeSoundEffect))}
+                              step={0.01}
+                              value={Number(activeSoundEffect.fadeIn || 0)}
+                              onChange={event =>
+                                updateSoundEffect(activeSoundEffect.id, {
+                                  fadeIn: Number(event.target.value),
+                                })
+                              }
+                            />
+                          </label>
+                          <label className="inspector-range">
+                            <span>
+                              <b>Fade out</b>
+                              <strong>{Number(activeSoundEffect.fadeOut || 0).toFixed(2)}s</strong>
+                            </span>
+                            <input
+                              data-testid="sound-effect-fade-out"
+                              type="range"
+                              min={0}
+                              max={Math.min(2, getSoundEffectDuration(activeSoundEffect))}
+                              step={0.01}
+                              value={Number(activeSoundEffect.fadeOut || 0)}
+                              onChange={event =>
+                                updateSoundEffect(activeSoundEffect.id, {
+                                  fadeOut: Number(event.target.value),
+                                })
+                              }
+                            />
+                          </label>
+                        </div>
+
+                        <div className="inspector-inline-actions">
+                          <button
+                            type="button"
+                            data-testid="sound-effect-preview"
+                            onClick={() => void toggleSoundEffectPreview(activeSoundEffect)}
+                          >
+                            {previewingSoundEffectId === activeSoundEffect.id
+                              ? "Stop SFX"
+                              : "Preview SFX"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              seekLiveEditTimelineItem(
+                                Number(activeSoundEffect.startTime || 0),
+                                "sound"
+                              );
+                              setComparisonMode("after");
+                            }}
+                          >
+                            Go to cue
+                          </button>
+                          <button
+                            type="button"
+                            data-testid="sound-effect-remove"
+                            onClick={() => removeSoundEffect(activeSoundEffect.id)}
+                          >
+                            Remove SFX
+                          </button>
+                        </div>
+                      </div>
+                    ) : null}
+                  </section>
+
+                  <label className="inspector-check-row">
+                    <input
+                      type="checkbox"
+                      checked={!muteOriginalAudio}
+                      onChange={event => setMuteOriginalAudio(!event.target.checked)}
+                    />
+                    <span>
+                      <strong>Keep original audio</strong>
+                      <small>Voice and room sound remain present outside cutaway rules.</small>
+                    </span>
+                  </label>
+
+                  <div className="sound-flow-summary">
+                    <span>Source voice</span>
+                    <i>→</i>
+                    <span>B-roll rules</span>
+                    <i>→</i>
+                    <span>SFX hits</span>
+                    <i>→</i>
+                    <span>Music ducking</span>
+                  </div>
+                </div>
+              ) : null}
+
+              <div className="clip-inspector-feedback" role="status">
+                <span>✓</span>
+                <p>{studioActionMessage}</p>
+              </div>
+            </section>
+            {/* ── B-Roll / Overlay Timeline Track ── */}
+            <section className="studio-panel broll-timeline-panel">
+              <div className="panel-heading compact">
+                <div>
+                  <span className="panel-kicker">B-Roll</span>
+                  <h4>Main · Hook · B-Roll</h4>
+                  <p className="panel-description">
+                    Upload clips to place real cutaways, or add a placeholder beat while planning.
+                  </p>
+                </div>
+              </div>
+              <div className="broll-sound-panel">
+                <div className="broll-sound-panel-header">
+                  <div>
+                    <span className="panel-kicker">Background Sound</span>
+                    <strong>
+                      {addMusic && musicTrack
+                        ? musicTrack.name || "Custom sound"
+                        : "No sound uploaded"}
+                    </strong>
+                  </div>
+                  {addMusic && musicTrack ? (
+                    <span className="broll-sound-state">
+                      {isBackgroundSoundPreviewing ? "Playing" : "Ready"}
+                    </span>
+                  ) : null}
+                </div>
+                <input
+                  id="studio-background-sound-input"
+                  type="file"
+                  ref={quickMusicFileInputRef}
+                  data-testid="background-sound-input"
+                  accept="audio/*,.mp3,.wav,.ogg,.m4a,.aac"
+                  className="visually-hidden-file-input"
+                  onChange={handleMusicFileUpload}
+                />
+                <div className="broll-sound-actions">
+                  <label
+                    htmlFor="studio-background-sound-input"
+                    role="button"
+                    tabIndex={0}
+                    className="clip-action-btn broll-sound-btn"
+                    onKeyDown={event => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        quickMusicFileInputRef.current?.click();
+                      }
+                    }}
+                  >
+                    {addMusic && musicTrack ? "Change Background Sound" : "Upload Background Sound"}
+                  </label>
+                  {addMusic && musicTrack ? (
+                    <>
+                      <button
+                        type="button"
+                        className="clip-action-btn broll-sound-active-btn"
+                        onClick={toggleBackgroundSoundPreview}
+                        title="Play or pause background sound preview"
+                      >
+                        {isBackgroundSoundPreviewing ? "Stop Sound" : "Preview Sound"}
+                      </button>
+                      <button
+                        type="button"
+                        className="clip-action-btn broll-sound-active-btn"
+                        onClick={removeMusic}
+                        title="Remove background sound"
+                      >
+                        Remove Sound
+                      </button>
+                    </>
+                  ) : null}
+                </div>
+                <SafeAudio
+                  ref={musicPreviewRef}
+                  data-testid="background-sound-preview"
+                  className={`broll-sound-player ${addMusic && effectiveMusicPreviewUrl ? "" : "empty"}`}
+                  controls={addMusic && !!effectiveMusicPreviewUrl}
+                  preload="auto"
+                  src={addMusic ? effectiveMusicPreviewUrl : undefined}
+                />
+                {soundEffects
+                  .filter(effect => !effect.builtIn && effect.url)
+                  .map(effect => (
+                    <SafeAudio
+                      key={effect.id}
+                      ref={element => {
+                        if (element) soundEffectAudioRefsRef.current.set(effect.id, element);
+                        else soundEffectAudioRefsRef.current.delete(effect.id);
+                      }}
+                      data-testid={`sound-effect-audio-${effect.id}`}
+                      preload="auto"
+                      src={effect.url}
+                      style={{ display: "none" }}
+                      onLoadedMetadata={event => {
+                        const availableDuration = Math.max(
+                          0.05,
+                          Number(event.currentTarget.duration || 0) - Number(effect.trimStart || 0)
+                        );
+                        if (Number.isFinite(availableDuration) && availableDuration > 0) {
+                          updateSoundEffect(effect.id, {
+                            duration: Math.min(getSoundEffectDuration(effect), availableDuration),
+                          });
+                        }
+                      }}
+                      onEnded={() =>
+                        setPreviewingSoundEffectId(current =>
+                          current === effect.id ? null : current
+                        )
+                      }
+                    />
+                  ))}
+                {addMusic && musicPreviewStatusMessage ? (
+                  <p className="broll-sound-message">{musicPreviewStatusMessage}</p>
+                ) : null}
+              </div>
+              <div className="broll-timeline-tracks">
+                {/* Track: Main Video */}
+                <div className="broll-track-row">
+                  <span className="broll-track-label">🎬 Main</span>
+                  <div className="broll-track-bar">
+                    <div
+                      className="broll-main-block"
+                      style={{ width: "100%" }}
+                      title="Main A-roll video"
+                    />
+                  </div>
+                </div>
+
+                {/* Track: Captions */}
+                <div className="broll-track-row">
+                  <span className="broll-track-label">💬 Captions</span>
+                  <div className="broll-track-bar">
+                    <div
+                      className="broll-captions-block"
+                      style={{ width: "100%" }}
+                      title="Auto-captions track"
+                    />
+                  </div>
+                </div>
+
+                {/* Track: B-Roll Overlays */}
+                <div className="broll-track-row">
+                  <span className="broll-track-label">🎞️ B-Roll</span>
+                  <div className="broll-track-bar" style={{ position: "relative" }}>
+                    {/* Playhead */}
+                    <div
+                      className="broll-playhead"
+                      style={{
+                        left: liveTimelineDuration
+                          ? `${Math.min(100, (previewTimelineTime / liveTimelineDuration) * 100)}%`
+                          : "0%",
+                      }}
+                    />
+                    {/* Overlay blocks */}
+                    {overlays
+                      .filter(o => o.startTime !== undefined && o.duration !== undefined)
+                      .map(o => {
+                        const leftPct = liveTimelineDuration
+                          ? (Number(o.startTime) / liveTimelineDuration) * 100
+                          : 0;
+                        const widthPct = liveTimelineDuration
+                          ? (Number(o.duration) / liveTimelineDuration) * 100
+                          : 0;
+                        const isActive = activeOverlayId === o.id;
+                        const label =
+                          o.type === "text"
+                            ? (o.text || "").slice(0, 8) || "Text"
+                            : o.type === "video"
+                              ? "🎥"
+                              : "🖼️";
+                        return (
+                          <div
+                            key={o.id}
+                            className={`broll-overlay-block ${isActive ? "active" : ""} ${o.bRollMode === "fullscreen" ? "fullscreen" : ""}`}
+                            style={{
+                              left: `${leftPct}%`,
+                              width: `${Math.max(1, widthPct)}%`,
+                              opacity: o.opacity !== undefined ? o.opacity : 1,
+                            }}
+                            onClick={() => setActiveOverlayId(o.id)}
+                            title={`${label} — ${Number(o.startTime).toFixed(1)}s → ${(Number(o.startTime) + Number(o.duration)).toFixed(1)}s${o.bRollMode ? ` (${o.bRollMode})` : ""}`}
+                          >
+                            <span className="broll-overlay-block-label">{label}</span>
+                          </div>
+                        );
+                      })}
+                    {/* Empty state */}
+                    {overlays.filter(o => o.startTime !== undefined && o.duration !== undefined)
+                      .length === 0 && (
+                      <div className="broll-empty-hint">
+                        Add a B-roll beat or upload a B-roll video
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Track: Audio */}
+                <div className="broll-track-row">
+                  <span className="broll-track-label">🔊 Audio</span>
+                  <div className="broll-track-bar" style={{ position: "relative" }}>
+                    {/* Main audio */}
+                    <div
+                      className="broll-audio-block"
+                      style={{
+                        width: muteOriginalAudio ? "0%" : "100%",
+                        opacity: muteOriginalAudio ? 0.25 : 0.55,
+                        height: addMusic ? "45%" : "100%",
+                        top: addMusic ? 0 : undefined,
+                      }}
+                      title={muteOriginalAudio ? "Main audio muted" : "Main audio active"}
+                    />
+                    {/* Music track overlay */}
+                    {addMusic && (
+                      <div
+                        className="broll-audio-block broll-music-block"
+                        style={{
+                          width: "100%",
+                          height: "55%",
+                          bottom: 0,
+                          opacity: 0.7,
+                          background: "linear-gradient(135deg, #a78bfa, #7c3aed)",
+                        }}
+                        title={`Music: ${musicTrack?.name || "Active"} · Vol: ${Math.round((musicTrack?.volume ?? musicVolume) * 100)}% · Ducking: ${musicTrack?.ducking ? (musicTrack.duckingMode === "speech" ? "Speech-aware" : "Constant") : "Off"}`}
+                      />
+                    )}
+                    {/* Music fade indicators */}
+                    {addMusic && musicTrack && (
+                      <>
+                        <div
+                          style={{
+                            position: "absolute",
+                            left: 0,
+                            top: 0,
+                            bottom: 0,
+                            width: `${Math.min(100, ((musicTrack.fadeIn || 0.5) / liveTimelineDuration) * 100)}%`,
+                            background:
+                              "linear-gradient(90deg, rgba(255,255,255,0.15), transparent)",
+                            pointerEvents: "none",
+                            zIndex: 2,
+                          }}
+                          title={`Fade In: ${musicTrack.fadeIn}s`}
+                        />
+                        <div
+                          style={{
+                            position: "absolute",
+                            right: 0,
+                            top: 0,
+                            bottom: 0,
+                            width: `${Math.min(100, ((musicTrack.fadeOut || 0.5) / liveTimelineDuration) * 100)}%`,
+                            background:
+                              "linear-gradient(270deg, rgba(255,255,255,0.15), transparent)",
+                            pointerEvents: "none",
+                            zIndex: 2,
+                          }}
+                          title={`Fade Out: ${musicTrack.fadeOut}s`}
+                        />
+                      </>
+                    )}
+                    {soundEffects.map(effect => {
+                      const left = liveTimelineDuration
+                        ? (Number(effect.startTime || 0) / liveTimelineDuration) * 100
+                        : 0;
+                      const width = liveTimelineDuration
+                        ? (getSoundEffectDuration(effect) / liveTimelineDuration) * 100
+                        : 0;
+                      return (
+                        <button
+                          key={`broll-sfx-${effect.id}`}
+                          type="button"
+                          className={`broll-sfx-block ${activeSoundEffectId === effect.id ? "is-active" : ""}`}
+                          style={{ left: `${left}%`, width: `${Math.max(1.8, width)}%` }}
+                          onClick={() => {
+                            setActiveSoundEffectId(effect.id);
+                            seekLiveEditTimelineItem(Number(effect.startTime || 0), "sound");
+                          }}
+                          title={`${effect.name} sound effect at ${formatPreviewTimePrecise(effect.startTime)}`}
+                        >
+                          {effect.emoji || "🔊"}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+              {/* Quick actions */}
+              <div className="broll-timeline-actions">
+                <button
+                  type="button"
+                  className="clip-action-btn"
+                  onClick={() => {
+                    const suggestions = suggestBRollMoments();
+                    if (suggestions.length === 0) {
+                      toast("Clip too short for B-roll suggestions.");
+                      return;
+                    }
+                    addBRollSuggestionOverlay(suggestions[0]);
+                  }}
+                >
+                  Add Placeholder Beat
+                </button>
+                <button
+                  type="button"
+                  className="clip-action-btn"
+                  onClick={() => {
+                    const currentVideoTime = videoRef.current ? videoRef.current.currentTime : 0;
+                    let relativeStartTime = currentVideoTime;
+                    if (selectedClip && activeTimelineIndex === 0) {
+                      relativeStartTime = Math.max(0, currentVideoTime - (selectedClip.start || 0));
+                    }
+                    const newOverlay = buildBRollOverlay({
+                      ...getBRollSuggestionCopy(getBRollStyleForClip()),
+                      style: getBRollStyleForClip(),
+                      time: relativeStartTime,
+                      duration: 1.8,
+                    });
+                    setOverlays(prev => [...prev, newOverlay]);
+                    setActiveOverlayId(newOverlay.id);
+                    toast.success("B-roll beat added at playhead.");
+                  }}
+                >
+                  Add Beat at Playhead
+                </button>
+                <input
+                  type="file"
+                  ref={brollVideoInputRef}
+                  data-testid="broll-video-input"
+                  accept="video/*"
+                  multiple
+                  style={{ display: "none" }}
+                  onChange={handleBRollVideoUpload}
+                />
+                <button
+                  type="button"
+                  className="clip-action-btn broll-upload-btn"
+                  onClick={() => brollVideoInputRef.current?.click()}
+                >
+                  📹 Upload B-Roll Clips
+                </button>
+              </div>
+
+              {(() => {
+                const brollVideoOverlays = overlays.filter(
+                  overlay => overlay.type === "video" && overlay.bRollMode
+                );
+                if (!brollVideoOverlays.length) return null;
+                return (
+                  <div className="broll-clip-library">
+                    <div className="broll-clip-library-header">
+                      <span>Uploaded B-roll clips</span>
+                      <strong>{brollVideoOverlays.length}</strong>
+                    </div>
+                    <div className="broll-clip-grid">
+                      {brollVideoOverlays.map((overlay, index) => {
+                        const safeSrc = getSafeMediaSource(overlay.src);
+                        const isActive = activeOverlayId === overlay.id;
+                        const label =
+                          overlay.file?.name || overlay.name || `B-roll clip ${index + 1}`;
+                        return (
+                          <div
+                            key={overlay.id}
+                            className={`broll-clip-card ${isActive ? "active" : ""}`}
+                            onClick={() => selectBRollOverlay(overlay)}
+                          >
+                            <div className="broll-clip-preview">
+                              {safeSrc ? (
+                                <video
+                                  ref={element => {
+                                    applySafeMediaSource(element, safeSrc);
+                                  }}
+                                  controls
+                                  muted
+                                  playsInline
+                                  preload="metadata"
+                                />
+                              ) : (
+                                <span>No preview</span>
+                              )}
+                            </div>
+                            <div className="broll-clip-meta">
+                              <strong title={label}>{label}</strong>
+                              <span>
+                                {Number(overlay.startTime || 0).toFixed(1)}s ·{" "}
+                                {Number(overlay.duration || 0).toFixed(1)}s
+                              </span>
+                            </div>
+                            <div className="broll-clip-actions">
+                              <button
+                                type="button"
+                                className="mini-toggle-btn"
+                                onClick={event => {
+                                  event.stopPropagation();
+                                  selectBRollOverlay(overlay);
+                                }}
+                              >
+                                Select
+                              </button>
+                              <button
+                                type="button"
+                                className="mini-toggle-btn"
+                                onClick={event => {
+                                  event.stopPropagation();
+                                  deleteOverlay(overlay.id);
+                                }}
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* B-roll suggestions list */}
+              {(() => {
+                const suggestions = suggestBRollMoments();
+                if (suggestions.length === 0) return null;
+                return (
+                  <div className="broll-suggestions">
+                    <span className="broll-suggestions-title">
+                      B-roll Shot Beats · showing {Math.min(8, suggestions.length)} of{" "}
+                      {suggestions.length}
+                    </span>
+                    {suggestions.slice(0, 8).map((s, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        className="broll-suggestion-chip"
+                        onClick={() => addBRollSuggestionOverlay(s)}
+                      >
+                        <strong>{s.time.toFixed(1)}s</strong> — {s.kicker}
+                        <span className="broll-suggestion-reason">{s.reason}</span>
+                      </button>
+                    ))}
+                  </div>
+                );
+              })()}
+            </section>
+
+            <section className="studio-panel workflow-summary-panel">
+              <div className="panel-heading compact">
+                <div>
+                  <span className="panel-kicker">Workflow</span>
+                  <h4>One pass to publish</h4>
+                </div>
+              </div>
+              <div className="workflow-summary-grid">
+                <div className="workflow-summary-item active">
+                  <strong>1. Choose the moment</strong>
+                  <span>Start with the clip most likely to stop the scroll.</span>
+                </div>
+                <div className="workflow-summary-item">
+                  <strong>2. Sharpen the frame</strong>
+                  <span>Add only the framing, text, and sound that make the promise clearer.</span>
+                </div>
+                <div className="workflow-summary-item">
+                  <strong>3. Render for publish</strong>
+                  <span>What you approve in Studio is what AutoPromote sends to export.</span>
+                </div>
+              </div>
+            </section>
+
+            {campaignSet.length ? (
+              <section className="studio-panel">
+                <div className="panel-heading compact">
+                  <div>
+                    <span className="panel-kicker">Campaign Set</span>
+                    <h4>Multiple angles from one source</h4>
+                    <p className="panel-description">
+                      Use different strategic cuts instead of betting everything on one export.
+                    </p>
+                  </div>
+                </div>
+                <div className="campaign-set-grid">
+                  {campaignSet.map(item => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      className="campaign-set-card"
+                      onClick={() => handleClipAction(item.entry.clip, { type: "use" })}
+                    >
+                      <span className="campaign-set-label">{item.label}</span>
+                      <strong>{item.entry.momentFamilyLabel}</strong>
+                      <span className="campaign-set-summary">{item.summary}</span>
+                      <span className="campaign-set-score">Viral Score {item.entry.score}</span>
+                    </button>
+                  ))}
+                </div>
+              </section>
+            ) : null}
+
+            {momentFamilies.length ? (
+              <section className="studio-panel">
+                <div className="panel-heading compact">
+                  <div>
+                    <span className="panel-kicker">Moment Families</span>
+                    <h4>Clusters, not duplicates</h4>
+                    <p className="panel-description">
+                      Similar highlights are grouped so the best angle wins without flooding the
+                      list.
+                    </p>
+                  </div>
+                </div>
+                <div className="family-cluster-list">
+                  {momentFamilies.slice(0, 4).map(family => (
+                    <button
+                      key={family.id}
+                      type="button"
+                      className={`family-cluster-card ${
+                        selectedMomentFamily?.id === family.id ? "active" : ""
+                      }`}
+                      onClick={() => handleClipAction(family.topEntry.clip, { type: "use" })}
+                    >
+                      <div className="family-cluster-topline">
+                        <span className="family-cluster-label">{family.label}</span>
+                        <span className="family-cluster-size">
+                          {family.members.length} angle{family.members.length === 1 ? "" : "s"}
+                        </span>
+                      </div>
+                      <strong>{family.headline}</strong>
+                      <span className="family-cluster-summary">{family.summary}</span>
+                    </button>
+                  ))}
+                </div>
+              </section>
+            ) : null}
+
+            <section className="studio-panel clips-list">
+              <div className="panel-heading compact">
+                <div>
+                  <span className="panel-kicker">Hook source</span>
+                  <h4>Choose the opening moment</h4>
+                </div>
+              </div>
+              {selectedClip && selectedClipGuidance ? (
+                <div
+                  className={`clip-guidance-card ${selectedClip.id === bestClipId ? "is-best" : ""}`}
+                  data-testid="selected-clip-guidance"
+                >
+                  <div className="clip-guidance-head">
+                    <div>
+                      <span className="clip-guidance-kicker">
+                        {selectedClip.id === bestClipId
+                          ? "BEST CLIP"
+                          : topPickIds.has(selectedClip.id)
+                            ? "TOP PICK"
+                            : "Selected clip"}
+                      </span>
+                      <h5>
+                        Hook Score: {selectedClipGuidance.score}
+                        <span className="clip-guidance-score-fire">🔥</span>
+                      </h5>
+                    </div>
+                    <div className="clip-guidance-timing-pill">
+                      #
+                      {rankedClipGuidance.findIndex(entry => entry.clip.id === selectedClip.id) + 1}
+                    </div>
+                  </div>
+
+                  <p className="clip-guidance-summary">
+                    {selectedClip.id === bestClipId
+                      ? "This has the highest viral potential right now."
+                      : "This moment is ready for hook tuning and export."}
+                  </p>
+
+                  <div className="clip-guidance-timing">
+                    <span>Start: {Number(selectedClip.start || 0).toFixed(1)}s</span>
+                    <span>End: {Number(selectedClip.end || 0).toFixed(1)}s</span>
+                    <span>{selectedClipGuidance.duration.toFixed(1)}s</span>
+                  </div>
+
+                  <div className="clip-guidance-tag-row">
+                    <span className="clip-tag-pill compact clip-tag-pill-family">
+                      Family: {selectedClipGuidance.momentFamilyLabel}
+                    </span>
+                    {selectedClipGuidance.bestFor.map((fit, index) => (
+                      <span
+                        key={`${selectedClip.id}-fit-${fit}-${index}`}
+                        className="clip-tag-pill compact"
+                      >
+                        {fit}
+                      </span>
+                    ))}
+                    <span className="clip-tag-pill compact">
+                      Export fit: {selectedClipGuidance.exportFit}
+                    </span>
+                  </div>
+
+                  <div className="clip-guidance-tag-row">
+                    {selectedClipGuidance.categories.map((category, index) => (
+                      <span
+                        key={`${selectedClip.id}-${category.label}-${index}`}
+                        className="clip-tag-pill"
+                      >
+                        {category.icon} {category.label}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="clip-guidance-packaging">
+                    <strong>Packaging move</strong>
+                    <p>{selectedClipGuidance.openingMove}</p>
+                    <div className="clip-guidance-storyline">
+                      <span className="clip-guidance-storyline-label">Why this can travel</span>
+                      <p>{selectedClipGuidance.travelReason}</p>
+                    </div>
+                    <div className="clip-guidance-scoreboard">
+                      {selectedClipGuidance.scoreBreakdown.slice(0, 6).map(entry => (
+                        <div
+                          key={`${selectedClip.id}-${entry.label}`}
+                          className="clip-guidance-score-item"
+                        >
+                          <span>{entry.label}</span>
+                          <div className="clip-guidance-score-track">
+                            <span
+                              className="clip-guidance-score-fill"
+                              style={{ width: `${entry.value}%` }}
+                            />
+                          </div>
+                          <strong>{entry.value}</strong>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="clip-guidance-variants">
+                    <strong>Alternate recuts</strong>
+                    <div className="clip-guidance-variant-grid">
+                      {selectedClipGuidance.recutVariants.map(variant => (
+                        <button
+                          key={`${selectedClip.id}-${variant.id}`}
+                          type="button"
+                          className="clip-guidance-variant-card"
+                          onClick={() =>
+                            handleClipAction(selectedClip, {
+                              type: "apply-variant",
+                              variant,
+                            })
+                          }
+                        >
+                          <span className="clip-guidance-variant-label">{variant.label}</span>
+                          <span className="clip-guidance-variant-summary">{variant.summary}</span>
+                          <span className="clip-guidance-variant-range">
+                            {variant.start.toFixed(1)}s - {variant.end.toFixed(1)}s
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {familySiblingEntries.length ? (
+                    <div className="clip-guidance-family">
+                      <strong>Sibling angles in this family</strong>
+                      <div className="clip-guidance-family-grid">
+                        {familySiblingEntries.map(entry => (
+                          <button
+                            key={`${selectedClip.id}-family-${entry.clip.id}`}
+                            type="button"
+                            className="clip-guidance-family-card"
+                            onClick={() => handleClipAction(entry.clip, { type: "use" })}
+                          >
+                            <span className="clip-guidance-family-label">
+                              {entry.narrativeRole.label}
+                            </span>
+                            <span className="clip-guidance-family-summary">
+                              {entry.openingMove}
+                            </span>
+                            <span className="clip-guidance-family-score">Score {entry.score}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+
+                  <div className="clip-guidance-actions compact">
+                    <button
+                      type="button"
+                      className="clip-action-btn"
+                      onClick={() => handleClipAction(selectedClip, { type: "use" })}
+                    >
+                      Use in Editor
+                    </button>
+                    <button
+                      type="button"
+                      className="clip-action-btn clip-action-btn-primary"
+                      onClick={() => handleClipAction(selectedClip, { type: "apply-hook" })}
+                    >
+                      Apply Hook
+                    </button>
+                  </div>
+
+                  <div className="clip-jump-row">
+                    <button
+                      type="button"
+                      className="clip-jump-btn"
+                      onClick={() => jumpToSourceTime(Number(selectedClip.start || 0))}
+                    >
+                      Jump to start
+                    </button>
+                    <button
+                      type="button"
+                      className="clip-jump-btn"
+                      onClick={() => jumpToSourceTime(Number(selectedClip.end || 0))}
+                    >
+                      Jump to end
+                    </button>
+                  </div>
+
+                  <div className="clip-guidance-reasons">
+                    <strong>Why this clip</strong>
+                    {selectedClipGuidance.reasons.slice(0, 4).map((reason, index) => (
+                      <div
+                        key={`${selectedClip.id}-${reason}-${index}`}
+                        className="clip-guidance-reason"
+                      >
+                        ✔ {reason}
+                      </div>
+                    ))}
+                  </div>
+
+                  {selectedClipGuidance.score < 60 ? (
+                    <div className="clip-fix-card">
+                      <strong>This clip can perform better</strong>
+                      {selectedClipGuidance.improvements.map((item, index) => (
+                        <div key={`${selectedClip.id}-${item}-${index}`} className="clip-fix-item">
+                          • {item}
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        className="clip-action-btn clip-action-btn-primary"
+                        onClick={() => handleClipAction(selectedClip, { type: "improve" })}
+                      >
+                        Improve Clip
+                      </button>
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
+              <div className="clips-scroller">
+                {orderedClips.map((clip, idx) => {
+                  const clipGuidance = clipGuidanceById.get(clip.id);
+                  const isBestClip = clip.id === bestClipId;
+                  const isTopPick = topPickIds.has(clip.id);
+
+                  return (
+                    <div
+                      key={clip.id}
+                      data-testid={`detected-clip-${clip.id}`}
+                      className={`clip-card ${selectedClip && selectedClip.id === clip.id ? "active" : ""} ${isBestClip ? "top-pick" : ""} ${isTopPick && !isBestClip ? "runner-up" : ""}`}
+                      draggable={orderedClips.length > 1}
+                      onDragStart={() => setDraggedDetectedClipId(clip.id)}
+                      onDragEnd={() => setDraggedDetectedClipId(null)}
+                      onDragOver={e => {
+                        e.preventDefault();
+                      }}
+                      onDrop={e => {
+                        e.preventDefault();
+                        if (draggedDetectedClipId === null || draggedDetectedClipId === clip.id)
+                          return;
+                        moveDetectedClipToIndex(draggedDetectedClipId, idx);
+                        setDraggedDetectedClipId(null);
+                      }}
+                      onClick={() => focusClipInEditor(clip, { boundary: "start", play: false })}
+                      style={
+                        draggedDetectedClipId === clip.id
+                          ? { borderStyle: "dashed", borderColor: "#e52e71" }
+                          : undefined
+                      }
+                    >
+                      <div className="clip-card-main">
+                        <div className="clip-card-header-row">
+                          <div className="clip-card-title-group">
+                            <span className="clip-badge">#{idx + 1}</span>
+                            {isBestClip ? (
+                              <span className="clip-priority-badge best">BEST CLIP</span>
+                            ) : null}
+                            {!isBestClip && isTopPick ? (
+                              <span className="clip-priority-badge">TOP PICK</span>
+                            ) : null}
+                          </div>
+                          <div className="clip-score-stack">
+                            <span className="clip-score-label">Viral Score</span>
+                            <strong>🔥 {clipGuidance?.score ?? 0}</strong>
+                          </div>
+                        </div>
+
+                        <div className="clip-timing-row">
+                          <span>Start {Number(clip.start || 0).toFixed(1)}s</span>
+                          <span>End {Number(clip.end || 0).toFixed(1)}s</span>
+                          <span>
+                            {(clipGuidance?.duration ?? getClipDurationSeconds(clip)).toFixed(1)}s
+                          </span>
+                        </div>
+
+                        <p>{normalizePlainText(clip.reason || "Primary detected moment")}</p>
+
+                        <div className="clip-tag-row">
+                          {clipGuidance?.momentFamilyLabel ? (
+                            <span className="clip-tag-pill compact clip-tag-pill-family">
+                              {clipGuidance.momentFamilyLabel}
+                            </span>
+                          ) : null}
+                          {(clipGuidance?.bestFor || []).map((fit, index) => (
+                            <span
+                              key={`${clip.id}-best-for-${fit}-${index}`}
+                              className="clip-tag-pill compact"
+                            >
+                              {fit}
+                            </span>
+                          ))}
+                          {(clipGuidance?.categories || []).map((category, index) => (
+                            <span
+                              key={`${clip.id}-${category.label}-${index}`}
+                              className="clip-tag-pill compact"
+                            >
+                              {category.icon} {category.label}
+                            </span>
+                          ))}
+                        </div>
+
+                        <div className="clip-guidance-mini-list">
+                          {clipGuidance?.travelReason ? (
+                            <div className="clip-guidance-mini-item emphasis">
+                              ★ {clipGuidance.travelReason}
+                            </div>
+                          ) : null}
+                          {clipGuidance?.openingMove ? (
+                            <div className="clip-guidance-mini-item">
+                              ↳ {clipGuidance.openingMove}
+                            </div>
+                          ) : null}
+                          {(clipGuidance?.reasons || []).slice(0, 3).map((reason, index) => (
+                            <div
+                              key={`${clip.id}-${reason}-${index}`}
+                              className="clip-guidance-mini-item"
+                            >
+                              ✔ {reason}
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="clip-guidance-actions">
+                          <button
+                            type="button"
+                            className="clip-action-btn"
+                            data-testid={`clip-action-use-${clip.id}`}
+                            onClick={e => {
+                              e.stopPropagation();
+                              handleClipAction(clip, { type: "use" });
+                            }}
+                          >
+                            Use in Editor
+                          </button>
+                          <button
+                            type="button"
+                            className="clip-action-btn clip-action-btn-primary"
+                            data-testid={`clip-action-hook-${clip.id}`}
+                            onClick={e => {
+                              e.stopPropagation();
+                              handleClipAction(clip, { type: "apply-hook" });
+                            }}
+                          >
+                            Apply Hook
+                          </button>
+                          {clipGuidance?.recutVariants?.[0] ? (
+                            <button
+                              type="button"
+                              className="clip-action-btn"
+                              onClick={e => {
+                                e.stopPropagation();
+                                handleClipAction(clip, {
+                                  type: "apply-variant",
+                                  variant: clipGuidance.recutVariants[0],
+                                });
+                              }}
+                            >
+                              {clipGuidance.recutVariants[0].label}
+                            </button>
+                          ) : null}
+                        </div>
+
+                        {clipGuidance && clipGuidance.score < 60 ? (
+                          <div className="clip-card-warning">
+                            <strong>This clip can perform better</strong>
+                            <button
+                              type="button"
+                              className="clip-action-btn clip-action-btn-primary"
+                              data-testid={`clip-action-improve-${clip.id}`}
+                              onClick={e => {
+                                e.stopPropagation();
+                                handleClipAction(clip, { type: "improve" });
+                              }}
+                            >
+                              Improve Clip
+                            </button>
+                          </div>
+                        ) : null}
+                      </div>
+                      {orderedClips.length > 1 && (
+                        <div style={{ display: "flex", gap: "4px", marginLeft: "8px" }}>
+                          <button
+                            type="button"
+                            className="resize-btn"
+                            title="Move moment earlier"
+                            data-testid={`detected-move-left-${clip.id}`}
+                            onClick={e => {
+                              e.stopPropagation();
+                              moveDetectedClip(clip.id, "backward");
+                            }}
+                            disabled={idx === 0}
+                          >
+                            ←
+                          </button>
+                          <button
+                            type="button"
+                            className="resize-btn"
+                            title="Move moment later"
+                            data-testid={`detected-move-right-${clip.id}`}
+                            onClick={e => {
+                              e.stopPropagation();
+                              moveDetectedClip(clip.id, "forward");
+                            }}
+                            disabled={idx === orderedClips.length - 1}
+                          >
+                            →
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+
+            <section className="studio-panel editing-tools-panel">
+              <div className="panel-heading compact">
+                <div>
+                  <span className="panel-kicker">Build</span>
+                  <h4>Legacy tools</h4>
+                  <p className="panel-description">
+                    Keep the frame clean. Add only what earns attention or clarity.
+                  </p>
+                </div>
+              </div>
+              <div className="editing-tools">
+                <button className="tool-btn" onClick={addTextOverlay}>
+                  <span>📝</span> Add Text
+                </button>
+                <button
+                  className="tool-btn"
+                  onClick={() => document.getElementById("video-upload-input").click()}
+                >
+                  <span>📹</span> Add Video
+                </button>
+                <button className="tool-btn" onClick={() => imageInputRef.current?.click()}>
+                  <span>🖼️</span> Add Image
+                </button>
+                <button
+                  className="tool-btn"
+                  onClick={() => setVideoFit(prev => (prev === "contain" ? "cover" : "contain"))}
+                  disabled={safeFaceFraming}
+                  title={
+                    safeFaceFraming
+                      ? "Disable Safe Face Framing to switch to Fill mode"
+                      : "Switch between Full frame and Fill frame"
+                  }
+                >
+                  <span>📐</span> Fit: {videoFit === "contain" ? "FULL" : "FILL"}
+                </button>
+                <button
+                  className={`tool-btn ${safeFaceFraming ? "active" : ""}`}
+                  onClick={() => setSafeFaceFraming(prev => !prev)}
+                  title="Prevent stretched/cropped faces by preserving aspect ratio"
+                >
+                  <span>🧠</span> Safe Face Framing: {safeFaceFraming ? "ON" : "OFF"}
+                </button>
+                <button
+                  className="tool-btn"
+                  onClick={() =>
+                    setFaceAnchorPreset(prev =>
+                      prev === "center" ? "face_top" : prev === "face_top" ? "face_mid" : "center"
+                    )
+                  }
+                  title="Choose a face-safe vertical anchor"
+                >
+                  <span>🎯</span> Anchor:{" "}
+                  {faceAnchorPreset === "center"
+                    ? "Center"
+                    : faceAnchorPreset === "face_top"
+                      ? "Face Top"
+                      : "Face Mid"}
+                </button>
+              </div>
+              <input
+                id="video-upload-input"
+                type="file"
+                accept="video/*"
+                style={{ display: "none" }}
+                onChange={addVideoLayer}
+              />
+              <input
+                ref={imageInputRef}
+                data-testid="visual-image-input"
+                type="file"
+                accept="image/*"
+                style={{ display: "none" }}
+                onChange={addImageLayer}
+              />
+              {images.length > 0 && (
+                <div className="asset-library-card">
+                  <h5>Image library</h5>
+                  <div className="asset-library-grid">
+                    {images.slice(0, 6).map((imageAsset, index) => {
+                      const imageSrc = normalizeAssetUrl(imageAsset);
+                      if (!imageSrc) return null;
+                      return (
+                        <button
+                          key={imageAsset.id || imageSrc || index}
+                          type="button"
+                          onClick={() => addExistingImageOverlay(imageAsset)}
+                          style={{
+                            width: "58px",
+                            height: "58px",
+                            padding: 0,
+                            borderRadius: "8px",
+                            border: "1px solid #d0d0d0",
+                            overflow: "hidden",
+                            cursor: "pointer",
+                            background: "#fff",
+                          }}
+                          title="Add image overlay"
+                        >
+                          <img
+                            src={getSafeMediaSource(imageSrc)}
+                            alt="Overlay option"
+                            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                          />
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </section>
+
+            <section className="studio-panel automation-panel">
+              <div className="panel-heading compact">
+                <div>
+                  <span className="panel-kicker">Hook</span>
+                  <h4>Opening hook builder</h4>
+                  <p className="panel-description">
+                    Choose the exact opening moment, write the hook text, and tune how it lands
+                    before the B-roll takes over.
+                  </p>
+                </div>
+              </div>
+              <div className="ai-settings-card hook-settings-card">
+                <h5
+                  style={{
+                    ...sidebarSectionTitleStyle,
+                    cursor: "pointer",
+                    userSelect: "none",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                  onClick={() => toggleSection("aiEnhancements")}
+                >
+                  <span>🤖 AI Enhancements</span>
+                  <span style={{ fontSize: "12px", opacity: 0.6 }}>
+                    {collapsedSections.aiEnhancements ? "▶" : "▼"}
+                  </span>
+                </h5>
+                {!collapsedSections.aiEnhancements && (
+                  <>
+                    <label style={{ ...sidebarCheckboxLabelStyle, marginBottom: "8px" }}>
+                      <input
+                        type="checkbox"
+                        checked={autoCaptions}
+                        onChange={e => setAutoCaptions(e.target.checked)}
+                        style={{ marginRight: "8px" }}
+                      />
+                      Auto-Captions (Burn-in)
+                    </label>
+                    {autoCaptions && (
+                      <div style={{ marginBottom: "10px", paddingLeft: "4px" }}>
+                        <label
+                          style={{ ...sidebarBodyTextStyle, display: "block", marginBottom: "6px" }}
+                        >
+                          Caption Style:
+                        </label>
+                        <select
+                          value={captionStyle}
+                          onChange={e => setCaptionStyle(e.target.value)}
+                          style={{
+                            width: "100%",
+                            padding: "6px 8px",
+                            borderRadius: "6px",
+                            border: "1px solid #444",
+                            background: "#1a1a2e",
+                            color: "#fff",
+                            fontSize: "13px",
+                          }}
+                        >
+                          <option value="">Classic (Plain text)</option>
+                          <option value="bold_pop">Bold Pop ✦</option>
+                          <option value="karaoke">Karaoke Highlight ♫</option>
+                          <option value="glow">Neon Glow ✧</option>
+                          <option value="bounce">Bounce ⬆</option>
+                          <option value="minimal">Minimal Clean</option>
+                        </select>
+                        <div
+                          style={{
+                            ...sidebarBodyTextStyle,
+                            marginTop: "4px",
+                            fontSize: "11px",
+                            opacity: 0.6,
+                          }}
+                        >
+                          {captionStyle === "bold_pop" &&
+                            "Active word scales up with orange highlight"}
+                          {captionStyle === "karaoke" && "Words fill with color as they're spoken"}
+                          {captionStyle === "glow" && "Active word gets neon glow outline effect"}
+                          {captionStyle === "bounce" && "Active word bounces up with red highlight"}
+                          {captionStyle === "minimal" && "Subtle fade in/out per word group"}
+                          {!captionStyle && "Yellow text on dark background (legacy)"}
+                        </div>
+                      </div>
+                    )}
+                    <div style={{ ...sidebarBodyTextStyle, marginBottom: "10px" }}>
+                      Captions are generated as an AI draft. Clean English and Afrikaans speech
+                      usually performs best. Mixed South African languages and slang may need manual
+                      review.
+                    </div>
+                    <label style={sidebarCheckboxLabelStyle}>
+                      <input
+                        type="checkbox"
+                        checked={smartCrop}
+                        onChange={e => setSmartCrop(e.target.checked)}
+                        style={{ marginRight: "8px" }}
+                      />
+                      Smart Crop (Vertical reframe)
+                    </label>
+                    {smartCrop && (
+                      <div style={{ marginBottom: "10px", paddingLeft: "4px", marginTop: "6px" }}>
+                        <label
+                          style={{ ...sidebarBodyTextStyle, display: "block", marginBottom: "4px" }}
+                        >
+                          Crop Mode:
+                        </label>
+                        <div style={{ display: "flex", gap: "6px" }}>
+                          <button
+                            onClick={() => setSmartCropMode("center")}
+                            style={{
+                              flex: 1,
+                              padding: "6px 8px",
+                              borderRadius: "6px",
+                              fontSize: "12px",
+                              cursor: "pointer",
+                              border:
+                                smartCropMode === "center" ? "2px solid #6366f1" : "1px solid #444",
+                              background: smartCropMode === "center" ? "#2d2b55" : "#1a1a2e",
+                              color: "#fff",
+                            }}
+                          >
+                            🎯 Center
+                          </button>
+                          <button
+                            onClick={() => setSmartCropMode("speaker_track")}
+                            style={{
+                              flex: 1,
+                              padding: "6px 8px",
+                              borderRadius: "6px",
+                              fontSize: "12px",
+                              cursor: "pointer",
+                              border:
+                                smartCropMode === "speaker_track"
+                                  ? "2px solid #6366f1"
+                                  : "1px solid #444",
+                              background: smartCropMode === "speaker_track" ? "#2d2b55" : "#1a1a2e",
+                              color: "#fff",
+                            }}
+                          >
+                            👤 Follow Speaker
+                          </button>
+                        </div>
+                        <div
+                          style={{
+                            ...sidebarBodyTextStyle,
+                            marginTop: "4px",
+                            fontSize: "11px",
+                            opacity: 0.6,
+                          }}
+                        >
+                          {smartCropMode === "speaker_track"
+                            ? "AI detects faces and dynamically follows the speaker"
+                            : "Crops to center of frame (fast, works for all content)"}
+                        </div>
+                      </div>
+                    )}
+                    <label style={{ ...sidebarCheckboxLabelStyle, marginTop: "10px" }}>
+                      <input
+                        type="checkbox"
+                        checked={enhanceQuality}
+                        onChange={e => setEnhanceQuality(e.target.checked)}
+                        style={{ marginRight: "8px" }}
+                      />
+                      Quality Enhancement (Safe clean-up)
+                    </label>
+                    {enhanceQuality ? (
+                      <div
+                        style={{ ...sidebarBodyTextStyle, marginTop: "8px", marginBottom: "10px" }}
+                      >
+                        Uses a conservative export pass to reduce noise and add light sharpening. It
+                        is designed to improve soft footage gently, not to fake missing detail.
+                      </div>
+                    ) : null}
+                    <label style={{ ...sidebarCheckboxLabelStyle, marginTop: "10px" }}>
+                      <input
+                        type="checkbox"
+                        checked={silenceRemoval}
+                        onChange={e => setSilenceRemoval(e.target.checked)}
+                        style={{ marginRight: "8px" }}
+                      />
+                      Remove Silence
+                    </label>
+                    {silenceRemoval ? (
+                      <div className="micro-settings-card">
+                        <label className="studio-slider-label">
+                          <span>Silence threshold {silenceThreshold} dB</span>
+                          <input
+                            type="range"
+                            min={-55}
+                            max={-20}
+                            step={1}
+                            value={silenceThreshold}
+                            onChange={e => setSilenceThreshold(Number(e.target.value))}
+                          />
+                        </label>
+                        <label className="studio-slider-label">
+                          <span>Minimum pause {Number(minSilenceDuration).toFixed(2)}s</span>
+                          <input
+                            type="range"
+                            min={0.25}
+                            max={2.5}
+                            step={0.05}
+                            value={minSilenceDuration}
+                            onChange={e => setMinSilenceDuration(Number(e.target.value))}
+                          />
+                        </label>
+                      </div>
+                    ) : null}
+                    <label style={{ ...sidebarCheckboxLabelStyle, marginTop: "10px" }}>
+                      <input
+                        type="checkbox"
+                        checked={removeWatermark}
+                        onChange={e => setRemoveWatermark(e.target.checked)}
+                        style={{ marginRight: "8px" }}
+                      />
+                      Remove Platform Watermarks
+                    </label>
+                    {removeWatermark ? (
+                      <div className="micro-settings-card compact">
+                        <label className="studio-slider-label">
+                          <span>Watermark cleanup mode</span>
+                          <select
+                            value={watermarkMode}
+                            onChange={e => setWatermarkMode(e.target.value)}
+                          >
+                            <option value="adaptive">Adaptive tracking</option>
+                            <option value="manual">Manual cleanup boxes</option>
+                            <option value="corners">Static opposite corners</option>
+                            <option value="top_right">Top right only</option>
+                            <option value="bottom_left">Bottom left only</option>
+                            <option value="all">Aggressive all corners</option>
+                          </select>
+                        </label>
+                        {watermarkMode === "manual" ? (
+                          <div className="watermark-manual-tools">
+                            <p style={{ ...sidebarBodyTextStyle, margin: 0 }}>
+                              Add a cleanup box, drag it over the watermark in the preview, then
+                              size it until it covers the badge cleanly.
+                            </p>
+                            <div className="watermark-manual-actions">
+                              <button
+                                type="button"
+                                className="mini-toggle-btn"
+                                onClick={() => addManualWatermarkRegion()}
+                              >
+                                Add cleanup box
+                              </button>
+                              {activeWatermarkRegionId ? (
+                                <button
+                                  type="button"
+                                  className="mini-toggle-btn"
+                                  onClick={() =>
+                                    deleteManualWatermarkRegion(activeWatermarkRegionId)
+                                  }
+                                >
+                                  Delete selected box
+                                </button>
+                              ) : null}
+                            </div>
+                            <div className="watermark-region-list">
+                              {manualWatermarkRegions.length ? (
+                                manualWatermarkRegions.map((region, index) => (
+                                  <button
+                                    key={region.id}
+                                    type="button"
+                                    className={`mini-toggle-btn ${
+                                      activeWatermarkRegionId === region.id ? "active" : ""
+                                    }`}
+                                    onClick={() => setActiveWatermarkRegionId(region.id)}
+                                  >
+                                    Box {index + 1}
+                                  </button>
+                                ))
+                              ) : (
+                                <span style={sidebarBodyTextStyle}>No manual boxes yet.</span>
+                              )}
+                            </div>
+                            {activeWatermarkRegionId
+                              ? (() => {
+                                  const activeRegion = manualWatermarkRegions.find(
+                                    region => region.id === activeWatermarkRegionId
+                                  );
+                                  if (!activeRegion) return null;
+
+                                  return (
+                                    <div className="watermark-region-editor">
+                                      <label
+                                        style={{ ...sidebarCheckboxLabelStyle, marginTop: "2px" }}
+                                      >
+                                        <input
+                                          type="checkbox"
+                                          checked={activeRegion.track !== false}
+                                          onChange={e =>
+                                            updateManualWatermarkRegion(activeRegion.id, {
+                                              track: e.target.checked,
+                                            })
+                                          }
+                                          style={{ marginRight: "8px" }}
+                                        />
+                                        Track this cleanup box across the clip
+                                      </label>
+                                      <div className="watermark-manual-actions">
+                                        <button
+                                          type="button"
+                                          className="mini-toggle-btn"
+                                          onClick={() =>
+                                            updateManualWatermarkRegion(activeRegion.id, {
+                                              seedTime: clampNumber(videoTime, 0, 36000, 0),
+                                            })
+                                          }
+                                        >
+                                          Use current frame as seed
+                                        </button>
+                                      </div>
+                                      <div className="watermark-cleanup-preview-status">
+                                        Tracking seed:{" "}
+                                        {Number(activeRegion.seedTime || 0).toFixed(2)}s
+                                      </div>
+                                      <label className="studio-slider-label">
+                                        <span>Box width</span>
+                                        <input
+                                          type="range"
+                                          min={8}
+                                          max={58}
+                                          step={1}
+                                          value={activeRegion.width}
+                                          onChange={e =>
+                                            updateManualWatermarkRegion(activeRegion.id, {
+                                              width: Number(e.target.value),
+                                            })
+                                          }
+                                        />
+                                      </label>
+                                      <label className="studio-slider-label">
+                                        <span>Box height</span>
+                                        <input
+                                          type="range"
+                                          min={4}
+                                          max={24}
+                                          step={1}
+                                          value={activeRegion.height}
+                                          onChange={e =>
+                                            updateManualWatermarkRegion(activeRegion.id, {
+                                              height: Number(e.target.value),
+                                            })
+                                          }
+                                        />
+                                      </label>
+                                    </div>
+                                  );
+                                })()
+                              : null}
+                          </div>
+                        ) : null}
+                        <div className="watermark-cleanup-preview-panel">
+                          <div className="watermark-cleanup-preview-actions">
+                            <p style={{ ...sidebarBodyTextStyle, margin: 0 }}>
+                              Pause on the frame you want to inspect, then run a real cleanup
+                              preview to verify the worker removes the watermark without damaging
+                              nearby content.
+                            </p>
+                            {watermarkCleanupPreview ? (
+                              <label style={{ ...sidebarCheckboxLabelStyle, marginTop: "2px" }}>
+                                <input
+                                  type="checkbox"
+                                  checked={showWatermarkCleanupOnVideo}
+                                  onChange={e => setShowWatermarkCleanupOnVideo(e.target.checked)}
+                                  style={{ marginRight: "8px" }}
+                                />
+                                Show cleaned frame on video when paused
+                              </label>
+                            ) : null}
+                            <button
+                              type="button"
+                              className="mini-toggle-btn"
+                              onClick={handleGenerateWatermarkCleanupPreview}
+                              disabled={
+                                isWatermarkCleanupPreviewLoading ||
+                                !currentTimelineClip ||
+                                (watermarkMode === "manual" && !manualWatermarkRegions.length)
+                              }
+                            >
+                              {isWatermarkCleanupPreviewLoading
+                                ? "Rendering real preview..."
+                                : "Preview real cleanup"}
+                            </button>
+                          </div>
+                          {watermarkCleanupPreviewError ? (
+                            <div className="watermark-cleanup-preview-status error">
+                              {watermarkCleanupPreviewError}
+                            </div>
+                          ) : null}
+                          {watermarkCleanupPreview ? (
+                            <div className="watermark-cleanup-preview-grid">
+                              <div className="watermark-cleanup-preview-card">
+                                <span className="watermark-cleanup-preview-label">
+                                  Original frame
+                                </span>
+                                {watermarkCleanupPreview.originalImageUrl ? (
+                                  <img
+                                    src={getSafeMediaSource(
+                                      watermarkCleanupPreview.originalImageUrl
+                                    )}
+                                    alt="Original watermark frame"
+                                    className="watermark-cleanup-preview-image"
+                                  />
+                                ) : null}
+                              </div>
+                              <div className="watermark-cleanup-preview-card">
+                                <span className="watermark-cleanup-preview-label">
+                                  Cleaned frame
+                                </span>
+                                {watermarkCleanupPreview.cleanedImageUrl ? (
+                                  <img
+                                    src={getSafeMediaSource(
+                                      watermarkCleanupPreview.cleanedImageUrl
+                                    )}
+                                    alt="Watermark-cleaned frame preview"
+                                    className="watermark-cleanup-preview-image"
+                                  />
+                                ) : null}
+                              </div>
+                              <div className="watermark-cleanup-preview-status">
+                                Captured at{" "}
+                                {Number(watermarkCleanupPreview.previewTime || 0).toFixed(2)}s. If
+                                you move the box or scrub to another moment, run the preview again.
+                              </div>
+                              {showWatermarkCleanupOnVideo &&
+                              !isWatermarkCleanupPreviewFrameAligned ? (
+                                <div className="watermark-cleanup-preview-status">
+                                  Pause near{" "}
+                                  {Number(watermarkCleanupPreview.previewTime || 0).toFixed(2)}s to
+                                  see the cleaned frame directly on the video preview.
+                                </div>
+                              ) : null}
+                            </div>
+                          ) : null}
+                        </div>
+                      </div>
+                    ) : null}
+                  </>
+                )}
+                <label style={{ ...sidebarCheckboxLabelStyle, marginTop: "10px" }}>
+                  <input
+                    type="checkbox"
+                    checked={addHook}
+                    onChange={e => setAddHook(e.target.checked)}
+                    style={{ marginRight: "8px" }}
+                  />
+                  Add Hook
+                </label>
+                {addHook ? (
+                  <div className="micro-settings-card">
+                    <div className="hook-suggestion-card">
+                      <strong>Suggested hook opening</strong>
+                      <p>{currentHookSuggestion.message}</p>
+                      <p>
+                        Suggested range:{" "}
+                        {formatPreviewTimePrecise(currentHookSuggestion.startTime || 0)} to{" "}
+                        {formatPreviewTimePrecise(currentHookSuggestion.endTime || hookEnd)}
+                        {currentHookSuggestion.confidenceLabel
+                          ? ` • ${currentHookSuggestion.confidenceLabel}`
+                          : ""}
+                      </p>
+                      {hookAnalysisMessage ? (
+                        <div
+                          className={`hook-analysis-status hook-analysis-status-${hookAnalysisStatus}`}
+                        >
+                          {hookAnalysisMessage}
+                        </div>
+                      ) : null}
+                      <div className="mini-toggle-row">
+                        <button
+                          type="button"
+                          className="mini-toggle-btn active"
+                          onClick={() => applyCurrentHookSuggestion(false)}
+                        >
+                          Apply suggested segment
+                        </button>
+                        <button
+                          type="button"
+                          className={`mini-toggle-btn ${hookAnalysisStatus === "analyzing" ? "active" : ""}`}
+                          onClick={runSmartHookSuggestion}
+                          disabled={hookAnalysisStatus === "analyzing"}
+                        >
+                          {hookAnalysisStatus === "analyzing" ? "Suggesting..." : "Suggest Hook"}
+                        </button>
+                      </div>
+                    </div>
+                    <label className="studio-slider-label">
+                      <span>Hook text</span>
+                      <textarea
+                        value={hookText}
+                        onChange={e => setHookText(normalizeHookText(e.target.value))}
+                        placeholder="Type a curiosity hook that earns the next 3 seconds"
+                        rows={3}
+                      />
+                    </label>
+                    <div className="hook-preset-card">
+                      <strong>Hook templates</strong>
+                      <div className="mini-toggle-row">
+                        {Object.entries(HOOK_TEMPLATES).map(([templateKey, template]) => (
+                          <button
+                            key={templateKey}
+                            type="button"
+                            className={`mini-toggle-btn ${hookTemplate === templateKey ? "active" : ""}`}
+                            onClick={() => applyHookTemplate(templateKey)}
+                          >
+                            {template.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="hook-treatment-card">
+                      <div className="hook-treatment-header">
+                        <strong>Hook treatment</strong>
+                        <p>{hookTemplateConfig.description}</p>
+                      </div>
+                      <div className="hook-treatment-toggle-grid">
+                        <label style={sidebarCheckboxLabelStyle}>
+                          <input
+                            type="checkbox"
+                            checked={hookBlurBackground}
+                            onChange={e => setHookBlurBackground(e.target.checked)}
+                            style={{ marginRight: "8px" }}
+                          />
+                          Blur background
+                        </label>
+                        <label style={sidebarCheckboxLabelStyle}>
+                          <input
+                            type="checkbox"
+                            checked={hookDarkOverlay}
+                            onChange={e => setHookDarkOverlay(e.target.checked)}
+                            style={{ marginRight: "8px" }}
+                          />
+                          Dark overlay
+                        </label>
+                        <label style={sidebarCheckboxLabelStyle}>
+                          <input
+                            type="checkbox"
+                            checked={hookFreezeFrame}
+                            onChange={e => setHookFreezeFrame(e.target.checked)}
+                            style={{ marginRight: "8px" }}
+                          />
+                          Freeze opening frame
+                        </label>
+                      </div>
+                      <label className="studio-slider-label">
+                        <span>Text animation</span>
+                        <select
+                          value={hookTextAnimation}
                           onChange={e => setHookTextAnimation(e.target.value)}
                         >
                           <option value="slide-up">Slide Up</option>

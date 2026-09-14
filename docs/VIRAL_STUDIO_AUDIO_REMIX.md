@@ -21,6 +21,8 @@ feature can be ported into a newer Studio without merging the older screen.
 - Send `audioRemixForRender(audioRemix)` as `audio_remix`.
 - Accept `audio_remix` in `RenderViralRequest` and call
   `render_audio_remix` after the base MP4 is rendered.
+- Send the selected loop to `/api/media/preview-audio-remix`; the worker caps
+  it at eight seconds and returns an AAC preview from the final mastering chain.
 
 ## Version 1 render contract
 
@@ -52,3 +54,8 @@ independent pitch, EQ, reverb, limiting, and final AAC delivery.
 sound cues so the limiter protects the complete mix. Voice and music targeting
 run before the tracks are mixed. `content_type` supports `auto`, `choir`,
 `speech`, and `music`; each uses a different dynamics/protection chain.
+
+The browser remains responsive with an instant Web Audio approximation while
+sliders move. **Preview Remix** is the proof step: it renders the selected loop
+through FFmpeg, including target isolation, precision pitch, level matching and
+the final limiter, then automatically plays the returned mastered audio.

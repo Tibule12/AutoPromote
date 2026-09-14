@@ -21,6 +21,8 @@ export default function AudioRemixPanel({
   loopActive = false,
   onToggleLoop,
   hasMusic = false,
+  exactPreviewStatus = "idle",
+  exactPreviewError = "",
 }) {
   const remix = normalizeAudioRemix(value);
   const patch = update => onChange(patchAudioRemix(remix, update));
@@ -264,10 +266,26 @@ export default function AudioRemixPanel({
         <button type="button" className={bypass ? "is-active" : ""} onClick={onBefore}>
           ↶ Before
         </button>
-        <button type="button" className="audio-remix-primary" onClick={onPreview}>
-          ▶ Preview Remix
+        <button
+          type="button"
+          className="audio-remix-primary"
+          onClick={onPreview}
+          disabled={exactPreviewStatus === "rendering" || !remix.enabled}
+        >
+          {exactPreviewStatus === "rendering"
+            ? "Rendering exact 8s…"
+            : exactPreviewStatus === "ready"
+              ? "▶ Replay Exact Preview"
+              : "▶ Preview Remix"}
         </button>
       </div>
+      {exactPreviewStatus === "failed" && exactPreviewError ? (
+        <p className="audio-remix-preview-status is-error">{exactPreviewError}</p>
+      ) : exactPreviewStatus === "ready" ? (
+        <p className="audio-remix-preview-status is-ready">
+          ✓ Rendered through the final FFmpeg mastering chain
+        </p>
+      ) : null}
       <div className="audio-remix-utility-row">
         <button
           type="button"

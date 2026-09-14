@@ -1,7 +1,7 @@
 import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import AudioRemixPanel from "./AudioRemixPanel";
-import { DEFAULT_AUDIO_REMIX } from "./audioRemixModel";
+import { DEFAULT_AUDIO_REMIX, applyAudioRemixPreset } from "./audioRemixModel";
 
 describe("AudioRemixPanel", () => {
   test("renders the approved controls and activates Slowed + Reverb", () => {
@@ -35,5 +35,22 @@ describe("AudioRemixPanel", () => {
     expect(onChange).toHaveBeenCalledWith(
       expect.objectContaining({ enabled: true, preset: "slowed_reverb", speed: 0.82 })
     );
+  });
+
+  test("shows worker rendering and exact-preview confirmation states", () => {
+    const props = {
+      value: applyAudioRemixPreset("warm_vocal"),
+      onChange: jest.fn(),
+      bypass: false,
+      onBefore: jest.fn(),
+      onPreview: jest.fn(),
+      onToggleLoop: jest.fn(),
+    };
+    const { rerender } = render(<AudioRemixPanel {...props} exactPreviewStatus="rendering" />);
+    expect(screen.getByRole("button", { name: /Rendering exact 8s/i })).toBeDisabled();
+
+    rerender(<AudioRemixPanel {...props} exactPreviewStatus="ready" />);
+    expect(screen.getByRole("button", { name: /Replay Exact Preview/i })).toBeEnabled();
+    expect(screen.getByText(/final FFmpeg mastering chain/i)).toBeInTheDocument();
   });
 });

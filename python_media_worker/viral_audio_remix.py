@@ -227,3 +227,103 @@ def render_audio_remix(source, destination, value):
     )
     duration = float(_probe(destination).get("format", {}).get("duration") or 0)
     return {**remix, "status": "applied", "duration": duration}
+
+
+def render_audio_remix_preview(
+    source,
+    destination,
+    value,
+    start_time=0,
+    duration=8,
+    background_audio=None,
+    background_volume=.18,
+    background_trim_start=0,
+    include_voice=True,
+):
+    """Render a short AAC preview through the same mastering chain as export."""
+    remix = normalize_audio_remix(value)
+    if not remix["enabled"]:
+        raise ValueError("Enable Remix Audio before requesting an exact preview")
+
+    preview_start = max(0, _number(start_time, 0))
+    preview_duration = _bound(duration, 2, 8, 8)
+    source_info = _probe(source)
+    source_has_audio = any(
+        stream.get("codec_type") == "audio" for stream in source_info.get("streams", [])
+    )
+    inputs = []
+    filter_parts = []
+    mix_labels = []
+
+    if include_voice and source_has_audio:
+        inputs.extend(["-ss", f"{preview_start:.3f}", "-t", f"{preview_duration:.3f}", "-i", str(source)])
+        voice_label = "preview_voice"
+        filter_parts.append("[0:a]asetpts=PTS-STARTPTS[preview_voice_base]")
+        if remix["target"] == "voice":
+            chain, _ = build_audio_remix_chain(remix)
+            filter_parts.append(f"[preview_voice_base]{chain}[{voice_label}]")
+        else:
+            filter_parts.append(f"[preview_voice_base]anull[{voice_label}]")
+        mix_labels.append(f"[{voice_label}]")
+
+    if background_audio:
+        background_index = 1 if inputs else 0
+        background_start = max(0, _number(background_trim_start, 0) + preview_start)
+        inputs.extend(
+            [
+                "-stream_loop", "-1", "-ss", f"{background_start:.3f}",
+                "-t", f"{preview_duration:.3f}", "-i", str(background_audio),
+            ]
+        )
+        music_label = "preview_music"
+        music_gain = _bound(background_volume, 0, 1.5, .18)
+        filter_parts.append(
+            f"[{background_index}:a]asetpts=PTS-STARTPTS,volume={music_gain:.4f}[preview_music_base]"
+        )
+        if remix["target"] == "music":
+            chain, _ = build_audio_remix_chain(remix)
+            filter_parts.append(f"[preview_music_base]{chain}[{music_label}]")
+        else:
+            filter_parts.append(f"[preview_music_base]anull[{music_label}]")
+        mix_labels.append(f"[{music_label}]")
+
+    if remix["target"] == "music" and not background_audio:
+        raise ValueError("Music-targeted preview requires a background music track")
+    if remix["target"] == "voice" and not (include_voice and source_has_audio):
+        raise ValueError("Voice-targeted preview requires the original voice track")
+    if not mix_labels:
+        raise ValueError("Exact Remix Audio preview requires an audible track")
+
+    if len(mix_labels) == 1:
+        filter_parts.append(f"{mix_labels[0]}anull[preview_mix]")
+    else:
+        filter_parts.append(
+            f"{''.join(mix_labels)}amix=inputs={len(mix_labels)}:"
+            "duration=shortest:dropout_transition=0:normalize=0[preview_mix]"
+        )
+
+    if remix["target"] == "master":
+        chain, _ = build_audio_remix_chain(remix)
+        filter_parts.append(f"[preview_mix]{chain}[preview_out]")
+    else:
+        filter_parts.append("[preview_mix]alimiter=limit=.95:level=false:latency=true[preview_out]")
+
+    bitrate = "256k" if remix["quality"] == "studio" else "160k"
+    _run(
+        [
+            "ffmpeg", "-v", "error", "-nostdin", *inputs,
+            "-filter_complex", ";".join(filter_parts), "-map", "[preview_out]",
+            "-vn", "-c:a", "aac", "-b:a", bitrate, "-ar", "48000",
+            "-t", f"{preview_duration:.3f}", "-movflags", "+faststart",
+            "-y", str(destination),
+        ]
+    )
+    rendered_duration = float(_probe(destination).get("format", {}).get("duration") or 0)
+    return {
+        **remix,
+        "status": "preview_ready",
+        "start_time": preview_start,
+        "duration": rendered_duration,
+        "includes_voice": bool(include_voice and source_has_audio),
+        "includes_music": bool(background_audio),
+    }

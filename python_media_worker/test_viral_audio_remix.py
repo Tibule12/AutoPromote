@@ -11,6 +11,7 @@ from viral_audio_remix import (
     build_audio_remix_filter,
     normalize_audio_remix,
     render_audio_remix,
+    render_audio_remix_preview,
 )
 
 
@@ -141,6 +142,48 @@ class AudioRemixRenderTests(unittest.TestCase):
                 self.assertEqual(receipt["status"], "applied")
                 self.assertEqual(receipt["content_type"], content_type)
                 self.assertGreater(Path(output).stat().st_size, 1000)
+
+    def test_exact_preview_uses_the_export_chain_and_caps_duration(self):
+        with tempfile.TemporaryDirectory() as temp:
+            source = str(Path(temp) / "source.mp4")
+            music = str(Path(temp) / "music.wav")
+            output = str(Path(temp) / "preview.m4a")
+            subprocess.run(
+                [
+                    "ffmpeg", "-v", "error", "-f", "lavfi", "-i",
+                    "color=c=black:s=320x180:r=24:d=10", "-f", "lavfi", "-i",
+                    "sine=frequency=330:sample_rate=48000:duration=10", "-c:v",
+                    "libx264", "-threads", "1", "-c:a", "aac", "-shortest", "-y", source,
+                ],
+                check=True,
+            )
+            subprocess.run(
+                [
+                    "ffmpeg", "-v", "error", "-f", "lavfi", "-i",
+                    "sine=frequency=660:sample_rate=48000:duration=10", "-y", music,
+                ],
+                check=True,
+            )
+            receipt = render_audio_remix_preview(
+                source,
+                output,
+                dict(
+                    enabled=True,
+                    preset="slowed_reverb",
+                    content_type="choir",
+                    target="master",
+                    level_match=True,
+                ),
+                start_time=1,
+                duration=99,
+                background_audio=music,
+                background_volume=.2,
+            )
+            self.assertEqual(receipt["status"], "preview_ready")
+            self.assertTrue(receipt["includes_voice"])
+            self.assertTrue(receipt["includes_music"])
+            self.assertAlmostEqual(receipt["duration"], 8, delta=.1)
+            self.assertGreater(Path(output).stat().st_size, 1000)
 
 
 if __name__ == "__main__":
