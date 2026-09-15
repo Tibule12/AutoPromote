@@ -86,9 +86,9 @@ export default function AudioReactiveVisualizer({
     };
 
     const drawRing = (width, height, energy) => {
-      const centerX = width / 2;
-      const centerY = position === "top" ? height * 0.24 : height * 0.76;
-      const radius = Math.min(width, height) * (0.13 + energy * 0.018 * intensity);
+      const centerX = width * 0.16;
+      const centerY = position === "top" ? height * 0.17 : height * 0.8;
+      const radius = Math.min(width, height) * (0.055 + energy * 0.01 * intensity);
       const segments = 72;
       context.beginPath();
       for (let index = 0; index <= segments; index += 1) {
@@ -103,10 +103,10 @@ export default function AudioReactiveVisualizer({
         else context.lineTo(x, y);
       }
       context.closePath();
-      context.lineWidth = Math.max(3, width * 0.007);
-      context.strokeStyle = rgba(color, 0.9);
-      context.shadowColor = rgba(color, 0.95);
-      context.shadowBlur = Math.max(12, width * 0.035);
+      context.lineWidth = Math.max(2, width * 0.0045);
+      context.strokeStyle = rgba(color, 0.78);
+      context.shadowColor = rgba(color, 0.72);
+      context.shadowBlur = Math.max(7, width * 0.018);
       context.stroke();
     };
 

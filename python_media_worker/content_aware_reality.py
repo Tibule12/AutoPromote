@@ -1143,6 +1143,22 @@ def recover_transient_subject_matte(
         return previous_mask.copy(), consecutive_misses + 1, True
 
 
+def story_assets_are_adjacent(
+    previous_asset: Optional[Mapping[str, Any]],
+    current_asset: Mapping[str, Any],
+    *,
+    max_gap: float = 0.36,
+) -> bool:
+    """Return true only when two story shots form one continuous edit."""
+    if not previous_asset:
+        return False
+    return (
+        float(current_asset.get("start", 0.0) or 0.0)
+        - float(previous_asset.get("end", 0.0) or 0.0)
+        <= max_gap
+    )
+
+
 def render_content_aware_reality(
     input_path: str,
     output_path: str,
@@ -1309,10 +1325,21 @@ def render_content_aware_reality(
                         )
                         active_plate = visual_asset_frame(asset, active_progress)
                         active_semantic_pan = asset["semantic_pan"]
-                        if asset_index > 0 and timestamp < asset["start"] + 0.32:
-                            previous_plate = visual_asset_frame(
-                                loaded_story_assets[asset_index - 1], 0.98
-                            )
+                        previous_asset = (
+                            loaded_story_assets[asset_index - 1]
+                            if asset_index > 0
+                            else None
+                        )
+                        assets_are_adjacent = story_assets_are_adjacent(
+                            previous_asset,
+                            asset,
+                        )
+                        # Only dissolve directly between consecutive story shots.
+                        # When beats are separated by the real speaker, blending the
+                        # last frame of old B-roll into the next asset creates a
+                        # misleading double exposure (for example phone -> choir).
+                        if assets_are_adjacent and timestamp < asset["start"] + 0.32:
+                            previous_plate = visual_asset_frame(previous_asset, 0.98)
                             if previous_plate.shape != active_plate.shape:
                                 previous_plate = cv2.resize(
                                     previous_plate,

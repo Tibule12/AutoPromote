@@ -44,3 +44,14 @@ test("builds a normalized browser audio envelope without uploading the track", (
   expect(analysis.envelope).toHaveLength(20);
   expect(Math.max(...analysis.envelope)).toBeGreaterThan(0.5);
 });
+
+test("detects right-channel audio without cancelling opposing stereo samples", () => {
+  const silent = new Float32Array(1000);
+  const signal = Float32Array.from({ length: 1000 }, (_, index) => index < 20 ? 0.8 : 0);
+  const analyse = channels => analyzeAudioBufferBeats({
+    sampleRate: 1000, duration: 1, numberOfChannels: channels.length,
+    getChannelData: channel => channels[channel],
+  });
+  expect(analyse([silent, signal]).envelope[0]).toBeGreaterThan(0.5);
+  expect(analyse([signal, Float32Array.from(signal, sample => -sample)]).envelope[0]).toBeGreaterThan(0.5);
+});

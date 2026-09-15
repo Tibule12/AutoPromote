@@ -69,6 +69,7 @@ function ViralClipStudioPanel({
 }) {
   const { canUseFeature } = useSubscription();
   const uploadRequestRef = useRef(0);
+  const retrySourceRef = useRef(null);
   const [sourceFile, setSourceFile] = useState(null);
   const [selectedClip, setSelectedClip] = useState(initialClip);
   const [sourceDuration, setSourceDuration] = useState(0);
@@ -79,6 +80,7 @@ function ViralClipStudioPanel({
   const [studioSource, setStudioSource] = useState(null);
 
   const prepareSource = useCallback(async incomingSource => {
+    retrySourceRef.current = incomingSource;
     const requestId = uploadRequestRef.current + 1;
     uploadRequestRef.current = requestId;
     setStudioSource(null);
@@ -210,36 +212,74 @@ function ViralClipStudioPanel({
           ← Back to discovery
         </button>
       ) : null}
-      <div className="viral-clips-workspace">
-        <article className="viral-source-card">
-          <div className="viral-card-heading">
-            <div>
-              <span>Studio source</span>
-              <h3>Choose a clip or finished video</h3>
-            </div>
-            <label className="btn-secondary viral-file-picker">
-              Choose video
-              <input
-                type="file"
-                accept="video/*"
-                disabled={sourceState === "uploading"}
-                onChange={event => {
-                  const [file] = Array.from(event.target.files || []);
-                  event.target.value = "";
-                  if (!file) return;
-                  setSelectedClip(null);
-                  void prepareSource(file);
-                }}
-              />
-            </label>
-          </div>
+      <div className="viral-clips-workspace creator-studio-entry">
+        {sourceState === "idle" && !previewUrl && (
+          <label
+            className="creator-studio-dropzone"
+            onDragOver={event => event.preventDefault()}
+            onDrop={event => {
+              event.preventDefault();
+              const file = Array.from(event.dataTransfer.files || []).find(
+                candidate => candidate.type.startsWith("video/")
+              );
+              if (!file) return;
+              setSelectedClip(null);
+              void prepareSource(file);
+            }}
+          >
+            <span className="creator-studio-dropzone-icon">☁️</span>
+            <h3>Upload your source video to begin</h3>
+            <p>Drag and drop a video file here, or click to browse.</p>
+            <span className="creator-studio-btn">Choose Video</span>
+            <input
+              type="file"
+              accept="video/*"
+              disabled={sourceState === "uploading"}
+              onChange={event => {
+                const [file] = Array.from(event.target.files || []);
+                event.target.value = "";
+                if (!file) return;
+                setSelectedClip(null);
+                void prepareSource(file);
+              }}
+            />
+          </label>
+        )}
 
-          <div className={`viral-source-preview ${previewUrl ? "has-video" : ""}`}>
-            {previewUrl ? (
+        {(sourceState === "uploading" || sourceState === "validating") && (
+          <div className="progress-modal-overlay">
+            <div className="progress-modal" role="status" aria-live="polite">
+              <div className="circular-progress" style={{ "--progress": sourceUploadProgress }}>
+                <span>{sourceUploadProgress}%</span>
+              </div>
+              <h3>{sourceState === "uploading" ? "Uploading video..." : "Validating preview..."}</h3>
+              <p>Please keep this page open.</p>
+            </div>
+          </div>
+        )}
+
+        {sourceState === "failed" && (
+          <div className="progress-modal-overlay">
+            <div className="progress-modal amber-error-overlay" role="alert">
+              <div className="circular-progress">
+                <span>⚠️</span>
+              </div>
+              <h3>Source could not be loaded</h3>
+              <p>{sourceError || "Video source could not be loaded."}</p>
+              <button className="retry-btn" onClick={() => void prepareSource(retrySourceRef.current)}>Retry Upload</button>
+              <button type="button" onClick={() => void prepareSource(null)}>Choose another video</button>
+            </div>
+          </div>
+        )}
+
+        {previewUrl && (sourceState === "ready" || sourceState === "validating") && (
+          <div className="creator-studio-preview-card" style={{ display: sourceState === "ready" ? "flex" : "none", flexDirection: "column", gap: "16px", background: "var(--studio-panel-bg)", padding: "24px", borderRadius: "24px", alignItems: "center" }}>
+            <div style={{ width: "100%", maxWidth: "400px", borderRadius: "12px", overflow: "hidden", border: "1px solid var(--ap-border-strong)" }}>
               <SafeVideo
                 src={previewUrl}
                 controls
                 preload="metadata"
+                style={{ width: "100%", display: "block" }}
                 onLoadedMetadata={event => {
                   const duration = Number(event.currentTarget.duration || 0);
                   if (!Number.isFinite(duration) || duration <= 0) {
@@ -253,80 +293,32 @@ function ViralClipStudioPanel({
                 }}
                 onError={() => {
                   setSourceState("failed");
-                  setSourceError(
-                    "The uploaded video could not be played. Choose a valid MP4 or MOV file and retry."
-                  );
+                  setSourceError("The uploaded video could not be played. Choose a valid MP4 or MOV file and retry.");
                 }}
               />
-            ) : (
-              <div className="viral-source-empty">
-                <span>{sourceState === "uploading" ? "↑" : "▶"}</span>
-                <strong>
-                  {sourceState === "uploading"
-                    ? "Uploading the real source video"
-                    : sourceState === "failed"
-                      ? "Video source not loaded"
-                      : "Open the full timeline editor"}
-                </strong>
-                <small>
-                  {sourceState === "uploading"
-                    ? `Keep this page open · ${sourceUploadProgress}%`
-                    : sourceError ||
-                      "Use a detected moment or start manually from a finished video"}
-                </small>
-              </div>
-            )}
-          </div>
+            </div>
 
-          <div className="viral-source-meta">
-            <span aria-hidden="true">▣</span>
-            <div>
-              <strong>{sourceName}</strong>
-              <small role={sourceState === "failed" ? "alert" : "status"}>
-                {sourceStateMessage}
-              </small>
+            <div style={{ textAlign: "center" }}>
+              <h3 style={{ margin: "0 0 8px 0" }}>{sourceName}</h3>
+              <p style={{ margin: "0 0 24px 0", color: "var(--ap-muted)" }}>{sourceStateMessage}</p>
+              <button
+                type="button"
+                className="creator-studio-btn"
+                style={{ pointerEvents: "auto", cursor: "pointer", fontSize: "1.1rem" }}
+                disabled={sourceState !== "ready"}
+                onClick={() => {
+                  if (!canUseFeature("viralClipStudio")) {
+                    onUpgrade?.();
+                    return;
+                  }
+                  setStudioSource(createStudioSource(sourceFile, selectedClip, sourceDuration));
+                }}
+              >
+                Open Creator Studio
+              </button>
             </div>
           </div>
-        </article>
-
-        <aside className="viral-settings-card">
-          <div className="viral-card-heading">
-            <div>
-              <span>Clip Studio</span>
-              <h3>Moments, hooks, B-roll, and export</h3>
-            </div>
-          </div>
-          <div className="viral-destination-field">
-            <span>Full workspace</span>
-            <div>
-              <span>Hook editor</span>
-              <span>9:16 preview</span>
-              <span>B-roll timeline</span>
-              <span>Captions & audio</span>
-            </div>
-          </div>
-          <button
-            type="button"
-            className="check-quality viral-analyse-button"
-            disabled={!sourceFile || sourceState !== "ready"}
-            onClick={() => {
-              if (!canUseFeature("viralClipStudio")) {
-                onUpgrade?.();
-                return;
-              }
-              setStudioSource(createStudioSource(sourceFile, selectedClip, sourceDuration));
-            }}
-          >
-            {sourceState === "uploading"
-              ? `Uploading source ${sourceUploadProgress}%`
-              : sourceState === "validating"
-                ? "Checking video preview…"
-                : "Open Clip Studio"}
-          </button>
-          <small className="viral-settings-note">
-            Open the full timeline editor and keep the existing render pipeline.
-          </small>
-        </aside>
+        )}
       </div>
     </section>
   );

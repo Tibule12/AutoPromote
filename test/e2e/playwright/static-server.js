@@ -40,7 +40,7 @@ if (global.__STATIC_SERVER_STARTED) {
     server.on("listening", () => {
       const p = server.address().port;
       console.log("Static server started on port", p);
-      process.env.E2E_BASE_URL = `http://localhost:${p}`;
+      if(!process.env.E2E_BASE_URL || !process.env.E2E_BASE_URL.includes("3001")) process.env.E2E_BASE_URL = `http://localhost:${p}`;
       resolve();
     });
     server.on("error", err => {
@@ -50,7 +50,7 @@ if (global.__STATIC_SERVER_STARTED) {
         fallback.on("listening", () => {
           const p = fallback.address().port;
           console.log("Static server started on ephemeral port", p);
-          process.env.E2E_BASE_URL = `http://localhost:${p}`;
+          if(!process.env.E2E_BASE_URL || !process.env.E2E_BASE_URL.includes("3001")) process.env.E2E_BASE_URL = `http://localhost:${p}`;
           resolve();
         });
         fallback.on("error", e => {

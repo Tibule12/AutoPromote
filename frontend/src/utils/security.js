@@ -72,6 +72,9 @@ export function applySafeMediaSource(element, url) {
   const safeUrl = sanitizeMediaUrl(url);
   const safeAttributeUrl = safeUrl ? encodeSafeAttributeUrl(safeUrl) : "";
   const isPlayableMedia = element.tagName === "AUDIO" || element.tagName === "VIDEO";
+  if (isPlayableMedia && !element.crossOrigin) {
+    element.crossOrigin = "anonymous";
+  }
   const reloadPlayableMedia = () => {
     if (isPlayableMedia && typeof element.load === "function") {
       element.load();

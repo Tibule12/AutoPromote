@@ -233,11 +233,23 @@ def resolve_caption_layout(position: Any, scale: Any, base_style: Mapping[str, A
     style = dict(base_style)
     normalized_position = str(position or "lower").strip().lower()
     style["alignment"] = {
+        "top_left": 7,
         "top": 8,
+        "top_center": 8,
+        "top_right": 9,
+        "middle_left": 4,
         "center": 5,
         "middle": 5,
+        "middle_center": 5,
+        "middle_right": 6,
+        "bottom_left": 1,
         "lower": 2,
         "bottom": 2,
+        "bottom_center": 2,
+        "bottom_right": 3,
+        # Per-line free positioning is emitted as an ASS override. Keep the
+        # base style centred so fallback lines are still safe and predictable.
+        "custom": 5,
     }.get(normalized_position, 2)
     style["margin_v"] = 0 if style["alignment"] == 5 else int(style.get("margin_v", 100))
     safe_scale = _finite_number(scale, 1.0)
@@ -336,10 +348,21 @@ def build_edited_caption_transcript(caption_segments: Iterable[Any]) -> Dict[str
         caption_icon = str(
             _read(item, "caption_icon", "captionIcon", "icon", default="") or ""
         ).strip()
+        caption_accent = str(
+            _read(item, "caption_accent", "captionAccent", default="") or ""
+        ).strip()
+        caption_x = _finite_number(_read(item, "caption_x", "captionX"), None)
+        caption_y = _finite_number(_read(item, "caption_y", "captionY"), None)
         if caption_placement:
             normalized_segment["captionPlacement"] = caption_placement
         if caption_icon:
             normalized_segment["captionIcon"] = caption_icon
+        if re.fullmatch(r"#[0-9a-fA-F]{6}", caption_accent):
+            normalized_segment["captionAccent"] = caption_accent.lower()
+        if caption_x is not None:
+            normalized_segment["captionX"] = max(5.0, min(95.0, caption_x))
+        if caption_y is not None:
+            normalized_segment["captionY"] = max(5.0, min(95.0, caption_y))
         normalized_segment["textReviewRequired"] = bool(
             _read(item, "text_review_required", "textReviewRequired", default=False)
         )

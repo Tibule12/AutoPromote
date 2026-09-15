@@ -64,11 +64,11 @@ export const normalizeCaptionSegmentsForRender = captionSegments => {
     const language = String(
       segment?.language ?? segment?.language_code ?? segment?.languageCode ?? ""
     ).trim();
-    const languageLabel = String(
-      segment?.languageLabel ?? segment?.language_label ?? ""
-    ).trim();
+    const languageLabel = String(segment?.languageLabel ?? segment?.language_label ?? "").trim();
     const languages = Array.isArray(segment?.languages)
-      ? Array.from(new Set(segment.languages.map(item => String(item || "").trim()).filter(Boolean)))
+      ? Array.from(
+          new Set(segment.languages.map(item => String(item || "").trim()).filter(Boolean))
+        )
       : [];
     if (speaker) normalized.speaker = speaker;
     if (speakerLabel) normalized.speaker_label = speakerLabel;
@@ -78,16 +78,11 @@ export const normalizeCaptionSegmentsForRender = captionSegments => {
     if (segment?.languageConfidence !== undefined || segment?.language_confidence !== undefined) {
       normalized.language_confidence = Math.max(
         0,
-        Math.min(
-          1,
-          Number(segment?.languageConfidence ?? segment?.language_confidence) || 0
-        )
+        Math.min(1, Number(segment?.languageConfidence ?? segment?.language_confidence) || 0)
       );
     }
     if (segment?.reviewRequired !== undefined || segment?.review_required !== undefined) {
-      normalized.review_required = Boolean(
-        segment?.reviewRequired ?? segment?.review_required
-      );
+      normalized.review_required = Boolean(segment?.reviewRequired ?? segment?.review_required);
     }
     if (segment?.textReviewRequired !== undefined || segment?.text_review_required !== undefined) {
       normalized.text_review_required = Boolean(
@@ -103,8 +98,18 @@ export const normalizeCaptionSegmentsForRender = captionSegments => {
     const captionIcon = String(
       segment?.captionIcon ?? segment?.caption_icon ?? segment?.icon ?? ""
     ).trim();
+    const captionAccent = String(
+      segment?.captionAccent ?? segment?.caption_accent ?? ""
+    ).trim();
+    const captionX = toFiniteNumber(segment?.captionX ?? segment?.caption_x);
+    const captionY = toFiniteNumber(segment?.captionY ?? segment?.caption_y);
     if (captionPlacement) normalized.caption_placement = captionPlacement;
     if (captionIcon) normalized.caption_icon = captionIcon;
+    if (/^#[0-9a-f]{6}$/i.test(captionAccent)) {
+      normalized.caption_accent = captionAccent.toLowerCase();
+    }
+    if (captionX !== null) normalized.caption_x = Math.max(5, Math.min(95, captionX));
+    if (captionY !== null) normalized.caption_y = Math.max(5, Math.min(95, captionY));
     segments.push(normalized);
     return segments;
   }, []);
@@ -192,7 +197,9 @@ export const applySilenceKeepSegmentsToTimeline = ({
       start: toFiniteNumber(segment?.start ?? segment?.start_time),
       end: toFiniteNumber(segment?.end ?? segment?.end_time),
     }))
-    .filter(segment => segment.start !== null && segment.end !== null && segment.end > segment.start)
+    .filter(
+      segment => segment.start !== null && segment.end !== null && segment.end > segment.start
+    )
     .sort((left, right) => left.start - right.start);
 
   if (!timeline.length || !normalizedKeepSegments.length || sourceClipId === null) {
@@ -203,7 +210,9 @@ export const applySilenceKeepSegmentsToTimeline = ({
     const segmentSourceId = segment?.source_clip_id ?? segment?.sourceClipId ?? segment?.id ?? null;
     if (String(segmentSourceId) !== String(sourceClipId)) return [segment];
 
-    const segmentStart = toFiniteNumber(segment?.start_time ?? segment?.startTime ?? segment?.start);
+    const segmentStart = toFiniteNumber(
+      segment?.start_time ?? segment?.startTime ?? segment?.start
+    );
     const segmentEnd = toFiniteNumber(segment?.end_time ?? segment?.endTime ?? segment?.end);
     if (segmentStart === null || segmentEnd === null || segmentEnd <= segmentStart) return [];
 
@@ -288,6 +297,11 @@ export const buildViralRenderData = ({
   payload.professional_cleanup = extraOptions.professionalCleanup !== false;
   addDefined(payload, "creative_plan", extraOptions.creativePlan);
   addDefined(payload, "finish_plan", extraOptions.finishPlan);
+  addDefined(payload, "audio_restoration", extraOptions.audioRestoration);
+  addDefined(payload, "audio_automation", extraOptions.audioAutomation);
+  addDefined(payload, "audio_track_states", extraOptions.audioTrackStates);
+  addDefined(payload, "editor_timeline", extraOptions.editorTimeline);
+  addDefined(payload, "composition_plan", extraOptions.compositionPlan);
 
   if (isDefined(extraOptions.speedSegments)) {
     payload.speed_segments = normalizeSpeedSegmentsForRender(extraOptions.speedSegments);
@@ -304,6 +318,8 @@ export const buildViralRenderData = ({
   addDefined(payload, "watermark_regions", extraOptions.manualWatermarkRegions);
   addDefined(payload, "brand_watermark", extraOptions.brandWatermark, Boolean);
   addDefined(payload, "watermark_text", extraOptions.brandWatermarkText);
+  addDefined(payload, "brand_watermark_variant", extraOptions.brandWatermarkVariant);
+  addDefined(payload, "brand_watermark_schedule", extraOptions.brandWatermarkSchedule);
   addDefined(payload, "output_settings", extraOptions.outputSettings);
 
   addDefined(payload, "add_hook", extraOptions.addHook, Boolean);
@@ -334,6 +350,8 @@ export const buildViralRenderData = ({
   addDefined(payload, "music_fade_out", extraOptions.musicFadeOut, Number);
   addDefined(payload, "music_loop", extraOptions.musicLoop, Boolean);
   addDefined(payload, "sound_effects", extraOptions.soundEffects);
+  addDefined(payload, "audio_remix", extraOptions.audioRemix);
+  addDefined(payload, "motionGraphics", extraOptions.motionGraphics);
   addDefined(payload, "mute_audio", extraOptions.muteAudio, Boolean);
   addDefined(payload, "export_destination", extraOptions.exportDestination);
 

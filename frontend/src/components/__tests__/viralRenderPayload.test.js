@@ -6,6 +6,53 @@ import {
 } from "../viralRenderPayload";
 
 describe("viralRenderPayload", () => {
+  test("forwards dialogue restoration settings to the native render", () => {
+    const audioRestoration = { preset: "broadcast", voiceIsolation: true, denoise: 64,
+      deEsser: 35, humFrequency: 50, compressor: 55, limiter: -1.5, loudness: -14,
+      eq: { low: -2, mid: 3, high: 1 } };
+    const audioAutomation = { originalAudio: [{ property: "volume", time: 2, value: 40 }] };
+    const audioTrackStates = { originalAudio: { muted: false }, voiceover: { solo: true } };
+    const payload = buildViralRenderData({ finalVideoUrl: "https://example.com/source.mp4",
+      selectedClip: { start: 0, end: 60 }, extraOptions: { audioRestoration, audioAutomation, audioTrackStates } });
+    expect(payload.audio_restoration).toEqual(audioRestoration);
+    expect(payload.audio_automation).toEqual(audioAutomation);
+    expect(payload.audio_track_states).toEqual(audioTrackStates);
+  });
+  test("forwards remix audio settings to the render contract", () => {
+    const audioRemix = {
+      version: 1,
+      enabled: true,
+      preset: "slowed_reverb",
+      speed: 0.82,
+      pitch_semitones: -3,
+      bass_db: 4,
+      clarity_db: 2,
+      air_db: 1,
+      reverb_mix: 0.68,
+      intensity: 0.7,
+      content_type: "choir",
+      target: "voice",
+      output_gain_db: -1,
+      level_match: true,
+      quality: "studio",
+    };
+    const payload = buildViralRenderData({
+      finalVideoUrl: "https://example.com/source.mp4",
+      selectedClip: { start: 0, end: 20 },
+      overlays: [],
+      extraOptions: { audioRemix },
+    });
+    expect(payload.audio_remix).toEqual(audioRemix);
+  });
+  test("keeps B-roll trim, end behavior, order and explicit zero levels in the actual request", () => {
+    const overlays = [
+      { id: "image", type: "image", opacity: 0 },
+      { id: "broll", type: "video", sourceStartTime: 2.5, sourceEndBehavior: "hold", overlayAudioVolume: 0 },
+    ];
+    const payload = buildViralRenderData({ finalVideoUrl: "https://example.com/source.mp4",
+      selectedClip: { start: 0, end: 60 }, overlays });
+    expect(payload.overlays).toEqual(overlays);
+  });
   test("turns reviewed silence keep ranges into real export cuts", () => {
     const timeline = applySilenceKeepSegmentsToTimeline({
       timelineSegments: [
@@ -73,6 +120,11 @@ describe("viralRenderPayload", () => {
           start: 11,
           end: 15,
           text: "Sawubona Mzansi",
+          captionPlacement: "custom",
+          captionIcon: "payoff",
+          captionAccent: "#FF5D8F",
+          captionX: 18,
+          captionY: 24,
         },
       ],
       timelineSegments: [
@@ -87,12 +139,22 @@ describe("viralRenderPayload", () => {
         start_time: 0,
         end_time: 1,
         text: "Sawubona Mzansi",
+        caption_placement: "custom",
+        caption_icon: "payoff",
+        caption_accent: "#ff5d8f",
+        caption_x: 18,
+        caption_y: 24,
       },
       {
         id: "caption-1-timeline-2",
         start_time: 3,
         end_time: 4,
         text: "Sawubona Mzansi",
+        caption_placement: "custom",
+        caption_icon: "payoff",
+        caption_accent: "#ff5d8f",
+        caption_x: 18,
+        caption_y: 24,
       },
     ]);
   });
@@ -208,6 +270,16 @@ describe("viralRenderPayload", () => {
         manualWatermarkRegions: [{ x: 0.1, y: 0.2, width: 0.3, height: 0.1 }],
         brandWatermark: true,
         brandWatermarkText: "AutoPromote · Viral Clip Studio",
+        brandWatermarkVariant: "studio",
+        brandWatermarkSchedule: [
+          {
+            startTime: 0,
+            endTime: 3.75,
+            position: "top_left",
+            left: 6,
+            top: 7,
+          },
+        ],
         outputSettings: {
           resolution: "1080p",
           fps: "30",
@@ -241,6 +313,12 @@ describe("viralRenderPayload", () => {
         musicFadeIn: 0.5,
         musicFadeOut: 0.75,
         musicLoop: true,
+        motionGraphics: { version: 1, scenes: [{ id: "motion-1", preset: "title", startTime: 2, duration: 3 }] },
+        editorTimeline: { motion_keyframes: [{ id: "key-1", property: "x", time: 2, value: 35 }] },
+        compositionPlan: {
+          version: 1,
+          layers: [{ id: "main-video", motion_keyframes: [{ property: "x", time: 2, value: 35 }] }],
+        },
         soundEffects: [
           {
             id: "sfx-1",
@@ -334,6 +412,16 @@ describe("viralRenderPayload", () => {
         remove_watermark: false,
         watermark_mode: "adaptive",
         brand_watermark: true,
+        brand_watermark_variant: "studio",
+        brand_watermark_schedule: [
+          {
+            startTime: 0,
+            endTime: 3.75,
+            position: "top_left",
+            left: 6,
+            top: 7,
+          },
+        ],
         output_settings: {
           resolution: "1080p",
           fps: "30",
@@ -352,6 +440,12 @@ describe("viralRenderPayload", () => {
         music_volume: 0.18,
         music_ducking: true,
         music_loop: true,
+        motionGraphics: { version: 1, scenes: [{ id: "motion-1", preset: "title", startTime: 2, duration: 3 }] },
+        editor_timeline: expect.objectContaining({ motion_keyframes: [expect.objectContaining({ id: "key-1" })] }),
+        composition_plan: expect.objectContaining({
+          version: 1,
+          layers: [expect.objectContaining({ id: "main-video" })],
+        }),
         sound_effects: [
           expect.objectContaining({
             id: "sfx-1",

@@ -829,6 +829,37 @@ router.post("/estimate", async (req, res) => {
 });
 
 // Route: POST /api/media/transcribe
+router.post("/track-studio-faces", requireTesterEditingFeature("audioExtract"), upload.single("file"), async (req, res) => {
+  let temporaryFile;
+  try {
+    if (!req.file) return res.status(400).json({ error: "Upload the source video" });
+    let anchors;
+    try { anchors = JSON.parse(req.body.anchors || "{}"); }
+    catch (_) { return res.status(400).json({ error: "Invalid speaker anchors" }); }
+    const start = Number(req.body.start || 0), end = Number(req.body.end);
+    const mode = req.body.mode || "anchored";
+    if (!["anchored", "source_shots"].includes(mode) ||
+        (mode === "source_shots" && (!anchors || Object.keys(anchors).join() !== "solo"))) {
+      return res.status(400).json({ error: "Choose anchored faces or a single source-shot crop" });
+    }
+    if (!Number.isFinite(start) || !Number.isFinite(end) || start < 0 || end <= start || end-start > 180 ||
+        !anchors || Array.isArray(anchors) || !Object.keys(anchors).length || Object.keys(anchors).length > 2 ||
+        Object.entries(anchors).some(([slot, anchor]) => !["top", "bottom", "solo"].includes(slot) ||
+          !anchor || [anchor.x, anchor.y].some(value => !Number.isFinite(value) || value < 0 || value > 100))) {
+      return res.status(400).json({ error: "Choose one or two anchors and up to 180 seconds" });
+    }
+    temporaryFile = admin.storage().bucket().file(`temp_tracking/${req.user.uid}/${uuidv4()}.mp4`);
+    await temporaryFile.save(req.file.buffer, { resumable: false, metadata: { contentType: req.file.mimetype } });
+    const [url] = await temporaryFile.getSignedUrl({ action: "read", expires: Date.now() + 15*60*1000 });
+    const response = await postToMediaWorker("/track-studio-faces", { video_url: url, anchors, start, end, mode }, 180000);
+    res.json(response.data);
+  } catch (error) {
+    res.status(error.response?.status === 422 ? 422 : 500).json({ error: "Face analysis failed. Your existing framing has not been changed." });
+  } finally {
+    if (temporaryFile) await temporaryFile.delete().catch(() => {});
+  }
+});
+
 // Handles file upload -> Firebase Storage -> Python Worker -> Returns Captions
 router.post(
   "/transcribe",
@@ -1782,6 +1813,41 @@ router.post("/preview-silence", async (req, res) => {
     console.error("[MediaRoute] Silence preview error:", error.message);
     res.status(500).json({
       message: "Silence preview failed",
+      details: error.response?.data?.detail || error.message,
+    });
+  }
+});
+
+router.post("/preview-audio-remix", async (req, res) => {
+  const fileUrl = typeof req.body?.fileUrl === "string" ? req.body.fileUrl.trim() : "";
+  if (!fileUrl || !req.body?.audioRemix) {
+    return res.status(400).json({ message: "Video and Remix Audio settings are required" });
+  }
+
+  try {
+    const backgroundAudio = req.body?.backgroundAudio || null;
+    const response = await postToMediaWorker(
+      "/preview-audio-remix",
+      {
+        video_url: fileUrl,
+        start_time: Math.max(0, Number(req.body?.startTime || 0)),
+        duration: Math.min(8, Math.max(2, Number(req.body?.duration || 8))),
+        audio_remix: req.body.audioRemix,
+        background_audio_url:
+          typeof backgroundAudio?.url === "string" && backgroundAudio.url.startsWith("http")
+            ? backgroundAudio.url
+            : null,
+        background_volume: Number(backgroundAudio?.volume ?? 0.18),
+        background_trim_start: Number(backgroundAudio?.trimStart ?? 0),
+        include_voice: req.body?.includeVoice !== false,
+      },
+      120000
+    );
+    return res.json(response.data || {});
+  } catch (error) {
+    console.error("[MediaRoute] Exact Remix Audio preview error:", error.message);
+    return res.status(error.response?.status || 500).json({
+      message: "Exact Remix Audio preview failed",
       details: error.response?.data?.detail || error.message,
     });
   }

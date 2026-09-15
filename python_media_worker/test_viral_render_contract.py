@@ -1,6 +1,7 @@
 import ast
 import json
 import os
+import re
 from pathlib import Path
 import subprocess
 import tempfile
@@ -26,9 +27,15 @@ from python_media_worker.main_media_server import (
     ViralOverlay,
     apply_manual_reframe_keyframes,
     build_viral_brand_watermark_asset,
+    build_group_stack_filter,
+    build_source_split_filter,
+    build_reframe_timeline_filter,
+    build_reviewed_reframe_filter,
+    build_multicam_layout_filter,
     build_main_video_frame_filter,
     build_speaker_track_crop_filter,
     get_reframe_output_dimensions,
+    generate_ass_captions,
     multicam_rounded_card_filter,
     multicam_rounded_mask_path,
     render_viral_clip_impl,
@@ -38,6 +45,113 @@ from python_media_worker.main_media_server import (
 
 
 class ViralRenderContractTests(unittest.TestCase):
+    def test_single_show_everyone_timeline_segment_is_valid_ffmpeg(self):
+        graph = build_reframe_timeline_filter(
+            640, 360, 180, 320, 1,
+            [{"time": 0, "mode": "center"}],
+            split_framing={
+                "top": {"x": 25, "y": 50, "zoom": 3},
+                "bottom": {"x": 75, "y": 50, "zoom": 3},
+            },
+        )
+        result = subprocess.run([
+            "ffmpeg", "-v", "error", "-f", "lavfi", "-i", "testsrc2=s=640x360:r=10:d=1",
+            "-filter_complex_threads", "1", "-filter_complex", graph,
+            "-map", "[vout]", "-frames:v", "1", "-f", "null", "-",
+        ], capture_output=True)
+        self.assertEqual(result.returncode, 0, result.stderr.decode())
+
+    def test_timed_reframe_renders_split_order_and_solo_as_one_sequence(self):
+        graph = build_reframe_timeline_filter(
+            640,
+            360,
+            180,
+            320,
+            2,
+            [
+                {"time": 0, "mode": "center"},
+                {"time": 1.5, "mode": "speaker_track"},
+            ],
+            split_framing={
+                "top": {"x": 25, "y": 50, "zoom": 3},
+                "bottom": {"x": 75, "y": 50, "zoom": 3},
+            },
+            speaker_order_cuts=[{"time": .8, "slot": "bottom"}],
+            solo_keyframes=[{"time": 1.5, "x": 72, "y": 50, "cut": True}],
+            solo_zoom=1.5,
+        )
+        result = subprocess.run([
+            "ffmpeg", "-v", "error", "-f", "lavfi", "-i",
+            "color=red:s=640x360:r=10:d=2,drawbox=x=320:y=0:w=320:h=360:color=blue:t=fill",
+            "-filter_complex_threads", "1", "-filter_complex", graph,
+            "-map", "[vout]", "-threads", "1", "-f", "rawvideo",
+            "-pix_fmt", "rgb24", "pipe:1",
+        ], capture_output=True)
+        self.assertEqual(result.returncode, 0, result.stderr.decode())
+
+        def pixel(frame, y=80):
+            offset = (frame * 180 * 320 + y * 180 + 90) * 3
+            return tuple(result.stdout[offset:offset + 3])
+
+        self.assertGreater(pixel(2, 80)[0], 200)   # Speaker 1 starts on top.
+        self.assertGreater(pixel(2, 240)[2], 200)  # Speaker 2 starts below.
+        self.assertGreater(pixel(10, 80)[2], 200)  # The order cut puts Speaker 2 on top.
+        self.assertGreater(pixel(10, 240)[0], 200)
+        self.assertGreater(pixel(17, 160)[2], 200) # Solo segment follows the right speaker.
+
+    def test_both_split_panels_follow_independent_timed_positions(self):
+        graph = build_source_split_filter(640, 360, 180, 320, {
+            "top": {"zoom": 3, "keyframes": [{"time": 0, "x": 20, "y": 50}, {"time": .8, "x": 80, "y": 50}]},
+            "bottom": {"zoom": 3, "keyframes": [{"time": 0, "x": 80, "y": 50}, {"time": .8, "x": 20, "y": 50}]},
+        })
+        result = subprocess.run(["ffmpeg", "-v", "error", "-f", "lavfi", "-i",
+            "color=red:s=640x360:r=10:d=1,drawbox=x=320:y=0:w=320:h=360:color=blue:t=fill",
+            "-filter_complex_threads", "1", "-filter_complex", graph, "-map", "[vout]",
+            "-threads", "1", "-f", "rawvideo", "-pix_fmt", "rgb24", "pipe:1"], capture_output=True)
+        self.assertEqual(result.returncode, 0, result.stderr.decode())
+        def pixel(frame, y):
+            offset = (frame * 180 * 320 + y * 180 + 90) * 3
+            return tuple(result.stdout[offset:offset+3])
+        self.assertGreater(pixel(0, 80)[0], 200)  # Top starts on red.
+        self.assertGreater(pixel(0, 240)[2], 200)  # Bottom starts on blue.
+        self.assertGreater(pixel(8, 80)[2], 200)  # Top follows right.
+        self.assertGreater(pixel(8, 240)[0], 200)  # Bottom independently follows left.
+
+    def test_portrait_source_split_and_speaker_zoom_encode(self):
+        with tempfile.TemporaryDirectory(prefix="studio-portrait-test-") as temp:
+            for style, graph in [
+                ("split", build_source_split_filter(640, 360, 180, 320, {
+                    "top": {"x": 30, "y": 50, "zoom": 1.2, "keyframes": [
+                        {"time": 0, "x": 25, "y": 50}, {"time": .5, "x": 75, "y": 50}]},
+                    "bottom": {"x": 80, "y": 20, "zoom": 3, "keyframes": [
+                        {"time": 0, "x": 80, "y": 20}, {"time": .5, "x": 20, "y": 20}]},
+                })),
+                ("track", "[0:v]" + build_reviewed_reframe_filter([
+                    {"time": 0, "x": 28, "y": 50}, {"time": 0.5, "x": 72, "y": 40}
+                ], 180, 320, zoom=1.5) + "[vout]"),
+            ]:
+                path = str(Path(temp) / f"{style}.mp4")
+                result = subprocess.run(["ffmpeg", "-v", "error", "-f", "lavfi", "-i",
+                    "testsrc2=s=640x360:r=10:d=1", "-filter_complex_threads", "1",
+                    "-filter_complex", graph, "-map", "[vout]", "-c:v", "libx264",
+                    "-threads", "1", "-n", path], capture_output=True, text=True)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertGreater(Path(path).stat().st_size, 1000)
+        self.assertIn("scale=270:480", build_reviewed_reframe_filter(
+            [{"time": 0, "x": 30, "y": 50}], 180, 320, 1.5))
+
+    def test_captions_scale_with_canvas_and_keep_lower_safe_margin(self):
+        transcript = build_edited_caption_transcript([
+            {"start_time": 0, "end_time": 2, "text": "Spelling corrected."}
+        ])
+        for width, height in [(640, 360), (1080, 1920), (2160, 2160)]:
+            ass = generate_ass_captions(transcript, "minimal", width, height)
+            style = next(line for line in ass.splitlines() if line.startswith("Style: Default,")).split(",")
+            self.assertEqual(int(style[2]), max(12, round(48*width/1080)))
+            self.assertEqual(int(style[-2]), round(height*.12))
+            self.assertIn("Spelling", ass)
+            self.assertIn("corrected.", ass)
+
     def test_main_video_frame_rounds_the_actual_source_over_a_dark_studio_canvas(self):
         frame_filter = build_main_video_frame_filter(
             {
@@ -90,6 +204,24 @@ class ViralRenderContractTests(unittest.TestCase):
         )
         self.assertIn("rounded_972x1812_r97.png", percentage_frame_filter)
         self.assertIn("overlay=54:54:shortest=1", percentage_frame_filter)
+
+    def test_rounded_frame_can_fill_canvas_without_forced_margin(self):
+        graph = build_main_video_frame_filter({"main_frame": {"enabled": True,
+            "inset_percent": 0, "border_radius_percent": 6}}, 1080, 1920)
+        self.assertIn("rounded_1080x1920_r65.png", graph)
+        self.assertIn("overlay=0:0:shortest=1", graph)
+        result = subprocess.run(["ffmpeg", "-v", "error", "-filter_complex_threads", "1",
+            "-f", "lavfi", "-i", "color=white:s=1080x1920:r=1:d=1", "-filter_complex", graph,
+            "-map", "[v_main_frame]", "-frames:v", "1", "-pix_fmt", "rgb24", "-f", "rawvideo", "-"],
+            capture_output=True, timeout=30)
+        self.assertEqual(result.returncode, 0, result.stderr.decode())
+        def pixel(x, y):
+            offset = (y*1080+x)*3
+            return result.stdout[offset:offset+3]
+        for x, y in [(0, 0), (1079, 0), (0, 1919), (1079, 1919)]:
+            self.assertLess(max(pixel(x, y)), 20, "Every corner must be rounded")
+        self.assertGreater(min(pixel(0, 960)), 230, "Zero margin must reach the side edge")
+        self.assertGreater(min(pixel(540, 0)), 230, "Zero margin must reach the top edge")
 
     def test_viral_watermark_is_a_transparent_logo_asset_not_boxed_text(self):
         asset_path = build_viral_brand_watermark_asset(1080, 1920)
@@ -199,6 +331,10 @@ class ViralRenderContractTests(unittest.TestCase):
         self.assertEqual(crop_width % 2, 0)
         self.assertEqual(crop_height % 2, 0)
         self.assertGreaterEqual(len(commands), 3)
+        first_crop_x = int(commands[0].split("crop x ")[1].split(";")[0])
+        face_x = int(0.68 * 960)
+        face_position_inside_crop = face_x - first_crop_x
+        self.assertGreater(face_position_inside_crop, crop_width * 0.58)
 
     def test_reframe_supports_editor_delivery_aspects(self):
         self.assertEqual(get_reframe_output_dimensions("9:16"), (1080, 1920))
@@ -206,6 +342,73 @@ class ViralRenderContractTests(unittest.TestCase):
         self.assertEqual(get_reframe_output_dimensions("1:1"), (1080, 1080))
         self.assertEqual(get_reframe_output_dimensions("16:9"), (1920, 1080))
         self.assertEqual(get_reframe_output_dimensions("bad-value"), (1080, 1920))
+
+    def test_group_stack_uses_two_real_source_crops_and_preview_coordinates(self):
+        filter_graph = build_group_stack_filter(
+            1920,
+            1080,
+            1080,
+            1920,
+            {
+                "divider_percent": 50,
+                "gap_percent": 0.7,
+                "top": {"x": 34, "y": 50, "zoom": 1.45},
+                "bottom": {"x": 70, "y": 48, "zoom": 1.35},
+            },
+        )
+
+        self.assertIn("[0:v]split=2", filter_graph)
+        self.assertEqual(filter_graph.count("crop="), 2)
+        self.assertIn("vstack=inputs=2", filter_graph)
+        self.assertIn("drawbox=x=0", filter_graph)
+        self.assertIn("color=white@0.94", filter_graph)
+        self.assertTrue(filter_graph.endswith("[vout]"))
+
+    def test_multicam_grid_uses_four_distinct_crops_and_preview_layout(self):
+        filter_graph = build_multicam_layout_filter(
+            [(1920, 1080), (1920, 1080), (1280, 720), (1080, 1920)],
+            1080,
+            1920,
+            {
+                "layout": "grid_4",
+                "gap_percent": 0.45,
+                "cameras": [
+                    {"x": 34, "y": 50, "zoom": 1.0},
+                    {"x": 70, "y": 50, "zoom": 1.0},
+                    {"x": 50, "y": 45, "zoom": 1.1},
+                    {"x": 50, "y": 50, "zoom": 1.0},
+                ],
+            },
+            input_labels=["0:v", "1:v", "2:v", "3:v"],
+            output_label="vout",
+        )
+
+        self.assertTrue(filter_graph.startswith("[0:v]crop="))
+        self.assertEqual(filter_graph.count("crop="), 4)
+        scaled_panels = re.findall(r"scale=(\d+):(\d+):flags=lanczos", filter_graph)
+        self.assertEqual(len(scaled_panels), 4)
+        self.assertTrue(
+            all(int(width) % 2 == 0 and int(height) % 2 == 0 for width, height in scaled_panels)
+        )
+        self.assertIn("xstack=inputs=4", filter_graph)
+        self.assertIn("shortest=1", filter_graph)
+        self.assertEqual(filter_graph.count("drawbox="), 2)
+        self.assertIn("format=yuv420p[vout]", filter_graph)
+
+    def test_multicam_hero_layout_uses_three_camera_panels(self):
+        filter_graph = build_multicam_layout_filter(
+            [(1920, 1080)] * 3,
+            1080,
+            1920,
+            {
+                "layout": "hero_3",
+                "cameras": [{"zoom": 1.0}, {"zoom": 1.0}, {"zoom": 1.0}],
+            },
+        )
+
+        self.assertEqual(filter_graph.count("crop="), 3)
+        self.assertIn("xstack=inputs=3", filter_graph)
+        self.assertEqual(filter_graph.count("drawbox="), 2)
 
     def test_manual_reframe_corrections_interpolate_at_render_samples(self):
         corrected = apply_manual_reframe_keyframes(
@@ -242,12 +445,25 @@ class ViralRenderContractTests(unittest.TestCase):
                 }
             ],
             export_destination="tiktok",
+            caption_segments=[{
+                "start_time": 0,
+                "end_time": 1,
+                "text": "Creator caption",
+                "caption_placement": "custom",
+                "caption_accent": "#ff5d8f",
+                "caption_x": 93,
+                "caption_y": 88,
+            }],
         )
 
         self.assertTrue(request.finish_plan["visualizer"]["enabled"])
         self.assertTrue(request.add_music)
         self.assertEqual(request.sound_effects[0].tone, "impact")
         self.assertEqual(request.export_destination, "tiktok")
+        self.assertEqual(request.caption_segments[0].caption_placement, "custom")
+        self.assertEqual(request.caption_segments[0].caption_accent, "#ff5d8f")
+        self.assertEqual(request.caption_segments[0].caption_x, 93)
+        self.assertEqual(request.caption_segments[0].caption_y, 88)
 
     def test_render_refuses_unresolved_broll_planning_placeholder(self):
         request = RenderViralRequest(
@@ -472,6 +688,13 @@ class ViralRenderContractTests(unittest.TestCase):
         self.assertEqual(style["fontsize"], 60)
         self.assertEqual(transcript["segments"][0]["text"], "Say this exactly")
 
+        self.assertEqual(resolve_caption_layout(
+            "top_right", 1, {"fontsize": 50, "alignment": 2, "margin_v": 120}
+        )["alignment"], 9)
+        self.assertEqual(resolve_caption_layout(
+            "middle_left", 1, {"fontsize": 50, "alignment": 2, "margin_v": 120}
+        )["alignment"], 4)
+
     def test_preserves_creator_edited_caption_lines_and_timings(self):
         transcript = build_edited_caption_transcript(
             [
@@ -482,6 +705,9 @@ class ViralRenderContractTests(unittest.TestCase):
                     "text": "Sawubona, welcome ekhaya",
                     "caption_placement": "middle_left",
                     "caption_icon": "payoff",
+                    "caption_accent": "#ff5d8f",
+                    "caption_x": 18,
+                    "caption_y": 24,
                     "text_review_required": True,
                     "text_reviewed": True,
                 }
@@ -496,7 +722,104 @@ class ViralRenderContractTests(unittest.TestCase):
         self.assertAlmostEqual(transcript["segments"][0]["words"][-1]["end"], 3.4)
         self.assertEqual(segment["captionPlacement"], "middle_left")
         self.assertEqual(segment["captionIcon"], "payoff")
+        self.assertEqual(segment["captionAccent"], "#ff5d8f")
+        self.assertEqual(segment["captionX"], 18)
+        self.assertEqual(segment["captionY"], 24)
         self.assertTrue(segment["textReviewed"])
+
+    def test_every_creator_caption_style_honors_custom_line_treatment(self):
+        transcript = build_edited_caption_transcript([
+            {
+                "start_time": 0,
+                "end_time": 1,
+                "text": "Lisakhanya welcomes Siphamandla",
+                "caption_placement": "custom",
+                "caption_icon": "payoff",
+                "caption_accent": "#ff5d8f",
+                "caption_x": 18,
+                "caption_y": 24,
+            }
+        ])
+        with tempfile.TemporaryDirectory(prefix="studio-caption-styles-") as temp:
+            for style_name in (
+                "rainbow", "watch_me", "wall_type", "story_pop", "bold_pop", "karaoke", "glow", "bounce", "minimal",
+                "headline", "boxed", "comic", "gradient", "typewriter", "editorial",
+                "sticker", "marker", "glass", "newsroom", "luxury", "retro",
+            ):
+                with self.subTest(style=style_name):
+                    ass = generate_ass_captions(transcript, style_name, 1080, 1920)
+                    self.assertIn(r"\an7\pos(194,461)\q0", ass)
+                    self.assertIn("&H008F5DFF", ass)
+                    self.assertIn("⚡", ass)
+                    self.assertIn("lisakhanya", ass.lower())
+                    ass_path = Path(temp) / f"{style_name}.ass"
+                    output_path = Path(temp) / f"{style_name}.png"
+                    ass_path.write_text(ass, encoding="utf-8")
+                    result = subprocess.run([
+                        "ffmpeg", "-v", "error", "-f", "lavfi", "-i",
+                        "color=0x07101d:s=360x640:r=25:d=1",
+                        "-vf", f"ass={ass_path}", "-frames:v", "1", "-threads", "1",
+                        "-y", str(output_path),
+                    ], capture_output=True, text=True)
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    self.assertGreater(output_path.stat().st_size, 1000)
+
+    def test_rainbow_caption_preserves_every_word_colour_and_shoulder_position(self):
+        transcript = build_edited_caption_transcript([
+            {
+                "start_time": 0,
+                "end_time": 1.4,
+                "text": "captions command the frame",
+                "caption_placement": "shoulder_right",
+                "caption_icon": "fire",
+            }
+        ])
+        ass = generate_ass_captions(transcript, "rainbow", 1080, 1920)
+        self.assertIn(r"\an6\pos(950,1075)\q0", ass)
+        self.assertIn("♨", ass)
+        for color in ("&H008F5DFF", "&H003DB3FF", "&H0052E6F6", "&H009BF572"):
+            self.assertIn(color, ass)
+
+    def test_background_wall_and_watch_me_are_real_render_treatments(self):
+        transcript = build_edited_caption_transcript([
+            {
+                "start_time": 0,
+                "end_time": 1,
+                "text": "watch me now",
+                "caption_placement": "background_left",
+                "caption_icon": "eyes",
+            }
+        ])
+        ass = generate_ass_captions(transcript, "watch_me", 1080, 1920)
+        self.assertIn(r"\an7\pos(76,346)\q0", ass)
+        self.assertIn("👁", ass)
+        self.assertIn(r"\alpha&H38&", ass)
+        self.assertIn(r"\fscx120", ass)
+
+    def test_custom_caption_ass_burns_into_a_real_video_frame(self):
+        transcript = build_edited_caption_transcript([
+            {
+                "start_time": 0,
+                "end_time": 1,
+                "text": "Lisakhanya Mdoda",
+                "caption_placement": "top_center",
+                "caption_icon": "none",
+                "caption_accent": "#72f59b",
+            }
+        ])
+        ass = generate_ass_captions(transcript, "headline", 360, 640)
+        with tempfile.TemporaryDirectory(prefix="studio-caption-test-") as temp:
+            ass_path = Path(temp) / "caption.ass"
+            output_path = Path(temp) / "caption.png"
+            ass_path.write_text(ass, encoding="utf-8")
+            result = subprocess.run([
+                "ffmpeg", "-v", "error", "-f", "lavfi", "-i",
+                "color=0x07101d:s=360x640:r=25:d=1",
+                "-vf", f"ass={ass_path}", "-frames:v", "1", "-threads", "1",
+                "-y", str(output_path),
+            ], capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertGreater(output_path.stat().st_size, 1000)
 
     def test_remaps_reviewed_caption_times_after_speed_changes(self):
         transcript = build_edited_caption_transcript(

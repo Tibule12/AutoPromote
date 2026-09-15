@@ -1,4 +1,4 @@
-﻿# Node
+# Node
 node_modules/
 npm-debug.log
 yarn-error.log
@@ -72,3 +72,26 @@ fix-*.js
 force-*.js
 merge-*.js
 sync-*.js
+
+# Local test outputs and recordings
+proof/
+test/e2e/playwright/proof/
+test/e2e/playwright/test-assets/
+*.patch
+*.mp4
+*.webm
+*.gif
+*.png
+diff.txt
+fix_*.js
+test-*.js
+test_*.js
+render_*.py
+split_publisher.js
+parse_publisher.py
+patch_broll_upgrades.js
+rewrite_backend_jcut.py
+fix_indentation.py
+*.bak
+
+

@@ -5,6 +5,10 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 
 export const CINEMATIC_PRESETS = [
+  { id: "studio_natural", name: "Studio Natural", icon: "◐", desc: "Neutral skin, controlled contrast; precision RGB grade",
+    precisionGrade: true, exposureStops: 0, lift: .005, gamma: 1.025, gain: .99, tint: .035,
+    brightness: 1, contrast: 1.055, saturation: 1.025, temperature: -.035,
+    vignette: .08, blur: 0, sharpness: .12, zoom: 1 },
   {
     id: "podcast_pro",
     name: "Podcast Pro",
@@ -78,6 +82,12 @@ export const CINEMATIC_PRESETS = [
 ];
 
 export const DEFAULT_CINEMATIC_FX = {
+  precisionGrade: false,
+  exposureStops: 0,
+  lift: 0,
+  gamma: 1,
+  gain: 1,
+  tint: 0,
   preset: null,
   brightness: 1,
   contrast: 1,
@@ -165,6 +175,12 @@ export default function useCinematicEffects() {
     setFx(prev => ({
       ...prev,
       preset: preset.id,
+      precisionGrade: !!preset.precisionGrade,
+      exposureStops: preset.exposureStops ?? 0,
+      lift: preset.lift ?? 0,
+      gamma: preset.gamma ?? 1,
+      gain: preset.gain ?? 1,
+      tint: preset.tint ?? 0,
       brightness: preset.brightness,
       contrast: preset.contrast,
       saturation: preset.saturation,
@@ -367,6 +383,7 @@ export default function useCinematicEffects() {
 
   const hasEffects = useMemo(
     () =>
+      (fx.precisionGrade && (fx.exposureStops !== 0 || fx.lift !== 0 || fx.gamma !== 1 || fx.gain !== 1 || fx.tint !== 0)) ||
       fx.brightness !== 1 ||
       fx.contrast !== 1 ||
       fx.saturation !== 1 ||

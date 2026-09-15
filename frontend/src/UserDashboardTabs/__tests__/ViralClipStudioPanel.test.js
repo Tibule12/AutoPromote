@@ -45,7 +45,8 @@ describe("ViralClipStudioPanel", () => {
       <ViralClipStudioPanel initialFile={source} initialClip={clip} onOpenPublisher={() => {}} />
     );
 
-    expect(screen.getByRole("button", { name: /uploading source/i })).toBeDisabled();
+    expect(screen.getByRole("status")).toHaveTextContent("Uploading video");
+    expect(screen.queryByRole("button", { name: /open creator studio/i })).not.toBeInTheDocument();
 
     await waitFor(() =>
       expect(uploadSourceFileViaBackend).toHaveBeenCalledWith(
@@ -63,7 +64,7 @@ describe("ViralClipStudioPanel", () => {
     Object.defineProperty(preview, "duration", { configurable: true, value: 20 });
     fireEvent.loadedMetadata(preview);
 
-    const openButton = await screen.findByRole("button", { name: /^open clip studio$/i });
+    const openButton = await screen.findByRole("button", { name: /^open creator studio$/i });
     await waitFor(() => expect(openButton).toBeEnabled());
     fireEvent.click(openButton);
 
@@ -82,6 +83,18 @@ describe("ViralClipStudioPanel", () => {
     ]);
   });
 
+  test("accepts a dropped video through the same authenticated upload flow", async () => {
+    const source = new File(["video"], "dropped.mp4", { type: "video/mp4" });
+    const { container } = render(<ViralClipStudioPanel />);
+    fireEvent.drop(container.querySelector(".creator-studio-dropzone"), {
+      dataTransfer: { files: [source] },
+    });
+    await waitFor(() => expect(uploadSourceFileViaBackend).toHaveBeenCalledWith(
+      expect.objectContaining({ file: source, token: "firebase-token", mediaType: "video" })
+    ));
+    expect(screen.getByRole("status")).toHaveTextContent("Validating preview");
+  });
+
   test("keeps Studio blocked and shows the upload failure", async () => {
     uploadSourceFileViaBackend.mockRejectedValueOnce(
       new Error("Upload service returned no HTTP response.")
@@ -95,7 +108,11 @@ describe("ViralClipStudioPanel", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "Upload service returned no HTTP response."
     );
-    expect(screen.getByRole("button", { name: /^open clip studio$/i })).toBeDisabled();
+    expect(screen.queryByRole("button", { name: /^open creator studio$/i })).not.toBeInTheDocument();
     expect(mockVideoEditor).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Retry Upload" }));
+    await waitFor(() => expect(uploadSourceFileViaBackend).toHaveBeenCalledTimes(2));
+    expect(uploadSourceFileViaBackend.mock.calls[1][0].file).toBe(source);
+    await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("Validating preview"));
   });
 });

@@ -9,7 +9,7 @@
 // Prefer env var from Render; fallback to the deployed backend domain.
 // Prefer custom domain by default; environment variable can override per-deploy
 // Default to localhost for development convenience if not specified
-export const API_BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+export const API_BASE_URL = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 
 // Public site URL used for user-facing pages (Terms, Privacy, etc.)
 export const PUBLIC_SITE_URL = process.env.REACT_APP_SITE_URL || "https://autopromote.org";

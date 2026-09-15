@@ -1,15 +1,35 @@
 import re
 import unittest
+import asyncio
+import tempfile
+from unittest.mock import patch
 
 from python_media_worker.main_media_server import (
+    build_transcription_prompt,
     annotate_caption_identity_segments,
     filter_caption_transcription_segments,
     generate_ass_captions,
     normalize_openai_diarized_transcription,
+    transcribe_video,
 )
 
 
 class CaptionQualityTests(unittest.TestCase):
+    def test_transcribe_endpoint_does_not_reintroduce_instruction_prompt(self):
+        for translate, hint in [(False, ""), (True, ""), (False, "Lisakhanya Mdoda. Siphamandla Tsephe.")]:
+            with self.subTest(translate=translate, hint=hint), tempfile.NamedTemporaryFile(suffix=".mp4") as source:
+                with patch("python_media_worker.main_media_server.transcribe_captions_with_provider",
+                           return_value={"segments": [], "language": "en"}) as provider:
+                    asyncio.run(transcribe_video({"video_url": source.name,
+                        "translate_to_english": str(translate), "hint": hint}))
+                self.assertEqual(provider.call_args.kwargs["prompt_hint"], hint)
+                self.assertEqual(provider.call_args.kwargs["translate_to_english"], translate)
+
+    def test_default_asr_prompt_does_not_seed_invented_instruction_text(self):
+        self.assertEqual(build_transcription_prompt(), "")
+        self.assertEqual(build_transcription_prompt("  Lisakhanya Mdoda. Siphamandla Tsephe.  "),
+                         "Lisakhanya Mdoda. Siphamandla Tsephe.")
+
     def test_large_story_captions_preserve_phrases_without_overflowing(self):
         words = ["Mina", "ebengiyiva", "kakhulu", "egazini", "Brothers", "Sisters"]
         ass = generate_ass_captions(
@@ -265,6 +285,69 @@ class CaptionQualityTests(unittest.TestCase):
         reasons = result["quality"]["rejections"][0]["reasons"]
         self.assertIn("repeated_token", reasons)
         self.assertIn("low_word_confidence", reasons)
+
+    def test_rejects_high_probability_repeated_character_hallucination(self):
+        result = filter_caption_transcription_segments(
+            [
+                {
+                    "start": 8.76,
+                    "end": 10.48,
+                    "text": "as well i am very exaqhqhqqqqqqqqqqqqqqqqqqqq",
+                    "avg_logprob": -0.2,
+                    "no_speech_prob": 0.01,
+                    "compression_ratio": 1.1,
+                    "words": [
+                        {"start": 8.76, "end": 9.0, "word": "as", "probability": 0.81},
+                        {"start": 9.0, "end": 9.24, "word": "well", "probability": 0.53},
+                        {"start": 9.24, "end": 9.96, "word": "i", "probability": 0.73},
+                        {"start": 9.96, "end": 10.06, "word": "am", "probability": 0.82},
+                        {"start": 10.06, "end": 10.22, "word": "very", "probability": 0.92},
+                        {
+                            "start": 10.22,
+                            "end": 10.48,
+                            "word": "exaqhqhqqqqqqqqqqqqqqqqqqqq",
+                            "probability": 0.97,
+                        },
+                    ],
+                }
+            ]
+        )
+
+        self.assertEqual(result["segments"], [])
+        self.assertEqual(result["quality"]["status"], "rejected")
+        self.assertIn(
+            "repeated_character",
+            result["quality"]["rejections"][0]["reasons"],
+        )
+
+    def test_rejects_repeated_syllable_inside_one_token(self):
+        result = filter_caption_transcription_segments(
+            [
+                {
+                    "start": 10.0,
+                    "end": 10.48,
+                    "text": "mannyehengengengengengengengengengeng",
+                    "avg_logprob": -0.2,
+                    "no_speech_prob": 0.01,
+                    "compression_ratio": 1.1,
+                    "words": [
+                        {
+                            "start": 10.0,
+                            "end": 10.48,
+                            "word": "mannyehengengengengengengengengengeng",
+                            "probability": 0.97,
+                        }
+                    ],
+                }
+            ]
+        )
+
+        self.assertEqual(result["segments"], [])
+        self.assertEqual(result["quality"]["status"], "rejected")
+        self.assertIn(
+            "repeated_character_sequence",
+            result["quality"]["rejections"][0]["reasons"],
+        )
 
 
 if __name__ == "__main__":

@@ -115,6 +115,21 @@ except ImportError:
     )
     from viral_studio_plan import build_studio_edit_plan, validate_studio_edit_plan
 
+try:
+    from .viral_audio_remix import (
+        build_audio_remix_chain,
+        normalize_audio_remix,
+        render_audio_remix,
+        render_audio_remix_preview,
+    )
+except ImportError:
+    from viral_audio_remix import (
+        build_audio_remix_chain,
+        normalize_audio_remix,
+        render_audio_remix,
+        render_audio_remix_preview,
+    )
+
 # Fix asyncio event loop policy for Windows (Enable Proactor for Subprocesses)
 if sys.platform == 'win32':
     asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
@@ -1661,13 +1676,12 @@ async def create_promo_analysis_copy(input_path, output_path):
     return output_path
 
 def build_transcription_prompt(extra_hint=""):
-    base = (
-        "Transcribe spoken dialogue accurately. Prefer South African English spellings and names "
-        "when the accent suggests it. Handle South African English, Afrikaans, isiZulu, isiXhosa, "
-        "Sesotho, and Tswana carefully. Ignore background music, filler noise, and invented narration."
-    )
-    hint = str(extra_hint or "").strip()
-    return f"{base} {hint}".strip()
+    """Keep optional vocabulary without seeding every clip with instructions.
+
+    Whisper's continuation prompt is not a chat instruction. Output remains an
+    editable draft, including when a spelling hint was supplied.
+    """
+    return str(extra_hint or "").strip()
 
 
 CAPTION_LANGUAGE_ALIASES = {
@@ -2127,6 +2141,13 @@ def get_transcript_hallucination_reasons(segment):
         reasons.append("repeated_token")
     if len(tokens) >= 8 and unique_ratio <= 0.35:
         reasons.append("repeated_phrase")
+    # Multilingual Whisper can assign high token probability to a corrupted
+    # word whose final character repeats for dozens of positions. Probability
+    # alone must never allow that invented text into creator captions.
+    if re.search(r"([^\W\d_])\1{5,}", text, flags=re.IGNORECASE):
+        reasons.append("repeated_character")
+    if re.search(r"([a-z]{2,8})\1{4,}", text, flags=re.IGNORECASE):
+        reasons.append("repeated_character_sequence")
 
     timed_words = [
         word
@@ -2228,6 +2249,10 @@ def estimate_transcript_segment_confidence(segment):
         confidence -= 0.35
     if "repeated_phrase" in hallucination_reasons:
         confidence -= 0.28
+    if "repeated_character" in hallucination_reasons:
+        confidence -= 0.4
+    if "repeated_character_sequence" in hallucination_reasons:
+        confidence -= 0.4
     if "collapsed_timestamps" in hallucination_reasons:
         confidence -= 0.4
     if "impossible_word_rate" in hallucination_reasons:
@@ -4732,23 +4757,41 @@ def build_delogo_filters(width, height, mode, duration=None, video_path=None, ma
     return filters
 
 # ============================================================
-# ANIMATED WORD-LEVEL CAPTIONS (5 STYLES) — OpusClip Competitor
+# ANIMATED WORD-LEVEL CAPTIONS — creator-grade visual systems
 # ============================================================
 
 CAPTION_STYLES = {
+    "rainbow": {
+        "label": "Rainbow Flow", "fontname": "DejaVu Sans", "primary_color": "&H00FFFFFF",
+        "outline_color": "&H00100618", "highlight_color": "&H008F5DFF", "fontsize": 68,
+        "bold": True, "outline": 5, "shadow": 4, "alignment": 2, "margin_v": 116,
+        "animation": "rainbow_words", "spacing": -1,
+    },
+    "watch_me": {
+        "label": "Watch Me", "fontname": "DejaVu Sans", "primary_color": "&H00FFFFFF",
+        "outline_color": "&H00000000", "highlight_color": "&H0052E6F6", "fontsize": 64,
+        "bold": True, "outline": 5, "shadow": 4, "alignment": 2, "margin_v": 116,
+        "animation": "focus_cut", "uppercase": True, "spacing": -2,
+    },
+    "wall_type": {
+        "label": "Wall Type", "fontname": "DejaVu Sans Condensed", "primary_color": "&H00FFFFFF",
+        "outline_color": "&H70000000", "highlight_color": "&H008F5DFF", "fontsize": 42,
+        "bold": True, "outline": 2, "shadow": 2, "alignment": 7, "margin_v": 84,
+        "animation": "fade_word", "uppercase": True, "spacing": 3,
+    },
     "story_pop": {
         "label": "Story Pop",
         "fontname": "DejaVu Sans",
         "primary_color": "&H00FFFFFF",
         "outline_color": "&H00140A22",
         "highlight_color": "&H003DB3FF",
-        "fontsize": 50,
+        "fontsize": 60,
         "bold": True,
         "outline": 4,
         "shadow": 2,
         "alignment": 2,
         "margin_v": 108,
-        "animation": "story_pop",
+        "animation": "story_pop", "border_style": 3, "back_color": "&HC0220A14",
     },
     "bold_pop": {
         "label": "Bold Pop",
@@ -4756,7 +4799,7 @@ CAPTION_STYLES = {
         "primary_color": "&H00FFFFFF",  # White (ASS BGR)
         "outline_color": "&H00000000",  # Black
         "highlight_color": "&H0000D4FF",  # Orange highlight (BGR)
-        "fontsize": 52,
+        "fontsize": 68,
         "bold": True,
         "outline": 4,
         "shadow": 2,
@@ -4770,7 +4813,7 @@ CAPTION_STYLES = {
         "primary_color": "&H00FFFFFF",
         "outline_color": "&H00000000",
         "highlight_color": "&H0042F5F5",  # Yellow highlight
-        "fontsize": 48,
+        "fontsize": 58,
         "bold": True,
         "outline": 3,
         "shadow": 1,
@@ -4784,7 +4827,7 @@ CAPTION_STYLES = {
         "primary_color": "&H00FFAA00",  # Cyan-ish (BGR)
         "outline_color": "&H00FF6600",  # Blue glow
         "highlight_color": "&H0000FFFF",  # Yellow highlight
-        "fontsize": 50,
+        "fontsize": 64,
         "bold": True,
         "outline": 6,
         "shadow": 4,
@@ -4798,7 +4841,7 @@ CAPTION_STYLES = {
         "primary_color": "&H00FFFFFF",
         "outline_color": "&H00222222",
         "highlight_color": "&H005050FF",  # Red highlight (BGR)
-        "fontsize": 54,
+        "fontsize": 68,
         "bold": True,
         "outline": 4,
         "shadow": 3,
@@ -4812,7 +4855,7 @@ CAPTION_STYLES = {
         "primary_color": "&H00FFFFFF",
         "outline_color": "&H80000000",  # Semi-transparent black
         "highlight_color": "&H00FFFFFF",
-        "fontsize": 42,
+        "fontsize": 48,
         "bold": False,
         "outline": 2,
         "shadow": 0,
@@ -4820,13 +4863,89 @@ CAPTION_STYLES = {
         "margin_v": 100,
         "animation": "fade_word",
     },
+    "headline": {
+        "label": "Big Headline", "fontname": "DejaVu Sans", "primary_color": "&H00FFFFFF",
+        "outline_color": "&H00050508", "highlight_color": "&H003DB3FF", "fontsize": 78,
+        "bold": True, "outline": 5, "shadow": 3, "alignment": 2, "margin_v": 120,
+        "animation": "scale_pop", "uppercase": True, "spacing": -1,
+    },
+    "boxed": {
+        "label": "Subtitle Card", "fontname": "DejaVu Sans", "primary_color": "&H00FFFFFF",
+        "outline_color": "&H00100804", "highlight_color": "&H00D0E03C", "fontsize": 56,
+        "bold": True, "outline": 3, "shadow": 4, "alignment": 2, "margin_v": 108,
+        "animation": "karaoke_fill", "border_style": 3, "back_color": "&HC0080402",
+    },
+    "comic": {
+        "label": "Comic Punch", "fontname": "DejaVu Sans", "primary_color": "&H00111111",
+        "outline_color": "&H0007070B", "highlight_color": "&H0052E6F6", "fontsize": 70,
+        "bold": True, "outline": 5, "shadow": 4, "alignment": 2, "margin_v": 120,
+        "animation": "bounce_word", "uppercase": True,
+    },
+    "gradient": {
+        "label": "Gradient Pop", "fontname": "DejaVu Sans", "primary_color": "&H00FFFFFF",
+        "outline_color": "&H00200B12", "highlight_color": "&H008F5DFF", "fontsize": 62,
+        "bold": True, "outline": 4, "shadow": 3, "alignment": 2, "margin_v": 112,
+        "animation": "story_pop", "border_style": 3, "back_color": "&HC0120B20",
+    },
+    "typewriter": {
+        "label": "Typewriter", "fontname": "DejaVu Sans Mono", "primary_color": "&H00FFFFFF",
+        "outline_color": "&H00100804", "highlight_color": "&H00D0E03C", "fontsize": 50,
+        "bold": True, "outline": 2, "shadow": 1, "alignment": 2, "margin_v": 105,
+        "animation": "karaoke_fill",
+    },
+    "editorial": {
+        "label": "Editorial Serif", "fontname": "DejaVu Serif", "primary_color": "&H00FFFFFF",
+        "outline_color": "&H60000000", "highlight_color": "&H00FFFFFF", "fontsize": 54,
+        "bold": True, "outline": 2, "shadow": 1, "alignment": 2, "margin_v": 108,
+        "animation": "fade_word", "italic": True, "spacing": 1,
+    },
+    "sticker": {
+        "label": "Sticker Stack", "fontname": "DejaVu Sans", "primary_color": "&H00100B08",
+        "outline_color": "&H00F8FBFF", "highlight_color": "&H008F5DFF", "fontsize": 66,
+        "bold": True, "outline": 9, "shadow": 6, "alignment": 2, "margin_v": 118,
+        "animation": "scale_pop", "border_style": 3, "back_color": "&H00FFFFFF",
+        "uppercase": True,
+    },
+    "marker": {
+        "label": "Marker Swipe", "fontname": "DejaVu Sans", "primary_color": "&H00121110",
+        "outline_color": "&H0052E6F6", "highlight_color": "&H00121110", "fontsize": 66,
+        "bold": True, "outline": 7, "shadow": 1, "alignment": 2, "margin_v": 118,
+        "animation": "scale_pop", "border_style": 3, "back_color": "&H0052E6F6",
+        "uppercase": True, "spacing": -1,
+    },
+    "glass": {
+        "label": "Glass", "fontname": "DejaVu Sans", "primary_color": "&H00FFFFFF",
+        "outline_color": "&HA8402818", "highlight_color": "&H00D0E03C", "fontsize": 58,
+        "bold": True, "outline": 7, "shadow": 3, "alignment": 2, "margin_v": 112,
+        "animation": "glow_pulse", "border_style": 3, "back_color": "&HA828160D",
+    },
+    "newsroom": {
+        "label": "News Flash", "fontname": "Liberation Sans Narrow", "primary_color": "&H00FFFFFF",
+        "outline_color": "&H004516C5", "highlight_color": "&H006DE6FF", "fontsize": 67,
+        "bold": True, "outline": 8, "shadow": 5, "alignment": 2, "margin_v": 116,
+        "animation": "scale_pop", "border_style": 3, "back_color": "&H004516C5",
+        "uppercase": True, "spacing": 1,
+    },
+    "luxury": {
+        "label": "Luxury", "fontname": "DejaVu Serif", "primary_color": "&H00E9F8FF",
+        "outline_color": "&H70000000", "highlight_color": "&H007DC7E7", "fontsize": 58,
+        "bold": False, "outline": 2, "shadow": 1, "alignment": 2, "margin_v": 112,
+        "animation": "fade_word", "italic": True, "spacing": 3,
+    },
+    "retro": {
+        "label": "Retro", "fontname": "DejaVu Sans Condensed", "primary_color": "&H00C9F1FF",
+        "outline_color": "&H0011193B", "highlight_color": "&H006EE3FF", "fontsize": 64,
+        "bold": True, "outline": 7, "shadow": 5, "alignment": 2, "margin_v": 118,
+        "animation": "bounce_word", "border_style": 3, "back_color": "&H002A47B7",
+        "uppercase": True, "spacing": 1,
+    },
 }
 
 
 def resolve_story_caption_treatment(
     segment, index, video_width, video_height, font_size, default_position="lower"
 ):
-    """Choose a stable safe position and accent for a creator-reviewed line."""
+    """Resolve the exact per-line treatment shared by preview and final render."""
     text = str(segment.get("text") or "").lower()
     requested_placement = str(
         segment.get("captionPlacement")
@@ -4845,25 +4964,54 @@ def resolve_story_caption_treatment(
     else:
         concept = "story"
 
+    normalized_default = str(default_position or "lower").strip().lower()
     auto_placement = {
         "top": "top_left",
         "center": "middle_left",
         "middle": "middle_left",
         "lower": "bottom_center",
         "bottom": "bottom_center",
-    }.get(str(default_position or "lower").strip().lower(), "bottom_center")
+    }.get(normalized_default, normalized_default)
 
     placements = {
+        "shoulder_left": (4, 0.12, 0.56),
+        "shoulder_right": (6, 0.88, 0.56),
+        "background_left": (7, 0.07, 0.18),
+        "background_center": (8, 0.5, 0.18),
+        "background_right": (9, 0.93, 0.18),
         "top_left": (7, 0.075, 0.09),
+        "top_center": (8, 0.5, 0.09),
         "top_right": (9, 0.925, 0.09),
         "middle_left": (4, 0.075, 0.48),
+        "middle_center": (5, 0.5, 0.48),
         "middle_right": (6, 0.925, 0.48),
         "bottom_left": (1, 0.075, 0.86),
         "bottom_center": (2, 0.5, 0.86),
         "bottom_right": (3, 0.925, 0.86),
     }
-    placement = requested_placement if requested_placement in placements else auto_placement
-    alignment, x_ratio, y_ratio = placements[placement]
+    if requested_placement == "custom":
+        placement = "custom"
+        try:
+            x_ratio = max(0.05, min(0.95, float(segment.get("captionX", 50)) / 100.0))
+        except (TypeError, ValueError):
+            x_ratio = 0.5
+        try:
+            y_ratio = max(0.05, min(0.95, float(segment.get("captionY", 82)) / 100.0))
+        except (TypeError, ValueError):
+            y_ratio = 0.82
+        horizontal_alignment = 1 if x_ratio <= 0.33 else 3 if x_ratio >= 0.67 else 2
+        alignment = (
+            horizontal_alignment + 6
+            if y_ratio <= 0.33
+            else horizontal_alignment + 3
+            if y_ratio < 0.67
+            else horizontal_alignment
+        )
+    else:
+        placement = requested_placement if requested_placement in placements else auto_placement
+        if placement not in placements:
+            placement = "bottom_center"
+        alignment, x_ratio, y_ratio = placements[placement]
     x = round(video_width * x_ratio)
     y = round(video_height * y_ratio)
     accent_by_concept = {
@@ -4874,10 +5022,44 @@ def resolve_story_caption_treatment(
         "story": "&H003DB3FF",
     }
     accent = accent_by_concept.get(concept, accent_by_concept["story"])
+    requested_accent = str(
+        segment.get("captionAccent") or segment.get("caption_accent") or ""
+    ).strip()
+    if re.fullmatch(r"#[0-9a-fA-F]{6}", requested_accent):
+        red, green, blue = requested_accent[1:3], requested_accent[3:5], requested_accent[5:7]
+        accent = f"&H00{blue}{green}{red}".upper()
+
+    requested_icon = str(
+        segment.get("captionIcon") or segment.get("caption_icon") or "auto"
+    ).strip().lower()
+    icon_concept = concept if requested_icon in {"", "auto"} else requested_icon
+    icon = {
+        # libass cannot paint Noto Color Emoji's bitmap glyphs. These authored
+        # Unicode pictograms live in Noto Sans Symbols2 and remain crisp in the
+        # exported video instead of degrading into missing-glyph squares.
+        "laugh": "☼",
+        "fire": "♨",
+        "heart": "♥",
+        "wow": "❗",
+        "clap": "✋",
+        "hundred": "✹",
+        "eyes": "👁",
+        "crown": "♛",
+        "mic": "🎙",
+        "phone": "☎",
+        "music": "♫",
+        "place": "⌖",
+        "payoff": "⚡",
+        "story": "✦",
+        "none": "",
+    }.get(icon_concept, "✦")
     return {
         "placement": placement,
-        "text_override": f"{{\\an{alignment}\\pos({x},{y})\\q2}}",
+        # Smart wrapping is mandatory with absolute positioning; ASS q2 turns
+        # wrapping off and lets long creator captions leave the programme frame.
+        "text_override": f"{{\\an{alignment}\\pos({x},{y})\\q0}}",
         "accent": accent,
+        "icon": icon,
     }
 
 
@@ -4898,6 +5080,14 @@ def generate_ass_captions(
         caption_scale,
         CAPTION_STYLES.get(style_name, CAPTION_STYLES["bold_pop"]),
     )
+    # Presets are authored for a 1080px-wide canvas. Keep text and safe margins
+    # proportional on landscape, portrait, preview-sized and 4K deliveries.
+    caption_pixel_scale = max(0.1, float(video_width) / 1080.0)
+    style["fontsize"] = max(12, round(style["fontsize"] * caption_pixel_scale))
+    style["outline"] = max(1, round(style["outline"] * caption_pixel_scale))
+    style["shadow"] = max(0, round(style["shadow"] * caption_pixel_scale))
+    style["margin_v"] = 0 if style["alignment"] == 5 else round(video_height * .12)
+    caption_margin_x = max(8, round(video_width * .04))
     segments = whisper_result.get("segments", [])
 
     # ASS header
@@ -4914,19 +5104,25 @@ def generate_ass_captions(
         "Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, "
         "Shadow, Alignment, MarginL, MarginR, MarginV, Encoding",
         f"Style: Default,{style['fontname']},{style['fontsize']},{style['primary_color']},"
-        f"{style['highlight_color']},{style['outline_color']},&H80000000,"
-        f"{'-1' if style['bold'] else '0'},0,0,0,100,100,0,0,1,{style['outline']},"
-        f"{style['shadow']},{style['alignment']},40,40,{style['margin_v']},1",
+        f"{style['highlight_color']},{style['outline_color']},{style.get('back_color', '&H80000000')},"
+        f"{'-1' if style['bold'] else '0'},{'-1' if style.get('italic') else '0'},0,0,100,100,{style.get('spacing', 0)},0,{style.get('border_style', 1)},{style['outline']},"
+        f"{style['shadow']},{style['alignment']},{caption_margin_x},{caption_margin_x},{style['margin_v']},1",
         f"Style: Active,{style['fontname']},{style['fontsize']},{style['highlight_color']},"
-        f"{style['primary_color']},{style['outline_color']},&H80000000,"
-        f"-1,0,0,0,100,100,0,0,1,{style['outline'] + 1},"
-        f"{style['shadow']},{style['alignment']},40,40,{style['margin_v']},1",
+        f"{style['primary_color']},{style['outline_color']},{style.get('back_color', '&H80000000')},"
+        f"-1,{'-1' if style.get('italic') else '0'},0,0,100,100,{style.get('spacing', 0)},0,{style.get('border_style', 1)},{style['outline'] + 1},"
+        f"{style['shadow']},{style['alignment']},{caption_margin_x},{caption_margin_x},{style['margin_v']},1",
         "",
         "[Events]",
         "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text",
     ]
 
     hallucinations = {"thank you.", "thanks.", "bye.", "music.", "watching.", "mbc", "lbc", "you", "silence"}
+
+    def caption_word(value):
+        clean_value = str(value or "").strip()
+        if style.get("uppercase"):
+            clean_value = clean_value.upper()
+        return _escape_ass(clean_value)
 
     for segment_index, segment in enumerate(segments):
         words = segment.get("words", [])
@@ -4938,25 +5134,44 @@ def generate_ass_captions(
         if segment.get("no_speech_prob", 0) > 0.8:
             continue
 
+        caption_treatment = resolve_story_caption_treatment(
+            segment,
+            segment_index,
+            video_width,
+            video_height,
+            style["fontsize"],
+            default_position=caption_position,
+        )
+        placement_override = caption_treatment["text_override"]
+        active_accent = caption_treatment["accent"]
+        emphasis_accent = (
+            style["primary_color"] if style_name == "marker" else active_accent
+        )
+        design_override = (
+            f"{{\\3c{active_accent}\\c{style['primary_color']}}}"
+            if style_name == "marker"
+            else ""
+        )
+        icon_prefix = (
+            f"{{\\fnNoto Sans Symbols2\\c{active_accent}\\fscx136\\fscy136}}"
+            f"{_escape_ass(caption_treatment['icon'])}"
+            f"{{\\fn{style['fontname']}\\c{style['primary_color']}\\fscx100\\fscy100}}\\h"
+            if caption_treatment.get("icon")
+            else ""
+        )
+
         if not words:
             # Fallback: show full segment text without word-level animation
             start_ass = _seconds_to_ass_time(segment["start"])
             end_ass = _seconds_to_ass_time(segment["end"])
             clean = re.sub(r"\[.*?\]|\(.*?\)", "", seg_text).strip()
             if clean and len(clean) >= 2:
-                ass_lines.append(f"Dialogue: 0,{start_ass},{end_ass},Default,,0,0,0,,{_escape_ass(clean)}")
+                ass_lines.append(
+                    f"Dialogue: 0,{start_ass},{end_ass},Default,,0,0,0,,"
+                    f"{placement_override}{design_override}{{\\c{emphasis_accent}}}"
+                    f"{icon_prefix}{caption_word(clean)}"
+                )
             continue
-
-        story_treatment = None
-        if style["animation"] == "story_pop":
-            story_treatment = resolve_story_caption_treatment(
-                segment,
-                segment_index,
-                video_width,
-                video_height,
-                style["fontsize"],
-                default_position=caption_position,
-            )
 
         # Keep enough neighbouring words together to preserve a phrase. The
         # previous three-word split produced fragments such as "nathi through
@@ -4985,18 +5200,55 @@ def generate_ass_captions(
             end_ass = _seconds_to_ass_time(group_end)
 
             # Build the animated text line
-            if style["animation"] == "story_pop":
+            if style["animation"] in {"rainbow_words", "focus_cut"}:
+                rainbow_palette = [
+                    "&H008F5DFF", "&H003DB3FF", "&H0052E6F6", "&H009BF572",
+                    "&H00D0E03C", "&H00FFA854", "&H00FF75A8",
+                ]
                 for i, word in enumerate(group):
                     w_start = _seconds_to_ass_time(word["start"])
                     w_end = _seconds_to_ass_time(word["end"])
                     parts = []
                     for j, candidate in enumerate(group):
-                        candidate_text = _escape_ass(candidate.get("word", "").strip())
+                        candidate_text = caption_word(candidate.get("word", ""))
+                        if not candidate_text:
+                            continue
+                        word_color = rainbow_palette[j % len(rainbow_palette)]
+                        if style["animation"] == "rainbow_words":
+                            if j == i:
+                                parts.append(
+                                    f"{{\\c{word_color}\\fscx122\\fscy122\\bord{style['outline'] + 2}"
+                                    f"\\t(60,190,\\fscx106\\fscy106)}}{candidate_text}"
+                                    f"{{\\fscx100\\fscy100\\bord{style['outline']}}}"
+                                )
+                            else:
+                                parts.append(f"{{\\c{word_color}}}{candidate_text}")
+                        elif j == i:
+                            parts.append(
+                                f"{{\\alpha&H00&\\c{emphasis_accent}\\fscx120\\fscy120"
+                                f"\\bord{style['outline'] + 2}\\t(70,210,\\fscx106\\fscy106)}}"
+                                f"{candidate_text}{{\\fscx100\\fscy100\\bord{style['outline']}}}"
+                            )
+                        else:
+                            parts.append(f"{{\\alpha&H38&\\c{style['primary_color']}}}{candidate_text}{{\\alpha&H00&}}")
+                    if parts:
+                        ass_lines.append(
+                            f"Dialogue: 2,{w_start},{w_end},Default,,0,0,0,,"
+                            f"{placement_override}{design_override}{{\\fad(45,65)}}{icon_prefix}{' '.join(parts)}"
+                        )
+
+            elif style["animation"] == "story_pop":
+                for i, word in enumerate(group):
+                    w_start = _seconds_to_ass_time(word["start"])
+                    w_end = _seconds_to_ass_time(word["end"])
+                    parts = []
+                    for j, candidate in enumerate(group):
+                        candidate_text = caption_word(candidate.get("word", ""))
                         if not candidate_text:
                             continue
                         if j == i:
                             parts.append(
-                                f"{{\\c{story_treatment['accent']}\\fscx118\\fscy118\\bord{style['outline'] + 1}"
+                                f"{{\\c{emphasis_accent}\\fscx118\\fscy118\\bord{style['outline'] + 1}"
                                 f"\\t(70,210,\\fscx104\\fscy104)}}{candidate_text}"
                                 f"{{\\c{style['primary_color']}\\fscx100\\fscy100\\bord{style['outline']}}}"
                             )
@@ -5006,7 +5258,7 @@ def generate_ass_captions(
                         line = " ".join(parts)
                         ass_lines.append(
                             f"Dialogue: 2,{w_start},{w_end},Default,,0,0,0,,"
-                            f"{story_treatment['text_override']}{{\\fad(55,70)}}{line}"
+                            f"{placement_override}{design_override}{{\\fad(55,70)}}{icon_prefix}{line}"
                         )
 
             elif style["animation"] == "karaoke_fill":
@@ -5014,84 +5266,98 @@ def generate_ass_captions(
                 text_parts = []
                 for word in group:
                     w_dur_cs = max(1, int((word["end"] - word["start"]) * 100))
-                    word_text = _escape_ass(word.get("word", "").strip())
+                    word_text = caption_word(word.get("word", ""))
                     if word_text:
                         spacer = "" if not text_parts else " "
                         text_parts.append(f"{spacer}{{\\kf{w_dur_cs}}}{word_text}")
                 if text_parts:
                     line = "".join(text_parts)
-                    ass_lines.append(f"Dialogue: 0,{start_ass},{end_ass},Default,,0,0,0,,{line}")
+                    ass_lines.append(
+                        f"Dialogue: 0,{start_ass},{end_ass},Default,,0,0,0,,"
+                        f"{placement_override}{design_override}{{\\2c{emphasis_accent}}}{icon_prefix}{line}"
+                    )
 
             elif style["animation"] == "scale_pop":
                 # Bold Pop: active word scales up briefly
                 for i, word in enumerate(group):
                     w_start = _seconds_to_ass_time(word["start"])
                     w_end = _seconds_to_ass_time(word["end"])
-                    word_text = _escape_ass(word.get("word", "").strip())
+                    word_text = caption_word(word.get("word", ""))
                     if not word_text:
                         continue
                     # Build line: all words shown, active word is highlighted + scaled
                     parts = []
                     for j, w in enumerate(group):
-                        wt = _escape_ass(w.get("word", "").strip())
+                        wt = caption_word(w.get("word", ""))
                         if not wt:
                             continue
                         if j == i:
-                            parts.append(f"{{\\fscx115\\fscy115\\c{style['highlight_color']}\\b1}}{wt}{{\\fscx100\\fscy100\\c{style['primary_color']}\\b1}}")
+                            parts.append(f"{{\\fscx115\\fscy115\\c{emphasis_accent}\\b1}}{wt}{{\\fscx100\\fscy100\\c{style['primary_color']}\\b1}}")
                         else:
                             parts.append(wt)
                     line = " ".join(parts)
-                    ass_lines.append(f"Dialogue: 0,{w_start},{w_end},Default,,0,0,0,,{line}")
+                    ass_lines.append(
+                        f"Dialogue: 0,{w_start},{w_end},Default,,0,0,0,,"
+                        f"{placement_override}{design_override}{icon_prefix}{line}"
+                    )
 
             elif style["animation"] == "bounce_word":
                 # Bounce: active word moves up slightly
                 for i, word in enumerate(group):
                     w_start = _seconds_to_ass_time(word["start"])
                     w_end = _seconds_to_ass_time(word["end"])
-                    word_text = _escape_ass(word.get("word", "").strip())
+                    word_text = caption_word(word.get("word", ""))
                     if not word_text:
                         continue
                     parts = []
                     for j, w in enumerate(group):
-                        wt = _escape_ass(w.get("word", "").strip())
+                        wt = caption_word(w.get("word", ""))
                         if not wt:
                             continue
                         if j == i:
-                            parts.append(f"{{\\move(0,0,0,-12)\\c{style['highlight_color']}\\b1}}{wt}{{\\c{style['primary_color']}\\b0}}")
+                            parts.append(f"{{\\fscy116\\t(80,190,\\fscy100)\\c{emphasis_accent}\\b1}}{wt}{{\\fscy100\\c{style['primary_color']}\\b0}}")
                         else:
                             parts.append(wt)
                     line = " ".join(parts)
-                    ass_lines.append(f"Dialogue: 0,{w_start},{w_end},Default,,0,0,0,,{line}")
+                    ass_lines.append(
+                        f"Dialogue: 0,{w_start},{w_end},Default,,0,0,0,,"
+                        f"{placement_override}{design_override}{icon_prefix}{line}"
+                    )
 
             elif style["animation"] == "glow_pulse":
                 # Glow: active word gets extra outline glow
                 for i, word in enumerate(group):
                     w_start = _seconds_to_ass_time(word["start"])
                     w_end = _seconds_to_ass_time(word["end"])
-                    word_text = _escape_ass(word.get("word", "").strip())
+                    word_text = caption_word(word.get("word", ""))
                     if not word_text:
                         continue
                     parts = []
                     for j, w in enumerate(group):
-                        wt = _escape_ass(w.get("word", "").strip())
+                        wt = caption_word(w.get("word", ""))
                         if not wt:
                             continue
                         if j == i:
-                            parts.append(f"{{\\bord{style['outline'] + 3}\\3c{style['highlight_color']}\\c{style['highlight_color']}}}{wt}{{\\bord{style['outline']}\\3c{style['outline_color']}\\c{style['primary_color']}}}")
+                            parts.append(f"{{\\bord{style['outline'] + 3}\\3c{emphasis_accent}\\c{emphasis_accent}}}{wt}{{\\bord{style['outline']}\\3c{style['outline_color']}\\c{style['primary_color']}}}")
                         else:
                             parts.append(wt)
                     line = " ".join(parts)
-                    ass_lines.append(f"Dialogue: 0,{w_start},{w_end},Default,,0,0,0,,{line}")
+                    ass_lines.append(
+                        f"Dialogue: 0,{w_start},{w_end},Default,,0,0,0,,"
+                        f"{placement_override}{design_override}{icon_prefix}{line}"
+                    )
 
             else:
                 # fade_word (minimal): simple fade per word group
-                clean_text = " ".join(_escape_ass(w.get("word", "").strip()) for w in group if w.get("word", "").strip())
+                clean_text = " ".join(caption_word(w.get("word", "")) for w in group if w.get("word", "").strip())
                 if clean_text:
                     fade_in_ms = 100
                     fade_out_ms = 150
                     ass_lines.append(
                         f"Dialogue: 0,{start_ass},{end_ass},Default,,0,0,0,,"
-                        f"{{\\fad({fade_in_ms},{fade_out_ms})}}{clean_text}"
+                        f"{placement_override}{design_override}"
+                        f"{{\\fad({fade_in_ms},{fade_out_ms})\\c{emphasis_accent}}}"
+                        f"{icon_prefix}{clean_text}"
                     )
 
     return "\n".join(ass_lines)
@@ -6054,7 +6320,7 @@ def build_viral_brand_watermark_asset(output_width, output_height, feature_label
     """Create the transparent AutoPromote logo lockup used by Viral Clip Studio."""
     width = max(160, int(output_width or 1080))
     height = max(160, int(output_height or 1920))
-    target_width = int(max(220, min(420, width * (0.27 if height >= width else 0.18))))
+    target_width = int(max(150, min(300, width * (0.18 if height >= width else 0.14))))
     target_height = max(56, int(round(target_width * 0.245)))
     cache_dir = os.path.join(tempfile.gettempdir(), "autopromote_brand_assets")
     os.makedirs(cache_dir, exist_ok=True)
@@ -6236,11 +6502,47 @@ async def apply_viral_brand_watermark(
     output_width,
     output_height,
     output_settings=None,
+    movement_schedule=None,
+    variant="studio",
 ):
-    """Burn the real transparent Viral Clip Studio logo into the finished file."""
-    asset_path = build_viral_brand_watermark_asset(output_width, output_height)
+    """Burn the transparent AutoPromote lockup using the Studio's timed safe path."""
+    normalized_variant = str(variant or "studio").strip().lower()
+    feature_label = "CREATE · GROW · PUBLISH" if normalized_variant == "general" else "VIRAL CLIP STUDIO"
+    asset_path = build_viral_brand_watermark_asset(output_width, output_height, feature_label)
     margin_x = max(24, int(int(output_width or 1080) * 0.05))
     margin_y = max(24, int(int(output_height or 1920) * 0.035))
+    normalized_schedule = []
+    for cue in movement_schedule or []:
+        if not isinstance(cue, dict):
+            continue
+        start_time = max(0.0, float(cue.get("startTime", cue.get("start_time", 0.0)) or 0.0))
+        end_time = max(start_time + 0.05, float(cue.get("endTime", cue.get("end_time", start_time + 3.75)) or start_time + 3.75))
+        normalized_schedule.append(
+            {
+                "start_time": start_time,
+                "end_time": end_time,
+                "position": str(cue.get("position") or "custom"),
+                "left": clamp_float(cue.get("left", 66), 2, 88),
+                "top": clamp_float(cue.get("top", 7), 2, 90),
+            }
+        )
+    normalized_schedule.sort(key=lambda cue: cue["start_time"])
+
+    def timed_position_expression(axis, fallback):
+        if not normalized_schedule:
+            return str(fallback)
+        coordinate = "left" if axis == "x" else "top"
+        dimension = "W" if axis == "x" else "H"
+        expression = f"{dimension}*{normalized_schedule[-1][coordinate] / 100.0:.6f}"
+        for cue in reversed(normalized_schedule[:-1]):
+            cue_value = f"{dimension}*{cue[coordinate] / 100.0:.6f}"
+            expression = (
+                f"if(lt(t\\,{cue['end_time']:.3f})\\,{cue_value}\\,{expression})"
+            )
+        return expression
+
+    x_expression = timed_position_expression("x", f"W-w-{margin_x}")
+    y_expression = timed_position_expression("y", str(margin_y))
     branded_output_path = os.path.join(
         os.path.dirname(output_path),
         f"{job_id}_viral_branded.mp4",
@@ -6249,8 +6551,10 @@ async def apply_viral_brand_watermark(
         "enabled": True,
         "status": "pending",
         "asset": "autopromote_viral_clip_studio_lockup",
-        "placement": "top_right_safe_zone",
+        "placement": "adaptive_safe_path" if normalized_schedule else "top_right_safe_zone",
         "style": "transparent_logo_lockup",
+        "variant": normalized_variant,
+        "movement_schedule": normalized_schedule,
     }
     export_profile = resolve_viral_export_profile(
         output_settings,
@@ -6270,8 +6574,8 @@ async def apply_viral_brand_watermark(
                 asset_path,
                 "-filter_complex",
                 (
-                    "[1:v]format=rgba,colorchannelmixer=aa=0.82[viral_brand];"
-                    f"[0:v][viral_brand]overlay=x=W-w-{margin_x}:y={margin_y}:"
+                    "[1:v]format=rgba,colorchannelmixer=aa=0.70[viral_brand];"
+                    f"[0:v][viral_brand]overlay=x='{x_expression}':y='{y_expression}':eval=frame:"
                     "eof_action=pass:shortest=1[viral_branded_video]"
                 ),
                 "-map",
@@ -7534,9 +7838,11 @@ def build_speaker_track_crop_filter(positions, src_width, src_height, target_asp
     smoothed = smooth_positions(positions, window=7)
     keyframes = []
     for t, cx, cy in smoothed:
-        # Keep the face near the upper third for natural headroom instead of
-        # pinning it to the geometric center of a tall delivery frame.
-        crop_x = int(cx * src_width - crop_w / 2)
+        # Preserve look-room from the source shot. A subject composed on the
+        # right remains on the right third of the vertical crop, and vice
+        # versa, instead of every face being pinned dead-center.
+        horizontal_anchor = 0.66 if cx >= 0.5 else 0.34
+        crop_x = int(cx * src_width - crop_w * horizontal_anchor)
         crop_y = int(cy * src_height - crop_h * 0.36)
         # Clamp to bounds
         crop_x = max(0, min(crop_x, src_width - crop_w))
@@ -7546,26 +7852,557 @@ def build_speaker_track_crop_filter(positions, src_width, src_height, target_asp
     return keyframes, crop_w, crop_h
 
 
+def build_group_stack_filter(
+    src_width,
+    src_height,
+    target_width=1080,
+    target_height=1920,
+    group_stack=None,
+    top_input_label="[0:v]",
+    bottom_input_label=None,
+    bottom_src_width=None,
+    bottom_src_height=None,
+    output_label="[vout]",
+):
+    """Build the same editable top/bottom two-speaker composition used by Studio preview."""
+    plan = group_stack or {}
+    divider_percent = clamp_float(float(plan.get("divider_percent", 50.0)), 35.0, 65.0)
+    gap_percent = clamp_float(float(plan.get("gap_percent", 0.45)), 0.0, 3.0)
+    target_width = max(2, int(target_width or 1080))
+    target_height = max(2, int(target_height or 1920))
+    divider_y = max(2, min(target_height - 2, int(target_height * divider_percent / 100.0)))
+    gap = max(2, int(target_height * gap_percent / 100.0))
+    gap -= gap % 2
+    top_height = divider_y
+    bottom_height = target_height - top_height
+
+    def resolve_crop(frame, source_width, source_height, panel_width, panel_height, fallback):
+        frame = frame or {}
+        focus_x = clamp_float(float(frame.get("x", fallback[0])) / 100.0, 0.0, 1.0)
+        focus_y = clamp_float(float(frame.get("y", fallback[1])) / 100.0, 0.0, 1.0)
+        zoom = clamp_float(float(frame.get("zoom", fallback[2])), 1.0, 7.0)
+        panel_aspect = float(panel_width) / max(1.0, float(panel_height))
+        source_aspect = float(source_width) / max(1.0, float(source_height))
+        if source_aspect > panel_aspect:
+            base_height = float(source_height)
+            base_width = base_height * panel_aspect
+        else:
+            base_width = float(source_width)
+            base_height = base_width / panel_aspect
+        crop_width = max(2, int(base_width / zoom))
+        crop_height = max(2, int(base_height / zoom))
+        crop_width = min(int(source_width), crop_width - (crop_width % 2))
+        crop_height = min(int(source_height), crop_height - (crop_height % 2))
+        crop_x = int(focus_x * source_width - crop_width / 2)
+        crop_y = int(focus_y * source_height - crop_height / 2)
+        crop_x = max(0, min(crop_x, int(source_width) - crop_width))
+        crop_y = max(0, min(crop_y, int(source_height) - crop_height))
+        crop_x -= crop_x % 2
+        crop_y -= crop_y % 2
+        if frame.get("keyframes"):
+            crop_x = f"'max(0,min(iw-ow,iw*({reviewed_axis_expression(frame['keyframes'], 'x', focus_x)})-ow/2))'"
+            crop_y = f"'max(0,min(ih-oh,ih*({reviewed_axis_expression(frame['keyframes'], 'y', focus_y)})-oh/2))'"
+        return crop_width, crop_height, crop_x, crop_y
+
+    resolved_bottom_width = int(bottom_src_width or src_width)
+    resolved_bottom_height = int(bottom_src_height or src_height)
+    top_crop = resolve_crop(
+        plan.get("top"), src_width, src_height, target_width, top_height, (34.0, 50.0, 1.0)
+    )
+    bottom_crop = resolve_crop(
+        plan.get("bottom"),
+        resolved_bottom_width,
+        resolved_bottom_height,
+        target_width,
+        bottom_height,
+        (70.0, 50.0, 1.0),
+    )
+    top_w, top_h, top_x, top_y = top_crop
+    bottom_w, bottom_h, bottom_x, bottom_y = bottom_crop
+    divider_top = max(0, divider_y - gap // 2)
+    if bottom_input_label:
+        input_stage = ""
+        top_label = top_input_label
+        bottom_label = bottom_input_label
+    else:
+        input_stage = f"{top_input_label}split=2[stack_top_in][stack_bottom_in];"
+        top_label = "[stack_top_in]"
+        bottom_label = "[stack_bottom_in]"
+    return (
+        f"{input_stage}"
+        f"{top_label}crop={top_w}:{top_h}:{top_x}:{top_y},"
+        f"scale={target_width}:{top_height}:flags=lanczos,setsar=1[stack_top];"
+        f"{bottom_label}crop={bottom_w}:{bottom_h}:{bottom_x}:{bottom_y},"
+        f"scale={target_width}:{bottom_height}:flags=lanczos,setsar=1[stack_bottom];"
+        f"[stack_top][stack_bottom]vstack=inputs=2[stacked];"
+        f"[stacked]drawbox=x=0:y={divider_top}:w={target_width}:h={gap}:"
+        f"color=white@0.94:t=fill{output_label}"
+    )
+
+
+def build_studio_multicam_command(camera_paths, programme_path, graph, duration, output_path, encoder, preset):
+    """Keep the reviewed programme audio independent of the selected camera."""
+    command = ["ffmpeg"]
+    for camera_path in camera_paths:
+        command.extend(["-i", camera_path])
+    command.extend([
+        "-i", programme_path, "-filter_complex", graph,
+        "-map", "[vout]", "-map", f"{len(camera_paths)}:a?",
+        "-t", str(duration), "-c:v", encoder, "-preset", preset,
+        "-c:a", "copy", "-shortest", "-y", output_path,
+    ])
+    return command
+
+
+def build_studio_camera_timeline(cameras, segments, transitions=None):
+    """Apply the programme's retained source ranges to each synchronized angle."""
+    if not segments or any(end <= start or start < 0 for start, end in segments):
+        raise ValueError("Camera timeline requires valid retained source ranges")
+    parts, outputs = [], []
+    for camera_index, camera in enumerate(cameras):
+        offset = float(camera.get("offset_seconds", 0)) - float(camera.get("time_origin_seconds", 0))
+        if not math.isfinite(offset):
+            raise ValueError("Camera offset must be finite")
+        sources = [f"[camera_{camera_index}_source_{i}]" for i in range(len(segments))]
+        if len(sources) > 1:
+            parts.append(f"[{camera_index}:v]split={len(sources)}{''.join(sources)}")
+        else:
+            sources = [f"[{camera_index}:v]"]
+        clips = []
+        for index, (start, end) in enumerate(segments):
+            label = f"[camera_{camera_index}_clip_{index}]"
+            duration = end - start
+            hold = max(0, -(start + offset))
+            chain = f"{sources[index]}trim=start={max(0, start + offset):.6f}:duration={max(0.001, duration - hold):.6f},setpts=PTS-STARTPTS"
+            if hold:
+                chain += f",tpad=start_mode=clone:start_duration={min(hold, duration):.6f},trim=duration={duration:.6f}"
+            if transitions and index < len(transitions) and transitions[index]:
+                chain += "," + ",".join(transitions[index])
+            parts.append(chain + label)
+            clips.append(label)
+        output = f"[camera_{camera_index}_timeline]"
+        if len(clips) > 1:
+            parts.append(f"{''.join(clips)}concat=n={len(clips)}:v=1:a=0{output}")
+        else:
+            parts.append(f"{clips[0]}null{output}")
+        outputs.append(output)
+    return ";".join(parts), outputs, sum(end - start for start, end in segments)
+
+
+def build_multicam_layout_filter(
+    source_dimensions,
+    target_width=1080,
+    target_height=1920,
+    multicam_plan=None,
+    input_labels=None,
+    output_label="[vout]",
+):
+    """Compose two to four synchronized cameras with preview-matching geometry."""
+    plan = multicam_plan or {}
+    cameras = list(plan.get("cameras") or [])[:4]
+    camera_count = max(2, min(4, len(cameras)))
+    cameras = cameras[:camera_count]
+    if len(cameras) < 2 or len(source_dimensions or []) < camera_count:
+        raise ValueError("Multi-Camera requires dimensions and framing for every source")
+    def normalize_filter_label(label):
+        raw_label = str(label or "").strip()
+        if raw_label.startswith("[") and raw_label.endswith("]"):
+            return raw_label
+        return f"[{raw_label.strip('[]')}]"
+
+    labels = [
+        normalize_filter_label(label)
+        for label in (input_labels or [f"[{index}:v]" for index in range(camera_count)])
+    ]
+    output_label = normalize_filter_label(output_label)
+    if len(labels) < camera_count:
+        raise ValueError("Multi-Camera requires one FFmpeg input label per camera")
+
+    target_width = max(2, int(target_width or 1080))
+    target_height = max(2, int(target_height or 1920))
+    gap_percent = clamp_float(float(plan.get("gap_percent", 0.45)), 0.0, 3.0)
+    gap = max(2, int(target_height * gap_percent / 100.0))
+    gap -= gap % 2
+    layout = str(plan.get("layout") or plan.get("orientation") or "").strip().lower()
+    default_layout = {2: "stack_2", 3: "hero_3", 4: "grid_4"}[camera_count]
+    layout = layout or default_layout
+    allowed_layouts = {2: {"stack_2", "split_2", "pip_2", "active_2", "spotlight_2"},
+                       3: {"hero_3"}, 4: {"grid_4"}}
+    if layout not in allowed_layouts[camera_count]:
+        raise ValueError(f"Unsupported {camera_count}-camera composition: {layout}")
+
+    # Both branches use the same time base. Reviewed marks select a branch;
+    # there is no timer-driven or inferred speaker switching.
+    if layout in {"active_2", "spotlight_2"}:
+        expression = "0"
+        cuts = sorted(
+            (cut for cut in plan.get("speaker_focus_cuts", [])
+             if cut.get("slot") in {"top", "bottom"}
+             and isinstance(cut.get("time"), (int, float))
+             and math.isfinite(cut["time"])),
+            key=lambda cut: cut["time"],
+        )
+        for cut in cuts:
+            expression = f"if(gte(T,{max(0, cut['time']):.6f}),{int(cut['slot'] == 'bottom')},{expression})"
+        if layout == "spotlight_2":
+            parts = []
+            for index, camera in enumerate(cameras):
+                sw, sh = source_dimensions[index]
+                zoom = clamp_float(float(camera.get("zoom", 1)), 1, 7)
+                scale = max(target_width / sw, target_height / sh) * zoom
+                cw, ch = max(2, int(target_width / scale)), max(2, int(target_height / scale))
+                cw -= cw % 2
+                ch -= ch % 2
+                x = max(0, min(int(sw * clamp_float(float(camera.get("x", 50)), 0, 100) / 100 - cw / 2), sw - cw))
+                y = max(0, min(int(sh * clamp_float(float(camera.get("y", 50)), 0, 100) / 100 - ch / 2), sh - ch))
+                parts.append(f"{labels[index]}crop={cw}:{ch}:{x}:{y},scale={target_width}:{target_height},setsar=1,setpts=PTS-STARTPTS[multicam_focus_{index}]")
+            parts.append(f"[multicam_focus_0][multicam_focus_1]blend=all_expr='if({expression},B,A)':shortest=1,format=yuv420p{output_label}")
+            return ";".join(parts)
+        parts = [f"{labels[i]}split=2[multicam_branch_a_{i}][multicam_branch_b_{i}]" for i in range(2)]
+        for branch, order in (("a", [0, 1]), ("b", [1, 0])):
+            graph = build_multicam_layout_filter(
+                [source_dimensions[i] for i in order], target_width, target_height,
+                {**plan, "layout": "pip_2", "cameras": [cameras[i] for i in order]},
+                [f"[multicam_branch_{branch}_{i}]" for i in order], f"[branch_{branch}]",
+            )
+            # Namespace intermediate outputs while preserving branch inputs.
+            graph = re.sub(r"\[multicam_(?!branch_)([^\]]+)\]", rf"[multicam_{branch}_\1]", graph)
+            parts.append(graph)
+        parts.append(f"[branch_a][branch_b]blend=all_expr='if({expression},B,A)':shortest=1,format=yuv420p{output_label}")
+        return ";".join(parts)
+
+    if layout == "grid_4":
+        left_width = max(2, (target_width - gap) // 2)
+        left_width -= left_width % 2
+        right_x = left_width + gap
+        right_width = max(2, target_width - right_x)
+        top_height = max(2, (target_height - gap) // 2)
+        top_height -= top_height % 2
+        bottom_y = top_height + gap
+        bottom_height = max(2, target_height - bottom_y)
+        panels = [
+            (0, 0, left_width, top_height),
+            (right_x, 0, right_width, top_height),
+            (0, bottom_y, left_width, bottom_height),
+            (right_x, bottom_y, right_width, bottom_height),
+        ]
+    elif layout == "hero_3":
+        hero_height = max(2, int(target_height * 0.54 - gap / 2))
+        hero_height -= hero_height % 2
+        lower_y = hero_height + gap
+        lower_height = max(2, target_height - lower_y)
+        left_width = max(2, (target_width - gap) // 2)
+        left_width -= left_width % 2
+        right_x = left_width + gap
+        right_width = max(2, target_width - right_x)
+        panels = [
+            (0, 0, target_width, hero_height),
+            (0, lower_y, left_width, lower_height),
+            (right_x, lower_y, right_width, lower_height),
+        ]
+    elif layout == "split_2":
+        left_width = max(2, (target_width - gap) // 2)
+        left_width -= left_width % 2
+        panels = [(0, 0, left_width, target_height),
+                  (left_width + gap, 0, target_width - left_width - gap, target_height)]
+    elif layout == "pip_2":
+        secondary = plan.get("secondary_frame") or {}
+        size = clamp_float(float(secondary.get("size_percent", 30)), 20, 46) / 100
+        pw, ph = max(2, int(target_width * size)), max(2, int(target_height * size))
+        pw -= pw % 2
+        ph -= ph % 2
+        px = int(target_width * clamp_float(float(secondary.get("x_percent", 80)), 16, 84) / 100 - pw / 2)
+        py = int(target_height * clamp_float(float(secondary.get("y_percent", 20)), 16, 84) / 100 - ph / 2)
+        panels = [(0, 0, target_width, target_height),
+                  (max(0, min(px, target_width - pw)), max(0, min(py, target_height - ph)), pw, ph)]
+    else:
+        divider_percent = clamp_float(float(plan.get("divider_percent", 50.0)), 35.0, 65.0)
+        top_height = max(2, int(target_height * divider_percent / 100.0 - gap / 2))
+        top_height -= top_height % 2
+        bottom_y = top_height + gap
+        panels = [
+            (0, 0, target_width, top_height),
+            (0, bottom_y, target_width, max(2, target_height - bottom_y)),
+        ]
+
+    def resolve_crop(frame, source_width, source_height, panel_width, panel_height):
+        focus_x = clamp_float(float((frame or {}).get("x", 50.0)) / 100.0, 0.0, 1.0)
+        focus_y = clamp_float(float((frame or {}).get("y", 50.0)) / 100.0, 0.0, 1.0)
+        zoom = clamp_float(float((frame or {}).get("zoom", 1.0)), 1.0, 7.0)
+        panel_aspect = float(panel_width) / max(1.0, float(panel_height))
+        source_aspect = float(source_width) / max(1.0, float(source_height))
+        if source_aspect > panel_aspect:
+            base_height = float(source_height)
+            base_width = base_height * panel_aspect
+        else:
+            base_width = float(source_width)
+            base_height = base_width / panel_aspect
+        crop_width = min(int(source_width), max(2, int(base_width / zoom)))
+        crop_height = min(int(source_height), max(2, int(base_height / zoom)))
+        crop_width -= crop_width % 2
+        crop_height -= crop_height % 2
+        crop_x = max(0, min(int(focus_x * source_width - crop_width / 2), int(source_width) - crop_width))
+        crop_y = max(0, min(int(focus_y * source_height - crop_height / 2), int(source_height) - crop_height))
+        crop_x -= crop_x % 2
+        crop_y -= crop_y % 2
+        if (frame or {}).get("keyframes"):
+            crop_x = f"'max(0,min(iw-ow,iw*({reviewed_axis_expression(frame['keyframes'], 'x', focus_x)})-ow/2))'"
+            crop_y = f"'max(0,min(ih-oh,ih*({reviewed_axis_expression(frame['keyframes'], 'y', focus_y)})-oh/2))'"
+        return crop_width, crop_height, crop_x, crop_y
+
+    filter_parts = []
+    xstack_layout = []
+    stack_labels = []
+    for index, ((panel_x, panel_y, panel_width, panel_height), camera) in enumerate(
+        zip(panels, cameras)
+    ):
+        source_width, source_height = source_dimensions[index]
+        crop_width, crop_height, crop_x, crop_y = resolve_crop(
+            camera, source_width, source_height, panel_width, panel_height
+        )
+        stack_label = f"[multicam_{index}]"
+        filter_parts.append(
+            f"{labels[index]}crop={crop_width}:{crop_height}:{crop_x}:{crop_y},"
+            f"scale={panel_width}:{panel_height}:flags=lanczos,setsar=1,setpts=PTS-STARTPTS{stack_label}"
+        )
+        stack_labels.append(stack_label)
+        xstack_layout.append(f"{panel_x}_{panel_y}")
+
+    if layout == "pip_2":
+        px, py, pw, ph = panels[1]
+        radius = max(1, int(min(pw, ph) * 0.08))
+        # Analytic rounded alpha mask: no generated imagery or external mask file.
+        dx = f"max(max({radius}-X,0),X-(W-1-{radius}))"
+        dy = f"max(max({radius}-Y,0),Y-(H-1-{radius}))"
+        alpha = f"if(lte(({dx})*({dx})+({dy})*({dy}),{radius * radius}),255,0)"
+        filter_parts.append(f"[multicam_1]format=rgba,geq=r='r(X,Y)':g='g(X,Y)':b='b(X,Y)':a='{alpha}'[multicam_card]")
+        filter_parts.append(f"[multicam_0][multicam_card]overlay=x={px}:y={py}:shortest=1,format=yuv420p{output_label}")
+        return ";".join(filter_parts)
+
+    filter_parts.append(
+        f"{''.join(stack_labels)}xstack=inputs={camera_count}:"
+        f"layout={'|'.join(xstack_layout)}:fill=black:shortest=1[multicam_grid]"
+    )
+    draw_filters = []
+    if layout == "stack_2":
+        draw_filters.append(f"drawbox=x=0:y={panels[0][3]}:w={target_width}:h={gap}:color=white@0.94:t=fill")
+    elif layout == "split_2":
+        draw_filters.append(f"drawbox=x={panels[0][2]}:y=0:w={gap}:h={target_height}:color=0x05080e:t=fill")
+    elif layout == "hero_3":
+        draw_filters.extend([
+            f"drawbox=x=0:y={panels[0][3]}:w={target_width}:h={gap}:color=white@0.94:t=fill",
+            f"drawbox=x={panels[1][2]}:y={panels[1][1]}:w={gap}:h={panels[1][3]}:color=white@0.94:t=fill",
+        ])
+    else:
+        draw_filters.extend([
+            f"drawbox=x=0:y={panels[0][3]}:w={target_width}:h={gap}:color=white@0.94:t=fill",
+            f"drawbox=x={panels[0][2]}:y=0:w={gap}:h={target_height}:color=white@0.94:t=fill",
+        ])
+    draw_filters = [item.replace("white@0.94", "0x05080e") for item in draw_filters]
+    filter_parts.append(f"[multicam_grid]{','.join(draw_filters)},format=yuv420p{output_label}")
+    return ";".join(filter_parts)
+
+
+def reviewed_axis_expression(keyframes, axis, fallback=.5):
+    points = {}
+    cuts = {}
+    for mark in keyframes or []:
+        time, value = float(mark.get("time", 0)), float(mark.get(axis, fallback * 100))
+        if math.isfinite(time) and math.isfinite(value):
+            points[max(0, time)] = clamp_float(value / 100, 0, 1)
+            cuts[max(0, time)] = mark.get("cut") is True
+    ordered = sorted(points.items())
+    if not ordered:
+        return f"{fallback:.8f}"
+    segments = [f"{left:.8f}" if cuts[end] else f"({left:.8f}+({right-left:.8f})*(t-{start:.6f})/{end-start:.6f})"
+                for (start, left), (end, right) in zip(ordered, ordered[1:])]
+    segments.append(f"{ordered[-1][1]:.8f}")
+
+    def branch(first, last):
+        # FFmpeg's expression parser rejects deeply nested linear chains.
+        # A balanced tree keeps even full-minute detection paths logarithmic.
+        if first == last:
+            return segments[first]
+        middle = (first+last)//2
+        return f"if(lt(t,{ordered[middle+1][0]:.6f}),{branch(first, middle)},{branch(middle+1, last)})"
+
+    return f"if(lt(t,{ordered[0][0]:.6f}),{ordered[0][1]:.8f},{branch(0, len(segments)-1)})"
+
+
+def build_reviewed_reframe_filter(keyframes, target_width, target_height, zoom=1):
+    """Interpolate editor object-position marks without substituting face detection."""
+    points = {}
+    for keyframe in keyframes or []:
+        timestamp = max(0, float(keyframe.get("time", 0)))
+        x, y = float(keyframe.get("x", 50)), float(keyframe.get("y", 50))
+        if all(math.isfinite(value) for value in (timestamp, x, y)):
+            points[timestamp] = (clamp_float(x, 0, 100) / 100, clamp_float(y, 0, 100) / 100, keyframe.get("cut") is True)
+    ordered = sorted(points.items())
+    if not ordered:
+        raise ValueError("Reviewed framing requires at least one valid framing mark")
+
+    def position(axis):
+        return reviewed_axis_expression([
+            {"time": time, "value": value[axis]*100, "cut": value[2]}
+            for time, value in ordered], "value")
+
+    zoom = clamp_float(float(zoom), 1.0, 3.0)
+    scaled_width = math.ceil(target_width * zoom / 2) * 2
+    scaled_height = math.ceil(target_height * zoom / 2) * 2
+    return (
+        f"scale={scaled_width}:{scaled_height}:force_original_aspect_ratio=increase,"
+        f"crop={target_width}:{target_height}:x='(iw-ow)*({position(0)})':y='(ih-oh)*({position(1)})',setsar=1"
+    )
+
+
+def build_source_split_filter(
+    src_width,
+    src_height,
+    target_width,
+    target_height,
+    framing,
+    input_label="[0:v]",
+    output_label="[vout]",
+    primary_slot="top",
+):
+    """Two user-positioned crops from one source, not two independent cameras."""
+    framing = framing or {}
+    top = framing.get("top") or {"x": 30, "y": 50, "zoom": 1.25}
+    bottom = framing.get("bottom") or {"x": 70, "y": 50, "zoom": 1.25}
+    cameras = [bottom, top] if primary_slot == "bottom" else [top, bottom]
+    plan = {"layout": "stack_2", "gap_percent": 0.3, "cameras": [
+        *cameras,
+    ]}
+    prefix = re.sub(r"[^a-zA-Z0-9_]", "", str(output_label)) or "source_split"
+    first_label = f"[{prefix}_first]"
+    second_label = f"[{prefix}_second]"
+    return f"{input_label}split=2{first_label}{second_label};" + build_multicam_layout_filter(
+        [(src_width, src_height), (src_width, src_height)], target_width, target_height,
+        plan, input_labels=[first_label, second_label], output_label=output_label,
+    )
+
+
+def build_reframe_timeline_filter(
+    src_width,
+    src_height,
+    target_width,
+    target_height,
+    duration,
+    timeline_cuts,
+    split_framing=None,
+    speaker_order_cuts=None,
+    solo_keyframes=None,
+    solo_zoom=1,
+    fallback_mode="speaker_track",
+):
+    """Render the editor's timed Show Everyone/Solo decisions as hard timeline cuts."""
+    allowed_modes = {"off", "speaker_track", "center"}
+    duration = max(0.04, float(duration or 0))
+    normalized = {}
+    for cut in timeline_cuts or []:
+        mode = str(cut.get("mode") or "").strip().lower()
+        time = float(cut.get("time", 0))
+        if mode in allowed_modes and math.isfinite(time) and 0 <= time < duration:
+            normalized[time] = mode
+    if not normalized:
+        raise ValueError("A timed reframe needs at least one valid timeline cut")
+    if min(normalized) > 0:
+        normalized[0.0] = fallback_mode if fallback_mode in allowed_modes else "off"
+
+    order_by_time = {}
+    for cut in speaker_order_cuts or []:
+        slot = str(cut.get("slot") or "").strip().lower()
+        time = float(cut.get("time", 0))
+        if slot in {"top", "bottom"} and math.isfinite(time) and 0 <= time < duration:
+            order_by_time[time] = slot
+
+    boundaries = sorted(set(normalized) | set(order_by_time) | {0.0, duration})
+
+    def value_at(items, timestamp, fallback):
+        value = fallback
+        for item_time, item_value in sorted(items.items()):
+            if item_time <= timestamp + 1e-9:
+                value = item_value
+            else:
+                break
+        return value
+
+    def position_at(timestamp):
+        keys = sorted(
+            (key for key in (solo_keyframes or [])
+             if isinstance(key, dict) and math.isfinite(float(key.get("time", 0)))),
+            key=lambda key: float(key.get("time", 0)),
+        )
+        if not keys:
+            return {"time": 0, "x": 50, "y": 50, "cut": True}
+        previous = keys[0]
+        for following in keys[1:]:
+            left_time = float(previous.get("time", 0))
+            right_time = float(following.get("time", 0))
+            if timestamp <= right_time:
+                if following.get("cut") is True or right_time <= left_time:
+                    return {"time": 0, "x": previous.get("x", 50), "y": previous.get("y", 50), "cut": True}
+                progress = max(0, min(1, (timestamp - left_time) / (right_time - left_time)))
+                return {"time": 0,
+                        "x": float(previous.get("x", 50)) + (float(following.get("x", 50)) - float(previous.get("x", 50))) * progress,
+                        "y": float(previous.get("y", 50)) + (float(following.get("y", 50)) - float(previous.get("y", 50))) * progress,
+                        "cut": True}
+            previous = following
+        return {"time": 0, "x": previous.get("x", 50), "y": previous.get("y", 50), "cut": True}
+
+    segments = [(start, end) for start, end in zip(boundaries, boundaries[1:]) if end-start >= .02]
+    input_labels = "".join(f"[rf_{index}_in]" for index in range(len(segments)))
+    parts = (
+        [f"[0:v]split={len(segments)}{input_labels}"]
+        if len(segments) > 1
+        else ["[0:v]null[rf_0_in]"]
+    )
+    outputs = []
+    for index, (start, end) in enumerate(segments):
+        mode = value_at(normalized, start, fallback_mode)
+        order = value_at(order_by_time, start, "top")
+        trimmed = f"[rf_{index}_trim]"
+        output = f"[rf_{index}_out]"
+        parts.append(
+            f"[rf_{index}_in]trim=start={start:.6f}:end={end:.6f},setpts=PTS-STARTPTS{trimmed}"
+        )
+        if mode == "center":
+            graph = build_source_split_filter(
+                src_width, src_height, target_width, target_height,
+                split_framing or {}, input_label=trimmed, output_label=output,
+                primary_slot=order,
+            )
+            graph = re.sub(r"\[multicam_([^\]]+)\]", rf"[rf_{index}_multicam_\1]", graph)
+            parts.append(graph)
+        elif mode == "speaker_track":
+            local_keys = [position_at(start)]
+            for key in solo_keyframes or []:
+                key_time = float(key.get("time", 0))
+                if start < key_time < end:
+                    local_keys.append({**key, "time": key_time-start})
+            parts.append(
+                f"{trimmed}{build_reviewed_reframe_filter(local_keys, target_width, target_height, solo_zoom)}{output}"
+            )
+        else:
+            parts.append(build_safe_vertical_fit_filter(trimmed, output, target_width, target_height))
+        outputs.append(output)
+    parts.append(f"{''.join(outputs)}concat=n={len(outputs)}:v=1:a=0,format=yuv420p[vout]")
+    return ";".join(parts)
+
+
 def build_safe_vertical_fit_filter(input_label="[0:v]", output_label="[vout]", target_width=1080, target_height=1920):
     """
     Build a vertical shorts/reels filter that never crops the foreground.
 
     Landscape podcast footage is usually composed for the full wide frame; a
     hard 9:16 crop can remove the speaker entirely. This keeps the complete
-    source visible and fills the empty vertical canvas with a blurred copy.
+    source visible on a black canvas, matching the Studio's Fit full preview.
     """
     target_width = int(target_width or 1080)
     target_height = int(target_height or 1920)
-    blur_width = max(2, target_width // 10)
-    blur_height = max(2, target_height // 10)
     return (
-        f"{input_label}split[v_bg_in][v_fg_in];"
-        f"[v_bg_in]scale={target_width}:{target_height}:force_original_aspect_ratio=increase,"
-        f"crop={target_width}:{target_height},scale={blur_width}:{blur_height},"
-        f"boxblur=2:1,scale={target_width}:{target_height}[bg];"
-        f"[v_fg_in]scale={target_width}:{target_height}:force_original_aspect_ratio=decrease,"
-        f"setsar=1[fg];"
-        f"[bg][fg]overlay=(W-w)/2:(H-h)/2{output_label}"
+        f"{input_label}scale={target_width}:{target_height}:force_original_aspect_ratio=decrease,"
+        f"pad={target_width}:{target_height}:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1{output_label}"
     )
 
 
@@ -10852,6 +11689,16 @@ class MusicPreviewRequest(BaseModel):
     safe_search: bool = True
     preview_duration: float = 20.0
 
+class AudioRemixExactPreviewRequest(BaseModel):
+    video_url: str
+    start_time: float = 0.0
+    duration: float = 8.0
+    audio_remix: Dict[str, Any]
+    background_audio_url: Optional[str] = None
+    background_volume: float = 0.18
+    background_trim_start: float = 0.0
+    include_voice: bool = True
+
 class WatermarkPreviewRequest(BaseModel):
     video_url: str
     watermark_mode: str = "adaptive"
@@ -11380,6 +12227,51 @@ async def preview_music(request: MusicPreviewRequest):
         if os.path.exists(resolved_output_path):
             try:
                 os.remove(resolved_output_path)
+            except Exception:
+                pass
+
+@app.post("/preview-audio-remix")
+async def preview_audio_remix(request: AudioRemixExactPreviewRequest):
+    job_id = str(uuid.uuid4())
+    shared_tmp_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../tmp"))
+    if not os.path.exists(shared_tmp_dir):
+        os.makedirs(shared_tmp_dir)
+    preview_output_path = os.path.join(shared_tmp_dir, f"{job_id}_audio_remix_preview.m4a")
+
+    try:
+        remix = normalize_audio_remix(request.audio_remix)
+        loop = asyncio.get_running_loop()
+        receipt = await loop.run_in_executor(
+            None,
+            render_audio_remix_preview,
+            request.video_url,
+            preview_output_path,
+            remix,
+            request.start_time,
+            request.duration,
+            request.background_audio_url,
+            request.background_volume,
+            request.background_trim_start,
+            request.include_voice,
+        )
+        preview_url = upload_file_to_firebase(
+            preview_output_path,
+            f"preview_audio/remix/{job_id}.m4a",
+        )
+        if not preview_url:
+            preview_url = encode_file_as_data_url(preview_output_path)
+        return {
+            "status": "completed",
+            "job_id": job_id,
+            "preview_url": preview_url,
+            "receipt": receipt,
+        }
+    except ValueError as error:
+        raise HTTPException(status_code=422, detail=str(error))
+    finally:
+        if os.path.exists(preview_output_path):
+            try:
+                os.remove(preview_output_path)
             except Exception:
                 pass
 
@@ -27644,6 +28536,22 @@ def cleanup_file(path: str, temp_files: list):
 # NEW ENDPOINTS: Speaker Track Crop + Auto-Generate All Clips
 # ============================================================
 
+@app.post("/track-studio-faces")
+async def track_studio_faces(request: Dict[str, Any]):
+    from studio_face_tracking import track_faces
+    import tempfile
+    if not request.get("video_url"):
+        raise HTTPException(status_code=400, detail="video_url is required")
+    try:
+        with tempfile.TemporaryDirectory(prefix="studio-face-analysis-") as folder:
+            source = os.path.join(folder, "source.mp4")
+            await materialize_video_input(request["video_url"], source)
+            return await asyncio.to_thread(track_faces, source, request.get("anchors"),
+                request.get("start", 0), request.get("end"), mode=request.get("mode", "anchored"))
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
 @app.post("/speaker-track-crop")
 async def speaker_track_crop(request: Dict[str, Any]):
     """
@@ -29089,12 +29997,27 @@ class ViralOverlay(BaseModel):
     bRollCreator: Optional[str] = None
     bRollSourceId: Optional[Union[str, int]] = None
     opacity: float = 1.0
+    scale: float = 1.0
+    rotation: float = 0.0
+    anchorX: float = 50.0
+    anchorY: float = 50.0
+    motionDesign: bool = False
+    glow: Optional[Dict[str, Any]] = None
+    layerShadow: Optional[Dict[str, Any]] = None
+    motionBlur: Optional[Dict[str, Any]] = None
+    blendMode: Optional[str] = "normal"
     coverMainVideo: bool = False
     muteMainAudio: bool = False
     useOverlayAudio: bool = False
     overlayAudioVolume: float = 0.7
+    sourceStartTime: float = 0.0
+    sourceEndBehavior: str = "return"
     audioDucking: bool = False
     audioDuckingStrength: float = 0.35
+    kenBurns: Optional[str] = None
+    ken_burns: Optional[str] = None
+    placementMode: Optional[str] = None
+    placement_mode: Optional[str] = None
 
 class ViralTimelineSegment(BaseModel):
     id: Optional[Union[str, int]] = None
@@ -29105,6 +30028,8 @@ class ViralTimelineSegment(BaseModel):
     transition_in: Optional[str] = None
     transition_out: Optional[str] = None
     transition_duration: Optional[float] = None
+    audioTrimOffsetStart: float = 0.0
+    audioTrimOffsetEnd: float = 0.0
 
 class ViralSpeedSegment(BaseModel):
     id: Optional[Union[str, int]] = None
@@ -29128,6 +30053,9 @@ class ViralCaptionSegment(BaseModel):
     text_reviewed: bool = False
     caption_placement: Optional[str] = None
     caption_icon: Optional[str] = None
+    caption_accent: Optional[str] = None
+    caption_x: Optional[float] = None
+    caption_y: Optional[float] = None
     review_required: bool = False
 
 class BackgroundAudioTrack(BaseModel):
@@ -29141,6 +30069,7 @@ class BackgroundAudioTrack(BaseModel):
 class ViralSoundEffect(BaseModel):
     id: Optional[Union[str, int]] = None
     name: Optional[str] = None
+    kind: str = "sfx"
     builtIn: bool = False
     tone: Optional[str] = None
     url: Optional[str] = None
@@ -29216,7 +30145,7 @@ def build_finish_keyframe_expression(finish_plan, field, default_value, transfor
     first_time, first_value, _ = keyframes[0]
     return f"if(lt(t\\,{first_time:.5f})\\,{first_value:.6f}\\,{expression})"
 
-def build_studio_finish_filter(finish_plan):
+def build_studio_finish_filter(finish_plan, color_cube_path=None):
     """Translate the browser Finish Rack into a conservative FFmpeg finishing pass."""
     plan = finish_plan or {}
     if not bool(plan.get("enabled")):
@@ -29248,7 +30177,10 @@ def build_studio_finish_filter(finish_plan):
         f"eq=brightness={brightness_value}:contrast={contrast_value}:"
         f"saturation={saturation_value}:eval=frame",
     ]
-    if abs(warmth) > 0.005:
+    if color.get("precisionGrade"):
+        from studio_precision_grade import build_precision_grade_filter
+        filters = [build_precision_grade_filter(color)]
+    if abs(warmth) > 0.005 and not color.get("precisionGrade"):
         red_shift = warmth * 0.035
         blue_shift = warmth * -0.035
         filters.append(
@@ -29256,6 +30188,8 @@ def build_studio_finish_filter(finish_plan):
             f"rs={red_shift:.5f}:bs={blue_shift:.5f}:"
             f"rm={red_shift * 0.65:.5f}:bm={blue_shift * 0.65:.5f}"
         )
+    if color_cube_path:
+        filters.append(f"format=rgb24,lut3d=file='{escape_ffmpeg_filter_path(color_cube_path)}':interp=trilinear")
     if sharpness > 0.005:
         filters.append(f"unsharp=5:5:{sharpness * 0.65:.4f}:3:3:{sharpness * 0.18:.4f}")
     if vignette > 0.005:
@@ -29350,14 +30284,13 @@ def build_main_video_frame_filter(finish_plan, width, height, content_crop=None)
     safe_height = max(160, int(height or 1920))
     requested_inset_percent = frame.get("inset_percent", frame.get("insetPercent"))
     requested_inset = (
-        round(safe_width * clamp_float(requested_inset_percent, 2.0, 12.0) / 100.0)
+        round(safe_width * clamp_float(requested_inset_percent, 0.0, 10.0) / 100.0)
         if requested_inset_percent is not None
         else frame.get("inset", 54)
     )
-    minimum_visible_inset = max(10, int(round(min(safe_width, safe_height) * 0.05)))
     inset = max(
-        minimum_visible_inset,
-        min(int(requested_inset or 54), min(safe_width, safe_height) // 10),
+        0,
+        min(int(requested_inset if requested_inset is not None else 54), min(safe_width, safe_height) // 10),
     )
     inner_width = max(2, safe_width - inset * 2)
     inner_height = max(2, safe_height - inset * 2)
@@ -29370,13 +30303,13 @@ def build_main_video_frame_filter(finish_plan, width, height, content_crop=None)
     requested_radius = (
         round(
             min(inner_width, inner_height)
-            * clamp_float(requested_radius_percent, 4.0, 20.0)
+            * clamp_float(requested_radius_percent, 3.0, 16.0)
             / 100.0
         )
         if requested_radius_percent is not None
         else frame.get("border_radius", frame.get("borderRadius", 116))
     )
-    minimum_visible_radius = max(24, int(round(min(safe_width, safe_height) * 0.04)))
+    minimum_visible_radius = max(18, int(round(min(safe_width, safe_height) * 0.03)))
     radius = max(
         minimum_visible_radius,
         min(int(requested_radius or 116), inner_width // 4, inner_height // 4),
@@ -29496,8 +30429,13 @@ class RenderViralRequest(BaseModel):
     professional_cleanup: bool = True
     creative_plan: Optional[ViralCreativePlan] = None
     finish_plan: Optional[Dict[str, Any]] = None
+    audio_restoration: Optional[Dict[str, Any]] = None
+    audio_automation: Optional[Dict[str, Any]] = None
+    audio_track_states: Optional[Dict[str, Any]] = None
+    editor_timeline: Optional[Dict[str, Any]] = None
+    composition_plan: Optional[Dict[str, Any]] = None
     smart_crop: bool = False
-    smart_crop_mode: str = "center"  # "center", "speaker_track", "ai_director"
+    smart_crop_mode: str = "center"  # "center", "speaker_track", "group_stack", "ai_director"
     visual_enhance: bool = False  # Use Smart Promo dynamic visual pipeline (face zoom, movement tracking, reframing)
     mute_audio: bool = False
     add_hook: bool = False
@@ -29529,6 +30467,9 @@ class RenderViralRequest(BaseModel):
     music_fade_out: float = 0.5
     music_loop: bool = True
     sound_effects: Optional[List[ViralSoundEffect]] = None
+    motionGraphics: Optional[Dict[str, Any]] = None
+    audio_remix: Optional[Dict[str, Any]] = None
+    audioRemix: Optional[Dict[str, Any]] = None
     silence_removal: bool = False
     silence_threshold_db: float = -35.0
     min_silence_duration: float = 0.75
@@ -29541,6 +30482,8 @@ class RenderViralRequest(BaseModel):
     brandWatermark: Optional[bool] = None
     watermark_text: Optional[str] = None
     watermarkText: Optional[str] = None
+    brand_watermark_variant: Optional[str] = "studio"
+    brand_watermark_schedule: Optional[List[Dict[str, Any]]] = None
     job_id: Optional[str] = None
     async_mode: bool = False
     template: str = ""  # preset template name from CLIP_TEMPLATES
@@ -29556,6 +30499,13 @@ async def render_viral_clip(request: RenderViralRequest):
     lose CPU or be terminated on request-billed Cloud Run instances; that left
     real renders permanently stuck after the 15% source-verification checkpoint.
     """
+    from viral_motion_graphics import validate_design
+    from viral_audio_remix import normalize_audio_remix
+    try:
+        validate_design(request.motionGraphics, [effect.model_dump() for effect in request.sound_effects or []])
+        normalize_audio_remix(getattr(request, "audio_remix", None) or getattr(request, "audioRemix", None))
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
     if request.async_mode:
         job_id = request.job_id or str(uuid.uuid4())
         logger.info(f"Running durable viral render request {job_id}")
@@ -29618,6 +30568,13 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             ),
         )
 
+    missing_media = [str(layer.id) for layer in request.overlays
+                     if layer.type in {"video", "image"} and not str(layer.src or "").strip()]
+    if missing_media:
+        raise HTTPException(status_code=400, detail=(
+            "Upload or reconnect these media layers before rendering: " + ", ".join(missing_media)
+        ))
+
     job_id = provided_job_id or str(uuid.uuid4())
     SHARED_TMP_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../tmp"))
     if not os.path.exists(SHARED_TMP_DIR): os.makedirs(SHARED_TMP_DIR)
@@ -29628,7 +30585,9 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
     thumbnail_output_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_thumbnail.jpg")
     downloaded_background_audio_path = None
     downloaded_music_path = None
+    color_cube_path = None
     sound_effect_paths = []
+    overlay_temp_paths = []
     speed_adjusted_path = None
     cleanup_path = None
     creative_adjusted_path = None
@@ -29641,6 +30600,14 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         "fallback": "clean",
         "effects": [],
     }
+    audio_remix_receipt = {
+        "version": 1,
+        "enabled": False,
+        "status": "not_requested",
+    }
+    normalized_audio_remix = normalize_audio_remix(
+        getattr(request, "audio_remix", None) or getattr(request, "audioRemix", None)
+    )
 
     def report_progress(progress: int, detail: str):
         if not request.async_mode:
@@ -29696,7 +30663,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             timeline_canvas_height -= timeline_canvas_height % 2
             for index, segment in enumerate(normalized_segments):
                 segment_source_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_segment_src_{index}.mp4")
-                segment_output_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_segment_{index}.mp4")
+                segment_video_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_segment_v_{index}.mp4")
+                segment_audio_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_segment_a_{index}.m4a")
                 segment_duration = float(segment.end_time) - float(segment.start_time)
 
                 if segment.url == request.video_url:
@@ -29722,71 +30690,93 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 )
                 video_filters = [normalize_vf]
                 video_filters.extend(transition_filters["video_filters"])
-                audio_filters = transition_filters["audio_filters"]
-                segment_cmd = [
+                
+                # 1. Render Video (No Audio)
+                segment_v_cmd = [
                     "ffmpeg", "-ss", str(segment.start_time), "-i", segment_source_path,
                     "-t", str(segment_duration), "-vf", ",".join(video_filters),
-                    "-map", "0:v:0", "-map", "0:a?",
+                    "-map", "0:v:0", "-an",
+                    "-c:v", "libx264", "-preset", "ultrafast",
+                    "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-y",
+                    segment_video_path,
                 ]
-                if audio_filters and has_audio_stream(segment_source_path):
-                    segment_cmd.extend(["-af", ",".join(audio_filters)])
-                segment_cmd.extend(
-                    [
-                        "-c:v", "libx264", "-preset", "ultrafast", "-c:a", "aac",
-                        "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-y",
-                        segment_output_path,
+                await run_subprocess_async(segment_v_cmd, check=True)
+                
+                # 2. Render Audio with J/L-Cut offsets
+                if has_audio_stream(segment_source_path):
+                    audio_start = max(0.0, float(segment.start_time) + float(segment.audioTrimOffsetStart or 0))
+                    audio_end = float(segment.end_time) + float(segment.audioTrimOffsetEnd or 0)
+                    audio_dur = max(0.05, audio_end - audio_start)
+                    segment_a_cmd = [
+                        "ffmpeg", "-ss", str(audio_start), "-i", segment_source_path,
+                        "-t", str(audio_dur), "-map", "0:a:0",
+                        "-c:a", "aac", "-b:a", "192k", "-y",
+                        segment_audio_path,
                     ]
-                )
-                await run_subprocess_async(segment_cmd, check=True)
-                segment_paths.append(segment_output_path)
+                    await run_subprocess_async(segment_a_cmd, check=True)
+                    segment.audio_rendered_path = segment_audio_path
+                else:
+                    segment.audio_rendered_path = None
+
+                segment_paths.append(segment_video_path)
 
             if not segment_paths:
                 raise HTTPException(status_code=400, detail="No valid timeline segments supplied")
 
-            if len(segment_paths) == 1:
-                shutil.copy(segment_paths[0], trimmed_path)
+            # 3. Assemble the sequence using concat for video and amix for audio
+            concat_list_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_concat.txt")
+            with open(concat_list_path, "w", encoding="utf-8") as concat_file:
+                for vp in segment_paths:
+                    concat_file.write(f"file '{vp}'\n")
+                    
+            # Build audio filter complex
+            audio_inputs = []
+            audio_mix_parts = []
+            current_output_time = 0.0
+            total_video_dur = 0.0
+            
+            for index, segment in enumerate(normalized_segments):
+                if getattr(segment, 'audio_rendered_path', None):
+                    # +1 because index 0 in inputs is the concat demuxer for video
+                    input_idx = len(audio_inputs) + 1
+                    audio_inputs.extend(["-i", segment.audio_rendered_path])
+                    
+                    delay_ms = int(max(0, current_output_time + float(segment.audioTrimOffsetStart or 0)) * 1000)
+                    audio_mix_parts.append(f"[{input_idx}:a]adelay={delay_ms}|{delay_ms}[a{index}];")
+                
+                current_output_time += (float(segment.end_time) - float(segment.start_time))
+                total_video_dur = current_output_time
+                
+            final_cmd = [
+                "ffmpeg",
+                "-f", "concat", "-safe", "0", "-i", concat_list_path
+            ]
+            final_cmd.extend(audio_inputs)
+            
+            if audio_mix_parts:
+                filter_complex = "".join(audio_mix_parts)
+                mix_labels = "".join([f"[a{i}]" for i, s in enumerate(normalized_segments) if getattr(s, 'audio_rendered_path', None)])
+                mix_count = len([s for s in normalized_segments if getattr(s, 'audio_rendered_path', None)])
+                filter_complex += f"{mix_labels}amix=inputs={mix_count}:duration=longest:dropout_transition=2:normalize=0[a_mixed];"
+                # Pad to total duration
+                filter_complex += f"[a_mixed]apad=whole_dur={total_video_dur:.3f},atrim=0:{total_video_dur:.3f}[a_out]"
+                
+                final_cmd.extend([
+                    "-filter_complex", filter_complex,
+                    "-map", "0:v:0",
+                    "-map", "[a_out]",
+                    "-c:v", "copy",
+                    "-c:a", "aac",
+                    "-y",
+                    trimmed_path
+                ])
             else:
-                with open(concat_list_path, "w", encoding="utf-8") as concat_file:
-                    for segment_path in segment_paths:
-                        concat_file.write(f"file '{segment_path}'\n")
-                try:
-                    await run_subprocess_async(
-                        [
-                            "ffmpeg",
-                            "-f",
-                            "concat",
-                            "-safe",
-                            "0",
-                            "-i",
-                            concat_list_path,
-                            "-c",
-                            "copy",
-                            "-y",
-                            trimmed_path,
-                        ],
-                        check=True,
-                    )
-                except Exception:
-                    await run_subprocess_async(
-                        [
-                            "ffmpeg",
-                            "-f",
-                            "concat",
-                            "-safe",
-                            "0",
-                            "-i",
-                            concat_list_path,
-                            "-c:v",
-                            "libx264",
-                            "-c:a",
-                            "aac",
-                            "-pix_fmt",
-                            "yuv420p",
-                            "-y",
-                            trimmed_path,
-                        ],
-                        check=True,
-                    )
+                final_cmd.extend([
+                    "-c", "copy",
+                    "-y", trimmed_path
+                ])
+            
+            await run_subprocess_async(final_cmd, check=True)
         else:
             duration = request.end_time - request.start_time
             try:
@@ -29840,7 +30830,9 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         # Analyze the real picture, not letterbox/pillarbox pixels embedded in
         # the uploaded file. This must happen before face tracking.
         reframe_source_path = trimmed_path
-        if request.smart_crop:
+        if (request.smart_crop and not manual_reframe_keyframes
+                and request.smart_crop_mode != "group_stack"
+                and "zoom" not in finish_reframe_plan and not finish_reframe_plan.get("split_source")):
             source_frame_width, source_frame_height = get_video_dimensions(trimmed_path)
             source_content_crop = await detect_video_content_crop(
                 trimmed_path,
@@ -30027,8 +31019,129 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         if (request.smart_crop or vertical_destination) and not visual_enhance_applied:
             cropped_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_cropped.mp4")
             crop_mode = str(request.smart_crop_mode or "center").strip().lower()
+            reframe_timeline_cuts = finish_reframe_plan.get("timeline_cuts") or []
+            global_multicam_cut = (
+                len(reframe_timeline_cuts) == 1
+                and str(reframe_timeline_cuts[0].get("mode") or "").lower() == "group_stack"
+                and float(reframe_timeline_cuts[0].get("time", 0)) <= 0.001
+            )
             try:
-                if crop_mode in {"speaker_track", "ai_director"}:
+                if reframe_timeline_cuts and not global_multicam_cut:
+                    if any(str(cut.get("mode") or "").lower() == "group_stack" for cut in reframe_timeline_cuts):
+                        raise ValueError("Timed Multi-Camera changes require one synchronized camera programme per framing segment")
+                    src_w, src_h = get_video_dimensions(reframe_source_path)
+                    reframe_duration = get_media_duration(reframe_source_path)
+                    await run_subprocess_async([
+                        "ffmpeg", "-i", reframe_source_path,
+                        "-filter_complex", build_reframe_timeline_filter(
+                            src_w,
+                            src_h,
+                            reframe_target_width,
+                            reframe_target_height,
+                            reframe_duration,
+                            reframe_timeline_cuts,
+                            split_framing=finish_reframe_plan.get("split_source") or {},
+                            speaker_order_cuts=finish_reframe_plan.get("speaker_order_cuts") or [],
+                            solo_keyframes=manual_reframe_keyframes,
+                            solo_zoom=finish_reframe_plan.get("zoom", 1),
+                            fallback_mode=crop_mode,
+                        ),
+                        "-map", "[vout]", "-map", "0:a?",
+                        "-c:v", GPU_VIDEO_ENCODER, "-preset", GPU_PRESET,
+                        "-c:a", "copy", "-shortest", "-y", cropped_path,
+                    ], check=True)
+                    working_path = cropped_path
+                elif crop_mode == "group_stack":
+                    logger.info("Applying synchronized multi-camera composition...")
+                    group_stack_plan = finish_reframe_plan.get("group_stack") or {}
+                    camera_plans = list(group_stack_plan.get("cameras") or [])[:4]
+                    if not camera_plans:
+                        camera_plans = [
+                            group_stack_plan.get("top") or {},
+                            group_stack_plan.get("bottom") or {},
+                        ]
+                    camera_plans = [camera for camera in camera_plans if camera]
+                    camera_urls = [
+                        str(camera.get("source_url") or "").strip()
+                        for camera in camera_plans
+                    ]
+                    if (
+                        len(camera_plans) < 2
+                        or len(camera_plans) > 4
+                        or any(not source_url for source_url in camera_urls)
+                        or len(set(camera_urls)) != len(camera_urls)
+                    ):
+                        raise RuntimeError(
+                            "Multi-Camera requires two to four distinct clean camera source URLs"
+                        )
+                    camera_paths = []
+                    for camera_index, source_url in enumerate(camera_urls):
+                        camera_paths.append(
+                            input_path
+                            if source_url == request.video_url
+                            else await materialize_video_input(
+                                source_url,
+                                os.path.join(
+                                    SHARED_TMP_DIR,
+                                    f"{job_id}_multicam_{camera_index + 1}.mp4",
+                                ),
+                                keep_audio=False,
+                            )
+                        )
+                    source_dimensions = [
+                        get_video_dimensions(camera_path) for camera_path in camera_paths
+                    ]
+                    if any(segment.url != request.video_url for segment in normalized_segments):
+                        raise ValueError("Multi-Camera needs a single synchronized programme timeline; separate appended programmes need their own camera setup")
+                    camera_ranges = (
+                        [(float(segment.start_time), float(segment.end_time)) for segment in normalized_segments]
+                        if normalized_segments else [(float(request.start_time), float(request.end_time))]
+                    )
+                    for camera, camera_path in zip(camera_plans, camera_paths):
+                        camera_end = max(end for _, end in camera_ranges) + float(camera.get("offset_seconds", 0)) - float(camera.get("time_origin_seconds", 0))
+                        if get_media_duration(camera_path) + 0.05 < camera_end:
+                            raise ValueError("A camera angle ends before the selected timeline. Shorten the edit or replace that angle; cameras are never looped to fabricate coverage.")
+                    camera_transitions = [build_segment_transition_filters(
+                        float(segment.end_time) - float(segment.start_time),
+                        segment.transition_in, segment.transition_out,
+                        segment.transition_duration, has_audio=False,
+                    )["video_filters"] for segment in normalized_segments]
+                    timeline_filter, camera_labels, camera_duration = build_studio_camera_timeline(camera_plans, camera_ranges, camera_transitions)
+                    group_stack_filter = timeline_filter + ";" + build_multicam_layout_filter(
+                        source_dimensions,
+                        reframe_target_width,
+                        reframe_target_height,
+                        {**group_stack_plan, "cameras": camera_plans},
+                        input_labels=camera_labels,
+                    )
+                    await run_subprocess_async(build_studio_multicam_command(
+                        camera_paths, trimmed_path, group_stack_filter, camera_duration,
+                        cropped_path, GPU_VIDEO_ENCODER, GPU_PRESET,
+                    ), check=True)
+                    working_path = cropped_path
+                elif crop_mode == "center" and finish_reframe_plan.get("split_source"):
+                    src_w, src_h = get_video_dimensions(reframe_source_path)
+                    await run_subprocess_async([
+                        "ffmpeg", "-i", reframe_source_path,
+                        "-filter_complex", build_source_split_filter(src_w, src_h, reframe_target_width,
+                            reframe_target_height, finish_reframe_plan["split_source"]),
+                        "-map", "[vout]", "-map", "0:a?",
+                        "-c:v", GPU_VIDEO_ENCODER, "-preset", GPU_PRESET,
+                        "-c:a", "copy", "-y", cropped_path,
+                    ], check=True)
+                    working_path = cropped_path
+                elif crop_mode == "speaker_track" and (manual_reframe_keyframes or "zoom" in finish_reframe_plan):
+                    await run_subprocess_async([
+                        "ffmpeg", "-i", reframe_source_path,
+                        "-vf", build_reviewed_reframe_filter(
+                            manual_reframe_keyframes or [{"time": 0, "x": 50, "y": 50}],
+                            reframe_target_width, reframe_target_height, finish_reframe_plan.get("zoom", 1)),
+                        "-map", "0:v:0", "-map", "0:a?",
+                        "-c:v", GPU_VIDEO_ENCODER, "-preset", GPU_PRESET,
+                        "-c:a", "copy", "-y", cropped_path,
+                    ], check=True)
+                    working_path = cropped_path
+                elif crop_mode in {"speaker_track", "ai_director"}:
                     logger.info("Applying Speaker-Tracking Smart Crop...")
                     src_w, src_h = get_video_dimensions(reframe_source_path)
                     loop = asyncio.get_running_loop()
@@ -30082,6 +31195,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     ], check=True)
                     working_path = cropped_path
             except Exception as e:
+                if reframe_timeline_cuts or crop_mode == "group_stack" or finish_reframe_plan.get("split_source") or "zoom" in finish_reframe_plan:
+                    raise RuntimeError(f"Framing could not reproduce the reviewed edit: {e}") from e
                 logger.error(f"Smart Crop failed: {e}. Proceeding with original aspect ratio.")
                 # Fallback to trimmed_path
 
@@ -30130,7 +31245,19 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         # 2.72. Reproduce the creator's browser Finish Rack in the final file.
         # The same normalized color values drive CSS preview and this restrained
         # FFmpeg pass, preventing an attractive preview from disappearing at export.
-        finish_filter = build_studio_finish_filter(request.finish_plan)
+        try:
+            from .studio_motion import build_studio_motion_filter
+        except ImportError:
+            from studio_motion import build_studio_motion_filter
+        if (request.finish_plan or {}).get("color_cube"):
+            from studio_color_cube import write_color_cube
+            color_cube_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_grade.cube")
+            write_color_cube(request.finish_plan["color_cube"], color_cube_path)
+        finish_filter = build_studio_finish_filter(request.finish_plan, color_cube_path)
+        zoom_filter = build_studio_motion_filter(
+            (request.finish_plan or {}).get("motion"), *get_video_dimensions(working_path)
+        )
+        finish_filter = ",".join(part for part in (finish_filter, zoom_filter) if part)
         if finish_filter:
             finish_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_finish.mp4")
             finish_has_audio = has_audio_stream(working_path)
@@ -30160,6 +31287,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             request.preview_speed,
         )
         rendered_timeline_duration = speed_plan_output_duration(speed_plan)
+
         if speed_plan_changes_timing(speed_plan):
             speed_adjusted_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_speed.mp4")
             speed_has_audio = has_audio_stream(working_path)
@@ -30597,11 +31725,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         lambda: transcribe_with_hints(
                             working_path,
                             word_timestamps=use_animated,
-                            prompt_hint=(
-                                "Multilingual South African speech. Translate everything into natural English."
-                                if request.translate_captions_to_english
-                                else "Preserve all spoken languages and code-switching exactly as spoken."
-                            ),
+                            prompt_hint="",
                             task=(
                                 "translate"
                                 if request.translate_captions_to_english
@@ -30668,6 +31792,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                             request.overlays.append(ov)
             except Exception as e:
                 logger.error(f"Auto-caption generation failed: {e}")
+                raise RuntimeError("Reviewed captions could not be rendered; the incomplete export was stopped") from e
         
         # Use working_path (either original trimmed or cropped version) as base for overlays
         base_width, base_height = get_video_dimensions(working_path)
@@ -30743,7 +31868,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         def build_overlay_scale_filter(input_label, output_label, overlay):
             width_percent = float(overlay.width) if overlay.width is not None else None
             height_percent = float(overlay.height) if overlay.height is not None else None
-            opacity = clamp_float(float(getattr(overlay, "opacity", 1.0) or 1.0), 0.0, 1.0)
+            opacity = clamp_float(float(overlay.opacity), 0.0, 1.0)
             media_fit = str(
                 getattr(overlay, "mediaFit", None)
                 or getattr(overlay, "media_fit", None)
@@ -30823,28 +31948,53 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 filter_body += f",format=rgba,colorchannelmixer=aa={opacity:.3f}"
             return f"{filter_body}[{output_label}];"
 
+        try:
+            from .studio_layer_motion import composition_layer, render_image_layer_motion
+        except ImportError:
+            from studio_layer_motion import composition_layer, render_image_layer_motion
+
         # Process Video Overlays
+        overlay_chain_start = len(filter_chain)
+        overlay_base_label = current_v_label
+        overlay_filter_blocks = []
+        def remember_overlay_block(overlay, start, input_label):
+            overlay_filter_blocks.append((str(overlay.id), list(filter_chain[start:]), input_label, current_v_label))
+
         video_overlays = [o for o in request.overlays if o.type == 'video' and o.src]
         overlay_audio_specs = []
+        prepared_overlay_ranges = {}
         
-        for ov in video_overlays: 
-            ov_path = ""
-            if ov.src.startswith("http"):
-                 ov_dl_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_ov_{input_idx}.mp4")
-                 # Async download
-                 # Force re-encode to ensure compatibility (copy might fail for webm -> mp4 container)
-                 # Use fast preset for speed
-                 await run_subprocess_async([
-                     "ffmpeg", "-i", ov.src, 
-                     "-c:v", "libx264", "-preset", "ultrafast",     # Re-encode video
-                     "-c:a", "aac",                                 # Re-encode audio
-                     "-y", ov_dl_path
-                 ], check=True)
-                 ov_path = ov_dl_path
+        for ov in video_overlays:
+            try:
+                from .studio_broll import overlay_commands
+            except ImportError:
+                from studio_broll import overlay_commands
+            prefix = os.path.join(SHARED_TMP_DIR, f"{job_id}_ov_{input_idx}")
+            ov_dl_path = f"{prefix}_source.mp4"
+            overlay_temp_paths.append(ov_dl_path)
+            ov_path = await materialize_video_input(ov.src, ov_dl_path, keep_audio=True)
+            source_duration = get_media_duration(ov_path)
+            cue_start = max(0, float(ov.start_time or 0))
+            timeline_end = max((p["end_time"] for p in speed_plan), default=0)
+            cue_duration = min(float(ov.duration) if ov.duration is not None else timeline_end-cue_start,
+                               timeline_end-cue_start)
+            if cue_duration <= 0:
+                continue
+            commands, prepared_path, visible_duration, _ = overlay_commands(
+                ov_path, prefix, source_duration, ov.sourceStartTime, cue_duration,
+                ov.sourceEndBehavior, cue_start, speed_plan, has_audio_stream(ov_path))
+            for command in commands:
+                overlay_temp_paths.append(command[-1])
+                await run_subprocess_async(command, check=True)
+            ov = ov.model_copy(update={"start_time": cue_start, "duration": visible_duration})
+            prepared_overlay_ranges[str(ov.id)] = ov
+            ov_path = prepared_path
             
             if ov_path:
-                # Add -stream_loop -1 to loop the overlay video indefinitely
-                inputs.extend(["-stream_loop", "-1", "-i", ov_path])
+                block_start, block_input = len(filter_chain), current_v_label
+                # Start the first selected B-roll frame at its cue, not at the
+                # programme's zero. Return/loop/hold and speed are baked above.
+                inputs.extend(["-itsoffset", str(rendered_timeline_time(cue_start)), "-i", ov_path])
                 overlay_input_idx = input_idx
                 if getattr(ov, "useOverlayAudio", False) and has_audio_stream(ov_path):
                     overlay_audio_specs.append((overlay_input_idx, ov))
@@ -30860,6 +32010,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 filter_chain.append(overlay_filter)
                 current_v_label = f"v{overlay_input_idx}"
                 input_idx += 1
+                remember_overlay_block(ov, block_start, block_input)
 
         # Process Image Overlays (e.g. Cute Captions)
         image_overlays = [o for o in request.overlays if o.type == 'image' and o.src]
@@ -30870,6 +32021,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                  ext = ov.src.split('?')[0].split('.')[-1]
                  if len(ext) > 4: ext = "png"
                  ov_dl_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_img_{input_idx}.{ext}")
+                 overlay_temp_paths.append(ov_dl_path)
                  
                  # Async download via executor
                  import urllib.request
@@ -30878,13 +32030,83 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                      await loop.run_in_executor(None, lambda: urllib.request.urlretrieve(ov.src, ov_dl_path))
                      ov_path = ov_dl_path
                  except Exception as e:
-                     logger.error(f"Failed to download image overlay: {e}")
+                     raise RuntimeError(f"Image layer {ov.id} could not be loaded; export stopped") from e
+            else:
+                raise ValueError(f"Image layer {ov.id} requires an uploaded HTTP(S) source")
             
             if ov_path:
+                block_start, block_input = len(filter_chain), current_v_label
+                layer_plan = composition_layer(request.composition_plan, ov.id)
+                layer_effects = (layer_plan or {}).get("effects") or {}
+                layer_has_motion = bool(
+                    layer_plan
+                    and (
+                        layer_plan.get("motion_keyframes")
+                        or float(layer_effects.get("blur") or 0) > 0
+                        or (layer_effects.get("glow") or {}).get("enabled")
+                        or (layer_effects.get("shadow") or {}).get("enabled")
+                        or (layer_effects.get("motion_blur") or {}).get("enabled")
+                        or getattr(ov, "motionDesign", False)
+                    )
+                )
+                if layer_has_motion:
+                    motion_layer_path = os.path.join(
+                        SHARED_TMP_DIR, f"{job_id}_image_motion_{input_idx}.mov"
+                    )
+                    overlay_temp_paths.append(motion_layer_path)
+                    receipt = await asyncio.to_thread(
+                        render_image_layer_motion,
+                        ov_path,
+                        motion_layer_path,
+                        ov,
+                        layer_plan,
+                        base_width,
+                        base_height,
+                        rendered_timeline_duration,
+                        speed_plan,
+                        30,
+                    )
+                    inputs.extend(["-itsoffset", f"{receipt['start_time']:.6f}", "-i", motion_layer_path])
+                    overlay_filter = (
+                        f"[{current_v_label}][{input_idx}:v]overlay=0:0:"
+                        f"eof_action=pass:format=auto[v{input_idx}];"
+                    )
+                    filter_chain.append(overlay_filter)
+                    current_v_label = f"v{input_idx}"
+                    input_idx += 1
+                    remember_overlay_block(ov, block_start, block_input)
+                    continue
                 # Loop 1 ensures image is available as a stream
                 inputs.extend(["-loop", "1", "-i", ov_path])
                 
-                scale_filter = build_overlay_scale_filter(f"{input_idx}:v", f"img{input_idx}", ov)
+                # Ken Burns motion for static images
+                ken_burns = str(getattr(ov, "kenBurns", None) or getattr(ov, "ken_burns", None) or "none").strip()
+                kb_label = f"kb{input_idx}"
+                if ken_burns and ken_burns != "none":
+                    ov_dur = max(0.5, float(ov.duration or 3.0))
+                    fps = 25
+                    total_frames = int(ov_dur * fps)
+                    # zoompan needs the source scaled up first
+                    if ken_burns == "zoomIn":
+                        zp = f"[{input_idx}:v]scale=4000:-1,zoompan=z='min(zoom+0.001,1.25)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d={total_frames}:s={base_width}x{base_height}:fps={fps}[{kb_label}];"
+                    elif ken_burns == "zoomOut":
+                        zp = f"[{input_idx}:v]scale=4000:-1,zoompan=z='if(eq(on,1),1.25,max(zoom-0.001,1.0))':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d={total_frames}:s={base_width}x{base_height}:fps={fps}[{kb_label}];"
+                    elif ken_burns == "panLeft":
+                        zp = f"[{input_idx}:v]scale=4000:-1,zoompan=z='1.12':x='iw*0.54-iw*0.08*on/{total_frames}-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d={total_frames}:s={base_width}x{base_height}:fps={fps}[{kb_label}];"
+                    elif ken_burns == "panRight":
+                        zp = f"[{input_idx}:v]scale=4000:-1,zoompan=z='1.12':x='iw*0.46+iw*0.08*on/{total_frames}-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d={total_frames}:s={base_width}x{base_height}:fps={fps}[{kb_label}];"
+                    elif ken_burns == "panUp":
+                        zp = f"[{input_idx}:v]scale=4000:-1,zoompan=z='1.12':x='iw/2-(iw/zoom/2)':y='ih*0.53-ih*0.06*on/{total_frames}-(ih/zoom/2)':d={total_frames}:s={base_width}x{base_height}:fps={fps}[{kb_label}];"
+                    else:
+                        zp = None
+                    
+                    if zp:
+                        filter_chain.append(zp)
+                        scale_filter = build_overlay_scale_filter(kb_label, f"img{input_idx}", ov)
+                    else:
+                        scale_filter = build_overlay_scale_filter(f"{input_idx}:v", f"img{input_idx}", ov)
+                else:
+                    scale_filter = build_overlay_scale_filter(f"{input_idx}:v", f"img{input_idx}", ov)
                 
                 x_expr, y_expr = get_overlay_xy_expr(ov)
                 
@@ -30896,10 +32118,11 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 filter_chain.append(overlay_filter)
                 current_v_label = f"v{input_idx}"
                 input_idx += 1
+                remember_overlay_block(ov, block_start, block_input)
 
 
         # Process Text Overlays
-        text_overlays = [o for o in request.overlays if o.type == 'text']
+        text_overlays = [o for o in request.overlays if o.type == 'text' and o.opacity > 0]
         
         # Robust Font Selection
         font_path = "Arial" # Default to system font name if file not found
@@ -30969,6 +32192,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         }
 
         for idx, txt in enumerate(text_overlays):
+            block_start, block_input = len(filter_chain), current_v_label
             enable_expr = get_overlay_enable_expr(txt)
             mode = get_broll_mode(txt)
 
@@ -31005,6 +32229,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         enable_expr=enable_expr,
                     )
                     current_v_label = next_label
+                remember_overlay_block(txt, block_start, block_input)
                 continue
 
             x_val = txt.x / 100.0
@@ -31024,7 +32249,39 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             )
             current_v_label = next_label
 
+            remember_overlay_block(txt, block_start, block_input)
+
+        # Media type must not override the editor's Send Back/Bring Forward
+        # stack. Reconnect independent layer blocks in the saved layer order.
+        overlay_order = {str(overlay.id): index for index, overlay in enumerate(request.overlays)}
+        filter_chain = filter_chain[:overlay_chain_start]
+        current_v_label = overlay_base_label
+        for overlay_id, block, previous_input, output_label in sorted(
+                overlay_filter_blocks, key=lambda item: overlay_order[item[0]]):
+            filter_chain.extend(part.replace(f"[{previous_input}]", f"[{current_v_label}]") for part in block)
+            current_v_label = output_label
+
         # Make sure we have an output label
+        # Add Motion Graphics Overlay
+        if request.motionGraphics and request.motionGraphics.get("scenes"):
+            from viral_motion_graphics import generate_transparent_motion_overlay
+            motion_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_motion.mov")
+            creative_adjusted_paths.append(motion_path)
+            report_progress(65, "Drawing reviewed motion graphics")
+            await asyncio.to_thread(
+                generate_transparent_motion_overlay, request.motionGraphics,
+                rendered_timeline_duration, motion_path, 30,
+                base_width, base_height, speed_plan,
+            )
+            inputs.extend(["-i", motion_path])
+            motion_idx = input_idx
+            input_idx += 1
+            next_label = "v_motion"
+            filter_chain.append(
+                f"[{current_v_label}][{motion_idx}:v]overlay=0:0:eof_action=pass[{next_label}];"
+            )
+            current_v_label = next_label
+
         if current_v_label != "output":
              # We should probably assign the last label to [output] for simplicity
              # But if filter chain is empty (no overlays), we just copy
@@ -31056,14 +32313,52 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 )
 
         audio_filter_chain = []
-        has_main_audio = has_audio_stream(working_path) and not request.mute_audio
+        try:
+            from .studio_audio import audio_track_audible, build_volume_filter
+        except ImportError:
+            from studio_audio import audio_track_audible, build_volume_filter
+        audio_track_states = request.audio_track_states or {}
+        audio_automation = request.audio_automation or {}
+        audio_automation_receipt = {}
+
+        def bus_automation(bus):
+            graph, points = build_volume_filter(
+                audio_automation.get(bus), rendered_timeline_duration
+            )
+            if points:
+                audio_automation_receipt[bus] = points
+            return graph
+
+        source_audio_allowed = (
+            has_audio_stream(working_path)
+            and not request.mute_audio
+            and audio_track_audible(audio_track_states, "originalAudio")
+        )
+        has_main_audio = source_audio_allowed
         audio_mix_labels = []
         main_audio_mix_token = None
 
         if has_main_audio:
             main_audio_label = "0:a"
+            restoration_receipt = None
+            if request.audio_restoration:
+                try:
+                    from .studio_audio import build_dialogue_filter
+                except ImportError:
+                    from studio_audio import build_dialogue_filter
+                restoration_filter, restoration_receipt = build_dialogue_filter(request.audio_restoration)
+                if restoration_filter:
+                    audio_filter_chain.append(f"[{main_audio_label}]{restoration_filter}[main_audio_restored]")
+                    main_audio_label = "main_audio_restored"
+            main_bus = "originalAudio" if audio_automation.get("originalAudio") else "masterPodcast"
+            main_automation = bus_automation(main_bus)
+            if main_automation:
+                audio_filter_chain.append(
+                    f"[{main_audio_label}]{main_automation}[main_audio_automated]"
+                )
+                main_audio_label = "main_audio_automated"
             ducking_overlays = [
-                overlay
+                prepared_overlay_ranges.get(str(overlay.id), overlay)
                 for overlay in request.overlays
                 if overlay.start_time is not None
                 and overlay.duration is not None
@@ -31084,10 +32379,22 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     f"[{main_audio_label}]volume={gain:.3f}:enable='between(t,{rel_start:.3f},{rel_end:.3f})'[{next_label}]"
                 )
                 main_audio_label = next_label
+            if normalized_audio_remix["enabled"] and normalized_audio_remix["target"] == "voice":
+                remix_chain, _ = build_audio_remix_chain(normalized_audio_remix)
+                audio_filter_chain.append(
+                    f"[{main_audio_label}]{remix_chain}[main_audio_remixed]"
+                )
+                main_audio_label = "main_audio_remixed"
+                audio_remix_receipt = {
+                    **normalized_audio_remix,
+                    "status": "applied_inline",
+                }
             main_audio_mix_token = f"[{main_audio_label}]"
             audio_mix_labels.append(main_audio_mix_token)
 
         for audio_index, (overlay_input_idx, overlay) in enumerate(overlay_audio_specs):
+            if not audio_track_audible(audio_track_states, "broll"):
+                continue
             if overlay.start_time is None or overlay.duration is None:
                 continue
             source_start = max(0.0, float(overlay.start_time))
@@ -31096,15 +32403,20 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             rendered_end = max(rendered_start + 0.05, rendered_timeline_time(source_end))
             delay_ms = max(0, int(rendered_start * 1000))
             audio_duration = rendered_end - rendered_start
-            volume = clamp_float(float(getattr(overlay, "overlayAudioVolume", 0.7) or 0.7), 0.0, 1.5)
+            volume = clamp_float(float(overlay.overlayAudioVolume), 0.0, 1.5)
             output_label = f"overlay_audio_{audio_index}"
+            broll_automation = bus_automation("broll")
+            automation_suffix = f",{broll_automation}" if broll_automation else ""
+            fade_out_st = max(0.01, audio_duration - 0.06)
             audio_filter_chain.append(
                 f"[{overlay_input_idx}:a]atrim=0:{audio_duration:.3f},asetpts=PTS-STARTPTS,"
-                f"volume={volume:.3f},adelay={delay_ms}|{delay_ms}[{output_label}]"
+                f"afade=t=in:st=0:d=0.06,afade=t=out:st={fade_out_st:.3f}:d=0.06,"
+                f"volume={volume:.3f},adelay={delay_ms}|{delay_ms}{automation_suffix}[{output_label}]"
             )
             audio_mix_labels.append(f"[{output_label}]")
 
-        if studio_music_source and os.path.exists(studio_music_source):
+        if (studio_music_source and os.path.exists(studio_music_source)
+                and audio_track_audible(audio_track_states, "music")):
             if request.music_loop:
                 inputs.extend(["-stream_loop", "-1"])
             inputs.extend(["-i", studio_music_source])
@@ -31119,15 +32431,31 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 "asetpts=PTS-STARTPTS",
                 f"volume={music_volume:.3f}",
             ]
+            music_automation = bus_automation("music")
+            if music_automation:
+                music_filters.append(music_automation)
             if fade_in > 0.005:
                 music_filters.append(f"afade=t=in:st=0:d={fade_in:.3f}")
             if fade_out > 0.005:
                 music_filters.append(
                     f"afade=t=out:st={max(0.0, music_duration - fade_out):.3f}:d={fade_out:.3f}"
                 )
-            audio_filter_chain.append(
-                f"[{studio_music_idx}:a]{','.join(music_filters)}[studio_music_raw]"
-            )
+            if normalized_audio_remix["enabled"] and normalized_audio_remix["target"] == "music":
+                remix_chain, _ = build_audio_remix_chain(normalized_audio_remix)
+                audio_filter_chain.append(
+                    f"[{studio_music_idx}:a]{','.join(music_filters)}[studio_music_base]"
+                )
+                audio_filter_chain.append(
+                    f"[studio_music_base]{remix_chain}[studio_music_raw]"
+                )
+                audio_remix_receipt = {
+                    **normalized_audio_remix,
+                    "status": "applied_inline",
+                }
+            else:
+                audio_filter_chain.append(
+                    f"[{studio_music_idx}:a]{','.join(music_filters)}[studio_music_raw]"
+                )
             studio_music_label = "[studio_music_raw]"
             if request.music_ducking and main_audio_mix_token:
                 audio_filter_chain.append(
@@ -31147,72 +32475,42 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 studio_music_label = "[music_ducked]"
             audio_mix_labels.append(studio_music_label)
 
-        for effect_index, effect in enumerate(request.sound_effects or []):
-            if not effect.enabled:
-                continue
-            effect_duration = clamp_float(effect.duration, 0.05, 15.0)
-            effect_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_sfx_{effect_index}.wav")
-            if str(effect.url or "").strip():
-                effect_path = await materialize_audio_input(
-                    str(effect.url).strip(),
-                    effect_path,
-                    sample_rate=48000,
-                )
-            elif effect.builtIn:
-                tone = str(effect.tone or "impact").strip().lower()
-                if tone in {"sweep", "riser"}:
-                    source = f"anoisesrc=color=pink:sample_rate=48000:duration={effect_duration:.3f}"
-                    synth_filter = "highpass=f=500,lowpass=f=6500"
+        if request.sound_effects:
+            from viral_motion_graphics import validate_design, write_sound_mix
+            _, reviewed_effects = validate_design(None, [effect.model_dump() for effect in request.sound_effects])
+            reviewed_effects = [effect for effect in reviewed_effects if audio_track_audible(
+                audio_track_states,
+                "voiceover" if effect.get("kind") == "voiceover" else "sfx",
+            )]
+            resolved_effect_audio = {}
+            for effect_index, effect in enumerate(reviewed_effects):
+                if effect.get("builtIn") or effect["volume"] <= 0:
+                    continue
+                url = str(effect["url"]).strip()
+                if url not in resolved_effect_audio:
+                    effect_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_sfx_{effect_index}.wav")
+                    sound_effect_paths.append(effect_path)
+                    resolved_effect_audio[url] = await materialize_audio_input(url, effect_path, sample_rate=48000)
+            # Keep speech and effects on independent buses so their mute, solo
+            # and volume automation behave exactly like the editor lanes.
+            for bus in ("sfx", "voiceover"):
+                bus_effects = [effect for effect in reviewed_effects
+                               if ("voiceover" if effect.get("kind") == "voiceover" else "sfx") == bus]
+                if not bus_effects:
+                    continue
+                effect_mix_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_{bus}_mix.wav")
+                sound_effect_paths.append(effect_mix_path)
+                await asyncio.to_thread(write_sound_mix, effect_mix_path, bus_effects,
+                                        rendered_timeline_duration, speed_plan, resolved_effect_audio)
+                inputs.extend(["-i", effect_mix_path])
+                automation = bus_automation(bus)
+                if automation:
+                    automated_label = f"{bus}_automated"
+                    audio_filter_chain.append(f"[{input_idx}:a]{automation}[{automated_label}]")
+                    audio_mix_labels.append(f"[{automated_label}]")
                 else:
-                    frequency = 105 if tone == "impact" else 980 if tone == "click" else 520
-                    source = (
-                        f"sine=frequency={frequency}:sample_rate=48000:duration={effect_duration:.3f}"
-                    )
-                    synth_filter = "anull"
-                await run_subprocess_async(
-                    [
-                        "ffmpeg", "-f", "lavfi", "-i", source,
-                        "-af", synth_filter, "-c:a", "pcm_s16le", "-y", effect_path,
-                    ],
-                    check=True,
-                    job_context=job_id,
-                )
-            else:
-                continue
-            if not effect_path or not os.path.exists(effect_path):
-                raise RuntimeError(f"Sound effect {effect.name or effect.id or effect_index} could not be materialized")
-            sound_effect_paths.append(effect_path)
-            inputs.extend(["-i", effect_path])
-            effect_input_idx = input_idx
-            input_idx += 1
-            source_start = max(0.0, float(effect.startTime or 0.0))
-            rendered_start = rendered_timeline_time(source_start)
-            rendered_end = max(
-                rendered_start + 0.05,
-                rendered_timeline_time(source_start + effect_duration),
-            )
-            rendered_effect_duration = rendered_end - rendered_start
-            trim_start = max(0.0, float(effect.trimStart or 0.0))
-            fade_in = clamp_float(effect.fadeIn, 0.0, rendered_effect_duration / 2.0)
-            fade_out = clamp_float(effect.fadeOut, 0.0, rendered_effect_duration / 2.0)
-            effect_filters = [
-                f"atrim=start={trim_start:.3f}:duration={rendered_effect_duration:.3f}",
-                "asetpts=PTS-STARTPTS",
-                f"volume={clamp_float(effect.volume, 0.0, 1.5):.3f}",
-            ]
-            if fade_in > 0.005:
-                effect_filters.append(f"afade=t=in:st=0:d={fade_in:.3f}")
-            if fade_out > 0.005:
-                effect_filters.append(
-                    f"afade=t=out:st={max(0.0, rendered_effect_duration - fade_out):.3f}:d={fade_out:.3f}"
-                )
-            delay_ms = max(0, int(round(rendered_start * 1000)))
-            effect_filters.append(f"adelay={delay_ms}|{delay_ms}")
-            effect_label = f"studio_sfx_{effect_index}"
-            audio_filter_chain.append(
-                f"[{effect_input_idx}:a]{','.join(effect_filters)}[{effect_label}]"
-            )
-            audio_mix_labels.append(f"[{effect_label}]")
+                    audio_mix_labels.append(f"[{input_idx}:a]")
+                input_idx += 1
 
         if background_audio and background_audio.url:
             background_audio_source = str(background_audio.url).strip()
@@ -31253,7 +32551,20 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 if background_audio_mode not in {"mix", "replace", "duck_original"}:
                     background_audio_mode = "mix"
                 ducking_strength = clamp_float(background_audio.ducking_strength, 0.15, 0.95)
-                audio_filter_chain.append(f"[{background_audio_idx}:a]volume={bg_volume}[bg_track]")
+                if normalized_audio_remix["enabled"] and normalized_audio_remix["target"] == "music":
+                    remix_chain, _ = build_audio_remix_chain(normalized_audio_remix)
+                    audio_filter_chain.append(
+                        f"[{background_audio_idx}:a]volume={bg_volume}[bg_track_base]"
+                    )
+                    audio_filter_chain.append(
+                        f"[bg_track_base]{remix_chain}[bg_track]"
+                    )
+                    audio_remix_receipt = {
+                        **normalized_audio_remix,
+                        "status": "applied_inline",
+                    }
+                else:
+                    audio_filter_chain.append(f"[{background_audio_idx}:a]volume={bg_volume}[bg_track]")
                 if background_audio_mode == "replace":
                     audio_mix_labels = ["[bg_track]"] + [
                         label for label in audio_mix_labels if label.startswith("[overlay_audio")
@@ -31316,13 +32627,19 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         # Build Command
         cmd = ["ffmpeg"]
         cmd.extend(inputs)
+        audio_bitrate = (
+            "256k"
+            if normalized_audio_remix["enabled"]
+            and normalized_audio_remix["quality"] == "studio"
+            else "160k"
+        )
 
         if not filter_chain and not audio_filter_chain:
              # Preserve the video stream, but normalize retained audio to AAC so
              # phone/browser playback cannot silently reject an unusual source codec.
              cmd.extend(["-map", "0:v:0"])
              if has_main_audio:
-                 cmd.extend(["-map", "0:a:0", "-c:v", "copy", "-c:a", "aac", "-b:a", "160k"])
+                 cmd.extend(["-map", "0:a:0", "-c:v", "copy", "-c:a", "aac", "-b:a", audio_bitrate])
              else:
                  cmd.extend(["-c:v", "copy", "-an"])
              cmd.extend(["-movflags", "+faststart", "-y", output_path])
@@ -31348,11 +32665,11 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                  cmd.extend(["-map", "0:v:0"])
 
              if audio_filter_chain:
-                 cmd.extend(["-map", "[a_mix]", "-c:a", "aac", "-b:a", "160k"])
-             elif request.mute_audio:
+                 cmd.extend(["-map", "[a_mix]", "-c:a", "aac", "-b:a", audio_bitrate])
+             elif request.mute_audio or not source_audio_allowed:
                  cmd.extend(["-an"])
              else:
-                 cmd.extend(["-map", "0:a?", "-c:a", "aac", "-b:a", "160k"])
+                 cmd.extend(["-map", "0:a?", "-c:a", "aac", "-b:a", audio_bitrate])
 
              cmd.extend(["-t", f"{rendered_timeline_duration:.3f}"])
              cmd.extend(build_viral_export_encode_args(delivery_profile))
@@ -31361,6 +32678,27 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         report_progress(75, "Rendering final video")
         logger.info(f"Running FFmpeg: {' '.join(cmd)}")
         await run_subprocess_async(cmd, check=True)
+
+        if normalized_audio_remix["enabled"] and normalized_audio_remix["target"] == "master":
+            if not has_audio_stream(output_path):
+                raise ValueError("Remix Audio requires an audible source track")
+            report_progress(88, "Mastering Remix Audio")
+            with tempfile.TemporaryDirectory(prefix="viral-audio-remix-", dir=SHARED_TMP_DIR) as remix_dir:
+                remixed_path = os.path.join(remix_dir, "remixed.mp4")
+                loop = asyncio.get_running_loop()
+                audio_remix_receipt = await loop.run_in_executor(
+                    None,
+                    render_audio_remix,
+                    output_path,
+                    remixed_path,
+                    normalized_audio_remix,
+                )
+                os.replace(remixed_path, output_path)
+        elif normalized_audio_remix["enabled"] and audio_remix_receipt["status"] == "not_requested":
+            audio_remix_receipt = {
+                **normalized_audio_remix,
+                "status": "skipped_no_target_audio",
+            }
 
         if os.path.exists(output_path):
             brand_watermark_receipt = None
@@ -31373,14 +32711,14 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     output_width,
                     output_height,
                     request.output_settings,
+                    request.brand_watermark_schedule,
+                    request.brand_watermark_variant,
                 )
             report_progress(90, "Verifying rendered video and audio")
             audio_expected = bool(
-                (source_has_audio and not request.mute_audio)
-                or overlay_audio_specs
-                or (background_audio and background_audio.url)
-                or studio_music_source
-                or any(effect.enabled for effect in (request.sound_effects or []))
+                audio_filter_chain
+                or source_audio_allowed
+                or str(audio_remix_receipt["status"]).startswith("applied")
             )
             audio_proof = build_audio_delivery_proof(output_path, expected=audio_expected)
             if audio_expected and not audio_proof["verified"]:
@@ -31483,6 +32821,10 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 "speed_plan": speed_plan,
                 "creative_receipt": creative_receipt,
                 "professional_cleanup": cleanup_receipt,
+                "audio_restoration": restoration_receipt if has_main_audio else None,
+                "audio_automation": audio_automation_receipt,
+                "audio_track_states": audio_track_states,
+                "audio_remix_receipt": audio_remix_receipt,
                 "studio_plan_validation": studio_plan_validation,
             }
             
@@ -31507,6 +32849,11 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
     finally:
         # Cleanup inputs
         if os.path.exists(input_path): os.remove(input_path)
+        for overlay_temp_path in set(overlay_temp_paths):
+            if os.path.exists(overlay_temp_path):
+                os.remove(overlay_temp_path)
+        if color_cube_path and os.path.exists(color_cube_path):
+            os.remove(color_cube_path)
         if downloaded_background_audio_path and os.path.exists(downloaded_background_audio_path):
             os.remove(downloaded_background_audio_path)
         if visualizer_path and os.path.exists(visualizer_path):
@@ -31571,11 +32918,7 @@ async def transcribe_video(request: Dict[str, str]):
             prompt_hint=(
                 request.get("hint")
                 or request.get("prompt_hint")
-                or (
-                    "Multilingual South African speech. Translate everything into natural English."
-                    if translate_to_english
-                    else "Preserve all spoken South African languages and code-switching exactly as spoken."
-                )
+                or ""
             ),
         )
         caption_quality = filter_caption_transcription_segments(result.get("segments", []))

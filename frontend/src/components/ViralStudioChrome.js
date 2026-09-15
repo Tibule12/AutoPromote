@@ -114,8 +114,10 @@ export function ViralStudioHeader({
           <strong>AutoPromote</strong>
         </div>
         <div className="studio-project-title">
-          <span>Viral Clip Studio</span>
-          <h3>{projectTitle}</h3>
+          <div>
+            <span>Viral Clip Studio</span>
+            <strong>{projectTitle}</strong>
+          </div>
         </div>
         <div className="studio-billing-strip">
           <span className="studio-billing-pill is-included">Studio included</span>
@@ -190,8 +192,13 @@ const INSPECTOR_TABS = [
   { id: "hook", label: "Hook", icon: "✦" },
   { id: "reframe", label: "Reframe", icon: "⌗" },
   { id: "captions", label: "Captions", icon: "CC" },
+  { id: "titles", label: "Graphics", icon: "T" },
+  { id: "motion", label: "Motion", icon: "◆" },
+  { id: "composite", label: "Composite", icon: "◫" },
+  { id: "creatorfx", label: "Creator FX", icon: "✺" },
   { id: "pacing", label: "Pacing", icon: "≋" },
   { id: "broll", label: "B-roll", icon: "▣" },
+  { id: "finish", label: "Color", icon: "◐" },
   { id: "sound", label: "Sound", icon: "♫" },
 ];
 

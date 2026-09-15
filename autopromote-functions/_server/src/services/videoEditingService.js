@@ -763,6 +763,9 @@ class VideoEditingService {
             ? viralData.speed_segments || viralData.speedSegments
             : [],
           pacing_level: viralData.pacing_level || viralData.pacingLevel || null,
+          motion_graphics: viralData.motion_graphics || viralData.motionGraphics || null,
+          sound_effects: viralData.sound_effects || viralData.soundEffects || [],
+          audio_remix: viralData.audio_remix || viralData.audioRemix || null,
           creative_intent: viralData.creative_intent || viralData.creativeIntent || null,
           creative_plan: viralData.creative_plan || viralData.creativePlan || null,
           smart_crop:

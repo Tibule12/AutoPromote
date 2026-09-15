@@ -16,7 +16,7 @@ const drawHistogram = (context, histogram, width, height, color, left, bandWidth
   context.stroke();
 };
 
-export default function VideoScopes({ videoRef, mode = "parade" }) {
+export default function VideoScopes({ videoRef, canvasRef, mode = "parade" }) {
   const outputRef = useRef(null);
   const sampleRef = useRef(null);
   const [status, setStatus] = useState("Waiting for frame");
@@ -32,7 +32,7 @@ export default function VideoScopes({ videoRef, mode = "parade" }) {
 
     const renderScope = () => {
       if (stopped) return;
-      const video = videoRef?.current;
+      const video = canvasRef?.current || videoRef?.current;
       outputContext.clearRect(0, 0, output.width, output.height);
       outputContext.fillStyle = "#050814";
       outputContext.fillRect(0, 0, output.width, output.height);
@@ -45,7 +45,7 @@ export default function VideoScopes({ videoRef, mode = "parade" }) {
         outputContext.stroke();
       }
 
-      if (!video || video.readyState < 2 || !video.videoWidth) {
+      if (!video || (video.tagName === "VIDEO" ? video.readyState < 2 || !video.videoWidth : !video.width)) {
         setStatus("Waiting for frame");
         return;
       }
@@ -69,9 +69,17 @@ export default function VideoScopes({ videoRef, mode = "parade" }) {
           drawHistogram(outputContext, luma, output.width, output.height, "#f5f7ff", 4, output.width - 8);
         } else {
           const bandWidth = output.width / 3 - 8;
-          drawHistogram(outputContext, red, output.width, output.height, "#ff5c7a", 4, bandWidth);
-          drawHistogram(outputContext, green, output.width, output.height, "#5fffa5", output.width / 3 + 4, bandWidth);
-          drawHistogram(outputContext, blue, output.width, output.height, "#62b5ff", (output.width / 3) * 2 + 4, bandWidth);
+          // A parade retains horizontal image position; three histograms do not.
+          ["#ff5c7a", "#5fffa5", "#62b5ff"].forEach((color, channel) => {
+            outputContext.fillStyle = color;
+            outputContext.globalAlpha = .16;
+            for (let index = 0; index < pixels.length; index += 4) {
+              const x = (index / 4) % sample.width;
+              const y = (1 - pixels[index + channel] / 255) * (output.height - 8) + 4;
+              outputContext.fillRect(channel * output.width / 3 + 4 + x / sample.width * bandWidth, y, 1, 1);
+            }
+          });
+          outputContext.globalAlpha = 1;
         }
         setStatus(mode === "luma" ? "Luma histogram live" : "RGB parade live");
       } catch (_error) {
@@ -85,7 +93,7 @@ export default function VideoScopes({ videoRef, mode = "parade" }) {
       stopped = true;
       window.clearInterval(interval);
     };
-  }, [mode, videoRef]);
+  }, [mode, videoRef, canvasRef]);
 
   return (
     <div className="studio-video-scopes" data-testid="studio-video-scopes">

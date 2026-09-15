@@ -7,7 +7,8 @@ import {
 } from "../utils/security";
 import { API_BASE_URL, API_ENDPOINTS } from "../config";
 import { uploadSourceFileViaBackend } from "../utils/sourceUpload";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { useSubscription } from "../hooks/useSubscription";
 import { storage } from "../firebaseClient";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -26,7 +27,78 @@ import { getMediaAuthToken } from "../utils/mediaAuth";
 import useCinematicEffects, { buildCinematicCssFilter } from "../hooks/useCinematicEffects";
 import StudioFinishLayers from "./StudioFinishLayers";
 import StudioFinishRack from "./StudioFinishRack";
+import { buildPrecisionGrade, applyPrecisionGrade } from "./studioPrecisionGrade";
+import { parseColorCube, buildAdvancedColorCube, applyColorCube, hasAdvancedGrade } from "./studioColorCube";
+import { soloTrackingCoordinates } from "./studioTrackingCoordinates";
+import { interpolateReframeKeyframes } from "./studioReframeInterpolation";
+import StudioProTimeline from "./StudioProTimeline";
+import {
+  generateSmartZoomKeyframes,
+  createSinglePunchKeyframes,
+  extractPunchZonesFromKeyframes,
+  isTimePunched,
+  PUNCH_SCALES,
+  PUNCH_STYLES,
+  PUNCH_MODES,
+} from "./studioSmartZoom";
+import {
+  SPLIT_AUDIO_PRESETS,
+  normalizeSplitAudioClip,
+  buildAudioSplitSequence,
+  applySplitAudioPreset,
+  autoApplyDialoguePreLaps,
+  calculateAudioProxyState,
+} from "./studioAudioSplit";
+import {
+  normalizeBeatMarkers,
+  calculateBpm,
+  findNearestBeat,
+  alignTimelineCutsToMusicBeats,
+  alignBRollToMusicBeats,
+  generateBeatPunchIns,
+} from "./studioBeatEngine";
+import StudioVoiceoverPreview from "./StudioVoiceoverPreview";
+import {
+  COMMON_FILLER_WORDS,
+  detectFillerWords,
+  sliceTimelineTimeRange,
+  sliceMultipleTimeRanges,
+  retimeCaptionsAfterCut,
+} from "./studioScriptSlicer";
+import { uploadVoiceoversForRender, voiceoverTrackAudible, voiceoverGain } from "./studioVoiceover";
+import { isStudioAudioTrackAudible } from "./studioAudioTracks";
+import {
+  DEFAULT_CREATOR_PREVIEW,
+  StudioCreatorPreviewLayer,
+  StudioCreatorWorkbench,
+  getCreatorCanvasClass,
+} from "./StudioCreatorWorkbench";
+import {
+  AudioRestorationPanel,
+  CompositeInspector,
+  MotionInspector,
+} from "./StudioAdvancedInspectors";
+import SoundWaveform from "./motion/SoundWaveform";
+import MotionPanel from "./motion/MotionPanel";
+import MotionCanvas from "./motion/MotionCanvas";
+import { motionCues, cutMotion, normalizeMotion, generateSmartMotionBeats } from "./motion/motionModel";
+import { DESIGN_SOUNDS, synthesizeEffect } from "./motion/soundDesign";
 import VideoScopes from "./VideoScopes";
+import {
+  STUDIO_EASINGS,
+  buildMotionAutomationStyle,
+  buildMotionPathPoints,
+  interpolateAutomationValue,
+  upsertAutomationKeyframe,
+} from "./studioAutomation";
+import {
+  buildCreatorMotionRecipe,
+  buildCreatorSpeedRecipe,
+  buildSpeedSegmentsFromKeyframes,
+  mergeCreatorRecipe,
+  findCreatorBeat,
+} from "./studioCreatorRecipes";
+import { rippleTimedItems, rippleTimelineKeys } from "./studioTimelineEdits";
 import { detectAudioBeats } from "./flowEditUtils";
 import {
   analyzeAudioBufferBeats,
@@ -40,6 +112,30 @@ import {
   ViralStudioHeader,
   normalizeViralStudioWorkspaceMode,
 } from "./ViralStudioChrome";
+import {
+  deleteViralStudioProject,
+  listViralStudioProjects,
+  saveViralStudioProject,
+} from "./viralStudioProjectStore";
+import {
+  WATERMARK_VARIANTS,
+  buildWatermarkMovementSchedule,
+  getActiveWatermarkCue,
+  getWatermarkPreviewStyle,
+} from "./studioWatermark";
+import AudioRemixPanel from "./audio/AudioRemixPanel";
+import {
+  DEFAULT_AUDIO_REMIX,
+  audioRemixForRender,
+  normalizeAudioRemix,
+} from "./audio/audioRemixModel";
+import {
+  ensureAudioRemixPreview,
+  subscribeAudioRemixMeter,
+  unlockAudioRemixContext,
+  updateAudioRemixPreview,
+} from "./audio/audioRemixPreview";
+import "./audio/audioRemixTimeline.css";
 import "./ViralClipStudio.css"; // We'll create this CSS next
 
 const TimelineVideoThumbnail = ({ src, previewTime, style }) => {
@@ -104,10 +200,15 @@ const normalizePlainText = value =>
     .replace(/[<>]/g, "")
     .trim();
 
-const AutoPromoteBrandLockup = ({ className = "", compact = false, ...props }) => (
+const AutoPromoteBrandLockup = ({
+  className = "",
+  compact = false,
+  featureLabel = "Viral Clip Studio",
+  ...props
+}) => (
   <div
     className={`autopromote-brand-lockup ${compact ? "is-compact" : ""} ${className}`.trim()}
-    aria-label="AutoPromote Viral Clip Studio watermark"
+    aria-label={`AutoPromote ${featureLabel} watermark`}
     {...props}
   >
     <span className="autopromote-brand-mark" aria-hidden="true">
@@ -117,7 +218,7 @@ const AutoPromoteBrandLockup = ({ className = "", compact = false, ...props }) =
       <strong>
         Auto<span>Promote</span>
       </strong>
-      <small>Viral Clip Studio</small>
+      <small>{featureLabel}</small>
     </span>
   </div>
 );
@@ -131,9 +232,24 @@ const getOverlayFrameRadius = overlay => {
   const shape = normalizeOverlayFrameShape(overlay?.frameShape, overlay?.bRollMode);
   if (shape === "round") {
     const radius = Math.max(12, Math.min(48, Number(overlay?.borderRadius ?? 28)));
-    return `${radius}px`;
+    // A percentage keeps the output-radius visually consistent when the full
+    // resolution composition is scaled down into the editor preview.
+    return `${(radius / 4).toFixed(2).replace(/\.00$/, "")}%`;
   }
   return "0";
+};
+
+const getOverlayMaskClipPath = overlay => {
+  const cropX = clampNumber(overlay?.cropX, 0, 45, 0);
+  const cropY = clampNumber(overlay?.cropY, 0, 45, 0);
+  if (!overlay?.mask?.enabled) {
+    return cropX || cropY ? `inset(${cropY}% ${cropX}% ${cropY}% ${cropX}%)` : undefined;
+  }
+  if (overlay.mask.shape === "ellipse") return "ellipse(48% 48% at 50% 50%)";
+  if (overlay.mask.shape === "polygon") {
+    return overlay.mask.path || "polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)";
+  }
+  return `inset(${cropY}% ${cropX}% ${cropY}% ${cropX}% round ${Number(overlay.mask.radius || 6)}%)`;
 };
 
 const CAPTION_LANGUAGE_OPTIONS = [
@@ -141,7 +257,7 @@ const CAPTION_LANGUAGE_OPTIONS = [
   { value: "xh", label: "isiXhosa" },
   { value: "en", label: "English" },
   { value: "zu", label: "isiZulu" },
-  { value: "mixed", label: "Mixed / code-switched" },
+  { value: "mixed", label: "Mixed languages" },
 ];
 
 const CAPTION_SPEAKER_OPTIONS = [
@@ -153,23 +269,83 @@ const CAPTION_SPEAKER_OPTIONS = [
 ];
 
 const CAPTION_PLACEMENT_OPTIONS = [
-  { value: "auto", label: "Auto · avoid faces" },
+  { value: "auto", label: "Auto safe region" },
+  { value: "shoulder_left", label: "Left shoulder" },
+  { value: "shoulder_right", label: "Right shoulder" },
+  { value: "background_left", label: "Background wall · left" },
+  { value: "background_center", label: "Background wall · centre" },
+  { value: "background_right", label: "Background wall · right" },
   { value: "top_left", label: "Top left" },
+  { value: "top_center", label: "Top centre" },
   { value: "top_right", label: "Top right" },
   { value: "middle_left", label: "Middle left" },
+  { value: "middle_center", label: "Dead centre" },
   { value: "middle_right", label: "Middle right" },
   { value: "bottom_left", label: "Bottom left" },
   { value: "bottom_center", label: "Bottom centre" },
   { value: "bottom_right", label: "Bottom right" },
+  { value: "custom", label: "Free position" },
 ];
 
+const CAPTION_STYLE_OPTIONS = [
+  ["rainbow", "Rainbow Flow", "Every spoken word carries the colour beat"],
+  ["watch_me", "Watch Me", "Dims the sentence and makes the live word command the frame"],
+  ["wall_type", "Wall Type", "Low-profile typography for open background space"],
+  ["story_pop", "Story Pop", "Editorial card + semantic accent"],
+  ["bold_pop", "Bold Pop", "Punchy active-word scale"],
+  ["karaoke", "Karaoke", "Progressive spoken-word fill"],
+  ["glow", "Neon Glow", "Electric outlined emphasis"],
+  ["bounce", "Bounce", "Playful vertical word punch"],
+  ["minimal", "Minimal", "Quiet premium subtitle"],
+  ["headline", "Big Headline", "Oversized uppercase impact"],
+  ["boxed", "Subtitle Card", "Broadcast-style readable card"],
+  ["comic", "Comic Punch", "Bold yellow social energy"],
+  ["gradient", "Gradient Pop", "Colour-rich creator highlight"],
+  ["typewriter", "Typewriter", "Measured word-by-word reveal"],
+  ["editorial", "Editorial Serif", "Elegant documentary voice"],
+  ["sticker", "Sticker Stack", "Layered creator sticker treatment"],
+  ["marker", "Marker Swipe", "Highlighter-strip emphasis"],
+  ["glass", "Glass Caption", "Frosted premium floating card"],
+  ["newsroom", "News Flash", "Urgent broadcast headline energy"],
+  ["luxury", "Luxury Quote", "Refined fashion-film typography"],
+  ["retro", "Retro Tape", "Warm analogue poster character"],
+];
+
+const CAPTION_ACCENT_OPTIONS = [
+  ["#ffb33d", "Amber"],
+  ["#8b5cf6", "Violet"],
+  ["#3ce0d0", "Aqua"],
+  ["#ff5d8f", "Rose"],
+  ["#f6e652", "Lemon"],
+  ["#72f59b", "Mint"],
+  ["#54a8ff", "Blue"],
+  ["#ffffff", "White"],
+];
+
+const normalizeCaptionDefaultPlacement = value => ({
+  top: "top_center",
+  center: "middle_center",
+  middle: "middle_center",
+  lower: "bottom_center",
+  bottom: "bottom_center",
+}[String(value || "").trim().toLowerCase()] || String(value || "bottom_center"));
+
 const CAPTION_ICON_OPTIONS = [
-  { value: "auto", label: "Auto icon" },
-  { value: "phone", label: "Phone / online" },
-  { value: "music", label: "Music / choir" },
-  { value: "place", label: "Place / journey" },
-  { value: "payoff", label: "Payoff" },
-  { value: "none", label: "No icon" },
+  { value: "auto", glyph: "✨", label: "Auto reaction" },
+  { value: "laugh", glyph: "😂", label: "Laugh" },
+  { value: "fire", glyph: "🔥", label: "Fire" },
+  { value: "heart", glyph: "❤️", label: "Love" },
+  { value: "wow", glyph: "😮", label: "Wow" },
+  { value: "clap", glyph: "👏", label: "Applause" },
+  { value: "hundred", glyph: "💯", label: "One hundred" },
+  { value: "eyes", glyph: "👀", label: "Watch this" },
+  { value: "crown", glyph: "👑", label: "Crown" },
+  { value: "mic", glyph: "🎙️", label: "Mic" },
+  { value: "phone", glyph: "📱", label: "Phone / online" },
+  { value: "music", glyph: "🎵", label: "Music / choir" },
+  { value: "place", glyph: "📍", label: "Place / journey" },
+  { value: "payoff", glyph: "⚡", label: "Payoff" },
+  { value: "none", glyph: "∅", label: "No emoji" },
 ];
 
 const REFRAME_ASPECT_OPTIONS = [
@@ -179,24 +355,89 @@ const REFRAME_ASPECT_OPTIONS = [
   { value: "16:9", label: "16:9", helper: "YouTube · landscape" },
 ];
 
-const interpolateReframeKeyframes = (keyframes, time) => {
-  const ordered = [...(keyframes || [])]
-    .filter(keyframe => Number.isFinite(Number(keyframe.time)))
-    .sort((left, right) => Number(left.time) - Number(right.time));
-  if (!ordered.length) return { x: 50, y: 50 };
-  const currentTime = Math.max(0, Number(time || 0));
-  if (currentTime <= Number(ordered[0].time)) return ordered[0];
-  if (currentTime >= Number(ordered[ordered.length - 1].time)) return ordered[ordered.length - 1];
-  const rightIndex = ordered.findIndex(keyframe => Number(keyframe.time) >= currentTime);
-  const right = ordered[rightIndex];
-  const left = ordered[Math.max(0, rightIndex - 1)];
-  const span = Math.max(0.001, Number(right.time) - Number(left.time));
-  const progress = clampNumber((currentTime - Number(left.time)) / span, 0, 1, 0);
-  return {
-    x: Number(left.x) + (Number(right.x) - Number(left.x)) * progress,
-    y: Number(left.y) + (Number(right.y) - Number(left.y)) * progress,
-  };
+const DEFAULT_SPEAKER_STACK_FRAMING = {
+  dividerPercent: 50,
+  gapPercent: 0.45,
+  secondaryXPercent: 80,
+  secondaryYPercent: 20,
+  secondarySizePercent: 30,
+  // Independent camera angles start centred. Source-split framing uses its own
+  // presets below; left/right programme anchors made uploaded cameras open off-centre.
+  top: { x: 50, y: 50, zoom: 1 },
+  bottom: { x: 50, y: 50, zoom: 1 },
+  third: { x: 50, y: 50, zoom: 1 },
+  fourth: { x: 50, y: 50, zoom: 1 },
 };
+
+// Same-time crops for a finished podcast programme that already contains a
+// large foreground shot plus the other participant in a corner window. The
+// tighter second crop removes the embedded window's rounded edge so it reads
+// as a real panel, not a tiny reaction overlay.
+const SOURCE_SPLIT_PROGRAMME_FRAMING = {
+  top: { x: 30, y: 50, zoom: 1.45 },
+  // The guest lives inside the programme's small upper-right camera window.
+  // This tighter crop isolates that picture instead of presenting the guest
+  // as a tiny reaction box surrounded by the orange studio monitor.
+  bottom: { x: 93, y: 18, zoom: 6.2 },
+};
+
+const SOURCE_SPLIT_SIDE_BY_SIDE_FRAMING = {
+  top: { x: 27, y: 50, zoom: 1.45 },
+  bottom: { x: 73, y: 50, zoom: 1.45 },
+};
+
+const MULTICAM_SLOT_KEYS = ["top", "bottom", "third", "fourth"];
+const MULTICAM_SLOT_LABELS = {
+  top: "Camera 1",
+  bottom: "Camera 2",
+  third: "Camera 3",
+  fourth: "Camera 4",
+};
+const getDefaultMulticamLayout = cameraCount =>
+  Number(cameraCount) >= 4 ? "grid_4" : Number(cameraCount) === 3 ? "hero_3" : "stack_2";
+
+const normalizeSpeakerFocusCuts = cuts =>
+  [...(Array.isArray(cuts) ? cuts : [])]
+    .filter(cut =>
+      ["top", "bottom"].includes(cut?.slot) && Number.isFinite(Number(cut?.time))
+    )
+    .map(cut => ({
+      id: cut.id || createSecureId("speaker-focus"),
+      time: Math.max(0, Number(cut.time || 0)),
+      slot: cut.slot,
+    }))
+    .sort((left, right) => left.time - right.time);
+
+const resolveSpeakerFocusSlot = (cuts, time, availableSlots = ["top", "bottom"]) => {
+  const fallback = availableSlots[0] || "top";
+  return normalizeSpeakerFocusCuts(cuts).reduce(
+    (current, cut) =>
+      cut.time <= Math.max(0, Number(time || 0)) && availableSlots.includes(cut.slot)
+        ? cut.slot
+        : current,
+    fallback
+  );
+};
+
+const normalizeReframeModeCuts = cuts =>
+  [...(Array.isArray(cuts) ? cuts : [])]
+    .filter(
+      cut =>
+        ["off", "speaker_track", "center", "group_stack"].includes(cut?.mode) &&
+        Number.isFinite(Number(cut?.time))
+    )
+    .map(cut => ({
+      id: cut.id || createSecureId("reframe-mode"),
+      time: Math.max(0, Number(cut.time || 0)),
+      mode: cut.mode,
+    }))
+    .sort((left, right) => left.time - right.time);
+
+const resolveReframeModeAtTime = (cuts, time, fallback) =>
+  normalizeReframeModeCuts(cuts).reduce(
+    (mode, cut) => (cut.time <= Math.max(0, Number(time || 0)) ? cut.mode : mode),
+    fallback
+  );
 
 const normalizeCaptionLanguage = value => {
   const normalized = String(value || "")
@@ -1421,6 +1662,11 @@ const normalizeCaptionSegments = segments =>
         captionIcon: normalizePlainText(
           segment?.captionIcon ?? segment?.caption_icon ?? segment?.icon ?? "auto"
         ),
+        captionAccent: /^#[0-9a-f]{6}$/i.test(String(segment?.captionAccent ?? segment?.caption_accent ?? ""))
+          ? String(segment?.captionAccent ?? segment?.caption_accent).toLowerCase()
+          : "",
+        captionX: clampNumber(segment?.captionX ?? segment?.caption_x, 5, 95, 50),
+        captionY: clampNumber(segment?.captionY ?? segment?.caption_y, 5, 95, 82),
         reviewRequired:
           Boolean(segment?.reviewRequired ?? segment?.review_required) ||
           speaker === "unknown" ||
@@ -1430,34 +1676,262 @@ const normalizeCaptionSegments = segments =>
     })
     .filter(Boolean);
 
-const getTimedCaptionPreviewState = ({ segments, sourceTime }) => {
-  const chunks = normalizeCaptionSegments(segments);
-  const safeTime = Math.max(0, Number(sourceTime || 0));
-  const currentIndex = chunks.findIndex(
-    segment => safeTime >= segment.start && safeTime < segment.end
+const parseSrtOrVtt = text => {
+  if (!text || typeof text !== "string") return [];
+  const lines = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
+  const segments = [];
+  let currentStart = null;
+  let currentEnd = null;
+  let currentText = [];
+
+  const timeRegex = /(?:(\d{1,2}):)?(\d{2}):(\d{2})[,.](\d{3})\s*-->\s*(?:(\d{1,2}):)?(\d{2}):(\d{2})[,.](\d{3})/;
+
+  const parseTime = (h, m, s, ms) => {
+    const hours = parseInt(h || "0", 10);
+    const minutes = parseInt(m, 10);
+    const seconds = parseInt(s, 10);
+    const milliseconds = parseInt(ms, 10);
+    return hours * 3600 + minutes * 60 + seconds + milliseconds / 1000;
+  };
+
+  for (let line of lines) {
+    line = line.trim();
+    if (!line) {
+      if (currentStart !== null && currentText.length > 0) {
+        const fullText = currentText.join(" ");
+        segments.push({
+          start: currentStart,
+          end: currentEnd,
+          duration: Math.max(0.1, currentEnd - currentStart),
+          text: fullText,
+          words: fullText.split(/\s+/).filter(Boolean),
+        });
+        currentStart = null;
+        currentEnd = null;
+        currentText = [];
+      }
+      continue;
+    }
+
+    const match = line.match(timeRegex);
+    if (match) {
+      if (currentStart !== null && currentText.length > 0) {
+        const fullText = currentText.join(" ");
+        segments.push({
+          start: currentStart,
+          end: currentEnd,
+          duration: Math.max(0.1, currentEnd - currentStart),
+          text: fullText,
+          words: fullText.split(/\s+/).filter(Boolean),
+        });
+        currentText = [];
+      }
+      currentStart = parseTime(match[1], match[2], match[3], match[4]);
+      currentEnd = parseTime(match[5], match[6], match[7], match[8]);
+      continue;
+    }
+
+    if (/^\d+$/.test(line) && currentStart === null) continue;
+    if (line.startsWith("WEBVTT")) continue;
+
+    if (currentStart !== null) {
+      currentText.push(line);
+    }
+  }
+
+  if (currentStart !== null && currentText.length > 0) {
+    const fullText = currentText.join(" ");
+    segments.push({
+      start: currentStart,
+      end: currentEnd,
+      duration: Math.max(0.1, currentEnd - currentStart),
+      text: fullText,
+      words: fullText.split(/\s+/).filter(Boolean),
+    });
+  }
+
+  return segments;
+};
+
+const generateClientSideCaptionSegments = ({ text = "", duration = 30, sourceClipId = null }) => {
+  const safeDuration = Math.max(2, Number(duration || 30));
+  const rawText = (text || "").trim();
+  const segments = [];
+
+  if (rawText) {
+    const words = rawText.split(/\s+/).filter(Boolean);
+    const chunkSize = 4;
+    const totalChunks = Math.max(1, Math.ceil(words.length / chunkSize));
+    const segmentDuration = Math.min(3.2, Math.max(1.0, safeDuration / totalChunks));
+
+    for (let i = 0; i < totalChunks; i++) {
+      const chunkWords = words.slice(i * chunkSize, (i + 1) * chunkSize);
+      if (!chunkWords.length) continue;
+      const start = Math.round(i * segmentDuration * 10) / 10;
+      const end = Math.round(Math.min(safeDuration, start + segmentDuration) * 10) / 10;
+      const chunkText = chunkWords.join(" ");
+      segments.push({
+        id: createSecureId("caption-line"),
+        start,
+        end,
+        duration: Math.max(0.1, end - start),
+        text: chunkText,
+        words: chunkWords,
+        speaker: "speaker_1",
+        speakerLabel: "Speaker 1",
+        language: "en",
+        languageLabel: "English",
+        languages: ["en"],
+        languageConfidence: 1,
+        textReviewRequired: false,
+        textReviewed: true,
+        captionPlacement: "auto",
+        captionIcon: "auto",
+        reviewRequired: false,
+        sourceClipId,
+      });
+    }
+  } else {
+    const step = 2.4;
+    const count = Math.min(12, Math.max(3, Math.floor(safeDuration / step)));
+    const defaultPhrases = [
+      "Tap here to edit this line",
+      "Add your spoken words here",
+      "Dynamic viral caption line",
+      "Keep viewers hooked to the end",
+      "Customize text in the sidebar",
+      "Kinetic text bounces with sound",
+      "Edit timestamps or add lines",
+      "Export with burned-in subtitles",
+    ];
+
+    for (let i = 0; i < count; i++) {
+      const start = Math.round(i * step * 10) / 10;
+      const end = Math.round(Math.min(safeDuration, start + step) * 10) / 10;
+      const phrase = defaultPhrases[i % defaultPhrases.length];
+      const phraseWords = phrase.split(" ");
+      segments.push({
+        id: createSecureId("caption-line"),
+        start,
+        end,
+        duration: Math.max(0.1, end - start),
+        text: phrase,
+        words: phraseWords,
+        speaker: "speaker_1",
+        speakerLabel: "Speaker 1",
+        language: "en",
+        languageLabel: "English",
+        languages: ["en"],
+        languageConfidence: 1,
+        textReviewRequired: true,
+        textReviewed: false,
+        captionPlacement: "auto",
+        captionIcon: "auto",
+        reviewRequired: true,
+        sourceClipId,
+      });
+    }
+  }
+
+  return segments;
+};
+
+const resolveInitialCaptionSegments = (clip, duration) => {
+  if (Array.isArray(clip?.segments) && clip.segments.length) {
+    return normalizeCaptionSegments(clip.segments);
+  }
+  if (Array.isArray(clip?.captions) && clip.captions.length) {
+    return normalizeCaptionSegments(clip.captions);
+  }
+  const text = normalizePlainText(
+    clip?.transcript || clip?.text || clip?.hookText || ""
   );
-  const currentChunk = currentIndex >= 0 ? chunks[currentIndex] : null;
-  const nextChunk = currentIndex >= 0 ? chunks[currentIndex + 1] || null : null;
-  const activeWordIndex = currentChunk
-    ? Math.min(
-        currentChunk.words.length - 1,
-        Math.floor(
-          clampNumber(
-            (safeTime - currentChunk.start) / Math.max(currentChunk.duration, 0.05),
-            0,
-            0.999,
-            0
-          ) * currentChunk.words.length
+  if (!text) {
+    return [];
+  }
+  const clipDuration = Math.max(3, Number(duration || clip?.duration || 30));
+  return generateClientSideCaptionSegments({
+    text,
+    duration: clipDuration,
+    sourceClipId: clip?.id || null,
+  });
+};
+
+const getTimedCaptionPreviewState = ({ segments, sourceTime, clipStartTime = 0 }) => {
+  const chunks = normalizeCaptionSegments(segments);
+  if (!chunks.length) {
+    return {
+      chunks: [],
+      currentChunk: null,
+      nextChunk: null,
+      activeWordIndex: 0,
+      previewDuration: 0,
+    };
+  }
+
+  const rawTime = Math.max(0, Number(sourceTime || 0));
+  const clipStart = Math.max(0, Number(clipStartTime || 0));
+
+  // 1. Direct match with rawTime (source video timestamp)
+  let currentIndex = chunks.findIndex(
+    segment => rawTime >= segment.start && rawTime < segment.end
+  );
+
+  // 2. Relative match with (rawTime - clipStart) (0-based clip timestamps)
+  if (currentIndex === -1) {
+    const relTime = Math.max(0, rawTime - clipStart);
+    currentIndex = chunks.findIndex(
+      segment => relTime >= segment.start && relTime < segment.end
+    );
+  }
+
+  // 3. Absolute match with (rawTime + clipStart)
+  if (currentIndex === -1 && clipStart > 0) {
+    const absTime = rawTime + clipStart;
+    currentIndex = chunks.findIndex(
+      segment => absTime >= segment.start && absTime < segment.end
+    );
+  }
+
+  // 4. Graceful gap hold: if in between words, keep showing current spoken block instead of disappearing
+  if (currentIndex === -1 && chunks.length > 0) {
+    const relTime = Math.max(0, rawTime - clipStart);
+    if (rawTime < chunks[0].start && relTime < chunks[0].start) {
+      currentIndex = 0;
+    } else {
+      const candidateIndex = chunks.reduce((bestIdx, seg, idx) => {
+        if (seg.start <= rawTime || seg.start <= relTime) return idx;
+        return bestIdx;
+      }, 0);
+      currentIndex = candidateIndex;
+    }
+  }
+
+  const currentChunk = currentIndex >= 0 ? chunks[currentIndex] : chunks[0];
+  const nextChunk =
+    currentIndex >= 0 && currentIndex + 1 < chunks.length ? chunks[currentIndex + 1] : null;
+  const chunkStart = currentChunk ? currentChunk.start : 0;
+  const chunkDur = currentChunk ? Math.max(currentChunk.duration, 0.05) : 1;
+  const effectiveTime =
+    rawTime >= chunkStart ? rawTime : rawTime - clipStart >= chunkStart ? rawTime - clipStart : chunkStart;
+  const elapsedInChunk = Math.max(0, effectiveTime - chunkStart);
+
+  const activeWordIndex =
+    currentChunk && Array.isArray(currentChunk.words) && currentChunk.words.length
+      ? Math.min(
+          currentChunk.words.length - 1,
+          Math.floor(
+            clampNumber(elapsedInChunk / chunkDur, 0, 0.999, 0) * currentChunk.words.length
+          )
         )
-      )
-    : 0;
+      : 0;
 
   return {
     chunks,
     currentChunk,
     nextChunk,
     activeWordIndex,
-    previewDuration: chunks.length ? chunks[chunks.length - 1].end : 0,
+    previewDuration: chunks[chunks.length - 1]?.end || 0,
   };
 };
 
@@ -1465,13 +1939,17 @@ const resolveCaptionStoryPreviewTreatment = (segment, fallbackPosition = "lower"
   const text = normalizePlainText(segment?.text).toLowerCase();
   const requestedPlacement = normalizePlainText(segment?.captionPlacement || "auto").toLowerCase();
   let concept = "story";
-  let placement = {
-    top: "top_left",
-    center: "middle_left",
-    middle: "middle_left",
-    lower: "bottom_center",
-    bottom: "bottom_center",
-  }[fallbackPosition] || "bottom_center";
+  let placement = CAPTION_PLACEMENT_OPTIONS.some(
+    option => option.value === fallbackPosition && !["auto", "custom"].includes(option.value)
+  )
+    ? fallbackPosition
+    : {
+      top: "top_left",
+      center: "middle_left",
+      middle: "middle_left",
+      lower: "bottom_center",
+      bottom: "bottom_center",
+      }[fallbackPosition] || "bottom_center";
 
   if (/facebook|scroll|timeline|online/.test(text)) {
     concept = "phone";
@@ -1494,15 +1972,39 @@ const resolveCaptionStoryPreviewTreatment = (segment, fallbackPosition = "lower"
     payoff: "#a6f598",
     story: "#ffb33d",
   };
+  const requestedIcon = normalizePlainText(segment?.captionIcon || "auto").toLowerCase();
+  const iconConcept = requestedIcon && requestedIcon !== "auto" ? requestedIcon : concept;
+  const icons = {
+    laugh: "😂",
+    fire: "🔥",
+    heart: "❤️",
+    wow: "😮",
+    clap: "👏",
+    hundred: "💯",
+    eyes: "👀",
+    crown: "👑",
+    mic: "🎙️",
+    phone: "📱",
+    music: "🎵",
+    place: "📍",
+    payoff: "⚡",
+    story: "✨",
+    none: "",
+  };
 
   return {
     placement,
-    accent: accents[concept] || accents.story,
+    accent: /^#[0-9a-f]{6}$/i.test(String(segment?.captionAccent || ""))
+      ? segment.captionAccent
+      : accents[concept] || accents.story,
+    icon: icons[iconConcept] ?? icons.story,
+    x: clampNumber(segment?.captionX, 5, 95, 50),
+    y: clampNumber(segment?.captionY, 5, 95, 82),
   };
 };
 
 const buildCaptionPreviewChunks = text => {
-  const words = normalizePlainText(text).split(/\s+/).filter(Boolean).slice(0, 24);
+  const words = normalizePlainText(text).split(/\s+/).filter(Boolean);
 
   if (!words.length) return [];
 
@@ -1707,8 +2209,13 @@ const CREATIVE_STUDIO_TOOLS = [
   { id: "hook", label: "Hook", icon: "⌁" },
   { id: "reframe", label: "Reframe", icon: "⌗" },
   { id: "captions", label: "Captions", icon: "CC" },
+  { id: "titles", label: "Graphics", icon: "T" },
+  { id: "motion", label: "Motion", icon: "◆" },
+  { id: "composite", label: "Composite", icon: "◫" },
+  { id: "creatorfx", label: "Creator FX", icon: "✺" },
   { id: "pacing", label: "Pacing", icon: "≋" },
   { id: "broll", label: "B-roll", icon: "▣" },
+  { id: "finish", label: "Color", icon: "◐" },
   { id: "sound", label: "Sound", icon: "♫" },
   { id: "export", label: "Export", icon: "⇧" },
 ];
@@ -1848,6 +2355,35 @@ const JOIN_TRANSITIONS = [
     label: "Energy Flash",
     helper: "A fast bright hit for action and reveals.",
   },
+  { id: "cross_dissolve", label: "Dissolve", helper: "A smooth opacity blend between shots." },
+  { id: "film_dip", label: "Film Dip", helper: "A soft filmic dip through black." },
+  {
+    id: "whip_pan",
+    label: "Whip Pan",
+    helper: "Directional motion blur carries the eye into the next shot.",
+  },
+  {
+    id: "zoom_push",
+    label: "Zoom Push",
+    helper: "A fast push through the cut for energetic stories.",
+  },
+  { id: "blur_morph", label: "Blur Morph", helper: "Shape and blur bridge similar compositions." },
+  {
+    id: "luma_wipe",
+    label: "Luma Wipe",
+    helper: "The brightest parts of the next shot reveal first.",
+  },
+  { id: "light_leak", label: "Light Leak", helper: "Organic light washes over the edit point." },
+  {
+    id: "film_burn",
+    label: "Film Burn",
+    helper: "A textured analogue burn for stylized transitions.",
+  },
+  {
+    id: "rgb_glitch",
+    label: "RGB Glitch",
+    helper: "A brief channel split for gaming and tech edits.",
+  },
 ];
 
 const buildSignatureCreativeEffects = ({ preset, intensity, duration }) => {
@@ -1892,12 +2428,28 @@ const buildSignatureCreativeEffects = ({ preset, intensity, duration }) => {
 };
 
 const PREVIEW_SPEED_OPTIONS = [0.5, 0.75, 1, 1.15, 1.25, 1.5, 2];
+const DEFAULT_TRACK_STATES = {
+  video: { visible: true, locked: false, muted: false, solo: false },
+  adjustment: { visible: true, locked: false, muted: false, solo: false },
+  graphics: { visible: true, locked: false, muted: false, solo: false },
+  broll: { visible: true, locked: false, muted: false, solo: false },
+  captions: { visible: true, locked: false, muted: false, solo: false },
+  originalAudio: { visible: true, locked: false, muted: false, solo: false },
+  voiceover: { visible: true, locked: false, muted: false, solo: false },
+  music: { visible: true, locked: false, muted: false, solo: false },
+  sfx: { visible: true, locked: false, muted: false, solo: false },
+};
 const STORY_BEAT_LABELS = ["Hook", "Problem", "Proof", "Payoff"];
 const OVERLAY_PIP_SLOTS = [
-  { x: 76, y: 24 },
-  { x: 24, y: 76 },
-  { x: 24, y: 24 },
-  { x: 76, y: 76 },
+  // Prefer the open mid-left editorial lane: top corners are commonly occupied
+  // by faces in vertical podcast crops, while the lower lane is reserved for
+  // captions and the moving brand mark.
+  { x: 18, y: 56 },
+  { x: 82, y: 30 },
+  { x: 16, y: 84 },
+  { x: 16, y: 28 },
+  { x: 84, y: 28 },
+  { x: 84, y: 84 },
   { x: 50, y: 50 },
 ];
 
@@ -1971,17 +2523,46 @@ const ViralClipStudio = ({
   const [overlays, setOverlays] = useState([]);
   const [activeOverlayId, setActiveOverlayId] = useState(null);
   const [videoTime, setVideoTime] = useState(0);
-  const [videoFit, setVideoFit] = useState("contain"); // safe: 'contain' (no stretch), optional: 'cover' (may crop)
-  const [safeFaceFraming, setSafeFaceFraming] = useState(true);
+  const [videoFit, setVideoFit] = useState("cover");
+  const [safeFaceFraming, setSafeFaceFraming] = useState(false);
   const [faceAnchorPreset, setFaceAnchorPreset] = useState("center"); // center | face_top | face_mid
 
   // New AI Options for users
-  const [autoCaptions, setAutoCaptions] = useState(false);
+  const [autoCaptions, setAutoCaptions] = useState(() => {
+    const firstClip = (clips || [])[0];
+    if (firstClip?.autoCaptions !== undefined) return Boolean(firstClip.autoCaptions);
+    return false;
+  });
   const [captionStyle, setCaptionStyle] = useState("bold_pop");
-  const [smartCrop, setSmartCrop] = useState(false);
+  const [smartCrop, setSmartCrop] = useState(true);
   const [smartCropMode, setSmartCropMode] = useState("speaker_track");
   const [reframeAspect, setReframeAspect] = useState("9:16");
+  const [speakerTrackZoom, setSpeakerTrackZoom] = useState(1);
+  const [faceTrackingStatus, setFaceTrackingStatus] = useState("idle");
+  const [faceTrackingMessage, setFaceTrackingMessage] = useState("");
+  const faceTrackingGeneration = useRef(0);
   const [reframeKeyframes, setReframeKeyframes] = useState([]);
+  const [speakerStackFraming, setSpeakerStackFraming] = useState(
+    DEFAULT_SPEAKER_STACK_FRAMING
+  );
+  const [speakerStackSourceIds, setSpeakerStackSourceIds] = useState({
+    top: null,
+    bottom: null,
+    third: null,
+    fourth: null,
+  });
+  const [speakerStackOffsets, setSpeakerStackOffsets] = useState({
+    top: 0,
+    bottom: 0,
+    third: 0,
+    fourth: 0,
+  });
+  const [speakerStackSources, setSpeakerStackSources] = useState([]);
+  const [speakerStackCameraCount, setSpeakerStackCameraCount] = useState(2);
+  const [speakerStackLayout, setSpeakerStackLayout] = useState("stack_2");
+  const [speakerStackSyncConfirmed, setSpeakerStackSyncConfirmed] = useState(false);
+  const [speakerFocusCuts, setSpeakerFocusCuts] = useState([]);
+  const [reframeModeCuts, setReframeModeCuts] = useState([]);
   const [activeReframeKeyframeId, setActiveReframeKeyframeId] = useState(null);
   const [enhanceQuality, setEnhanceQuality] = useState(false);
   const [silenceRemoval, setSilenceRemoval] = useState(false);
@@ -1996,13 +2577,12 @@ const ViralClipStudio = ({
   const [watermarkCleanupPreviewError, setWatermarkCleanupPreviewError] = useState("");
   const [showWatermarkCleanupOnVideo, setShowWatermarkCleanupOnVideo] = useState(true);
   const [brandWatermark, setBrandWatermark] = useState(true);
-  const [brandWatermarkText, setBrandWatermarkText] = useState(
-    "AutoPromote · Viral Clip Studio"
-  );
+  const [brandWatermarkVariant, setBrandWatermarkVariant] = useState("studio");
+  const [brandWatermarkText, setBrandWatermarkText] = useState("AutoPromote · Viral Clip Studio");
   const [mainFrame, setMainFrame] = useState({
     enabled: true,
-    insetPercent: 5,
-    radiusPercent: 10,
+    insetPercent: 0,
+    radiusPercent: 6,
     background: "studio_black",
   });
   // Hooks are an independent edit. Selecting a Signature transformation must
@@ -2044,6 +2624,11 @@ const ViralClipStudio = ({
   const [musicDucking, setMusicDucking] = useState(true);
   const [musicDuckingStrength, setMusicDuckingStrength] = useState(0.35);
   const [silencePreview, setSilencePreview] = useState(null);
+  const [isRippleCuttingSilence, setIsRippleCuttingSilence] = useState(false);
+  const [punchScale, setPunchScale] = useState(1.25);
+  const [punchStyle, setPunchStyle] = useState("punch");
+  const [punchMode, setPunchMode] = useState("cadence");
+  const [punchDuration, setPunchDuration] = useState(2.5);
   const [musicPreviewUrl, setMusicPreviewUrl] = useState("");
   const [musicPreviewStatus, setMusicPreviewStatus] = useState("idle");
   const [musicPreviewStatusMessage, setMusicPreviewStatusMessage] = useState("");
@@ -2058,6 +2643,94 @@ const ViralClipStudio = ({
   const [comparisonMode, setComparisonMode] = useState("split");
   const [activeCreativeTool, setActiveCreativeTool] = useState("moments");
   const [workspaceMode, setWorkspaceMode] = useState("creator");
+  const [projectId, setProjectId] = useState(() => createSecureId("viral-project"));
+  const [projectName, setProjectName] = useState("Untitled viral edit");
+  const [savedProjects, setSavedProjects] = useState([]);
+  const [projectSaveState, setProjectSaveState] = useState("unsaved");
+  const [projectSavedAt, setProjectSavedAt] = useState(null);
+  const [timelineZoom, setTimelineZoom] = useState(1);
+  const [timelineDockExpanded, setTimelineDockExpanded] = useState(true);
+  const [timelineDockHeight, setTimelineDockHeight] = useState(188);
+  const timelineResizeRef = useRef(null);
+  const [previewDockSide, setPreviewDockSide] = useState("center");
+  const [projectRailExpanded, setProjectRailExpanded] = useState(false);
+  const [timelineEditTool, setTimelineEditTool] = useState("select");
+  const [timelineSnapping, setTimelineSnapping] = useState(true);
+  const [linkedSelection, setLinkedSelection] = useState(true);
+  const [rippleMode, setRippleMode] = useState(false);
+  const [precisionNudge, setPrecisionNudge] = useState(0.1);
+  const [trackStates, setTrackStates] = useState(DEFAULT_TRACK_STATES);
+  const [motionKeyframes, setMotionKeyframes] = useState([]);
+  const [motionScenes, setMotionScenes] = useState([]);
+  const [selectedMotionId, setSelectedMotionId] = useState(null);
+  const [motionWorkspace, setMotionWorkspace] = useState("design");
+  const [motionTargetId, setMotionTargetId] = useState("main-video");
+  const [showMotionPath, setShowMotionPath] = useState(true);
+  const [compositeTargetId, setCompositeTargetId] = useState("main-video");
+  const [mainTransform, setMainTransform] = useState({
+    id: "main-video",
+    name: "Main video",
+    type: "video",
+    x: 50,
+    y: 50,
+    scale: 1,
+    rotation: 0,
+    opacity: 1,
+    cropX: 0,
+    cropY: 0,
+  });
+  const [audioKeyframes, setAudioKeyframes] = useState({
+    originalAudio: [],
+    masterPodcast: [],
+    voiceover: [],
+    music: [],
+    broll: [],
+    sfx: [],
+  });
+  const [speedKeyframes, setSpeedKeyframes] = useState([]);
+  const [voiceovers, setVoiceovers] = useState([]);
+  const [adjustmentLayers, setAdjustmentLayers] = useState([]);
+  const [compoundClips, setCompoundClips] = useState([]);
+  const [audioAutomationSource, setAudioAutomationSource] = useState("originalAudio");
+  const [audioRestoration, setAudioRestoration] = useState({
+    enabled: true,
+    preset: "natural",
+    voiceIsolation: false,
+    denoise: 22,
+    deEsser: 18,
+    humFrequency: 50,
+    compressor: 35,
+    limiter: -1,
+    loudness: -14,
+    eq: { low: 0, mid: 0, high: 0 },
+  });
+  const [isVoiceoverRecording, setIsVoiceoverRecording] = useState(false);
+  const [mediaBinSearch, setMediaBinSearch] = useState("");
+  const [proxySettings, setProxySettings] = useState({
+    enabled: true,
+    resolution: "720p",
+    codec: "h264",
+    status: "source_ready",
+  });
+  const [stabilization, setStabilization] = useState({
+    enabled: false,
+    strength: 35,
+    crop: "adaptive",
+    rollingShutter: false,
+  });
+  const [advancedColor, setAdvancedColor] = useState({
+    lutName: "",
+    lutFile: null,
+    lutIntensity: 100,
+    curve: { shadows: 0, midtones: 0, highlights: 0 },
+    hsl: { hue: 0, saturation: 0, luminance: 0 },
+  });
+  const [creatorPreview, setCreatorPreview] = useState(DEFAULT_CREATOR_PREVIEW);
+  const [editTemplates, setEditTemplates] = useState([]);
+  const [showSafeZones, setShowSafeZones] = useState(false);
+  const [showCompositionGrid, setShowCompositionGrid] = useState(false);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [commandSearch, setCommandSearch] = useState("");
   const {
     fx: finishFx,
     applyPreset: applyFinishPreset,
@@ -2093,12 +2766,15 @@ const ViralClipStudio = ({
   const [cutRangeStart, setCutRangeStart] = useState(null);
   const [cutRangeEnd, setCutRangeEnd] = useState(null);
   const [joinTransition, setJoinTransition] = useState("auto");
+  const [joinTransitionDuration, setJoinTransitionDuration] = useState(0.18);
   const [pacingLevel, setPacingLevel] = useState("balanced");
   const [previewSpeed, setPreviewSpeed] = useState(1);
-  const [captionPosition, setCaptionPosition] = useState("lower");
+  const [captionPosition, setCaptionPosition] = useState("bottom_center");
   const [captionScale, setCaptionScale] = useState(1);
   const [captionTextOverride, setCaptionTextOverride] = useState("");
-  const [captionSegments, setCaptionSegments] = useState([]);
+  const [captionSegments, setCaptionSegments] = useState(() =>
+    resolveInitialCaptionSegments((clips || [])[0], (clips || [])[0]?.duration)
+  );
   const [translateCaptionsToEnglish, setTranslateCaptionsToEnglish] = useState(false);
   const [captionGenerationStatus, setCaptionGenerationStatus] = useState("idle");
   const [captionGenerationMessage, setCaptionGenerationMessage] = useState("");
@@ -2106,9 +2782,30 @@ const ViralClipStudio = ({
     "Split preview is live. Edit on the right and compare the untouched source beside it."
   );
 
-  // ── Music Track State ──
-  const [musicTrack, setMusicTrack] = useState(null); // { url, file, name, trimStart, trimEnd, fadeIn, fadeOut, loop, volume, ducking, duckingStrength, duckingMode }
+  const [musicTrack, setMusicTrack] = useState(null);
   const [soundEffects, setSoundEffects] = useState([]);
+  const [audioRemix, setAudioRemix] = useState(() => normalizeAudioRemix(DEFAULT_AUDIO_REMIX));
+  const [audioRemixBypass, setAudioRemixBypass] = useState(false);
+  const [audioRemixMeter, setAudioRemixMeter] = useState({
+    peakDb: -60,
+    rmsDb: -60,
+    clipping: false,
+  });
+  const [audioRemixLoop, setAudioRemixLoop] = useState(null);
+  const [exactAudioRemixPreview, setExactAudioRemixPreview] = useState({
+    status: "idle",
+    url: "",
+    error: "",
+    receipt: null,
+  });
+  const exactAudioRemixPreviewRef = useRef(null);
+
+  const linkedMotionCues = React.useMemo(() => motionCues(motionScenes), [motionScenes]);
+  const allSoundEffects = React.useMemo(
+    () => [...soundEffects, ...linkedMotionCues],
+    [soundEffects, linkedMotionCues]
+  );
+
   const [activeSoundEffectId, setActiveSoundEffectId] = useState(null);
   const [previewingSoundEffectId, setPreviewingSoundEffectId] = useState(null);
   const [musicLibraryOpen, setMusicLibraryOpen] = useState(false);
@@ -2159,11 +2856,18 @@ const ViralClipStudio = ({
   const [isExporting, setIsExporting] = useState(false);
   const [exportStatusLabel, setExportStatusLabel] = useState("Render Final Clip");
   const [selectedExportDestination, setSelectedExportDestination] = useState("general");
+  const [splitExportEnabled, setSplitExportEnabled] = useState(false);
+  const [splitExportHooks, setSplitExportHooks] = useState([]);
   const [exportSettings, setExportSettings] = useState({
     resolution: "1080p",
     fps: "30",
     codec: "h264",
     quality: "high",
+    videoBitrate: "auto",
+    targetFileSizeMb: "",
+    audioCodec: "aac",
+    audioBitrate: "192",
+    colorSpace: "rec709",
   });
   const loggedScannerEntryRef = useRef(new Set());
   const renderedOutputUrl = getSafeMediaSource(renderedOutput?.previewUrl || renderedOutput?.url);
@@ -2176,6 +2880,7 @@ const ViralClipStudio = ({
   useEffect(() => {
     if (!renderedOutputUrl) return;
     setComparisonMode("after");
+    setActiveCreativeTool("export");
     setExportStatusLabel("Render Again");
     setStudioActionMessage(
       "Render complete. After is now playing the finished video, not the live edit simulation."
@@ -2192,15 +2897,32 @@ const ViralClipStudio = ({
   const [draggedDetectedClipId, setDraggedDetectedClipId] = useState(null);
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
+  const [directorModeActive, setDirectorModeActive] = useState(false);
+  const [activeDirectorAngle, setActiveDirectorAngle] = useState(0);
+  const [directorSessionCuts, setDirectorSessionCuts] = useState([]);
+  const [directorAngles, setDirectorAngles] = useState([
+    { id: "cam1", label: "Cam 1 (Master)", type: "master", src: null, zoom: 1 },
+    { id: "cam2", label: "Cam 2 (Tight Punch 1.35x)", type: "punch", src: null, zoom: 1.35 },
+    { id: "cam3", label: "Cam 3 (Reaction 1.22x)", type: "punch", src: null, zoom: 1.22 },
+    { id: "cam4", label: "Cam 4 (Wide 1.1x)", type: "punch", src: null, zoom: 1.1 },
+  ]);
 
   const videoRef = useRef(null);
+  const afterCanvasRef = useRef(null);
   const beforeVideoRef = useRef(null);
+  const beforeCanvasRef = useRef(null);
+  const speakerStackTopVideoRef = useRef(null);
+  const speakerStackBottomVideoRef = useRef(null);
+  const speakerStackThirdVideoRef = useRef(null);
+  const speakerStackFourthVideoRef = useRef(null);
+  const speakerStackSourceInputRef = useRef(null);
   const audioRef = useRef(null);
   const smartCropForegroundVideoRef = useRef(null);
   const hookBackdropVideoRef = useRef(null);
   const hookFreezeVideoRef = useRef(null);
   const beatEchoVideoRefsRef = useRef([]);
   const musicPreviewRef = useRef(null);
+  const timelineAudioPoolRef = useRef(new Map());
   const soundEffectAudioRefsRef = useRef(new Map());
   const soundEffectAudioContextRef = useRef(null);
   const soundEffectNodesRef = useRef(new Set());
@@ -2217,6 +2939,7 @@ const ViralClipStudio = ({
   const backgroundSoundPreviewSuppressedRef = useRef(false);
   const overlayMediaRefsRef = useRef(new Map());
   const imageInputRef = useRef(null);
+  const logoMotionInputRef = useRef(null);
   const brollVideoInputRef = useRef(null);
   const quickMusicFileInputRef = useRef(null);
   const audioSourceInputRef = useRef(null);
@@ -2230,6 +2953,7 @@ const ViralClipStudio = ({
   const cutHistoryTransactionRef = useRef(null);
   const previewPlaybackIntentRef = useRef(true);
   const phoneFrameRef = useRef(null);
+  const studioSidebarRef = useRef(null);
   const watermarkDragRef = useRef(null);
   const hookSegmentTrackRef = useRef(null);
   const hookSelectionDragRef = useRef(null);
@@ -2239,6 +2963,19 @@ const ViralClipStudio = ({
   const hookSuggestionCycleRef = useRef(0);
   const pendingClipActionRef = useRef(null);
   const pendingTimelineSeekRef = useRef(null);
+  const projectAutosaveTimerRef = useRef(null);
+  const projectCreatedAtRef = useRef(Date.now());
+  const voiceoverRecorderRef = useRef(null);
+  const voiceoverStreamRef = useRef(null);
+  const voiceoverRequestPendingRef = useRef(false);
+  const voiceoverMountedRef = useRef(true);
+  useEffect(() => {
+    voiceoverMountedRef.current = true;
+    return () => { voiceoverMountedRef.current = false; };
+  }, []);
+  const voiceoverChunksRef = useRef([]);
+  const voiceoverStartTimeRef = useRef(0);
+  const voiceoverStartedAtRef = useRef(0);
 
   useEffect(() => {
     attachFinishVideo(videoRef.current);
@@ -2442,10 +3179,21 @@ const ViralClipStudio = ({
     cutRangeStart,
     cutRangeEnd,
     joinTransition,
+    joinTransitionDuration,
     smartCrop,
     smartCropMode,
     reframeAspect,
+    speakerTrackZoom,
     reframeKeyframes,
+    speakerStackFraming,
+    speakerStackSourceIds,
+    speakerStackOffsets,
+    speakerStackSources,
+    speakerStackCameraCount,
+    speakerStackLayout,
+    speakerStackSyncConfirmed,
+    speakerFocusCuts,
+    reframeModeCuts,
     activeReframeKeyframeId,
     enhanceQuality,
     silenceRemoval,
@@ -2454,6 +3202,7 @@ const ViralClipStudio = ({
     removeWatermark,
     watermarkMode,
     brandWatermark,
+    brandWatermarkVariant,
     brandWatermarkText,
     mainFrame,
     exportSettings,
@@ -2482,12 +3231,272 @@ const ViralClipStudio = ({
     musicDuckingStrength,
     musicTrack,
     soundEffects,
+    audioRemix,
     activeSoundEffectId,
     extractedAudio,
     bRollCadence,
     timeline,
     activeTimelineIndex,
+    timelineZoom,
+    timelineEditTool,
+    timelineSnapping,
+    linkedSelection,
+    rippleMode,
+    trackStates,
+    motionKeyframes,
+    motionScenes,
+    motionTargetId,
+    compositeTargetId,
+    mainTransform,
+    audioKeyframes,
+    speedKeyframes,
+    voiceovers,
+    adjustmentLayers,
+    compoundClips,
+    audioAutomationSource,
+    audioRestoration,
+    proxySettings,
+    stabilization,
+    advancedColor,
+    creatorPreview,
+    splitExportEnabled,
+    splitExportHooks,
   });
+
+  const refreshSavedProjects = async () => {
+    try {
+      const nextProjects = await listViralStudioProjects();
+      if (nextProjects.length === 0 && savedProjects.length === 0) return;
+      setSavedProjects(nextProjects);
+    } catch (error) {
+      console.warn("Could not read local Viral Clip Studio projects", error);
+    }
+  };
+
+  const persistProjectSnapshot = async ({
+    duplicate = false,
+    snapshot = null,
+    checkpoint = false,
+  } = {}) => {
+    // A delayed autosave captured before a rename must not overwrite this
+    // explicit checkpoint after it reports "Saved locally".
+    if (projectAutosaveTimerRef.current) {
+      window.clearTimeout(projectAutosaveTimerRef.current);
+      projectAutosaveTimerRef.current = null;
+    }
+    const nextId = duplicate ? createSecureId("viral-project") : projectId;
+    const nextName = normalizePlainText(projectName) || "Untitled viral edit";
+    const existingProject = savedProjects.find(project => project.id === projectId);
+    const versions = duplicate
+      ? []
+      : [
+          ...(existingProject?.versions || []),
+          ...(checkpoint && existingProject?.snapshot
+            ? [
+                {
+                  id: createSecureId("project-version"),
+                  name: `Version ${(existingProject.versions || []).length + 1}`,
+                  createdAt: Number(existingProject.updatedAt || Date.now()),
+                  snapshot: existingProject.snapshot,
+                },
+              ]
+            : []),
+        ].slice(-12);
+    setProjectSaveState("saving");
+    try {
+      const saved = await saveViralStudioProject({
+        id: nextId,
+        name: duplicate ? `${nextName} copy` : nextName,
+        createdAt: duplicate ? Date.now() : projectCreatedAtRef.current,
+        snapshot: cloneSnapshot(snapshot || getEditorSnapshot()),
+        versions,
+      });
+      if (duplicate) {
+        setProjectId(saved.id);
+        setProjectName(saved.name);
+        projectCreatedAtRef.current = saved.createdAt;
+      }
+      setProjectSaveState("saved");
+      setProjectSavedAt(saved.updatedAt);
+      await refreshSavedProjects();
+      setStudioActionMessage(
+        duplicate
+          ? "Project duplicated with its complete editable timeline."
+          : checkpoint
+            ? "Project checkpoint saved. Earlier versions remain restorable."
+            : "Project saved locally with media, captions, layers and render settings."
+      );
+      return saved;
+    } catch (error) {
+      console.error("Could not save Viral Clip Studio project", error);
+      setProjectSaveState("error");
+      setStudioActionMessage(error.message || "Project could not be saved locally.");
+      return null;
+    }
+  };
+
+  const scheduleProjectAutosave = snapshot => {
+    // IndexedDB is the durable project store. Browsers that block it (and
+    // lightweight test DOMs that do not provide it) should keep editing
+    // normally instead of scheduling a save that can never succeed.
+    if (typeof indexedDB === "undefined") return;
+    setProjectSaveState("unsaved");
+    if (projectAutosaveTimerRef.current) {
+      window.clearTimeout(projectAutosaveTimerRef.current);
+    }
+    projectAutosaveTimerRef.current = window.setTimeout(() => {
+      projectAutosaveTimerRef.current = null;
+      void persistProjectSnapshot({ snapshot });
+    }, 3500);
+  };
+
+  const rehydrateStoredProjectSnapshot = snapshot => {
+    const restoreItem = item => {
+      if (!item || typeof item !== "object") return item;
+      const file = item.file;
+      if (!(typeof Blob !== "undefined" && file instanceof Blob)) return item;
+      const mediaUrl = URL.createObjectURL(file);
+      return {
+        ...item,
+        ...(Object.prototype.hasOwnProperty.call(item, "src") ? { src: mediaUrl } : {}),
+        ...(Object.prototype.hasOwnProperty.call(item, "url") ? { url: mediaUrl } : {}),
+      };
+    };
+
+    return {
+      ...snapshot,
+      orderedClips: (snapshot?.orderedClips || []).map(restoreItem),
+      timeline: (snapshot?.timeline || []).map(restoreItem),
+      overlays: (snapshot?.overlays || []).map(restoreItem),
+      soundEffects: (snapshot?.soundEffects || []).map(restoreItem),
+      voiceovers: (snapshot?.voiceovers || []).map(restoreItem),
+      musicTrack: restoreItem(snapshot?.musicTrack),
+      extractedAudio: restoreItem(snapshot?.extractedAudio),
+    };
+  };
+
+  const openSavedProject = project => {
+    if (!project?.snapshot) return;
+    const restoredSnapshot = rehydrateStoredProjectSnapshot(project.snapshot);
+    applyEditorSnapshot(restoredSnapshot);
+    setProjectId(project.id);
+    setProjectName(project.name || "Untitled viral edit");
+    projectCreatedAtRef.current = Number(project.createdAt || Date.now());
+    setProjectSavedAt(Number(project.updatedAt || Date.now()));
+    setProjectSaveState("saved");
+    setComparisonMode("after");
+    setStudioActionMessage(
+      `Opened “${project.name || "Untitled viral edit"}” with editable layers.`
+    );
+  };
+
+  const restoreProjectVersion = (project, version) => {
+    if (!version?.snapshot) return;
+    applyEditorSnapshot(rehydrateStoredProjectSnapshot(version.snapshot));
+    setProjectId(project.id);
+    setProjectName(project.name || "Untitled viral edit");
+    projectCreatedAtRef.current = Number(project.createdAt || Date.now());
+    setProjectSaveState("unsaved");
+    setProjectSavedAt(null);
+    setComparisonMode("after");
+    setStudioActionMessage(
+      `Restored ${version.name || "an earlier version"}. Save a new checkpoint to keep it.`
+    );
+  };
+
+  const removeSavedProject = async project => {
+    if (!project?.id) return;
+    if (!window.confirm(`Delete the saved project “${project.name || "Untitled viral edit"}”?`)) {
+      return;
+    }
+    await deleteViralStudioProject(project.id);
+    if (project.id === projectId) {
+      setProjectId(createSecureId("viral-project"));
+      projectCreatedAtRef.current = Date.now();
+      setProjectSaveState("unsaved");
+      setProjectSavedAt(null);
+    }
+    await refreshSavedProjects();
+  };
+
+  const saveEditTemplate = () => {
+    const requestedName = window.prompt("Template name", `${projectName || "Viral edit"} style`);
+    const name = normalizePlainText(requestedName);
+    if (!name) return;
+    const template = {
+      id: createSecureId("edit-template"),
+      name,
+      createdAt: Date.now(),
+      captionStyle,
+      captionPosition,
+      captionScale,
+      creativePreset,
+      creativeIntensity,
+      finishFx: { ...finishFx },
+      mainFrame: { ...mainFrame },
+      audioRestoration: { ...audioRestoration },
+      creatorPreview: { ...creatorPreview },
+      layout: {
+        smartCrop,
+        smartCropMode,
+        speakerStackCameraCount,
+        speakerStackLayout,
+        speakerStackFraming: { ...speakerStackFraming },
+        speakerFocusCuts: normalizeSpeakerFocusCuts(speakerFocusCuts),
+        reframeModeCuts: normalizeReframeModeCuts(reframeModeCuts),
+      },
+      transition: joinTransition,
+      soundEffects: soundEffects.map(({ file: _file, url: _url, ...effect }) => ({ ...effect })),
+      exportSettings: { ...exportSettings },
+      titleLayers: overlays
+        .filter(overlay => overlay.type === "text" && !overlay.isCaption)
+        .map(({ file: _file, src: _src, ...overlay }) => ({ ...overlay })),
+    };
+    const nextTemplates = [...editTemplates, template].slice(-20);
+    setEditTemplates(nextTemplates);
+    window.localStorage.setItem("autopromote-viral-edit-templates", JSON.stringify(nextTemplates));
+    setStudioActionMessage(
+      "Full edit template saved with titles, captions, grade and audio treatment."
+    );
+  };
+
+  const applyEditTemplate = template => {
+    if (!template) return;
+    setCaptionStyle(template.captionStyle || "bold_pop");
+    setCaptionPosition(normalizeCaptionDefaultPlacement(template.captionPosition));
+    setCaptionScale(Number(template.captionScale || 1));
+    setCreativePreset(template.creativePreset || "auto_story");
+    setCreativeIntensity(template.creativeIntensity || "bold");
+    replaceFinishFx(template.finishFx || {});
+    setMainFrame(current => ({ ...current, ...(template.mainFrame || {}) }));
+    setAudioRestoration(current => ({ ...current, ...(template.audioRestoration || {}) }));
+    setCreatorPreview(current => ({ ...current, ...(template.creatorPreview || {}) }));
+    if (template.layout) {
+      setSmartCrop(!!template.layout.smartCrop);
+      setSmartCropMode(template.layout.smartCropMode || "center");
+      setSpeakerStackCameraCount(Number(template.layout.speakerStackCameraCount || 2));
+      setSpeakerStackLayout(template.layout.speakerStackLayout || "stack_2");
+      setSpeakerFocusCuts(normalizeSpeakerFocusCuts(template.layout.speakerFocusCuts));
+      setReframeModeCuts(normalizeReframeModeCuts(template.layout.reframeModeCuts));
+      setSpeakerStackFraming(current => ({
+        ...current,
+        ...(template.layout.speakerStackFraming || {}),
+      }));
+    }
+    setJoinTransition(template.transition || "auto");
+    setExportSettings(current => ({ ...current, ...(template.exportSettings || {}) }));
+    if (template.titleLayers?.length) {
+      setOverlays(current => [
+        ...current,
+        ...template.titleLayers.map(layer => ({
+          ...layer,
+          id: createSecureId("template-title"),
+        })),
+      ]);
+    }
+    setComparisonMode("after");
+    setStudioActionMessage(`Applied “${template.name}” as a fully editable style.`);
+  };
 
   const getHistoryRelevantSnapshot = snapshot => {
     const {
@@ -2523,12 +3532,12 @@ const ViralClipStudio = ({
         ? snapshot.activeOverlayId
         : normalizedOverlays[normalizedOverlays.length - 1]?.id || null
     );
-    setVideoFit(snapshot.videoFit || "contain");
-    setSafeFaceFraming(snapshot.safeFaceFraming !== undefined ? !!snapshot.safeFaceFraming : true);
+    setVideoFit(snapshot.videoFit || "cover");
+    setSafeFaceFraming(snapshot.safeFaceFraming !== undefined ? !!snapshot.safeFaceFraming : false);
     setFaceAnchorPreset(snapshot.faceAnchorPreset || "center");
     setAutoCaptions(!!snapshot.autoCaptions);
     setCaptionStyle(snapshot.captionStyle || "bold_pop");
-    setCaptionPosition(snapshot.captionPosition || "lower");
+    setCaptionPosition(normalizeCaptionDefaultPlacement(snapshot.captionPosition));
     setCaptionScale(Number(snapshot.captionScale ?? 1));
     setCaptionTextOverride(snapshot.captionTextOverride || "");
     setCaptionSegments(normalizeCaptionSegments(snapshot.captionSegments));
@@ -2562,10 +3571,53 @@ const ViralClipStudio = ({
         : null
     );
     setJoinTransition(snapshot.joinTransition || "auto");
-    setSmartCrop(!!snapshot.smartCrop);
+    setJoinTransitionDuration(Number(snapshot.joinTransitionDuration ?? 0.18));
+    setSmartCrop(snapshot.smartCrop !== undefined ? !!snapshot.smartCrop : true);
     setSmartCropMode(snapshot.smartCropMode || "speaker_track");
     setReframeAspect(snapshot.reframeAspect || "9:16");
+    setSpeakerTrackZoom(clampNumber(snapshot.speakerTrackZoom, 1, 3, 1));
     setReframeKeyframes(Array.isArray(snapshot.reframeKeyframes) ? snapshot.reframeKeyframes : []);
+    setSpeakerStackFraming({
+      ...DEFAULT_SPEAKER_STACK_FRAMING,
+      ...(snapshot.speakerStackFraming || {}),
+      top: {
+        ...DEFAULT_SPEAKER_STACK_FRAMING.top,
+        ...(snapshot.speakerStackFraming?.top || {}),
+      },
+      bottom: {
+        ...DEFAULT_SPEAKER_STACK_FRAMING.bottom,
+        ...(snapshot.speakerStackFraming?.bottom || {}),
+      },
+      third: {
+        ...DEFAULT_SPEAKER_STACK_FRAMING.third,
+        ...(snapshot.speakerStackFraming?.third || {}),
+      },
+      fourth: {
+        ...DEFAULT_SPEAKER_STACK_FRAMING.fourth,
+        ...(snapshot.speakerStackFraming?.fourth || {}),
+      },
+    });
+    setSpeakerStackSourceIds({
+      top: snapshot.speakerStackSourceIds?.top ?? null,
+      bottom: snapshot.speakerStackSourceIds?.bottom ?? null,
+      third: snapshot.speakerStackSourceIds?.third ?? null,
+      fourth: snapshot.speakerStackSourceIds?.fourth ?? null,
+    });
+    setSpeakerStackOffsets({
+      top: Number(snapshot.speakerStackOffsets?.top || 0),
+      bottom: Number(snapshot.speakerStackOffsets?.bottom || 0),
+      third: Number(snapshot.speakerStackOffsets?.third || 0),
+      fourth: Number(snapshot.speakerStackOffsets?.fourth || 0),
+    });
+    setSpeakerStackSources(Array.isArray(snapshot.speakerStackSources) ? snapshot.speakerStackSources : []);
+    const restoredCameraCount = clampNumber(snapshot.speakerStackCameraCount, 2, 4, 2);
+    setSpeakerStackCameraCount(restoredCameraCount);
+    setSpeakerStackLayout(
+      snapshot.speakerStackLayout || getDefaultMulticamLayout(restoredCameraCount)
+    );
+    setSpeakerStackSyncConfirmed(!!snapshot.speakerStackSyncConfirmed);
+    setSpeakerFocusCuts(normalizeSpeakerFocusCuts(snapshot.speakerFocusCuts));
+    setReframeModeCuts(normalizeReframeModeCuts(snapshot.reframeModeCuts));
     setActiveReframeKeyframeId(snapshot.activeReframeKeyframeId || null);
     setEnhanceQuality(!!snapshot.enhanceQuality);
     setSilenceRemoval(!!snapshot.silenceRemoval);
@@ -2574,11 +3626,12 @@ const ViralClipStudio = ({
     setRemoveWatermark(!!snapshot.removeWatermark);
     setWatermarkMode(snapshot.watermarkMode || "adaptive");
     setBrandWatermark(snapshot.brandWatermark !== false);
+    setBrandWatermarkVariant(snapshot.brandWatermarkVariant || "studio");
     setBrandWatermarkText(snapshot.brandWatermarkText || "AutoPromote · Viral Clip Studio");
     setMainFrame({
       enabled: true,
-      insetPercent: 5,
-      radiusPercent: 10,
+      insetPercent: 3,
+      radiusPercent: 8,
       background: "studio_black",
       ...(snapshot.mainFrame || {}),
     });
@@ -2587,6 +3640,11 @@ const ViralClipStudio = ({
       fps: "30",
       codec: "h264",
       quality: "high",
+      videoBitrate: "auto",
+      targetFileSizeMb: "",
+      audioCodec: "aac",
+      audioBitrate: "192",
+      colorSpace: "rec709",
       ...(snapshot.exportSettings || {}),
     });
     setManualWatermarkRegions(
@@ -2625,11 +3683,92 @@ const ViralClipStudio = ({
     setMusicDuckingStrength(Number(snapshot.musicDuckingStrength ?? 0.35));
     setMusicTrack(snapshot.musicTrack || null);
     setSoundEffects(Array.isArray(snapshot.soundEffects) ? snapshot.soundEffects : []);
+    setAudioRemix(normalizeAudioRemix(snapshot.audioRemix || DEFAULT_AUDIO_REMIX));
+    setAudioRemixBypass(false);
+    setAudioRemixLoop(null);
     setActiveSoundEffectId(snapshot.activeSoundEffectId || null);
     setExtractedAudio(snapshot.extractedAudio || null);
     setBRollCadence(snapshot.bRollCadence || "balanced");
     setTimeline(snapshot.timeline || []);
     setActiveTimelineIndex(Math.max(0, Number(snapshot.activeTimelineIndex || 0)));
+    setTimelineZoom(Number(snapshot.timelineZoom || 1));
+    setTimelineEditTool(snapshot.timelineEditTool || "select");
+    setTimelineSnapping(snapshot.timelineSnapping !== false);
+    setLinkedSelection(snapshot.linkedSelection !== false);
+    setRippleMode(!!snapshot.rippleMode);
+    setTrackStates({ ...DEFAULT_TRACK_STATES, ...(snapshot.trackStates || {}) });
+    setMotionKeyframes(Array.isArray(snapshot.motionKeyframes) ? snapshot.motionKeyframes : []);
+    setMotionScenes(Array.isArray(snapshot.motionScenes) ? snapshot.motionScenes.map(normalizeMotion) : []);
+    setSelectedMotionId(null);
+    setMotionTargetId(snapshot.motionTargetId || "main-video");
+    setCompositeTargetId(snapshot.compositeTargetId || "main-video");
+    setMainTransform({
+      id: "main-video",
+      name: "Main video",
+      type: "video",
+      x: 50,
+      y: 50,
+      scale: 1,
+      rotation: 0,
+      opacity: 1,
+      cropX: 0,
+      cropY: 0,
+      ...(snapshot.mainTransform || {}),
+    });
+    setAudioKeyframes({
+      originalAudio: [],
+      masterPodcast: [],
+      voiceover: [],
+      music: [],
+      broll: [],
+      sfx: [],
+      ...(snapshot.audioKeyframes || {}),
+    });
+    setSpeedKeyframes(Array.isArray(snapshot.speedKeyframes) ? snapshot.speedKeyframes : []);
+    setVoiceovers(Array.isArray(snapshot.voiceovers) ? snapshot.voiceovers : []);
+    setAdjustmentLayers(Array.isArray(snapshot.adjustmentLayers) ? snapshot.adjustmentLayers : []);
+    setCompoundClips(Array.isArray(snapshot.compoundClips) ? snapshot.compoundClips : []);
+    setAudioAutomationSource(snapshot.audioAutomationSource || "originalAudio");
+    setAudioRestoration({
+      preset: "natural",
+      voiceIsolation: false,
+      denoise: 22,
+      deEsser: 18,
+      humFrequency: 50,
+      compressor: 35,
+      limiter: -1,
+      loudness: -14,
+      eq: { low: 0, mid: 0, high: 0 },
+      ...(snapshot.audioRestoration || {}),
+    });
+    setProxySettings({
+      enabled: true,
+      resolution: "720p",
+      codec: "h264",
+      status: "source_ready",
+      ...(snapshot.proxySettings || {}),
+    });
+    setStabilization({
+      enabled: false,
+      strength: 35,
+      crop: "adaptive",
+      rollingShutter: false,
+      ...(snapshot.stabilization || {}),
+    });
+    setAdvancedColor({
+      lutName: "",
+      lutFile: null,
+      lutIntensity: 100,
+      curve: { shadows: 0, midtones: 0, highlights: 0 },
+      hsl: { hue: 0, saturation: 0, luminance: 0 },
+      ...(snapshot.advancedColor || {}),
+    });
+    setCreatorPreview({
+      ...DEFAULT_CREATOR_PREVIEW,
+      ...(snapshot.creatorPreview || {}),
+    });
+    setSplitExportEnabled(!!snapshot.splitExportEnabled);
+    setSplitExportHooks(Array.isArray(snapshot.splitExportHooks) ? snapshot.splitExportHooks : []);
   };
 
   useEffect(() => {
@@ -2638,8 +3777,101 @@ const ViralClipStudio = ({
     setMusicSearchMode(!isPresetMusicSelection(currentMusic));
   }, [currentMusic]);
 
+  useEffect(() => {
+    void refreshSavedProjects();
+    try {
+      const storedTemplates = JSON.parse(
+        window.localStorage.getItem("autopromote-viral-edit-templates") || "[]"
+      );
+      setEditTemplates(Array.isArray(storedTemplates) ? storedTemplates : []);
+    } catch (error) {
+      console.warn("Could not read Viral Clip Studio templates", error);
+    }
+    return () => {
+      if (projectAutosaveTimerRef.current) {
+        window.clearTimeout(projectAutosaveTimerRef.current);
+        projectAutosaveTimerRef.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    // The Studio is a full-screen editor. Lock the dashboard document behind it
+    // so deep inspector controls cannot scroll the entire fixed workspace and
+    // visually push the header off-screen.
+    const root = document.documentElement;
+    const body = document.body;
+    const previousRootOverflow = root.style.overflow;
+    const previousBodyOverflow = body.style.overflow;
+    const previousRootScroll = root.scrollTop;
+    const previousBodyScroll = body.scrollTop;
+    root.classList.add("viral-studio-open");
+    body.classList.add("viral-studio-open");
+    root.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+    root.scrollTop = 0;
+    body.scrollTop = 0;
+    return () => {
+      root.classList.remove("viral-studio-open");
+      body.classList.remove("viral-studio-open");
+      root.style.overflow = previousRootOverflow;
+      body.style.overflow = previousBodyOverflow;
+      root.scrollTop = previousRootScroll;
+      body.scrollTop = previousBodyScroll;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (projectName !== "Untitled viral edit") return;
+    const suggestedName = normalizePlainText(
+      selectedClip?.hookText || selectedClip?.reason || timeline[0]?.name || ""
+    );
+    if (suggestedName) setProjectName(suggestedName.slice(0, 64));
+  }, [projectName, selectedClip, timeline]);
+
+  useEffect(() => {
+    const handleCommandShortcut = event => {
+      const targetTag = event.target?.tagName;
+      const isTypingTarget =
+        event.target?.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(targetTag);
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setCommandPaletteOpen(current => !current);
+      }
+      if (!isTypingTarget && !event.metaKey && !event.ctrlKey && event.key.toLowerCase() === "m") {
+        event.preventDefault();
+        setPreviewMuted(current => !current);
+      }
+      if (!isTypingTarget && !event.metaKey && !event.ctrlKey && event.key.toLowerCase() === "z") {
+        event.preventDefault();
+        togglePunchInAtPlayhead();
+      }
+      if (!isTypingTarget && !event.metaKey && !event.ctrlKey && event.key.toLowerCase() === "j") {
+        event.preventDefault();
+        toggleJCutAtPlayhead();
+      }
+      if (!isTypingTarget && !event.metaKey && !event.ctrlKey && event.key.toLowerCase() === "l") {
+        event.preventDefault();
+        toggleLCutAtPlayhead();
+      }
+      if (!isTypingTarget && !event.metaKey && !event.ctrlKey && event.key.toLowerCase() === "b") {
+        event.preventDefault();
+        setBeatSnapEnabled(current => !current);
+      }
+      if (event.key === "Escape") setCommandPaletteOpen(false);
+    };
+    window.addEventListener("keydown", handleCommandShortcut);
+    return () => window.removeEventListener("keydown", handleCommandShortcut);
+  }, []);
+
   useEffect(
     () => () => {
+      if (voiceoverRecorderRef.current) {
+        voiceoverRecorderRef.current.onstop = null;
+        voiceoverRecorderRef.current.ondataavailable = null;
+        if (voiceoverRecorderRef.current.state !== "inactive") voiceoverRecorderRef.current.stop();
+      }
+      voiceoverStreamRef.current?.getTracks().forEach(track => track.stop());
       stopMusicPreviewBufferPlayback();
       if (musicPreviewAudioContextRef.current) {
         musicPreviewAudioContextRef.current.close().catch(() => {});
@@ -3145,6 +4377,7 @@ const ViralClipStudio = ({
     hookFreezeVideoRef.current?.pause();
     smartCropForegroundVideoRef.current?.pause();
     musicPreviewRef.current?.pause();
+    exactAudioRemixPreviewRef.current?.pause();
     stopMusicPreviewBufferPlayback();
     stopSoundEffectPlayback();
     overlayMediaRefsRef.current.forEach(media => media.pause());
@@ -3372,6 +4605,295 @@ const ViralClipStudio = ({
     const height = clampOverlayDimension(overlay.height ?? 30);
     return width / height;
   };
+
+  const handleOverlayTimelineMove = (id, newStartTime) => {
+    setOverlays(prev =>
+      prev.map(overlay =>
+        overlay.id === id
+          ? { ...overlay, startTime: Math.max(0, newStartTime) }
+          : overlay
+      )
+    );
+  };
+
+  const handleOverlayTimelineTrim = (id, edge, value) => {
+    setOverlays(prev =>
+      prev.map(overlay => {
+        if (overlay.id !== id) return overlay;
+        if (edge === "start") {
+          const oldStart = Number(overlay.startTime || 0);
+          const oldEnd = oldStart + Number(overlay.duration || 3);
+          const newStart = Math.max(0, Math.min(value, oldEnd - 0.1));
+          return { ...overlay, startTime: newStart, duration: oldEnd - newStart };
+        }
+        if (edge === "end") {
+          const newDuration = Math.max(0.1, value - Number(overlay.startTime || 0));
+          return { ...overlay, duration: newDuration };
+        }
+        return overlay;
+      })
+    );
+  };
+
+  const handleOverlayTimelineSlip = (id, newSourceStart) => {
+    setOverlays(prev =>
+      prev.map(overlay =>
+        overlay.id === id
+          ? { ...overlay, sourceStartTime: Math.max(0, newSourceStart) }
+          : overlay
+      )
+    );
+  };
+
+  const handleMotionTimelineMove = (id, newStart) => {
+    setMotionScenes(prev =>
+      prev.map(scene =>
+        scene.id === id
+          ? { ...scene, startTime: Math.max(0, newStart) }
+          : scene
+      )
+    );
+  };
+
+  const handleMotionTimelineTrim = (id, edge, value) => {
+    setMotionScenes(prev =>
+      prev.map(scene => {
+        if (scene.id !== id) return scene;
+        if (edge === "start") {
+          const oldStart = Number(scene.startTime || 0);
+          const oldEnd = oldStart + Number(scene.duration || 4);
+          const newStart = Math.max(0, Math.min(value, oldEnd - 0.5));
+          return { ...scene, startTime: newStart, duration: Math.max(0.5, oldEnd - newStart) };
+        }
+        if (edge === "end") {
+          const newDuration = Math.max(0.5, value - Number(scene.startTime || 0));
+          return { ...scene, duration: newDuration };
+        }
+        return scene;
+      })
+    );
+  };
+
+  const rippleInsertOverlayIntoSequence = (overlayId) => {
+    const overlay = overlays.find(item => item.id === overlayId);
+    if (!overlay) return;
+
+    const overlayStart = Number(overlay.startTime ?? overlay.start_time ?? 0);
+    const overlayDuration = Number(overlay.duration || 3);
+    const sourceStart = Number(overlay.sourceStartTime || 0);
+
+    const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
+    pendingHistoryBaselineRef.current = cutHistoryBaseline;
+    cutHistoryTransactionRef.current = {
+      baseline: cutHistoryBaseline,
+      appliedSignature: null,
+      appliedTimelineSignature: null,
+    };
+
+    let accumulatedTime = 0;
+    let targetIndex = -1;
+    let localOffsetInClip = 0;
+
+    for (let i = 0; i < timeline.length; i++) {
+      const clip = timeline[i];
+      const win = getTimelineClipWindow(clip);
+      const clipDuration = Number(win.duration || 0);
+      if (overlayStart >= accumulatedTime && overlayStart < accumulatedTime + clipDuration) {
+        targetIndex = i;
+        localOffsetInClip = overlayStart - accumulatedTime;
+        break;
+      }
+      accumulatedTime += clipDuration;
+    }
+
+    if (targetIndex === -1) {
+      targetIndex = Math.max(0, timeline.length - 1);
+      const lastClip = timeline[targetIndex];
+      const win = getTimelineClipWindow(lastClip);
+      localOffsetInClip = Number(win?.duration || 0);
+    }
+
+    const targetClip = timeline[targetIndex];
+    const targetWin = getTimelineClipWindow(targetClip);
+    const targetClipStart = Number(targetWin?.start || 0);
+    const targetClipDuration = Number(targetWin?.duration || 0);
+
+    const newBrollSegment = {
+      id: createSecureId("broll-angle"),
+      name: overlay.bRollTitle || overlay.text || "Angle Cut",
+      url: overlay.src,
+      sourceClipId: overlay.id,
+      duration: overlayDuration,
+      startRequest: sourceStart,
+      endRequest: sourceStart + overlayDuration,
+      isLocal: overlay.isLocal || false,
+      file: overlay.file || null,
+      audioTrimOffsetStart: 0,
+      audioTrimOffsetEnd: 0,
+    };
+
+    let nextTimeline;
+    let nextActiveIndex;
+
+    if (localOffsetInClip <= 0.1) {
+      nextTimeline = [
+        ...timeline.slice(0, targetIndex),
+        newBrollSegment,
+        ...timeline.slice(targetIndex),
+      ];
+      nextActiveIndex = targetIndex;
+    } else if (localOffsetInClip >= targetClipDuration - 0.1) {
+      nextTimeline = [
+        ...timeline.slice(0, targetIndex + 1),
+        newBrollSegment,
+        ...timeline.slice(targetIndex + 1),
+      ];
+      nextActiveIndex = targetIndex + 1;
+    } else {
+      const clipLeft = {
+        ...targetClip,
+        id: createSecureId("split-left"),
+        startRequest: targetClipStart,
+        endRequest: targetClipStart + localOffsetInClip,
+      };
+      const clipRight = {
+        ...targetClip,
+        id: createSecureId("split-right"),
+        startRequest: targetClipStart + localOffsetInClip,
+        endRequest: targetClipStart + targetClipDuration,
+      };
+      nextTimeline = [
+        ...timeline.slice(0, targetIndex),
+        clipLeft,
+        newBrollSegment,
+        clipRight,
+        ...timeline.slice(targetIndex + 1),
+      ];
+      nextActiveIndex = targetIndex + 1;
+    }
+
+    setOverlays(prev => prev.filter(o => o.id !== overlayId));
+    setActiveOverlayId(null);
+    setTimeline(nextTimeline);
+    setActiveTimelineIndex(nextActiveIndex);
+    setStudioActionMessage("B-roll ripple-inserted into story sequence! Main video paused at cut and resumes after.");
+  };
+
+  const switchDirectorAngle = (targetAngleIndex) => {
+    if (targetAngleIndex === activeDirectorAngle) return;
+
+    const currentTime = Number(previewTimelineTime || 0);
+    const prevAngle = activeDirectorAngle;
+    setActiveDirectorAngle(targetAngleIndex);
+
+    const video = videoRef.current;
+    const isPlaying = video && !video.paused;
+
+    if (isPlaying) {
+      setDirectorSessionCuts(prev => [
+        ...prev,
+        {
+          id: createSecureId("dcut"),
+          time: currentTime,
+          fromAngle: prevAngle,
+          toAngle: targetAngleIndex,
+          label: directorAngles[targetAngleIndex]?.label || `Cam ${targetAngleIndex + 1}`,
+        },
+      ]);
+      setStudioActionMessage(
+        `🎬 LIVE CUT: ${directorAngles[targetAngleIndex]?.label || `Cam ${targetAngleIndex + 1}`} @ ${formatPreviewTimePrecise(currentTime)}`
+      );
+    } else {
+      setStudioActionMessage(
+        `Switched monitor to ${directorAngles[targetAngleIndex]?.label || `Cam ${targetAngleIndex + 1}`}`
+      );
+    }
+  };
+
+  const commitDirectorCutsToTimeline = () => {
+    if (!directorSessionCuts.length) {
+      setStudioActionMessage("No live cuts recorded yet. Hit Play and tap 1-4 to switch angles live.");
+      return;
+    }
+
+    const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
+    pendingHistoryBaselineRef.current = cutHistoryBaseline;
+    cutHistoryTransactionRef.current = {
+      baseline: cutHistoryBaseline,
+      appliedSignature: null,
+      appliedTimelineSignature: null,
+    };
+
+    const cuts = [...directorSessionCuts].sort((a, b) => a.time - b.time);
+    const timelineDuration = Math.max(1, getTimelineDuration());
+    const newOverlays = [];
+    const newFramingCuts = [];
+
+    for (let i = 0; i < cuts.length; i++) {
+      const cut = cuts[i];
+      const nextTime = i + 1 < cuts.length ? cuts[i + 1].time : timelineDuration;
+      const duration = Math.max(0.2, nextTime - cut.time);
+
+      if (cut.toAngle !== 0) {
+        const angle = directorAngles[cut.toAngle];
+        if (angle?.type === "video" && angle.src) {
+          newOverlays.push({
+            id: createSecureId("broll-angle"),
+            type: "video",
+            name: angle.label,
+            src: angle.src,
+            startTime: cut.time,
+            duration,
+            sourceStartTime: cut.time,
+            bRollMode: "fullscreen",
+            opacity: 1,
+            useOverlayAudio: false,
+            muteMainAudio: false,
+            animation: { enter: "fade", exit: "fade", enterDuration: 0.15, exitDuration: 0.15 },
+          });
+        } else {
+          newFramingCuts.push({
+            id: createSecureId("reframe-cut"),
+            time: cut.time,
+            mode: cut.toAngle === 1 ? "speaker_track" : "center",
+          });
+        }
+      }
+    }
+
+    if (newOverlays.length) {
+      setOverlays(prev => [...prev, ...newOverlays]);
+    }
+    if (newFramingCuts.length) {
+      setReframeModeCuts(prev => [...prev, ...newFramingCuts]);
+    }
+
+    const totalCuts = newOverlays.length + newFramingCuts.length;
+    setStudioActionMessage(`✓ Successfully baked ${totalCuts} camera cuts into story timeline!`);
+    setDirectorSessionCuts([]);
+  };
+
+  const clearDirectorCuts = () => {
+    setDirectorSessionCuts([]);
+    setActiveDirectorAngle(0);
+    setStudioActionMessage("Live director session cuts cleared.");
+  };
+
+  useEffect(() => {
+    const videoOverlays = overlays.filter(o => o.type === "video" && o.src);
+    setDirectorAngles([
+      { id: "cam1", label: "Cam 1 (Master Angle)", type: "master", src: null, zoom: 1 },
+      videoOverlays[0]
+        ? { id: "cam2", label: videoOverlays[0].name || "Cam 2 (B-Roll Angle)", type: "video", src: videoOverlays[0].src, zoom: 1 }
+        : { id: "cam2", label: "Cam 2 (Tight Punch 1.35x)", type: "punch", src: null, zoom: 1.35 },
+      videoOverlays[1]
+        ? { id: "cam3", label: videoOverlays[1].name || "Cam 3 (B-Roll Angle)", type: "video", src: videoOverlays[1].src, zoom: 1 }
+        : { id: "cam3", label: "Cam 3 (Reaction 1.22x)", type: "punch", src: null, zoom: 1.22 },
+      videoOverlays[2]
+        ? { id: "cam4", label: videoOverlays[2].name || "Cam 4 (B-Roll Angle)", type: "video", src: videoOverlays[2].src, zoom: 1 }
+        : { id: "cam4", label: "Cam 4 (Wide 1.1x)", type: "punch", src: null, zoom: 1.1 },
+    ]);
+  }, [overlays]);
 
   const updateOverlaySize = (id, dimension, delta) => {
     setOverlays(prev =>
@@ -3667,6 +5189,16 @@ const ViralClipStudio = ({
     setTrimPreviewLoop(false);
     setHookPreviewLoop(false);
 
+    const initialForClip = resolveInitialCaptionSegments(clip, clip?.duration);
+    if (initialForClip.length > 0) {
+      setCaptionSegments(initialForClip);
+      if (clip.autoCaptions !== undefined) {
+        setAutoCaptions(Boolean(clip.autoCaptions));
+      } else {
+        setAutoCaptions(true);
+      }
+    }
+
     const boundaryTime =
       options.boundary === "end" ? Number(clip.end || clip.start || 0) : Number(clip.start || 0);
 
@@ -3850,20 +5382,29 @@ const ViralClipStudio = ({
   };
 
   const duplicateOverlay = id => {
-    setOverlays(prev => {
-      const overlay = prev.find(item => item.id === id);
-      if (!overlay) return prev;
-
-      const duplicate = {
-        ...overlay,
-        id: createSecureId("overlay"),
-        x: clampOverlayCoordinate(Number(overlay.x ?? 50) + 4),
-        y: clampOverlayCoordinate(Number(overlay.y ?? 50) + 4),
-      };
-
-      setActiveOverlayId(duplicate.id);
-      return [...prev, duplicate];
-    });
+    const overlay = overlays.find(item => item.id === id);
+    if (!overlay) return;
+    const duplicateId = createSecureId("overlay");
+    const duplicate = {
+      ...overlay,
+      id: duplicateId,
+      name: overlay.name ? `${overlay.name} copy` : overlay.name,
+      x: clampOverlayCoordinate(Number(overlay.x ?? 50) + 4),
+      y: clampOverlayCoordinate(Number(overlay.y ?? 50) + 4),
+    };
+    setOverlays(current => [...current, duplicate]);
+    setMotionKeyframes(current => [
+      ...current,
+      ...current
+        .filter(keyframe => String(keyframe.targetId) === String(id))
+        .map(keyframe => ({
+          ...keyframe,
+          id: createSecureId("motion-key"),
+          targetId: duplicateId,
+        })),
+    ]);
+    setActiveOverlayId(duplicate.id);
+    setMotionTargetId(duplicate.id);
   };
 
   const activeOverlay = overlays.find(overlay => overlay.id === activeOverlayId) || null;
@@ -4194,8 +5735,10 @@ const ViralClipStudio = ({
     return true;
   };
 
-  const addSoundEffectPreset = preset => {
-    const magneticStart = resolveMagneticTimelineTime(previewTimelineTime);
+  const addSoundEffectPreset = (preset, exactBeat = null) => {
+    const magneticStart = exactBeat === null
+      ? resolveMagneticTimelineTime(previewTimelineTime)
+      : { time: exactBeat, snapped: true };
     const startTime = clampNumber(magneticStart.time, 0, outputTimelineDuration, 0);
     const effect = {
       id: createSecureId("sfx"),
@@ -4334,6 +5877,11 @@ const ViralClipStudio = ({
       return speechAnalyserRef.current.analyser;
     }
     if (!videoRef.current) return null;
+    const remixGraph = ensureAudioRemixPreview(videoRef.current);
+    if (remixGraph?.analyser) {
+      speechAnalyserRef.current = { ctx: remixGraph.context, analyser: remixGraph.analyser, source: remixGraph.source };
+      return remixGraph.analyser;
+    }
     try {
       const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
       if (!AudioContextCtor) return null;
@@ -4375,12 +5923,221 @@ const ViralClipStudio = ({
 
   const currentTimelineClip = timeline[activeTimelineIndex] || null;
   const currentTimelineWindow = getTimelineClipWindow(currentTimelineClip);
+  const silenceRegionsForTimeline = useMemo(() => {
+    if (!silencePreview?.silenceSegments?.length || !currentTimelineClip) return [];
+    if (silencePreview.clipId !== currentTimelineClip.id) return [];
+    const sourceWindow = getTimelineClipWindow(currentTimelineClip);
+    const clipStart = Number(sourceWindow.start || 0);
+    const clipOffset = getTimelineOffsetForIndex(activeTimelineIndex);
+    return silencePreview.silenceSegments
+      .map(seg => ({
+        timelineStart: clipOffset + (Number(seg.start) - clipStart),
+        duration: Number(seg.duration ?? (seg.end - seg.start)),
+        start: Number(seg.start),
+        end: Number(seg.end),
+      }))
+      .filter(z => z.duration > 0.05);
+  }, [silencePreview, currentTimelineClip, activeTimelineIndex, timeline]);
+  const activePunchZones = useMemo(
+    () => extractPunchZonesFromKeyframes(motionKeyframes),
+    [motionKeyframes]
+  );
+  const speakerStackSourceOptions = useMemo(() => {
+    const primarySource = getSafeMediaSource(currentTimelineClip?.url || videoUrl);
+    const primaryOption = primarySource
+      ? [
+          {
+            id: "programme-source",
+            clip: currentTimelineClip,
+            source: primarySource,
+            label: currentTimelineClip?.name || "Current programme source",
+            isProgrammeSource: true,
+          },
+        ]
+      : [];
+    return [
+      ...primaryOption,
+      ...speakerStackSources.flatMap((source, index) => {
+        const safeSource = getSafeMediaSource(source?.url);
+        if (!safeSource) return [];
+        return [
+          {
+            id: String(source.id || `clean-angle-${index}`),
+            clip: source,
+            source: safeSource,
+            label: source.name || `Clean speaker angle ${index + 1}`,
+            isProgrammeSource: false,
+          },
+        ];
+      }),
+    ];
+  }, [currentTimelineClip, speakerStackSources, videoUrl]);
+  const activeSpeakerStackSlots = useMemo(
+    () =>
+      MULTICAM_SLOT_KEYS.slice(0, clampNumber(speakerStackCameraCount, 2, 4, 2)),
+    [speakerStackCameraCount]
+  );
+  const resolvedSpeakerStackSourceIds = (() => {
+    const usedIds = new Set();
+    const primarySourceOption = speakerStackSourceOptions[0] || null;
+    return MULTICAM_SLOT_KEYS.reduce((resolved, slot) => {
+      if (!activeSpeakerStackSlots.includes(slot)) {
+        resolved[slot] = null;
+        return resolved;
+      }
+      const requestedId = String(speakerStackSourceIds[slot] || "");
+      const requested = speakerStackSourceOptions.find(
+        option => option.id === requestedId && !usedIds.has(option.id)
+      );
+      const fallback = speakerStackSourceOptions.find(option => !usedIds.has(option.id));
+      const selected = requested || fallback || primarySourceOption || null;
+      resolved[slot] = selected?.id || null;
+      if (selected?.id) usedIds.add(selected.id);
+      return resolved;
+    }, {});
+  })();
+  const resolvedSpeakerStackSources = activeSpeakerStackSlots.map(slot =>
+    speakerStackSourceOptions.find(option => option.id === resolvedSpeakerStackSourceIds[slot])
+  );
+  const speakerStackTopSource = speakerStackSourceOptions.find(
+    option => option.id === resolvedSpeakerStackSourceIds.top
+  );
+  const speakerStackBottomSource = speakerStackSourceOptions.find(
+    option => option.id === resolvedSpeakerStackSourceIds.bottom
+  );
+  const speakerStackThirdSource = speakerStackSourceOptions.find(
+    option => option.id === resolvedSpeakerStackSourceIds.third
+  );
+  const speakerStackFourthSource = speakerStackSourceOptions.find(
+    option => option.id === resolvedSpeakerStackSourceIds.fourth
+  );
+  const hasCleanSpeakerStackSources = Boolean(
+    resolvedSpeakerStackSources.length === activeSpeakerStackSlots.length &&
+      resolvedSpeakerStackSources.every(source => source?.source) &&
+      new Set(resolvedSpeakerStackSources.map(source => source.source)).size ===
+        activeSpeakerStackSlots.length
+  );
+  const speakerStackIsReady = Boolean(
+    hasCleanSpeakerStackSources && speakerStackSyncConfirmed
+  );
+  const multicamExportNeedsSupport =
+    smartCrop &&
+    (smartCropMode === "group_stack" || reframeModeCuts.some(cut => cut.mode === "group_stack")) &&
+    !["stack_2", "split_2", "pip_2", "active_2", "spotlight_2", "hero_3", "grid_4"].includes(speakerStackLayout);
   const currentAudioMode = normalizeAudioMode(extractedAudio?.mode);
   const previewClipTime = Math.max(
     0,
     Number(videoTime || 0) - Number(currentTimelineWindow.start || 0)
   );
   const previewTimelineTime = getPreviewTimelineTime(videoTime);
+  const isPlayheadPunched = useMemo(
+    () => isTimePunched(motionKeyframes, previewTimelineTime),
+    [motionKeyframes, previewTimelineTime]
+  );
+  const hasActiveJCut = useMemo(() => {
+    const activeClip = timeline[activeTimelineIndex];
+    return Number(activeClip?.audioTrimOffsetStart || 0) < -0.04;
+  }, [timeline, activeTimelineIndex]);
+  const hasActiveLCut = useMemo(() => {
+    const activeClip = timeline[activeTimelineIndex];
+    return Number(activeClip?.audioTrimOffsetEnd || 0) > 0.04;
+  }, [timeline, activeTimelineIndex]);
+
+  // J-Cut & L-Cut Live Preview Audio Synchronization
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !timeline.length) return;
+
+    const syncSplitAudioPlayback = () => {
+      if (video.paused) {
+        timelineAudioPoolRef.current.forEach(audio => {
+          if (!audio.paused) audio.pause();
+        });
+        return;
+      }
+
+      const globalTime = getPreviewTimelineTime(video.currentTime || 0);
+      const splitSequence = buildAudioSplitSequence(timeline);
+      const activeProxies = calculateAudioProxyState(globalTime, splitSequence, activeTimelineIndex);
+      const activeProxyIds = new Set(activeProxies.map(p => p.id));
+
+      timelineAudioPoolRef.current.forEach((audio, id) => {
+        if (!activeProxyIds.has(id) && !audio.paused) {
+          audio.pause();
+        }
+      });
+
+      activeProxies.forEach(proxy => {
+        let audio = timelineAudioPoolRef.current.get(proxy.id);
+        if (!audio) {
+          audio = document.createElement("audio");
+          audio.preload = "auto";
+          applySafeMediaSource(audio, proxy.url);
+          timelineAudioPoolRef.current.set(proxy.id, audio);
+        }
+        if (Math.abs(audio.currentTime - proxy.sourceSeekTime) > 0.15) {
+          audio.currentTime = proxy.sourceSeekTime;
+        }
+        audio.volume = proxy.volume;
+        if (audio.paused) {
+          safePlayMediaElement(audio);
+        }
+      });
+    };
+
+    const videoEl = videoRef.current;
+    videoEl.addEventListener("timeupdate", syncSplitAudioPlayback);
+    videoEl.addEventListener("pause", syncSplitAudioPlayback);
+    videoEl.addEventListener("seeking", syncSplitAudioPlayback);
+
+    return () => {
+      videoEl.removeEventListener("timeupdate", syncSplitAudioPlayback);
+      videoEl.removeEventListener("pause", syncSplitAudioPlayback);
+      videoEl.removeEventListener("seeking", syncSplitAudioPlayback);
+      timelineAudioPoolRef.current.forEach(audio => {
+        try {
+          audio.pause();
+        } catch (_) {}
+      });
+    };
+  }, [timeline, activeTimelineIndex]);
+  const effectiveSmartCropMode = resolveReframeModeAtTime(
+    reframeModeCuts,
+    previewTimelineTime,
+    smartCrop ? smartCropMode : "off"
+  );
+  const effectiveSmartCrop = effectiveSmartCropMode !== "off";
+  const activeShowEveryonePrimarySlot = resolveSpeakerFocusSlot(
+    speakerFocusCuts,
+    previewTimelineTime
+  );
+  const motionInspectorTarget =
+    motionTargetId === "main-video"
+      ? mainTransform
+      : overlays.find(overlay => String(overlay.id) === String(motionTargetId)) || null;
+  const compositeInspectorTarget =
+    compositeTargetId === "main-video"
+      ? mainTransform
+      : overlays.find(overlay => String(overlay.id) === String(compositeTargetId)) || null;
+  const mainMotionAutomation = buildMotionAutomationStyle(
+    motionKeyframes.filter(keyframe => keyframe.targetId === "main-video"),
+    previewTimelineTime,
+    mainTransform
+  );
+  const activeMotionTargetKeyframes = motionInspectorTarget
+    ? motionKeyframes.filter(
+        keyframe => String(keyframe.targetId) === String(motionInspectorTarget.id)
+      )
+    : [];
+  const activeMotionPathPoints = buildMotionPathPoints(
+    activeMotionTargetKeyframes,
+    motionInspectorTarget || mainTransform
+  );
+  const activeMotionCurrent = buildMotionAutomationStyle(
+    activeMotionTargetKeyframes,
+    previewTimelineTime,
+    motionInspectorTarget || mainTransform
+  );
   const outputTimelineDuration = Math.max(0.1, getTimelineDuration());
   const activeOverlayTimelineRemaining = Math.max(
     0.1,
@@ -4417,6 +6174,9 @@ const ViralClipStudio = ({
     creativeEffectsEnabled && comparisonMode !== "before" && !renderedOutputUrl;
   const beatEchoPreviewIsLive =
     creativeEffectIsLive && activeLiveCreativeEffect?.preset === "beat_echo";
+  const motionSculpturePreviewIsLive =
+    creativeEffectIsLive && activeLiveCreativeEffect?.preset === "motion_sculpture";
+  const temporalPreviewIsLive = beatEchoPreviewIsLive || motionSculpturePreviewIsLive;
   const creativePreviewClass = creativeEffectIsLive
     ? `creative-preview-${activeLiveCreativeEffect?.preset || "motion_sculpture"} creative-intensity-${creativeIntensity}`
     : "";
@@ -4560,12 +6320,13 @@ const ViralClipStudio = ({
   const hookVideoSaturate = showHookPreview
     ? 1 + hookOutroOpacity * (isZoomFocusTemplate ? 0.24 : 0.14)
     : 1;
-  const hookBackdropOpacity = hookBlurBackground
-    ? Math.max(
-        0,
-        (isBlurRevealTemplate ? 0.96 : 0.82) - hookProgress * (isBlurRevealTemplate ? 0.64 : 0.52)
-      ) * hookOutroOpacity
-    : 0;
+  const hookBackdropOpacity =
+    showHookPreview && hookBlurBackground
+      ? Math.max(
+          0,
+          (isBlurRevealTemplate ? 0.96 : 0.82) - hookProgress * (isBlurRevealTemplate ? 0.64 : 0.52)
+        ) * hookOutroOpacity
+      : 0;
   const hookOverlayOpacity = hookDarkOverlay
     ? ((isZoomFocusTemplate ? 0.28 : 0.18) +
         (1 - hookProgress) * (isZoomFocusTemplate ? 0.3 : 0.24)) *
@@ -4588,9 +6349,7 @@ const ViralClipStudio = ({
     ? (0.22 + (1 - hookProgress) * 0.26) * hookOutroOpacity
     : 0;
   const hookPrimaryVideoOpacity = showHookPreview
-    ? hookFreezeFrame
-      ? 0.02 + freezeReleaseProgress * 0.98
-      : hookBlurBackground
+    ? hookBlurBackground
         ? 0.9
         : 1
     : 1;
@@ -4599,15 +6358,16 @@ const ViralClipStudio = ({
   const hookVisualFocusPoint = showHookPreview ? resolvedHookFocusPoint : DEFAULT_HOOK_FOCUS_POINT;
   const hookTransformOrigin = `${hookVisualFocusPoint.x}% ${hookVisualFocusPoint.y}%`;
   const finishPreviewIsLive = comparisonMode !== "before" && !renderedOutputUrl;
-  const effectiveFinishFx = interpolateFinishKeyframes(
+  const effectiveFinishFx = finishFx.precisionGrade ? finishFx : interpolateFinishKeyframes(
     finishFx,
     finishKeyframes,
     previewTimelineTime
   );
-  const finishFilter = finishPreviewIsLive ? buildCinematicCssFilter(effectiveFinishFx) : "";
-  const finishZoom = finishPreviewIsLive
-    ? Math.max(1, Number(effectiveFinishFx.zoom || 1))
-    : 1;
+  const finishFilter = finishPreviewIsLive && !effectiveFinishFx.precisionGrade ? buildCinematicCssFilter(effectiveFinishFx) : "";
+  const precisionPreviewGrade = useMemo(() => finishPreviewIsLive && finishFx.precisionGrade
+    ? buildPrecisionGrade(finishFx) : null, [finishPreviewIsLive, finishFx]);
+  const advancedColorCube = useMemo(() => buildAdvancedColorCube(advancedColor), [advancedColor]);
+  const finishZoom = finishPreviewIsLive ? Math.max(1, Number(effectiveFinishFx.zoom || 1)) : 1;
   const finishTransformOrigin =
     effectiveFinishFx.zoomAnchor === "left"
       ? "15% 50%"
@@ -4807,11 +6567,18 @@ const ViralClipStudio = ({
     58,
     42
   )}%`;
-  const effectiveVideoFit = safeFaceFraming ? "contain" : smartCrop ? "cover" : videoFit;
-  const activeReframePosition = interpolateReframeKeyframes(
-    reframeKeyframes,
-    previewTimelineTime
-  );
+  const effectiveVideoFit = safeFaceFraming
+    ? "contain"
+    : effectiveSmartCrop
+      ? ["speaker_track", "group_stack"].includes(effectiveSmartCropMode)
+        ? "cover"
+        : "contain"
+      : videoFit;
+  const usesPanelFraming = effectiveSmartCrop && !renderedOutputUrl &&
+    (effectiveSmartCropMode === "group_stack" || (effectiveSmartCropMode === "center" && reframeAspect !== "16:9"));
+  const speakerStackPreviewIsLive =
+    effectiveSmartCrop && effectiveSmartCropMode === "group_stack" && speakerStackIsReady;
+  const activeReframePosition = interpolateReframeKeyframes(reframeKeyframes, previewTimelineTime);
   const activeReframeKeyframe =
     reframeKeyframes.find(keyframe => keyframe.id === activeReframeKeyframeId) || null;
   const reframeAspectClass = `reframe-aspect-${String(reframeAspect).replace(":", "-")}`;
@@ -4823,7 +6590,7 @@ const ViralClipStudio = ({
   )}%`;
   const showCropRiskIndicator =
     !safeFaceFraming &&
-    (effectiveVideoFit === "cover" || smartCrop || hookFreezeFrame || isZoomFocusTemplate);
+    (effectiveVideoFit === "cover" || effectiveSmartCrop || hookFreezeFrame || isZoomFocusTemplate);
   const previewClarityBrightness = 1.025;
   const previewClarityContrast = 1.08;
   const previewClaritySaturate = 1.05;
@@ -4886,6 +6653,7 @@ const ViralClipStudio = ({
       ? getTimedCaptionPreviewState({
           segments: normalizedTimedCaptionSegments,
           sourceTime: videoTime,
+          clipStartTime: currentTimelineWindow.start || selectedClip?.start || 0,
         })
       : getCaptionPreviewState({
           text: captionPreviewSourceText,
@@ -4902,6 +6670,7 @@ const ViralClipStudio = ({
       ? getTimedCaptionPreviewState({
           segments: normalizedTimedCaptionSegments,
           sourceTime: normalizedTimedCaptionSegments[0].start,
+          clipStartTime: currentTimelineWindow.start || selectedClip?.start || 0,
         })
       : resolvedCaptionPreviewState;
   const captionPreviewSegmentIndex = captionPreviewState.currentChunk
@@ -4911,10 +6680,7 @@ const ViralClipStudio = ({
     : -1;
   const captionStoryPreviewTreatment =
     captionPreviewSegmentIndex >= 0
-      ? resolveCaptionStoryPreviewTreatment(
-          captionPreviewState.currentChunk,
-          captionPosition
-        )
+      ? resolveCaptionStoryPreviewTreatment(captionPreviewState.currentChunk, captionPosition)
       : null;
   const liveTimelineDuration = outputTimelineDuration;
   const liveTimelineCutMarkers = timeline.slice(0, -1).flatMap((clip, index) => {
@@ -4946,16 +6712,43 @@ const ViralClipStudio = ({
       ? timeline.flatMap((clip, clipIndex) => {
           const clipWindow = getTimelineClipWindow(clip);
           const clipOffset = getTimelineOffsetForIndex(clipIndex);
+          const clipStart = Number(clipWindow.start || 0);
+          const clipEnd = Number(clipWindow.end || 0);
+          const clipDuration = Math.max(0.1, clipEnd - clipStart);
           return normalizedTimedCaptionSegments.flatMap(segment => {
-            const visibleStart = Math.max(segment.start, Number(clipWindow.start || 0));
-            const visibleEnd = Math.min(segment.end, Number(clipWindow.end || 0));
-            if (visibleEnd <= visibleStart) return [];
+            let outputStart = 0;
+            let outputDuration = 0;
+
+            if (segment.start >= clipStart && segment.start < clipEnd) {
+              // Segment is in absolute source timestamps
+              const visibleStart = Math.max(segment.start, clipStart);
+              const visibleEnd = Math.min(segment.end, clipEnd);
+              if (visibleEnd <= visibleStart) return [];
+              outputStart = clipOffset + (visibleStart - clipStart);
+              outputDuration = visibleEnd - visibleStart;
+            } else if (clipStart > 0 && segment.start < clipStart && segment.start < clipDuration) {
+              // Segment is in clip-relative timestamps
+              const visibleStart = Math.max(0, segment.start);
+              const visibleEnd = Math.min(clipDuration, segment.end);
+              if (visibleEnd <= visibleStart) return [];
+              outputStart = clipOffset + visibleStart;
+              outputDuration = visibleEnd - visibleStart;
+            } else if (clipStart === 0 && segment.start < clipEnd) {
+              const visibleStart = Math.max(0, segment.start);
+              const visibleEnd = Math.min(clipEnd, segment.end);
+              if (visibleEnd <= visibleStart) return [];
+              outputStart = clipOffset + visibleStart;
+              outputDuration = visibleEnd - visibleStart;
+            } else {
+              return [];
+            }
+
             return [
               {
                 ...segment,
                 blockId: `${clip.id}-${segment.id}`,
-                outputStart: clipOffset + visibleStart - Number(clipWindow.start || 0),
-                outputDuration: visibleEnd - visibleStart,
+                outputStart,
+                outputDuration,
               },
             ];
           });
@@ -4966,6 +6759,43 @@ const ViralClipStudio = ({
           outputStart: captionTrackOffset + index * fallbackTimelineCaptionDuration,
           outputDuration: fallbackTimelineCaptionDuration,
         }));
+  const watermarkCaptionWindows = liveTimelineCaptionBlocks.map(block => ({
+    ...block,
+    startTime: Number(block.outputStart || 0),
+    duration: Number(block.outputDuration || 0),
+  }));
+  const brandWatermarkSchedule = useMemo(
+    () =>
+      buildWatermarkMovementSchedule({
+        duration: liveTimelineDuration,
+        captions: watermarkCaptionWindows,
+        captionPosition,
+        overlays,
+        hookEnabled: addHook,
+        hookEndTime: hookDuration,
+        aspect: reframeAspect,
+        destination: selectedExportDestination,
+      }),
+    [
+      addHook,
+      captionPosition,
+      hookDuration,
+      liveTimelineDuration,
+      overlays,
+      reframeAspect,
+      selectedExportDestination,
+      // Caption metadata is intentionally serialized: timestamp or placement
+      // edits must immediately rebuild the exact preview/export path.
+      JSON.stringify(watermarkCaptionWindows),
+    ]
+  );
+  const activeBrandWatermarkCue = getActiveWatermarkCue(
+    brandWatermarkSchedule,
+    previewTimelineTime
+  );
+  const activeBrandVariant =
+    WATERMARK_VARIANTS.find(variant => variant.id === brandWatermarkVariant) ||
+    WATERMARK_VARIANTS[0];
   const liveTimelineSource = getSafeMediaSource(currentTimelineClip?.url || videoUrl);
   const liveTimelinePlayheadLeft =
     (clampNumber(previewTimelineTime, 0, liveTimelineDuration, 0) / liveTimelineDuration) * 100;
@@ -4994,6 +6824,25 @@ const ViralClipStudio = ({
       previewTimelineTime < end
     );
   });
+  const previewProgrammeFit = renderedOutputUrl
+    ? "contain"
+    : activeSideBySideOverlay
+      ? "cover"
+      : effectiveVideoFit;
+  const previewProgrammePosition = renderedOutputUrl
+    ? "center center"
+    : activeSideBySideOverlay
+      ? sideBySideObjectPosition
+      : effectiveSmartCrop
+        ? effectiveSmartCropMode === "speaker_track"
+          ? reframeObjectPosition
+          : effectiveSmartCropMode === "group_stack"
+            ? "center center"
+          : "center center"
+        : safeObjectPosition;
+  const previewProgrammeFilter = renderedOutputUrl
+    ? "none"
+    : `blur(${(hookVideoBlur + smartCropBackgroundBlur).toFixed(2)}px) brightness(${(hookVideoBrightness * smartCropBackgroundBrightness * previewClarityBrightness).toFixed(3)}) contrast(${(hookVideoContrast * previewClarityContrast).toFixed(3)}) saturate(${(hookVideoSaturate * previewClaritySaturate).toFixed(3)})${finishFilter ? ` ${finishFilter}` : ""}`;
   const liveTimelineEditCount =
     Number(addHook) +
     Number(creativeEffectsEnabled) +
@@ -5117,6 +6966,156 @@ const ViralClipStudio = ({
     setSafeFaceFraming(true);
     setStudioActionMessage("Fit full frame is active. The entire source stays visible.");
   };
+
+  const recordReframeModeAtPlayhead = mode => {
+    const time = Number(Math.max(0, previewTimelineTime).toFixed(3));
+    setReframeModeCuts(current => {
+      const normalized = normalizeReframeModeCuts(current);
+      const baseline =
+        !normalized.length && time > 0.08
+          ? [{
+              id: createSecureId("reframe-mode"),
+              time: 0,
+              mode: effectiveSmartCropMode,
+            }]
+          : normalized;
+      const existing = baseline.find(cut => Math.abs(cut.time - time) < 0.08);
+      return normalizeReframeModeCuts([
+        ...baseline.filter(cut => cut.id !== existing?.id),
+        {
+          id: existing?.id || createSecureId("reframe-mode"),
+          time,
+          mode,
+        },
+      ]);
+    });
+  };
+
+  const showEveryoneSplit = () => {
+    setSpeakerStackFraming(current => ({
+      ...current,
+      trackSpeakers: false,
+      top: { ...SOURCE_SPLIT_PROGRAMME_FRAMING.top, keyframes: [] },
+      bottom: { ...SOURCE_SPLIT_PROGRAMME_FRAMING.bottom, keyframes: [] },
+    }));
+    setSmartCrop(true);
+    setSmartCropMode("center");
+    recordReframeModeAtPlayhead("center");
+    setReframeAspect("9:16");
+    setComparisonMode("after");
+    selectCreativeTool("reframe");
+    setStudioActionMessage(`Show Everyone starts at ${previewTimelineTime.toFixed(2)}s and is recorded on the framing track.`);
+  };
+
+  const openSpeakerTracking = () => {
+    setSmartCrop(true);
+    setSmartCropMode("speaker_track");
+    recordReframeModeAtPlayhead("speaker_track");
+    setReframeAspect("9:16");
+    setSafeFaceFraming(false);
+    setVideoFit("cover");
+    setComparisonMode("after");
+    selectCreativeTool("reframe");
+    setStudioActionMessage(`Solo Speaker starts at ${previewTimelineTime.toFixed(2)}s and is recorded on the framing track.`);
+  };
+
+  const updateSplitSpeakerFraming = (slot, changes, addMark = false) => {
+    setSpeakerStackFraming(current => {
+      const frame = current[slot];
+      const tracking = current.trackSpeakers;
+      const position = tracking && frame.keyframes?.length
+        ? interpolateReframeKeyframes(frame.keyframes, previewTimelineTime) : frame;
+      const next = { ...frame, ...changes };
+      if (tracking && (addMark || changes.x !== undefined || changes.y !== undefined)) {
+        const time = Number(previewTimelineTime.toFixed(3));
+        const marks = frame.keyframes?.length ? frame.keyframes : [{ time: 0, x: frame.x, y: frame.y }];
+        next.keyframes = [...marks.filter(mark => Math.abs(mark.time - time) > .05),
+          { time, x: changes.x ?? position.x, y: changes.y ?? position.y }].sort((a, b) => a.time - b.time);
+      }
+      return { ...current, [slot]: next };
+    });
+  };
+
+  const analyzeSpeakerFaces = async (mode = "anchored") => {
+    if (faceTrackingStatus === "processing") return;
+    const generation = ++faceTrackingGeneration.current;
+    const clipId = currentTimelineClip?.id;
+    const split = effectiveSmartCropMode === "center" && reframeAspect !== "16:9";
+    const window = getTimelineClipWindow(currentTimelineClip);
+    if (window.duration > 180) {
+      setFaceTrackingMessage("Trim the analysis range to three minutes or less.");
+      return;
+    }
+    setFaceTrackingStatus("processing");
+    setFaceTrackingMessage("Detecting real faces. Existing framing stays unchanged until results arrive…");
+    try {
+      const source = getSafeMediaSource(currentTimelineClip?.url || videoUrl);
+      const file = currentTimelineClip?.file || selectedClip?.file;
+      let blob = file instanceof Blob ? file : null;
+      if (!blob) {
+        const response = await fetch(source);
+        if (!response.ok) throw new Error("Source video could not be read.");
+        blob = await response.blob();
+      }
+      const [aspectWidth, aspectHeight] = reframeAspect.split(":").map(Number);
+      const coordinates = soloTrackingCoordinates(activeReframePosition,
+        (videoRef.current?.videoWidth || 1920)/(videoRef.current?.videoHeight || 1080),
+        aspectWidth/aspectHeight, speakerTrackZoom);
+      const anchors = split ? { top: speakerStackFraming.top, bottom: speakerStackFraming.bottom }
+        : { solo: coordinates.anchor };
+      const body = new FormData();
+      body.append("file", blob, file?.name || "studio-source.mp4");
+      body.append("anchors", JSON.stringify(anchors));
+      body.append("start", String(window.start));
+      body.append("end", String(window.end));
+      body.append("mode", mode);
+      const token = await getMediaAuthToken();
+      if (!token) throw new Error("Sign in to analyze this source.");
+      const response = await fetch(`${API_BASE_URL}/api/media/track-studio-faces`, {
+        method: "POST", headers: { Authorization: `Bearer ${token}` }, body,
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || result.detail || "Face analysis failed.");
+      if (generation !== faceTrackingGeneration.current) return;
+      const offset = getTimelineOffsetForIndex(activeTimelineIndex);
+      const keys = slot => (result.tracks?.[slot]?.keyframes || []).map(mark => ({ ...(split ? mark : coordinates.toPosition(mark)),
+        id: createSecureId("detected-face"), time: offset + mark.time - window.start,
+      }));
+      const slots = split ? ["top", "bottom"] : ["solo"];
+      if (slots.some(slot => keys(slot).length < 2)) throw new Error("Not enough faces detected in each selected region. Adjust anchors or keep manual framing.");
+      if (slots.some(slot => result.tracks[slot].coverage < .65)) {
+        throw new Error("A face was missing in too many frames. Existing framing is unchanged. Adjust the crop anchors, shorten the analysis range, or edit the follow path manually.");
+      }
+      if (split) {
+        setSpeakerStackFraming(current => ({ ...current, trackSpeakers: true,
+          ...Object.fromEntries(slots.map(slot => [slot, { ...current[slot], keyframes: keys(slot) }])),
+          analysis: { clipId, engine: result.engine, reviewRequired: true, sceneCuts: result.sceneCuts },
+        }));
+      } else {
+        setReframeKeyframes(keys("solo"));
+        setActiveReframeKeyframeId(null);
+        setSafeFaceFraming(false);
+        setVideoFit("cover");
+      }
+      const coverage = slots.map(slot => `${slot}: ${Math.round((result.tracks[slot].coverage || 0)*100)}%`).join(" · ");
+      setFaceTrackingStatus("ready");
+      setFaceTrackingMessage(mode === "source_shots"
+        ? `Source-shot draft applied (${coverage}; ${result.sceneCuts?.length || 0} cuts). Follows the foreground face in each shot, not a person's identity. Review every cut.`
+        : `Face-follow draft applied (${coverage}). Review camera cuts and missed faces. This detects faces, not who is speaking.`);
+    } catch (error) {
+      if (generation !== faceTrackingGeneration.current) return;
+      setFaceTrackingStatus("error");
+      setFaceTrackingMessage(error.message || "Tracking failed; keep the existing framing.");
+    }
+  };
+
+  useEffect(() => {
+    faceTrackingGeneration.current += 1;
+    setFaceTrackingStatus("idle");
+    setFaceTrackingMessage("");
+    return () => { faceTrackingGeneration.current += 1; };
+  }, [currentTimelineClip?.id, currentTimelineClip?.startRequest, currentTimelineClip?.endRequest,
+    selectedClip?.start, selectedClip?.end, effectiveSmartCropMode, reframeAspect, speakerTrackZoom]);
 
   const focusCaptionSegmentsForReview = segments => {
     const normalizedSegments = normalizeCaptionSegments(segments);
@@ -5267,6 +7266,17 @@ const ViralClipStudio = ({
         .map(segment => ({ ...segment, sourceClipId: captionSourceClipId }));
       const transcriptionQuality =
         payload?.transcriptionQuality || payload?.transcription_quality || null;
+      if (transcriptionQuality?.status === "rejected") {
+        setCaptionSegments([]);
+        setCaptionGenerationStatus("error");
+        setCaptionGenerationMessage(
+          "Transcription was not confident enough to create honest captions. You can type or paste lines manually."
+        );
+        setStudioActionMessage(
+          "Automatic captions were rejected due to low audio confidence. Import SRT or paste a script to add captions."
+        );
+        return;
+      }
       const identityReviewSegments = nextSegments.filter(segment => segment.reviewRequired).length;
       const detectedLanguageLabels = Array.from(
         new Set(
@@ -5278,10 +7288,31 @@ const ViralClipStudio = ({
       );
 
       if (!nextSegments.length) {
-        if (transcriptionQuality?.status === "rejected") {
-          throw new Error(
-            "The speech model was not confident enough to create honest captions. Add or correct the lines manually before rendering."
+        if (captionTextOverride?.trim()) {
+          const clipDuration = Math.max(
+            3,
+            Number(currentTimelineWindow?.duration || selectedClip?.duration || currentTimelineClip?.duration || 30)
           );
+          const fallbackClientSegments = generateClientSideCaptionSegments({
+            text: captionTextOverride,
+            duration: clipDuration,
+            sourceClipId: captionSourceClipId,
+          });
+          if (fallbackClientSegments.length) {
+            setCaptionSegments(fallbackClientSegments);
+            setCaptionTextOverride("");
+            setAutoCaptions(true);
+            setComparisonMode("after");
+            setCaptionGenerationStatus("ready");
+            setCaptionGenerationMessage(
+              `${fallbackClientSegments.length} client-side captions ready · Edit lines, timestamps and styles below`
+            );
+            focusCaptionSegmentsForReview(fallbackClientSegments);
+            setStudioActionMessage(
+              "Client-side speech captions are active. Tap any line below to edit the words or timing directly."
+            );
+            return;
+          }
         }
         throw new Error("No clear speech was detected. You can still type captions manually.");
       }
@@ -5315,6 +7346,45 @@ const ViralClipStudio = ({
         "Real speech captions are live. Edit any timestamped line before rendering."
       );
     } catch (error) {
+      const fallbackText =
+        captionTextOverride?.trim() ||
+        selectedClip?.transcript ||
+        selectedClip?.text ||
+        selectedClip?.hookText ||
+        selectedClip?.name ||
+        "";
+      if (fallbackText) {
+        const fallbackDuration = Math.max(
+          3,
+          Number(currentTimelineWindow?.duration || selectedClip?.duration || currentTimelineClip?.duration || 30)
+        );
+        const clientSegments = generateClientSideCaptionSegments({
+          text: fallbackText,
+          duration: fallbackDuration,
+          sourceClipId:
+            currentTimelineClip?.sourceClipId ||
+            currentTimelineClip?.id ||
+            selectedClip?.id ||
+            null,
+        });
+
+        if (clientSegments.length) {
+          setCaptionSegments(clientSegments);
+          setCaptionTextOverride("");
+          setAutoCaptions(true);
+          setComparisonMode("after");
+          setCaptionGenerationStatus("ready");
+          setCaptionGenerationMessage(
+            `${clientSegments.length} client-side captions ready from clip speech · Edit lines, timestamps and styles below`
+          );
+          focusCaptionSegmentsForReview(clientSegments);
+          setStudioActionMessage(
+            "Speech captions are active. Tap any line below to edit words or timing directly."
+          );
+          return;
+        }
+      }
+
       setCaptionGenerationStatus("failed");
       setCaptionGenerationMessage(error.message || "Caption transcription failed.");
       setStudioActionMessage(error.message || "Caption transcription failed.");
@@ -5323,11 +7393,14 @@ const ViralClipStudio = ({
 
   const confirmAfterPreviewFrame = event => {
     const video = event.currentTarget;
+    // Scrubbing must drive every timed overlay just like normal playback.
+    // Keeping this in `seeked` also makes external/native media controls agree
+    // with the editor timeline, captions, B-roll and watermark cues.
+    setVideoTime(video.currentTime);
+    setIsAfterPreviewReady(true);
     if (typeof video.requestVideoFrameCallback === "function") {
       video.requestVideoFrameCallback(() => setIsAfterPreviewReady(true));
-      return;
     }
-    setIsAfterPreviewReady(video.readyState >= 2);
   };
 
   const togglePreviewFullscreen = async () => {
@@ -5340,8 +7413,9 @@ const ViralClipStudio = ({
     // Keep fullscreen inside the app. Native fullscreen is inconsistent in
     // embedded/cloud browsers and can trap its own exit control behind the
     // browser layer. This viewport-filling mode remains fully controllable.
+    setComparisonMode("after");
     setIsPreviewFullscreen(true);
-    setStudioActionMessage("Expanded preview is active. Press Escape or Exit preview to return.");
+    setStudioActionMessage("The edited canvas now fills the viewport. Press Escape or Exit preview to return.");
   };
 
   const changePreviewSpeed = nextSpeed => {
@@ -5389,6 +7463,82 @@ const ViralClipStudio = ({
     setCutRangeEnd(null);
   };
 
+  const rippleLinkedTimeline = (from, to) => {
+    const retime = items => rippleTimedItems(items, from, to, () => createSecureId("retained-layer"));
+    setOverlays(retime);
+    setSoundEffects(retime);
+    setVoiceovers(retime);
+    setAdjustmentLayers(retime);
+    setMotionScenes(current => cutMotion(current, from, to));
+    setMotionKeyframes(current => rippleTimelineKeys(current, from, to));
+    setSpeedKeyframes(current => rippleTimelineKeys(current, from, to));
+    setFinishKeyframes(current => rippleTimelineKeys(current, from, to));
+    setReframeKeyframes(current => rippleTimelineKeys(current, from, to));
+    setSpeakerFocusCuts(current => rippleTimelineKeys(current, from, to));
+    setSpeakerStackFraming(current => ({ ...current, ...Object.fromEntries(["top", "bottom"].map(slot => [slot, {
+      ...current[slot], keyframes: rippleTimelineKeys(current[slot].keyframes || [], from, to),
+    }])) }));
+    setAudioKeyframes(current => Object.fromEntries(Object.entries(current).map(([bus, keys]) => [bus, rippleTimelineKeys(keys, from, to)])));
+  };
+
+  const rippleLinkedTimelineMultiGaps = (gaps) => {
+    if (!Array.isArray(gaps) || !gaps.length) return;
+    const sortedGaps = [...gaps]
+      .filter(g => Number.isFinite(g?.from) && Number.isFinite(g?.to) && g.to > g.from)
+      .sort((a, b) => b.from - a.from);
+    if (!sortedGaps.length) return;
+
+    const retime = items => {
+      let current = items || [];
+      for (const gap of sortedGaps) {
+        current = rippleTimedItems(current, gap.from, gap.to, () => createSecureId("retained-layer"));
+      }
+      return current;
+    };
+
+    const retimeKeys = keys => {
+      let current = keys || [];
+      for (const gap of sortedGaps) {
+        current = rippleTimelineKeys(current, gap.from, gap.to);
+      }
+      return current;
+    };
+
+    setOverlays(retime);
+    setSoundEffects(retime);
+    setVoiceovers(retime);
+    setAdjustmentLayers(retime);
+    setMotionScenes(current => {
+      let res = current || [];
+      for (const gap of sortedGaps) {
+        res = cutMotion(res, gap.from, gap.to);
+      }
+      return res;
+    });
+    setMotionKeyframes(retimeKeys);
+    setSpeedKeyframes(retimeKeys);
+    setFinishKeyframes(retimeKeys);
+    setReframeKeyframes(retimeKeys);
+    setSpeakerFocusCuts(retimeKeys);
+    setSpeakerStackFraming(current => {
+      const next = { ...current };
+      for (const slot of ["top", "bottom"]) {
+        if (next[slot]) {
+          next[slot] = {
+            ...next[slot],
+            keyframes: retimeKeys(next[slot]?.keyframes || []),
+          };
+        }
+      }
+      return next;
+    });
+    setAudioKeyframes(current =>
+      Object.fromEntries(
+        Object.entries(current || {}).map(([bus, keys]) => [bus, retimeKeys(keys)])
+      )
+    );
+  };
+
   const removePendingCutRange = () => {
     if (!normalizedPendingCutRange || !currentTimelineClip) return;
 
@@ -5409,11 +7559,9 @@ const ViralClipStudio = ({
     const removedDuration = outputCutEnd - outputCutStart;
     const sourceClipId = currentTimelineClip.sourceClipId || currentTimelineClip.id;
     const transitionDuration =
-      resolvedJoinTransition === "energy_flash"
-        ? 0.12
-        : resolvedJoinTransition === "soft_dip"
-          ? 0.18
-          : 0.02;
+      resolvedJoinTransition === "clean_cut"
+        ? 0.02
+        : clampNumber(joinTransitionDuration, 0.04, 2, 0.18);
     const retainedBefore = {
       ...currentTimelineClip,
       id: createSecureId("kept-before"),
@@ -5461,51 +7609,7 @@ const ViralClipStudio = ({
       ...retainedSegments,
       ...previous.slice(activeTimelineIndex + 1),
     ]);
-    setOverlays(previous =>
-      previous.flatMap(overlay => {
-        const start = Number(overlay.startTime ?? overlay.start_time);
-        const duration = Number(overlay.duration || 0);
-        if (!Number.isFinite(start) || duration <= 0) return [overlay];
-        const end = start + duration;
-        if (end <= outputCutStart) return [overlay];
-        if (start >= outputCutEnd) {
-          return [{ ...overlay, startTime: Math.max(0, start - removedDuration) }];
-        }
-
-        const retainedDuration =
-          Math.max(0, outputCutStart - start) + Math.max(0, end - outputCutEnd);
-        if (retainedDuration < 0.1) return [];
-        return [
-          {
-            ...overlay,
-            startTime: Math.min(start, outputCutStart),
-            duration: retainedDuration,
-          },
-        ];
-      })
-    );
-    setSoundEffects(previous =>
-      previous.flatMap(effect => {
-        const start = Number(effect.startTime || 0);
-        const duration = getSoundEffectDuration(effect);
-        const end = start + duration;
-        if (end <= outputCutStart) return [effect];
-        if (start >= outputCutEnd) {
-          return [{ ...effect, startTime: Math.max(0, start - removedDuration) }];
-        }
-
-        const retainedDuration =
-          Math.max(0, outputCutStart - start) + Math.max(0, end - outputCutEnd);
-        if (retainedDuration < 0.05) return [];
-        return [
-          {
-            ...effect,
-            startTime: Math.min(start, outputCutStart),
-            duration: retainedDuration,
-          },
-        ];
-      })
-    );
+    rippleLinkedTimeline(outputCutStart, outputCutEnd);
     setCutRangeStart(null);
     setCutRangeEnd(null);
     setHookPreviewLoop(false);
@@ -5516,10 +7620,512 @@ const ViralClipStudio = ({
     );
   };
 
+  const splitCurrentClipAtPlayhead = () => {
+    if (activeOverlayId) {
+      const activeOverlay = overlays.find(item => item.id === activeOverlayId);
+      if (activeOverlay) {
+        const overlayStart = Number(activeOverlay.startTime ?? activeOverlay.start_time ?? 0);
+        const overlayDuration = Number(activeOverlay.duration || 3);
+        const overlayEnd = overlayStart + overlayDuration;
+        const currentPlayhead = Number(previewTimelineTime || 0);
+
+        if (currentPlayhead > overlayStart + 0.15 && currentPlayhead < overlayEnd - 0.15) {
+          const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
+          pendingHistoryBaselineRef.current = cutHistoryBaseline;
+          cutHistoryTransactionRef.current = {
+            baseline: cutHistoryBaseline,
+            appliedSignature: null,
+            appliedTimelineSignature: null,
+          };
+
+          const firstPartDuration = currentPlayhead - overlayStart;
+          const secondPartDuration = overlayEnd - currentPlayhead;
+          const sourceStart = Number(activeOverlay.sourceStartTime || 0);
+
+          const leftOverlay = {
+            ...activeOverlay,
+            duration: firstPartDuration,
+          };
+
+          const rightOverlay = {
+            ...activeOverlay,
+            id: createSecureId("broll-split"),
+            startTime: currentPlayhead,
+            duration: secondPartDuration,
+            sourceStartTime: sourceStart + firstPartDuration,
+          };
+
+          setOverlays(prev =>
+            prev.map(item => (item.id === activeOverlay.id ? leftOverlay : item)).concat(rightOverlay)
+          );
+          setActiveOverlayId(rightOverlay.id);
+          setStudioActionMessage(`B-roll split at ${formatPreviewTimePrecise(currentPlayhead)} into 2 clips!`);
+          return;
+        }
+      }
+    }
+
+    if (!currentTimelineClip) return;
+    const sourceWindow = getTimelineClipWindow(currentTimelineClip);
+    const localDuration = Number(sourceWindow.duration || 0);
+    const clipStart = Number(sourceWindow.start || 0);
+    const currentVideoTime = Number(videoTime || 0);
+    let splitPoint = currentVideoTime - clipStart;
+    if (splitPoint <= 0.2 || splitPoint >= localDuration - 0.2) {
+      splitPoint = Number(previewClipTime || 0);
+    }
+    if (splitPoint <= 0.2 || splitPoint >= localDuration - 0.2) {
+      setStudioActionMessage("Move the playhead inside the clip (at least 0.2s from edges) to split.");
+      return;
+    }
+
+    const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
+    pendingHistoryBaselineRef.current = cutHistoryBaseline;
+    cutHistoryTransactionRef.current = {
+      baseline: cutHistoryBaseline,
+      appliedSignature: null,
+      appliedTimelineSignature: null,
+    };
+
+    const sourceClipId = currentTimelineClip.sourceClipId || currentTimelineClip.id;
+    const clipLeft = {
+      ...currentTimelineClip,
+      id: createSecureId("split-left"),
+      sourceClipId,
+      startRequest: clipStart,
+      endRequest: clipStart + splitPoint,
+    };
+    const clipRight = {
+      ...currentTimelineClip,
+      id: createSecureId("split-right"),
+      sourceClipId,
+      startRequest: clipStart + splitPoint,
+      endRequest: Number(sourceWindow.end || clipStart + localDuration),
+    };
+
+    setTimeline(previous => [
+      ...previous.slice(0, activeTimelineIndex),
+      clipLeft,
+      clipRight,
+      ...previous.slice(activeTimelineIndex + 1),
+    ]);
+    setActiveTimelineIndex(activeTimelineIndex + 1);
+    setStudioActionMessage(`Clip split at ${formatPreviewTimePrecise(splitPoint)}! You now have 2 independent clips.`);
+  };
+
+  const deleteActiveTimelineClip = () => {
+    if (timeline.length <= 1) {
+      setStudioActionMessage("Cannot delete the only remaining clip in the timeline.");
+      return;
+    }
+    const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
+    pendingHistoryBaselineRef.current = cutHistoryBaseline;
+    cutHistoryTransactionRef.current = {
+      baseline: cutHistoryBaseline,
+      appliedSignature: null,
+      appliedTimelineSignature: null,
+    };
+    const nextTimeline = timeline.filter((_, idx) => idx !== activeTimelineIndex);
+    const removedStart = getTimelineOffsetForIndex(activeTimelineIndex);
+    rippleLinkedTimeline(removedStart, removedStart + getTimelineClipWindow(currentTimelineClip).duration);
+    const nextIndex = Math.min(activeTimelineIndex, nextTimeline.length - 1);
+    setTimeline(nextTimeline);
+    setActiveTimelineIndex(nextIndex);
+    setStudioActionMessage("Clip removed from timeline. Tap Undo if you change your mind.");
+  };
+
+  const trimClipStartToPlayhead = () => {
+    if (!currentTimelineClip) return;
+    const sourceWindow = getTimelineClipWindow(currentTimelineClip);
+    const clipStart = Number(sourceWindow.start || 0);
+    const currentVideoTime = Number(videoTime || 0);
+    let localTime = currentVideoTime - clipStart;
+    if (localTime <= 0.1 || localTime >= Number(sourceWindow.duration || 0) - 0.2) {
+      localTime = Number(previewClipTime || 0);
+    }
+    if (localTime <= 0.1 || localTime >= Number(sourceWindow.duration || 0) - 0.2) {
+      setStudioActionMessage("Move playhead to where you want the clip to start.");
+      return;
+    }
+    const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
+    pendingHistoryBaselineRef.current = cutHistoryBaseline;
+    cutHistoryTransactionRef.current = {
+      baseline: cutHistoryBaseline,
+      appliedSignature: null,
+      appliedTimelineSignature: null,
+    };
+    const updatedClip = {
+      ...currentTimelineClip,
+      startRequest: clipStart + localTime,
+    };
+    const removedStart = getTimelineOffsetForIndex(activeTimelineIndex);
+    rippleLinkedTimeline(removedStart, removedStart + localTime);
+    setTimeline(previous =>
+      previous.map((c, idx) => (idx === activeTimelineIndex ? updatedClip : c))
+    );
+    setStudioActionMessage(`Trimmed start to ${formatPreviewTimePrecise(localTime)}. Everything before it is removed.`);
+  };
+
+  const trimClipEndToPlayhead = () => {
+    if (!currentTimelineClip) return;
+    const sourceWindow = getTimelineClipWindow(currentTimelineClip);
+    const clipStart = Number(sourceWindow.start || 0);
+    const currentVideoTime = Number(videoTime || 0);
+    let localTime = currentVideoTime - clipStart;
+    if (localTime <= 0.2 || localTime >= Number(sourceWindow.duration || 0) - 0.1) {
+      localTime = Number(previewClipTime || 0);
+    }
+    if (localTime <= 0.2 || localTime >= Number(sourceWindow.duration || 0) - 0.1) {
+      setStudioActionMessage("Move playhead to where you want the clip to end.");
+      return;
+    }
+    const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
+    pendingHistoryBaselineRef.current = cutHistoryBaseline;
+    cutHistoryTransactionRef.current = {
+      baseline: cutHistoryBaseline,
+      appliedSignature: null,
+      appliedTimelineSignature: null,
+    };
+    const updatedClip = {
+      ...currentTimelineClip,
+      endRequest: clipStart + localTime,
+    };
+    const clipOffset = getTimelineOffsetForIndex(activeTimelineIndex);
+    rippleLinkedTimeline(clipOffset + localTime, clipOffset + sourceWindow.duration);
+    setTimeline(previous =>
+      previous.map((c, idx) => (idx === activeTimelineIndex ? updatedClip : c))
+    );
+    setStudioActionMessage(`Trimmed end to ${formatPreviewTimePrecise(localTime)}. Everything after it is removed.`);
+  };
+
+  const detectSilenceSegments = async (targetClip = currentTimelineClip) => {
+    if (!targetClip) return null;
+    try {
+      const token = await getMediaAuthToken();
+      if (!token) throw new Error("Please log in to analyze audio");
+      const fileUrl = await ensurePreviewableClipUrl(targetClip);
+      if (!fileUrl) throw new Error("Clip video source is not ready");
+
+      const response = await fetch(`${API_BASE_URL}/api/media/preview-silence`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fileUrl,
+          silenceThreshold,
+          minSilenceDuration,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Silence analysis failed with status ${response.status}`);
+      }
+      const payload = await response.json();
+      return {
+        silenceSegments: payload.silence_segments || [],
+        keepSegments: payload.keep_segments || [],
+        duration: payload.duration || 0,
+      };
+    } catch (error) {
+      console.warn("Silence preview API error, attempting client-side detection:", error);
+      const clipWindow = getTimelineClipWindow(targetClip);
+      const clipStart = Number(clipWindow.start || 0);
+      const clipEnd = Number(clipWindow.end || clipStart + Number(clipWindow.duration || 0));
+      const normalizedCaptions = normalizeCaptionSegments(captionSegments);
+
+      if (normalizedCaptions.length > 0) {
+        const matchingCaptions = normalizedCaptions
+          .filter(c => c.end > clipStart && c.start < clipEnd)
+          .sort((a, b) => a.start - b.start);
+
+        if (matchingCaptions.length > 1) {
+          const silences = [];
+          const keeps = [];
+          let cursor = clipStart;
+
+          for (const cap of matchingCaptions) {
+            const speechStart = Math.max(clipStart, Number(cap.start));
+            const speechEnd = Math.min(clipEnd, Number(cap.end));
+            if (speechStart - cursor >= minSilenceDuration) {
+              silences.push({
+                start: Number(cursor.toFixed(3)),
+                end: Number(speechStart.toFixed(3)),
+                duration: Number((speechStart - cursor).toFixed(3)),
+              });
+            }
+            if (speechEnd > speechStart) {
+              keeps.push({
+                start: Number(speechStart.toFixed(3)),
+                end: Number(speechEnd.toFixed(3)),
+                duration: Number((speechEnd - speechStart).toFixed(3)),
+              });
+            }
+            cursor = Math.max(cursor, speechEnd);
+          }
+
+          if (clipEnd - cursor >= minSilenceDuration) {
+            silences.push({
+              start: Number(cursor.toFixed(3)),
+              end: Number(clipEnd.toFixed(3)),
+              duration: Number((clipEnd - cursor).toFixed(3)),
+            });
+          }
+
+          const mergedKeeps = [];
+          for (const k of keeps) {
+            if (!mergedKeeps.length) {
+              mergedKeeps.push({ ...k });
+            } else {
+              const prev = mergedKeeps[mergedKeeps.length - 1];
+              if (k.start - prev.end < minSilenceDuration) {
+                prev.end = Math.max(prev.end, k.end);
+                prev.duration = Number((prev.end - prev.start).toFixed(3));
+              } else {
+                mergedKeeps.push({ ...k });
+              }
+            }
+          }
+
+          if (silences.length > 0 && mergedKeeps.length > 0) {
+            return {
+              silenceSegments: silences,
+              keepSegments: mergedKeeps,
+              duration: clipEnd - clipStart,
+            };
+          }
+        }
+      }
+      return null;
+    }
+  };
+
+  const rippleCutAllSilences = async () => {
+    if (!currentTimelineClip) return;
+    setIsRippleCuttingSilence(true);
+    try {
+      let silenceData = null;
+      if (
+        silencePreview?.clipId === currentTimelineClip.id &&
+        Array.isArray(silencePreview.keepSegments) &&
+        silencePreview.keepSegments.length > 0
+      ) {
+        silenceData = silencePreview;
+      } else {
+        setStudioActionMessage("Analyzing audio waveform for pauses and dead air...");
+        silenceData = await detectSilenceSegments(currentTimelineClip);
+      }
+
+      if (!silenceData || !Array.isArray(silenceData.keepSegments) || !silenceData.keepSegments.length) {
+        setStudioActionMessage("No speech intervals detected. Try lowering speech threshold in Pacing tab.");
+        toast("No dead-air pauses detected to cut.", { icon: "ℹ️" });
+        return;
+      }
+
+      const sourceWindow = getTimelineClipWindow(currentTimelineClip);
+      const clipStart = Number(sourceWindow.start || 0);
+      const clipEnd = Number(sourceWindow.end || clipStart + Number(sourceWindow.duration || 0));
+
+      const validKeepSegments = silenceData.keepSegments
+        .map(seg => ({
+          start: Math.max(clipStart, Number(seg.start ?? seg.start_time ?? 0)),
+          end: Math.min(clipEnd, Number(seg.end ?? seg.end_time ?? 0)),
+        }))
+        .filter(seg => seg.end - seg.start > 0.08)
+        .sort((a, b) => a.start - b.start);
+
+      if (validKeepSegments.length === 0) {
+        setStudioActionMessage("Silence cutting would remove the entire clip. Adjust threshold first.");
+        toast.error("Threshold too aggressive - would remove entire clip.");
+        return;
+      }
+
+      if (validKeepSegments.length === 1) {
+        const seg = validKeepSegments[0];
+        if (Math.abs(seg.start - clipStart) < 0.1 && Math.abs(seg.end - clipEnd) < 0.1) {
+          setStudioActionMessage("No dead air found at current settings. Pacing is already tight!");
+          toast("No dead air found at current settings.", { icon: "ℹ️" });
+          return;
+        }
+      }
+
+      const silenceGaps = [];
+      let cursor = clipStart;
+      for (const seg of validKeepSegments) {
+        if (seg.start > cursor + 0.06) {
+          silenceGaps.push({
+            sourceStart: cursor,
+            sourceEnd: seg.start,
+            duration: seg.start - cursor,
+          });
+        }
+        cursor = Math.max(cursor, seg.end);
+      }
+      if (clipEnd > cursor + 0.06) {
+        silenceGaps.push({
+          sourceStart: cursor,
+          sourceEnd: clipEnd,
+          duration: clipEnd - cursor,
+        });
+      }
+
+      if (!silenceGaps.length) {
+        setStudioActionMessage("No dead-air pauses found to remove.");
+        toast("No dead-air pauses found.", { icon: "ℹ️" });
+        return;
+      }
+
+      // 1. Snapshot editor state for full undo / redo
+      const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
+      pendingHistoryBaselineRef.current = cutHistoryBaseline;
+      cutHistoryTransactionRef.current = {
+        baseline: cutHistoryBaseline,
+        appliedSignature: null,
+        appliedTimelineSignature: null,
+      };
+
+      const clipTimelineOffset = getTimelineOffsetForIndex(activeTimelineIndex);
+
+      // 2. Map silence gaps from source time to timeline time coordinates
+      const timelineGaps = silenceGaps.map(gap => ({
+        from: clipTimelineOffset + (gap.sourceStart - clipStart),
+        to: clipTimelineOffset + (gap.sourceEnd - clipStart),
+        duration: gap.duration,
+      }));
+
+      // 3. Ripple linked items (overlays, B-roll, SFX, voiceovers, keyframes) across all tracks
+      rippleLinkedTimelineMultiGaps(timelineGaps);
+
+      // 4. Construct sliced primary timeline speech takes
+      const sourceClipId = currentTimelineClip.sourceClipId || currentTimelineClip.id;
+      const newClips = validKeepSegments.map((seg, idx) => ({
+        ...currentTimelineClip,
+        id: createSecureId(`take-${idx + 1}`),
+        sourceClipId,
+        startRequest: Number(seg.start.toFixed(3)),
+        endRequest: Number(seg.end.toFixed(3)),
+        duration: Number((seg.end - seg.start).toFixed(3)),
+        transitionIn: idx > 0 ? "crossfade" : (currentTimelineClip.transitionIn || null),
+        transitionOut: idx < validKeepSegments.length - 1 ? "crossfade" : (currentTimelineClip.transitionOut || null),
+        transitionDuration: 0.06,
+      }));
+
+      const nextTimeline = [
+        ...timeline.slice(0, activeTimelineIndex),
+        ...newClips,
+        ...timeline.slice(activeTimelineIndex + 1),
+      ];
+
+      setTimeline(nextTimeline);
+      // Physical cut replaces virtual skipping - turn virtual silence removal off
+      setSilenceRemoval(false);
+      setSilencePreview(null);
+
+      const totalSavedSeconds = silenceGaps.reduce((acc, g) => acc + g.duration, 0);
+      const deadAirCount = silenceGaps.length;
+
+      setStudioActionMessage(
+        `✓ Sliced ${deadAirCount} pauses · Removed ${totalSavedSeconds.toFixed(1)}s dead air · Created ${newClips.length} clean takes!`
+      );
+      toast.success(`Removed ${totalSavedSeconds.toFixed(1)}s dead air across ${deadAirCount} pauses!`);
+    } catch (err) {
+      console.error("Failed to ripple cut silence:", err);
+      toast.error("Could not slice dead air: " + (err.message || "Unknown error"));
+    } finally {
+      setIsRippleCuttingSilence(false);
+    }
+  };
+
+  const applyPrecisionTimelineEdit = (mode, direction = 1) => {
+    const delta = Number(precisionNudge || 0.1) * (direction < 0 ? -1 : 1);
+    const currentIndex = activeTimelineIndex;
+    if (!timeline[currentIndex]) return;
+    setTimeline(previous => {
+      const next = previous.map(item => ({ ...item }));
+      const clip = next[currentIndex];
+      const clipWindow = getTimelineClipWindow(clip);
+      if (mode === "slip") {
+        const shiftedStart = Math.max(0, Number(clipWindow.start || 0) + delta);
+        const shiftedEnd = shiftedStart + Number(clipWindow.duration || 0);
+        clip.startRequest = shiftedStart;
+        clip.endRequest = shiftedEnd;
+      } else if (mode === "ripple") {
+        clip.endRequest = Math.max(
+          Number(clipWindow.start || 0) + 0.1,
+          Number(clipWindow.end || 0) + delta
+        );
+      } else if (mode === "roll" && next[currentIndex + 1]) {
+        const nextClip = next[currentIndex + 1];
+        const nextWindow = getTimelineClipWindow(nextClip);
+        clip.endRequest = Math.max(
+          Number(clipWindow.start || 0) + 0.1,
+          Number(clipWindow.end || 0) + delta
+        );
+        nextClip.startRequest = Math.min(
+          Number(nextWindow.end || 0) - 0.1,
+          Math.max(0, Number(nextWindow.start || 0) + delta)
+        );
+      } else if (mode === "slide") {
+        const targetIndex = direction < 0 ? currentIndex - 1 : currentIndex + 1;
+        if (targetIndex >= 0 && targetIndex < next.length) {
+          const [moved] = next.splice(currentIndex, 1);
+          next.splice(targetIndex, 0, moved);
+          window.setTimeout(() => setActiveTimelineIndex(targetIndex), 0);
+        }
+      } else if (mode === "jcut") {
+        clip.audioStartOffset = Number(clip.audioStartOffset || 0) + delta;
+        clip.audioLinked = false;
+      } else if (mode === "lcut") {
+        clip.audioEndOffset = Number(clip.audioEndOffset || 0) + delta;
+        clip.audioLinked = false;
+      }
+      return next;
+    });
+    setTimelineEditTool(["ripple", "roll", "slip", "slide"].includes(mode) ? mode : "select");
+    setStudioActionMessage(
+      `${mode === "jcut" ? "J-cut" : mode === "lcut" ? "L-cut" : `${mode[0].toUpperCase()}${mode.slice(1)} edit`} moved ${Math.abs(delta).toFixed(2)}s ${direction < 0 ? "earlier" : "later"}.`
+    );
+  };
+
   const selectCreativeTool = toolId => {
     setActiveCreativeTool(toolId);
-    if (["cut", "hook", "reframe", "captions", "pacing", "broll", "sound"].includes(toolId)) {
+    window.requestAnimationFrame(() => {
+      const sidebar = studioSidebarRef.current;
+      if (!sidebar) return;
+      if (typeof sidebar.scrollTo === "function") {
+        sidebar.scrollTo({ top: 0, behavior: "auto" });
+      } else {
+        sidebar.scrollTop = 0;
+      }
+    });
+    if (
+      [
+        "cut",
+        "hook",
+        "reframe",
+        "captions",
+        "titles",
+        "motion",
+        "composite",
+        "creatorfx",
+        "pacing",
+        "broll",
+        "finish",
+        "sound",
+      ].includes(toolId)
+    ) {
       setStudioInspectorTab(toolId);
+    }
+    if (toolId === "captions") {
+      setAutoCaptions(true);
+      setComparisonMode("after");
+      if (!captionSegments.length && !captionTextOverride) {
+        const initialForClip = resolveInitialCaptionSegments(selectedClip, selectedClip?.duration);
+        if (initialForClip.length) {
+          setCaptionSegments(initialForClip);
+        }
+      }
     }
     if (toolId === "moments") {
       setStudioActionMessage("Choose a story moment, then shape how it earns attention.");
@@ -5561,13 +8167,19 @@ const ViralClipStudio = ({
     setComparisonMode("after");
     setStudioActionMessage(
       field === "enabled" && value
-        ? "The podcast visual is reading the real voice signal live in your browser."
+        ? "The voice-reactive visual is reading the real audio signal in your browser."
         : "Finish & Motion updated instantly. No render credits used."
     );
   };
 
   const applyStudioFinishPreset = preset => {
     applyFinishPreset(preset);
+    setMainFrame({
+      enabled: true,
+      insetPercent: 3,
+      radiusPercent: 8,
+      background: "studio_black",
+    });
     setComparisonMode("split");
     setStudioActionMessage(
       `${preset.name} is live in After. The untouched source remains available in Before.`
@@ -5576,11 +8188,14 @@ const ViralClipStudio = ({
 
   const resetStudioFinish = () => {
     resetFinishFx();
+    setFinishKeyframes([]);
+    setAdvancedColor({ lutName: "", lutFile: null, lutData: null, lutIntensity: 100,
+      curve: { shadows: 0, midtones: 0, highlights: 0 }, hsl: { hue: 0, saturation: 0, luminance: 0 } });
     setPodcastVisualizer(current => ({ ...current, enabled: false }));
     setMainFrame({
       enabled: true,
-      insetPercent: 5,
-      radiusPercent: 10,
+      insetPercent: 3,
+      radiusPercent: 8,
       background: "studio_black",
     });
     setStudioActionMessage("Finish & Motion reset. The underlying edit was not changed.");
@@ -5591,6 +8206,701 @@ const ViralClipStudio = ({
       return { time: Math.max(0, Number(requestedTime || 0)), snapped: false, beat: null };
     }
     return snapTimeToBeat(requestedTime, musicBeatMarkers, 0.2);
+  };
+
+  const addMotionKeyframesAtPlayhead = () => {
+    const target = motionInspectorTarget;
+    if (!target) {
+      setStudioActionMessage("Select a visual or graphic layer before adding motion keys.");
+      return;
+    }
+    const resolved = timelineSnapping
+      ? resolveMagneticTimelineTime(previewTimelineTime)
+      : { time: previewTimelineTime, snapped: false };
+    const values = {
+      x: Number(target.x ?? 50),
+      y: Number(target.y ?? 50),
+      scale: Number(target.scale ?? 1),
+      rotation: Number(target.rotation ?? 0),
+      opacity: Number(target.opacity ?? 1),
+      cropX: Number(target.cropX ?? 0),
+      cropY: Number(target.cropY ?? 0),
+    };
+    setMotionKeyframes(current =>
+      Object.entries(values).reduce(
+        (next, [property, value]) =>
+          upsertAutomationKeyframe(next, {
+            id: createSecureId("motion-key"),
+            targetId: target.id,
+            property,
+            value,
+            time: Number(resolved.time || 0),
+            easing: "ease_in_out",
+          }),
+        current
+      )
+    );
+    setStudioActionMessage(
+      `Transform keyframe group added at ${Number(resolved.time || 0).toFixed(2)}s${resolved.snapped ? " and snapped to the beat" : ""}.`
+    );
+  };
+
+  const updateMotionKeyframe = (keyframeId, changes) => {
+    setMotionKeyframes(current =>
+      current.map(keyframe => (keyframe.id === keyframeId ? { ...keyframe, ...changes } : keyframe))
+    );
+  };
+
+  const autoGeneratePunchIns = () => {
+    const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
+    pendingHistoryBaselineRef.current = cutHistoryBaseline;
+    cutHistoryTransactionRef.current = {
+      baseline: cutHistoryBaseline,
+      appliedSignature: null,
+      appliedTimelineSignature: null,
+    };
+
+    const keys = generateSmartZoomKeyframes({
+      duration: outputTimelineDuration,
+      captionSegments,
+      punchScale,
+      punchStyle,
+      punchMode,
+      punchDuration,
+      baseScale: Number(mainTransform.scale || 1.0),
+    });
+
+    setMotionKeyframes(current => [
+      ...current.filter(k => !(k.targetId === "main-video" && k.property === "scale")),
+      ...keys,
+    ]);
+
+    const zones = extractPunchZonesFromKeyframes(keys);
+    setStudioActionMessage(
+      `⚡ Generated ${zones.length} viral punch-ins (${punchScale.toFixed(2)}× ${punchStyle} easing)!`
+    );
+    toast.success(`Generated ${zones.length} retention punch-ins!`);
+  };
+
+  const togglePunchInAtPlayhead = () => {
+    const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
+    pendingHistoryBaselineRef.current = cutHistoryBaseline;
+    cutHistoryTransactionRef.current = {
+      baseline: cutHistoryBaseline,
+      appliedSignature: null,
+      appliedTimelineSignature: null,
+    };
+
+    const currentT = Number(previewTimelineTime || 0);
+
+    if (isPlayheadPunched) {
+      const zones = extractPunchZonesFromKeyframes(motionKeyframes);
+      const activeZone = zones.find(z => currentT >= z.startTime - 0.05 && currentT <= z.endTime + 0.05);
+      if (activeZone) {
+        setMotionKeyframes(current =>
+          current.filter(
+            k =>
+              k.punchId !== activeZone.punchId &&
+              !(k.targetId === "main-video" && k.property === "scale" && k.time >= activeZone.startTime - 0.05 && k.time <= activeZone.endTime + 0.05)
+          )
+        );
+        setStudioActionMessage(`Removed punch-in at ${formatPreviewTimePrecise(currentT)}.`);
+        toast("Punch-in removed", { icon: "↺" });
+        return;
+      }
+    }
+
+    const keys = createSinglePunchKeyframes({
+      startTime: currentT,
+      duration: punchDuration,
+      punchScale,
+      punchStyle,
+      baseScale: Number(mainTransform.scale || 1.0),
+    });
+
+    setMotionKeyframes(current => {
+      const endT = currentT + punchDuration;
+      const filtered = current.filter(
+        k => !(k.targetId === "main-video" && k.property === "scale" && k.time >= currentT - 0.1 && k.time <= endT + 0.1)
+      );
+      return [...filtered, ...keys].sort((a, b) => Number(a.time) - Number(b.time));
+    });
+
+    setStudioActionMessage(
+      `🎯 Punched in ${punchScale.toFixed(2)}× at ${formatPreviewTimePrecise(currentT)} for ${punchDuration}s (Press Z to toggle)`
+    );
+    toast.success(`Punched in ${punchScale.toFixed(2)}× at ${formatPreviewTimePrecise(currentT)}!`);
+  };
+
+  const clearAllPunchIns = () => {
+    const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
+    pendingHistoryBaselineRef.current = cutHistoryBaseline;
+    cutHistoryTransactionRef.current = {
+      baseline: cutHistoryBaseline,
+      appliedSignature: null,
+      appliedTimelineSignature: null,
+    };
+
+    setMotionKeyframes(current =>
+      current.filter(k => !(k.targetId === "main-video" && k.property === "scale"))
+    );
+    setStudioActionMessage("All camera punch-in scale keyframes cleared.");
+    toast("Camera punch-ins cleared", { icon: "↺" });
+  };
+
+  const handleAudioTrim = (clipIndex, offsets) => {
+    const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
+    pendingHistoryBaselineRef.current = cutHistoryBaseline;
+    cutHistoryTransactionRef.current = {
+      baseline: cutHistoryBaseline,
+      appliedSignature: null,
+      appliedTimelineSignature: null,
+    };
+    setTimeline(prev =>
+      prev.map((clip, idx) =>
+        idx === clipIndex ? { ...clip, ...offsets } : clip
+      )
+    );
+  };
+
+  const toggleJCutAtPlayhead = () => {
+    const activeClip = timeline[activeTimelineIndex];
+    if (!activeClip) return;
+    const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
+    pendingHistoryBaselineRef.current = cutHistoryBaseline;
+    cutHistoryTransactionRef.current = {
+      baseline: cutHistoryBaseline,
+      appliedSignature: null,
+      appliedTimelineSignature: null,
+    };
+    const currentlyJCut = Number(activeClip.audioTrimOffsetStart || 0) < -0.04;
+    const newOffset = currentlyJCut ? 0 : -0.8;
+    setTimeline(prev =>
+      prev.map((clip, idx) =>
+        idx === activeTimelineIndex
+          ? { ...clip, audioTrimOffsetStart: newOffset }
+          : clip
+      )
+    );
+    if (currentlyJCut) {
+      setStudioActionMessage("J-Cut removed: audio & video cuts are straight.");
+      toast("J-Cut removed (Straight Cut)", { icon: "↺" });
+    } else {
+      setStudioActionMessage("🎧 0.8s J-Cut applied: dialogue leads video by 0.8s.");
+      toast.success("🎧 0.8s J-Cut applied (Dialogue Pre-lap)!");
+    }
+  };
+
+  const toggleLCutAtPlayhead = () => {
+    const activeClip = timeline[activeTimelineIndex];
+    if (!activeClip) return;
+    const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
+    pendingHistoryBaselineRef.current = cutHistoryBaseline;
+    cutHistoryTransactionRef.current = {
+      baseline: cutHistoryBaseline,
+      appliedSignature: null,
+      appliedTimelineSignature: null,
+    };
+    const currentlyLCut = Number(activeClip.audioTrimOffsetEnd || 0) > 0.04;
+    const newOffset = currentlyLCut ? 0 : 0.8;
+    setTimeline(prev =>
+      prev.map((clip, idx) =>
+        idx === activeTimelineIndex
+          ? { ...clip, audioTrimOffsetEnd: newOffset }
+          : clip
+      )
+    );
+    if (currentlyLCut) {
+      setStudioActionMessage("L-Cut removed: audio & video cuts are straight.");
+      toast("L-Cut removed (Straight Cut)", { icon: "↺" });
+    } else {
+      setStudioActionMessage("🎧 0.8s L-Cut applied: dialogue trails video by 0.8s.");
+      toast.success("🎧 0.8s L-Cut applied (Dialogue Trail)!");
+    }
+  };
+
+  const autoApplyAllDialoguePreLaps = () => {
+    if (!timeline || timeline.length <= 1) {
+      toast("Add at least 2 clips to apply dialogue pre-laps", { icon: "ℹ️" });
+      return;
+    }
+    const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
+    pendingHistoryBaselineRef.current = cutHistoryBaseline;
+    cutHistoryTransactionRef.current = {
+      baseline: cutHistoryBaseline,
+      appliedSignature: null,
+      appliedTimelineSignature: null,
+    };
+    const updated = autoApplyDialoguePreLaps(timeline, 0.6);
+    setTimeline(updated);
+    setStudioActionMessage(`⚡ Applied 0.6s dialogue pre-laps across ${timeline.length - 1} cuts.`);
+    toast.success(`⚡ Applied 0.6s dialogue pre-laps across ${timeline.length - 1} cuts!`);
+  };
+
+  const handleAlignCutsToBeat = () => {
+    if (!timeline || timeline.length <= 1) {
+      toast("Add at least 2 sequence clips to align cuts to beats", { icon: "ℹ️" });
+      return;
+    }
+    if (!musicBeatMarkers || !musicBeatMarkers.length) {
+      toast("Add a background music track to detect rhythm beats first", { icon: "🎵" });
+      return;
+    }
+    const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
+    pendingHistoryBaselineRef.current = cutHistoryBaseline;
+    cutHistoryTransactionRef.current = {
+      baseline: cutHistoryBaseline,
+      appliedSignature: null,
+      appliedTimelineSignature: null,
+    };
+    const result = alignTimelineCutsToMusicBeats(timeline, musicBeatMarkers, { threshold: 0.35 });
+    if (result.cutsAligned === 0) {
+      setStudioActionMessage("All cuts are already in rhythm with music beats!");
+      toast("Cuts are already locked to musical beats", { icon: "🎵" });
+      return;
+    }
+    setTimeline(result.updatedTimeline);
+    setStudioActionMessage(`🎵 Aligned ${result.cutsAligned} sequence cuts to nearest music beat transients.`);
+    toast.success(`🎵 Aligned ${result.cutsAligned} cuts to music beats!`);
+  };
+
+  const handleAlignBRollToBeat = () => {
+    if (!overlays || !overlays.some(o => o.bRollMode)) {
+      toast("No B-roll overlays found to align", { icon: "ℹ️" });
+      return;
+    }
+    if (!musicBeatMarkers || !musicBeatMarkers.length) {
+      toast("Add a background music track to detect rhythm beats first", { icon: "🎵" });
+      return;
+    }
+    const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
+    pendingHistoryBaselineRef.current = cutHistoryBaseline;
+    cutHistoryTransactionRef.current = {
+      baseline: cutHistoryBaseline,
+      appliedSignature: null,
+      appliedTimelineSignature: null,
+    };
+    const brollClips = overlays.filter(o => o.bRollMode);
+    const nonBroll = overlays.filter(o => !o.bRollMode);
+    const result = alignBRollToMusicBeats(brollClips, musicBeatMarkers, 0.35);
+    setOverlays([...nonBroll, ...result.updatedBRoll]);
+    setStudioActionMessage(`⚡ Snapped ${result.alignedCount} B-roll clips to musical beat markers.`);
+    toast.success(`⚡ Snapped ${result.alignedCount} B-roll clips to beats!`);
+  };
+
+  const handleGenerateBeatPunchIns = (cadence = "bars") => {
+    if (!musicBeatMarkers || !musicBeatMarkers.length) {
+      toast("Add a background music track to detect rhythm beats first", { icon: "🎵" });
+      return;
+    }
+    const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
+    pendingHistoryBaselineRef.current = cutHistoryBaseline;
+    cutHistoryTransactionRef.current = {
+      baseline: cutHistoryBaseline,
+      appliedSignature: null,
+      appliedTimelineSignature: null,
+    };
+    const keys = generateBeatPunchIns(musicBeatMarkers, liveTimelineDuration, cadence, punchScale);
+    if (!keys.length) {
+      toast("No beat drops found in timeline duration", { icon: "ℹ️" });
+      return;
+    }
+    setMotionKeyframes(current => {
+      const filtered = current.filter(
+        k => !(k.targetId === "main-video" && k.property === "scale")
+      );
+      return [...filtered, ...keys].sort((a, b) => Number(a.time) - Number(b.time));
+    });
+    setStudioActionMessage(`🎯 Generated ${Math.floor(keys.length / 2)} punch-ins locked to musical beat drops!`);
+    toast.success(`🎯 Generated ${Math.floor(keys.length / 2)} punch-ins on music beats!`);
+  };
+
+  const handleAutoGenerateMotionBeats = () => {
+    const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
+    pendingHistoryBaselineRef.current = cutHistoryBaseline;
+    cutHistoryTransactionRef.current = {
+      baseline: cutHistoryBaseline,
+      appliedSignature: null,
+      appliedTimelineSignature: null,
+    };
+
+    const newScenes = generateSmartMotionBeats({
+      transcript: captionSegments,
+      duration: liveTimelineDuration || selectedClip?.duration || 30,
+      existingScenes: motionScenes,
+    });
+
+    if (!newScenes.length) {
+      toast("Motion graphics are already active across key moments", { icon: "ℹ️" });
+      return;
+    }
+
+    setMotionScenes(prev => [...prev, ...newScenes]);
+    setStudioActionMessage(`✨ Auto-generated ${newScenes.length} viral motion graphics from speech transcript!`);
+    toast.success(`✨ Auto-generated ${newScenes.length} viral motion graphics!`);
+  };
+
+  // Feature #6: Descript-Style Script Slicer & Filler Word Killer
+  const detectedFillerWords = useMemo(() => {
+    return detectFillerWords(captionSegments);
+  }, [captionSegments]);
+
+  const resolveCaptionTimelineRange = (segment) => {
+    const segStart = Number(segment.start || 0);
+    const segEnd = Number(segment.end || segStart + 1);
+
+    if (!timeline || !timeline.length) {
+      return { start: segStart, end: Math.max(segStart + 0.05, segEnd) };
+    }
+
+    let elapsed = 0;
+    for (let i = 0; i < timeline.length; i++) {
+      const clip = timeline[i];
+      const clipWindow = getTimelineClipWindow(clip);
+      const clipStart = Number(clipWindow.start || 0);
+      const clipEnd = Number(clipWindow.end || 0);
+      const clipDuration = Math.max(0.04, clipEnd - clipStart);
+
+      if (segStart >= clipStart && segStart < clipEnd) {
+        const startInTimeline = elapsed + (segStart - clipStart);
+        const endInTimeline = elapsed + (Math.min(segEnd, clipEnd) - clipStart);
+        return { start: Math.max(0, startInTimeline), end: Math.max(startInTimeline + 0.05, endInTimeline) };
+      }
+      if (clipStart > 0 && segStart < clipDuration && (segment.sourceClipId === clip.id || segment.sourceClipId === clip.sourceClipId)) {
+        const startInTimeline = elapsed + segStart;
+        const endInTimeline = elapsed + Math.min(segEnd, clipDuration);
+        return { start: Math.max(0, startInTimeline), end: Math.max(startInTimeline + 0.05, endInTimeline) };
+      }
+      elapsed += clipDuration;
+    }
+
+    return { start: segStart, end: Math.max(segStart + 0.05, segEnd) };
+  };
+
+  const handleCutCaptionFromVideo = (segment) => {
+    if (!segment) return;
+    if (!timeline || !timeline.length) {
+      toast.error("Timeline has no video clips to cut");
+      return;
+    }
+
+    const { start: cutStart, end: cutEnd } = resolveCaptionTimelineRange(segment);
+    if (cutEnd <= cutStart) {
+      toast("Invalid caption duration to cut", { icon: "⚠️" });
+      return;
+    }
+
+    // 1. Snapshot editor state for full undo / redo (Ctrl+Z)
+    const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
+    pendingHistoryBaselineRef.current = cutHistoryBaseline;
+    cutHistoryTransactionRef.current = {
+      baseline: cutHistoryBaseline,
+      appliedSignature: null,
+      appliedTimelineSignature: null,
+    };
+
+    // 2. Slice the video timeline
+    const sliceResult = sliceTimelineTimeRange(timeline, cutStart, cutEnd);
+    if (sliceResult.removedDuration <= 0) {
+      toast("Could not cut clip at that timestamp", { icon: "⚠️" });
+      return;
+    }
+
+    // 3. Ripple linked items across all tracks (B-roll, voiceovers, SFX, keyframes)
+    rippleLinkedTimeline(cutStart, cutEnd);
+
+    // 4. Retime remaining captions
+    const retimedCaptions = retimeCaptionsAfterCut(captionSegments, cutStart, cutEnd);
+
+    setTimeline(sliceResult.updatedTimeline);
+    setCaptionSegments(retimedCaptions);
+
+    const cutDur = (cutEnd - cutStart).toFixed(2);
+    setStudioActionMessage(`✂️ Script Sliced "${(segment.text || "").slice(0, 24)}..." · Removed ${cutDur}s and rippled timeline!`);
+    toast.success(`✂️ Sliced line from video (-${cutDur}s)!`);
+  };
+
+  const handleRemoveAllFillerWords = () => {
+    if (!detectedFillerWords || !detectedFillerWords.length) {
+      toast("No filler words detected in captions!", { icon: "🎉" });
+      return;
+    }
+    if (!timeline || !timeline.length) {
+      toast.error("Timeline has no video clips to slice");
+      return;
+    }
+
+    // 1. Snapshot editor state for full undo
+    const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
+    pendingHistoryBaselineRef.current = cutHistoryBaseline;
+    cutHistoryTransactionRef.current = {
+      baseline: cutHistoryBaseline,
+      appliedSignature: null,
+      appliedTimelineSignature: null,
+    };
+
+    // 2. Map filler words to timeline ranges
+    const fillerTimelineRanges = detectedFillerWords.map(f => {
+      const seg = captionSegments.find(s => s.id === f.segmentId) || { start: f.start, end: f.end };
+      const base = resolveCaptionTimelineRange(seg);
+      const segStart = Number(seg.start || 0);
+      const segEnd = Number(seg.end || segStart + 1);
+      const segDur = Math.max(0.1, segEnd - segStart);
+      const timelineSegDur = Math.max(0.1, base.end - base.start);
+
+      const offsetStartRatio = Math.max(0, (f.start - segStart) / segDur);
+      const offsetEndRatio = Math.min(1, (f.end - segStart) / segDur);
+
+      const tStart = base.start + offsetStartRatio * timelineSegDur;
+      const tEnd = base.start + offsetEndRatio * timelineSegDur;
+
+      return {
+        start: Math.round(tStart * 100) / 100,
+        end: Math.round(Math.max(tStart + 0.12, tEnd) * 100) / 100,
+      };
+    });
+
+    // 3. Batch slice timeline & captions in reverse chronological order
+    const batchResult = sliceMultipleTimeRanges(timeline, fillerTimelineRanges, captionSegments);
+    if (batchResult.slicesApplied === 0) {
+      toast("No filler ranges could be trimmed", { icon: "ℹ️" });
+      return;
+    }
+
+    // 4. Ripple all other tracks
+    const gaps = fillerTimelineRanges.map(r => ({
+      from: r.start,
+      to: r.end,
+      duration: r.end - r.start,
+    }));
+    rippleLinkedTimelineMultiGaps(gaps);
+
+    setTimeline(batchResult.updatedTimeline);
+    setCaptionSegments(batchResult.updatedCaptionSegments);
+
+    const saved = batchResult.totalRemovedDuration.toFixed(2);
+    const count = batchResult.slicesApplied;
+    setStudioActionMessage(`⚡ Removed ${count} filler words ("um", "uh", "like") · Saved ${saved}s!`);
+    toast.success(`⚡ Removed ${count} filler words (-${saved}s)!`);
+  };
+
+  const handleCutSingleFillerWord = (filler) => {
+    if (!filler) return;
+    if (!timeline || !timeline.length) {
+      toast.error("Timeline has no video clips to slice");
+      return;
+    }
+
+    const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
+    pendingHistoryBaselineRef.current = cutHistoryBaseline;
+    cutHistoryTransactionRef.current = {
+      baseline: cutHistoryBaseline,
+      appliedSignature: null,
+      appliedTimelineSignature: null,
+    };
+
+    const seg = captionSegments.find(s => s.id === filler.segmentId) || { start: filler.start, end: filler.end };
+    const base = resolveCaptionTimelineRange(seg);
+    const segStart = Number(seg.start || 0);
+    const segEnd = Number(seg.end || segStart + 1);
+    const segDur = Math.max(0.1, segEnd - segStart);
+    const timelineSegDur = Math.max(0.1, base.end - base.start);
+
+    const offsetStartRatio = Math.max(0, (filler.start - segStart) / segDur);
+    const offsetEndRatio = Math.min(1, (filler.end - segStart) / segDur);
+
+    const tStart = Math.round((base.start + offsetStartRatio * timelineSegDur) * 100) / 100;
+    const tEnd = Math.round(Math.max(tStart + 0.12, base.start + offsetEndRatio * timelineSegDur) * 100) / 100;
+
+    const sliceResult = sliceTimelineTimeRange(timeline, tStart, tEnd);
+    if (sliceResult.removedDuration <= 0) {
+      toast("Could not cut filler word at that timestamp", { icon: "⚠️" });
+      return;
+    }
+
+    rippleLinkedTimeline(tStart, tEnd);
+    const retimedCaptions = retimeCaptionsAfterCut(captionSegments, tStart, tEnd);
+
+    setTimeline(sliceResult.updatedTimeline);
+    setCaptionSegments(retimedCaptions);
+
+    const saved = (tEnd - tStart).toFixed(2);
+    setStudioActionMessage(`⚡ Cut filler "${filler.matchWord}" · Saved ${saved}s!`);
+    toast.success(`⚡ Cut filler "${filler.matchWord}" (-${saved}s)!`);
+  };
+
+  const addAudioAutomationKeyframe = () => {
+    const source = audioAutomationSource;
+    const resolved = timelineSnapping
+      ? resolveMagneticTimelineTime(previewTimelineTime)
+      : { time: previewTimelineTime, snapped: false };
+    const currentValue =
+      source === "music"
+        ? Math.round(Number(musicTrack?.volume ?? musicVolume) * 100)
+        : source === "sfx" && activeSoundEffect
+          ? Math.round(Number(activeSoundEffect.volume ?? 0.8) * 100)
+          : source === "originalAudio"
+            ? muteOriginalAudio
+              ? 0
+              : 100
+            : 100;
+    setAudioKeyframes(current => ({
+      ...current,
+      [source]: upsertAutomationKeyframe(current[source] || [], {
+        id: createSecureId("audio-key"),
+        targetId: source,
+        property: "volume",
+        value: currentValue,
+        time: Number(resolved.time || 0),
+        easing: "ease_in_out",
+      }),
+    }));
+    setStudioActionMessage(
+      `${source.replace(/([A-Z])/g, " $1")} volume keyframe added at ${Number(resolved.time || 0).toFixed(2)}s.`
+    );
+  };
+
+  const removeAudioAutomationKeyframe = keyframeId => {
+    setAudioKeyframes(current => ({
+      ...current,
+      [audioAutomationSource]: (current[audioAutomationSource] || []).filter(
+        keyframe => keyframe.id !== keyframeId
+      ),
+    }));
+  };
+
+  const addSpeedKeyframeAtPlayhead = () => {
+    const resolved = timelineSnapping
+      ? resolveMagneticTimelineTime(previewTimelineTime)
+      : { time: previewTimelineTime };
+    setSpeedKeyframes(current =>
+      upsertAutomationKeyframe(current, {
+        id: createSecureId("speed-key"),
+        targetId: "main",
+        property: "speed",
+        value: previewSpeed,
+        time: Number(resolved.time || 0),
+        easing: "bezier",
+      })
+    );
+    setStudioActionMessage(
+      `Speed point added at ${Number(resolved.time || 0).toFixed(2)}s with a smooth curve.`
+    );
+  };
+
+  const addAdjustmentLayer = () => {
+    const startTime = clampNumber(previewTimelineTime, 0, liveTimelineDuration, 0);
+    setAdjustmentLayers(current => [
+      ...current,
+      {
+        id: createSecureId("adjustment"),
+        name: `Adjustment ${current.length + 1}`,
+        startTime,
+        duration: Math.max(0.2, liveTimelineDuration - startTime),
+        effects: { color: { ...finishFx }, blendMode: "normal", opacity: 1 },
+      },
+    ]);
+    setStudioActionMessage("Adjustment layer added above the video tracks at the playhead.");
+  };
+
+  const createCompoundFromSelection = () => {
+    if (!activeOverlay) {
+      setStudioActionMessage("Select a layer to start a compound clip.");
+      return;
+    }
+    setCompoundClips(current => [
+      ...current,
+      {
+        id: createSecureId("compound"),
+        name: `Compound ${current.length + 1}`,
+        layerIds: [activeOverlay.id],
+        startTime: Number(activeOverlay.startTime || 0),
+        duration: Number(activeOverlay.duration || 0),
+      },
+    ]);
+    setStudioActionMessage(
+      "Compound clip created. Add more selected layers from the media bin or timeline."
+    );
+  };
+
+  const updateVoiceoverTake = (id, changes) => setVoiceovers(current => current.map(take => {
+    if (take.id !== id) return take;
+    const next = { ...take, ...changes };
+    const sourceDuration = Number(take.sourceDuration || Number(take.trimStart || 0) + take.duration);
+    next.startTime = clampNumber(next.startTime, 0, Math.max(0, liveTimelineDuration - .05), 0);
+    next.trimStart = clampNumber(next.trimStart, 0, Math.max(0, sourceDuration - .05), 0);
+    next.duration = clampNumber(next.duration, .05, Math.max(.05, sourceDuration - next.trimStart), .05);
+    next.volume = voiceoverGain(next.volume);
+    return next;
+  }));
+
+  const toggleVoiceoverRecording = async () => {
+    if (isVoiceoverRecording) {
+      voiceoverRecorderRef.current?.stop();
+      return;
+    }
+    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+      setStudioActionMessage("Voice-over recording is not supported by this browser.");
+      return;
+    }
+    if (voiceoverStreamRef.current || voiceoverRequestPendingRef.current) return;
+    voiceoverRequestPendingRef.current = true;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      if (!voiceoverMountedRef.current) {
+        stream.getTracks().forEach(track => track.stop());
+        return;
+      }
+      voiceoverStreamRef.current = stream;
+      const recorder = new MediaRecorder(stream);
+      voiceoverChunksRef.current = [];
+      voiceoverStartTimeRef.current = Number(previewTimelineTime || 0);
+      voiceoverStartedAtRef.current = Date.now();
+      recorder.ondataavailable = event => {
+        if (event.data?.size) voiceoverChunksRef.current.push(event.data);
+      };
+      recorder.onstop = () => {
+        stream.getTracks().forEach(track => track.stop());
+        voiceoverStreamRef.current = null;
+        voiceoverRecorderRef.current = null;
+        setIsVoiceoverRecording(false);
+        const mimeType = recorder.mimeType || "audio/webm";
+        const blob = new Blob(voiceoverChunksRef.current, { type: mimeType });
+        if (!blob.size) {
+          setStudioActionMessage("The microphone returned no audio. Check your input and record another take.");
+          return;
+        }
+        const duration = Math.max(0.1, (Date.now() - voiceoverStartedAtRef.current) / 1000);
+        const extension = mimeType.includes("mp4") ? "m4a" : mimeType.includes("ogg") ? "ogg" : "webm";
+        const file = new File([blob], `voiceover-${Date.now()}.${extension}`, { type: mimeType });
+        const url = URL.createObjectURL(file);
+        soundEffectObjectUrlsRef.current.add(url);
+        const voiceover = {
+          id: createSecureId("voiceover"),
+          name: `Voice-over ${voiceovers.length + 1}`,
+          file,
+          url,
+          startTime: voiceoverStartTimeRef.current,
+          duration,
+          sourceDuration: duration,
+          trimStart: 0,
+          volume: 1,
+        };
+        setVoiceovers(current => [...current, voiceover]);
+        setStudioActionMessage("Voice-over take placed on its own timeline track.");
+      };
+      voiceoverRecorderRef.current = recorder;
+      recorder.start(150);
+      setIsVoiceoverRecording(true);
+      setStudioActionMessage("Recording voice-over at the current playhead. Press stop when done.");
+    } catch (error) {
+      voiceoverStreamRef.current?.getTracks().forEach(track => track.stop());
+      voiceoverStreamRef.current = null;
+      setIsVoiceoverRecording(false);
+      setStudioActionMessage(error.message || "Microphone permission was not granted.");
+    } finally {
+      voiceoverRequestPendingRef.current = false;
+    }
   };
 
   const addFinishKeyframeAtPlayhead = () => {
@@ -5605,7 +8915,9 @@ const ViralClipStudio = ({
 
   const seekFinishKeyframe = keyframe => {
     seekLiveEditTimelineItem(Number(keyframe?.time || 0), null);
-    setStudioActionMessage(`Finish keyframe selected at ${Number(keyframe?.time || 0).toFixed(2)}s.`);
+    setStudioActionMessage(
+      `Finish keyframe selected at ${Number(keyframe?.time || 0).toFixed(2)}s.`
+    );
   };
 
   const removeFinishKeyframe = keyframeId => {
@@ -5616,7 +8928,9 @@ const ViralClipStudio = ({
   const addReframeKeyframeAtPlayhead = () => {
     const time = Number(previewTimelineTime || 0);
     const currentPosition = interpolateReframeKeyframes(reframeKeyframes, time);
-    const existing = reframeKeyframes.find(keyframe => Math.abs(Number(keyframe.time) - time) < 0.08);
+    const existing = reframeKeyframes.find(
+      keyframe => Math.abs(Number(keyframe.time) - time) < 0.08
+    );
     const id = existing?.id || createSecureId("reframe-keyframe");
     const keyframe = {
       id,
@@ -5657,7 +8971,43 @@ const ViralClipStudio = ({
       current.filter(keyframe => keyframe.id !== activeReframeKeyframeId)
     );
     setActiveReframeKeyframeId(null);
-    setStudioActionMessage("Manual framing correction removed. Auto tracking remains active.");
+    setStudioActionMessage(
+      "Manual framing correction removed. Remaining reviewed points continue, or the crop returns to its centered fallback."
+    );
+  };
+
+  const updateSpeakerStackFrame = (speaker, field, value) => {
+    setSpeakerStackFraming(current => ({
+      ...current,
+      [speaker]: {
+        ...current[speaker],
+        [field]: Number(value),
+      },
+    }));
+    setSmartCrop(true);
+    setSmartCropMode("group_stack");
+    setComparisonMode("after");
+  };
+
+  const addSpeakerFocusCutAtPlayhead = slot => {
+    if (!["top", "bottom"].includes(slot)) return;
+    const time = Math.max(0, Number(previewTimelineTime || 0));
+    const roundedTime = Number(time.toFixed(3));
+    const existing = speakerFocusCuts.find(cut => Math.abs(Number(cut.time) - time) < 0.08);
+    const nextCut = {
+      id: existing?.id || createSecureId("speaker-focus"),
+      time: roundedTime,
+      slot,
+    };
+    setSpeakerFocusCuts(current =>
+      normalizeSpeakerFocusCuts([
+        ...current.filter(cut => cut.id !== nextCut.id),
+        nextCut,
+      ])
+    );
+    setStudioActionMessage(
+      `${MULTICAM_SLOT_LABELS[slot]} marked as the reviewed speaker at ${time.toFixed(2)}s.`
+    );
   };
 
   const applyCreativeIntent = intentId => {
@@ -5703,7 +9053,7 @@ const ViralClipStudio = ({
   const applyMakeItHit = () => {
     setAutoCaptions(true);
     setCaptionStyle("story_pop");
-    setCaptionPosition("lower");
+    setCaptionPosition("bottom_center");
     setCaptionScale(0.94);
     setSilenceRemoval(true);
     setSmartCrop(true);
@@ -5746,10 +9096,152 @@ const ViralClipStudio = ({
   };
 
   useEffect(() => {
+    const programmeVideo = videoRef.current;
+    const videosBySlot = {
+      top: speakerStackTopVideoRef.current,
+      bottom: speakerStackBottomVideoRef.current,
+      third: speakerStackThirdVideoRef.current,
+      fourth: speakerStackFourthVideoRef.current,
+    };
+    const sourcesBySlot = {
+      top: speakerStackTopSource,
+      bottom: speakerStackBottomSource,
+      third: speakerStackThirdSource,
+      fourth: speakerStackFourthSource,
+    };
+    const activeVideos = activeSpeakerStackSlots.map(slot => videosBySlot[slot]);
+    if (
+      !programmeVideo ||
+      activeVideos.some(video => !video) ||
+      !speakerStackIsReady
+    ) {
+      return undefined;
+    }
+    let driftCorrectionTimer = null;
+
+    const syncAngle = (angleVideo, source, offset, forceSeek = false) => {
+      if (!angleVideo || !source) return;
+      const baseTime = source.isProgrammeSource
+        ? Number(programmeVideo.currentTime || 0)
+        : Math.max(
+            0,
+            Number(programmeVideo.currentTime || 0) - Number(selectedClip?.start || 0)
+          );
+      const requestedTime = Math.max(0, baseTime + Number(offset || 0));
+      const duration = Number(angleVideo.duration || source.clip?.duration || 0);
+      const targetTime = duration > 0 ? Math.min(requestedTime, Math.max(0, duration - 0.04)) : requestedTime;
+      const shouldSeek =
+        forceSeek || Math.abs(Number(angleVideo.currentTime || 0) - targetTime) > 0.14;
+      if (shouldSeek) {
+        try {
+          angleVideo.currentTime = targetTime;
+        } catch (error) {
+          console.log("Speaker angle seek skipped", error);
+        }
+      }
+      angleVideo.playbackRate = Number(programmeVideo.playbackRate || 1);
+      if (!programmeVideo.paused && speakerStackPreviewIsLive) {
+        if (angleVideo.seeking) {
+          angleVideo.addEventListener(
+            "seeked",
+            () => safePlayMediaElement(angleVideo),
+            { once: true }
+          );
+        } else {
+          safePlayMediaElement(angleVideo);
+        }
+      } else {
+        angleVideo.pause();
+      }
+    };
+    const syncSpeakerStack = (forceSeek = false) => {
+      activeSpeakerStackSlots.forEach(slot =>
+        syncAngle(
+          videosBySlot[slot],
+          sourcesBySlot[slot],
+          speakerStackOffsets[slot],
+          forceSeek
+        )
+      );
+    };
+    const stopDriftCorrection = () => {
+      if (driftCorrectionTimer !== null) {
+        window.clearInterval(driftCorrectionTimer);
+        driftCorrectionTimer = null;
+      }
+    };
+    const startSpeakerStack = () => {
+      syncSpeakerStack(true);
+      stopDriftCorrection();
+      driftCorrectionTimer = window.setInterval(() => syncSpeakerStack(false), 120);
+    };
+    const correctSpeakerStackDrift = () => syncSpeakerStack(false);
+    const seekSpeakerStack = () => syncSpeakerStack(true);
+    const pauseSpeakerStack = () => {
+      stopDriftCorrection();
+      activeVideos.forEach(video => video.pause());
+      syncSpeakerStack(true);
+    };
+
+    programmeVideo.addEventListener("play", startSpeakerStack);
+    programmeVideo.addEventListener("timeupdate", correctSpeakerStackDrift);
+    programmeVideo.addEventListener("seeked", seekSpeakerStack);
+    programmeVideo.addEventListener("ratechange", correctSpeakerStackDrift);
+    programmeVideo.addEventListener("pause", pauseSpeakerStack);
+    if (!programmeVideo.paused && speakerStackPreviewIsLive) {
+      startSpeakerStack();
+    } else {
+      syncSpeakerStack(true);
+    }
+
+    return () => {
+      programmeVideo.removeEventListener("play", startSpeakerStack);
+      programmeVideo.removeEventListener("timeupdate", correctSpeakerStackDrift);
+      programmeVideo.removeEventListener("seeked", seekSpeakerStack);
+      programmeVideo.removeEventListener("ratechange", correctSpeakerStackDrift);
+      programmeVideo.removeEventListener("pause", pauseSpeakerStack);
+      stopDriftCorrection();
+      activeVideos.forEach(video => video.pause());
+    };
+  }, [
+    activeSpeakerStackSlots,
+    speakerStackIsReady,
+    currentTimelineWindow.start,
+    selectedClip?.start,
+    speakerStackBottomSource,
+    speakerStackThirdSource,
+    speakerStackFourthSource,
+    speakerStackOffsets.bottom,
+    speakerStackOffsets.third,
+    speakerStackOffsets.fourth,
+    speakerStackOffsets.top,
+    speakerStackPreviewIsLive,
+    speakerStackTopSource,
+  ]);
+
+  useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
-    video.playbackRate = previewSpeed;
-  }, [activeTimelineIndex, currentTimelineClip, previewSpeed]);
+    const syncAutomationRate = () => {
+      const outputTime = getPreviewTimelineTime(video.currentTime || 0);
+      const rate = speedKeyframes.length
+        ? interpolateAutomationValue({
+            keyframes: speedKeyframes,
+            property: "speed",
+            time: outputTime,
+            fallback: previewSpeed,
+          })
+        : previewSpeed;
+      video.playbackRate = clampNumber(rate, 0.25, 4, 1);
+    };
+    syncAutomationRate();
+    video.addEventListener("timeupdate", syncAutomationRate);
+    video.addEventListener("seeking", syncAutomationRate);
+    return () => {
+      video.removeEventListener("timeupdate", syncAutomationRate);
+      video.removeEventListener("seeking", syncAutomationRate);
+    };
+  }, [activeTimelineIndex, currentTimelineClip, previewSpeed, speedKeyframes]);
 
   useEffect(() => {
     if (!addHook) return;
@@ -6061,8 +9553,11 @@ const ViralClipStudio = ({
 
     const decodeMusicPreview = async () => {
       try {
+        setMusicBeatMarkers([]);
+        musicPreviewBufferRef.current = null;
         const audioContext = ensureMusicPreviewAudioContext();
         const response = await fetch(beatSourceUrl, { signal: abortController.signal });
+        if (!response.ok) throw new Error("The selected music could not be loaded for beat analysis.");
         const arrayBuffer = await response.arrayBuffer();
         const decodedBuffer = await audioContext.decodeAudioData(arrayBuffer.slice(0));
         if (isCancelled) return;
@@ -6082,6 +9577,7 @@ const ViralClipStudio = ({
         console.error("Music preview decode failed", error);
         if (!isCancelled) {
           musicPreviewBufferRef.current = null;
+          setMusicBeatMarkers([]);
           setMusicPreviewStatus("failed");
           setMusicPreviewStatusMessage(error.message || "Preview audio could not be decoded.");
         }
@@ -6141,6 +9637,209 @@ const ViralClipStudio = ({
       music.removeEventListener("abort", markFailed);
     };
   }, [addMusic, musicSearchMode, effectiveMusicPreviewUrl, currentMusicLabel]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return undefined;
+    if (audioRemix.enabled) {
+      void updateAudioRemixPreview(video, audioRemix, audioRemixBypass);
+      return subscribeAudioRemixMeter(video, setAudioRemixMeter);
+    } else {
+      void updateAudioRemixPreview(video, { ...audioRemix, enabled: false }, true);
+      video.playbackRate = previewSpeed;
+      video.preservesPitch = true;
+      video.mozPreservesPitch = true;
+      video.webkitPreservesPitch = true;
+      setAudioRemixMeter({ peakDb: -60, rmsDb: -60, clipping: false });
+    }
+    return undefined;
+  }, [activeTimelineIndex, currentTimelineClip, previewSpeed, audioRemix, audioRemixBypass]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !audioRemixLoop) return undefined;
+    const keepLooping = () => {
+      if (
+        video.currentTime >= audioRemixLoop.end - 0.04 ||
+        video.currentTime < audioRemixLoop.start - 0.25
+      ) {
+        video.currentTime = audioRemixLoop.start;
+        safePlayMediaElement(video);
+      }
+    };
+    video.addEventListener("timeupdate", keepLooping);
+    return () => video.removeEventListener("timeupdate", keepLooping);
+  }, [audioRemixLoop, activeTimelineIndex, currentTimelineClip]);
+
+  useEffect(() => {
+    const exactPreview = exactAudioRemixPreviewRef.current;
+    exactPreview?.pause();
+    backgroundSoundPreviewSuppressedRef.current = false;
+    setExactAudioRemixPreview(current =>
+      current.status === "idle" ? current : { status: "idle", url: "", error: "", receipt: null }
+    );
+  }, [audioRemix, activeTimelineIndex, currentTimelineClip?.id, musicTrack?.url]);
+
+  useEffect(() => {
+    const exactPreview = exactAudioRemixPreviewRef.current;
+    if (exactAudioRemixPreview.status !== "ready" || !exactAudioRemixPreview.url || !exactPreview) {
+      return undefined;
+    }
+    pauseSynchronizedPreview();
+    backgroundSoundPreviewSuppressedRef.current = true;
+    if (!applySafeMediaSource(exactPreview, exactAudioRemixPreview.url)) {
+      setExactAudioRemixPreview(current => ({
+        ...current,
+        status: "failed",
+        error: "The mastered preview URL was rejected by the browser.",
+      }));
+      return undefined;
+    }
+    exactPreview.load();
+    void safePlayMediaElement(exactPreview);
+    return undefined;
+  }, [exactAudioRemixPreview.status, exactAudioRemixPreview.url]);
+
+  const handleExactAudioRemixPreview = async () => {
+    if (!currentTimelineClip || !audioRemix.enabled) return;
+    if (exactAudioRemixPreview.status === "ready" && exactAudioRemixPreview.url) {
+      const exactPreview = exactAudioRemixPreviewRef.current;
+      if (exactPreview) {
+        pauseSynchronizedPreview();
+        backgroundSoundPreviewSuppressedRef.current = true;
+        exactPreview.currentTime = 0;
+        void safePlayMediaElement(exactPreview);
+        setStudioActionMessage("Replaying the exact mastered worker preview.");
+        return;
+      }
+    }
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (!user) {
+      setExactAudioRemixPreview({
+        status: "failed",
+        url: "",
+        error: "Please log in before rendering an exact audio preview.",
+        receipt: null,
+      });
+      return;
+    }
+
+    exactAudioRemixPreviewRef.current?.pause();
+    setExactAudioRemixPreview({ status: "rendering", url: "", error: "", receipt: null });
+    setAudioRemixBypass(false);
+    setComparisonMode("after");
+
+    try {
+      let token = await user.getIdToken();
+      const fileUrl = await ensurePreviewableClipUrl(currentTimelineClip);
+      if (!fileUrl) throw new Error("No previewable source clip is available.");
+
+      const windowStart = Math.max(0, Number(currentTimelineWindow.start || 0));
+      const windowEnd = Math.max(
+        windowStart + 0.5,
+        Number(
+          currentTimelineWindow.end || windowStart + Number(currentTimelineWindow.duration || 8)
+        )
+      );
+      const requestedStart = Number(
+        audioRemixLoop?.start ?? videoRef.current?.currentTime ?? windowStart
+      );
+      let previewStart = clampNumber(
+        requestedStart,
+        windowStart,
+        Math.max(windowStart, windowEnd - 0.5),
+        windowStart
+      );
+      let previewDuration = Math.min(8, Math.max(0.5, windowEnd - previewStart));
+      if (previewDuration < 2) {
+        previewStart = Math.max(windowStart, windowEnd - Math.min(8, windowEnd - windowStart));
+        previewDuration = Math.min(8, Math.max(2, windowEnd - previewStart));
+      }
+      setAudioRemixLoop({ start: previewStart, end: previewStart + previewDuration });
+
+      let backgroundAudioUrl = musicTrack?.url || "";
+      if (
+        addMusic &&
+        musicTrack?.file &&
+        (!backgroundAudioUrl || backgroundAudioUrl.startsWith("blob:"))
+      ) {
+        const extension = musicTrack.file.name?.split(".").pop() || "mp3";
+        const upload = await uploadSourceFileViaBackend({
+          file: musicTrack.file,
+          token,
+          mediaType: "audio",
+          fileName: `${createSecureId("remix-preview-music")}.${extension}`,
+        });
+        backgroundAudioUrl = upload.url;
+        setMusicTrack(previous => (previous ? { ...previous, url: backgroundAudioUrl } : previous));
+      }
+
+      if (audioRemix.target === "music" && !backgroundAudioUrl.startsWith("http")) {
+        throw new Error("Add an uploaded background music track before previewing Music only.");
+      }
+
+      const body = {
+        fileUrl,
+        startTime: previewStart,
+        duration: previewDuration,
+        audioRemix: audioRemixForRender(audioRemix),
+        includeVoice: !muteOriginalAudio,
+        backgroundAudio:
+          addMusic && backgroundAudioUrl.startsWith("http")
+            ? {
+                url: backgroundAudioUrl,
+                volume: musicTrack?.volume ?? musicVolume,
+                trimStart: musicTrack?.trimStart ?? 0,
+              }
+            : null,
+      };
+
+      let response = await fetch(`${API_BASE_URL}/api/media/preview-audio-remix`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
+      if (response.status === 401) {
+        token = await user.getIdToken(true);
+        response = await fetch(`${API_BASE_URL}/api/media/preview-audio-remix`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(body),
+        });
+      }
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || !payload?.preview_url) {
+        throw new Error(
+          payload?.details || payload?.message || "The worker could not render the audio preview."
+        );
+      }
+      setExactAudioRemixPreview({
+        status: "ready",
+        url: payload.preview_url,
+        error: "",
+        receipt: payload.receipt || null,
+      });
+      setStudioActionMessage(
+        `Exact ${previewDuration.toFixed(1)}s worker preview is ready and playing.`
+      );
+    } catch (error) {
+      console.error("Exact Remix Audio preview failed", error);
+      setExactAudioRemixPreview({
+        status: "failed",
+        url: "",
+        error: error.message || "Exact Remix Audio preview failed.",
+        receipt: null,
+      });
+      setStudioActionMessage(error.message || "Exact Remix Audio preview failed.");
+    }
+  };
 
   const handleAudioSourceUpload = async event => {
     const sourceFile = event.target.files && event.target.files[0];
@@ -6327,6 +10026,8 @@ const ViralClipStudio = ({
           transition_in: clip.transitionIn || null,
           transition_out: clip.transitionOut || null,
           transition_duration: Number(clip.transitionDuration || 0),
+          audioTrimOffsetStart: Number(clip.audioTrimOffsetStart || 0),
+          audioTrimOffsetEnd: Number(clip.audioTrimOffsetEnd || 0),
         };
       })
     );
@@ -6455,6 +10156,7 @@ const ViralClipStudio = ({
       !normalizeCaptionSegments(captionSegments).length
     ) {
       setStudioInspectorTab("captions");
+      setActiveCreativeTool("captions");
       setCaptionGenerationMessage("Generate captions, review every timestamped line, then render.");
       setStudioActionMessage(
         "Render paused: captions must be generated and editable before rendering."
@@ -6474,6 +10176,38 @@ const ViralClipStudio = ({
         `Render paused: approve or correct ${captionReviewBlockers.length} caption ${captionReviewBlockers.length === 1 ? "line" : "lines"}. Broken multilingual wording must never be burned into the video automatically.`
       );
       toast.error("Review every flagged caption line before rendering.");
+      return;
+    }
+
+    if (
+      smartCrop &&
+      (smartCropMode === "group_stack" || reframeModeCuts.some(cut => cut.mode === "group_stack")) &&
+      !speakerStackIsReady
+    ) {
+      setStudioInspectorTab("reframe");
+      setActiveCreativeTool("reframe");
+      setStudioActionMessage(
+        `Render paused: Multi-Camera needs ${speakerStackCameraCount} distinct clean angles aligned to the same source timecode. Different excerpts and reaction insets are not valid camera feeds.`
+      );
+      toast.error(`Align and confirm ${speakerStackCameraCount} synchronized camera angles first.`);
+      return;
+    }
+
+    if (multicamExportNeedsSupport) {
+      setStudioInspectorTab("reframe");
+      setActiveCreativeTool("reframe");
+      setStudioActionMessage(
+        "This camera composition is available in preview only. Choose Top / Bottom for a two-camera export; your reviewed cuts remain saved in the project."
+      );
+      toast.error("Export does not yet support this camera composition.");
+      return;
+    }
+
+    if (creatorPreview.enabled && creatorPreview.activeDemo) {
+      setStudioInspectorTab("creatorfx");
+      setActiveCreativeTool("creatorfx");
+      setStudioActionMessage("An exploratory effect is still on the preview. Add supported titles to the timeline, or clear the preview before exporting. Saved timeline edits will be kept.");
+      toast.error("Review the exploratory effect before exporting.");
       return;
     }
 
@@ -6518,6 +10252,82 @@ const ViralClipStudio = ({
         if (!exportTimeline.length) {
           throw new Error("Silence removal left no playable material. Adjust its threshold first.");
         }
+      }
+      let exportedSpeakerStackPlan = null;
+      if (
+        smartCrop &&
+        (smartCropMode === "group_stack" || reframeModeCuts.some(cut => cut.mode === "group_stack"))
+      ) {
+        const resolveExportSpeakerSource = async sourceOption => {
+          if (!sourceOption) return "";
+          if (!sourceOption.isProgrammeSource) {
+            return ensurePreviewableClipUrl(sourceOption.clip);
+          }
+          const currentSourceId = String(
+            currentTimelineClip?.sourceClipId || currentTimelineClip?.id || ""
+          );
+          return (
+            exportTimeline.find(
+              segment => String(segment.source_clip_id || segment.id || "") === currentSourceId
+            )?.url || ensurePreviewableClipUrl(currentTimelineClip)
+          );
+        };
+        const sourceUrls = await Promise.all(
+          resolvedSpeakerStackSources.map(resolveExportSpeakerSource)
+        );
+        if (
+          sourceUrls.some(sourceUrl => !sourceUrl) ||
+          new Set(sourceUrls).size !== sourceUrls.length
+        ) {
+          throw new Error(
+            `Multi-Camera requires ${speakerStackCameraCount} distinct clean video sources.`
+          );
+        }
+        const cameras = activeSpeakerStackSlots.map((slot, index) => {
+          const source = resolvedSpeakerStackSources[index];
+          return {
+            slot,
+            source_url: sourceUrls[index],
+            source_id: resolvedSpeakerStackSourceIds[slot],
+            offset_seconds: Math.max(0, Number(speakerStackOffsets[slot] || 0)),
+            time_origin_seconds: source?.isProgrammeSource ? 0 : Number(selectedClip?.start || 0),
+            x: clampNumber(
+              speakerStackFraming[slot]?.x,
+              0,
+              100,
+              DEFAULT_SPEAKER_STACK_FRAMING[slot].x
+            ),
+            y: clampNumber(
+              speakerStackFraming[slot]?.y,
+              0,
+              100,
+              DEFAULT_SPEAKER_STACK_FRAMING[slot].y
+            ),
+            zoom: clampNumber(speakerStackFraming[slot]?.zoom, 1, 7, 1),
+          };
+        });
+        exportedSpeakerStackPlan = {
+          orientation: speakerStackLayout,
+          layout: speakerStackLayout,
+          camera_count: cameras.length,
+          divider_percent: clampNumber(speakerStackFraming.dividerPercent, 35, 65, 50),
+          gap_percent: clampNumber(speakerStackFraming.gapPercent, 0, 3, 0.45),
+          secondary_frame: {
+            x_percent: clampNumber(speakerStackFraming.secondaryXPercent, 16, 84, 80),
+            y_percent: clampNumber(speakerStackFraming.secondaryYPercent, 16, 84, 20),
+            size_percent: clampNumber(speakerStackFraming.secondarySizePercent, 20, 46, 30),
+          },
+          speaker_focus_cuts: normalizeSpeakerFocusCuts(speakerFocusCuts).map(cut => ({
+            time: cut.time,
+            slot: cut.slot,
+            source_id: resolvedSpeakerStackSourceIds[cut.slot] || null,
+            review: "manual",
+          })),
+          cameras,
+          // Keep legacy aliases so existing two-camera workers/projects remain readable.
+          top: cameras[0],
+          bottom: cameras[1],
+        };
       }
       setExportStatusLabel("Uploading edit layers...");
       const newOverlays = await Promise.all(
@@ -6601,9 +10411,11 @@ const ViralClipStudio = ({
         })
       );
 
-      let exportedMusicUrl = musicTrack?.url || null;
+      const musicTrackAudible = isStudioAudioTrackAudible(trackStates, "music");
+      let exportedMusicUrl = musicTrackAudible ? musicTrack?.url || null : null;
       if (
         addMusic &&
+        musicTrackAudible &&
         musicTrack?.file instanceof Blob &&
         (!exportedMusicUrl || exportedMusicUrl.startsWith("blob:"))
       ) {
@@ -6623,8 +10435,8 @@ const ViralClipStudio = ({
       }
 
       const exportedSoundEffects = await Promise.all(
-        soundEffects
-          .filter(effect => effect.enabled !== false)
+        allSoundEffects
+          .filter(effect => effect.enabled !== false && isStudioAudioTrackAudible(trackStates, "sfx"))
           .map(async effect => {
             let effectUrl = effect.url || null;
             if (effect.file instanceof Blob && (!effectUrl || effectUrl.startsWith("blob:"))) {
@@ -6658,6 +10470,24 @@ const ViralClipStudio = ({
           })
       );
 
+      setExportStatusLabel("Preparing voice-over recordings");
+      const exportedVoiceovers = await uploadVoiceoversForRender(voiceovers, {
+        upload: options => uploadSourceFileViaBackend({
+          ...options,
+          onProgress: (transferred, total) => {
+            const percent = total > 0 ? Math.round((transferred / total) * 100) : 0;
+            setExportStatusLabel(`Uploading voice-over ${percent}%`);
+          },
+        }),
+        token,
+        audible: voiceoverTrackAudible(trackStates),
+      });
+      if (exportedVoiceovers.length) {
+        const uploadedById = new Map(exportedVoiceovers.map(take => [String(take.id), take.url]));
+        setVoiceovers(current => current.map(take => uploadedById.has(String(take.id))
+          ? { ...take, url: uploadedById.get(String(take.id)) }
+          : take));
+      }
       const normalizedOverlays = normalizeOverlaysForExport(exportTimeline, newOverlays);
       const exportCaptionSegments = mapCaptionSegmentsToTimeline({
         captionSegments: normalizeCaptionSegments(captionSegments),
@@ -6690,14 +10520,20 @@ const ViralClipStudio = ({
         captionSegments: exportCaptionSegments,
         translateCaptionsToEnglish,
         previewSpeed,
-        speedSegments: [
-          {
-            startTime: 0,
-            endTime: Number(currentTimelineWindow.duration || selectedClip?.duration || 0),
-            rate: previewSpeed,
-            pitchPreserved: true,
-          },
-        ],
+        speedSegments: speedKeyframes.length
+          ? buildSpeedSegmentsFromKeyframes({
+              keyframes: speedKeyframes,
+              duration: outputTimelineDuration,
+              fallback: previewSpeed,
+            })
+          : [
+              {
+                startTime: 0,
+                endTime: outputTimelineDuration,
+                rate: previewSpeed,
+                pitchPreserved: true,
+              },
+            ],
         pacingLevel,
         creativeIntent,
         studioPlan: selectedClip?.studioEditPlan || selectedClip?.studio_edit_plan || null,
@@ -6717,6 +10553,7 @@ const ViralClipStudio = ({
         finishPlan: {
           version: 1,
           enabled: true,
+          color_cube: advancedColorCube,
           main_frame: {
             enabled: mainFrame.enabled,
             shape: "round",
@@ -6726,6 +10563,12 @@ const ViralClipStudio = ({
           },
           color: {
             preset: finishFx.preset,
+            precisionGrade: !!finishFx.precisionGrade,
+            exposureStops: finishFx.exposureStops,
+            lift: finishFx.lift,
+            gamma: finishFx.gamma,
+            gain: finishFx.gain,
+            tint: finishFx.tint,
             brightness: finishFx.brightness,
             contrast: finishFx.contrast,
             saturation: finishFx.saturation,
@@ -6736,6 +10579,18 @@ const ViralClipStudio = ({
           motion: {
             zoom: finishFx.zoom,
             zoom_anchor: finishFx.zoomAnchor,
+            base_scale: mainTransform.scale ?? 1,
+            scale_keyframes: motionKeyframes.filter(key => key.targetId === "main-video" && key.property === "scale"),
+            base_transform: {
+              x: Number(mainTransform.x ?? 50),
+              y: Number(mainTransform.y ?? 50),
+              scale: Number(mainTransform.scale ?? 1),
+              rotation: Number(mainTransform.rotation ?? 0),
+              opacity: Number(mainTransform.opacity ?? 1),
+              crop_x: Number(mainTransform.cropX ?? 0),
+              crop_y: Number(mainTransform.cropY ?? 0),
+            },
+            keyframes: motionKeyframes.filter(key => key.targetId === "main-video"),
           },
           texture: {
             film_grain: finishFx.filmGrain,
@@ -6755,21 +10610,126 @@ const ViralClipStudio = ({
           })),
           magnetic_beats: {
             enabled: beatSnapEnabled,
-            markers: musicBeatMarkers.map(marker => Number(marker.time || marker)).filter(Number.isFinite),
+            markers: musicBeatMarkers
+              .map(marker => Number(marker.time || marker))
+              .filter(Number.isFinite),
           },
           reframe: {
-            enabled: smartCrop,
+            enabled: smartCrop || reframeModeCuts.some(cut => cut.mode !== "off"),
             aspect: reframeAspect,
             mode: smartCropMode,
+            zoom: speakerTrackZoom,
+            ...(reframeModeCuts.length
+              ? { timeline_cuts: normalizeReframeModeCuts(reframeModeCuts).map(cut => ({
+                  time: cut.time,
+                  mode: cut.mode,
+                })) }
+              : {}),
+            ...(speakerFocusCuts.length
+              ? { speaker_order_cuts: normalizeSpeakerFocusCuts(speakerFocusCuts).map(cut => ({
+                  time: cut.time,
+                  slot: cut.slot,
+                })) }
+              : {}),
+            ...((smartCropMode === "center" || reframeModeCuts.some(cut => cut.mode === "center")) && reframeAspect !== "16:9"
+              ? { split_source: Object.fromEntries(["top", "bottom"].map(slot => [slot, {
+                  ...speakerStackFraming[slot], keyframes: speakerStackFraming.trackSpeakers ? speakerStackFraming[slot].keyframes || [] : [],
+                }])) }
+              : {}),
+            ...(smartCropMode === "group_stack" || reframeModeCuts.some(cut => cut.mode === "group_stack")
+              ? {
+                  group_stack: exportedSpeakerStackPlan,
+                }
+              : {}),
             keyframes: reframeKeyframes.map(keyframe => ({
               time: Number(keyframe.time || 0),
-              x: clampNumber(keyframe.x, 5, 95, 50),
-              y: clampNumber(keyframe.y, 8, 92, 50),
+              ...(keyframe.cut === true ? { cut: true } : {}),
+              x: clampNumber(keyframe.x, 0, 100, 50),
+              y: clampNumber(keyframe.y, 0, 100, 50),
             })),
           },
         },
+        editorTimeline: {
+          track_states: trackStates,
+          edit_tool: timelineEditTool,
+          snapping: timelineSnapping,
+          linked_selection: linkedSelection,
+          ripple_mode: rippleMode,
+          motion_keyframes: motionKeyframes,
+          audio_keyframes: audioKeyframes,
+          speed_keyframes: speedKeyframes,
+          adjustment_layers: adjustmentLayers,
+          compound_clips: compoundClips,
+          voiceovers,
+        },
+        compositionPlan: {
+          version: 1,
+          coordinate_space: "canvas_percent",
+          preview_timebase: "output_timeline_seconds",
+          layers: [mainTransform, ...overlays.filter(overlay => !overlay.isCaption)].map(layer => ({
+            id: layer.id,
+            name: layer.name || layer.file?.name || layer.text || "Visual layer",
+            type: layer.type || "visual",
+            base_transform: {
+              x: Number(layer.x ?? 50),
+              y: Number(layer.y ?? 50),
+              scale: Number(layer.scale ?? 1),
+              rotation: Number(layer.rotation ?? 0),
+              opacity: Number(layer.opacity ?? 1),
+              crop_x: Number(layer.cropX ?? 0),
+              crop_y: Number(layer.cropY ?? 0),
+            },
+            anchor_x: Number(layer.anchorX ?? 50),
+            anchor_y: Number(layer.anchorY ?? 50),
+            effects: {
+              blur: Number(layer.blur || 0),
+              glow: {
+                enabled: !!layer.glow?.enabled,
+                color: layer.glow?.color || "#8b5cf6",
+                radius: Number(layer.glow?.radius || 0),
+                intensity: Number(layer.glow?.intensity || 0),
+              },
+              shadow: {
+                enabled: !!layer.layerShadow?.enabled,
+                color: layer.layerShadow?.color || "#000000",
+                blur: Number(layer.layerShadow?.blur || 0),
+                opacity: Number(layer.layerShadow?.opacity || 0),
+                x: Number(layer.layerShadow?.x || 0),
+                y: Number(layer.layerShadow?.y || 0),
+              },
+              motion_blur: {
+                enabled: !!layer.motionBlur?.enabled,
+                samples: Number(layer.motionBlur?.samples || 1),
+                shutter: Number(layer.motionBlur?.shutter || 0),
+              },
+            },
+            motion_keyframes: motionKeyframes
+              .filter(keyframe => String(keyframe.targetId) === String(layer.id))
+              .map(keyframe => ({
+                id: keyframe.id,
+                property: keyframe.property,
+                time: Number(keyframe.time || 0),
+                value: Number(keyframe.value || 0),
+                easing: keyframe.easing || "ease_in_out",
+                ...(keyframe.curve ? { curve: keyframe.curve.map(Number) } : {}),
+              })),
+          })),
+        },
+        audioRestoration,
+        audioAutomation: audioKeyframes,
+        audioTrackStates: trackStates,
+        stabilization,
+        advancedColor,
+        proxySettings,
+        splitExport: {
+          enabled: splitExportEnabled,
+          hooks: splitExportEnabled ? splitExportHooks : [],
+        },
         smartCrop,
         smartCropMode,
+        reframeModeCuts: normalizeReframeModeCuts(reframeModeCuts),
+        speakerStackFraming,
+        speakerFocusCuts: normalizeSpeakerFocusCuts(speakerFocusCuts),
         enhanceQuality,
         silenceRemoval,
         silenceThreshold,
@@ -6777,7 +10737,9 @@ const ViralClipStudio = ({
         removeWatermark,
         watermarkMode,
         brandWatermark,
+        brandWatermarkVariant,
         brandWatermarkText,
+        brandWatermarkSchedule,
         manualWatermarkRegions: serializeManualWatermarkRegions(manualWatermarkRegions),
         addHook,
         hookText,
@@ -6817,7 +10779,7 @@ const ViralClipStudio = ({
         hookFreezeFrame,
         hookZoomScale,
         hookTextAnimation,
-        addMusic: addMusic && !!musicTrack,
+        addMusic: addMusic && !!musicTrack && musicTrackAudible,
         musicFile: null,
         musicUrl: exportedMusicUrl,
         musicName: musicTrack?.name || null,
@@ -6831,8 +10793,10 @@ const ViralClipStudio = ({
         musicFadeIn: musicTrack?.fadeIn ?? 0.5,
         musicFadeOut: musicTrack?.fadeOut ?? 0.5,
         musicLoop: musicTrack?.loop ?? true,
-        soundEffects: exportedSoundEffects,
-        muteAudio: muteOriginalAudio,
+        soundEffects: [...exportedSoundEffects, ...exportedVoiceovers],
+        audioRemix: audioRemixForRender(audioRemix),
+        motionGraphics: { version: 1, scenes: motionScenes.map(normalizeMotion) },
+        muteAudio: muteOriginalAudio || !isStudioAudioTrackAudible(trackStates, "originalAudio"),
         timelineSegments: exportTimeline,
         backgroundAudio: null,
         exportDestination: destination || "general",
@@ -6987,6 +10951,7 @@ const ViralClipStudio = ({
         );
       }
       syncHistoryAvailability();
+      scheduleProjectAutosave(snapshot);
       return;
     }
 
@@ -7006,6 +10971,7 @@ const ViralClipStudio = ({
     lastSnapshotRef.current = snapshot;
     lastSnapshotSignatureRef.current = serializedSnapshot;
     syncHistoryAvailability();
+    scheduleProjectAutosave(snapshot);
   }, [
     orderedClips,
     selectedClip,
@@ -7034,10 +11000,21 @@ const ViralClipStudio = ({
     cutRangeStart,
     cutRangeEnd,
     joinTransition,
+    joinTransitionDuration,
     smartCrop,
     smartCropMode,
+    reframeModeCuts,
     reframeAspect,
+    speakerTrackZoom,
     reframeKeyframes,
+    speakerStackFraming,
+    speakerStackSourceIds,
+    speakerStackOffsets,
+    speakerStackSources,
+    speakerStackCameraCount,
+    speakerStackLayout,
+    speakerStackSyncConfirmed,
+    speakerFocusCuts,
     activeReframeKeyframeId,
     enhanceQuality,
     silenceRemoval,
@@ -7046,6 +11023,7 @@ const ViralClipStudio = ({
     removeWatermark,
     watermarkMode,
     brandWatermark,
+    brandWatermarkVariant,
     brandWatermarkText,
     manualWatermarkRegions,
     activeWatermarkRegionId,
@@ -7077,7 +11055,30 @@ const ViralClipStudio = ({
     bRollCadence,
     timeline,
     activeTimelineIndex,
+    timelineZoom,
+    timelineEditTool,
+    timelineSnapping,
+    linkedSelection,
+    rippleMode,
+    trackStates,
+    motionKeyframes,
+    motionTargetId,
+    compositeTargetId,
+    mainTransform,
+    audioKeyframes,
+    speedKeyframes,
+    voiceovers,
+    adjustmentLayers,
+    compoundClips,
+    audioAutomationSource,
+    audioRestoration,
+    proxySettings,
+    stabilization,
+    advancedColor,
+    splitExportEnabled,
+    splitExportHooks,
     isDragging,
+    motionScenes,
   ]);
 
   useEffect(() => {
@@ -7114,6 +11115,7 @@ const ViralClipStudio = ({
     captionStyle,
     smartCrop,
     smartCropMode,
+    reframeModeCuts,
     silenceRemoval,
     silenceThreshold,
     minSilenceDuration,
@@ -7191,6 +11193,38 @@ const ViralClipStudio = ({
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [activeOverlayId]);
+
+  useEffect(() => {
+    if (!directorModeActive) return;
+
+    const handleDirectorKeyDown = (event) => {
+      const targetTag = event.target?.tagName;
+      const isTyping =
+        event.target?.isContentEditable ||
+        ["INPUT", "TEXTAREA"].includes(targetTag);
+      if (isTyping) return;
+
+      if (event.key === "1") {
+        event.preventDefault();
+        switchDirectorAngle(0);
+      } else if (event.key === "2") {
+        event.preventDefault();
+        switchDirectorAngle(1);
+      } else if (event.key === "3") {
+        event.preventDefault();
+        switchDirectorAngle(2);
+      } else if (event.key === "4") {
+        event.preventDefault();
+        switchDirectorAngle(3);
+      } else if (event.key === "Escape") {
+        event.preventDefault();
+        setDirectorModeActive(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleDirectorKeyDown);
+    return () => window.removeEventListener("keydown", handleDirectorKeyDown);
+  }, [directorModeActive, activeDirectorAngle, previewTimelineTime, directorAngles]);
 
   // Playback Logic: Handle loop of single clip OR sequence of timeline
   useEffect(() => {
@@ -7396,7 +11430,7 @@ const ViralClipStudio = ({
       const currentSrc = videoRef.current.src;
       const afterSource = renderedOutputUrl || clip.url;
       if (currentSrc !== afterSource && afterSource) {
-        setIsAfterPreviewReady(false);
+        setIsAfterPreviewReady(Boolean(videoRef.current?.readyState >= 2));
         applySafeMediaSource(videoRef.current, afterSource);
         // Reset to start
         videoRef.current.currentTime = targetStart;
@@ -7426,9 +11460,467 @@ const ViralClipStudio = ({
   }, [activeTimelineIndex, timeline, selectedClip, isDragging, renderedOutputUrl]);
 
   useEffect(() => {
+    const video = videoRef.current;
+    const canvas = afterCanvasRef.current;
+    if (!video || !canvas) return undefined;
+
+    let animationFrame = 0;
+    const paintProgrammeFrame = () => {
+      // CSS effects do not alter drawImage's decoded pixels. Use the actual
+      // programme element, not the lagging Before comparison clock: a 100 ms
+      // scrub across a camera cut must not show the previous shot's pixels.
+      const sourceVideo = video;
+      if (sourceVideo.readyState < 2 || !sourceVideo.videoWidth || !sourceVideo.videoHeight) return;
+      const rect = phoneFrameRef.current?.getBoundingClientRect();
+      if (rect.width < 1 || rect.height < 1) return;
+      const pixelRatio = Math.min(1.5, Math.max(1, window.devicePixelRatio || 1));
+      const canvasWidth = Math.max(2, Math.round(rect.width * pixelRatio));
+      const canvasHeight = Math.max(2, Math.round(rect.height * pixelRatio));
+      if (canvas.width !== canvasWidth) canvas.width = canvasWidth;
+      if (canvas.height !== canvasHeight) canvas.height = canvasHeight;
+      const context = canvas.getContext("2d", { alpha: false });
+      if (!context) return;
+      const [rawPositionX = "50", rawPositionY = "50"] = String(
+        previewProgrammePosition || "50% 50%"
+      ).split(/\s+/);
+      const positionX = clampNumber(parseFloat(rawPositionX), 0, 100, 50) / 100;
+      const positionY = clampNumber(parseFloat(rawPositionY), 0, 100, 50) / 100;
+      const widthScale = canvasWidth / sourceVideo.videoWidth;
+      const heightScale = canvasHeight / sourceVideo.videoHeight;
+      const scale = previewProgrammeFit === "cover"
+        ? Math.max(widthScale, heightScale) * (effectiveSmartCrop && effectiveSmartCropMode === "speaker_track" && !renderedOutputUrl ? speakerTrackZoom : 1)
+        : Math.min(widthScale, heightScale);
+      const drawWidth = sourceVideo.videoWidth * scale;
+      const drawHeight = sourceVideo.videoHeight * scale;
+      context.fillStyle = "#000";
+      context.fillRect(0, 0, canvasWidth, canvasHeight);
+      const isDualCamShowEveryone =
+        effectiveSmartCrop &&
+        effectiveSmartCropMode === "center" &&
+        reframeAspect !== "16:9";
+      if (effectiveSmartCropMode === "center" && !isDualCamShowEveryone && canvasHeight > drawHeight + 8) {
+        context.save();
+        const bgScale = Math.max(widthScale, heightScale);
+        const bgW = sourceVideo.videoWidth * bgScale;
+        const bgH = sourceVideo.videoHeight * bgScale;
+        context.filter = "blur(18px) brightness(0.42) saturate(1.25)";
+        context.drawImage(
+          sourceVideo,
+          (canvasWidth - bgW) * 0.5,
+          (canvasHeight - bgH) * 0.5,
+          bgW,
+          bgH
+        );
+        context.restore();
+      }
+      context.save();
+      context.filter = previewProgrammeFilter;
+      const currentDirectorAngle = directorModeActive ? directorAngles[activeDirectorAngle] : null;
+      const directorZoom = currentDirectorAngle?.zoom && currentDirectorAngle.zoom > 1 ? currentDirectorAngle.zoom : 1;
+      const programmeScale = (renderedOutputUrl || activeSideBySideOverlay
+        ? 1
+        : hookVisualScale * smartCropBackgroundScale * finishZoom * mainMotionAutomation.scale) * directorZoom;
+      const translateX = renderedOutputUrl || activeSideBySideOverlay
+        ? 0
+        : ((mainMotionAutomation.x - 50) / 100) * canvasWidth;
+      const translateY = renderedOutputUrl || activeSideBySideOverlay
+        ? 0
+        : ((mainMotionAutomation.y - 50) / 100) * canvasHeight;
+      const rotation = renderedOutputUrl || activeSideBySideOverlay
+        ? 0
+        : (mainMotionAutomation.rotation * Math.PI) / 180;
+      context.translate(canvasWidth / 2 + translateX, canvasHeight / 2 + translateY);
+      context.rotate(rotation);
+      context.scale(programmeScale, programmeScale);
+      context.translate(-canvasWidth / 2, -canvasHeight / 2);
+      context.globalAlpha = renderedOutputUrl
+        ? 1
+        : hookPrimaryVideoOpacity * mainMotionAutomation.opacity;
+      const isDualCamStackLive =
+        (isDualCamShowEveryone || speakerStackPreviewIsLive) &&
+        !renderedOutputUrl &&
+        !activeSideBySideOverlay;
+      if (isDualCamStackLive) {
+        const gap = Math.max(
+          2,
+          Math.round(canvasHeight * 0.003)
+        );
+        const drawSpeakerPanel = (
+          panelVideo,
+          panelX,
+          panelY,
+          panelWidth,
+          panelHeight,
+          framing
+        ) => {
+          const activeVideo =
+            panelVideo?.readyState >= 2 && panelVideo?.videoWidth
+              ? panelVideo
+              : sourceVideo;
+          if (!activeVideo || activeVideo.readyState < 2 || !activeVideo.videoWidth) return;
+          const zoom = clampNumber(framing?.zoom, 1, 7, 1.25);
+          const focusX = clampNumber(framing?.x, 0, 100, 50) / 100;
+          const focusY = clampNumber(framing?.y, 0, 100, 50) / 100;
+          const coverScale =
+            Math.max(panelWidth / activeVideo.videoWidth, panelHeight / activeVideo.videoHeight) *
+            zoom;
+          const panelDrawWidth = activeVideo.videoWidth * coverScale;
+          const panelDrawHeight = activeVideo.videoHeight * coverScale;
+          const unclampedX = panelX + panelWidth / 2 - focusX * panelDrawWidth;
+          const unclampedY = panelY + panelHeight / 2 - focusY * panelDrawHeight;
+          const drawX = clampNumber(
+            unclampedX,
+            panelX + panelWidth - panelDrawWidth,
+            panelX,
+            panelX
+          );
+          const drawY = clampNumber(
+            unclampedY,
+            panelY + panelHeight - panelDrawHeight,
+            panelY,
+            panelY
+          );
+          context.save();
+          context.beginPath();
+          const shouldRoundPanel =
+            !isDualCamShowEveryone &&
+            ["pip_2", "active_2"].includes(speakerStackLayout) &&
+            panelWidth < canvasWidth;
+          if (shouldRoundPanel && typeof context.roundRect === "function") {
+            context.roundRect(
+              panelX,
+              panelY,
+              panelWidth,
+              panelHeight,
+              Math.max(1, Math.min(panelWidth, panelHeight) * 0.08)
+            );
+          } else {
+            context.rect(panelX, panelY, panelWidth, panelHeight);
+          }
+          context.clip();
+          context.drawImage(
+            activeVideo,
+            drawX,
+            drawY,
+            panelDrawWidth,
+            panelDrawHeight
+          );
+          context.restore();
+        };
+
+        if (isDualCamShowEveryone) {
+          const halfHeight = Math.max(1, (canvasHeight - gap) / 2);
+          const topFraming = {
+            ...speakerStackFraming.top,
+            x: clampNumber(speakerStackFraming?.top?.x ?? 30, 0, 100, 30),
+            y: clampNumber(speakerStackFraming?.top?.y ?? 50, 0, 100, 50),
+            zoom: clampNumber(speakerStackFraming?.top?.zoom ?? 1.25, 1, 7, 1.25),
+          };
+          const bottomFraming = {
+            ...speakerStackFraming.bottom,
+            x: clampNumber(speakerStackFraming?.bottom?.x ?? 70, 0, 100, 70),
+            y: clampNumber(speakerStackFraming?.bottom?.y ?? 50, 0, 100, 50),
+            zoom: clampNumber(speakerStackFraming?.bottom?.zoom ?? 1.25, 1, 7, 1.25),
+          };
+          if (speakerStackFraming.trackSpeakers) {
+            if (topFraming.keyframes?.length) Object.assign(topFraming, interpolateReframeKeyframes(topFraming.keyframes, previewTimelineTime));
+            if (bottomFraming.keyframes?.length) Object.assign(bottomFraming, interpolateReframeKeyframes(bottomFraming.keyframes, previewTimelineTime));
+          }
+          const primaryFraming =
+            activeShowEveryonePrimarySlot === "bottom" ? bottomFraming : topFraming;
+          const secondaryFraming =
+            activeShowEveryonePrimarySlot === "bottom" ? topFraming : bottomFraming;
+          // A reviewed speaker cut swaps panel order without leaving Show Everyone.
+          drawSpeakerPanel(sourceVideo, 0, 0, canvasWidth, halfHeight, primaryFraming);
+          drawSpeakerPanel(
+            sourceVideo,
+            0,
+            halfHeight + gap,
+            canvasWidth,
+            Math.max(1, canvasHeight - halfHeight - gap),
+            secondaryFraming
+          );
+          // Divider between cameras
+          context.fillStyle = "rgba(5, 8, 14, 0.96)";
+          context.fillRect(0, halfHeight, canvasWidth, gap);
+        } else {
+          const cameraCount = clampNumber(speakerStackCameraCount, 2, 4, 2);
+          const halfWidth = Math.max(1, (canvasWidth - gap) / 2);
+          const halfHeight = Math.max(1, (canvasHeight - gap) / 2);
+          let panelRects;
+          if (cameraCount === 4 || speakerStackLayout === "grid_4") {
+            panelRects = [
+              [0, 0, halfWidth, halfHeight],
+              [halfWidth + gap, 0, halfWidth, halfHeight],
+              [0, halfHeight + gap, halfWidth, halfHeight],
+              [halfWidth + gap, halfHeight + gap, halfWidth, halfHeight],
+            ];
+          } else if (cameraCount === 3 || speakerStackLayout === "hero_3") {
+            const heroHeight = Math.max(1, canvasHeight * 0.54 - gap / 2);
+            const lowerY = heroHeight + gap;
+            const lowerHeight = Math.max(1, canvasHeight - lowerY);
+            panelRects = [
+              [0, 0, canvasWidth, heroHeight],
+              [0, lowerY, halfWidth, lowerHeight],
+              [halfWidth + gap, lowerY, halfWidth, lowerHeight],
+            ];
+          } else if (speakerStackLayout === "split_2") {
+            panelRects = [
+              [0, 0, halfWidth, canvasHeight],
+              [halfWidth + gap, 0, halfWidth, canvasHeight],
+            ];
+          } else if (speakerStackLayout === "pip_2" || speakerStackLayout === "active_2") {
+            const secondarySize =
+              clampNumber(speakerStackFraming.secondarySizePercent, 20, 46, 30) / 100;
+            const secondaryWidth = canvasWidth * secondarySize;
+            const secondaryHeight = canvasHeight * secondarySize;
+            const secondaryCenterX =
+              (clampNumber(speakerStackFraming.secondaryXPercent, 16, 84, 80) / 100) *
+              canvasWidth;
+            const secondaryCenterY =
+              (clampNumber(speakerStackFraming.secondaryYPercent, 16, 84, 20) / 100) *
+              canvasHeight;
+            panelRects = [
+              [0, 0, canvasWidth, canvasHeight],
+              [
+                clampNumber(
+                  secondaryCenterX - secondaryWidth / 2,
+                  0,
+                  canvasWidth - secondaryWidth,
+                  0
+                ),
+                clampNumber(
+                  secondaryCenterY - secondaryHeight / 2,
+                  0,
+                  canvasHeight - secondaryHeight,
+                  0
+                ),
+                secondaryWidth,
+                secondaryHeight,
+              ],
+            ];
+          } else if (speakerStackLayout === "spotlight_2") {
+            panelRects = [[0, 0, canvasWidth, canvasHeight], [0, 0, 0, 0]];
+          } else {
+            const dividerRatio =
+              clampNumber(speakerStackFraming.dividerPercent, 35, 65, 50) / 100;
+            const topHeight = Math.max(1, canvasHeight * dividerRatio - gap / 2);
+            const bottomY = topHeight + gap;
+            panelRects = [
+              [0, 0, canvasWidth, topHeight],
+              [0, bottomY, canvasWidth, Math.max(1, canvasHeight - bottomY)],
+            ];
+          }
+          const stackVideosBySlot = {
+            top: speakerStackTopVideoRef.current,
+            bottom: speakerStackBottomVideoRef.current,
+            third: speakerStackThirdVideoRef.current,
+            fourth: speakerStackFourthVideoRef.current,
+          };
+          const reviewedFocusSlot = resolveSpeakerFocusSlot(
+            speakerFocusCuts,
+            previewTimelineTime,
+            activeSpeakerStackSlots
+          );
+          const displaySlots = ["active_2", "spotlight_2"].includes(speakerStackLayout)
+            ? [
+                reviewedFocusSlot,
+                ...activeSpeakerStackSlots.filter(slot => slot !== reviewedFocusSlot),
+              ]
+            : activeSpeakerStackSlots;
+          displaySlots.forEach((slot, index) => {
+            const [x, y, width, height] = panelRects[index] || [];
+            if (!width || !height) return;
+            drawSpeakerPanel(
+              stackVideosBySlot[slot],
+              x,
+              y,
+              width,
+              height,
+              speakerStackFraming[slot]
+            );
+          });
+          context.fillStyle = "rgba(5, 8, 14, 0.96)";
+          if (cameraCount === 2 && speakerStackLayout === "split_2") {
+            context.fillRect(panelRects[0][2], 0, gap, canvasHeight);
+          } else if (cameraCount === 2 && speakerStackLayout === "stack_2") {
+            context.fillRect(0, panelRects[0][3], canvasWidth, gap);
+          } else if (cameraCount === 3) {
+            context.fillRect(0, panelRects[0][3], canvasWidth, gap);
+            context.fillRect(halfWidth, panelRects[1][1], gap, panelRects[1][3]);
+          } else if (cameraCount === 4) {
+            context.fillRect(0, halfHeight, canvasWidth, gap);
+            context.fillRect(halfWidth, 0, gap, canvasHeight);
+          }
+        }
+      } else {
+        context.drawImage(
+          sourceVideo,
+          (canvasWidth - drawWidth) * positionX,
+          (canvasHeight - drawHeight) * positionY,
+          drawWidth,
+          drawHeight
+        );
+      }
+      context.restore();
+      if (precisionPreviewGrade || (finishPreviewIsLive && advancedColorCube)) {
+        const pixels = context.getImageData(0, 0, canvasWidth, canvasHeight);
+        if (precisionPreviewGrade) applyPrecisionGrade(pixels.data, precisionPreviewGrade);
+        if (finishPreviewIsLive && advancedColorCube) applyColorCube(pixels.data, advancedColorCube);
+        context.putImageData(pixels, 0, 0);
+      }
+    };
+    const paintProgrammeLoop = () => {
+      paintProgrammeFrame();
+      if (!video.paused && !video.ended) {
+        animationFrame = window.requestAnimationFrame(paintProgrammeLoop);
+      } else {
+        animationFrame = 0;
+      }
+    };
+    const startProgrammeLoop = () => {
+      if (!animationFrame) animationFrame = window.requestAnimationFrame(paintProgrammeLoop);
+    };
+    const stopProgrammeLoop = () => {
+      if (animationFrame) window.cancelAnimationFrame(animationFrame);
+      animationFrame = 0;
+      paintProgrammeFrame();
+    };
+
+    video.addEventListener("loadeddata", paintProgrammeFrame);
+    video.addEventListener("loadedmetadata", paintProgrammeFrame);
+    video.addEventListener("seeked", paintProgrammeFrame);
+    video.addEventListener("timeupdate", paintProgrammeFrame);
+    video.addEventListener("play", startProgrammeLoop);
+    video.addEventListener("pause", stopProgrammeLoop);
+    const syncedSource = beforeVideoRef.current;
+    syncedSource?.addEventListener("loadeddata", paintProgrammeFrame);
+    syncedSource?.addEventListener("seeked", paintProgrammeFrame);
+    const stackTopVideo = speakerStackTopVideoRef.current;
+    const stackBottomVideo = speakerStackBottomVideoRef.current;
+    const stackThirdVideo = speakerStackThirdVideoRef.current;
+    const stackFourthVideo = speakerStackFourthVideoRef.current;
+    const stackVideos = [
+      stackTopVideo,
+      stackBottomVideo,
+      stackThirdVideo,
+      stackFourthVideo,
+    ];
+    stackVideos.forEach(stackVideo => {
+      stackVideo?.addEventListener("loadeddata", paintProgrammeFrame);
+      stackVideo?.addEventListener("seeked", paintProgrammeFrame);
+    });
+    const transport = phoneFrameRef.current?.parentElement?.querySelector(".preview-custom-controls");
+    const resizeProgramme = () => {
+      if (transport && phoneFrameRef.current?.parentElement) {
+        phoneFrameRef.current.parentElement.style.setProperty("--transport-space",
+          `${Math.ceil(transport.getBoundingClientRect().height) + 8}px`);
+      }
+      paintProgrammeFrame();
+    };
+    const previewResizeObserver = typeof ResizeObserver === "function"
+      ? new ResizeObserver(resizeProgramme) : null;
+    if (phoneFrameRef.current) previewResizeObserver?.observe(phoneFrameRef.current);
+    if (transport) previewResizeObserver?.observe(transport);
+    resizeProgramme();
+    window.addEventListener("resize", paintProgrammeFrame);
+    paintProgrammeFrame();
+    if (!video.paused) startProgrammeLoop();
+
+    return () => {
+      video.removeEventListener("loadeddata", paintProgrammeFrame);
+      video.removeEventListener("loadedmetadata", paintProgrammeFrame);
+      video.removeEventListener("seeked", paintProgrammeFrame);
+      video.removeEventListener("timeupdate", paintProgrammeFrame);
+      video.removeEventListener("play", startProgrammeLoop);
+      video.removeEventListener("pause", stopProgrammeLoop);
+      syncedSource?.removeEventListener("loadeddata", paintProgrammeFrame);
+      syncedSource?.removeEventListener("seeked", paintProgrammeFrame);
+      stackVideos.forEach(stackVideo => {
+        stackVideo?.removeEventListener("loadeddata", paintProgrammeFrame);
+        stackVideo?.removeEventListener("seeked", paintProgrammeFrame);
+      });
+      previewResizeObserver?.disconnect();
+      window.removeEventListener("resize", paintProgrammeFrame);
+      if (animationFrame) window.cancelAnimationFrame(animationFrame);
+    };
+  }, [
+    smartCrop,
+    smartCropMode,
+    speakerTrackZoom,
+    activeSideBySideOverlay,
+    activeTimelineIndex,
+    currentTimelineClip,
+    previewProgrammeFit,
+    previewProgrammeFilter,
+    precisionPreviewGrade,
+    advancedColorCube,
+    finishPreviewIsLive,
+    previewProgrammePosition,
+    reframeAspect,
+    renderedOutputUrl,
+    activeSpeakerStackSlots,
+    speakerStackCameraCount,
+    speakerStackFraming,
+    speakerStackLayout,
+    speakerStackPreviewIsLive,
+    speakerFocusCuts,
+    previewTimelineTime,
+    hookVisualScale,
+    smartCropBackgroundScale,
+    finishZoom,
+    mainMotionAutomation.x,
+    mainMotionAutomation.y,
+    mainMotionAutomation.rotation,
+    mainMotionAutomation.scale,
+    mainMotionAutomation.opacity,
+    hookPrimaryVideoOpacity,
+  ]);
+
+  useEffect(() => {
     const afterVideo = videoRef.current;
     const beforeVideo = beforeVideoRef.current;
-    if (!afterVideo || !beforeVideo || !currentTimelineClip) return undefined;
+    const beforeCanvas = beforeCanvasRef.current;
+    if (!afterVideo || !beforeVideo || !beforeCanvas || !currentTimelineClip) return undefined;
+
+    let beforeAnimationFrame = 0;
+    const paintBeforeFrame = () => {
+      if (beforeVideo.readyState < 2 || !beforeVideo.videoWidth || !beforeVideo.videoHeight) return;
+      const context = beforeCanvas.getContext("2d", { alpha: false });
+      if (!context) return;
+      const canvasWidth = 960;
+      const canvasHeight = 540;
+      if (beforeCanvas.width !== canvasWidth) beforeCanvas.width = canvasWidth;
+      if (beforeCanvas.height !== canvasHeight) beforeCanvas.height = canvasHeight;
+      const scale = Math.min(
+        canvasWidth / beforeVideo.videoWidth,
+        canvasHeight / beforeVideo.videoHeight
+      );
+      const drawWidth = beforeVideo.videoWidth * scale;
+      const drawHeight = beforeVideo.videoHeight * scale;
+      context.fillStyle = "#000";
+      context.fillRect(0, 0, canvasWidth, canvasHeight);
+      context.drawImage(
+        beforeVideo,
+        (canvasWidth - drawWidth) / 2,
+        (canvasHeight - drawHeight) / 2,
+        drawWidth,
+        drawHeight
+      );
+    };
+    const paintBeforeLoop = () => {
+      paintBeforeFrame();
+      if (!afterVideo.paused) {
+        beforeAnimationFrame = window.requestAnimationFrame(paintBeforeLoop);
+      } else {
+        beforeAnimationFrame = 0;
+      }
+    };
+    const startBeforeLoop = () => {
+      if (!beforeAnimationFrame) {
+        beforeAnimationFrame = window.requestAnimationFrame(paintBeforeLoop);
+      }
+    };
 
     applySafeMediaSource(beforeVideo, currentTimelineClip.url);
     beforeVideo.muted = true;
@@ -7442,7 +11934,7 @@ const ViralClipStudio = ({
       const targetTime = Number(afterVideo.currentTime || currentTimelineWindow.start || 0);
       if (
         Number.isFinite(targetTime) &&
-        Math.abs(Number(beforeVideo.currentTime || 0) - targetTime) > 0.12
+        Math.abs(Number(beforeVideo.currentTime || 0) - targetTime) > (afterVideo.paused ? .001 : .04)
       ) {
         try {
           beforeVideo.currentTime = targetTime;
@@ -7453,11 +11945,16 @@ const ViralClipStudio = ({
       beforeVideo.playbackRate = afterVideo.playbackRate || 1;
       if (afterVideo.paused) {
         beforeVideo.pause();
+        paintBeforeFrame();
       } else {
         safePlayMediaElement(beforeVideo);
+        startBeforeLoop();
       }
     };
-    const pauseBeforePreview = () => beforeVideo.pause();
+    const pauseBeforePreview = () => {
+      beforeVideo.pause();
+      paintBeforeFrame();
+    };
 
     afterVideo.addEventListener("play", syncBeforePreview);
     afterVideo.addEventListener("loadeddata", syncBeforePreview);
@@ -7467,6 +11964,14 @@ const ViralClipStudio = ({
     afterVideo.addEventListener("seeked", syncBeforePreview);
     afterVideo.addEventListener("ratechange", syncBeforePreview);
     afterVideo.addEventListener("pause", pauseBeforePreview);
+    // A source can finish loading after the programme has already sought or
+    // paused. Reconcile its clock at that point; painting alone leaves a stale
+    // Before frame (which is also used by the programme canvas).
+    beforeVideo.addEventListener("loadedmetadata", syncBeforePreview);
+    beforeVideo.addEventListener("loadeddata", syncBeforePreview);
+    beforeVideo.addEventListener("canplay", syncBeforePreview);
+    beforeVideo.addEventListener("seeked", paintBeforeFrame);
+    beforeVideo.addEventListener("timeupdate", paintBeforeFrame);
     syncBeforePreview();
 
     return () => {
@@ -7478,6 +11983,12 @@ const ViralClipStudio = ({
       afterVideo.removeEventListener("seeked", syncBeforePreview);
       afterVideo.removeEventListener("ratechange", syncBeforePreview);
       afterVideo.removeEventListener("pause", pauseBeforePreview);
+      beforeVideo.removeEventListener("loadedmetadata", syncBeforePreview);
+      beforeVideo.removeEventListener("loadeddata", syncBeforePreview);
+      beforeVideo.removeEventListener("canplay", syncBeforePreview);
+      beforeVideo.removeEventListener("seeked", paintBeforeFrame);
+      beforeVideo.removeEventListener("timeupdate", paintBeforeFrame);
+      if (beforeAnimationFrame) window.cancelAnimationFrame(beforeAnimationFrame);
       beforeVideo.pause();
     };
   }, [activeTimelineIndex, currentTimelineClip, currentTimelineWindow.start]);
@@ -7490,8 +12001,9 @@ const ViralClipStudio = ({
     if (!extractedAudio?.url) {
       if (video) {
         const effectiveMuted = muteOriginalAudio || previewMuted;
-        video.muted = effectiveMuted;
-        video.volume = effectiveMuted ? 0 : clampAudioControl(previewVolume, 0, 1, 1);
+        if (video.muted !== effectiveMuted) video.muted = effectiveMuted;
+        const targetVol = effectiveMuted ? 0 : clampAudioControl(previewVolume, 0, 1, 1);
+        if (Math.abs(video.volume - targetVol) > 0.005) video.volume = targetVol;
       }
       audio.pause();
       audio.removeAttribute("src");
@@ -7505,7 +12017,17 @@ const ViralClipStudio = ({
       const audioMode = normalizeAudioMode(extractedAudio.mode);
       const duckingStrength = clampAudioControl(extractedAudio.duckingStrength, 0.15, 0.95, 0.45);
       const previewGain = previewMuted ? 0 : clampAudioControl(previewVolume, 0, 1, 1);
-      audio.volume = clampAudioControl(extractedAudio.volume, 0, 1, 0.7) * previewGain;
+      const masterAutomationGain =
+        interpolateAutomationValue({
+          keyframes: audioKeyframes.masterPodcast,
+          property: "volume",
+          time: getPreviewTimelineTime(video.currentTime || 0),
+          fallback: 100,
+        }) / 100;
+      audio.volume =
+        clampAudioControl(extractedAudio.volume, 0, 1, 0.7) *
+        previewGain *
+        masterAutomationGain;
       audio.playbackRate = video.playbackRate || 1;
       const muteOriginal =
         previewMuted ||
@@ -7587,6 +12109,7 @@ const ViralClipStudio = ({
     muteOriginalAudio,
     previewMuted,
     previewVolume,
+    audioKeyframes.masterPodcast,
   ]);
 
   // ── B-Roll overlay audio ducking ──
@@ -7622,21 +12145,31 @@ const ViralClipStudio = ({
     const baseMuted =
       previewMuted ||
       muteOriginalAudio ||
+      !isStudioAudioTrackAudible(trackStates, "originalAudio") ||
       (extractedAudio?.enabled !== false && extractedAudio?.url && extractedMode === "replace");
     const restoredBaseGain =
       extractedAudio?.enabled !== false && extractedAudio?.url && extractedMode === "duck_original"
         ? clampAudioControl(1 - extractedDuckingStrength, 0.05, 1, 0.55) * baseGain
         : baseGain;
+    const originalAutomationGain =
+      interpolateAutomationValue({
+        keyframes: audioKeyframes.originalAudio,
+        property: "volume",
+        time: previewTimelineTime,
+        fallback: 100,
+      }) / 100;
+
+    const applyAudio = (muted, vol) => {
+      if (video.muted !== muted) video.muted = muted;
+      if (Math.abs(video.volume - vol) > 0.005) video.volume = vol;
+    };
 
     if (anyMuteMain) {
-      video.muted = true;
-      video.volume = 0;
+      applyAudio(true, 0);
     } else if (anyDucking) {
-      video.muted = baseMuted;
-      video.volume = clampAudioControl(1 - duckingStrength, 0.05, 1, 0.55) * baseGain;
+      applyAudio(!!baseMuted, clampAudioControl(1 - duckingStrength, 0.05, 1, 0.55) * baseGain * originalAutomationGain);
     } else {
-      video.muted = !!baseMuted;
-      video.volume = baseMuted ? 0 : restoredBaseGain;
+      applyAudio(!!baseMuted, baseMuted ? 0 : restoredBaseGain * originalAutomationGain);
     }
   }, [
     previewTimelineTime,
@@ -7645,6 +12178,8 @@ const ViralClipStudio = ({
     previewVolume,
     muteOriginalAudio,
     extractedAudio,
+    audioKeyframes.originalAudio,
+    trackStates,
   ]);
 
   useEffect(() => {
@@ -7692,9 +12227,28 @@ const ViralClipStudio = ({
         overlayVideo.muted =
           !overlay.useOverlayAudio ||
           previewMuted ||
+          !isStudioAudioTrackAudible(trackStates, "broll") ||
           (sourceEndBehavior === "hold" && hasReachedSourceEnd);
         overlayVideo.defaultMuted = overlayVideo.muted;
-        overlayVideo.volume = clampAudioControl(overlay.overlayAudioVolume, 0, 1, 0.7);
+        const brollAutomationGain =
+          interpolateAutomationValue({
+            keyframes: audioKeyframes.broll,
+            property: "volume",
+            time: outputTime,
+            fallback: 100,
+          }) / 100;
+        const remainingTime = Math.max(0, visibleDuration - elapsed);
+        const microFadeDur = 0.06;
+        let microFade = 1.0;
+        if (elapsed < microFadeDur) {
+          microFade = Math.max(0.01, elapsed / microFadeDur);
+        } else if (remainingTime < microFadeDur) {
+          microFade = Math.max(0.01, remainingTime / microFadeDur);
+        }
+
+        overlayVideo.volume =
+          clampAudioControl(overlay.overlayAudioVolume, 0, 1, 0.7) * brollAutomationGain *
+          clampAudioControl(previewVolume, 0, 1, 1) * microFade;
 
         if (
           Number.isFinite(targetTime) &&
@@ -7731,7 +12285,16 @@ const ViralClipStudio = ({
       sourceVideo.removeEventListener("timeupdate", syncOverlayMedia);
       sourceVideo.removeEventListener("ratechange", syncOverlayMedia);
     };
-  }, [activeTimelineIndex, overlays, previewMuted, soloPreviewOverlayId, timeline]);
+  }, [
+    activeTimelineIndex,
+    overlays,
+    previewMuted,
+    soloPreviewOverlayId,
+    timeline,
+    audioKeyframes.broll,
+    previewVolume,
+    trackStates,
+  ]);
 
   useEffect(
     () => () => {
@@ -7752,7 +12315,7 @@ const ViralClipStudio = ({
     applySafeMediaSource(hookBackdropVideoRef.current, currentTimelineClip?.url);
     applySafeMediaSource(hookFreezeVideoRef.current, currentTimelineClip?.url);
     beatEchoVideoRefsRef.current.forEach(element =>
-      applySafeMediaSource(element, beatEchoPreviewIsLive ? currentTimelineClip?.url : null)
+      applySafeMediaSource(element, temporalPreviewIsLive ? currentTimelineClip?.url : null)
     );
     applySafeMediaSource(audioRef.current, extractedAudio?.url);
     applySafeMediaSource(
@@ -7766,20 +12329,30 @@ const ViralClipStudio = ({
     musicSearchMode,
     shouldShowWatermarkCleanupOnVideo,
     smartCrop,
-    beatEchoPreviewIsLive,
+    temporalPreviewIsLive,
     watermarkCleanupPreview,
   ]);
 
   useEffect(() => {
     const sourceVideo = videoRef.current;
     const echoVideos = beatEchoVideoRefsRef.current.filter(Boolean);
-    if (!sourceVideo || !beatEchoPreviewIsLive || !echoVideos.length) {
+    if (!sourceVideo || !temporalPreviewIsLive || !echoVideos.length) {
       echoVideos.forEach(video => video.pause());
       return undefined;
     }
 
     const delayStep =
-      creativeIntensity === "clean" ? 0.07 : creativeIntensity === "unreal" ? 0.1 : 0.085;
+      motionSculpturePreviewIsLive
+        ? creativeIntensity === "clean"
+          ? 0.1
+          : creativeIntensity === "unreal"
+            ? 0.18
+            : 0.14
+        : creativeIntensity === "clean"
+          ? 0.07
+          : creativeIntensity === "unreal"
+            ? 0.1
+            : 0.085;
     const effectStart =
       Number(currentTimelineWindow.start || 0) + Number(activeLiveCreativeEffect?.start_time || 0);
 
@@ -7828,7 +12401,8 @@ const ViralClipStudio = ({
     };
   }, [
     activeLiveCreativeEffect?.start_time,
-    beatEchoPreviewIsLive,
+    temporalPreviewIsLive,
+    motionSculpturePreviewIsLive,
     creativeIntensity,
     currentTimelineClip,
     currentTimelineWindow.start,
@@ -8193,12 +12767,21 @@ const ViralClipStudio = ({
         0
       );
       const previewGain = previewMuted ? 0 : clampAudioControl(previewVolume, 0, 1, 1);
+      const sfxAutomationGain =
+        interpolateAutomationValue({
+          keyframes: audioKeyframes.sfx,
+          property: "volume",
+          time: outputTime,
+          fallback: 100,
+        }) / 100;
 
       soundEffects.forEach(effect => {
         const start = Number(effect.startTime || 0);
         const duration = getSoundEffectDuration(effect);
         const elapsed = outputTime - start;
-        const isActive = effect.enabled !== false && elapsed >= 0 && elapsed < duration;
+        const isActive =
+          isStudioAudioTrackAudible(trackStates, "sfx") &&
+          effect.enabled !== false && elapsed >= 0 && elapsed < duration;
         const audio = soundEffectAudioRefsRef.current.get(effect.id);
 
         if (!isActive || video.paused) {
@@ -8211,7 +12794,10 @@ const ViralClipStudio = ({
         if (effect.builtIn) {
           if (!triggeredSoundEffectsRef.current.has(effect.id)) {
             triggeredSoundEffectsRef.current.add(effect.id);
-            void playBuiltInSoundEffect(effect, elapsed).catch(error => {
+            void playBuiltInSoundEffect(
+              { ...effect, volume: Number(effect.volume || 0.8) * sfxAutomationGain },
+              elapsed
+            ).catch(error => {
               console.log("Sound effect playback prevented", error);
             });
           }
@@ -8220,7 +12806,11 @@ const ViralClipStudio = ({
 
         if (!audio || !effect.url) return;
         const targetTime = Number(effect.trimStart || 0) + elapsed;
-        audio.volume = clampAudioControl(effect.volume, 0, 1, 0.8) * previewGain * fadeGain;
+        audio.volume =
+          clampAudioControl(effect.volume, 0, 1, 0.8) *
+          previewGain *
+          fadeGain *
+          sfxAutomationGain;
         audio.playbackRate = video.playbackRate || 1;
         if (Math.abs(Number(audio.currentTime || 0) - targetTime) > 0.18) {
           try {
@@ -8260,6 +12850,8 @@ const ViralClipStudio = ({
     renderedOutputUrl,
     activeTimelineIndex,
     timeline,
+    audioKeyframes.sfx,
+    trackStates,
   ]);
 
   // ── Speech-aware auto-ducking for music preview ──
@@ -8268,7 +12860,8 @@ const ViralClipStudio = ({
     if (!music || !addMusic || !effectiveMusicPreviewUrl) return;
     if (!musicTrack?.ducking || musicTrack.duckingMode !== "speech") {
       // Reset volume to track setting when not in speech mode
-      const baseGain = previewMuted ? 0 : clampAudioControl(previewVolume, 0, 1, 1);
+      const baseGain = previewMuted || !isStudioAudioTrackAudible(trackStates, "music")
+        ? 0 : clampAudioControl(previewVolume, 0, 1, 1);
       const previewTimelineTime = clampAudioControl(
         getPreviewTimelineTime(videoRef.current?.currentTime || 0),
         0,
@@ -8281,8 +12874,18 @@ const ViralClipStudio = ({
         musicTrack?.fadeIn,
         musicTrack?.fadeOut
       );
+      const automationGain =
+        interpolateAutomationValue({
+          keyframes: audioKeyframes.music,
+          property: "volume",
+          time: previewTimelineTime,
+          fallback: 100,
+        }) / 100;
       music.volume =
-        clampAudioControl(musicTrack?.volume ?? musicVolume, 0.05, 0.6, 0.15) * baseGain * fadeGain;
+        clampAudioControl(musicTrack?.volume ?? musicVolume, 0.05, 0.6, 0.15) *
+        baseGain *
+        fadeGain *
+        automationGain;
       return;
     }
 
@@ -8292,7 +12895,8 @@ const ViralClipStudio = ({
     let lastDuckedVolume = music.volume;
     const duckingStrength = musicTrack.duckingStrength ?? 0.4;
     const baseVolume = clampAudioControl(musicTrack.volume ?? musicVolume, 0.05, 0.6, 0.15);
-    const baseGain = previewMuted ? 0 : clampAudioControl(previewVolume, 0, 1, 1);
+    const baseGain = previewMuted || !isStudioAudioTrackAudible(trackStates, "music")
+      ? 0 : clampAudioControl(previewVolume, 0, 1, 1);
     const maxMusicVol = baseVolume * baseGain;
 
     const duckLoop = () => {
@@ -8309,8 +12913,16 @@ const ViralClipStudio = ({
         musicTrack?.fadeIn,
         musicTrack?.fadeOut
       );
+      const automationGain =
+        interpolateAutomationValue({
+          keyframes: audioKeyframes.music,
+          property: "volume",
+          time: previewTimelineTime,
+          fallback: 100,
+        }) / 100;
       // Smooth transition: target volume inversely proportional to speech energy
-      const targetVolume = maxMusicVol * fadeGain * (1 - speechEnergy * duckingStrength);
+      const targetVolume =
+        maxMusicVol * fadeGain * automationGain * (1 - speechEnergy * duckingStrength);
       // Smooth ramp (0.08 = ~60ms smoothing)
       const smoothed = lastDuckedVolume + (targetVolume - lastDuckedVolume) * 0.08;
       music.volume = clampAudioControl(smoothed, 0, 0.6, 0.02);
@@ -8338,9 +12950,15 @@ const ViralClipStudio = ({
     musicVolume,
     previewMuted,
     previewVolume,
+    audioKeyframes.music,
+    trackStates,
   ]);
 
-  const addTextOverlay = () => {
+  const addTextOverlay = (preset = "headline", content = "") => {
+    // Legacy toolbar buttons used to pass the React click event directly into
+    // this function. Never retain that circular event object in project/history
+    // state; non-string callers mean the default headline preset.
+    const resolvedPreset = typeof preset === "string" ? preset : "headline";
     // START TIME: Use current video playback time
     // If paused, it's exact. If playing, it's roughly "now".
     const currentVideoTime = videoRef.current ? videoRef.current.currentTime : 0;
@@ -8356,16 +12974,27 @@ const ViralClipStudio = ({
     // We need to calculate the relative start time.
     const relativeStartTime = getPreviewTimelineTime(currentVideoTime);
 
+    const isLowerThird = resolvedPreset === "lower_third";
+    const isLabel = resolvedPreset === "label";
     const newOverlay = {
-      id: Date.now(),
+      id: createSecureId("title"),
       type: "text",
-      text: "Double Click to Edit ✏️",
-      x: 50,
-      y: 50,
+      text: content || (isLowerThird ? "Speaker name\nRole or context" : isLabel ? "NEW" : "Your headline"),
+      // Headlines start in the upper-right story-safe area so a newly added
+      // title does not cover the centred/left speaker before it is adjusted.
+      x: isLowerThird || isLabel ? 50 : 72,
+      y: isLowerThird ? 81 : 18,
       color: "#ffffff",
-      bg: "rgba(0,0,0,0.5)",
-      scale: 1,
-      isRainbow: true,
+      bg: isLowerThird ? "rgba(7,10,20,0.88)" : isLabel ? "#7c3aed" : "transparent",
+      scale: isLowerThird ? 0.82 : isLabel ? 0.68 : 1.15,
+      isRainbow: false,
+      titlePreset: resolvedPreset,
+      textAlign: "center",
+      fontWeight: 900,
+      fontFamily: "Inter",
+      strokeWidth: resolvedPreset === "headline" ? 2 : 0,
+      shadow: resolvedPreset === "headline" ? "strong" : "soft",
+      rotation: 0,
       startTime: relativeStartTime,
       duration: 3.0, // Default 3 seconds duration
       clipId: timeline[activeTimelineIndex]?.id || "main",
@@ -8381,8 +13010,85 @@ const ViralClipStudio = ({
       audioDucking: false,
       audioDuckingStrength: 0.35,
     };
-    setOverlays([...overlays, newOverlay]);
+    setOverlays(current => [...current, newOverlay]);
     setActiveOverlayId(newOverlay.id);
+    setStudioInspectorTab("titles");
+    setActiveCreativeTool("titles");
+    setComparisonMode("after");
+    setStudioActionMessage(
+      `${isLowerThird ? "Lower third" : isLabel ? "Label" : "Headline"} added at ${relativeStartTime.toFixed(2)}s. Edit the copy and styling before render.`
+    );
+  };
+
+  const applyCreatorMotionPreset = (preset, zoom = creatorPreview.zoom) => {
+    const points = buildCreatorMotionRecipe({ preset, zoom, time: previewTimelineTime, duration: outputTimelineDuration });
+    if (!points.length) {
+      setStudioActionMessage("Move the playhead earlier: a zoom needs at least 0.1 seconds of picture.");
+      return;
+    }
+    setMotionKeyframes(current => mergeCreatorRecipe({ keyframes: current, points,
+      targetId: "main-video", property: "scale", fallback: mainTransform.scale ?? 1,
+      createId: () => createSecureId("creator-zoom") }));
+    setCreatorPreview(current => ({ ...current, activeDemo: "" }));
+    setMotionTargetId("main-video");
+    setTimelineDockExpanded(true);
+    setComparisonMode("after");
+    setStudioActionMessage(`${preset.replace(/_/g, " ")} added at ${points[0].time.toFixed(2)}s. Three editable scale keys; the shot returns to its original framing.`);
+  };
+
+  const applyCreatorSpeedRamp = () => {
+    const points = buildCreatorSpeedRecipe({ time: previewTimelineTime, duration: outputTimelineDuration });
+    if (!points.length) {
+      setStudioActionMessage("Move the playhead earlier: a speed ramp needs at least 0.3 seconds of picture.");
+      return;
+    }
+    setSpeedKeyframes(current => mergeCreatorRecipe({ keyframes: current, points,
+      targetId: "main", property: "speed", fallback: previewSpeed,
+      createId: () => createSecureId("creator-speed") }));
+    setTimelineDockExpanded(true);
+    setStudioActionMessage("Speed ramp added around the playhead. Existing speed keys outside this range are preserved.");
+    setComparisonMode("after");
+  };
+
+  const addCreatorImpactSound = () => {
+    const impact = SOUND_EFFECT_PRESETS.find(preset => preset.id === "impact");
+    if (impact) addSoundEffectPreset(impact);
+  };
+
+  const applyCreatorBeatSync = () => {
+    const beat = findCreatorBeat(musicBeatMarkers, previewTimelineTime, outputTimelineDuration);
+    if (beat === null) {
+      selectCreativeTool("sound");
+      setStudioActionMessage("Choose or import music in Sound and let its audio analysis finish. No detected beats are available yet; no impact was added.");
+      return;
+    }
+    const impact = SOUND_EFFECT_PRESETS.find(preset => preset.id === "impact");
+    if (!impact) return;
+    setBeatSnapEnabled(true);
+    setCreatorPreview(current => ({ ...current, activeDemo: "" }));
+    addSoundEffectPreset(impact, beat);
+  };
+
+  const applyCreatorLayerStack = () => {
+    setComparisonMode("after");
+    setTimelineDockExpanded(true);
+    setCreatorPreview(current => ({ ...current, activeDemo: "" }));
+    setStudioActionMessage(`${1 + overlays.filter(overlay => !overlay.isCaption).length} visual layers in this project. Add your own titles, graphics and media from the timeline.`);
+  };
+
+  const applyCreatorDirectorSuggestion = evidenceText => {
+    const hasReviewedEvidence = Boolean(String(evidenceText || "").trim());
+    setCreatorPreview(current => ({
+      ...current,
+      enabled: true,
+      evidenceText: hasReviewedEvidence ? String(evidenceText).trim() : "",
+    }));
+    setStudioActionMessage(
+      hasReviewedEvidence
+        ? "Transcript-led visual suggestion accepted as an editable browser preview."
+        : "Suggestion opened without a grounding claim. Review a timestamped caption line before using it."
+    );
+    setComparisonMode("after");
   };
 
   const addVideoLayer = event => {
@@ -8465,6 +13171,67 @@ const ViralClipStudio = ({
     event.target.value = null;
   };
 
+  const addCleanSpeakerAngle = event => {
+    const files = Array.from(event.target.files || []);
+    if (!files.length) return;
+    const videoFiles = files.filter(file => file.type.startsWith("video/")).slice(0, 12);
+    if (!videoFiles.length) {
+      toast.error("Choose a real video source for the clean speaker angle.");
+      event.target.value = "";
+      return;
+    }
+    const sources = videoFiles.map(file => ({
+      id: createSecureId("speaker-angle"),
+      url: URL.createObjectURL(file),
+      file,
+      name: file.name,
+      isLocal: true,
+      duration: 0,
+    }));
+    setSpeakerStackSources(current => [...current, ...sources]);
+    setSpeakerStackSyncConfirmed(false);
+    if (sources.length > 1) {
+      const cameraCount = clampNumber(sources.length, 2, 4, 2);
+      setSpeakerStackCameraCount(cameraCount);
+      setSpeakerStackLayout(getDefaultMulticamLayout(cameraCount));
+      setSpeakerStackSourceIds(current =>
+        MULTICAM_SLOT_KEYS.reduce(
+          (next, slot, index) => ({
+            ...next,
+            [slot]: sources[index]?.id || current[slot] || null,
+          }),
+          {}
+        )
+      );
+    } else {
+      setSpeakerStackSourceIds(current => ({
+        ...current,
+        top: current.top || "programme-source",
+        bottom: sources[0].id,
+      }));
+    }
+    sources.forEach(source => {
+      const probe = document.createElement("video");
+      if (!applySafeMediaSource(probe, source.url)) return;
+      probe.preload = "metadata";
+      probe.onloadedmetadata = () => {
+        setSpeakerStackSources(current =>
+          current.map(item =>
+            item.id === source.id ? { ...item, duration: Number(probe.duration || 0) } : item
+          )
+        );
+      };
+    });
+    setStudioActionMessage(
+      sources.length > 4
+        ? `${sources.length} clean angles added to the source bank. The first four are routed to the programme grid; choose any replacements below.`
+        : sources.length > 1
+          ? `${sources.length} clean camera angles added. Choose the layout, align timecode, and confirm synchronization.`
+        : `${sources[0].name} added as a clean camera angle. Select every required source before enabling multicamera.`
+    );
+    event.target.value = "";
+  };
+
   const addImageLayer = event => {
     const file = event.target.files[0];
     if (!file) return;
@@ -8494,6 +13261,129 @@ const ViralClipStudio = ({
     event.target.value = null;
   };
 
+  const addLogoMotionLayer = async event => {
+    const selectedFile = event.target.files?.[0];
+    if (!selectedFile) return;
+    if (!selectedFile.type.startsWith("image/")) {
+      toast.error("Choose a PNG, WebP, JPEG or SVG logo asset.");
+      event.target.value = "";
+      return;
+    }
+
+    let file = selectedFile;
+    if (selectedFile.type === "image/svg+xml" || selectedFile.name.toLowerCase().endsWith(".svg")) {
+      try {
+        const documentNode = new DOMParser().parseFromString(await selectedFile.text(), "image/svg+xml");
+        documentNode.querySelectorAll("script, foreignObject").forEach(node => node.remove());
+        documentNode.querySelectorAll("[href], [xlink\\:href]").forEach(node => {
+          const href = node.getAttribute("href") || node.getAttribute("xlink:href") || "";
+          if (href && !href.startsWith("#") && !href.startsWith("data:image/")) {
+            node.removeAttribute("href");
+            node.removeAttribute("xlink:href");
+          }
+        });
+        const safeSvg = new XMLSerializer().serializeToString(documentNode.documentElement);
+        const svgUrl = URL.createObjectURL(new Blob([safeSvg], { type: "image/svg+xml" }));
+        const raster = await new Promise((resolve, reject) => {
+          const image = new Image();
+          image.onload = () => {
+            const longest = Math.max(image.naturalWidth || 1, image.naturalHeight || 1);
+            const scale = Math.min(1, 2048 / longest);
+            const canvas = document.createElement("canvas");
+            canvas.width = Math.max(1, Math.round((image.naturalWidth || 1) * scale));
+            canvas.height = Math.max(1, Math.round((image.naturalHeight || 1) * scale));
+            canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
+            canvas.toBlob(blob => (blob ? resolve(blob) : reject(new Error("SVG rasterization failed"))), "image/png");
+          };
+          image.onerror = () => reject(new Error("SVG could not be decoded"));
+          image.src = svgUrl;
+        });
+        URL.revokeObjectURL(svgUrl);
+        file = new File([raster], selectedFile.name.replace(/\.svg$/i, ".png"), {
+          type: "image/png",
+        });
+      } catch (error) {
+        toast.error("That SVG could not be safely imported. Export it as a transparent PNG and retry.");
+        event.target.value = "";
+        return;
+      }
+    }
+
+    const logo = addOverlayAsset({
+      type: "image",
+      src: URL.createObjectURL(file),
+      file,
+      isLocal: true,
+      width: 52,
+      height: 28,
+      bRollMode: "pip",
+    });
+    if (!logo) return;
+    const start = Number(logo.startTime || 0);
+    const layerDuration = Math.max(0.5, Math.min(6, outputTimelineDuration - start));
+    const end = start + layerDuration;
+    const finalLogo = {
+      ...logo,
+      name: selectedFile.name,
+      x: 50,
+      y: 50,
+      width: 52,
+      height: 28,
+      startTime: start,
+      duration: layerDuration,
+      mediaFit: "contain",
+      frameShape: "edge",
+      borderRadius: 0,
+      shadow: "none",
+      scale: 1,
+      rotation: 0,
+      opacity: 1,
+      anchorX: 50,
+      anchorY: 50,
+      motionDesign: true,
+      glow: { enabled: true, color: "#8b5cf6", radius: 16, intensity: 0.5 },
+      layerShadow: { enabled: true, color: "#000000", blur: 18, opacity: 0.55, x: 0, y: 10 },
+      motionBlur: { enabled: true, samples: 4, shutter: 0.5 },
+    };
+    setOverlays(current => current.map(layer => (layer.id === logo.id ? finalLogo : layer)));
+    const pose = (time, property, value, easing = "ease_out", curve) => ({
+      id: createSecureId("logo-key"),
+      targetId: logo.id,
+      time,
+      property,
+      value,
+      easing,
+      ...(curve ? { curve } : {}),
+    });
+    setMotionKeyframes(current => [
+      ...current,
+      pose(start, "x", 42, "bezier", [0.16, 1, 0.3, 1]),
+      pose(start, "y", 53, "bezier", [0.16, 1, 0.3, 1]),
+      pose(start, "scale", 0.55, "bezier", [0.16, 1, 0.3, 1]),
+      pose(start, "rotation", -12, "bezier", [0.16, 1, 0.3, 1]),
+      pose(start, "opacity", 0, "ease_out"),
+      pose(start + 0.42, "x", 50, "bezier", [0.18, 1.25, 0.32, 1]),
+      pose(start + 0.42, "y", 50, "bezier", [0.18, 1.25, 0.32, 1]),
+      pose(start + 0.42, "scale", 1.12, "bezier", [0.18, 1.25, 0.32, 1]),
+      pose(start + 0.42, "rotation", 2, "bezier", [0.18, 1.25, 0.32, 1]),
+      pose(start + 0.18, "opacity", 1, "ease_out"),
+      pose(start + 0.7, "scale", 1, "ease_out"),
+      pose(start + 0.7, "rotation", 0, "ease_out"),
+      pose(Math.max(start + 0.75, end - 0.22), "opacity", 1, "ease_in"),
+      pose(end, "opacity", 0, "ease_in"),
+    ]);
+    setMotionTargetId(logo.id);
+    setActiveOverlayId(logo.id);
+    setMotionWorkspace("logo");
+    setStudioInspectorTab("motion");
+    setComparisonMode("after");
+    jumpToOutputTimelineTime(start);
+    setStudioActionMessage(
+      "Logo imported as a real motion layer with editable transform keys, anchor, glow, shadow and motion blur."
+    );
+    event.target.value = "";
+  };
+
   const addExistingImageOverlay = imageAsset => {
     const src = normalizeAssetUrl(imageAsset);
     if (!src) {
@@ -8514,7 +13404,14 @@ const ViralClipStudio = ({
     if (imageOverlay) jumpToOutputTimelineTime(Number(imageOverlay.startTime || 0));
   };
 
-  const buildVideoBRollOverlay = (file, src, startTime, duration, sourceDuration = 0) => ({
+  const buildVideoBRollOverlay = (
+    file,
+    src,
+    startTime,
+    duration,
+    sourceDuration = 0,
+    poster = ""
+  ) => ({
     id: createSecureId("overlay"),
     type: "video",
     src,
@@ -8532,6 +13429,7 @@ const ViralClipStudio = ({
     duration,
     sourceStartTime: 0,
     sourceDuration,
+    poster,
     sourceEndBehavior: "return",
     bRollMode: "fullscreen",
     frameShape: "edge",
@@ -8570,6 +13468,52 @@ const ViralClipStudio = ({
       timeoutId = window.setTimeout(() => finish(0), 4000);
     });
 
+  const captureLocalVideoPoster = src =>
+    process.env.NODE_ENV === "test"
+      ? Promise.resolve("")
+      : new Promise(resolve => {
+      const probe = document.createElement("video");
+      let settled = false;
+      let timeoutId = null;
+      const finish = poster => {
+        if (settled) return;
+        settled = true;
+        if (timeoutId) window.clearTimeout(timeoutId);
+        probe.removeAttribute("src");
+        resolve(poster || "");
+      };
+      probe.muted = true;
+      probe.preload = "auto";
+      probe.playsInline = true;
+      probe.onloadeddata = () => {
+        try {
+          const posterCanvas = document.createElement("canvas");
+          const sourceWidth = Number(probe.videoWidth || 0);
+          const sourceHeight = Number(probe.videoHeight || 0);
+          if (!sourceWidth || !sourceHeight) return finish("");
+          const scale = Math.min(1, 640 / sourceWidth);
+          posterCanvas.width = Math.max(2, Math.round(sourceWidth * scale));
+          posterCanvas.height = Math.max(2, Math.round(sourceHeight * scale));
+          posterCanvas.getContext("2d")?.drawImage(
+            probe,
+            0,
+            0,
+            posterCanvas.width,
+            posterCanvas.height
+          );
+          finish(posterCanvas.toDataURL("image/jpeg", 0.82));
+        } catch (_) {
+          finish("");
+        }
+      };
+      probe.onerror = () => finish("");
+      if (!applySafeMediaSource(probe, src)) {
+        finish("");
+        return;
+      }
+      timeoutId = window.setTimeout(() => finish(""), 5000);
+        });
+
   const handleBRollVideoUpload = async event => {
     const input = event.target;
     const files = Array.from(event.target.files || []);
@@ -8598,6 +13542,7 @@ const ViralClipStudio = ({
     );
     const safeEnd = Math.max(0, previewDuration - fallbackShotDuration - 0.1);
     const localSources = videoFiles.map(file => ({ file, url: URL.createObjectURL(file) }));
+    const sourcePosterPromises = localSources.map(source => captureLocalVideoPoster(source.url));
     const sourceDurations = await Promise.all(
       localSources.map(source => readLocalVideoDuration(source.url))
     );
@@ -8656,6 +13601,17 @@ const ViralClipStudio = ({
         : [...prev, ...overlaysToAdd]
     );
     setActiveOverlayId(overlaysToAdd[0]?.id || null);
+    Promise.all(sourcePosterPromises).then(sourcePosters => {
+      if (!sourcePosters.some(Boolean)) return;
+      setOverlays(current =>
+        current.map(overlay => {
+          const matchedIndex = overlaysToAdd.findIndex(item => item.id === overlay.id);
+          return matchedIndex >= 0 && sourcePosters[matchedIndex]
+            ? { ...overlay, poster: sourcePosters[matchedIndex] }
+            : overlay;
+        })
+      );
+    });
     setStudioInspectorTab("broll");
     setComparisonMode("after");
     if (overlaysToAdd[0]) {
@@ -8663,7 +13619,7 @@ const ViralClipStudio = ({
     }
     setStudioActionMessage(
       selectedStoryPlaceholder
-        ? `Real moving footage replaced the “${selectedStoryPlaceholder.bRollTitle || "story beat"}” plan at ${formatPreviewTimePrecise(Number(selectedStoryPlaceholder.startTime || 0))}. Original podcast audio stays active.`
+        ? `Real moving footage replaced the “${selectedStoryPlaceholder.bRollTitle || "story beat"}” plan at ${formatPreviewTimePrecise(Number(selectedStoryPlaceholder.startTime || 0))}. Original programme audio stays active.`
         : overlaysToAdd.length === 1
           ? "B-roll placed at the playhead. Set its layout, timing, and audio in one panel."
           : `${overlaysToAdd.length} B-roll clips were distributed across the short. Fine-tune any block below.`
@@ -8685,12 +13641,19 @@ const ViralClipStudio = ({
   };
 
   const deleteOverlay = id => {
-    const nextOverlays = overlays.filter(overlay => overlay.id !== id);
-    setOverlays(nextOverlays);
-    setActiveOverlayId(currentId => {
-      if (currentId !== id) return currentId;
-      return nextOverlays[nextOverlays.length - 1]?.id || null;
+    setOverlays(current => {
+      const nextOverlays = current.filter(overlay => overlay.id !== id);
+      setActiveOverlayId(currentId => {
+        if (currentId !== id) return currentId;
+        return nextOverlays[nextOverlays.length - 1]?.id || null;
+      });
+      setMotionTargetId(currentId => {
+        if (String(currentId) !== String(id)) return currentId;
+        return nextOverlays[nextOverlays.length - 1]?.id || "main-video";
+      });
+      return nextOverlays;
     });
+    setMotionKeyframes(current => current.filter(keyframe => String(keyframe.targetId) !== String(id)));
   };
 
   // ── B-roll / cutaway overlay helpers ──
@@ -8762,8 +13725,8 @@ const ViralClipStudio = ({
           overlayId: id,
           startTime: o.startTime,
           duration: o.duration,
-          width: 48,
-          height: 34,
+          width: 28,
+          height: 20,
         });
         const modeLayout = {
           fullscreen: { width: 100, height: 100, x: 0, y: 0 },
@@ -9361,7 +14324,7 @@ const ViralClipStudio = ({
     setComparisonMode("after");
     jumpToOutputTimelineTime(Number(approvedOverlay.startTime || 0));
     setStudioActionMessage(
-      `Approved licensed moving footage for “${suggestion?.title || "story beat"}”. It fills the frame while the real podcast audio continues.`
+      `Approved licensed moving footage for “${suggestion?.title || "story beat"}”. It fills the frame while the original programme audio continues.`
     );
     toast.success("Moving story visual approved and placed.");
   };
@@ -9566,17 +14529,22 @@ const ViralClipStudio = ({
         ? 1
         : 0;
 
-  return (
-    <div className="viral-studio-overlay">
+  return createPortal(
+    <div className="viral-studio-overlay ap-dashboard-redesign">
+      <StudioVoiceoverPreview takes={voiceovers} videoRef={videoRef}
+        getTimelineTime={getPreviewTimelineTime} activeClip={activeTimelineIndex}
+        muted={previewMuted || !voiceoverTrackAudible(trackStates)} volume={previewVolume}
+        automationKeyframes={audioKeyframes.voiceover}
+        renderedOutputUrl={renderedOutputUrl} onError={setStudioActionMessage} />
       <div
-        className={`viral-studio-container hook-broll-only-mode studio-mode-${workspaceMode}`}
+        className={`viral-studio-container hook-broll-only-mode studio-mode-${workspaceMode} ${
+          projectRailExpanded ? "project-rail-open" : "project-rail-closed"
+        } ${timelineDockExpanded ? "timeline-dock-open" : "timeline-dock-closed"}`}
         data-testid="viral-studio-workspace"
         data-workspace-mode={workspaceMode}
       >
         <ViralStudioHeader
-          projectTitle={normalizePlainText(
-            selectedClip?.hookText || selectedClip?.reason || "Podcast Growth Clip"
-          ).slice(0, 52)}
+          projectTitle={normalizePlainText(projectName || "Untitled viral edit").slice(0, 52)}
           clipFinderCost={clipFinderCost}
           clipRenderCost={clipRenderCost}
           transcribeCost={transcribeCost}
@@ -9591,11 +14559,104 @@ const ViralClipStudio = ({
           canRedo={canRedo}
           onRedo={handleRedo}
           onClose={() => {
-            if (window.confirm("Close the studio? Unsaved changes will be lost.")) onCancel();
+            if (
+              projectSaveState === "saved" ||
+              window.confirm("Close the studio? Unsaved changes will be lost.")
+            )
+              onCancel();
           }}
         />
 
-        <div className="studio-layout">
+        {commandPaletteOpen ? (
+          <div className="studio-command-backdrop" onMouseDown={() => setCommandPaletteOpen(false)}>
+            <section
+              className="studio-command-palette"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Find an editing tool"
+              onMouseDown={event => event.stopPropagation()}
+            >
+              <div className="studio-command-search">
+                <span>⌘K</span>
+                <input
+                  autoFocus
+                  type="search"
+                  placeholder="Find a tool, effect or workflow…"
+                  value={commandSearch}
+                  onChange={event => setCommandSearch(event.target.value)}
+                />
+                <button type="button" onClick={() => setCommandPaletteOpen(false)}>
+                  Esc
+                </button>
+              </div>
+              <div className="studio-command-results">
+                {[
+                  ...CREATIVE_STUDIO_TOOLS.map(tool => ({
+                    id: tool.id,
+                    label: tool.label,
+                    helper: `Open the ${tool.label} workspace`,
+                    action: () => selectCreativeTool(tool.id),
+                  })),
+                  {
+                    id: "add-title",
+                    label: "Add headline at playhead",
+                    helper: "Create an independent animated title layer",
+                    action: () => addTextOverlay("headline"),
+                  },
+                  {
+                    id: "add-adjustment",
+                    label: "Add adjustment layer",
+                    helper: "Apply a finish across the tracks below",
+                    action: addAdjustmentLayer,
+                  },
+                  {
+                    id: "save-project",
+                    label: "Save project checkpoint",
+                    helper: "Store the editable timeline and a restorable version",
+                    action: () => void persistProjectSnapshot({ checkpoint: true }),
+                  },
+                  {
+                    id: "record-voiceover",
+                    label: "Record voice-over",
+                    helper: "Place a microphone take at the playhead",
+                    action: () => void toggleVoiceoverRecording(),
+                  },
+                ]
+                  .filter(command =>
+                    `${command.label} ${command.helper}`
+                      .toLowerCase()
+                      .includes(commandSearch.trim().toLowerCase())
+                  )
+                  .map(command => (
+                    <button
+                      key={command.id}
+                      type="button"
+                      onClick={() => {
+                        command.action();
+                        setCommandPaletteOpen(false);
+                        setCommandSearch("");
+                      }}
+                    >
+                      <span>›</span>
+                      <strong>{command.label}</strong>
+                      <small>{command.helper}</small>
+                    </button>
+                  ))}
+              </div>
+              <footer>
+                <span>↑↓ Navigate</span>
+                <span>Enter Open</span>
+                <strong>Every advanced tool remains searchable</strong>
+              </footer>
+            </section>
+          </div>
+        ) : null}
+
+        <div
+          className={`studio-layout preview-layout-${previewDockSide} ${
+            comparisonMode === "split" ? "has-split-preview" : "has-single-preview"
+          }`}
+        >
           <CreativeToolRail
             tools={CREATIVE_STUDIO_TOOLS}
             mode={workspaceMode}
@@ -9603,10 +14664,91 @@ const ViralClipStudio = ({
             onSelect={selectCreativeTool}
           />
           <aside className="studio-project-rail" aria-label="Project navigator">
+            <button type="button" className="studio-media-close" onClick={() => setProjectRailExpanded(false)}>
+              Close media ×
+            </button>
             <div className="studio-project-rail__head">
-              <span>AI Moments</span>
-              <strong>Your story, already mapped</strong>
-              <small>Choose a beat. AutoPromote keeps the complicated editing underneath.</small>
+              <span>Project</span>
+              <label className="studio-project-name-field">
+                <span className="sr-only">Project name</span>
+                <input
+                  aria-label="Project name"
+                  value={projectName}
+                  maxLength={80}
+                  onChange={event => {
+                    setProjectName(event.target.value);
+                    setProjectSaveState("unsaved");
+                  }}
+                />
+              </label>
+              <div className="studio-project-actions">
+                <button
+                  type="button"
+                  className="is-primary"
+                  onClick={() => void persistProjectSnapshot({ checkpoint: true })}
+                  disabled={projectSaveState === "saving"}
+                  data-testid="studio-save-project"
+                >
+                  {projectSaveState === "saving" ? "Saving…" : "Save project"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void persistProjectSnapshot({ duplicate: true })}
+                >
+                  Duplicate
+                </button>
+              </div>
+              <small className={`studio-project-save-state is-${projectSaveState}`}>
+                {projectSaveState === "saved"
+                  ? `Saved locally${projectSavedAt ? ` · ${new Date(projectSavedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : ""}`
+                  : projectSaveState === "saving"
+                    ? "Saving the editable project…"
+                    : projectSaveState === "error"
+                      ? "Local save failed — retry"
+                      : "Unsaved changes · autosave pending"}
+              </small>
+              {savedProjects.length ? (
+                <details className="studio-saved-projects">
+                  <summary>Open saved project ({savedProjects.length})</summary>
+                  <div>
+                    {savedProjects.slice(0, 8).map(project => (
+                      <article
+                        key={project.id}
+                        className={project.id === projectId ? "is-current" : ""}
+                      >
+                        <button type="button" onClick={() => openSavedProject(project)}>
+                          <strong>{project.name || "Untitled viral edit"}</strong>
+                          <small>{new Date(project.updatedAt).toLocaleString()}</small>
+                        </button>
+                        {project.versions?.length ? (
+                          <button
+                            type="button"
+                            className="studio-project-version"
+                            aria-label={`Restore previous version of ${project.name || "saved project"}`}
+                            title={`Restore ${project.versions[project.versions.length - 1].name}`}
+                            onClick={() =>
+                              restoreProjectVersion(
+                                project,
+                                project.versions[project.versions.length - 1]
+                              )
+                            }
+                          >
+                            ↶{project.versions.length}
+                          </button>
+                        ) : null}
+                        <button
+                          type="button"
+                          className="studio-project-delete"
+                          aria-label={`Delete ${project.name || "saved project"}`}
+                          onClick={() => void removeSavedProject(project)}
+                        >
+                          ×
+                        </button>
+                      </article>
+                    ))}
+                  </div>
+                </details>
+              ) : null}
             </div>
 
             <nav className="studio-workflow-nav" aria-label="Clip Studio workflow">
@@ -9732,6 +14874,146 @@ const ViralClipStudio = ({
               </div>
             </section>
 
+            <section className="studio-media-bin" aria-label="Project media bin">
+              <div className="studio-project-list__heading">
+                <div>
+                  <span>Media</span>
+                  <strong>Project assets</strong>
+                </div>
+                <i>
+                  {timeline.length + overlays.length + voiceovers.length + (musicTrack ? 1 : 0)}
+                </i>
+              </div>
+              <input
+                type="search"
+                aria-label="Search project media"
+                placeholder="Search footage, audio, graphics…"
+                value={mediaBinSearch}
+                onChange={event => setMediaBinSearch(event.target.value)}
+              />
+              <div className="studio-media-bin__actions">
+                <button type="button" onClick={() => brollVideoInputRef.current?.click()}>
+                  ＋ Video
+                </button>
+                <button type="button" onClick={() => imageInputRef.current?.click()}>
+                  ＋ Image
+                </button>
+                <button type="button" onClick={() => quickMusicFileInputRef.current?.click()}>
+                  ＋ Audio
+                </button>
+              </div>
+              <div className="studio-media-bin__items">
+                {[
+                  ...timeline.map((item, index) => ({
+                    ...item,
+                    assetId: `timeline-${item.id || index}`,
+                    kind: "VIDEO",
+                    label: item.name || `Source clip ${index + 1}`,
+                    action: () => setActiveTimelineIndex(index),
+                  })),
+                  ...overlays.map((item, index) => ({
+                    ...item,
+                    assetId: `overlay-${item.id || index}`,
+                    kind: item.type === "text" ? "TITLE" : item.type?.toUpperCase() || "LAYER",
+                    label: item.file?.name || item.name || item.text || `Layer ${index + 1}`,
+                    action: () => {
+                      setActiveOverlayId(item.id);
+                      selectCreativeTool(item.type === "text" ? "titles" : "broll");
+                    },
+                  })),
+                  ...voiceovers.map((item, index) => ({
+                    ...item,
+                    assetId: `voice-${item.id || index}`,
+                    kind: "VOICE",
+                    label: item.name || `Voice-over ${index + 1}`,
+                    action: () => selectCreativeTool("sound"),
+                  })),
+                  ...(musicTrack
+                    ? [
+                        {
+                          ...musicTrack,
+                          assetId: "music-active",
+                          kind: "MUSIC",
+                          label: musicTrack.name || "Background music",
+                          action: () => selectCreativeTool("sound"),
+                        },
+                      ]
+                    : []),
+                ]
+                  .filter(item =>
+                    normalizePlainText(item.label)
+                      .toLowerCase()
+                      .includes(normalizePlainText(mediaBinSearch).toLowerCase())
+                  )
+                  .slice(0, 12)
+                  .map(item => (
+                    <button key={item.assetId} type="button" onClick={item.action}>
+                      <span>{item.kind}</span>
+                      <strong>{item.label}</strong>
+                      <small>
+                        {item.duration ? `${Number(item.duration).toFixed(1)}s` : "Editable asset"}
+                      </small>
+                    </button>
+                  ))}
+              </div>
+              <details className="studio-proxy-settings">
+                <summary>Optimized media / proxies</summary>
+                <label className="inspector-check-row">
+                  <input
+                    type="checkbox"
+                    checked={proxySettings.enabled}
+                    onChange={event =>
+                      setProxySettings(current => ({
+                        ...current,
+                        enabled: event.target.checked,
+                        status: event.target.checked ? "source_ready" : "off",
+                      }))
+                    }
+                  />
+                  <span>
+                    <strong>Use optimized preview media</strong>
+                    <small>Original files remain linked for final export.</small>
+                  </span>
+                </label>
+                <select
+                  aria-label="Proxy resolution"
+                  value={proxySettings.resolution}
+                  onChange={event =>
+                    setProxySettings(current => ({
+                      ...current,
+                      resolution: event.target.value,
+                    }))
+                  }
+                >
+                  <option value="540p">540p · fastest</option>
+                  <option value="720p">720p · balanced</option>
+                  <option value="1080p">1080p · detailed</option>
+                </select>
+                <small>
+                  {proxySettings.enabled
+                    ? "Source-linked editing is active; proxy generation is queued only for heavy media."
+                    : "The browser previews original media."}
+                </small>
+              </details>
+              <details className="studio-template-library">
+                <summary>Reusable edit templates ({editTemplates.length})</summary>
+                <button type="button" className="studio-template-save" onClick={saveEditTemplate}>
+                  ＋ Save current edit as template
+                </button>
+                {editTemplates.map(template => (
+                  <button
+                    key={template.id}
+                    type="button"
+                    className="studio-template-item"
+                    onClick={() => applyEditTemplate(template)}
+                  >
+                    <strong>{template.name}</strong>
+                    <small>Titles · captions · grade · audio · delivery</small>
+                  </button>
+                ))}
+              </details>
+            </section>
+
             <div className="studio-project-rail__footer">
               <span>
                 <i aria-hidden="true" />
@@ -9780,7 +15062,7 @@ const ViralClipStudio = ({
                       }}
                       aria-pressed={comparisonMode === mode}
                     >
-                      {mode === "split" ? "Split" : mode[0].toUpperCase() + mode.slice(1)}
+                      {mode === "split" ? "Compare" : mode[0].toUpperCase() + mode.slice(1)}
                     </button>
                   ))}
                 </div>
@@ -9793,31 +15075,102 @@ const ViralClipStudio = ({
                   {isPreviewPaused ? "▶ Play comparison" : "❚❚ Pause comparison"}
                 </button>
                 <div className="preview-display-controls" aria-label="Preview display controls">
+                  <div className="preview-reframe-quick-group" aria-label="Quick camera framing">
+                    <button
+                      type="button"
+                      className={`preview-cam-btn ${effectiveSmartCrop && effectiveSmartCropMode === "center" ? "is-active" : ""}`}
+                      onClick={showEveryoneSplit}
+                      title="Show everyone in a vertical split using two editable source crops"
+                      data-testid="preview-quick-both-cams"
+                    >
+                      👥 Show Everyone
+                    </button>
+                    <button
+                      type="button"
+                      className={`preview-cam-btn ${effectiveSmartCrop && effectiveSmartCropMode === "speaker_track" ? "is-active" : ""}`}
+                      onClick={() => openSpeakerTracking()}
+                      title="Open speaker framing and review tracking points"
+                      data-testid="preview-quick-track-speaker"
+                    >
+                      🎯 Solo Speaker
+                    </button>
+                  </div>
                   <button
                     type="button"
-                    className={effectiveVideoFit === "contain" ? "is-active" : ""}
-                    aria-pressed={effectiveVideoFit === "contain"}
-                    onClick={() => setPreviewFillMode("contain")}
-                    title="Show the entire source frame"
+                    className={`preview-dock-toggle-btn ${previewDockSide === "side" ? "is-side" : "is-center"}`}
+                    aria-pressed={previewDockSide === "side"}
+                    data-testid="preview-dock-toggle-btn"
+                    onClick={() =>
+                      setPreviewDockSide(current => (current === "side" ? "center" : "side"))
+                    }
+                    title={
+                      previewDockSide === "side"
+                        ? "Dock preview monitor to center"
+                        : "Dock preview monitor to side"
+                    }
                   >
-                    Fit full
+                    {previewDockSide === "side" ? "⧉ Center canvas" : "⊞ Dock canvas right"}
                   </button>
                   <button
                     type="button"
-                    className={effectiveVideoFit === "cover" ? "is-active" : ""}
-                    aria-pressed={effectiveVideoFit === "cover"}
-                    onClick={() => setPreviewFillMode("cover")}
-                    title="Fill the vertical canvas without side gaps"
+                    className={projectRailExpanded ? "is-active" : ""}
+                    aria-pressed={projectRailExpanded}
+                    onClick={() => setProjectRailExpanded(current => !current)}
                   >
-                    Fill canvas
+                    {projectRailExpanded ? "Hide media" : "Show media"}
                   </button>
+                  {usesPanelFraming ? (
+                    <button
+                      type="button"
+                      className="is-active"
+                      data-testid="edit-panel-crops"
+                      onClick={() => {
+                        selectCreativeTool("reframe");
+                        window.requestAnimationFrame(() =>
+                          document
+                            .querySelector("[data-testid='source-split-editor'], .speaker-stack-editor")
+                            ?.scrollIntoView({ behavior: "smooth", block: "nearest" })
+                        );
+                        setStudioActionMessage(
+                          effectiveSmartCropMode === "group_stack"
+                            ? "Camera crop controls are open. Position and zoom each synchronized angle independently."
+                            : "Split crop controls are open. Position and zoom both same-time views independently."
+                        );
+                      }}
+                      title="Open the position and zoom controls used by this panel layout"
+                    >
+                      {effectiveSmartCropMode === "group_stack" ? "Adjust camera crops" : "Adjust split crops"}
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        className={effectiveVideoFit === "contain" ? "is-active" : ""}
+                        aria-pressed={effectiveVideoFit === "contain"}
+                        onClick={() => setPreviewFillMode("contain")}
+                        title="Show the entire source frame"
+                      >
+                        Fit full
+                      </button>
+                      <button
+                        type="button"
+                        className={effectiveVideoFit === "cover" ? "is-active" : ""}
+                        aria-pressed={effectiveVideoFit === "cover"}
+                        onClick={() => setPreviewFillMode("cover")}
+                        title="Fill the vertical canvas without side gaps"
+                      >
+                        Fill canvas
+                      </button>
+                    </>
+                  )}
                   <button
                     type="button"
                     data-testid="main-footage-frame-toggle"
                     className={mainFrame.enabled ? "is-active" : ""}
                     aria-pressed={mainFrame.enabled}
                     onClick={() => {
-                      setMainFrame(current => ({ ...current, enabled: !current.enabled }));
+                      setMainFrame(current => ({ ...current, enabled: !current.enabled,
+                        radiusPercent: Number(current.radiusPercent) > 0 ? current.radiusPercent : 6 }));
                       setComparisonMode("after");
                     }}
                     title="Round the complete source footage in preview and export"
@@ -9827,19 +15180,111 @@ const ViralClipStudio = ({
                   <button
                     type="button"
                     data-testid="preview-fullscreen-button"
+                    className={isPreviewFullscreen ? "is-active" : ""}
+                    aria-pressed={isPreviewFullscreen}
                     onClick={() => void togglePreviewFullscreen()}
                   >
                     {isPreviewFullscreen ? "Exit fullscreen" : "Fullscreen"}
+                  </button>
+                  <button
+                    type="button"
+                    className={showSafeZones ? "is-active" : ""}
+                    aria-pressed={showSafeZones}
+                    onClick={() => setShowSafeZones(current => !current)}
+                  >
+                    Safe zones
+                  </button>
+                  <button
+                    type="button"
+                    className={showCompositionGrid ? "is-active" : ""}
+                    aria-pressed={showCompositionGrid}
+                    onClick={() => setShowCompositionGrid(current => !current)}
+                  >
+                    Grid
+                  </button>
+                  <button type="button" onClick={() => setCommandPaletteOpen(true)}>
+                    ⌘K Tools
+                  </button>
+                  <button
+                    type="button"
+                    className={timelineDockExpanded ? "is-active" : ""}
+                    aria-pressed={timelineDockExpanded}
+                    onClick={() => setTimelineDockExpanded(current => !current)}
+                  >
+                    {timelineDockExpanded ? "Hide timeline" : "Show timeline"}
                   </button>
                 </div>
               </div>
 
               <div className="preview-device-column">
                 <div className="preview-intelligence-stack" aria-label="Live edit intelligence">
-                  <span className={hookPreviewLoop ? "is-ready" : ""}>↻ Loop ready</span>
-                  <span className={!muteOriginalAudio ? "is-ready" : ""}>≋ Speech clear</span>
-                  <span className={smartCrop ? "is-ready" : ""}>⌗ Face tracked</span>
-                  <span className="is-safe">◇ No render credits used</span>
+                  <span className={hookPreviewLoop || silenceRemoval ? "is-ready" : ""}>
+                    {silenceRemoval
+                      ? "≋ Smart pacing"
+                      : hookPreviewLoop
+                        ? "↻ Loop ready"
+                        : "↻ Preview synced"}
+                  </span>
+                  <span
+                    className={!previewMuted && (!muteOriginalAudio || extractedAudio?.url) ? "is-ready" : ""}
+                    data-testid="preview-audio-status"
+                  >
+                    {previewMuted
+                      ? "♪ Monitoring muted"
+                      : muteOriginalAudio
+                        ? extractedAudio?.url
+                          ? "♪ Extracted audio on"
+                          : "♪ Source audio muted"
+                        : "♪ Source audio on"}
+                  </span>
+                  <span
+                    className={effectiveSmartCrop ? "is-ready" : ""}
+                    data-testid="reframe-preview-status"
+                  >
+                    {effectiveSmartCrop
+                      ? effectiveSmartCropMode === "center"
+                        ? reframeAspect === "9:16"
+                          ? "⌗ Everyone in frame · source split"
+                          : "⌗ Everyone in frame"
+                        : effectiveSmartCropMode === "group_stack"
+                          ? speakerStackIsReady
+                            ? speakerStackCameraCount === 2
+                              ? speakerStackLayout === "stack_2"
+                                ? "⌗ 2 cameras · stacked"
+                                : speakerStackLayout === "split_2"
+                                  ? "⌗ 2 cameras · split"
+                                  : speakerStackLayout === "pip_2"
+                                    ? "⌗ 2 cameras · PIP"
+                                    : speakerStackLayout === "active_2"
+                                      ? speakerFocusCuts.length
+                                        ? `⌗ ${speakerFocusCuts.length} reviewed speaker cut${speakerFocusCuts.length === 1 ? "" : "s"}`
+                                        : "⌗ Speaker focus needs marks"
+                                      : speakerFocusCuts.length
+                                        ? `⌗ ${speakerFocusCuts.length} reviewed spotlight cut${speakerFocusCuts.length === 1 ? "" : "s"}`
+                                        : "⌗ Spotlight needs marks"
+                              : `⌗ ${speakerStackCameraCount} cameras live`
+                            : "⌗ Stack angles not synchronized"
+                        : reframeKeyframes.length
+                        ? `⌗ ${reframeKeyframes.length} framing correction${reframeKeyframes.length === 1 ? "" : "s"}`
+                        : "⌗ Follow path needs data"
+                      : "⌗ Reframe off"}
+                  </span>
+                  <span className="is-ready">
+                    ◆{" "}
+                    {
+                      overlays.filter(overlay => {
+                        const start = Number(overlay.startTime || 0);
+                        const end = start + Number(overlay.duration || 0);
+                        return previewTimelineTime >= start && previewTimelineTime <= end;
+                      }).length
+                    }{" "}
+                    layers on this frame
+                  </span>
+                  <span className={multicamExportNeedsSupport ? "" : "is-safe"}>
+                    {multicamExportNeedsSupport
+                      ? "◇ Camera layout · preview only"
+                      : "◇ Edit plan saved for export"}
+                  </span>
                 </div>
                 <div className={`preview-player-shell comparison-${comparisonMode}`}>
                   <div
@@ -9847,12 +15292,12 @@ const ViralClipStudio = ({
                     data-testid="hook-preview-frame"
                     className={`phone-frame ${smartCrop ? reframeAspectClass : ""} ${isPreviewFullscreen ? "preview-expanded" : ""} ${hookFocusMode ? "hook-focus-enabled" : ""} ${creativePreviewClass} ${renderedOutputUrl ? "has-rendered-output" : ""}`}
                     style={{
-                      "--main-frame-inset": mainFrame.enabled
-                        ? `${mainFrame.insetPercent}%`
-                        : "0%",
+                      "--main-frame-inset": mainFrame.enabled ? `${mainFrame.insetPercent}%` : "0%",
                       "--main-frame-radius": mainFrame.enabled
                         ? `${mainFrame.radiusPercent}%`
                         : "0px",
+                      borderRadius: mainFrame.enabled ? `${mainFrame.radiusPercent}%` : "0px",
+                      backgroundColor: "#000",
                     }}
                     onClick={handlePreviewFrameClick}
                     onMouseMove={handleMouseMove}
@@ -9866,9 +15311,9 @@ const ViralClipStudio = ({
                     </span>
                     <video
                       ref={videoRef}
+                      crossOrigin="anonymous"
                       data-testid="studio-after-video"
                       className="studio-video main-video-frame-preview"
-                      autoPlay
                       playsInline
                       preload="auto"
                       onLoadStart={() => setIsAfterPreviewReady(false)}
@@ -9877,16 +15322,9 @@ const ViralClipStudio = ({
                       onSeeking={() => setIsAfterPreviewReady(false)}
                       onSeeked={confirmAfterPreviewFrame}
                       style={{
-                        objectFit: renderedOutputUrl
-                          ? "contain"
-                          : activeSideBySideOverlay
-                            ? "cover"
-                            : effectiveVideoFit,
-                        objectPosition: renderedOutputUrl
-                          ? "center center"
-                          : activeSideBySideOverlay
-                            ? sideBySideObjectPosition
-                            : safeObjectPosition,
+                        display: "none",
+                        objectFit: previewProgrammeFit,
+                        objectPosition: previewProgrammePosition,
                         width: renderedOutputUrl
                           ? "100%"
                           : activeSideBySideOverlay
@@ -9894,26 +15332,159 @@ const ViralClipStudio = ({
                             : "100%",
                         height: "100%",
                         background: "transparent",
-                        position: activeSideBySideOverlay ? "absolute" : "relative",
-                        inset: activeSideBySideOverlay ? "0 auto 0 0" : undefined,
-                        zIndex: 10,
+                        position: "absolute",
+                        inset: "0 auto 0 0",
+                        zIndex: -1,
+                        visibility: "hidden",
+                        pointerEvents: "none",
                         transformOrigin: activeSideBySideOverlay
                           ? "center center"
                           : finishTransformOrigin,
-                        transform: renderedOutputUrl
-                          ? "scale(1)"
-                          : activeSideBySideOverlay
-                            ? "scale(1)"
-                            : `scale(${(hookVisualScale * smartCropBackgroundScale * finishZoom).toFixed(3)})`,
-                        opacity: renderedOutputUrl ? 1 : hookPrimaryVideoOpacity,
-                        filter: renderedOutputUrl
-                          ? "none"
-                          : `blur(${(hookVideoBlur + smartCropBackgroundBlur).toFixed(2)}px) brightness(${(hookVideoBrightness * smartCropBackgroundBrightness * previewClarityBrightness).toFixed(3)}) contrast(${(hookVideoContrast * previewClarityContrast).toFixed(3)}) saturate(${(hookVideoSaturate * previewClaritySaturate).toFixed(3)})${previewClarityHalo}${finishFilter ? ` ${finishFilter}` : ""}`,
+                        transform: "none",
+                        opacity: 0,
+                        mixBlendMode: mainTransform.blendMode || "normal",
+                        clipPath: renderedOutputUrl
+                          ? undefined
+                          : getOverlayMaskClipPath({
+                              ...mainTransform,
+                              cropX: mainMotionAutomation.cropX ?? mainTransform.cropX,
+                              cropY: mainMotionAutomation.cropY ?? mainTransform.cropY,
+                            }),
+                        filter: "none",
                         transition:
                           "width 180ms ease, transform 150ms linear, opacity 160ms linear, filter 160ms linear",
-                        willChange: "transform, opacity, filter",
                       }}
                     />
+                    <video
+                      ref={speakerStackTopVideoRef}
+                      src={speakerStackTopSource?.source || undefined}
+                      muted
+                      playsInline
+                      preload="auto"
+                      tabIndex={-1}
+                      aria-hidden="true"
+                      data-testid="speaker-stack-top-video"
+                      style={{ display: "none" }}
+                    />
+                    <video
+                      ref={speakerStackBottomVideoRef}
+                      src={speakerStackBottomSource?.source || undefined}
+                      muted
+                      playsInline
+                      preload="auto"
+                      tabIndex={-1}
+                      aria-hidden="true"
+                      data-testid="speaker-stack-bottom-video"
+                      style={{ display: "none" }}
+                    />
+                    <video
+                      ref={speakerStackThirdVideoRef}
+                      src={speakerStackThirdSource?.source || undefined}
+                      muted
+                      playsInline
+                      preload="auto"
+                      tabIndex={-1}
+                      aria-hidden="true"
+                      data-testid="speaker-stack-third-video"
+                      style={{ display: "none" }}
+                    />
+                    <video
+                      ref={speakerStackFourthVideoRef}
+                      src={speakerStackFourthSource?.source || undefined}
+                      muted
+                      playsInline
+                      preload="auto"
+                      tabIndex={-1}
+                      aria-hidden="true"
+                      data-testid="speaker-stack-fourth-video"
+                      style={{ display: "none" }}
+                    />
+                    <canvas
+                      ref={afterCanvasRef}
+                      data-testid="studio-program-canvas"
+                      data-programme-filter={previewProgrammeFilter}
+                      className={`studio-video studio-program-canvas ${getCreatorCanvasClass(
+                        creatorPreview
+                      )}`}
+                      aria-label="Edited programme monitor"
+                      style={{
+                        width: renderedOutputUrl
+                          ? "100%"
+                          : activeSideBySideOverlay
+                            ? "50%"
+                            : "100%",
+                        height: "100%",
+                        background: "#000",
+                        borderRadius: renderedOutputUrl
+                          ? "inherit"
+                          : mainFrame.enabled
+                            ? `${mainFrame.radiusPercent}%`
+                            : "0",
+                      }}
+                    />
+                    {comparisonMode !== "before" && !renderedOutputUrl ? (
+                      <StudioCreatorPreviewLayer
+                        value={creatorPreview}
+                        source={liveTimelineSource}
+                        reactionSources={resolvedSpeakerStackSources
+                          .map(item => item?.source)
+                          .filter(Boolean)}
+                        time={videoTime}
+                        playing={!isPreviewPaused}
+                        playbackRate={Number(videoRef.current?.playbackRate || previewSpeed || 1)}
+                      />
+                    ) : null}
+                    {studioInspectorTab === "motion" &&
+                    showMotionPath &&
+                    motionInspectorTarget &&
+                    !renderedOutputUrl ? (
+                      <svg
+                        className="studio-motion-path"
+                        data-testid="studio-motion-path"
+                        viewBox="0 0 100 100"
+                        preserveAspectRatio="none"
+                        aria-label={`Motion path for ${motionInspectorTarget.name || "selected layer"}`}
+                      >
+                        {activeMotionPathPoints.length > 1 ? (
+                          <polyline
+                            points={activeMotionPathPoints
+                              .map(point => `${point.x},${point.y}`)
+                              .join(" ")}
+                          />
+                        ) : null}
+                        {activeMotionPathPoints.map((point, index) => (
+                          <circle
+                            key={`${point.time}-${index}`}
+                            className="studio-motion-path-key"
+                            cx={point.x}
+                            cy={point.y}
+                            r="1.55"
+                            vectorEffect="non-scaling-stroke"
+                            role="button"
+                            tabIndex="0"
+                            aria-label={`Go to motion pose at ${Number(point.time).toFixed(2)} seconds`}
+                            onClick={event => {
+                              event.stopPropagation();
+                              jumpToOutputTimelineTime(point.time);
+                            }}
+                            onKeyDown={event => {
+                              if (event.key === "Enter" || event.key === " ") {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                jumpToOutputTimelineTime(point.time);
+                              }
+                            }}
+                          />
+                        ))}
+                        <circle
+                          className="studio-motion-path-current"
+                          cx={activeMotionCurrent.x}
+                          cy={activeMotionCurrent.y}
+                          r="2.1"
+                          vectorEffect="non-scaling-stroke"
+                        />
+                      </svg>
+                    ) : null}
                     {!isAfterPreviewReady && !renderedOutputUrl ? (
                       <div className="after-preview-loading" role="status" aria-live="polite">
                         <span />
@@ -9932,9 +15503,11 @@ const ViralClipStudio = ({
                         Exit preview
                       </button>
                     ) : null}
-                    {beatEchoPreviewIsLive && !activeSideBySideOverlay ? (
+                    {temporalPreviewIsLive && !activeSideBySideOverlay ? (
                       <div
-                        className={`beat-echo-preview-layer is-${creativeIntensity}`}
+                        className={`beat-echo-preview-layer ${
+                          motionSculpturePreviewIsLive ? "is-motion-sculpture" : "is-beat-echo"
+                        } is-${creativeIntensity}`}
                         aria-hidden="true"
                         data-testid="beat-echo-preview-layer"
                       >
@@ -9971,7 +15544,12 @@ const ViralClipStudio = ({
                     ["soft_dip", "energy_flash"].includes(previewJoinTransition) ? (
                       <div
                         className={`join-transition-preview is-${previewJoinTransition}`}
-                        style={{ opacity: previewJoinOpacity }}
+                        style={{
+                          opacity: Math.min(
+                            previewJoinOpacity,
+                            previewJoinTransition === "soft_dip" ? 0.42 : 0.58
+                          ),
+                        }}
                         aria-hidden="true"
                         data-testid="join-transition-preview"
                       />
@@ -9983,27 +15561,24 @@ const ViralClipStudio = ({
                         className="watermark-cleanup-video-overlay"
                       />
                     ) : null}
-                    {smartCrop ? (
-                      <video
-                        ref={smartCropForegroundVideoRef}
-                        className="smart-crop-foreground"
-                        preload="auto"
-                        muted
-                        playsInline
-                        style={{
-                          objectFit: smartCropMode === "speaker_track" ? "cover" : "contain",
-                          objectPosition:
-                            smartCropMode === "speaker_track"
-                              ? reframeObjectPosition
-                              : safeObjectPosition,
-                          transform: smartCropMode === "speaker_track" ? "scale(1)" : "scale(0.92)",
-                        }}
-                      />
+                    {showSafeZones || showCompositionGrid ? (
+                      <div
+                        className={`studio-canvas-guides ${showSafeZones ? "show-safe" : ""} ${showCompositionGrid ? "show-grid" : ""}`}
+                        aria-hidden="true"
+                      >
+                        {showSafeZones ? <i className="studio-action-safe" /> : null}
+                        {showSafeZones ? <i className="studio-title-safe" /> : null}
+                      </div>
                     ) : null}
                     {brandWatermark && !renderedOutputUrl ? (
                       <AutoPromoteBrandLockup
                         className="studio-brand-watermark-preview"
                         compact
+                        featureLabel={activeBrandVariant.featureLabel}
+                        style={getWatermarkPreviewStyle(activeBrandWatermarkCue)}
+                        data-position={activeBrandWatermarkCue.position}
+                        data-start-time={activeBrandWatermarkCue.startTime}
+                        data-end-time={activeBrandWatermarkCue.endTime}
                         data-testid="brand-watermark-preview"
                       />
                     ) : null}
@@ -10013,7 +15588,12 @@ const ViralClipStudio = ({
                       preload="auto"
                       muted
                       playsInline
-                      style={{ opacity: hookBackdropOpacity, objectPosition: safeObjectPosition }}
+                      style={{
+                        display: "none",
+                        opacity: hookBackdropOpacity,
+                        visibility: hookBackdropOpacity > 0.001 ? "visible" : "hidden",
+                        objectPosition: safeObjectPosition,
+                      }}
                     />
                     <video
                       ref={hookFreezeVideoRef}
@@ -10022,7 +15602,9 @@ const ViralClipStudio = ({
                       muted
                       playsInline
                       style={{
+                        display: "none",
                         opacity: hookFreezeOpacity,
+                        visibility: hookFreezeOpacity > 0.001 ? "visible" : "hidden",
                         objectPosition: safeObjectPosition,
                         transformOrigin: hookTransformOrigin,
                         transform: `scale(${effectiveHookZoomTarget.toFixed(3)})`,
@@ -10047,6 +15629,7 @@ const ViralClipStudio = ({
                     <div
                       className="video-bg-layer"
                       style={{
+                        display: "none",
                         position: "absolute",
                         top: 0,
                         left: 0,
@@ -10054,7 +15637,10 @@ const ViralClipStudio = ({
                         height: "100%",
                         zIndex: 0,
                         overflow: "hidden",
-                        background: "linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%)",
+                        background:
+                          mainFrame.background === "soft_blur"
+                            ? "radial-gradient(circle at 50% 42%, #1b2030 0%, #080a10 58%, #020305 100%)"
+                            : "#020305",
                       }}
                     />
 
@@ -10206,25 +15792,45 @@ const ViralClipStudio = ({
                             "--caption-preview-scale": captionScale,
                             "--caption-story-accent":
                               captionStoryPreviewTreatment?.accent || "#ffb33d",
+                            "--caption-custom-x": `${captionStoryPreviewTreatment?.x ?? 50}%`,
+                            "--caption-custom-y": `${captionStoryPreviewTreatment?.y ?? 82}%`,
+                            "--caption-custom-shift-x":
+                              (captionStoryPreviewTreatment?.x ?? 50) <= 33
+                                ? "0%"
+                                : (captionStoryPreviewTreatment?.x ?? 50) >= 67
+                                  ? "-100%"
+                                  : "-50%",
+                            "--caption-custom-shift-y":
+                              (captionStoryPreviewTreatment?.y ?? 82) <= 33
+                                ? "0%"
+                                : (captionStoryPreviewTreatment?.y ?? 82) >= 67
+                                  ? "-100%"
+                                  : "-50%",
                           }}
                         >
-                          <div
-                            className="caption-preview-pill caption-preview-pill-active"
-                          >
+                          <div className="caption-preview-pill caption-preview-pill-active">
+                            {captionStoryPreviewTreatment?.icon ? (
+                              <span className="caption-preview-story-icon" aria-hidden="true">
+                                {captionStoryPreviewTreatment.icon}
+                              </span>
+                            ) : null}
                             {captionPreviewState.currentChunk.words.map((word, index) => (
-                              <span
+                              <React.Fragment
                                 key={`${captionPreviewState.currentChunk.id}-${word}-${index}`}
-                                className={
-                                  index === captionPreviewState.activeWordIndex
-                                    ? "caption-preview-word caption-preview-word-active"
-                                    : "caption-preview-word"
-                                }
                               >
-                                {word}
+                                <span
+                                  className={`caption-preview-word caption-rainbow-${index % 7} ${
+                                    index === captionPreviewState.activeWordIndex
+                                      ? "caption-preview-word-active"
+                                      : ""
+                                  }`}
+                                >
+                                  {word}
+                                </span>
                                 {index < captionPreviewState.currentChunk.words.length - 1
                                   ? " "
-                                  : ""}
-                              </span>
+                                  : null}
+                              </React.Fragment>
                             ))}
                           </div>
                           {captionPreviewState.nextChunk ? (
@@ -10234,12 +15840,19 @@ const ViralClipStudio = ({
                           ) : null}
                         </div>
                       ) : null}
+                      {!renderedOutputUrl && motionScenes.length > 0 ? (
+                        <MotionCanvas
+                          scenes={motionScenes}
+                          time={previewTimelineTime}
+                          getTime={() => getPreviewTimelineTime(videoRef.current?.currentTime || 0)}
+                        />
+                      ) : null}
                       {silenceRemoval && !showHookPreview ? (
                         <div className="silence-preview-indicator">
                           <span />
                           <span />
                           <span />
-                          <strong>Pacing · pauses tightened</strong>
+                          <strong>Smart pacing</strong>
                         </div>
                       ) : null}
                       {overlays
@@ -10274,6 +15887,13 @@ const ViralClipStudio = ({
                           const frameRadius = getOverlayFrameRadius(overlay);
                           const anim = overlay.animation || {};
                           const animClass = anim.enter ? `broll-anim-${anim.enter}` : "";
+                          const overlayMotion = buildMotionAutomationStyle(
+                            motionKeyframes.filter(
+                              keyframe => String(keyframe.targetId) === String(overlay.id)
+                            ),
+                            previewTimelineTime,
+                            overlay
+                          );
 
                           return (
                             <div
@@ -10286,10 +15906,10 @@ const ViralClipStudio = ({
                                 overlay.bRollMode === "sideBySide" ? "broll-side-by-side" : ""
                               } ${isMediaOverlay ? "is-media-overlay" : ""} ${
                                 isMediaOverlay ? `frame-shape-${frameShape}` : ""
-                              } ${animClass}`}
+                              } ${overlay.type === "text" ? "is-text-overlay" : ""} ${animClass}`}
                               style={{
-                                top: isFullscreen ? "0%" : `${overlay.y}%`,
-                                left: isFullscreen ? "0%" : `${overlay.x}%`,
+                                top: isFullscreen ? "0%" : `${overlayMotion.y}%`,
+                                left: isFullscreen ? "0%" : `${overlayMotion.x}%`,
                                 width: isFullscreen
                                   ? "100%"
                                   : overlay.type === "video" || overlay.type === "image"
@@ -10307,9 +15927,43 @@ const ViralClipStudio = ({
                                       : overlay.bg
                                     : "transparent",
                                 color: overlay.color,
+                                "--title-scale": Number(overlayMotion.scale || 1),
+                                "--title-rotation": `${Number(overlayMotion.rotation || 0)}deg`,
+                                "--layer-translate-x": `${-Number(overlay.anchorX ?? 50)}%`,
+                                "--layer-translate-y": `${-Number(overlay.anchorY ?? 50)}%`,
+                                "--layer-anchor-x": `${Number(overlay.anchorX ?? 50)}%`,
+                                "--layer-anchor-y": `${Number(overlay.anchorY ?? 50)}%`,
+                                "--title-stroke": `${Number(overlay.strokeWidth || 0)}px`,
+                                textAlign: overlay.textAlign || "center",
+                                fontWeight: Number(overlay.fontWeight || 900),
+                                fontFamily: `${overlay.fontFamily || "Inter"}, Inter, system-ui, sans-serif`,
+                                textShadow:
+                                  overlay.shadow === "none"
+                                    ? "none"
+                                    : overlay.shadow === "strong"
+                                      ? "0 4px 14px rgba(0,0,0,.95), 0 1px 2px rgba(0,0,0,1)"
+                                      : "0 3px 10px rgba(0,0,0,.72)",
                                 zIndex: isFullscreen ? 300 + index : 100 + index,
-                                opacity:
-                                  overlay.opacity !== undefined ? overlay.opacity : undefined,
+                                opacity: overlayMotion.opacity,
+                                mixBlendMode: overlay.blendMode || "normal",
+                                filter: isMediaOverlay
+                                  ? [
+                                      overlay.layerShadow?.enabled
+                                        ? `drop-shadow(${Number(overlay.layerShadow.x || 0)}px ${Number(overlay.layerShadow.y || 10)}px ${Number(overlay.layerShadow.blur || 18)}px color-mix(in srgb, ${overlay.layerShadow.color || "#000000"} ${Math.round(Number(overlay.layerShadow.opacity ?? 0.55) * 100)}%, transparent))`
+                                        : "",
+                                      overlay.glow?.enabled
+                                        ? `drop-shadow(0 0 ${Number(overlay.glow.radius || 16)}px color-mix(in srgb, ${overlay.glow.color || "#8b5cf6"} ${Math.round(Number(overlay.glow.intensity ?? 0.5) * 100)}%, transparent))`
+                                        : "",
+                                      Number(overlay.blur || 0) > 0
+                                        ? `blur(${Number(overlay.blur)}px)`
+                                        : "",
+                                    ].filter(Boolean).join(" ") || "none"
+                                  : undefined,
+                                clipPath: getOverlayMaskClipPath({
+                                  ...overlay,
+                                  cropX: overlayMotion.cropX,
+                                  cropY: overlayMotion.cropY,
+                                }),
                                 borderRadius: isFullscreen ? "0" : frameRadius,
                                 transition: anim.enterDuration
                                   ? `opacity ${anim.enterDuration}s ease, transform ${anim.enterDuration}s ease`
@@ -10376,6 +16030,7 @@ const ViralClipStudio = ({
                                     applySafeMediaSource(element, safeOverlaySrc);
                                   }}
                                   alt="Overlay"
+                                  className={overlay.kenBurns && overlay.kenBurns !== "none" ? `ken-burns-${overlay.kenBurns}` : ""}
                                   style={{
                                     width: "100%",
                                     height: "100%",
@@ -10388,13 +16043,13 @@ const ViralClipStudio = ({
                                       !isFullscreen && overlay.shadow !== "none"
                                         ? "0 16px 36px rgba(0, 0, 0, 0.42)"
                                         : "none",
-                                    transform: `rotate(${Number(overlay.rotation || 0)}deg)`,
                                     pointerEvents: "none",
                                   }}
                                 />
                               ) : safeOverlaySrc ? (
                                 <video
                                   data-testid={`broll-preview-${overlay.id}`}
+                                  poster={overlay.poster || undefined}
                                   ref={element => {
                                     applySafeMediaSource(element, safeOverlaySrc);
                                     if (element) {
@@ -10432,6 +16087,7 @@ const ViralClipStudio = ({
                               {comparisonMode !== "split" &&
                                 activeOverlayId === overlay.id &&
                                 isPreviewPaused &&
+                                !isPreviewFullscreen &&
                                 !isFullscreen && (
                                   <div className="overlay-controls">
                                     <button
@@ -10580,9 +16236,10 @@ const ViralClipStudio = ({
                           );
                         })}
                     </div>
-                    {comparisonMode === "after" ? (
+                  </div>
+                    {(
                       <div
-                        className="preview-custom-controls"
+                        className={`preview-custom-controls${isPreviewFullscreen ? " is-expanded" : ""}`}
                         onMouseDown={event => event.stopPropagation()}
                         onClick={event => event.stopPropagation()}
                       >
@@ -10596,6 +16253,7 @@ const ViralClipStudio = ({
                           {isPreviewPaused ? "▶" : "❚❚"}
                         </button>
                         <input
+                          className="preview-playhead-range"
                           type="range"
                           min={0}
                           max={Math.max(0.1, outputPlaybackDuration)}
@@ -10613,35 +16271,144 @@ const ViralClipStudio = ({
                           }
                           aria-label="Edited output position"
                         />
-                        <span>
+                        <span className="preview-timecode">
                           {formatPreviewTimePrecise(previewPlaybackTime)} /{" "}
                           {formatPreviewTimePrecise(outputPlaybackDuration)}
                         </span>
+                        <div className="preview-audio-controls" aria-label="Preview audio monitoring">
+                          <button
+                            type="button"
+                            data-testid="preview-audio-toggle"
+                            className={previewMuted ? "is-muted" : ""}
+                            aria-pressed={previewMuted}
+                            aria-label={previewMuted ? "Unmute preview audio" : "Mute preview audio"}
+                            title={`${previewMuted ? "Unmute" : "Mute"} preview audio (M)`}
+                            onClick={() => setPreviewMuted(current => !current)}
+                          >
+                            {previewMuted || previewVolume <= 0 ? "🔇" : "🔊"}
+                          </button>
+                          <input
+                            type="range"
+                            min={0}
+                            max={100}
+                            step={1}
+                            value={Math.round(previewVolume * 100)}
+                            aria-label="Preview master volume"
+                            title={`Preview volume ${Math.round(previewVolume * 100)}%`}
+                            onChange={event => {
+                              const nextVolume = Number(event.target.value || 0) / 100;
+                              setPreviewVolume(nextVolume);
+                              setPreviewMuted(nextVolume <= 0);
+                            }}
+                          />
+                          <span aria-live="polite">{previewMuted ? "Muted" : `${Math.round(previewVolume * 100)}%`}</span>
+                        </div>
                       </div>
-                    ) : null}
-                  </div>
+                    )}
                   <div className="before-preview-card" data-testid="before-preview-frame">
                     <span className="preview-version-label is-before">Before</span>
-                    <div
-                      className={`phone-frame phone-frame-before ${smartCrop ? reframeAspectClass : ""}`}
-                    >
+                    <div className="phone-frame phone-frame-before">
                       <video
                         ref={beforeVideoRef}
-                        className="studio-video"
                         muted
                         playsInline
                         preload="auto"
                         aria-label="Untouched source preview"
-                        style={{
-                          objectFit: effectiveVideoFit,
-                          objectPosition: safeObjectPosition,
-                          width: "100%",
-                          height: "100%",
-                        }}
+                        style={{ display: "none" }}
+                      />
+                      <canvas
+                        ref={beforeCanvasRef}
+                        className="studio-video before-preview-canvas"
+                        aria-label="Untouched source monitor"
                       />
                     </div>
                   </div>
                 </div>
+
+                {directorModeActive && (
+                  <div className="director-mode-hud" data-testid="director-mode-hud">
+                    <div className="director-hud-header">
+                      <div className="director-hud-status">
+                        <span
+                          className={`director-rec-badge ${
+                            videoRef.current && !videoRef.current.paused ? "is-recording" : ""
+                          }`}
+                        >
+                          ● {videoRef.current && !videoRef.current.paused ? "REC LIVE CUTS" : "DIRECTOR STANDBY"}
+                        </span>
+                        <span className="director-cuts-count">
+                          {directorSessionCuts.length} cut{directorSessionCuts.length === 1 ? "" : "s"} in session
+                        </span>
+                        <span className="director-hud-tip">
+                          (Play and tap keys 1, 2, 3, 4 to switch angles live)
+                        </span>
+                      </div>
+                      <div className="director-hud-actions">
+                        <button
+                          type="button"
+                          className="director-hud-btn is-commit"
+                          onClick={commitDirectorCutsToTimeline}
+                          disabled={!directorSessionCuts.length}
+                          title="Bake all recorded cuts into your story timeline"
+                        >
+                          ⚡ Commit Cuts ({directorSessionCuts.length})
+                        </button>
+                        <button
+                          type="button"
+                          className="director-hud-btn is-clear"
+                          onClick={clearDirectorCuts}
+                          disabled={!directorSessionCuts.length}
+                          title="Clear current session cuts"
+                        >
+                          ↺ Reset Take
+                        </button>
+                        <button
+                          type="button"
+                          className="director-hud-btn is-close"
+                          onClick={() => setDirectorModeActive(false)}
+                          title="Exit Director Mode (Esc)"
+                        >
+                          ✕ Exit
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="director-multi-view-grid">
+                      {directorAngles.map((angle, idx) => {
+                        const isLive = activeDirectorAngle === idx;
+                        return (
+                          <button
+                            type="button"
+                            key={angle.id}
+                            className={`director-camera-tile ${isLive ? "is-live" : "is-standby"}`}
+                            onClick={() => switchDirectorAngle(idx)}
+                            title={`Click or press [${idx + 1}] to cut to ${angle.label}`}
+                          >
+                            <div className="camera-tile-header">
+                              <span className={`camera-tally-pill ${isLive ? "is-live" : ""}`}>
+                                {isLive ? "🔴 LIVE" : "STANDBY"}
+                              </span>
+                              <span className="camera-hotkey-badge">[{idx + 1}]</span>
+                            </div>
+                            <div className="camera-tile-viewport">
+                              <div className={`camera-simulated-view angle-${angle.type}`}>
+                                <span className="camera-view-icon">
+                                  {idx === 0 ? "🎥" : idx === 1 ? "🔍" : idx === 2 ? "👀" : "📐"}
+                                </span>
+                                <span className="camera-zoom-badge">
+                                  {angle.type === "video" ? "Alternate Cam" : `${angle.zoom}x Focal`}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="camera-tile-footer">
+                              <strong>{angle.label}</strong>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
 
                 <div className="preview-signal-grid">
                   <div className="signal-card">
@@ -10682,10 +16449,95 @@ const ViralClipStudio = ({
                   <div className="compact-timeline-head">
                     <div>
                       <strong>Live edit timeline</strong>
+                      <span>{formatPreviewTimePrecise(previewPlaybackTime)} / </span>
                       <span data-testid="timeline-output-time">
-                        {formatPreviewTimePrecise(previewPlaybackTime)} /{" "}
                         {formatPreviewTimePrecise(outputPlaybackDuration)}
                       </span>
+                    </div>
+                    <div className="timeline-quick-toolbar" role="toolbar" aria-label="Quick editing tools">
+                      <button
+                        type="button"
+                        className="timeline-quick-btn is-primary"
+                        onClick={splitCurrentClipAtPlayhead}
+                        title="Split clip at playhead"
+                        data-testid="timeline-quick-split"
+                      >
+                        ✂️ Split
+                      </button>
+                      <button
+                        type="button"
+                        className="timeline-quick-btn"
+                        onClick={trimClipStartToPlayhead}
+                        title="Cut everything before playhead"
+                        data-testid="timeline-quick-trim-start"
+                      >
+                        ⏮️ Trim Start
+                      </button>
+                      <button
+                        type="button"
+                        className="timeline-quick-btn"
+                        onClick={trimClipEndToPlayhead}
+                        title="Cut everything after playhead"
+                        data-testid="timeline-quick-trim-end"
+                      >
+                        ⏭️ Trim End
+                      </button>
+                      {timeline.length > 1 && (
+                        <button
+                          type="button"
+                          className="timeline-quick-btn is-danger"
+                          onClick={deleteActiveTimelineClip}
+                          title="Delete selected clip"
+                          data-testid="timeline-quick-delete"
+                        >
+                          🗑️ Delete
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        className={`timeline-quick-btn ${autoCaptions ? "is-active" : ""}`}
+                        onClick={() => {
+                          const next = !autoCaptions;
+                          setAutoCaptions(next);
+                          if (next && !captionSegments.length && !captionTextOverride) {
+                            const initial = resolveInitialCaptionSegments(selectedClip, selectedClip?.duration);
+                            if (initial.length) setCaptionSegments(initial);
+                          }
+                        }}
+                        title="Toggle animated captions"
+                        data-testid="timeline-quick-captions"
+                      >
+                        💬 Captions {autoCaptions ? "On" : "Off"}
+                      </button>
+                      <button
+                        type="button"
+                        className={`timeline-quick-btn ${silenceRemoval ? "is-active" : ""}`}
+                        onClick={() => setSilenceRemoval(!silenceRemoval)}
+                        title="Automatically remove silent dead pauses"
+                        data-testid="timeline-quick-silence"
+                      >
+                        ⚡ Cut Silences
+                      </button>
+                      <button
+                        type="button"
+                        className="timeline-quick-btn is-history"
+                        onClick={handleUndo}
+                        disabled={!canUndo}
+                        title="Undo (Ctrl+Z)"
+                        data-testid="timeline-quick-undo"
+                      >
+                        ↩ Undo
+                      </button>
+                      <button
+                        type="button"
+                        className="timeline-quick-btn is-history"
+                        onClick={handleRedo}
+                        disabled={!canRedo}
+                        title="Redo (Ctrl+Y)"
+                        data-testid="timeline-quick-redo"
+                      >
+                        ↪ Redo
+                      </button>
                     </div>
                     <span className="compact-timeline-sync">
                       <i aria-hidden="true" /> After preview · {liveTimelineEditCount} live edits
@@ -11034,6 +16886,28 @@ const ViralClipStudio = ({
                     </div>
                   </div>
 
+                  {motionScenes.map(scene => (
+                    <div className="compact-timeline-row" key={scene.id}>
+                      <span>Motion</span>
+                      <div className="compact-timeline-track motion-timeline-track">
+                        <button
+                          type="button"
+                          className="motion-timeline-block"
+                          aria-label={`Inspect motion ${scene.text}`}
+                          style={{
+                            left: `${(100 * scene.startTime) / Math.max(0.1, liveTimelineDuration)}%`,
+                            width: `${(100 * scene.duration) / Math.max(0.1, liveTimelineDuration)}%`,
+                          }}
+                          onClick={() => {
+                            setSelectedMotionId(scene.id);
+                            seekLiveEditTimelineItem(scene.startTime, "motion");
+                          }}
+                        >
+                          ◆ {scene.text} {scene.sound !== "none" ? "♫" : ""}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                   <div className="compact-timeline-row">
                     <span>Speed</span>
                     <div
@@ -11063,10 +16937,10 @@ const ViralClipStudio = ({
                     </div>
                   </div>
 
-                  <div className="compact-timeline-row">
-                    <span>Audio</span>
+                  <div className="compact-timeline-row audio-remix-timeline-row">
+                    <span>Voice</span>
                     <div
-                      className={`compact-timeline-track compact-audio-track ${soundEffects.length ? "has-sfx" : ""}`}
+                      className="compact-timeline-track compact-audio-track is-voice-track"
                       onClick={seekLiveEditTimeline}
                       role="presentation"
                     >
@@ -11111,6 +16985,20 @@ const ViralClipStudio = ({
                             </button>
                           );
                         })}
+                    </div>
+                  </div>
+
+                  <div className="compact-timeline-row audio-remix-timeline-row">
+                    <span>Music</span>
+                    <div
+                      className="compact-timeline-track compact-audio-track is-music-track"
+                      onClick={seekLiveEditTimeline}
+                      role="presentation"
+                    >
+                      <i
+                        className="compact-timeline-playhead"
+                        style={{ left: `${liveTimelinePlayheadLeft}%` }}
+                      />
                       {addMusic ? (
                         <button
                           type="button"
@@ -11127,6 +17015,46 @@ const ViralClipStudio = ({
                           <i className="compact-audio-wave" aria-hidden="true" />
                           <span>{musicTrack?.name || currentMusicLabel || "Background sound"}</span>
                         </button>
+                      ) : (
+                        <button
+                          type="button"
+                          className="compact-audio-lane is-music is-empty"
+                          onClick={event => {
+                            event.stopPropagation();
+                            selectCreativeTool("sound");
+                          }}
+                          data-testid="timeline-music-audio-empty"
+                        >
+                          <i className="compact-audio-wave" aria-hidden="true" />
+                          <span>No music selected</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="compact-timeline-row audio-remix-timeline-row">
+                    <span>SFX</span>
+                    <div
+                      className="compact-timeline-track compact-audio-track is-sfx-track"
+                      onClick={seekLiveEditTimeline}
+                      role="presentation"
+                    >
+                      <i
+                        className="compact-timeline-playhead"
+                        style={{ left: `${liveTimelinePlayheadLeft}%` }}
+                      />
+                      {soundEffects.length === 0 ? (
+                        <button
+                          type="button"
+                          className="compact-audio-lane is-sfx-empty"
+                          onClick={event => {
+                            event.stopPropagation();
+                            selectCreativeTool("sound");
+                          }}
+                        >
+                          <i className="compact-audio-wave" aria-hidden="true" />
+                          <span>Add sound effects</span>
+                        </button>
                       ) : null}
                       {soundEffects.map(effect => {
                         const left = (Number(effect.startTime || 0) / liveTimelineDuration) * 100;
@@ -11139,7 +17067,6 @@ const ViralClipStudio = ({
                             style={{
                               left: `${left}%`,
                               width: `${Math.max(2.4, width)}%`,
-                              top: addMusic ? "54px" : "29px",
                             }}
                             onClick={event => {
                               event.stopPropagation();
@@ -11550,6 +17477,115 @@ const ViralClipStudio = ({
                       }}
                     />
                   </label>
+                  <div className="split-audio-panel" style={{ borderTop: "1px solid var(--border)", paddingTop: "10px", marginTop: "10px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <strong style={{ fontSize: "12px", color: "var(--text)" }}>🎧 J-Cut & L-Cut Dialogue Transitions</strong>
+                      <span style={{ fontSize: "10px", color: "#38bdf8" }}>Broadcast Rhythm</span>
+                    </div>
+
+                    {/* Preset Pills */}
+                    <div className="split-audio-pill-group">
+                      {SPLIT_AUDIO_PRESETS.map(preset => {
+                        const curJ = Math.abs(Number(timeline[activeTimelineIndex]?.audioTrimOffsetStart || 0));
+                        const curL = Number(timeline[activeTimelineIndex]?.audioTrimOffsetEnd || 0);
+                        const isPresetActive =
+                          preset.id === "straight"
+                            ? curJ < 0.05 && curL < 0.05
+                            : (preset.jCut > 0 && Math.abs(curJ - preset.jCut) < 0.1) ||
+                              (preset.lCut > 0 && Math.abs(curL - preset.lCut) < 0.1);
+
+                        return (
+                          <button
+                            key={preset.id}
+                            type="button"
+                            className={`split-audio-pill ${isPresetActive ? "is-active" : ""}`}
+                            onClick={() => {
+                              const updated = applySplitAudioPreset(timeline, activeTimelineIndex, preset.id);
+                              setTimeline(updated);
+                              toast.success(`Applied ${preset.label}`);
+                            }}
+                            title={preset.description}
+                          >
+                            {preset.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* J-Cut Slider */}
+                    <label className="studio-slider-label">
+                      <div style={{ display: "flex", justifyContent: "space-between" }}>
+                        <span>J-Cut Lead (Dialogue Pre-lap)</span>
+                        <strong style={{ color: "#22d3ee" }}>
+                          {Number(timeline[activeTimelineIndex]?.audioTrimOffsetStart || 0) < -0.04
+                            ? `-${Math.abs(timeline[activeTimelineIndex].audioTrimOffsetStart).toFixed(1)}s`
+                            : "0.0s (Straight)"}
+                        </strong>
+                      </div>
+                      <input
+                        type="range"
+                        min={-3}
+                        max={0}
+                        step={0.1}
+                        value={timeline[activeTimelineIndex].audioTrimOffsetStart || 0}
+                        onChange={e => {
+                          const val = parseFloat(e.target.value);
+                          setTimeline(prev =>
+                            prev.map((item, i) =>
+                              i === activeTimelineIndex ? { ...item, audioTrimOffsetStart: val } : item
+                            )
+                          );
+                        }}
+                      />
+                    </label>
+
+                    {/* L-Cut Slider */}
+                    <label className="studio-slider-label">
+                      <div style={{ display: "flex", justifyContent: "space-between" }}>
+                        <span>L-Cut Trail (Dialogue Hold)</span>
+                        <strong style={{ color: "#a78bfa" }}>
+                          {Number(timeline[activeTimelineIndex]?.audioTrimOffsetEnd || 0) > 0.04
+                            ? `+${Number(timeline[activeTimelineIndex].audioTrimOffsetEnd).toFixed(1)}s`
+                            : "0.0s (Straight)"}
+                        </strong>
+                      </div>
+                      <input
+                        type="range"
+                        min={0}
+                        max={3}
+                        step={0.1}
+                        value={timeline[activeTimelineIndex].audioTrimOffsetEnd || 0}
+                        onChange={e => {
+                          const val = parseFloat(e.target.value);
+                          setTimeline(prev =>
+                            prev.map((item, i) =>
+                              i === activeTimelineIndex ? { ...item, audioTrimOffsetEnd: val } : item
+                            )
+                          );
+                        }}
+                      />
+                    </label>
+
+                    {/* Auto-Apply Pre-laps Button */}
+                    <button
+                      type="button"
+                      className="smart-zoom-btn-primary"
+                      onClick={autoApplyAllDialoguePreLaps}
+                      style={{
+                        background: "linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(139, 92, 246, 0.2))",
+                        borderColor: "rgba(56, 189, 248, 0.4)",
+                        color: "#e0f2fe",
+                        padding: "6px 12px",
+                        fontSize: "11px",
+                        cursor: "pointer",
+                        borderRadius: "6px",
+                        marginTop: "2px",
+                      }}
+                      title="Auto-apply 0.6s dialogue pre-laps across all cuts in the sequence"
+                    >
+                      ⚡ Auto-Dialogue Pre-lap (All Cuts)
+                    </button>
+                  </div>
                   <label className="studio-slider-label">
                     <span>Clip end</span>
                     <input
@@ -11639,19 +17675,34 @@ const ViralClipStudio = ({
             </section>
           </div>
 
-          <div className="studio-sidebar">
+          <div className="studio-sidebar" ref={studioSidebarRef}>
             <section
-              className="studio-panel clip-inspector-panel"
+              className={`studio-panel clip-inspector-panel ${
+                activeCreativeTool === "export" ? "is-export-hidden" : ""
+              }`}
               data-testid="clip-studio-inspector"
             >
-              <div className="creative-director-panel">
-                <div className="creative-director-heading">
+              <div
+                className={`creative-director-panel ${
+                  activeCreativeTool === "moments" ? "is-expanded" : "is-compact"
+                }`}
+              >
+                <button
+                  type="button"
+                  className="creative-director-heading"
+                  aria-expanded={activeCreativeTool === "moments"}
+                  onClick={() => selectCreativeTool("moments")}
+                >
                   <div>
                     <span>AI Creative Director</span>
-                    <strong>Tell it how the clip should feel</strong>
+                    <strong>
+                      {activeCreativeTool === "moments"
+                        ? "Tell it how the clip should feel"
+                        : "Return to story direction"}
+                    </strong>
                   </div>
                   <i aria-hidden="true">☷</i>
-                </div>
+                </button>
                 <button
                   type="button"
                   className="make-it-hit-button"
@@ -11759,41 +17810,15 @@ const ViralClipStudio = ({
                   </small>
                 </div>
                 {workspaceMode === "signature" ? (
-                  <StudioFinishRack
-                    fx={finishFx}
-                    hasEffects={hasFinishEffects}
-                    onUpdateFx={(field, value) => {
-                      updateFinishFx(field, value);
-                      setComparisonMode("after");
-                      setStudioActionMessage(
-                        "Finish & Motion updated instantly in After. No render credits used."
-                      );
-                    }}
-                    onApplyPreset={applyStudioFinishPreset}
-                    onReset={resetStudioFinish}
-                    visualizer={podcastVisualizer}
-                    onUpdateVisualizer={updatePodcastVisualizer}
-                    keyframes={finishKeyframes}
-                    currentTime={previewTimelineTime}
-                    duration={liveTimelineDuration}
-                    onAddKeyframe={addFinishKeyframeAtPlayhead}
-                    onRemoveKeyframe={removeFinishKeyframe}
-                    onSeekKeyframe={seekFinishKeyframe}
-                    scopeMode={scopeMode}
-                    onScopeModeChange={setScopeMode}
-                    scopes={<VideoScopes videoRef={videoRef} mode={scopeMode} />}
-                    beatCount={musicBeatMarkers.length}
-                    beatSnapEnabled={beatSnapEnabled}
-                    onBeatSnapChange={setBeatSnapEnabled}
-                    mainFrame={mainFrame}
-                    onUpdateMainFrame={(field, value) => {
-                      setMainFrame(current => ({ ...current, [field]: value }));
-                      setComparisonMode("after");
-                      setStudioActionMessage(
-                        "Main footage frame updated in preview and final export."
-                      );
-                    }}
-                  />
+                  <button
+                    type="button"
+                    className="signature-color-shortcut"
+                    onClick={() => selectCreativeTool("finish")}
+                  >
+                    <span>◐</span>
+                    <strong>Open Color & Finish</strong>
+                    <small>Grade, scopes, motion, texture and the complete rounded frame.</small>
+                  </button>
                 ) : null}
                 <span className="creative-intent-label">Choose your intent</span>
                 <div className="creative-intent-grid">
@@ -11904,6 +17929,118 @@ const ViralClipStudio = ({
                     </span>
                   </div>
 
+                  <section className="simple-cut-card">
+                    <div className="simple-cut-heading">
+                      <div>
+                        <span className="panel-kicker">1-Tap Editing</span>
+                        <strong>Trim or split at the playhead line</strong>
+                      </div>
+                    </div>
+                    <div className="simple-cut-buttons">
+                      <button
+                        type="button"
+                        className="simple-cut-btn is-primary"
+                        onClick={splitCurrentClipAtPlayhead}
+                        title="Split clip into two at the current playhead"
+                        data-testid="inspector-cut-split"
+                      >
+                        ✂️ Split at playhead
+                      </button>
+                      <button
+                        type="button"
+                        className="simple-cut-btn"
+                        onClick={trimClipStartToPlayhead}
+                        title="Cut everything before the playhead"
+                        data-testid="inspector-cut-trim-start"
+                      >
+                        ⏮️ Trim start to here
+                      </button>
+                      <button
+                        type="button"
+                        className="simple-cut-btn"
+                        onClick={trimClipEndToPlayhead}
+                        title="Cut everything after the playhead"
+                        data-testid="inspector-cut-trim-end"
+                      >
+                        ⏭️ Trim end to here
+                      </button>
+                      {timeline.length > 1 && (
+                        <button
+                          type="button"
+                          className="simple-cut-btn is-danger"
+                          onClick={deleteActiveTimelineClip}
+                          title="Delete the currently selected clip"
+                          data-testid="inspector-cut-delete"
+                        >
+                          🗑️ Delete this clip
+                        </button>
+                      )}
+                    </div>
+                  </section>
+
+                  <details className="advanced-tool-section precision-edit-details">
+                    <summary>⚙️ Advanced Pro Controls (Ripple, Slip, Slide, J/L-Cuts)</summary>
+                    <section className="precision-edit-card">
+                      <div className="sound-effects-heading">
+                        <div>
+                          <span className="panel-kicker">Precision edit</span>
+                          <strong>Ripple, roll, slip, slide and split audio</strong>
+                        </div>
+                        <label>
+                          <span>Nudge</span>
+                          <select
+                            aria-label="Precision edit nudge"
+                            value={precisionNudge}
+                            onChange={event => setPrecisionNudge(Number(event.target.value))}
+                          >
+                            <option value={0.04}>1 frame</option>
+                            <option value={0.1}>0.10s</option>
+                            <option value={0.25}>0.25s</option>
+                            <option value={1}>1.00s</option>
+                          </select>
+                        </label>
+                      </div>
+                      <div className="precision-edit-grid">
+                        {["ripple", "roll", "slip", "slide", "jcut", "lcut"].map(mode => (
+                          <div key={mode}>
+                            <strong>
+                              {mode === "jcut"
+                                ? "J-cut"
+                                : mode === "lcut"
+                                  ? "L-cut"
+                                  : mode[0].toUpperCase() + mode.slice(1)}
+                            </strong>
+                            <button
+                              type="button"
+                              aria-label={`${mode} earlier`}
+                              onClick={() => applyPrecisionTimelineEdit(mode, -1)}
+                            >
+                              −
+                            </button>
+                            <button
+                              type="button"
+                              aria-label={`${mode} later`}
+                              onClick={() => applyPrecisionTimelineEdit(mode, 1)}
+                            >
+                              +
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                      <label className="inspector-check-row">
+                        <input
+                          type="checkbox"
+                          checked={linkedSelection}
+                          onChange={event => setLinkedSelection(event.target.checked)}
+                        />
+                        <span>
+                          <strong>Link source video and audio</strong>
+                          <small>Turn off for independent J-cuts, L-cuts and audio slips.</small>
+                        </span>
+                      </label>
+                    </section>
+                  </details>
+
                   <div className="cut-mark-actions">
                     <button type="button" onClick={() => markCutBoundary("start")}>
                       [ Mark remove start
@@ -12009,6 +18146,22 @@ const ViralClipStudio = ({
                         ? ` Recommended here: ${JOIN_TRANSITIONS.find(item => item.id === resolvedJoinTransition)?.label}.`
                         : ""}
                     </small>
+                    {resolvedJoinTransition !== "clean_cut" ? (
+                      <label className="inspector-range">
+                        <span>
+                          <b>Transition duration</b>
+                          <strong>{joinTransitionDuration.toFixed(2)}s</strong>
+                        </span>
+                        <input
+                          type="range"
+                          min={0.04}
+                          max={2}
+                          step={0.02}
+                          value={joinTransitionDuration}
+                          onChange={event => setJoinTransitionDuration(Number(event.target.value))}
+                        />
+                      </label>
+                    ) : null}
                   </div>
 
                   <div className="inspector-inline-actions">
@@ -12037,6 +18190,80 @@ const ViralClipStudio = ({
                       Preview lead-in
                     </button>
                   </div>
+
+                  <details className="advanced-tool-section stabilization-section">
+                    <summary>Video stabilization</summary>
+                    <label className="inspector-toggle-row">
+                      <span>
+                        <b>Stabilize shaky footage</b>
+                        <small>Motion analysis smooths camera shake before reframing.</small>
+                      </span>
+                      <input
+                        type="checkbox"
+                        checked={stabilization.enabled}
+                        onChange={event =>
+                          setStabilization(current => ({
+                            ...current,
+                            enabled: event.target.checked,
+                          }))
+                        }
+                      />
+                    </label>
+                    {stabilization.enabled ? (
+                      <>
+                        <label className="inspector-range">
+                          <span>
+                            <b>Smoothing</b>
+                            <strong>{stabilization.strength}%</strong>
+                          </span>
+                          <input
+                            type="range"
+                            min={5}
+                            max={100}
+                            value={stabilization.strength}
+                            onChange={event =>
+                              setStabilization(current => ({
+                                ...current,
+                                strength: Number(event.target.value),
+                              }))
+                            }
+                          />
+                        </label>
+                        <label className="inspector-select-field">
+                          <span>Edge crop</span>
+                          <select
+                            value={stabilization.crop}
+                            onChange={event =>
+                              setStabilization(current => ({
+                                ...current,
+                                crop: event.target.value,
+                              }))
+                            }
+                          >
+                            <option value="adaptive">Adaptive crop</option>
+                            <option value="minimal">Minimal crop</option>
+                            <option value="scale">Scale to hide edges</option>
+                          </select>
+                        </label>
+                        <label className="inspector-check-row">
+                          <input
+                            type="checkbox"
+                            checked={stabilization.rollingShutter}
+                            onChange={event =>
+                              setStabilization(current => ({
+                                ...current,
+                                rollingShutter: event.target.checked,
+                              }))
+                            }
+                          />
+                          <span>
+                            <strong>Rolling-shutter repair</strong>
+                            <small>Corrects phone-camera wobble before stabilization.</small>
+                          </span>
+                        </label>
+                      </>
+                    ) : null}
+                  </details>
 
                   <button
                     type="button"
@@ -12202,10 +18429,10 @@ const ViralClipStudio = ({
                   <div className="inspector-heading-row">
                     <div>
                       <span className="panel-kicker">Auto Reframe</span>
-                      <h4>Keep the subject inside the vertical edit</h4>
+                      <h4>Frame the speaker or the complete conversation</h4>
                     </div>
-                    <span className={`inspector-status-dot ${smartCrop ? "is-ready" : ""}`}>
-                      {smartCrop ? "Enabled" : "Off"}
+                    <span className={`inspector-status-dot ${effectiveSmartCrop ? "is-ready" : ""}`}>
+                      {effectiveSmartCrop ? "Enabled" : "Off"}
                     </span>
                   </div>
 
@@ -12213,23 +18440,21 @@ const ViralClipStudio = ({
                     <span>
                       <b>Enable Auto Reframe</b>
                       <small>
-                        Detects faces across the clip and moves the 9:16 crop to follow them.
+                        Follow a reviewed subject, preserve the full source, or compose synchronized cameras.
                       </small>
                     </span>
                     <input
                       type="checkbox"
                       data-testid="auto-reframe-toggle"
-                      checked={smartCrop}
+                      checked={effectiveSmartCrop}
                       onChange={event => {
                         const enabled = event.target.checked;
+                        recordReframeModeAtPlayhead(enabled ? smartCropMode : "off");
                         setSmartCrop(enabled);
-                        if (enabled && smartCropMode === "center") {
-                          setSmartCropMode("speaker_track");
-                        }
                         setComparisonMode("after");
                         setStudioActionMessage(
                           enabled
-                            ? "Auto Reframe enabled. The export analyzes the full face path instead of using a fixed center crop."
+                            ? "Auto Reframe enabled."
                             : "Auto Reframe disabled. The source framing is preserved."
                         );
                       }}
@@ -12264,68 +18489,637 @@ const ViralClipStudio = ({
 
                   <div className="inspector-field">
                     <span>Framing behaviour</span>
-                    <div className="inspector-choice-grid is-two">
+                    <div className="inspector-choice-grid is-three reframe-behaviour-grid">
                       <button
                         type="button"
                         data-testid="reframe-follow-subject"
-                        className={smartCropMode === "speaker_track" ? "is-active" : ""}
-                        aria-pressed={smartCropMode === "speaker_track"}
-                        onClick={() => {
-                          setSmartCrop(true);
-                          setSmartCropMode("speaker_track");
-                          setComparisonMode("after");
-                          setStudioActionMessage(
-                            "Follow Subject selected. Face positions drive the crop throughout the exported clip."
-                          );
-                        }}
+                        className={effectiveSmartCropMode === "speaker_track" ? "is-active" : ""}
+                        aria-pressed={effectiveSmartCropMode === "speaker_track"}
+                        onClick={() => openSpeakerTracking(true)}
                       >
-                        Follow Subject
+                        Solo Speaker
                       </button>
                       <button
                         type="button"
                         data-testid="reframe-preserve-frame"
-                        className={smartCropMode === "center" ? "is-active" : ""}
-                        aria-pressed={smartCropMode === "center"}
+                        className={effectiveSmartCropMode === "center" ? "is-active" : ""}
+                        aria-pressed={effectiveSmartCropMode === "center"}
+                        onClick={showEveryoneSplit}
+                      >
+                        Show Everyone
+                      </button>
+                      <button
+                        type="button"
+                        data-testid="reframe-speaker-stack"
+                        className={effectiveSmartCropMode === "group_stack" ? "is-active" : ""}
+                        aria-pressed={effectiveSmartCropMode === "group_stack"}
+                        disabled={!speakerStackIsReady}
+                        title={
+                          speakerStackIsReady
+                            ? `Compose multi-camera layout for participants`
+                            : `Load video to enable multi-camera layout`
+                        }
                         onClick={() => {
                           setSmartCrop(true);
-                          setSmartCropMode("center");
+                          setSmartCropMode("group_stack");
+                          recordReframeModeAtPlayhead("group_stack");
+                          setReframeAspect(current =>
+                            current === "16:9" ? "9:16" : current
+                          );
                           setComparisonMode("after");
                           setStudioActionMessage(
-                            "Preserve Full Frame selected. The complete source stays visible over a fitted background."
+                            `${speakerStackCameraCount}-camera composition selected. Every participant is live in preview and export.`
                           );
                         }}
                       >
-                        Preserve Full Frame
+                        Multi-Camera
                       </button>
                     </div>
                     <small>
-                      {smartCropMode === "speaker_track"
-                        ? "Best for interviews, podcasts, tutorials, and moving presenters."
-                        : "Best for groups, demonstrations, screen recordings, and composed wide shots."}
+                      {effectiveSmartCropMode === "speaker_track"
+                        ? "Use reviewed framing points to keep the speaker comfortably in view."
+                        : effectiveSmartCropMode === "group_stack"
+                          ? `Use the ${speakerStackCameraCount}-camera layout so every participant remains live and visible together.`
+                          : reframeAspect === "9:16"
+                            ? "Two crops of the same source, stacked vertically. Adjust both speakers below; no second camera file is required."
+                            : "Use the untouched wide composition when the whole set and every participant must remain visible."}
                     </small>
                   </div>
+
+                  <details
+                    className={`speaker-source-setup ${speakerStackIsReady ? "is-ready" : ""}`}
+                    data-testid="speaker-source-setup"
+                  >
+                    <summary>
+                      <span>Multi-Camera setup</span>
+                      <small>
+                        {speakerStackIsReady
+                          ? speakerStackSources.length > speakerStackCameraCount
+                            ? `${speakerStackSources.length} in bank · ${speakerStackCameraCount} live`
+                            : `${speakerStackCameraCount} synchronized angles ready`
+                          : `Needs ${speakerStackCameraCount} synchronized angles`}
+                      </small>
+                    </summary>
+                    <div className="speaker-source-setup-body">
+                    <div className="speaker-stack-editor-heading">
+                      <div>
+                        <strong>Clean camera sources</strong>
+                        <small>
+                          Add 2–12 real full-size angles, then route any four into the live grid.
+                          Reaction insets are never treated as independent cameras.
+                        </small>
+                      </div>
+                      <button
+                        type="button"
+                        data-testid="add-clean-speaker-angle"
+                        onClick={() => speakerStackSourceInputRef.current?.click()}
+                      >
+                        + Add angle
+                      </button>
+                    </div>
+                    <input
+                      ref={speakerStackSourceInputRef}
+                      type="file"
+                      accept="video/*"
+                      multiple
+                      data-testid="clean-speaker-angle-input"
+                      onChange={addCleanSpeakerAngle}
+                      hidden
+                    />
+                    <div className="multicam-layout-picker" role="group" aria-label="Camera layout">
+                      {[
+                        [2, "stack_2", "2 cameras", "Top / bottom"],
+                        [3, "hero_3", "3 cameras", "Hero + duo"],
+                        [4, "grid_4", "4+ sources", "Route any 4 · 2 × 2"],
+                      ].map(([count, layout, label, helper]) => (
+                        <button
+                          key={layout}
+                          type="button"
+                          data-testid={`multicam-layout-${count}`}
+                          className={speakerStackCameraCount === count ? "is-active" : ""}
+                          aria-pressed={speakerStackCameraCount === count}
+                          onClick={() => {
+                            setSpeakerStackCameraCount(count);
+                            setSpeakerStackLayout(layout);
+                            setSpeakerStackSyncConfirmed(false);
+                          }}
+                        >
+                          <strong>{label}</strong>
+                          <small>{helper}</small>
+                        </button>
+                      ))}
+                    </div>
+                    {speakerStackCameraCount === 2 ? (
+                      <div
+                        className="multicam-composition-picker"
+                        role="group"
+                        aria-label="Two camera composition"
+                      >
+                        {[
+                          ["stack_2", "Top / Bottom", "Equal stacked speakers"],
+                          ["split_2", "50 / 50", "Left and right split"],
+                          ["pip_2", "Picture in picture", "One full, one rounded PIP"],
+                          ["active_2", "Speaker + reaction", "Reviewed focus cuts"],
+                          ["spotlight_2", "Speaker spotlight", "Full-frame reviewed cuts"],
+                        ].map(([layout, label, helper]) => (
+                          <button
+                            key={layout}
+                            type="button"
+                            data-testid={`multicam-composition-${layout}`}
+                            className={speakerStackLayout === layout ? "is-active" : ""}
+                            aria-pressed={speakerStackLayout === layout}
+                            onClick={() => {
+                              setSpeakerStackLayout(layout);
+                              setSmartCrop(true);
+                              setSmartCropMode("group_stack");
+                              setComparisonMode("after");
+                              setStudioActionMessage(`${label} camera composition is live in preview.`);
+                            }}
+                          >
+                            <strong>{label}</strong>
+                            <small>{helper}</small>
+                          </button>
+                        ))}
+                      </div>
+                    ) : null}
+                    {speakerStackCameraCount === 2 &&
+                    ["active_2", "spotlight_2"].includes(speakerStackLayout) ? (
+                      <section
+                        className="speaker-focus-director"
+                        aria-labelledby="speaker-focus-director-title"
+                      >
+                        <div className="speaker-focus-director-heading">
+                          <div>
+                            <strong id="speaker-focus-director-title">Reviewed speaker cuts</strong>
+                            <small>
+                              Mark who is speaking at the playhead to direct the preview.
+                              These reviewed cuts are saved with the project and sent to the media worker.
+                            </small>
+                          </div>
+                          {speakerFocusCuts.length ? (
+                            <button
+                              type="button"
+                              className="speaker-focus-clear"
+                              onClick={() => setSpeakerFocusCuts([])}
+                            >
+                              Clear
+                            </button>
+                          ) : null}
+                        </div>
+                        <div className="speaker-focus-actions" role="group" aria-label="Mark active speaker">
+                          {["top", "bottom"].map(slot => (
+                            <button
+                              key={slot}
+                              type="button"
+                              data-testid={`speaker-focus-${slot}`}
+                              onClick={() => addSpeakerFocusCutAtPlayhead(slot)}
+                            >
+                              <span>{slot === "top" ? "1" : "2"}</span>
+                              Mark {MULTICAM_SLOT_LABELS[slot]}
+                            </button>
+                          ))}
+                        </div>
+                        {speakerFocusCuts.length ? (
+                          <div className="speaker-focus-cut-list" aria-label="Reviewed speaker cut list">
+                            {speakerFocusCuts.map(cut => (
+                              <div key={cut.id} className="speaker-focus-cut">
+                                <button
+                                  type="button"
+                                  onClick={() => seekLiveEditTimelineItem(cut.time, { play: false })}
+                                >
+                                  <strong>{MULTICAM_SLOT_LABELS[cut.slot]}</strong>
+                                  <span>{cut.time.toFixed(2)}s</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  className="speaker-focus-cut-remove"
+                                  aria-label={`Remove ${MULTICAM_SLOT_LABELS[cut.slot]} focus cut at ${cut.time.toFixed(2)} seconds`}
+                                  onClick={() =>
+                                    setSpeakerFocusCuts(current =>
+                                      current.filter(currentCut => currentCut.id !== cut.id)
+                                    )
+                                  }
+                                >
+                                  ×
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="speaker-focus-empty">
+                            Until a mark is added, Camera 1 remains the explicit fallback.
+                          </p>
+                        )}
+                      </section>
+                    ) : null}
+                    <div className="speaker-source-selectors">
+                      {activeSpeakerStackSlots.map(slot => {
+                        const label =
+                          slot === "top"
+                            ? "Top speaker source"
+                            : slot === "bottom"
+                              ? "Bottom speaker source"
+                              : `${MULTICAM_SLOT_LABELS[slot]} source`;
+                        return (
+                        <label key={slot}>
+                          <span>{label}</span>
+                          <select
+                            aria-label={label}
+                            value={resolvedSpeakerStackSourceIds[slot] || ""}
+                            onChange={event => {
+                              setSpeakerStackSyncConfirmed(false);
+                              setSpeakerStackSourceIds(current => ({
+                                ...current,
+                                [slot]: event.target.value,
+                              }));
+                            }}
+                          >
+                            <option value="" disabled>
+                              Choose a clean angle
+                            </option>
+                            {speakerStackSourceOptions.map(option => (
+                              <option
+                                key={`${slot}-${option.id}`}
+                                value={option.id}
+                                disabled={
+                                  activeSpeakerStackSlots.some(
+                                    otherSlot =>
+                                      otherSlot !== slot &&
+                                      option.id === resolvedSpeakerStackSourceIds[otherSlot]
+                                  )
+                                }
+                              >
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                        );
+                      })}
+                    </div>
+                    <div className="speaker-source-offsets">
+                      {activeSpeakerStackSlots.map(slot => {
+                        const label =
+                          slot === "top"
+                            ? "Top angle start"
+                            : slot === "bottom"
+                              ? "Bottom angle start"
+                              : `${MULTICAM_SLOT_LABELS[slot]} start`;
+                        return (
+                        <label key={slot}>
+                          <span>{label}</span>
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.1"
+                            aria-label={label}
+                            value={speakerStackOffsets[slot]}
+                            onChange={event => {
+                              setSpeakerStackSyncConfirmed(false);
+                              setSpeakerStackOffsets(current => ({
+                                ...current,
+                                [slot]: Math.max(0, Number(event.target.value || 0)),
+                              }));
+                            }}
+                          />
+                          <small>seconds</small>
+                        </label>
+                        );
+                      })}
+                    </div>
+                    <label className="speaker-stack-sync-confirmation">
+                      <input
+                        type="checkbox"
+                        checked={speakerStackSyncConfirmed}
+                        disabled={!hasCleanSpeakerStackSources}
+                        aria-label="Angles share the same source timecode"
+                        onChange={event => setSpeakerStackSyncConfirmed(event.target.checked)}
+                      />
+                      <span>
+                        <strong>Angles share the same source timecode</strong>
+                        <small>
+                          Confirm only after every preview shows the exact same spoken moment.
+                          Unrelated excerpts are invalid camera feeds.
+                        </small>
+                      </span>
+                    </label>
+                    <span className={`speaker-source-readiness ${speakerStackIsReady ? "is-ready" : ""}`}>
+                      {speakerStackIsReady
+                        ? `${speakerStackCameraCount} synchronized moving camera angles ready${
+                            speakerStackSources.length > speakerStackCameraCount
+                              ? ` · ${speakerStackSources.length} in source bank`
+                              : ""
+                          }`
+                        : hasCleanSpeakerStackSources
+                          ? "Align the same spoken moment, then confirm synchronization"
+                          : `Add and select ${speakerStackCameraCount} distinct clean angles to unlock multicamera`}
+                    </span>
+                    </div>
+                  </details>
 
                   <div className="reframe-safety-card">
                     <span aria-hidden="true">⌗</span>
                     <div>
                       <strong>
-                        {smartCropMode === "speaker_track"
-                          ? "Face path controls the crop"
-                          : "No important edge is cropped"}
+                        {effectiveSmartCropMode === "speaker_track"
+                          ? reframeKeyframes.length
+                            ? "Reviewed follow path controls the crop"
+                            : "Centered close-up · add speaker marks"
+                          : effectiveSmartCropMode === "group_stack"
+                            ? ["active_2", "spotlight_2"].includes(speakerStackLayout)
+                              ? speakerFocusCuts.length
+                                ? `${speakerFocusCuts.length} reviewed speaker cut${speakerFocusCuts.length === 1 ? "" : "s"}`
+                                : "Manual speaker focus needs marks"
+                              : `${speakerStackCameraCount} live camera frames`
+                          : reframeAspect !== "16:9" ? "Two editable speaker crops" : "Full source frame"}
                       </strong>
                       <small>
-                        {smartCropMode === "speaker_track"
-                          ? "The After canvas previews the vertical treatment. Export analyzes the complete face path; if it cannot find enough faces it falls back safely instead of guessing."
-                          : "The source keeps its composition while the vertical canvas is filled behind it."}
+                        {effectiveSmartCropMode === "speaker_track"
+                          ? reframeKeyframes.length
+                            ? "The After canvas interpolates the reviewed framing points below, and export receives the same timed path."
+                            : "No face or speaker tracking data exists for this clip yet. Preview and export remain centered until reviewed framing points are added."
+                          : effectiveSmartCropMode === "group_stack"
+                            ? ["active_2", "spotlight_2"].includes(speakerStackLayout)
+                              ? speakerFocusCuts.length
+                                ? "Each reviewed mark switches the programme monitor. The same timed camera choices are sent to export."
+                                : "No automated speaker claim is being made. Add reviewed speaker marks at the playhead to direct each focus change."
+                              : `${speakerStackCameraCount} synchronized camera angles show the same source moment in the selected layout. Programme audio remains shared, and every crop anchor is included in export.`
+                          : reframeAspect !== "16:9"
+                            ? "Preview and export use the same top and bottom crop positions. Check both faces; these are crops of your source, not detected speaker identities."
+                            : "The complete source is fitted into the landscape canvas."}
                       </small>
                     </div>
                   </div>
 
+                  {effectiveSmartCropMode === "group_stack" ? (
+                    <div className="speaker-stack-editor" data-testid="speaker-stack-editor">
+                      <div className="speaker-stack-editor-heading">
+                        <div>
+                          <strong>{speakerStackCameraCount}-camera framing</strong>
+                          <small>Adjust every real moving crop—no generated fill.</small>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setSpeakerStackFraming(DEFAULT_SPEAKER_STACK_FRAMING)}
+                        >
+                          Reset
+                        </button>
+                      </div>
+                      <fieldset className="speaker-stack-frame-controls speaker-layout-controls">
+                        <legend>Layout geometry</legend>
+                        {speakerStackLayout === "stack_2" ? (
+                          <label>
+                            <span>
+                              Split point <b>{Math.round(speakerStackFraming.dividerPercent)}%</b>
+                            </span>
+                            <input
+                              type="range"
+                              min="35"
+                              max="65"
+                              value={speakerStackFraming.dividerPercent}
+                              aria-label="Stack split point"
+                              onChange={event =>
+                                setSpeakerStackFraming(current => ({
+                                  ...current,
+                                  dividerPercent: Number(event.target.value),
+                                }))
+                              }
+                            />
+                          </label>
+                        ) : null}
+                        <label>
+                          <span>
+                            Panel gap <b>{Number(speakerStackFraming.gapPercent).toFixed(1)}%</b>
+                          </span>
+                          <input
+                            type="range"
+                            min="0"
+                            max="3"
+                            step="0.1"
+                            value={speakerStackFraming.gapPercent}
+                            aria-label="Camera panel gap"
+                            onChange={event =>
+                              setSpeakerStackFraming(current => ({
+                                ...current,
+                                gapPercent: Number(event.target.value),
+                              }))
+                            }
+                          />
+                        </label>
+                        {["pip_2", "active_2"].includes(speakerStackLayout) ? (
+                          <>
+                            <div className="speaker-secondary-presets" role="group" aria-label="Reaction frame position">
+                              {[
+                                ["Top left", 20, 20],
+                                ["Top right", 80, 20],
+                                ["Bottom left", 20, 80],
+                                ["Bottom right", 80, 80],
+                              ].map(([label, x, y]) => (
+                                <button
+                                  key={label}
+                                  type="button"
+                                  aria-label={`Place reaction frame ${label.toLowerCase()}`}
+                                  className={
+                                    Math.abs(speakerStackFraming.secondaryXPercent - x) < 2 &&
+                                    Math.abs(speakerStackFraming.secondaryYPercent - y) < 2
+                                      ? "is-active"
+                                      : ""
+                                  }
+                                  onClick={() =>
+                                    setSpeakerStackFraming(current => ({
+                                      ...current,
+                                      secondaryXPercent: x,
+                                      secondaryYPercent: y,
+                                    }))
+                                  }
+                                >
+                                  {label}
+                                </button>
+                              ))}
+                            </div>
+                            <label>
+                              <span>
+                                Reaction size <b>{Math.round(speakerStackFraming.secondarySizePercent)}%</b>
+                              </span>
+                              <input
+                                type="range"
+                                min="20"
+                                max="46"
+                                value={speakerStackFraming.secondarySizePercent}
+                                aria-label="Reaction frame size"
+                                onChange={event =>
+                                  setSpeakerStackFraming(current => ({
+                                    ...current,
+                                    secondarySizePercent: Number(event.target.value),
+                                  }))
+                                }
+                              />
+                            </label>
+                          </>
+                        ) : null}
+                      </fieldset>
+                      {activeSpeakerStackSlots.map(speaker => {
+                        const label =
+                          speaker === "top"
+                            ? "Top speaker"
+                            : speaker === "bottom"
+                              ? "Bottom speaker"
+                              : MULTICAM_SLOT_LABELS[speaker];
+                        return (
+                        <fieldset key={speaker} className="speaker-stack-frame-controls">
+                          <legend>{label}</legend>
+                          <label>
+                            <span>
+                              Horizontal <b>{Math.round(speakerStackFraming[speaker].x)}%</b>
+                            </span>
+                            <input
+                              type="range"
+                              min="0"
+                              max="100"
+                              value={speakerStackFraming[speaker].x}
+                              aria-label={`${label} horizontal position`}
+                              onChange={event =>
+                                updateSpeakerStackFrame(speaker, "x", event.target.value)
+                              }
+                            />
+                          </label>
+                          <label>
+                            <span>
+                              Vertical <b>{Math.round(speakerStackFraming[speaker].y)}%</b>
+                            </span>
+                            <input
+                              type="range"
+                              min="0"
+                              max="100"
+                              value={speakerStackFraming[speaker].y}
+                              aria-label={`${label} vertical position`}
+                              onChange={event =>
+                                updateSpeakerStackFrame(speaker, "y", event.target.value)
+                              }
+                            />
+                          </label>
+                          <label>
+                            <span>
+                              Crop size <b>{Number(speakerStackFraming[speaker].zoom).toFixed(2)}×</b>
+                            </span>
+                            <input
+                              type="range"
+                              min="1"
+                              max="7"
+                              step="0.05"
+                              value={speakerStackFraming[speaker].zoom}
+                              aria-label={`${label} crop size`}
+                              onChange={event =>
+                                updateSpeakerStackFrame(speaker, "zoom", event.target.value)
+                              }
+                            />
+                          </label>
+                        </fieldset>
+                        );
+                      })}
+                    </div>
+                  ) : null}
+
+                  {effectiveSmartCropMode === "center" && reframeAspect !== "16:9" ? (
+                    <div className="speaker-stack-editor" data-testid="source-split-editor">
+                      <strong>Show Everyone · split framing</strong>
+                      <small>Position each crop over its speaker. These are two views of your existing video, not separate cameras.</small>
+                      <div className="multicam-layout-grid" aria-label="Show Everyone source layout">
+                        <button type="button" onClick={() => setSpeakerStackFraming(current => ({
+                          ...current, trackSpeakers: false,
+                          top: { ...SOURCE_SPLIT_PROGRAMME_FRAMING.top, keyframes: [] },
+                          bottom: { ...SOURCE_SPLIT_PROGRAMME_FRAMING.bottom, keyframes: [] },
+                        }))}>Finished programme</button>
+                        <button type="button" onClick={() => setSpeakerStackFraming(current => ({
+                          ...current, trackSpeakers: false,
+                          top: { ...SOURCE_SPLIT_SIDE_BY_SIDE_FRAMING.top, keyframes: [] },
+                          bottom: { ...SOURCE_SPLIT_SIDE_BY_SIDE_FRAMING.bottom, keyframes: [] },
+                        }))}>Side-by-side source</button>
+                      </div>
+                      <div className="speaker-focus-director" data-testid="show-everyone-order-director">
+                        <strong>Active speaker placement</strong>
+                        <small>Keep both panels and record who appears on top at the playhead.</small>
+                        <div className="speaker-focus-actions" role="group" aria-label="Put active speaker on top">
+                          <button
+                            type="button"
+                            className={activeShowEveryonePrimarySlot === "top" ? "is-active" : ""}
+                            aria-pressed={activeShowEveryonePrimarySlot === "top"}
+                            data-testid="show-everyone-top-first"
+                            onClick={() => addSpeakerFocusCutAtPlayhead("top")}
+                          >
+                            Speaker 1 on top
+                          </button>
+                          <button
+                            type="button"
+                            className={activeShowEveryonePrimarySlot === "bottom" ? "is-active" : ""}
+                            aria-pressed={activeShowEveryonePrimarySlot === "bottom"}
+                            data-testid="show-everyone-bottom-first"
+                            onClick={() => addSpeakerFocusCutAtPlayhead("bottom")}
+                          >
+                            Speaker 2 on top
+                          </button>
+                        </div>
+                        <small>{speakerFocusCuts.length} timed speaker-order cut{speakerFocusCuts.length === 1 ? "" : "s"} on the framing track.</small>
+                      </div>
+                      <button type="button" data-testid="analyze-speaker-faces" disabled={faceTrackingStatus === "processing"}
+                        onClick={() => analyzeSpeakerFaces()}>{faceTrackingStatus === "processing" ? "Analyzing faces…" : "Detect & follow both faces"}</button>
+                      <p role="status">{faceTrackingMessage || "Set each panel over its speaker, then analyze. Review the detected follow paths before export."}</p>
+                      <label className="inspector-toggle-row">
+                        <span><b>Track both speakers</b><small>Follow each panel’s reviewed timed positions while keeping the split.</small></span>
+                        <input type="checkbox" aria-label="Track both speakers" checked={!!speakerStackFraming.trackSpeakers}
+                          onChange={event => setSpeakerStackFraming(current => ({ ...current, trackSpeakers: event.target.checked }))} />
+                      </label>
+                      {["top", "bottom"].map(slot => (
+                        <fieldset key={slot} className="speaker-stack-frame-controls">
+                          <legend>{slot === "top" ? "Top speaker" : "Bottom speaker"}</legend>
+                          {speakerStackFraming.trackSpeakers ? <>
+                            <button type="button" onClick={() => updateSplitSpeakerFraming(slot, {}, true)}
+                              aria-label={`Add ${slot} speaker tracking point`}>+ Track here · {previewTimelineTime.toFixed(2)}s</button>
+                            <small data-testid={`${slot}-tracking-status`}>{speakerStackFraming[slot].keyframes?.length || 0} reviewed tracking points</small>
+                            <button type="button" aria-label={`Clear ${slot} speaker tracking points`}
+                              onClick={() => setSpeakerStackFraming(current => ({ ...current, [slot]: { ...current[slot], keyframes: [] } }))}>Clear points</button>
+                            <div className="reframe-keyframe-list">
+                              {(speakerStackFraming[slot].keyframes || []).map(mark => <button key={mark.time} type="button"
+                                onClick={() => seekLiveEditTimelineItem(mark.time, { play: false })}>{mark.time.toFixed(2)}s</button>)}
+                            </div>
+                          </> : null}
+                          {[["x", "Horizontal", 0, 100, 1], ["y", "Vertical", 0, 100, 1], ["zoom", "Zoom", 1, 7, 0.05]].map(([key, label, min, max, step]) => (
+                            <label key={key}>
+                              <span>{label} <b>{Number(key !== "zoom" && speakerStackFraming.trackSpeakers && speakerStackFraming[slot].keyframes?.length
+                                ? interpolateReframeKeyframes(speakerStackFraming[slot].keyframes, previewTimelineTime)[key] : speakerStackFraming[slot][key]).toFixed(key === "zoom" ? 2 : 0)}{key === "zoom" ? "×" : "%"}</b></span>
+                              <input type="range" min={min} max={max} step={step}
+                                aria-label={`${slot} split ${label.toLowerCase()}`}
+                                value={key !== "zoom" && speakerStackFraming.trackSpeakers && speakerStackFraming[slot].keyframes?.length
+                                  ? interpolateReframeKeyframes(speakerStackFraming[slot].keyframes, previewTimelineTime)[key] : speakerStackFraming[slot][key]}
+                                onChange={event => updateSplitSpeakerFraming(slot, { [key]: Number(event.target.value) })} />
+                            </label>
+                          ))}
+                        </fieldset>
+                      ))}
+                    </div>
+                  ) : null}
+
+                  {effectiveSmartCropMode === "speaker_track" ? (
                   <div className="reframe-corrections-card">
+                    <button type="button" className="mini-toggle-btn" data-testid="analyze-speaker-faces" disabled={faceTrackingStatus === "processing"}
+                      onClick={() => analyzeSpeakerFaces()}>{faceTrackingStatus === "processing" ? "Analyzing faces…" : "Detect & follow face"}</button>
+                    <button type="button" className="mini-toggle-btn" data-testid="analyze-source-shots" disabled={faceTrackingStatus === "processing"}
+                      onClick={() => analyzeSpeakerFaces("source_shots")}>Follow existing camera cuts</button>
+                    <small>For an already-edited video: follow the foreground face in each shot. No separate camera files needed.</small>
+                    <p role="status">{faceTrackingMessage || "Position the crop over your speaker, then analyze real face movement."}</p>
+                    <label className="inspector-field">
+                      <span>Speaker zoom <b>{speakerTrackZoom.toFixed(2)}×</b></span>
+                      <input type="range" min="1" max="3" step="0.05" aria-label="Speaker zoom"
+                        value={speakerTrackZoom} onChange={event => {
+                          setSpeakerTrackZoom(Number(event.target.value));
+                          setSafeFaceFraming(false);
+                          setVideoFit("cover");
+                        }} />
+                    </label>
                     <div className="reframe-corrections-heading">
                       <div>
                         <strong>Framing corrections</strong>
-                        <small>Fix a bad automatic crop at the current playhead.</small>
+                        <small>Add a crop point at the playhead or use multi-speaker shortcuts.</small>
                       </div>
                       <button
                         type="button"
@@ -12335,8 +19129,64 @@ const ViralClipStudio = ({
                         + Add here
                       </button>
                     </div>
+                    <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", margin: "6px 0 10px 0" }}>
+                      <button
+                        type="button"
+                        className="mini-toggle-btn"
+                        onClick={() => {
+                          const time = Number(previewTimelineTime || 0);
+                          const id = createSecureId("reframe-keyframe");
+                          const keyframe = { id, time, x: 28, y: 50 };
+                          setReframeKeyframes(cur => [...cur.filter(k => Math.abs(k.time - time) >= 0.1), keyframe].sort((a,b) => a.time - b.time));
+                          setActiveReframeKeyframeId(id);
+                          setStudioActionMessage("Camera framed on Speaker 1 (Left, 28%).");
+                        }}
+                      >
+                        👤 Left Speaker
+                      </button>
+                      <button
+                        type="button"
+                        className="mini-toggle-btn"
+                        onClick={() => {
+                          const time = Number(previewTimelineTime || 0);
+                          const id = createSecureId("reframe-keyframe");
+                          const keyframe = { id, time, x: 72, y: 50 };
+                          setReframeKeyframes(cur => [...cur.filter(k => Math.abs(k.time - time) >= 0.1), keyframe].sort((a,b) => a.time - b.time));
+                          setActiveReframeKeyframeId(id);
+                          setStudioActionMessage("Camera framed on Speaker 2 (Right, 72%).");
+                        }}
+                      >
+                        👤 Right Speaker
+                      </button>
+                      <button
+                        type="button"
+                        className="mini-toggle-btn"
+                        onClick={() => {
+                          const duration = liveTimelineDuration || 15;
+                          const step = Math.max(2.5, Math.min(5, duration / 6));
+                          const cuts = [];
+                          let isLeft = true;
+                          for (let t = 0; t < duration; t += step) {
+                            cuts.push({
+                              id: createSecureId("reframe-keyframe"),
+                              time: Number(t.toFixed(2)),
+                              x: isLeft ? 28 : 72,
+                              y: 50,
+                            });
+                            isLeft = !isLeft;
+                          }
+                          setReframeKeyframes(cuts);
+                          setStudioActionMessage(`Generated ${cuts.length} alternating speaker cuts across the conversation.`);
+                        }}
+                      >
+                        🔄 Alternate Speakers
+                      </button>
+                    </div>
                     {reframeKeyframes.length ? (
-                      <div className="reframe-keyframe-list" aria-label="Manual framing corrections">
+                      <div
+                        className="reframe-keyframe-list"
+                        aria-label="Manual framing corrections"
+                      >
                         {reframeKeyframes.map((keyframe, index) => (
                           <button
                             type="button"
@@ -12354,13 +19204,15 @@ const ViralClipStudio = ({
                       </div>
                     ) : (
                       <small className="reframe-empty-corrections">
-                        Auto tracking controls every shot until you add a correction.
+                        No tracking data yet. Preview stays centered; add reviewed framing points to create a timed follow path.
                       </small>
                     )}
                     {activeReframeKeyframe ? (
                       <div className="reframe-keyframe-editor">
                         <label>
-                          <span>Horizontal <b>{Math.round(activeReframeKeyframe.x)}%</b></span>
+                          <span>
+                            Horizontal <b>{Math.round(activeReframeKeyframe.x)}%</b>
+                          </span>
                           <input
                             type="range"
                             min="5"
@@ -12373,7 +19225,9 @@ const ViralClipStudio = ({
                           />
                         </label>
                         <label>
-                          <span>Headroom <b>{Math.round(activeReframeKeyframe.y)}%</b></span>
+                          <span>
+                            Headroom <b>{Math.round(activeReframeKeyframe.y)}%</b>
+                          </span>
                           <input
                             type="range"
                             min="8"
@@ -12395,6 +19249,7 @@ const ViralClipStudio = ({
                       </div>
                     ) : null}
                   </div>
+                  ) : null}
 
                   <button
                     type="button"
@@ -12404,7 +19259,7 @@ const ViralClipStudio = ({
                       setComparisonMode("after");
                       focusComparisonPreview("reframe", true);
                       setStudioActionMessage(
-                        "Vertical framing preview is live. Follow Subject analyzes the complete face path during export; Preserve Full Frame keeps all source context."
+                        "Framing preview is live. Follow Subject uses reviewed timed points, Show Everyone keeps the wide set, and Multi-Camera keeps every synchronized angle visible."
                       );
                     }}
                   >
@@ -12513,54 +19368,197 @@ const ViralClipStudio = ({
                       This short override updates the preview instantly. Leave it empty to use the
                       full timestamped transcript.
                     </small>
+                    {captionTextOverride.trim().length > 0 && (
+                      <button
+                        type="button"
+                        className="caption-split-script-btn"
+                        style={{
+                          marginTop: "6px",
+                          width: "100%",
+                          padding: "6px 10px",
+                          borderRadius: "8px",
+                          border: "1px solid rgba(121, 87, 255, 0.4)",
+                          background: "rgba(121, 87, 255, 0.16)",
+                          color: "#e0d8ff",
+                          fontWeight: 600,
+                          cursor: "pointer",
+                          fontSize: "0.82rem",
+                        }}
+                        onClick={() => {
+                          const fallbackDuration = Math.max(
+                            3,
+                            Number(currentTimelineWindow?.duration || selectedClip?.duration || currentTimelineClip?.duration || 30)
+                          );
+                          const clientSegments = generateClientSideCaptionSegments({
+                            text: captionTextOverride,
+                            duration: fallbackDuration,
+                            sourceClipId:
+                              currentTimelineClip?.sourceClipId ||
+                              currentTimelineClip?.id ||
+                              selectedClip?.id ||
+                              null,
+                          });
+                          if (clientSegments.length) {
+                            setCaptionSegments(clientSegments);
+                            setAutoCaptions(true);
+                            setComparisonMode("after");
+                            setCaptionGenerationStatus("ready");
+                            setCaptionGenerationMessage(
+                              `${clientSegments.length} timed lines created from your text!`
+                            );
+                            focusCaptionSegmentsForReview(clientSegments);
+                          }
+                        }}
+                      >
+                        ⚡ Split text into timed lines
+                      </button>
+                    )}
                   </label>
 
                   <div className="caption-segment-editor" data-testid="caption-segment-editor">
                     <div className="caption-segment-heading">
                       <span>Transcript lines</span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const start = Math.max(0, Number(videoTime || 0));
-                          setCaptionSegments(previous => [
-                            ...previous,
-                            {
-                              id: createSecureId("caption-line"),
-                              start,
-                              end: start + 2,
-                              duration: 2,
-                              text: "New caption",
-                              words: ["New", "caption"],
-                              speaker: "unknown",
-                              speakerLabel: "Speaker needs review",
-                              language: "und",
-                              languageLabel: "Language needs review",
-                              languages: [],
-                              languageConfidence: 0,
-                              textReviewRequired: true,
-                              textReviewed: false,
-                              captionPlacement: "auto",
-                              captionIcon: "auto",
-                              reviewRequired: true,
-                              sourceClipId:
-                                currentTimelineClip?.sourceClipId ||
-                                currentTimelineClip?.id ||
-                                selectedClip?.id ||
-                                null,
-                            },
-                          ]);
-                          setCaptionTextOverride("");
-                          setAutoCaptions(true);
-                        }}
-                      >
-                        + Add line
-                      </button>
+                      <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                        <label
+                          className="caption-import-srt-btn"
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            cursor: "pointer",
+                            padding: "4px 8px",
+                            borderRadius: "6px",
+                            background: "rgba(32, 200, 222, 0.12)",
+                            border: "1px solid rgba(32, 200, 222, 0.3)",
+                            fontSize: "0.78rem",
+                            color: "#8be9fd",
+                            fontWeight: 600,
+                          }}
+                          title="Import .srt or .vtt subtitle file directly without server"
+                        >
+                          📁 Import SRT
+                          <input
+                            type="file"
+                            accept=".srt,.vtt,.txt"
+                            style={{ display: "none" }}
+                            onChange={event => {
+                              const file = event.target.files?.[0];
+                              if (!file) return;
+                              const reader = new FileReader();
+                              reader.onload = e => {
+                                const rawContent = e.target?.result;
+                                if (typeof rawContent === "string") {
+                                  const parsed = parseSrtOrVtt(rawContent);
+                                  if (parsed.length) {
+                                    const normalized = normalizeCaptionSegments(parsed);
+                                    setCaptionSegments(normalized);
+                                    setAutoCaptions(true);
+                                    setComparisonMode("after");
+                                    setCaptionGenerationStatus("ready");
+                                    setCaptionGenerationMessage(
+                                      `${normalized.length} subtitle lines imported directly from ${file.name}`
+                                    );
+                                    focusCaptionSegmentsForReview(normalized);
+                                    setStudioActionMessage("Subtitles imported and active in preview.");
+                                  }
+                                }
+                              };
+                              reader.readAsText(file);
+                              event.target.value = "";
+                            }}
+                          />
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const start = Math.max(0, Number(videoTime || 0));
+                            setCaptionSegments(previous => [
+                              ...previous,
+                              {
+                                id: createSecureId("caption-line"),
+                                start,
+                                end: start + 2,
+                                duration: 2,
+                                text: "New caption",
+                                words: ["New", "caption"],
+                                speaker: "unknown",
+                                speakerLabel: "Speaker needs review",
+                                language: "und",
+                                languageLabel: "Language needs review",
+                                languages: [],
+                                languageConfidence: 0,
+                                textReviewRequired: true,
+                                textReviewed: false,
+                                captionPlacement: "auto",
+                                captionIcon: "auto",
+                                captionAccent: "",
+                                captionX: 50,
+                                captionY: 82,
+                                reviewRequired: true,
+                                sourceClipId:
+                                  currentTimelineClip?.sourceClipId ||
+                                  currentTimelineClip?.id ||
+                                  selectedClip?.id ||
+                                  null,
+                              },
+                            ]);
+                            setCaptionTextOverride("");
+                            setAutoCaptions(true);
+                          }}
+                        >
+                          + Add line
+                        </button>
+                      </div>
+                    </div>
+                    {/* Feature #6: Descript-Style Script Slicer & Filler Word Killer Banner */}
+                    <div className="script-slicer-banner">
+                      <div className="script-slicer-info">
+                        <span className="script-slicer-icon">⚡</span>
+                        <div className="script-slicer-text">
+                          <strong>Descript-Style Script Slicer</strong>
+                          <span>
+                            {detectedFillerWords.length > 0
+                              ? `${detectedFillerWords.length} filler word${detectedFillerWords.length > 1 ? "s" : ""} detected (${Array.from(new Set(detectedFillerWords.map(f => `"${f.matchWord}"`))).slice(0, 3).join(", ")})`
+                              : "Speech pacing clean · No filler words detected"}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="script-slicer-actions">
+                        <button
+                          type="button"
+                          className="script-slicer-auto-btn"
+                          onClick={handleRemoveAllFillerWords}
+                          disabled={!detectedFillerWords.length}
+                          title="Physically slice all detected filler words out of video and ripple timeline"
+                        >
+                          ⚡ Remove All Filler Words ({detectedFillerWords.length})
+                        </button>
+                      </div>
                     </div>
                     {captionSegments.length ? (
                       <div className="caption-segment-list">
-                        {captionSegments.map((segment, index) => (
-                          <div className="caption-segment-row" key={segment.id}>
+                        {captionSegments.map((segment, index) => {
+                          const segmentFillers = detectedFillerWords.filter(f => f.segmentId === segment.id);
+                          return (
+                            <div
+                              className={`caption-segment-row ${captionPreviewSegmentIndex === index ? "is-active-caption-segment" : ""}`}
+                              key={segment.id}
+                            >
                             <div className="caption-segment-time">
+                              <button
+                                type="button"
+                                className="caption-jump-playhead-btn"
+                                title="Jump video to this subtitle line"
+                                onClick={() => {
+                                  const clipStart = Number(currentTimelineWindow.start || selectedClip?.start || 0);
+                                  const targetTime = segment.start >= clipStart ? segment.start : clipStart + segment.start;
+                                  if (videoRef.current) {
+                                    videoRef.current.currentTime = targetTime;
+                                    setVideoTime(targetTime);
+                                  }
+                                }}
+                              >
+                                ▶
+                              </button>
                               <label>
                                 <span>In</span>
                                 <input
@@ -12694,6 +19692,14 @@ const ViralClipStudio = ({
                                 aria-label={`Caption ${index + 1} text`}
                                 value={segment.text}
                                 rows={2}
+                                onFocus={() => {
+                                  const clipStart = Number(currentTimelineWindow.start || selectedClip?.start || 0);
+                                  const targetTime = segment.start >= clipStart ? segment.start : clipStart + segment.start;
+                                  if (videoRef.current) {
+                                    videoRef.current.currentTime = targetTime;
+                                    setVideoTime(targetTime);
+                                  }
+                                }}
                                 onChange={event => {
                                   const text = event.target.value;
                                   setCaptionSegments(previous =>
@@ -12715,6 +19721,22 @@ const ViralClipStudio = ({
                                   );
                                 }}
                               />
+                              {segmentFillers.length > 0 && (
+                                <div className="caption-filler-tags">
+                                  <span className="caption-filler-label">Filler words:</span>
+                                  {segmentFillers.map(f => (
+                                    <button
+                                      key={f.id}
+                                      type="button"
+                                      className="caption-filler-chip"
+                                      title={`Physically cut "${f.matchWord}" out of video`}
+                                      onClick={() => handleCutSingleFillerWord(f)}
+                                    >
+                                      ✂️ &quot;{f.matchWord}&quot;
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
                               <div className="caption-line-creative-controls">
                                 <label>
                                   <span>Placement</span>
@@ -12738,28 +19760,83 @@ const ViralClipStudio = ({
                                     ))}
                                   </select>
                                 </label>
+                                <fieldset className="caption-emoji-picker">
+                                  <legend>Emoji reaction</legend>
+                                  <div role="group" aria-label={`Caption ${index + 1} emoji reaction`}>
+                                    {CAPTION_ICON_OPTIONS.map(option => (
+                                      <button
+                                        key={option.value}
+                                        type="button"
+                                        className={(segment.captionIcon || "auto") === option.value ? "is-active" : ""}
+                                        aria-label={option.label}
+                                        aria-pressed={(segment.captionIcon || "auto") === option.value}
+                                        title={option.label}
+                                        onClick={() =>
+                                          setCaptionSegments(previous =>
+                                            previous.map(item =>
+                                              item.id === segment.id
+                                                ? { ...item, captionIcon: option.value }
+                                                : item
+                                            )
+                                          )
+                                        }
+                                      >
+                                        {option.glyph}
+                                      </button>
+                                    ))}
+                                  </div>
+                                </fieldset>
                                 <label>
-                                  <span>Story icon</span>
-                                  <select
-                                    aria-label={`Caption ${index + 1} story icon`}
-                                    value={segment.captionIcon || "auto"}
+                                  <span>Accent</span>
+                                  <input
+                                    type="color"
+                                    aria-label={`Caption ${index + 1} accent`}
+                                    value={segment.captionAccent || captionStoryPreviewTreatment?.accent || "#ffb33d"}
                                     onChange={event =>
                                       setCaptionSegments(previous =>
                                         previous.map(item =>
                                           item.id === segment.id
-                                            ? { ...item, captionIcon: event.target.value }
+                                            ? { ...item, captionAccent: event.target.value }
                                             : item
                                         )
                                       )
                                     }
-                                  >
-                                    {CAPTION_ICON_OPTIONS.map(option => (
-                                      <option key={option.value} value={option.value}>
-                                        {option.label}
-                                      </option>
-                                    ))}
-                                  </select>
+                                  />
                                 </label>
+                                {segment.captionPlacement === "custom" ? (
+                                  <div className="caption-custom-position" data-testid={`caption-${index + 1}-custom-position`}>
+                                    <label>
+                                      <span>Horizontal <b>{Math.round(segment.captionX ?? 50)}%</b></span>
+                                      <input
+                                        type="range"
+                                        min="5"
+                                        max="95"
+                                        value={segment.captionX ?? 50}
+                                        aria-label={`Caption ${index + 1} horizontal position`}
+                                        onChange={event =>
+                                          setCaptionSegments(previous => previous.map(item =>
+                                            item.id === segment.id ? { ...item, captionX: Number(event.target.value) } : item
+                                          ))
+                                        }
+                                      />
+                                    </label>
+                                    <label>
+                                      <span>Vertical <b>{Math.round(segment.captionY ?? 82)}%</b></span>
+                                      <input
+                                        type="range"
+                                        min="5"
+                                        max="95"
+                                        value={segment.captionY ?? 82}
+                                        aria-label={`Caption ${index + 1} vertical position`}
+                                        onChange={event =>
+                                          setCaptionSegments(previous => previous.map(item =>
+                                            item.id === segment.id ? { ...item, captionY: Number(event.target.value) } : item
+                                          ))
+                                        }
+                                      />
+                                    </label>
+                                  </div>
+                                ) : null}
                                 {segment.textReviewRequired && !segment.textReviewed ? (
                                   <button
                                     type="button"
@@ -12785,20 +19862,32 @@ const ViralClipStudio = ({
                                 ) : null}
                               </div>
                             </div>
-                            <button
-                              type="button"
-                              className="caption-segment-delete"
-                              aria-label={`Delete caption ${index + 1}`}
-                              onClick={() =>
-                                setCaptionSegments(previous =>
-                                  previous.filter(item => item.id !== segment.id)
-                                )
-                              }
-                            >
-                              ×
-                            </button>
+                            <div className="caption-segment-row-actions">
+                              <button
+                                type="button"
+                                className="caption-cut-video-btn"
+                                title="Physically slice this line from video & ripple timeline"
+                                onClick={() => handleCutCaptionFromVideo(segment)}
+                              >
+                                ✂️ Cut Video
+                              </button>
+                              <button
+                                type="button"
+                                className="caption-segment-delete"
+                                aria-label={`Delete caption ${index + 1}`}
+                                title="Remove subtitle text only"
+                                onClick={() =>
+                                  setCaptionSegments(previous =>
+                                    previous.filter(item => item.id !== segment.id)
+                                  )
+                                }
+                              >
+                                ×
+                              </button>
+                            </div>
                           </div>
-                        ))}
+                        );
+                      })}
                       </div>
                     ) : (
                       <p className="caption-segment-empty">
@@ -12811,18 +19900,14 @@ const ViralClipStudio = ({
                   <div className="inspector-field">
                     <span>Creator style</span>
                     <div className="inspector-choice-grid caption-style-grid">
-                      {[
-                        ["story_pop", "Story Pop"],
-                        ["bold_pop", "Bold Pop"],
-                        ["karaoke", "Karaoke"],
-                        ["glow", "Neon Glow"],
-                        ["bounce", "Bounce"],
-                        ["minimal", "Minimal"],
-                      ].map(([value, label]) => (
+                      {CAPTION_STYLE_OPTIONS.map(([value, label, helper]) => (
                         <button
                           key={value}
                           type="button"
-                          className={captionStyle === value ? "is-active" : ""}
+                          aria-label={label}
+                          className={`caption-style-option caption-style-option-${value} ${
+                            captionStyle === value ? "is-active" : ""
+                          }`}
                           aria-pressed={captionStyle === value}
                           onClick={() => {
                             setCaptionStyle(value);
@@ -12831,29 +19916,75 @@ const ViralClipStudio = ({
                             focusCaptionSegmentsForReview(captionSegments);
                           }}
                         >
-                          {label}
+                          <span className="caption-style-swatch" aria-hidden="true">
+                            <i>Aa</i>
+                            <b>WORD</b>
+                          </span>
+                          <span className="caption-style-option-copy">
+                            <strong>{label}</strong>
+                            <small>{helper}</small>
+                          </span>
                         </button>
                       ))}
                     </div>
                   </div>
 
                   <div className="inspector-field">
-                    <span>Position</span>
-                    <div className="inspector-choice-grid is-three">
+                    <span>Default placement</span>
+                    <small>Each transcript line can override this at its own timestamp.</small>
+                    <div className="caption-placement-grid" role="group" aria-label="Default caption placement">
                       {[
-                        ["top", "Top"],
-                        ["center", "Center"],
-                        ["lower", "Lower"],
+                        ["top_left", "↖"], ["top_center", "↑"], ["top_right", "↗"],
+                        ["middle_left", "←"], ["middle_center", "•"], ["middle_right", "→"],
+                        ["bottom_left", "↙"], ["bottom_center", "↓"], ["bottom_right", "↘"],
                       ].map(([value, label]) => (
                         <button
                           key={value}
                           type="button"
                           className={captionPosition === value ? "is-active" : ""}
                           aria-pressed={captionPosition === value}
+                          aria-label={CAPTION_PLACEMENT_OPTIONS.find(option => option.value === value)?.label}
                           onClick={() => setCaptionPosition(value)}
                         >
                           {label}
                         </button>
+                      ))}
+                    </div>
+                    <div className="caption-stage-zone-grid" role="group" aria-label="Creative caption zones">
+                      {[
+                        ["shoulder_left", "↙", "Left shoulder"],
+                        ["shoulder_right", "↘", "Right shoulder"],
+                        ["background_left", "◧", "Wall left"],
+                        ["background_center", "▣", "Wall centre"],
+                        ["background_right", "◨", "Wall right"],
+                      ].map(([value, icon, label]) => (
+                        <button
+                          key={value}
+                          type="button"
+                          className={captionPosition === value ? "is-active" : ""}
+                          aria-pressed={captionPosition === value}
+                          aria-label={label}
+                          onClick={() => setCaptionPosition(value)}
+                        >
+                          <b aria-hidden="true">{icon}</b>
+                          <span>{label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="inspector-field">
+                    <span>Quick accent palette</span>
+                    <div className="caption-accent-palette" role="group" aria-label="Caption accent palette">
+                      {CAPTION_ACCENT_OPTIONS.map(([color, label]) => (
+                        <button
+                          key={color}
+                          type="button"
+                          aria-label={label}
+                          title={label}
+                          style={{ "--caption-swatch": color }}
+                          onClick={() => setCaptionSegments(previous => previous.map(item => ({ ...item, captionAccent: color })))}
+                        />
                       ))}
                     </div>
                   </div>
@@ -12886,6 +20017,853 @@ const ViralClipStudio = ({
                     CC Preview Captions
                   </button>
                 </div>
+              ) : null}
+
+              {studioInspectorTab === "titles" ? (
+                <div className="clip-inspector-body graphics-inspector-body" role="tabpanel">
+                  <div className="inspector-heading-row">
+                    <div>
+                      <span className="panel-kicker">Titles & graphics</span>
+                      <h4>Build headlines, labels and lower thirds</h4>
+                    </div>
+                    <span className="inspector-status-dot is-ready">
+                      {
+                        overlays.filter(overlay => overlay.type === "text" && !overlay.isCaption)
+                          .length
+                      }{" "}
+                      layers
+                    </span>
+                  </div>
+
+                  <div className="title-preset-grid" aria-label="Add title layer">
+                    <button type="button" onClick={() => addTextOverlay("headline")}>
+                      <span>H1</span>
+                      <strong>Headline</strong>
+                      <small>Bold hook copy</small>
+                    </button>
+                    <button type="button" onClick={() => addTextOverlay("lower_third")}>
+                      <span>▤</span>
+                      <strong>Lower third</strong>
+                      <small>Name and context</small>
+                    </button>
+                    <button type="button" onClick={() => addTextOverlay("label")}>
+                      <span>TAG</span>
+                      <strong>Label</strong>
+                      <small>Short callout</small>
+                    </button>
+                  </div>
+
+                  {overlays.some(overlay => overlay.type === "text" && !overlay.isCaption) ? (
+                    <div className="title-layer-list" aria-label="Title layers">
+                      {overlays
+                        .filter(overlay => overlay.type === "text" && !overlay.isCaption)
+                        .map((overlay, index) => (
+                          <button
+                            key={overlay.id}
+                            type="button"
+                            className={activeOverlayId === overlay.id ? "is-active" : ""}
+                            onClick={() => {
+                              setActiveOverlayId(overlay.id);
+                              jumpToOutputTimelineTime(Number(overlay.startTime || 0));
+                            }}
+                          >
+                            <span>T{index + 1}</span>
+                            <strong>{normalizePlainText(overlay.text || "Untitled title")}</strong>
+                            <small>
+                              {formatPreviewTimePrecise(overlay.startTime)} ·{" "}
+                              {Number(overlay.duration || 0).toFixed(1)}s
+                            </small>
+                          </button>
+                        ))}
+                    </div>
+                  ) : null}
+
+                  {activeOverlay?.type === "text" && !activeOverlay.isCaption ? (
+                    <div className="title-editor-card" data-testid="title-editor">
+                      <label className="inspector-text-field">
+                        <span>Copy</span>
+                        <textarea
+                          aria-label="Title text"
+                          rows={3}
+                          maxLength={180}
+                          value={activeOverlay.text || ""}
+                          onChange={event =>
+                            updateOverlayText(activeOverlay.id, event.target.value)
+                          }
+                        />
+                      </label>
+
+                      <div className="title-typography-row">
+                        <label className="inspector-select-field">
+                          <span>Font</span>
+                          <select
+                            value={activeOverlay.fontFamily || "Inter"}
+                            onChange={event =>
+                              setOverlayStyleOption(
+                                activeOverlay.id,
+                                "fontFamily",
+                                event.target.value
+                              )
+                            }
+                          >
+                            {[
+                              "Inter",
+                              "Arial Black",
+                              "Impact",
+                              "Georgia",
+                              "Trebuchet MS",
+                              "Courier New",
+                            ].map(font => (
+                              <option key={font} value={font}>
+                                {font}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                        <label className="inspector-select-field">
+                          <span>Weight</span>
+                          <select
+                            value={Number(activeOverlay.fontWeight || 900)}
+                            onChange={event =>
+                              setOverlayStyleOption(
+                                activeOverlay.id,
+                                "fontWeight",
+                                Number(event.target.value)
+                              )
+                            }
+                          >
+                            <option value={400}>Regular</option>
+                            <option value={600}>Semibold</option>
+                            <option value={800}>Bold</option>
+                            <option value={900}>Black</option>
+                          </select>
+                        </label>
+                        <label className="inspector-select-field">
+                          <span>Shadow</span>
+                          <select
+                            value={activeOverlay.shadow || "soft"}
+                            onChange={event =>
+                              setOverlayStyleOption(activeOverlay.id, "shadow", event.target.value)
+                            }
+                          >
+                            <option value="none">None</option>
+                            <option value="soft">Soft</option>
+                            <option value="strong">Strong</option>
+                          </select>
+                        </label>
+                      </div>
+
+                      <div className="inspector-field">
+                        <span>Alignment</span>
+                        <div className="inspector-choice-grid is-three">
+                          {["left", "center", "right"].map(alignment => (
+                            <button
+                              key={alignment}
+                              type="button"
+                              className={
+                                (activeOverlay.textAlign || "center") === alignment
+                                  ? "is-active"
+                                  : ""
+                              }
+                              onClick={() =>
+                                setOverlayStyleOption(activeOverlay.id, "textAlign", alignment)
+                              }
+                            >
+                              {alignment}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="title-color-row">
+                        <label>
+                          <span>Text</span>
+                          <input
+                            aria-label="Title text color"
+                            type="color"
+                            value={activeOverlay.color || "#ffffff"}
+                            onChange={event =>
+                              setOverlayStyleOption(activeOverlay.id, "color", event.target.value)
+                            }
+                          />
+                        </label>
+                        <label>
+                          <span>Background</span>
+                          <input
+                            aria-label="Title background color"
+                            type="color"
+                            value={
+                              /^#[0-9a-f]{6}$/i.test(activeOverlay.bg || "")
+                                ? activeOverlay.bg
+                                : "#080b16"
+                            }
+                            onChange={event =>
+                              setOverlayStyleOption(activeOverlay.id, "bg", event.target.value)
+                            }
+                          />
+                        </label>
+                        <button
+                          type="button"
+                          className={activeOverlay.bg === "transparent" ? "is-active" : ""}
+                          onClick={() =>
+                            setOverlayStyleOption(activeOverlay.id, "bg", "transparent")
+                          }
+                        >
+                          No background
+                        </button>
+                      </div>
+
+                      <label className="inspector-range">
+                        <span>
+                          <b>Outline</b>
+                          <strong>{Number(activeOverlay.strokeWidth || 0)}px</strong>
+                        </span>
+                        <input
+                          aria-label="Title outline width"
+                          type="range"
+                          min={0}
+                          max={8}
+                          step={1}
+                          value={Number(activeOverlay.strokeWidth || 0)}
+                          onChange={event =>
+                            setOverlayStyleOption(
+                              activeOverlay.id,
+                              "strokeWidth",
+                              Number(event.target.value)
+                            )
+                          }
+                        />
+                      </label>
+
+                      <label className="inspector-range">
+                        <span>
+                          <b>Size</b>
+                          <strong>{Math.round(Number(activeOverlay.scale || 1) * 100)}%</strong>
+                        </span>
+                        <input
+                          aria-label="Title size"
+                          type="range"
+                          min={0.5}
+                          max={2}
+                          step={0.05}
+                          value={Number(activeOverlay.scale || 1)}
+                          onChange={event =>
+                            setOverlayStyleOption(
+                              activeOverlay.id,
+                              "scale",
+                              Number(event.target.value)
+                            )
+                          }
+                        />
+                      </label>
+
+                      <label className="inspector-range">
+                        <span>
+                          <b>Rotation</b>
+                          <strong>{Math.round(Number(activeOverlay.rotation || 0))}°</strong>
+                        </span>
+                        <input
+                          aria-label="Title rotation"
+                          type="range"
+                          min={-25}
+                          max={25}
+                          step={1}
+                          value={Number(activeOverlay.rotation || 0)}
+                          onChange={event =>
+                            setOverlayStyleOption(
+                              activeOverlay.id,
+                              "rotation",
+                              Number(event.target.value)
+                            )
+                          }
+                        />
+                      </label>
+
+                      <div className="inspector-field">
+                        <span>Position</span>
+                        <div className="inspector-choice-grid is-three">
+                          {[
+                            [18, "Top"],
+                            [50, "Center"],
+                            [82, "Lower"],
+                          ].map(([position, label]) => (
+                            <button
+                              key={label}
+                              type="button"
+                              className={
+                                Math.abs(Number(activeOverlay.y || 50) - position) < 4
+                                  ? "is-active"
+                                  : ""
+                              }
+                              onClick={() => {
+                                setOverlayStyleOption(activeOverlay.id, "x", 50);
+                                setOverlayStyleOption(activeOverlay.id, "y", position);
+                              }}
+                            >
+                              {label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="inspector-time-grid">
+                        <label>
+                          <span>Start</span>
+                          <input
+                            aria-label="Title start time"
+                            type="number"
+                            min={0}
+                            max={liveTimelineDuration}
+                            step={0.05}
+                            value={Number(activeOverlay.startTime || 0).toFixed(2)}
+                            onChange={event =>
+                              updateOverlayTimeRange(
+                                activeOverlay.id,
+                                Number(event.target.value),
+                                activeOverlay.duration
+                              )
+                            }
+                          />
+                        </label>
+                        <label>
+                          <span>Duration</span>
+                          <input
+                            aria-label="Title duration"
+                            type="number"
+                            min={0.2}
+                            max={liveTimelineDuration}
+                            step={0.05}
+                            value={Number(activeOverlay.duration || 0).toFixed(2)}
+                            onChange={event =>
+                              updateOverlayTimeRange(
+                                activeOverlay.id,
+                                activeOverlay.startTime,
+                                Number(event.target.value)
+                              )
+                            }
+                          />
+                        </label>
+                      </div>
+
+                      <div className="inspector-field">
+                        <span>Entrance motion</span>
+                        <div className="inspector-choice-grid is-three">
+                          {[
+                            ["fade", "Fade"],
+                            ["slideUp", "Slide"],
+                            ["zoom", "Pop"],
+                          ].map(([value, label]) => (
+                            <button
+                              key={value}
+                              type="button"
+                              className={
+                                (activeOverlay.animation?.enter || "fade") === value
+                                  ? "is-active"
+                                  : ""
+                              }
+                              onClick={() => setOverlayAnimation(activeOverlay.id, "enter", value)}
+                            >
+                              {label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="inspector-inline-actions">
+                        <button type="button" onClick={() => duplicateOverlay(activeOverlay.id)}>
+                          Duplicate
+                        </button>
+                        <button type="button" onClick={() => deleteOverlay(activeOverlay.id)}>
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="inspector-empty-state">
+                      <span>T</span>
+                      <strong>Add or select a title</strong>
+                      <small>Every title is timed, positioned and animated independently.</small>
+                    </div>
+                  )}
+                </div>
+              ) : null}
+
+              {studioInspectorTab === "finish" ? (
+                <div className="clip-inspector-body finish-inspector-body" role="tabpanel">
+                  <div className="inspector-heading-row">
+                    <div>
+                      <span className="panel-kicker">Color & finish</span>
+                      <h4>Grade the real footage with live scopes</h4>
+                    </div>
+                    <span className={`inspector-status-dot ${hasFinishEffects || hasAdvancedGrade(advancedColor) ? "is-ready" : ""}`}>
+                      {hasFinishEffects || hasAdvancedGrade(advancedColor) ? "Grade on" : "Neutral"}
+                    </span>
+                  </div>
+                  <section className="advanced-color-lab">
+                    <div className="sound-effects-heading">
+                      <div>
+                        <span className="panel-kicker">Color shaping</span>
+                        <strong>Tone curve, global HSL &amp; 3D LUT</strong>
+                      </div>
+                      <span className="sound-effect-count">
+                        {advancedColor.lutName || "No LUT"}
+                      </span>
+                    </div>
+                    <label className="lut-import-button">
+                      <span>＋ Import .cube LUT</span>
+                      <input
+                        type="file"
+                        accept=".cube,text/plain"
+                        onChange={async event => {
+                          const file = event.target.files?.[0];
+                          if (!file) return;
+                          try {
+                            if (file.size > 12*1024*1024) throw new Error("Choose a .cube LUT smaller than 12 MB.");
+                            const lutData = parseColorCube(await file.text());
+                            setAdvancedColor(current => ({ ...current, lutName: file.name, lutFile: null, lutData }));
+                            setComparisonMode("after");
+                            setStudioActionMessage(`${file.name} applied to preview and export. LUT data is saved with this project.`);
+                          } catch (error) { setStudioActionMessage(error.message); }
+                        }}
+                      />
+                    </label>
+                    {advancedColor.lutName && !advancedColor.lutData ? <p role="status">This older project contains a LUT name without its data. Reimport the .cube file to apply it.</p> : null}
+                    {advancedColor.lutData ? <button type="button" onClick={() => setAdvancedColor(current => ({ ...current, lutName: "", lutData: null, lutFile: null }))}>Remove LUT</button> : null}
+                    {advancedColor.lutName ? (
+                      <label className="inspector-range">
+                        <span>
+                          <b>LUT mix</b>
+                          <strong>{advancedColor.lutIntensity}%</strong>
+                        </span>
+                        <input
+                          type="range"
+                          min={0}
+                          max={100}
+                          value={advancedColor.lutIntensity}
+                          onChange={event =>
+                            setAdvancedColor(current => ({
+                              ...current,
+                              lutIntensity: Number(event.target.value),
+                            }))
+                          }
+                        />
+                      </label>
+                    ) : null}
+                    <div className="advanced-color-sliders">
+                      {Object.entries(advancedColor.curve).map(([field, value]) => (
+                        <label key={`curve-${field}`} className="inspector-range">
+                          <span>
+                            <b>Curve · {field}</b>
+                            <strong>
+                              {value > 0 ? "+" : ""}
+                              {value}
+                            </strong>
+                          </span>
+                          <input
+                            type="range"
+                            min={-100}
+                            max={100}
+                            value={value}
+                            onChange={event =>
+                              setAdvancedColor(current => ({
+                                ...current,
+                                curve: {
+                                  ...current.curve,
+                                  [field]: Number(event.target.value),
+                                },
+                              }))
+                            }
+                          />
+                        </label>
+                      ))}
+                      {Object.entries(advancedColor.hsl).map(([field, value]) => (
+                        <label key={`hsl-${field}`} className="inspector-range">
+                          <span>
+                            <b>HSL · {field}</b>
+                            <strong>
+                              {value > 0 ? "+" : ""}
+                              {value}
+                            </strong>
+                          </span>
+                          <input
+                            type="range"
+                            min={-100}
+                            max={100}
+                            value={value}
+                            onChange={event =>
+                              setAdvancedColor(current => ({
+                                ...current,
+                                hsl: {
+                                  ...current.hsl,
+                                  [field]: Number(event.target.value),
+                                },
+                              }))
+                            }
+                          />
+                        </label>
+                      ))}
+                    </div>
+                  </section>
+                  <StudioFinishRack
+                    fx={finishFx}
+                    hasEffects={hasFinishEffects || hasAdvancedGrade(advancedColor)}
+                    onUpdateFx={(field, value) => {
+                      updateFinishFx(field, value);
+                      setComparisonMode("after");
+                      setStudioActionMessage(
+                        "Color and finish updated instantly in After. No render credits used."
+                      );
+                    }}
+                    onApplyPreset={applyStudioFinishPreset}
+                    onReset={resetStudioFinish}
+                    visualizer={podcastVisualizer}
+                    onUpdateVisualizer={updatePodcastVisualizer}
+                    keyframes={finishKeyframes}
+                    currentTime={previewTimelineTime}
+                    duration={liveTimelineDuration}
+                    onAddKeyframe={addFinishKeyframeAtPlayhead}
+                    onRemoveKeyframe={removeFinishKeyframe}
+                    onSeekKeyframe={seekFinishKeyframe}
+                    scopeMode={scopeMode}
+                    onScopeModeChange={setScopeMode}
+                    scopes={<VideoScopes videoRef={videoRef} canvasRef={afterCanvasRef} mode={scopeMode} />}
+                    beatCount={musicBeatMarkers.length}
+                    beatSnapEnabled={beatSnapEnabled}
+                    onBeatSnapChange={setBeatSnapEnabled}
+                    mainFrame={mainFrame}
+                    onUpdateMainFrame={(field, value) => {
+                      setMainFrame(current => ({ ...current, [field]: value,
+                        ...(field === "enabled" && value && !(Number(current.radiusPercent) > 0)
+                          ? { radiusPercent: 6 } : {}) }));
+                      setComparisonMode("after");
+                      setStudioActionMessage(
+                        "Main footage frame updated in preview and final export."
+                      );
+                    }}
+                  />
+                </div>
+              ) : null}
+
+              {studioInspectorTab === "motion" ? (
+                <>
+                <div className="motion-workspace-switch" role="group" aria-label="Motion workspace">
+                  <button type="button" aria-pressed={motionWorkspace === "design"} onClick={() => setMotionWorkspace("design")}>Motion + sound</button>
+                  <button type="button" aria-pressed={motionWorkspace === "logo"} onClick={() => setMotionWorkspace("logo")}>Logo & layers</button>
+                  <button type="button" aria-pressed={motionWorkspace === "smart_zoom"} onClick={() => setMotionWorkspace("smart_zoom")}>🎯 Viral Punch-Ins {activePunchZones.length ? `(${activePunchZones.length})` : ""}</button>
+                  <button type="button" aria-pressed={motionWorkspace === "transform"} onClick={() => setMotionWorkspace("transform")}>Transform keyframes</button>
+                </div>
+                <input
+                  ref={logoMotionInputRef}
+                  type="file"
+                  accept="image/png,image/webp,image/jpeg,image/svg+xml"
+                  onChange={addLogoMotionLayer}
+                  data-testid="motion-logo-input"
+                  hidden
+                />
+                {motionWorkspace === "smart_zoom" ? (
+                  <div className="smart-zoom-panel">
+                    <div className="smart-zoom-card">
+                      <div className="smart-zoom-header">
+                        <div>
+                          <span className="panel-kicker">Hormozi / MrBeast Retention Engine</span>
+                          <strong>AI Smart Zoom & Dynamic Punch-Ins</strong>
+                        </div>
+                        <span className="smart-zoom-count-badge">
+                          {activePunchZones.length} {activePunchZones.length === 1 ? "Punch" : "Punches"} Active
+                        </span>
+                      </div>
+                      <p className="smart-zoom-desc">
+                        Automatically punch in the camera angle (1.15×–1.35×) on vocal emphasis and rhythmic cadence to destroy drop-off and maximize viewer retention.
+                      </p>
+
+                      <div className="smart-zoom-config-section">
+                        <label className="smart-zoom-label">
+                          <span>Punch Rhythm & Strategy</span>
+                          <div className="smart-zoom-pill-group">
+                            {PUNCH_MODES.map(mode => (
+                              <button
+                                key={mode.id}
+                                type="button"
+                                className={`smart-zoom-pill ${punchMode === mode.id ? "is-active" : ""}`}
+                                onClick={() => setPunchMode(mode.id)}
+                                title={mode.desc}
+                              >
+                                {mode.label}
+                              </button>
+                            ))}
+                          </div>
+                        </label>
+
+                        <label className="smart-zoom-label">
+                          <span>Punch Scale Intensity</span>
+                          <div className="smart-zoom-pill-group">
+                            {PUNCH_SCALES.map(s => (
+                              <button
+                                key={s.id}
+                                type="button"
+                                className={`smart-zoom-pill ${punchScale === s.id ? "is-active" : ""}`}
+                                onClick={() => setPunchScale(s.id)}
+                              >
+                                {s.label}
+                              </button>
+                            ))}
+                          </div>
+                        </label>
+
+                        <label className="smart-zoom-label">
+                          <span>Zoom Transition Easing</span>
+                          <div className="smart-zoom-pill-group">
+                            {PUNCH_STYLES.map(style => (
+                              <button
+                                key={style.id}
+                                type="button"
+                                className={`smart-zoom-pill ${punchStyle === style.id ? "is-active" : ""}`}
+                                onClick={() => setPunchStyle(style.id)}
+                                title={style.desc}
+                              >
+                                {style.label}
+                              </button>
+                            ))}
+                          </div>
+                        </label>
+
+                        <label className="inspector-range" style={{ marginTop: "4px" }}>
+                          <span>
+                            <b>Hold duration</b>
+                            <strong>{Number(punchDuration).toFixed(1)}s</strong>
+                          </span>
+                          <input
+                            type="range"
+                            min={1.2}
+                            max={4.5}
+                            step={0.1}
+                            value={punchDuration}
+                            onChange={e => setPunchDuration(Number(e.target.value))}
+                          />
+                        </label>
+                      </div>
+
+                      <div className="smart-zoom-actions">
+                        <button
+                          type="button"
+                          className="inspector-primary-action smart-zoom-btn-primary"
+                          onClick={autoGeneratePunchIns}
+                          data-testid="smart-zoom-auto-generate"
+                        >
+                          ⚡ Auto-Generate Viral Punch-Ins
+                        </button>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+                          <button
+                            type="button"
+                            className={`inspector-secondary-action ${isPlayheadPunched ? "is-punched" : ""}`}
+                            onClick={togglePunchInAtPlayhead}
+                            data-testid="smart-zoom-toggle-playhead"
+                          >
+                            {isPlayheadPunched ? "🎯 Remove Punch at Playhead" : "🎯 Punch In at Playhead (Z)"}
+                          </button>
+                          <button
+                            type="button"
+                            className="inspector-secondary-action is-danger"
+                            onClick={clearAllPunchIns}
+                            disabled={!activePunchZones.length}
+                            data-testid="smart-zoom-clear"
+                          >
+                            ↺ Clear All Punches
+                          </button>
+                        </div>
+                      </div>
+
+                      {activePunchZones.length > 0 && (
+                        <div className="smart-zoom-zones-list">
+                          <span className="panel-kicker">Active Punch Points</span>
+                          <div className="smart-zoom-zones-scroll">
+                            {activePunchZones.map((zone, zIdx) => (
+                              <div
+                                key={zone.id || zIdx}
+                                className="smart-zoom-zone-item"
+                                onClick={() => jumpToOutputTimelineTime(zone.startTime)}
+                              >
+                                <span className="smart-zoom-zone-badge">🎯 {zone.maxScale || punchScale}×</span>
+                                <strong>{formatPreviewTimePrecise(zone.startTime)} → {formatPreviewTimePrecise(zone.endTime)}</strong>
+                                <small>({zone.duration}s hold)</small>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : motionWorkspace === "design" ? (
+                <MotionPanel
+                  scenes={motionScenes}
+                  onChange={setMotionScenes}
+                  focusId={selectedMotionId}
+                  onSelect={setSelectedMotionId}
+                  playhead={previewTimelineTime}
+                  duration={outputTimelineDuration}
+                  transcript={captionSegments}
+                  onAutoGenerateMotionBeats={handleAutoGenerateMotionBeats}
+                  onSeek={(time, play = false) => {
+                    seekLiveEditTimelineItem(time, "motion");
+                    if (play) safePlayMediaElement(videoRef.current);
+                  }}
+                />
+                ) : (
+                  <>
+                  {motionWorkspace === "logo" ? (
+                    <section className="motion-logo-workspace" aria-label="Logo motion designer">
+                      <div>
+                        <span className="panel-kicker">Layer motion designer</span>
+                        <h4>Animate your real logo asset</h4>
+                        <p>
+                          Import transparent PNG, WebP or SVG artwork. Each import becomes an independent
+                          timed layer with editable keys and a transparent export path.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        className="inspector-primary-action"
+                        onClick={() => logoMotionInputRef.current?.click()}
+                      >
+                        ＋ Import logo layer
+                      </button>
+                      <div className="motion-layer-stack" aria-label="Motion layer stack">
+                        {overlays.filter(layer => layer.motionDesign).map((layer, index, motionLayers) => (
+                          <div
+                            key={layer.id}
+                            className={String(motionTargetId) === String(layer.id) ? "is-active" : ""}
+                            role="group"
+                            aria-label={`${layer.name || "Logo layer"} controls`}
+                          >
+                          <button
+                            type="button"
+                            className="motion-layer-select"
+                            onClick={() => {
+                              setMotionTargetId(layer.id);
+                              setActiveOverlayId(layer.id);
+                              jumpToOutputTimelineTime(Number(layer.startTime || 0));
+                            }}
+                          >
+                            <span>{String(index + 1).padStart(2, "0")}</span>
+                            <strong>{layer.name || "Logo layer"}</strong>
+                            <small>{Number(layer.startTime || 0).toFixed(2)}s · {Number(layer.duration || 0).toFixed(2)}s</small>
+                          </button>
+                          <div className="motion-layer-actions">
+                            <button type="button" title="Move layer down" aria-label={`Move ${layer.name || "logo layer"} down`}
+                              disabled={index === 0} onClick={() => moveOverlay(layer.id, "backward")}>↓</button>
+                            <button type="button" title="Move layer up" aria-label={`Move ${layer.name || "logo layer"} up`}
+                              disabled={index === motionLayers.length - 1} onClick={() => moveOverlay(layer.id, "forward")}>↑</button>
+                            <button type="button" title="Duplicate layer with animation" aria-label={`Duplicate ${layer.name || "logo layer"}`}
+                              onClick={() => duplicateOverlay(layer.id)}>⧉</button>
+                            <button type="button" title="Delete layer and animation" aria-label={`Delete ${layer.name || "logo layer"}`}
+                              onClick={() => deleteOverlay(layer.id)}>×</button>
+                          </div>
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+                  ) : null}
+                  <MotionInspector
+                    activeOverlay={motionInspectorTarget}
+                    overlays={[mainTransform, ...overlays.filter(overlay => !overlay.isCaption)]}
+                    playhead={previewTimelineTime}
+                    keyframes={motionKeyframes}
+                    onSelectOverlay={setMotionTargetId}
+                    onUpdateOverlay={(field, value) => {
+                      if (!motionInspectorTarget) return;
+                      if (motionInspectorTarget.id === "main-video") setMainTransform(current => ({ ...current, [field]: value }));
+                      else setOverlayStyleOption(motionInspectorTarget.id, field, value);
+                      setComparisonMode("after");
+                    }}
+                    onAddKeyframe={addMotionKeyframesAtPlayhead}
+                    onUpdateKeyframe={updateMotionKeyframe}
+                    onRemoveKeyframe={id => setMotionKeyframes(current => current.filter(key => key.id !== id))}
+                    onSeek={jumpToOutputTimelineTime}
+                    showMotionPath={showMotionPath}
+                    onToggleMotionPath={() => setShowMotionPath(current => !current)}
+                    onResetMotion={() => {
+                      const reset = { x: 50, y: 50, scale: 1, rotation: 0, opacity: 1, cropX: 0, cropY: 0 };
+                      if (motionTargetId === "main-video") setMainTransform(current => ({ ...current, ...reset }));
+                      else setOverlays(current => current.map(overlay => overlay.id === motionTargetId ? { ...overlay, ...reset } : overlay));
+                      setMotionKeyframes(current => current.filter(key => key.targetId !== motionTargetId));
+                    }}
+                  />
+                  </>
+                )}
+                </>
+              ) : null}
+
+              {studioInspectorTab === "composite" ? (
+                <CompositeInspector
+                  activeOverlay={compositeInspectorTarget}
+                  overlays={[mainTransform, ...overlays.filter(overlay => !overlay.isCaption)]}
+                  adjustmentLayers={adjustmentLayers}
+                  onSelectOverlay={targetId => {
+                    setCompositeTargetId(targetId);
+                    if (targetId !== "main-video") setActiveOverlayId(targetId);
+                  }}
+                  onUpdateOverlay={(field, value) => {
+                    if (!compositeInspectorTarget) return;
+                    if (compositeInspectorTarget.id === "main-video") {
+                      setMainTransform(current => ({ ...current, [field]: value }));
+                    } else {
+                      setOverlayStyleOption(compositeInspectorTarget.id, field, value);
+                    }
+                    setComparisonMode("after");
+                  }}
+                  onAddAdjustmentLayer={addAdjustmentLayer}
+                  onCreateCompound={createCompoundFromSelection}
+                />
+              ) : null}
+
+              {studioInspectorTab === "creatorfx" ? (
+                <StudioCreatorWorkbench
+                  value={creatorPreview}
+                  onChange={next => {
+                    setCreatorPreview(next);
+                    setComparisonMode("after");
+                    setProjectSaveState("unsaved");
+                  }}
+                  onOpenTool={selectCreativeTool}
+                  onFreeze={() => {
+                    videoRef.current?.pause?.();
+                    setIsPreviewPaused(true);
+                    setStudioActionMessage("Programme paused on the selected reaction frame.");
+                  }}
+                  onResume={() => {
+                    safePlayMediaElement(videoRef.current);
+                    setStudioActionMessage("Programme resumed from the held reaction frame.");
+                  }}
+                  onApplyMotionPreset={applyCreatorMotionPreset}
+                  onApplySpeedRamp={applyCreatorSpeedRamp}
+                  onAddImpactSound={addCreatorImpactSound}
+                  onApplyBeatSync={applyCreatorBeatSync}
+                  onApplyLayerStack={applyCreatorLayerStack}
+                  onSaveTemplate={saveEditTemplate}
+                  onApplyDirectorSuggestion={applyCreatorDirectorSuggestion}
+                  onInsertTitle={({ preset, text, position }) => {
+                    addTextOverlay(preset, text);
+                    if (position) setOverlays(current => current.map((overlay, index) => index === current.length - 1
+                      ? { ...overlay, x: clampNumber(position.x, 5, 95, 50), y: clampNumber(position.y, 5, 95, 50) }
+                      : overlay));
+                    setCreatorPreview(current => ({ ...current, activeDemo: "" }));
+                    setTimelineDockExpanded(true);
+                    setStudioActionMessage("Editable title added to the timeline. Its text, timing and style are included in export.");
+                  }}
+                  cameraCount={new Set(resolvedSpeakerStackSources.map(source => source?.source).filter(Boolean)).size}
+                  beatCount={musicBeatMarkers.length}
+                  layerCount={1 + overlays.filter(overlay => !overlay.isCaption).length}
+                  transcriptEvidence={
+                    normalizedTimedCaptionSegments.find(
+                      segment =>
+                        !segment.reviewRequired &&
+                        previewTimelineTime >= Number(segment.start || 0) &&
+                        previewTimelineTime <= Number(segment.end || 0)
+                    )?.text ||
+                    normalizedTimedCaptionSegments.find(segment => !segment.reviewRequired)?.text ||
+                    ""
+                  }
+                />
               ) : null}
 
               {studioInspectorTab === "pacing" ? (
@@ -13005,6 +20983,92 @@ const ViralClipStudio = ({
                       </label>
                     </div>
                   ) : null}
+
+                  <div className="dead-air-slicer-card">
+                    <div className="dead-air-slicer-header">
+                      <span className="panel-kicker">Dead-Air Ripple Slicer</span>
+                      <strong>Physical Silence Elimination</strong>
+                    </div>
+                    <p className="dead-air-slicer-desc">
+                      {silencePreview?.silenceSegments?.length
+                        ? `Detected ${silencePreview.silenceSegments.length} pauses (${silencePreview.silenceSegments.reduce((a, s) => a + Number(s.duration || 0), 0).toFixed(1)}s dead air). Slices the timeline and pulls speech takes together.`
+                        : "Physically slices detected pauses out of the primary video track, adjusts downstream overlays, and removes dead air from your sequence."}
+                    </p>
+                    <button
+                      type="button"
+                      className="inspector-primary-action dead-air-slicer-btn"
+                      onClick={rippleCutAllSilences}
+                      disabled={isRippleCuttingSilence}
+                      data-testid="pacing-ripple-cut-silences"
+                    >
+                      {isRippleCuttingSilence
+                        ? "⏳ Slicing Dead Air..."
+                        : silencePreview?.silenceSegments?.length
+                          ? `⚡ Ripple-Cut All Silences (${silencePreview.silenceSegments.reduce((a, s) => a + Number(s.duration || 0), 0).toFixed(1)}s saved)`
+                          : "⚡ Detect & Ripple-Cut Dead Air"}
+                    </button>
+                  </div>
+
+                  <section className="speed-ramp-card">
+                    <div className="sound-effects-heading">
+                      <div>
+                        <span className="panel-kicker">Speed ramp curve</span>
+                        <strong>Smooth acceleration and slow-down points</strong>
+                      </div>
+                      <span className="sound-effect-count">{speedKeyframes.length} points</span>
+                    </div>
+                    <button
+                      type="button"
+                      className="inspector-primary-action"
+                      onClick={addSpeedKeyframeAtPlayhead}
+                    >
+                      ◆ Add {previewSpeed.toFixed(2)}× point at {previewTimelineTime.toFixed(2)}s
+                    </button>
+                    <div className="automation-keyframe-list">
+                      {speedKeyframes.map(keyframe => (
+                        <article key={keyframe.id}>
+                          <button
+                            type="button"
+                            onClick={() => jumpToOutputTimelineTime(Number(keyframe.time || 0))}
+                          >
+                            <span>◆</span>
+                            <strong>{Number(keyframe.value || 1).toFixed(2)}×</strong>
+                            <small>{Number(keyframe.time || 0).toFixed(2)}s</small>
+                          </button>
+                          <select
+                            aria-label="Speed point easing"
+                            value={keyframe.easing || "bezier"}
+                            onChange={event =>
+                              setSpeedKeyframes(current =>
+                                current.map(item =>
+                                  item.id === keyframe.id
+                                    ? { ...item, easing: event.target.value }
+                                    : item
+                                )
+                              )
+                            }
+                          >
+                            {STUDIO_EASINGS.map(easing => (
+                              <option key={easing.id} value={easing.id}>
+                                {easing.label}
+                              </option>
+                            ))}
+                          </select>
+                          <button
+                            type="button"
+                            aria-label="Remove speed point"
+                            onClick={() =>
+                              setSpeedKeyframes(current =>
+                                current.filter(item => item.id !== keyframe.id)
+                              )
+                            }
+                          >
+                            ×
+                          </button>
+                        </article>
+                      ))}
+                    </div>
+                  </section>
                 </div>
               ) : null}
 
@@ -13262,6 +21326,37 @@ const ViralClipStudio = ({
                         </label>
                       ) : null}
 
+                      {activeOverlay.type === "image" ? (
+                        <div className="inspector-field">
+                          <span>Image motion (Ken Burns)</span>
+                          <div className="inspector-choice-grid is-three">
+                            {[
+                              ["none", "Static"],
+                              ["zoomIn", "Zoom in"],
+                              ["zoomOut", "Zoom out"],
+                              ["panLeft", "Pan left"],
+                              ["panRight", "Pan right"],
+                              ["panUp", "Pan up"],
+                            ].map(([value, label]) => (
+                              <button
+                                key={value}
+                                type="button"
+                                className={(activeOverlay.kenBurns || "none") === value ? "is-active" : ""}
+                                aria-pressed={(activeOverlay.kenBurns || "none") === value}
+                                onClick={() => setOverlayStyleOption(activeOverlay.id, "kenBurns", value)}
+                              >
+                                {label}
+                              </button>
+                            ))}
+                          </div>
+                          <small className="inspector-reassurance">
+                            {(activeOverlay.kenBurns || "none") !== "none"
+                              ? "✓ Slow cinematic motion keeps the frame alive during static images."
+                              : "Enable motion to avoid a frozen frame."}
+                          </small>
+                        </div>
+                      ) : null}
+
                       {activeOverlay.type === "video" ? (
                         <div className="inspector-field broll-source-end-control">
                           <span>When B-roll footage ends</span>
@@ -13322,6 +21417,57 @@ const ViralClipStudio = ({
                           </small>
                         </div>
                       ) : null}
+
+                      <div className="inspector-field">
+                        <span>Placement mode</span>
+                        <div className="inspector-choice-grid is-two" style={{ marginBottom: "8px" }}>
+                          {[
+                            ["overwrite", "Overwrite (Cover)"],
+                            ["insert", "Insert (Pause Main)"],
+                          ].map(([value, label]) => (
+                            <button
+                              key={value}
+                              type="button"
+                              className={(activeOverlay.placementMode || "overwrite") === value ? "is-active" : ""}
+                              aria-pressed={(activeOverlay.placementMode || "overwrite") === value}
+                              onClick={() => setOverlayStyleOption(activeOverlay.id, "placementMode", value)}
+                            >
+                              {label}
+                            </button>
+                          ))}
+                        </div>
+                        <small className="inspector-reassurance">
+                          {(activeOverlay.placementMode || "overwrite") === "insert"
+                            ? "✓ Main video pauses during this clip, then resumes exactly where it left off."
+                            : "Main video continues playing underneath this overlay."}
+                        </small>
+                        {(activeOverlay.placementMode || "overwrite") === "insert" ? (
+                          <button
+                            type="button"
+                            className="inspector-primary-action is-accent"
+                            style={{
+                              marginTop: "10px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: "8px",
+                              background: "linear-gradient(135deg, #0284c7, #2563eb)",
+                              color: "#fff",
+                              fontWeight: 600,
+                              borderRadius: "8px",
+                              padding: "10px 14px",
+                              border: "none",
+                              cursor: "pointer",
+                              width: "100%",
+                              boxShadow: "0 4px 12px rgba(37, 99, 235, 0.35)",
+                            }}
+                            onClick={() => rippleInsertOverlayIntoSequence(activeOverlay.id)}
+                            title="Slice the main sequence at this point and insert this B-roll clip as a story cut"
+                          >
+                            <span>⚡ Ripple-Insert into Story Sequence</span>
+                          </button>
+                        ) : null}
+                      </div>
 
                       <div className="inspector-field">
                         <span>Layout</span>
@@ -13552,7 +21698,11 @@ const ViralClipStudio = ({
                               {[
                                 ["fade", "Fade"],
                                 ["slideUp", "Slide up"],
+                                ["slideLeft", "Slide left"],
                                 ["zoom", "Zoom"],
+                                ["pop", "Pop"],
+                                ["wipe", "Wipe"],
+                                ["blur", "Blur in"],
                               ].map(([value, label]) => (
                                 <button
                                   key={value}
@@ -13612,6 +21762,202 @@ const ViralClipStudio = ({
                       {addMusic ? "Music on" : "Voice only"}
                     </span>
                   </div>
+
+                  <AudioRemixPanel
+                    value={audioRemix}
+                    bypass={audioRemixBypass}
+                    meter={audioRemixMeter}
+                    loopActive={!!audioRemixLoop}
+                    hasMusic={addMusic && !!musicTrack}
+                    exactPreviewStatus={exactAudioRemixPreview.status}
+                    exactPreviewError={exactAudioRemixPreview.error}
+                    onChange={next => {
+                      const normalized = normalizeAudioRemix(next);
+                      setAudioRemix(normalized);
+                      setAudioRemixBypass(false);
+                      setPreviewSpeed(normalized.speed);
+                      setComparisonMode("after");
+                      const video = videoRef.current;
+                      if (video) {
+                        unlockAudioRemixContext(video);
+                        safePlayMediaElement(video);
+                      }
+                      setStudioActionMessage(
+                        `${normalized.preset.replaceAll("_", " ")} remix is live. EQ, reverb and speed are active in After.`
+                      );
+                    }}
+                    onBefore={() => {
+                      exactAudioRemixPreviewRef.current?.pause();
+                      backgroundSoundPreviewSuppressedRef.current = false;
+                      setAudioRemixBypass(true);
+                      setComparisonMode("after");
+                      safePlayMediaElement(videoRef.current);
+                      setStudioActionMessage("Before is playing with the original audio tone.");
+                    }}
+                    onPreview={handleExactAudioRemixPreview}
+                    onToggleLoop={() => {
+                      const video = videoRef.current;
+                      if (audioRemixLoop) {
+                        setAudioRemixLoop(null);
+                        setStudioActionMessage("Remix preview loop is off.");
+                        return;
+                      }
+                      const start = Math.max(0, Number(video?.currentTime || 0));
+                      const duration = Number(
+                        video?.duration || getClipDurationSeconds(currentTimelineClip) || 0
+                      );
+                      const end = Math.min(duration || start + 8, start + 8);
+                      setAudioRemixLoop({ start, end: Math.max(start + 0.5, end) });
+                      setAudioRemixBypass(false);
+                      safePlayMediaElement(video);
+                      setStudioActionMessage(
+                        `Looping ${formatPreviewTimePrecise(start)}–${formatPreviewTimePrecise(
+                          Math.max(start + 0.5, end)
+                        )} for an exact preset comparison.`
+                      );
+                    }}
+                  />
+
+                  {exactAudioRemixPreview.url ? (
+                    <SafeAudio
+                      ref={exactAudioRemixPreviewRef}
+                      data-testid="exact-audio-remix-preview"
+                      className="audio-remix-exact-player"
+                      controls
+                      preload="auto"
+                      src={exactAudioRemixPreview.url}
+                      onEnded={() => {
+                        backgroundSoundPreviewSuppressedRef.current = false;
+                        setStudioActionMessage("Exact Remix Audio preview finished.");
+                      }}
+                      onError={() => {
+                        backgroundSoundPreviewSuppressedRef.current = false;
+                        setExactAudioRemixPreview(current => ({
+                          ...current,
+                          status: "failed",
+                          error: "The exact preview audio failed during browser playback.",
+                        }));
+                      }}
+                    />
+                  ) : null}
+
+                  <section className="advanced-tool-section beat-sync-panel" aria-label="Music Beat Sync & Viral Rhythm" style={{ marginBottom: "16px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                      <div>
+                        <span className="panel-kicker">Rhythm engine</span>
+                        <h5 style={{ margin: 0 }}>🎵 Cut to Music Beats & Transient Drops</h5>
+                      </div>
+                      <span className="smart-zoom-zone-badge" style={{ color: "#38bdf8", fontSize: "11px" }}>
+                        {musicBeatMarkers.length ? `${musicBeatMarkers.length} rhythm points (${calculateBpm(musicBeatMarkers) || 120} BPM)` : "Add music to detect rhythm"}
+                      </span>
+                    </div>
+
+                    <p style={{ fontSize: "11px", color: "var(--muted)", margin: "0 0 10px 0" }}>
+                      Automatically lock timeline cuts, B-roll overlays, and camera punch-ins to background music kick and snare transients.
+                    </p>
+
+                    <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "10px" }}>
+                      <button
+                        type="button"
+                        className={`split-audio-pill ${beatSnapEnabled ? "is-active" : ""}`}
+                        onClick={() => setBeatSnapEnabled(prev => !prev)}
+                        title="Toggle magnetic snapping to musical beats across the timeline (Hotkey: B)"
+                      >
+                        {beatSnapEnabled ? "🧲 Magnetic Beats ON" : "🧲 Enable Beat Snap (B)"}
+                      </button>
+                      <button
+                        type="button"
+                        className="split-audio-pill"
+                        onClick={handleAlignCutsToBeat}
+                        disabled={!musicBeatMarkers.length || timeline.length <= 1}
+                        title="Shift sequence cuts to nearest musical beat transients with downstream ripple"
+                      >
+                        🎵 Align Sequence Cuts to Beats
+                      </button>
+                      <button
+                        type="button"
+                        className="split-audio-pill"
+                        onClick={handleAlignBRollToBeat}
+                        disabled={!musicBeatMarkers.length || !overlays.some(o => o.bRollMode)}
+                        title="Snap B-roll clips to musical beat points"
+                      >
+                        ⚡ Snap B-Roll to Beats
+                      </button>
+                    </div>
+
+                    <div style={{ display: "flex", gap: "6px", alignItems: "center", borderTop: "1px solid var(--border)", paddingTop: "8px" }}>
+                      <span style={{ fontSize: "11px", color: "var(--muted)" }}>Auto-Punch on drops:</span>
+                      <button
+                        type="button"
+                        className="split-audio-pill"
+                        onClick={() => handleGenerateBeatPunchIns("drops")}
+                        disabled={!musicBeatMarkers.length}
+                        title="Generate punch-ins on major beat drops (every 4 bars)"
+                      >
+                        🎯 On Drops (4 Bars)
+                      </button>
+                      <button
+                        type="button"
+                        className="split-audio-pill"
+                        onClick={() => handleGenerateBeatPunchIns("bars")}
+                        disabled={!musicBeatMarkers.length}
+                        title="Generate punch-ins on every measure (1 Bar)"
+                      >
+                        🎯 Every Bar
+                      </button>
+                    </div>
+                  </section>
+
+                  <AudioRestorationPanel
+                    settings={audioRestoration}
+                    onUpdate={(field, value) =>
+                      setAudioRestoration(current => ({ ...current, [field]: value }))
+                    }
+                    source={audioAutomationSource}
+                    onSourceChange={setAudioAutomationSource}
+                    keyframes={audioKeyframes}
+                    playhead={previewTimelineTime}
+                    onAddKeyframe={addAudioAutomationKeyframe}
+                    onUpdateKeyframe={(keyframeId, changes) =>
+                      setAudioKeyframes(current => ({
+                        ...current,
+                        [audioAutomationSource]: (current[audioAutomationSource] || []).map(
+                          keyframe =>
+                            keyframe.id === keyframeId ? { ...keyframe, ...changes } : keyframe
+                        ),
+                      }))
+                    }
+                    onRemoveKeyframe={removeAudioAutomationKeyframe}
+                    onSeek={time => jumpToOutputTimelineTime(Number(time || 0))}
+                    recording={isVoiceoverRecording}
+                    onToggleRecording={() => void toggleVoiceoverRecording()}
+                    voiceoverCount={voiceovers.length}
+                  />
+
+                  {voiceovers.length > 0 && <section className="advanced-tool-section" aria-label="Voice-over takes">
+                    <h5>Voice-over takes</h5>
+                    {voiceovers.map(take => <div key={take.id} className="sound-effect-item voiceover-take">
+                      <label>Take name<input aria-label={`Name for ${take.name}`} value={take.name}
+                        onChange={event => updateVoiceoverTake(take.id, { name: event.target.value })} /></label>
+                      <div className="voiceover-take-fields">
+                        <label>Start (s)<input type="number" min="0" step="0.1" aria-label={`Start for ${take.name}`}
+                          value={take.startTime} onChange={event => updateVoiceoverTake(take.id, { startTime: Number(event.target.value) })} /></label>
+                        <label>Source in (s)<input type="number" min="0" step="0.1" aria-label={`Source in for ${take.name}`}
+                          value={take.trimStart || 0} onChange={event => updateVoiceoverTake(take.id, { trimStart: Number(event.target.value) })} /></label>
+                        <label>Length (s)<input type="number" min="0.05" step="0.1" aria-label={`Length for ${take.name}`}
+                          value={Number(take.duration.toFixed(2))} onChange={event => updateVoiceoverTake(take.id, { duration: Number(event.target.value) })} /></label>
+                      </div>
+                      <label>Volume {Math.round(voiceoverGain(take.volume) * 100)}%
+                        <input type="range" min="0" max="1" step="0.01" aria-label={`Volume for ${take.name}`}
+                          value={voiceoverGain(take.volume)} onChange={event => updateVoiceoverTake(take.id, { volume: Number(event.target.value) })} /></label>
+                      <div className="inspector-heading-row">
+                        <button type="button" className="clip-action-btn" onClick={() => jumpToOutputTimelineTime(take.startTime)}>Go to take</button>
+                        <button type="button" className="clip-action-btn" aria-pressed={take.enabled === false}
+                          onClick={() => updateVoiceoverTake(take.id, { enabled: take.enabled === false })}>{take.enabled === false ? "Unmute" : "Mute"} take</button>
+                        <button type="button" className="clip-action-btn" onClick={() => setVoiceovers(current => current.filter(item => item.id !== take.id))}>Remove take</button>
+                      </div>
+                    </div>)}
+                  </section>}
 
                   <label
                     htmlFor="studio-background-sound-input"
@@ -13739,7 +22085,7 @@ const ViralClipStudio = ({
                         />
                         <span>
                           <strong>Loop for the full clip</strong>
-                          <small>Repeats shorter tracks across long podcast edits.</small>
+                          <small>Repeats shorter tracks across longer edits.</small>
                         </span>
                       </label>
 
@@ -15043,7 +23389,7 @@ const ViralClipStudio = ({
                 </div>
               </div>
               <div className="editing-tools">
-                <button className="tool-btn" onClick={addTextOverlay}>
+                <button className="tool-btn" onClick={() => addTextOverlay("headline")}>
                   <span>📝</span> Add Text
                 </button>
                 <button
@@ -15202,13 +23548,9 @@ const ViralClipStudio = ({
                             fontSize: "13px",
                           }}
                         >
-                          <option value="">Classic (Plain text)</option>
-                          <option value="story_pop">Story Pop ◆</option>
-                          <option value="bold_pop">Bold Pop ✦</option>
-                          <option value="karaoke">Karaoke Highlight ♫</option>
-                          <option value="glow">Neon Glow ✧</option>
-                          <option value="bounce">Bounce ⬆</option>
-                          <option value="minimal">Minimal Clean</option>
+                          {CAPTION_STYLE_OPTIONS.map(([value, label]) => (
+                            <option key={value} value={value}>{label}</option>
+                          ))}
                         </select>
                         <div
                           style={{
@@ -15218,13 +23560,7 @@ const ViralClipStudio = ({
                             opacity: 0.6,
                           }}
                         >
-                          {captionStyle === "bold_pop" &&
-                            "Active word scales up with orange highlight"}
-                          {captionStyle === "karaoke" && "Words fill with color as they're spoken"}
-                          {captionStyle === "glow" && "Active word gets neon glow outline effect"}
-                          {captionStyle === "bounce" && "Active word bounces up with red highlight"}
-                          {captionStyle === "minimal" && "Subtle fade in/out per word group"}
-                          {!captionStyle && "Yellow text on dark background (legacy)"}
+                          {CAPTION_STYLE_OPTIONS.find(([value]) => value === captionStyle)?.[2]}
                         </div>
                       </div>
                     )}
@@ -15236,13 +23572,16 @@ const ViralClipStudio = ({
                     <label style={sidebarCheckboxLabelStyle}>
                       <input
                         type="checkbox"
-                        checked={smartCrop}
-                        onChange={e => setSmartCrop(e.target.checked)}
+                        checked={effectiveSmartCrop}
+                        onChange={e => {
+                          recordReframeModeAtPlayhead(e.target.checked ? smartCropMode : "off");
+                          setSmartCrop(e.target.checked);
+                        }}
                         style={{ marginRight: "8px" }}
                       />
                       Smart Crop (Vertical reframe)
                     </label>
-                    {smartCrop && (
+                    {effectiveSmartCrop && (
                       <div style={{ marginBottom: "10px", paddingLeft: "4px", marginTop: "6px" }}>
                         <label
                           style={{ ...sidebarBodyTextStyle, display: "block", marginBottom: "4px" }}
@@ -15251,7 +23590,7 @@ const ViralClipStudio = ({
                         </label>
                         <div style={{ display: "flex", gap: "6px" }}>
                           <button
-                            onClick={() => setSmartCropMode("center")}
+                            onClick={showEveryoneSplit}
                             style={{
                               flex: 1,
                               padding: "6px 8px",
@@ -15259,15 +23598,15 @@ const ViralClipStudio = ({
                               fontSize: "12px",
                               cursor: "pointer",
                               border:
-                                smartCropMode === "center" ? "2px solid #6366f1" : "1px solid #444",
-                              background: smartCropMode === "center" ? "#2d2b55" : "#1a1a2e",
+                                effectiveSmartCropMode === "center" ? "2px solid #6366f1" : "1px solid #444",
+                              background: effectiveSmartCropMode === "center" ? "#2d2b55" : "#1a1a2e",
                               color: "#fff",
                             }}
                           >
-                            🎯 Center
+                            👥 Show Everyone
                           </button>
                           <button
-                            onClick={() => setSmartCropMode("speaker_track")}
+                            onClick={() => openSpeakerTracking(true)}
                             style={{
                               flex: 1,
                               padding: "6px 8px",
@@ -15275,14 +23614,40 @@ const ViralClipStudio = ({
                               fontSize: "12px",
                               cursor: "pointer",
                               border:
-                                smartCropMode === "speaker_track"
+                                effectiveSmartCropMode === "speaker_track"
                                   ? "2px solid #6366f1"
                                   : "1px solid #444",
-                              background: smartCropMode === "speaker_track" ? "#2d2b55" : "#1a1a2e",
+                              background: effectiveSmartCropMode === "speaker_track" ? "#2d2b55" : "#1a1a2e",
                               color: "#fff",
                             }}
                           >
-                            👤 Follow Speaker
+                            👤 Reviewed Follow Path
+                          </button>
+                          <button
+                            onClick={() => {
+                              setSmartCrop(true);
+                              setSmartCropMode("group_stack");
+                              recordReframeModeAtPlayhead("group_stack");
+                              setReframeAspect(current =>
+                                current === "16:9" ? "9:16" : current
+                              );
+                            }}
+                            style={{
+                              flex: 1,
+                              padding: "6px 8px",
+                              borderRadius: "6px",
+                              fontSize: "12px",
+                              cursor: "pointer",
+                              border:
+                                effectiveSmartCropMode === "group_stack"
+                                  ? "2px solid #6366f1"
+                                  : "1px solid #444",
+                              background:
+                                effectiveSmartCropMode === "group_stack" ? "#2d2b55" : "#1a1a2e",
+                              color: "#fff",
+                            }}
+                          >
+                            🎥 Multi-Camera
                           </button>
                         </div>
                         <div
@@ -15293,9 +23658,13 @@ const ViralClipStudio = ({
                             opacity: 0.6,
                           }}
                         >
-                          {smartCropMode === "speaker_track"
-                            ? "AI detects faces and dynamically follows the speaker"
-                            : "Crops to center of frame (fast, works for all content)"}
+                          {effectiveSmartCropMode === "speaker_track"
+                            ? reframeKeyframes.length
+                              ? `${reframeKeyframes.length} reviewed framing point${reframeKeyframes.length === 1 ? "" : "s"} drive the follow path`
+                              : "No tracking data yet; the crop stays centered until framing points are added"
+                            : effectiveSmartCropMode === "group_stack"
+                              ? `Shows ${speakerStackCameraCount} synchronized live camera crops in the selected layout`
+                              : "Keeps the complete native source frame and every subject visible"}
                         </div>
                       </div>
                     )}
@@ -16237,7 +24606,10 @@ const ViralClipStudio = ({
               </div>
             </section>
 
-            <section className="studio-panel export-panel">
+            <section
+              className={`studio-panel export-panel ${activeCreativeTool === "export" ? "is-tool-visible" : ""}`}
+              aria-hidden={activeCreativeTool !== "export"}
+            >
               <div className="panel-heading compact">
                 <div>
                   <span className="panel-kicker">Publish</span>
@@ -16247,6 +24619,64 @@ const ViralClipStudio = ({
               <p className="panel-description">
                 Final export uses the hook treatment and B-roll layers you approved in Studio.
               </p>
+              <section className="split-export-card">
+                <div>
+                  <span>A/B hook pack</span>
+                  <strong>Export alternate first-three-second hooks</strong>
+                  <small>One edit, up to three hook variants for real platform testing.</small>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const suggestions = getHookCopySuggestions(selectedClip).slice(0, 3);
+                    setSplitExportHooks(
+                      suggestions.map((text, index) => ({
+                        id: createSecureId("split-hook"),
+                        text,
+                        template: ["zoom_focus", "freeze_text", "blur_reveal"][index],
+                      }))
+                    );
+                    setSplitExportEnabled(true);
+                    setStudioActionMessage(
+                      "Three editable hook variants are ready for split export."
+                    );
+                  }}
+                >
+                  {splitExportHooks.length ? "Regenerate hooks" : "Generate 3 hooks"}
+                </button>
+                {splitExportHooks.length ? (
+                  <div className="split-export-variants">
+                    {splitExportHooks.map((variant, index) => (
+                      <label key={variant.id}>
+                        <span>V{index + 1}</span>
+                        <input
+                          aria-label={`Split export hook ${index + 1}`}
+                          value={variant.text}
+                          onChange={event =>
+                            setSplitExportHooks(current =>
+                              current.map(item =>
+                                item.id === variant.id
+                                  ? { ...item, text: normalizeHookText(event.target.value) }
+                                  : item
+                              )
+                            )
+                          }
+                        />
+                      </label>
+                    ))}
+                    <label className="inspector-check-row">
+                      <input
+                        type="checkbox"
+                        checked={splitExportEnabled}
+                        onChange={event => setSplitExportEnabled(event.target.checked)}
+                      />
+                      <span>
+                        <strong>Include all variants in this render job</strong>
+                      </span>
+                    </label>
+                  </div>
+                ) : null}
+              </section>
               <div className="export-branding-card">
                 <label>
                   <span>
@@ -16261,11 +24691,45 @@ const ViralClipStudio = ({
                   />
                 </label>
                 {brandWatermark ? (
-                  <AutoPromoteBrandLockup
-                    className="export-branding-preview"
-                    compact
-                    data-testid="export-branding-preview"
-                  />
+                  <>
+                    <div className="watermark-brand-controls">
+                      <label>
+                        <span>Brand variant</span>
+                        <select
+                          aria-label="Watermark brand variant"
+                          value={brandWatermarkVariant}
+                          onChange={event => {
+                            const variant =
+                              WATERMARK_VARIANTS.find(item => item.id === event.target.value) ||
+                              WATERMARK_VARIANTS[0];
+                            setBrandWatermarkVariant(variant.id);
+                            setBrandWatermarkText(variant.text);
+                          }}
+                        >
+                          {WATERMARK_VARIANTS.map(variant => (
+                            <option key={variant.id} value={variant.id}>
+                              {variant.label}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <div className="watermark-path-status" data-testid="watermark-path-status">
+                        <span aria-hidden="true">↗</span>
+                        <span>
+                          <strong>Adaptive safe path</strong>
+                          <small>
+                            {brandWatermarkSchedule.length} timed positions · preview = export
+                          </small>
+                        </span>
+                      </div>
+                    </div>
+                    <AutoPromoteBrandLockup
+                      className="export-branding-preview"
+                      compact
+                      featureLabel={activeBrandVariant.featureLabel}
+                      data-testid="export-branding-preview"
+                    />
+                  </>
                 ) : (
                   <small>Clean export selected. Availability follows the creator plan.</small>
                 )}
@@ -16380,6 +24844,102 @@ const ViralClipStudio = ({
                     <option value="balanced">Balanced</option>
                     <option value="high">High</option>
                     <option value="master">Master</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Video bitrate</span>
+                  <select
+                    aria-label="Export video bitrate"
+                    value={exportSettings.videoBitrate}
+                    onChange={event =>
+                      setExportSettings(current => ({
+                        ...current,
+                        videoBitrate: event.target.value,
+                      }))
+                    }
+                    disabled={isExporting}
+                  >
+                    <option value="auto">Auto for quality</option>
+                    <option value="5">5 Mbps</option>
+                    <option value="8">8 Mbps</option>
+                    <option value="12">12 Mbps</option>
+                    <option value="20">20 Mbps</option>
+                    <option value="40">40 Mbps</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Target size</span>
+                  <input
+                    aria-label="Target file size megabytes"
+                    type="number"
+                    min={1}
+                    max={10000}
+                    placeholder="Auto (MB)"
+                    value={exportSettings.targetFileSizeMb}
+                    onChange={event =>
+                      setExportSettings(current => ({
+                        ...current,
+                        targetFileSizeMb: event.target.value,
+                      }))
+                    }
+                    disabled={isExporting}
+                  />
+                </label>
+                <label>
+                  <span>Audio codec</span>
+                  <select
+                    aria-label="Export audio codec"
+                    value={exportSettings.audioCodec}
+                    onChange={event =>
+                      setExportSettings(current => ({
+                        ...current,
+                        audioCodec: event.target.value,
+                      }))
+                    }
+                    disabled={isExporting}
+                  >
+                    <option value="aac">AAC</option>
+                    <option value="opus">Opus</option>
+                    <option value="pcm">PCM · lossless</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Audio bitrate</span>
+                  <select
+                    aria-label="Export audio bitrate"
+                    value={exportSettings.audioBitrate}
+                    onChange={event =>
+                      setExportSettings(current => ({
+                        ...current,
+                        audioBitrate: event.target.value,
+                      }))
+                    }
+                    disabled={isExporting}
+                  >
+                    {[128, 192, 256, 320].map(bitrate => (
+                      <option key={bitrate} value={String(bitrate)}>
+                        {bitrate} kbps
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  <span>Color space</span>
+                  <select
+                    aria-label="Export color space"
+                    value={exportSettings.colorSpace}
+                    onChange={event =>
+                      setExportSettings(current => ({
+                        ...current,
+                        colorSpace: event.target.value,
+                      }))
+                    }
+                    disabled={isExporting}
+                  >
+                    <option value="rec709">Rec.709</option>
+                    <option value="srgb">sRGB</option>
+                    <option value="display_p3">Display P3</option>
+                    <option value="hdr10">HDR10</option>
                   </select>
                 </label>
               </div>
@@ -16856,9 +25416,159 @@ const ViralClipStudio = ({
               </section>
             )}
           </div>
+
+          <div
+            style={{ "--timeline-dock-height": `${timelineDockHeight}px` }}
+            className={`studio-pro-timeline-dock ${
+              timelineDockExpanded ? "is-open" : "is-closed"
+            }`}
+          >
+            <div className="studio-timeline-resize" role="separator" tabIndex={0}
+              aria-label="Resize timeline" aria-orientation="horizontal"
+              aria-valuemin={148} aria-valuemax={480} aria-valuenow={timelineDockHeight}
+              onPointerDown={event => {
+                timelineResizeRef.current = { y: event.clientY, height: timelineDockHeight };
+                event.currentTarget.setPointerCapture(event.pointerId);
+              }}
+              onPointerMove={event => {
+                if (!timelineResizeRef.current) return;
+                setTimelineDockHeight(Math.max(148, Math.min(480, window.innerHeight*.55,
+                  timelineResizeRef.current.height + timelineResizeRef.current.y - event.clientY)));
+              }}
+              onPointerUp={() => { timelineResizeRef.current = null; }}
+              onPointerCancel={() => { timelineResizeRef.current = null; }}
+              onKeyDown={event => {
+                if (!["ArrowUp", "ArrowDown"].includes(event.key)) return;
+                event.preventDefault();
+                setTimelineDockHeight(current => Math.max(148, Math.min(480, window.innerHeight*.55,
+                  current + (event.key === "ArrowUp" ? 24 : -24))));
+              }}
+              title="Drag to resize the timeline; use arrow keys when focused">
+              <span />
+            </div>
+            <StudioProTimeline
+              duration={liveTimelineDuration}
+              playhead={previewTimelineTime}
+              zoom={timelineZoom}
+              onZoomChange={setTimelineZoom}
+              editTool={timelineEditTool}
+              onEditToolChange={setTimelineEditTool}
+              snapping={timelineSnapping}
+              onSnappingChange={setTimelineSnapping}
+              linkedSelection={linkedSelection}
+              onLinkedSelectionChange={setLinkedSelection}
+              rippleMode={rippleMode}
+              onRippleModeChange={setRippleMode}
+              trackStates={trackStates}
+              timelineSegments={timeline}
+              onTrackStateChange={(trackId, changes) =>
+                setTrackStates(current => ({
+                  ...current,
+                  [trackId]: { ...(current[trackId] || {}), ...changes },
+                }))
+              }
+              overlays={overlays}
+              captionSegments={captionSegments}
+              soundEffects={[...soundEffects, ...linkedMotionCues]}
+              motionScenes={motionScenes}
+              onSelectMotion={id => {
+                setSelectedMotionId(id);
+                setMotionWorkspace("design");
+                selectCreativeTool("motion");
+              }}
+              musicTrack={addMusic ? musicTrack : null}
+              voiceovers={voiceovers}
+              adjustmentLayers={adjustmentLayers}
+              creativeEffects={
+                creativeEffectsEnabled
+                  ? [
+                      {
+                        id: "signature-transformation",
+                        name:
+                          SIGNATURE_CREATIVE_STYLES.find(style => style.id === creativePreset)
+                            ?.label || "Signature transformation",
+                        startTime: 0,
+                        duration: liveTimelineDuration,
+                      },
+                    ]
+                  : []
+              }
+              motionKeyframes={motionKeyframes}
+              audioKeyframes={audioKeyframes}
+              speedKeyframes={speedKeyframes}
+              onSeek={(event, exactTime = null) => {
+                if (exactTime !== null && exactTime !== undefined && Number.isFinite(Number(exactTime))) {
+                  jumpToOutputTimelineTime(Number(exactTime));
+                  return;
+                }
+                const bounds = event.currentTarget.getBoundingClientRect();
+                const ratio = clampNumber(
+                  (event.clientX - bounds.left) / Math.max(1, bounds.width),
+                  0,
+                  1,
+                  0
+                );
+                jumpToOutputTimelineTime(ratio * liveTimelineDuration);
+              }}
+              onOverlayMove={handleOverlayTimelineMove}
+              onOverlayTrim={handleOverlayTimelineTrim}
+              onOverlaySlip={handleOverlayTimelineSlip}
+              onSelectOverlay={setActiveOverlayId}
+              onMotionMove={handleMotionTimelineMove}
+              onMotionTrim={handleMotionTimelineTrim}
+              onAutoGenerateMotionBeats={handleAutoGenerateMotionBeats}
+              onSelectTool={toolId => toolId && selectCreativeTool(toolId)}
+              onSplit={splitCurrentClipAtPlayhead}
+              onTrimStart={trimClipStartToPlayhead}
+              onTrimEnd={trimClipEndToPlayhead}
+              onDelete={deleteActiveTimelineClip}
+              canDelete={timeline.length > 1}
+              onToggleCaptions={() => {
+                const next = !autoCaptions;
+                setAutoCaptions(next);
+                if (next && !captionSegments.length && !captionTextOverride) {
+                  const initial = resolveInitialCaptionSegments(selectedClip, selectedClip?.duration);
+                  if (initial.length) setCaptionSegments(initial);
+                }
+              }}
+              captionsActive={autoCaptions}
+              onToggleSilence={() => setSilenceRemoval(!silenceRemoval)}
+              silenceRemovalActive={silenceRemoval}
+              onRippleCutSilence={rippleCutAllSilences}
+              isRippleCutting={isRippleCuttingSilence}
+              silenceRegions={silenceRegionsForTimeline}
+              onUndo={handleUndo}
+              onRedo={handleRedo}
+              canUndo={canUndo}
+              canRedo={canRedo}
+              onSetDualCam={showEveryoneSplit}
+              framingCuts={normalizeReframeModeCuts(reframeModeCuts)}
+              speakerFocusCuts={normalizeSpeakerFocusCuts(speakerFocusCuts)}
+              isDualCamActive={effectiveSmartCrop && effectiveSmartCropMode === "center"}
+              onSetAutoReframe={() => openSpeakerTracking()}
+              isAutoReframeActive={effectiveSmartCrop && effectiveSmartCropMode === "speaker_track"}
+              onToggleDirectorMode={() => setDirectorModeActive(prev => !prev)}
+              isDirectorModeActive={directorModeActive}
+              onTogglePunchAtPlayhead={togglePunchInAtPlayhead}
+              onAutoGeneratePunchIns={autoGeneratePunchIns}
+              isPlayheadPunched={isPlayheadPunched}
+              punchZones={activePunchZones}
+              onAudioTrim={handleAudioTrim}
+              onToggleJCutAtPlayhead={toggleJCutAtPlayhead}
+              onToggleLCutAtPlayhead={toggleLCutAtPlayhead}
+              hasActiveJCut={hasActiveJCut}
+              hasActiveLCut={hasActiveLCut}
+              musicBeatMarkers={musicBeatMarkers}
+              beatSnapping={beatSnapEnabled}
+              onBeatSnappingChange={setBeatSnapEnabled}
+              onAlignCutsToBeat={handleAlignCutsToBeat}
+              onAlignBRollToBeat={handleAlignBRollToBeat}
+            />
+          </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

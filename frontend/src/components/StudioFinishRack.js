@@ -81,18 +81,18 @@ export default function StudioFinishRack({
           <div className="finish-rack-grid">
             <Slider
               label="Canvas margin"
-              value={Number(mainFrame?.insetPercent ?? 5)}
-              min={2}
-              max={12}
+              value={Number(mainFrame?.insetPercent ?? 3)}
+              min={0}
+              max={10}
               step={0.5}
               onChange={value => onUpdateMainFrame?.("insetPercent", value)}
               format={value => `${Number(value).toFixed(1)}%`}
             />
             <Slider
               label="Corner curve"
-              value={Number(mainFrame?.radiusPercent ?? 10)}
-              min={4}
-              max={20}
+              value={Number(mainFrame?.radiusPercent ?? 8)}
+              min={3}
+              max={16}
               step={0.5}
               onChange={value => onUpdateMainFrame?.("radiusPercent", value)}
               format={value => `${Number(value).toFixed(1)}%`}
@@ -184,6 +184,18 @@ export default function StudioFinishRack({
             format={value => `${Math.round(value * 100)}%`}
           />
         </div>
+        <label className="inspector-toggle-row">
+          <span><b>Precision RGB grade</b><small>Matched tone transfer in preview and render. Static grade; disable to use animated legacy grade keys.</small></span>
+          <input type="checkbox" aria-label="Precision RGB grade" checked={!!fx.precisionGrade}
+            onChange={event => onUpdateFx("precisionGrade", event.target.checked)} />
+        </label>
+        {fx.precisionGrade ? <div className="finish-rack-grid">
+          <Slider label="Exposure stops" value={fx.exposureStops ?? 0} min={-2} max={2} step={.05} onChange={value => onUpdateFx("exposureStops", value)} />
+          <Slider label="Lift" value={fx.lift ?? 0} min={-.15} max={.15} step={.005} onChange={value => onUpdateFx("lift", value)} />
+          <Slider label="Gamma" value={fx.gamma ?? 1} min={.6} max={1.6} onChange={value => onUpdateFx("gamma", value)} />
+          <Slider label="Gain" value={fx.gain ?? 1} min={.6} max={1.4} onChange={value => onUpdateFx("gain", value)} />
+          <Slider label="Tint" value={fx.tint ?? 0} min={-1} max={1} onChange={value => onUpdateFx("tint", value)} />
+        </div> : null}
       </details>
 
       <details className="finish-rack-section" open>
@@ -192,7 +204,7 @@ export default function StudioFinishRack({
           <small>{keyframes.length} keyframes · {Number(currentTime || 0).toFixed(2)}s</small>
         </summary>
         <div className="finish-keyframe-toolbar">
-          <button type="button" onClick={onAddKeyframe}>
+          <button type="button" onClick={onAddKeyframe} disabled={!!fx.precisionGrade}>
             ◆ Add grade keyframe
           </button>
           <span>Animates exposure, contrast and saturation with render-accurate interpolation.</span>
@@ -291,7 +303,7 @@ export default function StudioFinishRack({
 
       <details className="finish-rack-section" open>
         <summary>
-          <span>Podcast voice visual</span>
+          <span>Voice-reactive visual</span>
           <small>Web Audio reactive</small>
         </summary>
         <div className="visualizer-switch-row">

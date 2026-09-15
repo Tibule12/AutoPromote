@@ -1,0 +1,60 @@
+.audio-remix-timeline-row {
+  align-items: center;
+}
+
+.audio-remix-timeline-row > span {
+  color: #91a3bd;
+}
+
+.audio-remix-timeline-row .compact-audio-track {
+  height: 30px;
+  border-color: rgba(126, 99, 255, 0.18);
+  background-color: rgba(8, 15, 31, 0.96);
+}
+
+.audio-remix-timeline-row .compact-audio-lane {
+  top: 4px;
+}
+
+.audio-remix-timeline-row .is-voice {
+  border-color: rgba(175, 79, 255, 0.55);
+  color: #f2e7ff;
+  background: linear-gradient(90deg, rgba(121, 42, 184, 0.62), rgba(65, 38, 122, 0.52));
+}
+
+.audio-remix-timeline-row .is-voice .compact-audio-wave {
+  background: repeating-linear-gradient(90deg, #dd70ff 0 2px, transparent 2px 5px);
+}
+
+.audio-remix-timeline-row .is-music {
+  top: 4px;
+  border-color: rgba(42, 214, 241, 0.5);
+  color: #e2fbff;
+  background: linear-gradient(90deg, rgba(23, 123, 161, 0.5), rgba(39, 66, 137, 0.5));
+}
+
+.audio-remix-timeline-row .is-music .compact-audio-wave {
+  background: repeating-linear-gradient(90deg, #43e1f5 0 2px, transparent 2px 5px);
+}
+
+.audio-remix-timeline-row .is-empty,
+.audio-remix-timeline-row .is-sfx-empty {
+  opacity: 0.62;
+  border-style: dashed;
+}
+
+.audio-remix-timeline-row .is-sfx-empty {
+  top: 4px;
+  color: #ffd8ef;
+  border-color: rgba(242, 90, 184, 0.4);
+  background: rgba(112, 31, 85, 0.25);
+  cursor: pointer;
+}
+
+.audio-remix-timeline-row .is-sfx-empty .compact-audio-wave {
+  background: repeating-linear-gradient(90deg, #f25ab8 0 2px, transparent 2px 5px);
+}
+
+.audio-remix-timeline-row .compact-sfx-audio {
+  top: 4px;
+}

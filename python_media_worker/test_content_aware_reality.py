@@ -19,6 +19,7 @@ from python_media_worker.content_aware_reality import (
     recover_transient_subject_matte,
     render_content_aware_reality,
     search_story_video_candidates,
+    story_assets_are_adjacent,
     validate_scene_brief,
 )
 from python_media_worker.motion_sculpture import validate_rendered_media
@@ -41,6 +42,15 @@ class ContentAwareRealityTests(unittest.TestCase):
         {"start": 4.0, "end": 8.0, "text": "mina ebengiva kakhulu egazini"},
         {"start": 8.0, "end": 12.0, "text": "abafowethu nodadewethu"},
     ]
+
+    def test_only_crossfades_story_assets_that_are_directly_adjacent(self):
+        previous = {"start": 0.3, "end": 2.45}
+        self.assertTrue(
+            story_assets_are_adjacent(previous, {"start": 2.7, "end": 4.0})
+        )
+        self.assertFalse(
+            story_assets_are_adjacent(previous, {"start": 6.55, "end": 8.05})
+        )
 
     def test_reuses_verified_matte_for_only_a_bounded_transient_miss(self):
         frame = np.zeros((12, 8, 3), dtype=np.uint8)

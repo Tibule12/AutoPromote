@@ -87,19 +87,22 @@ export const analyzeAudioBufferBeats = (audioBuffer, secondsPerBin = 0.05) => {
   if (!audioBuffer?.getChannelData || !audioBuffer.sampleRate || !audioBuffer.duration) {
     return { envelope: [], secondsPerBin, duration: 0 };
   }
-  const channel = audioBuffer.getChannelData(0);
+  const channels = Array.from({ length: Math.max(1, audioBuffer.numberOfChannels || 1) }, (_, index) => audioBuffer.getChannelData(index));
+  const sampleLength = Math.min(...channels.map(channel => channel.length));
   const samplesPerBin = Math.max(1, Math.round(audioBuffer.sampleRate * secondsPerBin));
   const envelope = [];
-  for (let start = 0; start < channel.length; start += samplesPerBin) {
+  for (let start = 0; start < sampleLength; start += samplesPerBin) {
     let peak = 0;
     let sumSquares = 0;
-    const end = Math.min(channel.length, start + samplesPerBin);
+    const end = Math.min(sampleLength, start + samplesPerBin);
     for (let index = start; index < end; index += 1) {
-      const sample = Math.abs(channel[index]);
-      peak = Math.max(peak, sample);
-      sumSquares += sample * sample;
+      for (const channel of channels) {
+        const sample = Math.abs(channel[index]);
+        peak = Math.max(peak, sample);
+        sumSquares += sample * sample;
+      }
     }
-    const rms = Math.sqrt(sumSquares / Math.max(1, end - start));
+    const rms = Math.sqrt(sumSquares / Math.max(1, (end - start) * channels.length));
     envelope.push(Math.min(1, peak * 0.38 + rms * 1.45));
   }
   return { envelope, secondsPerBin, duration: Number(audioBuffer.duration || 0) };
