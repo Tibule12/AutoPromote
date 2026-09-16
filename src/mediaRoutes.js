@@ -40,6 +40,7 @@ const {
   verifyMulticamRenderInputs,
 } = require("./services/multicamUploadService");
 const { getMulticamStoragePaths } = require("./services/storageCleanupService");
+const { createStudio3DPreview, getOwnedStudio3DPreview, resolveStudio3DExport } = require("./services/studio3DService");
 const { getClipLearningProfile } = require("./services/clipOutcomeLearningService");
 const {
   deleteOwnedTemporaryVideoSource,
@@ -715,6 +716,28 @@ router.post("/internal/multicam-job-failed", async (req, res) => {
 // Replaced local 'protect' with standard 'authMiddleware' for consistency
 router.use(authMiddleware);
 
+router.post("/studio-3d/preview", requireTesterEditingFeature("clipRender"), async (req, res) => {
+  try {
+    const result = await createStudio3DPreview({ ownerUid: req.user.uid, scene: req.body?.scene, aspect: req.body?.aspect, clientRequestId: req.body?.clientRequestId });
+    res.status(202).json({ jobId: result.jobId, status: "queued", reused: result.reused });
+  } catch (error) {
+    const message = String(error.message || "Preview request failed");
+    const busy = message.includes("capacity is busy") || message.includes("daily limit reached");
+    const invalid = /^Invalid|^Logo asset|^Save the logo|^Idempotency/.test(message);
+    res.status(busy ? 429 : invalid ? 422 : 503).json({ error: busy || invalid ? message : "3D preview is temporarily unavailable" });
+  }
+});
+
+router.get("/studio-3d/preview/:jobId", async (req, res) => {
+  try {
+    const result = await getOwnedStudio3DPreview({ ownerUid: req.user.uid, jobId: req.params.jobId });
+    if (!result) return res.status(404).json({ error: "Preview not found" });
+    return res.json(result);
+  } catch (error) {
+    return res.status(503).json({ error: "Preview status is temporarily unavailable" });
+  }
+});
+
 // Route: GET /api/media/credits
 // Returns the user's credit breakdown (monthly + top-up) and cost table
 router.get("/credits", async (req, res) => {
@@ -991,7 +1014,7 @@ router.post(
     }
 
     const fileUrl = resolvedSource.outputUrl;
-    const resolvedOptions = options?.viralData
+    let resolvedOptions = options?.viralData
       ? {
           ...options,
           viralData: {
@@ -1005,10 +1028,19 @@ router.post(
           },
         }
       : options;
+    if (isViralClipRender && options?.viralData && Object.prototype.hasOwnProperty.call(options.viralData, "threeDGraphics")) {
+      try {
+        const threeDGraphics = await resolveStudio3DExport({ ownerUid: userId, items: options.viralData.threeDGraphics });
+        resolvedOptions = { ...resolvedOptions, viralData: { ...resolvedOptions.viralData, threeDGraphics } };
+      } catch (error) {
+        return res.status(422).json({ message: error.message || "3D preview must be regenerated before export" });
+      }
+    }
     console.log("[MediaRoute] Received request:", {
-      fileUrl,
+      hasSource: Boolean(fileUrl),
       renderJobId: resolvedSource.renderJobId,
-      options: resolvedOptions,
+      isViralClipRender,
+      hasThreeDGraphics: Boolean(resolvedOptions?.viralData?.threeDGraphics?.length),
     });
 
     // 1. Deduct Credits

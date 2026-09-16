@@ -1115,7 +1115,7 @@ describe("ViralClipStudio timeline sequencing", () => {
   });
 
   test("dragging the selected hook range does not toggle selection mode", () => {
-    const { container } = render(
+    const { container: _container } = render(
       <ViralClipStudio
         videoUrl="https://example.com/source.mp4"
         clips={[{ id: "clip-1", start: 0, end: 10, duration: 10, reason: "Hook moment" }]}
@@ -1142,7 +1142,7 @@ describe("ViralClipStudio timeline sequencing", () => {
 
   test("allows choosing a hook point from the timeline and setting it as the hook", async () => {
     const onSave = jest.fn();
-    const { container } = render(
+    const { container: _container } = render(
       <ViralClipStudio
         videoUrl="https://example.com/source.mp4"
         clips={[{ id: "clip-1", start: 0, end: 10, duration: 10, reason: "Hook moment" }]}
@@ -1213,7 +1213,7 @@ describe("ViralClipStudio timeline sequencing", () => {
   });
 
   test("setting a hook point freezes the chosen opening moment", async () => {
-    const { container } = render(
+    const { container: _container } = render(
       <ViralClipStudio
         videoUrl="https://example.com/source.mp4"
         clips={[{ id: "clip-1", start: 0, end: 10, duration: 10, reason: "Hook moment" }]}
@@ -1297,7 +1297,7 @@ describe("ViralClipStudio timeline sequencing", () => {
 
   test("captures preview focus targeting and exports cover frame metadata", async () => {
     const onSave = jest.fn();
-    const { container } = render(
+    const { container: _container } = render(
       <ViralClipStudio
         videoUrl="https://example.com/source.mp4"
         clips={[{ id: "clip-1", start: 0, end: 10, duration: 10, reason: "Hook moment" }]}
@@ -1404,7 +1404,7 @@ describe("ViralClipStudio timeline sequencing", () => {
   });
 
   test("uses face-aware hook banner placement and freeze-text offset in the preview", async () => {
-    const { container } = render(
+    const { container: _container } = render(
       <ViralClipStudio
         videoUrl="https://example.com/source.mp4"
         clips={[{ id: "clip-1", start: 0, end: 10, duration: 10, reason: "Hook moment" }]}
@@ -1492,7 +1492,7 @@ describe("ViralClipStudio timeline sequencing", () => {
 
   test("allows appended clips to be reordered in the timeline", async () => {
     const createdVideos = setupVideoCreateElementMock();
-    const { container } = render(
+    const { container: _container } = render(
       <ViralClipStudio
         videoUrl="https://example.com/source.mp4"
         clips={[{ id: "clip-1", start: 0, end: 10, duration: 10, reason: "Hook" }]}
@@ -1530,7 +1530,7 @@ describe("ViralClipStudio timeline sequencing", () => {
 
   test("keeps the same timeline clip active after reordering", async () => {
     const createdVideos = setupVideoCreateElementMock();
-    const { container } = render(
+    const { container: _container } = render(
       <ViralClipStudio
         videoUrl="https://example.com/source.mp4"
         clips={[{ id: "clip-1", start: 0, end: 10, duration: 10, reason: "Hook" }]}
@@ -1858,7 +1858,7 @@ describe("ViralClipStudio timeline sequencing", () => {
 
   test("exports the selected hook once and removes the duplicate span from the main clip", async () => {
     const onSave = jest.fn();
-    const { container } = render(
+    const { container: _container } = render(
       <ViralClipStudio
         videoUrl="https://example.com/source.mp4"
         clips={[{ id: "clip-1", start: 0, end: 10, duration: 10, reason: "Calm intro" }]}
@@ -1929,7 +1929,7 @@ describe("ViralClipStudio timeline sequencing", () => {
   test("suggests a hook segment from video analysis and applies it", async () => {
     setupHookAnalysisEnvironment();
 
-    const { container } = render(
+    const { container: _container } = render(
       <ViralClipStudio
         videoUrl="https://example.com/source.mp4"
         clips={[{ id: "clip-1", start: 0, end: 8, duration: 8, reason: "Steady explanation" }]}
@@ -1986,7 +1986,7 @@ describe("ViralClipStudio timeline sequencing", () => {
   });
 
   test("selected hook segment plays as the opening during normal playback", async () => {
-    const { container } = render(
+    const { container: _container } = render(
       <ViralClipStudio
         videoUrl="https://example.com/source.mp4"
         clips={[{ id: "clip-1", start: 0, end: 10, duration: 10, reason: "Hook moment" }]}
@@ -2043,7 +2043,7 @@ describe("ViralClipStudio timeline sequencing", () => {
   });
 
   test("preview hook once plays the selected range first then jumps back to clip start", async () => {
-    const { container } = render(
+    const { container: _container } = render(
       <ViralClipStudio
         videoUrl="https://example.com/source.mp4"
         clips={[{ id: "clip-1", start: 0, end: 10, duration: 10, reason: "Hook moment" }]}
@@ -2549,7 +2549,10 @@ describe("ViralClipStudio timeline sequencing", () => {
     });
 
     const image = screen.getByAltText("Overlay");
-    expect(image).toHaveStyle({ objectFit: "contain", transform: "rotate(8deg)" });
+    expect(image).toHaveStyle({ objectFit: "contain" });
+    // Rotation is applied to the layer wrapper so the frame and image rotate
+    // together; the image element itself deliberately has no transform.
+    expect(image.closest(".draggable-overlay").style.getPropertyValue("--title-rotation")).toBe("8deg");
     // The preview uses a proportional radius so the same rounded framing
     // remains visually consistent at export resolution.
     expect(image).toHaveStyle({ borderRadius: "9%" });

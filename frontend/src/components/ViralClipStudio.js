@@ -82,6 +82,8 @@ import SoundWaveform from "./motion/SoundWaveform";
 import MotionPanel from "./motion/MotionPanel";
 import MotionCanvas from "./motion/MotionCanvas";
 import { motionCues, cutMotion, normalizeMotion, generateSmartMotionBeats } from "./motion/motionModel";
+import Studio3DPanel from "./threeD/Studio3DPanel";
+import { cutStudio3DScenes, normalizeStudio3DScene, studio3DSceneRevision } from "./threeD/studio3DModel";
 import { DESIGN_SOUNDS, synthesizeEffect } from "./motion/soundDesign";
 import VideoScopes from "./VideoScopes";
 import {
@@ -137,6 +139,8 @@ import {
 } from "./audio/audioRemixPreview";
 import "./audio/audioRemixTimeline.css";
 import "./ViralClipStudio.css"; // We'll create this CSS next
+
+const Studio3DCanvas = React.lazy(() => import("./threeD/Studio3DCanvas"));
 
 const TimelineVideoThumbnail = ({ src, previewTime, style }) => {
   const thumbnailRef = useRef(null);
@@ -2663,6 +2667,13 @@ const ViralClipStudio = ({
   const [motionKeyframes, setMotionKeyframes] = useState([]);
   const [motionScenes, setMotionScenes] = useState([]);
   const [selectedMotionId, setSelectedMotionId] = useState(null);
+  const [threeDScenes, setThreeDScenes] = useState([]);
+  const [selectedThreeDId, setSelectedThreeDId] = useState(null);
+  const [threeDPreviewState, setThreeDPreviewState] = useState({ status: "idle" });
+  const threeDScenesRef = useRef(threeDScenes);
+  const threeDPreviewPollRef = useRef(null);
+  threeDScenesRef.current = threeDScenes;
+  useEffect(() => () => clearTimeout(threeDPreviewPollRef.current), []);
   const [motionWorkspace, setMotionWorkspace] = useState("design");
   const [motionTargetId, setMotionTargetId] = useState("main-video");
   const [showMotionPath, setShowMotionPath] = useState(true);
@@ -3245,6 +3256,7 @@ const ViralClipStudio = ({
     trackStates,
     motionKeyframes,
     motionScenes,
+    threeDScenes,
     motionTargetId,
     compositeTargetId,
     mainTransform,
@@ -3699,7 +3711,9 @@ const ViralClipStudio = ({
     setTrackStates({ ...DEFAULT_TRACK_STATES, ...(snapshot.trackStates || {}) });
     setMotionKeyframes(Array.isArray(snapshot.motionKeyframes) ? snapshot.motionKeyframes : []);
     setMotionScenes(Array.isArray(snapshot.motionScenes) ? snapshot.motionScenes.map(normalizeMotion) : []);
+    setThreeDScenes(Array.isArray(snapshot.threeDScenes) ? snapshot.threeDScenes.map(normalizeStudio3DScene) : []);
     setSelectedMotionId(null);
+    setSelectedThreeDId(null);
     setMotionTargetId(snapshot.motionTargetId || "main-video");
     setCompositeTargetId(snapshot.compositeTargetId || "main-video");
     setMainTransform({
@@ -4646,6 +4660,16 @@ const ViralClipStudio = ({
   };
 
   const handleMotionTimelineMove = (id, newStart) => {
+    if (threeDScenes.some(scene => scene.id === id)) {
+      setThreeDScenes(prev => prev.map(scene => {
+        if (scene.id !== id) return scene;
+        const startTime = Math.max(0, newStart);
+        const delta = startTime - Number(scene.startTime || 0);
+        return normalizeStudio3DScene({ ...scene, startTime,
+          keyframes: (scene.keyframes || []).map(frame => ({ ...frame, time: frame.time + delta })) });
+      }));
+      return;
+    }
     setMotionScenes(prev =>
       prev.map(scene =>
         scene.id === id
@@ -4656,6 +4680,17 @@ const ViralClipStudio = ({
   };
 
   const handleMotionTimelineTrim = (id, edge, value) => {
+    if (threeDScenes.some(scene => scene.id === id)) {
+      setThreeDScenes(prev => prev.map(scene => {
+        if (scene.id !== id) return scene;
+        const end = Number(scene.startTime) + Number(scene.duration);
+        const startTime = edge === "start" ? Math.max(0, Math.min(value, end - 0.5)) : Number(scene.startTime);
+        const duration = edge === "start" ? end - startTime : Math.max(0.5, value - startTime);
+        return normalizeStudio3DScene({ ...scene, startTime, duration,
+          keyframes: (scene.keyframes || []).filter(frame => frame.time >= startTime && frame.time <= startTime + duration) });
+      }));
+      return;
+    }
     setMotionScenes(prev =>
       prev.map(scene => {
         if (scene.id !== id) return scene;
@@ -4672,6 +4707,68 @@ const ViralClipStudio = ({
         return scene;
       })
     );
+  };
+
+  const uploadThreeDAsset = async (sceneId, file) => {
+    if (!["image/png", "image/jpeg", "image/webp"].includes(file.type) || file.size <= 0 || file.size > 5 * 1024 * 1024) {
+      toast.error("Use a PNG, JPEG or WebP image under 5 MB.");
+      return;
+    }
+    const localUrl = URL.createObjectURL(file);
+    setThreeDScenes(current => current.map(scene => scene.id === sceneId ? { ...scene, assetUrl: localUrl, assetName: file.name, assetStoragePath: "" } : scene));
+    try {
+      const token = await getMediaAuthToken();
+      if (!token) throw new Error("Sign in to save and render logo assets.");
+      const uploaded = await uploadSourceFileViaBackend({ file, token, mediaType: "image", fileName: file.name });
+      if (!uploaded?.url || !uploaded?.storagePath) throw new Error("Logo upload did not return a secure storage reference.");
+      setThreeDScenes(current => current.map(scene => scene.id === sceneId && scene.assetUrl === localUrl ? normalizeStudio3DScene({ ...scene, assetUrl: uploaded.url, assetStoragePath: uploaded.storagePath }) : scene));
+      URL.revokeObjectURL(localUrl);
+    } catch (error) {
+      toast.error(error.message || "Logo upload failed. Live preview remains available, but HQ render needs a saved asset.");
+    }
+  };
+
+  const generateThreeDPreview = async scene => {
+    clearTimeout(threeDPreviewPollRef.current);
+    const revision = studio3DSceneRevision(scene);
+    const sceneId = scene.id;
+    setThreeDPreviewState({ sceneId, revision, status: "queued" });
+    try {
+      const token = await getMediaAuthToken();
+      if (!token) throw new Error("Sign in to generate an HQ 3D preview.");
+      const response = await fetch(API_ENDPOINTS.STUDIO_3D_PREVIEW, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ scene: normalizeStudio3DScene(scene), aspect: reframeAspect, clientRequestId: createSecureId("studio-3d-preview") }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.jobId) throw new Error(result.error || "3D preview could not be queued.");
+      const poll = async () => {
+        try {
+          const statusResponse = await fetch(API_ENDPOINTS.STUDIO_3D_PREVIEW_STATUS(result.jobId), { headers: { Authorization: `Bearer ${token}` } });
+          const status = await statusResponse.json().catch(() => ({}));
+          if (!statusResponse.ok) throw new Error(status.error || "Preview status is unavailable.");
+          const currentScene = threeDScenesRef.current.find(item => item.id === sceneId);
+          if (!currentScene || studio3DSceneRevision(currentScene) !== revision) {
+            setThreeDPreviewState({ sceneId, status: "idle", message: "Scene changed; generate a new HQ preview." });
+            return;
+          }
+          if (status.status === "completed" && status.url) {
+            setThreeDScenes(current => current.map(item => item.id === sceneId ? { ...item, hqPreviewJobId: result.jobId, hqPreviewRevision: revision } : item));
+            setThreeDPreviewState({ sceneId, revision, status: "completed", url: status.url, jobId: result.jobId });
+            return;
+          }
+          if (status.status === "failed") throw new Error("The HQ 3D render failed. Retry after checking the scene asset.");
+          setThreeDPreviewState({ sceneId, revision, status: status.status === "rendering" ? "rendering" : "queued", jobId: result.jobId });
+          threeDPreviewPollRef.current = setTimeout(poll, 3000);
+        } catch (error) {
+          setThreeDPreviewState({ sceneId, revision, status: "failed", message: error.message });
+        }
+      };
+      void poll();
+    } catch (error) {
+      setThreeDPreviewState({ sceneId, revision, status: "failed", message: error.message });
+    }
   };
 
   const rippleInsertOverlayIntoSequence = (overlayId) => {
@@ -7470,6 +7567,7 @@ const ViralClipStudio = ({
     setVoiceovers(retime);
     setAdjustmentLayers(retime);
     setMotionScenes(current => cutMotion(current, from, to));
+    setThreeDScenes(current => cutStudio3DScenes(current, from, to));
     setMotionKeyframes(current => rippleTimelineKeys(current, from, to));
     setSpeedKeyframes(current => rippleTimelineKeys(current, from, to));
     setFinishKeyframes(current => rippleTimelineKeys(current, from, to));
@@ -7515,6 +7613,7 @@ const ViralClipStudio = ({
       }
       return res;
     });
+    setThreeDScenes(current => sortedGaps.reduce((items, gap) => cutStudio3DScenes(items, gap.from, gap.to), current));
     setMotionKeyframes(retimeKeys);
     setSpeedKeyframes(retimeKeys);
     setFinishKeyframes(retimeKeys);
@@ -10137,6 +10236,17 @@ const ViralClipStudio = ({
   const handleExportRender = async destination => {
     if (isExporting) return;
 
+    const enabledThreeDScenes = threeDScenes.filter(scene => scene.enabled !== false);
+    const staleThreeDScenes = enabledThreeDScenes.filter(scene => !scene.hqPreviewJobId || scene.hqPreviewRevision !== studio3DSceneRevision(scene));
+    if (staleThreeDScenes.length) {
+      setStudioInspectorTab("motion");
+      setMotionWorkspace("3d");
+      setSelectedThreeDId(staleThreeDScenes[0].id);
+      setStudioActionMessage(`Render paused: generate an HQ 3D preview for ${staleThreeDScenes.length} new or changed 3D scene${staleThreeDScenes.length === 1 ? "" : "s"}. The final video will use those verified rendered frames.`);
+      toast.error("Generate an HQ 3D preview for every active 3D scene before exporting.");
+      return;
+    }
+
     const unresolvedStoryBeats = overlays.filter(
       overlay => overlay.bRollMode && overlay.bRollPlaceholder
     );
@@ -10796,6 +10906,7 @@ const ViralClipStudio = ({
         soundEffects: [...exportedSoundEffects, ...exportedVoiceovers],
         audioRemix: audioRemixForRender(audioRemix),
         motionGraphics: { version: 1, scenes: motionScenes.map(normalizeMotion) },
+        threeDGraphics: enabledThreeDScenes.map(scene => ({ jobId: scene.hqPreviewJobId, scene: normalizeStudio3DScene(scene), aspect: reframeAspect })),
         muteAudio: muteOriginalAudio || !isStudioAudioTrackAudible(trackStates, "originalAudio"),
         timelineSegments: exportTimeline,
         backgroundAudio: null,
@@ -11079,6 +11190,7 @@ const ViralClipStudio = ({
     splitExportHooks,
     isDragging,
     motionScenes,
+    threeDScenes,
   ]);
 
   useEffect(() => {
@@ -15847,6 +15959,15 @@ const ViralClipStudio = ({
                           getTime={() => getPreviewTimelineTime(videoRef.current?.currentTime || 0)}
                         />
                       ) : null}
+                      {!renderedOutputUrl && threeDScenes.length > 0 ? (
+                        <React.Suspense fallback={null}>
+                          <Studio3DCanvas
+                            scenes={threeDScenes}
+                            time={previewTimelineTime}
+                            getTime={() => getPreviewTimelineTime(videoRef.current?.currentTime || 0)}
+                          />
+                        </React.Suspense>
+                      ) : null}
                       {silenceRemoval && !showHookPreview ? (
                         <div className="silence-preview-indicator">
                           <span />
@@ -16904,6 +17025,18 @@ const ViralClipStudio = ({
                           }}
                         >
                           ◆ {scene.text} {scene.sound !== "none" ? "♫" : ""}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                  {threeDScenes.map(scene => (
+                    <div className="compact-timeline-row" key={scene.id}>
+                      <span>3D</span>
+                      <div className="compact-timeline-track motion-timeline-track">
+                        <button type="button" className="motion-timeline-block" aria-label={`Inspect 3D motion ${scene.text}`}
+                          style={{ left: `${(100 * scene.startTime) / Math.max(0.1, liveTimelineDuration)}%`, width: `${(100 * scene.duration) / Math.max(0.1, liveTimelineDuration)}%` }}
+                          onClick={() => { setSelectedThreeDId(scene.id); setMotionWorkspace("3d"); seekLiveEditTimelineItem(scene.startTime, "motion"); }}>
+                          ◈ {scene.text}
                         </button>
                       </div>
                     </div>
@@ -20548,6 +20681,7 @@ const ViralClipStudio = ({
                 <>
                 <div className="motion-workspace-switch" role="group" aria-label="Motion workspace">
                   <button type="button" aria-pressed={motionWorkspace === "design"} onClick={() => setMotionWorkspace("design")}>Motion + sound</button>
+                  <button type="button" aria-pressed={motionWorkspace === "3d"} onClick={() => setMotionWorkspace("3d")}>3D Motion</button>
                   <button type="button" aria-pressed={motionWorkspace === "logo"} onClick={() => setMotionWorkspace("logo")}>Logo & layers</button>
                   <button type="button" aria-pressed={motionWorkspace === "smart_zoom"} onClick={() => setMotionWorkspace("smart_zoom")}>🎯 Viral Punch-Ins {activePunchZones.length ? `(${activePunchZones.length})` : ""}</button>
                   <button type="button" aria-pressed={motionWorkspace === "transform"} onClick={() => setMotionWorkspace("transform")}>Transform keyframes</button>
@@ -20560,7 +20694,20 @@ const ViralClipStudio = ({
                   data-testid="motion-logo-input"
                   hidden
                 />
-                {motionWorkspace === "smart_zoom" ? (
+                {motionWorkspace === "3d" ? (
+                  <Studio3DPanel
+                    scenes={threeDScenes}
+                    onChange={setThreeDScenes}
+                    focusId={selectedThreeDId}
+                    onSelect={setSelectedThreeDId}
+                    playhead={previewTimelineTime}
+                    duration={outputTimelineDuration}
+                    onSeek={time => seekLiveEditTimelineItem(time, "motion")}
+                    onUploadAsset={uploadThreeDAsset}
+                    onGeneratePreview={generateThreeDPreview}
+                    previewState={threeDPreviewState.sceneId === (selectedThreeDId || threeDScenes[0]?.id) ? threeDPreviewState : { status: "idle" }}
+                  />
+                ) : motionWorkspace === "smart_zoom" ? (
                   <div className="smart-zoom-panel">
                     <div className="smart-zoom-card">
                       <div className="smart-zoom-header">
@@ -25470,10 +25617,15 @@ const ViralClipStudio = ({
               overlays={overlays}
               captionSegments={captionSegments}
               soundEffects={[...soundEffects, ...linkedMotionCues]}
-              motionScenes={motionScenes}
+              motionScenes={[...motionScenes, ...threeDScenes.map(scene => ({ ...scene, is3D: true, color: scene.primaryColor, name: `3D · ${scene.text}` }))]}
               onSelectMotion={id => {
-                setSelectedMotionId(id);
-                setMotionWorkspace("design");
+                if (threeDScenes.some(scene => scene.id === id)) {
+                  setSelectedThreeDId(id);
+                  setMotionWorkspace("3d");
+                } else {
+                  setSelectedMotionId(id);
+                  setMotionWorkspace("design");
+                }
                 selectCreativeTool("motion");
               }}
               musicTrack={addMusic ? musicTrack : null}

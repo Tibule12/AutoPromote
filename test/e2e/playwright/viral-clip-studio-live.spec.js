@@ -1029,6 +1029,183 @@ test("records imported logo layer design and verifies preview-to-export keyframe
   expect(errors).toEqual([]);
 });
 
+test("designs an AutoPromote 3D logo in the real Studio and proves HQ export parity", async ({ page }, testInfo) => {
+  test.setTimeout(180000);
+  page.setDefaultTimeout(15000);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const state = await installAppRoutes(page);
+  const pageErrors = [];
+  page.on("pageerror", error => pageErrors.push(error.message));
+  await page.addInitScript(() => {
+    window.__E2E_BYPASS = true;
+    window.__E2E_TEST_TOKEN = "e2e-test-token";
+    localStorage.setItem("E2E_BYPASS", "true");
+    localStorage.setItem("user", JSON.stringify({
+      uid: "testUser",
+      email: "test@local",
+      name: "3D Logo Motion QA",
+    }));
+  });
+
+  const repositoryRoot = path.resolve(__dirname, "../../..");
+  const logoProofPath = path.resolve(
+    repositoryRoot,
+    "artifacts",
+    "viral-studio-3d",
+    "logo-proof",
+    "preview.mp4"
+  );
+  expect(fs.existsSync(logoProofPath)).toBe(true);
+  const logoProofBody = fs.readFileSync(logoProofPath);
+  await page.route("**/studio-3d-logo-proof.mp4*", route => {
+    const range = /^bytes=(\d+)-(\d*)$/.exec(route.request().headers().range || "");
+    const start = range ? Number(range[1]) : 0;
+    const end = range
+      ? Math.min(
+          logoProofBody.length - 1,
+          start + 1024 * 1024 - 1,
+          range[2] ? Number(range[2]) : logoProofBody.length - 1
+        )
+      : logoProofBody.length - 1;
+    return route.fulfill({
+      status: range ? 206 : 200,
+      contentType: "video/mp4",
+      headers: {
+        "Accept-Ranges": "bytes",
+        "Content-Length": String(end - start + 1),
+        ...(range ? { "Content-Range": `bytes ${start}-${end}/${logoProofBody.length}` } : {}),
+      },
+      body: logoProofBody.subarray(start, end + 1),
+    });
+  });
+  await page.route("**/api/media/studio-3d/preview", route =>
+    route.fulfill(json({ jobId: "studio-3d-logo-proof" }))
+  );
+  await page.route("**/api/media/studio-3d/preview/studio-3d-logo-proof", route =>
+    route.fulfill(json({
+      status: "completed",
+      url: `${getBase()}/studio-3d-logo-proof.mp4`,
+    }))
+  );
+
+  await page.goto(`${getBase()}/#/dashboard`, { waitUntil: "networkidle" });
+  await openViralClipStudioEntry(page);
+  await page.locator('.viral-studio-entry-panel input[type="file"]').setInputFiles(liveSourcePath);
+  await page.getByRole("button", { name: "Open Creator Studio", exact: true }).click();
+  await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("readyState", 4);
+
+  const rail = page.getByRole("navigation", { name: "Creative tools" });
+  await rail.getByRole("button", { name: "Reframe", exact: true }).click();
+  await page.getByTestId("reframe-aspect-9-16").click();
+  await rail.getByRole("button", { name: /Motion/ }).click();
+  await page.getByRole("button", { name: "3D Motion", exact: true }).click();
+  await page.getByRole("button", { name: /Neon Logo Reveal/ }).click();
+  await page.getByLabel("Main text", { exact: true }).fill("AutoPromote");
+  await page.getByLabel("Supporting line", { exact: true }).fill("CREATE WHAT MOVES PEOPLE");
+  await page.getByLabel(/Motion intensity/).fill("0.78");
+  await page.getByLabel("Edited output position").fill("2.15");
+
+  const canvas = page.getByTestId("studio-3d-preview");
+  await expect(canvas).toBeVisible();
+  await expect(page.locator(".studio-3d-scene-list").getByText("AutoPromote", { exact: true })).toBeVisible();
+  await page.screenshot({
+    path: path.resolve(repositoryRoot, "proof", "viral-clip-studio", "autopromote-3d-logo-live-editor.png"),
+    fullPage: false,
+  });
+
+  await page.getByRole("button", { name: "Advanced", exact: true }).click();
+  const threeDPanel = page.getByTestId("studio-3d-panel");
+  const selectField = label => threeDPanel.locator("label", { hasText: label }).locator("select").first();
+  const numberField = label => threeDPanel.locator("label", { hasText: label }).locator('input[type="number"]').first();
+  await selectField("Material").selectOption("neon");
+  await selectField("Hold").selectOption("orbit");
+  await selectField("Exit").selectOption("spin");
+  await numberField("Bloom").fill("0.72");
+  await numberField("Camera motion").fill("0.34");
+
+  await page.getByRole("button", { name: "Duplicate", exact: true }).click();
+  await expect(page.locator(".studio-3d-scene-list > button")).toHaveCount(2);
+  await page.getByRole("button", { name: "Delete", exact: true }).click();
+  await expect(page.locator(".studio-3d-scene-list > button")).toHaveCount(1);
+  const visibleUndo = page.locator("button:visible", { hasText: "Undo" }).first();
+  const visibleRedo = page.locator("button:visible", { hasText: "Redo" }).first();
+  await expect(visibleUndo).toBeEnabled();
+  await visibleUndo.click();
+  await expect(page.locator(".studio-3d-scene-list > button")).toHaveCount(2);
+  await expect(visibleRedo).toBeEnabled();
+  await visibleRedo.click();
+  await expect(page.locator(".studio-3d-scene-list > button")).toHaveCount(1);
+
+  await page.getByRole("button", { name: "Generate HQ 3D Preview", exact: true }).click();
+  const hqVideo = page.getByLabel("HQ 3D preview");
+  await expect(hqVideo).toBeVisible();
+  await expect(hqVideo).toHaveJSProperty("readyState", 4);
+  const standaloneDownload = page.getByRole("link", { name: "Download standalone motion" });
+  await expect(standaloneDownload).toBeVisible();
+  await expect(standaloneDownload).toHaveAttribute("href", `${getBase()}/studio-3d-logo-proof.mp4`);
+  await hqVideo.evaluate(video => { video.currentTime = 2.4; });
+  await page.waitForTimeout(250);
+  await hqVideo.screenshot({
+    path: path.resolve(repositoryRoot, "proof", "viral-clip-studio", "autopromote-3d-logo-hq-render-frame.png"),
+  });
+  await hqVideo.evaluate(video => video.play());
+  await page.waitForTimeout(2400);
+  await page.screenshot({
+    path: path.resolve(repositoryRoot, "proof", "viral-clip-studio", "autopromote-3d-logo-hq-preview.png"),
+    fullPage: false,
+  });
+  await standaloneDownload.scrollIntoViewIfNeeded();
+  await threeDPanel.screenshot({
+    path: path.resolve(repositoryRoot, "proof", "viral-clip-studio", "autopromote-3d-logo-standalone-download.png"),
+  });
+
+  await rail.getByRole("button", { name: "Export", exact: true }).click();
+  await page.getByRole("button", { name: /Render Final Clip/i }).click();
+  await expect.poll(() => state.renderPayload).not.toBeNull();
+  const data = state.renderPayload.options.viralData;
+  expect(data.threeDGraphics).toHaveLength(1);
+  expect(data.threeDGraphics[0]).toMatchObject({
+    jobId: "studio-3d-logo-proof",
+    aspect: "9:16",
+    scene: expect.objectContaining({
+      template: "neon_logo",
+      text: "AutoPromote",
+      secondary: "CREATE WHAT MOVES PEOPLE",
+      material: "neon",
+      hold: "orbit",
+      exit: "spin",
+      bloom: .72,
+      cameraMotion: .34,
+    }),
+  });
+  expect(pageErrors).toEqual([]);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.getByText(/optimized for laptop and desktop editing/i)).toBeVisible();
+  await expect(page.getByRole("button", { name: /Launch Clip Studio/i })).toBeDisabled();
+  const horizontalOverflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  expect(horizontalOverflow).toBeLessThanOrEqual(1);
+  await page.screenshot({
+    path: path.resolve(repositoryRoot, "proof", "viral-clip-studio", "autopromote-3d-logo-mobile-guard.png"),
+    fullPage: false,
+  });
+
+  const recording = page.video();
+  const proofPath = path.resolve(
+    repositoryRoot,
+    "proof",
+    "viral-clip-studio",
+    "autopromote-3d-logo-frontend-workflow.webm"
+  );
+  fs.mkdirSync(path.dirname(proofPath), { recursive: true });
+  await page.close();
+  await recording.saveAs(proofPath);
+  await testInfo.attach("autopromote-3d-logo-frontend-workflow", {
+    path: proofPath,
+    contentType: "video/webm",
+  });
+});
+
 test("runs the production Viral Clip Studio feature workflow with real playable media", async ({
   page,
 }) => {

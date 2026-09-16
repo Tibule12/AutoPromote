@@ -30468,6 +30468,7 @@ class RenderViralRequest(BaseModel):
     music_loop: bool = True
     sound_effects: Optional[List[ViralSoundEffect]] = None
     motionGraphics: Optional[Dict[str, Any]] = None
+    threeDGraphics: Optional[List[Dict[str, Any]]] = None
     audio_remix: Optional[Dict[str, Any]] = None
     audioRemix: Optional[Dict[str, Any]] = None
     silence_removal: bool = False
@@ -30500,9 +30501,11 @@ async def render_viral_clip(request: RenderViralRequest):
     real renders permanently stuck after the 15% source-verification checkpoint.
     """
     from viral_motion_graphics import validate_design
+    from studio_3d_overlay import validate_resolved_overlays
     from viral_audio_remix import normalize_audio_remix
     try:
         validate_design(request.motionGraphics, [effect.model_dump() for effect in request.sound_effects or []])
+        validate_resolved_overlays(getattr(request, "threeDGraphics", None))
         normalize_audio_remix(getattr(request, "audio_remix", None) or getattr(request, "audioRemix", None))
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
@@ -32281,6 +32284,30 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 f"[{current_v_label}][{motion_idx}:v]overlay=0:0:eof_action=pass[{next_label}];"
             )
             current_v_label = next_label
+
+        if request.threeDGraphics:
+            from studio_3d_overlay import download_overlay, validate_overlay_media, validate_resolved_overlays
+            for index, graphic in enumerate(validate_resolved_overlays(request.threeDGraphics)):
+                alpha_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_3d_{index}.mov")
+                creative_adjusted_paths.append(alpha_path)
+                report_progress(68, "Compositing reviewed 3D motion graphics")
+                await asyncio.to_thread(download_overlay, graphic, alpha_path)
+                await asyncio.to_thread(validate_overlay_media, alpha_path, graphic["duration"])
+                inputs.extend(["-i", alpha_path])
+                start = rendered_timeline_time(graphic["startTime"])
+                end = rendered_timeline_time(graphic["startTime"] + graphic["duration"])
+                stretch = max(.01, (end - start) / graphic["duration"])
+                layer_label = f"v_3d_input_{index}"
+                next_label = f"v_3d_{index}"
+                filter_chain.append(
+                    f"[{input_idx}:v]format=rgba,scale={base_width}:{base_height}:flags=lanczos,"
+                    f"setpts=(PTS-STARTPTS)*{stretch:.8f}+{start:.3f}/TB[{layer_label}];"
+                )
+                filter_chain.append(
+                    f"[{current_v_label}][{layer_label}]overlay=0:0:eof_action=pass:repeatlast=0[{next_label}];"
+                )
+                input_idx += 1
+                current_v_label = next_label
 
         if current_v_label != "output":
              # We should probably assign the last label to [output] for simplicity

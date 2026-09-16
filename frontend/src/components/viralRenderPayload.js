@@ -352,6 +352,10 @@ export const buildViralRenderData = ({
   addDefined(payload, "sound_effects", extraOptions.soundEffects);
   addDefined(payload, "audio_remix", extraOptions.audioRemix);
   addDefined(payload, "motionGraphics", extraOptions.motionGraphics);
+  // Keep the verified HQ render reference and its normalized scene contract
+  // together all the way to the media API. Dropping this field makes the live
+  // 3D preview look correct while the exported video contains no 3D layer.
+  addDefined(payload, "threeDGraphics", extraOptions.threeDGraphics);
   addDefined(payload, "mute_audio", extraOptions.muteAudio, Boolean);
   addDefined(payload, "export_destination", extraOptions.exportDestination);
 

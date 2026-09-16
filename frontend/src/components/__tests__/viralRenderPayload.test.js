@@ -314,6 +314,11 @@ describe("viralRenderPayload", () => {
         musicFadeOut: 0.75,
         musicLoop: true,
         motionGraphics: { version: 1, scenes: [{ id: "motion-1", preset: "title", startTime: 2, duration: 3 }] },
+        threeDGraphics: [{
+          jobId: "studio-3d-job-1",
+          aspect: "9:16",
+          scene: { id: "three-d-1", template: "neon_logo", text: "AutoPromote" },
+        }],
         editorTimeline: { motion_keyframes: [{ id: "key-1", property: "x", time: 2, value: 35 }] },
         compositionPlan: {
           version: 1,
@@ -441,6 +446,11 @@ describe("viralRenderPayload", () => {
         music_ducking: true,
         music_loop: true,
         motionGraphics: { version: 1, scenes: [{ id: "motion-1", preset: "title", startTime: 2, duration: 3 }] },
+        threeDGraphics: [{
+          jobId: "studio-3d-job-1",
+          aspect: "9:16",
+          scene: { id: "three-d-1", template: "neon_logo", text: "AutoPromote" },
+        }],
         editor_timeline: expect.objectContaining({ motion_keyframes: [expect.objectContaining({ id: "key-1" })] }),
         composition_plan: expect.objectContaining({
           version: 1,

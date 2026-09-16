@@ -56,7 +56,6 @@ export default function AudioRemixPanel({
             data-testid={`audio-remix-preset-${preset.id}`}
             className={`audio-remix-preset preset-art-${index + 1} ${remix.preset === preset.id && remix.enabled ? "is-active" : ""}`}
             aria-pressed={remix.preset === preset.id && remix.enabled}
-            onClick={() => onChange(applyAudioRemixPreset(preset.id))}
             onClick={() => {
               if (typeof document !== "undefined") {
                 const video = document.querySelector("video.main-video-frame-preview, video[data-testid='studio-after-video']");

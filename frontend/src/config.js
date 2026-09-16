@@ -40,6 +40,8 @@ export const API_ENDPOINTS = {
   MEDIA_SCAN_PREFLIGHT: `${API_BASE_URL}/api/media/scan-preflight`,
   MEDIA_RENDER_CLIP: `${API_BASE_URL}/api/media/render-clip`,
   MEDIA_RENDER_MULTICAM: `${API_BASE_URL}/api/media/render-multicam`,
+  STUDIO_3D_PREVIEW: `${API_BASE_URL}/api/media/studio-3d/preview`,
+  STUDIO_3D_PREVIEW_STATUS: jobId => `${API_BASE_URL}/api/media/studio-3d/preview/${encodeURIComponent(jobId)}`,
   MEDIA_STATUS: jobId => `${API_BASE_URL}/api/media/status/${encodeURIComponent(jobId)}`,
   CLIP_LEARNING_PROFILE: `${API_BASE_URL}/api/analytics/clip-learning-profile`,
   CLIP_LEARNING_PROFILE_REBUILD: `${API_BASE_URL}/api/analytics/clip-learning-profile/rebuild`,
