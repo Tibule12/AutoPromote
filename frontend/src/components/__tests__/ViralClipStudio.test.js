@@ -2423,6 +2423,12 @@ describe("ViralClipStudio timeline sequencing", () => {
     });
     fireEvent.change(overlayVolume, { target: { value: "80" } });
     expect(overlayVolume).toHaveValue("80");
+    fireEvent.change(screen.getByLabelText("Preview master volume"), {
+      target: { value: "25" },
+    });
+    afterVideo.currentTime = 7;
+    fireEvent.timeUpdate(afterVideo);
+    await waitFor(() => expect(bRollPreview.volume).toBeCloseTo(0.2, 2));
 
     fireEvent.click(screen.getByRole("button", { name: "Use overlay" }));
     afterVideo.currentTime = 13;

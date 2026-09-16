@@ -12352,10 +12352,14 @@ const ViralClipStudio = ({
         const remainingTime = Math.max(0, visibleDuration - elapsed);
         const microFadeDur = 0.06;
         let microFade = 1.0;
-        if (elapsed < microFadeDur) {
-          microFade = Math.max(0.01, elapsed / microFadeDur);
-        } else if (remainingTime < microFadeDur) {
-          microFade = Math.max(0.01, remainingTime / microFadeDur);
+        // Fade playback edges to avoid audio clicks, but keep the exact mixer
+        // gain while paused so changing the master control is deterministic.
+        if (!sourceVideo.paused) {
+          if (elapsed < microFadeDur) {
+            microFade = Math.max(0.01, elapsed / microFadeDur);
+          } else if (remainingTime < microFadeDur) {
+            microFade = Math.max(0.01, remainingTime / microFadeDur);
+          }
         }
 
         overlayVideo.volume =
@@ -16175,12 +16179,13 @@ const ViralClipStudio = ({
                                     applySafeMediaSource(element, safeOverlaySrc);
                                     if (element) {
                                       overlayMediaRefsRef.current.set(String(overlay.id), element);
-                                      element.volume = clampAudioControl(
-                                        overlay.overlayAudioVolume,
-                                        0,
-                                        1,
-                                        0.7
-                                      );
+                                      element.volume =
+                                        clampAudioControl(
+                                          overlay.overlayAudioVolume,
+                                          0,
+                                          1,
+                                          0.7
+                                        ) * clampAudioControl(previewVolume, 0, 1, 1);
                                     } else {
                                       overlayMediaRefsRef.current.delete(String(overlay.id));
                                     }

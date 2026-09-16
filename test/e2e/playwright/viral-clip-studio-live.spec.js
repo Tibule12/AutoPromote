@@ -656,17 +656,21 @@ test("proves new motion studio editing, linked audio, timeline seeking and local
     await page.getByTestId("studio-after-video").evaluate(video => video.pause());
     await page.screenshot({ path: testInfo.outputPath(`show-everyone-${aspect}.png`) });
   }
+  // The Show Everyone preset intentionally resets prior tracking points and
+  // disables tracking. Enable tracking after choosing the preset so the new
+  // points belong to the visible two-panel layout.
+  await page.getByLabel("Edited output position").fill("1");
+  await page.getByTestId("preview-quick-both-cams").click();
+  await page.getByLabel("top split horizontal").fill("34");
+  await page.getByLabel("bottom split horizontal").fill("89");
   await page.getByLabel("Track both speakers").check();
   await expect(page.getByTestId("reframe-preserve-frame")).toHaveAttribute("aria-pressed", "true");
-  // Toggling tracking may refresh the inspector onto the single-speaker tab;
-  // return explicitly to the two-panel layout before adding per-panel points.
-  await page.getByTestId("preview-quick-both-cams").click();
-  await page.getByLabel("Edited output position").fill("1");
   await page.getByRole("button", { name: "Add top speaker tracking point", exact: true }).click();
   await page.getByRole("button", { name: "Add bottom speaker tracking point", exact: true }).click();
   await page.getByLabel("Edited output position").fill("4");
   await page.getByLabel("top split horizontal").fill("38");
   await page.getByLabel("bottom split horizontal").fill("90");
+  await expect(page.getByLabel("top split horizontal")).toHaveValue("38");
   await page.getByLabel("Edited output position").fill("2.5");
   await expect(page.getByLabel("top split horizontal")).toHaveValue("36");
   await page.getByTestId("reframe-aspect-9-16").click();
@@ -844,12 +848,15 @@ test("keeps every creative caption style and free placement inside the real prog
   await inspector.getByRole("slider", { name: "Caption 1 horizontal position" }).fill("93");
   await inspector.getByRole("slider", { name: "Caption 1 vertical position" }).fill("88");
   await inspector.getByLabel("Caption 1 accent").fill("#ff5d8f");
-  await inspector.getByRole("combobox", { name: "Caption 1 story icon" }).selectOption("payoff");
+  await inspector
+    .getByRole("group", { name: "Caption 1 emoji reaction" })
+    .getByRole("button", { name: "Payoff", exact: true })
+    .click();
 
   const caption = page.getByTestId("live-caption-preview");
   await expect(caption).toHaveClass(/caption-style-gradient/);
   await expect(caption).toHaveClass(/caption-placement-custom/);
-  await expect(caption).toContainText("✦");
+  await expect(caption).toContainText("⚡");
   await expect.poll(async () => {
     const [captionBox, frameBox] = await Promise.all([
       caption.boundingBox(),
