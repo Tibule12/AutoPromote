@@ -18,6 +18,7 @@ import { trackClipWorkflowEvent } from "../utils/clipWorkflowAnalytics";
 import { playMediaSafely } from "../utils/mediaPlayback";
 import toast from "react-hot-toast";
 import { SafeAudio, SafeImage, SafeVideo } from "./SafeMedia";
+import { sanitizeLogoSvg } from "./motion/sanitizeLogoSvg";
 import {
   applySilenceKeepSegmentsToTimeline,
   mapCaptionSegmentsToTimeline,
@@ -13389,16 +13390,7 @@ const ViralClipStudio = ({
     let file = selectedFile;
     if (selectedFile.type === "image/svg+xml" || selectedFile.name.toLowerCase().endsWith(".svg")) {
       try {
-        const documentNode = new DOMParser().parseFromString(await selectedFile.text(), "image/svg+xml");
-        documentNode.querySelectorAll("script, foreignObject").forEach(node => node.remove());
-        documentNode.querySelectorAll("[href], [xlink\\:href]").forEach(node => {
-          const href = node.getAttribute("href") || node.getAttribute("xlink:href") || "";
-          if (href && !href.startsWith("#") && !href.startsWith("data:image/")) {
-            node.removeAttribute("href");
-            node.removeAttribute("xlink:href");
-          }
-        });
-        const safeSvg = new XMLSerializer().serializeToString(documentNode.documentElement);
+        const safeSvg = sanitizeLogoSvg(await selectedFile.text());
         const svgUrl = URL.createObjectURL(new Blob([safeSvg], { type: "image/svg+xml" }));
         const raster = await new Promise((resolve, reject) => {
           const image = new Image();
@@ -15471,9 +15463,9 @@ const ViralClipStudio = ({
                           "width 180ms ease, transform 150ms linear, opacity 160ms linear, filter 160ms linear",
                       }}
                     />
-                    <video
+                    <SafeVideo
                       ref={speakerStackTopVideoRef}
-                      src={speakerStackTopSource?.source || undefined}
+                      src={speakerStackTopSource?.source}
                       muted
                       playsInline
                       preload="auto"
@@ -15482,9 +15474,9 @@ const ViralClipStudio = ({
                       data-testid="speaker-stack-top-video"
                       style={{ display: "none" }}
                     />
-                    <video
+                    <SafeVideo
                       ref={speakerStackBottomVideoRef}
-                      src={speakerStackBottomSource?.source || undefined}
+                      src={speakerStackBottomSource?.source}
                       muted
                       playsInline
                       preload="auto"
@@ -15493,9 +15485,9 @@ const ViralClipStudio = ({
                       data-testid="speaker-stack-bottom-video"
                       style={{ display: "none" }}
                     />
-                    <video
+                    <SafeVideo
                       ref={speakerStackThirdVideoRef}
-                      src={speakerStackThirdSource?.source || undefined}
+                      src={speakerStackThirdSource?.source}
                       muted
                       playsInline
                       preload="auto"
@@ -15504,9 +15496,9 @@ const ViralClipStudio = ({
                       data-testid="speaker-stack-third-video"
                       style={{ display: "none" }}
                     />
-                    <video
+                    <SafeVideo
                       ref={speakerStackFourthVideoRef}
-                      src={speakerStackFourthSource?.source || undefined}
+                      src={speakerStackFourthSource?.source}
                       muted
                       playsInline
                       preload="auto"

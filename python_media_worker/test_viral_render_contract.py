@@ -84,7 +84,7 @@ class ViralRenderContractTests(unittest.TestCase):
             "ffmpeg", "-v", "error", "-f", "lavfi", "-i",
             "color=red:s=640x360:r=10:d=2,drawbox=x=320:y=0:w=320:h=360:color=blue:t=fill",
             "-filter_complex_threads", "1", "-filter_complex", graph,
-            "-map", "[vout]", "-threads", "1", "-f", "rawvideo",
+            "-map", "[vout]", "-threads", "1", "-fps_mode", "passthrough", "-f", "rawvideo",
             "-pix_fmt", "rgb24", "pipe:1",
         ], capture_output=True)
         self.assertEqual(result.returncode, 0, result.stderr.decode())
@@ -107,7 +107,7 @@ class ViralRenderContractTests(unittest.TestCase):
         result = subprocess.run(["ffmpeg", "-v", "error", "-f", "lavfi", "-i",
             "color=red:s=640x360:r=10:d=1,drawbox=x=320:y=0:w=320:h=360:color=blue:t=fill",
             "-filter_complex_threads", "1", "-filter_complex", graph, "-map", "[vout]",
-            "-threads", "1", "-f", "rawvideo", "-pix_fmt", "rgb24", "pipe:1"], capture_output=True)
+            "-threads", "1", "-fps_mode", "passthrough", "-f", "rawvideo", "-pix_fmt", "rgb24", "pipe:1"], capture_output=True)
         self.assertEqual(result.returncode, 0, result.stderr.decode())
         def pixel(frame, y):
             offset = (frame * 180 * 320 + y * 180 + 90) * 3

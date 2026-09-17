@@ -219,8 +219,8 @@ export function StudioInspectorTabs({ mode, activeTab, onSelect }) {
           className={activeTab === tab.id ? "is-active" : ""}
           onClick={() => onSelect(tab.id)}
         >
-          <span>{tab.icon}</span>
-          {tab.label}
+          <span className="clip-inspector-tabs__icon" aria-hidden="true">{tab.icon}</span>
+          <span className="clip-inspector-tabs__label">{tab.label}</span>
         </button>
       ))}
     </div>

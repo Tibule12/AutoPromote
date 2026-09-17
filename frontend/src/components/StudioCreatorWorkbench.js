@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef } from "react";
+import { SafeVideo } from "./SafeMedia";
 
 export const CREATOR_PREVIEW_SECTIONS = [
   ["layers", "Layers"],
@@ -324,7 +325,7 @@ function SyncedPreviewVideo({ src, time, playing, rate = 1, className = "", styl
     if (playing) video.play?.().catch(() => {});
     else video.pause?.();
   }, [playing, rate, src, time]);
-  return <video ref={ref} src={src || undefined} muted playsInline preload="auto" tabIndex={-1} aria-hidden="true" className={className} style={style} />;
+  return <SafeVideo ref={ref} src={src} muted playsInline preload="auto" tabIndex={-1} aria-hidden="true" className={className} style={style} />;
 }
 
 const TrackedStyle = ({ state }) => {

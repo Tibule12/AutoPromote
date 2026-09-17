@@ -16,6 +16,8 @@ test.use({
 const STATIC_PORT = process.env.STATIC_SERVER_PORT || 5000;
 const getBase = () => process.env.E2E_BASE_URL || `http://localhost:${STATIC_PORT}`;
 const liveSourcePath = path.join(os.tmpdir(), `autopromote-viral-studio-${process.pid}.mp4`);
+const brandLogoPath = path.join(os.tmpdir(), `autopromote-e2e-logo-${process.pid}.png`);
+const generatedHqPreviewPath = path.join(os.tmpdir(), `autopromote-e2e-hq-${process.pid}.mp4`);
 const motionSourcePath = path.join(
   os.tmpdir(),
   `autopromote-motion-sculpture-${process.pid}.mp4`
@@ -341,6 +343,13 @@ const openViralClipStudioEntry = async page => {
 test.beforeAll(async () => {
   buildLiveSource();
   assertMediaHasAudio(liveSourcePath);
+  // CI has no access to the editor's laptop-only brand assets. This PNG is a
+  // deterministic upload fixture; the separate local logo proof is visual QA.
+  execFileSync("ffmpeg", [
+    "-v", "error", "-f", "lavfi", "-i", "color=c=0x211449:s=512x160",
+    "-vf", "drawbox=x=28:y=28:w=456:h=104:color=0x7658f5:t=8",
+    "-frames:v", "1", "-y", brandLogoPath,
+  ]);
   if (hasLocalSpeakerPair) {
     [
       [defaultSpeakerTopSource, speakerTopSourcePath],
@@ -431,6 +440,8 @@ test.beforeAll(async () => {
 
 test.afterAll(() => {
   if (fs.existsSync(liveSourcePath)) fs.unlinkSync(liveSourcePath);
+  if (fs.existsSync(brandLogoPath)) fs.unlinkSync(brandLogoPath);
+  if (fs.existsSync(generatedHqPreviewPath)) fs.unlinkSync(generatedHqPreviewPath);
   if (fs.existsSync(motionSourcePath)) fs.unlinkSync(motionSourcePath);
   if (fs.existsSync(speakerTopSourcePath)) fs.unlinkSync(speakerTopSourcePath);
   if (fs.existsSync(speakerBottomSourcePath)) fs.unlinkSync(speakerBottomSourcePath);
@@ -992,9 +1003,11 @@ test("records imported logo layer design and verifies preview-to-export keyframe
   const rail = page.getByRole("navigation", { name: "Creative tools" });
   await rail.getByRole("button", { name: /Motion/ }).click();
   await page.getByRole("button", { name: "Logo & layers", exact: true }).click();
-  await page.getByTestId("motion-logo-input").setInputFiles(
-    "/tmp/autopromote_brand_assets/viral_v2_194x56_VIRAL_CLIP_STUDIO.png"
-  );
+  await page.getByTestId("motion-logo-input").setInputFiles({
+    name: "viral_v2_194x56_VIRAL_CLIP_STUDIO.png",
+    mimeType: "image/png",
+    buffer: fs.readFileSync(brandLogoPath),
+  });
   await expect(page.getByRole("group", { name: /viral_v2_194x56_VIRAL_CLIP_STUDIO.png controls/i })).toBeVisible();
   await expect(page.getByText("6 poses", { exact: true })).toBeVisible();
   await page.getByLabel("Edited output position").fill("0.4");
@@ -1036,7 +1049,7 @@ test("records imported logo layer design and verifies preview-to-export keyframe
   expect(errors).toEqual([]);
 });
 
-test("designs an AutoPromote 3D logo in the real Studio and proves HQ export parity", async ({ page }, testInfo) => {
+test("designs an AutoPromote 3D logo and verifies HQ preview transport and export payload", async ({ page }, testInfo) => {
   test.setTimeout(180000);
   page.setDefaultTimeout(15000);
   await page.setViewportSize({ width: 1440, height: 900 });
@@ -1055,14 +1068,28 @@ test("designs an AutoPromote 3D logo in the real Studio and proves HQ export par
   });
 
   const repositoryRoot = path.resolve(__dirname, "../../..");
-  const logoProofPath = path.resolve(
+  const recordedLogoProofPath = path.resolve(
     repositoryRoot,
     "artifacts",
     "viral-studio-3d",
     "logo-proof",
     "preview.mp4"
   );
-  expect(fs.existsSync(logoProofPath)).toBe(true);
+  // The recorded Blender proof exists on the QA laptop but is intentionally
+  // not checked into Git. CI uses a playable local stub for transport checks.
+  const useRecordedLogoProof = process.env.CI !== "true" && fs.existsSync(recordedLogoProofPath);
+  if (!useRecordedLogoProof) {
+    execFileSync("ffmpeg", [
+      "-v", "error", "-f", "lavfi", "-i", "color=c=0x110d29:s=360x640:r=18:d=4",
+      "-vf", "drawbox=x=65:y=225:w=230:h=190:color=0x7658f5:t=8",
+      "-c:v", "libx264", "-pix_fmt", "yuv420p", "-movflags", "+faststart",
+      "-y", generatedHqPreviewPath,
+    ]);
+  }
+  const logoProofPath = useRecordedLogoProof ? recordedLogoProofPath : generatedHqPreviewPath;
+  const proofDir = useRecordedLogoProof
+    ? path.resolve(repositoryRoot, "proof", "viral-clip-studio")
+    : testInfo.outputDir;
   const logoProofBody = fs.readFileSync(logoProofPath);
   await page.route("**/studio-3d-logo-proof.mp4*", route => {
     const range = /^bytes=(\d+)-(\d*)$/.exec(route.request().headers().range || "");
@@ -1115,8 +1142,9 @@ test("designs an AutoPromote 3D logo in the real Studio and proves HQ export par
   const canvas = page.getByTestId("studio-3d-preview");
   await expect(canvas).toBeVisible();
   await expect(page.locator(".studio-3d-scene-list").getByText("AutoPromote", { exact: true })).toBeVisible();
+  fs.mkdirSync(proofDir, { recursive: true });
   await page.screenshot({
-    path: path.resolve(repositoryRoot, "proof", "viral-clip-studio", "autopromote-3d-logo-live-editor.png"),
+    path: path.resolve(proofDir, "autopromote-3d-logo-live-editor.png"),
     fullPage: false,
   });
 
@@ -1153,17 +1181,17 @@ test("designs an AutoPromote 3D logo in the real Studio and proves HQ export par
   await hqVideo.evaluate(video => { video.currentTime = 2.4; });
   await page.waitForTimeout(250);
   await hqVideo.screenshot({
-    path: path.resolve(repositoryRoot, "proof", "viral-clip-studio", "autopromote-3d-logo-hq-render-frame.png"),
+    path: path.resolve(proofDir, "autopromote-3d-logo-hq-render-frame.png"),
   });
   await hqVideo.evaluate(video => video.play());
   await page.waitForTimeout(2400);
   await page.screenshot({
-    path: path.resolve(repositoryRoot, "proof", "viral-clip-studio", "autopromote-3d-logo-hq-preview.png"),
+    path: path.resolve(proofDir, "autopromote-3d-logo-hq-preview.png"),
     fullPage: false,
   });
   await standaloneDownload.scrollIntoViewIfNeeded();
   await threeDPanel.screenshot({
-    path: path.resolve(repositoryRoot, "proof", "viral-clip-studio", "autopromote-3d-logo-standalone-download.png"),
+    path: path.resolve(proofDir, "autopromote-3d-logo-standalone-download.png"),
   });
 
   await rail.getByRole("button", { name: "Export", exact: true }).click();
@@ -1193,17 +1221,12 @@ test("designs an AutoPromote 3D logo in the real Studio and proves HQ export par
   const horizontalOverflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   expect(horizontalOverflow).toBeLessThanOrEqual(1);
   await page.screenshot({
-    path: path.resolve(repositoryRoot, "proof", "viral-clip-studio", "autopromote-3d-logo-mobile-guard.png"),
+    path: path.resolve(proofDir, "autopromote-3d-logo-mobile-guard.png"),
     fullPage: false,
   });
 
   const recording = page.video();
-  const proofPath = path.resolve(
-    repositoryRoot,
-    "proof",
-    "viral-clip-studio",
-    "autopromote-3d-logo-frontend-workflow.webm"
-  );
+  const proofPath = path.resolve(proofDir, "autopromote-3d-logo-frontend-workflow.webm");
   fs.mkdirSync(path.dirname(proofPath), { recursive: true });
   await page.close();
   await recording.saveAs(proofPath);
