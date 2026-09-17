@@ -7,7 +7,7 @@ import {
 } from "./audioRemixModel";
 
 describe("audioRemixModel", () => {
-  test("offers the six Studio remix presets", () => {
+  test("offers the ten Studio remix presets", () => {
     expect(AUDIO_REMIX_PRESETS.map(item => item.name)).toEqual([
       "Slowed + Reverb",
       "Sped Up",
@@ -15,6 +15,10 @@ describe("audioRemixModel", () => {
       "Nightcore",
       "Amapiano Space",
       "Warm Vocal",
+      "Bass Boost",
+      "Lo-Fi Chill",
+      "Telephone",
+      "8D Spatial",
     ]);
   });
 
@@ -68,5 +72,13 @@ describe("audioRemixModel", () => {
         quality: "preview",
       })
     );
+  });
+
+  test("Bass Boost preset sets heavy sub-bass and allows up to +18 dB boost", () => {
+    const bassPreset = applyAudioRemixPreset("bass_boost");
+    expect(bassPreset.bass).toBe(12);
+    const boosted = patchAudioRemix(bassPreset, { bass: 25 });
+    expect(boosted.bass).toBe(18);
+    expect(audioRemixForRender(boosted).bass_db).toBe(18);
   });
 });

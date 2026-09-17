@@ -19,6 +19,10 @@ PRESETS = {
     "nightcore",
     "amapiano_space",
     "warm_vocal",
+    "bass_boost",
+    "lo_fi",
+    "telephone",
+    "spatial_8d",
 }
 CONTENT_TYPES = {"auto", "choir", "speech", "music"}
 TARGETS = {"master", "voice", "music"}
@@ -75,7 +79,7 @@ def normalize_audio_remix(value=None):
         "pitch_semitones": 0.0 if keep_pitch else _bound(
             _read(value, "pitch_semitones", "pitch", default=0), -12, 12, 0
         ),
-        "bass_db": _bound(_read(value, "bass_db", "bass", default=0), -12, 12, 0),
+        "bass_db": _bound(_read(value, "bass_db", "bass", default=0), -12, 18, 0),
         "clarity_db": _bound(_read(value, "clarity_db", "clarity", default=0), -12, 12, 0),
         "air_db": _bound(_read(value, "air_db", "air", default=0), -12, 12, 0),
         "reverb_mix": _bound(_read(value, "reverb_mix", "reverb", default=0), 0, 1, 0),

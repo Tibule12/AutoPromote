@@ -134,7 +134,7 @@ export default function AudioRemixPanel({
         {eq.map(([label, key, color]) => {
           const reverb = key === "reverb";
           const min = reverb ? 0 : -12;
-          const max = reverb ? 100 : 12;
+          const max = reverb ? 100 : key === "bass" ? 18 : 12;
           return (
             <label key={key} style={{ "--remix-color": color }}>
               <output>{reverb ? `${Math.round(remix[key])}%` : signed(remix[key])}</output>

@@ -43,6 +43,12 @@ class AudioRemixContractTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             normalize_audio_remix(dict(target="everything"))
 
+    def test_new_presets_and_high_bass_are_supported(self):
+        for preset_name in ["bass_boost", "lo_fi", "telephone", "spatial_8d"]:
+            remix = normalize_audio_remix(dict(preset=preset_name, bass_db=25))
+            self.assertEqual(remix["preset"], preset_name)
+            self.assertEqual(remix["bass_db"], 18)
+
     def test_filter_contains_independent_pitch_eq_reverb_and_limiter(self):
         result, remix = build_audio_remix_filter(
             dict(

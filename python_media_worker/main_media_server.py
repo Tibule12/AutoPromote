@@ -32918,9 +32918,10 @@ async def transcribe_video(request: Dict[str, str]):
     logger.info(f"Transcribing video: {video_url}")
     
     job_id = str(uuid.uuid4())
-    SHARED_TMP_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../tmp"))
-    if not os.path.exists(SHARED_TMP_DIR):
-        os.makedirs(SHARED_TMP_DIR)
+    # The deployed image and CI source mount can be read-only. Downloaded
+    # transcription inputs are transient and belong on the writable tmp volume.
+    SHARED_TMP_DIR = os.path.join(tempfile.gettempdir(), "autopromote-transcribe")
+    os.makedirs(SHARED_TMP_DIR, exist_ok=True)
 
     input_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_input.mp4")
 

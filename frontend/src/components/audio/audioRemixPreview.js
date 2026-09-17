@@ -190,10 +190,10 @@ export async function updateAudioRemixPreview(media, value, bypass = false) {
   setAudioParam(graph.dry.gain, active ? Math.max(0.75, 1 - wet * 0.25) : 1, graph.context);
 
   const positiveEq =
-    Math.max(0, remix.bass) * 0.06 +
+    Math.max(0, remix.bass) * 0.04 +
     Math.max(0, remix.clarity) * 0.04 +
     Math.max(0, remix.air) * 0.03;
-  const levelTrim = active && remix.levelMatch ? -Math.min(3.0, positiveEq + wet * 1.5) : 0;
+  const levelTrim = active && remix.levelMatch ? -Math.min(2.5, positiveEq + wet * 1.2) : 0;
   setAudioParam(
     graph.output.gain,
     active ? dbToGain(remix.outputGain + levelTrim) : 1,
@@ -207,8 +207,12 @@ export async function updateAudioRemixPreview(media, value, bypass = false) {
     auto: { threshold: -16, ratio: 2.5, attack: 0.012, release: 0.22 },
   }[remix.contentType] || { threshold: -16, ratio: 2.5, attack: 0.012, release: 0.22 };
 
-  setAudioParam(graph.compressor.threshold, active ? dynamics.threshold : -3, graph.context);
-  setAudioParam(graph.compressor.ratio, active ? dynamics.ratio : 1, graph.context);
+  const bassHeadroom = Math.max(0, remix.bass * amount) * 0.45;
+  const targetThreshold = active ? Math.min(-6, dynamics.threshold + bassHeadroom) : -3;
+  const targetRatio = active ? Math.max(1.5, dynamics.ratio - (bassHeadroom > 2 ? 0.4 : 0)) : 1;
+
+  setAudioParam(graph.compressor.threshold, targetThreshold, graph.context);
+  setAudioParam(graph.compressor.ratio, targetRatio, graph.context);
   setAudioParam(graph.compressor.attack, dynamics.attack, graph.context);
   setAudioParam(graph.compressor.release, dynamics.release, graph.context);
 

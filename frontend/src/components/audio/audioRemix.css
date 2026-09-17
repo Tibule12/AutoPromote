@@ -99,6 +99,26 @@
     radial-gradient(circle at 50% 35%, #ff743a66, transparent 35%),
     linear-gradient(#3f1531, #161b34);
 }
+.audio-remix-preset.preset-art-7:before {
+  background:
+    radial-gradient(circle at 75% 25%, #ef444488, transparent 40%),
+    linear-gradient(135deg, #450a0a, #1a0826);
+}
+.audio-remix-preset.preset-art-8:before {
+  background:
+    radial-gradient(circle at 40% 40%, #f59e0b66, transparent 45%),
+    linear-gradient(140deg, #3d220f, #141829);
+}
+.audio-remix-preset.preset-art-9:before {
+  background:
+    radial-gradient(circle at 50% 25%, #06b6d466, transparent 40%),
+    linear-gradient(130deg, #0e374e, #131c2e);
+}
+.audio-remix-preset.preset-art-10:before {
+  background:
+    radial-gradient(circle at 60% 30%, #8b5cf688, transparent 42%),
+    linear-gradient(145deg, #2e1065, #0f172a);
+}
 .audio-remix-preset > * {
   position: relative;
   z-index: 1;
