@@ -2778,6 +2778,36 @@ describe("ViralClipStudio timeline sequencing", () => {
             ],
           })
         ),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        blob: jest.fn(() => Promise.resolve(sourceBlob)),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: jest.fn(() =>
+          Promise.resolve({
+            language_mode: "translated_to_english",
+            segments: [
+              {
+                start: 1,
+                end: 3,
+                text: "Hello creators",
+                language: "en",
+                languages: ["en"],
+                translatedToEnglish: true,
+              },
+              {
+                start: 4,
+                end: 6.5,
+                text: "This is the real transcript",
+                language: "en",
+                languages: ["en"],
+                translatedToEnglish: true,
+              },
+            ],
+          })
+        ),
       });
 
     render(
@@ -2838,8 +2868,87 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(screen.getAllByTestId("timeline-caption-block")[0]).toHaveStyle({ left: "10%" });
 
     fireEvent.click(translateToggle);
-    expect(screen.queryAllByTestId("timeline-caption-block")).toHaveLength(0);
-    expect(within(inspector).getByText(/editable English translation/i)).toBeInTheDocument();
+    expect(screen.getAllByTestId("timeline-caption-block")).toHaveLength(2);
+    await waitFor(() => {
+      expect(within(inspector).getByText(/translated to English/i)).toBeInTheDocument();
+    });
+    expect(within(inspector).getByRole("textbox", { name: "Caption 1 text" })).toHaveValue(
+      "Hello creators"
+    );
+    expect(screen.getAllByTestId("timeline-caption-block")).toHaveLength(2);
+    const transcriptionRequests = global.fetch.mock.calls.filter(([url]) =>
+      String(url).includes("/api/media/transcribe")
+    );
+    expect(transcriptionRequests).toHaveLength(2);
+    expect(transcriptionRequests[1][1].body.get("translate_to_english")).toBe("true");
+  });
+
+  test("keeps the existing caption track when English translation is not confirmed", async () => {
+    const sourceBlob = new Blob(["creator-video"], { type: "video/mp4" });
+    global.fetch
+      .mockResolvedValueOnce({
+        ok: true,
+        blob: jest.fn(() => Promise.resolve(sourceBlob)),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: jest.fn(() =>
+          Promise.resolve({
+            language_mode: "translated_to_english",
+            segments: [{ start: 1, end: 3, text: "Hello creators", language: "en" }],
+          })
+        ),
+      });
+
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={[
+          {
+            id: "clip-1",
+            start: 0,
+            end: 20,
+            duration: 20,
+            segments: [
+              {
+                id: "source-caption",
+                start: 1,
+                end: 3,
+                text: "Sawubona creators",
+                speaker: "host",
+                language: "zu",
+                languages: ["zu"],
+              },
+            ],
+          },
+        ]}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+        onStatusChange={jest.fn()}
+      />
+    );
+
+    const inspector = screen.getByTestId("clip-studio-inspector");
+    fireEvent.click(within(inspector).getByRole("tab", { name: /Captions/i }));
+    const translateToggle = within(inspector).getByRole("checkbox", {
+      name: /Translate captions to English/i,
+    });
+    expect(within(inspector).getByRole("textbox", { name: "Caption 1 text" })).toHaveValue(
+      "Sawubona creators"
+    );
+
+    fireEvent.click(translateToggle);
+
+    await waitFor(() => {
+      expect(within(inspector).getByText(/existing captions were kept/i)).toBeInTheDocument();
+    });
+    expect(translateToggle).not.toBeChecked();
+    expect(within(inspector).getByRole("textbox", { name: "Caption 1 text" })).toHaveValue(
+      "Sawubona creators"
+    );
+    expect(within(inspector).getAllByRole("textbox", { name: /Caption \d+ text/i })).toHaveLength(
+      1
+    );
   });
 
   test("turns a reviewed spoken story beat into approved licensed moving footage", async () => {

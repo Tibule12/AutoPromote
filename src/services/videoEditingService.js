@@ -1412,8 +1412,9 @@ class VideoEditingService {
           segments: result.segments,
           transcriptionQuality: result.transcription_quality || null,
           detectedLanguages: result.detected_languages || [],
-          languageMode: result.language_mode ||
-            (translateToEnglish ? "translated_to_english" : "preserve_spoken_languages"),
+          languageMode:
+            result.language_mode ||
+            (translateToEnglish ? null : "preserve_spoken_languages"),
         },
         progress: 100,
         completedAt: new Date().toISOString(),

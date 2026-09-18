@@ -3,18 +3,87 @@ import unittest
 import asyncio
 import tempfile
 from unittest.mock import patch
+from fastapi import HTTPException
 
 from python_media_worker.main_media_server import (
     build_transcription_prompt,
     annotate_caption_identity_segments,
+    caption_segments_confirm_english_translation,
     filter_caption_transcription_segments,
     generate_ass_captions,
     normalize_openai_diarized_transcription,
     transcribe_video,
+    RenderViralRequest,
+    render_viral_clip_impl,
 )
 
 
 class CaptionQualityTests(unittest.TestCase):
+    def test_translation_response_marks_english_caption_provenance(self):
+        with tempfile.NamedTemporaryFile(suffix=".mp4") as source:
+            with patch(
+                "python_media_worker.main_media_server.transcribe_captions_with_provider",
+                return_value={
+                    "language": "zu",
+                    "engine": "test-whisper",
+                    "segments": [
+                        {
+                            "start": 0.0,
+                            "end": 2.0,
+                            "text": "Hello creators",
+                            "avg_logprob": -0.1,
+                            "no_speech_prob": 0.0,
+                            "compression_ratio": 1.0,
+                            "speaker": "host",
+                        }
+                    ],
+                },
+            ):
+                result = asyncio.run(
+                    transcribe_video(
+                        {"video_url": source.name, "translate_to_english": "true"}
+                    )
+                )
+
+        self.assertEqual(result["language_mode"], "translated_to_english")
+        self.assertEqual(result["segments"][0]["language"], "en")
+        self.assertEqual(result["segments"][0]["languages"], ["en"])
+        self.assertTrue(result["segments"][0]["translatedToEnglish"])
+        self.assertTrue(caption_segments_confirm_english_translation(result["segments"]))
+
+    def test_source_language_captions_are_not_accepted_as_translated(self):
+        self.assertFalse(
+            caption_segments_confirm_english_translation(
+                [{"text": "Sawubona", "language": "zu"}]
+            )
+        )
+
+    def test_render_rejects_unconfirmed_source_captions_as_english_translation(self):
+        request = RenderViralRequest(
+            video_url="https://example.com/source.mp4",
+            start_time=0,
+            end_time=3,
+            auto_captions=True,
+            translate_captions_to_english=True,
+            caption_segments=[
+                {
+                    "id": "source-caption",
+                    "start_time": 0,
+                    "end_time": 2,
+                    "text": "Sawubona creators",
+                    "speaker": "host",
+                    "language": "zu",
+                    "languages": ["zu"],
+                }
+            ],
+        )
+
+        with self.assertRaises(HTTPException) as raised:
+            asyncio.run(render_viral_clip_impl(request))
+
+        self.assertEqual(raised.exception.status_code, 400)
+        self.assertIn("Translate the editable caption track", str(raised.exception.detail))
+
     def test_transcribe_endpoint_does_not_reintroduce_instruction_prompt(self):
         for translate, hint in [(False, ""), (True, ""), (False, "Lisakhanya Mdoda. Siphamandla Tsephe.")]:
             with self.subTest(translate=translate, hint=hint), tempfile.NamedTemporaryFile(suffix=".mp4") as source:

@@ -490,4 +490,36 @@ describe("viralRenderPayload", () => {
       },
     ]);
   });
+
+  test("preserves confirmed English translation provenance in the render payload", () => {
+    const payload = buildViralRenderData({
+      finalVideoUrl: "https://example.com/source.mp4",
+      selectedClip: { start: 0, end: 8 },
+      extraOptions: {
+        autoCaptions: true,
+        translateCaptionsToEnglish: true,
+        captionSegments: [
+          {
+            id: "translated-caption",
+            start: 0,
+            end: 3,
+            text: "Hello creators",
+            language: "en",
+            languages: ["en"],
+            translatedToEnglish: true,
+          },
+        ],
+      },
+    });
+
+    expect(payload.translate_captions_to_english).toBe(true);
+    expect(payload.caption_segments).toEqual([
+      expect.objectContaining({
+        id: "translated-caption",
+        text: "Hello creators",
+        language: "en",
+        translated_to_english: true,
+      }),
+    ]);
+  });
 });

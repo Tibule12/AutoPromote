@@ -30051,12 +30051,26 @@ class ViralCaptionSegment(BaseModel):
     language_confidence: Optional[float] = None
     text_review_required: bool = False
     text_reviewed: bool = False
+    translated_to_english: bool = False
     caption_placement: Optional[str] = None
     caption_icon: Optional[str] = None
     caption_accent: Optional[str] = None
     caption_x: Optional[float] = None
     caption_y: Optional[float] = None
     review_required: bool = False
+
+
+def caption_segments_confirm_english_translation(caption_segments):
+    """Require explicit translation provenance before exporting reviewed English captions."""
+    segments = list(caption_segments or [])
+    return bool(segments) and all(
+        bool(
+            segment.get("translated_to_english", segment.get("translatedToEnglish", False))
+            if isinstance(segment, dict)
+            else getattr(segment, "translated_to_english", False)
+        )
+        for segment in segments
+    )
 
 class BackgroundAudioTrack(BaseModel):
     url: str
@@ -30554,6 +30568,19 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             status_code=400,
             detail=(
                 "Generate and review editable captions in Viral Clip Studio before rendering"
+            ),
+        )
+    if (
+        request.auto_captions
+        and request.translate_captions_to_english
+        and reviewed_caption_transcript.get("segments")
+        and not caption_segments_confirm_english_translation(request.caption_segments)
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Translate the editable caption track to English before rendering; "
+                "source-language captions cannot be exported as an English translation"
             ),
         )
     if request.auto_captions and any(
@@ -32954,6 +32981,27 @@ async def transcribe_video(request: Dict[str, str]):
             caption_quality["segments"],
             detected_language=result.get("language"),
         )
+        if translate_to_english:
+            for segment in segments:
+                segment.update(
+                    {
+                        "language": "en",
+                        "languageLabel": "English",
+                        "languages": ["en"],
+                        "languageConfidence": max(
+                            0.9,
+                            float(segment.get("languageConfidence") or 0.0),
+                        ),
+                        "translatedToEnglish": True,
+                        "reviewRequired": bool(
+                            segment.get("speaker") in {None, "", "unknown", "und"}
+                            or (
+                                segment.get("textReviewRequired")
+                                and not segment.get("textReviewed")
+                            )
+                        ),
+                    }
+                )
         caption_quality["quality"].update(
             {
                 "speaker_aware": any(

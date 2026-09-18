@@ -92,6 +92,14 @@ export const normalizeCaptionSegmentsForRender = captionSegments => {
     if (segment?.textReviewed !== undefined || segment?.text_reviewed !== undefined) {
       normalized.text_reviewed = Boolean(segment?.textReviewed ?? segment?.text_reviewed);
     }
+    if (
+      segment?.translatedToEnglish !== undefined ||
+      segment?.translated_to_english !== undefined
+    ) {
+      normalized.translated_to_english = Boolean(
+        segment?.translatedToEnglish ?? segment?.translated_to_english
+      );
+    }
     const captionPlacement = String(
       segment?.captionPlacement ?? segment?.caption_placement ?? segment?.placement ?? ""
     ).trim();

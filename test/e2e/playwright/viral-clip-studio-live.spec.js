@@ -252,6 +252,7 @@ const installAppRoutes = async (page, sourcePath = liveSourcePath) => {
                 language: "en",
                 languages: ["en"],
                 languageConfidence: 0.96,
+                translatedToEnglish: true,
               },
               {
                 start: 7.16,
@@ -262,6 +263,7 @@ const installAppRoutes = async (page, sourcePath = liveSourcePath) => {
                 language: "en",
                 languages: ["en"],
                 languageConfidence: 0.94,
+                translatedToEnglish: true,
               },
             ]
           : [
@@ -1698,6 +1700,12 @@ test("runs the production Viral Clip Studio feature workflow with real playable 
   await expect(page.getByTestId("live-caption-preview")).toContainText(
     "Greetings! This is Unmuted"
   );
+  await translateToEnglish.check();
+  await expect(inspector.getByText(/translated to English/i)).toBeVisible();
+  await expect(inspector.getByRole("textbox", { name: "Caption 1 text" })).toHaveValue(
+    /Greetings! This is Unmuted/i
+  );
+  expect(appState.captionTranslationRequests).toContain(true);
   await seekAfterPreview(0.5);
   await setTimelineExpanded(false);
   await resetProofViewport();
@@ -1899,7 +1907,7 @@ test("runs the production Viral Clip Studio feature workflow with real playable 
   await page.keyboard.press("Escape");
   await expect(page.locator(".overlay-controls")).toHaveCount(0);
 
-  expect(appState.captionTranslationRequests).toEqual([false]);
+  expect(appState.captionTranslationRequests).toEqual([false, true]);
   expect(appState.renderStatusPolls).toBe(0);
   expect(appState.renderPayload).toBeNull();
 

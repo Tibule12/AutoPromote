@@ -1659,6 +1659,9 @@ const normalizeCaptionSegments = segments =>
           1,
           0
         ),
+        translatedToEnglish: Boolean(
+          segment?.translatedToEnglish ?? segment?.translated_to_english
+        ),
         textReviewRequired,
         textReviewed,
         captionPlacement: normalizePlainText(
@@ -7263,11 +7266,21 @@ const ViralClipStudio = ({
     }, 0);
   };
 
-  const generateLiveTranscript = async () => {
-    if (captionGenerationStatus === "processing") return;
+  const generateLiveTranscript = async ({
+    translateToEnglish = translateCaptionsToEnglish,
+    preserveExistingOnFailure = false,
+  } = {}) => {
+    if (captionGenerationStatus === "processing") return false;
+
+    const requestedTranslation = Boolean(translateToEnglish);
+    const retainedSegments = normalizeCaptionSegments(captionSegments);
 
     setCaptionGenerationStatus("processing");
-    setCaptionGenerationMessage("Listening for speech and building timestamped captions…");
+    setCaptionGenerationMessage(
+      requestedTranslation
+        ? "Translating the spoken audio into timestamped English captions…"
+        : "Listening for speech and building timestamped captions…"
+    );
 
     try {
       const sourceUrl = getSafeMediaSource(currentTimelineClip?.url || videoUrl);
@@ -7296,7 +7309,7 @@ const ViralClipStudio = ({
         sourceBlob,
         selectedClip?.file?.name || currentTimelineClip?.file?.name || "viral-studio-source.mp4"
       );
-      formData.append("translate_to_english", translateCaptionsToEnglish ? "true" : "false");
+      formData.append("translate_to_english", requestedTranslation ? "true" : "false");
 
       let response = await fetch(`${API_BASE_URL}/api/media/transcribe`, {
         method: "POST",
@@ -7340,14 +7353,32 @@ const ViralClipStudio = ({
             break;
           }
           setCaptionGenerationMessage(
-            `Listening for speech… ${Math.round(Number(statusPayload.progress || 0))}%`
+            `${requestedTranslation ? "Translating speech" : "Listening for speech"}… ${Math.round(
+              Number(statusPayload.progress || 0)
+            )}%`
           );
         }
       }
 
       const captionSourceClipId =
         currentTimelineClip?.sourceClipId || currentTimelineClip?.id || selectedClip?.id || null;
-      const nextSegments = normalizeCaptionSegments(payload?.segments)
+      const responseSegments = Array.isArray(payload?.segments) ? payload.segments : [];
+      const languageMode = String(
+        payload?.languageMode || payload?.language_mode || ""
+      ).trim().toLowerCase();
+      const translationProvenanceConfirmed =
+        responseSegments.length > 0 &&
+        responseSegments.every(
+          segment =>
+            segment?.translatedToEnglish === true || segment?.translated_to_english === true
+        );
+      if (
+        requestedTranslation &&
+        (languageMode !== "translated_to_english" || !translationProvenanceConfirmed)
+      ) {
+        throw new Error("The caption service did not confirm an English translation.");
+      }
+      const nextSegments = normalizeCaptionSegments(responseSegments)
         .filter(segment => {
           const text = segment.text.toLowerCase();
           return ![
@@ -7361,19 +7392,26 @@ const ViralClipStudio = ({
             "all rights reserved",
           ].some(blocked => text.includes(blocked));
         })
-        .map(segment => ({ ...segment, sourceClipId: captionSourceClipId }));
+        .map(segment => ({
+          ...segment,
+          sourceClipId: captionSourceClipId,
+          translatedToEnglish: requestedTranslation,
+          ...(requestedTranslation
+            ? {
+                language: "en",
+                languageLabel: "English",
+                languages: ["en"],
+              }
+            : {}),
+        }));
       const transcriptionQuality =
         payload?.transcriptionQuality || payload?.transcription_quality || null;
       if (transcriptionQuality?.status === "rejected") {
-        setCaptionSegments([]);
-        setCaptionGenerationStatus("error");
-        setCaptionGenerationMessage(
-          "Transcription was not confident enough to create honest captions. You can type or paste lines manually."
+        throw new Error(
+          requestedTranslation
+            ? "The English translation was rejected because the speech confidence was too low."
+            : "Transcription was not confident enough to create honest captions."
         );
-        setStudioActionMessage(
-          "Automatic captions were rejected due to low audio confidence. Import SRT or paste a script to add captions."
-        );
-        return;
       }
       const identityReviewSegments = nextSegments.filter(segment => segment.reviewRequired).length;
       const detectedLanguageLabels = Array.from(
@@ -7386,7 +7424,7 @@ const ViralClipStudio = ({
       );
 
       if (!nextSegments.length) {
-        if (captionTextOverride?.trim()) {
+        if (!requestedTranslation && captionTextOverride?.trim()) {
           const clipDuration = Math.max(
             3,
             Number(currentTimelineWindow?.duration || selectedClip?.duration || currentTimelineClip?.duration || 30)
@@ -7409,7 +7447,7 @@ const ViralClipStudio = ({
             setStudioActionMessage(
               "Client-side speech captions are active. Tap any line below to edit the words or timing directly."
             );
-            return;
+            return true;
           }
         }
         throw new Error("No clear speech was detected. You can still type captions manually.");
@@ -7422,7 +7460,7 @@ const ViralClipStudio = ({
       setCaptionGenerationStatus("ready");
       setCaptionGenerationMessage(
         `${nextSegments.length} timestamped caption${nextSegments.length === 1 ? "" : "s"} ready · ${
-          translateCaptionsToEnglish
+          requestedTranslation
             ? "translated to English"
             : "spoken languages preserved automatically"
         }${
@@ -7441,9 +7479,22 @@ const ViralClipStudio = ({
       );
       focusCaptionSegmentsForReview(nextSegments);
       setStudioActionMessage(
-        "Real speech captions are live. Edit any timestamped line before rendering."
+        requestedTranslation
+          ? "English captions are live. Edit any translated line before rendering."
+          : "Real speech captions are live. Edit any timestamped line before rendering."
       );
+      return true;
     } catch (error) {
+      if (preserveExistingOnFailure && retainedSegments.length) {
+        setCaptionGenerationStatus("failed");
+        setCaptionGenerationMessage(
+          `${requestedTranslation ? "Translation" : "Caption regeneration"} failed. Your existing captions were kept. ${error.message || "Try again."}`
+        );
+        setStudioActionMessage(
+          `${requestedTranslation ? "Translation" : "Caption regeneration"} failed; the existing caption track was not changed.`
+        );
+        return false;
+      }
       const fallbackText =
         captionTextOverride?.trim() ||
         selectedClip?.transcript ||
@@ -7451,7 +7502,7 @@ const ViralClipStudio = ({
         selectedClip?.hookText ||
         selectedClip?.name ||
         "";
-      if (fallbackText) {
+      if (!requestedTranslation && fallbackText) {
         const fallbackDuration = Math.max(
           3,
           Number(currentTimelineWindow?.duration || selectedClip?.duration || currentTimelineClip?.duration || 30)
@@ -7479,13 +7530,14 @@ const ViralClipStudio = ({
           setStudioActionMessage(
             "Speech captions are active. Tap any line below to edit words or timing directly."
           );
-          return;
+          return true;
         }
       }
 
       setCaptionGenerationStatus("failed");
       setCaptionGenerationMessage(error.message || "Caption transcription failed.");
       setStudioActionMessage(error.message || "Caption transcription failed.");
+      return false;
     }
   };
 
@@ -19441,17 +19493,22 @@ const ViralClipStudio = ({
                     <input
                       type="checkbox"
                       checked={translateCaptionsToEnglish}
+                      disabled={captionGenerationStatus === "processing"}
                       onChange={event => {
                         const enabled = event.target.checked;
+                        const previousMode = translateCaptionsToEnglish;
                         setTranslateCaptionsToEnglish(enabled);
-                        setCaptionSegments([]);
-                        setCaptionTextOverride("");
-                        setCaptionGenerationStatus("idle");
                         setCaptionGenerationMessage(
                           enabled
-                            ? "Generate captions to create an editable English translation."
-                            : "Generate captions to preserve all spoken languages automatically."
+                            ? "Starting an editable English translation…"
+                            : "Restoring captions in the spoken languages…"
                         );
+                        void generateLiveTranscript({
+                          translateToEnglish: enabled,
+                          preserveExistingOnFailure: true,
+                        }).then(succeeded => {
+                          if (!succeeded) setTranslateCaptionsToEnglish(previousMode);
+                        });
                       }}
                     />
                   </label>
@@ -19465,7 +19522,9 @@ const ViralClipStudio = ({
                       onClick={() => void generateLiveTranscript()}
                     >
                       {captionGenerationStatus === "processing"
-                        ? "Listening…"
+                        ? translateCaptionsToEnglish
+                          ? "Translating…"
+                          : "Listening…"
                         : captionSegments.length
                           ? "Regenerate speech captions"
                           : "Generate speech captions"}
