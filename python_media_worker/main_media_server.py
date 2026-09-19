@@ -30523,7 +30523,7 @@ def build_studio_adjustment_timeline_filter(base_filter, layers, duration):
     return ";".join(parts)
 
 
-def plan_studio_adjustment_segments(layers, duration):
+def plan_studio_adjustment_segments(layers, duration, max_segment_duration=30.0):
     """Return bounded Finish Rack intervals and their active grade filters."""
     duration = max(0.04, float(duration or 0))
     active_layers = []
@@ -30547,18 +30547,21 @@ def plan_studio_adjustment_segments(layers, duration):
         boundaries.update((start, end))
     if not active_layers:
         return []
-    return [
-        {
-            "start": start,
-            "end": end,
-            "grades": [
-                grade for layer_start, layer_end, grade in active_layers
-                if layer_start <= start + 1e-6 and layer_end >= end - 1e-6
-            ],
-        }
-        for start, end in zip(sorted(boundaries), sorted(boundaries)[1:])
-        if end - start >= 0.02
-    ]
+    max_segment_duration = max(1.0, float(max_segment_duration or 30.0))
+    specs = []
+    for interval_start, interval_end in zip(sorted(boundaries), sorted(boundaries)[1:]):
+        if interval_end - interval_start < 0.02:
+            continue
+        grades = [
+            grade for layer_start, layer_end, grade in active_layers
+            if layer_start <= interval_start + 1e-6 and layer_end >= interval_end - 1e-6
+        ]
+        start = interval_start
+        while interval_end - start >= 0.02:
+            end = min(interval_end, start + max_segment_duration)
+            specs.append({"start": start, "end": end, "grades": grades})
+            start = end
+    return specs
 
 
 async def render_studio_finish_timeline_sequential(

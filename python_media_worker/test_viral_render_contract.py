@@ -132,9 +132,12 @@ class ViralRenderContractTests(unittest.TestCase):
                 "/tmp/source.mp4", str(Path(temp_dir) / "output.mp4"),
                 "eq=brightness=0.01", layers, 600, job_id="bounded-finish-proof",
             ))
-        self.assertEqual(run.await_count, 4)
+        # 600 seconds is deliberately capped at 30-second FFmpeg processes,
+        # regardless of how long one grade state remains unchanged.
+        self.assertEqual(run.await_count, 22)
         interval_commands = [call.args[0] for call in run.await_args_list[:-1]]
         self.assertTrue(all("-ss" in command and "-t" in command for command in interval_commands))
+        self.assertTrue(all(float(command[command.index("-t") + 1]) <= 30 for command in interval_commands))
         self.assertTrue(all("split=3" not in " ".join(command) for command in interval_commands))
         concat_command = run.await_args_list[-1].args[0]
         self.assertEqual(concat_command[1:4], ["-f", "concat", "-safe"])
