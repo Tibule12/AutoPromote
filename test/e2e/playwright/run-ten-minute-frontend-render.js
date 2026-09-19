@@ -311,6 +311,7 @@ async function main() {
   const canonicalPayload = buildPayload(sourceUrl);
   const snapshot = buildSnapshot(canonicalPayload);
   let submittedBody = null;
+  let submittedUrl = null;
   let payloadChecks = null;
   const pageErrors = [];
   const apiFailures = [];
@@ -332,6 +333,7 @@ async function main() {
   });
   page.on("request", request => {
     if (request.url().endsWith("/api/media/process") && request.method() === "POST") {
+      submittedUrl = request.url();
       submittedBody = request.postDataJSON();
       payloadChecks = assertPayload(submittedBody);
       fs.writeFileSync(
@@ -481,6 +483,9 @@ async function main() {
   await page.screenshot({ path: path.join(proofDir, liveRender ? "frontend-live-render-complete.png" : "frontend-dry-run-render-complete.png"), fullPage: true });
 
   if (!submittedBody || !payloadChecks) throw new Error("No validated frontend render request was captured");
+  if (submittedUrl !== "http://127.0.0.1:8000/api/media/process") {
+    throw new Error(`Frontend render targeted the wrong backend: ${submittedUrl}`);
+  }
   const receipt = {
     mode: liveRender ? "live" : "dry-run",
     capturedAt: new Date().toISOString(),
@@ -489,6 +494,7 @@ async function main() {
     uploadReferenceFile: uploadReferencePath,
     uploadReferenceBytes: fs.statSync(uploadReferencePath).size,
     checks: payloadChecks,
+    backendUrl: submittedUrl,
     passed: Object.values(payloadChecks).filter(Boolean).length,
     failed: Object.values(payloadChecks).filter(value => !value).length,
     pageErrors,

@@ -5,6 +5,7 @@ const mockDocs = new Map();
 const mockExistingObjects = new Set();
 const mockAnalyzeVideo = jest.fn();
 const mockStartProcessingJob = jest.fn();
+const mockResolveStudio3DExport = jest.fn();
 
 const makeDoc = id => ({
   id,
@@ -54,6 +55,12 @@ jest.mock("../services/videoEditingService", () =>
     startProcessingJob: mockStartProcessingJob,
   }))
 );
+
+jest.mock("../services/studio3DService", () => ({
+  createStudio3DPreview: jest.fn(),
+  getOwnedStudio3DPreview: jest.fn(),
+  resolveStudio3DExport: mockResolveStudio3DExport,
+}));
 
 jest.mock("../services/billingService", () => ({
   getEffectiveTierSnapshot: jest.fn().mockResolvedValue({ tierId: "premium" }),
@@ -221,6 +228,32 @@ describe("Cam Combiner master reuse for Find Viral Clips", () => {
             }),
           ],
         }),
+      }),
+      "owner-1"
+    );
+  });
+
+  it("accepts an empty frontend 3D scene list without requiring a 3D storage bucket", async () => {
+    const response = await request(buildApp())
+      .post("/api/media/process")
+      .send({
+        fileUrl: "https://storage.example.com/source.mp4",
+        options: {
+          renderViral: true,
+          viralData: {
+            timeline_segments: [],
+            threeDGraphics: [],
+            brand_watermark: false,
+          },
+        },
+      });
+
+    expect(response.statusCode).toBe(200);
+    expect(mockResolveStudio3DExport).not.toHaveBeenCalled();
+    expect(mockStartProcessingJob).toHaveBeenCalledWith(
+      "https://storage.example.com/source.mp4",
+      expect.objectContaining({
+        viralData: expect.objectContaining({ threeDGraphics: [], brand_watermark: false }),
       }),
       "owner-1"
     );

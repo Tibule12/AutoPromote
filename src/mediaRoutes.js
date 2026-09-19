@@ -1106,11 +1106,25 @@ router.post(
         }
       : options;
     if (isViralClipRender && options?.viralData && Object.prototype.hasOwnProperty.call(options.viralData, "threeDGraphics")) {
-      try {
-        const threeDGraphics = await resolveStudio3DExport({ ownerUid: userId, items: options.viralData.threeDGraphics });
-        resolvedOptions = { ...resolvedOptions, viralData: { ...resolvedOptions.viralData, threeDGraphics } };
-      } catch (error) {
-        return res.status(422).json({ message: error.message || "3D preview must be regenerated before export" });
+      const requestedThreeDGraphics = options.viralData.threeDGraphics;
+      if (Array.isArray(requestedThreeDGraphics) && requestedThreeDGraphics.length === 0) {
+        resolvedOptions = {
+          ...resolvedOptions,
+          viralData: { ...resolvedOptions.viralData, threeDGraphics: [] },
+        };
+      } else {
+        try {
+          const threeDGraphics = await resolveStudio3DExport({
+            ownerUid: userId,
+            items: requestedThreeDGraphics,
+          });
+          resolvedOptions = {
+            ...resolvedOptions,
+            viralData: { ...resolvedOptions.viralData, threeDGraphics },
+          };
+        } catch (error) {
+          return res.status(422).json({ message: error.message || "3D preview must be regenerated before export" });
+        }
       }
     }
     console.log("[MediaRoute] Received request:", {
