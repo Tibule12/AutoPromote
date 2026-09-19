@@ -234,9 +234,17 @@ const installAppRoutes = async (page, sourcePath = liveSourcePath) => {
     state.faceTrackingRequests += 1;
     await route.fulfill(json(state.faceTrackingResult));
   });
-  await page.route("**/api/media/transcribe", async route => {
-    const multipart = (await route.request().postDataBuffer())?.toString("utf8") || "";
-    const translateToEnglish = /name="translate_to_english"[\s\S]*?true/.test(multipart);
+  const fulfillTranscription = async route => {
+    const request = route.request();
+    const requestBody = (await request.postDataBuffer())?.toString("utf8") || "";
+    let translateToEnglish = /name="translate_to_english"[\s\S]*?true/.test(requestBody);
+    if (request.url().includes("/transcribe-source")) {
+      try {
+        translateToEnglish = JSON.parse(requestBody).translate_to_english === true;
+      } catch {
+        translateToEnglish = false;
+      }
+    }
     state.captionTranslationRequests.push(translateToEnglish);
     await route.fulfill(
       json({
@@ -290,7 +298,7 @@ const installAppRoutes = async (page, sourcePath = liveSourcePath) => {
             ],
       })
     );
-  });
+  };
   await page.route("**/api/media/preview-silence", route => {
     state.silencePreviewRequests += 1;
     return route.fulfill(
@@ -303,6 +311,8 @@ const installAppRoutes = async (page, sourcePath = liveSourcePath) => {
       })
     );
   });
+  await page.route("**/api/media/transcribe", fulfillTranscription);
+  await page.route("**/api/media/transcribe-source", fulfillTranscription);
   await page.route("**/api/media/process", async route => {
     state.renderPayload = route.request().postDataJSON();
     await route.fulfill(json({ jobId: "viral-live-render" }));
@@ -789,12 +799,14 @@ test("proves new motion studio editing, linked audio, timeline seeking and local
   await page.screenshot({ path: testInfo.outputPath("restored-motion-project.png") });
   await toolRail.getByRole("button", { name: "Captions", exact: true }).click();
   await page.getByTestId("generate-live-transcript").click();
-  await expect(page.getByRole("textbox", { name: "Caption 1 text", exact: true })).toHaveValue(/Greetings/);
-  await page.getByRole("textbox", { name: "Caption 1 text", exact: true }).fill("Unmuted — spelling corrected.");
+  const firstCaptionEditor = page.getByRole("textbox", { name: "Caption 1 text", exact: true });
+  await expect(firstCaptionEditor).toHaveValue(/Greetings/);
+  const originalFirstCaption = await firstCaptionEditor.inputValue();
+  await firstCaptionEditor.fill("Unmuted — spelling corrected.");
   await page.getByLabel("Edited output position").fill("0.5");
   await expect(page.getByTestId("live-caption-preview")).toContainText("spelling corrected");
   await page.getByTestId("studio-undo-button").click();
-  await expect(page.getByRole("textbox", { name: "Caption 1 text", exact: true })).toHaveValue(/space for honest/);
+  await expect(firstCaptionEditor).toHaveValue(originalFirstCaption);
   await page.getByTestId("studio-redo-button").click();
   await expect(page.getByTestId("live-caption-preview")).toContainText("spelling corrected");
   await page.screenshot({ path: testInfo.outputPath("corrected-caption-preview.png") });
