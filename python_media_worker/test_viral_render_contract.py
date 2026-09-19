@@ -34,6 +34,7 @@ from python_media_worker.main_media_server import (
     build_source_split_filter,
     build_reframe_timeline_filter,
     render_reframe_timeline_sequential,
+    render_studio_finish_timeline_sequential,
     build_reviewed_reframe_filter,
     build_multicam_layout_filter,
     build_main_video_frame_filter,
@@ -117,6 +118,28 @@ class ViralRenderContractTests(unittest.TestCase):
         frame_bytes = 64 * 64 * 3
         self.assertEqual(len(result.stdout), 20 * frame_bytes)
         self.assertGreater(result.stdout[15 * frame_bytes], result.stdout[2 * frame_bytes] + 30)
+
+    def test_long_color_timeline_renders_bounded_intervals_then_restores_audio(self):
+        layers = [{"startTime": 170, "duration": 70, "effects": {
+            "color": {"brightness": 1.05, "contrast": 1.1, "saturation": .95}
+        }}]
+        with tempfile.TemporaryDirectory(prefix="bounded-finish-") as temp_dir, patch(
+            "python_media_worker.main_media_server.run_subprocess_async", new_callable=AsyncMock
+        ) as run, patch(
+            "python_media_worker.main_media_server.has_audio_stream", return_value=True
+        ):
+            asyncio.run(render_studio_finish_timeline_sequential(
+                "/tmp/source.mp4", str(Path(temp_dir) / "output.mp4"),
+                "eq=brightness=0.01", layers, 600, job_id="bounded-finish-proof",
+            ))
+        self.assertEqual(run.await_count, 4)
+        interval_commands = [call.args[0] for call in run.await_args_list[:-1]]
+        self.assertTrue(all("-ss" in command and "-t" in command for command in interval_commands))
+        self.assertTrue(all("split=3" not in " ".join(command) for command in interval_commands))
+        concat_command = run.await_args_list[-1].args[0]
+        self.assertEqual(concat_command[1:4], ["-f", "concat", "-safe"])
+        self.assertIn("1:a?", concat_command)
+        self.assertEqual(concat_command[-7:-5], ["-c:v", "copy"])
 
     def test_http_render_boundary_forces_branding_even_for_forged_payload(self):
         request = RenderViralRequest(

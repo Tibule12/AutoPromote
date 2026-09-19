@@ -30523,6 +30523,98 @@ def build_studio_adjustment_timeline_filter(base_filter, layers, duration):
     return ";".join(parts)
 
 
+def plan_studio_adjustment_segments(layers, duration):
+    """Return bounded Finish Rack intervals and their active grade filters."""
+    duration = max(0.04, float(duration or 0))
+    active_layers = []
+    boundaries = {0.0, duration}
+    for layer in layers or []:
+        if not isinstance(layer, dict):
+            continue
+        start = max(0.0, float(layer.get("startTime", layer.get("start_time", 0)) or 0))
+        end = min(duration, start + max(0.0, float(layer.get("duration", 0) or 0)))
+        if end - start < 0.02 or start >= duration:
+            continue
+        effects = layer.get("effects") or {}
+        if effects.get("blendMode", "normal") != "normal" or float(effects.get("opacity", 1)) != 1:
+            raise ValueError("Timed color adjustment supports normal blend at full opacity only")
+        grade = build_studio_finish_filter({
+            "enabled": True,
+            "color": effects.get("color") or {},
+            "texture": effects.get("texture") or {},
+        })
+        active_layers.append((start, end, grade))
+        boundaries.update((start, end))
+    if not active_layers:
+        return []
+    return [
+        {
+            "start": start,
+            "end": end,
+            "grades": [
+                grade for layer_start, layer_end, grade in active_layers
+                if layer_start <= start + 1e-6 and layer_end >= end - 1e-6
+            ],
+        }
+        for start, end in zip(sorted(boundaries), sorted(boundaries)[1:])
+        if end - start >= 0.02
+    ]
+
+
+async def render_studio_finish_timeline_sequential(
+    source_path,
+    output_path,
+    base_filter,
+    layers,
+    duration,
+    job_id="finish",
+):
+    """Render timed Finish Rack intervals without retaining the full programme in RAM."""
+    specs = plan_studio_adjustment_segments(layers, duration)
+    if not specs:
+        raise ValueError("A sequential Finish Rack render needs at least one timed adjustment")
+    work_dir = os.path.dirname(os.path.abspath(output_path))
+    segment_paths = []
+    concat_path = os.path.join(work_dir, f"{job_id}_finish_concat.txt")
+    try:
+        for index, segment in enumerate(specs):
+            segment_path = os.path.join(work_dir, f"{job_id}_finish_{index:03d}.mp4")
+            segment_paths.append(segment_path)
+            filters = [part for part in [base_filter, *segment["grades"], "format=yuv420p", "setsar=1"] if part]
+            await run_subprocess_async([
+                "ffmpeg", "-ss", f"{segment['start']:.6f}", "-i", source_path,
+                "-t", f"{segment['end']-segment['start']:.6f}",
+                "-vf", ",".join(filters), "-an",
+                "-c:v", "libx264", "-preset", "veryfast", "-crf", "19",
+                "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-y", segment_path,
+            ], check=True, job_context=job_id, timeout_seconds=MEDIA_WORKER_SUBPROCESS_TIMEOUT_SECONDS)
+        with open(concat_path, "w", encoding="utf-8") as concat_file:
+            for segment_path in segment_paths:
+                concat_file.write(f"file '{segment_path}'\n")
+        finish_has_audio = has_audio_stream(source_path)
+        concat_command = [
+            "ffmpeg", "-f", "concat", "-safe", "0", "-i", concat_path,
+            "-i", source_path, "-map", "0:v:0",
+        ]
+        if finish_has_audio:
+            concat_command.extend(["-map", "1:a?", "-c:a", "copy"])
+        else:
+            concat_command.append("-an")
+        concat_command.extend([
+            "-c:v", "copy", "-shortest", "-movflags", "+faststart", "-y", output_path,
+        ])
+        await run_subprocess_async(
+            concat_command, check=True, job_context=job_id,
+            timeout_seconds=MEDIA_WORKER_SUBPROCESS_TIMEOUT_SECONDS,
+        )
+    finally:
+        for temporary_path in [*segment_paths, concat_path]:
+            try:
+                os.remove(temporary_path)
+            except FileNotFoundError:
+                pass
+
+
 async def detect_video_content_crop(input_path, width, height):
     """Detect embedded black framing before applying the delivery-frame mask."""
     safe_width = max(2, int(width or 0))
@@ -31593,30 +31685,35 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             (request.finish_plan or {}).get("motion"), *get_video_dimensions(working_path)
         )
         finish_filter = ",".join(part for part in (finish_filter, zoom_filter) if part)
+        adjustment_layers = (request.finish_plan or {}).get("adjustment_layers") or []
         adjustment_graph = build_studio_adjustment_timeline_filter(
-            finish_filter,
-            (request.finish_plan or {}).get("adjustment_layers") or [],
-            get_media_duration(working_path),
+            finish_filter, adjustment_layers, get_media_duration(working_path),
         )
         if finish_filter or adjustment_graph:
             finish_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_finish.mp4")
             finish_has_audio = has_audio_stream(working_path)
-            finish_cmd = [
-                "ffmpeg", "-i", working_path,
-                *(["-filter_complex", adjustment_graph, "-map", "[v_finish]"]
-                  if adjustment_graph else ["-vf", finish_filter]),
-                "-c:v", "libx264", "-preset", "veryfast", "-crf", "19",
-                "-pix_fmt", "yuv420p",
-            ]
-            if finish_has_audio:
-                if adjustment_graph:
-                    finish_cmd.extend(["-map", "0:a?"])
-                finish_cmd.extend(["-c:a", "copy"])
-            else:
-                finish_cmd.append("-an")
-            finish_cmd.extend(["-movflags", "+faststart", "-y", finish_path])
             report_progress(49, "Applying creator color and finish")
-            await run_subprocess_async(finish_cmd, check=True, job_context=job_id)
+            if adjustment_graph:
+                await render_studio_finish_timeline_sequential(
+                    working_path,
+                    finish_path,
+                    finish_filter,
+                    adjustment_layers,
+                    get_media_duration(working_path),
+                    job_id=job_id,
+                )
+            else:
+                finish_cmd = [
+                    "ffmpeg", "-i", working_path, "-vf", finish_filter,
+                    "-c:v", "libx264", "-preset", "veryfast", "-crf", "19",
+                    "-pix_fmt", "yuv420p",
+                ]
+                if finish_has_audio:
+                    finish_cmd.extend(["-c:a", "copy"])
+                else:
+                    finish_cmd.append("-an")
+                finish_cmd.extend(["-movflags", "+faststart", "-y", finish_path])
+                await run_subprocess_async(finish_cmd, check=True, job_context=job_id)
             working_path = finish_path
 
         # 2.75. Apply the Studio speed plan before captions and overlays so
