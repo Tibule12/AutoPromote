@@ -7,7 +7,7 @@ import {
 } from "../utils/security";
 import { API_BASE_URL, API_ENDPOINTS } from "../config";
 import { uploadSourceFileViaBackend } from "../utils/sourceUpload";
-import React, { useState, useRef, useEffect, useMemo } from "react";
+import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { useSubscription } from "../hooks/useSubscription";
 import { storage } from "../firebaseClient";
@@ -436,6 +436,7 @@ const normalizeReframeModeCuts = cuts =>
       id: cut.id || createSecureId("reframe-mode"),
       time: Math.max(0, Number(cut.time || 0)),
       mode: cut.mode,
+      ...(Number(cut.zoom) > 1 ? { zoom: Math.min(2, Number(cut.zoom)) } : {}),
     }))
     .sort((left, right) => left.time - right.time);
 
@@ -1685,6 +1686,18 @@ const normalizeCaptionSegments = segments =>
     })
     .filter(Boolean);
 
+const ensureUniqueCaptionIds = segments => {
+  const seen = new Set();
+  return (Array.isArray(segments) ? segments : []).map((segment, index) => {
+    const base = String(segment?.id || `caption-line-${index + 1}`);
+    let id = base;
+    let copy = 2;
+    while (seen.has(id)) id = `${base}-copy-${copy++}`;
+    seen.add(id);
+    return id === segment?.id ? segment : { ...segment, id };
+  });
+};
+
 const parseSrtOrVtt = text => {
   if (!text || typeof text !== "string") return [];
   const lines = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
@@ -2586,7 +2599,10 @@ const ViralClipStudio = ({
   const [isWatermarkCleanupPreviewLoading, setIsWatermarkCleanupPreviewLoading] = useState(false);
   const [watermarkCleanupPreviewError, setWatermarkCleanupPreviewError] = useState("");
   const [showWatermarkCleanupOnVideo, setShowWatermarkCleanupOnVideo] = useState(true);
-  const [brandWatermark, setBrandWatermark] = useState(true);
+  // The AutoPromote signature is a platform mark, not an export option.
+  // Older saved projects may contain brandWatermark: false; restoring one must
+  // not make the preview disagree with the branded final render.
+  const brandWatermark = true;
   const [brandWatermarkVariant, setBrandWatermarkVariant] = useState("studio");
   const [brandWatermarkText, setBrandWatermarkText] = useState("AutoPromote · Viral Clip Studio");
   const [mainFrame, setMainFrame] = useState({
@@ -2789,9 +2805,14 @@ const ViralClipStudio = ({
   const [captionPosition, setCaptionPosition] = useState("bottom_center");
   const [captionScale, setCaptionScale] = useState(1);
   const [captionTextOverride, setCaptionTextOverride] = useState("");
-  const [captionSegments, setCaptionSegments] = useState(() =>
-    resolveInitialCaptionSegments((clips || [])[0], (clips || [])[0]?.duration)
+  const [captionSegments, setRawCaptionSegments] = useState(() =>
+    ensureUniqueCaptionIds(resolveInitialCaptionSegments((clips || [])[0], (clips || [])[0]?.duration))
   );
+  const setCaptionSegments = useCallback(update => {
+    setRawCaptionSegments(previous => ensureUniqueCaptionIds(
+      typeof update === "function" ? update(previous) : update
+    ));
+  }, []);
   const [translateCaptionsToEnglish, setTranslateCaptionsToEnglish] = useState(false);
   const [captionGenerationStatus, setCaptionGenerationStatus] = useState("idle");
   const [captionGenerationMessage, setCaptionGenerationMessage] = useState("");
@@ -2926,6 +2947,7 @@ const ViralClipStudio = ({
 
   const videoRef = useRef(null);
   const afterCanvasRef = useRef(null);
+  const adjustmentScratchRef = useRef(null);
   const beforeVideoRef = useRef(null);
   const beforeCanvasRef = useRef(null);
   const speakerStackTopVideoRef = useRef(null);
@@ -3645,7 +3667,6 @@ const ViralClipStudio = ({
     setMinSilenceDuration(Number(snapshot.minSilenceDuration ?? 0.75));
     setRemoveWatermark(!!snapshot.removeWatermark);
     setWatermarkMode(snapshot.watermarkMode || "adaptive");
-    setBrandWatermark(snapshot.brandWatermark !== false);
     setBrandWatermarkVariant(snapshot.brandWatermarkVariant || "studio");
     setBrandWatermarkText(snapshot.brandWatermarkText || "AutoPromote · Viral Clip Studio");
     setMainFrame({
@@ -4657,6 +4678,42 @@ const ViralClipStudio = ({
     );
   };
 
+  const handleAdjustmentTimelineMove = (id, newStartTime) => {
+    setAdjustmentLayers(current => current.map(layer => layer.id === id
+      ? { ...layer, startTime: Math.max(0, Math.min(newStartTime, liveTimelineDuration - Number(layer.duration || 0.2))) }
+      : layer));
+  };
+
+  const handleAdjustmentTimelineTrim = (id, edge, value) => {
+    setAdjustmentLayers(current => current.map(layer => {
+      if (layer.id !== id) return layer;
+      const start = Number(layer.startTime || 0);
+      const end = start + Number(layer.duration || 0.2);
+      if (edge === "start") {
+        const nextStart = Math.max(0, Math.min(Number(value), end - 0.2));
+        return { ...layer, startTime: nextStart, duration: end - nextStart };
+      }
+      return { ...layer, duration: Math.max(0.2, Math.min(Number(value), liveTimelineDuration - start)) };
+    }));
+  };
+
+  const updateAdjustmentLayer = (id, field, value) => {
+    setAdjustmentLayers(current => current.map(layer => {
+      if (layer.id !== id) return layer;
+      if (field === "startTime" || field === "duration") {
+        const nextValue = Math.max(field === "duration" ? 0.2 : 0, Number(value) || 0);
+        return { ...layer, [field]: nextValue };
+      }
+      return {
+        ...layer,
+        effects: {
+          ...layer.effects,
+          color: { ...layer.effects?.color, [field]: Number(value), preset: null },
+        },
+      };
+    }));
+  };
+
   const handleOverlayTimelineSlip = (id, newSourceStart) => {
     setOverlays(prev =>
       prev.map(overlay =>
@@ -4939,9 +4996,8 @@ const ViralClipStudio = ({
       const nextTime = i + 1 < cuts.length ? cuts[i + 1].time : timelineDuration;
       const duration = Math.max(0.2, nextTime - cut.time);
 
-      if (cut.toAngle !== 0) {
-        const angle = directorAngles[cut.toAngle];
-        if (angle?.type === "video" && angle.src) {
+      const angle = directorAngles[cut.toAngle];
+      if (angle?.type === "video" && angle.src) {
           newOverlays.push({
             id: createSecureId("broll-angle"),
             type: "video",
@@ -4956,13 +5012,16 @@ const ViralClipStudio = ({
             muteMainAudio: false,
             animation: { enter: "fade", exit: "fade", enterDuration: 0.15, exitDuration: 0.15 },
           });
-        } else {
-          newFramingCuts.push({
-            id: createSecureId("reframe-cut"),
-            time: cut.time,
-            mode: cut.toAngle === 1 ? "speaker_track" : "center",
-          });
-        }
+      } else {
+        // A virtual camera is a punch on the current programme, not a change
+        // to Show Everyone/Solo framing. Record the zoom and the return to
+        // the master camera so the exported cut matches the monitor.
+        newFramingCuts.push({
+          id: createSecureId("reframe-cut"),
+          time: cut.time,
+          mode: resolveReframeModeAtTime(reframeModeCuts, cut.time, smartCrop ? smartCropMode : "off"),
+          zoom: Number(angle?.zoom || 1),
+        });
       }
     }
 
@@ -4976,6 +5035,8 @@ const ViralClipStudio = ({
     const totalCuts = newOverlays.length + newFramingCuts.length;
     setStudioActionMessage(`✓ Successfully baked ${totalCuts} camera cuts into story timeline!`);
     setDirectorSessionCuts([]);
+    setActiveDirectorAngle(0);
+    setDirectorModeActive(false);
   };
 
   const clearDirectorCuts = () => {
@@ -6463,6 +6524,13 @@ const ViralClipStudio = ({
   const hookVisualFocusPoint = showHookPreview ? resolvedHookFocusPoint : DEFAULT_HOOK_FOCUS_POINT;
   const hookTransformOrigin = `${hookVisualFocusPoint.x}% ${hookVisualFocusPoint.y}%`;
   const finishPreviewIsLive = comparisonMode !== "before" && !renderedOutputUrl;
+  const activeAdjustmentGrades = useMemo(() => finishPreviewIsLive
+    ? adjustmentLayers
+        .filter(layer => previewTimelineTime >= Number(layer.startTime || 0) &&
+          previewTimelineTime < Number(layer.startTime || 0) + Number(layer.duration || 0))
+        .map(layer => layer.effects?.color)
+        .filter(Boolean)
+    : [], [adjustmentLayers, previewTimelineTime, finishPreviewIsLive]);
   const effectiveFinishFx = finishFx.precisionGrade ? finishFx : interpolateFinishKeyframes(
     finishFx,
     finishKeyframes,
@@ -10318,7 +10386,7 @@ const ViralClipStudio = ({
     });
   };
 
-  const handleExportRender = async destination => {
+  const handleExportRender = async (destination, { captionReviewCopy = false } = {}) => {
     if (isExporting) return;
 
     const enabledThreeDScenes = threeDScenes.filter(scene => scene.enabled !== false);
@@ -10363,7 +10431,7 @@ const ViralClipStudio = ({
     const captionReviewBlockers = normalizeCaptionSegments(captionSegments).filter(
       segment => segment.reviewRequired
     );
-    if (autoCaptions && !normalizePlainText(captionTextOverride) && captionReviewBlockers.length) {
+    if (autoCaptions && !captionReviewCopy && !normalizePlainText(captionTextOverride) && captionReviewBlockers.length) {
       setStudioInspectorTab("captions");
       setActiveCreativeTool("captions");
       focusCaptionSegmentsForReview(captionReviewBlockers);
@@ -10708,6 +10776,7 @@ const ViralClipStudio = ({
       setExportStatusLabel("Starting render...");
       await onSave(selectedClip, normalizedOverlays, {
         autoCaptions,
+        captionReviewCopy,
         captionStyle,
         captionPosition,
         captionScale,
@@ -10749,6 +10818,7 @@ const ViralClipStudio = ({
           version: 1,
           enabled: true,
           color_cube: advancedColorCube,
+          adjustment_layers: adjustmentLayers,
           main_frame: {
             enabled: mainFrame.enabled,
             shape: "round",
@@ -10818,6 +10888,7 @@ const ViralClipStudio = ({
               ? { timeline_cuts: normalizeReframeModeCuts(reframeModeCuts).map(cut => ({
                   time: cut.time,
                   mode: cut.mode,
+                  zoom: cut.zoom,
                 })) }
               : {}),
             ...(speakerFocusCuts.length
@@ -11713,7 +11784,13 @@ const ViralClipStudio = ({
       context.save();
       context.filter = previewProgrammeFilter;
       const currentDirectorAngle = directorModeActive ? directorAngles[activeDirectorAngle] : null;
-      const directorZoom = currentDirectorAngle?.zoom && currentDirectorAngle.zoom > 1 ? currentDirectorAngle.zoom : 1;
+      const timelineDirectorZoom = normalizeReframeModeCuts(reframeModeCuts).reduce(
+        (zoom, cut) => cut.time <= previewTimelineTime ? Number(cut.zoom || 1) : zoom,
+        1
+      );
+      const directorZoom = renderedOutputUrl ? 1 : directorModeActive
+        ? Number(currentDirectorAngle?.zoom || 1)
+        : timelineDirectorZoom;
       const programmeScale = (renderedOutputUrl || activeSideBySideOverlay
         ? 1
         : hookVisualScale * smartCropBackgroundScale * finishZoom * mainMotionAutomation.scale) * directorZoom;
@@ -11966,6 +12043,26 @@ const ViralClipStudio = ({
         if (finishPreviewIsLive && advancedColorCube) applyColorCube(pixels.data, advancedColorCube);
         context.putImageData(pixels, 0, 0);
       }
+      for (const grade of activeAdjustmentGrades) {
+        if (grade.precisionGrade) {
+          const pixels = context.getImageData(0, 0, canvasWidth, canvasHeight);
+          applyPrecisionGrade(pixels.data, buildPrecisionGrade(grade));
+          context.putImageData(pixels, 0, 0);
+        } else {
+          const scratch = adjustmentScratchRef.current || document.createElement("canvas");
+          adjustmentScratchRef.current = scratch;
+          if (scratch.width !== canvasWidth) scratch.width = canvasWidth;
+          if (scratch.height !== canvasHeight) scratch.height = canvasHeight;
+          const scratchContext = scratch.getContext("2d");
+          if (!scratchContext) continue;
+          scratchContext.drawImage(canvas, 0, 0);
+          context.save();
+          context.filter = buildCinematicCssFilter(grade) || "none";
+          context.clearRect(0, 0, canvasWidth, canvasHeight);
+          context.drawImage(scratch, 0, 0);
+          context.restore();
+        }
+      }
     };
     const paintProgrammeLoop = () => {
       paintProgrammeFrame();
@@ -12051,11 +12148,13 @@ const ViralClipStudio = ({
     previewProgrammeFit,
     previewProgrammeFilter,
     precisionPreviewGrade,
+    activeAdjustmentGrades,
     advancedColorCube,
     finishPreviewIsLive,
     previewProgrammePosition,
     reframeAspect,
     renderedOutputUrl,
+    reframeModeCuts,
     activeSpeakerStackSlots,
     speakerStackCameraCount,
     speakerStackFraming,
@@ -21033,6 +21132,8 @@ const ViralClipStudio = ({
                   activeOverlay={compositeInspectorTarget}
                   overlays={[mainTransform, ...overlays.filter(overlay => !overlay.isCaption)]}
                   adjustmentLayers={adjustmentLayers}
+                  onUpdateAdjustmentLayer={updateAdjustmentLayer}
+                  onDeleteAdjustmentLayer={id => setAdjustmentLayers(current => current.filter(layer => layer.id !== id))}
                   onSelectOverlay={targetId => {
                     setCompositeTargetId(targetId);
                     if (targetId !== "main-video") setActiveOverlayId(targetId);
@@ -24913,18 +25014,13 @@ const ViralClipStudio = ({
                 ) : null}
               </section>
               <div className="export-branding-card">
-                <label>
+                <div>
                   <span>
                     <b>AutoPromote signature</b>
-                    <small>Transparent logo lockup placed inside the export safe zone.</small>
+                    <small>Always included. Its adaptive path stays inside the export safe zone.</small>
                   </span>
-                  <input
-                    type="checkbox"
-                    data-testid="brand-watermark-toggle"
-                    checked={brandWatermark}
-                    onChange={event => setBrandWatermark(event.target.checked)}
-                  />
-                </label>
+                  <strong data-testid="brand-watermark-locked">Always on</strong>
+                </div>
                 {brandWatermark ? (
                   <>
                     <div className="watermark-brand-controls">
@@ -24976,16 +25072,20 @@ const ViralClipStudio = ({
                   data-testid="rendered-output-ready"
                 >
                   <div>
-                    <strong>Rendered video ready</strong>
-                    <span>The finished file is loaded in After above.</span>
+                    <strong>{renderedOutput?.captionReviewCopy ? "Caption review copy ready" : "Rendered video ready"}</strong>
+                    <span>{renderedOutput?.captionReviewCopy
+                      ? "Draft captions are burned in for review. Correct and approve the timeline before publishing."
+                      : "The finished file is loaded in After above."}</span>
                   </div>
                   <div className="rendered-output-actions">
                     <button type="button" onClick={onDownloadRendered}>
                       Download Rendered Clip
                     </button>
-                    <button type="button" onClick={onUseRendered}>
-                      Use in Publisher
-                    </button>
+                    {!renderedOutput?.captionReviewCopy ? (
+                      <button type="button" onClick={onUseRendered}>
+                        Use in Publisher
+                      </button>
+                    ) : null}
                   </div>
                 </div>
               ) : null}
@@ -25185,6 +25285,17 @@ const ViralClipStudio = ({
               >
                 {exportStatusLabel}
               </button>
+              {autoCaptions && captionSegments.some(segment => segment.reviewRequired) ? (
+                <button
+                  type="button"
+                  className="export-btn"
+                  data-testid="render-caption-review-copy"
+                  onClick={() => void handleExportRender(selectedExportDestination, { captionReviewCopy: true })}
+                  disabled={isExporting}
+                >
+                  Render caption review copy (draft, not publishable)
+                </button>
+              ) : null}
               {isExporting && (
                 <button
                   className="export-btn cancel-export-btn"
@@ -25703,7 +25814,15 @@ const ViralClipStudio = ({
                 }))
               }
               overlays={overlays}
-              captionSegments={captionSegments}
+              captionSegments={autoCaptions ? liveTimelineCaptionBlocks.map(block => ({
+                ...block,
+                // One source caption can legitimately appear in more than one
+                // trimmed timeline clip. The timeline identity must therefore
+                // include the clip, not only the transcript line id.
+                id: block.blockId || block.id,
+                startTime: Number(block.outputStart || 0),
+                duration: Number(block.outputDuration || 0),
+              })) : []}
               soundEffects={[...soundEffects, ...linkedMotionCues]}
               motionScenes={[...motionScenes, ...threeDScenes.map(scene => ({ ...scene, is3D: true, color: scene.primaryColor, name: `3D · ${scene.text}` }))]}
               onSelectMotion={id => {
@@ -25753,6 +25872,8 @@ const ViralClipStudio = ({
               onOverlayMove={handleOverlayTimelineMove}
               onOverlayTrim={handleOverlayTimelineTrim}
               onOverlaySlip={handleOverlayTimelineSlip}
+              onAdjustmentMove={handleAdjustmentTimelineMove}
+              onAdjustmentTrim={handleAdjustmentTimelineTrim}
               onSelectOverlay={setActiveOverlayId}
               onMotionMove={handleMotionTimelineMove}
               onMotionTrim={handleMotionTimelineTrim}

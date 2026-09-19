@@ -3613,5 +3613,8 @@ describe("ViralClipStudio timeline sequencing", () => {
 
     // Redo delete
     fireEvent.click(screen.getByTestId("timeline-quick-redo"));
+    expect(
+      consoleErrorSpy.mock.calls.some(([message]) => String(message).includes("same key"))
+    ).toBe(false);
   });
 });

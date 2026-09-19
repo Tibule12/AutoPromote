@@ -91,6 +91,7 @@ const BrollClip = ({
   onOverlayTrim,
   onOverlaySlip,
   onClick,
+  allowSlip = true,
 }) => {
   const dragRef = React.useRef(null);
   const [isSnapped, setIsSnapped] = React.useState(false);
@@ -114,12 +115,12 @@ const BrollClip = ({
   const handlePointerDownBody = (e) => {
     e.stopPropagation();
     try { e.target.setPointerCapture(e.pointerId); } catch (_) {}
-    const isSlip = Boolean(e.altKey || e.shiftKey);
+    const isSlip = allowSlip && Boolean(e.altKey || e.shiftKey);
     dragRef.current = {
       type: isSlip ? "slip" : "move",
       startX: e.clientX,
       startParam: isSlip ? Number(item.sourceStartTime || 0) : start,
-      laneWidth: e.target.parentElement.getBoundingClientRect().width,
+      laneWidth: Math.max(1, e.currentTarget.parentElement.parentElement.getBoundingClientRect().width),
     };
   };
 
@@ -130,7 +131,7 @@ const BrollClip = ({
       type: "trim-start",
       startX: e.clientX,
       startParam: start,
-      laneWidth: e.target.parentElement.parentElement.getBoundingClientRect().width,
+      laneWidth: Math.max(1, e.currentTarget.parentElement.parentElement.getBoundingClientRect().width),
     };
   };
 
@@ -141,7 +142,7 @@ const BrollClip = ({
       type: "trim-end",
       startX: e.clientX,
       startParam: duration,
-      laneWidth: e.target.parentElement.parentElement.getBoundingClientRect().width,
+      laneWidth: Math.max(1, e.currentTarget.parentElement.parentElement.getBoundingClientRect().width),
     };
   };
 
@@ -204,7 +205,7 @@ const BrollClip = ({
         boxShadow: isSnapped ? "0 0 0 2px #38bdf8, 0 0 14px rgba(56, 189, 248, 0.7)" : undefined,
         transition: "box-shadow 0.15s ease",
       }}
-      title={`${itemLabel} · ${start.toFixed(2)}s–${(start + duration).toFixed(2)}s · (Hold Alt/Option to Slip source footage)`}
+      title={`${itemLabel} · ${start.toFixed(2)}s–${(start + duration).toFixed(2)}s${allowSlip ? " · (Hold Alt/Option to Slip source footage)" : ""}`}
     >
       <div
         style={{
@@ -613,6 +614,8 @@ export default function StudioProTimeline({
   onOverlayMove,
   onOverlayTrim,
   onOverlaySlip,
+  onAdjustmentMove,
+  onAdjustmentTrim,
   onMotionMove,
   onMotionTrim,
   onAutoGenerateMotionBeats,
@@ -693,7 +696,9 @@ export default function StudioProTimeline({
         Number(ordered[index + 1]?.time ?? safeDuration) - Number(cut.time || 0)
       ),
       name:
-        cut.mode === "center"
+        cut.zoom > 1
+          ? `Camera punch ${Number(cut.zoom).toFixed(2)}×`
+          : cut.mode === "center"
           ? "Show Everyone"
           : cut.mode === "speaker_track"
             ? "Solo Speaker"
@@ -1166,6 +1171,30 @@ export default function StudioProTimeline({
                     );
                     const itemLabel =
                       item.name || item.text || item.label || `${label} ${index + 1}`;
+                    if (trackId === "adjustment" && item.effects) {
+                      return (
+                        <BrollClip
+                          key={item.id || `${trackId}-${index}`}
+                          item={item}
+                          index={index}
+                          trackId={trackId}
+                          start={start}
+                          duration={itemDuration}
+                          itemLabel={itemLabel}
+                          safeDuration={safeDuration}
+                          snapping={snapping}
+                          snapTargets={snapTargets}
+                          onOverlayMove={onAdjustmentMove}
+                          onOverlayTrim={onAdjustmentTrim}
+                          allowSlip={false}
+                          onClick={event => {
+                            event.stopPropagation();
+                            onSelectTool?.("composite");
+                            onSeek?.(event, start);
+                          }}
+                        />
+                      );
+                    }
                     if (trackId === "broll") {
                       return (
                         <BrollClip

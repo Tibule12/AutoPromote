@@ -6,6 +6,28 @@ import {
 } from "../viralRenderPayload";
 
 describe("viralRenderPayload", () => {
+  test("never lets an old project disable the AutoPromote export signature", () => {
+    const payload = buildViralRenderData({
+      finalVideoUrl: "https://example.com/source.mp4",
+      selectedClip: { start: 0, end: 10 },
+      extraOptions: { brandWatermark: false },
+    });
+    expect(payload.brand_watermark).toBe(true);
+  });
+  test("marks a caption review copy without claiming the transcript is approved", () => {
+    const payload = buildViralRenderData({
+      finalVideoUrl: "https://example.com/source.mp4",
+      selectedClip: { start: 0, end: 10 },
+      extraOptions: {
+        autoCaptions: true,
+        captionReviewCopy: true,
+        captionSegments: [{ start: 0, end: 2, text: "Draft phrase", reviewRequired: true }],
+      },
+    });
+    expect(payload.caption_review_copy).toBe(true);
+    expect(payload.caption_segments[0].review_required).toBe(true);
+    expect(payload.brand_watermark).toBe(true);
+  });
   test("forwards dialogue restoration settings to the native render", () => {
     const audioRestoration = { preset: "broadcast", voiceIsolation: true, denoise: 64,
       deEsser: 35, humFrequency: 50, compressor: 55, limiter: -1.5, loudness: -14,
@@ -219,6 +241,7 @@ describe("viralRenderPayload", () => {
       end_time: 15,
       overlays: [{ id: "overlay-1" }],
       auto_captions: true,
+      brand_watermark: true,
       professional_cleanup: true,
       timeline_segments: [
         {

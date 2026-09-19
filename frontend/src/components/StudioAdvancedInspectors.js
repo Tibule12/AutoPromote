@@ -416,6 +416,8 @@ export function CompositeInspector({
   activeOverlay,
   overlays,
   adjustmentLayers,
+  onUpdateAdjustmentLayer,
+  onDeleteAdjustmentLayer,
   onSelectOverlay,
   onUpdateOverlay,
   onAddAdjustmentLayer,
@@ -440,9 +442,40 @@ export function CompositeInspector({
         </button>
       </div>
       {adjustmentLayers.length ? (
-        <p className="advanced-feature-note">
-          {adjustmentLayers.length} adjustment layer(s) affect the tracks beneath them.
-        </p>
+        <div className="advanced-feature-note">
+          <p>{adjustmentLayers.length} timed color adjustment layer(s) affect the tracks beneath them in preview and export.</p>
+          {adjustmentLayers.map((layer, index) => (
+            <div key={layer.id} className="adjustment-layer-controls">
+              <strong>{layer.name || `Adjustment ${index + 1}`}</strong>
+              {[
+                ["startTime", "Start", 0, 3600, 0.1],
+                ["duration", "Duration", 0.2, 3600, 0.1],
+                ["brightness", "Exposure", 0.65, 1.4, 0.01],
+                ["contrast", "Contrast", 0.65, 1.75, 0.01],
+                ["saturation", "Saturation", 0, 1.8, 0.01],
+                ["temperature", "Warmth", -1, 1, 0.01],
+              ].map(([field, label, min, max, step]) => (
+                <label key={field}>
+                  <span>{label}</span>
+                  <input
+                    type="number"
+                    aria-label={`${layer.name || `Adjustment ${index + 1}`} ${label}`}
+                    min={min}
+                    max={max}
+                    step={step}
+                    value={Number(field === "startTime" || field === "duration"
+                      ? layer[field] ?? 0
+                      : layer.effects?.color?.[field] ?? (field === "temperature" ? 0 : 1))}
+                    onChange={event => onUpdateAdjustmentLayer?.(layer.id, field, event.target.value)}
+                  />
+                </label>
+              ))}
+              <button type="button" onClick={() => onDeleteAdjustmentLayer?.(layer.id)}>
+                Remove {layer.name || `Adjustment ${index + 1}`}
+              </button>
+            </div>
+          ))}
+        </div>
       ) : null}
 
       <label className="inspector-select-field">

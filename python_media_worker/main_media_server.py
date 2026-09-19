@@ -6504,6 +6504,7 @@ async def apply_viral_brand_watermark(
     output_settings=None,
     movement_schedule=None,
     variant="studio",
+    caption_review_copy=False,
 ):
     """Burn the transparent AutoPromote lockup using the Studio's timed safe path."""
     normalized_variant = str(variant or "studio").strip().lower()
@@ -6561,6 +6562,23 @@ async def apply_viral_brand_watermark(
         output_width,
         output_height,
     )
+    video_chain = (
+        "[1:v]format=rgba,colorchannelmixer=aa=0.70[viral_brand];"
+        f"[0:v][viral_brand]overlay=x='{x_expression}':y='{y_expression}':eval=frame:"
+        "eof_action=pass:shortest=1[viral_brand_base]"
+    )
+    if caption_review_copy:
+        # A review copy is deliberately conspicuous and cannot be mistaken for
+        # a publishable render when its transcript still needs human review.
+        video_chain += (
+            ";[viral_brand_base]drawtext=text='DRAFT CAPTIONS - REVIEW BEFORE PUBLISHING':"
+            "fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:"
+            f"fontsize={max(18, int(output_width * .021))}:fontcolor=white:"
+            "box=1:boxcolor=black@0.78:boxborderw=12:"
+            "x=(w-text_w)/2:y=h-text_h-h*0.075[viral_branded_video]"
+        )
+    else:
+        video_chain += ";[viral_brand_base]null[viral_branded_video]"
     try:
         await run_subprocess_async(
             [
@@ -6573,11 +6591,7 @@ async def apply_viral_brand_watermark(
                 "-i",
                 asset_path,
                 "-filter_complex",
-                (
-                    "[1:v]format=rgba,colorchannelmixer=aa=0.70[viral_brand];"
-                    f"[0:v][viral_brand]overlay=x='{x_expression}':y='{y_expression}':eval=frame:"
-                    "eof_action=pass:shortest=1[viral_branded_video]"
-                ),
+                video_chain,
                 "-map",
                 "[viral_branded_video]",
                 "-map",
@@ -6597,6 +6611,7 @@ async def apply_viral_brand_watermark(
         )
         os.replace(branded_output_path, output_path)
         receipt["status"] = "burned_in"
+        receipt["caption_review_copy"] = bool(caption_review_copy)
         receipt["delivery"] = export_profile
     except Exception as exc:
         raise HTTPException(
@@ -8299,15 +8314,19 @@ def build_reframe_timeline_filter(
     allowed_modes = {"off", "speaker_track", "center"}
     duration = max(0.04, float(duration or 0))
     normalized = {}
+    zooms = {}
     for cut in timeline_cuts or []:
         mode = str(cut.get("mode") or "").strip().lower()
         time = float(cut.get("time", 0))
         if mode in allowed_modes and math.isfinite(time) and 0 <= time < duration:
             normalized[time] = mode
+            raw_zoom = float(cut.get("zoom") or 1)
+            zooms[time] = min(2.0, max(1.0, raw_zoom)) if math.isfinite(raw_zoom) else 1.0
     if not normalized:
         raise ValueError("A timed reframe needs at least one valid timeline cut")
     if min(normalized) > 0:
         normalized[0.0] = fallback_mode if fallback_mode in allowed_modes else "off"
+        zooms[0.0] = 1.0
 
     order_by_time = {}
     for cut in speaker_order_cuts or []:
@@ -8335,11 +8354,13 @@ def build_reframe_timeline_filter(
         )
         if not keys:
             return {"time": 0, "x": 50, "y": 50, "cut": True}
+        if timestamp <= float(keys[0].get("time", 0)):
+            return {"time": 0, "x": keys[0].get("x", 50), "y": keys[0].get("y", 50), "cut": True}
         previous = keys[0]
         for following in keys[1:]:
             left_time = float(previous.get("time", 0))
             right_time = float(following.get("time", 0))
-            if timestamp <= right_time:
+            if timestamp < right_time:
                 if following.get("cut") is True or right_time <= left_time:
                     return {"time": 0, "x": previous.get("x", 50), "y": previous.get("y", 50), "cut": True}
                 progress = max(0, min(1, (timestamp - left_time) / (right_time - left_time)))
@@ -8349,6 +8370,38 @@ def build_reframe_timeline_filter(
                         "cut": True}
             previous = following
         return {"time": 0, "x": previous.get("x", 50), "y": previous.get("y", 50), "cut": True}
+
+    def localized_split_framing(start, end):
+        localized = {}
+        for slot in ("top", "bottom"):
+            frame = dict((split_framing or {}).get(slot) or {})
+            keys = frame.get("keyframes") or []
+            if not keys:
+                localized[slot] = frame
+                continue
+            # Express global reviewed marks on this trimmed segment's clock.
+            ordered = sorted(keys, key=lambda key: float(key.get("time", 0)))
+            def split_position(timestamp):
+                if timestamp <= float(ordered[0].get("time", 0)):
+                    return {"x": ordered[0].get("x", frame.get("x", 50)), "y": ordered[0].get("y", frame.get("y", 50))}
+                previous = ordered[0]
+                for following in ordered[1:]:
+                    left_time, right_time = float(previous.get("time", 0)), float(following.get("time", 0))
+                    if timestamp < right_time:
+                        if following.get("cut") is True or right_time <= left_time:
+                            return {"x": previous.get("x", 50), "y": previous.get("y", 50)}
+                        progress = max(0, min(1, (timestamp-left_time)/(right_time-left_time)))
+                        return {
+                            "x": float(previous.get("x", 50)) + (float(following.get("x", 50))-float(previous.get("x", 50)))*progress,
+                            "y": float(previous.get("y", 50)) + (float(following.get("y", 50))-float(previous.get("y", 50)))*progress,
+                        }
+                    previous = following
+                return {"x": previous.get("x", 50), "y": previous.get("y", 50)}
+            local_keys = [{"time": 0, **split_position(start), "cut": True}]
+            local_keys.extend({**key, "time": float(key.get("time", 0))-start}
+                              for key in ordered if start < float(key.get("time", 0)) < end)
+            localized[slot] = {**frame, "keyframes": local_keys}
+        return localized
 
     segments = [(start, end) for start, end in zip(boundaries, boundaries[1:]) if end-start >= .02]
     input_labels = "".join(f"[rf_{index}_in]" for index in range(len(segments)))
@@ -8360,16 +8413,18 @@ def build_reframe_timeline_filter(
     outputs = []
     for index, (start, end) in enumerate(segments):
         mode = value_at(normalized, start, fallback_mode)
+        director_zoom = value_at(zooms, start, 1.0)
         order = value_at(order_by_time, start, "top")
         trimmed = f"[rf_{index}_trim]"
         output = f"[rf_{index}_out]"
+        composed = f"[rf_{index}_base]" if director_zoom > 1.001 else output
         parts.append(
             f"[rf_{index}_in]trim=start={start:.6f}:end={end:.6f},setpts=PTS-STARTPTS{trimmed}"
         )
         if mode == "center":
             graph = build_source_split_filter(
                 src_width, src_height, target_width, target_height,
-                split_framing or {}, input_label=trimmed, output_label=output,
+                localized_split_framing(start, end), input_label=trimmed, output_label=composed,
                 primary_slot=order,
             )
             graph = re.sub(r"\[multicam_([^\]]+)\]", rf"[rf_{index}_multicam_\1]", graph)
@@ -8381,10 +8436,15 @@ def build_reframe_timeline_filter(
                 if start < key_time < end:
                     local_keys.append({**key, "time": key_time-start})
             parts.append(
-                f"{trimmed}{build_reviewed_reframe_filter(local_keys, target_width, target_height, solo_zoom)}{output}"
+                f"{trimmed}{build_reviewed_reframe_filter(local_keys, target_width, target_height, solo_zoom)}{composed}"
             )
         else:
-            parts.append(build_safe_vertical_fit_filter(trimmed, output, target_width, target_height))
+            parts.append(build_safe_vertical_fit_filter(trimmed, composed, target_width, target_height))
+        if director_zoom > 1.001:
+            parts.append(
+                f"{composed}crop=trunc(iw/{director_zoom:.6f}/2)*2:trunc(ih/{director_zoom:.6f}/2)*2:"
+                f"(iw-ow)/2:(ih-oh)/2,scale={target_width}:{target_height},setsar=1{output}"
+            )
         outputs.append(output)
     parts.append(f"{''.join(outputs)}concat=n={len(outputs)}:v=1:a=0,format=yuv420p[vout]")
     return ";".join(parts)
@@ -30233,6 +30293,50 @@ def build_studio_finish_filter(finish_plan, color_cube_path=None):
     return ",".join(filters)
 
 
+def build_studio_adjustment_timeline_filter(base_filter, layers, duration):
+    """Apply actual timed grade layers on the same clock as the editor timeline."""
+    duration = max(0.04, float(duration or 0))
+    active_layers = []
+    boundaries = {0.0, duration}
+    for layer in layers or []:
+        if not isinstance(layer, dict):
+            continue
+        start = max(0.0, float(layer.get("startTime", layer.get("start_time", 0)) or 0))
+        end = min(duration, start + max(0.0, float(layer.get("duration", 0) or 0)))
+        if end - start < 0.02 or start >= duration:
+            continue
+        effects = layer.get("effects") or {}
+        if effects.get("blendMode", "normal") != "normal" or float(effects.get("opacity", 1)) != 1:
+            raise ValueError("Timed color adjustment supports normal blend at full opacity only")
+        grade = build_studio_finish_filter({
+            "enabled": True,
+            "color": effects.get("color") or {},
+            "texture": effects.get("texture") or {},
+        })
+        active_layers.append((start, end, grade))
+        boundaries.update((start, end))
+    if not active_layers:
+        return ""
+    intervals = [(left, right) for left, right in zip(sorted(boundaries), sorted(boundaries)[1:])
+                 if right - left >= 0.02]
+    base = f"[0:v]{base_filter or 'null'}[finish_base]"
+    inputs = "".join(f"[finish_{index}_in]" for index in range(len(intervals)))
+    parts = [base, f"[finish_base]split={len(intervals)}{inputs}"]
+    outputs = []
+    for index, (start, end) in enumerate(intervals):
+        grades = [grade for layer_start, layer_end, grade in active_layers
+                  if layer_start <= start + 1e-6 and layer_end >= end - 1e-6]
+        output = f"[finish_{index}_out]"
+        parts.append(
+            f"[finish_{index}_in]trim=start={start:.6f}:end={end:.6f},setpts=PTS-STARTPTS,"
+            + (",".join(grades) + "," if grades else "")
+            + f"format=yuv420p,setsar=1{output}"
+        )
+        outputs.append(output)
+    parts.append(f"{''.join(outputs)}concat=n={len(outputs)}:v=1:a=0[v_finish]")
+    return ";".join(parts)
+
+
 async def detect_video_content_crop(input_path, width, height):
     """Detect embedded black framing before applying the delivery-frame mask."""
     safe_width = max(2, int(width or 0))
@@ -30434,6 +30538,7 @@ class RenderViralRequest(BaseModel):
     caption_scale: float = 1.0
     caption_text_override: Optional[str] = None
     caption_segments: Optional[List[ViralCaptionSegment]] = None
+    caption_review_copy: bool = False
     translate_captions_to_english: bool = False
     preview_speed: float = 1.0
     speed_segments: Optional[List[ViralSpeedSegment]] = None
@@ -30517,6 +30622,11 @@ async def render_viral_clip(request: RenderViralRequest):
     from viral_motion_graphics import validate_design
     from studio_3d_overlay import validate_resolved_overlays
     from viral_audio_remix import normalize_audio_remix
+    # This is an HTTP trust boundary. A forged or old frontend payload cannot
+    # suppress the AutoPromote mark; the finished asset is branded after every
+    # edit, cleanup, grade and caption pass.
+    request.brand_watermark = True
+    request.brandWatermark = True
     try:
         validate_design(request.motionGraphics, [effect.model_dump() for effect in request.sound_effects or []])
         validate_resolved_overlays(getattr(request, "threeDGraphics", None))
@@ -30583,7 +30693,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 "source-language captions cannot be exported as an English translation"
             ),
         )
-    if request.auto_captions and any(
+    if request.auto_captions and not request.caption_review_copy and any(
         bool(getattr(segment, "review_required", False))
         or (
             bool(getattr(segment, "text_review_required", False))
@@ -30836,7 +30946,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 get_media_duration(trimmed_path)
                 or max(0.0, float(request.end_time) - float(request.start_time)),
             )
-            if caption_coverage_gaps:
+            if caption_coverage_gaps and not request.caption_review_copy:
                 gap_summary = ", ".join(
                     f"{gap['start']:.1f}-{gap['end']:.1f}s"
                     for gap in caption_coverage_gaps[:5]
@@ -31288,16 +31398,24 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             (request.finish_plan or {}).get("motion"), *get_video_dimensions(working_path)
         )
         finish_filter = ",".join(part for part in (finish_filter, zoom_filter) if part)
-        if finish_filter:
+        adjustment_graph = build_studio_adjustment_timeline_filter(
+            finish_filter,
+            (request.finish_plan or {}).get("adjustment_layers") or [],
+            get_media_duration(working_path),
+        )
+        if finish_filter or adjustment_graph:
             finish_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_finish.mp4")
             finish_has_audio = has_audio_stream(working_path)
             finish_cmd = [
                 "ffmpeg", "-i", working_path,
-                "-vf", finish_filter,
+                *(["-filter_complex", adjustment_graph, "-map", "[v_finish]"]
+                  if adjustment_graph else ["-vf", finish_filter]),
                 "-c:v", "libx264", "-preset", "veryfast", "-crf", "19",
                 "-pix_fmt", "yuv420p",
             ]
             if finish_has_audio:
+                if adjustment_graph:
+                    finish_cmd.extend(["-map", "0:a?"])
                 finish_cmd.extend(["-c:a", "copy"])
             else:
                 finish_cmd.append("-an")
@@ -32767,6 +32885,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     request.output_settings,
                     request.brand_watermark_schedule,
                     request.brand_watermark_variant,
+                    request.caption_review_copy,
                 )
             report_progress(90, "Verifying rendered video and audio")
             audio_expected = bool(
@@ -32860,6 +32979,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 "cover_frame": cover_frame_result,
                 "thumbnail_frame": thumbnail_frame_result,
                 "brand_watermark": brand_watermark_enabled,
+                "caption_review_copy": bool(request.caption_review_copy),
                 "brand_watermark_receipt": brand_watermark_receipt,
                 "output_settings": delivery_profile,
                 "watermark_text": (

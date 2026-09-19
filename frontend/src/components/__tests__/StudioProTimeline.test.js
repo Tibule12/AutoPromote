@@ -34,6 +34,34 @@ test("motion scenes are selectable from their own lane and seek to their actual 
   expect(onSeek.mock.calls[0][1]).toBe(4);
 });
 
+test("timed color adjustment block moves and trims the exported grade interval", () => {
+  const onAdjustmentMove = jest.fn();
+  const onAdjustmentTrim = jest.fn();
+  const onSelectTool = jest.fn();
+  render(
+    <StudioProTimeline
+      duration={20}
+      trackStates={{}}
+      adjustmentLayers={[{ id: "grade-1", name: "Interview grade", startTime: 4, duration: 3,
+        effects: { color: { brightness: 1.1 } } }]}
+      onAdjustmentMove={onAdjustmentMove}
+      onAdjustmentTrim={onAdjustmentTrim}
+      onSelectTool={onSelectTool}
+    />
+  );
+  const clip = screen.getByTestId("pro-adjustment-clip-1");
+  jest.spyOn(clip.parentElement, "getBoundingClientRect").mockReturnValue({ width: 1000 });
+  const body = clip.children[1];
+  body.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true, clientX: 200 }));
+  body.dispatchEvent(new MouseEvent("pointermove", { bubbles: true, clientX: 250 }));
+  expect(onAdjustmentMove).toHaveBeenCalledWith("grade-1", 5);
+  fireEvent.click(body);
+  expect(onSelectTool).toHaveBeenCalledWith("composite");
+  clip.children[0].dispatchEvent(new MouseEvent("pointerdown", { bubbles: true, clientX: 200 }));
+  clip.children[0].dispatchEvent(new MouseEvent("pointermove", { bubbles: true, clientX: 250 }));
+  expect(onAdjustmentTrim).toHaveBeenCalledWith("grade-1", "start", 5);
+});
+
 test("auto-motion button in toolbar triggers onAutoGenerateMotionBeats", () => {
   const onAutoGenerate = jest.fn();
   render(

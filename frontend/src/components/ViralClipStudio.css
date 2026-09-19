@@ -5612,6 +5612,48 @@ body.dashboard-mode.viral-studio-open {
   font-size: 0.52rem;
 }
 
+.adjustment-layer-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 9px;
+  padding: 10px;
+  border: 1px solid rgba(115, 216, 179, 0.2);
+  border-radius: 9px;
+  background: rgba(9, 27, 36, 0.75);
+}
+
+.adjustment-layer-controls > strong,
+.adjustment-layer-controls > button {
+  grid-column: 1 / -1;
+}
+
+.adjustment-layer-controls label {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.adjustment-layer-controls input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  border: 1px solid rgba(142, 190, 199, 0.28);
+  border-radius: 6px;
+  padding: 5px;
+  color: #efffff;
+  background: #10232b;
+}
+
+.adjustment-layer-controls > button {
+  border: 1px solid rgba(255, 110, 119, 0.35);
+  border-radius: 6px;
+  padding: 7px;
+  color: #ffd4d7;
+  background: rgba(132, 34, 47, 0.25);
+  cursor: pointer;
+}
+
 .advanced-tool-section {
   border: 1px solid rgba(126, 149, 183, 0.14);
   border-radius: 9px;
@@ -9417,18 +9459,17 @@ body.dashboard-mode.viral-studio-open {
   background: rgba(5, 12, 21, 0.74);
 }
 
-.export-branding-card > label {
+.export-branding-card > div:first-child {
   display: flex;
   min-width: 0;
   flex: 1;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  cursor: pointer;
   grid-column: 1 / -1;
 }
 
-.export-branding-card > label > span {
+.export-branding-card > div:first-child > span {
   display: flex;
   min-width: 0;
   flex-direction: column;

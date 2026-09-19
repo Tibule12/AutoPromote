@@ -292,6 +292,7 @@ export const buildViralRenderData = ({
     extraOptions.captionSegments,
     normalizeCaptionSegmentsForRender
   );
+  addDefined(payload, "caption_review_copy", extraOptions.captionReviewCopy, Boolean);
   addDefined(
     payload,
     "translate_captions_to_english",
@@ -324,7 +325,9 @@ export const buildViralRenderData = ({
   addDefined(payload, "remove_watermark", extraOptions.removeWatermark, Boolean);
   addDefined(payload, "watermark_mode", extraOptions.watermarkMode);
   addDefined(payload, "watermark_regions", extraOptions.manualWatermarkRegions);
-  addDefined(payload, "brand_watermark", extraOptions.brandWatermark, Boolean);
+  // The platform signature cannot be disabled by a stale project or a caller
+  // that constructs the render payload outside the Studio UI.
+  payload.brand_watermark = true;
   addDefined(payload, "watermark_text", extraOptions.brandWatermarkText);
   addDefined(payload, "brand_watermark_variant", extraOptions.brandWatermarkVariant);
   addDefined(payload, "brand_watermark_schedule", extraOptions.brandWatermarkSchedule);

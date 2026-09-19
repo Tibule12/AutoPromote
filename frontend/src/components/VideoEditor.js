@@ -1364,6 +1364,7 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
           coverFrame: result.coverFrame || null,
           thumbnailFrame: result.thumbnailFrame || null,
           audioProof: result.audioProof || result.audio_proof || null,
+          captionReviewCopy: extraOptions.captionReviewCopy === true,
           isRemote: true,
           clipLearning:
             selectedClip?.id || selectedClip?.scanSessionId
@@ -1508,7 +1509,7 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
         renderedOutput={viralRenderedFile}
         onDownloadRendered={handleDownloadVideo}
         onUseRendered={() => {
-          if (!viralRenderedFile) return;
+          if (!viralRenderedFile || viralRenderedFile.captionReviewCopy) return;
           onSave?.(viralRenderedFile);
           setClipSuggestions(null);
         }}

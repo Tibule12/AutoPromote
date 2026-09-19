@@ -7,6 +7,7 @@ import subprocess
 import tempfile
 import unittest
 import asyncio
+from unittest.mock import AsyncMock, patch
 
 from python_media_worker.viral_render_contract import (
     build_caption_override_transcript,
@@ -26,7 +27,9 @@ from python_media_worker.main_media_server import (
     RenderViralRequest,
     ViralOverlay,
     apply_manual_reframe_keyframes,
+    apply_viral_brand_watermark,
     build_viral_brand_watermark_asset,
+    build_studio_adjustment_timeline_filter,
     build_group_stack_filter,
     build_source_split_filter,
     build_reframe_timeline_filter,
@@ -39,12 +42,90 @@ from python_media_worker.main_media_server import (
     multicam_rounded_card_filter,
     multicam_rounded_mask_path,
     render_viral_clip_impl,
+    render_viral_clip,
     resolve_viral_export_profile,
     smooth_positions,
 )
 
 
 class ViralRenderContractTests(unittest.TestCase):
+    def test_caption_review_copy_is_stamped_and_keeps_audio(self):
+        with tempfile.TemporaryDirectory(prefix="viral-review-copy-") as temp:
+            output = str(Path(temp) / "source.mp4")
+            created = subprocess.run([
+                "ffmpeg", "-v", "error", "-f", "lavfi", "-i",
+                "color=c=navy:s=180x320:r=10:d=1", "-f", "lavfi", "-i",
+                "sine=frequency=440:duration=1", "-c:v", "libx264", "-c:a", "aac",
+                "-shortest", "-y", output,
+            ], capture_output=True)
+            self.assertEqual(created.returncode, 0, created.stderr.decode())
+            receipt = asyncio.run(apply_viral_brand_watermark(
+                output, "qa-review-copy", 180, 320,
+                {"resolution": "source", "fps": "source", "codec": "h264"},
+                caption_review_copy=True,
+            ))
+            self.assertTrue(receipt["caption_review_copy"])
+            self.assertEqual(receipt["status"], "burned_in")
+            probed = subprocess.run([
+                "ffprobe", "-v", "error", "-show_entries", "stream=codec_type",
+                "-of", "csv=p=0", output,
+            ], capture_output=True, text=True)
+            self.assertEqual(probed.returncode, 0)
+            self.assertIn("audio", probed.stdout)
+
+    def test_color_adjustment_timeline_changes_only_its_visible_interval(self):
+        graph = build_studio_adjustment_timeline_filter("", [
+            {"startTime": 1, "duration": 1, "effects": {
+                "color": {"brightness": 1.2, "contrast": 1, "saturation": 1}
+            }},
+        ], 2)
+        result = subprocess.run([
+            "ffmpeg", "-v", "error", "-f", "lavfi", "-i", "color=c=gray:s=64x64:r=10:d=2",
+            "-filter_complex_threads", "1", "-filter_complex", graph,
+            "-map", "[v_finish]", "-threads", "1", "-pix_fmt", "rgb24",
+            "-f", "rawvideo", "pipe:1",
+        ], capture_output=True)
+        self.assertEqual(result.returncode, 0, result.stderr.decode())
+        frame_bytes = 64 * 64 * 3
+        self.assertEqual(len(result.stdout), 20 * frame_bytes)
+        self.assertGreater(result.stdout[15 * frame_bytes], result.stdout[2 * frame_bytes] + 30)
+
+    def test_http_render_boundary_forces_branding_even_for_forged_payload(self):
+        request = RenderViralRequest(
+            video_url="https://example.com/source.mp4", start_time=0, end_time=1,
+            brand_watermark=False, brandWatermark=False,
+        )
+        with patch("python_media_worker.main_media_server.render_viral_clip_impl", new_callable=AsyncMock) as render:
+            render.return_value = {"ok": True}
+            asyncio.run(render_viral_clip(request))
+        self.assertTrue(request.brand_watermark)
+        self.assertTrue(request.brandWatermark)
+
+    def test_director_virtual_camera_punch_renders_and_resets_at_master_cut(self):
+        graph = build_reframe_timeline_filter(
+            640, 360, 180, 320, 3,
+            [
+                {"time": 0, "mode": "off"},
+                {"time": 1, "mode": "off", "zoom": 1.35},
+                {"time": 2, "mode": "off", "zoom": 1},
+            ],
+        )
+        result = subprocess.run([
+            "ffmpeg", "-v", "error", "-f", "lavfi", "-i",
+            "testsrc2=s=640x360:r=5:d=3", "-filter_complex_threads", "1",
+            "-filter_complex", graph, "-map", "[vout]", "-threads", "1",
+            "-pix_fmt", "rgb24", "-f", "rawvideo", "pipe:1",
+        ], capture_output=True)
+        self.assertEqual(result.returncode, 0, result.stderr.decode())
+        frame_bytes = 180 * 320 * 3
+        self.assertEqual(len(result.stdout), 15 * frame_bytes)
+        # A safe-fit master has black corners; the punch enlarges the programme.
+        def nonblack(frame_index):
+            frame = result.stdout[frame_index * frame_bytes:(frame_index + 1) * frame_bytes]
+            return sum(any(frame[index:index + 3]) for index in range(0, len(frame), 3))
+        self.assertGreater(nonblack(7), nonblack(2))
+        self.assertEqual(nonblack(2), nonblack(12))
+
     def test_single_show_everyone_timeline_segment_is_valid_ffmpeg(self):
         graph = build_reframe_timeline_filter(
             640, 360, 180, 320, 1,
@@ -98,6 +179,27 @@ class ViralRenderContractTests(unittest.TestCase):
         self.assertGreater(pixel(10, 80)[2], 200)  # The order cut puts Speaker 2 on top.
         self.assertGreater(pixel(10, 240)[0], 200)
         self.assertGreater(pixel(17, 160)[2], 200) # Solo segment follows the right speaker.
+
+    def test_timed_split_rebases_global_panel_keyframes_to_each_segment(self):
+        graph = build_reframe_timeline_filter(
+            640, 360, 180, 320, 2,
+            [{"time": 0, "mode": "speaker_track"}, {"time": 1, "mode": "center"}],
+            split_framing={
+                "top": {"x": 25, "y": 50, "zoom": 3},
+                "bottom": {"x": 75, "y": 50, "zoom": 3, "keyframes": [
+                    {"time": 0, "x": 75, "y": 50, "cut": True},
+                    {"time": 1.2, "x": 25, "y": 50, "cut": True},
+                ]},
+            },
+            solo_keyframes=[{"time": 0, "x": 25, "y": 50, "cut": True}],
+        )
+        self.assertIn("0.200000", graph)
+        result = subprocess.run([
+            "ffmpeg", "-v", "error", "-f", "lavfi", "-i", "testsrc2=s=640x360:r=10:d=2",
+            "-filter_complex_threads", "1", "-filter_complex", graph,
+            "-map", "[vout]", "-frames:v", "20", "-f", "null", "-",
+        ], capture_output=True)
+        self.assertEqual(result.returncode, 0, result.stderr.decode())
 
     def test_both_split_panels_follow_independent_timed_positions(self):
         graph = build_source_split_filter(640, 360, 180, 320, {

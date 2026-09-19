@@ -972,6 +972,7 @@ class VideoEditingService {
           ),
           caption_text_override:
             viralData.caption_text_override ?? viralData.captionTextOverride ?? null,
+          caption_review_copy: viralData.caption_review_copy === true,
           preview_speed: Number(
             viralData.preview_speed ?? viralData.previewSpeed ?? 1
           ),
@@ -1070,9 +1071,8 @@ class VideoEditingService {
           hook_focus_point: viralData.hook_focus_point || null,
           cover_frame: viralData.cover_frame || null,
           thumbnail_frame: viralData.thumbnail_frame || viralData.cover_frame || null,
-          brand_watermark:
-            viralData.brand_watermark !== false && viralData.brandWatermark !== false,
-          brandWatermark: viralData.brand_watermark !== false && viralData.brandWatermark !== false,
+          brand_watermark: true,
+          brandWatermark: true,
           watermark_text:
             viralData.watermark_text ||
             viralData.watermarkText ||
@@ -1127,6 +1127,7 @@ class VideoEditingService {
           thumbnailFrame: result.thumbnail_frame || result.thumbnailFrame || null,
           duration: result.duration || 0,
           audioProof: result.audio_proof || result.audioProof || null,
+          captionReviewCopy: result.caption_review_copy === true,
           message: "Processing completed (Remote Worker)",
         };
       }
