@@ -885,6 +885,83 @@ router.post("/track-studio-faces", requireTesterEditingFeature("audioExtract"), 
 
 // Handles file upload -> Firebase Storage -> Python Worker -> Returns Captions
 router.post(
+  "/transcribe-source",
+  requireTesterEditingFeature("audioExtract"),
+  async (req, res) => {
+    try {
+      const userId = req.user.uid;
+      const storagePath = String(req.body?.storage_path || req.body?.storagePath || "")
+        .trim()
+        .replace(/^\/+/, "");
+      const ownedPrefix = `uploads/videos/${userId}/`;
+      const resumableOwnedPrefix = `temp/multicam-ingest/${userId}/`;
+      const matchingOwnedPrefix = storagePath.startsWith(ownedPrefix)
+        ? ownedPrefix
+        : storagePath.startsWith(resumableOwnedPrefix)
+          ? resumableOwnedPrefix
+          : "";
+      if (
+        !matchingOwnedPrefix ||
+        storagePath.length <= matchingOwnedPrefix.length ||
+        storagePath.length > 1024 ||
+        storagePath.includes("..") ||
+        storagePath.includes("\\")
+      ) {
+        return res.status(403).json({
+          error: "Choose a video uploaded by your account before generating full-source captions",
+        });
+      }
+
+      const resumableBucketName = String(
+        process.env.MULTICAM_INGEST_BUCKET || process.env.FIREBASE_STORAGE_BUCKET || ""
+      )
+        .replace(/^gs:\/\//, "")
+        .replace(/\/$/, "");
+      const sourceBucket =
+        storagePath.startsWith(resumableOwnedPrefix) && resumableBucketName
+          ? admin.storage().bucket(resumableBucketName)
+          : admin.storage().bucket();
+      const sourceFile = sourceBucket.file(storagePath);
+      const [metadata] = await sourceFile.getMetadata();
+      const contentType = String(metadata?.contentType || "").toLowerCase();
+      const customMetadata = metadata?.metadata || {};
+      if (
+        storagePath.startsWith(resumableOwnedPrefix) &&
+        (customMetadata.ownerUid !== userId || customMetadata.purpose !== "studio_source")
+      ) {
+        return res.status(403).json({ error: "The full-source upload does not belong to this Studio" });
+      }
+      if (contentType && !contentType.startsWith("video/")) {
+        return res.status(400).json({ error: "The selected Studio source is not a video" });
+      }
+
+      const [url] = await sourceFile.getSignedUrl({
+        action: "read",
+        expires: Date.now() + 1000 * 60 * 60 * 2,
+      });
+      const job = await videoEditingService.startTranscriptionJob(url, userId, {
+        translateToEnglish: ["1", "true", "yes", "on"].includes(
+          String(req.body?.translate_to_english ?? req.body?.translateToEnglish ?? "")
+            .trim()
+            .toLowerCase()
+        ),
+      });
+      return res.json({
+        success: true,
+        jobId: job.jobId,
+        message: "Full-source transcription started",
+      });
+    } catch (error) {
+      if (error?.code === 404) {
+        return res.status(404).json({ error: "The uploaded Studio source no longer exists" });
+      }
+      console.error("[MediaRoute] Full-source transcription failed:", error.message);
+      return res.status(500).json({ error: "Full-source transcription could not be started" });
+    }
+  }
+);
+
+router.post(
   "/transcribe",
   requireTesterEditingFeature("audioExtract"),
   upload.single("file"),
@@ -1137,12 +1214,25 @@ router.post("/multicam/uploads/start", async (req, res) => {
   try {
     const userId = req.user?.uid || req.userId;
     const tierSnapshot = await getEffectiveTierSnapshot(userId);
-    const capabilities = getPlanCapabilities(tierSnapshot.tierId);
-    if (!capabilities.multicam) {
+    const capabilities = applyTesterCapabilityAllowlist(
+      getPlanCapabilities(tierSnapshot.tierId),
+      tierSnapshot.testerAccess
+    );
+    const uploadPurpose = String(req.body?.purpose || "camera_original");
+    const studioSourceAllowed =
+      uploadPurpose === "studio_source" &&
+      capabilities?.editing?.features?.viralClipStudio?.enabled;
+    if (!studioSourceAllowed && !capabilities.multicam) {
       return res.status(403).json({
         success: false,
-        code: "MULTICAM_PLAN_REQUIRED",
-        message: `${capabilities.planName} plan does not include multi-camera rendering.`,
+        code:
+          uploadPurpose === "studio_source"
+            ? "VIRAL_STUDIO_PLAN_REQUIRED"
+            : "MULTICAM_PLAN_REQUIRED",
+        message:
+          uploadPurpose === "studio_source"
+            ? `${capabilities.planName} plan does not include Viral Clip Studio.`
+            : `${capabilities.planName} plan does not include multi-camera rendering.`,
       });
     }
 

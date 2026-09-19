@@ -1,7 +1,8 @@
-import { API_ENDPOINTS } from "../config";
+import { API_BASE_URL, API_ENDPOINTS } from "../config";
 import { auth, storage } from "../firebaseClient";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { getRuntimeE2EToken } from "./mediaAuth";
+import { uploadMulticamSourceResumable } from "./multicamResumableUpload";
 
 export const STORAGE_UPLOAD_LIMIT_MB = 500;
 const TEMPORARY_SOURCE_PREFIXES = Object.freeze({
@@ -229,16 +230,29 @@ async function uploadSourceFileViaBackendRequest({
 export async function uploadSourceFileViaBackend({
   file,
   token,
+  getToken,
   mediaType,
   fileName,
   onProgress,
   timeoutMs = 180000,
+  purpose,
 }) {
   if (!(file instanceof Blob)) {
     throw new Error("Upload requires a File or Blob.");
   }
 
   const normalizedMediaType = mediaType || inferUploadMediaType(file);
+  if (purpose === "studio_source" && file.size > STORAGE_UPLOAD_LIMIT_MB * 1024 * 1024) {
+    const uploaded = await uploadMulticamSourceResumable({
+      apiBaseUrl: API_BASE_URL,
+      token,
+      getToken,
+      file,
+      purpose: "studio_source",
+      onProgress,
+    });
+    return { ...uploaded, uploadMode: "studio_resumable" };
+  }
   if (getRuntimeE2EToken()) {
     return uploadSourceFileViaBackendRequest({
       file,

@@ -1,5 +1,6 @@
-import { uploadTemporaryVideoSource } from "../sourceUpload";
+import { uploadSourceFileViaBackend, uploadTemporaryVideoSource } from "../sourceUpload";
 import { uploadBytesResumable, ref } from "firebase/storage";
+import { uploadMulticamSourceResumable } from "../multicamResumableUpload";
 
 jest.mock("../../firebaseClient", () => ({
   auth: { currentUser: { uid: "secure-user" } },
@@ -10,6 +11,10 @@ jest.mock("firebase/storage", () => ({
   getDownloadURL: jest.fn(),
   ref: jest.fn((_storage, path) => ({ fullPath: path })),
   uploadBytesResumable: jest.fn(),
+}));
+
+jest.mock("../multicamResumableUpload", () => ({
+  uploadMulticamSourceResumable: jest.fn(),
 }));
 
 describe("temporary source uploads", () => {
@@ -63,6 +68,44 @@ describe("temporary source uploads", () => {
     await expect(
       uploadTemporaryVideoSource({ file, purpose: "unknown" })
     ).rejects.toThrow("Invalid temporary upload purpose");
+    expect(uploadBytesResumable).not.toHaveBeenCalled();
+  });
+
+  it("uses the secure resumable path for a full Studio podcast larger than 500 MB", async () => {
+    const file = new File(["video"], "full-podcast.mp4", { type: "video/mp4" });
+    Object.defineProperty(file, "size", { configurable: true, value: 2_611_147_007 });
+    const getToken = jest.fn(() => Promise.resolve("fresh-token"));
+    const onProgress = jest.fn();
+    uploadMulticamSourceResumable.mockResolvedValue({
+      url: "https://storage.example/full-podcast.mp4",
+      storagePath: "temp/multicam-ingest/secure-user/full-podcast.mp4",
+      size: file.size,
+    });
+
+    const result = await uploadSourceFileViaBackend({
+      file,
+      token: "token",
+      getToken,
+      mediaType: "video",
+      purpose: "studio_source",
+      onProgress,
+    });
+
+    expect(uploadMulticamSourceResumable).toHaveBeenCalledWith(
+      expect.objectContaining({
+        file,
+        token: "token",
+        getToken,
+        purpose: "studio_source",
+        onProgress,
+      })
+    );
+    expect(result).toEqual(
+      expect.objectContaining({
+        storagePath: "temp/multicam-ingest/secure-user/full-podcast.mp4",
+        uploadMode: "studio_resumable",
+      })
+    );
     expect(uploadBytesResumable).not.toHaveBeenCalled();
   });
 });

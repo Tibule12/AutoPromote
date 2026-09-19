@@ -1399,7 +1399,10 @@ class VideoEditingService {
             : "Multilingual South African podcast. Preserve every language, local name, slang term, and code-switch exactly as spoken.",
         },
         {
-          timeout: 600000, // 10 minutes
+          // Full podcast transcription can legitimately exceed ten minutes on
+          // CPU workers. The browser polls the durable job and must not receive
+          // a false failure while the worker is still producing captions.
+          timeout: 3600000,
         }
       );
 

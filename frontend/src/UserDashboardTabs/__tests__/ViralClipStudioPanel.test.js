@@ -74,6 +74,7 @@ describe("ViralClipStudioPanel", () => {
       expect.objectContaining({
         name: "source.mp4",
         url: "https://storage.example/source.mp4",
+        storagePath: "uploads/videos/user/source.mp4",
         isRemote: true,
         openStudio: true,
       })

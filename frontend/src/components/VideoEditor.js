@@ -1491,6 +1491,7 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
     const studio = (
       <ViralClipStudio
         videoUrl={videoSrc}
+        sourceStoragePath={processedFile?.storagePath || file?.storagePath || null}
         clips={clipSuggestions}
         images={images}
         onSave={handleViralRender}

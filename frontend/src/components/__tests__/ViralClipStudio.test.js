@@ -2951,6 +2951,64 @@ describe("ViralClipStudio timeline sequencing", () => {
     );
   });
 
+  test("captions a full uploaded podcast by secure storage reference without downloading it into the browser", async () => {
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: jest.fn(() =>
+        Promise.resolve({
+          language_mode: "preserve_spoken_languages",
+          segments: [
+            {
+              start: 0,
+              end: 3.2,
+              text: "Molweni, my lovely viewers at home.",
+              speaker: "host",
+              language: "xh",
+              languages: ["xh", "en"],
+            },
+          ],
+        })
+      ),
+    });
+
+    render(
+      <ViralClipStudio
+        videoUrl="https://storage.example/full-podcast.mp4"
+        sourceStoragePath="temp/multicam-ingest/test-user/full-podcast.mp4"
+        clips={[
+          {
+            id: "full-podcast",
+            start: 0,
+            end: 2067.094,
+            duration: 2067.094,
+            url: "https://storage.example/full-podcast.mp4",
+          },
+        ]}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+        onStatusChange={jest.fn()}
+      />
+    );
+
+    const inspector = screen.getByTestId("clip-studio-inspector");
+    fireEvent.click(within(inspector).getByRole("tab", { name: /Captions/i }));
+    fireEvent.click(within(inspector).getByTestId("generate-live-transcript"));
+
+    await waitFor(() => {
+      expect(within(inspector).getByRole("textbox", { name: "Caption 1 text" })).toHaveValue(
+        "Molweni, my lovely viewers at home."
+      );
+    });
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+    const [requestUrl, request] = global.fetch.mock.calls[0];
+    expect(requestUrl).toContain("/api/media/transcribe-source");
+    expect(request.headers["Content-Type"]).toBe("application/json");
+    expect(JSON.parse(request.body)).toEqual({
+      storage_path: "temp/multicam-ingest/test-user/full-podcast.mp4",
+      translate_to_english: false,
+    });
+  });
+
   test("turns a reviewed spoken story beat into approved licensed moving footage", async () => {
     const onSave = jest.fn(() => Promise.resolve());
     global.fetch

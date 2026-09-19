@@ -79,6 +79,33 @@ describe("multicam upload service", () => {
     expect(uploadOptions.metadata.metadata.deleteAfter).toBeUndefined();
   });
 
+  it("allows full Studio sources to use the same large resumable upload transport", async () => {
+    const result = await startMulticamUpload({
+      userId: "user-1",
+      fileName: "full-podcast.mp4",
+      contentType: "video/mp4",
+      sizeBytes: 2_611_147_007,
+      lastModified: 999,
+      fingerprint: "full-podcast:2611147007:999",
+      purpose: "studio_source",
+      origin: "https://autopromote.org",
+    });
+
+    const file = mockFileObjects.get(`test-bucket/${result.storagePath}`);
+    expect(result.storagePath).toContain("temp/multicam-ingest/user-1/");
+    expect(file.createResumableUpload).toHaveBeenCalledWith(
+      expect.objectContaining({
+        metadata: expect.objectContaining({
+          metadata: expect.objectContaining({
+            ownerUid: "user-1",
+            purpose: "studio_source",
+            expectedSizeBytes: "2611147007",
+          }),
+        }),
+      })
+    );
+  });
+
   it("rejects completion when the uploaded byte count is incomplete", async () => {
     const storagePath = buildIngestStoragePath({
       userId: "user-1",

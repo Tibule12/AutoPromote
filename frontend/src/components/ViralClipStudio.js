@@ -2514,6 +2514,7 @@ const getCollisionSafePipPlacement = ({
 
 const ViralClipStudio = ({
   videoUrl,
+  sourceStoragePath = null,
   clips,
   images = [],
   onSave,
@@ -7284,45 +7285,71 @@ const ViralClipStudio = ({
 
     try {
       const sourceUrl = getSafeMediaSource(currentTimelineClip?.url || videoUrl);
-      let sourceBlob =
-        selectedClip?.file instanceof Blob
-          ? selectedClip.file
-          : currentTimelineClip?.file instanceof Blob
-            ? currentTimelineClip.file
-            : null;
-
-      if (!sourceBlob && sourceUrl) {
-        const sourceResponse = await fetch(sourceUrl);
-        if (!sourceResponse.ok) throw new Error("The source video could not be opened.");
-        sourceBlob = await sourceResponse.blob();
-      }
-
-      if (!(sourceBlob instanceof Blob)) {
-        throw new Error("Reload the source video, then try captions again.");
-      }
-
       let token = await getMediaAuthToken();
       if (!token) throw new Error("Please log in before generating captions.");
-      const formData = new FormData();
-      formData.append(
-        "file",
-        sourceBlob,
-        selectedClip?.file?.name || currentTimelineClip?.file?.name || "viral-studio-source.mp4"
-      );
-      formData.append("translate_to_english", requestedTranslation ? "true" : "false");
 
-      let response = await fetch(`${API_BASE_URL}/api/media/transcribe`, {
+      const trustedStoragePath = String(
+        sourceStoragePath || currentTimelineClip?.storagePath || selectedClip?.storagePath || ""
+      ).trim();
+      let transcriptionUrl = `${API_BASE_URL}/api/media/transcribe-source`;
+      let transcriptionBody;
+      let transcriptionHeaders = {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      };
+
+      if (trustedStoragePath) {
+        transcriptionBody = JSON.stringify({
+          storage_path: trustedStoragePath,
+          translate_to_english: requestedTranslation,
+        });
+        setCaptionGenerationMessage(
+          requestedTranslation
+            ? "Starting full-source English translation without re-uploading the video…"
+            : "Starting full-source captions without re-uploading the video…"
+        );
+      } else {
+        let sourceBlob =
+          selectedClip?.file instanceof Blob
+            ? selectedClip.file
+            : currentTimelineClip?.file instanceof Blob
+              ? currentTimelineClip.file
+              : null;
+
+        if (!sourceBlob && sourceUrl) {
+          const sourceResponse = await fetch(sourceUrl);
+          if (!sourceResponse.ok) throw new Error("The source video could not be opened.");
+          sourceBlob = await sourceResponse.blob();
+        }
+
+        if (!(sourceBlob instanceof Blob)) {
+          throw new Error("Reload the source video, then try captions again.");
+        }
+
+        const formData = new FormData();
+        formData.append(
+          "file",
+          sourceBlob,
+          selectedClip?.file?.name || currentTimelineClip?.file?.name || "viral-studio-source.mp4"
+        );
+        formData.append("translate_to_english", requestedTranslation ? "true" : "false");
+        transcriptionUrl = `${API_BASE_URL}/api/media/transcribe`;
+        transcriptionBody = formData;
+        transcriptionHeaders = { Authorization: `Bearer ${token}` };
+      }
+
+      let response = await fetch(transcriptionUrl, {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
+        headers: transcriptionHeaders,
+        body: transcriptionBody,
       });
 
       if (response.status === 401) {
         token = await getMediaAuthToken(true);
-        response = await fetch(`${API_BASE_URL}/api/media/transcribe`, {
+        response = await fetch(transcriptionUrl, {
           method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-          body: formData,
+          headers: { ...transcriptionHeaders, Authorization: `Bearer ${token}` },
+          body: transcriptionBody,
         });
       }
 
@@ -7332,7 +7359,7 @@ const ViralClipStudio = ({
       }
 
       if (payload?.jobId) {
-        for (let attempt = 0; attempt < 120; attempt += 1) {
+        for (let attempt = 0; attempt < 1800; attempt += 1) {
           await sleep(2000);
           let statusResponse = await fetch(`${API_BASE_URL}/api/media/status/${payload.jobId}`, {
             headers: { Authorization: `Bearer ${token}` },

@@ -118,8 +118,10 @@ function ViralClipStudioPanel({
       const uploadResult = await uploadSourceFileViaBackend({
         file: incomingSource,
         token,
+        getToken: forceRefresh => getMediaAuthToken(forceRefresh),
         mediaType: "video",
         fileName: incomingName,
+        purpose: "studio_source",
         onProgress: (transferred, total) => {
           if (uploadRequestRef.current !== requestId) return;
           const progress = total > 0 ? Math.round((transferred / total) * 100) : 0;

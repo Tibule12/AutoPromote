@@ -3,7 +3,7 @@ const admin = require("firebase-admin");
 
 const DEFAULT_MAX_UPLOAD_BYTES = 12 * 1024 * 1024 * 1024;
 const DEFAULT_RETENTION_HOURS = 72;
-const ALLOWED_PURPOSES = new Set(["camera_original", "external_audio"]);
+const ALLOWED_PURPOSES = new Set(["camera_original", "external_audio", "studio_source"]);
 
 function sanitizeFileName(value) {
   const safe = String(value || "media.bin")
