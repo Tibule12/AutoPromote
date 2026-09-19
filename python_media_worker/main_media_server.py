@@ -8466,6 +8466,192 @@ def build_safe_vertical_fit_filter(input_label="[0:v]", output_label="[vout]", t
     )
 
 
+def plan_reframe_timeline_segments(
+    duration,
+    timeline_cuts,
+    split_framing=None,
+    speaker_order_cuts=None,
+    solo_keyframes=None,
+    fallback_mode="speaker_track",
+):
+    """Resolve the reviewed reframe state into independently renderable intervals.
+
+    A single FFmpeg graph built with ``split=N`` retains frames for future trim
+    branches while concat is still consuming the first branch. That grows with
+    programme length and can exhaust Cloud Run memory. These interval specs let
+    the renderer encode one bounded segment at a time without changing the
+    editor's cut, framing, split-panel, or Director zoom decisions.
+    """
+    allowed_modes = {"off", "speaker_track", "center"}
+    duration = max(0.04, float(duration or 0))
+    normalized = {}
+    zooms = {}
+    for cut in timeline_cuts or []:
+        mode = str(cut.get("mode") or "").strip().lower()
+        timestamp = float(cut.get("time", 0))
+        if mode in allowed_modes and math.isfinite(timestamp) and 0 <= timestamp < duration:
+            normalized[timestamp] = mode
+            raw_zoom = float(cut.get("zoom") or 1)
+            zooms[timestamp] = min(2.0, max(1.0, raw_zoom)) if math.isfinite(raw_zoom) else 1.0
+    if not normalized:
+        raise ValueError("A timed reframe needs at least one valid timeline cut")
+    if min(normalized) > 0:
+        normalized[0.0] = fallback_mode if fallback_mode in allowed_modes else "off"
+        zooms[0.0] = 1.0
+
+    order_by_time = {}
+    for cut in speaker_order_cuts or []:
+        slot = str(cut.get("slot") or "").strip().lower()
+        timestamp = float(cut.get("time", 0))
+        if slot in {"top", "bottom"} and math.isfinite(timestamp) and 0 <= timestamp < duration:
+            order_by_time[timestamp] = slot
+
+    def value_at(items, timestamp, fallback):
+        value = fallback
+        for item_time, item_value in sorted(items.items()):
+            if item_time <= timestamp + 1e-9:
+                value = item_value
+            else:
+                break
+        return value
+
+    def position_at(keys, timestamp, fallback_x=50, fallback_y=50):
+        ordered = sorted(
+            (key for key in (keys or []) if isinstance(key, dict)
+             and math.isfinite(float(key.get("time", 0)))),
+            key=lambda key: float(key.get("time", 0)),
+        )
+        if not ordered:
+            return {"x": fallback_x, "y": fallback_y}
+        if timestamp <= float(ordered[0].get("time", 0)):
+            return {"x": ordered[0].get("x", fallback_x), "y": ordered[0].get("y", fallback_y)}
+        previous = ordered[0]
+        for following in ordered[1:]:
+            left_time = float(previous.get("time", 0))
+            right_time = float(following.get("time", 0))
+            if timestamp < right_time:
+                if following.get("cut") is True or right_time <= left_time:
+                    return {"x": previous.get("x", fallback_x), "y": previous.get("y", fallback_y)}
+                progress = max(0, min(1, (timestamp-left_time)/(right_time-left_time)))
+                return {
+                    "x": float(previous.get("x", fallback_x)) + (float(following.get("x", fallback_x))-float(previous.get("x", fallback_x)))*progress,
+                    "y": float(previous.get("y", fallback_y)) + (float(following.get("y", fallback_y))-float(previous.get("y", fallback_y)))*progress,
+                }
+            previous = following
+        return {"x": previous.get("x", fallback_x), "y": previous.get("y", fallback_y)}
+
+    def localized_keys(keys, start, end, fallback_x=50, fallback_y=50):
+        local = [{"time": 0, **position_at(keys, start, fallback_x, fallback_y), "cut": True}]
+        local.extend({**key, "time": float(key.get("time", 0))-start}
+                     for key in (keys or [])
+                     if start < float(key.get("time", 0)) < end)
+        return local
+
+    boundaries = sorted(set(normalized) | set(order_by_time) | {0.0, duration})
+    specs = []
+    for start, end in zip(boundaries, boundaries[1:]):
+        if end-start < .02:
+            continue
+        local_split = {}
+        for slot in ("top", "bottom"):
+            frame = dict((split_framing or {}).get(slot) or {})
+            if frame.get("keyframes"):
+                frame["keyframes"] = localized_keys(
+                    frame["keyframes"], start, end, frame.get("x", 50), frame.get("y", 50)
+                )
+            local_split[slot] = frame
+        specs.append({
+            "start": start,
+            "end": end,
+            "mode": value_at(normalized, start, fallback_mode),
+            "zoom": value_at(zooms, start, 1.0),
+            "order": value_at(order_by_time, start, "top"),
+            "solo_keyframes": localized_keys(solo_keyframes, start, end),
+            "split_framing": local_split,
+        })
+    return specs
+
+
+def build_reframe_segment_filter(src_width, src_height, target_width, target_height, segment, solo_zoom=1):
+    """Build one bounded interval from a reviewed reframe timeline."""
+    director_zoom = float(segment.get("zoom") or 1)
+    composed = "[segment_base]" if director_zoom > 1.001 else "[vout]"
+    mode = segment.get("mode")
+    if mode == "center":
+        graph = build_source_split_filter(
+            src_width, src_height, target_width, target_height,
+            segment.get("split_framing") or {}, output_label=composed,
+            primary_slot=segment.get("order") or "top",
+        )
+    elif mode == "speaker_track":
+        graph = (
+            f"[0:v]{build_reviewed_reframe_filter(segment.get('solo_keyframes') or [], target_width, target_height, solo_zoom)}{composed}"
+        )
+    else:
+        graph = build_safe_vertical_fit_filter("[0:v]", composed, target_width, target_height)
+    if director_zoom > 1.001:
+        graph += (
+            f";{composed}crop=trunc(iw/{director_zoom:.6f}/2)*2:trunc(ih/{director_zoom:.6f}/2)*2:"
+            f"(iw-ow)/2:(ih-oh)/2,scale={target_width}:{target_height},setsar=1[vout]"
+        )
+    return graph
+
+
+async def render_reframe_timeline_sequential(
+    source_path,
+    output_path,
+    src_width,
+    src_height,
+    target_width,
+    target_height,
+    duration,
+    timeline_cuts,
+    split_framing=None,
+    speaker_order_cuts=None,
+    solo_keyframes=None,
+    solo_zoom=1,
+    fallback_mode="speaker_track",
+    job_id="reframe",
+):
+    """Render long reviewed timelines with bounded memory and preserve source audio."""
+    specs = plan_reframe_timeline_segments(
+        duration, timeline_cuts, split_framing, speaker_order_cuts,
+        solo_keyframes, fallback_mode,
+    )
+    segment_paths = []
+    work_dir = os.path.dirname(os.path.abspath(output_path))
+    concat_path = os.path.join(work_dir, f"{job_id}_reframe_concat.txt")
+    try:
+        for index, segment in enumerate(specs):
+            segment_path = os.path.join(work_dir, f"{job_id}_reframe_{index:03d}.mp4")
+            segment_paths.append(segment_path)
+            await run_subprocess_async([
+                "ffmpeg", "-ss", f"{segment['start']:.6f}", "-i", source_path,
+                "-t", f"{segment['end']-segment['start']:.6f}",
+                "-filter_complex", build_reframe_segment_filter(
+                    src_width, src_height, target_width, target_height, segment, solo_zoom,
+                ),
+                "-map", "[vout]", "-an",
+                "-c:v", GPU_VIDEO_ENCODER, "-preset", GPU_PRESET,
+                "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-y", segment_path,
+            ], check=True, job_context=job_id, timeout_seconds=MEDIA_WORKER_SUBPROCESS_TIMEOUT_SECONDS)
+        with open(concat_path, "w", encoding="utf-8") as concat_file:
+            for segment_path in segment_paths:
+                concat_file.write(f"file '{segment_path}'\n")
+        await run_subprocess_async([
+            "ffmpeg", "-f", "concat", "-safe", "0", "-i", concat_path,
+            "-i", source_path,
+            "-map", "0:v:0", "-map", "1:a?", "-c:v", "copy", "-c:a", "copy",
+            "-shortest", "-movflags", "+faststart", "-y", output_path,
+        ], check=True, job_context=job_id, timeout_seconds=MEDIA_WORKER_SUBPROCESS_TIMEOUT_SECONDS)
+    finally:
+        for temporary_path in [*segment_paths, concat_path]:
+            try:
+                os.remove(temporary_path)
+            except FileNotFoundError:
+                pass
+
+
 # ============================================================
 # ENHANCED VIRALITY SCORING — Audio energy + motion analysis
 # ============================================================
@@ -31183,25 +31369,22 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         raise ValueError("Timed Multi-Camera changes require one synchronized camera programme per framing segment")
                     src_w, src_h = get_video_dimensions(reframe_source_path)
                     reframe_duration = get_media_duration(reframe_source_path)
-                    await run_subprocess_async([
-                        "ffmpeg", "-i", reframe_source_path,
-                        "-filter_complex", build_reframe_timeline_filter(
-                            src_w,
-                            src_h,
-                            reframe_target_width,
-                            reframe_target_height,
-                            reframe_duration,
-                            reframe_timeline_cuts,
-                            split_framing=finish_reframe_plan.get("split_source") or {},
-                            speaker_order_cuts=finish_reframe_plan.get("speaker_order_cuts") or [],
-                            solo_keyframes=manual_reframe_keyframes,
-                            solo_zoom=finish_reframe_plan.get("zoom", 1),
-                            fallback_mode=crop_mode,
-                        ),
-                        "-map", "[vout]", "-map", "0:a?",
-                        "-c:v", GPU_VIDEO_ENCODER, "-preset", GPU_PRESET,
-                        "-c:a", "copy", "-shortest", "-y", cropped_path,
-                    ], check=True)
+                    await render_reframe_timeline_sequential(
+                        reframe_source_path,
+                        cropped_path,
+                        src_w,
+                        src_h,
+                        reframe_target_width,
+                        reframe_target_height,
+                        reframe_duration,
+                        reframe_timeline_cuts,
+                        split_framing=finish_reframe_plan.get("split_source") or {},
+                        speaker_order_cuts=finish_reframe_plan.get("speaker_order_cuts") or [],
+                        solo_keyframes=manual_reframe_keyframes,
+                        solo_zoom=finish_reframe_plan.get("zoom", 1),
+                        fallback_mode=crop_mode,
+                        job_id=job_id,
+                    )
                     working_path = cropped_path
                 elif crop_mode == "group_stack":
                     logger.info("Applying synchronized multi-camera composition...")

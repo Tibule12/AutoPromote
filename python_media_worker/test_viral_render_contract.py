@@ -33,6 +33,7 @@ from python_media_worker.main_media_server import (
     build_group_stack_filter,
     build_source_split_filter,
     build_reframe_timeline_filter,
+    render_reframe_timeline_sequential,
     build_reviewed_reframe_filter,
     build_multicam_layout_filter,
     build_main_video_frame_filter,
@@ -49,6 +50,33 @@ from python_media_worker.main_media_server import (
 
 
 class ViralRenderContractTests(unittest.TestCase):
+    def test_long_reframe_timeline_renders_bounded_intervals_then_restores_audio(self):
+        cuts = [
+            {"time": index * 10, "mode": "center" if index in {4, 9} else "speaker_track"}
+            for index in range(13)
+        ]
+        with tempfile.TemporaryDirectory(prefix="bounded-reframe-") as temp_dir, patch(
+            "python_media_worker.main_media_server.run_subprocess_async", new_callable=AsyncMock
+        ) as run:
+            asyncio.run(render_reframe_timeline_sequential(
+                "/tmp/source.mp4", str(Path(temp_dir) / "output.mp4"), 640, 360, 180, 320,
+                130, cuts,
+                split_framing={
+                    "top": {"x": 25, "y": 50, "zoom": 3},
+                    "bottom": {"x": 75, "y": 50, "zoom": 3},
+                },
+                solo_keyframes=[{"time": 0, "x": 25, "y": 50, "cut": True}],
+                job_id="bounded-proof",
+            ))
+        self.assertEqual(run.await_count, 14)
+        interval_commands = [call.args[0] for call in run.await_args_list[:-1]]
+        self.assertTrue(all("-ss" in command and "-t" in command for command in interval_commands))
+        self.assertTrue(all("split=13" not in " ".join(command) for command in interval_commands))
+        concat_command = run.await_args_list[-1].args[0]
+        self.assertEqual(concat_command[1:4], ["-f", "concat", "-safe"])
+        self.assertIn("1:a?", concat_command)
+        self.assertIn("copy", concat_command)
+
     def test_caption_review_copy_is_stamped_and_keeps_audio(self):
         with tempfile.TemporaryDirectory(prefix="viral-review-copy-") as temp:
             output = str(Path(temp) / "source.mp4")
