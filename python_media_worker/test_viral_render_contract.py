@@ -567,6 +567,29 @@ class ViralRenderContractTests(unittest.TestCase):
         self.assertEqual(request.caption_segments[0].caption_x, 93)
         self.assertEqual(request.caption_segments[0].caption_y, 88)
 
+    def test_timeline_audio_render_state_is_not_attached_to_strict_request_models(self):
+        worker_source = Path(__file__).with_name("main_media_server.py").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("segment_audio_paths = []", worker_source)
+        self.assertIn("zip(normalized_segments, segment_audio_paths)", worker_source)
+        self.assertNotIn("segment.audio_rendered_path =", worker_source)
+
+        request = RenderViralRequest(
+            video_url="https://example.com/source.mp4",
+            start_time=0,
+            end_time=2,
+            timeline_segments=[{
+                "id": "frontend-timeline-1",
+                "url": "https://example.com/source.mp4",
+                "start_time": 0,
+                "end_time": 2,
+                "audioTrimOffsetStart": 0,
+                "audioTrimOffsetEnd": 0,
+            }],
+        )
+        self.assertEqual(request.timeline_segments[0].id, "frontend-timeline-1")
+
     def test_render_refuses_unresolved_broll_planning_placeholder(self):
         request = RenderViralRequest(
             video_url="https://example.com/source.mp4",

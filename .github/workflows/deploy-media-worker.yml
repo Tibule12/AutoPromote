@@ -140,6 +140,13 @@ jobs:
               "video_url": "/tmp/viral-render-smoke/source.mp4",
               "start_time": 0,
               "end_time": 2,
+              "timeline_segments": [{
+                "id": "frontend-smoke-main",
+                "url": "/tmp/viral-render-smoke/source.mp4",
+                "start_time": 0,
+                "end_time": 2,
+                "duration": 2
+              }],
               "auto_captions": false,
               "smart_crop": true,
               "smart_crop_mode": "ai_director",

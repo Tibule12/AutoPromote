@@ -30802,6 +30802,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
 
         if normalized_segments:
             segment_paths = []
+            segment_audio_paths = []
             concat_list_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_concat.txt")
             timeline_canvas_width, timeline_canvas_height = get_video_dimensions(input_path)
             timeline_canvas_width = max(2, int(timeline_canvas_width or 1920))
@@ -30861,9 +30862,9 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         segment_audio_path,
                     ]
                     await run_subprocess_async(segment_a_cmd, check=True)
-                    segment.audio_rendered_path = segment_audio_path
+                    segment_audio_paths.append(segment_audio_path)
                 else:
-                    segment.audio_rendered_path = None
+                    segment_audio_paths.append(None)
 
                 segment_paths.append(segment_video_path)
 
@@ -30882,14 +30883,18 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             current_output_time = 0.0
             total_video_dur = 0.0
             
-            for index, segment in enumerate(normalized_segments):
-                if getattr(segment, 'audio_rendered_path', None):
+            audio_labels = []
+            for index, (segment, rendered_audio_path) in enumerate(
+                zip(normalized_segments, segment_audio_paths)
+            ):
+                if rendered_audio_path:
                     # +1 because index 0 in inputs is the concat demuxer for video
-                    input_idx = len(audio_inputs) + 1
-                    audio_inputs.extend(["-i", segment.audio_rendered_path])
+                    input_idx = len(audio_labels) + 1
+                    audio_inputs.extend(["-i", rendered_audio_path])
                     
                     delay_ms = int(max(0, current_output_time + float(segment.audioTrimOffsetStart or 0)) * 1000)
                     audio_mix_parts.append(f"[{input_idx}:a]adelay={delay_ms}|{delay_ms}[a{index}];")
+                    audio_labels.append(f"[a{index}]")
                 
                 current_output_time += (float(segment.end_time) - float(segment.start_time))
                 total_video_dur = current_output_time
@@ -30902,8 +30907,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             
             if audio_mix_parts:
                 filter_complex = "".join(audio_mix_parts)
-                mix_labels = "".join([f"[a{i}]" for i, s in enumerate(normalized_segments) if getattr(s, 'audio_rendered_path', None)])
-                mix_count = len([s for s in normalized_segments if getattr(s, 'audio_rendered_path', None)])
+                mix_labels = "".join(audio_labels)
+                mix_count = len(audio_labels)
                 filter_complex += f"{mix_labels}amix=inputs={mix_count}:duration=longest:dropout_transition=2:normalize=0[a_mixed];"
                 # Pad to total duration
                 filter_complex += f"[a_mixed]apad=whole_dur={total_video_dur:.3f},atrim=0:{total_video_dur:.3f}[a_out]"
