@@ -117,6 +117,11 @@ export async function uploadMulticamSourceResumable({
     signal
   );
 
+  if (session.alreadyCompleted && session.url && session.storagePath) {
+    if (typeof onProgress === "function") onProgress(file.size, file.size);
+    return session;
+  }
+
   try {
     const chunkSize = normalizeResumableChunkSize(session.chunkSizeBytes);
     let committedBytes = await queryCommittedBytes({

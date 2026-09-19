@@ -22,6 +22,8 @@ class CaptionQualityTests(unittest.TestCase):
     def test_translation_response_marks_english_caption_provenance(self):
         with tempfile.NamedTemporaryFile(suffix=".mp4") as source:
             with patch(
+                "python_media_worker.main_media_server.subprocess.run"
+            ), patch(
                 "python_media_worker.main_media_server.transcribe_captions_with_provider",
                 return_value={
                     "language": "zu",
@@ -87,8 +89,10 @@ class CaptionQualityTests(unittest.TestCase):
     def test_transcribe_endpoint_does_not_reintroduce_instruction_prompt(self):
         for translate, hint in [(False, ""), (True, ""), (False, "Lisakhanya Mdoda. Siphamandla Tsephe.")]:
             with self.subTest(translate=translate, hint=hint), tempfile.NamedTemporaryFile(suffix=".mp4") as source:
-                with patch("python_media_worker.main_media_server.transcribe_captions_with_provider",
-                           return_value={"segments": [], "language": "en"}) as provider:
+                with patch("python_media_worker.main_media_server.subprocess.run"), patch(
+                    "python_media_worker.main_media_server.transcribe_captions_with_provider",
+                    return_value={"segments": [], "language": "en"},
+                ) as provider:
                     asyncio.run(transcribe_video({"video_url": source.name,
                         "translate_to_english": str(translate), "hint": hint}))
                 self.assertEqual(provider.call_args.kwargs["prompt_hint"], hint)

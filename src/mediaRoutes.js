@@ -1222,7 +1222,14 @@ router.post("/multicam/uploads/start", async (req, res) => {
     const studioSourceAllowed =
       uploadPurpose === "studio_source" &&
       capabilities?.editing?.features?.viralClipStudio?.enabled;
-    if (!studioSourceAllowed && !capabilities.multicam) {
+    // Local Playwright sessions authenticate as a synthetic test user. Permit
+    // that user to exercise the real Studio uploader without weakening plan
+    // enforcement in production or enabling any other upload purpose.
+    const localStudioE2EAllowed =
+      uploadPurpose === "studio_source" &&
+      process.env.NODE_ENV !== "production" &&
+      req.user?.test === true;
+    if (!studioSourceAllowed && !localStudioE2EAllowed && !capabilities.multicam) {
       return res.status(403).json({
         success: false,
         code:

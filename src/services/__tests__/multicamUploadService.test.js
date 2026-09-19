@@ -9,7 +9,7 @@ jest.mock("firebase-admin", () => ({
         if (!mockFileObjects.has(key)) {
           mockFileObjects.set(key, {
             createResumableUpload: jest.fn(async () => ["https://upload.example/session"]),
-            getMetadata: jest.fn(),
+            getMetadata: jest.fn().mockRejectedValue({ code: 404 }),
             setMetadata: jest.fn(async () => [{}]),
             delete: jest.fn(async () => {}),
           });
@@ -104,6 +104,51 @@ describe("multicam upload service", () => {
         }),
       })
     );
+  });
+
+  it("reuses a completed matching Studio source instead of uploading gigabytes twice", async () => {
+    const input = {
+      userId: "user-1",
+      fileName: "full-podcast.mp4",
+      contentType: "video/mp4",
+      sizeBytes: 2_611_147_007,
+      lastModified: 999,
+      fingerprint: "full-podcast:2611147007:999",
+      purpose: "studio_source",
+      origin: "https://autopromote.org",
+    };
+    const storagePath = buildIngestStoragePath(input);
+    const file = mockFileObjects.get(`test-bucket/${storagePath}`) || {
+      createResumableUpload: jest.fn(),
+      getMetadata: jest.fn(),
+      setMetadata: jest.fn(),
+      delete: jest.fn(),
+    };
+    file.getMetadata.mockResolvedValue([
+      {
+        size: String(input.sizeBytes),
+        metadata: {
+          ownerUid: input.userId,
+          purpose: input.purpose,
+          expectedSizeBytes: String(input.sizeBytes),
+          deleteAfter: "2099-01-01T00:00:00.000Z",
+          firebaseStorageDownloadTokens: "existing-token",
+        },
+      },
+    ]);
+    mockFileObjects.set(`test-bucket/${storagePath}`, file);
+
+    const result = await startMulticamUpload(input);
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        alreadyCompleted: true,
+        storagePath,
+        size: input.sizeBytes,
+      })
+    );
+    expect(result.url).toContain("existing-token");
+    expect(file.createResumableUpload).not.toHaveBeenCalled();
   });
 
   it("rejects completion when the uploaded byte count is incomplete", async () => {

@@ -23,6 +23,7 @@ import {
   applySilenceKeepSegmentsToTimeline,
   mapCaptionSegmentsToTimeline,
 } from "./viralRenderPayload";
+import { splitCaptionSegmentsForReadability } from "./captionReadability";
 import { buildTranscriptGroundedBRollSuggestions } from "./storyBeatPlanner";
 import { getMediaAuthToken } from "../utils/mediaAuth";
 import useCinematicEffects, { buildCinematicCssFilter } from "../hooks/useCinematicEffects";
@@ -1846,10 +1847,10 @@ const generateClientSideCaptionSegments = ({ text = "", duration = 30, sourceCli
 
 const resolveInitialCaptionSegments = (clip, duration) => {
   if (Array.isArray(clip?.segments) && clip.segments.length) {
-    return normalizeCaptionSegments(clip.segments);
+    return normalizeCaptionSegments(splitCaptionSegmentsForReadability(clip.segments));
   }
   if (Array.isArray(clip?.captions) && clip.captions.length) {
-    return normalizeCaptionSegments(clip.captions);
+    return normalizeCaptionSegments(splitCaptionSegmentsForReadability(clip.captions));
   }
   const text = normalizePlainText(
     clip?.transcript || clip?.text || clip?.hookText || ""
@@ -3557,7 +3558,9 @@ const ViralClipStudio = ({
     setCaptionPosition(normalizeCaptionDefaultPlacement(snapshot.captionPosition));
     setCaptionScale(Number(snapshot.captionScale ?? 1));
     setCaptionTextOverride(snapshot.captionTextOverride || "");
-    setCaptionSegments(normalizeCaptionSegments(snapshot.captionSegments));
+    setCaptionSegments(
+      normalizeCaptionSegments(splitCaptionSegmentsForReadability(snapshot.captionSegments))
+    );
     setTranslateCaptionsToEnglish(!!snapshot.translateCaptionsToEnglish);
     setPreviewSpeed(Number(snapshot.previewSpeed ?? 1));
     setPacingLevel(snapshot.pacingLevel || "balanced");
@@ -7405,9 +7408,8 @@ const ViralClipStudio = ({
       ) {
         throw new Error("The caption service did not confirm an English translation.");
       }
-      const nextSegments = normalizeCaptionSegments(responseSegments)
-        .filter(segment => {
-          const text = segment.text.toLowerCase();
+      const safeResponseSegments = responseSegments.filter(segment => {
+          const text = normalizePlainText(segment?.text).toLowerCase();
           return ![
             "music outro",
             "music intro",
@@ -7418,7 +7420,10 @@ const ViralClipStudio = ({
             "copyright",
             "all rights reserved",
           ].some(blocked => text.includes(blocked));
-        })
+        });
+      const nextSegments = normalizeCaptionSegments(
+        splitCaptionSegmentsForReadability(safeResponseSegments)
+      )
         .map(segment => ({
           ...segment,
           sourceClipId: captionSourceClipId,

@@ -109,4 +109,47 @@ describe("multicam resumable upload helpers", () => {
       global.XMLHttpRequest = originalXhr;
     }
   });
+
+  it("reuses a completed fingerprint without opening another cloud upload", async () => {
+    const originalFetch = global.fetch;
+    const originalXhr = global.XMLHttpRequest;
+    const onProgress = jest.fn();
+    const fetchMock = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 201,
+      json: async () => ({
+        success: true,
+        alreadyCompleted: true,
+        storagePath: "temp/multicam-ingest/user/podcast.mp4",
+        url: "https://storage.example/podcast.mp4",
+        size: 1024,
+      }),
+    });
+    global.fetch = fetchMock;
+    global.XMLHttpRequest = jest.fn(() => {
+      throw new Error("XHR must not be created for a completed upload");
+    });
+    try {
+      const file = new Blob([new Uint8Array(1024)], { type: "video/mp4" });
+      Object.defineProperties(file, {
+        name: { value: "podcast.mp4" },
+        lastModified: { value: 123 },
+      });
+
+      const result = await uploadMulticamSourceResumable({
+        apiBaseUrl: "https://api.example",
+        token: "token",
+        file,
+        purpose: "studio_source",
+        onProgress,
+      });
+
+      expect(result.alreadyCompleted).toBe(true);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(onProgress).toHaveBeenLastCalledWith(1024, 1024);
+    } finally {
+      global.fetch = originalFetch;
+      global.XMLHttpRequest = originalXhr;
+    }
+  });
 });

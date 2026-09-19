@@ -1393,7 +1393,10 @@ class VideoEditingService {
         `${MEDIA_WORKER_URL}/transcribe`,
         {
           video_url: videoUrl,
-          translate_to_english: !!translateToEnglish,
+          // The worker intentionally validates this endpoint as Dict[str, str].
+          // Sending a JSON boolean makes FastAPI reject the whole request with
+          // 422 before transcription starts.
+          translate_to_english: translateToEnglish ? "true" : "false",
           hint: translateToEnglish
             ? "Multilingual South African podcast. Translate all spoken content into natural English."
             : "Multilingual South African podcast. Preserve every language, local name, slang term, and code-switch exactly as spoken.",
@@ -1425,10 +1428,16 @@ class VideoEditingService {
 
       console.log(`[VideoTranscribe] Job ${jobId} Completed.`);
     } catch (error) {
-      console.error(`[VideoTranscribe] Job ${jobId} Failed:`, error.message);
+      const workerDetail =
+        error.response?.data?.detail || error.response?.data?.message || error.message;
+      const safeWorkerDetail =
+        typeof workerDetail === "string"
+          ? workerDetail.slice(0, 1000)
+          : JSON.stringify(workerDetail || "Transcription failed").slice(0, 1000);
+      console.error(`[VideoTranscribe] Job ${jobId} Failed:`, safeWorkerDetail);
       await docRef.update({
         status: "failed",
-        error: error.message,
+        error: safeWorkerDetail,
         progress: 0,
         failedAt: new Date().toISOString(),
       });

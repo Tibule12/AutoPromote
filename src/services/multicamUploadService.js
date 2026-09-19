@@ -234,10 +234,50 @@ async function startMulticamUpload({
     lastModified,
     fingerprint,
   });
-  const downloadToken = crypto.randomUUID();
-  const uploadStartedAt = new Date().toISOString();
   const bucket = admin.storage().bucket(bucketName);
   const file = bucket.file(storagePath);
+  // The path is derived from the file fingerprint, so a retry of an already
+  // completed multi-gigabyte upload can safely reuse the verified object. This
+  // avoids forcing users to transfer the same podcast again after a later
+  // analysis or transcription failure.
+  try {
+    const [existingMetadata] = await file.getMetadata();
+    const customMetadata = existingMetadata?.metadata || {};
+    const deleteAfterMs = Date.parse(customMetadata.deleteAfter || "");
+    const existingToken = String(customMetadata.firebaseStorageDownloadTokens || "")
+      .split(",")
+      .map(value => value.trim())
+      .find(Boolean);
+    const reusable =
+      customMetadata.ownerUid === userId &&
+      customMetadata.purpose === normalizedPurpose &&
+      Number(existingMetadata.size || 0) === normalizedSize &&
+      Number(customMetadata.expectedSizeBytes || 0) === normalizedSize &&
+      existingToken &&
+      (!Number.isFinite(deleteAfterMs) || deleteAfterMs > Date.now());
+    if (reusable) {
+      return {
+        alreadyCompleted: true,
+        url: buildFirebaseDownloadUrl(bucketName, storagePath, existingToken),
+        uploadUrl: null,
+        storagePath,
+        bucketName,
+        downloadToken: existingToken,
+        deleteAfter: customMetadata.deleteAfter || null,
+        expectedSizeBytes: normalizedSize,
+        size: normalizedSize,
+        chunkSizeBytes: 16 * 1024 * 1024,
+      };
+    }
+  } catch (error) {
+    // A missing object is the normal first-upload path. Surface only storage
+    // failures that are not a simple 404.
+    const statusCode = Number(error?.code || error?.statusCode || 0);
+    if (statusCode && statusCode !== 404) throw error;
+  }
+
+  const downloadToken = crypto.randomUUID();
+  const uploadStartedAt = new Date().toISOString();
   const [uploadUrl] = await file.createResumableUpload({
     origin: origin || undefined,
     private: true,

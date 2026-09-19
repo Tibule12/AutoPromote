@@ -18,11 +18,17 @@ export const getRuntimeE2EToken = () => {
 };
 
 export const getMediaAuthToken = async (forceRefresh = false) => {
+  // A runtime browser-test session must remain deterministic even if Firebase
+  // restores an unrelated cached user in the persistent QA profile. This token
+  // is accepted only by the non-production API auth middleware and only on a
+  // local hostname, so it cannot replace a real user's token in production.
+  const runtimeToken = getRuntimeE2EToken();
+  if (runtimeToken) return runtimeToken;
   try {
     const user = getAuth()?.currentUser;
     if (user?.getIdToken) return await user.getIdToken(forceRefresh);
   } catch (_error) {
     // The explicit browser-test token below is the only supported fallback.
   }
-  return getRuntimeE2EToken();
+  return null;
 };

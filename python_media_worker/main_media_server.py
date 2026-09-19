@@ -32950,16 +32950,64 @@ async def transcribe_video(request: Dict[str, str]):
     SHARED_TMP_DIR = os.path.join(tempfile.gettempdir(), "autopromote-transcribe")
     os.makedirs(SHARED_TMP_DIR, exist_ok=True)
 
-    input_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_input.mp4")
+    # Captioning needs audio only. Copying a multi-gigabyte source video into a
+    # 4 GiB Cloud Run instance leaves too little memory for Whisper and can make
+    # the kernel kill the worker. Stream the source once and retain only a small
+    # mono speech file instead.
+    input_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_speech.mp3")
 
     try:
-        # 1. Download Video
+        # 1. Extract speech audio without materializing another full video.
         if video_url.startswith("http"):
-            subprocess.run(["ffmpeg", "-i", video_url, "-c", "copy", "-y", input_path], check=True)
+            subprocess.run(
+                [
+                    "ffmpeg",
+                    "-v",
+                    "error",
+                    "-nostdin",
+                    "-i",
+                    video_url,
+                    "-vn",
+                    "-ac",
+                    "1",
+                    "-ar",
+                    "16000",
+                    "-c:a",
+                    "libmp3lame",
+                    "-b:a",
+                    "64k",
+                    "-y",
+                    input_path,
+                ],
+                check=True,
+                timeout=900,
+            )
         else:
             # If local path?
             if os.path.exists(video_url):
-                 input_path = video_url
+                subprocess.run(
+                    [
+                        "ffmpeg",
+                        "-v",
+                        "error",
+                        "-nostdin",
+                        "-i",
+                        video_url,
+                        "-vn",
+                        "-ac",
+                        "1",
+                        "-ar",
+                        "16000",
+                        "-c:a",
+                        "libmp3lame",
+                        "-b:a",
+                        "64k",
+                        "-y",
+                        input_path,
+                    ],
+                    check=True,
+                    timeout=900,
+                )
             else:
                  raise HTTPException(status_code=404, detail="File not found")
 

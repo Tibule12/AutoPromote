@@ -159,6 +159,52 @@ describe("viralRenderPayload", () => {
     ]);
   });
 
+  test("sends a Studio spelling correction through the caption timeline into the render payload", () => {
+    const correctedCues = mapCaptionSegmentsToTimeline({
+      captionSegments: [
+        {
+          id: "podcast-cue-1",
+          sourceClipId: "podcast",
+          start: 1.2,
+          end: 4.5,
+          text: "Molweni my lovely viewers at home",
+          textReviewed: true,
+          reviewRequired: false,
+          speaker: "host",
+          language: "xh",
+        },
+      ],
+      timelineSegments: [
+        {
+          id: "source-1",
+          source_clip_id: "podcast",
+          url: "https://example.com/podcast.mp4",
+          start_time: 0,
+          end_time: 2067.094,
+          duration: 2067.094,
+        },
+      ],
+    });
+    const payload = buildViralRenderData({
+      finalVideoUrl: "https://example.com/podcast.mp4",
+      selectedClip: { start: 0, end: 2067.094 },
+      extraOptions: { autoCaptions: true, captionSegments: correctedCues },
+    });
+
+    expect(payload.caption_segments).toEqual([
+      expect.objectContaining({
+        text: "Molweni my lovely viewers at home",
+        start_time: 1.2,
+        end_time: 4.5,
+        text_reviewed: true,
+        review_required: false,
+        speaker: "host",
+        language: "xh",
+      }),
+    ]);
+    expect(payload.caption_segments[0].text).not.toMatch(/^omolweni/i);
+  });
+
   test("builds a safe default timeline payload", () => {
     const payload = buildViralRenderData({
       finalVideoUrl: "https://example.com/source.mp4",
