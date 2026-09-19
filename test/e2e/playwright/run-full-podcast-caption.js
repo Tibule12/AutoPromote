@@ -218,8 +218,10 @@ async function main() {
   const lastText = await page.getByLabel(`Caption ${captionCount} text`).inputValue();
   if (reuseSavedProject) {
     const correctedText = firstText.replace(/^omolweni\b/i, "Molweni");
-    if (correctedText === firstText) throw new Error("Expected first-word spelling was not found");
-    await page.getByLabel("Caption 1 text").fill(correctedText);
+    if (correctedText === firstText && !/^Molweni\b/.test(firstText)) {
+      throw new Error("Expected first-word spelling was not found");
+    }
+    if (correctedText !== firstText) await page.getByLabel("Caption 1 text").fill(correctedText);
     firstText = correctedText;
     await page.getByTestId("studio-save-project").click();
     await page.locator(".studio-project-save-state.is-saved").waitFor({ state: "visible", timeout: 30000 });
@@ -254,6 +256,31 @@ async function main() {
   const captionEnds = await page
     .locator('input[aria-label^="Caption "][aria-label$=" end"]')
     .evaluateAll(elements => elements.map(element => Number(element.value)));
+  if (
+    captionTexts.length !== captionCount ||
+    captionStarts.length !== captionCount ||
+    captionEnds.length !== captionCount
+  ) {
+    throw new Error("The editable caption text/timing controls are incomplete");
+  }
+  const srtTimestamp = time => {
+    const milliseconds = Math.max(0, Math.round(Number(time) * 1000));
+    const hours = Math.floor(milliseconds / 3600000);
+    const minutes = Math.floor((milliseconds % 3600000) / 60000);
+    const seconds = Math.floor((milliseconds % 60000) / 1000);
+    const remainder = milliseconds % 1000;
+    return [hours, minutes, seconds].map(value => String(value).padStart(2, "0")).join(":") +
+      `,${String(remainder).padStart(3, "0")}`;
+  };
+  fs.writeFileSync(
+    path.join(proofDir, "full-podcast-editable-captions.srt"),
+    captionTexts
+      .map((value, index) =>
+        `${index + 1}\n${srtTimestamp(captionStarts[index])} --> ${srtTimestamp(captionEnds[index])}\n${value.trim()}\n`
+      )
+      .join("\n"),
+    "utf8"
+  );
   const timelineCaptionBlocks = await page.getByTestId("timeline-caption-block").count();
   if (timelineCaptionBlocks !== captionCount) {
     throw new Error(
