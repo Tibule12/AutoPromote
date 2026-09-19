@@ -83,7 +83,7 @@ class ViralRenderContractTests(unittest.TestCase):
             "ffmpeg", "-v", "error", "-f", "lavfi", "-i", "color=c=gray:s=64x64:r=10:d=2",
             "-filter_complex_threads", "1", "-filter_complex", graph,
             "-map", "[v_finish]", "-threads", "1", "-pix_fmt", "rgb24",
-            "-f", "rawvideo", "pipe:1",
+            "-fps_mode", "passthrough", "-f", "rawvideo", "pipe:1",
         ], capture_output=True)
         self.assertEqual(result.returncode, 0, result.stderr.decode())
         frame_bytes = 64 * 64 * 3
@@ -114,7 +114,7 @@ class ViralRenderContractTests(unittest.TestCase):
             "ffmpeg", "-v", "error", "-f", "lavfi", "-i",
             "testsrc2=s=640x360:r=5:d=3", "-filter_complex_threads", "1",
             "-filter_complex", graph, "-map", "[vout]", "-threads", "1",
-            "-pix_fmt", "rgb24", "-f", "rawvideo", "pipe:1",
+            "-pix_fmt", "rgb24", "-fps_mode", "passthrough", "-f", "rawvideo", "pipe:1",
         ], capture_output=True)
         self.assertEqual(result.returncode, 0, result.stderr.decode())
         frame_bytes = 180 * 320 * 3

@@ -30619,9 +30619,16 @@ async def render_viral_clip(request: RenderViralRequest):
     lose CPU or be terminated on request-billed Cloud Run instances; that left
     real renders permanently stuck after the 15% source-verification checkpoint.
     """
-    from viral_motion_graphics import validate_design
-    from studio_3d_overlay import validate_resolved_overlays
-    from viral_audio_remix import normalize_audio_remix
+    try:
+        from .viral_motion_graphics import validate_design
+        from .studio_3d_overlay import validate_resolved_overlays
+        from .viral_audio_remix import normalize_audio_remix
+    except ImportError:
+        # The production container starts this file as a top-level uvicorn
+        # module, while the immutable-image test imports it as a package.
+        from viral_motion_graphics import validate_design
+        from studio_3d_overlay import validate_resolved_overlays
+        from viral_audio_remix import normalize_audio_remix
     # This is an HTTP trust boundary. A forged or old frontend payload cannot
     # suppress the AutoPromote mark; the finished asset is branded after every
     # edit, cleanup, grade and caption pass.
