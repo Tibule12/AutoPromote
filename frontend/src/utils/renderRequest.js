@@ -1,5 +1,9 @@
 export const RENDER_SUBMISSION_TIMEOUT_MS = 45000;
 export const RENDER_STATUS_TIMEOUT_MS = 15000;
+// Cloud renders can legitimately run for up to an hour. Keep the browser's
+// polling window slightly longer so a healthy worker cannot finish after the
+// Studio has already reported a false timeout.
+export const RENDER_STATUS_MAX_WAIT_MS = 65 * 60 * 1000;
 
 export const createRenderRequestId = () => {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {

@@ -19,6 +19,7 @@ import { playMediaSafely } from "../utils/mediaPlayback";
 import { buildViralRenderData } from "./viralRenderPayload";
 import { getMediaAuthToken } from "../utils/mediaAuth";
 import {
+  RENDER_STATUS_MAX_WAIT_MS,
   RENDER_STATUS_TIMEOUT_MS,
   RENDER_SUBMISSION_TIMEOUT_MS,
   createRenderRequestId,
@@ -1258,9 +1259,12 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
 
         let attempts = 0;
         let consecutiveStatusFailures = 0;
+        const statusPollingStartedAt = Date.now();
         while (true) {
           if (abortRef.current) throw new Error("Processing cancelled by user.");
-          if (attempts > 300) throw new Error("Rendering timed out");
+          if (Date.now() - statusPollingStartedAt > RENDER_STATUS_MAX_WAIT_MS) {
+            throw new Error("Rendering timed out after 65 minutes");
+          }
           await new Promise(r => setTimeout(r, 2000));
           attempts++;
 

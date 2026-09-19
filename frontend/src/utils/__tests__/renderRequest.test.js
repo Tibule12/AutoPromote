@@ -1,4 +1,8 @@
-import { createRenderRequestId, fetchWithRenderTimeout } from "../renderRequest";
+import {
+  RENDER_STATUS_MAX_WAIT_MS,
+  createRenderRequestId,
+  fetchWithRenderTimeout,
+} from "../renderRequest";
 
 describe("render request safety", () => {
   afterEach(() => {
@@ -8,6 +12,10 @@ describe("render request safety", () => {
 
   test("assigns a stable, non-empty request id", () => {
     expect(createRenderRequestId()).toMatch(/^[a-zA-Z0-9-]+$/);
+  });
+
+  test("keeps status polling alive for the full Cloud Run render window", () => {
+    expect(RENDER_STATUS_MAX_WAIT_MS).toBe(65 * 60 * 1000);
   });
 
   test("aborts a render request at its deadline", async () => {

@@ -74,6 +74,8 @@ describe("VideoEditingService Viral Clip payload", () => {
           translate_captions_to_english: false,
           studio_plan: { version: 1, timeline: [] },
           professional_cleanup: true,
+          brand_watermark: false,
+          brandWatermark: false,
           creative_plan: { version: 1, enabled: true, effects: [] },
           finish_plan: {
             version: 1,
@@ -129,6 +131,8 @@ describe("VideoEditingService Viral Clip payload", () => {
         translate_captions_to_english: false,
         studio_plan: { version: 1, timeline: [] },
         professional_cleanup: true,
+        brand_watermark: false,
+        brandWatermark: false,
         creative_plan: expect.objectContaining({ enabled: true }),
         finish_plan: expect.objectContaining({
           enabled: true,

@@ -1071,8 +1071,18 @@ class VideoEditingService {
           hook_focus_point: viralData.hook_focus_point || null,
           cover_frame: viralData.cover_frame || null,
           thumbnail_frame: viralData.thumbnail_frame || viralData.cover_frame || null,
-          brand_watermark: true,
-          brandWatermark: true,
+          brand_watermark:
+            viralData.brand_watermark !== undefined
+              ? !!viralData.brand_watermark
+              : viralData.brandWatermark !== undefined
+                ? !!viralData.brandWatermark
+                : true,
+          brandWatermark:
+            viralData.brandWatermark !== undefined
+              ? !!viralData.brandWatermark
+              : viralData.brand_watermark !== undefined
+                ? !!viralData.brand_watermark
+                : true,
           watermark_text:
             viralData.watermark_text ||
             viralData.watermarkText ||
