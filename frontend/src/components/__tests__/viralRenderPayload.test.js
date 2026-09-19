@@ -6,13 +6,13 @@ import {
 } from "../viralRenderPayload";
 
 describe("viralRenderPayload", () => {
-  test("never lets an old project disable the AutoPromote export signature", () => {
+  test("preserves an explicit clean export choice", () => {
     const payload = buildViralRenderData({
       finalVideoUrl: "https://example.com/source.mp4",
       selectedClip: { start: 0, end: 10 },
       extraOptions: { brandWatermark: false },
     });
-    expect(payload.brand_watermark).toBe(true);
+    expect(payload.brand_watermark).toBe(false);
   });
   test("marks a caption review copy without claiming the transcript is approved", () => {
     const payload = buildViralRenderData({

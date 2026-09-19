@@ -144,7 +144,7 @@ class ViralRenderContractTests(unittest.TestCase):
         self.assertIn("1:a?", concat_command)
         self.assertEqual(concat_command[-7:-5], ["-c:v", "copy"])
 
-    def test_http_render_boundary_forces_branding_even_for_forged_payload(self):
+    def test_http_render_boundary_preserves_explicit_clean_export_choice(self):
         request = RenderViralRequest(
             video_url="https://example.com/source.mp4", start_time=0, end_time=1,
             brand_watermark=False, brandWatermark=False,
@@ -152,8 +152,8 @@ class ViralRenderContractTests(unittest.TestCase):
         with patch("python_media_worker.main_media_server.render_viral_clip_impl", new_callable=AsyncMock) as render:
             render.return_value = {"ok": True}
             asyncio.run(render_viral_clip(request))
-        self.assertTrue(request.brand_watermark)
-        self.assertTrue(request.brandWatermark)
+        self.assertFalse(request.brand_watermark)
+        self.assertFalse(request.brandWatermark)
 
     def test_director_virtual_camera_punch_renders_and_resets_at_master_cut(self):
         graph = build_reframe_timeline_filter(

@@ -325,9 +325,9 @@ export const buildViralRenderData = ({
   addDefined(payload, "remove_watermark", extraOptions.removeWatermark, Boolean);
   addDefined(payload, "watermark_mode", extraOptions.watermarkMode);
   addDefined(payload, "watermark_regions", extraOptions.manualWatermarkRegions);
-  // The platform signature cannot be disabled by a stale project or a caller
-  // that constructs the render payload outside the Studio UI.
-  payload.brand_watermark = true;
+  // Default existing projects to branded exports, but preserve an explicit
+  // creator choice for a clean export all the way to the renderer.
+  payload.brand_watermark = extraOptions.brandWatermark !== false;
   addDefined(payload, "watermark_text", extraOptions.brandWatermarkText);
   addDefined(payload, "brand_watermark_variant", extraOptions.brandWatermarkVariant);
   addDefined(payload, "brand_watermark_schedule", extraOptions.brandWatermarkSchedule);

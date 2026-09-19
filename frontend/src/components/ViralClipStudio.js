@@ -2599,10 +2599,7 @@ const ViralClipStudio = ({
   const [isWatermarkCleanupPreviewLoading, setIsWatermarkCleanupPreviewLoading] = useState(false);
   const [watermarkCleanupPreviewError, setWatermarkCleanupPreviewError] = useState("");
   const [showWatermarkCleanupOnVideo, setShowWatermarkCleanupOnVideo] = useState(true);
-  // The AutoPromote signature is a platform mark, not an export option.
-  // Older saved projects may contain brandWatermark: false; restoring one must
-  // not make the preview disagree with the branded final render.
-  const brandWatermark = true;
+  const [brandWatermark, setBrandWatermark] = useState(true);
   const [brandWatermarkVariant, setBrandWatermarkVariant] = useState("studio");
   const [brandWatermarkText, setBrandWatermarkText] = useState("AutoPromote · Viral Clip Studio");
   const [mainFrame, setMainFrame] = useState({
@@ -3667,6 +3664,7 @@ const ViralClipStudio = ({
     setMinSilenceDuration(Number(snapshot.minSilenceDuration ?? 0.75));
     setRemoveWatermark(!!snapshot.removeWatermark);
     setWatermarkMode(snapshot.watermarkMode || "adaptive");
+    setBrandWatermark(snapshot.brandWatermark !== false);
     setBrandWatermarkVariant(snapshot.brandWatermarkVariant || "studio");
     setBrandWatermarkText(snapshot.brandWatermarkText || "AutoPromote · Viral Clip Studio");
     setMainFrame({
@@ -25017,9 +25015,17 @@ const ViralClipStudio = ({
                 <div>
                   <span>
                     <b>AutoPromote signature</b>
-                    <small>Always included. Its adaptive path stays inside the export safe zone.</small>
+                    <small>Optional. When enabled, its adaptive path stays inside the export safe zone.</small>
                   </span>
-                  <strong data-testid="brand-watermark-locked">Always on</strong>
+                  <label className="inspector-check-row">
+                    <input
+                      type="checkbox"
+                      aria-label="Include AutoPromote signature"
+                      checked={brandWatermark}
+                      onChange={event => setBrandWatermark(event.target.checked)}
+                    />
+                    <strong>{brandWatermark ? "Included" : "Clean export"}</strong>
+                  </label>
                 </div>
                 {brandWatermark ? (
                   <>

@@ -30910,11 +30910,6 @@ async def render_viral_clip(request: RenderViralRequest):
         from viral_motion_graphics import validate_design
         from studio_3d_overlay import validate_resolved_overlays
         from viral_audio_remix import normalize_audio_remix
-    # This is an HTTP trust boundary. A forged or old frontend payload cannot
-    # suppress the AutoPromote mark; the finished asset is branded after every
-    # edit, cleanup, grade and caption pass.
-    request.brand_watermark = True
-    request.brandWatermark = True
     try:
         validate_design(request.motionGraphics, [effect.model_dump() for effect in request.sound_effects or []])
         validate_resolved_overlays(getattr(request, "threeDGraphics", None))

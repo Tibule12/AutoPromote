@@ -300,6 +300,42 @@ describe("ViralClipStudio timeline sequencing", () => {
     });
   });
 
+  test("lets the creator disable the AutoPromote signature in preview and export", async () => {
+    const onSave = jest.fn(() => Promise.resolve());
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/clean-export.mp4"
+        clips={[{
+          id: "clean-export",
+          start: 0,
+          end: 12,
+          duration: 12,
+          url: "https://example.com/clean-export.mp4",
+        }]}
+        onSave={onSave}
+        onCancel={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("brand-watermark-preview")).toBeInTheDocument();
+    fireEvent.click(
+      within(screen.getByRole("navigation", { name: "Creative tools" })).getByRole("button", {
+        name: "Export",
+        exact: true,
+      })
+    );
+    const signatureToggle = screen.getByRole("checkbox", {
+      name: "Include AutoPromote signature",
+    });
+    expect(signatureToggle).toBeChecked();
+    fireEvent.click(signatureToggle);
+    expect(signatureToggle).not.toBeChecked();
+    expect(screen.queryByTestId("brand-watermark-preview")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Render Final Clip/i }));
+    await waitFor(() => expect(onSave).toHaveBeenCalled());
+    expect(onSave.mock.calls[0][2].brandWatermark).toBe(false);
+  });
+
   test("exports a four-camera grid with every source, offset, and framing anchor", async () => {
     uploadSourceFileViaBackend.mockImplementation(({ file, onProgress }) => {
       onProgress?.(file?.size || 1, file?.size || 1);
