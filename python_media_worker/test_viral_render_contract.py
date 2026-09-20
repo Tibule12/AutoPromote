@@ -51,6 +51,12 @@ from python_media_worker.main_media_server import (
 
 
 class ViralRenderContractTests(unittest.TestCase):
+    def test_quality_cleanup_is_opt_in_at_the_worker_boundary(self):
+        request = RenderViralRequest(
+            video_url="https://example.com/source.mp4", start_time=0, end_time=1,
+        )
+        self.assertFalse(request.professional_cleanup)
+
     def test_long_reframe_timeline_renders_bounded_intervals_then_restores_audio(self):
         cuts = [
             {"time": index * 10, "mode": "center" if index in {4, 9} else "speaker_track"}

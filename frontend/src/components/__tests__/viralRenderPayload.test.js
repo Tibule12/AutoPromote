@@ -242,7 +242,7 @@ describe("viralRenderPayload", () => {
       overlays: [{ id: "overlay-1" }],
       auto_captions: true,
       brand_watermark: true,
-      professional_cleanup: true,
+      professional_cleanup: false,
       timeline_segments: [
         {
           id: "main",
@@ -479,6 +479,7 @@ describe("viralRenderPayload", () => {
         }),
         smart_crop: true,
         smart_crop_mode: "face",
+        professional_cleanup: false,
         visual_enhance: false,
         silence_removal: true,
         silence_threshold_db: -32,

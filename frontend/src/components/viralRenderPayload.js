@@ -303,7 +303,12 @@ export const buildViralRenderData = ({
   addDefined(payload, "pacing_level", extraOptions.pacingLevel);
   addDefined(payload, "creative_intent", extraOptions.creativeIntent);
   addDefined(payload, "studio_plan", extraOptions.studioPlan);
-  payload.professional_cleanup = extraOptions.professionalCleanup !== false;
+  // Quality clean-up is an explicit, potentially expensive full-video pass.
+  // Keep it off unless the creator enabled the matching Studio control (or a
+  // caller deliberately supplied the lower-level override).
+  payload.professional_cleanup = Boolean(
+    extraOptions.professionalCleanup ?? extraOptions.enhanceQuality ?? false
+  );
   addDefined(payload, "creative_plan", extraOptions.creativePlan);
   addDefined(payload, "finish_plan", extraOptions.finishPlan);
   addDefined(payload, "audio_restoration", extraOptions.audioRestoration);

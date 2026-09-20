@@ -30826,7 +30826,9 @@ class RenderViralRequest(BaseModel):
     pacing_level: Optional[str] = None
     creative_intent: Optional[str] = None
     studio_plan: Optional[Dict[str, Any]] = None
-    professional_cleanup: bool = True
+    # This launches a separate full-video encode, so it must only run when the
+    # frontend's Quality Enhancement control explicitly requests it.
+    professional_cleanup: bool = False
     creative_plan: Optional[ViralCreativePlan] = None
     finish_plan: Optional[Dict[str, Any]] = None
     audio_restoration: Optional[Dict[str, Any]] = None

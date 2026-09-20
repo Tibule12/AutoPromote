@@ -12,6 +12,9 @@ const payloadPath = "/tmp/autopromote-10m-cloud-payload.json";
 const baseUrl = process.env.E2E_BASE_URL || "http://localhost:5000";
 const liveRender = process.env.FRONTEND_RENDER_LIVE === "1";
 const uploadReferencePath = "/tmp/autopromote-10m-upload-reference.mp4";
+let activeContext = null;
+let activePage = null;
+let activeVideo = null;
 
 const loadSourceUrl = () => {
   const explicit = String(process.env.AUTOPROMOTE_QA_SOURCE_URL || "").trim();
@@ -250,6 +253,7 @@ const assertPayload = body => {
     splitSource: Boolean(viral.finish_plan?.reframe?.split_source?.top && viral.finish_plan?.reframe?.split_source?.bottom),
     adjustmentLayer: viral.finish_plan?.adjustment_layers?.length === 1,
     precisionGrade: viral.finish_plan?.color?.precisionGrade === true,
+    professionalCleanupOff: viral.professional_cleanup === false,
     watermarkOff: viral.brand_watermark === false,
     sourceAudioOn: viral.mute_audio === false,
     timeline600: viral.timeline_segments?.length === 1 && Number(viral.timeline_segments[0]?.duration) === 600,
@@ -324,6 +328,9 @@ async function main() {
   });
   const page = context.pages()[0] || (await context.newPage());
   const video = page.video();
+  activeContext = context;
+  activePage = page;
+  activeVideo = video;
   page.on("pageerror", error => pageErrors.push(error.message));
   page.on("dialog", dialog => dialog.accept());
   page.on("response", response => {
@@ -479,7 +486,13 @@ async function main() {
   await page.getByTestId("render-caption-review-copy").click();
   await page.waitForFunction(() => document.body.innerText.includes("Queued for Rendering") || document.body.innerText.includes("Rendering Clip"), null, { timeout: 120000 });
   await page.screenshot({ path: path.join(proofDir, liveRender ? "frontend-live-render-started.png" : "frontend-dry-run-render-started.png"), fullPage: true });
-  await page.getByTestId("rendered-output-ready").waitFor({ state: "visible", timeout: liveRender ? 65 * 60 * 1000 : 60000 });
+  await Promise.race([
+    page.getByTestId("rendered-output-ready").waitFor({ state: "visible", timeout: liveRender ? 65 * 60 * 1000 : 60000 }),
+    page.getByText(/^Export failed:/).first().waitFor({ state: "visible", timeout: liveRender ? 65 * 60 * 1000 : 60000 }).then(async () => {
+      const failure = await page.getByText(/^Export failed:/).first().innerText();
+      throw new Error(failure);
+    }),
+  ]);
   await page.screenshot({ path: path.join(proofDir, liveRender ? "frontend-live-render-complete.png" : "frontend-dry-run-render-complete.png"), fullPage: true });
 
   if (!submittedBody || !payloadChecks) throw new Error("No validated frontend render request was captured");
@@ -506,6 +519,7 @@ async function main() {
   );
 
   await context.close();
+  activeContext = null;
   if (video) {
     const recordedPath = await video.path();
     const destination = path.join(proofDir, liveRender ? "frontend-live-render-workflow.webm" : "frontend-dry-run-workflow.webm");
@@ -514,7 +528,20 @@ async function main() {
   console.log(JSON.stringify(receipt, null, 2));
 }
 
-main().catch(error => {
+main().catch(async error => {
   console.error(error.stack || error.message);
+  if (activePage) {
+    await activePage.screenshot({ path: path.join(proofDir, "frontend-live-render-failed.png"), fullPage: true }).catch(() => {});
+  }
+  if (activeContext) {
+    await activeContext.close().catch(() => {});
+    activeContext = null;
+  }
+  if (activeVideo) {
+    const recordedPath = await activeVideo.path().catch(() => null);
+    if (recordedPath && fs.existsSync(recordedPath)) {
+      fs.copyFileSync(recordedPath, path.join(proofDir, "frontend-live-render-failed-workflow.webm"));
+    }
+  }
   process.exitCode = 1;
 });

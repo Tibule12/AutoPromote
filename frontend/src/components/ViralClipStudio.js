@@ -10995,6 +10995,7 @@ const ViralClipStudio = ({
         speakerStackFraming,
         speakerFocusCuts: normalizeSpeakerFocusCuts(speakerFocusCuts),
         enhanceQuality,
+        professionalCleanup: enhanceQuality,
         silenceRemoval,
         silenceThreshold,
         minSilenceDuration,
@@ -11068,6 +11069,7 @@ const ViralClipStudio = ({
         outputSettings: exportSettings,
       });
     } catch (err) {
+      const exportFailureMessage = `Export failed: ${err?.message || "Unknown render error"}`;
       if (scanSessionId) {
         void trackClipWorkflowEvent("scanner_clip_export_failed", {
           scanSessionId,
@@ -11076,7 +11078,8 @@ const ViralClipStudio = ({
           message: err?.message || "Export failed",
         });
       }
-      toast.error("Export failed: " + err.message);
+      setStudioActionMessage(exportFailureMessage);
+      toast.error(exportFailureMessage);
     } finally {
       setExportStatusLabel("Render Final Clip");
       setIsExporting(false);

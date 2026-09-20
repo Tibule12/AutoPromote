@@ -30,11 +30,27 @@ class MotionContractTests(unittest.TestCase):
         handler.returns = None
         for arg in handler.args.args:
             arg.annotation = None
+        # The production handler resolves its validators lazily so it works in
+        # both package and top-level uvicorn modes. This isolated AST contract
+        # test injects lightweight validators instead of executing those imports.
+        handler.body = [
+            node for node in handler.body
+            if not (
+                isinstance(node, ast.Try)
+                and any(isinstance(child, (ast.Import, ast.ImportFrom)) for child in ast.walk(node))
+            )
+        ]
         class HttpError(Exception):
             def __init__(self, status_code, detail):
                 self.status_code, self.detail = status_code, detail
         implementation = AsyncMock(return_value={"status": "completed"})
-        namespace = dict(validate_design=validate_design, HTTPException=HttpError, render_viral_clip_impl=implementation)
+        namespace = dict(
+            validate_design=validate_design,
+            validate_resolved_overlays=lambda _overlays: None,
+            normalize_audio_remix=lambda _remix: None,
+            HTTPException=HttpError,
+            render_viral_clip_impl=implementation,
+        )
         exec(compile(ast.Module(body=[handler], type_ignores=[]), "render-handler", "exec"), namespace)
         request = SimpleNamespace(motionGraphics={"version": 99}, sound_effects=[], async_mode=False)
         with self.assertRaises(HttpError) as error:
