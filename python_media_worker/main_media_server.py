@@ -6506,6 +6506,26 @@ def build_viral_export_encode_args(profile):
     return args
 
 
+def remove_replaced_temp_media(previous_path, replacement_path, approved_tmp_dir):
+    """Remove a superseded worker intermediate without touching external media."""
+    if not previous_path or not replacement_path:
+        return False
+    previous_real = os.path.realpath(os.path.abspath(str(previous_path)))
+    replacement_real = os.path.realpath(os.path.abspath(str(replacement_path)))
+    approved_real = os.path.realpath(os.path.abspath(str(approved_tmp_dir)))
+    if previous_real == replacement_real:
+        return False
+    try:
+        if os.path.commonpath([previous_real, approved_real]) != approved_real:
+            return False
+    except ValueError:
+        return False
+    if not os.path.isfile(previous_real):
+        return False
+    os.remove(previous_real)
+    return True
+
+
 async def apply_viral_brand_watermark(
     output_path,
     job_id,
@@ -30588,28 +30608,33 @@ async def render_studio_finish_timeline_sequential(
         raise ValueError("A sequential Finish Rack render needs at least one timed adjustment")
     work_dir = os.path.dirname(os.path.abspath(output_path))
     segment_paths = []
-    concat_path = os.path.join(work_dir, f"{job_id}_finish_concat.txt")
+    joined_transport_path = os.path.join(work_dir, f"{job_id}_finish_joined.ts")
     try:
         for index, segment in enumerate(specs):
-            segment_path = os.path.join(work_dir, f"{job_id}_finish_{index:03d}.mp4")
+            segment_path = os.path.join(work_dir, f"{job_id}_finish_{index:03d}.ts")
             segment_paths.append(segment_path)
             filters = [part for part in [base_filter, *segment["grades"], "format=yuv420p", "setsar=1"] if part]
             await run_subprocess_async([
                 "ffmpeg", "-ss", f"{segment['start']:.6f}", "-i", source_path,
                 "-t", f"{segment['end']-segment['start']:.6f}",
                 "-vf", ",".join(filters), "-an",
-                # This is an intermediate that is encoded again by the final
-                # caption/delivery graph. Superfast keeps the 10-minute CPU
-                # path bounded while CRF 19 protects the reviewed pixels.
-                "-c:v", "libx264", "-preset", "superfast", "-crf", "19",
-                "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-y", segment_path,
+                # This is encoded again by the final caption/delivery graph.
+                # Veryfast keeps the intermediate compact enough for Cloud
+                # Run's memory-backed filesystem while preserving CRF 19.
+                "-c:v", "libx264", "-preset", "veryfast", "-crf", "19",
+                "-pix_fmt", "yuv420p", "-f", "mpegts", "-y", segment_path,
             ], check=True, job_context=job_id, timeout_seconds=MEDIA_WORKER_SUBPROCESS_TIMEOUT_SECONDS)
-        with open(concat_path, "w", encoding="utf-8") as concat_file:
-            for segment_path in segment_paths:
-                concat_file.write(f"file '{segment_path}'\n")
+            # MPEG-TS is safely byte-concatenable. Fold each completed interval
+            # into one transport stream and delete it immediately so a long
+            # grade never retains dozens of standalone media files.
+            with open(segment_path, "rb") as segment_file, open(
+                joined_transport_path, "ab"
+            ) as joined_file:
+                shutil.copyfileobj(segment_file, joined_file, length=1024 * 1024)
+            os.remove(segment_path)
         finish_has_audio = has_audio_stream(source_path)
         concat_command = [
-            "ffmpeg", "-f", "concat", "-safe", "0", "-i", concat_path,
+            "ffmpeg", "-fflags", "+genpts", "-i", joined_transport_path,
             "-i", source_path, "-map", "0:v:0",
         ]
         if finish_has_audio:
@@ -30624,7 +30649,7 @@ async def render_studio_finish_timeline_sequential(
             timeout_seconds=MEDIA_WORKER_SUBPROCESS_TIMEOUT_SECONDS,
         )
     finally:
-        for temporary_path in [*segment_paths, concat_path]:
+        for temporary_path in [*segment_paths, joined_transport_path]:
             try:
                 os.remove(temporary_path)
             except FileNotFoundError:
@@ -31220,6 +31245,19 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 ])
             
             await run_subprocess_async(final_cmd, check=True)
+            # The writable Cloud Run filesystem counts against container
+            # memory. Once the assembled timeline exists, retaining the full
+            # video/audio segment set can OOM-kill a later grade pass.
+            for timeline_temporary_path in [
+                *segment_paths,
+                *[path for path in segment_audio_paths if path],
+                concat_list_path,
+            ]:
+                remove_replaced_temp_media(
+                    timeline_temporary_path,
+                    trimmed_path,
+                    SHARED_TMP_DIR,
+                )
         else:
             duration = request.end_time - request.start_time
             try:
@@ -31640,6 +31678,21 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 logger.error(f"Smart Crop failed: {e}. Proceeding with original aspect ratio.")
                 # Fallback to trimmed_path
 
+        # Reframing has now consumed the source/timeline intermediates. Keep
+        # only the active programme so later 10-minute grade chunks have a
+        # bounded memory-backed filesystem footprint.
+        for superseded_path in {
+            input_path,
+            trimmed_path,
+            reframe_source_cleanup_path,
+        }:
+            if superseded_path:
+                remove_replaced_temp_media(
+                    superseded_path,
+                    working_path,
+                    SHARED_TMP_DIR,
+                )
+
         # 2.7. Establish a professional technical baseline before any creative
         # transformation. This refines the captured pixels; it never invents a
         # background, face, or story visual.
@@ -31705,6 +31758,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         if finish_filter or adjustment_graph:
             finish_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_finish.mp4")
             finish_has_audio = has_audio_stream(working_path)
+            finish_source_path = working_path
             report_progress(49, "Applying creator color and finish")
             if adjustment_graph:
                 await render_studio_finish_timeline_sequential(
@@ -31728,6 +31782,11 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 finish_cmd.extend(["-movflags", "+faststart", "-y", finish_path])
                 await run_subprocess_async(finish_cmd, check=True, job_context=job_id)
             working_path = finish_path
+            remove_replaced_temp_media(
+                finish_source_path,
+                working_path,
+                SHARED_TMP_DIR,
+            )
 
         # 2.75. Apply the Studio speed plan before captions and overlays so
         # transcription, caption timing, B-roll, and audio share one final clock.

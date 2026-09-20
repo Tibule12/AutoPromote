@@ -35,6 +35,7 @@ from python_media_worker.main_media_server import (
     build_reframe_timeline_filter,
     render_reframe_timeline_sequential,
     render_studio_finish_timeline_sequential,
+    remove_replaced_temp_media,
     build_reviewed_reframe_filter,
     build_multicam_layout_filter,
     build_main_video_frame_filter,
@@ -130,8 +131,14 @@ class ViralRenderContractTests(unittest.TestCase):
         layers = [{"startTime": 170, "duration": 70, "effects": {
             "color": {"brightness": 1.05, "contrast": 1.1, "saturation": .95}
         }}]
+        async def create_mock_segment(command, **_kwargs):
+            output = Path(command[-1])
+            if output.suffix == ".ts":
+                output.write_bytes(b"transport-segment")
+
         with tempfile.TemporaryDirectory(prefix="bounded-finish-") as temp_dir, patch(
-            "python_media_worker.main_media_server.run_subprocess_async", new_callable=AsyncMock
+            "python_media_worker.main_media_server.run_subprocess_async",
+            new=AsyncMock(side_effect=create_mock_segment),
         ) as run, patch(
             "python_media_worker.main_media_server.has_audio_stream", return_value=True
         ):
@@ -144,13 +151,45 @@ class ViralRenderContractTests(unittest.TestCase):
         self.assertEqual(run.await_count, 22)
         interval_commands = [call.args[0] for call in run.await_args_list[:-1]]
         self.assertTrue(all("-ss" in command and "-t" in command for command in interval_commands))
-        self.assertTrue(all(command[command.index("-preset") + 1] == "superfast" for command in interval_commands))
+        self.assertTrue(all(command[command.index("-preset") + 1] == "veryfast" for command in interval_commands))
         self.assertTrue(all(float(command[command.index("-t") + 1]) <= 30 for command in interval_commands))
+        self.assertTrue(all(command[-1].endswith(".ts") for command in interval_commands))
         self.assertTrue(all("split=3" not in " ".join(command) for command in interval_commands))
         concat_command = run.await_args_list[-1].args[0]
-        self.assertEqual(concat_command[1:4], ["-f", "concat", "-safe"])
+        self.assertEqual(concat_command[1:4], ["-fflags", "+genpts", "-i"])
         self.assertIn("1:a?", concat_command)
         self.assertEqual(concat_command[-7:-5], ["-c:v", "copy"])
+
+    def test_finish_transport_stream_consolidation_preserves_duration_and_audio(self):
+        with tempfile.TemporaryDirectory(prefix="finish-ts-real-") as temp_dir:
+            source = str(Path(temp_dir) / "source.mp4")
+            output = str(Path(temp_dir) / "output.mp4")
+            created = subprocess.run([
+                "ffmpeg", "-v", "error", "-f", "lavfi", "-i",
+                "testsrc2=s=180x320:r=10:d=2", "-f", "lavfi", "-i",
+                "sine=frequency=440:duration=2", "-c:v", "libx264", "-c:a", "aac",
+                "-shortest", "-y", source,
+            ], capture_output=True)
+            self.assertEqual(created.returncode, 0, created.stderr.decode())
+            asyncio.run(render_studio_finish_timeline_sequential(
+                source, output, "eq=brightness=0.01",
+                [{"startTime": 1, "duration": 1, "effects": {
+                    "color": {"brightness": 1.04, "contrast": 1, "saturation": 1},
+                }}],
+                2,
+                job_id="finish-ts-real",
+            ))
+            validation = subprocess.run([
+                "ffprobe", "-v", "error", "-show_entries",
+                "format=duration:stream=codec_type", "-of", "json", output,
+            ], capture_output=True, text=True)
+            self.assertEqual(validation.returncode, 0, validation.stderr)
+            probe = json.loads(validation.stdout)
+            self.assertAlmostEqual(float(probe["format"]["duration"]), 2.0, delta=0.15)
+            self.assertEqual(
+                {stream["codec_type"] for stream in probe["streams"]},
+                {"video", "audio"},
+            )
 
     def test_http_render_boundary_preserves_explicit_clean_export_choice(self):
         request = RenderViralRequest(
@@ -162,6 +201,28 @@ class ViralRenderContractTests(unittest.TestCase):
             asyncio.run(render_viral_clip(request))
         self.assertFalse(request.brand_watermark)
         self.assertFalse(request.brandWatermark)
+
+    def test_replaced_worker_intermediate_is_deleted_only_inside_approved_tmp(self):
+        with tempfile.TemporaryDirectory(prefix="worker-cleanup-") as temp_dir:
+            previous = Path(temp_dir) / "previous.mp4"
+            replacement = Path(temp_dir) / "replacement.mp4"
+            previous.write_bytes(b"old")
+            replacement.write_bytes(b"new")
+            self.assertTrue(
+                remove_replaced_temp_media(previous, replacement, temp_dir)
+            )
+            self.assertFalse(previous.exists())
+            self.assertTrue(replacement.exists())
+
+            outside = Path(temp_dir).parent / "must-stay.mp4"
+            outside.write_bytes(b"safe")
+            try:
+                self.assertFalse(
+                    remove_replaced_temp_media(outside, replacement, temp_dir)
+                )
+                self.assertTrue(outside.exists())
+            finally:
+                outside.unlink(missing_ok=True)
 
     def test_director_virtual_camera_punch_renders_and_resets_at_master_cut(self):
         graph = build_reframe_timeline_filter(
