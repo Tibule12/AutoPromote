@@ -38,6 +38,7 @@ from python_media_worker.main_media_server import (
     build_reviewed_reframe_filter,
     build_multicam_layout_filter,
     build_main_video_frame_filter,
+    build_viral_export_encode_args,
     build_speaker_track_crop_filter,
     get_reframe_output_dimensions,
     generate_ass_captions,
@@ -143,6 +144,7 @@ class ViralRenderContractTests(unittest.TestCase):
         self.assertEqual(run.await_count, 22)
         interval_commands = [call.args[0] for call in run.await_args_list[:-1]]
         self.assertTrue(all("-ss" in command and "-t" in command for command in interval_commands))
+        self.assertTrue(all(command[command.index("-preset") + 1] == "superfast" for command in interval_commands))
         self.assertTrue(all(float(command[command.index("-t") + 1]) <= 30 for command in interval_commands))
         self.assertTrue(all("split=3" not in " ".join(command) for command in interval_commands))
         concat_command = run.await_args_list[-1].args[0]
@@ -415,6 +417,11 @@ class ViralRenderContractTests(unittest.TestCase):
         self.assertEqual((landscape["width"], landscape["height"]), (1920, 1080))
         self.assertIsNone(landscape["fps"])
         self.assertEqual(landscape["crf"], 19)
+        self.assertEqual(landscape["preset"], "veryfast")
+        self.assertEqual(
+            build_viral_export_encode_args(landscape)[3],
+            "veryfast",
+        )
 
     def test_caption_coverage_gate_finds_spoken_ranges_missing_from_review(self):
         gaps = find_uncovered_caption_speech_ranges(

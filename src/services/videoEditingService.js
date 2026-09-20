@@ -43,6 +43,11 @@ const MULTICAM_MASTER_RETENTION_DAYS = Math.max(
 );
 const DEFAULT_MULTICAM_CHECKPOINT_SECONDS =
   parseInt(process.env.MULTICAM_CHECKPOINT_SECONDS || String(5 * 60), 10) || 5 * 60;
+const VIRAL_RENDER_WORKER_TIMEOUT_MS = Math.max(
+  60 * 1000,
+  parseInt(process.env.VIRAL_RENDER_WORKER_TIMEOUT_MS || String(62 * 60 * 1000), 10) ||
+    62 * 60 * 1000
+);
 
 function normalizeMulticamCheckpointContract(multicamRequest = {}) {
   const totalDurationSeconds = Math.max(
@@ -1105,9 +1110,11 @@ class VideoEditingService {
 
       console.log("[VideoEditing] Payload to worker:", JSON.stringify(payload));
 
-      // Increase timeout significantly for AI model downloading (30 mins)
+      // A reviewed long-form Studio render may use the full 60-minute Cloud Run
+      // window. Keep the Node request alive slightly longer so it cannot mark a
+      // healthy worker job failed while that worker is still rendering.
       const response = await axios.post(`${MEDIA_WORKER_URL}${endpoint}`, payload, {
-        timeout: 1800000, // 30 minutes (increased from 10m for model downloads)
+        timeout: endpoint === "/render-viral-clip" ? VIRAL_RENDER_WORKER_TIMEOUT_MS : 1800000,
       });
 
       const result = response.data;

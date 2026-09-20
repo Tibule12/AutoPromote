@@ -154,7 +154,7 @@ describe("VideoEditingService Viral Clip payload", () => {
         },
         export_destination: "tiktok",
       }),
-      expect.any(Object)
+      expect.objectContaining({ timeout: 62 * 60 * 1000 })
     );
   });
 });

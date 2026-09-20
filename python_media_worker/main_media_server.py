@@ -6468,6 +6468,15 @@ def resolve_viral_export_profile(output_settings, source_width, source_height):
     crf_by_quality = {"draft": 27, "balanced": 23, "high": 19, "master": 16}
     crf = crf_by_quality[quality] + (2 if codec == "h265" else 0)
     encoder = "libx265" if codec == "h265" else "libx264"
+    # Cloud Run's CPU fallback must finish inside the same bounded request as
+    # the browser job. CRF remains the creator-facing quality control; faster
+    # presets trade file size/encode efficiency, not resolution or frame rate.
+    preset_by_quality = {
+        "draft": "ultrafast",
+        "balanced": "superfast",
+        "high": "veryfast",
+        "master": "fast",
+    }
     return {
         "resolution": resolution,
         "width": output_width,
@@ -6477,6 +6486,7 @@ def resolve_viral_export_profile(output_settings, source_width, source_height):
         "encoder": encoder,
         "quality": quality,
         "crf": crf,
+        "preset": preset_by_quality[quality],
     }
 
 
@@ -6485,7 +6495,7 @@ def build_viral_export_encode_args(profile):
         "-c:v",
         profile["encoder"],
         "-preset",
-        "medium",
+        profile.get("preset", "veryfast"),
         "-crf",
         str(profile["crf"]),
         "-pix_fmt",
@@ -30588,7 +30598,10 @@ async def render_studio_finish_timeline_sequential(
                 "ffmpeg", "-ss", f"{segment['start']:.6f}", "-i", source_path,
                 "-t", f"{segment['end']-segment['start']:.6f}",
                 "-vf", ",".join(filters), "-an",
-                "-c:v", "libx264", "-preset", "veryfast", "-crf", "19",
+                # This is an intermediate that is encoded again by the final
+                # caption/delivery graph. Superfast keeps the 10-minute CPU
+                # path bounded while CRF 19 protects the reviewed pixels.
+                "-c:v", "libx264", "-preset", "superfast", "-crf", "19",
                 "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-y", segment_path,
             ], check=True, job_context=job_id, timeout_seconds=MEDIA_WORKER_SUBPROCESS_TIMEOUT_SECONDS)
         with open(concat_path, "w", encoding="utf-8") as concat_file:
