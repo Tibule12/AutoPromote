@@ -1125,6 +1125,7 @@ export default function StudioProTimeline({
             return (
               <div
                 key={trackId}
+                data-testid={`pro-track-row-${trackId}`}
                 className={`pro-track-row is-${type} ${state.visible === false ? "is-hidden" : ""}`}
                 style={
                   trackId === "adjustment" && items.length > 1

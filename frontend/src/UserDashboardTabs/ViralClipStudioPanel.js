@@ -78,6 +78,7 @@ function ViralClipStudioPanel({
   const [sourceUploadProgress, setSourceUploadProgress] = useState(0);
   const [pendingSourceName, setPendingSourceName] = useState("");
   const [studioSource, setStudioSource] = useState(null);
+  const [additionalSourceFiles, setAdditionalSourceFiles] = useState([]);
 
   const prepareSource = useCallback(async incomingSource => {
     retrySourceRef.current = incomingSource;
@@ -154,8 +155,18 @@ function ViralClipStudioPanel({
 
   useEffect(() => {
     setSelectedClip(initialClip || null);
-    void prepareSource(initialFile || null);
+    const initialSources = Array.isArray(initialFile) ? initialFile.filter(Boolean) : null;
+    setAdditionalSourceFiles(initialSources ? initialSources.slice(1) : []);
+    void prepareSource(initialSources ? initialSources[0] || null : initialFile || null);
   }, [initialClip, initialFile, prepareSource]);
+
+  const prepareSelectedVideos = files => {
+    const videos = Array.from(files || []).filter(candidate => candidate.type?.startsWith("video/"));
+    if (!videos.length) return;
+    setSelectedClip(null);
+    setAdditionalSourceFiles(videos.slice(1));
+    void prepareSource(videos[0]);
+  };
 
   useEffect(() => {
     if (!autoOpen || sourceState !== "ready" || !sourceFile) return;
@@ -195,6 +206,7 @@ function ViralClipStudioPanel({
     return (
       <VideoEditor
         file={studioSource}
+        initialProjectFiles={additionalSourceFiles}
         onCancel={() => {
           setStudioSource(null);
           onBack?.();
@@ -221,28 +233,22 @@ function ViralClipStudioPanel({
             onDragOver={event => event.preventDefault()}
             onDrop={event => {
               event.preventDefault();
-              const file = Array.from(event.dataTransfer.files || []).find(
-                candidate => candidate.type.startsWith("video/")
-              );
-              if (!file) return;
-              setSelectedClip(null);
-              void prepareSource(file);
+              prepareSelectedVideos(event.dataTransfer.files);
             }}
           >
             <span className="creator-studio-dropzone-icon">☁️</span>
-            <h3>Upload your source video to begin</h3>
-            <p>Drag and drop a video file here, or click to browse.</p>
-            <span className="creator-studio-btn">Choose Video</span>
+            <h3>Bring your footage into Studio</h3>
+            <p>Choose one video or several scenes and camera takes. The first video opens the editor; the rest appear in your project library.</p>
+            <span className="creator-studio-btn">Choose Videos</span>
             <input
               type="file"
               accept="video/*"
+              multiple
               disabled={sourceState === "uploading"}
               onChange={event => {
-                const [file] = Array.from(event.target.files || []);
+                const files = Array.from(event.target.files || []);
                 event.target.value = "";
-                if (!file) return;
-                setSelectedClip(null);
-                void prepareSource(file);
+                prepareSelectedVideos(files);
               }}
             />
           </label>
@@ -269,7 +275,10 @@ function ViralClipStudioPanel({
               <h3>Source could not be loaded</h3>
               <p>{sourceError || "Video source could not be loaded."}</p>
               <button className="retry-btn" onClick={() => void prepareSource(retrySourceRef.current)}>Retry Upload</button>
-              <button type="button" onClick={() => void prepareSource(null)}>Choose another video</button>
+              <button type="button" onClick={() => {
+                setAdditionalSourceFiles([]);
+                void prepareSource(null);
+              }}>Choose other videos</button>
             </div>
           </div>
         )}
@@ -303,6 +312,9 @@ function ViralClipStudioPanel({
             <div style={{ textAlign: "center" }}>
               <h3 style={{ margin: "0 0 8px 0" }}>{sourceName}</h3>
               <p style={{ margin: "0 0 24px 0", color: "var(--ap-muted)" }}>{sourceStateMessage}</p>
+              {additionalSourceFiles.length > 0 ? (
+                <p>{additionalSourceFiles.length} more video{additionalSourceFiles.length === 1 ? "" : "s"} will import into your project library when Studio opens.</p>
+              ) : null}
               <button
                 type="button"
                 className="creator-studio-btn"

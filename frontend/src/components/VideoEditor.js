@@ -26,6 +26,11 @@ import {
   fetchWithRenderTimeout,
   waitForRenderRetry,
 } from "../utils/renderRequest";
+import {
+  clearViralRenderAttempt,
+  loadViralRenderAttempt,
+  saveViralRenderAttempt,
+} from "../utils/viralRenderRecovery";
 
 const DESKTOP_EDITING_TOOL_QUERY = "(min-width: 900px) and (hover: hover) and (pointer: fine)";
 
@@ -64,7 +69,89 @@ function DesktopOnlyToolNotice({ toolName, onClose }) {
   );
 }
 
-function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflows = false }) {
+function ViralRenderRecoveryPanel({
+  recovery,
+  renderedFile,
+  onDismiss,
+  onRetry,
+  onDownload,
+  onUse,
+}) {
+  if (!recovery) return null;
+  return (
+    <section
+      className="viral-render-recovery"
+      data-testid="viral-render-recovery"
+      aria-live="polite"
+    >
+      <div className="viral-render-recovery__heading">
+        <strong>Previous render</strong>
+        {!["checking", "processing"].includes(recovery.status) ? (
+          <button type="button" onClick={onDismiss}>
+            Dismiss
+          </button>
+        ) : null}
+      </div>
+      {recovery.status === "checking" ? <p>Checking your previous render…</p> : null}
+      {recovery.status === "processing" ? (
+        <p>
+          Previous render is processing · {recovery.progress}%
+          {recovery.detail ? ` · ${recovery.detail}` : ""}
+        </p>
+      ) : null}
+      {recovery.status === "completed" && renderedFile ? (
+        <>
+          <p>Your finished clip is ready to preview, download, or use in the publisher.</p>
+          <video
+            controls
+            preload="metadata"
+            src={sanitizeUrl(renderedFile.url)}
+            aria-label="Recovered viral clip"
+          />
+          <div className="viral-render-recovery__actions">
+            <button type="button" onClick={() => onDownload(renderedFile.url)}>
+              Download clip
+            </button>
+            {!renderedFile.captionReviewCopy ? (
+              <button type="button" onClick={() => onUse(renderedFile)}>
+                Use in Publisher
+              </button>
+            ) : null}
+          </div>
+        </>
+      ) : null}
+      {recovery.status === "failed" ? <p>Render failed: {recovery.error}</p> : null}
+      {recovery.status === "missing" ? (
+        <>
+          <p>
+            The previous submission has not appeared yet. Check again, or dismiss recovery to start
+            a new render.
+          </p>
+          <button type="button" onClick={onRetry}>
+            Retry status check
+          </button>
+        </>
+      ) : null}
+      {recovery.status === "unavailable" ? (
+        <>
+          <p>{recovery.error}</p>
+          <button type="button" onClick={onRetry}>
+            Retry status check
+          </button>
+        </>
+      ) : null}
+    </section>
+  );
+}
+
+function VideoEditor({
+  file,
+  onSave,
+  onCancel,
+  images = [],
+  hideCreationWorkflows = false,
+  initialProjectFiles = [],
+}) {
   const { editing, credits: subscriptionCredits } = useSubscription();
   const [videoSrc, setVideoSrc] = useState("");
   const [processing, setProcessing] = useState(false);
@@ -72,6 +159,9 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
   const abortRef = useRef(false);
   const activeRenderRequestRef = useRef(null);
   const viralRenderAttemptRef = useRef(null);
+  const recoveryDismissedRef = useRef(false);
+  const [renderRecovery, setRenderRecovery] = useState(null);
+  const [renderRecoveryRetry, setRenderRecoveryRetry] = useState(0);
 
   const cancelActiveProcessing = () => {
     abortRef.current = true;
@@ -115,6 +205,12 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
   // an empty source and immediately replacing that source aborts Firefox's fetch.
   const [clipSuggestions, setClipSuggestions] = useState(null);
   const [showMultiCamCombiner, setShowMultiCamCombiner] = useState(false);
+  const [cameraInitialFiles, setCameraInitialFiles] = useState([]);
+  const [cameraSessionKey, setCameraSessionKey] = useState(0);
+  const [importedCameraMaster, setImportedCameraMaster] = useState(null);
+  const [cameraImportStatus, setCameraImportStatus] = useState("");
+  const cameraCombinerOriginRef = useRef("editor");
+  const cameraImportPendingRef = useRef(false);
   const autoOpenedStudioRef = useRef(false);
   const analyzeCost = editing?.features?.findViralClips?.creditCost || creditCosts?.analyze || 8;
   const renderClipCost =
@@ -149,15 +245,17 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
     return `${safeName || "edited-video"}.mp4`;
   };
 
-  const handleDownloadVideo = async () => {
-    const downloadSource = processedFile?.url || videoSrc;
+  const handleDownloadVideo = async sourceOverride => {
+    const downloadSource =
+      typeof sourceOverride === "string" ? sourceOverride : processedFile?.url || videoSrc;
     if (!downloadSource) {
       setStatusMessage("No processed video is available to download yet.");
       return;
     }
 
     try {
-      const downloadName = getDownloadFileName();
+      const downloadName =
+        typeof sourceOverride === "string" ? "viral_clip_rendered.mp4" : getDownloadFileName();
 
       if (processedFile instanceof File || processedFile instanceof Blob) {
         const objectUrl = URL.createObjectURL(processedFile);
@@ -1026,7 +1124,119 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
     onSave(payload);
   };
 
+  useEffect(() => {
+    const uid = getAuth().currentUser?.uid;
+    const attempt = loadViralRenderAttempt(uid);
+    if (!attempt) return undefined;
+
+    recoveryDismissedRef.current = false;
+    let stopped = false;
+    let timer = null;
+    let missingChecks = 0;
+    const requestRef = { current: null };
+    setRenderRecovery({ status: "checking", requestId: attempt.requestId });
+
+    const check = async () => {
+      if (stopped || recoveryDismissedRef.current) return;
+      try {
+        let token = await getMediaAuthToken();
+        if (!token) throw new Error("Please sign in to recover your render.");
+        const url = `${API_BASE_URL}/api/media/viral-render-attempt/${encodeURIComponent(attempt.requestId)}`;
+        const requestStatus = currentToken =>
+          fetchWithRenderTimeout(
+            url,
+            { headers: { Authorization: `Bearer ${currentToken}` } },
+            { timeoutMs: RENDER_STATUS_TIMEOUT_MS, controllerRef: requestRef }
+          );
+        let response = await requestStatus(token);
+        if (response.status === 401) {
+          token = await getMediaAuthToken(true);
+          if (!token) throw new Error("Please sign in to recover your render.");
+          response = await requestStatus(token);
+        }
+        if (stopped || recoveryDismissedRef.current) return;
+        if (response.status === 404) {
+          missingChecks += 1;
+          if (missingChecks < 10) {
+            timer = setTimeout(check, 3000);
+          } else {
+            setRenderRecovery({ status: "missing", requestId: attempt.requestId });
+          }
+          return;
+        }
+        if (!response.ok) throw new Error(`Render status is unavailable (${response.status}).`);
+
+        const job = await response.json();
+        if (stopped || recoveryDismissedRef.current) return;
+        const status = String(job.status || "queued");
+        if (status === "completed") {
+          const result = job.result || {};
+          const outputUrl = sanitizeUrl(
+            job.outputUrl || job.output_url || result.url || result.output_url
+          );
+          if (!outputUrl) throw new Error("This render finished without a playable video URL.");
+          const recoveredFile = {
+            name: "viral_clip_rendered.mp4",
+            type: "video/mp4",
+            url: outputUrl,
+            previewUrl: outputUrl,
+            thumbnailUrl: result.thumbnailUrl || job.thumbnailUrl || null,
+            audioProof: result.audioProof || job.audioProof || null,
+            captionReviewCopy: attempt.captionReviewCopy,
+            isRemote: true,
+          };
+          setViralRenderedFile(recoveredFile);
+          setRenderRecovery({ status, requestId: attempt.requestId, jobId: job.jobId, outputUrl });
+          return;
+        }
+        if (["failed", "dispatch_failed", "proof_failed"].includes(status)) {
+          setRenderRecovery({
+            status: "failed",
+            requestId: attempt.requestId,
+            jobId: job.jobId,
+            error: job.error || job.detail || "The render failed.",
+          });
+          return;
+        }
+        setRenderRecovery({
+          status: "processing",
+          requestId: attempt.requestId,
+          jobId: job.jobId,
+          progress: Math.max(0, Math.min(99, Number(job.progress) || 0)),
+          detail: job.detail || null,
+        });
+        timer = setTimeout(check, 3000);
+      } catch (error) {
+        if (stopped || recoveryDismissedRef.current) return;
+        setRenderRecovery({
+          status: "unavailable",
+          requestId: attempt.requestId,
+          error: error.message || "Could not check the previous render.",
+        });
+      }
+    };
+
+    void check();
+    return () => {
+      stopped = true;
+      if (timer) clearTimeout(timer);
+      requestRef.current?.abort();
+    };
+  }, [renderRecoveryRetry]);
+
+  const dismissRenderRecovery = () => {
+    recoveryDismissedRef.current = true;
+    clearViralRenderAttempt(getAuth().currentUser?.uid, renderRecovery?.requestId);
+    setRenderRecovery(null);
+  };
+
   const handleViralRender = async (selectedClip, overlays, extraOptions = {}) => {
+    if (["checking", "processing", "unavailable", "missing"].includes(renderRecovery?.status)) {
+      setStatusMessage(
+        "Your previous render may still be processing. Check its status or dismiss recovery before starting another render."
+      );
+      return null;
+    }
     setStatusMessage("Rendering your viral clip with overlays...");
     setViralRenderedFile(null);
     setProcessing(true);
@@ -1070,6 +1280,27 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
       });
 
       const { timelineSegments: requestTimelineSegments, ...requestRenderOptions } = extraOptions;
+      const firstTimelineSegment = Array.isArray(requestTimelineSegments)
+        ? requestTimelineSegments[0]
+        : null;
+      const samePrimarySource = (() => {
+        if (!firstTimelineSegment?.url || !finalVideoUrl) return false;
+        if (firstTimelineSegment.url === finalVideoUrl) return true;
+        try {
+          const timelineUrl = new URL(firstTimelineSegment.url);
+          const primaryUrl = new URL(finalVideoUrl);
+          return (
+            timelineUrl.origin === primaryUrl.origin && timelineUrl.pathname === primaryUrl.pathname
+          );
+        } catch (_error) {
+          return false;
+        }
+      })();
+      const sourceStoragePath =
+        (samePrimarySource && firstTimelineSegment?.sourceStoragePath) ||
+        processedFile?.storagePath ||
+        file?.storagePath ||
+        null;
       const requestFingerprint = JSON.stringify({
         source: videoSrc,
         clipId: selectedClip?.id || null,
@@ -1088,6 +1319,12 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
         };
       }
       const renderRequestId = viralRenderAttemptRef.current.requestId;
+      recoveryDismissedRef.current = true;
+      setRenderRecovery(null);
+      saveViralRenderAttempt(user.uid, {
+        requestId: renderRequestId,
+        captionReviewCopy: extraOptions.captionReviewCopy === true,
+      });
 
       // NOTE: backend 'mediaRoutes.js' expects 'fileUrl' and 'options'.
       // But 'videoEditingService.js' puts 'payload' inside 'options.viralData'.
@@ -1107,7 +1344,8 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
               },
               body: JSON.stringify({
                 fileUrl: finalVideoUrl,
-                renderJobId: file?.renderJobId || null,
+                sourceStoragePath,
+                renderJobId: processedFile?.renderJobId || file?.renderJobId || null,
                 renderRequestId,
                 options: {
                   ...options,
@@ -1241,6 +1479,10 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
           const errJson = JSON.parse(debugText);
           backendMessage = errJson.detail || errJson.details || errJson.message || backendMessage;
         } catch (_parseError) {}
+        if ([400, 402, 403, 409, 422].includes(response.status)) {
+          clearViralRenderAttempt(user.uid, renderRequestId);
+          viralRenderAttemptRef.current = null;
+        }
         throw new Error(
           `${backendMessage} (${response.status}${response.statusText ? ` ${response.statusText}` : ""})`
         );
@@ -1411,7 +1653,14 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
       const isCancelled = error.message === "Processing cancelled by user.";
       let msg = error.message;
       if (msg === "Failed to fetch") msg = "Network error. Is the backend running?";
-      setStatusMessage(isCancelled ? "Rendering cancelled." : "Error rendering clip: " + msg);
+      setStatusMessage(
+        isCancelled
+          ? "Stopped waiting for the render. Check its server status before starting another."
+          : "Error rendering clip: " + msg
+      );
+      if (loadViralRenderAttempt(getAuth().currentUser?.uid)) {
+        setRenderRecoveryRetry(value => value + 1);
+      }
       // Keep the studio open on error/cancel so the user can retry or adjust settings
       // (only close on explicit user cancel if they want to go back)
       throw error;
@@ -1420,7 +1669,108 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
     }
   };
 
+  const handleOpenCameraAngles = ({ assets = [] } = {}) => {
+    if (!desktopToolsAvailable) {
+      setStatusMessage(DESKTOP_TOOL_MESSAGE);
+      return;
+    }
+    if (processing || cameraImportPendingRef.current) return;
+    const selectedAssets = Array.isArray(assets) ? assets.filter(Boolean) : [];
+    if (!selectedAssets.length) {
+      setStatusMessage("Choose at least one uploaded camera angle first.");
+      return;
+    }
+    if (selectedAssets.length > 3) {
+      setStatusMessage("Cam Combiner currently supports up to three synchronized camera angles.");
+      return;
+    }
+    if (selectedAssets.some(asset => !asset.url || !asset.storagePath)) {
+      setStatusMessage("Wait for every selected camera upload to finish before opening Cam Combiner.");
+      return;
+    }
+    cameraCombinerOriginRef.current = "studio";
+    setCameraInitialFiles(
+      selectedAssets.map(asset => ({
+        ...asset,
+        name: asset.name || "Camera angle",
+        type: asset.type || "video/mp4",
+        isRemote: true,
+      }))
+    );
+    setCameraImportStatus("");
+    setCameraSessionKey(current => current + 1);
+    setShowMultiCamCombiner(true);
+  };
+
+  const handleCancelCameraCombiner = () => {
+    if (cameraImportPendingRef.current) return;
+    setShowMultiCamCombiner(false);
+    setCameraImportStatus("");
+  };
+
   const handleMultiCamComplete = async multiCamFile => {
+    if (cameraCombinerOriginRef.current === "studio") {
+      if (cameraImportPendingRef.current) return;
+      const localFile =
+        multiCamFile?.file instanceof File || multiCamFile?.file instanceof Blob
+          ? multiCamFile.file
+          : null;
+      if (localFile) {
+        setImportedCameraMaster({
+          id: `camera-master-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+          file: localFile,
+          name: multiCamFile.name || localFile.name || "Camera master",
+          duration: multiCamFile.duration || null,
+        });
+        setShowMultiCamCombiner(false);
+        setStatusMessage("Camera master is uploading into your Studio project.");
+        return;
+      }
+
+      const renderJobId = multiCamFile?.renderJobId;
+      if (!renderJobId) {
+        setCameraImportStatus(
+          "This master has no render job ID. Keep it in Cam Combiner and retry from the saved render."
+        );
+        return;
+      }
+
+      cameraImportPendingRef.current = true;
+      setCameraImportStatus("Saving the camera master to your Studio media library…");
+      try {
+        const token = await getMediaAuthToken();
+        if (!token) throw new Error("Sign in again before saving this camera master.");
+        const response = await fetchWithRenderTimeout(
+          `${API_BASE_URL}/api/media/studio-assets/import-render`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ renderJobId }),
+          },
+          {
+            timeoutMs: 120000,
+            timeoutMessage: "Saving the master is taking longer than expected. Try again from Cam Combiner.",
+          }
+        );
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok || !payload?.asset?.storagePath || !payload?.asset?.url) {
+          throw new Error(payload.message || "The camera master could not be saved to Studio.");
+        }
+        setImportedCameraMaster(payload.asset);
+        setShowMultiCamCombiner(false);
+        setCameraImportStatus("");
+        setStatusMessage("Camera master added to your Studio media library and sequence.");
+      } catch (error) {
+        setCameraImportStatus(error.message || "The camera master could not be saved to Studio.");
+      } finally {
+        cameraImportPendingRef.current = false;
+      }
+      return;
+    }
+
     let finalUrl = "";
     if (multiCamFile?.file instanceof File || multiCamFile?.file instanceof Blob) {
       if (blobUrlRef.current) {
@@ -1451,7 +1801,7 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
           : `${finalUrl}?t=${Date.now()}`;
 
     autoOpenedStudioRef.current = true;
-    setProcessedFile(multiCamFile.file || multiCamFile);
+    setProcessedFile(multiCamFile);
     setVideoSrc(urlWithCacheBuster);
     setShowMultiCamCombiner(false);
 
@@ -1474,6 +1824,55 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
     );
   };
 
+  const recoveryPanel = (
+    <ViralRenderRecoveryPanel
+      recovery={renderRecovery}
+      renderedFile={viralRenderedFile}
+      onDismiss={dismissRenderRecovery}
+      onRetry={() => setRenderRecoveryRetry(value => value + 1)}
+      onDownload={url => void handleDownloadVideo(url)}
+      onUse={renderedFile => {
+        onSave?.(renderedFile);
+        setClipSuggestions(null);
+      }}
+    />
+  );
+
+  const cameraCombiner = showMultiCamCombiner ? (
+    <>
+      <MultiCamCombiner
+        key={`camera-session-${cameraSessionKey}`}
+        primaryFile={cameraInitialFiles[0] || processedFile || file}
+        initialFiles={cameraInitialFiles}
+        returnToStudio={cameraCombinerOriginRef.current === "studio"}
+        onCancel={handleCancelCameraCombiner}
+        onComplete={handleMultiCamComplete}
+        onStatusChange={setStatusMessage}
+      />
+      {cameraImportStatus ? (
+        <div
+          role="status"
+          aria-live="polite"
+          style={{
+            position: "fixed",
+            zIndex: 10001,
+            left: "50%",
+            bottom: 20,
+            transform: "translateX(-50%)",
+            maxWidth: "min(560px, calc(100vw - 32px))",
+            padding: "12px 16px",
+            borderRadius: 12,
+            color: "#fff",
+            background: "#17243b",
+            boxShadow: "0 12px 36px rgba(0, 0, 0, 0.35)",
+          }}
+        >
+          {cameraImportStatus}
+        </div>
+      ) : null}
+    </>
+  ) : null;
+
   if (clipSuggestions) {
     if (!desktopToolsAvailable) {
       const notice = (
@@ -1494,35 +1893,46 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
     }
 
     const studio = (
-      <ViralClipStudio
-        videoUrl={videoSrc}
-        sourceStoragePath={processedFile?.storagePath || file?.storagePath || null}
-        clips={clipSuggestions}
-        images={images}
-        onSave={handleViralRender}
-        onCancel={() => {
-          if (processing) {
-            // Cancel the in-progress render instead of closing the studio
-            cancelActiveProcessing();
-          } else {
-            setClipSuggestions(null);
-          }
-        }}
-        onStatusChange={setStatusMessage}
-        renderStatus={statusMessage}
-        renderedOutput={viralRenderedFile}
-        onDownloadRendered={handleDownloadVideo}
-        onUseRendered={() => {
-          if (!viralRenderedFile || viralRenderedFile.captionReviewCopy) return;
-          onSave?.(viralRenderedFile);
-          setClipSuggestions(null);
-        }}
-        // Pass down music state
-        currentMusic={options.musicFile}
-        onMusicChange={(newMusic, isSearchMode) => {
-          setOptions(prev => ({ ...prev, musicFile: newMusic, isSearch: isSearchMode }));
-        }}
-      />
+      <>
+        <div style={showMultiCamCombiner ? { display: "none" } : undefined} aria-hidden={showMultiCamCombiner || undefined}>
+          <ViralClipStudio
+            videoUrl={videoSrc}
+            sourceName={processedFile?.name || file?.name || "Original source video"}
+            sourceStoragePath={processedFile?.storagePath || file?.storagePath || null}
+            initialProjectFiles={initialProjectFiles}
+            importedCameraMaster={importedCameraMaster}
+            isWorkflowPaused={showMultiCamCombiner}
+            onOpenCameraAngles={handleOpenCameraAngles}
+            clips={clipSuggestions}
+            images={images}
+            onSave={handleViralRender}
+            onCancel={() => {
+              if (processing) {
+                // Cancel the in-progress render instead of closing the studio
+                cancelActiveProcessing();
+              } else {
+                setClipSuggestions(null);
+              }
+            }}
+            onStatusChange={setStatusMessage}
+            renderStatus={statusMessage}
+            renderedOutput={viralRenderedFile}
+            renderRecoveryPanel={renderRecovery ? recoveryPanel : null}
+            onDownloadRendered={handleDownloadVideo}
+            onUseRendered={() => {
+              if (!viralRenderedFile || viralRenderedFile.captionReviewCopy) return;
+              onSave?.(viralRenderedFile);
+              setClipSuggestions(null);
+            }}
+            // Pass down music state
+            currentMusic={options.musicFile}
+            onMusicChange={(newMusic, isSearchMode) => {
+              setOptions(prev => ({ ...prev, musicFile: newMusic, isSearch: isSearchMode }));
+            }}
+          />
+        </div>
+        {cameraCombiner}
+      </>
     );
 
     if (typeof document !== "undefined" && document.body) {
@@ -1551,20 +1961,11 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
       return notice;
     }
 
-    const combiner = (
-      <MultiCamCombiner
-        primaryFile={processedFile || file}
-        onCancel={() => setShowMultiCamCombiner(false)}
-        onComplete={handleMultiCamComplete}
-        onStatusChange={setStatusMessage}
-      />
-    );
-
     if (typeof document !== "undefined" && document.body) {
-      return createPortal(combiner, document.body);
+      return createPortal(cameraCombiner, document.body);
     }
 
-    return combiner;
+    return cameraCombiner;
   }
 
   if (showSmartPromoSummary) {
@@ -1634,6 +2035,8 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
           </div>
         </div>
       ) : null}
+
+      {recoveryPanel}
 
       {needsCredits && !showCreditShop ? (
         <div
@@ -1972,6 +2375,10 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
                 <button
                   className="legacy-toggle-btn multicam-launch-btn"
                   onClick={() => {
+                    cameraCombinerOriginRef.current = "editor";
+                    setCameraInitialFiles([]);
+                    setCameraImportStatus("");
+                    setCameraSessionKey(current => current + 1);
                     setStatusMessage("");
                     setShowMultiCamCombiner(true);
                   }}
@@ -1979,7 +2386,7 @@ function VideoEditor({ file, onSave, onCancel, images = [], hideCreationWorkflow
                   title={!desktopToolsAvailable ? DESKTOP_TOOL_MESSAGE : undefined}
                   type="button"
                 >
-                  Combine Multi-Camera Angles First
+                  Open Podcast Cam Combiner
                 </button>
                 <button
                   className="legacy-toggle-btn multicam-launch-btn"

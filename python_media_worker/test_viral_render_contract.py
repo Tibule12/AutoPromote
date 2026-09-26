@@ -32,7 +32,10 @@ from python_media_worker.main_media_server import (
     build_studio_adjustment_timeline_filter,
     build_group_stack_filter,
     build_source_split_filter,
+    build_reframe_segment_filter,
     build_reframe_timeline_filter,
+    plan_reframe_timeline_segments,
+    preflight_studio_podcast_timeline,
     render_reframe_timeline_sequential,
     render_studio_finish_timeline_sequential,
     remove_replaced_temp_media,
@@ -53,6 +56,51 @@ from python_media_worker.main_media_server import (
 
 
 class ViralRenderContractTests(unittest.TestCase):
+    def test_podcast_preflight_blocks_reaction_window_enlargement(self):
+        receipt = preflight_studio_podcast_timeline({
+            "main_frame": {"enabled": True, "shape": "round", "border_radius_percent": 10},
+            "reframe": {
+                "timeline_cuts": [{"time": 0, "mode": "center"}],
+                "keyframes": [{"time": 0, "x": 50, "y": 50}],
+                "split_source": {
+                    "top": {"x": 30, "y": 50, "zoom": 1.45},
+                    "bottom": {"x": 93, "y": 18, "zoom": 6.2},
+                },
+            },
+        }, 12)
+        self.assertFalse(receipt["passed"])
+        self.assertIn("reaction window", " ".join(receipt["blockers"]))
+
+    def test_podcast_preflight_accepts_rounded_clean_speaker_views(self):
+        receipt = preflight_studio_podcast_timeline({
+            "main_frame": {"enabled": True, "shape": "round", "border_radius_percent": 10},
+            "reframe": {
+                "timeline_cuts": [{"time": 0, "mode": "speaker_track"}, {"time": 5, "mode": "center"}],
+                "keyframes": [{"time": 0, "x": 30, "y": 40}],
+                "split_source": {
+                    "top": {"x": 30, "y": 45, "zoom": 1.45},
+                    "bottom": {"x": 70, "y": 45, "zoom": 1.45},
+                },
+            },
+        }, 12)
+        self.assertTrue(receipt["passed"], receipt)
+
+    def test_podcast_preflight_rejects_time_shifted_fake_second_speaker(self):
+        receipt = preflight_studio_podcast_timeline({
+            "main_frame": {"enabled": True, "shape": "round", "border_radius_percent": 10},
+            "reframe": {
+                "timeline_cuts": [{"time": 0, "mode": "center"}],
+                "keyframes": [{"time": 0, "x": 50, "y": 50}],
+                "split_source": {
+                    "top": {"x": 30, "y": 45, "zoom": 1.45},
+                    "bottom": {"x": 70, "y": 45, "zoom": 1.45,
+                               "source_time_offset_keyframes": [{"time": 0, "offset_seconds": -4.8}]},
+                },
+            },
+        }, 12)
+        self.assertFalse(receipt["passed"])
+        self.assertIn("time-shifted", " ".join(receipt["blockers"]))
+
     def test_quality_cleanup_is_opt_in_at_the_worker_boundary(self):
         request = RenderViralRequest(
             video_url="https://example.com/source.mp4", start_time=0, end_time=1,
@@ -341,6 +389,34 @@ class ViralRenderContractTests(unittest.TestCase):
         self.assertGreater(pixel(0, 240)[2], 200)  # Bottom starts on blue.
         self.assertGreater(pixel(8, 80)[2], 200)  # Top follows right.
         self.assertGreater(pixel(8, 240)[0], 200)  # Bottom independently follows left.
+
+    def test_source_split_keeps_reviewed_divider_in_sequential_render(self):
+        framing = {
+            "divider_percent": 58,
+            "top": {"x": 30, "y": 48, "zoom": 1.45},
+            "bottom": {"x": 70, "y": 48, "zoom": 1.45},
+        }
+        segment = plan_reframe_timeline_segments(
+            2, [{"time": 0, "mode": "center"}], split_framing=framing
+        )[0]
+        self.assertEqual(segment["split_framing"]["divider_percent"], 58)
+        self.assertTrue(segment["split_framing"]["rounded_cards"])
+        graph = build_source_split_filter(640, 360, 180, 320, segment["split_framing"])
+        self.assertIn("drawbox=x=0:y=0:w=iw:h=ih:color=0x030509", graph)
+        self.assertIn("overlay=x=4:y=4:shortest=1", graph)
+        self.assertIn("[multicam_card_0]", graph)
+
+    def test_rejected_short_shot_uses_reviewed_alternate_source_in_solo_render(self):
+        segment = plan_reframe_timeline_segments(2, [
+            {"time": 0, "mode": "speaker_track"},
+            {"time": .5, "mode": "speaker_track", "source_time_offset_seconds": -.62},
+            {"time": 1, "mode": "speaker_track"},
+        ], solo_keyframes=[{"time": 0, "x": 70, "y": 30}])[1]
+        self.assertEqual(segment["source_time_offset_seconds"], -.62)
+        graph = build_reframe_segment_filter(
+            640, 360, 180, 320, segment, alternate_input_label="[1:v]"
+        )
+        self.assertTrue(graph.startswith("[1:v]"))
 
     def test_portrait_source_split_and_speaker_zoom_encode(self):
         with tempfile.TemporaryDirectory(prefix="studio-portrait-test-") as temp:

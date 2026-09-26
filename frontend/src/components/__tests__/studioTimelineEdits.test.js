@@ -1,4 +1,5 @@
 import { rippleTimedItems, rippleTimelineKeys } from "../studioTimelineEdits";
+import { interpolateReframeKeyframes } from "../studioReframeInterpolation";
 
 test("ripple cuts move later media without mutating the originals", () => {
   const item = { id: "later", startTime: 8, duration: 2, trimStart: 1 };
@@ -32,6 +33,30 @@ test("keys inside a removed range disappear and subsequent keys share the new cl
   expect(rippleTimelineKeys(keys, 1, 4)).toEqual([
     { time: 0, value: 1 },
     { time: 2, value: 3 },
+  ]);
+});
+
+test("a deleted section preserves the next camera at the join until its next hard cut", () => {
+  const cameraCuts = [
+    { time: 165.769, x: 22, y: 30, cut: true },
+    { time: 171.536, x: 68, y: 28, cut: true },
+    { time: 173.519, x: 75, y: 25, cut: true },
+    { time: 174.269, x: 21, y: 27, cut: true },
+  ];
+  const joined = rippleTimelineKeys(cameraCuts, 168, 174, { preserveRightState: true });
+  expect(interpolateReframeKeyframes(joined, 168.1).x).toBe(75);
+  expect(interpolateReframeKeyframes(joined, 168.27).x).toBe(21);
+  expect(cameraCuts[2].time).toBe(173.519);
+});
+
+test("the reviewed alternate full-frame angle moves with Director splits after a delete", () => {
+  const alternates = [
+    { time: 176, offset_seconds: 6.75 },
+    { time: 210, offset_seconds: 1.75 },
+  ];
+  expect(rippleTimelineKeys(alternates, 168, 174, { preserveRightState: true })).toEqual([
+    { time: 170, offset_seconds: 6.75 },
+    { time: 204, offset_seconds: 1.75 },
   ]);
 });
 

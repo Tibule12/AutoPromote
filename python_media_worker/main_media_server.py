@@ -5264,11 +5264,29 @@ def generate_ass_captions(
             elif style["animation"] == "karaoke_fill":
                 # Karaoke: words fill with color as they're spoken
                 text_parts = []
-                for word in group:
+                rendered_words = [caption_word(word.get("word", "")) for word in group]
+                rendered_words = [word for word in rendered_words if word]
+                break_index = None
+                if (
+                    style_name == "boxed"
+                    and len(rendered_words) > 2
+                    and (sum(len(word) for word in rendered_words) + len(rendered_words) - 1)
+                    * style["fontsize"] * 0.58
+                    > video_width * 0.72
+                ):
+                    target_chars = (sum(len(word) for word in rendered_words) + len(rendered_words) - 1) / 2
+                    running_chars = 0
+                    break_index = min(
+                        range(1, len(rendered_words)),
+                        key=lambda index: abs(
+                            sum(len(word) for word in rendered_words[:index]) + index - 1 - target_chars
+                        ),
+                    )
+                for word_index, word in enumerate(group):
                     w_dur_cs = max(1, int((word["end"] - word["start"]) * 100))
                     word_text = caption_word(word.get("word", ""))
                     if word_text:
-                        spacer = "" if not text_parts else " "
+                        spacer = "" if not text_parts else "\\N" if word_index == break_index else " "
                         text_parts.append(f"{spacer}{{\\kf{w_dur_cs}}}{word_text}")
                 if text_parts:
                     line = "".join(text_parts)
@@ -7912,7 +7930,7 @@ def build_group_stack_filter(
     """Build the same editable top/bottom two-speaker composition used by Studio preview."""
     plan = group_stack or {}
     divider_percent = clamp_float(float(plan.get("divider_percent", 50.0)), 35.0, 65.0)
-    gap_percent = clamp_float(float(plan.get("gap_percent", 0.45)), 0.0, 3.0)
+    gap_percent = clamp_float(float(plan.get("gap_percent", 0.45)), 0.0, 12.0)
     target_width = max(2, int(target_width or 1080))
     target_height = max(2, int(target_height or 1920))
     divider_y = max(2, min(target_height - 2, int(target_height * divider_percent / 100.0)))
@@ -8065,9 +8083,20 @@ def build_multicam_layout_filter(
 
     target_width = max(2, int(target_width or 1080))
     target_height = max(2, int(target_height or 1920))
-    gap_percent = clamp_float(float(plan.get("gap_percent", 0.45)), 0.0, 3.0)
+    # Rounded source splits reserve a real caption gutter between the cards.
+    # The Studio exposes up to 12%; clamping every layout to the legacy 3%
+    # value made the exported cards collide with captions while preview stayed
+    # correct. Other layouts still send values in their existing 0-3% range.
+    gap_percent = clamp_float(float(plan.get("gap_percent", 0.45)), 0.0, 12.0)
     gap = max(2, int(target_height * gap_percent / 100.0))
     gap -= gap % 2
+    rounded_cards = bool(plan.get("rounded_cards", plan.get("roundedCards", False)))
+    card_inset_percent = clamp_float(
+        float(plan.get("card_inset_percent", plan.get("cardInsetPercent", 2.5))), 0.0, 8.0
+    )
+    card_radius_percent = clamp_float(
+        float(plan.get("card_radius_percent", plan.get("cardRadiusPercent", 8.0))), 2.0, 18.0
+    )
     layout = str(plan.get("layout") or plan.get("orientation") or "").strip().lower()
     default_layout = {2: "stack_2", 3: "hero_3", 4: "grid_4"}[camera_count]
     layout = layout or default_layout
@@ -8162,12 +8191,16 @@ def build_multicam_layout_filter(
                   (max(0, min(px, target_width - pw)), max(0, min(py, target_height - ph)), pw, ph)]
     else:
         divider_percent = clamp_float(float(plan.get("divider_percent", 50.0)), 35.0, 65.0)
-        top_height = max(2, int(target_height * divider_percent / 100.0 - gap / 2))
+        card_inset = max(0, int(target_width * card_inset_percent / 100.0)) if rounded_cards else 0
+        card_inset -= card_inset % 2
+        card_width = max(2, target_width - card_inset * 2)
+        available_height = max(4, target_height - card_inset * 2 - gap)
+        top_height = max(2, int(available_height * divider_percent / 100.0))
         top_height -= top_height % 2
-        bottom_y = top_height + gap
+        bottom_y = card_inset + top_height + gap
         panels = [
-            (0, 0, target_width, top_height),
-            (0, bottom_y, target_width, max(2, target_height - bottom_y)),
+            (card_inset, card_inset, card_width, top_height),
+            (card_inset, bottom_y, card_width, max(2, target_height - card_inset - bottom_y)),
         ]
 
     def resolve_crop(frame, source_width, source_height, panel_width, panel_height):
@@ -8195,6 +8228,23 @@ def build_multicam_layout_filter(
             crop_y = f"'max(0,min(ih-oh,ih*({reviewed_axis_expression(frame['keyframes'], 'y', focus_y)})-oh/2))'"
         return crop_width, crop_height, crop_x, crop_y
 
+    def resolve_source_rect(frame, source_width, source_height):
+        rect = (frame or {}).get("source_rect") or (frame or {}).get("sourceRect")
+        if not isinstance(rect, dict):
+            return None
+        try:
+            rect_x = int(float(rect.get("x", 0)))
+            rect_y = int(float(rect.get("y", 0)))
+            rect_width = int(float(rect.get("width", rect.get("w", source_width))))
+            rect_height = int(float(rect.get("height", rect.get("h", source_height))))
+        except (TypeError, ValueError):
+            return None
+        rect_x = max(0, min(rect_x, source_width - 2))
+        rect_y = max(0, min(rect_y, source_height - 2))
+        rect_width = max(2, min(rect_width, source_width - rect_x))
+        rect_height = max(2, min(rect_height, source_height - rect_y))
+        return rect_x, rect_y, rect_width - rect_width % 2, rect_height - rect_height % 2
+
     filter_parts = []
     xstack_layout = []
     stack_labels = []
@@ -8202,12 +8252,40 @@ def build_multicam_layout_filter(
         zip(panels, cameras)
     ):
         source_width, source_height = source_dimensions[index]
-        crop_width, crop_height, crop_x, crop_y = resolve_crop(
-            camera, source_width, source_height, panel_width, panel_height
-        )
         stack_label = f"[multicam_{index}]"
+        source_rect = resolve_source_rect(camera, source_width, source_height)
+        crop_source = labels[index]
+        crop_frame = camera
+        if not source_rect:
+            # Some podcast masters have a black, rounded landscape frame baked
+            # into the pixels. Cropping that border *before* composing a card
+            # keeps the visible picture edge rounded as well as the card mask.
+            visible_top = clamp_float(float(camera.get("source_visible_top_percent", 0) or 0), 0, 15)
+            visible_bottom = clamp_float(float(camera.get("source_visible_bottom_percent", 0) or 0), 0, 15)
+            if visible_top or visible_bottom:
+                trim_top = int(round(source_height * visible_top / 100)) & ~1
+                trim_bottom = int(round(source_height * visible_bottom / 100)) & ~1
+                trimmed_height = even_dimension(source_height - trim_top - trim_bottom)
+                visible_label = f"[multicam_visible_{index}]"
+                filter_parts.append(
+                    f"{crop_source}crop={source_width}:{trimmed_height}:0:{trim_top}{visible_label}"
+                )
+                crop_source = visible_label
+                source_height = trimmed_height
+        if source_rect:
+            rect_x, rect_y, rect_width, rect_height = source_rect
+            rect_label = f"[multicam_rect_{index}]"
+            filter_parts.append(
+                f"{labels[index]}crop={rect_width}:{rect_height}:{rect_x}:{rect_y}{rect_label}"
+            )
+            crop_source = rect_label
+            source_width, source_height = rect_width, rect_height
+            crop_frame = {**camera, "x": 50, "y": 50, "zoom": 1, "keyframes": []}
+        crop_width, crop_height, crop_x, crop_y = resolve_crop(
+            crop_frame, source_width, source_height, panel_width, panel_height
+        )
         filter_parts.append(
-            f"{labels[index]}crop={crop_width}:{crop_height}:{crop_x}:{crop_y},"
+            f"{crop_source}crop={crop_width}:{crop_height}:{crop_x}:{crop_y},"
             f"scale={panel_width}:{panel_height}:flags=lanczos,setsar=1,setpts=PTS-STARTPTS{stack_label}"
         )
         stack_labels.append(stack_label)
@@ -8222,6 +8300,36 @@ def build_multicam_layout_filter(
         alpha = f"if(lte(({dx})*({dx})+({dy})*({dy}),{radius * radius}),255,0)"
         filter_parts.append(f"[multicam_1]format=rgba,geq=r='r(X,Y)':g='g(X,Y)':b='b(X,Y)':a='{alpha}'[multicam_card]")
         filter_parts.append(f"[multicam_0][multicam_card]overlay=x={px}:y={py}:shortest=1,format=yuv420p{output_label}")
+        return ";".join(filter_parts)
+
+    if layout == "stack_2" and rounded_cards:
+        rounded_labels = []
+        filter_parts.append("[multicam_0]split=2[multicam_0_round_src][multicam_card_bg_src]")
+        for index, ((panel_x, panel_y, panel_width, panel_height), stack_label) in enumerate(
+            zip(panels, stack_labels)
+        ):
+            radius = max(8, int(min(panel_width, panel_height) * card_radius_percent / 100.0))
+            dx = f"max(max({radius}-X,0),X-(W-1-{radius}))"
+            dy = f"max(max({radius}-Y,0),Y-(H-1-{radius}))"
+            alpha = f"if(lte(({dx})*({dx})+({dy})*({dy}),{radius * radius}),255,0)"
+            rounded_label = f"[multicam_card_{index}]"
+            rounded_source = "[multicam_0_round_src]" if index == 0 else stack_label
+            filter_parts.append(
+                f"{rounded_source}format=rgba,geq=r='r(X,Y)':g='g(X,Y)':b='b(X,Y)':a='{alpha}'{rounded_label}"
+            )
+            rounded_labels.append(rounded_label)
+        filter_parts.append(
+            f"[multicam_card_bg_src]scale={target_width}:{target_height},setsar=1,"
+            "drawbox=x=0:y=0:w=iw:h=ih:color=0x030509:t=fill[multicam_card_bg]"
+        )
+        previous = "[multicam_card_bg]"
+        for index, ((panel_x, panel_y, _, _), rounded_label) in enumerate(zip(panels, rounded_labels)):
+            next_label = output_label if index == len(rounded_labels) - 1 else f"[multicam_card_stage_{index}]"
+            suffix = ",format=yuv420p,setsar=1" if next_label == output_label else ""
+            filter_parts.append(
+                f"{previous}{rounded_label}overlay=x={panel_x}:y={panel_y}:shortest=1{suffix}{next_label}"
+            )
+            previous = next_label
         return ";".join(filter_parts)
 
     filter_parts.append(
@@ -8309,21 +8417,44 @@ def build_source_split_filter(
     input_label="[0:v]",
     output_label="[vout]",
     primary_slot="top",
+    top_input_label=None,
+    bottom_input_label=None,
 ):
     """Two user-positioned crops from one source, not two independent cameras."""
     framing = framing or {}
     top = framing.get("top") or {"x": 30, "y": 50, "zoom": 1.25}
     bottom = framing.get("bottom") or {"x": 70, "y": 50, "zoom": 1.25}
     cameras = [bottom, top] if primary_slot == "bottom" else [top, bottom]
-    plan = {"layout": "stack_2", "gap_percent": 0.3, "cameras": [
+    divider_percent = clamp_float(
+        framing.get("divider_percent", framing.get("dividerPercent", 50)), 35, 65
+    )
+    plan = {"layout": "stack_2",
+            "gap_percent": clamp_float(
+                framing.get("card_gap_percent", framing.get("cardGapPercent", 2.5)), 0.0, 3.0
+            ),
+            "divider_percent": divider_percent, "cameras": [
         *cameras,
-    ]}
+    ],
+            "rounded_cards": framing.get("rounded_cards", framing.get("roundedCards", True)),
+            "card_inset_percent": framing.get("card_inset_percent", framing.get("cardInsetPercent", 2.5)),
+            "card_radius_percent": framing.get("card_radius_percent", framing.get("cardRadiusPercent", 8)),
+    }
     prefix = re.sub(r"[^a-zA-Z0-9_]", "", str(output_label)) or "source_split"
-    first_label = f"[{prefix}_first]"
-    second_label = f"[{prefix}_second]"
-    return f"{input_label}split=2{first_label}{second_label};" + build_multicam_layout_filter(
+    if top_input_label and bottom_input_label:
+        labels = (
+            [bottom_input_label, top_input_label]
+            if primary_slot == "bottom"
+            else [top_input_label, bottom_input_label]
+        )
+        split_prefix = ""
+    else:
+        first_label = f"[{prefix}_first]"
+        second_label = f"[{prefix}_second]"
+        labels = [first_label, second_label]
+        split_prefix = f"{input_label}split=2{first_label}{second_label};"
+    return split_prefix + build_multicam_layout_filter(
         [(src_width, src_height), (src_width, src_height)], target_width, target_height,
-        plan, input_labels=[first_label, second_label], output_label=output_label,
+        plan, input_labels=labels, output_label=output_label,
     )
 
 
@@ -8402,9 +8533,46 @@ def build_reframe_timeline_filter(
         return {"time": 0, "x": previous.get("x", 50), "y": previous.get("y", 50), "cut": True}
 
     def localized_split_framing(start, end):
-        localized = {}
+        localized = {
+            "divider_percent": (split_framing or {}).get(
+                "divider_percent", (split_framing or {}).get("dividerPercent", 50)
+            ),
+            "rounded_cards": (split_framing or {}).get(
+                "rounded_cards", (split_framing or {}).get("roundedCards", True)
+            ),
+            "card_inset_percent": (split_framing or {}).get(
+                "card_inset_percent", (split_framing or {}).get("cardInsetPercent", 2.5)
+            ),
+            "card_gap_percent": (split_framing or {}).get(
+                "card_gap_percent", (split_framing or {}).get("cardGapPercent", 2.5)
+            ),
+            "card_radius_percent": (split_framing or {}).get(
+                "card_radius_percent", (split_framing or {}).get("cardRadiusPercent", 8)
+            ),
+        }
         for slot in ("top", "bottom"):
             frame = dict((split_framing or {}).get(slot) or {})
+            active_frame_mark = max(
+                (key for key in frame.get("keyframes") or []
+                 if float(key.get("time", 0)) <= start + 1e-9),
+                key=lambda key: float(key.get("time", 0)), default=None,
+            )
+            if active_frame_mark:
+                for field in ("source_visible_top_percent", "source_visible_bottom_percent"):
+                    if field in active_frame_mark:
+                        frame[field] = active_frame_mark[field]
+            offset_keys = sorted(
+                frame.get("source_time_offset_keyframes") or [],
+                key=lambda key: float(key.get("time", 0)),
+            )
+            if offset_keys:
+                active_offset = 0.0
+                for key in offset_keys:
+                    if float(key.get("time", 0)) <= start + 1e-9:
+                        active_offset = float(key.get("offset_seconds", 0) or 0)
+                    else:
+                        break
+                frame["source_time_offset_seconds"] = active_offset
             keys = frame.get("keyframes") or []
             if not keys:
                 localized[slot] = frame
@@ -8516,6 +8684,7 @@ def plan_reframe_timeline_segments(
     duration = max(0.04, float(duration or 0))
     normalized = {}
     zooms = {}
+    source_offsets = {}
     for cut in timeline_cuts or []:
         mode = str(cut.get("mode") or "").strip().lower()
         timestamp = float(cut.get("time", 0))
@@ -8523,11 +8692,15 @@ def plan_reframe_timeline_segments(
             normalized[timestamp] = mode
             raw_zoom = float(cut.get("zoom") or 1)
             zooms[timestamp] = min(2.0, max(1.0, raw_zoom)) if math.isfinite(raw_zoom) else 1.0
+            raw_offset = float(cut.get("source_time_offset_seconds",
+                                       cut.get("sourceTimeOffsetSeconds", 0)) or 0)
+            source_offsets[timestamp] = raw_offset if math.isfinite(raw_offset) else 0.0
     if not normalized:
         raise ValueError("A timed reframe needs at least one valid timeline cut")
     if min(normalized) > 0:
         normalized[0.0] = fallback_mode if fallback_mode in allowed_modes else "off"
         zooms[0.0] = 1.0
+        source_offsets[0.0] = 0.0
 
     order_by_time = {}
     for cut in speaker_order_cuts or []:
@@ -8582,9 +8755,46 @@ def plan_reframe_timeline_segments(
     for start, end in zip(boundaries, boundaries[1:]):
         if end-start < .02:
             continue
-        local_split = {}
+        local_split = {
+            "divider_percent": (split_framing or {}).get(
+                "divider_percent", (split_framing or {}).get("dividerPercent", 50)
+            ),
+            "rounded_cards": (split_framing or {}).get(
+                "rounded_cards", (split_framing or {}).get("roundedCards", True)
+            ),
+            "card_inset_percent": (split_framing or {}).get(
+                "card_inset_percent", (split_framing or {}).get("cardInsetPercent", 2.5)
+            ),
+            "card_gap_percent": (split_framing or {}).get(
+                "card_gap_percent", (split_framing or {}).get("cardGapPercent", 2.5)
+            ),
+            "card_radius_percent": (split_framing or {}).get(
+                "card_radius_percent", (split_framing or {}).get("cardRadiusPercent", 8)
+            ),
+        }
         for slot in ("top", "bottom"):
             frame = dict((split_framing or {}).get(slot) or {})
+            active_frame_mark = max(
+                (key for key in frame.get("keyframes") or []
+                 if float(key.get("time", 0)) <= start + 1e-9),
+                key=lambda key: float(key.get("time", 0)), default=None,
+            )
+            if active_frame_mark:
+                for field in ("source_visible_top_percent", "source_visible_bottom_percent"):
+                    if field in active_frame_mark:
+                        frame[field] = active_frame_mark[field]
+            offset_keys = sorted(
+                frame.get("source_time_offset_keyframes") or [],
+                key=lambda key: float(key.get("time", 0)),
+            )
+            if offset_keys:
+                active_offset = 0.0
+                for key in offset_keys:
+                    if float(key.get("time", 0)) <= start + 1e-9:
+                        active_offset = float(key.get("offset_seconds", 0) or 0)
+                    else:
+                        break
+                frame["source_time_offset_seconds"] = active_offset
             if frame.get("keyframes"):
                 frame["keyframes"] = localized_keys(
                     frame["keyframes"], start, end, frame.get("x", 50), frame.get("y", 50)
@@ -8595,6 +8805,7 @@ def plan_reframe_timeline_segments(
             "end": end,
             "mode": value_at(normalized, start, fallback_mode),
             "zoom": value_at(zooms, start, 1.0),
+            "source_time_offset_seconds": value_at(source_offsets, start, 0.0),
             "order": value_at(order_by_time, start, "top"),
             "solo_keyframes": localized_keys(solo_keyframes, start, end),
             "split_framing": local_split,
@@ -8602,20 +8813,72 @@ def plan_reframe_timeline_segments(
     return specs
 
 
-def build_reframe_segment_filter(src_width, src_height, target_width, target_height, segment, solo_zoom=1):
+def preflight_studio_podcast_timeline(finish_plan, duration):
+    """Reject Studio timelines that cannot match the reviewed podcast preview."""
+    finish_plan = finish_plan or {}
+    reframe = finish_plan.get("reframe") or {}
+    cuts = reframe.get("timeline_cuts") or []
+    blockers = []
+    warnings = []
+    if cuts and not any(float(cut.get("time", -1)) <= .001 for cut in cuts):
+        blockers.append("The framing timeline needs a cut at 0 seconds")
+    for cut in cuts:
+        timestamp = float(cut.get("time", -1))
+        if not math.isfinite(timestamp) or timestamp < 0 or timestamp >= float(duration) + .001:
+            blockers.append("A framing cut is outside the rendered timeline")
+            break
+    if any(str(cut.get("mode") or "").lower() == "center" for cut in cuts):
+        split = reframe.get("split_source") or {}
+        if not split.get("top") or not split.get("bottom"):
+            blockers.append("Show Everyone needs two reviewed speaker crops")
+        for slot in ("top", "bottom"):
+            speaker_view = split.get(slot) or {}
+            zoom = float(speaker_view.get("zoom", 1) or 1)
+            if zoom > 3.0:
+                blockers.append(
+                    f"{slot.title()} split crop is {zoom:.2f}x; use a clean full-size speaker view instead of enlarging a reaction window"
+                )
+            offsets = [speaker_view.get("source_time_offset_seconds", speaker_view.get("sourceTimeOffsetSeconds", 0))]
+            offsets.extend(key.get("offset_seconds", 0) for key in speaker_view.get("source_time_offset_keyframes") or [])
+            if any(abs(float(offset or 0)) > 1e-6 for offset in offsets):
+                blockers.append(
+                    "Show Everyone from one edited source cannot present a time-shifted shot as a synchronized second speaker"
+                )
+    frame = finish_plan.get("main_frame") or {}
+    radius = float(frame.get("border_radius_percent", frame.get("radiusPercent", 0)) or 0)
+    if not frame.get("enabled", True) or str(frame.get("shape") or "round").lower() != "round" or radius < 3:
+        blockers.append("Podcast output needs one rounded main frame in preview and export")
+    keyframes = reframe.get("keyframes") or []
+    if cuts and not keyframes:
+        warnings.append("No reviewed face path is present; the crop will remain centered")
+    return {"passed": not blockers, "blockers": blockers, "warnings": warnings}
+
+
+def build_reframe_segment_filter(
+    src_width, src_height, target_width, target_height, segment, solo_zoom=1,
+    alternate_input_label=None,
+):
     """Build one bounded interval from a reviewed reframe timeline."""
     director_zoom = float(segment.get("zoom") or 1)
     composed = "[segment_base]" if director_zoom > 1.001 else "[vout]"
     mode = segment.get("mode")
     if mode == "center":
+        split_framing = segment.get("split_framing") or {}
+        top_offset = float((split_framing.get("top") or {}).get("source_time_offset_seconds", 0) or 0)
+        bottom_offset = float((split_framing.get("bottom") or {}).get("source_time_offset_seconds", 0) or 0)
+        top_label = alternate_input_label if alternate_input_label and abs(top_offset) > 1e-6 else "[0:v]"
+        bottom_label = alternate_input_label if alternate_input_label and abs(bottom_offset) > 1e-6 else "[0:v]"
         graph = build_source_split_filter(
             src_width, src_height, target_width, target_height,
-            segment.get("split_framing") or {}, output_label=composed,
+            split_framing, output_label=composed,
             primary_slot=segment.get("order") or "top",
+            top_input_label=top_label if alternate_input_label else None,
+            bottom_input_label=bottom_label if alternate_input_label else None,
         )
     elif mode == "speaker_track":
+        source_label = alternate_input_label or "[0:v]"
         graph = (
-            f"[0:v]{build_reviewed_reframe_filter(segment.get('solo_keyframes') or [], target_width, target_height, solo_zoom)}{composed}"
+            f"{source_label}{build_reviewed_reframe_filter(segment.get('solo_keyframes') or [], target_width, target_height, solo_zoom)}{composed}"
         )
     else:
         graph = build_safe_vertical_fit_filter("[0:v]", composed, target_width, target_height)
@@ -8655,16 +8918,37 @@ async def render_reframe_timeline_sequential(
         for index, segment in enumerate(specs):
             segment_path = os.path.join(work_dir, f"{job_id}_reframe_{index:03d}.mp4")
             segment_paths.append(segment_path)
-            await run_subprocess_async([
+            split_framing = segment.get("split_framing") or {}
+            offsets = [
+                float((split_framing.get(slot) or {}).get("source_time_offset_seconds", 0) or 0)
+                for slot in ("top", "bottom")
+            ] if segment.get("mode") == "center" else [0.0, 0.0]
+            if segment.get("mode") == "speaker_track":
+                offsets = [float(segment.get("source_time_offset_seconds", 0) or 0)]
+            active_offsets = [offset for offset in offsets if abs(offset) > 1e-6]
+            if len(active_offsets) > 1:
+                raise ValueError("A source split supports one alternate full-frame angle per segment")
+            command = [
                 "ffmpeg", "-ss", f"{segment['start']:.6f}", "-i", source_path,
+            ]
+            if active_offsets:
+                command.extend([
+                    "-ss", f"{segment['start'] + active_offsets[0]:.6f}", "-i", source_path,
+                ])
+            command.extend([
                 "-t", f"{segment['end']-segment['start']:.6f}",
                 "-filter_complex", build_reframe_segment_filter(
                     src_width, src_height, target_width, target_height, segment, solo_zoom,
+                    alternate_input_label="[1:v]" if active_offsets else None,
                 ),
                 "-map", "[vout]", "-an",
                 "-c:v", GPU_VIDEO_ENCODER, "-preset", GPU_PRESET,
                 "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-y", segment_path,
-            ], check=True, job_context=job_id, timeout_seconds=MEDIA_WORKER_SUBPROCESS_TIMEOUT_SECONDS)
+            ])
+            await run_subprocess_async(
+                command, check=True, job_context=job_id,
+                timeout_seconds=MEDIA_WORKER_SUBPROCESS_TIMEOUT_SECONDS,
+            )
         with open(concat_path, "w", encoding="utf-8") as concat_file:
             for segment_path in segment_paths:
                 concat_file.write(f"file '{segment_path}'\n")
@@ -31512,6 +31796,15 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         raise ValueError("Timed Multi-Camera changes require one synchronized camera programme per framing segment")
                     src_w, src_h = get_video_dimensions(reframe_source_path)
                     reframe_duration = get_media_duration(reframe_source_path)
+                    podcast_preflight = preflight_studio_podcast_timeline(
+                        {
+                            "reframe": finish_reframe_plan,
+                            "main_frame": (request.finish_plan or {}).get("main_frame") or {},
+                        },
+                        reframe_duration,
+                    )
+                    if not podcast_preflight["passed"]:
+                        raise ValueError("Podcast timeline preflight failed: " + "; ".join(podcast_preflight["blockers"]))
                     await render_reframe_timeline_sequential(
                         reframe_source_path,
                         cropped_path,

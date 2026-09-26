@@ -69,13 +69,14 @@ export default function StudioFinishRack({
           <label className="main-frame-toggle">
             <span>
               <b>Rounded footage</b>
-              <small>Rounds the entire source video, not only B-roll.</small>
+              <small>Always applied to After and the final export.</small>
             </span>
             <input
               type="checkbox"
               aria-label="Rounded main footage"
-              checked={mainFrame?.enabled !== false}
-              onChange={event => onUpdateMainFrame?.("enabled", event.target.checked)}
+              checked
+              disabled
+              readOnly
             />
           </label>
           <div className="finish-rack-grid">

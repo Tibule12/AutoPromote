@@ -108,4 +108,27 @@ describe("temporary source uploads", () => {
     );
     expect(uploadBytesResumable).not.toHaveBeenCalled();
   });
+
+  it("uses the durable resumable path for a large project library video", async () => {
+    const file = new File(["video"], "scene-take.mp4", { type: "video/mp4" });
+    Object.defineProperty(file, "size", { configurable: true, value: 750_000_000 });
+    uploadMulticamSourceResumable.mockResolvedValue({
+      url: "https://storage.example/scene-take.mp4",
+      storagePath: "studio/sources/secure-user/scene-take.mp4",
+      size: file.size,
+    });
+
+    const result = await uploadSourceFileViaBackend({
+      file,
+      token: "token",
+      mediaType: "video",
+      purpose: "studio_project",
+    });
+
+    expect(uploadMulticamSourceResumable).toHaveBeenCalledWith(
+      expect.objectContaining({ file, token: "token", purpose: "studio_project" })
+    );
+    expect(result.storagePath).toBe("studio/sources/secure-user/scene-take.mp4");
+    expect(uploadBytesResumable).not.toHaveBeenCalled();
+  });
 });

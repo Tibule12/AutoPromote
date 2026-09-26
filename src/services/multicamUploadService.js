@@ -3,7 +3,8 @@ const admin = require("firebase-admin");
 
 const DEFAULT_MAX_UPLOAD_BYTES = 12 * 1024 * 1024 * 1024;
 const DEFAULT_RETENTION_HOURS = 72;
-const ALLOWED_PURPOSES = new Set(["camera_original", "external_audio", "studio_source"]);
+const ALLOWED_PURPOSES = new Set(["camera_original", "external_audio", "studio_source", "studio_project"]);
+const DURABLE_STUDIO_PURPOSES = new Set(["studio_source", "studio_project"]);
 
 function sanitizeFileName(value) {
   const safe = String(value || "media.bin")
@@ -44,21 +45,32 @@ function getDeleteAfterFromCompletion(completedAtMs = Date.now()) {
   return new Date(completedAtMs + getRetentionHours() * 60 * 60 * 1000).toISOString();
 }
 
-function buildIngestStoragePath({ userId, fileName, sizeBytes, lastModified, fingerprint }) {
+function buildIngestStoragePath({ userId, fileName, sizeBytes, lastModified, fingerprint, purpose }) {
+  const normalizedPurpose = String(purpose || "camera_original");
   const identity = [
     userId,
+    normalizedPurpose,
     fingerprint || "",
     fileName || "",
     Number(sizeBytes || 0),
     Number(lastModified || 0),
   ].join(":");
   const digest = crypto.createHash("sha256").update(identity).digest("hex").slice(0, 24);
-  return `temp/multicam-ingest/${userId}/${digest}_${sanitizeFileName(fileName)}`;
+  const prefix = DURABLE_STUDIO_PURPOSES.has(normalizedPurpose)
+    ? "studio/sources"
+    : "temp/multicam-ingest";
+  return `${prefix}/${userId}/${digest}_${sanitizeFileName(fileName)}`;
 }
 
 function assertOwnedIngestPath(userId, storagePath) {
-  const expectedPrefix = `temp/multicam-ingest/${userId}/`;
-  if (!String(storagePath || "").startsWith(expectedPrefix)) {
+  const path = String(storagePath || "");
+  const allowedPrefixes = [`temp/multicam-ingest/${userId}/`, `studio/sources/${userId}/`];
+  if (
+    !allowedPrefixes.some(prefix => path.startsWith(prefix) && path.length > prefix.length) ||
+    path.includes("..") ||
+    path.includes("\\") ||
+    /[\x00-\x1f\x7f]/.test(path)
+  ) {
     const error = new Error("Upload does not belong to this user");
     error.statusCode = 403;
     throw error;
@@ -83,6 +95,7 @@ function getDownloadTokenFromUrl(value) {
 async function verifyOwnedIngestObject({ userId, source, purpose }) {
   const storagePath = source?.storagePath || source?.storage_path;
   assertOwnedIngestPath(userId, storagePath);
+  const durableStudioSource = storagePath.startsWith(`studio/sources/${userId}/`);
   const bucketName = resolveIngestBucketName();
   if (!bucketName) {
     const error = new Error("Multicam ingest bucket is not configured");
@@ -92,7 +105,11 @@ async function verifyOwnedIngestObject({ userId, source, purpose }) {
 
   const [metadata] = await admin.storage().bucket(bucketName).file(storagePath).getMetadata();
   const customMetadata = metadata.metadata || {};
-  if (customMetadata.ownerUid !== userId || customMetadata.purpose !== purpose) {
+  const studioCameraSource =
+    purpose === "camera_original" &&
+    durableStudioSource &&
+    DURABLE_STUDIO_PURPOSES.has(customMetadata.purpose);
+  if (customMetadata.ownerUid !== userId || (!studioCameraSource && customMetadata.purpose !== purpose)) {
     const error = new Error("Render source ownership or purpose does not match");
     error.statusCode = 403;
     throw error;
@@ -103,12 +120,22 @@ async function verifyOwnedIngestObject({ userId, source, purpose }) {
     throw error;
   }
 
-  const urlToken = getDownloadTokenFromUrl(source?.url);
-  const storedTokens = String(customMetadata.firebaseStorageDownloadTokens || "").split(",");
-  if (!urlToken || !storedTokens.includes(urlToken)) {
-    const error = new Error("Render source download token does not match its upload");
-    error.statusCode = 403;
-    throw error;
+  let verifiedUrl = source?.url;
+  if (studioCameraSource) {
+    // Imported masters use short signed URLs. Ignore the browser URL and mint
+    // a fresh one from the verified owner-scoped Storage object.
+    [verifiedUrl] = await admin.storage().bucket(bucketName).file(storagePath).getSignedUrl({
+      action: "read",
+      expires: Date.now() + 24 * 60 * 60 * 1000,
+    });
+  } else {
+    const urlToken = getDownloadTokenFromUrl(source?.url);
+    const storedTokens = String(customMetadata.firebaseStorageDownloadTokens || "").split(",");
+    if (!urlToken || !storedTokens.includes(urlToken)) {
+      const error = new Error("Render source download token does not match its upload");
+      error.statusCode = 403;
+      throw error;
+    }
   }
 
   const deleteAfter = Date.parse(customMetadata.deleteAfter || "");
@@ -118,7 +145,12 @@ async function verifyOwnedIngestObject({ userId, source, purpose }) {
     throw error;
   }
 
-  return { storagePath, size: Number(metadata.size), deleteAfter: customMetadata.deleteAfter || null };
+  return {
+    storagePath,
+    url: verifiedUrl,
+    size: Number(metadata.size),
+    deleteAfter: customMetadata.deleteAfter || null,
+  };
 }
 
 async function verifyMulticamRenderInputs({ userId, sources, externalAudio }) {
@@ -233,6 +265,7 @@ async function startMulticamUpload({
     sizeBytes: normalizedSize,
     lastModified,
     fingerprint,
+    purpose: normalizedPurpose,
   });
   const bucket = admin.storage().bucket(bucketName);
   const file = bucket.file(storagePath);
@@ -343,13 +376,21 @@ async function completeMulticamUpload({ userId, storagePath, downloadToken, size
   // Starting this clock when a resumable upload session is created steals
   // hours from large uploads and can make a freshly completed source expire.
   const completedAt = new Date();
-  const deleteAfter = getDeleteAfterFromCompletion(completedAt.getTime());
+  const durableStudioSource = storagePath.startsWith(`studio/sources/${userId}/`);
+  if (durableStudioSource && !DURABLE_STUDIO_PURPOSES.has(customMetadata.purpose)) {
+    const error = new Error("This Studio upload has the wrong purpose");
+    error.statusCode = 403;
+    throw error;
+  }
+  const deleteAfter = durableStudioSource
+    ? null
+    : getDeleteAfterFromCompletion(completedAt.getTime());
   await file.setMetadata({
-    customTime: completedAt.toISOString(),
+    ...(durableStudioSource ? {} : { customTime: completedAt.toISOString() }),
     metadata: {
       ...customMetadata,
       uploadCompletedAt: completedAt.toISOString(),
-      deleteAfter,
+      ...(deleteAfter ? { deleteAfter } : {}),
     },
   });
 
@@ -378,6 +419,7 @@ module.exports = {
   buildIngestStoragePath,
   completeMulticamUpload,
   recoverMulticamUpload,
+  resolveIngestBucketName,
   sanitizeFileName,
   startMulticamUpload,
   verifyMulticamRenderInputs,

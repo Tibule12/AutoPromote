@@ -7,6 +7,13 @@ import {
 } from "../utils/security";
 import { API_BASE_URL, API_ENDPOINTS } from "../config";
 import { uploadSourceFileViaBackend } from "../utils/sourceUpload";
+import {
+  MAX_STUDIO_ANGLES,
+  createStudioAngleGroup,
+  createStudioAngleShot,
+  getStudioAngleSharedRange,
+  setStudioAngleOffset,
+} from "./studioAngleGroups";
 import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { useSubscription } from "../hooks/useSubscription";
@@ -26,7 +33,7 @@ import {
 import { splitCaptionSegmentsForReadability } from "./captionReadability";
 import { buildTranscriptGroundedBRollSuggestions } from "./storyBeatPlanner";
 import { getMediaAuthToken } from "../utils/mediaAuth";
-import useCinematicEffects, { buildCinematicCssFilter } from "../hooks/useCinematicEffects";
+import useCinematicEffects, { CINEMATIC_PRESETS, buildCinematicCssFilter } from "../hooks/useCinematicEffects";
 import StudioFinishLayers from "./StudioFinishLayers";
 import StudioFinishRack from "./StudioFinishRack";
 import { buildPrecisionGrade, applyPrecisionGrade } from "./studioPrecisionGrade";
@@ -363,7 +370,11 @@ const REFRAME_ASPECT_OPTIONS = [
 
 const DEFAULT_SPEAKER_STACK_FRAMING = {
   dividerPercent: 50,
-  gapPercent: 0.45,
+  gapPercent: 1.2,
+  cardGapPercent: 2.5,
+  roundedCards: true,
+  cardInsetPercent: 2.5,
+  cardRadiusPercent: 8,
   secondaryXPercent: 80,
   secondaryYPercent: 20,
   secondarySizePercent: 30,
@@ -373,18 +384,6 @@ const DEFAULT_SPEAKER_STACK_FRAMING = {
   bottom: { x: 50, y: 50, zoom: 1 },
   third: { x: 50, y: 50, zoom: 1 },
   fourth: { x: 50, y: 50, zoom: 1 },
-};
-
-// Same-time crops for a finished podcast programme that already contains a
-// large foreground shot plus the other participant in a corner window. The
-// tighter second crop removes the embedded window's rounded edge so it reads
-// as a real panel, not a tiny reaction overlay.
-const SOURCE_SPLIT_PROGRAMME_FRAMING = {
-  top: { x: 30, y: 50, zoom: 1.45 },
-  // The guest lives inside the programme's small upper-right camera window.
-  // This tighter crop isolates that picture instead of presenting the guest
-  // as a tiny reaction box surrounded by the orange studio monitor.
-  bottom: { x: 93, y: 18, zoom: 6.2 },
 };
 
 const SOURCE_SPLIT_SIDE_BY_SIDE_FRAMING = {
@@ -401,6 +400,20 @@ const MULTICAM_SLOT_LABELS = {
 };
 const getDefaultMulticamLayout = cameraCount =>
   Number(cameraCount) >= 4 ? "grid_4" : Number(cameraCount) === 3 ? "hero_3" : "stack_2";
+
+const enforceRoundedMainFrame = frame => {
+  const normalized = {
+    insetPercent: 2.5,
+    radiusPercent: 6,
+    background: "studio_black",
+    ...(frame || {}),
+  };
+  return {
+    ...normalized,
+    enabled: true,
+    radiusPercent: Math.max(3, Number(normalized.radiusPercent || 6)),
+  };
+};
 
 const normalizeSpeakerFocusCuts = cuts =>
   [...(Array.isArray(cuts) ? cuts : [])]
@@ -437,6 +450,10 @@ const normalizeReframeModeCuts = cuts =>
       time: Math.max(0, Number(cut.time || 0)),
       mode: cut.mode,
       ...(Number(cut.zoom) > 1 ? { zoom: Math.min(2, Number(cut.zoom)) } : {}),
+      ...(Number.isFinite(Number(cut.sourceTimeOffsetSeconds ?? cut.source_time_offset_seconds)) &&
+      Math.abs(Number(cut.sourceTimeOffsetSeconds ?? cut.source_time_offset_seconds)) > 0.001
+        ? { sourceTimeOffsetSeconds: Number(cut.sourceTimeOffsetSeconds ?? cut.source_time_offset_seconds) }
+        : {}),
     }))
     .sort((left, right) => left.time - right.time);
 
@@ -444,6 +461,12 @@ const resolveReframeModeAtTime = (cuts, time, fallback) =>
   normalizeReframeModeCuts(cuts).reduce(
     (mode, cut) => (cut.time <= Math.max(0, Number(time || 0)) ? cut.mode : mode),
     fallback
+  );
+
+const resolveReframeCutAtTime = (cuts, time) =>
+  normalizeReframeModeCuts(cuts).reduce(
+    (active, cut) => (cut.time <= Math.max(0, Number(time || 0)) ? cut : active),
+    null
   );
 
 const normalizeCaptionLanguage = value => {
@@ -2529,6 +2552,7 @@ const getCollisionSafePipPlacement = ({
 const ViralClipStudio = ({
   videoUrl,
   sourceStoragePath = null,
+  sourceName,
   clips,
   images = [],
   onSave,
@@ -2536,8 +2560,13 @@ const ViralClipStudio = ({
   onStatusChange,
   renderStatus,
   renderedOutput,
+  renderRecoveryPanel,
   onDownloadRendered,
   onUseRendered,
+  onOpenCameraAngles,
+  importedCameraMaster,
+  initialProjectFiles,
+  isWorkflowPaused = false,
   currentMusic,
   onMusicChange,
 }) => {
@@ -2602,12 +2631,7 @@ const ViralClipStudio = ({
   const [brandWatermark, setBrandWatermark] = useState(true);
   const [brandWatermarkVariant, setBrandWatermarkVariant] = useState("studio");
   const [brandWatermarkText, setBrandWatermarkText] = useState("AutoPromote · Viral Clip Studio");
-  const [mainFrame, setMainFrame] = useState({
-    enabled: true,
-    insetPercent: 0,
-    radiusPercent: 6,
-    background: "studio_black",
-  });
+  const [mainFrame, setMainFrame] = useState(() => enforceRoundedMainFrame());
   // Hooks are an independent edit. Selecting a Signature transformation must
   // never silently cover it with the default Blur Reveal treatment.
   const [addHook, setAddHook] = useState(false);
@@ -2736,6 +2760,29 @@ const ViralClipStudio = ({
   });
   const [isVoiceoverRecording, setIsVoiceoverRecording] = useState(false);
   const [mediaBinSearch, setMediaBinSearch] = useState("");
+  const [projectMedia, setProjectMedia] = useState(() => videoUrl ? [{
+    id: `primary-${sourceStoragePath || "source"}`,
+    name: sourceName || "Original source video",
+    url: videoUrl,
+    file: null,
+    isLocal: false,
+    isPrimary: true,
+    storagePath: sourceStoragePath || "",
+    sourceStoragePath: sourceStoragePath || "",
+    duration: Math.max(0, Number(clips?.[0]?.sourceDuration || clips?.[0]?.end || clips?.[0]?.duration || 0)),
+    status: sourceStoragePath ? "ready" : "existing",
+    progress: 100,
+  }] : []);
+  const [mediaBinVisibleCount, setMediaBinVisibleCount] = useState(12);
+  const [selectedProjectMediaId, setSelectedProjectMediaId] = useState(
+    videoUrl ? `primary-${sourceStoragePath || "source"}` : null
+  );
+  const [selectedCameraMediaIds, setSelectedCameraMediaIds] = useState([]);
+  const [cameraGroupStatus, setCameraGroupStatus] = useState("idle");
+  const [angleGroups, setAngleGroups] = useState([]);
+  const [activeAngleGroupId, setActiveAngleGroupId] = useState(null);
+  const [angleGroupName, setAngleGroupName] = useState("");
+  const [mediaImportMessage, setMediaImportMessage] = useState("");
   const [proxySettings, setProxySettings] = useState({
     enabled: true,
     resolution: "720p",
@@ -2924,7 +2971,16 @@ const ViralClipStudio = ({
 
   const [timeline, setTimeline] = useState(() => {
     // Initial timeline is just the main video URL, effectively one clip
-    return [{ id: "main", url: videoUrl, duration: 0, startRequest: null, endRequest: null }];
+    return [{
+      id: "main",
+      name: sourceName || "Original source video",
+      url: videoUrl,
+      storagePath: sourceStoragePath || "",
+      sourceStoragePath: sourceStoragePath || "",
+      duration: 0,
+      startRequest: null,
+      endRequest: null,
+    }];
   });
   const [activeTimelineIndex, setActiveTimelineIndex] = useState(0);
   const [draggedOverlayId, setDraggedOverlayId] = useState(null);
@@ -2951,6 +3007,8 @@ const ViralClipStudio = ({
   const speakerStackBottomVideoRef = useRef(null);
   const speakerStackThirdVideoRef = useRef(null);
   const speakerStackFourthVideoRef = useRef(null);
+  const sourceSplitAlternateVideoRef = useRef(null);
+  const sourceSplitAlternateFrameRef = useRef(null);
   const speakerStackSourceInputRef = useRef(null);
   const audioRef = useRef(null);
   const smartCropForegroundVideoRef = useRef(null);
@@ -2977,6 +3035,14 @@ const ViralClipStudio = ({
   const imageInputRef = useRef(null);
   const logoMotionInputRef = useRef(null);
   const brollVideoInputRef = useRef(null);
+  const projectMediaInputRef = useRef(null);
+  const projectMediaObjectUrlsRef = useRef(new Set());
+  const filmAnglePreviewRefsRef = useRef(new Map());
+  const consumedCameraMasterIdsRef = useRef(new Set());
+  const consumedInitialFilesRef = useRef(new WeakSet());
+  const activeProjectIdRef = useRef(projectId);
+  const attemptedSourceRefreshRef = useRef(new Set());
+  activeProjectIdRef.current = projectId;
   const quickMusicFileInputRef = useRef(null);
   const audioSourceInputRef = useRef(null);
   const previewSourceCacheRef = useRef(new Map());
@@ -3089,6 +3155,18 @@ const ViralClipStudio = ({
     musicPreviewSourceRef.current = null;
   };
 
+  useEffect(() => {
+    if (!isWorkflowPaused) return;
+    previewPlaybackIntentRef.current = false;
+    [videoRef.current, beforeVideoRef.current, musicPreviewRef.current].forEach(media => {
+      if (media && typeof media.pause === "function") media.pause();
+    });
+    timelineAudioPoolRef.current.forEach(media => media?.pause?.());
+    soundEffectAudioRefsRef.current.forEach(media => media?.pause?.());
+    stopMusicPreviewBufferPlayback();
+    setIsPreviewPaused(true);
+  }, [isWorkflowPaused]);
+
   const ensureMusicPreviewAudioContext = () => {
     const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
     if (!AudioContextCtor) {
@@ -3188,6 +3266,9 @@ const ViralClipStudio = ({
 
   const getEditorSnapshot = () => ({
     orderedClips,
+    projectMedia,
+    angleGroups,
+    activeAngleGroupId,
     selectedClipId: selectedClip?.id || null,
     overlays,
     activeOverlayId,
@@ -3315,6 +3396,14 @@ const ViralClipStudio = ({
     snapshot = null,
     checkpoint = false,
   } = {}) => {
+    const unfinishedMedia = (snapshot?.projectMedia || projectMedia).filter(item =>
+      ["queued", "uploading", "failed", "needs_upload"].includes(item.status)
+    );
+    if (unfinishedMedia.length) {
+      setProjectSaveState("unsaved");
+      setMediaImportMessage(`Finish or retry ${unfinishedMedia.length} video upload${unfinishedMedia.length === 1 ? "" : "s"} before saving this project.`);
+      return null;
+    }
     // A delayed autosave captured before a rename must not overwrite this
     // explicit checkpoint after it reports "Saved locally".
     if (projectAutosaveTimerRef.current) {
@@ -3380,7 +3469,11 @@ const ViralClipStudio = ({
     setProjectSaveState("unsaved");
     if (projectAutosaveTimerRef.current) {
       window.clearTimeout(projectAutosaveTimerRef.current);
+      projectAutosaveTimerRef.current = null;
     }
+    if ((snapshot?.projectMedia || []).some(item =>
+      ["queued", "uploading", "failed", "needs_upload"].includes(item.status)
+    )) return;
     projectAutosaveTimerRef.current = window.setTimeout(() => {
       projectAutosaveTimerRef.current = null;
       void persistProjectSnapshot({ snapshot });
@@ -3393,6 +3486,7 @@ const ViralClipStudio = ({
       const file = item.file;
       if (!(typeof Blob !== "undefined" && file instanceof Blob)) return item;
       const mediaUrl = URL.createObjectURL(file);
+      projectMediaObjectUrlsRef.current.add(mediaUrl);
       return {
         ...item,
         ...(Object.prototype.hasOwnProperty.call(item, "src") ? { src: mediaUrl } : {}),
@@ -3403,6 +3497,12 @@ const ViralClipStudio = ({
     return {
       ...snapshot,
       orderedClips: (snapshot?.orderedClips || []).map(restoreItem),
+      projectMedia: (snapshot?.projectMedia || []).map(item => {
+        const restored = restoreItem(item);
+        return restored.status === "uploading" || restored.status === "queued"
+          ? { ...restored, status: "needs_upload", progress: 0 }
+          : restored;
+      }),
       timeline: (snapshot?.timeline || []).map(restoreItem),
       overlays: (snapshot?.overlays || []).map(restoreItem),
       soundEffects: (snapshot?.soundEffects || []).map(restoreItem),
@@ -3412,9 +3512,65 @@ const ViralClipStudio = ({
     };
   };
 
+  const refreshSourceUrlByPath = async (storagePath, expectedProjectId = activeProjectIdRef.current) => {
+    if (!storagePath) return false;
+    try {
+      const token = await getMediaAuthToken();
+      if (!token) throw new Error("Sign in to reopen saved videos.");
+      const response = await fetch(`${API_BASE_URL}/api/media/studio-assets/resolve`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ storagePath }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.url) throw new Error(result.message || result.error || "Saved video is unavailable.");
+      if (activeProjectIdRef.current !== expectedProjectId) return false;
+      setProjectMedia(current => current.map(item => item.storagePath === storagePath
+        ? { ...item, url: result.url, status: "ready", error: "" }
+        : item));
+      setTimeline(current => current.map(clip =>
+        (clip.sourceStoragePath || clip.storagePath) === storagePath
+          ? { ...clip, url: result.url }
+          : clip));
+      setOrderedClips(current => current.map(clip =>
+        (clip.sourceStoragePath || clip.storagePath) === storagePath ||
+        (storagePath === sourceStoragePath && clip.url === videoUrl)
+          ? { ...clip, url: result.url }
+          : clip));
+      setSelectedClip(current => current && (
+        (current.sourceStoragePath || current.storagePath) === storagePath ||
+        (storagePath === sourceStoragePath && current.url === videoUrl)
+      ) ? { ...current, url: result.url } : current);
+      setOverlays(current => current.map(overlay =>
+        (overlay.sourceStoragePath || overlay.storagePath) === storagePath
+          ? { ...overlay, src: result.url, ...(overlay.url ? { url: result.url } : {}) }
+          : overlay));
+      return result.url;
+    } catch (error) {
+      if (activeProjectIdRef.current !== expectedProjectId) return false;
+      setProjectMedia(current => current.map(item => item.storagePath === storagePath
+        ? { ...item, status: "unavailable", error: error.message || "Saved video is unavailable. Refresh its link." }
+        : item));
+      setMediaImportMessage("Some saved videos could not be reopened. Use Refresh link on an affected video.");
+      return false;
+    }
+  };
+
+  const refreshStoredSourceUrls = snapshot => {
+    const expectedProjectId = activeProjectIdRef.current;
+    const paths = new Set([
+      ...(snapshot?.projectMedia || []).map(item => item.storagePath || item.sourceStoragePath),
+      ...(snapshot?.timeline || []).map(item => item.sourceStoragePath || item.storagePath),
+      ...(snapshot?.overlays || []).map(item => item.sourceStoragePath || item.storagePath),
+    ].filter(Boolean));
+    paths.forEach(path => { void refreshSourceUrlByPath(path, expectedProjectId); });
+  };
+
   const openSavedProject = project => {
     if (!project?.snapshot) return;
     const restoredSnapshot = rehydrateStoredProjectSnapshot(project.snapshot);
+    activeProjectIdRef.current = project.id;
+    attemptedSourceRefreshRef.current.clear();
     applyEditorSnapshot(restoredSnapshot);
     setProjectId(project.id);
     setProjectName(project.name || "Untitled viral edit");
@@ -3425,11 +3581,15 @@ const ViralClipStudio = ({
     setStudioActionMessage(
       `Opened “${project.name || "Untitled viral edit"}” with editable layers.`
     );
+    refreshStoredSourceUrls(restoredSnapshot);
   };
 
   const restoreProjectVersion = (project, version) => {
     if (!version?.snapshot) return;
-    applyEditorSnapshot(rehydrateStoredProjectSnapshot(version.snapshot));
+    const restoredSnapshot = rehydrateStoredProjectSnapshot(version.snapshot);
+    activeProjectIdRef.current = project.id;
+    attemptedSourceRefreshRef.current.clear();
+    applyEditorSnapshot(restoredSnapshot);
     setProjectId(project.id);
     setProjectName(project.name || "Untitled viral edit");
     projectCreatedAtRef.current = Number(project.createdAt || Date.now());
@@ -3439,6 +3599,7 @@ const ViralClipStudio = ({
     setStudioActionMessage(
       `Restored ${version.name || "an earlier version"}. Save a new checkpoint to keep it.`
     );
+    refreshStoredSourceUrls(restoredSnapshot);
   };
 
   const removeSavedProject = async project => {
@@ -3505,7 +3666,7 @@ const ViralClipStudio = ({
     setCreativePreset(template.creativePreset || "auto_story");
     setCreativeIntensity(template.creativeIntensity || "bold");
     replaceFinishFx(template.finishFx || {});
-    setMainFrame(current => ({ ...current, ...(template.mainFrame || {}) }));
+    setMainFrame(current => enforceRoundedMainFrame({ ...current, ...(template.mainFrame || {}) }));
     setAudioRestoration(current => ({ ...current, ...(template.audioRestoration || {}) }));
     setCreatorPreview(current => ({ ...current, ...(template.creatorPreview || {}) }));
     if (template.layout) {
@@ -3544,9 +3705,15 @@ const ViralClipStudio = ({
       activeTimelineIndex: _activeTimelineIndex,
       cutRangeStart: _cutRangeStart,
       cutRangeEnd: _cutRangeEnd,
+      projectMedia: snapshotProjectMedia,
       ...editableSnapshot
     } = snapshot;
-    return editableSnapshot;
+    return {
+      ...editableSnapshot,
+      projectMedia: (snapshotProjectMedia || []).map(
+        ({ status: _status, progress: _progress, error: _error, ...asset }) => asset
+      ),
+    };
   };
 
   const syncHistoryAvailability = () => {
@@ -3558,6 +3725,22 @@ const ViralClipStudio = ({
     const normalizedClips = snapshot.orderedClips || [];
     const normalizedOverlays = snapshot.overlays || [];
     setOrderedClips(normalizedClips);
+    setProjectMedia(Array.isArray(snapshot.projectMedia)
+      ? snapshot.projectMedia
+      : (snapshot.timeline || []).slice(0, 1).filter(item => item?.url).map(item => ({
+          id: `primary-${item.sourceStoragePath || item.storagePath || "source"}`,
+          name: item.name || "Original source video",
+          url: item.url,
+          storagePath: item.sourceStoragePath || item.storagePath || "",
+          sourceStoragePath: item.sourceStoragePath || item.storagePath || "",
+          duration: Number(item.duration || 0),
+          status: item.sourceStoragePath || item.storagePath ? "ready" : "existing",
+          isPrimary: true,
+        })));
+    setAngleGroups(Array.isArray(snapshot.angleGroups) ? snapshot.angleGroups : []);
+    setActiveAngleGroupId(snapshot.activeAngleGroupId || null);
+    setSelectedProjectMediaId(null);
+    setSelectedCameraMediaIds([]);
     setSelectedClip(
       normalizedClips.find(clip => clip.id === snapshot.selectedClipId) ||
         normalizedClips[0] ||
@@ -3619,6 +3802,7 @@ const ViralClipStudio = ({
     setSpeakerStackFraming({
       ...DEFAULT_SPEAKER_STACK_FRAMING,
       ...(snapshot.speakerStackFraming || {}),
+      cardGapPercent: clampNumber(snapshot.speakerStackFraming?.cardGapPercent, 0, 3, 2.5),
       top: {
         ...DEFAULT_SPEAKER_STACK_FRAMING.top,
         ...(snapshot.speakerStackFraming?.top || {}),
@@ -3667,13 +3851,12 @@ const ViralClipStudio = ({
     setBrandWatermark(snapshot.brandWatermark !== false);
     setBrandWatermarkVariant(snapshot.brandWatermarkVariant || "studio");
     setBrandWatermarkText(snapshot.brandWatermarkText || "AutoPromote · Viral Clip Studio");
-    setMainFrame({
-      enabled: true,
+    setMainFrame(enforceRoundedMainFrame({
       insetPercent: 3,
       radiusPercent: 8,
       background: "studio_black",
       ...(snapshot.mainFrame || {}),
-    });
+    }));
     setExportSettings({
       resolution: "1080p",
       fps: "30",
@@ -6275,6 +6458,19 @@ const ViralClipStudio = ({
     speakerFocusCuts,
     previewTimelineTime
   );
+  const resolveSourceSplitTimeOffset = (frame, time = previewTimelineTime) => {
+    const keys = [...(frame?.sourceTimeOffsetKeyframes || frame?.source_time_offset_keyframes || [])]
+      .sort((left, right) => Number(left?.time || 0) - Number(right?.time || 0));
+    let offset = Number(frame?.sourceTimeOffsetSeconds ?? frame?.source_time_offset_seconds ?? 0) || 0;
+    keys.forEach(key => {
+      if (Number(key?.time || 0) <= time + 0.001) {
+        offset = Number(key?.offsetSeconds ?? key?.offset_seconds ?? 0) || 0;
+      }
+    });
+    return offset;
+  };
+  const sourceSplitTopOffset = resolveSourceSplitTimeOffset(speakerStackFraming.top);
+  const sourceSplitBottomOffset = resolveSourceSplitTimeOffset(speakerStackFraming.bottom);
   const motionInspectorTarget =
     motionTargetId === "main-video"
       ? mainTransform
@@ -6753,6 +6949,23 @@ const ViralClipStudio = ({
   const activeReframeKeyframe =
     reframeKeyframes.find(keyframe => keyframe.id === activeReframeKeyframeId) || null;
   const reframeAspectClass = `reframe-aspect-${String(reframeAspect).replace(":", "-")}`;
+  const [previewAspectWidth = 9, previewAspectHeight = 16] = String(reframeAspect)
+    .split(":")
+    .map(value => Math.max(1, Number(value) || 1));
+  const previewAspectRatio = previewAspectWidth / previewAspectHeight;
+  // The renderer defines frame inset as a percentage of output width on all
+  // four sides. Convert that same physical inset to a CSS height percentage so
+  // a portrait preview does not get almost twice the top/bottom margin.
+  const mainFrameInsetXPercent = clampNumber(mainFrame.insetPercent, 0, 10, 0);
+  const mainFrameInsetYPercent = mainFrameInsetXPercent * previewAspectRatio;
+  const previewInnerWidth = Math.max(0.01, 1 - (mainFrameInsetXPercent * 2) / 100);
+  const previewInnerHeight = Math.max(
+    0.01,
+    1 / previewAspectRatio - (mainFrameInsetXPercent * 2) / 100
+  );
+  const previewInnerAspectRatio = previewInnerWidth / previewInnerHeight;
+  const mainFrameRadiusXPercent = clampNumber(mainFrame.radiusPercent, 0, 25, 0);
+  const mainFrameRadiusYPercent = mainFrameRadiusXPercent * previewInnerAspectRatio;
   const reframeObjectPosition = `${clampNumber(activeReframePosition.x, 5, 95, 50)}% ${clampNumber(
     activeReframePosition.y,
     8,
@@ -6762,9 +6975,11 @@ const ViralClipStudio = ({
   const showCropRiskIndicator =
     !safeFaceFraming &&
     (effectiveVideoFit === "cover" || effectiveSmartCrop || hookFreezeFrame || isZoomFocusTemplate);
-  const previewClarityBrightness = 1.025;
-  const previewClarityContrast = 1.08;
-  const previewClaritySaturate = 1.05;
+  // The Finish Rack grade is already applied to the programme canvas. Extra
+  // clarity here made the preview brighter and more saturated than export.
+  const previewClarityBrightness = 1;
+  const previewClarityContrast = 1;
+  const previewClaritySaturate = 1;
   const previewClarityHalo = " drop-shadow(0 0 0.45px rgba(255, 255, 255, 0.34))";
   const currentMusicLabel = musicSearchMode
     ? musicSelection || "Search query"
@@ -7157,18 +7372,32 @@ const ViralClipStudio = ({
           id: existing?.id || createSecureId("reframe-mode"),
           time,
           mode,
+          ...(existing?.mode === mode && existing.zoom ? { zoom: existing.zoom } : {}),
         },
       ]);
     });
   };
 
+  const setPictureFillForCurrentShot = value => {
+    const fill = clampNumber(value, 1, 1.5, 1);
+    const time = Number(Math.max(0, previewTimelineTime).toFixed(3));
+    setReframeModeCuts(current => {
+      const cuts = normalizeReframeModeCuts(current);
+      const active = [...cuts].reverse().find(cut => cut.time <= time + 0.001);
+      if (active?.mode === "speaker_track") {
+        return cuts.map(cut => cut.id === active.id ? { ...cut, zoom: fill } : cut);
+      }
+      return normalizeReframeModeCuts([
+        ...cuts,
+        { id: createSecureId("reframe-mode"), time, mode: "speaker_track", zoom: fill },
+      ]);
+    });
+  };
+
   const showEveryoneSplit = () => {
-    setSpeakerStackFraming(current => ({
-      ...current,
-      trackSpeakers: false,
-      top: { ...SOURCE_SPLIT_PROGRAMME_FRAMING.top, keyframes: [] },
-      bottom: { ...SOURCE_SPLIT_PROGRAMME_FRAMING.bottom, keyframes: [] },
-    }));
+    // Switching the camera mode is a timeline edit. Keep the creator's
+    // reviewed panel crops and alternate-angle timing instead of resetting
+    // them every time this shortcut is used during playback.
     setSmartCrop(true);
     setSmartCropMode("center");
     recordReframeModeAtPlayhead("center");
@@ -7213,8 +7442,8 @@ const ViralClipStudio = ({
     const clipId = currentTimelineClip?.id;
     const split = effectiveSmartCropMode === "center" && reframeAspect !== "16:9";
     const window = getTimelineClipWindow(currentTimelineClip);
-    if (window.duration > 180) {
-      setFaceTrackingMessage("Trim the analysis range to three minutes or less.");
+    if (window.duration > 900) {
+      setFaceTrackingMessage("Trim the analysis range to fifteen minutes or less.");
       return;
     }
     setFaceTrackingStatus("processing");
@@ -7263,15 +7492,156 @@ const ViralClipStudio = ({
           analysis: { clipId, engine: result.engine, reviewRequired: true, sceneCuts: result.sceneCuts },
         }));
       } else {
-        setReframeKeyframes(keys("solo"));
+        const rangeStart = offset;
+        const rangeEnd = offset + window.duration;
+        const detectedKeys = keys("solo");
+        setReframeKeyframes(current => [
+          ...current.filter(mark => mark.time < rangeStart - .001 || mark.time > rangeEnd + .001),
+          ...detectedKeys,
+        ].sort((left, right) => left.time - right.time));
         setActiveReframeKeyframeId(null);
         setSafeFaceFraming(false);
         setVideoFit("cover");
+        if (mode === "source_shots" && result.editPlan) {
+          const plan = result.editPlan;
+          const toTimelineTime = value => offset + Number(value || 0) - window.start;
+          const plannedCuts = (plan.timelineCuts || []).map(cut => ({
+            id: createSecureId("analyzed-shot"),
+            time: toTimelineTime(cut.time),
+            mode: cut.mode || "speaker_track",
+            zoom: clampNumber(cut.zoom, 1, 1.5, 1),
+            ...(Math.abs(Number(cut.sourceTimeOffsetSeconds || 0)) > .001
+              ? { sourceTimeOffsetSeconds: Number(cut.sourceTimeOffsetSeconds) }
+              : {}),
+          }));
+          const cleanSplits = (plan.splitSuggestions || []).filter(
+            suggestion => suggestion.reason === "two_clean_foreground_faces"
+          );
+          cleanSplits.forEach(suggestion => {
+            const activeShot = [...(plan.timelineCuts || [])]
+              .filter(cut => Number(cut.time) <= Number(suggestion.end) + 1e-6)
+              .sort((left, right) => Number(right.time) - Number(left.time))[0];
+            plannedCuts.push({
+              id: createSecureId("director-split"),
+              time: toTimelineTime(suggestion.start),
+              mode: "center",
+              zoom: 1,
+            }, {
+              id: createSecureId("director-solo"),
+              time: toTimelineTime(suggestion.end),
+              mode: "speaker_track",
+              zoom: clampNumber(activeShot?.zoom, 1, 1.5, 1),
+            });
+          });
+          setReframeModeCuts(current => normalizeReframeModeCuts([
+            ...current.filter(cut => cut.time < rangeStart - .001 || cut.time > rangeEnd + .001),
+            ...plannedCuts,
+          ]));
+          if (cleanSplits.length) {
+            const first = cleanSplits[0];
+            setSpeakerStackFraming(current => ({
+              ...current,
+              trackSpeakers: true,
+              roundedCards: true,
+              cardInsetPercent: 2.5,
+              cardGapPercent: 2.5,
+              cardRadiusPercent: 8,
+              top: {
+                ...current.top,
+                ...first.top,
+                keyframes: cleanSplits.map(suggestion => ({
+                  time: toTimelineTime(suggestion.start),
+                  x: Number(suggestion.top?.x ?? first.top?.x ?? 50),
+                  y: Number(suggestion.top?.y ?? first.top?.y ?? 50),
+                  source_visible_top_percent: Number(suggestion.top?.source_visible_top_percent || 0),
+                  source_visible_bottom_percent: Number(suggestion.top?.source_visible_bottom_percent || 0),
+                  cut: true,
+                })),
+              },
+              bottom: {
+                ...current.bottom,
+                ...first.bottom,
+                keyframes: cleanSplits.map(suggestion => ({
+                  time: toTimelineTime(suggestion.start),
+                  x: Number(suggestion.bottom?.x ?? first.bottom?.x ?? 50),
+                  y: Number(suggestion.bottom?.y ?? first.bottom?.y ?? 50),
+                  source_visible_top_percent: Number(suggestion.bottom?.source_visible_top_percent || 0),
+                  source_visible_bottom_percent: Number(suggestion.bottom?.source_visible_bottom_percent || 0),
+                  cut: true,
+                })),
+                source_time_offset_keyframes: cleanSplits.map(suggestion => ({
+                  time: toTimelineTime(suggestion.start),
+                  offset_seconds: Number(suggestion.bottom?.sourceTimeOffsetSeconds || 0),
+                })),
+              },
+            }));
+            setSpeakerFocusCuts(current => normalizeSpeakerFocusCuts([
+              ...current.filter(cut => cut.time < rangeStart - .001 || cut.time > rangeEnd + .001),
+              ...cleanSplits.map((suggestion, index) => ({
+                id: createSecureId("director-order"),
+                time: toTimelineTime(suggestion.start),
+                slot: index % 2 ? "bottom" : "top",
+              })),
+            ]));
+          }
+          const placementCuts = [...(plan.captionPlacementCuts || [])]
+            .sort((left, right) => Number(left.time || 0) - Number(right.time || 0));
+          if (placementCuts.length) {
+            setCaptionPosition(placementCuts[0].placement || "bottom_center");
+            setCaptionSegments(current => current.flatMap(segment => {
+              const existing = String(segment.captionPlacement || "auto");
+              if (existing !== "auto" && existing) return segment;
+              const segmentStart = Number(segment.start || 0);
+              const segmentEnd = Number(segment.end || segment.start || 0);
+              // A caption cue often straddles the short Director beat. Split
+              // it at those exact boundaries so the preview and export move
+              // the same cue with the programme speaker at the cut itself.
+              const boundaries = [segmentStart, segmentEnd];
+              cleanSplits.forEach(suggestion => {
+                [Number(suggestion.start), Number(suggestion.end)].forEach(boundary => {
+                  if (segmentStart < boundary && boundary < segmentEnd) boundaries.push(boundary);
+                });
+              });
+              const orderedBoundaries = [...new Set(boundaries)].sort((left, right) => left - right);
+              return orderedBoundaries.slice(0, -1).map((pieceStart, index) => {
+                const pieceEnd = orderedBoundaries[index + 1];
+                const midpoint = (pieceStart + pieceEnd) / 2;
+                const insideSplit = cleanSplits.some(suggestion =>
+                  midpoint >= Number(suggestion.start || 0) && midpoint < Number(suggestion.end || 0)
+                );
+                const active = placementCuts.reduce(
+                  (found, cut) => Number(cut.time || 0) <= midpoint + .001 ? cut : found,
+                  placementCuts[0]
+                );
+                return {
+                  ...segment,
+                  id: orderedBoundaries.length > 2 ? `${segment.id}-layout-${index + 1}` : segment.id,
+                  start: pieceStart,
+                  end: pieceEnd,
+                  duration: pieceEnd - pieceStart,
+                  captionPlacement: insideSplit ? "custom" : active.placement || "bottom_center",
+                  ...(insideSplit ? { captionX: 50, captionY: 40 } : {}),
+                };
+              });
+            }));
+          }
+          setMainFrame(current => enforceRoundedMainFrame({
+            ...current,
+            insetPercent: Number(plan.mainFrame?.insetPercent ?? 2.5),
+            radiusPercent: Number(plan.mainFrame?.radiusPercent ?? 10),
+            background: plan.mainFrame?.background || "studio_black",
+          }));
+          const naturalGrade = CINEMATIC_PRESETS.find(preset => preset.id === "studio_natural");
+          if (naturalGrade) applyFinishPreset(naturalGrade);
+        }
       }
       const coverage = slots.map(slot => `${slot}: ${Math.round((result.tracks[slot].coverage || 0)*100)}%`).join(" · ");
       setFaceTrackingStatus("ready");
+      const editPlan = result.editPlan;
       setFaceTrackingMessage(mode === "source_shots"
-        ? `Source-shot draft applied (${coverage}; ${result.sceneCuts?.length || 0} cuts). Follows the foreground face in each shot, not a person's identity. Review every cut.`
+        ? editPlan
+          ? `Editable podcast first cut applied (${coverage}; ${result.sceneCuts?.length || 0} camera cuts; ${editPlan.splitSuggestions?.length || 0} clean Director splits). Picture fill, face-safe captions, Studio Natural grade and one rounded frame now match preview and export. Review marked cuts.`
+          : `Source-shot draft applied (${coverage}; ${result.sceneCuts?.length || 0} cuts). Review every cut.`
         : `Face-follow draft applied (${coverage}). Review camera cuts and missed faces. This detects faces, not who is speaking.`);
     } catch (error) {
       if (generation !== faceTrackingGeneration.current) return;
@@ -7722,10 +8092,18 @@ const ViralClipStudio = ({
     setMotionKeyframes(current => rippleTimelineKeys(current, from, to));
     setSpeedKeyframes(current => rippleTimelineKeys(current, from, to));
     setFinishKeyframes(current => rippleTimelineKeys(current, from, to));
-    setReframeKeyframes(current => rippleTimelineKeys(current, from, to));
-    setSpeakerFocusCuts(current => rippleTimelineKeys(current, from, to));
+    setReframeKeyframes(current => rippleTimelineKeys(current, from, to, { preserveRightState: true }));
+    setReframeModeCuts(current => rippleTimelineKeys(current, from, to, { preserveRightState: true }));
+    setSpeakerFocusCuts(current => rippleTimelineKeys(current, from, to, { preserveRightState: true }));
     setSpeakerStackFraming(current => ({ ...current, ...Object.fromEntries(["top", "bottom"].map(slot => [slot, {
-      ...current[slot], keyframes: rippleTimelineKeys(current[slot].keyframes || [], from, to),
+      ...current[slot],
+      keyframes: rippleTimelineKeys(current[slot].keyframes || [], from, to, { preserveRightState: true }),
+      ...(current[slot].sourceTimeOffsetKeyframes ? {
+        sourceTimeOffsetKeyframes: rippleTimelineKeys(current[slot].sourceTimeOffsetKeyframes, from, to, { preserveRightState: true }),
+      } : {}),
+      ...(current[slot].source_time_offset_keyframes ? {
+        source_time_offset_keyframes: rippleTimelineKeys(current[slot].source_time_offset_keyframes, from, to, { preserveRightState: true }),
+      } : {}),
     }])) }));
     setAudioKeyframes(current => Object.fromEntries(Object.entries(current).map(([bus, keys]) => [bus, rippleTimelineKeys(keys, from, to)])));
   };
@@ -7768,15 +8146,22 @@ const ViralClipStudio = ({
     setMotionKeyframes(retimeKeys);
     setSpeedKeyframes(retimeKeys);
     setFinishKeyframes(retimeKeys);
-    setReframeKeyframes(retimeKeys);
-    setSpeakerFocusCuts(retimeKeys);
+    setReframeKeyframes(current => sortedGaps.reduce((items, gap) => rippleTimelineKeys(items, gap.from, gap.to, { preserveRightState: true }), current));
+    setReframeModeCuts(current => sortedGaps.reduce((items, gap) => rippleTimelineKeys(items, gap.from, gap.to, { preserveRightState: true }), current));
+    setSpeakerFocusCuts(current => sortedGaps.reduce((items, gap) => rippleTimelineKeys(items, gap.from, gap.to, { preserveRightState: true }), current));
     setSpeakerStackFraming(current => {
       const next = { ...current };
       for (const slot of ["top", "bottom"]) {
         if (next[slot]) {
           next[slot] = {
             ...next[slot],
-            keyframes: retimeKeys(next[slot]?.keyframes || []),
+            keyframes: sortedGaps.reduce((items, gap) => rippleTimelineKeys(items, gap.from, gap.to, { preserveRightState: true }), next[slot]?.keyframes || []),
+            ...(next[slot]?.sourceTimeOffsetKeyframes ? {
+              sourceTimeOffsetKeyframes: sortedGaps.reduce((items, gap) => rippleTimelineKeys(items, gap.from, gap.to, { preserveRightState: true }), next[slot].sourceTimeOffsetKeyframes),
+            } : {}),
+            ...(next[slot]?.source_time_offset_keyframes ? {
+              source_time_offset_keyframes: sortedGaps.reduce((items, gap) => rippleTimelineKeys(items, gap.from, gap.to, { preserveRightState: true }), next[slot].source_time_offset_keyframes),
+            } : {}),
           };
         }
       }
@@ -9470,6 +9855,108 @@ const ViralClipStudio = ({
   ]);
 
   useEffect(() => {
+    const programmeVideo = videoRef.current;
+    const alternateVideo = sourceSplitAlternateVideoRef.current;
+    if (!programmeVideo || !alternateVideo) return undefined;
+    const cacheAlternateFrame = () => {
+      if (alternateVideo.readyState < 2 || !alternateVideo.videoWidth || !alternateVideo.videoHeight) return;
+      let cached = sourceSplitAlternateFrameRef.current;
+      if (!cached?.canvas) {
+        cached = { canvas: document.createElement("canvas"), sourceTime: 0 };
+        sourceSplitAlternateFrameRef.current = cached;
+      }
+      if (
+        cached.canvas.width !== alternateVideo.videoWidth ||
+        cached.canvas.height !== alternateVideo.videoHeight
+      ) {
+        cached.canvas.width = alternateVideo.videoWidth;
+        cached.canvas.height = alternateVideo.videoHeight;
+      }
+      const cachedContext = cached.canvas.getContext("2d");
+      if (!cachedContext) return;
+      try {
+        cachedContext.drawImage(alternateVideo, 0, 0, cached.canvas.width, cached.canvas.height);
+        cached.sourceTime = Number(alternateVideo.currentTime || 0);
+      } catch (_) {}
+    };
+    const syncAlternateAngle = () => {
+      const outputTime = getPreviewTimelineTime(programmeVideo.currentTime || 0);
+      const mode = resolveReframeModeAtTime(
+        reframeModeCuts, outputTime, smartCrop ? smartCropMode : "off"
+      );
+      const normalizedCuts = normalizeReframeModeCuts(reframeModeCuts);
+      const activeCut = resolveReframeCutAtTime(normalizedCuts, outputTime);
+      const soloOffset = mode === "speaker_track"
+        ? Number(activeCut?.sourceTimeOffsetSeconds || 0)
+        : 0;
+      const nextAlternateCut = (mode === "center" || Math.abs(soloOffset) > .001) ? null : normalizedCuts.find(
+        cut => (cut.mode === "center" || Math.abs(Number(cut.sourceTimeOffsetSeconds || 0)) > .001) &&
+          cut.time > outputTime && cut.time - outputTime <= 12
+      );
+      if (mode !== "center" && Math.abs(soloOffset) <= .001 && !nextAlternateCut) {
+        alternateVideo.pause();
+        return;
+      }
+      const cueTime = nextAlternateCut ? nextAlternateCut.time : outputTime;
+      const offsetCut = nextAlternateCut || activeCut;
+      const offset = Number(offsetCut?.sourceTimeOffsetSeconds || 0) ||
+        resolveSourceSplitTimeOffset(speakerStackFraming.bottom, cueTime) ||
+        resolveSourceSplitTimeOffset(speakerStackFraming.top, cueTime);
+      if (!offset) {
+        alternateVideo.pause();
+        return;
+      }
+      // Cue the clean, full-frame alternate speaker shot before the split. The programme
+      // keeps its own source clock and remains the only audible media element.
+      const target = Math.max(0, Number(programmeVideo.currentTime || 0) +
+        Math.max(0, cueTime - outputTime) + offset);
+      const duration = Number(alternateVideo.duration || 0);
+      const bounded = duration > 0 ? Math.min(target, Math.max(0, duration - 0.04)) : target;
+      // Avoid repeatedly flushing decoded frames while both videos are
+      // playing. Small sub-frame drift is less disruptive than a blank card.
+      if (Math.abs(Number(alternateVideo.currentTime || 0) - bounded) >
+          (mode === "center" && !programmeVideo.paused ? 0.35 : 0.08)) {
+        try {
+          alternateVideo.currentTime = bounded;
+        } catch (_) {}
+      }
+      alternateVideo.playbackRate = Number(programmeVideo.playbackRate || 1);
+      if (!programmeVideo.paused && (mode === "center" || Math.abs(soloOffset) > .001)) {
+        void safePlayMediaElement(alternateVideo);
+      } else {
+        alternateVideo.pause();
+      }
+    };
+    programmeVideo.addEventListener("play", syncAlternateAngle);
+    programmeVideo.addEventListener("pause", syncAlternateAngle);
+    programmeVideo.addEventListener("seeking", syncAlternateAngle);
+    programmeVideo.addEventListener("seeked", syncAlternateAngle);
+    programmeVideo.addEventListener("timeupdate", syncAlternateAngle);
+    alternateVideo.addEventListener("loadeddata", cacheAlternateFrame);
+    alternateVideo.addEventListener("seeked", cacheAlternateFrame);
+    alternateVideo.addEventListener("timeupdate", cacheAlternateFrame);
+    syncAlternateAngle();
+    return () => {
+      programmeVideo.removeEventListener("play", syncAlternateAngle);
+      programmeVideo.removeEventListener("pause", syncAlternateAngle);
+      programmeVideo.removeEventListener("seeking", syncAlternateAngle);
+      programmeVideo.removeEventListener("seeked", syncAlternateAngle);
+      programmeVideo.removeEventListener("timeupdate", syncAlternateAngle);
+      alternateVideo.removeEventListener("loadeddata", cacheAlternateFrame);
+      alternateVideo.removeEventListener("seeked", cacheAlternateFrame);
+      alternateVideo.removeEventListener("timeupdate", cacheAlternateFrame);
+      alternateVideo.pause();
+    };
+  }, [
+    activeTimelineIndex,
+    currentTimelineClip,
+    reframeModeCuts,
+    smartCrop,
+    smartCropMode,
+    speakerStackFraming,
+  ]);
+
+  useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
     const syncAutomationRate = () => {
@@ -10231,6 +10718,7 @@ const ViralClipStudio = ({
     const exportSegments = await Promise.all(
       timeline.map(async clip => {
         let clipUrl = clip.url;
+        let clipStoragePath = clip.sourceStoragePath || clip.storagePath || null;
         let sourceFile = clip.file instanceof Blob ? clip.file : null;
 
         if (!sourceFile && typeof clip.url === "string" && clip.url.startsWith("blob:")) {
@@ -10252,8 +10740,10 @@ const ViralClipStudio = ({
               uploadSourceFileViaBackend({
                 file: sourceFile,
                 token,
+                getToken: forceRefresh => getMediaAuthToken(forceRefresh),
                 mediaType: "video",
                 fileName,
+                purpose: "studio_project",
                 onProgress: (transferred, total) => {
                   const percent = total > 0 ? Math.round((transferred / total) * 100) : 0;
                   setExportStatusLabel(`Uploading source ${percent}%`);
@@ -10263,6 +10753,7 @@ const ViralClipStudio = ({
           }
           const uploadResult = await sourceUploadPromises.get(sourceKey);
           clipUrl = uploadResult.url;
+          clipStoragePath = uploadResult.storagePath || null;
         }
 
         const window = getTimelineClipWindow(clip);
@@ -10270,6 +10761,7 @@ const ViralClipStudio = ({
           id: clip.id,
           source_clip_id: clip.sourceClipId || clip.id,
           url: clipUrl,
+          ...(clipStoragePath ? { sourceStoragePath: clipStoragePath } : {}),
           start_time: window.start,
           end_time: window.end,
           duration: window.duration,
@@ -10326,6 +10818,9 @@ const ViralClipStudio = ({
         id: `hook-intro-${activeSegment.id}`,
         source_clip_id: activeSegment.source_clip_id || activeSegment.id,
         url: activeSegment.url,
+        ...(activeSegment.sourceStoragePath
+          ? { sourceStoragePath: activeSegment.sourceStoragePath }
+          : {}),
         start_time: hookSourceStart,
         end_time: hookSourceEnd,
         duration: hookSegmentDuration,
@@ -10572,7 +11067,10 @@ const ViralClipStudio = ({
           layout: speakerStackLayout,
           camera_count: cameras.length,
           divider_percent: clampNumber(speakerStackFraming.dividerPercent, 35, 65, 50),
-          gap_percent: clampNumber(speakerStackFraming.gapPercent, 0, 3, 0.45),
+          gap_percent: clampNumber(speakerStackFraming.gapPercent, 0, 3, 1.2),
+          rounded_cards: speakerStackFraming.roundedCards !== false,
+          card_inset_percent: clampNumber(speakerStackFraming.cardInsetPercent, 0, 8, 2.5),
+          card_radius_percent: clampNumber(speakerStackFraming.cardRadiusPercent, 2, 18, 8),
           secondary_frame: {
             x_percent: clampNumber(speakerStackFraming.secondaryXPercent, 16, 84, 80),
             y_percent: clampNumber(speakerStackFraming.secondaryYPercent, 16, 84, 20),
@@ -10649,6 +11147,7 @@ const ViralClipStudio = ({
             const uploadResult = await uploadSourceFileViaBackend({
               file: fileToUpload,
               token,
+              getToken: forceRefresh => getMediaAuthToken(forceRefresh),
               mediaType:
                 finalOverlay.type === "video"
                   ? "video"
@@ -10656,6 +11155,7 @@ const ViralClipStudio = ({
                     ? "image"
                     : "audio",
               fileName,
+              purpose: finalOverlay.type === "video" ? "studio_project" : undefined,
               onProgress: (transferred, total) => {
                 const percent = total > 0 ? Math.round((transferred / total) * 100) : 0;
                 setExportStatusLabel(`Uploading layers ${percent}%`);
@@ -10664,6 +11164,9 @@ const ViralClipStudio = ({
             const url = uploadResult.url;
 
             finalOverlay.src = url;
+            if (finalOverlay.type === "video" && uploadResult.storagePath) {
+              finalOverlay.sourceStoragePath = uploadResult.storagePath;
+            }
             finalOverlay.isLocal = false;
             finalOverlay.file = null;
           }
@@ -10818,7 +11321,7 @@ const ViralClipStudio = ({
           color_cube: advancedColorCube,
           adjustment_layers: adjustmentLayers,
           main_frame: {
-            enabled: mainFrame.enabled,
+            enabled: true,
             shape: "round",
             inset_percent: mainFrame.insetPercent,
             border_radius_percent: mainFrame.radiusPercent,
@@ -10887,6 +11390,9 @@ const ViralClipStudio = ({
                   time: cut.time,
                   mode: cut.mode,
                   zoom: cut.zoom,
+                  ...(cut.sourceTimeOffsetSeconds
+                    ? { source_time_offset_seconds: cut.sourceTimeOffsetSeconds }
+                    : {}),
                 })) }
               : {}),
             ...(speakerFocusCuts.length
@@ -10896,9 +11402,16 @@ const ViralClipStudio = ({
                 })) }
               : {}),
             ...((smartCropMode === "center" || reframeModeCuts.some(cut => cut.mode === "center")) && reframeAspect !== "16:9"
-              ? { split_source: Object.fromEntries(["top", "bottom"].map(slot => [slot, {
-                  ...speakerStackFraming[slot], keyframes: speakerStackFraming.trackSpeakers ? speakerStackFraming[slot].keyframes || [] : [],
-                }])) }
+              ? { split_source: {
+                  divider_percent: clampNumber(speakerStackFraming.dividerPercent, 35, 65, 50),
+                  rounded_cards: speakerStackFraming.roundedCards !== false,
+                  card_inset_percent: clampNumber(speakerStackFraming.cardInsetPercent, 0, 8, 2.5),
+                  card_gap_percent: clampNumber(speakerStackFraming.cardGapPercent, 0, 3, 2.5),
+                  card_radius_percent: clampNumber(speakerStackFraming.cardRadiusPercent, 2, 18, 8),
+                  ...Object.fromEntries(["top", "bottom"].map(slot => [slot, {
+                    ...speakerStackFraming[slot], keyframes: speakerStackFraming.trackSpeakers ? speakerStackFraming[slot].keyframes || [] : [],
+                  }])),
+                } }
               : {}),
             ...(smartCropMode === "group_stack" || reframeModeCuts.some(cut => cut.mode === "group_stack")
               ? {
@@ -11124,6 +11637,11 @@ const ViralClipStudio = ({
             : item
         )
       );
+      if (activeTimelineIndex === 0) {
+        setProjectMedia(current => current.map(item => item.isPrimary
+          ? { ...item, duration: Number(dur || 0) }
+          : item));
+      }
     }
   };
 
@@ -11242,6 +11760,9 @@ const ViralClipStudio = ({
     scheduleProjectAutosave(snapshot);
   }, [
     orderedClips,
+    projectMedia,
+    angleGroups,
+    activeAngleGroupId,
     selectedClip,
     overlays,
     activeOverlayId,
@@ -11738,9 +12259,12 @@ const ViralClipStudio = ({
       // CSS effects do not alter drawImage's decoded pixels. Use the actual
       // programme element, not the lagging Before comparison clock: a 100 ms
       // scrub across a camera cut must not show the previous shot's pixels.
-      const sourceVideo = video;
-      if (sourceVideo.readyState < 2 || !sourceVideo.videoWidth || !sourceVideo.videoHeight) return;
-      const rect = phoneFrameRef.current?.getBoundingClientRect();
+      const programmeVideo = video;
+      if (programmeVideo.readyState < 2 || !programmeVideo.videoWidth || !programmeVideo.videoHeight) return;
+      // Size the decoded programme to the visible inner frame. Measuring the
+      // outer monitor here stretches an inset canvas and makes preview framing
+      // diverge from the backend's scale/crop result.
+      const rect = canvas.getBoundingClientRect();
       if (rect.width < 1 || rect.height < 1) return;
       const pixelRatio = Math.min(1.5, Math.max(1, window.devicePixelRatio || 1));
       const canvasWidth = Math.max(2, Math.round(rect.width * pixelRatio));
@@ -11749,29 +12273,59 @@ const ViralClipStudio = ({
       if (canvas.height !== canvasHeight) canvas.height = canvasHeight;
       const context = canvas.getContext("2d", { alpha: false });
       if (!context) return;
+      // Use the decoded programme's clock for its crop and Director cut. React
+      // state can arrive a frame later than the video at a hard source edit.
+      const frameOutputTime = getPreviewTimelineTime(programmeVideo.currentTime || 0);
+      const frameCropMode = resolveReframeModeAtTime(
+        reframeModeCuts, frameOutputTime, smartCrop ? smartCropMode : "off"
+      );
+      const frameModeCut = resolveReframeCutAtTime(reframeModeCuts, frameOutputTime);
+      const frameSoloOffset = frameCropMode === "speaker_track"
+        ? Number(frameModeCut?.sourceTimeOffsetSeconds || 0)
+        : 0;
+      const alternateVideo = sourceSplitAlternateVideoRef.current;
+      const alternateTargetTime = Number(programmeVideo.currentTime || 0) + frameSoloOffset;
+      const cachedSoloFrame = sourceSplitAlternateFrameRef.current;
+      const alternateIsCurrent = Math.abs(frameSoloOffset) > .001 && alternateVideo?.readyState >= 2 &&
+        alternateVideo.videoWidth && Math.abs(Number(alternateVideo.currentTime || 0) - alternateTargetTime) <= .36;
+      const cachedAlternateIsCurrent = Math.abs(frameSoloOffset) > .001 && cachedSoloFrame?.canvas &&
+        Math.abs(Number(cachedSoloFrame.sourceTime || 0) - alternateTargetTime) <= .5;
+      const sourceVideo = alternateIsCurrent
+        ? alternateVideo
+        : cachedAlternateIsCurrent ? cachedSoloFrame.canvas : programmeVideo;
+      const frameProgrammeFit = renderedOutputUrl || activeSideBySideOverlay
+        ? previewProgrammeFit
+        : frameCropMode === "speaker_track" || frameCropMode === "group_stack"
+          ? "cover"
+          : frameCropMode !== "off" ? "contain" : previewProgrammeFit;
+      const frameReframePosition = interpolateReframeKeyframes(reframeKeyframes, frameOutputTime);
+      const frameProgrammePosition = frameCropMode === "speaker_track" && !renderedOutputUrl
+        ? `${clampNumber(frameReframePosition.x, 5, 95, 50)}% ${clampNumber(frameReframePosition.y, 8, 92, 50)}%`
+        : previewProgrammePosition;
       const [rawPositionX = "50", rawPositionY = "50"] = String(
-        previewProgrammePosition || "50% 50%"
+        frameProgrammePosition || "50% 50%"
       ).split(/\s+/);
       const positionX = clampNumber(parseFloat(rawPositionX), 0, 100, 50) / 100;
       const positionY = clampNumber(parseFloat(rawPositionY), 0, 100, 50) / 100;
-      const widthScale = canvasWidth / sourceVideo.videoWidth;
-      const heightScale = canvasHeight / sourceVideo.videoHeight;
-      const scale = previewProgrammeFit === "cover"
-        ? Math.max(widthScale, heightScale) * (effectiveSmartCrop && effectiveSmartCropMode === "speaker_track" && !renderedOutputUrl ? speakerTrackZoom : 1)
+      const sourceFrameWidth = Number(sourceVideo.videoWidth || sourceVideo.width || programmeVideo.videoWidth);
+      const sourceFrameHeight = Number(sourceVideo.videoHeight || sourceVideo.height || programmeVideo.videoHeight);
+      const widthScale = canvasWidth / sourceFrameWidth;
+      const heightScale = canvasHeight / sourceFrameHeight;
+      const scale = frameProgrammeFit === "cover"
+        ? Math.max(widthScale, heightScale) * (frameCropMode === "speaker_track" && !renderedOutputUrl ? speakerTrackZoom : 1)
         : Math.min(widthScale, heightScale);
-      const drawWidth = sourceVideo.videoWidth * scale;
-      const drawHeight = sourceVideo.videoHeight * scale;
+      const drawWidth = sourceFrameWidth * scale;
+      const drawHeight = sourceFrameHeight * scale;
       context.fillStyle = "#000";
       context.fillRect(0, 0, canvasWidth, canvasHeight);
       const isDualCamShowEveryone =
-        effectiveSmartCrop &&
-        effectiveSmartCropMode === "center" &&
+        frameCropMode === "center" &&
         reframeAspect !== "16:9";
-      if (effectiveSmartCropMode === "center" && !isDualCamShowEveryone && canvasHeight > drawHeight + 8) {
+      if (frameCropMode === "center" && !isDualCamShowEveryone && canvasHeight > drawHeight + 8) {
         context.save();
         const bgScale = Math.max(widthScale, heightScale);
-        const bgW = sourceVideo.videoWidth * bgScale;
-        const bgH = sourceVideo.videoHeight * bgScale;
+        const bgW = sourceFrameWidth * bgScale;
+        const bgH = sourceFrameHeight * bgScale;
         context.filter = "blur(18px) brightness(0.42) saturate(1.25)";
         context.drawImage(
           sourceVideo,
@@ -11786,7 +12340,7 @@ const ViralClipStudio = ({
       context.filter = previewProgrammeFilter;
       const currentDirectorAngle = directorModeActive ? directorAngles[activeDirectorAngle] : null;
       const timelineDirectorZoom = normalizeReframeModeCuts(reframeModeCuts).reduce(
-        (zoom, cut) => cut.time <= previewTimelineTime ? Number(cut.zoom || 1) : zoom,
+        (zoom, cut) => cut.time <= frameOutputTime ? Number(cut.zoom || 1) : zoom,
         1
       );
       const directorZoom = renderedOutputUrl ? 1 : directorModeActive
@@ -11812,35 +12366,65 @@ const ViralClipStudio = ({
         ? 1
         : hookPrimaryVideoOpacity * mainMotionAutomation.opacity;
       const isDualCamStackLive =
-        (isDualCamShowEveryone || speakerStackPreviewIsLive) &&
+        (isDualCamShowEveryone || (frameCropMode === "group_stack" && speakerStackIsReady)) &&
         !renderedOutputUrl &&
         !activeSideBySideOverlay;
       if (isDualCamStackLive) {
-        const gap = Math.max(
-          2,
-          Math.round(canvasHeight * 0.003)
-        );
+        const gapPercent = isDualCamShowEveryone
+          ? clampNumber(speakerStackFraming.cardGapPercent, 0, 3, 2.5)
+          : clampNumber(speakerStackFraming.gapPercent, 0, 3, 1.2);
+        const gap = Math.max(2, Math.round(canvasHeight * gapPercent / 100));
         const drawSpeakerPanel = (
           panelVideo,
           panelX,
           panelY,
           panelWidth,
           panelHeight,
-          framing
+          framing,
+          alternateOffset = 0
         ) => {
-          const activeVideo =
-            panelVideo?.readyState >= 2 && panelVideo?.videoWidth
-              ? panelVideo
-              : sourceVideo;
-          if (!activeVideo || activeVideo.readyState < 2 || !activeVideo.videoWidth) return;
+          const wantsAlternate = Math.abs(alternateOffset) > 0.001;
+          const targetAlternateTime = Number(programmeVideo.currentTime || 0) + alternateOffset;
+          const alternateIsCurrent = wantsAlternate && panelVideo?.readyState >= 2 &&
+            panelVideo?.videoWidth &&
+            Math.abs(Number(panelVideo.currentTime || 0) - targetAlternateTime) <= 0.36;
+          const cachedAlternate = sourceSplitAlternateFrameRef.current;
+          const cachedAlternateIsCurrent = wantsAlternate && cachedAlternate?.canvas &&
+            Math.abs(Number(cachedAlternate.sourceTime || 0) - targetAlternateTime) <= 0.5;
+          // A flattened programme's reaction inset is never a second camera.
+          // While the clean alternate catches up, hold its last decoded frame
+          // instead of flashing a black card or enlarging the reaction inset.
+          const activeVideo = wantsAlternate
+            ? (alternateIsCurrent ? panelVideo : cachedAlternateIsCurrent ? cachedAlternate.canvas : null)
+            : (panelVideo?.readyState >= 2 && panelVideo?.videoWidth ? panelVideo : sourceVideo);
+          const activeWidth = Number(activeVideo?.videoWidth || activeVideo?.width || 0);
+          const activeHeight = Number(activeVideo?.videoHeight || activeVideo?.height || 0);
+          if (!activeVideo || !activeWidth || !activeHeight) return;
+          const sourceRect = framing?.sourceRect || framing?.source_rect;
+          const sourceX = sourceRect ? clampNumber(sourceRect.x, 0, activeWidth - 2, 0) : 0;
+          const sourceY = sourceRect ? clampNumber(sourceRect.y, 0, activeHeight - 2, 0) : 0;
+          const sourceWidth = sourceRect
+            ? clampNumber(sourceRect.width ?? sourceRect.w, 2, activeWidth - sourceX, activeWidth - sourceX)
+            : activeWidth;
+          const sourceHeight = sourceRect
+            ? clampNumber(sourceRect.height ?? sourceRect.h, 2, activeHeight - sourceY, activeHeight - sourceY)
+            : activeHeight;
+          const visibleTop = sourceRect ? 0 : clampNumber(
+            framing?.source_visible_top_percent, 0, 15, 0
+          ) / 100;
+          const visibleBottom = sourceRect ? 0 : clampNumber(
+            framing?.source_visible_bottom_percent, 0, 15, 0
+          ) / 100;
+          const visibleSourceY = sourceY + sourceHeight * visibleTop;
+          const visibleSourceHeight = sourceHeight * (1 - visibleTop - visibleBottom);
           const zoom = clampNumber(framing?.zoom, 1, 7, 1.25);
-          const focusX = clampNumber(framing?.x, 0, 100, 50) / 100;
-          const focusY = clampNumber(framing?.y, 0, 100, 50) / 100;
+          const focusX = sourceRect ? 0.5 : clampNumber(framing?.x, 0, 100, 50) / 100;
+          const focusY = sourceRect ? 0.5 : clampNumber(framing?.y, 0, 100, 50) / 100;
           const coverScale =
-            Math.max(panelWidth / activeVideo.videoWidth, panelHeight / activeVideo.videoHeight) *
+            Math.max(panelWidth / sourceWidth, panelHeight / visibleSourceHeight) *
             zoom;
-          const panelDrawWidth = activeVideo.videoWidth * coverScale;
-          const panelDrawHeight = activeVideo.videoHeight * coverScale;
+          const panelDrawWidth = sourceWidth * coverScale;
+          const panelDrawHeight = visibleSourceHeight * coverScale;
           const unclampedX = panelX + panelWidth / 2 - focusX * panelDrawWidth;
           const unclampedY = panelY + panelHeight / 2 - focusY * panelDrawHeight;
           const drawX = clampNumber(
@@ -11858,33 +12442,54 @@ const ViralClipStudio = ({
           context.save();
           context.beginPath();
           const shouldRoundPanel =
-            !isDualCamShowEveryone &&
-            ["pip_2", "active_2"].includes(speakerStackLayout) &&
-            panelWidth < canvasWidth;
+            (isDualCamShowEveryone && speakerStackFraming.roundedCards !== false) ||
+            (!isDualCamShowEveryone &&
+              ["pip_2", "active_2"].includes(speakerStackLayout) &&
+              panelWidth < canvasWidth);
           if (shouldRoundPanel && typeof context.roundRect === "function") {
             context.roundRect(
               panelX,
               panelY,
               panelWidth,
               panelHeight,
-              Math.max(1, Math.min(panelWidth, panelHeight) * 0.08)
+              Math.max(
+                1,
+                Math.min(panelWidth, panelHeight) *
+                  clampNumber(speakerStackFraming.cardRadiusPercent, 2, 18, 8) / 100
+              )
             );
           } else {
             context.rect(panelX, panelY, panelWidth, panelHeight);
           }
           context.clip();
-          context.drawImage(
-            activeVideo,
-            drawX,
-            drawY,
-            panelDrawWidth,
-            panelDrawHeight
-          );
+          if (sourceRect || visibleTop || visibleBottom) {
+            context.drawImage(
+              activeVideo,
+              sourceX,
+              visibleSourceY,
+              sourceWidth,
+              visibleSourceHeight,
+              drawX,
+              drawY,
+              panelDrawWidth,
+              panelDrawHeight
+            );
+          } else {
+            context.drawImage(activeVideo, drawX, drawY, panelDrawWidth, panelDrawHeight);
+          }
           context.restore();
         };
 
         if (isDualCamShowEveryone) {
-          const halfHeight = Math.max(1, (canvasHeight - gap) / 2);
+          const dividerPercent = clampNumber(
+            speakerStackFraming.dividerPercent, 35, 65, 50
+          );
+          const cardInset = speakerStackFraming.roundedCards === false
+            ? 0
+            : canvasWidth * clampNumber(speakerStackFraming.cardInsetPercent, 0, 8, 2.5) / 100;
+          const cardWidth = Math.max(1, canvasWidth - cardInset * 2);
+          const availableHeight = Math.max(2, canvasHeight - cardInset * 2 - gap);
+          const topHeight = Math.max(1, availableHeight * dividerPercent / 100);
           const topFraming = {
             ...speakerStackFraming.top,
             x: clampNumber(speakerStackFraming?.top?.x ?? 30, 0, 100, 30),
@@ -11898,26 +12503,37 @@ const ViralClipStudio = ({
             zoom: clampNumber(speakerStackFraming?.bottom?.zoom ?? 1.25, 1, 7, 1.25),
           };
           if (speakerStackFraming.trackSpeakers) {
-            if (topFraming.keyframes?.length) Object.assign(topFraming, interpolateReframeKeyframes(topFraming.keyframes, previewTimelineTime));
-            if (bottomFraming.keyframes?.length) Object.assign(bottomFraming, interpolateReframeKeyframes(bottomFraming.keyframes, previewTimelineTime));
+            if (topFraming.keyframes?.length) Object.assign(topFraming, interpolateReframeKeyframes(topFraming.keyframes, frameOutputTime));
+            if (bottomFraming.keyframes?.length) Object.assign(bottomFraming, interpolateReframeKeyframes(bottomFraming.keyframes, frameOutputTime));
           }
-          const primaryFraming =
-            activeShowEveryonePrimarySlot === "bottom" ? bottomFraming : topFraming;
-          const secondaryFraming =
-            activeShowEveryonePrimarySlot === "bottom" ? topFraming : bottomFraming;
+          const alternateVideo = sourceSplitAlternateVideoRef.current;
+          const frameSplitTopOffset = resolveSourceSplitTimeOffset(speakerStackFraming.top, frameOutputTime);
+          const frameSplitBottomOffset = resolveSourceSplitTimeOffset(speakerStackFraming.bottom, frameOutputTime);
+          const topPanel = {
+            video: Math.abs(frameSplitTopOffset) > 0.001 ? alternateVideo : sourceVideo,
+            framing: topFraming,
+            offset: frameSplitTopOffset,
+          };
+          const bottomPanel = {
+            video: Math.abs(frameSplitBottomOffset) > 0.001 ? alternateVideo : sourceVideo,
+            framing: bottomFraming,
+            offset: frameSplitBottomOffset,
+          };
+          const primaryPanel =
+            resolveSpeakerFocusSlot(speakerFocusCuts, frameOutputTime) === "bottom" ? bottomPanel : topPanel;
+          const secondaryPanel =
+            resolveSpeakerFocusSlot(speakerFocusCuts, frameOutputTime) === "bottom" ? topPanel : bottomPanel;
           // A reviewed speaker cut swaps panel order without leaving Show Everyone.
-          drawSpeakerPanel(sourceVideo, 0, 0, canvasWidth, halfHeight, primaryFraming);
+          drawSpeakerPanel(primaryPanel.video, cardInset, cardInset, cardWidth, topHeight, primaryPanel.framing, primaryPanel.offset);
           drawSpeakerPanel(
-            sourceVideo,
-            0,
-            halfHeight + gap,
-            canvasWidth,
-            Math.max(1, canvasHeight - halfHeight - gap),
-            secondaryFraming
+            secondaryPanel.video,
+            cardInset,
+            cardInset + topHeight + gap,
+            cardWidth,
+            Math.max(1, canvasHeight - cardInset * 2 - topHeight - gap),
+            secondaryPanel.framing,
+            secondaryPanel.offset
           );
-          // Divider between cameras
-          context.fillStyle = "rgba(5, 8, 14, 0.96)";
-          context.fillRect(0, halfHeight, canvasWidth, gap);
         } else {
           const cameraCount = clampNumber(speakerStackCameraCount, 2, 4, 2);
           const halfWidth = Math.max(1, (canvasWidth - gap) / 2);
@@ -11994,7 +12610,7 @@ const ViralClipStudio = ({
           };
           const reviewedFocusSlot = resolveSpeakerFocusSlot(
             speakerFocusCuts,
-            previewTimelineTime,
+            frameOutputTime,
             activeSpeakerStackSlots
           );
           const displaySlots = ["active_2", "spotlight_2"].includes(speakerStackLayout)
@@ -12029,13 +12645,43 @@ const ViralClipStudio = ({
           }
         }
       } else {
-        context.drawImage(
-          sourceVideo,
-          (canvasWidth - drawWidth) * positionX,
-          (canvasHeight - drawHeight) * positionY,
-          drawWidth,
-          drawHeight
-        );
+        const drawX = (canvasWidth - drawWidth) * positionX;
+        const drawY = (canvasHeight - drawHeight) * positionY;
+        const roundContainedFootage =
+          mainFrame.enabled &&
+          frameProgrammeFit === "contain" &&
+          drawWidth > 8 &&
+          drawHeight > 8;
+        if (roundContainedFootage) {
+          const containedRadius = Math.max(
+            2,
+            Math.min(drawWidth, drawHeight) *
+              clampNumber(mainFrame.radiusPercent, 3, 16, 8) / 100
+          );
+          context.save();
+          context.beginPath();
+          if (typeof context.roundRect === "function") {
+            context.roundRect(drawX, drawY, drawWidth, drawHeight, containedRadius);
+          } else {
+            const right = drawX + drawWidth;
+            const bottom = drawY + drawHeight;
+            context.moveTo(drawX + containedRadius, drawY);
+            context.lineTo(right - containedRadius, drawY);
+            context.quadraticCurveTo(right, drawY, right, drawY + containedRadius);
+            context.lineTo(right, bottom - containedRadius);
+            context.quadraticCurveTo(right, bottom, right - containedRadius, bottom);
+            context.lineTo(drawX + containedRadius, bottom);
+            context.quadraticCurveTo(drawX, bottom, drawX, bottom - containedRadius);
+            context.lineTo(drawX, drawY + containedRadius);
+            context.quadraticCurveTo(drawX, drawY, drawX + containedRadius, drawY);
+            context.closePath();
+          }
+          context.clip();
+          context.drawImage(sourceVideo, drawX, drawY, drawWidth, drawHeight);
+          context.restore();
+        } else {
+          context.drawImage(sourceVideo, drawX, drawY, drawWidth, drawHeight);
+        }
       }
       context.restore();
       if (precisionPreviewGrade || (finishPreviewIsLive && advancedColorCube)) {
@@ -12095,11 +12741,13 @@ const ViralClipStudio = ({
     const stackBottomVideo = speakerStackBottomVideoRef.current;
     const stackThirdVideo = speakerStackThirdVideoRef.current;
     const stackFourthVideo = speakerStackFourthVideoRef.current;
+    const sourceSplitAlternateVideo = sourceSplitAlternateVideoRef.current;
     const stackVideos = [
       stackTopVideo,
       stackBottomVideo,
       stackThirdVideo,
       stackFourthVideo,
+      sourceSplitAlternateVideo,
     ];
     stackVideos.forEach(stackVideo => {
       stackVideo?.addEventListener("loadeddata", paintProgrammeFrame);
@@ -12153,6 +12801,7 @@ const ViralClipStudio = ({
     advancedColorCube,
     finishPreviewIsLive,
     previewProgrammePosition,
+    reframeKeyframes,
     reframeAspect,
     renderedOutputUrl,
     reframeModeCuts,
@@ -12162,6 +12811,8 @@ const ViralClipStudio = ({
     speakerStackLayout,
     speakerStackPreviewIsLive,
     speakerFocusCuts,
+    sourceSplitBottomOffset,
+    sourceSplitTopOffset,
     previewTimelineTime,
     hookVisualScale,
     smartCropBackgroundScale,
@@ -12172,6 +12823,8 @@ const ViralClipStudio = ({
     mainMotionAutomation.scale,
     mainMotionAutomation.opacity,
     hookPrimaryVideoOpacity,
+    mainFrame.enabled,
+    mainFrame.radiusPercent,
   ]);
 
   useEffect(() => {
@@ -13806,6 +14459,400 @@ const ViralClipStudio = ({
       timeoutId = window.setTimeout(() => finish(""), 5000);
         });
 
+  const makeProjectMediaPreviewUrl = file => {
+    const url = URL.createObjectURL(file);
+    projectMediaObjectUrlsRef.current.add(url);
+    return url;
+  };
+
+  const releaseProjectMediaPreviewUrl = url => {
+    if (!projectMediaObjectUrlsRef.current.has(url)) return;
+    projectMediaObjectUrlsRef.current.delete(url);
+    URL.revokeObjectURL(url);
+  };
+
+  const appendProjectMediaToSequence = asset => {
+    if (!asset?.storagePath || !asset.url || !(Number(asset.duration) > 0)) {
+      setMediaImportMessage("This video needs a readable duration before it can be placed. Use Retry duration on its card.");
+      return;
+    }
+    const duration = Number(asset.duration || 0);
+    const nextClip = {
+      id: createSecureId("scene"),
+      sourceClipId: asset.id,
+      sourceMediaId: asset.id,
+      name: asset.name,
+      url: asset.url,
+      storagePath: asset.storagePath,
+      sourceStoragePath: asset.storagePath,
+      duration,
+      startRequest: 0,
+      endRequest: duration > 0 ? duration : null,
+      isLocal: false,
+    };
+    setTimeline(current => [...current, nextClip]);
+    setActiveTimelineIndex(timeline.length);
+    setComparisonMode("after");
+    setTimelineDockExpanded(true);
+    setStudioActionMessage(`“${asset.name}” added to the end of your sequence. Select it to trim or split.`);
+  };
+
+  const addProjectMediaAsBRoll = asset => {
+    if (!asset?.storagePath || !asset.url || !(Number(asset.duration) > 0)) {
+      setMediaImportMessage("This video needs a readable duration before it can be placed. Use Retry duration on its card.");
+      return;
+    }
+    const sourceDuration = Number(asset.duration || 0);
+    const currentVideoTime = Number(videoRef.current?.currentTime || 0);
+    const startTime = getPreviewTimelineTime(currentVideoTime);
+    const duration = Math.min(sourceDuration || 3, 3);
+    const overlay = {
+      ...buildVideoBRollOverlay(null, asset.url, startTime, duration, sourceDuration, asset.poster),
+      name: asset.name,
+      file: null,
+      isLocal: false,
+      sourceMediaId: asset.id,
+      storagePath: asset.storagePath,
+      sourceStoragePath: asset.storagePath,
+    };
+    setOverlays(current => [...current, overlay]);
+    setActiveOverlayId(overlay.id);
+    setStudioInspectorTab("broll");
+    setComparisonMode("after");
+    jumpToOutputTimelineTime(startTime);
+    setStudioActionMessage(`“${asset.name}” placed as B-roll at the playhead. Adjust its length on the timeline.`);
+  };
+
+  const uploadProjectMediaAsset = async (asset, { appendToSequenceOnReady = false } = {}) => {
+    if (!(asset?.file instanceof Blob)) return;
+    const uploadProjectId = activeProjectIdRef.current;
+    setProjectMedia(current => current.map(item => item.id === asset.id
+      ? { ...item, status: "uploading", progress: 0, error: "" }
+      : item));
+    try {
+      const token = await getMediaAuthToken();
+      if (!token) throw new Error("Sign in to save this video to your project.");
+      const uploaded = await uploadSourceFileViaBackend({
+        file: asset.file,
+        token,
+        getToken: getMediaAuthToken,
+        mediaType: "video",
+        fileName: asset.name,
+        purpose: "studio_project",
+        onProgress: (transferred, total) => {
+          if (activeProjectIdRef.current !== uploadProjectId) return;
+          const progress = total > 0 ? Math.min(100, Math.round((transferred / total) * 100)) : 0;
+          setProjectMedia(current => current.map(item => item.id === asset.id
+            ? { ...item, progress }
+            : item));
+        },
+      });
+      if (!uploaded?.url || !uploaded?.storagePath) {
+        throw new Error("Upload did not return a saved project source. Retry this video.");
+      }
+      if (activeProjectIdRef.current !== uploadProjectId) return;
+      const measuredDuration = appendToSequenceOnReady && !(Number(asset.duration) > 0)
+        ? await readLocalVideoDuration(asset.url)
+        : Number(asset.duration || 0);
+      const readyAsset = {
+        ...asset,
+        url: uploaded.url,
+        storagePath: uploaded.storagePath,
+        sourceStoragePath: uploaded.storagePath,
+        file: null,
+        isLocal: false,
+        duration: measuredDuration,
+        status: "ready",
+        progress: 100,
+        error: "",
+      };
+      setProjectMedia(current => current.map(item => item.id === asset.id
+        ? { ...item, ...readyAsset, duration: Number(item.duration || readyAsset.duration || 0), poster: item.poster || readyAsset.poster || "" }
+        : item));
+      if (appendToSequenceOnReady) {
+        if (measuredDuration > 0) appendProjectMediaToSequence(readyAsset);
+        else setMediaImportMessage("Combined video saved, but its duration is unreadable. Use Retry duration before adding it to your sequence.");
+      }
+      releaseProjectMediaPreviewUrl(asset.url);
+    } catch (error) {
+      if (activeProjectIdRef.current !== uploadProjectId) return;
+      setProjectMedia(current => current.map(item => item.id === asset.id
+        ? { ...item, status: "failed", progress: 0, error: error.message || "Upload failed. Retry this video." }
+        : item));
+      setMediaImportMessage(`“${asset.name}” could not be saved. Retry it from Project media.`);
+    }
+  };
+
+  const importProjectFiles = files => {
+    const selectedFiles = Array.from(files || []);
+    const validFiles = selectedFiles.filter(file =>
+      file instanceof Blob && file.size > 0 &&
+      (file.type.startsWith("video/") || /\.(mp4|mov|m4v|webm|mkv)$/i.test(file.name || ""))
+    );
+    if (!validFiles.length) {
+      setMediaImportMessage("Choose one or more nonempty video files to import.");
+      return;
+    }
+    const assets = validFiles.map(file => ({
+      id: createSecureId("project-media"),
+      name: file.name || "Untitled video",
+      url: makeProjectMediaPreviewUrl(file),
+      file,
+      isLocal: true,
+      duration: 0,
+      poster: "",
+      status: "queued",
+      progress: 0,
+      error: "",
+    }));
+    setProjectMedia(current => [...current, ...assets]);
+    setSelectedProjectMediaId(assets[0].id);
+    setProjectRailExpanded(true);
+    setMediaImportMessage(
+      `${assets.length} ${assets.length === 1 ? "video" : "videos"} added to your media library. Save completes per file; choose a ready video to place it in the edit.` +
+      (validFiles.length !== selectedFiles.length ? ` ${selectedFiles.length - validFiles.length} unsupported or empty files skipped.` : "")
+    );
+    const queue = [...assets];
+    const workers = Array.from({ length: Math.min(3, assets.length) }, async () => {
+      while (queue.length) {
+        const asset = queue.shift();
+        await Promise.all([
+          (async () => {
+            const [duration, poster] = await Promise.all([
+              readLocalVideoDuration(asset.url),
+              captureLocalVideoPoster(asset.url),
+            ]);
+            setProjectMedia(current => current.map(item => item.id === asset.id
+              ? { ...item, duration, poster }
+              : item));
+          })(),
+          uploadProjectMediaAsset(asset),
+        ]);
+      }
+    });
+    void Promise.allSettled(workers);
+  };
+
+  const handleProjectMediaImport = event => {
+    importProjectFiles(event.target.files);
+    event.target.value = "";
+  };
+
+  const probeProjectMediaDuration = async asset => {
+    if (!asset?.url) return;
+    const duration = await readLocalVideoDuration(asset.url);
+    if (duration > 0) {
+      setProjectMedia(current => current.map(item => item.id === asset.id
+        ? { ...item, duration, error: "" }
+        : item));
+      setMediaImportMessage(`Duration read for “${asset.name}”. It is ready to place in your edit.`);
+      return;
+    }
+    setMediaImportMessage(`Could not read the duration of “${asset.name}”. Check that the video plays, then retry.`);
+  };
+
+  useEffect(() => () => {
+    projectMediaObjectUrlsRef.current.forEach(url => URL.revokeObjectURL(url));
+    projectMediaObjectUrlsRef.current.clear();
+  }, []);
+
+  useEffect(() => {
+    const unseenFiles = Array.from(initialProjectFiles || []).filter(file => {
+      if (!(file instanceof Blob) || consumedInitialFilesRef.current.has(file)) return false;
+      consumedInitialFilesRef.current.add(file);
+      return true;
+    });
+    if (unseenFiles.length) importProjectFiles(unseenFiles);
+  }, [initialProjectFiles]);
+
+  useEffect(() => {
+    if (!importedCameraMaster) return;
+    const key = String(importedCameraMaster.id || importedCameraMaster.storagePath || "");
+    if (!key || consumedCameraMasterIdsRef.current.has(key)) return;
+    consumedCameraMasterIdsRef.current.add(key);
+    const file = importedCameraMaster.file instanceof Blob ? importedCameraMaster.file : null;
+    if (!file && (!importedCameraMaster.storagePath || !importedCameraMaster.url)) {
+      setMediaImportMessage("The combined camera video has no saved source. Reopen the camera workflow and retry its import.");
+      return;
+    }
+    const asset = {
+      id: key,
+      name: importedCameraMaster.name || file?.name || "Combined camera take",
+      url: file ? makeProjectMediaPreviewUrl(file) : importedCameraMaster.url,
+      file,
+      isLocal: !!file,
+      storagePath: importedCameraMaster.storagePath || "",
+      sourceStoragePath: importedCameraMaster.storagePath || "",
+      duration: Number(importedCameraMaster.duration || 0),
+      poster: "",
+      status: file ? "queued" : "ready",
+      progress: file ? 0 : 100,
+      error: "",
+    };
+    setProjectMedia(current => current.some(item => item.id === key) ? current : [...current, asset]);
+    setProjectRailExpanded(true);
+    setSelectedProjectMediaId(key);
+    if (file) {
+      void uploadProjectMediaAsset(asset, { appendToSequenceOnReady: true });
+    } else {
+      if (asset.duration > 0) appendProjectMediaToSequence(asset);
+      else {
+        void readLocalVideoDuration(asset.url).then(duration => {
+          if (!(duration > 0)) {
+            setMediaImportMessage("Combined video saved, but its duration is unreadable. Use Retry duration before adding it to your sequence.");
+            return;
+          }
+          const readyAsset = { ...asset, duration };
+          setProjectMedia(current => current.map(item => item.id === asset.id ? readyAsset : item));
+          appendProjectMediaToSequence(readyAsset);
+        });
+      }
+    }
+  }, [importedCameraMaster]);
+
+  const toggleCameraMediaSelection = assetId => {
+    setSelectedCameraMediaIds(current => {
+      if (current.includes(assetId)) return current.filter(id => id !== assetId);
+      if (current.length >= MAX_STUDIO_ANGLES) {
+        setMediaImportMessage(`Choose up to ${MAX_STUDIO_ANGLES} camera angles for one take.`);
+        return current;
+      }
+      return [...current, assetId];
+    });
+  };
+
+  const createSelectedFilmTake = () => {
+    const assets = selectedCameraMediaIds
+      .map(id => projectMedia.find(item => item.id === id))
+      .filter(Boolean);
+    try {
+      const group = createStudioAngleGroup({
+        id: createSecureId("camera-take"),
+        name: angleGroupName || `Camera take ${angleGroups.length + 1}`,
+        assets,
+      });
+      setAngleGroups(current => [...current, group]);
+      setActiveAngleGroupId(group.id);
+      setSelectedCameraMediaIds([]);
+      setAngleGroupName("");
+      setMediaImportMessage(`“${group.name}” is ready. Choose shot times and a camera below.`);
+    } catch (error) {
+      setMediaImportMessage(error.message);
+    }
+  };
+
+  const updateFilmTake = (groupId, updater) => {
+    setAngleGroups(current => current.map(group => {
+      if (group.id !== groupId) return group;
+      try {
+        return updater(group);
+      } catch (error) {
+        setMediaImportMessage(error.message);
+        return group;
+      }
+    }));
+  };
+
+  const appendFilmAngleShot = (group, asset) => {
+    try {
+      const shot = createStudioAngleShot({
+        group,
+        asset,
+        sharedStart: group.sharedStart,
+        sharedEnd: group.sharedEnd,
+        clipId: createSecureId("angle-shot"),
+      });
+      setTimeline(current => [...current, shot]);
+      setActiveTimelineIndex(timeline.length);
+      setTimelineDockExpanded(true);
+      setComparisonMode("after");
+      setMediaImportMessage(`Added ${asset.name} from ${Number(group.sharedStart).toFixed(1)}s–${Number(group.sharedEnd).toFixed(1)}s. Set the next shot range to switch cameras.`);
+    } catch (error) {
+      setMediaImportMessage(error.message);
+    }
+  };
+
+  const pauseFilmTakePreview = () => {
+    filmAnglePreviewRefsRef.current.forEach(video => video?.pause?.());
+  };
+
+  const playFilmTakePreview = async group => {
+    pauseFilmTakePreview();
+    try {
+      const cameras = group.angles.map((angle, index) => ({
+        angle,
+        index,
+        video: filmAnglePreviewRefsRef.current.get(angle.assetId),
+      }));
+      if (cameras.some(camera => !camera.video)) throw new Error("Camera previews are still opening. Try Play together again.");
+      await Promise.all(cameras.map(({ video }) => video.readyState >= 1
+        ? Promise.resolve()
+        : new Promise((resolve, reject) => {
+            const timer = window.setTimeout(() => {
+              video.removeEventListener("loadedmetadata", onReady);
+              video.removeEventListener("error", onError);
+              reject(new Error("One camera preview could not load. Refresh its link and retry."));
+            }, 5000);
+            const onReady = () => {
+              window.clearTimeout(timer);
+              video.removeEventListener("error", onError);
+              resolve();
+            };
+            const onError = () => {
+              window.clearTimeout(timer);
+              video.removeEventListener("loadedmetadata", onReady);
+              reject(new Error("One camera preview could not load. Refresh its link and retry."));
+            };
+            video.addEventListener("loadedmetadata", onReady, { once: true });
+            video.addEventListener("error", onError, { once: true });
+            video.load?.();
+          })));
+      cameras.forEach(({ angle, index, video }) => {
+        video.muted = index !== 0;
+        video.currentTime = Number(angle.offsetSeconds || 0) + Number(group.sharedStart || 0);
+      });
+      await Promise.all(cameras.map(({ video }) => safePlayMediaElement(video)));
+    } catch (error) {
+      pauseFilmTakePreview();
+      setMediaImportMessage(error.message || "Camera previews could not start together.");
+    }
+  };
+
+  const syncFilmTakePreview = group => {
+    const master = group.angles[0];
+    const masterVideo = filmAnglePreviewRefsRef.current.get(master?.assetId);
+    if (!masterVideo || masterVideo.paused) return;
+    const sharedTime = Math.max(0, masterVideo.currentTime - Number(master.offsetSeconds || 0));
+    group.angles.slice(1).forEach(angle => {
+      const video = filmAnglePreviewRefsRef.current.get(angle.assetId);
+      if (!video || video.paused) return;
+      const target = sharedTime + Number(angle.offsetSeconds || 0);
+      if (Math.abs(video.currentTime - target) > 0.2) video.currentTime = target;
+    });
+  };
+
+  useEffect(() => () => pauseFilmTakePreview(), [activeAngleGroupId]);
+
+  const openPodcastCamCombiner = async () => {
+    const assets = selectedCameraMediaIds
+      .map(id => projectMedia.find(item => item.id === id))
+      .filter(item => item?.status === "ready" && item.storagePath);
+    if (assets.length < 2 || assets.length > 3 || !onOpenCameraAngles) return;
+    setCameraGroupStatus("opening");
+    try {
+      const refreshed = await Promise.all(assets.map(async asset => {
+        const url = await refreshSourceUrlByPath(asset.storagePath);
+        if (!url) throw new Error(`Could not reopen “${asset.name}”. Use Refresh link and retry.`);
+        return { ...asset, url };
+      }));
+      onOpenCameraAngles({ assets: refreshed });
+      setCameraGroupStatus("idle");
+    } catch (error) {
+      setCameraGroupStatus("idle");
+      setMediaImportMessage(error.message || "Podcast cameras could not be opened. Retry from Project media.");
+    }
+  };
+
   const handleBRollVideoUpload = async event => {
     const input = event.target;
     const files = Array.from(event.target.files || []);
@@ -14821,6 +15868,21 @@ const ViralClipStudio = ({
         ? 1
         : 0;
 
+  const normalizedMediaBinSearch = normalizePlainText(mediaBinSearch).toLowerCase();
+  const matchingProjectMedia = projectMedia.filter(item =>
+    normalizePlainText(item.name || "").toLowerCase().includes(normalizedMediaBinSearch)
+  );
+  const visibleProjectMedia = matchingProjectMedia.slice(0, mediaBinVisibleCount);
+  const selectedProjectMedia = projectMedia.find(item => item.id === selectedProjectMediaId) || null;
+  const pendingProjectMediaCount = projectMedia.filter(item =>
+    item.status === "queued" || item.status === "uploading"
+  ).length;
+  const activeFilmTake = angleGroups.find(group => group.id === activeAngleGroupId) || null;
+  const activeFilmTakeAssets = activeFilmTake?.angles
+    .map(angle => projectMedia.find(item => item.id === angle.assetId))
+    .filter(Boolean) || [];
+  const activeFilmTakeRange = getStudioAngleSharedRange(activeFilmTake, activeFilmTakeAssets);
+
   return createPortal(
     <div className="viral-studio-overlay ap-dashboard-redesign">
       <StudioVoiceoverPreview takes={voiceovers} videoRef={videoRef}
@@ -14858,6 +15920,7 @@ const ViralClipStudio = ({
               onCancel();
           }}
         />
+        {renderRecoveryPanel}
 
         {commandPaletteOpen ? (
           <div className="studio-command-backdrop" onMouseDown={() => setCommandPaletteOpen(false)}>
@@ -14882,7 +15945,7 @@ const ViralClipStudio = ({
                 </button>
               </div>
               <div className="studio-command-results">
-                {[
+                  {[
                   ...CREATIVE_STUDIO_TOOLS.map(tool => ({
                     id: tool.id,
                     label: tool.label,
@@ -15097,7 +16160,7 @@ const ViralClipStudio = ({
                   >
                     <span>{String(index + 1).padStart(2, "0")}</span>
                     <div>
-                      <strong>{`Source clip ${index + 1}`}</strong>
+                      <strong>{clip.name || `Source clip ${index + 1}`}</strong>
                       <small>
                         {clip.name
                           ? `${clip.name} · ${
@@ -15170,30 +16233,266 @@ const ViralClipStudio = ({
               <div className="studio-project-list__heading">
                 <div>
                   <span>Media</span>
-                  <strong>Project assets</strong>
+                  <strong>Project media</strong>
                 </div>
-                <i>
-                  {timeline.length + overlays.length + voiceovers.length + (musicTrack ? 1 : 0)}
-                </i>
+                <i>{projectMedia.length}</i>
               </div>
+              <p className="studio-media-bin__help">
+                Import all your scenes first. Preview each take, then choose where it goes. Camera angles are grouped separately.
+              </p>
+              <input
+                ref={projectMediaInputRef}
+                type="file"
+                accept="video/*,.mp4,.mov,.m4v,.webm,.mkv"
+                multiple
+                data-testid="project-media-import-input"
+                aria-label="Choose scene videos"
+                style={{ display: "none" }}
+                onChange={handleProjectMediaImport}
+              />
+              <button
+                type="button"
+                className="studio-media-bin__import"
+                onClick={() => projectMediaInputRef.current?.click()}
+              >
+                ＋ Import scenes
+              </button>
+              {pendingProjectMediaCount > 0 ? (
+                <small className="studio-media-bin__pending" role="status">
+                  Saving {pendingProjectMediaCount} {pendingProjectMediaCount === 1 ? "video" : "videos"}… You can keep editing.
+                </small>
+              ) : null}
+              {mediaImportMessage ? <p className="studio-media-bin__notice" role="status">{mediaImportMessage}</p> : null}
               <input
                 type="search"
                 aria-label="Search project media"
-                placeholder="Search footage, audio, graphics…"
+                placeholder="Find a scene by filename…"
                 value={mediaBinSearch}
-                onChange={event => setMediaBinSearch(event.target.value)}
+                onChange={event => {
+                  setMediaBinSearch(event.target.value);
+                  setMediaBinVisibleCount(12);
+                }}
               />
-              <div className="studio-media-bin__actions">
-                <button type="button" onClick={() => brollVideoInputRef.current?.click()}>
-                  ＋ Video
+              {selectedProjectMedia?.url ? (
+                <div className="studio-media-bin__preview" aria-label="Selected project video preview">
+                  <video
+                    key={`${selectedProjectMedia.id}-${selectedProjectMedia.url}`}
+                    src={getSafeMediaSource(selectedProjectMedia.url) || undefined}
+                    poster={selectedProjectMedia.poster || undefined}
+                    controls
+                    playsInline
+                    preload="metadata"
+                    onError={() => {
+                      const path = selectedProjectMedia.storagePath;
+                      if (path && !attemptedSourceRefreshRef.current.has(path)) {
+                        attemptedSourceRefreshRef.current.add(path);
+                        void refreshSourceUrlByPath(path);
+                      }
+                    }}
+                  />
+                  <strong title={selectedProjectMedia.name}>{selectedProjectMedia.name}</strong>
+                  <small>Preview only · use the buttons below to place this video in your edit.</small>
+                </div>
+              ) : null}
+              <div className="studio-media-bin__library" data-testid="project-media-library">
+                {visibleProjectMedia.map(item => {
+                  const ready = item.status === "ready" && !!item.storagePath && Number(item.duration) > 0;
+                  const selectedAsCamera = selectedCameraMediaIds.includes(item.id);
+                  return (
+                    <article key={item.id} className={`studio-media-card is-${item.status || "existing"}`}>
+                      <button
+                        type="button"
+                        className="studio-media-card__thumb"
+                        aria-label={`Preview ${item.name}`}
+                        aria-pressed={selectedProjectMediaId === item.id}
+                        onClick={() => setSelectedProjectMediaId(item.id)}
+                      >
+                        {item.poster ? <img src={item.poster} alt="" /> : <span aria-hidden="true">▶</span>}
+                      </button>
+                      <div className="studio-media-card__body">
+                        <strong title={item.name}>{item.name}</strong>
+                        <small>
+                          {item.duration > 0 ? `${Number(item.duration).toFixed(1)}s` : "Duration loading"}
+                          {item.isPrimary ? " · Original" : ""}
+                        </small>
+                        <small className={`studio-media-card__status is-${item.status || "existing"}`}>
+                          {item.status === "ready" ? "Saved · ready to edit"
+                            : item.status === "uploading" ? `Saving ${Number(item.progress || 0)}%`
+                              : item.status === "queued" ? "Waiting to save"
+                                : item.status === "failed" ? "Save failed"
+                                  : item.status === "needs_upload" ? "Needs upload"
+                                    : item.status === "unavailable" ? "Link needs refresh"
+                                      : "In current edit"}
+                        </small>
+                        {item.error ? <small className="studio-media-card__error">{item.error}</small> : null}
+                      </div>
+                      <div className="studio-media-card__actions">
+                        <button type="button" onClick={() => setSelectedProjectMediaId(item.id)}>Preview</button>
+                        <button type="button" disabled={!ready} onClick={() => appendProjectMediaToSequence(item)}>
+                          Add to sequence
+                        </button>
+                        <button type="button" disabled={!ready} onClick={() => addProjectMediaAsBRoll(item)}>
+                          Add as B-roll
+                        </button>
+                        <button
+                          type="button"
+                          disabled={!ready}
+                          aria-pressed={selectedAsCamera}
+                          onClick={() => toggleCameraMediaSelection(item.id)}
+                        >
+                          {selectedAsCamera ? "✓ In camera take" : "Select for camera take"}
+                        </button>
+                        {(item.status === "failed" || item.status === "needs_upload") && item.file instanceof Blob ? (
+                          <button type="button" onClick={() => void uploadProjectMediaAsset(item)}>Retry upload</button>
+                        ) : null}
+                        {item.status === "unavailable" && item.storagePath ? (
+                          <button type="button" onClick={() => void refreshSourceUrlByPath(item.storagePath)}>Refresh link</button>
+                        ) : null}
+                        {item.status === "ready" && !(Number(item.duration) > 0) ? (
+                          <button type="button" onClick={() => void probeProjectMediaDuration(item)}>Retry duration</button>
+                        ) : null}
+                      </div>
+                    </article>
+                  );
+                })}
+                {!matchingProjectMedia.length ? (
+                  <p className="studio-media-bin__empty">No videos match that filename.</p>
+                ) : null}
+              </div>
+              {matchingProjectMedia.length > mediaBinVisibleCount ? (
+                <button
+                  type="button"
+                  className="studio-media-bin__more"
+                  onClick={() => setMediaBinVisibleCount(count => count + 12)}
+                >
+                  Show more videos ({matchingProjectMedia.length - mediaBinVisibleCount} left)
                 </button>
+              ) : null}
+              <section className="studio-media-bin__camera" aria-label="Film camera takes">
+                <strong>Camera takes for your movie</strong>
+                <small>Choose 2–{MAX_STUDIO_ANGLES} videos of the same moment. Set where each starts, then choose each shot yourself. Studio will keep the cuts you place in the sequence.</small>
+                <label>
+                  Take name
+                  <input
+                    type="text"
+                    value={angleGroupName}
+                    placeholder={`Camera take ${angleGroups.length + 1}`}
+                    onChange={event => setAngleGroupName(event.target.value)}
+                  />
+                </label>
+                <button
+                  type="button"
+                  disabled={selectedCameraMediaIds.length < 2}
+                  onClick={createSelectedFilmTake}
+                >
+                  Create camera take ({selectedCameraMediaIds.length})
+                </button>
+                {onOpenCameraAngles ? (
+                  <button
+                    type="button"
+                    disabled={selectedCameraMediaIds.length < 2 || selectedCameraMediaIds.length > 3 || cameraGroupStatus === "opening"}
+                    onClick={() => void openPodcastCamCombiner()}
+                  >
+                    {cameraGroupStatus === "opening" ? "Opening podcast editor…" : "Open Podcast Cam Combiner for automatic podcast cuts"}
+                  </button>
+                ) : null}
+              </section>
+              {angleGroups.length ? (
+                <section className="studio-angle-groups" aria-label="Saved film camera takes">
+                  <strong>Film camera takes</strong>
+                  <div className="studio-angle-groups__tabs">
+                    {angleGroups.map(group => (
+                      <button
+                        key={group.id}
+                        type="button"
+                        aria-pressed={activeAngleGroupId === group.id}
+                        onClick={() => setActiveAngleGroupId(group.id)}
+                      >
+                        {group.name}
+                      </button>
+                    ))}
+                  </div>
+                  {activeFilmTake ? (
+                    <div className="studio-angle-groups__editor">
+                      <p>Pick a shared shot range. Each camera uses its own start offset, so the chosen moment stays aligned.</p>
+                      <button type="button" className="studio-angle-groups__remove" onClick={() => {
+                        setAngleGroups(current => current.filter(group => group.id !== activeFilmTake.id));
+                        setActiveAngleGroupId(angleGroups.find(group => group.id !== activeFilmTake.id)?.id || null);
+                        setMediaImportMessage("Camera take grouping removed. Shots already in your sequence stay editable.");
+                      }}>Remove this take grouping</button>
+                      <div className="studio-angle-groups__range">
+                        <label>Shot starts at (seconds)
+                          <input type="number" min="0" max={activeFilmTakeRange.end} step="0.1"
+                            value={activeFilmTake.sharedStart}
+                            onChange={event => updateFilmTake(activeFilmTake.id, group => ({
+                              ...group,
+                              sharedStart: clampNumber(event.target.value, 0, getStudioAngleSharedRange(group, projectMedia).end, 0),
+                            }))} />
+                        </label>
+                        <label>Shot ends at (seconds)
+                          <input type="number" min="0" max={activeFilmTakeRange.end} step="0.1"
+                            value={activeFilmTake.sharedEnd}
+                            onChange={event => updateFilmTake(activeFilmTake.id, group => ({
+                              ...group,
+                              sharedEnd: clampNumber(event.target.value, 0, getStudioAngleSharedRange(group, projectMedia).end, 0),
+                            }))} />
+                        </label>
+                      </div>
+                      <small>Shared footage available: 0–{activeFilmTakeRange.end.toFixed(1)} seconds</small>
+                      <div className="studio-angle-groups__playback">
+                        <button type="button" onClick={() => void playFilmTakePreview(activeFilmTake)}>
+                          ▶ Play all angles together
+                        </button>
+                        <button type="button" onClick={pauseFilmTakePreview}>Pause all</button>
+                      </div>
+                      <div className="studio-angle-groups__angles">
+                        {activeFilmTake.angles.map((angle, index) => {
+                          const asset = projectMedia.find(item => item.id === angle.assetId);
+                          if (!asset) return null;
+                          return (
+                            <article key={angle.assetId}>
+                              <strong>Camera {index + 1}: {asset.name}</strong>
+                              <video
+                                ref={video => {
+                                  if (video) filmAnglePreviewRefsRef.current.set(asset.id, video);
+                                  else filmAnglePreviewRefsRef.current.delete(asset.id);
+                                }}
+                                src={getSafeMediaSource(asset.url) || undefined}
+                                controls
+                                playsInline
+                                preload="metadata"
+                                poster={asset.poster || undefined}
+                                onTimeUpdate={index === 0 ? () => syncFilmTakePreview(activeFilmTake) : undefined}
+                              />
+                              <label>Skip from beginning (seconds)
+                                <input type="number" min="0" max={Math.max(0, Number(asset.duration || 0) - 0.1)} step="0.1"
+                                  value={angle.offsetSeconds}
+                                  onChange={event => updateFilmTake(activeFilmTake.id, group =>
+                                    setStudioAngleOffset({ group, assetId: asset.id, offsetSeconds: event.target.value, assets: projectMedia }))} />
+                              </label>
+                              <button type="button"
+                                disabled={asset.status !== "ready" || !(Number(activeFilmTake.sharedEnd) > Number(activeFilmTake.sharedStart)) || Number(activeFilmTake.sharedEnd) > activeFilmTakeRange.end}
+                                onClick={() => appendFilmAngleShot(activeFilmTake, asset)}>
+                                Use this angle for this shot
+                              </button>
+                            </article>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ) : null}
+                </section>
+              ) : null}
+              <details className="studio-media-bin__placed">
+                <summary>Items already in this edit</summary>
+                <div className="studio-media-bin__actions">
                 <button type="button" onClick={() => imageInputRef.current?.click()}>
                   ＋ Image
                 </button>
                 <button type="button" onClick={() => quickMusicFileInputRef.current?.click()}>
                   ＋ Audio
                 </button>
-              </div>
+                </div>
               <div className="studio-media-bin__items">
                 {[
                   ...timeline.map((item, index) => ({
@@ -15248,6 +16547,7 @@ const ViralClipStudio = ({
                     </button>
                   ))}
               </div>
+              </details>
               <details className="studio-proxy-settings">
                 <summary>Optimized media / proxies</summary>
                 <label className="inspector-check-row">
@@ -15345,10 +16645,9 @@ const ViralClipStudio = ({
                       className={comparisonMode === mode ? "is-active" : ""}
                       onClick={() => {
                         setComparisonMode(mode);
-                        focusComparisonPreview(studioInspectorTab, false);
                         setStudioActionMessage(
                           mode === "split"
-                            ? "Before and After are synchronized at the same frame."
+                            ? "Before and After stay synchronized while playback continues."
                             : `${mode === "before" ? "Untouched source" : "Edited result"} preview is active.`
                         );
                       }}
@@ -15391,7 +16690,7 @@ const ViralClipStudio = ({
                     type="button"
                     className={`preview-dock-toggle-btn ${previewDockSide === "side" ? "is-side" : "is-center"}`}
                     aria-pressed={previewDockSide === "side"}
-                    data-testid="preview-dock-toggle-btn"
+                      data-testid="preview-dock-toggle-btn"
                     onClick={() =>
                       setPreviewDockSide(current => (current === "side" ? "center" : "side"))
                     }
@@ -15407,6 +16706,7 @@ const ViralClipStudio = ({
                     type="button"
                     className={projectRailExpanded ? "is-active" : ""}
                     aria-pressed={projectRailExpanded}
+                    data-testid="preview-media-toggle"
                     onClick={() => setProjectRailExpanded(current => !current)}
                   >
                     {projectRailExpanded ? "Hide media" : "Show media"}
@@ -15439,6 +16739,7 @@ const ViralClipStudio = ({
                         type="button"
                         className={effectiveVideoFit === "contain" ? "is-active" : ""}
                         aria-pressed={effectiveVideoFit === "contain"}
+                        data-testid="preview-fit-full"
                         onClick={() => setPreviewFillMode("contain")}
                         title="Show the entire source frame"
                       >
@@ -15448,6 +16749,7 @@ const ViralClipStudio = ({
                         type="button"
                         className={effectiveVideoFit === "cover" ? "is-active" : ""}
                         aria-pressed={effectiveVideoFit === "cover"}
+                        data-testid="preview-fill-canvas"
                         onClick={() => setPreviewFillMode("cover")}
                         title="Fill the vertical canvas without side gaps"
                       >
@@ -15455,20 +16757,15 @@ const ViralClipStudio = ({
                       </button>
                     </>
                   )}
-                  <button
-                    type="button"
+                  <span
                     data-testid="main-footage-frame-toggle"
-                    className={mainFrame.enabled ? "is-active" : ""}
-                    aria-pressed={mainFrame.enabled}
-                    onClick={() => {
-                      setMainFrame(current => ({ ...current, enabled: !current.enabled,
-                        radiusPercent: Number(current.radiusPercent) > 0 ? current.radiusPercent : 6 }));
-                      setComparisonMode("after");
-                    }}
-                    title="Round the complete source footage in preview and export"
+                    className="preview-frame-lock"
+                    role="status"
+                    data-rounded-locked="true"
+                    title="Rounded framing stays on for every After view and final export"
                   >
-                    Rounded footage
-                  </button>
+                    <span aria-hidden="true">🔒</span> Rounded frame locked
+                  </span>
                   <button
                     type="button"
                     data-testid="preview-fullscreen-button"
@@ -15482,6 +16779,7 @@ const ViralClipStudio = ({
                     type="button"
                     className={showSafeZones ? "is-active" : ""}
                     aria-pressed={showSafeZones}
+                    data-testid="preview-safe-zones"
                     onClick={() => setShowSafeZones(current => !current)}
                   >
                     Safe zones
@@ -15490,17 +16788,19 @@ const ViralClipStudio = ({
                     type="button"
                     className={showCompositionGrid ? "is-active" : ""}
                     aria-pressed={showCompositionGrid}
+                    data-testid="preview-grid"
                     onClick={() => setShowCompositionGrid(current => !current)}
                   >
                     Grid
                   </button>
-                  <button type="button" onClick={() => setCommandPaletteOpen(true)}>
+                  <button type="button" data-testid="preview-tools" onClick={() => setCommandPaletteOpen(true)}>
                     ⌘K Tools
                   </button>
                   <button
                     type="button"
                     className={timelineDockExpanded ? "is-active" : ""}
                     aria-pressed={timelineDockExpanded}
+                    data-testid="preview-timeline-toggle"
                     onClick={() => setTimelineDockExpanded(current => !current)}
                   >
                     {timelineDockExpanded ? "Hide timeline" : "Show timeline"}
@@ -15585,10 +16885,20 @@ const ViralClipStudio = ({
                     className={`phone-frame ${smartCrop ? reframeAspectClass : ""} ${isPreviewFullscreen ? "preview-expanded" : ""} ${hookFocusMode ? "hook-focus-enabled" : ""} ${creativePreviewClass} ${renderedOutputUrl ? "has-rendered-output" : ""}`}
                     style={{
                       "--main-frame-inset": mainFrame.enabled ? `${mainFrame.insetPercent}%` : "0%",
+                      "--main-frame-inset-x": mainFrame.enabled ? `${mainFrameInsetXPercent}%` : "0%",
+                      "--main-frame-inset-y": mainFrame.enabled ? `${mainFrameInsetYPercent}%` : "0%",
                       "--main-frame-radius": mainFrame.enabled
                         ? `${mainFrame.radiusPercent}%`
                         : "0px",
-                      borderRadius: mainFrame.enabled ? `${mainFrame.radiusPercent}%` : "0px",
+                      "--main-frame-radius-x": mainFrame.enabled
+                        ? `${mainFrameRadiusXPercent}%`
+                        : "0px",
+                      "--main-frame-radius-y": mainFrame.enabled
+                        ? `${mainFrameRadiusYPercent}%`
+                        : "0px",
+                      borderRadius: mainFrame.enabled
+                        ? `${mainFrameRadiusXPercent}% / ${mainFrameRadiusYPercent}%`
+                        : "0px",
                       backgroundColor: "#000",
                     }}
                     onClick={handlePreviewFrameClick}
@@ -15611,7 +16921,13 @@ const ViralClipStudio = ({
                       onLoadStart={() => setIsAfterPreviewReady(false)}
                       onLoadedData={() => setIsAfterPreviewReady(true)}
                       onCanPlay={() => setIsAfterPreviewReady(true)}
-                      onSeeking={() => setIsAfterPreviewReady(false)}
+                      onError={() => {
+                        const path = currentTimelineClip?.sourceStoragePath || currentTimelineClip?.storagePath;
+                        if (path && !attemptedSourceRefreshRef.current.has(path)) {
+                          attemptedSourceRefreshRef.current.add(path);
+                          void refreshSourceUrlByPath(path);
+                        }
+                      }}
                       onSeeked={confirmAfterPreviewFrame}
                       style={{
                         display: "none",
@@ -15691,6 +17007,17 @@ const ViralClipStudio = ({
                       data-testid="speaker-stack-fourth-video"
                       style={{ display: "none" }}
                     />
+                    <SafeVideo
+                      ref={sourceSplitAlternateVideoRef}
+                      src={getSafeMediaSource(currentTimelineClip?.url || videoUrl)}
+                      muted
+                      playsInline
+                      preload="auto"
+                      tabIndex={-1}
+                      aria-hidden="true"
+                      data-testid="source-split-alternate-video"
+                      style={{ display: "none" }}
+                    />
                     <canvas
                       ref={afterCanvasRef}
                       data-testid="studio-program-canvas"
@@ -15700,17 +17027,45 @@ const ViralClipStudio = ({
                       )}`}
                       aria-label="Edited programme monitor"
                       style={{
+                        position: "absolute",
+                        top:
+                          renderedOutputUrl || !mainFrame.enabled
+                            ? "0"
+                            : `${mainFrameInsetYPercent}%`,
+                        right:
+                          renderedOutputUrl || !mainFrame.enabled
+                            ? activeSideBySideOverlay
+                              ? "50%"
+                              : "0"
+                            : activeSideBySideOverlay
+                              ? "50%"
+                              : `${mainFrameInsetXPercent}%`,
+                        bottom:
+                          renderedOutputUrl || !mainFrame.enabled
+                            ? "0"
+                            : `${mainFrameInsetYPercent}%`,
+                        left:
+                          renderedOutputUrl || !mainFrame.enabled
+                            ? "0"
+                            : `${mainFrameInsetXPercent}%`,
                         width: renderedOutputUrl
                           ? "100%"
                           : activeSideBySideOverlay
-                            ? "50%"
-                            : "100%",
-                        height: "100%",
+                            ? mainFrame.enabled
+                              ? `calc(50% - ${mainFrameInsetXPercent}%)`
+                              : "50%"
+                            : mainFrame.enabled
+                              ? `calc(100% - ${mainFrameInsetXPercent * 2}%)`
+                              : "100%",
+                        height:
+                          renderedOutputUrl || !mainFrame.enabled
+                            ? "100%"
+                            : `calc(100% - ${mainFrameInsetYPercent * 2}%)`,
                         background: "#000",
                         borderRadius: renderedOutputUrl
                           ? "inherit"
                           : mainFrame.enabled
-                            ? `${mainFrame.radiusPercent}%`
+                            ? `${mainFrameRadiusXPercent}% / ${mainFrameRadiusYPercent}%`
                             : "0",
                       }}
                     />
@@ -19337,13 +20692,8 @@ const ViralClipStudio = ({
                   {effectiveSmartCropMode === "center" && reframeAspect !== "16:9" ? (
                     <div className="speaker-stack-editor" data-testid="source-split-editor">
                       <strong>Show Everyone · split framing</strong>
-                      <small>Position each crop over its speaker. These are two views of your existing video, not separate cameras.</small>
+                      <small>Position each crop over a real full-size speaker view. Small reaction windows are never enlarged into split panels.</small>
                       <div className="multicam-layout-grid" aria-label="Show Everyone source layout">
-                        <button type="button" onClick={() => setSpeakerStackFraming(current => ({
-                          ...current, trackSpeakers: false,
-                          top: { ...SOURCE_SPLIT_PROGRAMME_FRAMING.top, keyframes: [] },
-                          bottom: { ...SOURCE_SPLIT_PROGRAMME_FRAMING.bottom, keyframes: [] },
-                        }))}>Finished programme</button>
                         <button type="button" onClick={() => setSpeakerStackFraming(current => ({
                           ...current, trackSpeakers: false,
                           top: { ...SOURCE_SPLIT_SIDE_BY_SIDE_FRAMING.top, keyframes: [] },
@@ -19429,6 +20779,20 @@ const ViralClipStudio = ({
                           setSafeFaceFraming(false);
                           setVideoFit("cover");
                         }} />
+                    </label>
+                    <label className="inspector-field">
+                      <span>Picture fill for this camera shot <b>{Number(
+                        [...normalizeReframeModeCuts(reframeModeCuts)].reverse().find(
+                          cut => cut.time <= previewTimelineTime + 0.001 && cut.mode === "speaker_track"
+                        )?.zoom || 1
+                      ).toFixed(2)}×</b></span>
+                      <input type="range" min="1" max="1.5" step="0.01"
+                        aria-label="Picture fill for this camera shot"
+                        value={Number([...normalizeReframeModeCuts(reframeModeCuts)].reverse().find(
+                          cut => cut.time <= previewTimelineTime + 0.001 && cut.mode === "speaker_track"
+                        )?.zoom || 1)}
+                        onChange={event => setPictureFillForCurrentShot(Number(event.target.value))} />
+                      <small>Use this to remove black bars inside the rounded frame. The value stays on the Director timeline until the next camera cut.</small>
                     </label>
                     <div className="reframe-corrections-heading">
                       <div>
@@ -20853,9 +22217,10 @@ const ViralClipStudio = ({
                     onBeatSnapChange={setBeatSnapEnabled}
                     mainFrame={mainFrame}
                     onUpdateMainFrame={(field, value) => {
-                      setMainFrame(current => ({ ...current, [field]: value,
-                        ...(field === "enabled" && value && !(Number(current.radiusPercent) > 0)
-                          ? { radiusPercent: 6 } : {}) }));
+                      setMainFrame(current => enforceRoundedMainFrame({
+                        ...current,
+                        ...(field === "enabled" ? {} : { [field]: value }),
+                      }));
                       setComparisonMode("after");
                       setStudioActionMessage(
                         "Main footage frame updated in preview and final export."

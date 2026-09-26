@@ -31,7 +31,20 @@ export const rippleTimedItems = (items, from, to, createId) => {
   });
 };
 
-export const rippleTimelineKeys = (keys, from, to) =>
-  keys
+export const rippleTimelineKeys = (keys, from, to, { preserveRightState = false } = {}) => {
+  if (!(to > from)) return keys;
+  const retained = keys
     .filter(key => Number(key.time) < from || Number(key.time) >= to)
     .map(key => (Number(key.time) >= to ? { ...key, time: Number(key.time) - (to - from) } : key));
+  if (!preserveRightState || keys.some(key => Number(key.time) === to)) {
+    return retained;
+  }
+  // A camera direction chosen inside the deleted section can still be live
+  // at its right edge. Start the joined shot with that direction immediately.
+  const lastRemoved = keys
+    .filter(key => Number(key.time) >= from && Number(key.time) < to)
+    .sort((left, right) => Number(right.time) - Number(left.time))[0];
+  return lastRemoved
+    ? [...retained, { ...lastRemoved, time: from, cut: true }].sort((left, right) => Number(left.time) - Number(right.time))
+    : retained;
+};

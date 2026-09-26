@@ -1550,7 +1550,7 @@ test("runs the production Viral Clip Studio feature workflow with real playable 
   );
   await expect(page.getByTestId("studio-program-canvas")).toHaveCSS("border-radius", "8%");
   await expect(page.getByTestId("main-footage-frame-toggle")).toHaveAttribute(
-    "aria-pressed",
+    "data-rounded-locked",
     "true"
   );
   await setTimelineExpanded(false);
@@ -2454,7 +2454,7 @@ test("follows existing camera cuts using real full-minute analysis in the progra
     expect(geometry.ratio).toBeCloseTo(9/16, 2);
     expect(geometry.bottom).toBeLessThan(geometry.timeline);
     expect(geometry.corners.every(radius => radius > 0)).toBe(true);
-    await expect(page.getByTestId("main-footage-frame-toggle")).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByTestId("main-footage-frame-toggle")).toHaveAttribute("data-rounded-locked", "true");
     await page.screenshot({ path: testInfo.outputPath(`large-rounded-preview-${width}.png`) });
   }
   const handle = page.getByRole("separator", { name: "Resize timeline" });
@@ -2463,10 +2463,10 @@ test("follows existing camera cuts using real full-minute analysis in the progra
   await expect(handle).toHaveAttribute("aria-valuenow", "212");
   await handle.press("ArrowDown");
   await expect(handle).toHaveAttribute("aria-valuenow", "188");
-  await page.getByTestId("main-footage-frame-toggle").click();
-  await expect(page.getByTestId("hook-preview-frame")).toHaveCSS("border-top-left-radius", "0px");
-  await page.getByTestId("main-footage-frame-toggle").click();
-  await expect(page.getByTestId("main-footage-frame-toggle")).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByTestId("main-footage-frame-toggle")).toHaveAttribute("data-rounded-locked", "true");
+  await expect.poll(() => page.getByTestId("hook-preview-frame").evaluate(frame =>
+    parseFloat(getComputedStyle(frame).borderTopLeftRadius)
+  )).toBeGreaterThan(0);
   for (const width of [1440, 1280, 1100]) {
     await page.setViewportSize({ width, height: 900 });
     await page.getByRole("button", { name: "Show media", exact: true }).click();
@@ -2513,10 +2513,10 @@ test("switches the full-minute programme from Show Everyone to a solo speaker at
   await page.getByTestId("preview-quick-both-cams").click();
   await expect(page.getByTestId("reframe-preserve-frame")).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByTestId("source-split-editor")).toBeVisible();
-  await expect(page.getByLabel("bottom split zoom")).toHaveValue("6.2");
+  await expect(page.getByLabel("bottom split zoom")).toHaveValue("1");
   await expect(page.getByTestId("pro-framing-clip-1")).toContainText("Solo Speaker");
   await expect(page.getByTestId("pro-framing-clip-2")).toContainText("Show Everyone");
-  await page.screenshot({ path: testInfo.outputPath("show-everyone-same-time-pair.png") });
+  await page.screenshot({ path: testInfo.outputPath("show-everyone-clean-source-pair.png") });
 
   await page.getByTestId("show-everyone-bottom-first").click();
   await expect(page.getByTestId("show-everyone-bottom-first")).toHaveAttribute("aria-pressed", "true");

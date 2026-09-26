@@ -96,6 +96,33 @@ describe("ViralClipStudioPanel", () => {
     expect(screen.getByRole("status")).toHaveTextContent("Validating preview");
   });
 
+  test("stages additional selected videos for Studio's project library", async () => {
+    const first = new File(["first"], "scene-1.mp4", { type: "video/mp4" });
+    const second = new File(["second"], "scene-2.mp4", { type: "video/mp4" });
+    const third = new File(["third"], "camera-b.mp4", { type: "video/mp4" });
+    const { container } = render(<ViralClipStudioPanel />);
+
+    fireEvent.change(container.querySelector('input[type="file"]'), {
+      target: { files: [first, second, third] },
+    });
+
+    await waitFor(() => expect(uploadSourceFileViaBackend).toHaveBeenCalledWith(
+      expect.objectContaining({ file: first, purpose: "studio_source" })
+    ));
+    expect(uploadSourceFileViaBackend).toHaveBeenCalledTimes(1);
+    const preview = await waitFor(() => {
+      const video = container.querySelector("video");
+      expect(video).not.toBeNull();
+      return video;
+    });
+    Object.defineProperty(preview, "duration", { configurable: true, value: 12 });
+    fireEvent.loadedMetadata(preview);
+    expect(await screen.findByText(/2 more videos will import/i)).toBeInTheDocument();
+    fireEvent.click(await screen.findByRole("button", { name: /^open creator studio$/i }));
+
+    expect(mockVideoEditor.mock.calls.at(-1)[0].initialProjectFiles).toEqual([second, third]);
+  });
+
   test("keeps Studio blocked and shows the upload failure", async () => {
     uploadSourceFileViaBackend.mockRejectedValueOnce(
       new Error("Upload service returned no HTTP response.")

@@ -6,6 +6,21 @@ import {
 } from "../viralRenderPayload";
 
 describe("viralRenderPayload", () => {
+  test("keeps owned source references and scene order in a multi-video render", () => {
+    const timelineSegments = [
+      { id: "scene-a", url: "https://example.com/a.mp4", sourceStoragePath: "uploads/videos/user/a.mp4", start_time: 2, end_time: 5, duration: 3 },
+      { id: "scene-b", url: "https://example.com/b.mp4", sourceStoragePath: "studio/sources/user/b.mp4", start_time: 1, end_time: 7, duration: 6 },
+    ];
+    const payload = buildViralRenderData({
+      finalVideoUrl: timelineSegments[0].url,
+      selectedClip: { start: 0, end: 3 },
+      extraOptions: { timelineSegments },
+    });
+
+    expect(payload.timeline_segments).toEqual(timelineSegments);
+    expect(payload.end_time).toBe(9);
+  });
+
   test("preserves an explicit clean export choice", () => {
     const payload = buildViralRenderData({
       finalVideoUrl: "https://example.com/source.mp4",

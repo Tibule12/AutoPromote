@@ -134,6 +134,56 @@ describe("ViralClipStudio timeline sequencing", () => {
     jest.clearAllMocks();
   });
 
+  test("groups film camera takes manually and exports the chosen angle range", async () => {
+    const onSave = jest.fn(() => Promise.resolve());
+    render(<ViralClipStudio
+      videoUrl="https://example.com/camera-a.mp4"
+      sourceStoragePath="studio/sources/test-user/camera-a.mp4"
+      sourceName="Camera A.mp4"
+      importedCameraMaster={{
+        id: "camera-b",
+        name: "Camera B.mp4",
+        url: "https://example.com/camera-b.mp4",
+        storagePath: "studio/sources/test-user/camera-b.mp4",
+        duration: 10,
+      }}
+      clips={[{ id: "main", start: 0, end: 12, duration: 12, url: "https://example.com/camera-a.mp4" }]}
+      onSave={onSave}
+      onCancel={jest.fn()}
+    />);
+
+    const media = screen.getByRole("region", { name: "Project media bin" });
+    await within(media).findByRole("button", { name: "Preview Camera B.mp4" });
+    const addButtons = within(media).getAllByRole("button", { name: "Select for camera take" });
+    expect(addButtons).toHaveLength(2);
+    addButtons.forEach(button => fireEvent.click(button));
+    fireEvent.change(within(media).getByLabelText("Take name"), { target: { value: "Scene 4 take 2" } });
+    fireEvent.click(within(media).getByRole("button", { name: "Create camera take (2)" }));
+    const filmTake = screen.getByRole("region", { name: "Saved film camera takes" });
+    expect(within(filmTake).getByText("Camera 1: Camera A.mp4")).toBeInTheDocument();
+    expect(within(filmTake).getByText("Camera 2: Camera B.mp4")).toBeInTheDocument();
+    fireEvent.change(within(filmTake).getAllByLabelText("Skip from beginning (seconds)")[1], { target: { value: "1.5" } });
+    fireEvent.change(within(filmTake).getByLabelText("Shot starts at (seconds)"), { target: { value: "2" } });
+    fireEvent.change(within(filmTake).getByLabelText("Shot ends at (seconds)"), { target: { value: "4" } });
+    const anglePreviews = filmTake.querySelectorAll("video");
+    anglePreviews.forEach(video => Object.defineProperty(video, "readyState", { configurable: true, value: 1 }));
+    fireEvent.click(within(filmTake).getByRole("button", { name: "▶ Play all angles together" }));
+    await waitFor(() => expect(anglePreviews[1].play).toHaveBeenCalled());
+    expect(anglePreviews[0].currentTime).toBe(2);
+    expect(anglePreviews[1].currentTime).toBe(3.5);
+    fireEvent.click(within(filmTake).getByRole("button", { name: "Pause all" }));
+    fireEvent.click(within(filmTake).getAllByRole("button", { name: "Use this angle for this shot" })[1]);
+
+    await clickRenderFinalClip();
+    await waitFor(() => expect(onSave).toHaveBeenCalled());
+    expect(onSave.mock.calls[0][2].timelineSegments.at(-1)).toMatchObject({
+      sourceStoragePath: "studio/sources/test-user/camera-b.mp4",
+      start_time: 3.5,
+      end_time: 5.5,
+      duration: 2,
+    });
+  });
+
   test("uses Quick, Creator and Signature as views over one shared edit", () => {
     render(
       <ViralClipStudio
@@ -295,9 +345,81 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(onSave.mock.calls[0][2].finishPlan.reframe).toMatchObject({
       enabled: true, aspect: "9:16", mode: "center",
       timeline_cuts: [{ time: 0, mode: "center" }],
-      split_source: { top: { x: 31, keyframes: [{ time: 0, x: 31, y: 50 }] },
-        bottom: { zoom: 2.5, keyframes: [{ time: 0, x: 93, y: 18 }] } },
+      split_source: { divider_percent: 50,
+        rounded_cards: true,
+        card_inset_percent: 2.5,
+        card_gap_percent: 2.5,
+        card_radius_percent: 8,
+        top: { x: 31, keyframes: [{ time: 0, x: 31, y: 50 }] },
+        bottom: { zoom: 2.5, keyframes: [{ time: 0, x: 50, y: 50 }] } },
     });
+  });
+
+  test("applies reusable podcast analysis as an editable rounded Director timeline", async () => {
+    const onSave = jest.fn(() => Promise.resolve());
+    global.fetch
+      .mockResolvedValueOnce({
+        ok: true,
+        blob: jest.fn(() => Promise.resolve(new Blob(["podcast"], { type: "video/mp4" }))),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: jest.fn(() => Promise.resolve({
+          engine: "opencv-yunet-source-shot-follow",
+          sceneCuts: [5],
+          tracks: { solo: { coverage: .95, keyframes: [
+            { time: 0, x: 30, y: 40, cut: false },
+            { time: 5, x: 70, y: 42, cut: true },
+          ] } },
+          editPlan: {
+            timelineCuts: [
+              { time: 0, mode: "speaker_track", zoom: 1.12 },
+              { time: 5, mode: "speaker_track", zoom: 1.08 },
+              { time: 7, mode: "speaker_track", zoom: 1.08,
+                sourceTimeOffsetSeconds: -0.62 },
+            ],
+            captionPlacementCuts: [{ time: 0, placement: "bottom_center" }],
+            splitSuggestions: [{
+              start: 2, end: 3.25, reason: "two_clean_foreground_faces",
+              top: { x: 30, y: 40, zoom: 1.45,
+                source_visible_top_percent: 4.44, source_visible_bottom_percent: 4.44 },
+              bottom: { x: 70, y: 42, zoom: 1.45,
+                source_visible_top_percent: 4.44, source_visible_bottom_percent: 4.44 },
+            }],
+            mainFrame: { insetPercent: 2.5, radiusPercent: 10, background: "studio_black" },
+          },
+        })),
+      });
+    render(<ViralClipStudio videoUrl="https://example.com/podcast.mp4"
+      clips={[{ id: "podcast", start: 0, end: 12, duration: 12,
+        url: "https://example.com/podcast.mp4", captions: [
+          { id: "spanning", start: 1, end: 4, text: "caption follows the active speaker" },
+        ] }]}
+      onSave={onSave} onCancel={jest.fn()} />);
+    fireEvent.click(screen.getByTestId("preview-quick-track-speaker"));
+    fireEvent.click(screen.getByTestId("analyze-source-shots"));
+    await screen.findByText(/Editable podcast first cut applied/i);
+    expect(screen.getByLabelText("Picture fill for this camera shot")).toHaveValue("1.12");
+    await clickRenderFinalClip();
+    await waitFor(() => expect(onSave).toHaveBeenCalled());
+    const finishPlan = onSave.mock.calls[0][2].finishPlan;
+    expect(finishPlan.main_frame).toMatchObject({ enabled: true, border_radius_percent: 10 });
+    expect(finishPlan.color).toMatchObject({ preset: "studio_natural", precisionGrade: true });
+    expect(finishPlan.reframe.timeline_cuts).toEqual([
+      { time: 0, mode: "speaker_track", zoom: 1.12 },
+      { time: 2, mode: "center", zoom: undefined },
+      { time: 3.25, mode: "speaker_track", zoom: 1.12 },
+      { time: 5, mode: "speaker_track", zoom: 1.08 },
+      { time: 7, mode: "speaker_track", zoom: 1.08,
+        source_time_offset_seconds: -0.62 },
+    ]);
+    expect(finishPlan.reframe.split_source.top.keyframes[0]).toMatchObject({
+      source_visible_top_percent: 4.44, source_visible_bottom_percent: 4.44,
+    });
+    expect(onSave.mock.calls[0][2].captionSegments).toEqual(expect.arrayContaining([
+      expect.objectContaining({ start_time: 2, end_time: 3.25,
+        caption_placement: "custom", caption_x: 50, caption_y: 40 }),
+    ]));
   });
 
   test("lets the creator disable the AutoPromote signature in preview and export", async () => {
@@ -591,10 +713,21 @@ describe("ViralClipStudio timeline sequencing", () => {
     const rack = screen.getByTestId("studio-finish-rack");
     fireEvent.click(within(rack).getByRole("button", { name: /Podcast Pro/i }));
 
-    expect(screen.getByTestId("studio-program-canvas")).toHaveAttribute(
+    const programmeCanvas = screen.getByTestId("studio-program-canvas");
+    expect(programmeCanvas).toHaveAttribute(
       "data-programme-filter",
       expect.stringContaining("brightness(1.050)")
     );
+    // Podcast Pro uses a 3%-of-output-width frame inset. A 9:16 preview must
+    // convert that same physical inset to 1.6875% vertically, just like the
+    // worker, rather than applying 3% of the much taller canvas.
+    expect(programmeCanvas).toHaveStyle({
+      left: "3%",
+      top: "1.6875%",
+      width: "calc(100% - 6%)",
+      height: "calc(100% - 3.375%)",
+    });
+    expect(programmeCanvas.style.borderRadius).not.toBe("0px");
     expect(screen.getByTestId("studio-after-video")).toHaveClass("main-video-frame-preview");
     expect(screen.getByLabelText("Untouched source preview").style.filter).not.toContain(
       "brightness(1.050)"
@@ -3594,8 +3727,20 @@ describe("ViralClipStudio timeline sequencing", () => {
     const afterVideo = screen.getByTestId("studio-after-video");
     Object.defineProperty(afterVideo, "duration", { configurable: true, value: 20 });
     fireEvent.loadedMetadata(afterVideo);
+    fireEvent.loadedData(afterVideo);
     Object.defineProperty(afterVideo, "currentTime", { configurable: true, writable: true, value: 8 });
     fireEvent.timeUpdate(afterVideo);
+
+    // Monitoring and comparison controls must not pause an edit that is
+    // already playing, and scrubbing keeps the last decoded frame visible.
+    Object.defineProperty(afterVideo, "paused", { configurable: true, value: false });
+    afterVideo.pause.mockClear();
+    fireEvent.click(screen.getByRole("button", { name: "Before", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "After", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Compare", exact: true }));
+    expect(afterVideo.pause).not.toHaveBeenCalled();
+    fireEvent.seeking(afterVideo);
+    expect(screen.queryByText("Loading edited preview…")).not.toBeInTheDocument();
 
     // 1-tap framing shortcuts
     const bothCamsBtn = screen.getByTestId("preview-quick-both-cams");
@@ -3612,6 +3757,16 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(screen.getByTestId("studio-after-video")).toHaveStyle({ objectFit: "cover" });
     fireEvent.change(screen.getByLabelText("Speaker zoom"), { target: { value: "1.6" } });
     expect(screen.getByLabelText("Speaker zoom")).toHaveValue("1.6");
+    fireEvent.click(screen.getByTestId("preview-fit-full"));
+    expect(screen.getByTestId("main-footage-frame-toggle")).toHaveAttribute("data-rounded-locked", "true");
+    fireEvent.click(screen.getByTestId("preview-fill-canvas"));
+    expect(screen.getByTestId("main-footage-frame-toggle")).toHaveAttribute("data-rounded-locked", "true");
+    afterVideo.currentTime = 10;
+    fireEvent.timeUpdate(afterVideo);
+    fireEvent.click(screen.getByTestId("preview-quick-both-cams"));
+    expect(screen.getByLabelText("top split zoom")).toHaveValue("1.5");
+    expect(screen.getByTestId("pro-framing-clip-1")).toHaveTextContent("Solo Speaker");
+    expect(screen.getByTestId("pro-framing-clip-3")).toHaveTextContent("Show Everyone");
 
     // Quick simple timeline toolbar
     expect(screen.getByTestId("timeline-quick-split")).toBeInTheDocument();

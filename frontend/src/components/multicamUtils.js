@@ -1,4 +1,4 @@
-export const MULTICAM_MAX_SOURCES = 6;
+export const MULTICAM_MAX_SOURCES = 3;
 export const MULTICAM_MIN_SOURCES = 2;
 export const DEFAULT_SWITCH_INTERVAL = 3;
 export const DEFAULT_IMAGE_SEGMENT_DURATION = 4.5;

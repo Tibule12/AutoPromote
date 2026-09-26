@@ -52,6 +52,16 @@ test("forwards explicit source-shot mode without requiring separate cameras", as
     expect.objectContaining({ mode: "source_shots" }), expect.any(Object));
 });
 
+test("accepts a complete ten-minute podcast analysis range", async () => {
+  axios.post.mockResolvedValue({ data: { tracks: {}, editPlan: { timelineCuts: [] } } });
+  await request(app).post("/api/media/track-studio-faces")
+    .field("anchors", JSON.stringify({ solo: { x: 34, y: 47 } }))
+    .field("start", "0").field("end", "600").field("mode", "source_shots")
+    .attach("file", Buffer.from("fixture-video"), "source.mp4").expect(200);
+  expect(axios.post).toHaveBeenCalledWith(expect.any(String),
+    expect.objectContaining({ start: 0, end: 600, mode: "source_shots" }), expect.any(Object));
+});
+
 test("rejects unknown modes and source-shot reassignment of two panel identities", async () => {
   await send({ solo: { x: 34, y: 47 } }).field("mode", "invented").expect(400);
   await send({ top: { x: 34, y: 47 }, bottom: { x: 89, y: 17 } })

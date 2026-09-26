@@ -203,27 +203,49 @@ class VideoEditingService {
    * Start an async video processing job
    * Returns a jobId immediately for polling.
    */
-  async startProcessingJob(videoUrl, options, userId) {
-    const jobId = uuidv4();
+  async startProcessingJob(videoUrl, options, userId, attempt = {}) {
+    const jobId = attempt.jobId || uuidv4();
     console.log(`[VideoEditing] Starting Async Job ${jobId} for User ${userId}`);
 
     try {
-      await db.collection("video_edits").doc(jobId).set({
+      const jobRef = db.collection("video_edits").doc(jobId);
+      const jobData = {
         jobId,
         userId,
         videoUrl,
         options,
+        ...(attempt.renderRequestId ? { type: "viral_render", renderRequestId: attempt.renderRequestId } : {}),
+        ...(attempt.sourceRenderJobId ? { sourceRenderJobId: attempt.sourceRenderJobId } : {}),
+        ...(attempt.creditReceipt ? { creditReceipt: attempt.creditReceipt } : {}),
         status: "queued",
         progress: 0,
         createdAt: new Date().toISOString(),
-      });
+      };
+      try {
+        // create() is atomic across server instances. A repeated request must
+        // never replace an existing job or dispatch the same render twice.
+        if (attempt.jobId) await jobRef.create(jobData);
+        else await jobRef.set(jobData);
+      } catch (createError) {
+        if (!attempt.jobId) throw createError;
+        const existing = await jobRef.get();
+        if (
+          existing.exists &&
+          existing.data()?.userId === userId &&
+          existing.data()?.renderRequestId === attempt.renderRequestId &&
+          existing.data()?.options?.renderViral === true
+        ) {
+          return { jobId, reused: true, status: existing.data().status };
+        }
+        throw createError;
+      }
 
       // Start background processing without awaiting
       this.processJobBackground(jobId, videoUrl, options, userId).catch(err => {
         console.error(`[VideoEditing] Background Job ${jobId} Failed (uncaught):`, err);
       });
 
-      return { jobId };
+      return { jobId, reused: false };
     } catch (error) {
       console.error("Failed to start job:", error);
       throw new Error("Failed to queue video processing job");
@@ -395,10 +417,28 @@ class VideoEditingService {
       console.log(`[VideoEditing] Job ${jobId} Completed Successfully.`);
     } catch (error) {
       console.error(`[VideoEditing] Job ${jobId} Failed:`, error.message);
+      let creditRefund = null;
+      if (options?.renderViral === true) {
+        try {
+          const existing = await docRef.get();
+          const receipt = existing.exists ? existing.data()?.creditReceipt : null;
+          if (receipt && !receipt.skipped) {
+            creditRefund = await refundCredits(userId, receipt, "viral-render-process-refund", {
+              jobId,
+              idempotencyKey: `viral-render-refund:${jobId}`,
+              reason: "worker_failed",
+            });
+          }
+        } catch (refundError) {
+          creditRefund = { success: false, message: refundError.message };
+          console.error(`[VideoEditing] Job ${jobId} refund failed:`, refundError.message);
+        }
+      }
       await docRef.update({
         status: "failed",
         error: error.message,
         progress: 0,
+        ...(creditRefund ? { creditRefund, creditsRefunded: creditRefund.success === true } : {}),
         failedAt: new Date().toISOString(),
       });
     }

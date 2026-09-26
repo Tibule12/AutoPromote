@@ -242,13 +242,13 @@ export async function uploadSourceFileViaBackend({
   }
 
   const normalizedMediaType = mediaType || inferUploadMediaType(file);
-  if (purpose === "studio_source" && file.size > STORAGE_UPLOAD_LIMIT_MB * 1024 * 1024) {
+  if (["studio_source", "studio_project"].includes(purpose) && file.size > STORAGE_UPLOAD_LIMIT_MB * 1024 * 1024) {
     const uploaded = await uploadMulticamSourceResumable({
       apiBaseUrl: API_BASE_URL,
       token,
       getToken,
       file,
-      purpose: "studio_source",
+      purpose,
       onProgress,
     });
     return { ...uploaded, uploadMode: "studio_resumable" };

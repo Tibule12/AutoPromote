@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import MultiCamCombiner from "./components/MultiCamCombiner";
 import { useAuth } from "./contexts/AuthContext";
@@ -27,12 +27,17 @@ function InternalDemoEditorPage() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const fileInputRef = useRef(null);
+  const screenRecorderRef = useRef(null);
+  const screenStreamRef = useRef(null);
+  const screenChunksRef = useRef([]);
   const [selectedFile, setSelectedFile] = useState(null);
   const [sourceUrl, setSourceUrl] = useState("");
   const [launchError, setLaunchError] = useState("");
   const [sessionPrimaryFile, setSessionPrimaryFile] = useState(null);
   const [sessionKey, setSessionKey] = useState(0);
   const [lastRender, setLastRender] = useState(null);
+  const [isScreenRecording, setIsScreenRecording] = useState(false);
+  const [screenRecordingStatus, setScreenRecordingStatus] = useState("");
 
   const isLocalDev = typeof window !== "undefined" && LOCAL_HOSTS.has(window.location.hostname);
   const canAccess = Boolean(user?.isAdmin || user?.role === "admin" || isLocalDev);
@@ -51,6 +56,97 @@ function InternalDemoEditorPage() {
       setLaunchError("");
     }
   };
+
+  const releaseScreenCapture = () => {
+    screenStreamRef.current?.getTracks().forEach(track => track.stop());
+    screenStreamRef.current = null;
+    screenRecorderRef.current = null;
+    setIsScreenRecording(false);
+  };
+
+  const stopScreenRecording = () => {
+    const recorder = screenRecorderRef.current;
+    if (recorder?.state === "recording") {
+      setScreenRecordingStatus("Finishing synchronized screen recording…");
+      recorder.stop();
+    }
+  };
+
+  const startScreenRecording = async () => {
+    if (!navigator.mediaDevices?.getDisplayMedia || typeof MediaRecorder === "undefined") {
+      setLaunchError("This browser cannot record the screen. Use a current Chrome, Edge, or Firefox build.");
+      return;
+    }
+    try {
+      setLaunchError("");
+      setScreenRecordingStatus("Choose a browser tab and enable Share tab audio.");
+      const stream = await navigator.mediaDevices.getDisplayMedia({
+        video: { frameRate: { ideal: 30, max: 60 } },
+        audio: true,
+      });
+      const mimeType = [
+        "video/webm;codecs=vp9,opus",
+        "video/webm;codecs=vp8,opus",
+        "video/webm",
+      ].find(type => MediaRecorder.isTypeSupported(type));
+      const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+      screenChunksRef.current = [];
+      screenStreamRef.current = stream;
+      screenRecorderRef.current = recorder;
+      recorder.ondataavailable = event => {
+        if (event.data?.size) screenChunksRef.current.push(event.data);
+      };
+      recorder.onerror = event => {
+        setLaunchError(event.error?.message || "The screen recording stopped unexpectedly.");
+        releaseScreenCapture();
+      };
+      recorder.onstop = () => {
+        const chunks = screenChunksRef.current;
+        const outputType = recorder.mimeType || mimeType || "video/webm";
+        if (chunks.length) {
+          const blob = new Blob(chunks, { type: outputType });
+          const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+          const file = new File([blob], `autopromote-screen-${stamp}.webm`, { type: outputType });
+          setSelectedFile(file);
+          setSourceUrl("");
+          setScreenRecordingStatus(
+            stream.getAudioTracks().length
+              ? "Screen and tab audio captured on one synchronized track. Ready to edit."
+              : "Screen captured without tab audio. Record again and enable Share tab audio for synchronized sound."
+          );
+        } else {
+          setLaunchError("The browser stopped before any screen video was captured.");
+          setScreenRecordingStatus("");
+        }
+        screenChunksRef.current = [];
+        releaseScreenCapture();
+      };
+      stream.getVideoTracks()[0]?.addEventListener("ended", () => {
+        if (recorder.state === "recording") recorder.stop();
+      }, { once: true });
+      recorder.start(250);
+      setIsScreenRecording(true);
+      setScreenRecordingStatus(
+        stream.getAudioTracks().length
+          ? "Recording screen + tab audio together. Perform the demo, then stop recording."
+          : "Recording screen only. Stop and record again with Share tab audio enabled if sound is required."
+      );
+    } catch (error) {
+      releaseScreenCapture();
+      if (error?.name === "NotAllowedError") {
+        setScreenRecordingStatus("Screen recording was cancelled.");
+        return;
+      }
+      setLaunchError(error?.message || "Could not start screen recording.");
+      setScreenRecordingStatus("");
+    }
+  };
+
+  useEffect(() => () => {
+    const recorder = screenRecorderRef.current;
+    if (recorder?.state === "recording") recorder.stop();
+    screenStreamRef.current?.getTracks().forEach(track => track.stop());
+  }, []);
 
   const buildPrimarySource = () => {
     if (selectedFile) return selectedFile;
@@ -138,7 +234,7 @@ function InternalDemoEditorPage() {
           <div className="internal-demo-editor-card">
             <h2>Load Demo Source</h2>
             <p className="internal-demo-editor-note">
-              Use a local screen recording upload or a direct internal video URL. Public navigation is unchanged; this route is only reachable by URL.
+              Record a browser tab with its audio on one synchronized stream, upload an existing recording, or use a direct internal video URL. Public navigation is unchanged; this route is only reachable by URL.
             </p>
             <input
               ref={fileInputRef}
@@ -150,8 +246,16 @@ function InternalDemoEditorPage() {
             <div className="internal-demo-editor-actions">
               <button
                 type="button"
-                className="internal-demo-editor-primary"
+                className={isScreenRecording ? "internal-demo-editor-stop" : "internal-demo-editor-primary"}
+                onClick={isScreenRecording ? stopScreenRecording : startScreenRecording}
+              >
+                {isScreenRecording ? "Stop Recording" : "Record Screen + Tab Audio"}
+              </button>
+              <button
+                type="button"
+                className="internal-demo-editor-secondary"
                 onClick={() => fileInputRef.current?.click()}
+                disabled={isScreenRecording}
               >
                 Upload Screen Recording
               </button>
@@ -159,10 +263,17 @@ function InternalDemoEditorPage() {
                 type="button"
                 className="internal-demo-editor-secondary"
                 onClick={handleResetSource}
+                disabled={isScreenRecording}
               >
                 Clear
               </button>
             </div>
+            {screenRecordingStatus ? (
+              <p className="internal-demo-editor-capture-status" role="status" aria-live="polite">
+                {isScreenRecording ? <span className="internal-demo-editor-record-dot" aria-hidden="true" /> : null}
+                {screenRecordingStatus}
+              </p>
+            ) : null}
             <label className="internal-demo-editor-field">
               <span>Or paste a direct video URL</span>
               <input

@@ -24,6 +24,7 @@ import {
   normalizeMulticamLayoutMode,
   normalizeSegments,
   normalizeSwitches,
+  MULTICAM_MAX_SOURCES,
   splitSegmentAtTimelineTime,
   resolveSmartMulticamLayoutAtTime,
 } from "./multicamUtils";
@@ -50,8 +51,6 @@ import { useSubscription } from "../hooks/useSubscription";
 import PayPalSubscriptionPanel from "./PayPalSubscriptionPanel";
 import { SafeAudio, SafeVideo } from "./SafeMedia";
 import { uploadMulticamSourceResumable } from "../utils/multicamResumableUpload";
-
-const MULTICAM_MAX_SOURCES = 6;
 
 const CAMERA_COLORS = ["#f97316", "#38bdf8", "#a78bfa", "#34d399", "#fb7185", "#facc15"];
 
@@ -566,6 +565,10 @@ export const buildExportEditorHandoff = exportResult => {
     type: localFile?.type || "video/mp4",
     isRemote: !localFile && Boolean(remoteUrl),
     duration: exportResult.duration,
+    ...(exportResult.renderJobId || exportResult.jobId
+      ? { renderJobId: exportResult.renderJobId || exportResult.jobId }
+      : {}),
+    ...(exportResult.storagePath ? { storagePath: exportResult.storagePath } : {}),
     workflowAction: "refine-full-video",
   };
 };
@@ -2318,6 +2321,7 @@ function MultiCamCombiner({
   onComplete,
   onStatusChange,
   onFindViralClips,
+  returnToStudio = false,
 }) {
   const { canUseFeature, credits } = useSubscription();
   const [sources, setSources] = useState(() => {
@@ -2341,6 +2345,8 @@ function MultiCamCombiner({
           ? DEFAULT_IMAGE_SEGMENT_DURATION
           : 0,
         uploadedUrl: file?.isRemote ? file.url : "",
+        cloudOriginalUrl: file?.isRemote ? file.url : "",
+        cloudOriginalStoragePath: file?.isRemote ? file.storagePath || "" : "",
       };
     });
 
@@ -2349,6 +2355,10 @@ function MultiCamCombiner({
       id: source.id || `cam-${index + 1}`,
       label: normalizeSourceLabel(source.label, index),
       name: source.file?.name || normalizeSourceLabel(source.label, index),
+      cloudOriginalUrl: source.file?.isRemote ? source.file.url || "" : source.cloudOriginalUrl || "",
+      cloudOriginalStoragePath: source.file?.isRemote
+        ? source.file.storagePath || ""
+        : source.cloudOriginalStoragePath || "",
       videoWidth: 0,
       videoHeight: 0,
     }));
@@ -2719,6 +2729,7 @@ function MultiCamCombiner({
             setExportResult({
               url: completedUrl,
               file: { name: `multicam-master-${Date.now()}.mp4` },
+              renderJobId: statusData.jobId || activeRenderJobId || null,
               duration:
                 statusData.result?.duration || statusData.totalDurationSeconds || fallbackDuration,
               manifestUrl: manifestLocation,
@@ -4933,22 +4944,25 @@ function MultiCamCombiner({
   }, []);
 
   const appendFiles = files => {
-    const available = MULTICAM_MAX_SOURCES - sources.length;
+    const emptySlots = sources.filter(source => !getSourceMediaUrl(source));
+    const available = MULTICAM_MAX_SOURCES - sources.length + emptySlots.length;
     if (available <= 0) {
       toast.error(`Maximum ${MULTICAM_MAX_SOURCES} camera sources allowed.`);
       return;
     }
     const acceptedFiles = Array.from(files || []);
     const filesToAdd = acceptedFiles.slice(0, available);
-    const nextSources = filesToAdd.map(file => {
+    const nextSources = filesToAdd.map((file, index) => {
       const previewUrl = URL.createObjectURL(file);
       objectUrlsRef.current.add(previewUrl);
-      const cameraNumber = nextCameraIndexRef.current;
-      nextCameraIndexRef.current += 1;
+      const emptySlot = emptySlots[index];
+      const cameraNumber = emptySlot
+        ? Number(String(emptySlot.id || "").replace(/^cam-/, "")) || index + 1
+        : nextCameraIndexRef.current++;
       const mediaKind = String(file?.type || "").startsWith("image/") ? "image" : "video";
       return {
-        id: `cam-${cameraNumber}`,
-        label: `Camera ${cameraNumber}`,
+        id: emptySlot?.id || `cam-${cameraNumber}`,
+        label: emptySlot?.label || `Camera ${cameraNumber}`,
         name: file.name,
         file,
         mediaKind,
@@ -4963,7 +4977,15 @@ function MultiCamCombiner({
       };
     });
 
-    setSources(currentSources => [...currentSources, ...nextSources]);
+    setSources(currentSources => {
+      const updated = [...currentSources];
+      nextSources.forEach(source => {
+        const existingIndex = updated.findIndex(item => item.id === source.id);
+        if (existingIndex >= 0) updated[existingIndex] = { ...updated[existingIndex], ...source };
+        else updated.push(source);
+      });
+      return updated;
+    });
     if (nextSources.length) {
       const largeVideoAdded = nextSources.some(
         source => getSourceFileSize(source) > BROWSER_SYNC_MAX_SINGLE_VISUAL_BYTES
@@ -7819,7 +7841,7 @@ function MultiCamCombiner({
     setStatusMessage(`Loaded ${file.name} into ${cameraId}.`);
   };
 
-  // Keyboard shortcuts: 1-6 switch cameras, W wide, Space play/pause
+  // Keyboard shortcuts: 1-3 switch cameras, W wide, Space play/pause
   useEffect(() => {
     const onKeyDown = e => {
       if (
@@ -8341,9 +8363,16 @@ function MultiCamCombiner({
     // If even one camera original is unavailable, use the same small local
     // render-window proxy path for every proof camera. Mixing absolute-timeline
     // originals with zero-based proxies would make sync semantics ambiguous.
+    // A Studio library asset has a durable cloud original but no local File.
+    // If another angle is local, upload that original instead of entering the
+    // all-proxy path, which cannot create a browser proxy from a remote record.
+    const hasRemoteOnlyCamera = readySources.some(
+      source => source.file?.isRemote && source.cloudOriginalUrl && !(source.file instanceof Blob)
+    );
     const usePlannedProofProxies =
       cloudRenderMode === "proof" &&
       proofSourceMode === "small_proxy" &&
+      !hasRemoteOnlyCamera &&
       plannedProxyItems.some(item => !item.hasMatchingRenderProxy);
     const estimatedProofProxyBytesPerCamera = Math.ceil(
       (plannedRenderWindowDuration *
@@ -9226,6 +9255,7 @@ function MultiCamCombiner({
         setExportResult({
           url: outputUrl,
           file: { name: `multicam-master-${Date.now()}.mp4` },
+          renderJobId: data.jobId || null,
           duration: data.duration || renderWindowDuration,
           manifestUrl: immediateManifest,
           isServerRender: true,
@@ -9554,6 +9584,26 @@ function MultiCamCombiner({
                 ) : null}
               </div>
               <div className="nle-saved-render-actions">
+                {returnToStudio && onComplete && isFullMaster ? (
+                  <button
+                    type="button"
+                    className="nle-mini-btn"
+                    disabled={sourceExpired}
+                    onClick={() =>
+                      onComplete({
+                        url: downloadUrl,
+                        name: `cam-combiner-${render.jobId}.mp4`,
+                        type: "video/mp4",
+                        isRemote: true,
+                        renderJobId: render.jobId,
+                        duration: Number(render.duration || 0),
+                        workflowAction: "refine-full-video",
+                      })
+                    }
+                  >
+                    Add to Studio
+                  </button>
+                ) : null}
                 {onFindViralClips && isFullMaster ? (
                   <button
                     type="button"
@@ -9734,7 +9784,7 @@ function MultiCamCombiner({
             className="nle-close-btn"
             type="button"
             onClick={onCancel}
-            aria-label="Close multicam studio"
+            aria-label={returnToStudio ? "Back to Studio" : "Close multicam studio"}
           >
             &times;
           </button>
@@ -9743,6 +9793,21 @@ function MultiCamCombiner({
         {!isFlowWorkspace && (
           <div className="nle-studio-shell is-simplified" ref={scrollContainerRef}>
             <section className="nle-studio-main is-simplified" ref={previewPanelRef}>
+              {returnToStudio ? (
+                <div className="nle-export-result" role="note">
+                  <strong>Podcast Cam Combiner</strong>
+                  <span>
+                    Use synchronized conversation cameras here: check sync, review automatic shot
+                    choices, render a podcast master, then add it to Studio. Your Studio sequence
+                    stays open while you work.
+                  </span>
+                  <div className="nle-export-actions">
+                    <button type="button" className="nle-btn secondary" onClick={onCancel}>
+                      Back to Studio
+                    </button>
+                  </div>
+                </div>
+              ) : null}
               <div className="nle-studio-steps" aria-label="Cam Combiner workflow">
                 {[
                   { id: "sources", number: 1, label: "Sources", done: readySources.length >= 2 },
@@ -10349,9 +10414,13 @@ function MultiCamCombiner({
                 <div className="nle-export-result">
                   <strong>Multicam master ready</strong>
                   <span>
-                    {exportResult.isServerRender
-                      ? "Server render is available as MP4. View it or continue into the editor."
-                      : "The browser render is available as WebM. View it or continue into the editor."}
+                    {returnToStudio
+                      ? exportResult.isServerRender
+                        ? "Server MP4 is ready. Review it, then add it to your Studio sequence."
+                        : "Browser WebM is ready. Review it, then add it to your Studio sequence."
+                      : exportResult.isServerRender
+                        ? "Server render is available as MP4. View it or continue into the editor."
+                        : "The browser render is available as WebM. View it or continue into the editor."}
                   </span>
                   <div className="nle-export-actions">
                     <a
@@ -10363,7 +10432,7 @@ function MultiCamCombiner({
                       View Master
                     </a>
                     <button className="nle-btn" type="button" onClick={handleUseExportInEditor}>
-                      Use This Master
+                      {returnToStudio ? "Add Master to Studio" : "Use This Master"}
                     </button>
                   </div>
                 </div>
@@ -12469,7 +12538,7 @@ function MultiCamCombiner({
                           View Master
                         </a>
                         <button className="nle-btn" type="button" onClick={handleUseExportInEditor}>
-                          Use This Master
+                          {returnToStudio ? "Add Master to Studio" : "Use This Master"}
                         </button>
                       </div>
                     </div>
