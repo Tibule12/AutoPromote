@@ -304,6 +304,72 @@ class CaptionQualityTests(unittest.TestCase):
         self.assertEqual(result["quality"]["status"], "ready")
         self.assertEqual(len(result["segments"]), 1)
 
+    def test_keeps_uncertain_choir_words_as_an_unverified_editable_draft(self):
+        result = filter_caption_transcription_segments(
+            [
+                {
+                    "start": 2.0,
+                    "end": 5.0,
+                    "text": "Siyabonga kakhulu ekhaya namhlanje",
+                    "avg_logprob": -1.3,
+                    "no_speech_prob": 0.6,
+                    "words": [
+                        {"word": word, "start": 2.0 + index * 0.5,
+                         "end": 2.4 + index * 0.5, "probability": 0.22}
+                        for index, word in enumerate(
+                            "Siyabonga kakhulu ekhaya namhlanje".split()
+                        )
+                    ],
+                }
+            ]
+        )
+
+        self.assertEqual(result["quality"]["status"], "review_required")
+        self.assertEqual(result["quality"]["accepted_segments"], 1)
+        self.assertEqual(result["quality"]["rejected_segments"], 0)
+        self.assertEqual(result["quality"]["review_segments"], 1)
+        self.assertEqual(result["segments"][0]["text"], "Siyabonga kakhulu ekhaya namhlanje")
+        self.assertTrue(result["segments"][0]["textReviewRequired"])
+        self.assertFalse(result["segments"][0]["textReviewed"])
+        self.assertIn("low_word_confidence", result["segments"][0]["transcriptionReviewReasons"])
+
+    def test_keeps_repeated_lyrics_for_review_but_excludes_corruption(self):
+        result = filter_caption_transcription_segments(
+            [
+                {"start": 0.0, "end": 4.0, "text": "Hallelujah hallelujah hallelujah hallelujah",
+                 "avg_logprob": -0.25, "no_speech_prob": 0.01},
+                {"start": 5.0, "end": 6.0, "text": "xxxxxxyyyyyyy"},
+            ]
+        )
+
+        self.assertEqual(result["quality"]["status"], "review_required")
+        self.assertEqual(result["quality"]["rejected_segments"], 1)
+        self.assertEqual(result["segments"][0]["text"], "Hallelujah hallelujah hallelujah hallelujah")
+        self.assertIn("repeated_token", result["segments"][0]["transcriptionReviewReasons"])
+
+    def test_keeps_low_probability_repeated_choir_refrain_for_review(self):
+        result = filter_caption_transcription_segments(
+            [{"start": 1.0, "end": 4.0, "text": "Hallelujah hallelujah hallelujah hallelujah",
+              "words": [{"word": "Hallelujah", "start": 1.0 + index * 0.7,
+                         "end": 1.6 + index * 0.7, "probability": 0.2}
+                        for index in range(4)]}]
+        )
+
+        self.assertEqual(result["quality"]["status"], "review_required")
+        self.assertEqual(result["quality"]["accepted_segments"], 1)
+        self.assertTrue(result["segments"][0]["textReviewRequired"])
+
+    def test_discards_collapsed_word_alignment_for_reviewable_text(self):
+        result = filter_caption_transcription_segments(
+            [{"start": 0.0, "end": 3.0, "text": "We are singing together tonight",
+              "words": [{"word": word, "start": 1.0, "end": 1.0, "probability": 0.8}
+                        for word in "We are singing together tonight".split()]}]
+        )
+
+        self.assertEqual(result["quality"]["status"], "review_required")
+        self.assertEqual(result["segments"][0]["words"], [])
+        self.assertIn("collapsed_timestamps", result["segments"][0]["transcriptionReviewReasons"])
+
     def test_rejects_repetition_and_collapsed_word_timestamps(self):
         result = filter_caption_transcription_segments(
             [

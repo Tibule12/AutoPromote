@@ -13195,6 +13195,11 @@ body.dashboard-mode.viral-studio-open {
   background: rgba(22, 133, 108, 0.14);
 }
 
+.caption-generation-status.is-review {
+  color: #ffd992;
+  background: rgba(182, 119, 32, 0.16);
+}
+
 .caption-generation-status.is-failed {
   color: #ffb5bd;
   background: rgba(190, 47, 68, 0.14);

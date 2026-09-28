@@ -3321,7 +3321,7 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(exportedOverlays.some(overlay => overlay.bRollPlaceholder)).toBe(false);
   });
 
-  test("rejects low-confidence caption hallucinations instead of showing fake lines", async () => {
+  test("does not invent subtitles when the worker finds no usable words", async () => {
     global.fetch
       .mockResolvedValueOnce({
         ok: true,
@@ -3365,10 +3365,66 @@ describe("ViralClipStudio timeline sequencing", () => {
 
     await waitFor(() => {
       expect(
-        within(inspector).getAllByText(/not confident enough to create honest captions/i)
+        within(inspector).getAllByText(/No usable words were detected/i)
       ).not.toHaveLength(0);
     });
     expect(within(inspector).queryByRole("textbox", { name: /Caption 1 text/i })).toBeNull();
+  });
+
+  test("shows uncertain choir words as editable captions that need wording review", async () => {
+    global.fetch
+      .mockResolvedValueOnce({
+        ok: true,
+        blob: jest.fn(() => Promise.resolve(new Blob(["choir-video"], { type: "video/mp4" }))),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: jest.fn(() =>
+          Promise.resolve({
+            segments: [
+              {
+                start: 2,
+                end: 5,
+                text: "Siyabonga kakhulu ekhaya namhlanje",
+                speaker: "choir",
+                language: "zu",
+                languages: ["zu"],
+                textReviewRequired: true,
+                textReviewed: false,
+                reviewRequired: true,
+                transcriptConfidence: 0.18,
+              },
+            ],
+            transcriptionQuality: {
+              status: "review_required",
+              accepted_segments: 1,
+              rejected_segments: 0,
+              review_segments: 1,
+            },
+          })
+        ),
+      });
+
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={[{ id: "clip-1", start: 0, end: 20, duration: 20 }]}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+        onStatusChange={jest.fn()}
+      />
+    );
+
+    const inspector = screen.getByTestId("clip-studio-inspector");
+    fireEvent.click(within(inspector).getByRole("tab", { name: /Captions/i }));
+    fireEvent.click(within(inspector).getByRole("checkbox", { name: /Preview captions/i }));
+
+    const line = await within(inspector).findByRole("textbox", { name: /Caption 1 text/i });
+    expect(line).toHaveValue("Siyabonga kakhulu ekhaya namhlanje");
+    expect(within(inspector).getByText("Review wording")).toBeInTheDocument();
+    expect(within(inspector).getAllByText(/draft line.*need wording review/i).length).toBeGreaterThan(0);
+    fireEvent.change(line, { target: { value: "Corrected choir lyrics" } });
+    expect(line).toHaveValue("Corrected choir lyrics");
   });
 
   test("pauses a captioned render until editable timed lines exist", async () => {
