@@ -2139,8 +2139,11 @@ def get_transcript_hallucination_reasons(segment):
     unique_ratio = len(token_counts) / max(1, len(tokens))
     if len(tokens) >= 4 and dominant_ratio >= 0.75:
         reasons.append("repeated_token")
-        if len(max(token_counts, key=token_counts.get)) <= 2:
+        dominant_token = max(token_counts, key=token_counts.get)
+        if len(dominant_token) <= 2:
             reasons.append("short_repeated_token")
+        elif re.fullmatch(r"[\u0400-\u04ff]+", dominant_token):
+            reasons.append("repeated_cyrillic_token")
     if len(tokens) >= 8 and unique_ratio <= 0.35:
         reasons.append("repeated_phrase")
     # Multilingual Whisper can assign high token probability to a corrupted
@@ -2284,35 +2287,42 @@ def filter_caption_transcription_segments(transcription_segments):
     accepted = []
     rejected = []
     review_count = 0
-    short_signatures = []
+    vocalization_signatures = []
     for segment in annotated:
         text_tokens = [
             re.sub(r"[^\w'-]+", "", token).casefold()
             for token in normalize_transcript_text(segment.get("text")).split()
         ]
         text_tokens = [token for token in text_tokens if token]
-        short_signatures.append(
+        vocalization_signatures.append(
             text_tokens[0]
-            if text_tokens and len(text_tokens[0]) <= 2 and len(set(text_tokens)) == 1
+            if text_tokens and len(set(text_tokens)) == 1 and (
+                len(text_tokens[0]) <= 2
+                or re.fullmatch(r"[\u0400-\u04ff]+", text_tokens[0])
+            )
             else None
         )
-    repeated_short_run_indexes = set()
+    repeated_vocalization_run_indexes = set()
     run_start = 0
     while run_start < len(annotated):
-        signature = short_signatures[run_start]
+        signature = vocalization_signatures[run_start]
         run_end = run_start + 1
-        while signature and run_end < len(annotated) and short_signatures[run_end] == signature:
+        while signature and run_end < len(annotated) and vocalization_signatures[run_end] == signature:
             run_end += 1
         if signature and run_end - run_start >= 3 and (
             float(annotated[run_end - 1].get("end") or 0)
             - float(annotated[run_start].get("start") or 0) >= 6
         ):
-            repeated_short_run_indexes.update(range(run_start, run_end))
+            repeated_vocalization_run_indexes.update(range(run_start, run_end))
         run_start = run_end
     for index, segment in enumerate(annotated):
         reasons = get_transcript_hallucination_reasons(segment)
-        if index in repeated_short_run_indexes:
-            reasons.append("repeated_short_vocalization")
+        if index in repeated_vocalization_run_indexes:
+            reasons.append(
+                "repeated_short_vocalization"
+                if len(vocalization_signatures[index]) <= 2
+                else "repeated_cyrillic_vocalization"
+            )
         confidence = float(segment.get("transcriptConfidence", 0.0) or 0.0)
         if confidence < 0.52:
             reasons = list(dict.fromkeys([*reasons, "low_segment_confidence"]))
@@ -2343,6 +2353,8 @@ def filter_caption_transcription_segments(transcription_segments):
                 "impossible_character_rate",
                 "short_repeated_token",
                 "repeated_short_vocalization",
+                "repeated_cyrillic_token",
+                "repeated_cyrillic_vocalization",
             }
             or repeated_language_placeholder
             or {"repeated_phrase", "collapsed_timestamps"} <= set(reasons)
