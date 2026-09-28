@@ -1455,9 +1455,6 @@ class VideoEditingService {
           // Sending a JSON boolean makes FastAPI reject the whole request with
           // 422 before transcription starts.
           translate_to_english: translateToEnglish ? "true" : "false",
-          hint: translateToEnglish
-            ? "Multilingual South African podcast. Translate all spoken content into natural English."
-            : "Multilingual South African podcast. Preserve every language, local name, slang term, and code-switch exactly as spoken.",
         },
         {
           // Full podcast transcription can legitimately exceed ten minutes on
@@ -1469,12 +1466,29 @@ class VideoEditingService {
 
       // Worker returns { segments: [...] }
       const result = response.data;
+      const segments = Array.isArray(result?.segments) ? result.segments : [];
+      const transcriptionQuality = result?.transcription_quality || null;
+
+      if (!segments.length) {
+        // A successful HTTP response can still contain zero usable captions:
+        // the speech model sometimes invents repeated syllables over music or
+        // a choir. Never label that as a completed caption job.
+        await docRef.update({
+          status: "failed",
+          error:
+            "No reliable spoken words were found in this video. Music or singing can confuse automatic captions. Try a clearer speech section, or add and time your own captions in Studio.",
+          transcriptionQuality,
+          progress: 0,
+          failedAt: new Date().toISOString(),
+        });
+        return;
+      }
 
       await docRef.update({
         status: "completed",
         result: {
-          segments: result.segments,
-          transcriptionQuality: result.transcription_quality || null,
+          segments,
+          transcriptionQuality,
           detectedLanguages: result.detected_languages || [],
           languageMode:
             result.language_mode ||

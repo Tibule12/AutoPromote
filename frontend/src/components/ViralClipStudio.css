@@ -9129,6 +9129,29 @@ body.dashboard-mode.viral-studio-open {
   line-height: 1.45;
 }
 
+.caption-script-draft {
+  padding: 12px;
+  border: 1px solid rgba(126, 98, 245, 0.25);
+  border-radius: 11px;
+  background: rgba(18, 21, 43, 0.6);
+}
+
+.caption-script-draft > label {
+  display: grid;
+  gap: 5px;
+  color: #aab8cc;
+  font-size: 0.66rem;
+}
+
+.caption-script-draft select {
+  min-height: 34px;
+  padding: 6px 8px;
+  border: 1px solid rgba(125, 150, 185, 0.25);
+  border-radius: 8px;
+  color: #e8edf5;
+  background: #101b2b;
+}
+
 .inspector-choice-grid {
   display: grid;
   gap: 6px;

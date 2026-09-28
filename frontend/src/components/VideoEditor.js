@@ -1321,7 +1321,7 @@ function VideoEditor({
       const renderRequestId = viralRenderAttemptRef.current.requestId;
       recoveryDismissedRef.current = true;
       setRenderRecovery(null);
-      saveViralRenderAttempt(user.uid, {
+      saveViralRenderAttempt(user?.uid, {
         requestId: renderRequestId,
         captionReviewCopy: extraOptions.captionReviewCopy === true,
       });
@@ -1480,7 +1480,7 @@ function VideoEditor({
           backendMessage = errJson.detail || errJson.details || errJson.message || backendMessage;
         } catch (_parseError) {}
         if ([400, 402, 403, 409, 422].includes(response.status)) {
-          clearViralRenderAttempt(user.uid, renderRequestId);
+          clearViralRenderAttempt(user?.uid, renderRequestId);
           viralRenderAttemptRef.current = null;
         }
         throw new Error(

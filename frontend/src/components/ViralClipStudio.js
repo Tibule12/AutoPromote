@@ -31,6 +31,7 @@ import {
   mapCaptionSegmentsToTimeline,
 } from "./viralRenderPayload";
 import { splitCaptionSegmentsForReadability } from "./captionReadability";
+import { buildTimedScriptDraft } from "../utils/captionDrafts";
 import { buildTranscriptGroundedBRollSuggestions } from "./storyBeatPlanner";
 import { getMediaAuthToken } from "../utils/mediaAuth";
 import useCinematicEffects, { CINEMATIC_PRESETS, buildCinematicCssFilter } from "../hooks/useCinematicEffects";
@@ -213,6 +214,16 @@ const normalizePlainText = value =>
     .replace(/[<>]/g, "")
     .trim();
 
+const getCaptionServiceError = (payload, fallback) => {
+  const detail = payload?.error ?? payload?.message ?? payload?.detail;
+  if (typeof detail === "string" && detail.trim()) return detail.trim();
+  if (Array.isArray(detail)) {
+    const messages = detail.map(item => item?.msg).filter(Boolean);
+    if (messages.length) return messages.join("; ");
+  }
+  return fallback;
+};
+
 const AutoPromoteBrandLockup = ({
   className = "",
   compact = false,
@@ -275,6 +286,7 @@ const CAPTION_LANGUAGE_OPTIONS = [
 
 const CAPTION_SPEAKER_OPTIONS = [
   { value: "unknown", label: "Speaker needs review" },
+  { value: "choir", label: "Choir" },
   { value: "host", label: "Host" },
   { value: "guest", label: "Guest" },
   { value: "A", label: "Speaker A" },
@@ -2896,6 +2908,9 @@ const ViralClipStudio = ({
   const [captionPosition, setCaptionPosition] = useState("bottom_center");
   const [captionScale, setCaptionScale] = useState(1);
   const [captionTextOverride, setCaptionTextOverride] = useState("");
+  const [captionScriptDraft, setCaptionScriptDraft] = useState("");
+  const [captionDraftLanguage, setCaptionDraftLanguage] = useState("und");
+  const [captionDraftSpeaker, setCaptionDraftSpeaker] = useState("choir");
   const [captionSegments, setRawCaptionSegments] = useState(() =>
     ensureUniqueCaptionIds(resolveInitialCaptionSegments((clips || [])[0], (clips || [])[0]?.duration))
   );
@@ -2907,6 +2922,7 @@ const ViralClipStudio = ({
   const [translateCaptionsToEnglish, setTranslateCaptionsToEnglish] = useState(false);
   const [captionGenerationStatus, setCaptionGenerationStatus] = useState("idle");
   const [captionGenerationMessage, setCaptionGenerationMessage] = useState("");
+  const captionGenerationInFlightRef = useRef(false);
   const [studioActionMessage, setStudioActionMessage] = useState(
     "Split preview is live. Edit on the right and compare the untouched source beside it."
   );
@@ -7753,14 +7769,102 @@ const ViralClipStudio = ({
     }, 0);
   };
 
+  const activateCaptionScriptDraft = (script, sourceLabel = "your text") => {
+    const sourceClipId =
+      currentTimelineClip?.sourceClipId || currentTimelineClip?.id || selectedClip?.id || null;
+    try {
+      const windowStart = Number(currentTimelineWindow.start || 0);
+      const windowDuration = Number(currentTimelineWindow.duration || selectedClip?.duration || 0);
+      const draft = buildTimedScriptDraft(script, {
+        start: windowStart,
+        duration: windowDuration,
+      });
+      if (!draft.length) throw new Error("Enter lyrics or a script before creating timed lines.");
+      const language = normalizeCaptionLanguage(captionDraftLanguage);
+      const speaker = normalizeCaptionSpeaker(captionDraftSpeaker);
+      const segments = normalizeCaptionSegments(draft.map(line => ({
+        ...line,
+        id: createSecureId("script-caption"),
+        sourceClipId,
+        speaker,
+        speakerLabel: getCaptionSpeakerLabel(speaker),
+        language,
+        languageLabel: getCaptionLanguageLabel(language),
+        languages: language === "und" ? [] : [language],
+        textReviewRequired: true,
+        textReviewed: false,
+        reviewRequired: true,
+      })));
+      setCaptionSegments(previous => [
+        ...previous.filter(segment =>
+          sourceClipId && (
+            String(segment.sourceClipId || "") !== String(sourceClipId) ||
+            Number(segment.end || 0) <= windowStart ||
+            Number(segment.start || 0) >= windowStart + windowDuration
+          )
+        ),
+        ...segments,
+      ]);
+      setCaptionTextOverride("");
+      setTranslateCaptionsToEnglish(false);
+      setAutoCaptions(true);
+      setComparisonMode("after");
+      setCaptionGenerationStatus("review");
+      setCaptionGenerationMessage(
+        `${segments.length} timed draft line${segments.length === 1 ? "" : "s"} from ${sourceLabel}. Check the words and timing against the video, then approve each line before export.`
+      );
+      focusCaptionSegmentsForReview(segments);
+      return true;
+    } catch (error) {
+      setCaptionGenerationStatus("failed");
+      setCaptionGenerationMessage(error.message || "The caption draft could not be created.");
+      return false;
+    }
+  };
+
+  const addChoirMusicCue = () => {
+    const start = Math.max(0, Number(currentTimelineWindow.start || 0));
+    const duration = Math.max(0, Number(currentTimelineWindow.duration || selectedClip?.duration || 0));
+    if (!duration) {
+      setCaptionGenerationStatus("failed");
+      setCaptionGenerationMessage("Choose a video clip before adding a choir cue.");
+      return;
+    }
+    const cue = normalizeCaptionSegments([{
+      id: createSecureId("caption-line"),
+      start,
+      end: start + Math.min(4, duration),
+      text: "[Choir singing]",
+      speaker: "choir",
+      speakerLabel: "Choir",
+      language: "en",
+      languageLabel: "English",
+      languages: ["en"],
+      textReviewRequired: false,
+      textReviewed: true,
+      reviewRequired: false,
+      sourceClipId: currentTimelineClip?.sourceClipId || currentTimelineClip?.id || selectedClip?.id || null,
+    }])[0];
+    setCaptionSegments(previous => [...previous, cue]);
+    setCaptionTextOverride("");
+    setTranslateCaptionsToEnglish(false);
+    setAutoCaptions(true);
+    setComparisonMode("after");
+    setCaptionGenerationStatus("ready");
+    setCaptionGenerationMessage("Choir sound cue added at the start of this clip. It does not claim to transcribe the lyrics.");
+    focusCaptionSegmentsForReview([cue]);
+  };
+
   const generateLiveTranscript = async ({
     translateToEnglish = translateCaptionsToEnglish,
-    preserveExistingOnFailure = false,
+    sourceClip = currentTimelineClip,
   } = {}) => {
-    if (captionGenerationStatus === "processing") return false;
+    if (captionGenerationInFlightRef.current) return false;
+    captionGenerationInFlightRef.current = true;
 
     const requestedTranslation = Boolean(translateToEnglish);
     const retainedSegments = normalizeCaptionSegments(captionSegments);
+    const activeSourceClip = sourceClip || currentTimelineClip;
 
     setCaptionGenerationStatus("processing");
     setCaptionGenerationMessage(
@@ -7770,12 +7874,15 @@ const ViralClipStudio = ({
     );
 
     try {
-      const sourceUrl = getSafeMediaSource(currentTimelineClip?.url || videoUrl);
+      const sourceUrl = getSafeMediaSource(activeSourceClip?.url || videoUrl);
       let token = await getMediaAuthToken();
       if (!token) throw new Error("Please log in before generating captions.");
 
       const trustedStoragePath = String(
-        sourceStoragePath || currentTimelineClip?.storagePath || selectedClip?.storagePath || ""
+        activeSourceClip?.sourceStoragePath ||
+          activeSourceClip?.storagePath ||
+          (activeSourceClip?.id === "main" ? sourceStoragePath || selectedClip?.storagePath : "") ||
+          ""
       ).trim();
       let transcriptionUrl = `${API_BASE_URL}/api/media/transcribe-source`;
       let transcriptionBody;
@@ -7796,10 +7903,10 @@ const ViralClipStudio = ({
         );
       } else {
         let sourceBlob =
-          selectedClip?.file instanceof Blob
-            ? selectedClip.file
-            : currentTimelineClip?.file instanceof Blob
-              ? currentTimelineClip.file
+          activeSourceClip?.file instanceof Blob
+            ? activeSourceClip.file
+            : activeSourceClip?.id === "main" && selectedClip?.file instanceof Blob
+              ? selectedClip.file
               : null;
 
         if (!sourceBlob && sourceUrl) {
@@ -7816,7 +7923,7 @@ const ViralClipStudio = ({
         formData.append(
           "file",
           sourceBlob,
-          selectedClip?.file?.name || currentTimelineClip?.file?.name || "viral-studio-source.mp4"
+          activeSourceClip?.file?.name || selectedClip?.file?.name || "viral-studio-source.mp4"
         );
         formData.append("translate_to_english", requestedTranslation ? "true" : "false");
         transcriptionUrl = `${API_BASE_URL}/api/media/transcribe`;
@@ -7832,6 +7939,7 @@ const ViralClipStudio = ({
 
       if (response.status === 401) {
         token = await getMediaAuthToken(true);
+        if (!token) throw new Error("Your session expired. Sign in, then try captions again.");
         response = await fetch(transcriptionUrl, {
           method: "POST",
           headers: { ...transcriptionHeaders, Authorization: `Bearer ${token}` },
@@ -7841,10 +7949,17 @@ const ViralClipStudio = ({
 
       let payload = await response.json().catch(() => null);
       if (!response.ok) {
-        throw new Error(payload?.error || payload?.message || "Caption transcription failed.");
+        throw new Error(
+          getCaptionServiceError(
+            payload,
+            "Caption transcription could not start. Please try again."
+          )
+        );
       }
 
       if (payload?.jobId) {
+        let completed = false;
+        let failedPolls = 0;
         for (let attempt = 0; attempt < 1800; attempt += 1) {
           await sleep(2000);
           let statusResponse = await fetch(`${API_BASE_URL}/api/media/status/${payload.jobId}`, {
@@ -7852,17 +7967,50 @@ const ViralClipStudio = ({
           });
           if (statusResponse.status === 401) {
             token = await getMediaAuthToken(true);
+            if (!token) throw new Error("Your session expired. Sign in, then try captions again.");
             statusResponse = await fetch(`${API_BASE_URL}/api/media/status/${payload.jobId}`, {
               headers: { Authorization: `Bearer ${token}` },
             });
           }
-          if (!statusResponse.ok) continue;
-          const statusPayload = await statusResponse.json();
-          if (statusPayload.status === "failed") {
-            throw new Error(statusPayload.error || "Caption transcription failed.");
+          const statusPayload = await statusResponse.json().catch(() => null);
+          if (!statusResponse.ok) {
+            if (statusResponse.status === 401) {
+              throw new Error("Your session expired. Sign in, then try captions again.");
+            }
+            if ([403, 404].includes(statusResponse.status)) {
+              throw new Error(
+                getCaptionServiceError(
+                  statusPayload,
+                  "The caption job is no longer available. Please retry."
+                )
+              );
+            }
+            failedPolls += 1;
+            if (failedPolls >= 3) {
+              throw new Error(
+                getCaptionServiceError(
+                  statusPayload,
+                  "The caption service is temporarily unavailable. Please retry."
+                )
+              );
+            }
+            continue;
+          }
+          if (!statusPayload || typeof statusPayload !== "object") {
+            failedPolls += 1;
+            if (failedPolls >= 3)
+              throw new Error("The caption service returned an unreadable status. Please retry.");
+            continue;
+          }
+          failedPolls = 0;
+          if (["failed", "cancelled", "canceled"].includes(statusPayload.status)) {
+            throw new Error(
+              getCaptionServiceError(statusPayload, "Caption transcription failed. Please retry.")
+            );
           }
           if (statusPayload.status === "completed") {
             payload = statusPayload.result || statusPayload;
+            completed = true;
             break;
           }
           setCaptionGenerationMessage(
@@ -7871,27 +8019,23 @@ const ViralClipStudio = ({
             )}%`
           );
         }
+        if (!completed) throw new Error("Caption transcription timed out. Please retry.");
       }
 
       const captionSourceClipId =
-        currentTimelineClip?.sourceClipId || currentTimelineClip?.id || selectedClip?.id || null;
+        activeSourceClip?.sourceClipId || activeSourceClip?.id || selectedClip?.id || null;
       const responseSegments = Array.isArray(payload?.segments) ? payload.segments : [];
-      const languageMode = String(
-        payload?.languageMode || payload?.language_mode || ""
-      ).trim().toLowerCase();
+      const languageMode = String(payload?.languageMode || payload?.language_mode || "")
+        .trim()
+        .toLowerCase();
       const translationProvenanceConfirmed =
         responseSegments.length > 0 &&
         responseSegments.every(
           segment =>
             segment?.translatedToEnglish === true || segment?.translated_to_english === true
         );
-      if (
-        requestedTranslation &&
-        (languageMode !== "translated_to_english" || !translationProvenanceConfirmed)
-      ) {
-        throw new Error("The caption service did not confirm an English translation.");
-      }
-      const safeResponseSegments = filterClearlyCorruptCaptionSegments(responseSegments.filter(segment => {
+      const safeResponseSegments = filterClearlyCorruptCaptionSegments(
+        responseSegments.filter(segment => {
           const text = normalizePlainText(segment?.text).toLowerCase();
           return ![
             "music outro",
@@ -7903,28 +8047,28 @@ const ViralClipStudio = ({
             "copyright",
             "all rights reserved",
           ].some(blocked => text.includes(blocked));
-        }));
+        })
+      );
       const nextSegments = normalizeCaptionSegments(
         splitCaptionSegmentsForReadability(safeResponseSegments)
-      )
-        .map(segment => ({
-          ...segment,
-          // Older workers might return words with a rejected quality status.
-          // Never silently present those words as verified subtitles.
-          ...(payload?.transcriptionQuality?.status === "rejected" ||
-          payload?.transcription_quality?.status === "rejected"
-            ? { textReviewRequired: true, textReviewed: false, reviewRequired: true }
-            : {}),
-          sourceClipId: captionSourceClipId,
-          translatedToEnglish: requestedTranslation,
-          ...(requestedTranslation
-            ? {
-                language: "en",
-                languageLabel: "English",
-                languages: ["en"],
-              }
-            : {}),
-        }));
+      ).map(segment => ({
+        ...segment,
+        // Older workers might return words with a rejected quality status.
+        // Never silently present those words as verified subtitles.
+        ...(payload?.transcriptionQuality?.status === "rejected" ||
+        payload?.transcription_quality?.status === "rejected"
+          ? { textReviewRequired: true, textReviewed: false, reviewRequired: true }
+          : {}),
+        sourceClipId: captionSourceClipId,
+        translatedToEnglish: requestedTranslation,
+        ...(requestedTranslation
+          ? {
+              language: "en",
+              languageLabel: "English",
+              languages: ["en"],
+            }
+          : {}),
+      }));
       const transcriptionQuality =
         payload?.transcriptionQuality || payload?.transcription_quality || null;
       const identityReviewSegments = nextSegments.filter(segment => segment.reviewRequired).length;
@@ -7941,35 +8085,15 @@ const ViralClipStudio = ({
       );
 
       if (!nextSegments.length) {
-        if (!requestedTranslation && captionTextOverride?.trim()) {
-          const clipDuration = Math.max(
-            3,
-            Number(currentTimelineWindow?.duration || selectedClip?.duration || currentTimelineClip?.duration || 30)
-          );
-          const fallbackClientSegments = generateClientSideCaptionSegments({
-            text: captionTextOverride,
-            duration: clipDuration,
-            sourceClipId: captionSourceClipId,
-          });
-          if (fallbackClientSegments.length) {
-            setCaptionSegments(fallbackClientSegments);
-            setCaptionTextOverride("");
-            setAutoCaptions(true);
-            setComparisonMode("after");
-            setCaptionGenerationStatus("ready");
-            setCaptionGenerationMessage(
-              `${fallbackClientSegments.length} client-side captions ready · Edit lines, timestamps and styles below`
-            );
-            focusCaptionSegmentsForReview(fallbackClientSegments);
-            setStudioActionMessage(
-              "Client-side speech captions are active. Tap any line below to edit the words or timing directly."
-            );
-            return true;
-          }
-        }
         throw new Error(
           "Automatic transcription could not identify reliable words in this audio. Try a shorter, clearer section, or import/type the lyrics."
         );
+      }
+      if (
+        requestedTranslation &&
+        (languageMode !== "translated_to_english" || !translationProvenanceConfirmed)
+      ) {
+        throw new Error("The caption service did not confirm an English translation.");
       }
 
       setCaptionSegments(nextSegments);
@@ -8000,9 +8124,7 @@ const ViralClipStudio = ({
           identityReviewSegments
             ? ` · ${identityReviewSegments} line${identityReviewSegments === 1 ? "" : "s"} need review`
             : " · speakers and languages identified"
-        }${
-          identityReviewSegments ? " · approve flagged lines before final render" : ""
-        }`
+        }${identityReviewSegments ? " · approve flagged lines before final render" : ""}`
       );
       focusCaptionSegmentsForReview(nextSegments);
       setStudioActionMessage(
@@ -8012,7 +8134,7 @@ const ViralClipStudio = ({
       );
       return true;
     } catch (error) {
-      if (preserveExistingOnFailure && retainedSegments.length) {
+      if (retainedSegments.length) {
         setCaptionGenerationStatus("failed");
         setCaptionGenerationMessage(
           `${requestedTranslation ? "Translation" : "Caption regeneration"} failed. Your existing captions were kept. ${error.message || "Try again."}`
@@ -8026,6 +8148,8 @@ const ViralClipStudio = ({
       setCaptionGenerationMessage(error.message || "Caption transcription failed.");
       setStudioActionMessage(error.message || "Caption transcription failed.");
       return false;
+    } finally {
+      captionGenerationInFlightRef.current = false;
     }
   };
 
@@ -20974,7 +21098,11 @@ const ViralClipStudio = ({
                       <h4>Make every word land before you render</h4>
                     </div>
                     <span className={`inspector-status-dot ${autoCaptions ? "is-ready" : ""}`}>
-                      {autoCaptions ? "Live" : "Off"}
+                      {autoCaptions
+                        ? captionSegments.length || normalizedCaptionOverride
+                          ? "Live"
+                          : "Needs captions"
+                        : "Off"}
                     </span>
                   </div>
 
@@ -21021,7 +21149,6 @@ const ViralClipStudio = ({
                         );
                         void generateLiveTranscript({
                           translateToEnglish: enabled,
-                          preserveExistingOnFailure: true,
                         }).then(succeeded => {
                           if (!succeeded) setTranslateCaptionsToEnglish(previousMode);
                         });
@@ -21046,13 +21173,13 @@ const ViralClipStudio = ({
                           : "Generate speech captions"}
                     </button>
                     <small>
-                      Detects multilingual South African speech and creates editable, timestamped
-                      lines before rendering.
+                      Creates editable, timestamped lines from clear speech. For songs or choirs,
+                      import an SRT/VTT subtitle file or type lyrics below.
                     </small>
                     {captionGenerationMessage ? (
                       <p
                         className={`caption-generation-status is-${captionGenerationStatus}`}
-                        role="status"
+                        role={captionGenerationStatus === "failed" ? "alert" : "status"}
                       >
                         {captionGenerationMessage}
                       </p>
@@ -21120,6 +21247,104 @@ const ViralClipStudio = ({
                     )}
                   </label>
 
+                  <div className="inspector-field caption-script-draft" data-testid="caption-script-draft">
+                    <span>Song lyrics or full script</span>
+                    <small>
+                      Paste the words one line at a time. Studio spreads them across this clip as
+                      editable timing drafts; listen and check each line before export.
+                    </small>
+                    <textarea
+                      aria-label="Full lyrics or script"
+                      value={captionScriptDraft}
+                      onChange={event => setCaptionScriptDraft(event.target.value.slice(0, 20000))}
+                      rows={6}
+                      maxLength={20000}
+                      placeholder="Paste the full lyrics or script here, one caption line per row"
+                    />
+                    <label>
+                      <span>Words are in</span>
+                      <select
+                        aria-label="Draft caption language"
+                        value={captionDraftLanguage}
+                        onChange={event => setCaptionDraftLanguage(event.target.value)}
+                      >
+                        {CAPTION_LANGUAGE_OPTIONS.map(option => (
+                          <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                      </select>
+                    </label>
+                    <label>
+                      <span>Voice</span>
+                      <select
+                        aria-label="Draft caption voice"
+                        value={captionDraftSpeaker}
+                        onChange={event => setCaptionDraftSpeaker(event.target.value)}
+                      >
+                        {CAPTION_SPEAKER_OPTIONS.map(option => (
+                          <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                      </select>
+                    </label>
+                    <button
+                      type="button"
+                      className="inspector-primary-action"
+                      disabled={!captionScriptDraft.trim()}
+                      onClick={() => activateCaptionScriptDraft(captionScriptDraft, "your lyrics or script")}
+                    >
+                      Create timed lyric draft
+                    </button>
+                    {captionSegments.some(segment =>
+                      String(segment.id || "").startsWith("script-caption") &&
+                      String(segment.sourceClipId || "") === String(
+                        currentTimelineClip?.sourceClipId || currentTimelineClip?.id || selectedClip?.id || ""
+                      ) &&
+                      Number(segment.end || 0) > Number(currentTimelineWindow.start || 0) &&
+                      Number(segment.start || 0) < Number(currentTimelineWindow.end || 0)
+                    ) && (
+                      <button
+                        type="button"
+                        className="inspector-secondary-action"
+                        onClick={() => {
+                          const draftSourceClipId =
+                            currentTimelineClip?.sourceClipId || currentTimelineClip?.id || selectedClip?.id || "";
+                          const isCurrentDraftLine = segment =>
+                            String(segment.id || "").startsWith("script-caption") &&
+                            String(segment.sourceClipId || "") === String(draftSourceClipId) &&
+                            Number(segment.end || 0) > Number(currentTimelineWindow.start || 0) &&
+                            Number(segment.start || 0) < Number(currentTimelineWindow.end || 0);
+                          const draftLines = captionSegments.filter(isCurrentDraftLine);
+                          const missingIdentity = draftLines.filter(segment =>
+                            segment.speaker === "unknown" || segment.language === "und"
+                          ).length;
+                          setCaptionSegments(previous => previous.map(segment =>
+                            isCurrentDraftLine(segment)
+                              ? {
+                                  ...segment,
+                                  textReviewed: true,
+                                  reviewRequired:
+                                    segment.speaker === "unknown" || segment.language === "und",
+                                }
+                              : segment
+                          ));
+                          setCaptionGenerationStatus(missingIdentity ? "review" : "ready");
+                          setCaptionGenerationMessage(missingIdentity
+                            ? `Wording approved. Choose the speaker and language for ${missingIdentity} draft line${missingIdentity === 1 ? "" : "s"} before export.`
+                            : `${draftLines.length} creator-supplied draft line${draftLines.length === 1 ? "" : "s"} approved after review.`
+                          );
+                        }}
+                      >
+                        I checked the lyric draft — approve wording
+                      </button>
+                    )}
+                    <button type="button" className="inspector-secondary-action" onClick={addChoirMusicCue}>
+                      Add [Choir singing] sound cue
+                    </button>
+                    <small>
+                      A sound cue describes the music. It does not invent lyrics when speech
+                      recognition cannot hear reliable words.
+                    </small>
+                  </div>
+
                   <div className="caption-segment-editor" data-testid="caption-segment-editor">
                     <div className="caption-segment-heading">
                       <span>Transcript lines</span>
@@ -21138,9 +21363,9 @@ const ViralClipStudio = ({
                             color: "#8be9fd",
                             fontWeight: 600,
                           }}
-                          title="Import .srt or .vtt subtitle file directly without server"
+                          title="Import timed SRT/VTT subtitles or an untimed TXT lyric draft"
                         >
-                          📁 Import SRT
+                          📁 Import SRT/VTT/TXT
                           <input
                             type="file"
                             accept=".srt,.vtt,.txt"
@@ -21164,8 +21389,17 @@ const ViralClipStudio = ({
                                     );
                                     focusCaptionSegmentsForReview(normalized);
                                     setStudioActionMessage("Subtitles imported and active in preview.");
+                                  } else if (file.name.toLowerCase().endsWith(".txt")) {
+                                    activateCaptionScriptDraft(rawContent, file.name);
+                                  } else {
+                                    setCaptionGenerationStatus("failed");
+                                    setCaptionGenerationMessage("No timed subtitles were found. Check the SRT/VTT timestamps, or import plain lyrics as a .txt file.");
                                   }
                                 }
+                              };
+                              reader.onerror = () => {
+                                setCaptionGenerationStatus("failed");
+                                setCaptionGenerationMessage("The subtitle file could not be read. Please try again.");
                               };
                               reader.readAsText(file);
                               event.target.value = "";

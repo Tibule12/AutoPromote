@@ -396,6 +396,38 @@ class CaptionQualityTests(unittest.TestCase):
         self.assertIn("repeated_short_vocalization", result["quality"]["rejections"][0]["reasons"])
         self.assertIn("short_repeated_token", result["quality"]["rejections"][3]["reasons"])
 
+    def test_keeps_audio_supported_oh_la_choir_refrain_only_as_review_draft(self):
+        result = filter_caption_transcription_segments([
+            {
+                "start": 38.36,
+                "end": 59.78,
+                "text": "Oh, " + "la, " * 22 + "la.",
+                "avg_logprob": -0.219,
+                "no_speech_prob": 0.000001,
+                "compression_ratio": 5.58,
+            },
+            {
+                "start": 60.0,
+                "end": 74.08,
+                "text": "Oh la la, oh la la, la la, la, la, la, la, la, la.",
+                "avg_logprob": -0.701,
+                "no_speech_prob": 0.000001,
+                "compression_ratio": 2.34,
+            },
+            {
+                "start": 75.0,
+                "end": 89.0,
+                "text": "la " * 25,
+                "avg_logprob": -0.2,
+                "no_speech_prob": 0.000001,
+            },
+        ])
+
+        self.assertEqual(result["quality"]["accepted_segments"], 2)
+        self.assertEqual(result["quality"]["rejected_segments"], 1)
+        self.assertTrue(all(segment["reviewRequired"] for segment in result["segments"]))
+        self.assertTrue(all(segment["textReviewRequired"] for segment in result["segments"]))
+
     def test_rejects_repeated_cyrillic_word_from_live_choir_retest(self):
         result = filter_caption_transcription_segments(
             [

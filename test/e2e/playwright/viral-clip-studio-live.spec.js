@@ -1548,7 +1548,10 @@ test("runs the production Viral Clip Studio feature workflow with real playable 
     "data-programme-filter",
     /brightness/
   );
-  await expect(page.getByTestId("studio-program-canvas")).toHaveCSS("border-radius", "8%");
+  await expect(page.getByTestId("studio-program-canvas")).toHaveCSS(
+    "border-radius",
+    /^8% \/ [\d.]+%$/
+  );
   await expect(page.getByTestId("main-footage-frame-toggle")).toHaveAttribute(
     "data-rounded-locked",
     "true"
