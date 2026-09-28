@@ -3178,6 +3178,203 @@ describe("ViralClipStudio timeline sequencing", () => {
     });
   });
 
+  test("shows an actionable error for the uploaded WhatsApp video and allows a retry", async () => {
+    global.fetch
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 503,
+        json: jest.fn(() => Promise.resolve({ error: "Transcription worker is unavailable" })),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: jest.fn(() =>
+          Promise.resolve({
+            segments: [
+              {
+                start: 1,
+                end: 3,
+                text: "Actual spoken words",
+                speaker: "speaker_1",
+                language: "en",
+              },
+            ],
+          })
+        ),
+      });
+
+    render(
+      <ViralClipStudio
+        videoUrl="https://storage.example/whatsapp-video.mp4"
+        sourceName="WhatsApp Video 2026-09-14 at 21.30.02.mp4"
+        sourceStoragePath="studio/sources/test-user/whatsapp-video.mp4"
+        clips={[
+          {
+            id: "clip-1",
+            name: "WhatsApp Video 2026-09-14 at 21.30.02.mp4",
+            start: 0,
+            end: 210,
+            duration: 210,
+          },
+        ]}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+      />
+    );
+
+    const inspector = screen.getByTestId("clip-studio-inspector");
+    fireEvent.click(within(inspector).getByRole("tab", { name: /Captions/i }));
+    fireEvent.click(within(inspector).getByTestId("generate-live-transcript"));
+    expect(await within(inspector).findByRole("alert")).toHaveTextContent(
+      "Transcription worker is unavailable"
+    );
+    expect(within(inspector).queryByRole("textbox", { name: /Caption 1 text/i })).toBeNull();
+    expect(
+      within(inspector).getByRole("checkbox", { name: /Preview captions/i })
+    ).not.toBeChecked();
+
+    fireEvent.click(within(inspector).getByTestId("generate-live-transcript"));
+    expect(await within(inspector).findByRole("textbox", { name: "Caption 1 text" })).toHaveValue(
+      "Actual spoken words"
+    );
+    expect(global.fetch).toHaveBeenCalledTimes(2);
+    expect(
+      global.fetch.mock.calls.every(([url]) => String(url).includes("/api/media/transcribe-source"))
+    ).toBe(true);
+  });
+
+  test("keeps reviewed captions when regeneration fails", async () => {
+    global.fetch.mockResolvedValueOnce({
+      ok: false,
+      status: 503,
+      json: jest.fn(() => Promise.resolve({ error: "Transcription worker is unavailable" })),
+    });
+
+    render(
+      <ViralClipStudio
+        videoUrl="https://storage.example/whatsapp-video.mp4"
+        sourceStoragePath="studio/sources/test-user/whatsapp-video.mp4"
+        clips={[
+          {
+            id: "clip-1",
+            start: 0,
+            end: 210,
+            duration: 210,
+            segments: [
+              {
+                id: "reviewed-caption",
+                start: 1,
+                end: 3,
+                text: "Creator corrected lyrics",
+                speaker: "host",
+                language: "en",
+              },
+            ],
+          },
+        ]}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+      />
+    );
+
+    const inspector = screen.getByTestId("clip-studio-inspector");
+    fireEvent.click(within(inspector).getByRole("tab", { name: /Captions/i }));
+    expect(within(inspector).getByRole("textbox", { name: "Caption 1 text" })).toHaveValue(
+      "Creator corrected lyrics"
+    );
+    fireEvent.click(within(inspector).getByTestId("generate-live-transcript"));
+    expect(await within(inspector).findByRole("alert")).toHaveTextContent(
+      /existing captions were kept.*Transcription worker is unavailable/i
+    );
+    expect(within(inspector).getByRole("textbox", { name: "Caption 1 text" })).toHaveValue(
+      "Creator corrected lyrics"
+    );
+  });
+
+  test("completed caption jobs with zero usable lines fail without inventing captions", async () => {
+    global.fetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: jest.fn(() => Promise.resolve({ jobId: "empty-caption-job" })),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: jest.fn(() =>
+          Promise.resolve({
+            status: "completed",
+            result: { segments: [], transcriptionQuality: { status: "rejected" } },
+          })
+        ),
+      });
+
+    render(
+      <ViralClipStudio
+        videoUrl="https://storage.example/whatsapp-video.mp4"
+        sourceName="WhatsApp Video 2026-09-14 at 21.30.02.mp4"
+        sourceStoragePath="studio/sources/test-user/whatsapp-video.mp4"
+        clips={[
+          {
+            id: "clip-1",
+            name: "WhatsApp Video 2026-09-14 at 21.30.02.mp4",
+            start: 0,
+            end: 210,
+            duration: 210,
+          },
+        ]}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+      />
+    );
+
+    const inspector = screen.getByTestId("clip-studio-inspector");
+    fireEvent.click(within(inspector).getByRole("tab", { name: /Captions/i }));
+    fireEvent.click(within(inspector).getByTestId("generate-live-transcript"));
+    expect(await within(inspector).findByRole("alert", {}, { timeout: 7000 })).toHaveTextContent(
+      /could not identify reliable words/i
+    );
+    expect(within(inspector).queryByRole("textbox", { name: /Caption 1 text/i })).toBeNull();
+    expect(
+      within(inspector).getByRole("checkbox", { name: /Preview captions/i })
+    ).not.toBeChecked();
+  });
+
+  test("empty English translation reports no reliable words rather than unconfirmed translation", async () => {
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: jest.fn(() =>
+        Promise.resolve({
+          language_mode: "translated_to_english",
+          segments: [],
+          transcription_quality: { status: "rejected", rejected_segments: 8 },
+        })
+      ),
+    });
+
+    render(
+      <ViralClipStudio
+        videoUrl="https://storage.example/choir-video.mp4"
+        sourceStoragePath="studio/sources/test-user/choir-video.mp4"
+        clips={[{ id: "clip-1", start: 0, end: 210, duration: 210 }]}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+      />
+    );
+
+    const inspector = screen.getByTestId("clip-studio-inspector");
+    fireEvent.click(within(inspector).getByRole("tab", { name: /Captions/i }));
+    fireEvent.click(
+      within(inspector).getByRole("checkbox", {
+        name: /Translate captions to English/i,
+      })
+    );
+    expect(await within(inspector).findByRole("alert")).toHaveTextContent(
+      /could not identify reliable words/i
+    );
+    expect(within(inspector).queryByText(/did not confirm an English translation/i)).toBeNull();
+    expect(
+      within(inspector).getByRole("checkbox", { name: /Translate captions to English/i })
+    ).not.toBeChecked();
+  });
+
   test("turns a reviewed spoken story beat into approved licensed moving footage", async () => {
     const onSave = jest.fn(() => Promise.resolve());
     global.fetch

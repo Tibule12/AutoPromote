@@ -213,6 +213,16 @@ const normalizePlainText = value =>
     .replace(/[<>]/g, "")
     .trim();
 
+const getCaptionServiceError = (payload, fallback) => {
+  const detail = payload?.error ?? payload?.message ?? payload?.detail;
+  if (typeof detail === "string" && detail.trim()) return detail.trim();
+  if (Array.isArray(detail)) {
+    const messages = detail.map(item => item?.msg).filter(Boolean);
+    if (messages.length) return messages.join("; ");
+  }
+  return fallback;
+};
+
 const AutoPromoteBrandLockup = ({
   className = "",
   compact = false,
@@ -2907,6 +2917,7 @@ const ViralClipStudio = ({
   const [translateCaptionsToEnglish, setTranslateCaptionsToEnglish] = useState(false);
   const [captionGenerationStatus, setCaptionGenerationStatus] = useState("idle");
   const [captionGenerationMessage, setCaptionGenerationMessage] = useState("");
+  const captionGenerationInFlightRef = useRef(false);
   const [studioActionMessage, setStudioActionMessage] = useState(
     "Split preview is live. Edit on the right and compare the untouched source beside it."
   );
@@ -7755,12 +7766,14 @@ const ViralClipStudio = ({
 
   const generateLiveTranscript = async ({
     translateToEnglish = translateCaptionsToEnglish,
-    preserveExistingOnFailure = false,
+    sourceClip = currentTimelineClip,
   } = {}) => {
-    if (captionGenerationStatus === "processing") return false;
+    if (captionGenerationInFlightRef.current) return false;
+    captionGenerationInFlightRef.current = true;
 
     const requestedTranslation = Boolean(translateToEnglish);
     const retainedSegments = normalizeCaptionSegments(captionSegments);
+    const activeSourceClip = sourceClip || currentTimelineClip;
 
     setCaptionGenerationStatus("processing");
     setCaptionGenerationMessage(
@@ -7770,12 +7783,15 @@ const ViralClipStudio = ({
     );
 
     try {
-      const sourceUrl = getSafeMediaSource(currentTimelineClip?.url || videoUrl);
+      const sourceUrl = getSafeMediaSource(activeSourceClip?.url || videoUrl);
       let token = await getMediaAuthToken();
       if (!token) throw new Error("Please log in before generating captions.");
 
       const trustedStoragePath = String(
-        sourceStoragePath || currentTimelineClip?.storagePath || selectedClip?.storagePath || ""
+        activeSourceClip?.sourceStoragePath ||
+          activeSourceClip?.storagePath ||
+          (activeSourceClip?.id === "main" ? sourceStoragePath || selectedClip?.storagePath : "") ||
+          ""
       ).trim();
       let transcriptionUrl = `${API_BASE_URL}/api/media/transcribe-source`;
       let transcriptionBody;
@@ -7796,10 +7812,10 @@ const ViralClipStudio = ({
         );
       } else {
         let sourceBlob =
-          selectedClip?.file instanceof Blob
-            ? selectedClip.file
-            : currentTimelineClip?.file instanceof Blob
-              ? currentTimelineClip.file
+          activeSourceClip?.file instanceof Blob
+            ? activeSourceClip.file
+            : activeSourceClip?.id === "main" && selectedClip?.file instanceof Blob
+              ? selectedClip.file
               : null;
 
         if (!sourceBlob && sourceUrl) {
@@ -7816,7 +7832,7 @@ const ViralClipStudio = ({
         formData.append(
           "file",
           sourceBlob,
-          selectedClip?.file?.name || currentTimelineClip?.file?.name || "viral-studio-source.mp4"
+          activeSourceClip?.file?.name || selectedClip?.file?.name || "viral-studio-source.mp4"
         );
         formData.append("translate_to_english", requestedTranslation ? "true" : "false");
         transcriptionUrl = `${API_BASE_URL}/api/media/transcribe`;
@@ -7832,6 +7848,7 @@ const ViralClipStudio = ({
 
       if (response.status === 401) {
         token = await getMediaAuthToken(true);
+        if (!token) throw new Error("Your session expired. Sign in, then try captions again.");
         response = await fetch(transcriptionUrl, {
           method: "POST",
           headers: { ...transcriptionHeaders, Authorization: `Bearer ${token}` },
@@ -7841,10 +7858,17 @@ const ViralClipStudio = ({
 
       let payload = await response.json().catch(() => null);
       if (!response.ok) {
-        throw new Error(payload?.error || payload?.message || "Caption transcription failed.");
+        throw new Error(
+          getCaptionServiceError(
+            payload,
+            "Caption transcription could not start. Please try again."
+          )
+        );
       }
 
       if (payload?.jobId) {
+        let completed = false;
+        let failedPolls = 0;
         for (let attempt = 0; attempt < 1800; attempt += 1) {
           await sleep(2000);
           let statusResponse = await fetch(`${API_BASE_URL}/api/media/status/${payload.jobId}`, {
@@ -7852,17 +7876,50 @@ const ViralClipStudio = ({
           });
           if (statusResponse.status === 401) {
             token = await getMediaAuthToken(true);
+            if (!token) throw new Error("Your session expired. Sign in, then try captions again.");
             statusResponse = await fetch(`${API_BASE_URL}/api/media/status/${payload.jobId}`, {
               headers: { Authorization: `Bearer ${token}` },
             });
           }
-          if (!statusResponse.ok) continue;
-          const statusPayload = await statusResponse.json();
-          if (statusPayload.status === "failed") {
-            throw new Error(statusPayload.error || "Caption transcription failed.");
+          const statusPayload = await statusResponse.json().catch(() => null);
+          if (!statusResponse.ok) {
+            if (statusResponse.status === 401) {
+              throw new Error("Your session expired. Sign in, then try captions again.");
+            }
+            if ([403, 404].includes(statusResponse.status)) {
+              throw new Error(
+                getCaptionServiceError(
+                  statusPayload,
+                  "The caption job is no longer available. Please retry."
+                )
+              );
+            }
+            failedPolls += 1;
+            if (failedPolls >= 3) {
+              throw new Error(
+                getCaptionServiceError(
+                  statusPayload,
+                  "The caption service is temporarily unavailable. Please retry."
+                )
+              );
+            }
+            continue;
+          }
+          if (!statusPayload || typeof statusPayload !== "object") {
+            failedPolls += 1;
+            if (failedPolls >= 3)
+              throw new Error("The caption service returned an unreadable status. Please retry.");
+            continue;
+          }
+          failedPolls = 0;
+          if (["failed", "cancelled", "canceled"].includes(statusPayload.status)) {
+            throw new Error(
+              getCaptionServiceError(statusPayload, "Caption transcription failed. Please retry.")
+            );
           }
           if (statusPayload.status === "completed") {
             payload = statusPayload.result || statusPayload;
+            completed = true;
             break;
           }
           setCaptionGenerationMessage(
@@ -7871,27 +7928,23 @@ const ViralClipStudio = ({
             )}%`
           );
         }
+        if (!completed) throw new Error("Caption transcription timed out. Please retry.");
       }
 
       const captionSourceClipId =
-        currentTimelineClip?.sourceClipId || currentTimelineClip?.id || selectedClip?.id || null;
+        activeSourceClip?.sourceClipId || activeSourceClip?.id || selectedClip?.id || null;
       const responseSegments = Array.isArray(payload?.segments) ? payload.segments : [];
-      const languageMode = String(
-        payload?.languageMode || payload?.language_mode || ""
-      ).trim().toLowerCase();
+      const languageMode = String(payload?.languageMode || payload?.language_mode || "")
+        .trim()
+        .toLowerCase();
       const translationProvenanceConfirmed =
         responseSegments.length > 0 &&
         responseSegments.every(
           segment =>
             segment?.translatedToEnglish === true || segment?.translated_to_english === true
         );
-      if (
-        requestedTranslation &&
-        (languageMode !== "translated_to_english" || !translationProvenanceConfirmed)
-      ) {
-        throw new Error("The caption service did not confirm an English translation.");
-      }
-      const safeResponseSegments = filterClearlyCorruptCaptionSegments(responseSegments.filter(segment => {
+      const safeResponseSegments = filterClearlyCorruptCaptionSegments(
+        responseSegments.filter(segment => {
           const text = normalizePlainText(segment?.text).toLowerCase();
           return ![
             "music outro",
@@ -7903,28 +7956,28 @@ const ViralClipStudio = ({
             "copyright",
             "all rights reserved",
           ].some(blocked => text.includes(blocked));
-        }));
+        })
+      );
       const nextSegments = normalizeCaptionSegments(
         splitCaptionSegmentsForReadability(safeResponseSegments)
-      )
-        .map(segment => ({
-          ...segment,
-          // Older workers might return words with a rejected quality status.
-          // Never silently present those words as verified subtitles.
-          ...(payload?.transcriptionQuality?.status === "rejected" ||
-          payload?.transcription_quality?.status === "rejected"
-            ? { textReviewRequired: true, textReviewed: false, reviewRequired: true }
-            : {}),
-          sourceClipId: captionSourceClipId,
-          translatedToEnglish: requestedTranslation,
-          ...(requestedTranslation
-            ? {
-                language: "en",
-                languageLabel: "English",
-                languages: ["en"],
-              }
-            : {}),
-        }));
+      ).map(segment => ({
+        ...segment,
+        // Older workers might return words with a rejected quality status.
+        // Never silently present those words as verified subtitles.
+        ...(payload?.transcriptionQuality?.status === "rejected" ||
+        payload?.transcription_quality?.status === "rejected"
+          ? { textReviewRequired: true, textReviewed: false, reviewRequired: true }
+          : {}),
+        sourceClipId: captionSourceClipId,
+        translatedToEnglish: requestedTranslation,
+        ...(requestedTranslation
+          ? {
+              language: "en",
+              languageLabel: "English",
+              languages: ["en"],
+            }
+          : {}),
+      }));
       const transcriptionQuality =
         payload?.transcriptionQuality || payload?.transcription_quality || null;
       const identityReviewSegments = nextSegments.filter(segment => segment.reviewRequired).length;
@@ -7941,35 +7994,15 @@ const ViralClipStudio = ({
       );
 
       if (!nextSegments.length) {
-        if (!requestedTranslation && captionTextOverride?.trim()) {
-          const clipDuration = Math.max(
-            3,
-            Number(currentTimelineWindow?.duration || selectedClip?.duration || currentTimelineClip?.duration || 30)
-          );
-          const fallbackClientSegments = generateClientSideCaptionSegments({
-            text: captionTextOverride,
-            duration: clipDuration,
-            sourceClipId: captionSourceClipId,
-          });
-          if (fallbackClientSegments.length) {
-            setCaptionSegments(fallbackClientSegments);
-            setCaptionTextOverride("");
-            setAutoCaptions(true);
-            setComparisonMode("after");
-            setCaptionGenerationStatus("ready");
-            setCaptionGenerationMessage(
-              `${fallbackClientSegments.length} client-side captions ready · Edit lines, timestamps and styles below`
-            );
-            focusCaptionSegmentsForReview(fallbackClientSegments);
-            setStudioActionMessage(
-              "Client-side speech captions are active. Tap any line below to edit the words or timing directly."
-            );
-            return true;
-          }
-        }
         throw new Error(
           "Automatic transcription could not identify reliable words in this audio. Try a shorter, clearer section, or import/type the lyrics."
         );
+      }
+      if (
+        requestedTranslation &&
+        (languageMode !== "translated_to_english" || !translationProvenanceConfirmed)
+      ) {
+        throw new Error("The caption service did not confirm an English translation.");
       }
 
       setCaptionSegments(nextSegments);
@@ -8000,9 +8033,7 @@ const ViralClipStudio = ({
           identityReviewSegments
             ? ` · ${identityReviewSegments} line${identityReviewSegments === 1 ? "" : "s"} need review`
             : " · speakers and languages identified"
-        }${
-          identityReviewSegments ? " · approve flagged lines before final render" : ""
-        }`
+        }${identityReviewSegments ? " · approve flagged lines before final render" : ""}`
       );
       focusCaptionSegmentsForReview(nextSegments);
       setStudioActionMessage(
@@ -8012,7 +8043,7 @@ const ViralClipStudio = ({
       );
       return true;
     } catch (error) {
-      if (preserveExistingOnFailure && retainedSegments.length) {
+      if (retainedSegments.length) {
         setCaptionGenerationStatus("failed");
         setCaptionGenerationMessage(
           `${requestedTranslation ? "Translation" : "Caption regeneration"} failed. Your existing captions were kept. ${error.message || "Try again."}`
@@ -8026,6 +8057,8 @@ const ViralClipStudio = ({
       setCaptionGenerationMessage(error.message || "Caption transcription failed.");
       setStudioActionMessage(error.message || "Caption transcription failed.");
       return false;
+    } finally {
+      captionGenerationInFlightRef.current = false;
     }
   };
 
@@ -20974,7 +21007,11 @@ const ViralClipStudio = ({
                       <h4>Make every word land before you render</h4>
                     </div>
                     <span className={`inspector-status-dot ${autoCaptions ? "is-ready" : ""}`}>
-                      {autoCaptions ? "Live" : "Off"}
+                      {autoCaptions
+                        ? captionSegments.length || normalizedCaptionOverride
+                          ? "Live"
+                          : "Needs captions"
+                        : "Off"}
                     </span>
                   </div>
 
@@ -21021,7 +21058,6 @@ const ViralClipStudio = ({
                         );
                         void generateLiveTranscript({
                           translateToEnglish: enabled,
-                          preserveExistingOnFailure: true,
                         }).then(succeeded => {
                           if (!succeeded) setTranslateCaptionsToEnglish(previousMode);
                         });
@@ -21046,13 +21082,13 @@ const ViralClipStudio = ({
                           : "Generate speech captions"}
                     </button>
                     <small>
-                      Detects multilingual South African speech and creates editable, timestamped
-                      lines before rendering.
+                      Creates editable, timestamped lines from clear speech. For songs or choirs,
+                      import an SRT/VTT subtitle file or type lyrics below.
                     </small>
                     {captionGenerationMessage ? (
                       <p
                         className={`caption-generation-status is-${captionGenerationStatus}`}
-                        role="status"
+                        role={captionGenerationStatus === "failed" ? "alert" : "status"}
                       >
                         {captionGenerationMessage}
                       </p>
