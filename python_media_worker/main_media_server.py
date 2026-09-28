@@ -2275,12 +2275,41 @@ def filter_caption_transcription_segments(transcription_segments):
     annotated = annotate_transcription_segments(transcription_segments)
     accepted = []
     rejected = []
+    review_count = 0
     for index, segment in enumerate(annotated):
         reasons = get_transcript_hallucination_reasons(segment)
         confidence = float(segment.get("transcriptConfidence", 0.0) or 0.0)
         if confidence < 0.52:
             reasons = list(dict.fromkeys([*reasons, "low_segment_confidence"]))
-        if reasons:
+        # A low model score is not evidence that the words are invented. This
+        # happens frequently with choirs, accents and code-switched singing.
+        # Preserve plausible words as an explicitly unverified editor draft.
+        # Only discard unmistakable corruption or implausible timing.
+        # A provider occasionally emits the detected language name over and
+        # over instead of lyrics. Ordinary repeated words can be a real chorus.
+        repeated_label = normalize_transcript_text(segment.get("text")).lower().split()
+        repeated_language_placeholder = bool(
+            {"repeated_token", "low_word_confidence"} <= set(reasons)
+            and repeated_label
+            and all(
+                re.sub(r"[^a-z]+", "", token) in {
+                    "isizulu", "isixhosa", "zulu", "xhosa", "english",
+                    "unintelligible", "inaudible", "unknown",
+                }
+                for token in repeated_label
+            )
+        )
+        hard_rejection = bool(
+            set(reasons) & {
+                "empty_text",
+                "repeated_character",
+                "repeated_character_sequence",
+                "impossible_word_rate",
+            }
+            or repeated_language_placeholder
+            or {"repeated_phrase", "collapsed_timestamps"} <= set(reasons)
+        )
+        if hard_rejection:
             rejected.append(
                 {
                     "index": index,
@@ -2291,6 +2320,16 @@ def filter_caption_transcription_segments(transcription_segments):
                 }
             )
         else:
+            if reasons:
+                review_count += 1
+                segment["textReviewRequired"] = True
+                segment["textReviewed"] = False
+                segment["reviewRequired"] = True
+                segment["transcriptionReviewReasons"] = reasons
+            if "collapsed_timestamps" in reasons:
+                # Broken word alignment must not drive subtitle cue splitting;
+                # the editor can estimate cue timing from the segment instead.
+                segment["words"] = []
             accepted.append(segment)
 
     return {
@@ -2298,13 +2337,14 @@ def filter_caption_transcription_segments(transcription_segments):
         "quality": {
             "status": (
                 "rejected"
-                if annotated and not accepted
+                if not accepted
                 else "review_required"
-                if rejected
+                if rejected or review_count
                 else "ready"
             ),
             "accepted_segments": len(accepted),
             "rejected_segments": len(rejected),
+            "review_segments": review_count,
             "rejections": rejected,
         },
     }

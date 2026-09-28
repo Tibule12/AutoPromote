@@ -1687,6 +1687,10 @@ const normalizeCaptionSegments = segments =>
         translatedToEnglish: Boolean(
           segment?.translatedToEnglish ?? segment?.translated_to_english
         ),
+        transcriptConfidence: clampNumber(segment?.transcriptConfidence, 0, 1, 0),
+        transcriptionReviewReasons: Array.isArray(segment?.transcriptionReviewReasons)
+          ? segment.transcriptionReviewReasons
+          : [],
         textReviewRequired,
         textReviewed,
         captionPlacement: normalizePlainText(
@@ -7862,6 +7866,12 @@ const ViralClipStudio = ({
       )
         .map(segment => ({
           ...segment,
+          // Older workers might return words with a rejected quality status.
+          // Never silently present those words as verified subtitles.
+          ...(payload?.transcriptionQuality?.status === "rejected" ||
+          payload?.transcription_quality?.status === "rejected"
+            ? { textReviewRequired: true, textReviewed: false, reviewRequired: true }
+            : {}),
           sourceClipId: captionSourceClipId,
           translatedToEnglish: requestedTranslation,
           ...(requestedTranslation
@@ -7874,14 +7884,10 @@ const ViralClipStudio = ({
         }));
       const transcriptionQuality =
         payload?.transcriptionQuality || payload?.transcription_quality || null;
-      if (transcriptionQuality?.status === "rejected") {
-        throw new Error(
-          requestedTranslation
-            ? "The English translation was rejected because the speech confidence was too low."
-            : "Transcription was not confident enough to create honest captions."
-        );
-      }
       const identityReviewSegments = nextSegments.filter(segment => segment.reviewRequired).length;
+      const wordingReviewSegments = nextSegments.filter(
+        segment => segment.textReviewRequired && !segment.textReviewed
+      ).length;
       const detectedLanguageLabels = Array.from(
         new Set(
           nextSegments
@@ -7918,22 +7924,30 @@ const ViralClipStudio = ({
             return true;
           }
         }
-        throw new Error("No clear speech was detected. You can still type captions manually.");
+        throw new Error(
+          "No usable words were detected. Try a shorter section, or type captions manually."
+        );
       }
 
       setCaptionSegments(nextSegments);
       setCaptionTextOverride("");
       setAutoCaptions(true);
       setComparisonMode("after");
-      setCaptionGenerationStatus("ready");
+      setCaptionGenerationStatus(identityReviewSegments ? "review" : "ready");
       setCaptionGenerationMessage(
-        `${nextSegments.length} timestamped caption${nextSegments.length === 1 ? "" : "s"} ready · ${
+        `${nextSegments.length} timestamped caption${nextSegments.length === 1 ? "" : "s"} ${
+          identityReviewSegments ? "available as a preview draft" : "ready"
+        } · ${
           requestedTranslation
             ? "translated to English"
             : "spoken languages preserved automatically"
         }${
+          wordingReviewSegments
+            ? ` · ${wordingReviewSegments} draft line${wordingReviewSegments === 1 ? "" : "s"} need wording review`
+            : ""
+        }${
           Number(transcriptionQuality?.rejected_segments || 0) > 0
-            ? ` · ${transcriptionQuality.rejected_segments} uncertain line${Number(transcriptionQuality.rejected_segments) === 1 ? "" : "s"} hidden`
+            ? ` · ${transcriptionQuality.rejected_segments} corrupted line${Number(transcriptionQuality.rejected_segments) === 1 ? "" : "s"} excluded`
             : ""
         }${
           detectedLanguageLabels.length
@@ -7941,15 +7955,17 @@ const ViralClipStudio = ({
             : " · language labels need review"
         }${
           identityReviewSegments
-            ? ` · ${identityReviewSegments} speaker/language label${identityReviewSegments === 1 ? "" : "s"} need review`
+            ? ` · ${identityReviewSegments} line${identityReviewSegments === 1 ? "" : "s"} need review`
             : " · speakers and languages identified"
+        }${
+          identityReviewSegments ? " · approve flagged lines before final render" : ""
         }`
       );
       focusCaptionSegmentsForReview(nextSegments);
       setStudioActionMessage(
         requestedTranslation
-          ? "English captions are live. Edit any translated line before rendering."
-          : "Real speech captions are live. Edit any timestamped line before rendering."
+          ? "English caption drafts are live. Verify translated wording before rendering."
+          : "Caption drafts are live. Correct flagged wording and timing before rendering."
       );
       return true;
     } catch (error) {
@@ -7963,45 +7979,6 @@ const ViralClipStudio = ({
         );
         return false;
       }
-      const fallbackText =
-        captionTextOverride?.trim() ||
-        selectedClip?.transcript ||
-        selectedClip?.text ||
-        selectedClip?.hookText ||
-        selectedClip?.name ||
-        "";
-      if (!requestedTranslation && fallbackText) {
-        const fallbackDuration = Math.max(
-          3,
-          Number(currentTimelineWindow?.duration || selectedClip?.duration || currentTimelineClip?.duration || 30)
-        );
-        const clientSegments = generateClientSideCaptionSegments({
-          text: fallbackText,
-          duration: fallbackDuration,
-          sourceClipId:
-            currentTimelineClip?.sourceClipId ||
-            currentTimelineClip?.id ||
-            selectedClip?.id ||
-            null,
-        });
-
-        if (clientSegments.length) {
-          setCaptionSegments(clientSegments);
-          setCaptionTextOverride("");
-          setAutoCaptions(true);
-          setComparisonMode("after");
-          setCaptionGenerationStatus("ready");
-          setCaptionGenerationMessage(
-            `${clientSegments.length} client-side captions ready from clip speech · Edit lines, timestamps and styles below`
-          );
-          focusCaptionSegmentsForReview(clientSegments);
-          setStudioActionMessage(
-            "Speech captions are active. Tap any line below to edit words or timing directly."
-          );
-          return true;
-        }
-      }
-
       setCaptionGenerationStatus("failed");
       setCaptionGenerationMessage(error.message || "Caption transcription failed.");
       setStudioActionMessage(error.message || "Caption transcription failed.");
