@@ -2282,6 +2282,35 @@ def annotate_transcription_segments(transcription_segments):
     return annotated
 
 
+def is_plausible_sung_vocalization(segment):
+    """Retain an audible-looking refrain as a review draft, not verified lyrics.
+
+    A choir can genuinely repeat short syllables. Require an alternating Latin
+    refrain and strong audio evidence; pure loops and corrupted Cyrillic text
+    still fail the hallucination checks below.
+    """
+    tokens = [
+        re.sub(r"[^a-z]+", "", token.casefold())
+        for token in normalize_transcript_text(segment.get("text")).split()
+    ]
+    tokens = [token for token in tokens if token]
+    if (
+        len(tokens) < 4
+        or len(tokens) > 80
+        or not set(tokens) <= {"oh", "ooh", "la", "lah"}
+        or "la" not in tokens
+        or not {"oh", "ooh"}.intersection(tokens)
+    ):
+        return False
+    duration = float(segment.get("end") or 0) - float(segment.get("start") or 0)
+    try:
+        logprob = float(segment.get("avg_logprob"))
+        no_speech_prob = float(segment.get("no_speech_prob"))
+    except (TypeError, ValueError):
+        return False
+    return 1.0 <= duration <= 30.0 and logprob >= -0.8 and no_speech_prob <= 0.18
+
+
 def filter_caption_transcription_segments(transcription_segments):
     annotated = annotate_transcription_segments(transcription_segments)
     accepted = []
@@ -2344,8 +2373,13 @@ def filter_caption_transcription_segments(transcription_segments):
                 for token in repeated_label
             )
         )
+        hard_reasons = set(reasons)
+        if is_plausible_sung_vocalization(segment):
+            # The creator still reviews the line because repetition can also
+            # be a model hallucination. Do not suppress any other hard reason.
+            hard_reasons.discard("short_repeated_token")
         hard_rejection = bool(
-            set(reasons) & {
+            hard_reasons & {
                 "empty_text",
                 "repeated_character",
                 "repeated_character_sequence",
@@ -2357,7 +2391,7 @@ def filter_caption_transcription_segments(transcription_segments):
                 "repeated_cyrillic_vocalization",
             }
             or repeated_language_placeholder
-            or {"repeated_phrase", "collapsed_timestamps"} <= set(reasons)
+            or {"repeated_phrase", "collapsed_timestamps"} <= hard_reasons
         )
         if hard_rejection:
             rejected.append(

@@ -3337,6 +3337,102 @@ describe("ViralClipStudio timeline sequencing", () => {
     ).not.toBeChecked();
   });
 
+  test("can add a truthful choir sound cue after speech recognition rejects the video", async () => {
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: jest.fn(() => Promise.resolve({
+        segments: [],
+        transcription_quality: { status: "rejected" },
+      })),
+    });
+    render(
+      <ViralClipStudio
+        videoUrl="https://storage.example/choir-video.mp4"
+        sourceStoragePath="studio/sources/test-user/choir-video.mp4"
+        clips={[{ id: "clip-1", start: 0, end: 210, duration: 210 }]}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+      />
+    );
+    const inspector = screen.getByTestId("clip-studio-inspector");
+    fireEvent.click(within(inspector).getByRole("tab", { name: /Captions/i }));
+    fireEvent.click(within(inspector).getByTestId("generate-live-transcript"));
+    expect(await within(inspector).findByRole("alert")).toHaveTextContent(/could not identify reliable words/i);
+    fireEvent.click(within(inspector).getByRole("button", { name: /Add \[Choir singing\] sound cue/i }));
+    expect(within(inspector).getByRole("textbox", { name: "Caption 1 text" })).toHaveValue("[Choir singing]");
+    expect(within(inspector).getByRole("spinbutton", { name: "Caption 1 start" })).toHaveValue(0);
+    expect(within(inspector).getByRole("spinbutton", { name: "Caption 1 end" })).toHaveValue(4);
+    expect(within(inspector).getByRole("checkbox", { name: /Preview captions/i })).toBeChecked();
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  test("pasted lyrics can be reviewed and reach the render contract across the full clip", async () => {
+    const onSave = jest.fn(() => Promise.resolve());
+    render(
+      <ViralClipStudio
+        videoUrl="https://storage.example/choir-video.mp4"
+        sourceStoragePath="studio/sources/test-user/choir-video.mp4"
+        clips={[{ id: "clip-1", start: 12, end: 222, duration: 210 }]}
+        onSave={onSave}
+        onCancel={jest.fn()}
+      />
+    );
+    const inspector = screen.getByTestId("clip-studio-inspector");
+    fireEvent.click(within(inspector).getByRole("tab", { name: /Captions/i }));
+    fireEvent.change(within(inspector).getByRole("textbox", { name: "Full lyrics or script" }), {
+      target: { value: "First sung line\nSecond sung line\nThird sung line\nFourth sung line\nFifth sung line" },
+    });
+    fireEvent.change(within(inspector).getByRole("combobox", { name: "Draft caption language" }), {
+      target: { value: "xh" },
+    });
+    fireEvent.click(within(inspector).getByRole("button", { name: "Create timed lyric draft" }));
+    expect(within(inspector).getByRole("textbox", { name: "Caption 1 text" })).toHaveValue("First sung line");
+    expect(within(inspector).getByRole("spinbutton", { name: "Caption 1 start" })).toHaveValue(12);
+    expect(within(inspector).getByRole("spinbutton", { name: "Caption 5 end" })).toHaveValue(222);
+    expect(within(inspector).getByText(/5 timed draft lines from your lyrics or script/i)).toBeInTheDocument();
+    expect(within(inspector).getByRole("checkbox", { name: /Preview captions/i })).toBeChecked();
+    fireEvent.click(within(inspector).getByRole("button", {
+      name: /I checked the lyric draft — approve wording/i,
+    }));
+    expect(within(inspector).getByText(/5 creator-supplied draft lines approved after review/i)).toBeInTheDocument();
+    await clickRenderFinalClip();
+    await waitFor(() => expect(onSave).toHaveBeenCalled());
+    const exportCaptions = onSave.mock.calls[0][2].captionSegments;
+    expect(exportCaptions).toHaveLength(5);
+    expect(exportCaptions[0]).toMatchObject({
+      start_time: 0,
+      text: "First sung line",
+      language: "xh",
+      speaker: "choir",
+      text_reviewed: true,
+      review_required: false,
+    });
+    expect(exportCaptions.at(-1).end_time).toBe(210);
+  });
+
+  test("imports a plain TXT lyric sheet as a timed draft", async () => {
+    render(
+      <ViralClipStudio
+        videoUrl="https://storage.example/choir-video.mp4"
+        sourceStoragePath="studio/sources/test-user/choir-video.mp4"
+        clips={[{ id: "clip-1", start: 0, end: 210, duration: 210 }]}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+      />
+    );
+    const inspector = screen.getByTestId("clip-studio-inspector");
+    fireEvent.click(within(inspector).getByRole("tab", { name: /Captions/i }));
+    const fileInput = within(inspector).getByTitle(/Import timed SRT\/VTT subtitles/i)
+      .querySelector('input[type="file"]');
+    const file = new File(["First lyric\nSecond lyric\nThird lyric\nFourth lyric\nFifth lyric"], "choir.txt", {
+      type: "text/plain",
+    });
+    fireEvent.change(fileInput, { target: { files: [file] } });
+    expect(await within(inspector).findByText(/5 timed draft lines from choir.txt/i)).toBeInTheDocument();
+    expect(within(inspector).getByRole("textbox", { name: "Caption 5 text" })).toHaveValue("Fifth lyric");
+    expect(within(inspector).getByRole("spinbutton", { name: "Caption 5 end" })).toHaveValue(210);
+  });
+
   test("empty English translation reports no reliable words rather than unconfirmed translation", async () => {
     global.fetch.mockResolvedValueOnce({
       ok: true,

@@ -31,6 +31,7 @@ import {
   mapCaptionSegmentsToTimeline,
 } from "./viralRenderPayload";
 import { splitCaptionSegmentsForReadability } from "./captionReadability";
+import { buildTimedScriptDraft } from "../utils/captionDrafts";
 import { buildTranscriptGroundedBRollSuggestions } from "./storyBeatPlanner";
 import { getMediaAuthToken } from "../utils/mediaAuth";
 import useCinematicEffects, { CINEMATIC_PRESETS, buildCinematicCssFilter } from "../hooks/useCinematicEffects";
@@ -285,6 +286,7 @@ const CAPTION_LANGUAGE_OPTIONS = [
 
 const CAPTION_SPEAKER_OPTIONS = [
   { value: "unknown", label: "Speaker needs review" },
+  { value: "choir", label: "Choir" },
   { value: "host", label: "Host" },
   { value: "guest", label: "Guest" },
   { value: "A", label: "Speaker A" },
@@ -2906,6 +2908,9 @@ const ViralClipStudio = ({
   const [captionPosition, setCaptionPosition] = useState("bottom_center");
   const [captionScale, setCaptionScale] = useState(1);
   const [captionTextOverride, setCaptionTextOverride] = useState("");
+  const [captionScriptDraft, setCaptionScriptDraft] = useState("");
+  const [captionDraftLanguage, setCaptionDraftLanguage] = useState("und");
+  const [captionDraftSpeaker, setCaptionDraftSpeaker] = useState("choir");
   const [captionSegments, setRawCaptionSegments] = useState(() =>
     ensureUniqueCaptionIds(resolveInitialCaptionSegments((clips || [])[0], (clips || [])[0]?.duration))
   );
@@ -7762,6 +7767,92 @@ const ViralClipStudio = ({
       video.currentTime = target.sourceTime;
       setVideoTime(target.sourceTime);
     }, 0);
+  };
+
+  const activateCaptionScriptDraft = (script, sourceLabel = "your text") => {
+    const sourceClipId =
+      currentTimelineClip?.sourceClipId || currentTimelineClip?.id || selectedClip?.id || null;
+    try {
+      const windowStart = Number(currentTimelineWindow.start || 0);
+      const windowDuration = Number(currentTimelineWindow.duration || selectedClip?.duration || 0);
+      const draft = buildTimedScriptDraft(script, {
+        start: windowStart,
+        duration: windowDuration,
+      });
+      if (!draft.length) throw new Error("Enter lyrics or a script before creating timed lines.");
+      const language = normalizeCaptionLanguage(captionDraftLanguage);
+      const speaker = normalizeCaptionSpeaker(captionDraftSpeaker);
+      const segments = normalizeCaptionSegments(draft.map(line => ({
+        ...line,
+        id: createSecureId("script-caption"),
+        sourceClipId,
+        speaker,
+        speakerLabel: getCaptionSpeakerLabel(speaker),
+        language,
+        languageLabel: getCaptionLanguageLabel(language),
+        languages: language === "und" ? [] : [language],
+        textReviewRequired: true,
+        textReviewed: false,
+        reviewRequired: true,
+      })));
+      setCaptionSegments(previous => [
+        ...previous.filter(segment =>
+          sourceClipId && (
+            String(segment.sourceClipId || "") !== String(sourceClipId) ||
+            Number(segment.end || 0) <= windowStart ||
+            Number(segment.start || 0) >= windowStart + windowDuration
+          )
+        ),
+        ...segments,
+      ]);
+      setCaptionTextOverride("");
+      setTranslateCaptionsToEnglish(false);
+      setAutoCaptions(true);
+      setComparisonMode("after");
+      setCaptionGenerationStatus("review");
+      setCaptionGenerationMessage(
+        `${segments.length} timed draft line${segments.length === 1 ? "" : "s"} from ${sourceLabel}. Check the words and timing against the video, then approve each line before export.`
+      );
+      focusCaptionSegmentsForReview(segments);
+      return true;
+    } catch (error) {
+      setCaptionGenerationStatus("failed");
+      setCaptionGenerationMessage(error.message || "The caption draft could not be created.");
+      return false;
+    }
+  };
+
+  const addChoirMusicCue = () => {
+    const start = Math.max(0, Number(currentTimelineWindow.start || 0));
+    const duration = Math.max(0, Number(currentTimelineWindow.duration || selectedClip?.duration || 0));
+    if (!duration) {
+      setCaptionGenerationStatus("failed");
+      setCaptionGenerationMessage("Choose a video clip before adding a choir cue.");
+      return;
+    }
+    const cue = normalizeCaptionSegments([{
+      id: createSecureId("caption-line"),
+      start,
+      end: start + Math.min(4, duration),
+      text: "[Choir singing]",
+      speaker: "choir",
+      speakerLabel: "Choir",
+      language: "en",
+      languageLabel: "English",
+      languages: ["en"],
+      textReviewRequired: false,
+      textReviewed: true,
+      reviewRequired: false,
+      sourceClipId: currentTimelineClip?.sourceClipId || currentTimelineClip?.id || selectedClip?.id || null,
+    }])[0];
+    setCaptionSegments(previous => [...previous, cue]);
+    setCaptionTextOverride("");
+    setTranslateCaptionsToEnglish(false);
+    setAutoCaptions(true);
+    setComparisonMode("after");
+    setCaptionGenerationStatus("ready");
+    setCaptionGenerationMessage("Choir sound cue added at the start of this clip. It does not claim to transcribe the lyrics.");
+    focusCaptionSegmentsForReview([cue]);
   };
 
   const generateLiveTranscript = async ({
@@ -21156,6 +21247,104 @@ const ViralClipStudio = ({
                     )}
                   </label>
 
+                  <div className="inspector-field caption-script-draft" data-testid="caption-script-draft">
+                    <span>Song lyrics or full script</span>
+                    <small>
+                      Paste the words one line at a time. Studio spreads them across this clip as
+                      editable timing drafts; listen and check each line before export.
+                    </small>
+                    <textarea
+                      aria-label="Full lyrics or script"
+                      value={captionScriptDraft}
+                      onChange={event => setCaptionScriptDraft(event.target.value.slice(0, 20000))}
+                      rows={6}
+                      maxLength={20000}
+                      placeholder="Paste the full lyrics or script here, one caption line per row"
+                    />
+                    <label>
+                      <span>Words are in</span>
+                      <select
+                        aria-label="Draft caption language"
+                        value={captionDraftLanguage}
+                        onChange={event => setCaptionDraftLanguage(event.target.value)}
+                      >
+                        {CAPTION_LANGUAGE_OPTIONS.map(option => (
+                          <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                      </select>
+                    </label>
+                    <label>
+                      <span>Voice</span>
+                      <select
+                        aria-label="Draft caption voice"
+                        value={captionDraftSpeaker}
+                        onChange={event => setCaptionDraftSpeaker(event.target.value)}
+                      >
+                        {CAPTION_SPEAKER_OPTIONS.map(option => (
+                          <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                      </select>
+                    </label>
+                    <button
+                      type="button"
+                      className="inspector-primary-action"
+                      disabled={!captionScriptDraft.trim()}
+                      onClick={() => activateCaptionScriptDraft(captionScriptDraft, "your lyrics or script")}
+                    >
+                      Create timed lyric draft
+                    </button>
+                    {captionSegments.some(segment =>
+                      String(segment.id || "").startsWith("script-caption") &&
+                      String(segment.sourceClipId || "") === String(
+                        currentTimelineClip?.sourceClipId || currentTimelineClip?.id || selectedClip?.id || ""
+                      ) &&
+                      Number(segment.end || 0) > Number(currentTimelineWindow.start || 0) &&
+                      Number(segment.start || 0) < Number(currentTimelineWindow.end || 0)
+                    ) && (
+                      <button
+                        type="button"
+                        className="inspector-secondary-action"
+                        onClick={() => {
+                          const draftSourceClipId =
+                            currentTimelineClip?.sourceClipId || currentTimelineClip?.id || selectedClip?.id || "";
+                          const isCurrentDraftLine = segment =>
+                            String(segment.id || "").startsWith("script-caption") &&
+                            String(segment.sourceClipId || "") === String(draftSourceClipId) &&
+                            Number(segment.end || 0) > Number(currentTimelineWindow.start || 0) &&
+                            Number(segment.start || 0) < Number(currentTimelineWindow.end || 0);
+                          const draftLines = captionSegments.filter(isCurrentDraftLine);
+                          const missingIdentity = draftLines.filter(segment =>
+                            segment.speaker === "unknown" || segment.language === "und"
+                          ).length;
+                          setCaptionSegments(previous => previous.map(segment =>
+                            isCurrentDraftLine(segment)
+                              ? {
+                                  ...segment,
+                                  textReviewed: true,
+                                  reviewRequired:
+                                    segment.speaker === "unknown" || segment.language === "und",
+                                }
+                              : segment
+                          ));
+                          setCaptionGenerationStatus(missingIdentity ? "review" : "ready");
+                          setCaptionGenerationMessage(missingIdentity
+                            ? `Wording approved. Choose the speaker and language for ${missingIdentity} draft line${missingIdentity === 1 ? "" : "s"} before export.`
+                            : `${draftLines.length} creator-supplied draft line${draftLines.length === 1 ? "" : "s"} approved after review.`
+                          );
+                        }}
+                      >
+                        I checked the lyric draft — approve wording
+                      </button>
+                    )}
+                    <button type="button" className="inspector-secondary-action" onClick={addChoirMusicCue}>
+                      Add [Choir singing] sound cue
+                    </button>
+                    <small>
+                      A sound cue describes the music. It does not invent lyrics when speech
+                      recognition cannot hear reliable words.
+                    </small>
+                  </div>
+
                   <div className="caption-segment-editor" data-testid="caption-segment-editor">
                     <div className="caption-segment-heading">
                       <span>Transcript lines</span>
@@ -21174,9 +21363,9 @@ const ViralClipStudio = ({
                             color: "#8be9fd",
                             fontWeight: 600,
                           }}
-                          title="Import .srt or .vtt subtitle file directly without server"
+                          title="Import timed SRT/VTT subtitles or an untimed TXT lyric draft"
                         >
-                          📁 Import SRT
+                          📁 Import SRT/VTT/TXT
                           <input
                             type="file"
                             accept=".srt,.vtt,.txt"
@@ -21200,8 +21389,17 @@ const ViralClipStudio = ({
                                     );
                                     focusCaptionSegmentsForReview(normalized);
                                     setStudioActionMessage("Subtitles imported and active in preview.");
+                                  } else if (file.name.toLowerCase().endsWith(".txt")) {
+                                    activateCaptionScriptDraft(rawContent, file.name);
+                                  } else {
+                                    setCaptionGenerationStatus("failed");
+                                    setCaptionGenerationMessage("No timed subtitles were found. Check the SRT/VTT timestamps, or import plain lyrics as a .txt file.");
                                   }
                                 }
+                              };
+                              reader.onerror = () => {
+                                setCaptionGenerationStatus("failed");
+                                setCaptionGenerationMessage("The subtitle file could not be read. Please try again.");
                               };
                               reader.readAsText(file);
                               event.target.value = "";
