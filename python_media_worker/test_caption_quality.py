@@ -396,6 +396,31 @@ class CaptionQualityTests(unittest.TestCase):
         self.assertIn("repeated_short_vocalization", result["quality"]["rejections"][0]["reasons"])
         self.assertIn("short_repeated_token", result["quality"]["rejections"][3]["reasons"])
 
+    def test_rejects_repeated_cyrillic_word_from_live_choir_retest(self):
+        result = filter_caption_transcription_segments(
+            [
+                {"start": 161.5, "end": 166.9, "text": "омодо омодо омодо"},
+                {"start": 166.9, "end": 171.1, "text": "омодо " * 6},
+                {"start": 171.1, "end": 174.9, "text": "омодо омодо"},
+                {"start": 174.9, "end": 181.7, "text": "омодо"},
+                {"start": 182.0, "end": 185.0, "text": "Siyabonga ekhaya namhlanje"},
+                {"start": 185.0, "end": 193.0, "text": "Hallelujah"},
+                {"start": 193.0, "end": 201.0, "text": "Hallelujah"},
+                {"start": 201.0, "end": 209.0, "text": "Hallelujah"},
+            ]
+        )
+
+        self.assertEqual(result["quality"]["rejected_segments"], 4)
+        self.assertEqual(result["quality"]["accepted_segments"], 4)
+        self.assertEqual(
+            [segment["text"] for segment in result["segments"]],
+            ["Siyabonga ekhaya namhlanje", "Hallelujah", "Hallelujah", "Hallelujah"],
+        )
+        self.assertTrue(all(
+            "repeated_cyrillic_vocalization" in rejected["reasons"]
+            for rejected in result["quality"]["rejections"]
+        ))
+
     def test_discards_collapsed_word_alignment_for_reviewable_text(self):
         result = filter_caption_transcription_segments(
             [{"start": 0.0, "end": 3.0, "text": "We are singing together tonight",

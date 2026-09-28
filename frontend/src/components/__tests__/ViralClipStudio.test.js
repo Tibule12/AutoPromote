@@ -3466,6 +3466,44 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(within(inspector).queryByRole("textbox", { name: "Caption 2 text" })).toBeNull();
   });
 
+  test("rejects repeated longer Cyrillic words from the live choir retest", async () => {
+    global.fetch
+      .mockResolvedValueOnce({
+        ok: true,
+        blob: jest.fn(() => Promise.resolve(new Blob(["choir-video"], { type: "video/mp4" }))),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: jest.fn(() => Promise.resolve({
+          segments: [
+            { start: 161.5, end: 166.9, text: "омодо омодо омодо" },
+            { start: 166.9, end: 171.1, text: "омодо ".repeat(6) },
+            { start: 171.1, end: 174.9, text: "омодо омодо" },
+            { start: 174.9, end: 181.7, text: "омодо" },
+            { start: 182, end: 185, text: "Siyabonga ekhaya namhlanje", language: "zu" },
+          ],
+          transcriptionQuality: { status: "review_required", accepted_segments: 5 },
+        })),
+      });
+
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={[{ id: "clip-1", start: 0, end: 200, duration: 200 }]}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+        onStatusChange={jest.fn()}
+      />
+    );
+
+    const inspector = screen.getByTestId("clip-studio-inspector");
+    fireEvent.click(within(inspector).getByRole("tab", { name: /Captions/i }));
+    fireEvent.click(within(inspector).getByRole("checkbox", { name: /Preview captions/i }));
+    expect(await within(inspector).findByRole("textbox", { name: "Caption 1 text" }))
+      .toHaveValue("Siyabonga ekhaya namhlanje");
+    expect(within(inspector).queryByRole("textbox", { name: "Caption 2 text" })).toBeNull();
+  });
+
   test("pauses a captioned render until editable timed lines exist", async () => {
     const onSave = jest.fn(() => Promise.resolve());
     global.fetch.mockRejectedValue(new Error("Test transcription unavailable"));

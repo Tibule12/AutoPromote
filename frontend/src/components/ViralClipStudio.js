@@ -1636,42 +1636,45 @@ const getCaptionPreviewSourceText = clip => {
   return transcript;
 };
 
-const shortCaptionLoopSignature = segment => {
+const captionLoopSignature = segment => {
   const tokens = normalizePlainText(segment?.text).match(/\p{L}+/gu)?.map(token => token.toLowerCase()) || [];
-  return tokens.length && tokens[0].length <= 2 && tokens.every(token => token === tokens[0])
+  const repeatedVocalization = tokens[0]?.length <= 2 || /^[\u0400-\u04ff]+$/u.test(tokens[0] || "");
+  return tokens.length && repeatedVocalization && tokens.every(token => token === tokens[0])
     ? tokens[0]
     : null;
 };
 
 const filterClearlyCorruptCaptionSegments = segments => {
   const rows = Array.isArray(segments) ? segments : [];
-  const repeatedShortRuns = new Set();
+  const repeatedVocalizationRuns = new Set();
   for (let start = 0; start < rows.length;) {
-    const signature = shortCaptionLoopSignature(rows[start]);
+    const signature = captionLoopSignature(rows[start]);
     let end = start + 1;
-    while (signature && end < rows.length && shortCaptionLoopSignature(rows[end]) === signature) {
+    while (signature && end < rows.length && captionLoopSignature(rows[end]) === signature) {
       end += 1;
     }
     if (
       signature && end - start >= 3 &&
       Number(rows[end - 1]?.end ?? 0) - Number(rows[start]?.start ?? 0) >= 6
     ) {
-      for (let index = start; index < end; index += 1) repeatedShortRuns.add(index);
+      for (let index = start; index < end; index += 1) repeatedVocalizationRuns.add(index);
     }
     start = end;
   }
   return rows.filter((segment, index) => {
-    if (repeatedShortRuns.has(index)) return false;
+    if (repeatedVocalizationRuns.has(index)) return false;
     const text = normalizePlainText(segment?.text);
     const tokens = text.match(/\p{L}+/gu)?.map(token => token.toLowerCase()) || [];
     const shortLoop = tokens.length >= 4 && tokens[0].length <= 2 &&
+      tokens.filter(token => token === tokens[0]).length / tokens.length >= 0.75;
+    const cyrillicLoop = tokens.length >= 4 && /^[\u0400-\u04ff]+$/u.test(tokens[0]) &&
       tokens.filter(token => token === tokens[0]).length / tokens.length >= 0.75;
     const duration = Math.max(
       0.05,
       Number(segment?.end ?? segment?.end_time ?? 0) - Number(segment?.start ?? segment?.start_time ?? 0)
     );
     const compactLength = text.replace(/\s+/g, "").length;
-    return !shortLoop && !/(\p{L}{2,8})\1{4,}/iu.test(text) &&
+    return !shortLoop && !cyrillicLoop && !/(\p{L}{2,8})\1{4,}/iu.test(text) &&
       !(compactLength >= 80 && compactLength / duration > 60);
   });
 };
