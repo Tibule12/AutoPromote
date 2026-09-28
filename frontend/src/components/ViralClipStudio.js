@@ -1636,6 +1636,46 @@ const getCaptionPreviewSourceText = clip => {
   return transcript;
 };
 
+const shortCaptionLoopSignature = segment => {
+  const tokens = normalizePlainText(segment?.text).match(/\p{L}+/gu)?.map(token => token.toLowerCase()) || [];
+  return tokens.length && tokens[0].length <= 2 && tokens.every(token => token === tokens[0])
+    ? tokens[0]
+    : null;
+};
+
+const filterClearlyCorruptCaptionSegments = segments => {
+  const rows = Array.isArray(segments) ? segments : [];
+  const repeatedShortRuns = new Set();
+  for (let start = 0; start < rows.length;) {
+    const signature = shortCaptionLoopSignature(rows[start]);
+    let end = start + 1;
+    while (signature && end < rows.length && shortCaptionLoopSignature(rows[end]) === signature) {
+      end += 1;
+    }
+    if (
+      signature && end - start >= 3 &&
+      Number(rows[end - 1]?.end ?? 0) - Number(rows[start]?.start ?? 0) >= 6
+    ) {
+      for (let index = start; index < end; index += 1) repeatedShortRuns.add(index);
+    }
+    start = end;
+  }
+  return rows.filter((segment, index) => {
+    if (repeatedShortRuns.has(index)) return false;
+    const text = normalizePlainText(segment?.text);
+    const tokens = text.match(/\p{L}+/gu)?.map(token => token.toLowerCase()) || [];
+    const shortLoop = tokens.length >= 4 && tokens[0].length <= 2 &&
+      tokens.filter(token => token === tokens[0]).length / tokens.length >= 0.75;
+    const duration = Math.max(
+      0.05,
+      Number(segment?.end ?? segment?.end_time ?? 0) - Number(segment?.start ?? segment?.start_time ?? 0)
+    );
+    const compactLength = text.replace(/\s+/g, "").length;
+    return !shortLoop && !/(\p{L}{2,8})\1{4,}/iu.test(text) &&
+      !(compactLength >= 80 && compactLength / duration > 60);
+  });
+};
+
 const normalizeCaptionSegments = segments =>
   (Array.isArray(segments) ? segments : [])
     .map((segment, index) => {
@@ -7848,7 +7888,7 @@ const ViralClipStudio = ({
       ) {
         throw new Error("The caption service did not confirm an English translation.");
       }
-      const safeResponseSegments = responseSegments.filter(segment => {
+      const safeResponseSegments = filterClearlyCorruptCaptionSegments(responseSegments.filter(segment => {
           const text = normalizePlainText(segment?.text).toLowerCase();
           return ![
             "music outro",
@@ -7860,7 +7900,7 @@ const ViralClipStudio = ({
             "copyright",
             "all rights reserved",
           ].some(blocked => text.includes(blocked));
-        });
+        }));
       const nextSegments = normalizeCaptionSegments(
         splitCaptionSegmentsForReadability(safeResponseSegments)
       )
@@ -7925,7 +7965,7 @@ const ViralClipStudio = ({
           }
         }
         throw new Error(
-          "No usable words were detected. Try a shorter section, or type captions manually."
+          "Automatic transcription could not identify reliable words in this audio. Try a shorter, clearer section, or import/type the lyrics."
         );
       }
 

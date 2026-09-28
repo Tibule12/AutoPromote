@@ -359,6 +359,43 @@ class CaptionQualityTests(unittest.TestCase):
         self.assertEqual(result["quality"]["accepted_segments"], 1)
         self.assertTrue(result["segments"][0]["textReviewRequired"])
 
+    def test_rejects_unicode_syllable_loops_seen_in_live_choir_test(self):
+        result = filter_caption_transcription_segments(
+            [
+                {"start": 26.9, "end": 28.3, "text": "эмэмэ" + "дэ" * 105},
+                {"start": 56.7, "end": 58.1, "text": "Ла" * 220},
+                {"start": 82.3, "end": 83.7, "text": "Во" + "ла" * 210},
+            ]
+        )
+
+        self.assertEqual(result["quality"]["status"], "rejected")
+        self.assertEqual(result["segments"], [])
+        self.assertEqual(result["quality"]["rejected_segments"], 3)
+        for rejection in result["quality"]["rejections"]:
+            self.assertIn("repeated_character_sequence", rejection["reasons"])
+            self.assertIn("impossible_character_rate", rejection["reasons"])
+
+    def test_rejects_short_syllable_loops_but_keeps_meaningful_refrains(self):
+        result = filter_caption_transcription_segments(
+            [
+                {"start": 113.7, "end": 119.2, "text": "ве ве"},
+                {"start": 119.2, "end": 122.9, "text": "ве"},
+                {"start": 122.9, "end": 129.7, "text": "ве ве ве"},
+                {"start": 132.3, "end": 136.3, "text": "ве ве ве ве ве ве ве"},
+                {"start": 140.0, "end": 143.0, "text": "Siyabonga ekhaya namhlanje"},
+                {"start": 144.0, "end": 147.0, "text": "Hallelujah hallelujah hallelujah hallelujah"},
+            ]
+        )
+
+        self.assertEqual(result["quality"]["rejected_segments"], 4)
+        self.assertEqual(result["quality"]["accepted_segments"], 2)
+        self.assertEqual(
+            [segment["text"] for segment in result["segments"]],
+            ["Siyabonga ekhaya namhlanje", "Hallelujah hallelujah hallelujah hallelujah"],
+        )
+        self.assertIn("repeated_short_vocalization", result["quality"]["rejections"][0]["reasons"])
+        self.assertIn("short_repeated_token", result["quality"]["rejections"][3]["reasons"])
+
     def test_discards_collapsed_word_alignment_for_reviewable_text(self):
         result = filter_caption_transcription_segments(
             [{"start": 0.0, "end": 3.0, "text": "We are singing together tonight",
