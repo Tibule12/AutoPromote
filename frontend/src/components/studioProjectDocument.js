@@ -817,8 +817,11 @@ export const validateStudioProjectDocument = document => {
       proposalIds.add(receipt.proposalId);
       if (record.serverReview !== undefined) {
         const server = record.serverReview;
+        const serverFields = ["serverReviewId", "projectId", "proposalId", "baseRevision",
+          "proposalFingerprint", "decision", "reviewerUid", "reviewedAt"];
         if (
           !server ||
+          JSON.stringify(Object.keys(server).sort()) !== JSON.stringify(serverFields.sort()) ||
           !/^[a-f0-9]{64}$/i.test(server.serverReviewId || "") ||
           server.projectId !== document.projectId ||
           server.proposalId !== receipt.proposalId ||
