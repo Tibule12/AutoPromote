@@ -113,6 +113,13 @@ import {
 import { rippleTimedItems, rippleTimelineKeys } from "./studioTimelineEdits";
 import { reconcileStudioDocument, rebaseStudioHistoryRestore } from "./studioProjectDocument";
 import { MINIMUM_SPLIT_DISTANCE_TICKS, runStudioCommandOnSnapshot } from "./studioCommands";
+import {
+  createStudioDirectorReviewReceipt,
+  prepareStudioDirectorProposal,
+  recordStudioDirectorReviewRejectionOnSnapshot,
+  runStudioDirectorProposalOnSnapshot,
+} from "./studioDirectorProposals";
+import { describeStudioDirectorReview } from "./studioDirectorReviewDiff";
 import { secondsToTicks, ticksToSeconds } from "./studioTime";
 import {
   assertStudioExportTimelineMatchesDocument,
@@ -1399,6 +1406,18 @@ const formatPreviewTimePrecise = value => {
   return `${minutes}:${seconds}`;
 };
 
+const formatDirectorReviewRange = range => {
+  if (!range) return "—";
+  if (Number.isSafeInteger(range.atTick)) {
+    return `${range.atTick} ticks (${ticksToSeconds(range.atTick).toFixed(5)}s)`;
+  }
+  if (!Number.isSafeInteger(range.startTick) || !Number.isSafeInteger(range.endTick)) {
+    return "—";
+  }
+  return `${range.startTick}–${range.endTick} ticks ` +
+    `(${ticksToSeconds(range.startTick).toFixed(5)}–${ticksToSeconds(range.endTick).toFixed(5)}s)`;
+};
+
 const formatEditorDuration = value => {
   const totalSeconds = Math.max(0, Number(value) || 0);
   const hours = Math.floor(totalSeconds / 3600);
@@ -2635,6 +2654,8 @@ const ViralClipStudio = ({
   isWorkflowPaused = false,
   currentMusic,
   onMusicChange,
+  directorProposalRequest = null,
+  onDirectorReview,
 }) => {
   const [orderedClips, setOrderedClips] = useState(clips || []);
   const [selectedClip, setSelectedClip] = useState((clips || [])[0]);
@@ -2761,6 +2782,9 @@ const ViralClipStudio = ({
   const [savedProjects, setSavedProjects] = useState([]);
   const [projectSaveState, setProjectSaveState] = useState("unsaved");
   const [projectSavedAt, setProjectSavedAt] = useState(null);
+  const [directorReview, setDirectorReview] = useState(null);
+  const [directorReviewState, setDirectorReviewState] = useState("idle");
+  const [directorReviewError, setDirectorReviewError] = useState("");
   const [timelineZoom, setTimelineZoom] = useState(1);
   const [timelineDockExpanded, setTimelineDockExpanded] = useState(true);
   const [timelineDockHeight, setTimelineDockHeight] = useState(188);
@@ -8596,6 +8620,114 @@ const ViralClipStudio = ({
     setSpeakerStackFraming(next.speakerStackFraming);
     setAudioKeyframes(next.audioKeyframes);
   };
+
+  const openDirectorReview = async () => {
+    if (!directorProposalRequest || directorReviewState === "working") return;
+    setDirectorReviewState("working");
+    setDirectorReviewError("");
+    try {
+      const snapshot = getEditorSnapshot();
+      if (!snapshot.studioDocument) {
+        throw new Error("Clip source timing is still loading. Try the review again shortly.");
+      }
+      const { proposal, preview } = await prepareStudioDirectorProposal(
+        snapshot.studioDocument,
+        directorProposalRequest
+      );
+      const prepared = {
+        requestSignature: serializeSnapshot(directorProposalRequest),
+        document: cloneSnapshot(snapshot.studioDocument),
+        proposal: cloneSnapshot(proposal),
+        previewDocument: cloneSnapshot(preview.previewDocument),
+      };
+      prepared.diff = describeStudioDirectorReview({
+        document: prepared.document,
+        previewDocument: prepared.previewDocument,
+        proposal: prepared.proposal,
+      });
+      setDirectorReview(prepared);
+      setDirectorReviewState("ready");
+    } catch (error) {
+      setDirectorReview(null);
+      setDirectorReviewState("error");
+      setDirectorReviewError(error.message || "The incoming edit could not be reviewed.");
+    }
+  };
+
+  const decideDirectorReview = async decision => {
+    if (!directorReview || directorReviewState !== "ready") return;
+    setDirectorReviewState("working");
+    setDirectorReviewError("");
+    try {
+      const auth = getAuth();
+      const reviewer = auth?.currentUser;
+      if (!reviewer?.uid || typeof reviewer.getIdToken !== "function") {
+        throw new Error("Sign in with Firebase before reviewing this edit.");
+      }
+      const token = await reviewer.getIdToken();
+      if (!token || auth.currentUser?.uid !== reviewer.uid) {
+        throw new Error("Your sign-in changed. Sign in again before reviewing this edit.");
+      }
+      const snapshot = getEditorSnapshot();
+      if (!snapshot.studioDocument ||
+          serializeSnapshot(snapshot.studioDocument) !== serializeSnapshot(directorReview.document)) {
+        const stale = new Error("The project changed after this preview. Review the edit again.");
+        stale.code = "STALE_REVIEW";
+        throw stale;
+      }
+      const reviewReceipt = await createStudioDirectorReviewReceipt({
+        proposal: directorReview.proposal,
+        reviewerId: reviewer.uid,
+        decision,
+        reviewedAt: new Date().toISOString(),
+      });
+      const result = decision === "approve"
+        ? await runStudioDirectorProposalOnSnapshot({
+            snapshot, projectId, proposal: directorReview.proposal, reviewReceipt,
+          })
+        : await recordStudioDirectorReviewRejectionOnSnapshot({
+            snapshot, projectId, proposal: directorReview.proposal, reviewReceipt,
+          });
+      await onDirectorReview?.({
+        decision,
+        proposal: directorReview.proposal,
+        reviewReceipt,
+        document: result.document,
+      });
+      if (decision === "approve") {
+        const baseline = cloneSnapshot(snapshot);
+        pendingHistoryBaselineRef.current = baseline;
+        cutHistoryTransactionRef.current = {
+          baseline,
+          appliedSignature: null,
+          appliedTimelineSignature: null,
+        };
+        applyLinkedCommandSnapshot(result);
+        setStudioActionMessage("Reviewed Director edit applied to the timeline. Undo restores it.");
+      } else {
+        studioDocumentRef.current = result.document;
+        const reviewedSnapshot = cloneSnapshot(result.snapshot);
+        lastSnapshotRef.current = reviewedSnapshot;
+        lastSnapshotSignatureRef.current = serializeSnapshot(
+          getHistoryRelevantSnapshot(reviewedSnapshot)
+        );
+        scheduleProjectAutosave(reviewedSnapshot);
+        setStudioActionMessage("Incoming Director edit rejected. The timeline was not changed.");
+      }
+      setDirectorReviewState(decision === "approve" ? "approved" : "rejected");
+    } catch (error) {
+      setDirectorReviewState(
+        ["STALE_REVISION", "DOCUMENT_CHANGED", "PROJECT_MISMATCH", "PREVIEW_CHANGED", "STALE_REVIEW"]
+          .includes(error.code)
+          ? "stale"
+          : "error"
+      );
+      setDirectorReviewError(error.message || "The review could not be recorded.");
+    }
+  };
+
+  const visibleDirectorReview = directorProposalRequest && directorReview?.requestSignature ===
+    serializeSnapshot(directorProposalRequest) ? directorReview : null;
 
   const trimClipStartToPlayhead = () => {
     if (!currentTimelineClip) return;
@@ -18489,6 +18621,111 @@ const ViralClipStudio = ({
                     These are the same media, timings and audio decisions shown in After. Click a
                     track to inspect that exact frame.
                   </p>
+
+                  {directorProposalRequest ? (
+                    <section
+                      className="studio-director-review"
+                      aria-label="Incoming Director edit review"
+                      data-testid="studio-director-review"
+                    >
+                      <div className="studio-director-review__heading">
+                        <div>
+                          <span className="panel-kicker">Incoming proposal</span>
+                          <h4>Review one suggested cut</h4>
+                          <p>The timeline stays unchanged until you approve this exact preview.</p>
+                        </div>
+                        {(!visibleDirectorReview || ["stale", "error"].includes(directorReviewState)) ? (
+                          <button
+                            type="button"
+                            onClick={() => void openDirectorReview()}
+                            disabled={directorReviewState === "working"}
+                            data-testid="studio-director-review-open"
+                          >
+                            {visibleDirectorReview ? "Review again" : "Review incoming edit"}
+                          </button>
+                        ) : null}
+                      </div>
+                      {directorReviewError ? (
+                        <p className="studio-director-review__error" role="alert">
+                          {directorReviewError}
+                        </p>
+                      ) : null}
+                      {directorReviewState === "working" ? (
+                        <p role="status">Checking the proposal and signed-in reviewer…</p>
+                      ) : null}
+                      {visibleDirectorReview ? (
+                        <>
+                          <div className="studio-director-review__meta">
+                            <span>Proposal <code>{visibleDirectorReview.proposal.proposalId}</code></span>
+                            <span>Base revision {visibleDirectorReview.proposal.baseRevision}</span>
+                            <span>{visibleDirectorReview.diff.operationLabel}</span>
+                          </div>
+                          <div className="studio-director-review__table-wrap">
+                            <table>
+                              <caption>Exact before and after source and programme timing, in ticks</caption>
+                              <thead>
+                                <tr>
+                                  <th scope="col">Item</th>
+                                  <th scope="col">Source before</th>
+                                  <th scope="col">Source after</th>
+                                  <th scope="col">Programme before</th>
+                                  <th scope="col">Programme after</th>
+                                  <th scope="col">Cue trim before</th>
+                                  <th scope="col">Cue trim after</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {[...visibleDirectorReview.diff.clipRows,
+                                  ...visibleDirectorReview.diff.timingRows].map((row, index) => (
+                                  <tr key={`${row.label}-${index}`} data-testid={`studio-director-review-row-${index}`}>
+                                    <th scope="row">{row.label}</th>
+                                    <td>{formatDirectorReviewRange(row.beforeSourceRange)}</td>
+                                    <td>{formatDirectorReviewRange(row.afterSourceRange)}</td>
+                                    <td>{formatDirectorReviewRange(row.beforeProgrammeRange)}</td>
+                                    <td>{formatDirectorReviewRange(row.afterProgrammeRange)}</td>
+                                    <td>{formatDirectorReviewRange(Number.isSafeInteger(row.beforeTrimStartTick)
+                                      ? { atTick: row.beforeTrimStartTick } : null)}</td>
+                                    <td>{formatDirectorReviewRange(Number.isSafeInteger(row.afterTrimStartTick)
+                                      ? { atTick: row.afterTrimStartTick } : null)}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                          {visibleDirectorReview.diff.timingRows.length === 0 ? (
+                            <p>No linked cue or key timing changes.</p>
+                          ) : null}
+                          {directorReviewState === "ready" ? (
+                            <div className="studio-director-review__actions">
+                              <button
+                                type="button"
+                                className="is-approve"
+                                onClick={() => void decideDirectorReview("approve")}
+                                data-testid="studio-director-review-approve"
+                              >
+                                Approve and apply
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => void decideDirectorReview("reject")}
+                                data-testid="studio-director-review-reject"
+                              >
+                                Reject proposal
+                              </button>
+                            </div>
+                          ) : null}
+                          {["approved", "rejected"].includes(directorReviewState) ? (
+                            <p role="status">
+                              {directorReviewState === "approved"
+                                ? "Approved edit applied and recorded with this project."
+                                : "Proposal rejected and recorded. The timeline is unchanged."}
+                            </p>
+                          ) : null}
+                          <small>Review identity is recorded from your signed-in account in this project.</small>
+                        </>
+                      ) : null}
+                    </section>
+                  ) : null}
 
                   <div className="compact-timeline-row compact-source-row">
                     <span>Video</span>

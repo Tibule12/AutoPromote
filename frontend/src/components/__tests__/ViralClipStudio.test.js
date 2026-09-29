@@ -1,9 +1,13 @@
 import React from "react";
+import { webcrypto } from "crypto";
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { getAuth } from "firebase/auth";
 import ViralClipStudio from "../ViralClipStudio";
 import { uploadSourceFileViaBackend } from "../../utils/sourceUpload";
 import * as studioCommands from "../studioCommands";
 import * as studioProjectDocument from "../studioProjectDocument";
+import * as studioDirectorProposals from "../studioDirectorProposals";
+import { secondsToTicks } from "../studioTime";
 
 jest.mock("../../utils/clipWorkflowAnalytics", () => ({
   trackClipWorkflowEvent: jest.fn(() => Promise.resolve(true)),
@@ -20,12 +24,12 @@ jest.mock("firebase/storage", () => ({
 }));
 
 jest.mock("firebase/auth", () => ({
-  getAuth: () => ({
+  getAuth: jest.fn(() => ({
     currentUser: {
       uid: "test-user",
       getIdToken: jest.fn(() => Promise.resolve("token")),
     },
-  }),
+  })),
 }));
 
 jest.mock("html2canvas", () => jest.fn(() => Promise.resolve({ toBlob: cb => cb(new Blob()) })));
@@ -63,6 +67,13 @@ describe("ViralClipStudio timeline sequencing", () => {
   };
 
   beforeEach(() => {
+    Object.defineProperty(globalThis, "crypto", { configurable: true, value: webcrypto });
+    getAuth.mockImplementation(() => ({
+      currentUser: {
+        uid: "test-user",
+        getIdToken: jest.fn(() => Promise.resolve("token")),
+      },
+    }));
     uploadSourceFileViaBackend.mockImplementation(({ file, onProgress }) => {
       onProgress?.(file?.size || 1, file?.size || 1);
       return Promise.resolve({ url: "https://example.com/mock.mp4" });
@@ -4308,5 +4319,161 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(
       consoleErrorSpy.mock.calls.some(([message]) => String(message).includes("same key"))
     ).toBe(false);
+  });
+
+  test("reviews exact Director trim timing and applies only after signed-in approval", async () => {
+    const onDirectorReview = jest.fn(() => Promise.resolve());
+    const applySpy = jest.spyOn(studioDirectorProposals, "runStudioDirectorProposalOnSnapshot");
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={[{ id: "clip-review", start: 0, end: 20, duration: 20 }]}
+        directorProposalRequest={{
+          proposalId: "proposal-end-trim",
+          idempotencyKey: "director-end-trim",
+          directorId: "bounded-director",
+          operation: {
+            type: "trim_clip",
+            target: { occurrenceId: "main" },
+            keep: { space: "source", startTick: 0, endTick: secondsToTicks(15) },
+          },
+        }}
+        onDirectorReview={onDirectorReview}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+      />
+    );
+
+    expect(applySpy).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId("studio-director-review-open"));
+    const panel = screen.getByTestId("studio-director-review");
+    await within(panel).findByTestId("studio-director-review-approve");
+    expect(panel).toHaveTextContent("Proposal proposal-end-trim");
+    expect(panel).toHaveTextContent("Base revision 0");
+    expect(panel).toHaveTextContent("Clip main");
+    expect(panel).toHaveTextContent("0–1800000 ticks");
+    expect(panel).toHaveTextContent("0–1350000 ticks");
+    expect(applySpy).not.toHaveBeenCalled();
+
+    await act(async () => {
+      fireEvent.click(within(panel).getByTestId("studio-director-review-approve"));
+    });
+    await waitFor(() => expect(onDirectorReview).toHaveBeenCalledTimes(1));
+    expect(applySpy).toHaveBeenCalledTimes(1);
+    const receipt = onDirectorReview.mock.calls[0][0].reviewReceipt;
+    expect(receipt).toMatchObject({
+      reviewerId: "test-user",
+      decision: "approve",
+      identityStatus: "client_claim_unverified",
+    });
+    expect(onDirectorReview.mock.calls[0][0].document).toMatchObject({
+      revision: 1,
+      directorReviewJournal: [expect.objectContaining({ receipt })],
+    });
+    expect(within(panel).getByText(/Approved edit applied and recorded/i)).toBeInTheDocument();
+    expect(screen.getByTestId("timeline-output-time")).toHaveTextContent("0:15.0");
+    applySpy.mockRestore();
+  });
+
+  test("records a rejected Director split without changing the timeline", async () => {
+    const onDirectorReview = jest.fn(() => Promise.resolve());
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={[{ id: "clip-review", start: 0, end: 20, duration: 20 }]}
+        directorProposalRequest={{
+          proposalId: "proposal-split-reject",
+          idempotencyKey: "director-split-reject",
+          directorId: "bounded-director",
+          operation: {
+            type: "split_clip",
+            target: { occurrenceId: "main" },
+            at: { space: "source", ticks: secondsToTicks(8) },
+            newOccurrenceIds: { left: "director-left", right: "director-right" },
+          },
+        }}
+        onDirectorReview={onDirectorReview}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId("studio-director-review-open"));
+    const panel = screen.getByTestId("studio-director-review");
+    await within(panel).findByTestId("studio-director-review-reject");
+    expect(panel).toHaveTextContent("Clip main");
+    expect(panel).toHaveTextContent("Clip director-left");
+    expect(panel).toHaveTextContent("Clip director-right");
+    await act(async () => {
+      fireEvent.click(within(panel).getByTestId("studio-director-review-reject"));
+    });
+    await waitFor(() => expect(onDirectorReview).toHaveBeenCalledTimes(1));
+    expect(onDirectorReview.mock.calls[0][0]).toMatchObject({
+      decision: "reject",
+      reviewReceipt: { reviewerId: "test-user", decision: "reject" },
+      document: { revision: 0, directorReviewJournal: [expect.any(Object)] },
+    });
+    expect(screen.getByTestId("timeline-output-time")).toHaveTextContent("0:20.0");
+    expect(panel).toHaveTextContent("Proposal rejected and recorded");
+  });
+
+  test("blocks review without Firebase sign-in and marks a changed preview stale", async () => {
+    const onDirectorReview = jest.fn();
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={[{ id: "clip-review", start: 0, end: 20, duration: 20 }]}
+        directorProposalRequest={{
+          proposalId: "proposal-stale",
+          idempotencyKey: "director-stale",
+          directorId: "bounded-director",
+          operation: {
+            type: "trim_clip", target: { occurrenceId: "main" },
+            keep: { space: "source", startTick: 0, endTick: secondsToTicks(15) },
+          },
+        }}
+        onDirectorReview={onDirectorReview}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId("studio-director-review-open"));
+    const panel = screen.getByTestId("studio-director-review");
+    await within(panel).findByTestId("studio-director-review-approve");
+    getAuth.mockReturnValueOnce({ currentUser: null });
+    await act(async () => {
+      fireEvent.click(within(panel).getByTestId("studio-director-review-approve"));
+    });
+    expect(within(panel).getByRole("alert")).toHaveTextContent(/Sign in with Firebase/i);
+    expect(onDirectorReview).not.toHaveBeenCalled();
+
+    fireEvent.click(within(panel).getByTestId("studio-director-review-open"));
+    await within(panel).findByTestId("studio-director-review-approve");
+    getAuth.mockReturnValueOnce({
+      currentUser: {
+        uid: "test-user",
+        getIdToken: jest.fn(() => Promise.reject(new Error("Sign-in token expired"))),
+      },
+    });
+    await act(async () => {
+      fireEvent.click(within(panel).getByTestId("studio-director-review-approve"));
+    });
+    expect(within(panel).getByRole("alert")).toHaveTextContent(/Sign-in token expired/i);
+    expect(screen.getByTestId("timeline-output-time")).toHaveTextContent("0:20.0");
+    expect(onDirectorReview).not.toHaveBeenCalled();
+
+    fireEvent.click(within(panel).getByTestId("studio-director-review-open"));
+    await within(panel).findByTestId("studio-director-review-approve");
+    const afterVideo = screen.getByTestId("studio-after-video");
+    Object.defineProperty(afterVideo, "currentTime", { configurable: true, writable: true, value: 8 });
+    fireEvent.timeUpdate(afterVideo);
+    fireEvent.click(screen.getByTestId("timeline-quick-split"));
+    await act(async () => {
+      fireEvent.click(within(panel).getByTestId("studio-director-review-approve"));
+    });
+    expect(within(panel).getByRole("alert")).toHaveTextContent(/project changed/i);
+    expect(within(panel).getByTestId("studio-director-review-open")).toHaveTextContent("Review again");
+    expect(onDirectorReview).not.toHaveBeenCalled();
   });
 });
