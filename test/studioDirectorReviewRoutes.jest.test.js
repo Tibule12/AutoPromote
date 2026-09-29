@@ -4,6 +4,8 @@ const request = require("supertest");
 const { db } = require("../src/firebaseAdmin");
 const authMiddleware = require("../src/authMiddleware");
 const router = require("../src/routes/studioDirectorReviewRoutes");
+const { assertOwnedStudioSourceBinding } = require("../src/services/studioDirectorProjectBinding");
+const { persistSourceShotArtifact } = require("../src/services/studioSourceShotArtifactService");
 
 const store = new Map();
 const originalCollection = db.collection;
@@ -49,7 +51,7 @@ const rehash = candidate => {
   const { proposalFingerprint: _oldFingerprint, ...core } = candidate;
   return { ...core, proposalFingerprint: hash(core) };
 };
-const evidence = () => ({
+const evidence = receipt => ({
   schemaVersion: 1,
   type: "source_shot_boundary",
   provider: "studio_face_tracking",
@@ -57,12 +59,29 @@ const evidence = () => ({
   sourceAssetId: "source:asset-1",
   sourceIdentityState: "legacy_reference_unverified",
   sourceContentHash: null,
+  artifactHash: receipt.artifactHash,
+  sourceSha256: receipt.sourceSha256,
   analysisRange: sourceRange,
   boundaryTick: 720_000,
   sampleCoverage: 0.8,
   verification: "needs_review",
   decodeFailures: 0,
 });
+const seedSourceShot = async (uid = "reviewer-1") => {
+  const sourceSha256 = "c".repeat(64);
+  await assertOwnedStudioSourceBinding({
+    uid, projectId: "project-1", sourceAssetId: "source:asset-1", sourceSha256,
+  });
+  return persistSourceShotArtifact({
+    uid, projectId: "project-1", sourceAssetId: "source:asset-1", sourceSha256,
+    analysis: {
+      mode: "source_shots", engine: "opencv-yunet-source-shot-follow",
+      start: 0, end: 20, sceneCuts: [8], decodeFailures: [],
+      reviewRequired: true, tracks: { solo: { coverage: 0.8 } },
+      editPlan: { version: 1, preflight: { passed: true } },
+    },
+  });
+};
 const post = (body, uid = "reviewer-1") =>
   request(app).post("/api/studio/director/reviews")
     .set("Authorization", `Bearer test-token-for-${uid}`)
@@ -76,7 +95,8 @@ beforeEach(() => {
     return {
       doc: uid => ({
         collection: subcollection => {
-          expect(subcollection).toBe("studioDirectorReviews");
+          expect(["studioDirectorReviews", "studioDirectorProjectBindings",
+            "studioSourceShotArtifacts"]).toContain(subcollection);
           return {
             doc: id => {
               const path = `${collection}/${uid}/${subcollection}/${id}`;
@@ -210,16 +230,17 @@ test("a bounded edge trim can be reviewed without source-shot evidence", async (
 });
 
 test("accepts bounded shot evidence and rejects extra or unbound evidence", async () => {
-  const valid = proposal(split(), evidence());
+  const receipt = await seedSourceShot();
+  const valid = proposal(split(), evidence(receipt));
   expect((await post({ proposal: valid, decision: "approve" })).status).toBe(201);
-  const wrongBoundary = proposal(split(), { ...evidence(), boundaryTick: 810_000 });
+  const wrongBoundary = proposal(split(), { ...evidence(receipt), boundaryTick: 810_000 });
   expect((await post({ proposal: wrongBoundary, decision: "approve" })).status).toBe(400);
-  const unknownField = proposal(split(), { ...evidence(), command: "run" });
+  const unknownField = proposal(split(), { ...evidence(receipt), command: "run" });
   expect((await post({ proposal: unknownField, decision: "approve" })).status).toBe(400);
-  const lowCoverage = proposal(split(), { ...evidence(), sampleCoverage: 0.64 });
+  const lowCoverage = proposal(split(), { ...evidence(receipt), sampleCoverage: 0.64 });
   expect((await post({ proposal: lowCoverage, decision: "approve" })).status).toBe(400);
   const outsideSource = proposal(split(), {
-    ...evidence(),
+    ...evidence(receipt),
     analysisRange: { space: "source", startTick: 0, endTick: sourceRange.endTick + 1 },
   });
   expect((await post({ proposal: outsideSource, decision: "approve" })).status).toBe(400);
@@ -229,7 +250,19 @@ test("accepts bounded shot evidence and rejects extra or unbound evidence", asyn
     keep: { space: "source", startTick: 0, endTick: 1_350_000 },
     preconditions: { sourceRange },
   };
-  expect((await post({ proposal: proposal(trim, evidence()), decision: "approve" })).status).toBe(400);
+  expect((await post({ proposal: proposal(trim, evidence(receipt)), decision: "approve" })).status).toBe(400);
+});
+
+test("source-shot review requires the server-observed cut and source binding", async () => {
+  const receipt = await seedSourceShot();
+  const otherCut = { ...split(), at: { space: "source", ticks: 810_000 } };
+  const unobserved = proposal(otherCut, { ...evidence(receipt), boundaryTick: 810_000 });
+  expect((await post({ proposal: unobserved, decision: "approve" })).status).toBe(409);
+  const wrongBytes = proposal(split(), { ...evidence(receipt), sourceSha256: "d".repeat(64) });
+  expect((await post({ proposal: wrongBytes, decision: "approve" })).status).toBe(409);
+  const wrongUser = await post({ proposal: proposal(split(), evidence(receipt)), decision: "approve" }, "other-user");
+  expect(wrongUser.status).toBe(409);
+  expect(store.size).toBe(2);
 });
 
 test("oversized envelopes fail before a Firestore write", async () => {

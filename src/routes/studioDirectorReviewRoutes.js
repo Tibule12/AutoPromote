@@ -2,6 +2,8 @@ const crypto = require("crypto");
 const express = require("express");
 const authMiddleware = require("../authMiddleware");
 const { db } = require("../firebaseAdmin");
+const { getOwnedStudioSourceBinding } = require("../services/studioDirectorProjectBinding");
+const { getOwnedSourceShotArtifact } = require("../services/studioSourceShotArtifactService");
 
 const router = express.Router();
 const REVIEW_VERSION = 1;
@@ -45,7 +47,8 @@ const validEvidence = (evidence, operation) => {
     operation.type !== "split_clip" ||
     !exactKeys(evidence, [
       "schemaVersion", "type", "provider", "engine", "sourceAssetId",
-      "sourceIdentityState", "sourceContentHash", "analysisRange", "boundaryTick",
+      "sourceIdentityState", "sourceContentHash", "artifactHash", "sourceSha256",
+      "analysisRange", "boundaryTick",
       "sampleCoverage", "verification", "decodeFailures",
     ]) ||
     evidence.schemaVersion !== 1 ||
@@ -57,6 +60,10 @@ const validEvidence = (evidence, operation) => {
     (evidence.sourceIdentityState === "hash_verified"
       ? !validHash(evidence.sourceContentHash)
       : evidence.sourceContentHash !== null) ||
+    !validHash(evidence.artifactHash) ||
+    !validHash(evidence.sourceSha256) ||
+    (evidence.sourceIdentityState === "hash_verified" &&
+      evidence.sourceContentHash !== evidence.sourceSha256) ||
     !validSourceRange(evidence.analysisRange) ||
     evidence.analysisRange.startTick < operation.preconditions.sourceRange.startTick ||
     evidence.analysisRange.endTick > operation.preconditions.sourceRange.endTick ||
@@ -167,6 +174,38 @@ const responseFor = (record, duplicate) => ({
   duplicate,
 });
 
+const verifiedSourceShotEvidence = async (reviewerUid, proposal) => {
+  const evidence = proposal.evidence;
+  if (!evidence) return true;
+  const [binding, artifact] = await Promise.all([
+    getOwnedStudioSourceBinding({
+      uid: reviewerUid,
+      projectId: proposal.projectId,
+      sourceAssetId: evidence.sourceAssetId,
+    }),
+    getOwnedSourceShotArtifact({ uid: reviewerUid, artifactHash: evidence.artifactHash }),
+  ]);
+  if (!binding || !artifact) return false;
+  return binding.sourceSha256 === evidence.sourceSha256 &&
+    artifact.ownerUid === reviewerUid &&
+    artifact.projectId === proposal.projectId &&
+    artifact.sourceAssetId === evidence.sourceAssetId &&
+    artifact.sourceSha256 === evidence.sourceSha256 &&
+    artifact.artifactHash === evidence.artifactHash &&
+    artifact.engine === evidence.engine &&
+    artifact.mode === "source_shots" &&
+    artifact.reviewRequired === true &&
+    artifact.editPlanVersion === 1 &&
+    artifact.preflightPassed === true &&
+    artifact.decodeFailures === 0 &&
+    artifact.sampleCoverage === evidence.sampleCoverage &&
+    artifact.analysisRange?.space === evidence.analysisRange.space &&
+    artifact.analysisRange?.startTick === evidence.analysisRange.startTick &&
+    artifact.analysisRange?.endTick === evidence.analysisRange.endTick &&
+    Array.isArray(artifact.sceneCutTicks) &&
+    artifact.sceneCutTicks.includes(evidence.boundaryTick);
+};
+
 // The server verifies Firebase identity and the bounded proposal envelope.
 // The Studio document remains local, so this endpoint cannot attest that the
 // proposed edit still matches a current browser document or rendered preview.
@@ -187,6 +226,13 @@ router.post("/", authMiddleware, async (req, res) => {
   }
 
   const { proposal, decision } = body;
+  try {
+    if (!await verifiedSourceShotEvidence(reviewerUid, proposal)) {
+      return res.status(409).json({ ok: false, error: "source_shot_evidence_mismatch" });
+    }
+  } catch (_) {
+    return res.status(503).json({ ok: false, error: "source_shot_evidence_unavailable" });
+  }
   const serverReviewId = sha256(`${proposal.projectId}\0${proposal.proposalId}`);
   const record = {
     schemaVersion: REVIEW_VERSION,
