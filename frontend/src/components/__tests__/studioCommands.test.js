@@ -59,6 +59,28 @@ test("dry run reports read/write sets without mutating the project", () => {
   expect(document.clipOccurrences).toHaveLength(1);
 });
 
+test("direct trim rejects older documents without linked timing references", () => {
+  const current = adaptStudioSnapshotToDocument({
+    snapshot: sourceSnapshot(),
+    projectId: "project",
+  });
+  const olderDocument = { ...current };
+  delete olderDocument.linkedTiming;
+  const command = batch(olderDocument, [{
+    type: "trim_clip",
+    target: { occurrenceId: "main" },
+    keep: { space: "source", startTick: secondsToTicks(5), endTick: secondsToTicks(20) },
+  }]);
+  let failure;
+  try {
+    executeStudioCommandBatch(olderDocument, command);
+  } catch (error) {
+    failure = error;
+  }
+  expect(failure).toMatchObject({ code: "UNSUPPORTED_LINKED_TIMING" });
+  expect(olderDocument.clipOccurrences[0].sourceRange.startTick).toBe(0);
+});
+
 test("manual snapshot adapter and headless command produce equivalent split state", () => {
   const snapshot = sourceSnapshot();
   const document = adaptStudioSnapshotToDocument({ snapshot, projectId: "project" });

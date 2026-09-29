@@ -305,6 +305,12 @@ const applyOne = (document, operation, idempotencyKey) => {
     });
   }
   const keep = operation.keep;
+  if (!document.linkedTiming) {
+    commandError(
+      "UNSUPPORTED_LINKED_TIMING",
+      "Trim requires migrated programme cue and key timing."
+    );
+  }
   if (
     keep.startTick < occurrence.sourceRange.startTick ||
     keep.endTick > occurrence.sourceRange.endTick
