@@ -111,6 +111,13 @@ import {
   findCreatorBeat,
 } from "./studioCreatorRecipes";
 import { rippleTimedItems, rippleTimelineKeys } from "./studioTimelineEdits";
+import { reconcileStudioDocument, rebaseStudioHistoryRestore } from "./studioProjectDocument";
+import { MINIMUM_SPLIT_DISTANCE_TICKS, runStudioCommandOnSnapshot } from "./studioCommands";
+import { secondsToTicks, ticksToSeconds } from "./studioTime";
+import {
+  assertStudioExportTimelineMatchesDocument,
+  assertStudioSpeedPlanMatchesDocument,
+} from "./studioRenderCompiler";
 import { detectAudioBeats } from "./flowEditUtils";
 import {
   analyzeAudioBufferBeats,
@@ -3110,6 +3117,7 @@ const ViralClipStudio = ({
   const audioSourceInputRef = useRef(null);
   const previewSourceCacheRef = useRef(new Map());
   const undoStackRef = useRef([]);
+  const studioDocumentRef = useRef(null);
   const redoStackRef = useRef([]);
   const lastSnapshotRef = useRef(null);
   const lastSnapshotSignatureRef = useRef(null);
@@ -3327,7 +3335,8 @@ const ViralClipStudio = ({
     return uploadResult.url;
   };
 
-  const getEditorSnapshot = () => ({
+  const getEditorSnapshot = () => {
+    const snapshot = {
     orderedClips,
     projectMedia,
     angleGroups,
@@ -3442,7 +3451,24 @@ const ViralClipStudio = ({
     creatorPreview,
     splitExportEnabled,
     splitExportHooks,
-  });
+    };
+    try {
+      const studioDocument = reconcileStudioDocument({
+        snapshot,
+        projectId,
+        storedDocument: studioDocumentRef.current,
+      });
+      studioDocumentRef.current = studioDocument;
+      snapshot.studioDocument = studioDocument;
+    } catch (error) {
+      // A source may have no known duration while its media metadata loads.
+      // The legacy editor can still hold that transient state; commands require
+      // a validated document once the duration arrives.
+      if (error.code !== "INVALID_SOURCE_RANGE") throw error;
+      snapshot.studioDocument = null;
+    }
+    return snapshot;
+  };
 
   const refreshSavedProjects = async () => {
     try {
@@ -3493,14 +3519,22 @@ const ViralClipStudio = ({
         ].slice(-12);
     setProjectSaveState("saving");
     try {
+      const savedSnapshot = cloneSnapshot(snapshot || getEditorSnapshot());
+      if (duplicate && savedSnapshot.studioDocument) {
+        savedSnapshot.studioDocument = reconcileStudioDocument({
+          snapshot: savedSnapshot,
+          projectId: nextId,
+        });
+      }
       const saved = await saveViralStudioProject({
         id: nextId,
         name: duplicate ? `${nextName} copy` : nextName,
         createdAt: duplicate ? Date.now() : projectCreatedAtRef.current,
-        snapshot: cloneSnapshot(snapshot || getEditorSnapshot()),
+        snapshot: savedSnapshot,
         versions,
       });
       if (duplicate) {
+        studioDocumentRef.current = savedSnapshot.studioDocument || null;
         setProjectId(saved.id);
         setProjectName(saved.name);
         projectCreatedAtRef.current = saved.createdAt;
@@ -3785,6 +3819,20 @@ const ViralClipStudio = ({
   };
 
   const applyEditorSnapshot = snapshot => {
+    if (isRestoringHistoryRef.current && studioDocumentRef.current) {
+      try {
+        studioDocumentRef.current = rebaseStudioHistoryRestore({
+          currentDocument: studioDocumentRef.current,
+          restoredSnapshot: snapshot,
+          projectId,
+        });
+      } catch (error) {
+        if (error.code !== "INVALID_SOURCE_RANGE") throw error;
+        studioDocumentRef.current = null;
+      }
+    } else {
+      studioDocumentRef.current = snapshot.studioDocument || null;
+    }
     const normalizedClips = snapshot.orderedClips || [];
     const normalizedOverlays = snapshot.overlays || [];
     setOrderedClips(normalizedClips);
@@ -8458,36 +8506,52 @@ const ViralClipStudio = ({
       return;
     }
 
-    const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
+    const splitTick = secondsToTicks(clipStart + splitPoint);
+    if (splitTick - secondsToTicks(clipStart) < MINIMUM_SPLIT_DISTANCE_TICKS ||
+        secondsToTicks(Number(sourceWindow.end)) - splitTick < MINIMUM_SPLIT_DISTANCE_TICKS) {
+      setStudioActionMessage("Move the playhead at least 0.2s from either clip edge.");
+      return;
+    }
+    const baseline = getEditorSnapshot();
+    if (!baseline.studioDocument) {
+      setStudioActionMessage("Clip source timing is still loading. Try the split again shortly.");
+      return;
+    }
+    const cutHistoryBaseline = cloneSnapshot(baseline);
     pendingHistoryBaselineRef.current = cutHistoryBaseline;
     cutHistoryTransactionRef.current = {
       baseline: cutHistoryBaseline,
       appliedSignature: null,
       appliedTimelineSignature: null,
     };
-
-    const sourceClipId = currentTimelineClip.sourceClipId || currentTimelineClip.id;
-    const clipLeft = {
-      ...currentTimelineClip,
-      id: createSecureId("split-left"),
-      sourceClipId,
-      startRequest: clipStart,
-      endRequest: clipStart + splitPoint,
-    };
-    const clipRight = {
-      ...currentTimelineClip,
-      id: createSecureId("split-right"),
-      sourceClipId,
-      startRequest: clipStart + splitPoint,
-      endRequest: Number(sourceWindow.end || clipStart + localDuration),
-    };
-
-    setTimeline(previous => [
-      ...previous.slice(0, activeTimelineIndex),
-      clipLeft,
-      clipRight,
-      ...previous.slice(activeTimelineIndex + 1),
-    ]);
+    try {
+      const result = runStudioCommandOnSnapshot({
+        snapshot: baseline,
+        projectId,
+        batch: {
+          projectId,
+          baseRevision: baseline.studioDocument.revision,
+          idempotencyKey: createSecureId("split-command"),
+          actor: { type: "human", id: "viral-studio-ui" },
+          operations: [{
+            type: "split_clip",
+            target: { occurrenceId: String(currentTimelineClip.id) },
+            at: { space: "source", ticks: splitTick },
+            newOccurrenceIds: {
+              left: createSecureId("split-left"),
+              right: createSecureId("split-right"),
+            },
+          }],
+        },
+      });
+      studioDocumentRef.current = result.document;
+      setTimeline(result.snapshot.timeline);
+    } catch (error) {
+      pendingHistoryBaselineRef.current = null;
+      cutHistoryTransactionRef.current = null;
+      setStudioActionMessage(error.message || "Clip could not be split.");
+      return;
+    }
     setActiveTimelineIndex(activeTimelineIndex + 1);
     setStudioActionMessage(`Clip split at ${formatPreviewTimePrecise(splitPoint)}! You now have 2 independent clips.`);
   };
@@ -10918,6 +10982,11 @@ const ViralClipStudio = ({
       })
     );
 
+    const canonicalDocument = getEditorSnapshot().studioDocument;
+    if (canonicalDocument) {
+      assertStudioExportTimelineMatchesDocument(canonicalDocument, exportSegments);
+    }
+
     if (!addHook || !exportSegments[activeTimelineIndex]) {
       return exportSegments;
     }
@@ -11419,6 +11488,25 @@ const ViralClipStudio = ({
 
       setOverlays(newOverlays);
       setExportStatusLabel("Starting render...");
+      const speedDocument = getEditorSnapshot().studioDocument;
+      const speedPlanDuration = speedDocument
+        ? ticksToSeconds(speedDocument.clipOccurrences.at(-1)?.programmeRange.endTick || 0)
+        : outputTimelineDuration;
+      const exportSpeedSegments = speedKeyframes.length
+        ? buildSpeedSegmentsFromKeyframes({
+            keyframes: speedKeyframes,
+            duration: speedPlanDuration,
+            fallback: previewSpeed,
+          })
+        : [{
+            startTime: 0,
+            endTime: speedPlanDuration,
+            rate: previewSpeed,
+            pitchPreserved: true,
+          }];
+      if (speedDocument) {
+        assertStudioSpeedPlanMatchesDocument(speedDocument, exportSpeedSegments);
+      }
       await onSave(selectedClip, normalizedOverlays, {
         autoCaptions,
         captionReviewCopy,
@@ -11429,20 +11517,7 @@ const ViralClipStudio = ({
         captionSegments: exportCaptionSegments,
         translateCaptionsToEnglish,
         previewSpeed,
-        speedSegments: speedKeyframes.length
-          ? buildSpeedSegmentsFromKeyframes({
-              keyframes: speedKeyframes,
-              duration: outputTimelineDuration,
-              fallback: previewSpeed,
-            })
-          : [
-              {
-                startTime: 0,
-                endTime: outputTimelineDuration,
-                rate: previewSpeed,
-                pitchPreserved: true,
-              },
-            ],
+        speedSegments: exportSpeedSegments,
         pacingLevel,
         creativeIntent,
         studioPlan: selectedClip?.studioEditPlan || selectedClip?.studio_edit_plan || null,

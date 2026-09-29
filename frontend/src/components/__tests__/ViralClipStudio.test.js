@@ -2,6 +2,7 @@ import React from "react";
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import ViralClipStudio from "../ViralClipStudio";
 import { uploadSourceFileViaBackend } from "../../utils/sourceUpload";
+import * as studioCommands from "../studioCommands";
 
 jest.mock("../../utils/clipWorkflowAnalytics", () => ({
   trackClipWorkflowEvent: jest.fn(() => Promise.resolve(true)),
@@ -4131,6 +4132,7 @@ describe("ViralClipStudio timeline sequencing", () => {
   });
 
   test("supports 1-click simple editing toolbar for split, trim, delete, and 1-tap framing", async () => {
+    const commandSpy = jest.spyOn(studioCommands, "runStudioCommandOnSnapshot");
     const onSave = jest.fn(() => Promise.resolve());
     render(
       <ViralClipStudio
@@ -4207,6 +4209,15 @@ describe("ViralClipStudio timeline sequencing", () => {
     // 1-click split at 8s
     fireEvent.click(screen.getByTestId("timeline-quick-split"));
     expect(screen.getByText(/Clip split/i)).toBeInTheDocument();
+    expect(commandSpy).toHaveBeenCalledTimes(1);
+    const commandInput = commandSpy.mock.calls[0][0];
+    const manualResult = commandSpy.mock.results[0].value;
+    const headlessResult = studioCommands.executeStudioCommandBatch(
+      commandInput.snapshot.studioDocument,
+      commandInput.batch
+    );
+    expect(manualResult.document).toEqual(headlessResult.document);
+    commandSpy.mockRestore();
 
     // 1-click trim start (clipRight is active: 8s-20s)
     afterVideo.currentTime = 11;

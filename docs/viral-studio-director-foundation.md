@@ -1,0 +1,27 @@
+# Viral Clip Studio Director foundation (v1)
+
+This is an incremental editing boundary for Viral Clip Studio. It does not change Cam Combiner and does not start an AI Director or a GPU job. The existing Studio snapshot, React history, preview and worker render paths remain active while one manual edit action moves through the headless command kernel.
+
+## Canonical project boundary
+
+`studioProjectDocument.js` adapts the current Studio snapshot to a versioned document. The document holds a project ID and revision; a 90 kHz half-open clock; output frame/audio configuration; source asset references; distinct clip occurrence IDs; explicit source, programme and clip-local ranges; source-to-programme maps; a piecewise programme-to-output speed map; typed caption, overlay, motion and 3D layer descriptors; audio route references; source-range locks; style and immutable semantic analysis references; a command journal; and idempotency receipts.
+
+Assets with a SHA-256 are marked hash verified and use a hash-qualified asset ID. Existing Studio sources without one remain `legacy_reference_unverified`; a signed URL is never treated as immutable identity. The output configuration records the requested frame rate, including `source`, while audio sample rate remains worker selected until that render setting has a fixed contract. The adapter does not copy transcript word arrays, dense tracks, mattes, waveforms, depth maps, file bytes or temporary media URLs into the document. Existing project snapshots still carry their legacy editable fields so older saves, media resolution and the current history UI continue to work. The canonical occurrence sequence is projected back to that legacy timeline for the current preview/render path.
+
+The document's per-occurrence `timeMaps` currently express source-to-programme identity for forward footage. `outputTimeMap` separately expresses post-speed timing using the same complete sampled speed plan sent to the renderer. Reverse and freeze have exact semantics in `studioTime.js`, but the command executor rejects destructive edits on those occurrence modes until render support is proven. The adapter also records that regular overlays, motion and 3D alpha currently compose in separate worker stages. Its `compositionStage` is a compatibility fact, not global z order.
+
+## Commands and revision model
+
+`studioCommands.js` accepts batches with `projectId`, `baseRevision`, `idempotencyKey`, `actor` and typed `operations`. The first operations are `split_clip`, `trim_clip` and `preserve_range`. Every time point/range declares its space and uses integer ticks. The executor validates schemas and capability entries, resolves the target occurrence, checks preconditions and locks, calculates read/write sets, exposes a dry run, then commits the whole batch as one revision. A failed operation leaves the input document unchanged. Reusing an idempotency key with the same request returns the existing state; reusing it for different content fails. A stale base revision fails. Each batch records affected nodes and before values for undo. Programmatic undo advances the revision. Existing UI Undo/Redo still restores full snapshots; the adapter rebases that restore onto a new revision, preserving stale-write protection.
+
+The existing **Split current clip** action in `ViralClipStudio.js` now calls `runStudioCommandOnSnapshot`. The same batch passed directly to `executeStudioCommandBatch` yields the same canonical document; the mounted UI test asserts this. Split preserves the existing legacy history checkpoint and timeline projection. `trim_clip` and `preserve_range` are headless foundations; the legacy trim handlers still own the many linked layer and audio ripple side effects. Programmatic trim explicitly rejects projects with speed keys until those keys are retimed as part of the same transaction. A Director should initially use only the proven split path. No DOM click automation or separate AI timeline is introduced.
+
+## Render conformance and release gates
+
+`studioRenderCompiler.js` compiles the canonical clip occurrence sequence into the existing worker timing shape. Before hook insertion, export compares its resolved timeline to that sequence and fails on a clip count, identity or source-range mismatch. Tests cover duplicate source occurrences, known caption intervals and a deliberately changed render range. `studioTime.js` covers source/programme/output mapping, reverse/freeze semantics, speed partitions and exact frame/sample rounding. The long 76-second alternating speed regression now covers its whole interval within 240 segments. These checks establish **sequence and timing** parity at this boundary; they do not claim pixel parity for typography, motion, B-roll or 3D.
+
+The versioned capability registry classifies the current UI/worker paths and the 3D field parity matrix. `studioSemanticTimeline.js` defines typed evidence records, immutable artifact references and content-hash cache keys. Analysis reruns can add references but cannot overwrite edits or turn an editorial hypothesis into a command. The isolated L4 qualification remains a separate workstream.
+
+## Next bounded step
+
+Move one trim variant through the command kernel together with all linked programme-timed layers, sound cues and speed keys. Then add a paired preview/render fixture for that trim and mark its human UI route as migrated. This is the next prerequisite before a bounded Director pass can safely group split and trim edits.
