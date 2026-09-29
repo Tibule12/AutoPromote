@@ -1301,6 +1301,9 @@ try {
       },
     })
   );
+  // Director review envelopes are intentionally small even though media APIs
+  // use a larger global JSON limit.
+  app.use("/api/studio/director/reviews", express.json({ limit: "24kb" }));
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ extended: true, limit: "50mb", parameterLimit: 1000 }));
 
@@ -1339,6 +1342,12 @@ try {
   if (codeqlLimiter && codeqlLimiter.writes) {
     app.use("/api/users", codeqlLimiter.writes);
   }
+  app.use(
+    "/api/studio/director/reviews",
+    routeLimiter({ windowHint: "studio_director_reviews" }),
+    codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (_req, _res, next) => next(),
+    require("./routes/studioDirectorReviewRoutes")
+  );
   // Require latest terms before allowing access to content routes
   if (requireAcceptedTerms) {
     app.use(
