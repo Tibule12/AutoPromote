@@ -7802,8 +7802,8 @@ const ViralClipStudio = ({
       const editPlan = result.editPlan;
       setFaceTrackingMessage(mode === "source_shots"
         ? editPlan
-          ? `Editable podcast first cut applied (${coverage}; ${result.sceneCuts?.length || 0} camera cuts; ${editPlan.splitSuggestions?.length || 0} clean Director splits). Picture fill, face-safe captions, Studio Natural grade and one rounded frame now match preview and export. Review marked cuts.`
-          : `Source-shot draft applied (${coverage}; ${result.sceneCuts?.length || 0} cuts). Review every cut.`
+          ? `Podcast layout draft applied (${coverage}; ${result.sceneCuts?.length || 0} camera cuts; ${editPlan.splitSuggestions?.length || 0} two-person layout suggestions). Picture fill, face-safe captions, Studio Natural grade and one rounded frame now match preview and export. Review marked cuts. Any proposed clip split below needs separate approval.`
+          : `Source-shot draft applied (${coverage}; ${result.sceneCuts?.length || 0} cuts). Review every cut. Any proposed clip split below needs separate approval.`
         : `Face-follow draft applied (${coverage}). Review camera cuts and missed faces. This detects faces, not who is speaking.`);
     } catch (error) {
       if (generation !== faceTrackingGeneration.current) return;

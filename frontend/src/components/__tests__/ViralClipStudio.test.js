@@ -438,7 +438,7 @@ describe("ViralClipStudio timeline sequencing", () => {
       onSave={onSave} onCancel={jest.fn()} />);
     fireEvent.click(screen.getByTestId("preview-quick-track-speaker"));
     fireEvent.click(screen.getByTestId("analyze-source-shots"));
-    await screen.findByText(/Editable podcast first cut applied/i);
+    await screen.findByText(/Podcast layout draft applied/i);
     expect(screen.getByLabelText("Picture fill for this camera shot")).toHaveValue("1.12");
     await clickRenderFinalClip();
     await waitFor(() => expect(onSave).toHaveBeenCalled());
