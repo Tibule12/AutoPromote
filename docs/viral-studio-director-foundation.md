@@ -24,8 +24,12 @@ The versioned capability registry classifies the current UI/worker paths and the
 
 ## Bounded Director proposal review
 
-`studioDirectorProposals.js` prepares one source-timed split or edge trim as an AI-authored command batch. It returns a dry-run document for review and binds the proposal to the project, revision, full document digest and preview digest. Applying it requires a matching approval receipt, reruns the command checks against current state and rejects changed projects, changed previews, locks and invalid timing. Duplicate application is idempotent. The receipt is a workflow record, **not** an authentication signature; an eventual UI/server integration must derive the reviewer ID from an authenticated human action and persist that receipt with the resulting journal. This module has no model call, DOM automation or automatic application.
+`studioDirectorProposals.js` prepares one source-timed split or edge trim as an AI-authored command batch. It returns a dry-run document for review and binds the proposal to the project, revision, full document digest and preview digest. Applying it requires a matching approval receipt, reruns the command checks against current state and rejects changed projects, changed previews, locks and invalid timing. Duplicate application is idempotent.
+
+The Studio review panel accepts an incoming `directorProposalRequest` from its caller. It freezes the prepared proposal and uses `studioDirectorReviewDiff.js` to show the exact before/after clip, layer, cue and key timing in integer ticks. The timeline is unchanged while the human reviews it. Approve and reject require a current Firebase user and successful ID-token retrieval at the click; the user ID is taken from that account. Approval applies one linked command and stores the receipt in `directorReviewJournal`, linked to its command journal entry. Rejection stores a review record without a timeline edit or revision increment. Both records survive local project save/load and history restore. A changed project must be reviewed again.
+
+The receipt digest detects changes to the client workflow record; it is **not** a signature or server verification. Persisted records explicitly say `client_claim_unverified`. No current product path supplies a live AI proposal to this optional panel, and the panel never applies one automatically. There is no model call, DOM automation or production deployment.
 
 ## Next bounded step
 
-Connect the proposal dry run to a small human review panel that displays exact before/after clip and linked cue timing, then records an authenticated approval or rejection and persists the receipt with the command journal. Keep automatic application disabled.
+Add a server review endpoint that verifies the Firebase ID token and binds the decision to the proposal fingerprint, then feed one evidence-backed proposal into the panel. Keep automatic application disabled.
