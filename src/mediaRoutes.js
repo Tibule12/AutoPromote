@@ -41,7 +41,10 @@ const {
 } = require("./services/multicamUploadService");
 const { getStudioSourceBucket, resolveOwnedStudioVideoSource } = require("./services/studioSourceService");
 const { assertOwnedStudioSourceBinding } = require("./services/studioDirectorProjectBinding");
-const { persistSourceShotArtifact } = require("./services/studioSourceShotArtifactService");
+const {
+  persistSourceShotArtifact,
+  projectSourceShotAnalysis,
+} = require("./services/studioSourceShotArtifactService");
 const { getMulticamStoragePaths } = require("./services/storageCleanupService");
 const { createStudio3DPreview, getOwnedStudio3DPreview, resolveStudio3DExport } = require("./services/studio3DService");
 const { getClipLearningProfile } = require("./services/clipOutcomeLearningService");
@@ -1174,25 +1177,29 @@ router.post("/track-studio-faces", requireTesterEditingFeature("audioExtract"), 
           });
         }
       }
-      await assertOwnedStudioSourceBinding({
-        uid: req.user.uid,
-        projectId: req.body.projectId,
-        sourceAssetId: req.body.sourceAssetId,
-        sourceSha256,
-      });
     }
     temporaryFile = admin.storage().bucket().file(`temp_tracking/${req.user.uid}/${uuidv4()}.mp4`);
     await temporaryFile.save(req.file.buffer, { resumable: false, metadata: { contentType: req.file.mimetype } });
     const [url] = await temporaryFile.getSignedUrl({ action: "read", expires: Date.now() + 15*60*1000 });
     const response = await postToMediaWorker("/track-studio-faces", { video_url: url, anchors, start, end, mode }, 720000);
     if (mode === "source_shots") {
-      const sourceShotArtifact = await persistSourceShotArtifact({
+      const artifactInput = {
         uid: req.user.uid,
         projectId: req.body.projectId,
         sourceAssetId: req.body.sourceAssetId,
         sourceSha256,
         analysis: response.data,
+      };
+      // A failed or malformed worker result must not permanently claim an
+      // asset ID for these uploaded bytes.
+      projectSourceShotAnalysis(artifactInput);
+      await assertOwnedStudioSourceBinding({
+        uid: artifactInput.uid,
+        projectId: artifactInput.projectId,
+        sourceAssetId: artifactInput.sourceAssetId,
+        sourceSha256: artifactInput.sourceSha256,
       });
+      const sourceShotArtifact = await persistSourceShotArtifact(artifactInput);
       return res.json({ ...response.data, sourceShotArtifact });
     }
     return res.json(response.data);

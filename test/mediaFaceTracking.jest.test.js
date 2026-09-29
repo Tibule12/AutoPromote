@@ -15,6 +15,7 @@ jest.mock("../src/services/studioDirectorProjectBinding", () => ({
 }));
 jest.mock("../src/services/studioSourceShotArtifactService", () => ({
   persistSourceShotArtifact: jest.fn(),
+  projectSourceShotAnalysis: jest.fn(),
 }));
 jest.mock("../src/creditSystem", () => ({ deductCredits: jest.fn(), refundCredits: jest.fn(), getCreditBreakdown: jest.fn() }));
 jest.mock("../src/services/billingService", () => ({ getEffectiveTierSnapshot: jest.fn().mockResolvedValue({ testerAccess: null }) }));
@@ -24,7 +25,10 @@ jest.mock("firebase-admin", () => ({ storage: () => ({ bucket: () => ({ file: mo
 jest.mock("axios", () => ({ post: jest.fn() }));
 const axios = require("axios");
 const { assertOwnedStudioSourceBinding } = require("../src/services/studioDirectorProjectBinding");
-const { persistSourceShotArtifact } = require("../src/services/studioSourceShotArtifactService");
+const {
+  persistSourceShotArtifact,
+  projectSourceShotAnalysis,
+} = require("../src/services/studioSourceShotArtifactService");
 const routes = require("../src/mediaRoutes");
 const app = express();
 app.use("/api/media", routes);
@@ -37,6 +41,7 @@ const send = anchors => request(app).post("/api/media/track-studio-faces")
 beforeEach(() => {
   jest.clearAllMocks();
   assertOwnedStudioSourceBinding.mockResolvedValue({});
+  projectSourceShotAnalysis.mockReturnValue({});
   persistSourceShotArtifact.mockResolvedValue({
     artifactHash: "a".repeat(64), sourceSha256: "b".repeat(64),
     projectId: "project-1", sourceAssetId: "source:asset-1",
@@ -84,6 +89,10 @@ test("forwards explicit source-shot mode without requiring separate cameras", as
     uid: "tracking-user", projectId: "project-1", sourceAssetId: "source:asset-1",
     sourceSha256, analysis: { tracks: {}, sceneCuts: [49.5] },
   }));
+  expect(projectSourceShotAnalysis.mock.invocationCallOrder[0])
+    .toBeLessThan(assertOwnedStudioSourceBinding.mock.invocationCallOrder[0]);
+  expect(assertOwnedStudioSourceBinding.mock.invocationCallOrder[0])
+    .toBeLessThan(persistSourceShotArtifact.mock.invocationCallOrder[0]);
   expect(response.body.sourceShotArtifact.artifactHash).toBe("a".repeat(64));
 });
 
@@ -128,4 +137,23 @@ test("does not return unrecorded source-shot analysis when artifact storage fail
   expect(result.body.code).toBe("SOURCE_SHOT_ARTIFACT_UNAVAILABLE");
   expect(result.body).not.toHaveProperty("sceneCuts");
   expect(mockDelete).toHaveBeenCalledTimes(1);
+});
+
+test("worker failure or invalid analysis cannot permanently bind a source asset", async () => {
+  axios.post.mockRejectedValueOnce({ response: { status: 422 } });
+  await send({ solo: { x: 34, y: 47 } })
+    .field("mode", "source_shots").expect(422);
+  expect(assertOwnedStudioSourceBinding).not.toHaveBeenCalled();
+
+  axios.post.mockResolvedValueOnce({ data: { tracks: {}, sceneCuts: [49.5] } });
+  projectSourceShotAnalysis.mockImplementationOnce(() => {
+    throw Object.assign(new Error("Invalid source-shot analysis"), {
+      code: "SOURCE_SHOT_ANALYSIS_INVALID", statusCode: 502,
+    });
+  });
+  await send({ solo: { x: 34, y: 47 } })
+    .field("mode", "source_shots").expect(502);
+  expect(assertOwnedStudioSourceBinding).not.toHaveBeenCalled();
+  expect(persistSourceShotArtifact).not.toHaveBeenCalled();
+  expect(mockDelete).toHaveBeenCalledTimes(2);
 });
