@@ -120,6 +120,8 @@ import {
   runStudioDirectorProposalOnSnapshot,
 } from "./studioDirectorProposals";
 import { describeStudioDirectorReview } from "./studioDirectorReviewDiff";
+import { postStudioDirectorReviewDecision } from "./studioDirectorReviewClient";
+import { buildSourceShotDirectorSplitRequest } from "./studioDirectorEvidenceProposals";
 import { secondsToTicks, ticksToSeconds } from "./studioTime";
 import {
   assertStudioExportTimelineMatchesDocument,
@@ -2778,6 +2780,9 @@ const ViralClipStudio = ({
   const [activeCreativeTool, setActiveCreativeTool] = useState("moments");
   const [workspaceMode, setWorkspaceMode] = useState("creator");
   const [projectId, setProjectId] = useState(() => createSecureId("viral-project"));
+  const [localDirectorProposal, setLocalDirectorProposal] = useState(null);
+  const incomingDirectorProposalRequest = directorProposalRequest ||
+    (localDirectorProposal?.projectId === projectId ? localDirectorProposal.request : null);
   const [projectName, setProjectName] = useState("Untitled viral edit");
   const [savedProjects, setSavedProjects] = useState([]);
   const [projectSaveState, setProjectSaveState] = useState("unsaved");
@@ -3135,13 +3140,16 @@ const ViralClipStudio = ({
   const consumedCameraMasterIdsRef = useRef(new Set());
   const consumedInitialFilesRef = useRef(new WeakSet());
   const activeProjectIdRef = useRef(projectId);
+  const directorProposalRequestRef = useRef(incomingDirectorProposalRequest);
   const attemptedSourceRefreshRef = useRef(new Set());
   activeProjectIdRef.current = projectId;
+  directorProposalRequestRef.current = incomingDirectorProposalRequest;
   const quickMusicFileInputRef = useRef(null);
   const audioSourceInputRef = useRef(null);
   const previewSourceCacheRef = useRef(new Map());
   const undoStackRef = useRef([]);
   const studioDocumentRef = useRef(null);
+  const latestEditorSnapshotRef = useRef(null);
   const redoStackRef = useRef([]);
   const lastSnapshotRef = useRef(null);
   const lastSnapshotSignatureRef = useRef(null);
@@ -3493,6 +3501,7 @@ const ViralClipStudio = ({
     }
     return snapshot;
   };
+  latestEditorSnapshotRef.current = getEditorSnapshot;
 
   const refreshSavedProjects = async () => {
     try {
@@ -7573,6 +7582,7 @@ const ViralClipStudio = ({
 
   const analyzeSpeakerFaces = async (mode = "anchored") => {
     if (faceTrackingStatus === "processing") return;
+    if (mode === "source_shots") setLocalDirectorProposal(null);
     const generation = ++faceTrackingGeneration.current;
     const clipId = currentTimelineClip?.id;
     const split = effectiveSmartCropMode === "center" && reframeAspect !== "16:9";
@@ -7768,6 +7778,23 @@ const ViralClipStudio = ({
           }));
           const naturalGrade = CINEMATIC_PRESETS.find(preset => preset.id === "studio_natural");
           if (naturalGrade) applyFinishPreset(naturalGrade);
+        }
+      }
+      if (mode === "source_shots" && !split) {
+        try {
+          const snapshot = getEditorSnapshot();
+          const request = snapshot.studioDocument && buildSourceShotDirectorSplitRequest({
+            document: snapshot.studioDocument,
+            occurrenceId: String(clipId),
+            analysis: result,
+            preferredSourceTick: secondsToTicks(Number(videoTime || window.start || 0)),
+            proposalId: createSecureId("source-shot-proposal"),
+            idempotencyKey: createSecureId("source-shot-command"),
+          });
+          setLocalDirectorProposal(request ? { projectId, request } : null);
+        } catch (proposalError) {
+          setLocalDirectorProposal(null);
+          console.warn("Source-shot analysis had no reviewable clip boundary", proposalError);
         }
       }
       const coverage = slots.map(slot => `${slot}: ${Math.round((result.tracks[slot].coverage || 0)*100)}%`).join(" · ");
@@ -8622,7 +8649,7 @@ const ViralClipStudio = ({
   };
 
   const openDirectorReview = async () => {
-    if (!directorProposalRequest || directorReviewState === "working") return;
+    if (!incomingDirectorProposalRequest || directorReviewState === "working") return;
     setDirectorReviewState("working");
     setDirectorReviewError("");
     try {
@@ -8632,10 +8659,10 @@ const ViralClipStudio = ({
       }
       const { proposal, preview } = await prepareStudioDirectorProposal(
         snapshot.studioDocument,
-        directorProposalRequest
+        incomingDirectorProposalRequest
       );
       const prepared = {
-        requestSignature: serializeSnapshot(directorProposalRequest),
+        requestSignature: serializeSnapshot(incomingDirectorProposalRequest),
         document: cloneSnapshot(snapshot.studioDocument),
         proposal: cloneSnapshot(proposal),
         previewDocument: cloneSnapshot(preview.previewDocument),
@@ -8658,6 +8685,7 @@ const ViralClipStudio = ({
     if (!directorReview || directorReviewState !== "ready") return;
     setDirectorReviewState("working");
     setDirectorReviewError("");
+    let serverReview = null;
     try {
       const auth = getAuth();
       const reviewer = auth?.currentUser;
@@ -8675,27 +8703,50 @@ const ViralClipStudio = ({
         stale.code = "STALE_REVIEW";
         throw stale;
       }
+      const editorSignature = lastSnapshotSignatureRef.current;
+      serverReview = await postStudioDirectorReviewDecision({
+        proposal: directorReview.proposal,
+        decision,
+        token,
+        reviewerUid: reviewer.uid,
+      });
+      if (auth.currentUser?.uid !== reviewer.uid) {
+        throw new Error("Your sign-in changed during review. No local edit was applied.");
+      }
+      const latestSnapshot = latestEditorSnapshotRef.current?.();
+      if (activeProjectIdRef.current !== projectId ||
+          serializeSnapshot(directorProposalRequestRef.current) !== directorReview.requestSignature ||
+          lastSnapshotSignatureRef.current !== editorSignature ||
+          !latestSnapshot?.studioDocument ||
+          serializeSnapshot(latestSnapshot.studioDocument) !== serializeSnapshot(snapshot.studioDocument)) {
+        const stale = new Error(
+          "The server recorded the decision, but this project changed. Request a new proposal before editing."
+        );
+        stale.code = "SERVER_REVIEW_LOCAL_STALE";
+        throw stale;
+      }
       const reviewReceipt = await createStudioDirectorReviewReceipt({
         proposal: directorReview.proposal,
-        reviewerId: reviewer.uid,
+        reviewerId: serverReview.reviewerUid,
         decision,
-        reviewedAt: new Date().toISOString(),
+        reviewedAt: serverReview.reviewedAt,
       });
       const result = decision === "approve"
         ? await runStudioDirectorProposalOnSnapshot({
-            snapshot, projectId, proposal: directorReview.proposal, reviewReceipt,
+            snapshot: latestSnapshot, projectId, proposal: directorReview.proposal,
+            reviewReceipt, serverReview,
           })
         : await recordStudioDirectorReviewRejectionOnSnapshot({
-            snapshot, projectId, proposal: directorReview.proposal, reviewReceipt,
+            snapshot: latestSnapshot, projectId, proposal: directorReview.proposal,
+            reviewReceipt, serverReview,
           });
-      await onDirectorReview?.({
-        decision,
-        proposal: directorReview.proposal,
-        reviewReceipt,
-        document: result.document,
-      });
+      const beforeCommit = latestEditorSnapshotRef.current?.();
+      if (!beforeCommit?.studioDocument ||
+          serializeSnapshot(beforeCommit.studioDocument) !== serializeSnapshot(latestSnapshot.studioDocument)) {
+        throw new Error("The project changed while the server review was being applied locally.");
+      }
       if (decision === "approve") {
-        const baseline = cloneSnapshot(snapshot);
+        const baseline = cloneSnapshot(latestSnapshot);
         pendingHistoryBaselineRef.current = baseline;
         cutHistoryTransactionRef.current = {
           baseline,
@@ -8715,19 +8766,34 @@ const ViralClipStudio = ({
         setStudioActionMessage("Incoming Director edit rejected. The timeline was not changed.");
       }
       setDirectorReviewState(decision === "approve" ? "approved" : "rejected");
+      try {
+        await onDirectorReview?.({
+          decision,
+          proposal: directorReview.proposal,
+          reviewReceipt,
+          serverReview,
+          document: result.document,
+        });
+      } catch (callbackError) {
+        console.warn("Director review notification failed", callbackError);
+      }
     } catch (error) {
       setDirectorReviewState(
-        ["STALE_REVISION", "DOCUMENT_CHANGED", "PROJECT_MISMATCH", "PREVIEW_CHANGED", "STALE_REVIEW"]
+        serverReview
+          ? "server-recorded-stale"
+          : ["STALE_REVISION", "DOCUMENT_CHANGED", "PROJECT_MISMATCH", "PREVIEW_CHANGED", "STALE_REVIEW"]
           .includes(error.code)
           ? "stale"
           : "error"
       );
-      setDirectorReviewError(error.message || "The review could not be recorded.");
+      setDirectorReviewError(serverReview
+        ? `Decision recorded on the server; no local edit was applied. ${error.message || "Request a new proposal."}`
+        : error.message || "The review could not be recorded.");
     }
   };
 
-  const visibleDirectorReview = directorProposalRequest && directorReview?.requestSignature ===
-    serializeSnapshot(directorProposalRequest) ? directorReview : null;
+  const visibleDirectorReview = incomingDirectorProposalRequest && directorReview?.requestSignature ===
+    serializeSnapshot(incomingDirectorProposalRequest) ? directorReview : null;
 
   const trimClipStartToPlayhead = () => {
     if (!currentTimelineClip) return;
@@ -18622,7 +18688,7 @@ const ViralClipStudio = ({
                     track to inspect that exact frame.
                   </p>
 
-                  {directorProposalRequest ? (
+                  {incomingDirectorProposalRequest ? (
                     <section
                       className="studio-director-review"
                       aria-label="Incoming Director edit review"
@@ -18660,6 +18726,19 @@ const ViralClipStudio = ({
                             <span>Base revision {visibleDirectorReview.proposal.baseRevision}</span>
                             <span>{visibleDirectorReview.diff.operationLabel}</span>
                           </div>
+                          {visibleDirectorReview.proposal.evidence?.type === "source_shot_boundary" ? (
+                            <div className="studio-director-review__evidence"
+                              data-testid="studio-director-review-evidence">
+                              <strong>Detected source-shot boundary — proposed split requiring review</strong>
+                              <span>Source boundary {formatDirectorReviewRange({
+                                atTick: visibleDirectorReview.proposal.evidence.boundaryTick,
+                              })}</span>
+                              <span>Provider {visibleDirectorReview.proposal.evidence.provider}</span>
+                              <span>Engine {visibleDirectorReview.proposal.evidence.engine}</span>
+                              <span>Sample coverage {(visibleDirectorReview.proposal.evidence.sampleCoverage * 100).toFixed(1)}% (coverage, not model confidence)</span>
+                              <span>Source identity {visibleDirectorReview.proposal.evidence.sourceIdentityState}</span>
+                            </div>
+                          ) : null}
                           <div className="studio-director-review__table-wrap">
                             <table>
                               <caption>Exact before and after source and programme timing, in ticks</caption>
@@ -18717,11 +18796,11 @@ const ViralClipStudio = ({
                           {["approved", "rejected"].includes(directorReviewState) ? (
                             <p role="status">
                               {directorReviewState === "approved"
-                                ? "Approved edit applied and recorded with this project."
-                                : "Proposal rejected and recorded. The timeline is unchanged."}
+                                ? "Approval recorded on the server; edit applied to this project."
+                                : "Rejection recorded on the server. The timeline is unchanged."}
                             </p>
                           ) : null}
-                          <small>Review identity is recorded from your signed-in account in this project.</small>
+                          <small>The server records the signed-in reviewer and decision; this project keeps a linked copy.</small>
                         </>
                       ) : null}
                     </section>

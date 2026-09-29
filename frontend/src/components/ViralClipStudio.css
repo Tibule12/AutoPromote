@@ -8354,6 +8354,22 @@ body.dashboard-mode.viral-studio-open {
   color: #ffaaa4 !important;
 }
 
+.studio-director-review__evidence {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  padding: 9px;
+  border-radius: 8px;
+  background: rgba(76, 153, 153, 0.12);
+  color: #c3dcdd;
+  font-size: 0.63rem;
+}
+
+.studio-director-review__evidence strong {
+  width: 100%;
+  color: #e5f7f2;
+}
+
 .studio-director-review__table-wrap {
   max-height: 240px;
   overflow: auto;
