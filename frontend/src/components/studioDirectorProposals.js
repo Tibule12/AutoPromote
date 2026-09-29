@@ -21,6 +21,9 @@ const proposalError = (code, message) => {
 
 const validId = value => typeof value === "string" && value.trim().length > 0 && value.length <= 160;
 const validTick = value => Number.isSafeInteger(value) && value >= 0;
+const exactKeys = (value, keys) => value && typeof value === "object" &&
+  !Array.isArray(value) &&
+  JSON.stringify(Object.keys(value).sort()) === JSON.stringify([...keys].sort());
 const stableStringify = value =>
   JSON.stringify(value, (_key, item) =>
     item && typeof item === "object" && !Array.isArray(item)
@@ -81,6 +84,38 @@ const assertBoundedOperation = (document, operation) => {
   return occurrence;
 };
 
+const assertSourceShotEvidence = (document, occurrence, operation, evidence) => {
+  if (evidence === undefined) return;
+  const asset = document.assets.find(item => item.assetId === occurrence.assetId);
+  const range = evidence?.analysisRange;
+  if (
+    operation.type !== "split_clip" ||
+    !exactKeys(evidence, ["schemaVersion", "type", "provider", "engine", "sourceAssetId",
+      "sourceIdentityState", "sourceContentHash", "analysisRange", "boundaryTick",
+      "sampleCoverage", "verification", "decodeFailures"]) ||
+    !exactKeys(range, ["space", "startTick", "endTick"]) ||
+    evidence.schemaVersion !== 1 ||
+    evidence.type !== "source_shot_boundary" ||
+    evidence.provider !== "studio_face_tracking" ||
+    evidence.engine !== "opencv-yunet-source-shot-follow" ||
+    evidence.verification !== "needs_review" ||
+    evidence.decodeFailures !== 0 ||
+    evidence.sourceAssetId !== occurrence.assetId ||
+    evidence.sourceIdentityState !== asset?.identityState ||
+    evidence.sourceContentHash !== (asset?.contentHash || null) ||
+    range.space !== "source" ||
+    !validTick(range.startTick) || !validTick(range.endTick) ||
+    range.endTick <= range.startTick ||
+    range.startTick < occurrence.sourceRange.startTick ||
+    range.endTick > occurrence.sourceRange.endTick ||
+    evidence.boundaryTick !== operation.at?.ticks ||
+    evidence.boundaryTick <= range.startTick ||
+    evidence.boundaryTick >= range.endTick ||
+    !Number.isFinite(evidence.sampleCoverage) ||
+    evidence.sampleCoverage < 0.65 || evidence.sampleCoverage > 1
+  ) proposalError("INVALID_DIRECTOR_EVIDENCE", "Source-shot evidence does not match this split.");
+};
+
 const proposalCore = proposal => ({
   schemaVersion: proposal.schemaVersion,
   proposalId: proposal.proposalId,
@@ -89,17 +124,19 @@ const proposalCore = proposal => ({
   documentFingerprint: proposal.documentFingerprint,
   previewFingerprint: proposal.previewFingerprint,
   batch: proposal.batch,
+  evidence: proposal.evidence,
 });
 
 export const prepareStudioDirectorProposal = async (
   document,
-  { proposalId, idempotencyKey, directorId, operation }
+  { proposalId, idempotencyKey, directorId, operation, evidence }
 ) => {
   validateStudioProjectDocument(document);
   if (![proposalId, idempotencyKey, directorId].every(validId)) {
     proposalError("INVALID_PROPOSAL", "Director proposal and actor IDs are required.");
   }
   const occurrence = assertBoundedOperation(document, operation);
+  assertSourceShotEvidence(document, occurrence, operation, evidence);
   const batch = {
     projectId: document.projectId,
     baseRevision: document.revision,
@@ -119,6 +156,7 @@ export const prepareStudioDirectorProposal = async (
     documentFingerprint: await digest(document),
     previewFingerprint: await digest(preview.previewDocument),
     batch,
+    ...(evidence === undefined ? {} : { evidence }),
   };
   proposal.proposalFingerprint = await digest(proposalCore(proposal));
   return { proposal, preview };
@@ -191,20 +229,48 @@ const recordedReview = (document, proposal, reviewReceipt) => {
   return record;
 };
 
-const reviewRecord = (reviewReceipt, commandJournalId) => ({
+const validatedServerReview = (proposal, reviewReceipt, serverReview) => {
+  if (serverReview === undefined) return null;
+  const required = ["serverReviewId", "projectId", "proposalId", "baseRevision",
+    "proposalFingerprint", "decision", "reviewerUid", "reviewedAt"];
+  if (!serverReview || typeof serverReview !== "object" ||
+      !required.every(key => Object.prototype.hasOwnProperty.call(serverReview, key)) ||
+      !/^[a-f0-9]{64}$/i.test(serverReview.serverReviewId || "") ||
+      serverReview.projectId !== proposal.projectId ||
+      serverReview.proposalId !== proposal.proposalId ||
+      serverReview.baseRevision !== proposal.baseRevision ||
+      serverReview.proposalFingerprint !== proposal.proposalFingerprint ||
+      serverReview.decision !== reviewReceipt.decision ||
+      serverReview.reviewerUid !== reviewReceipt.reviewerId ||
+      serverReview.reviewedAt !== reviewReceipt.reviewedAt) {
+    proposalError("INVALID_SERVER_REVIEW", "Server review does not match the proposal and receipt.");
+  }
+  return Object.fromEntries(required.map(key => [key, serverReview[key]]));
+};
+
+const reviewRecord = (reviewReceipt, commandJournalId, serverReview) => ({
   receipt: reviewReceipt,
   commandJournalId,
   identityStatus: STUDIO_DIRECTOR_REVIEW_IDENTITY_STATUS,
+  ...(serverReview ? { serverReview } : {}),
 });
 
-export const recordStudioDirectorReviewRejection = async ({ document, proposal, reviewReceipt }) => {
+export const recordStudioDirectorReviewRejection = async ({
+  document, proposal, reviewReceipt, serverReview,
+}) => {
   await assertMatchingReview({ document, proposal, reviewReceipt });
+  const serverRecord = validatedServerReview(proposal, reviewReceipt, serverReview);
   if (reviewReceipt.decision !== "reject") {
     proposalError("INVALID_REVIEW", "Only rejected proposals can be recorded without a command.");
   }
   const prior = recordedReview(document, proposal, reviewReceipt);
-  if (prior) return { document, duplicate: true, reviewRecord: prior };
-  const record = reviewRecord(reviewReceipt, null);
+  if (prior) {
+    if (serverRecord && JSON.stringify(prior.serverReview || null) !== JSON.stringify(serverRecord)) {
+      proposalError("REVIEW_CONFLICT", "Server review differs from the recorded decision.");
+    }
+    return { document, duplicate: true, reviewRecord: prior };
+  }
+  const record = reviewRecord(reviewReceipt, null, serverRecord);
   const next = {
     ...document,
     directorReviewJournal: [...(document.directorReviewJournal || []), record],
@@ -213,8 +279,11 @@ export const recordStudioDirectorReviewRejection = async ({ document, proposal, 
   return { document: next, duplicate: false, reviewRecord: record };
 };
 
-export const applyStudioDirectorProposal = async ({ document, proposal, reviewReceipt }) => {
+export const applyStudioDirectorProposal = async ({
+  document, proposal, reviewReceipt, serverReview,
+}) => {
   await assertMatchingReview({ document, proposal, reviewReceipt });
+  const serverRecord = validatedServerReview(proposal, reviewReceipt, serverReview);
   if (reviewReceipt.decision !== "approve") {
     proposalError("REVIEW_NOT_APPROVED", "The Director proposal was not approved.");
   }
@@ -235,12 +304,16 @@ export const applyStudioDirectorProposal = async ({ document, proposal, reviewRe
     if (!priorCommand) {
       proposalError("REVIEW_JOURNAL_MISMATCH", "The prior command has no matching review record.");
     }
+    if (serverRecord && JSON.stringify(prior.serverReview || null) !== JSON.stringify(serverRecord)) {
+      proposalError("REVIEW_CONFLICT", "Server review differs from the recorded decision.");
+    }
     return { ...executeStudioCommandBatch(document, proposal.batch), reviewReceipt };
   }
   if (prior) {
     proposalError("REVIEW_JOURNAL_MISMATCH", "The review record has no matching command.");
   }
-  assertBoundedOperation(document, proposal.batch.operations[0]);
+  const occurrence = assertBoundedOperation(document, proposal.batch.operations[0]);
+  assertSourceShotEvidence(document, occurrence, proposal.batch.operations[0], proposal.evidence);
   if (document.revision !== proposal.baseRevision) {
     proposalError("STALE_REVISION", "Project changed after the Director review.");
   }
@@ -260,7 +333,7 @@ export const applyStudioDirectorProposal = async ({ document, proposal, reviewRe
       receiptFingerprint: reviewReceipt.receiptFingerprint,
     },
   };
-  const record = reviewRecord(reviewReceipt, journalEntry.journalId);
+  const record = reviewRecord(reviewReceipt, journalEntry.journalId, serverRecord);
   const next = {
     ...result.document,
     journal: [...result.document.journal.slice(0, -1), journalEntry],
@@ -271,28 +344,32 @@ export const applyStudioDirectorProposal = async ({ document, proposal, reviewRe
 };
 
 export const runStudioDirectorProposalOnSnapshot = async ({
-  snapshot, projectId, proposal, reviewReceipt,
+  snapshot, projectId, proposal, reviewReceipt, serverReview,
 }) => {
   const document = reconcileStudioDocument({
     snapshot,
     projectId,
     storedDocument: snapshot.studioDocument || null,
   });
-  const result = await applyStudioDirectorProposal({ document, proposal, reviewReceipt });
+  const result = await applyStudioDirectorProposal({
+    document, proposal, reviewReceipt, serverReview,
+  });
   if (result.duplicate) return { ...result, snapshot };
   const plan = resolveStudioCommandBatch(document, proposal.batch);
   return projectStudioCommandResultOnSnapshot({ snapshot, projectId, plan, result });
 };
 
 export const recordStudioDirectorReviewRejectionOnSnapshot = async ({
-  snapshot, projectId, proposal, reviewReceipt,
+  snapshot, projectId, proposal, reviewReceipt, serverReview,
 }) => {
   const document = reconcileStudioDocument({
     snapshot,
     projectId,
     storedDocument: snapshot.studioDocument || null,
   });
-  const result = await recordStudioDirectorReviewRejection({ document, proposal, reviewReceipt });
+  const result = await recordStudioDirectorReviewRejection({
+    document, proposal, reviewReceipt, serverReview,
+  });
   return {
     ...result,
     snapshot: result.duplicate ? snapshot : { ...snapshot, studioDocument: result.document },

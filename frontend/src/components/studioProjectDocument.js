@@ -815,6 +815,23 @@ export const validateStudioProjectDocument = document => {
         fail("INVALID_DIRECTOR_REVIEW", "Director review record is invalid or duplicated.");
       }
       proposalIds.add(receipt.proposalId);
+      if (record.serverReview !== undefined) {
+        const server = record.serverReview;
+        if (
+          !server ||
+          !/^[a-f0-9]{64}$/i.test(server.serverReviewId || "") ||
+          server.projectId !== document.projectId ||
+          server.proposalId !== receipt.proposalId ||
+          !Number.isSafeInteger(server.baseRevision) ||
+          server.baseRevision < 0 ||
+          server.proposalFingerprint !== receipt.proposalFingerprint ||
+          server.decision !== receipt.decision ||
+          server.reviewerUid !== receipt.reviewerId ||
+          server.reviewedAt !== receipt.reviewedAt
+        ) {
+          fail("INVALID_DIRECTOR_REVIEW", "Server review reference must match the local receipt.");
+        }
+      }
       if (receipt.decision === "reject") {
         if (record.commandJournalId !== null)
           fail("INVALID_DIRECTOR_REVIEW", "A rejected proposal cannot name a command.");
