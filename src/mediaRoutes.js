@@ -1166,6 +1166,15 @@ router.post("/track-studio-faces", requireTesterEditingFeature("audioExtract"), 
       if (!req.user?.uid || !req.userId || req.user.uid !== req.userId) {
         return res.status(401).json({ error: "Sign in to analyze this source" });
       }
+      const validStudioId = value => typeof value === "string" && value.length > 0 &&
+        value.length <= 160 && value === value.trim() && value !== "." && value !== ".." &&
+        !/[\x00-\x1f\x7f/]/.test(value);
+      if (!validStudioId(req.body.projectId) || !validStudioId(req.body.sourceAssetId)) {
+        return res.status(400).json({
+          code: "PROJECT_SOURCE_BINDING_INVALID",
+          error: "Choose a Studio project and source before analysis",
+        });
+      }
       sourceSha256 = crypto.createHash("sha256").update(req.file.buffer).digest("hex");
       const sourceAssetId = req.body.sourceAssetId;
       if (typeof sourceAssetId === "string" && sourceAssetId.includes(":sha256:")) {

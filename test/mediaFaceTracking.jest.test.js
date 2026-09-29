@@ -127,6 +127,33 @@ test("rejects a hash-qualified asset ID that does not match uploaded source byte
   expect(axios.post).not.toHaveBeenCalled();
 });
 
+test("accepts a hash-qualified asset ID matching the uploaded source bytes", async () => {
+  const sourceSha256 = crypto.createHash("sha256").update("fixture-video").digest("hex");
+  const sourceAssetId = `source:asset-1:sha256:${sourceSha256}`;
+  axios.post.mockResolvedValue({ data: { tracks: {}, sceneCuts: [49.5] } });
+  await request(app).post("/api/media/track-studio-faces")
+    .field("anchors", JSON.stringify({ solo: { x: 34, y: 47 } }))
+    .field("start", "0").field("end", "60").field("mode", "source_shots")
+    .field("projectId", "project-1").field("sourceAssetId", sourceAssetId)
+    .attach("file", Buffer.from("fixture-video"), "source.mp4")
+    .expect(200);
+  expect(assertOwnedStudioSourceBinding).toHaveBeenCalledWith({
+    uid: "tracking-user", projectId: "project-1", sourceAssetId, sourceSha256,
+  });
+});
+
+test("rejects malformed source bindings before invoking the worker", async () => {
+  await request(app).post("/api/media/track-studio-faces")
+    .field("anchors", JSON.stringify({ solo: { x: 34, y: 47 } }))
+    .field("start", "0").field("end", "60").field("mode", "source_shots")
+    .field("projectId", "project/another-user").field("sourceAssetId", "source:asset-1")
+    .attach("file", Buffer.from("fixture-video"), "source.mp4")
+    .expect(400);
+  expect(mockSave).not.toHaveBeenCalled();
+  expect(axios.post).not.toHaveBeenCalled();
+  expect(assertOwnedStudioSourceBinding).not.toHaveBeenCalled();
+});
+
 test("does not return unrecorded source-shot analysis when artifact storage fails", async () => {
   axios.post.mockResolvedValue({ data: { tracks: {}, sceneCuts: [49.5] } });
   persistSourceShotArtifact.mockRejectedValue(Object.assign(new Error("receipt unavailable"), {
