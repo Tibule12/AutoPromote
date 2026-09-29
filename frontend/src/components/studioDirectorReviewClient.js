@@ -38,9 +38,17 @@ export const postStudioDirectorReviewDecision = async ({ proposal, decision, tok
     reviewError("SERVER_REVIEW_INVALID", "The review service returned an invalid response. No edit was applied.");
   }
   if (!response.ok) {
+    if (response.status === 409 && payload?.error === "source_shot_evidence_mismatch") {
+      reviewError("SOURCE_SHOT_EVIDENCE_MISMATCH",
+        "The source-shot evidence does not match the server record. Analyze this source again. No edit was applied.");
+    }
+    if (response.status === 503 && payload?.error === "source_shot_evidence_unavailable") {
+      reviewError("SOURCE_SHOT_EVIDENCE_UNAVAILABLE",
+        "The review service could not verify the source-shot evidence. Try again later. No edit was applied.");
+    }
     const message = response.status === 401 || response.status === 403
       ? "Your sign-in was not accepted by the review service. No edit was applied."
-      : response.status === 409
+      : response.status === 409 && payload?.error === "review_conflict"
         ? "This proposal already has a different review decision. No edit was applied."
         : "The review service could not record this decision. No edit was applied.";
     reviewError("SERVER_REVIEW_FAILED", message);

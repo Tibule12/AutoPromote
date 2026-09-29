@@ -85,4 +85,20 @@ describe("Director review server client", () => {
     }), "INVALID_SERVER_REVIEW_REQUEST");
     expect(global.fetch).not.toHaveBeenCalled();
   });
+
+  test("reports unverified source-shot evidence without claiming a decision conflict", async () => {
+    global.fetch = jest.fn(() => Promise.resolve({
+      ok: false, status: 409,
+      json: () => Promise.resolve({ error: "source_shot_evidence_mismatch" }),
+    }));
+    await expect(submit()).rejects.toMatchObject({
+      code: "SOURCE_SHOT_EVIDENCE_MISMATCH",
+      message: expect.stringMatching(/Analyze this source again/),
+    });
+    global.fetch = jest.fn(() => Promise.resolve({
+      ok: false, status: 503,
+      json: () => Promise.resolve({ error: "source_shot_evidence_unavailable" }),
+    }));
+    await rejectCode(submit(), "SOURCE_SHOT_EVIDENCE_UNAVAILABLE");
+  });
 });
