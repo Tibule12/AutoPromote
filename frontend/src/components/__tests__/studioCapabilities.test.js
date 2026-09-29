@@ -11,11 +11,11 @@ import { STUDIO_3D_FIELD_PARITY, getStudio3DFieldParity } from "../threeD/studio
 import poseFixture from "../threeD/fixtures/pose-parity-v1.json";
 
 test("registry has unique versioned entries with traceable execution evidence", () => {
-  expect(STUDIO_CAPABILITY_REGISTRY_VERSION).toBe(1);
+  expect(STUDIO_CAPABILITY_REGISTRY_VERSION).toBe(2);
   expect(new Set(STUDIO_CAPABILITIES.map(item => item.id)).size).toBe(STUDIO_CAPABILITIES.length);
   for (const item of STUDIO_CAPABILITIES) {
     expect(item).toMatchObject({
-      version: 1,
+      version: expect.any(Number),
       parameterSchema: { type: "object", additionalProperties: false },
       requiredEvidence: expect.any(Array),
       readSet: expect.any(Array),
@@ -65,6 +65,13 @@ test("migrated command family advertises exact source/programme targeting and pr
   expect(
     getStudioCapability("trim_clip").parameterSchema.properties.keep.properties.space.const
   ).toBe("source");
+  expect(getStudioCapability("trim_clip")).toMatchObject({
+    version: 2,
+    limits: { humanUiRouted: true, humanUiRoute: "trim_start_only" },
+  });
+  expect(getStudioCapability("trim_clip").writeSet).toEqual(expect.arrayContaining([
+    "layers", "linkedTiming", "speedKeyframes",
+  ]));
   expect(getStudioCapability("preserve_range").writeSet).toContain("locks");
 });
 

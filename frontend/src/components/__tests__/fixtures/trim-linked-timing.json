@@ -1,0 +1,117 @@
+{
+  "projectId": "trim-linked-timing",
+  "snapshot": {
+    "orderedClips": [
+      { "id": "source-a", "start": 0, "end": 20 },
+      { "id": "source-b", "start": 0, "end": 8 }
+    ],
+    "selectedClipId": "source-a",
+    "timeline": [
+      {
+        "id": "first",
+        "sourceClipId": "source-a",
+        "url": "https://example.com/source-a.mp4",
+        "startRequest": 0,
+        "endRequest": 20
+      },
+      {
+        "id": "second",
+        "sourceClipId": "source-b",
+        "url": "https://example.com/source-b.mp4",
+        "startRequest": 0,
+        "endRequest": 8
+      }
+    ],
+    "captionSegments": [
+      { "id": "a-caption", "sourceClipId": "source-a", "start": 6, "end": 8, "text": "First" },
+      { "id": "b-caption", "sourceClipId": "source-b", "start": 1, "end": 2, "text": "Second" }
+    ],
+    "soundEffects": [
+      {
+        "id": "a-cue",
+        "name": "First cue",
+        "startTime": 8,
+        "duration": 0.5,
+        "builtIn": true,
+        "tone": "chime",
+        "volume": 0.7,
+        "enabled": true
+      },
+      {
+        "id": "b-cue",
+        "name": "Second cue",
+        "startTime": 22,
+        "duration": 0.5,
+        "builtIn": true,
+        "tone": "chime",
+        "volume": 0.7,
+        "enabled": true
+      }
+    ],
+    "speedKeyframes": [
+      { "id": "removed-key", "property": "speed", "time": 0, "value": 1, "easing": "hold" },
+      { "id": "first-speed", "property": "speed", "time": 5, "value": 2, "easing": "hold" },
+      { "id": "same-speed", "property": "speed", "time": 10, "value": 2, "easing": "hold" },
+      { "id": "second-speed", "property": "speed", "time": 20, "value": 1, "easing": "hold" },
+      { "id": "end-speed", "property": "speed", "time": 25, "value": 1, "easing": "hold" }
+    ],
+    "previewSpeed": 1
+  },
+  "trim": {
+    "occurrenceId": "first",
+    "keepSourceStart": 5,
+    "keepSourceEnd": 20
+  },
+  "expected": {
+    "programmeDuration": 23,
+    "outputDuration": 15.5,
+    "timeline": [
+      {
+        "id": "first",
+        "source_clip_id": "source-a",
+        "start_time": 5,
+        "end_time": 20,
+        "duration": 15
+      },
+      {
+        "id": "second",
+        "source_clip_id": "source-b",
+        "start_time": 0,
+        "end_time": 8,
+        "duration": 8
+      }
+    ],
+    "speedKeys": [
+      { "id": "first-speed", "time": 0, "value": 2 },
+      { "id": "same-speed", "time": 5, "value": 2 },
+      { "id": "second-speed", "time": 15, "value": 1 },
+      { "id": "end-speed", "time": 20, "value": 1 }
+    ],
+    "renderSpeedSegments": [
+      { "start_time": 0, "end_time": 15, "rate": 2 },
+      { "start_time": 15, "end_time": 23, "rate": 1 }
+    ],
+    "captions": [
+      {
+        "id": "a-caption-timeline-1",
+        "start_time": 1,
+        "end_time": 3,
+        "text": "First",
+        "output_start": 0.5,
+        "output_end": 1.5
+      },
+      {
+        "id": "b-caption-timeline-2",
+        "start_time": 16,
+        "end_time": 17,
+        "text": "Second",
+        "output_start": 8.5,
+        "output_end": 9.5
+      }
+    ],
+    "soundCues": [
+      { "id": "a-cue", "start_time": 3, "output_start": 1.5 },
+      { "id": "b-cue", "start_time": 17, "output_start": 9.5 }
+    ]
+  }
+}

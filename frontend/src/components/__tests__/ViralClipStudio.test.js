@@ -3,6 +3,7 @@ import { act, fireEvent, render, screen, waitFor, within } from "@testing-librar
 import ViralClipStudio from "../ViralClipStudio";
 import { uploadSourceFileViaBackend } from "../../utils/sourceUpload";
 import * as studioCommands from "../studioCommands";
+import * as studioProjectDocument from "../studioProjectDocument";
 
 jest.mock("../../utils/clipWorkflowAnalytics", () => ({
   trackClipWorkflowEvent: jest.fn(() => Promise.resolve(true)),
@@ -4106,6 +4107,7 @@ describe("ViralClipStudio timeline sequencing", () => {
   });
 
   test("quick trim retimes motion and its linked sound and undo restores both", async () => {
+    const commandSpy = jest.spyOn(studioCommands, "runStudioCommandOnSnapshot");
     const onSave = jest.fn(() => Promise.resolve());
     render(<ViralClipStudio videoUrl="https://example.com/source.mp4"
       clips={[{ id: "trim-motion", start: 0, end: 12, duration: 12 }]}
@@ -4115,20 +4117,59 @@ describe("ViralClipStudio timeline sequencing", () => {
     fireEvent.timeUpdate(video);
     fireEvent.click(within(screen.getByRole("navigation", { name: "Creative tools" })).getByRole("button", { name: "Motion", exact: true }));
     fireEvent.click(screen.getByRole("button", { name: "Add Impact title" }));
+    const inspector = screen.getByTestId("clip-studio-inspector");
+    fireEvent.click(within(inspector).getByRole("tab", { name: /Sound/i }));
+    fireEvent.click(screen.getByTestId("sound-effect-preset-impact"));
+    video.currentTime = 6;
+    fireEvent.timeUpdate(video);
+    fireEvent.click(within(inspector).getByRole("tab", { name: /Pacing/i }));
+    fireEvent.click(within(inspector).getByRole("button", { name: /Add .* point at 6\.00s/i }));
     video.currentTime = 2;
     fireEvent.timeUpdate(video);
     fireEvent.click(screen.getByTestId("pro-quick-trim-start"));
-    expect(screen.getByLabelText("Motion start")).toHaveValue(3);
+    expect(commandSpy).toHaveBeenCalledTimes(1);
+    const { snapshot, batch } = commandSpy.mock.calls[0][0];
+    expect(batch.operations).toEqual([expect.objectContaining({
+      type: "trim_clip",
+      target: { occurrenceId: snapshot.timeline[snapshot.activeTimelineIndex].id },
+      keep: { space: "source", startTick: 180000, endTick: 1080000 },
+    })]);
+    const manualResult = commandSpy.mock.results[0].value;
+    const headlessResult = studioCommands.executeStudioCommandBatch(snapshot.studioDocument, batch);
+    expect(manualResult.document).toEqual(headlessResult.document);
+    expect(manualResult.document.revision).toBe(snapshot.studioDocument.revision + 1);
+    expect(manualResult.snapshot.speedKeyframes).toEqual([
+      expect.objectContaining({ time: 4 }),
+    ]);
+    expect(manualResult.snapshot.soundEffects).toEqual(expect.arrayContaining([
+      expect.objectContaining({ startTime: 3, tone: "impact" }),
+    ]));
+    commandSpy.mockRestore();
     expect(screen.getByTestId("pro-motion-clip-1")).toHaveAttribute("title", expect.stringContaining("3.00s"));
+    expect(within(inspector).getByText("4.00s")).toBeInTheDocument();
+    fireEvent.click(within(screen.getByRole("navigation", { name: "Creative tools" })).getByRole("button", { name: "Motion", exact: true }));
+    expect(screen.getByLabelText("Motion start")).toHaveValue(3);
+    const reconcileSpy = jest.spyOn(studioProjectDocument, "reconcileStudioDocument");
     fireEvent.click(screen.getByTestId("studio-undo-button"));
+    expect(reconcileSpy.mock.results[0].value.revision).toBe(manualResult.document.revision);
+    reconcileSpy.mockRestore();
     expect(screen.getByLabelText("Motion start")).toHaveValue(5);
+    fireEvent.click(within(inspector).getByRole("tab", { name: /Pacing/i }));
+    expect(within(inspector).getByText("6.00s")).toBeInTheDocument();
     fireEvent.click(screen.getByTestId("studio-redo-button"));
+    expect(within(inspector).getByText("4.00s")).toBeInTheDocument();
+    fireEvent.click(within(screen.getByRole("navigation", { name: "Creative tools" })).getByRole("button", { name: "Motion", exact: true }));
     expect(screen.getByLabelText("Motion start")).toHaveValue(3);
     await clickRenderFinalClip();
     await waitFor(() => expect(onSave).toHaveBeenCalled());
     expect(onSave.mock.calls[0][2].soundEffects).toEqual(expect.arrayContaining([
       expect.objectContaining({ startTime: 3, tone: "impact" }),
     ]));
+    expect(onSave.mock.calls[0][2].timelineSegments[0]).toMatchObject({
+      start_time: 2,
+      end_time: 12,
+    });
+    expect(onSave.mock.calls[0][2].speedSegments.at(-1).endTime).toBe(10);
   });
 
   test("supports 1-click simple editing toolbar for split, trim, delete, and 1-tap framing", async () => {
@@ -4217,13 +4258,24 @@ describe("ViralClipStudio timeline sequencing", () => {
       commandInput.batch
     );
     expect(manualResult.document).toEqual(headlessResult.document);
-    commandSpy.mockRestore();
 
     // 1-click trim start (clipRight is active: 8s-20s)
     afterVideo.currentTime = 11;
     fireEvent.timeUpdate(afterVideo);
     fireEvent.click(screen.getByTestId("timeline-quick-trim-start"));
     expect(screen.getByText(/Trimmed start/i)).toBeInTheDocument();
+    expect(commandSpy).toHaveBeenCalledTimes(2);
+    const trimInput = commandSpy.mock.calls[1][0];
+    expect(trimInput.batch.baseRevision).toBe(manualResult.document.revision);
+    expect(trimInput.batch.operations).toEqual([expect.objectContaining({
+      type: "trim_clip",
+      target: { occurrenceId: trimInput.snapshot.timeline[trimInput.snapshot.activeTimelineIndex].id },
+      keep: { space: "source", startTick: 990000, endTick: 1800000 },
+    })]);
+    expect(commandSpy.mock.results[1].value.document).toEqual(
+      studioCommands.executeStudioCommandBatch(trimInput.snapshot.studioDocument, trimInput.batch).document
+    );
+    commandSpy.mockRestore();
 
     // 1-click trim end
     afterVideo.currentTime = 16;

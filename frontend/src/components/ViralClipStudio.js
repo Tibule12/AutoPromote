@@ -8590,22 +8590,61 @@ const ViralClipStudio = ({
       setStudioActionMessage("Move playhead to where you want the clip to start.");
       return;
     }
-    const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
+    const baseline = getEditorSnapshot();
+    if (!baseline.studioDocument) {
+      setStudioActionMessage("Clip source timing is still loading. Try the trim again shortly.");
+      return;
+    }
+    const cutHistoryBaseline = cloneSnapshot(baseline);
     pendingHistoryBaselineRef.current = cutHistoryBaseline;
     cutHistoryTransactionRef.current = {
       baseline: cutHistoryBaseline,
       appliedSignature: null,
       appliedTimelineSignature: null,
     };
-    const updatedClip = {
-      ...currentTimelineClip,
-      startRequest: clipStart + localTime,
-    };
-    const removedStart = getTimelineOffsetForIndex(activeTimelineIndex);
-    rippleLinkedTimeline(removedStart, removedStart + localTime);
-    setTimeline(previous =>
-      previous.map((c, idx) => (idx === activeTimelineIndex ? updatedClip : c))
-    );
+    try {
+      const result = runStudioCommandOnSnapshot({
+        snapshot: baseline,
+        projectId,
+        batch: {
+          projectId,
+          baseRevision: baseline.studioDocument.revision,
+          idempotencyKey: createSecureId("trim-start-command"),
+          actor: { type: "human", id: "viral-studio-ui" },
+          operations: [{
+            type: "trim_clip",
+            target: { occurrenceId: String(currentTimelineClip.id) },
+            keep: {
+              space: "source",
+              startTick: secondsToTicks(clipStart + localTime),
+              endTick: secondsToTicks(Number(sourceWindow.end)),
+            },
+          }],
+        },
+      });
+      const next = result.snapshot;
+      studioDocumentRef.current = result.document;
+      setTimeline(next.timeline);
+      setOverlays(next.overlays);
+      setSoundEffects(next.soundEffects);
+      setVoiceovers(next.voiceovers);
+      setAdjustmentLayers(next.adjustmentLayers);
+      setMotionScenes(next.motionScenes);
+      setThreeDScenes(next.threeDScenes);
+      setMotionKeyframes(next.motionKeyframes);
+      setSpeedKeyframes(next.speedKeyframes);
+      setFinishKeyframes(next.finishKeyframes);
+      setReframeKeyframes(next.reframeKeyframes);
+      setReframeModeCuts(next.reframeModeCuts);
+      setSpeakerFocusCuts(next.speakerFocusCuts);
+      setSpeakerStackFraming(next.speakerStackFraming);
+      setAudioKeyframes(next.audioKeyframes);
+    } catch (error) {
+      pendingHistoryBaselineRef.current = null;
+      cutHistoryTransactionRef.current = null;
+      setStudioActionMessage(error.message || "Clip could not be trimmed.");
+      return;
+    }
     setStudioActionMessage(`Trimmed start to ${formatPreviewTimePrecise(localTime)}. Everything before it is removed.`);
   };
 

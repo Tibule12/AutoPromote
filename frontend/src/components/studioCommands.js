@@ -1,11 +1,19 @@
 import { getStudioCapability } from "./studioCapabilities";
 import {
+  buildStudioLayersFromSnapshot,
+  buildStudioLinkedTimingFromSnapshot,
   buildStudioOutputTimeMap,
+  projectStudioLinkedTimingToSnapshot,
   projectDocumentToLegacyTimeline,
   reconcileStudioDocument,
   validateStudioProjectDocument,
 } from "./studioProjectDocument";
 import { mapOutputTickToProgrammeTick, TICKS_PER_SECOND } from "./studioTime";
+import {
+  rippleProgrammeSpeedKeys,
+  rippleStudioSnapshotLinkedTimeline,
+  studioTrimGaps,
+} from "./studioTrimTransaction";
 
 const commandError = (code, message, details = {}) => {
   const error = new Error(message);
@@ -195,7 +203,7 @@ const reflow = document => {
   };
 };
 
-const applyOne = (document, operation) => {
+const applyOne = (document, operation, idempotencyKey) => {
   const index = document.clipOccurrences.findIndex(
     item => item.occurrenceId === operation.target.occurrenceId
   );
@@ -297,12 +305,6 @@ const applyOne = (document, operation) => {
     });
   }
   const keep = operation.keep;
-  if (document.programmeSpeedKeys?.length) {
-    commandError(
-      "UNSUPPORTED_TIME_MAPPING",
-      "Trim with a speed plan needs explicit speed-key retiming."
-    );
-  }
   if (
     keep.startTick < occurrence.sourceRange.startTick ||
     keep.endTick > occurrence.sourceRange.endTick
@@ -319,7 +321,36 @@ const applyOne = (document, operation) => {
   });
   const clipOccurrences = [...document.clipOccurrences];
   clipOccurrences[index] = { ...occurrence, sourceRange: keep };
-  return reflow({ ...document, clipOccurrences });
+  let linkedSnapshot = projectStudioLinkedTimingToSnapshot(document);
+  let programmeSpeedKeys = document.programmeSpeedKeys;
+  for (const gap of studioTrimGaps(occurrence, keep)) {
+    if (
+      Object.values(document.linkedTiming?.cues || {}).some(cues =>
+        cues.some(cue => cue.programmeRange === null)
+      ) ||
+      Object.values(document.linkedTiming?.keys || {}).some(keys =>
+        keys.some(key => key.atProgrammeTick === null)
+      )
+    ) {
+      commandError(
+        "UNSUPPORTED_LINKED_TIMING",
+        "Trim needs valid timing for every linked programme cue and key."
+      );
+    }
+    linkedSnapshot = rippleStudioSnapshotLinkedTimeline(linkedSnapshot, gap, idempotencyKey);
+    programmeSpeedKeys = rippleProgrammeSpeedKeys(programmeSpeedKeys, gap);
+  }
+  const layers = [
+    ...buildStudioLayersFromSnapshot(linkedSnapshot),
+    ...document.layers.filter(layer => layer.type === "caption"),
+  ];
+  return reflow({
+    ...document,
+    clipOccurrences,
+    layers,
+    linkedTiming: buildStudioLinkedTimingFromSnapshot(linkedSnapshot),
+    programmeSpeedKeys,
+  });
 };
 
 export const resolveStudioCommandBatch = (document, batch) => {
@@ -339,7 +370,16 @@ export const resolveStudioCommandBatch = (document, batch) => {
       currentRevision: document.revision,
     });
   let candidate = document;
-  for (const operation of batch.operations) candidate = applyOne(candidate, operation);
+  const linkedEdits = [];
+  for (const operation of batch.operations) {
+    if (operation.type === "trim_clip") {
+      const occurrence = candidate.clipOccurrences.find(
+        item => item.occurrenceId === operation.target.occurrenceId
+      );
+      if (occurrence) linkedEdits.push(...studioTrimGaps(occurrence, operation.keep));
+    }
+    candidate = applyOne(candidate, operation, batch.idempotencyKey);
+  }
   const readNodes = [...new Set(batch.operations.map(operation => operation.target.occurrenceId))];
   const affected = [
     ...new Set(
@@ -352,6 +392,8 @@ export const resolveStudioCommandBatch = (document, batch) => {
     ),
   ];
   const readSet = readNodes.map(id => `occurrence:${id}`);
+  if (linkedEdits.length)
+    readSet.push("programme:layers", "programme:linked_timing", "programme:speed_keys");
   const writeSet = [
     ...affected.map(id => `occurrence:${id}`),
     ...(batch.operations.some(operation => operation.type !== "preserve_range")
@@ -362,8 +404,21 @@ export const resolveStudioCommandBatch = (document, batch) => {
     )
       ? ["constraints:locks"]
       : []),
+    ...(linkedEdits.length
+      ? ["programme:layers", "programme:linked_timing", "programme:speed_keys"]
+      : []),
   ];
-  return { document, batch, candidate, duplicate: false, fingerprint, affected, readSet, writeSet };
+  return {
+    document,
+    batch,
+    candidate,
+    duplicate: false,
+    fingerprint,
+    affected,
+    readSet,
+    writeSet,
+    linkedEdits,
+  };
 };
 
 export const dryRunStudioCommandBatch = (document, batch) => {
@@ -398,6 +453,9 @@ export const applyStudioCommandTransaction = plan => {
       timeMaps: document.timeMaps,
       outputTimeMap: document.outputTimeMap,
       constraints: document.constraints,
+      layers: document.layers,
+      linkedTiming: document.linkedTiming,
+      programmeSpeedKeys: document.programmeSpeedKeys,
     },
   };
   const next = {
@@ -455,6 +513,9 @@ export const undoStudioCommandBatch = (document, { baseRevision, actor, idempote
           timeMaps: document.timeMaps,
           outputTimeMap: document.outputTimeMap,
           constraints: document.constraints,
+          layers: document.layers,
+          linkedTiming: document.linkedTiming,
+          programmeSpeedKeys: document.programmeSpeedKeys,
         },
       },
     ],
@@ -473,16 +534,43 @@ export const runStudioCommandOnSnapshot = ({ snapshot, projectId, batch }) => {
     projectId,
     storedDocument: snapshot.studioDocument || null,
   });
-  const result = executeStudioCommandBatch(document, batch);
+  const plan = resolveStudioCommandBatch(document, batch);
+  const result = applyStudioCommandTransaction(plan);
+  if (result.duplicate) return { ...result, snapshot };
+  let linkedSnapshot = snapshot;
+  for (const gap of plan.linkedEdits) {
+    linkedSnapshot = rippleStudioSnapshotLinkedTimeline(linkedSnapshot, gap, batch.idempotencyKey);
+  }
+  const nextSnapshot = {
+    ...linkedSnapshot,
+    timeline: projectDocumentToLegacyTimeline(result.document, snapshot.timeline),
+    studioDocument: result.document,
+  };
+  const reconciled = reconcileStudioDocument({
+    snapshot: nextSnapshot,
+    projectId,
+    storedDocument: result.document,
+  });
+  if (reconciled.revision !== result.document.revision) {
+    const mismatchedFields = [
+      "assets",
+      "clipOccurrences",
+      "layers",
+      "linkedTiming",
+      "audioGraph",
+      "programmeSpeedKeys",
+      "fallbackSpeed",
+      "outputTimeMap",
+    ].filter(field => JSON.stringify(reconciled[field]) !== JSON.stringify(result.document[field]));
+    commandError(
+      "SNAPSHOT_PROJECTION_MISMATCH",
+      "Command timing disagrees with the editor snapshot.",
+      { mismatchedFields }
+    );
+  }
   return {
     ...result,
-    snapshot: result.duplicate
-      ? snapshot
-      : {
-          ...snapshot,
-          timeline: projectDocumentToLegacyTimeline(result.document, snapshot.timeline),
-          studioDocument: result.document,
-        },
+    snapshot: nextSnapshot,
   };
 };
 

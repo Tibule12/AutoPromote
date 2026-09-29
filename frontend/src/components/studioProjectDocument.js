@@ -78,6 +78,7 @@ const LAYER_PARAMETER_FIELDS = [
   "volume",
   "fadeIn",
   "fadeOut",
+  "soundOffset",
   "layout",
   "animation",
   "entrance",
@@ -86,6 +87,7 @@ const LAYER_PARAMETER_FIELDS = [
   "keyframes",
   "poseKeyframes",
   "templateId",
+  "template",
   "preset",
   "enabled",
   "layerOrder",
@@ -95,6 +97,7 @@ const LAYER_PARAMETER_FIELDS = [
 const layerReference = (item, type, index) => ({
   layerId: String(item.id || `${type}-${index + 1}`),
   type,
+  legacyType: item.type || null,
   legacyCollection:
     type === "three_d" ? "threeDScenes" : type === "motion" ? "motionScenes" : "overlays",
   ...(Number.isFinite(Number(item.startTime)) && Number.isFinite(Number(item.duration))
@@ -115,6 +118,153 @@ const layerReference = (item, type, index) => ({
     ])
   ),
 });
+
+export const buildStudioLayersFromSnapshot = snapshot => [
+  ...(snapshot.overlays || []).map((item, index) =>
+    layerReference(item, item.type === "text" ? "title" : "b_roll", index)
+  ),
+  ...(snapshot.motionScenes || []).map((item, index) => layerReference(item, "motion", index)),
+  ...(snapshot.threeDScenes || []).map((item, index) => layerReference(item, "three_d", index)),
+  ...(snapshot.captionSegments || []).map(captionLayerReference),
+];
+
+const LINKED_CUE_COLLECTIONS = ["soundEffects", "voiceovers", "adjustmentLayers"];
+const LINKED_KEY_COLLECTIONS = [
+  "motionKeyframes",
+  "finishKeyframes",
+  "reframeKeyframes",
+  "reframeModeCuts",
+  "speakerFocusCuts",
+];
+
+const timedCueReference = (item, index, collection) => {
+  const start = Number(item.startTime ?? item.start_time);
+  const duration = Number(item.duration);
+  return {
+    cueId: String(item.id || `${collection}-${index + 1}`),
+    type: item.type || null,
+    programmeRange:
+      Number.isFinite(start) && Number.isFinite(duration) && start >= 0 && duration > 0
+        ? createTimeRange("programme", secondsToTicks(start), secondsToTicks(start + duration))
+        : null,
+    ...(item.trimStart !== undefined
+      ? { trimStartTick: secondsToTicks(Number(item.trimStart || 0)) }
+      : {}),
+    ...(item.sourceStartTime !== undefined
+      ? { sourceStartTick: secondsToTicks(Number(item.sourceStartTime || 0)) }
+      : {}),
+  };
+};
+
+const timedKeyReference = key => {
+  const time = Number(key.time);
+  const { time: _time, ...parameters } = key;
+  return {
+    atProgrammeTick: Number.isFinite(time) && time >= 0 ? secondsToTicks(time) : null,
+    parameters,
+  };
+};
+
+// The canonical document keeps small timing references for legacy tracks.
+// Actual media and source-timed caption payloads remain in the legacy snapshot.
+export const buildStudioLinkedTimingFromSnapshot = snapshot => {
+  const cues = Object.fromEntries(
+    LINKED_CUE_COLLECTIONS.map(collection => [
+      collection,
+      (snapshot[collection] || []).map((item, index) => timedCueReference(item, index, collection)),
+    ])
+  );
+  const keys = Object.fromEntries(
+    LINKED_KEY_COLLECTIONS.map(collection => [
+      collection,
+      (snapshot[collection] || []).map(timedKeyReference),
+    ])
+  );
+  for (const slot of ["top", "bottom"]) {
+    for (const field of [
+      "keyframes",
+      "sourceTimeOffsetKeyframes",
+      "source_time_offset_keyframes",
+    ]) {
+      const frames = snapshot.speakerStackFraming?.[slot]?.[field];
+      if (Array.isArray(frames))
+        keys[`speakerStackFraming.${slot}.${field}`] = frames.map(timedKeyReference);
+    }
+  }
+  for (const [bus, frames] of Object.entries(snapshot.audioKeyframes || {})) {
+    if (Array.isArray(frames)) keys[`audioKeyframes.${bus}`] = frames.map(timedKeyReference);
+  }
+  return { cues, keys };
+};
+
+// A small legacy-shaped projection lets the command executor use the same
+// ripple rules as the editor without retaining media payloads in the document.
+export const projectStudioLinkedTimingToSnapshot = document => {
+  const snapshot = {
+    overlays: [],
+    motionScenes: [],
+    threeDScenes: [],
+    speedKeyframes: (document.programmeSpeedKeys || []).map(key => ({
+      property: "speed",
+      time: ticksToSeconds(key.atProgrammeTick),
+      value: key.rate,
+      easing: key.easing,
+    })),
+  };
+  for (const layer of document.layers || []) {
+    if (layer.type === "caption") continue;
+    const collection = layer.legacyCollection;
+    if (!["overlays", "motionScenes", "threeDScenes"].includes(collection)) continue;
+    const item = {
+      ...layer.parameters,
+      id: layer.layerId,
+      ...(layer.legacyType ? { type: layer.legacyType } : {}),
+      ...(layer.programmeRange
+        ? {
+            startTime: layer.parameters.startTime ?? ticksToSeconds(layer.programmeRange.startTick),
+            duration:
+              layer.parameters.duration ??
+              ticksToSeconds(layer.programmeRange.endTick - layer.programmeRange.startTick),
+          }
+        : {}),
+    };
+    snapshot[collection].push(item);
+  }
+  for (const collection of LINKED_CUE_COLLECTIONS) {
+    snapshot[collection] = (document.linkedTiming?.cues?.[collection] || []).map(cue => ({
+      id: cue.cueId,
+      ...(cue.type ? { type: cue.type } : {}),
+      ...(cue.programmeRange
+        ? {
+            startTime: ticksToSeconds(cue.programmeRange.startTick),
+            duration: ticksToSeconds(cue.programmeRange.endTick - cue.programmeRange.startTick),
+          }
+        : {}),
+      ...(cue.trimStartTick !== undefined ? { trimStart: ticksToSeconds(cue.trimStartTick) } : {}),
+      ...(cue.sourceStartTick !== undefined
+        ? { sourceStartTime: ticksToSeconds(cue.sourceStartTick) }
+        : {}),
+    }));
+  }
+  for (const [track, keys] of Object.entries(document.linkedTiming?.keys || {})) {
+    const projected = keys.map(key => ({
+      ...key.parameters,
+      time: key.atProgrammeTick === null ? NaN : ticksToSeconds(key.atProgrammeTick),
+    }));
+    if (track.startsWith("speakerStackFraming.")) {
+      const [, slot, field] = track.split(".");
+      snapshot.speakerStackFraming ||= {};
+      snapshot.speakerStackFraming[slot] ||= {};
+      snapshot.speakerStackFraming[slot][field] = projected;
+    } else if (track.startsWith("audioKeyframes.")) {
+      snapshot.audioKeyframes ||= {};
+      snapshot.audioKeyframes[track.slice("audioKeyframes.".length)] = projected;
+    } else {
+      snapshot[track] = projected;
+    }
+  }
+  return snapshot;
+};
 
 const captionLayerReference = (segment, index) => {
   const start = Number(segment.start ?? segment.start_time ?? segment.startTime);
@@ -222,14 +372,8 @@ export const adaptStudioSnapshotToDocument = ({ snapshot, projectId, previousDoc
     programmeTick += durationTick;
     return occurrence;
   });
-  const layers = [
-    ...(snapshot.overlays || []).map((item, index) =>
-      layerReference(item, item.type === "text" ? "title" : "b_roll", index)
-    ),
-    ...(snapshot.motionScenes || []).map((item, index) => layerReference(item, "motion", index)),
-    ...(snapshot.threeDScenes || []).map((item, index) => layerReference(item, "three_d", index)),
-    ...(snapshot.captionSegments || []).map(captionLayerReference),
-  ];
+  const layers = buildStudioLayersFromSnapshot(snapshot);
+  const linkedTiming = buildStudioLinkedTimingFromSnapshot(snapshot);
   const output = {
     aspectRatio: snapshot.reframeAspect || "9:16",
     requestedResolution: snapshot.exportSettings?.resolution || "1080p",
@@ -301,6 +445,7 @@ export const adaptStudioSnapshotToDocument = ({ snapshot, projectId, previousDoc
         )
       ) &&
     JSON.stringify(previousDocument.layers) === JSON.stringify(layers) &&
+    JSON.stringify(previousDocument.linkedTiming) === JSON.stringify(linkedTiming) &&
     JSON.stringify(previousDocument.output) === JSON.stringify(output) &&
     JSON.stringify(previousDocument.audioGraph) === JSON.stringify(audioGraph) &&
     JSON.stringify(previousDocument.analysisRefs) === JSON.stringify(analysisRefs) &&
@@ -336,6 +481,7 @@ export const adaptStudioSnapshotToDocument = ({ snapshot, projectId, previousDoc
       ],
     })),
     layers,
+    linkedTiming,
     audioGraph,
     constraints: {
       locks: (previousDocument?.constraints?.locks || []).filter(lock =>
@@ -441,6 +587,52 @@ export const validateStudioProjectDocument = document => {
     fail("INVALID_CLOCK", "Invalid Studio clock.");
   if (!Array.isArray(document.assets) || !Array.isArray(document.clipOccurrences))
     fail("INVALID_DOCUMENT", "Missing assets or clip occurrences.");
+  if (document.linkedTiming !== undefined) {
+    if (
+      !document.linkedTiming ||
+      typeof document.linkedTiming.cues !== "object" ||
+      typeof document.linkedTiming.keys !== "object" ||
+      Array.isArray(document.linkedTiming.cues) ||
+      Array.isArray(document.linkedTiming.keys)
+    ) {
+      fail("INVALID_LINKED_TIMING", "Linked timeline timing must name cue and key tracks.");
+    }
+    Object.values(document.linkedTiming.cues).forEach(cues => {
+      if (!Array.isArray(cues)) fail("INVALID_LINKED_TIMING", "Cue track must be an array.");
+      cues.forEach(cue => {
+        const range = cue.programmeRange;
+        if (
+          !cue.cueId ||
+          (range !== null &&
+            (range?.space !== "programme" ||
+              !Number.isSafeInteger(range.startTick) ||
+              !Number.isSafeInteger(range.endTick) ||
+              range.startTick < 0 ||
+              range.endTick <= range.startTick)) ||
+          (cue.trimStartTick !== undefined &&
+            (!Number.isSafeInteger(cue.trimStartTick) || cue.trimStartTick < 0)) ||
+          (cue.sourceStartTick !== undefined &&
+            (!Number.isSafeInteger(cue.sourceStartTick) || cue.sourceStartTick < 0))
+        ) {
+          fail("INVALID_LINKED_TIMING", "Cue timing must use half-open programme ticks.");
+        }
+      });
+    });
+    Object.values(document.linkedTiming.keys).forEach(keys => {
+      if (!Array.isArray(keys)) fail("INVALID_LINKED_TIMING", "Key track must be an array.");
+      keys.forEach(key => {
+        if (
+          (key.atProgrammeTick !== null &&
+            (!Number.isSafeInteger(key.atProgrammeTick) || key.atProgrammeTick < 0)) ||
+          !key.parameters ||
+          typeof key.parameters !== "object" ||
+          Array.isArray(key.parameters)
+        ) {
+          fail("INVALID_LINKED_TIMING", "Key timing must use programme ticks.");
+        }
+      });
+    });
+  }
   document.assets.forEach(asset => {
     if (
       !asset.assetId ||

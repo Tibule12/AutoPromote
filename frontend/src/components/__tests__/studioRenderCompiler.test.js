@@ -1,11 +1,19 @@
 import { adaptStudioSnapshotToDocument } from "../studioProjectDocument";
+import { runStudioCommandOnSnapshot } from "../studioCommands";
 import {
   assertStudioExportTimelineMatchesDocument,
   assertStudioSpeedPlanMatchesDocument,
   compileStudioTimelineForRender,
 } from "../studioRenderCompiler";
-import { mapCaptionSegmentsToTimeline } from "../viralRenderPayload";
+import { buildViralRenderData, mapCaptionSegmentsToTimeline } from "../viralRenderPayload";
 import { buildSpeedSegmentsFromKeyframes } from "../studioCreatorRecipes";
+import {
+  mapProgrammeTickToOutputTick,
+  mapSourceCaptionToOutputRanges,
+  secondsToTicks,
+  ticksToSeconds,
+} from "../studioTime";
+import trimFixture from "./fixtures/trim-linked-timing.json";
 
 test("canonical programme timeline agrees with worker timing for duplicate source occurrences", () => {
   const document = adaptStudioSnapshotToDocument({
@@ -68,4 +76,149 @@ test("browser sampled speed plan and canonical post-speed map agree through long
   expect(() =>
     assertStudioSpeedPlanMatchesDocument(document, [{ ...renderPlan[0], endTime: 30 }])
   ).toThrow();
+});
+
+test("linked start trim gives preview and worker payload the same caption and sound clocks", () => {
+  const { projectId, snapshot, trim, expected } = trimFixture;
+  const original = adaptStudioSnapshotToDocument({ projectId, snapshot });
+  const result = runStudioCommandOnSnapshot({
+    projectId,
+    snapshot: { ...snapshot, studioDocument: original },
+    batch: {
+      projectId,
+      baseRevision: original.revision,
+      idempotencyKey: "paired-preview-export-start-trim",
+      actor: { type: "human", id: "fixture-editor" },
+      operations: [
+        {
+          type: "trim_clip",
+          target: { occurrenceId: trim.occurrenceId },
+          keep: {
+            space: "source",
+            startTick: secondsToTicks(trim.keepSourceStart),
+            endTick: secondsToTicks(trim.keepSourceEnd),
+          },
+        },
+      ],
+    },
+  });
+  const { document, snapshot: trimmed } = result;
+  const timelineSegments = compileStudioTimelineForRender(document);
+  expect(timelineSegments).toEqual(expected.timeline);
+  expect(assertStudioExportTimelineMatchesDocument(document, timelineSegments)).toBe(true);
+  expect(trimmed.speedKeyframes.map(({ id, time, value }) => ({ id, time, value }))).toEqual(
+    expected.speedKeys
+  );
+  expect(document.programmeSpeedKeys.map(key => ticksToSeconds(key.atProgrammeTick))).toEqual(
+    expected.speedKeys.map(key => key.time)
+  );
+
+  const speedSegments = buildSpeedSegmentsFromKeyframes({
+    keyframes: trimmed.speedKeyframes,
+    duration: expected.programmeDuration,
+    fallback: trimmed.previewSpeed,
+  });
+  expect(
+    speedSegments.map(({ startTime, endTime, rate }) => ({
+      start_time: startTime,
+      end_time: endTime,
+      rate,
+    }))
+  ).toEqual(expected.renderSpeedSegments);
+  expect(assertStudioSpeedPlanMatchesDocument(document, speedSegments)).toBe(true);
+  expect(ticksToSeconds(document.outputTimeMap.at(-1).outputRange.endTick)).toBe(
+    expected.outputDuration
+  );
+
+  const exportCaptions = mapCaptionSegmentsToTimeline({
+    captionSegments: trimmed.captionSegments,
+    timelineSegments,
+  });
+  const payload = buildViralRenderData({
+    finalVideoUrl: trimmed.timeline[0].url,
+    selectedClip: trimmed.orderedClips[0],
+    extraOptions: {
+      autoCaptions: true,
+      timelineSegments,
+      captionSegments: exportCaptions,
+      speedSegments,
+      soundEffects: trimmed.soundEffects,
+    },
+  });
+  expect(payload.auto_captions).toBe(true);
+  expect(payload.end_time).toBe(expected.programmeDuration);
+  expect(payload.timeline_segments).toEqual(expected.timeline);
+  expect(
+    payload.speed_segments.map(({ start_time, end_time, rate }) => ({
+      start_time,
+      end_time,
+      rate,
+    }))
+  ).toEqual(expected.renderSpeedSegments);
+  expect(payload.caption_segments).toHaveLength(expected.captions.length);
+  expect(payload.sound_effects).toHaveLength(expected.soundCues.length);
+
+  const timeOccurrences = document.clipOccurrences.map(occurrence => ({
+    ...occurrence,
+    sourceAssetId: occurrence.assetId,
+    direction: "forward",
+  }));
+  expected.captions.forEach((caption, index) => {
+    const exported = payload.caption_segments[index];
+    expect({
+      id: exported.id,
+      start_time: exported.start_time,
+      end_time: exported.end_time,
+      text: exported.text,
+    }).toEqual({
+      id: caption.id,
+      start_time: caption.start_time,
+      end_time: caption.end_time,
+      text: caption.text,
+    });
+    const sourceCaption = trimmed.captionSegments[index];
+    expect(document.layers.find(layer => layer.layerId === sourceCaption.id).sourceRange).toEqual({
+      space: "source",
+      startTick: secondsToTicks(sourceCaption.start),
+      endTick: secondsToTicks(sourceCaption.end),
+    });
+    const sourceAsset = document.assets.find(
+      asset => asset.sourceId === sourceCaption.sourceClipId
+    );
+    const previewRanges = mapSourceCaptionToOutputRanges(
+      timeOccurrences,
+      document.outputTimeMap,
+      sourceAsset.assetId,
+      {
+        space: "source",
+        startTick: secondsToTicks(sourceCaption.start),
+        endTick: secondsToTicks(sourceCaption.end),
+      }
+    );
+    expect(previewRanges).toHaveLength(1);
+    expect(previewRanges[0].outputRange).toEqual({
+      space: "output",
+      startTick: secondsToTicks(caption.output_start),
+      endTick: secondsToTicks(caption.output_end),
+    });
+    expect(
+      ticksToSeconds(
+        mapProgrammeTickToOutputTick(document.outputTimeMap, secondsToTicks(exported.start_time))
+      )
+    ).toBe(caption.output_start);
+  });
+
+  expected.soundCues.forEach((cue, index) => {
+    const exported = payload.sound_effects[index];
+    expect(exported.id).toBe(cue.id);
+    expect(exported.startTime).toBe(cue.start_time);
+    expect(
+      ticksToSeconds(document.linkedTiming.cues.soundEffects[index].programmeRange.startTick)
+    ).toBe(cue.start_time);
+    expect(
+      ticksToSeconds(
+        mapProgrammeTickToOutputTick(document.outputTimeMap, secondsToTicks(exported.startTime))
+      )
+    ).toBe(cue.output_start);
+  });
 });

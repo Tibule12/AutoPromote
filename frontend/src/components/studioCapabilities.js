@@ -1,7 +1,7 @@
 // Director-facing inventory of executable Viral Clip Studio operations.
 // A UI control or a validated request field alone is not evidence of rendering.
 // Bump the registry version when a capability's contract or support changes.
-export const STUDIO_CAPABILITY_REGISTRY_VERSION = 1;
+export const STUDIO_CAPABILITY_REGISTRY_VERSION = 2;
 
 const objectSchema = (properties, required = []) => ({
   type: "object",
@@ -66,12 +66,12 @@ const entries = [
   },
   {
     id: "trim_clip",
-    version: 1,
+    version: 2,
     operationType: "trim_clip",
     parameterSchema: objectSchema({ target, keep: sourceRange, preconditions }, ["target", "keep"]),
-    requiredEvidence: ["target occurrence", "nonempty source range within occurrence"],
-    readSet: ["occurrences", "locks", "timeMap"],
-    writeSet: ["occurrences", "revision", "journal"],
+    requiredEvidence: ["target occurrence", "nonempty source range within occurrence", "valid linked programme timing"],
+    readSet: ["occurrences", "locks", "timeMap", "layers", "linkedTiming", "speedKeyframes"],
+    writeSet: ["occurrences", "layers", "linkedTiming", "speedKeyframes", "revision", "journal"],
     previewEngine: "studio project adapter",
     previewFidelity: "exact project state",
     finalRenderEngine: "Python timeline segments + FFmpeg",
@@ -81,13 +81,17 @@ const entries = [
     releaseState: "foundation",
     executable: true,
     supportStatus: "exact",
-    limits: { frameQuantizationAtExport: true, commandKernelMigrated: true, humanUiRouted: false },
-    compatibility: ["source range is half-open"],
-    conflicts: ["locked source range"],
+    limits: { frameQuantizationAtExport: true, commandKernelMigrated: true, humanUiRouted: true, humanUiRoute: "trim_start_only" },
+    compatibility: ["source range is half-open", "programme cues and keys ripple with the retained source range", "captions remain source-timed"],
+    conflicts: ["locked source range", "invalid linked programme timing"],
     rendererVersion: "viral-render-contract/current",
     templateVersion: null,
     evidenceSuite: [
+      "frontend/src/components/__tests__/studioCommands.test.js",
+      "frontend/src/components/__tests__/ViralClipStudio.test.js",
+      "frontend/src/components/__tests__/studioRenderCompiler.test.js",
       "frontend/src/components/__tests__/studioTimelineEdits.test.js",
+      "python_media_worker/test_studio_trim_timing_contract.py",
       "python_media_worker/test_viral_render_contract.py",
     ],
   },
