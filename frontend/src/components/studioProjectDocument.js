@@ -504,6 +504,7 @@ export const adaptStudioSnapshotToDocument = ({ snapshot, projectId, previousDoc
     }),
     journal: isSame ? previousDocument.journal : previousDocument?.journal || [],
     idempotency: isSame ? previousDocument.idempotency : previousDocument?.idempotency || {},
+    directorReviewJournal: previousDocument?.directorReviewJournal || [],
     compatibility: {
       legacySnapshotVersion: 1,
       projection: "clip_occurrences_canonical_other_fields_legacy",
@@ -547,6 +548,7 @@ export const rebaseStudioHistoryRestore = ({ currentDocument, restoredSnapshot, 
       },
     ],
     idempotency: currentDocument.idempotency,
+    directorReviewJournal: currentDocument.directorReviewJournal || [],
   };
   validateStudioProjectDocument(rebased);
   return rebased;
@@ -784,6 +786,51 @@ export const validateStudioProjectDocument = document => {
     Array.isArray(document.idempotency)
   ) {
     fail("INVALID_REVISION_STATE", "Command journal and idempotency receipts are required.");
+  }
+  // Review records are separate from revision entries: a rejection does not
+  // edit the timeline, and Undo must continue to inspect the latest command.
+  // The reviewer ID is a client claim until a server verifies the identity.
+  if (document.directorReviewJournal !== undefined) {
+    if (!Array.isArray(document.directorReviewJournal))
+      fail("INVALID_DIRECTOR_REVIEW", "Director review journal must be an array.");
+    const proposalIds = new Set();
+    document.directorReviewJournal.forEach(record => {
+      const receipt = record?.receipt;
+      if (
+        !receipt ||
+        receipt.schemaVersion !== 1 ||
+        typeof receipt.proposalId !== "string" ||
+        !receipt.proposalId ||
+        !/^[a-f0-9]{64}$/.test(receipt.proposalFingerprint || "") ||
+        !/^[a-f0-9]{64}$/.test(receipt.receiptFingerprint || "") ||
+        typeof receipt.reviewerId !== "string" ||
+        !receipt.reviewerId ||
+        !["approve", "reject"].includes(receipt.decision) ||
+        typeof receipt.reviewedAt !== "string" ||
+        Number.isNaN(Date.parse(receipt.reviewedAt)) ||
+        receipt.identityStatus !== "client_claim_unverified" ||
+        record.identityStatus !== "client_claim_unverified" ||
+        proposalIds.has(receipt.proposalId)
+      ) {
+        fail("INVALID_DIRECTOR_REVIEW", "Director review record is invalid or duplicated.");
+      }
+      proposalIds.add(receipt.proposalId);
+      if (receipt.decision === "reject") {
+        if (record.commandJournalId !== null)
+          fail("INVALID_DIRECTOR_REVIEW", "A rejected proposal cannot name a command.");
+      } else {
+        const command = document.journal.find(entry => entry.journalId === record.commandJournalId);
+        if (
+          !command ||
+          command.actor?.type !== "ai" ||
+          command.directorReview?.proposalId !== receipt.proposalId ||
+          command.directorReview?.proposalFingerprint !== receipt.proposalFingerprint ||
+          command.directorReview?.receiptFingerprint !== receipt.receiptFingerprint
+        ) {
+          fail("INVALID_DIRECTOR_REVIEW", "An approved review must link to its AI command.");
+        }
+      }
+    });
   }
   document.analysisRefs.forEach(ref => {
     const normalized = createSemanticAnalysisReference(ref);

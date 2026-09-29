@@ -2,10 +2,16 @@ import {
   dryRunStudioCommandBatch,
   executeStudioCommandBatch,
   MINIMUM_SPLIT_DISTANCE_TICKS,
+  projectStudioCommandResultOnSnapshot,
+  resolveStudioCommandBatch,
 } from "./studioCommands";
-import { validateStudioProjectDocument } from "./studioProjectDocument";
+import {
+  reconcileStudioDocument,
+  validateStudioProjectDocument,
+} from "./studioProjectDocument";
 
 export const STUDIO_DIRECTOR_PROPOSAL_VERSION = 1;
+export const STUDIO_DIRECTOR_REVIEW_IDENTITY_STATUS = "client_claim_unverified";
 
 const proposalError = (code, message) => {
   const error = new Error(message);
@@ -123,12 +129,14 @@ const receiptCore = receipt => ({
   proposalId: receipt.proposalId,
   proposalFingerprint: receipt.proposalFingerprint,
   reviewerId: receipt.reviewerId,
+  identityStatus: receipt.identityStatus,
   decision: receipt.decision,
   reviewedAt: receipt.reviewedAt,
 });
 
-// A workflow receipt records a review action. It is not authentication or a
-// signature; the caller must bind reviewerId to an authenticated human UI.
+// A workflow receipt records a review action. Its digest is not a signature or
+// authentication proof. A trusted server must verify reviewer identity before
+// treating the caller-supplied reviewerId as an authorization boundary.
 export const createStudioDirectorReviewReceipt = async (
   { proposal, reviewerId, decision, reviewedAt }
 ) => {
@@ -145,6 +153,7 @@ export const createStudioDirectorReviewReceipt = async (
     proposalId: proposal.proposalId,
     proposalFingerprint: proposal.proposalFingerprint,
     reviewerId,
+    identityStatus: STUDIO_DIRECTOR_REVIEW_IDENTITY_STATUS,
     decision,
     reviewedAt,
   };
@@ -152,7 +161,7 @@ export const createStudioDirectorReviewReceipt = async (
   return receipt;
 };
 
-export const applyStudioDirectorProposal = async ({ document, proposal, reviewReceipt }) => {
+const assertMatchingReview = async ({ document, proposal, reviewReceipt }) => {
   validateStudioProjectDocument(document);
   if (proposal?.schemaVersion !== STUDIO_DIRECTOR_PROPOSAL_VERSION ||
       await digest(proposalCore(proposal)) !== proposal.proposalFingerprint) {
@@ -162,14 +171,52 @@ export const applyStudioDirectorProposal = async ({ document, proposal, reviewRe
       await digest(receiptCore(reviewReceipt)) !== reviewReceipt.receiptFingerprint ||
       reviewReceipt.proposalId !== proposal.proposalId ||
       reviewReceipt.proposalFingerprint !== proposal.proposalFingerprint ||
+      reviewReceipt.identityStatus !== STUDIO_DIRECTOR_REVIEW_IDENTITY_STATUS ||
+      !["approve", "reject"].includes(reviewReceipt.decision) ||
       !validId(reviewReceipt.reviewerId)) {
     proposalError("INVALID_REVIEW", "The review receipt does not match this proposal.");
   }
-  if (reviewReceipt.decision !== "approve") {
-    proposalError("REVIEW_NOT_APPROVED", "The Director proposal was not approved.");
-  }
   if (document.projectId !== proposal.projectId) {
     proposalError("PROJECT_MISMATCH", "Director proposal targets another project.");
+  }
+};
+
+const recordedReview = (document, proposal, reviewReceipt) => {
+  const record = (document.directorReviewJournal || []).find(
+    item => item.receipt.proposalId === proposal.proposalId
+  );
+  if (record && record.receipt.receiptFingerprint !== reviewReceipt.receiptFingerprint) {
+    proposalError("REVIEW_CONFLICT", "This proposal already has a different review decision.");
+  }
+  return record;
+};
+
+const reviewRecord = (reviewReceipt, commandJournalId) => ({
+  receipt: reviewReceipt,
+  commandJournalId,
+  identityStatus: STUDIO_DIRECTOR_REVIEW_IDENTITY_STATUS,
+});
+
+export const recordStudioDirectorReviewRejection = async ({ document, proposal, reviewReceipt }) => {
+  await assertMatchingReview({ document, proposal, reviewReceipt });
+  if (reviewReceipt.decision !== "reject") {
+    proposalError("INVALID_REVIEW", "Only rejected proposals can be recorded without a command.");
+  }
+  const prior = recordedReview(document, proposal, reviewReceipt);
+  if (prior) return { document, duplicate: true, reviewRecord: prior };
+  const record = reviewRecord(reviewReceipt, null);
+  const next = {
+    ...document,
+    directorReviewJournal: [...(document.directorReviewJournal || []), record],
+  };
+  validateStudioProjectDocument(next);
+  return { document: next, duplicate: false, reviewRecord: record };
+};
+
+export const applyStudioDirectorProposal = async ({ document, proposal, reviewReceipt }) => {
+  await assertMatchingReview({ document, proposal, reviewReceipt });
+  if (reviewReceipt.decision !== "approve") {
+    proposalError("REVIEW_NOT_APPROVED", "The Director proposal was not approved.");
   }
   if (proposal.batch?.projectId !== proposal.projectId ||
       proposal.batch?.baseRevision !== proposal.baseRevision ||
@@ -177,10 +224,21 @@ export const applyStudioDirectorProposal = async ({ document, proposal, reviewRe
       !Array.isArray(proposal.batch.operations) || proposal.batch.operations.length !== 1) {
     proposalError("INVALID_PROPOSAL", "Director proposal must contain one AI edit batch.");
   }
+  const prior = recordedReview(document, proposal, reviewReceipt);
   // An exact duplicate is harmless and must not add a second edit. The command
   // executor still compares the idempotency fingerprint before returning it.
   if (document.idempotency?.[proposal.batch.idempotencyKey]) {
+    const priorCommand = document.journal.find(
+      entry => entry.journalId === prior?.commandJournalId &&
+        entry.idempotencyKey === proposal.batch.idempotencyKey
+    );
+    if (!priorCommand) {
+      proposalError("REVIEW_JOURNAL_MISMATCH", "The prior command has no matching review record.");
+    }
     return { ...executeStudioCommandBatch(document, proposal.batch), reviewReceipt };
+  }
+  if (prior) {
+    proposalError("REVIEW_JOURNAL_MISMATCH", "The review record has no matching command.");
   }
   assertBoundedOperation(document, proposal.batch.operations[0]);
   if (document.revision !== proposal.baseRevision) {
@@ -193,5 +251,50 @@ export const applyStudioDirectorProposal = async ({ document, proposal, reviewRe
   if (await digest(preview.previewDocument) !== proposal.previewFingerprint) {
     proposalError("PREVIEW_CHANGED", "Director preview changed since review.");
   }
-  return { ...executeStudioCommandBatch(document, proposal.batch), reviewReceipt };
+  const result = executeStudioCommandBatch(document, proposal.batch);
+  const journalEntry = {
+    ...result.journalEntry,
+    directorReview: {
+      proposalId: proposal.proposalId,
+      proposalFingerprint: proposal.proposalFingerprint,
+      receiptFingerprint: reviewReceipt.receiptFingerprint,
+    },
+  };
+  const record = reviewRecord(reviewReceipt, journalEntry.journalId);
+  const next = {
+    ...result.document,
+    journal: [...result.document.journal.slice(0, -1), journalEntry],
+    directorReviewJournal: [...(document.directorReviewJournal || []), record],
+  };
+  validateStudioProjectDocument(next);
+  return { ...result, document: next, journalEntry, reviewReceipt, reviewRecord: record };
+};
+
+export const runStudioDirectorProposalOnSnapshot = async ({
+  snapshot, projectId, proposal, reviewReceipt,
+}) => {
+  const document = reconcileStudioDocument({
+    snapshot,
+    projectId,
+    storedDocument: snapshot.studioDocument || null,
+  });
+  const result = await applyStudioDirectorProposal({ document, proposal, reviewReceipt });
+  if (result.duplicate) return { ...result, snapshot };
+  const plan = resolveStudioCommandBatch(document, proposal.batch);
+  return projectStudioCommandResultOnSnapshot({ snapshot, projectId, plan, result });
+};
+
+export const recordStudioDirectorReviewRejectionOnSnapshot = async ({
+  snapshot, projectId, proposal, reviewReceipt,
+}) => {
+  const document = reconcileStudioDocument({
+    snapshot,
+    projectId,
+    storedDocument: snapshot.studioDocument || null,
+  });
+  const result = await recordStudioDirectorReviewRejection({ document, proposal, reviewReceipt });
+  return {
+    ...result,
+    snapshot: result.duplicate ? snapshot : { ...snapshot, studioDocument: result.document },
+  };
 };

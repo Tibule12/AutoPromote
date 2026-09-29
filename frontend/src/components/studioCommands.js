@@ -534,18 +534,15 @@ export const undoStudioCommandBatch = (document, { baseRevision, actor, idempote
   return { document: restored, duplicate: false, undoneJournalId: last.journalId };
 };
 
-export const runStudioCommandOnSnapshot = ({ snapshot, projectId, batch }) => {
-  const document = reconcileStudioDocument({
-    snapshot,
-    projectId,
-    storedDocument: snapshot.studioDocument || null,
-  });
-  const plan = resolveStudioCommandBatch(document, batch);
-  const result = applyStudioCommandTransaction(plan);
+export const projectStudioCommandResultOnSnapshot = ({ snapshot, projectId, plan, result }) => {
   if (result.duplicate) return { ...result, snapshot };
   let linkedSnapshot = snapshot;
   for (const gap of plan.linkedEdits) {
-    linkedSnapshot = rippleStudioSnapshotLinkedTimeline(linkedSnapshot, gap, batch.idempotencyKey);
+    linkedSnapshot = rippleStudioSnapshotLinkedTimeline(
+      linkedSnapshot,
+      gap,
+      plan.batch.idempotencyKey
+    );
   }
   const nextSnapshot = {
     ...linkedSnapshot,
@@ -578,6 +575,17 @@ export const runStudioCommandOnSnapshot = ({ snapshot, projectId, batch }) => {
     ...result,
     snapshot: nextSnapshot,
   };
+};
+
+export const runStudioCommandOnSnapshot = ({ snapshot, projectId, batch }) => {
+  const document = reconcileStudioDocument({
+    snapshot,
+    projectId,
+    storedDocument: snapshot.studioDocument || null,
+  });
+  const plan = resolveStudioCommandBatch(document, batch);
+  const result = applyStudioCommandTransaction(plan);
+  return projectStudioCommandResultOnSnapshot({ snapshot, projectId, plan, result });
 };
 
 export const MINIMUM_SPLIT_DISTANCE_TICKS = Math.round(0.2 * TICKS_PER_SECOND);
