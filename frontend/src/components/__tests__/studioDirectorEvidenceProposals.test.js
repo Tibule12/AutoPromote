@@ -30,9 +30,17 @@ const analysis = () => ({
   end: 20,
   sceneCuts: [-1, 0.1, 8, 14, 19.95],
   reviewRequired: true,
-  decodeFailures: 0,
+  decodeFailures: [],
   tracks: { solo: { coverage: 0.9 } },
   editPlan: { version: 1, preflight: { passed: true } },
+  sourceShotArtifact: {
+    artifactHash: "d".repeat(64),
+    sourceSha256: "e".repeat(64),
+    projectId: "evidence-project",
+    sourceAssetId: "source:source",
+    analysisRange: { space: "source", startTick: 0, endTick: secondsToTicks(20) },
+    createdAt: "2026-09-29T17:00:00.000Z",
+  },
 });
 const request = (project, response = analysis()) => buildSourceShotDirectorSplitRequest({
   document: project,
@@ -57,6 +65,8 @@ test("detected source shot produces one evidence-bound, reviewable split", async
     sourceAssetId: project.clipOccurrences[0].assetId,
     sourceIdentityState: "legacy_reference_unverified",
     sourceContentHash: null,
+    artifactHash: "d".repeat(64),
+    sourceSha256: "e".repeat(64),
     sampleCoverage: 0.9,
     verification: "needs_review",
   });
@@ -111,7 +121,14 @@ test("bad analysis and inconsistent evidence never produce an editable proposal"
   const project = document();
   expect(request(project, { ...analysis(), mode: "anchored" })).toBeNull();
   expect(request(project, { ...analysis(), tracks: { solo: { coverage: 0.4 } } })).toBeNull();
-  expect(request(project, { ...analysis(), decodeFailures: 1 })).toBeNull();
+  expect(request(project, { ...analysis(), decodeFailures: [0] })).toBeNull();
+  expect(request(project, { ...analysis(), sourceShotArtifact: null })).toBeNull();
+  expect(request(project, { ...analysis(), sourceShotArtifact: {
+    ...analysis().sourceShotArtifact, sourceSha256: "not-a-sha256",
+  } })).toBeNull();
+  expect(request(project, { ...analysis(), sourceShotArtifact: {
+    ...analysis().sourceShotArtifact, sourceAssetId: "wrong-asset",
+  } })).toBeNull();
   expect(request(project, { ...analysis(), sceneCuts: [0.1, 19.95] })).toBeNull();
   const suggested = request(project);
   await expect(prepareStudioDirectorProposal(project, {

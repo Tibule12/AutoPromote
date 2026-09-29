@@ -7594,6 +7594,16 @@ const ViralClipStudio = ({
     setFaceTrackingStatus("processing");
     setFaceTrackingMessage("Detecting real faces. Existing framing stays unchanged until results arrive…");
     try {
+      let sourceShotAssetId = null;
+      if (mode === "source_shots") {
+        const sourceDocument = getEditorSnapshot().studioDocument;
+        sourceShotAssetId = sourceDocument?.clipOccurrences.find(
+          occurrence => occurrence.occurrenceId === String(clipId)
+        )?.assetId || null;
+        if (!sourceShotAssetId) {
+          throw new Error("Source timing is still loading. Try camera-cut analysis again shortly.");
+        }
+      }
       const source = getSafeMediaSource(currentTimelineClip?.url || videoUrl);
       const file = currentTimelineClip?.file || selectedClip?.file;
       let blob = file instanceof Blob ? file : null;
@@ -7614,6 +7624,10 @@ const ViralClipStudio = ({
       body.append("start", String(window.start));
       body.append("end", String(window.end));
       body.append("mode", mode);
+      if (mode === "source_shots") {
+        body.append("projectId", projectId);
+        body.append("sourceAssetId", sourceShotAssetId);
+      }
       const token = await getMediaAuthToken();
       if (!token) throw new Error("Sign in to analyze this source.");
       const response = await fetch(`${API_BASE_URL}/api/media/track-studio-faces`, {
@@ -18735,6 +18749,12 @@ const ViralClipStudio = ({
                               })}</span>
                               <span>Provider {visibleDirectorReview.proposal.evidence.provider}</span>
                               <span>Engine {visibleDirectorReview.proposal.evidence.engine}</span>
+                              <span>Analysis artifact <code title={visibleDirectorReview.proposal.evidence.artifactHash}>
+                                {visibleDirectorReview.proposal.evidence.artifactHash.slice(0, 12)}…
+                              </code></span>
+                              <span>Source bytes SHA-256 <code title={visibleDirectorReview.proposal.evidence.sourceSha256}>
+                                {visibleDirectorReview.proposal.evidence.sourceSha256.slice(0, 12)}…
+                              </code></span>
                               <span>Sample coverage {(visibleDirectorReview.proposal.evidence.sampleCoverage * 100).toFixed(1)}% (coverage, not model confidence)</span>
                               <span>Source identity {visibleDirectorReview.proposal.evidence.sourceIdentityState}</span>
                             </div>

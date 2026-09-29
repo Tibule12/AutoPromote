@@ -91,7 +91,7 @@ const assertSourceShotEvidence = (document, occurrence, operation, evidence) => 
   if (
     operation.type !== "split_clip" ||
     !exactKeys(evidence, ["schemaVersion", "type", "provider", "engine", "sourceAssetId",
-      "sourceIdentityState", "sourceContentHash", "analysisRange", "boundaryTick",
+      "sourceIdentityState", "sourceContentHash", "artifactHash", "sourceSha256", "analysisRange", "boundaryTick",
       "sampleCoverage", "verification", "decodeFailures"]) ||
     !exactKeys(range, ["space", "startTick", "endTick"]) ||
     evidence.schemaVersion !== 1 ||
@@ -103,6 +103,9 @@ const assertSourceShotEvidence = (document, occurrence, operation, evidence) => 
     evidence.sourceAssetId !== occurrence.assetId ||
     evidence.sourceIdentityState !== asset?.identityState ||
     evidence.sourceContentHash !== (asset?.contentHash || null) ||
+    !/^[a-f0-9]{64}$/.test(evidence.artifactHash || "") ||
+    !/^[a-f0-9]{64}$/.test(evidence.sourceSha256 || "") ||
+    (asset?.identityState === "hash_verified" && evidence.sourceSha256 !== asset.contentHash) ||
     range.space !== "source" ||
     !validTick(range.startTick) || !validTick(range.endTick) ||
     range.endTick <= range.startTick ||

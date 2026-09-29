@@ -4555,8 +4555,12 @@ describe("ViralClipStudio timeline sequencing", () => {
   test("source-shot analysis offers one evidence-bound split without applying it", async () => {
     const onDirectorReview = jest.fn();
     const requestSpy = jest.spyOn(studioDirectorEvidenceProposals, "buildSourceShotDirectorSplitRequest");
-    global.fetch.mockImplementation(url => {
+    global.fetch.mockImplementation((url, request) => {
       if (String(url).endsWith("/api/media/track-studio-faces")) {
+        const submittedProjectId = request.body.get("projectId");
+        const submittedAssetId = request.body.get("sourceAssetId");
+        expect(submittedProjectId).toMatch(/^viral-project/);
+        expect(submittedAssetId).toMatch(/^source:/);
         return Promise.resolve({
           ok: true,
           json: () => Promise.resolve({
@@ -4565,12 +4569,18 @@ describe("ViralClipStudio timeline sequencing", () => {
             start: 0, end: 20,
             sceneCuts: [8],
             reviewRequired: true,
-            decodeFailures: 0,
+            decodeFailures: [],
             tracks: { solo: { coverage: 0.9, keyframes: [
               { time: 0, x: 38, y: 47 }, { time: 20, x: 46, y: 48 },
             ] } },
             editPlan: { version: 1, preflight: { passed: true },
               timelineCuts: [], splitSuggestions: [], captionPlacementCuts: [] },
+            sourceShotArtifact: {
+              artifactHash: "d".repeat(64), sourceSha256: "e".repeat(64),
+              projectId: submittedProjectId, sourceAssetId: submittedAssetId,
+              analysisRange: { space: "source", startTick: 0, endTick: secondsToTicks(20) },
+              createdAt: "2026-09-29T17:00:00.000Z",
+            },
           }),
         });
       }
@@ -4607,6 +4617,8 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(evidence).toHaveTextContent("720000 ticks");
     expect(evidence).toHaveTextContent("Provider studio_face_tracking");
     expect(evidence).toHaveTextContent("Engine opencv-yunet-source-shot-follow");
+    expect(evidence).toHaveTextContent(`Analysis artifact ${"d".repeat(12)}…`);
+    expect(evidence).toHaveTextContent(`Source bytes SHA-256 ${"e".repeat(12)}…`);
     expect(evidence).toHaveTextContent("90.0% (coverage, not model confidence)");
     expect(evidence).toHaveTextContent("Source identity legacy_reference_unverified");
     expect(evidence).toHaveTextContent("proposed split requiring review");
