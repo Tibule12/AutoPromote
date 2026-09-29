@@ -4275,13 +4275,25 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(commandSpy.mock.results[1].value.document).toEqual(
       studioCommands.executeStudioCommandBatch(trimInput.snapshot.studioDocument, trimInput.batch).document
     );
-    commandSpy.mockRestore();
 
     // 1-click trim end
     afterVideo.currentTime = 16;
     fireEvent.timeUpdate(afterVideo);
     fireEvent.click(screen.getByTestId("timeline-quick-trim-end"));
     expect(screen.getByText(/Trimmed end/i)).toBeInTheDocument();
+    expect(commandSpy).toHaveBeenCalledTimes(3);
+    const endInput = commandSpy.mock.calls[2][0];
+    expect(endInput.batch.baseRevision).toBe(commandSpy.mock.results[1].value.document.revision);
+    expect(endInput.batch.operations).toEqual([expect.objectContaining({
+      type: "trim_clip",
+      target: { occurrenceId: endInput.snapshot.timeline[endInput.snapshot.activeTimelineIndex].id },
+      keep: { space: "source", startTick: 990000, endTick: 1440000 },
+    })]);
+    expect(commandSpy.mock.results[2].value.document).toEqual(
+      studioCommands.executeStudioCommandBatch(endInput.snapshot.studioDocument, endInput.batch).document
+    );
+    expect(commandSpy.mock.results[2].value.document.revision).toBe(endInput.batch.baseRevision + 1);
+    commandSpy.mockRestore();
 
     // 1-click delete active clip (since timeline now has 2 clips)
     fireEvent.click(screen.getByTestId("timeline-quick-delete"));

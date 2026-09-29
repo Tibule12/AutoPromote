@@ -1,7 +1,7 @@
 // Director-facing inventory of executable Viral Clip Studio operations.
 // A UI control or a validated request field alone is not evidence of rendering.
 // Bump the registry version when a capability's contract or support changes.
-export const STUDIO_CAPABILITY_REGISTRY_VERSION = 2;
+export const STUDIO_CAPABILITY_REGISTRY_VERSION = 3;
 
 const objectSchema = (properties, required = []) => ({
   type: "object",
@@ -66,7 +66,7 @@ const entries = [
   },
   {
     id: "trim_clip",
-    version: 2,
+    version: 3,
     operationType: "trim_clip",
     parameterSchema: objectSchema({ target, keep: sourceRange, preconditions }, ["target", "keep"]),
     requiredEvidence: ["target occurrence", "nonempty source range within occurrence", "valid linked programme timing"],
@@ -81,7 +81,7 @@ const entries = [
     releaseState: "foundation",
     executable: true,
     supportStatus: "exact",
-    limits: { frameQuantizationAtExport: true, commandKernelMigrated: true, humanUiRouted: true, humanUiRoute: "trim_start_only" },
+    limits: { frameQuantizationAtExport: true, commandKernelMigrated: true, humanUiRouted: true, humanUiRoute: "trim_start_and_end" },
     compatibility: ["source range is half-open", "programme cues and keys ripple with the retained source range", "captions remain source-timed"],
     conflicts: ["locked source range", "invalid linked programme timing"],
     rendererVersion: "viral-render-contract/current",

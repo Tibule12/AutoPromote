@@ -1,4 +1,4 @@
-"""Worker half of the paired Studio start-trim timing fixture."""
+"""Worker half of the paired Studio start- and end-trim timing fixtures."""
 
 import json
 from pathlib import Path
@@ -14,15 +14,38 @@ from python_media_worker.viral_render_contract import (
 )
 
 
-FIXTURE = (
+FIXTURE_DIR = (
     Path(__file__).resolve().parents[1]
-    / "frontend/src/components/__tests__/fixtures/trim-linked-timing.json"
+    / "frontend/src/components/__tests__/fixtures"
 )
 
 
 class StudioTrimTimingContractTests(unittest.TestCase):
     def test_trimmed_preview_caption_and_sound_times_match_worker_clock(self):
-        fixture = json.loads(FIXTURE.read_text())
+        fixture = json.loads((FIXTURE_DIR / "trim-linked-timing.json").read_text())
+        self.assert_worker_timing(fixture)
+
+    def test_end_trimmed_later_captions_and_sound_times_match_worker_clock(self):
+        fixture = json.loads((FIXTURE_DIR / "trim-end-linked-timing.json").read_text())
+        self.assertEqual(
+            [cue["id"] for cue in fixture["expected"]["soundCues"]],
+            ["a-cue", "boundary-cue", "b-cue"],
+        )
+        self.assertEqual(
+            [caption["id"] for caption in fixture["expected"]["captions"]],
+            [
+                "a-caption-timeline-1",
+                "boundary-caption-timeline-1",
+                "b-caption-timeline-2",
+            ],
+        )
+        self.assertEqual(
+            [key["id"] for key in fixture["expected"]["speedKeys"]],
+            ["initial-speed", "first-speed", "same-speed", "second-speed", "end-speed"],
+        )
+        self.assert_worker_timing(fixture)
+
+    def assert_worker_timing(self, fixture):
         expected = fixture["expected"]
         plan = normalize_speed_plan(
             expected["programmeDuration"], expected["renderSpeedSegments"]
@@ -48,13 +71,16 @@ class StudioTrimTimingContractTests(unittest.TestCase):
                     places=6,
                 )
 
+        source_cues = {cue["id"]: cue for cue in fixture["snapshot"]["soundEffects"]}
         worker_cues = validate_design(
             None,
             [
-                {**source, "startTime": expected_cue["start_time"]}
-                for source, expected_cue in zip(
-                    fixture["snapshot"]["soundEffects"], expected["soundCues"]
-                )
+                {
+                    **source_cues[cue["id"]],
+                    "startTime": cue["start_time"],
+                    "duration": cue.get("duration", source_cues[cue["id"]]["duration"]),
+                }
+                for cue in expected["soundCues"]
             ],
         )[1]
         self.assertEqual(len(worker_cues), len(expected["soundCues"]))
@@ -62,11 +88,21 @@ class StudioTrimTimingContractTests(unittest.TestCase):
             with self.subTest(cue=cue["id"]):
                 self.assertEqual(worker_cue["id"], cue["id"])
                 self.assertEqual(worker_cue["startTime"], cue["start_time"])
+                if "duration" in cue:
+                    self.assertEqual(worker_cue["duration"], cue["duration"])
                 self.assertAlmostEqual(
                     map_timeline_time(plan, worker_cue["startTime"]),
                     cue["output_start"],
                     places=6,
                 )
+                if "output_end" in cue:
+                    self.assertAlmostEqual(
+                        map_timeline_time(
+                            plan, worker_cue["startTime"] + worker_cue["duration"]
+                        ),
+                        cue["output_end"],
+                        places=6,
+                    )
                 self.assertAlmostEqual(
                     float(edit_clock(cue["output_start"], plan)),
                     cue["start_time"],
