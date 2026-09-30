@@ -174,6 +174,80 @@ const responseFor = (record, duplicate) => ({
   duplicate,
 });
 
+const reviewFailure = (status, code) => Object.assign(new Error(code), { status, code });
+
+const ownedProjectHeadRef = (uid, projectId) => db.collection("users").doc(uid)
+  .collection("studioDirectorProjects").doc(sha256(projectId));
+
+const storedDocumentForReview = (head, uid, proposal) => {
+  if (!head || head.schemaVersion !== 1 || head.ownerUid !== uid ||
+      head.projectId !== proposal.projectId ||
+      !Number.isSafeInteger(head.revision) || head.revision < 0 ||
+      !validHash(head.documentFingerprint) ||
+      !validHash(head.serverRevisionId) ||
+      typeof head.documentJson !== "string") {
+    throw reviewFailure(503, "project_revision_unavailable");
+  }
+  let document;
+  try {
+    document = JSON.parse(head.documentJson);
+  } catch (_) {
+    throw reviewFailure(503, "project_revision_unavailable");
+  }
+  if (!plainObject(document) || document.projectId !== head.projectId ||
+      document.revision !== head.revision ||
+      sha256(stableStringify(document)) !== head.documentFingerprint) {
+    throw reviewFailure(503, "project_revision_unavailable");
+  }
+  if (head.revision !== proposal.baseRevision ||
+      head.documentFingerprint !== proposal.documentFingerprint) {
+    throw reviewFailure(409, "project_revision_mismatch");
+  }
+  return document;
+};
+
+const assertStoredProposalTarget = (document, proposal) => {
+  const operation = proposal.batch.operations[0];
+  const occurrence = Array.isArray(document.clipOccurrences) &&
+    document.clipOccurrences.find(item => item?.occurrenceId === operation.target.occurrenceId);
+  const source = occurrence?.sourceRange;
+  const expected = operation.preconditions.sourceRange;
+  if (!source || source.space !== "source" ||
+      source.startTick !== expected.startTick || source.endTick !== expected.endTick) {
+    throw reviewFailure(409, "project_revision_target_mismatch");
+  }
+  if (proposal.evidence) {
+    const asset = Array.isArray(document.assets) &&
+      document.assets.find(item => item?.assetId === occurrence.assetId);
+    if (!asset || asset.assetId !== proposal.evidence.sourceAssetId ||
+        asset.identityState !== proposal.evidence.sourceIdentityState ||
+        (asset.identityState === "hash_verified" &&
+          asset.contentHash !== proposal.evidence.sourceSha256) ||
+        (asset.identityState === "legacy_reference_unverified" &&
+          proposal.evidence.sourceContentHash !== null)) {
+      throw reviewFailure(409, "project_revision_target_mismatch");
+    }
+  }
+};
+
+const assertSameReview = (prior, serverReviewId, proposal, decision, reviewerUid) => {
+  if (!prior || prior.schemaVersion !== REVIEW_VERSION ||
+      prior.serverReviewId !== serverReviewId ||
+      typeof prior.reviewedAt !== "string" || Number.isNaN(Date.parse(prior.reviewedAt))) {
+    throw reviewFailure(503, "review_store_unavailable");
+  }
+  if (prior.projectId !== proposal.projectId ||
+      prior.proposalId !== proposal.proposalId ||
+      prior.baseRevision !== proposal.baseRevision ||
+      prior.proposalFingerprint !== proposal.proposalFingerprint ||
+      prior.documentFingerprint !== proposal.documentFingerprint ||
+      prior.previewFingerprint !== proposal.previewFingerprint ||
+      prior.decision !== decision || prior.reviewerUid !== reviewerUid) {
+    throw reviewFailure(409, "review_conflict");
+  }
+  return prior;
+};
+
 const verifiedSourceShotEvidence = async (reviewerUid, proposal) => {
   const evidence = proposal.evidence;
   if (!evidence) return true;
@@ -206,9 +280,9 @@ const verifiedSourceShotEvidence = async (reviewerUid, proposal) => {
     artifact.sceneCutTicks.includes(evidence.boundaryTick);
 };
 
-// The server verifies Firebase identity and the bounded proposal envelope.
-// The Studio document remains local, so this endpoint cannot attest that the
-// proposed edit still matches a current browser document or rendered preview.
+// The registered project document is a browser-supplied owner-scoped snapshot.
+// The transaction checks the current stored head and records one decision, but
+// the rendered preview remains a browser claim checked by the local editor.
 router.post("/", authMiddleware, async (req, res) => {
   const reviewerUid = req.user?.uid;
   if (!validReviewerUid(reviewerUid) || !req.userId || req.userId !== reviewerUid)
@@ -248,44 +322,43 @@ router.post("/", authMiddleware, async (req, res) => {
     reviewedAt: new Date().toISOString(),
     proposal,
   };
+  const recordRef = db.collection("users").doc(reviewerUid)
+    .collection("studioDirectorReviews").doc(serverReviewId);
   try {
-    const recordRef = db.collection("users").doc(reviewerUid)
-      .collection("studioDirectorReviews").doc(serverReviewId);
-    // Firestore create is atomic and fails if the immutable record exists.
-    await recordRef.create(record);
-    return res.status(201).json(responseFor(record, false));
+    const outcome = await db.runTransaction(async transaction => {
+      const existing = await transaction.get(recordRef);
+      if (existing.exists) {
+        return { record: assertSameReview(existing.data(), serverReviewId,
+          proposal, decision, reviewerUid), duplicate: true };
+      }
+      const head = await transaction.get(ownedProjectHeadRef(reviewerUid, proposal.projectId));
+      if (!head.exists) throw reviewFailure(409, "project_revision_missing");
+      const document = storedDocumentForReview(head.data(), reviewerUid, proposal);
+      assertStoredProposalTarget(document, proposal);
+      transaction.create(recordRef, record);
+      return { record, duplicate: false };
+    });
+    return res.status(outcome.duplicate ? 200 : 201)
+      .json(responseFor(outcome.record, outcome.duplicate));
   } catch (error) {
-    if (!alreadyExists(error)) {
-      return res.status(503).json({ ok: false, error: "review_store_unavailable" });
+    if (error.status && error.code) {
+      return res.status(error.status).json({ ok: false, error: error.code });
     }
-    try {
-      const recordRef = db.collection("users").doc(reviewerUid)
-        .collection("studioDirectorReviews").doc(serverReviewId);
-      const existing = await recordRef.get();
-      if (!existing.exists) {
-        return res.status(503).json({ ok: false, error: "review_store_unavailable" });
+    if (alreadyExists(error)) {
+      try {
+        const existing = await recordRef.get();
+        if (existing.exists) {
+          const prior = assertSameReview(existing.data(), serverReviewId,
+            proposal, decision, reviewerUid);
+          return res.json(responseFor(prior, true));
+        }
+      } catch (retryError) {
+        if (retryError.status && retryError.code) {
+          return res.status(retryError.status).json({ ok: false, error: retryError.code });
+        }
       }
-      const prior = existing.data();
-      if (!prior || prior.schemaVersion !== REVIEW_VERSION ||
-          prior.serverReviewId !== serverReviewId ||
-          typeof prior.reviewedAt !== "string" ||
-          Number.isNaN(Date.parse(prior.reviewedAt))) {
-        return res.status(503).json({ ok: false, error: "review_store_unavailable" });
-      }
-      if (prior.projectId !== proposal.projectId ||
-          prior.proposalId !== proposal.proposalId ||
-          prior.baseRevision !== proposal.baseRevision ||
-          prior.proposalFingerprint !== proposal.proposalFingerprint ||
-          prior.documentFingerprint !== proposal.documentFingerprint ||
-          prior.previewFingerprint !== proposal.previewFingerprint ||
-          prior.decision !== decision ||
-          prior.reviewerUid !== reviewerUid) {
-        return res.status(409).json({ ok: false, error: "review_conflict" });
-      }
-      return res.json(responseFor(prior, true));
-    } catch (_) {
-      return res.status(503).json({ ok: false, error: "review_store_unavailable" });
     }
+    return res.status(503).json({ ok: false, error: "review_store_unavailable" });
   }
 });
 

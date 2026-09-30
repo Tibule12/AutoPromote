@@ -9,6 +9,7 @@ const { persistSourceShotArtifact } = require("../src/services/studioSourceShotA
 
 const store = new Map();
 const originalCollection = db.collection;
+const originalRunTransaction = db.runTransaction;
 const paths = [];
 const app = express();
 app.use(express.json({ limit: "24kb" }));
@@ -21,6 +22,29 @@ const stableStringify = value => JSON.stringify(value, (_key, item) =>
 );
 const hash = value => crypto.createHash("sha256").update(stableStringify(value)).digest("hex");
 const sourceRange = { space: "source", startTick: 0, endTick: 1_800_000 };
+const projectDocument = () => ({
+  schemaVersion: 1,
+  projectId: "project-1",
+  revision: 4,
+  assets: [{
+    assetId: "source:asset-1", sourceId: "asset-1",
+    identityState: "legacy_reference_unverified",
+  }],
+  clipOccurrences: [{
+    occurrenceId: "main", assetId: "source:asset-1", sourceRange,
+  }],
+});
+const headPath = (uid = "reviewer-1") =>
+  `users/${uid}/studioDirectorProjects/${crypto.createHash("sha256").update("project-1").digest("hex")}`;
+const seedHead = (uid = "reviewer-1", document = projectDocument()) => {
+  const documentFingerprint = hash(document);
+  store.set(headPath(uid), {
+    schemaVersion: 1, ownerUid: uid, projectId: document.projectId,
+    revision: document.revision, documentFingerprint,
+    serverRevisionId: "f".repeat(64), registeredAt: new Date().toISOString(),
+    documentJson: stableStringify(document),
+  });
+};
 const split = () => ({
   type: "split_clip",
   target: { occurrenceId: "main" },
@@ -28,13 +52,13 @@ const split = () => ({
   newOccurrenceIds: { left: "left", right: "right" },
   preconditions: { sourceRange },
 });
-const proposal = (operation = split(), evidence) => {
+const proposal = (operation = split(), evidence, document = projectDocument()) => {
   const core = {
     schemaVersion: 1,
     proposalId: "proposal-1",
     projectId: "project-1",
     baseRevision: 4,
-    documentFingerprint: "a".repeat(64),
+    documentFingerprint: hash(document),
     previewFingerprint: "b".repeat(64),
     batch: {
       projectId: "project-1",
@@ -95,13 +119,14 @@ beforeEach(() => {
     return {
       doc: uid => ({
         collection: subcollection => {
-          expect(["studioDirectorReviews", "studioDirectorProjectBindings",
+          expect(["studioDirectorReviews", "studioDirectorProjects", "studioDirectorProjectBindings",
             "studioSourceShotArtifacts"]).toContain(subcollection);
           return {
             doc: id => {
               const path = `${collection}/${uid}/${subcollection}/${id}`;
               paths.push(path);
               return {
+                path,
                 create: async data => {
                   if (store.has(path)) throw Object.assign(new Error("already exists"), { code: 6 });
                   store.set(path, structuredClone(data));
@@ -117,10 +142,21 @@ beforeEach(() => {
       }),
     };
   };
+  db.runTransaction = async work => {
+    const writes = [];
+    const transaction = {
+      get: ref => ref.get(),
+      create: (ref, data) => writes.push({ ref, data }),
+    };
+    const result = await work(transaction);
+    for (const { ref, data } of writes) await ref.create(data);
+    return result;
+  };
 });
 
 afterAll(() => {
   db.collection = originalCollection;
+  db.runTransaction = originalRunTransaction;
 });
 
 test("route requires the shared Firebase auth middleware", async () => {
@@ -150,6 +186,7 @@ test("pre-attached or mismatched user objects cannot choose a review scope", asy
 });
 
 test("server derives UID and time, writes once, and replays the same immutable decision", async () => {
+  seedHead();
   const body = { proposal: proposal(), decision: "approve" };
   const first = await post(body);
   expect(first.status).toBe(201);
@@ -167,13 +204,72 @@ test("server derives UID and time, writes once, and replays the same immutable d
   expect(Date.parse(first.body.reviewedAt)).not.toBeNaN();
   expect(paths[0]).toBe(`users/reviewer-1/studioDirectorReviews/${first.body.serverReviewId}`);
   expect(store.get(paths[0]).proposal).toEqual(body.proposal);
+  seedHead("reviewer-1", { ...projectDocument(), revision: 5 });
   const replay = await post(body);
   expect(replay.status).toBe(200);
   expect(replay.body).toEqual({ ...first.body, duplicate: true });
-  expect(store.size).toBe(1);
+  expect(store.size).toBe(2);
+});
+
+test("review requires the authenticated owner's current stored revision", async () => {
+  const body = { proposal: proposal(), decision: "approve" };
+  const missing = await post(body);
+  expect(missing.status).toBe(409);
+  expect(missing.body.error).toBe("project_revision_missing");
+  expect(store.size).toBe(0);
+
+  seedHead("other-user");
+  const otherOwner = await post(body);
+  expect(otherOwner.status).toBe(409);
+  expect(otherOwner.body.error).toBe("project_revision_missing");
+
+  seedHead();
+  const changed = rehash({ ...body.proposal, documentFingerprint: "a".repeat(64) });
+  const mismatch = await post({ proposal: changed, decision: "approve" });
+  expect(mismatch.status).toBe(409);
+  expect(mismatch.body.error).toBe("project_revision_mismatch");
+  expect([...store.keys()].filter(path => path.includes("studioDirectorReviews"))).toHaveLength(0);
+});
+
+test("review checks the target occurrence and source range in the stored document", async () => {
+  seedHead();
+  const unknownTarget = proposal({ ...split(), target: { occurrenceId: "other" } });
+  const unknown = await post({ proposal: unknownTarget, decision: "approve" });
+  expect(unknown.status).toBe(409);
+  expect(unknown.body.error).toBe("project_revision_target_mismatch");
+
+  const wrongRange = proposal({ ...split(), preconditions: {
+    sourceRange: { space: "source", startTick: 0, endTick: 1_900_000 },
+  } });
+  const mismatch = await post({ proposal: wrongRange, decision: "approve" });
+  expect(mismatch.status).toBe(409);
+  expect(mismatch.body.error).toBe("project_revision_target_mismatch");
+  expect([...store.keys()].filter(path => path.includes("studioDirectorReviews"))).toHaveLength(0);
+});
+
+test("source-shot evidence must name the stored target's source asset", async () => {
+  const document = projectDocument();
+  document.assets.push({ assetId: "source:asset-2", sourceId: "asset-2",
+    identityState: "legacy_reference_unverified" });
+  document.clipOccurrences[0].assetId = "source:asset-2";
+  seedHead("reviewer-1", document);
+  const receipt = await seedSourceShot();
+  const result = await post({ proposal: proposal(split(), evidence(receipt), document),
+    decision: "approve" });
+  expect(result.status).toBe(409);
+  expect(result.body.error).toBe("project_revision_target_mismatch");
+});
+
+test("a corrupt current head cannot attest a document", async () => {
+  seedHead();
+  store.get(headPath()).documentJson = "{invalid";
+  const result = await post({ proposal: proposal(), decision: "approve" });
+  expect(result.status).toBe(503);
+  expect(result.body.error).toBe("project_revision_unavailable");
 });
 
 test("conflicting decision or changed proposal cannot overwrite the first review", async () => {
+  seedHead();
   const original = proposal();
   expect((await post({ proposal: original, decision: "reject" })).status).toBe(201);
   const conflictingDecision = await post({ proposal: original, decision: "approve" });
@@ -182,18 +278,20 @@ test("conflicting decision or changed proposal cannot overwrite the first review
   const changed = proposal({ ...split(), at: { space: "source", ticks: 810_000 } });
   const conflictingProposal = await post({ proposal: changed, decision: "reject" });
   expect(conflictingProposal.status).toBe(409);
-  expect(store.size).toBe(1);
-  expect([...store.values()][0].decision).toBe("reject");
+  expect(store.size).toBe(2);
+  expect([...store.values()].find(value => value.decision)?.decision).toBe("reject");
 });
 
 test("different authenticated users have separate review scopes", async () => {
+  seedHead("reviewer-1");
+  seedHead("reviewer-2");
   const body = { proposal: proposal(), decision: "reject" };
   const first = await post(body, "reviewer-1");
   const second = await post(body, "reviewer-2");
   expect(first.status).toBe(201);
   expect(second.status).toBe(201);
   expect(second.body.reviewerUid).toBe("reviewer-2");
-  expect(store.size).toBe(2);
+  expect(store.size).toBe(4);
 });
 
 test("rejects client identity and time, malformed fingerprints, and invalid edit bounds", async () => {
@@ -218,6 +316,7 @@ test("rejects client identity and time, malformed fingerprints, and invalid edit
 });
 
 test("a bounded edge trim can be reviewed without source-shot evidence", async () => {
+  seedHead();
   const trim = {
     type: "trim_clip",
     target: { occurrenceId: "main" },
@@ -230,6 +329,7 @@ test("a bounded edge trim can be reviewed without source-shot evidence", async (
 });
 
 test("accepts bounded shot evidence and rejects extra or unbound evidence", async () => {
+  seedHead();
   const receipt = await seedSourceShot();
   const valid = proposal(split(), evidence(receipt));
   expect((await post({ proposal: valid, decision: "approve" })).status).toBe(201);
@@ -254,6 +354,7 @@ test("accepts bounded shot evidence and rejects extra or unbound evidence", asyn
 });
 
 test("source-shot review requires the server-observed cut and source binding", async () => {
+  seedHead();
   const receipt = await seedSourceShot();
   const otherCut = { ...split(), at: { space: "source", ticks: 810_000 } };
   const unobserved = proposal(otherCut, { ...evidence(receipt), boundaryTick: 810_000 });
@@ -262,7 +363,7 @@ test("source-shot review requires the server-observed cut and source binding", a
   expect((await post({ proposal: wrongBytes, decision: "approve" })).status).toBe(409);
   const wrongUser = await post({ proposal: proposal(split(), evidence(receipt)), decision: "approve" }, "other-user");
   expect(wrongUser.status).toBe(409);
-  expect(store.size).toBe(2);
+  expect(store.size).toBe(3);
 });
 
 test("oversized envelopes fail before a Firestore write", async () => {
@@ -272,13 +373,8 @@ test("oversized envelopes fail before a Firestore write", async () => {
 });
 
 test("storage failures return unavailable and never claim a successful review", async () => {
-  db.collection = () => ({
-    doc: () => ({
-      collection: () => ({
-        doc: () => ({ create: async () => { throw new Error("offline"); } }),
-      }),
-    }),
-  });
+  seedHead();
+  db.runTransaction = async () => { throw new Error("offline"); };
   const result = await post({ proposal: proposal(), decision: "approve" });
   expect(result.status).toBe(503);
   expect(result.body.error).toBe("review_store_unavailable");
