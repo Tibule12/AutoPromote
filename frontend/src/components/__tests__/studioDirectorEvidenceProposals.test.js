@@ -109,7 +109,8 @@ test("reject record retains a matching server reference without an edit", async 
   const rejected = await recordStudioDirectorReviewRejection({
     document: project, proposal, reviewReceipt: receipt, serverReview,
   });
-  expect(rejected.document.revision).toBe(0);
+  expect(rejected.document.revision).toBe(1);
+  expect(rejected.document.directorReviewJournal[0].reviewRevision).toBe(1);
   expect(rejected.document.directorReviewJournal[0].serverReview).toEqual(serverReview);
   await expect(recordStudioDirectorReviewRejection({
     document: project, proposal, reviewReceipt: receipt,
