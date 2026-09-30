@@ -54,6 +54,22 @@ export const postStudioDirectorReviewDecision = async ({ proposal, decision, tok
       reviewError("PROJECT_REVISION_UNAVAILABLE",
         "The review service could not verify the saved project version. Try again later. No edit was applied.");
     }
+    if (response.status === 409 && payload?.error === "preview_fingerprint_mismatch") {
+      reviewError("PREVIEW_FINGERPRINT_MISMATCH",
+        "The proposed preview differs from the server replay. Review the edit again. No edit was applied.");
+    }
+    if (response.status === 409 && payload?.error === "proposal_replay_rejected") {
+      reviewError("PROPOSAL_REPLAY_REJECTED",
+        "The proposed edit could not be replayed against the saved project. Review the edit again. No edit was applied.");
+    }
+    if (response.status === 503 && payload?.error === "proposal_replay_unavailable") {
+      reviewError("PROPOSAL_REPLAY_UNAVAILABLE",
+        "The review service could not verify the proposed edit. Try again later. No edit was applied.");
+    }
+    if (response.status === 409 && payload?.error === "review_requires_reproposal") {
+      reviewError("REVIEW_REQUIRES_REPROPOSAL",
+        "This earlier review has no server-verified preview. Create a new proposal and review it again. No edit was applied.");
+    }
     if (response.status === 409 && payload?.error === "source_shot_evidence_mismatch") {
       reviewError("SOURCE_SHOT_EVIDENCE_MISMATCH",
         "The source-shot evidence does not match the server record. Analyze this source again. No edit was applied.");

@@ -115,4 +115,21 @@ describe("Director review server client", () => {
       await expect(submit()).rejects.toMatchObject({ code, message: expect.stringMatching(/No edit was applied/) });
     }
   });
+
+  test("reports server replay failures distinctly and fails closed", async () => {
+    for (const [status, error, code, detail] of [
+      [409, "preview_fingerprint_mismatch", "PREVIEW_FINGERPRINT_MISMATCH", /preview differs from the server replay/],
+      [409, "proposal_replay_rejected", "PROPOSAL_REPLAY_REJECTED", /could not be replayed/],
+      [503, "proposal_replay_unavailable", "PROPOSAL_REPLAY_UNAVAILABLE", /Try again later/],
+      [409, "review_requires_reproposal", "REVIEW_REQUIRES_REPROPOSAL", /Create a new proposal/],
+    ]) {
+      global.fetch = jest.fn(() => Promise.resolve({
+        ok: false, status, json: () => Promise.resolve({ error }),
+      }));
+      let failure;
+      try { await submit(); } catch (caught) { failure = caught; }
+      expect(failure).toMatchObject({ code, message: expect.stringMatching(detail) });
+      expect(failure.message).toMatch(/No edit was applied/);
+    }
+  });
 });
