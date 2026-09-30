@@ -2,6 +2,8 @@
 
 **Status: COMPLETE against the original 14 foundation acceptance criteria, 30 September 2026.** This receipt closes the safe foundation requested in the original brief. It does not qualify the full AI Director, L4 acceleration, or pixel-perfect parity across renderers. No production deployment was performed.
 
+Follow-up review found four correctness defects in this accepted foundation. Their fixes and regression coverage are recorded in [Director foundation review fixes](viral-studio-director-review-fixes.md); the measurements below describe the original acceptance run.
+
 ## A–C. Branch, commits, and files
 
 - **A. Branch:** `agent/viral-studio-director-foundation`.

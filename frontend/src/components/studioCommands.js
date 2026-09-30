@@ -1,5 +1,10 @@
 import { getStudioCapability } from "./studioCapabilities";
 import {
+  applyStudioCommandInverse,
+  createStudioCommandInverse,
+  latestUndoableStudioCommand,
+} from "./studioCommandHistory";
+import {
   buildStudioLayersFromSnapshot,
   buildStudioLinkedTimingFromSnapshot,
   buildStudioOutputTimeMap,
@@ -454,15 +459,7 @@ export const applyStudioCommandTransaction = plan => {
     affectedNodes: plan.affected,
     readSet: plan.readSet,
     writeSet: plan.writeSet,
-    inverse: {
-      clipOccurrences: document.clipOccurrences,
-      timeMaps: document.timeMaps,
-      outputTimeMap: document.outputTimeMap,
-      constraints: document.constraints,
-      layers: document.layers,
-      linkedTiming: document.linkedTiming,
-      programmeSpeedKeys: document.programmeSpeedKeys,
-    },
+    inverse: createStudioCommandInverse(document, candidate),
   };
   const next = {
     ...candidate,
@@ -496,25 +493,13 @@ export const undoStudioCommandBatch = (document, { baseRevision, actor, idempote
   }
   if (document.revision !== baseRevision)
     commandError("STALE_REVISION", "Project changed since undo was prepared.");
-  const last = document.journal?.[document.journal.length - 1];
-  // Rejection receipts advance the canonical revision while leaving the
-  // timeline intact. They may follow an undoable command without hiding it.
-  const reviewOnlyRevisions = new Set((document.directorReviewJournal || [])
-    .filter(record => record.receipt?.decision === "reject")
-    .map(record => record.reviewRevision));
-  const interveningCount = last ? document.revision - last.newRevision : -1;
-  const interveningRevisionsAreReviews = interveningCount >= 0 &&
-    interveningCount <= reviewOnlyRevisions.size &&
-    Array.from({ length: interveningCount },
-      (_, index) => last.newRevision + index + 1)
-      .every(revision => reviewOnlyRevisions.has(revision));
-  if (!last || last.newRevision > document.revision || !last.inverse ||
-      !interveningRevisionsAreReviews)
+  const last = latestUndoableStudioCommand(document);
+  if (!last)
     commandError("UNDO_UNAVAILABLE", "No latest command batch can be undone.");
   const newRevision = document.revision + 1;
+  const content = applyStudioCommandInverse(document, last.inverse);
   const restored = {
-    ...document,
-    ...last.inverse,
+    ...content,
     revision: newRevision,
     journal: [
       ...document.journal,
@@ -526,15 +511,7 @@ export const undoStudioCommandBatch = (document, { baseRevision, actor, idempote
         idempotencyKey,
         operations: [{ type: "undo", journalId: last.journalId }],
         affectedNodes: last.affectedNodes,
-        inverse: {
-          clipOccurrences: document.clipOccurrences,
-          timeMaps: document.timeMaps,
-          outputTimeMap: document.outputTimeMap,
-          constraints: document.constraints,
-          layers: document.layers,
-          linkedTiming: document.linkedTiming,
-          programmeSpeedKeys: document.programmeSpeedKeys,
-        },
+        inverse: createStudioCommandInverse(document, content),
       },
     ],
     idempotency: {

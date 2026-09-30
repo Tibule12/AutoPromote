@@ -30,12 +30,20 @@ export const assertStudioExportTimelineMatchesDocument = (document, renderSegmen
   }
   expected.forEach((segment, index) => {
     const actual = renderSegments[index];
+    const actualStart = Number(actual?.start_time);
+    const actualEnd = Number(actual?.end_time);
+    const actualDuration = Number(actual?.duration);
+    // round(end - start) can differ from round(end) - round(start). Compare
+    // canonical endpoints, then check duration against its own raw endpoints.
     if (
       String(actual?.id) !== segment.id ||
       String(actual?.source_clip_id) !== segment.source_clip_id ||
-      secondsToTicks(Number(actual?.start_time)) !== secondsToTicks(segment.start_time) ||
-      secondsToTicks(Number(actual?.end_time)) !== secondsToTicks(segment.end_time) ||
-      secondsToTicks(Number(actual?.duration)) !== secondsToTicks(segment.duration)
+      !Number.isFinite(actualStart) || actualStart < 0 ||
+      !Number.isFinite(actualEnd) || actualEnd <= actualStart ||
+      !Number.isFinite(actualDuration) || actualDuration <= 0 ||
+      secondsToTicks(actualStart) !== secondsToTicks(segment.start_time) ||
+      secondsToTicks(actualEnd) !== secondsToTicks(segment.end_time) ||
+      secondsToTicks(actualDuration) !== secondsToTicks(actualEnd - actualStart)
     ) {
       fail(
         "RENDER_TIMELINE_MISMATCH",
@@ -71,7 +79,14 @@ export const assertStudioSpeedPlanMatchesDocument = (document, renderSpeedSegmen
   } catch (error) {
     fail("RENDER_SPEED_MISMATCH", `Render speed plan is invalid: ${error.message}`);
   }
-  if (JSON.stringify(actual) !== JSON.stringify(document.outputTimeMap)) {
+  const sameMap = actual.length === document.outputTimeMap.length && actual.every((segment, index) => {
+    const expected = document.outputTimeMap[index];
+    return segment.rateNumerator === expected.rateNumerator &&
+      segment.rateDenominator === expected.rateDenominator &&
+      ["programmeRange", "outputRange"].every(field =>
+        ["space", "startTick", "endTick"].every(key => segment[field][key] === expected[field][key]));
+  });
+  if (!sameMap) {
     fail("RENDER_SPEED_MISMATCH", "Render speed plan differs from the canonical output time map.");
   }
   return true;

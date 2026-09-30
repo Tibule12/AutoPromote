@@ -32,7 +32,7 @@ test("registry has unique versioned entries with traceable execution evidence", 
     });
     expect(item.evidenceSuite.length).toBeGreaterThan(0);
     for (const evidencePath of item.evidenceSuite) {
-      expect(fs.existsSync(path.resolve(process.cwd(), "..", evidencePath))).toBe(true);
+      expect(fs.existsSync(path.resolve(__dirname, "../../../..", evidencePath))).toBe(true);
     }
     expect(["exact", "approximate", "unsupported"]).toContain(item.supportStatus);
     expect(getStudioCapability(item.id)).toBe(item);

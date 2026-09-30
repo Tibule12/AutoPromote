@@ -111,7 +111,11 @@ import {
   findCreatorBeat,
 } from "./studioCreatorRecipes";
 import { rippleTimedItems, rippleTimelineKeys } from "./studioTimelineEdits";
-import { reconcileStudioDocument, rebaseStudioHistoryRestore } from "./studioProjectDocument";
+import {
+  reconcileStudioDocument,
+  rebaseStudioHistoryRestore,
+  restoreStudioProjectCheckpoint,
+} from "./studioProjectDocument";
 import { MINIMUM_SPLIT_DISTANCE_TICKS, runStudioCommandOnSnapshot } from "./studioCommands";
 import {
   createStudioDirectorReviewReceipt,
@@ -3717,7 +3721,19 @@ const ViralClipStudio = ({
 
   const restoreProjectVersion = (project, version) => {
     if (!version?.snapshot) return;
-    const restoredSnapshot = rehydrateStoredProjectSnapshot(version.snapshot);
+    let restoredSnapshot;
+    try {
+      restoredSnapshot = restoreStudioProjectCheckpoint({
+        projectId: project.id,
+        restoredSnapshot: rehydrateStoredProjectSnapshot(version.snapshot),
+        currentDocument: project.id === projectId
+          ? getEditorSnapshot().studioDocument : null,
+        savedDocument: project.snapshot?.studioDocument || null,
+      });
+    } catch (error) {
+      setStudioActionMessage(error.message || "This checkpoint could not be restored.");
+      return;
+    }
     activeProjectIdRef.current = project.id;
     attemptedSourceRefreshRef.current.clear();
     applyEditorSnapshot(restoredSnapshot);

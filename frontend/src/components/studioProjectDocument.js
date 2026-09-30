@@ -10,6 +10,13 @@ import { buildSpeedSegmentsFromKeyframes } from "./studioCreatorRecipes";
 
 export const STUDIO_DOCUMENT_VERSION = 1;
 
+// Canonical server JSON sorts keys; object ordering must not count as an edit.
+const stableStringify = value => JSON.stringify(value, (_key, item) =>
+  item && typeof item === "object" && !Array.isArray(item)
+    ? Object.fromEntries(Object.keys(item).sort().map(key => [key, item[key]]))
+    : item
+);
+
 const fail = (code, message) => {
   const error = new Error(message);
   error.code = code;
@@ -422,7 +429,7 @@ export const adaptStudioSnapshotToDocument = ({ snapshot, projectId, previousDoc
   const isSame =
     !!previousDocument &&
     sameOccurrenceProjection(previousDocument.clipOccurrences || [], clipOccurrences) &&
-    JSON.stringify(
+    stableStringify(
       previousDocument.assets.map(
         ({ assetId, sourceId, storagePath, contentHash, identityState }) => ({
           assetId,
@@ -433,7 +440,7 @@ export const adaptStudioSnapshotToDocument = ({ snapshot, projectId, previousDoc
         })
       )
     ) ===
-      JSON.stringify(
+      stableStringify(
         [...assets.values()].map(
           ({ assetId, sourceId, storagePath, contentHash, identityState }) => ({
             assetId,
@@ -444,14 +451,14 @@ export const adaptStudioSnapshotToDocument = ({ snapshot, projectId, previousDoc
           })
         )
       ) &&
-    JSON.stringify(previousDocument.layers) === JSON.stringify(layers) &&
-    JSON.stringify(previousDocument.linkedTiming) === JSON.stringify(linkedTiming) &&
-    JSON.stringify(previousDocument.output) === JSON.stringify(output) &&
-    JSON.stringify(previousDocument.audioGraph) === JSON.stringify(audioGraph) &&
-    JSON.stringify(previousDocument.analysisRefs) === JSON.stringify(analysisRefs) &&
-    JSON.stringify(previousDocument.programmeSpeedKeys) === JSON.stringify(programmeSpeedKeys) &&
+    stableStringify(previousDocument.layers) === stableStringify(layers) &&
+    stableStringify(previousDocument.linkedTiming) === stableStringify(linkedTiming) &&
+    stableStringify(previousDocument.output) === stableStringify(output) &&
+    stableStringify(previousDocument.audioGraph) === stableStringify(audioGraph) &&
+    stableStringify(previousDocument.analysisRefs) === stableStringify(analysisRefs) &&
+    stableStringify(previousDocument.programmeSpeedKeys) === stableStringify(programmeSpeedKeys) &&
     previousDocument.fallbackSpeed === fallbackSpeed &&
-    JSON.stringify(previousDocument.styleRef) === JSON.stringify(styleRef);
+    stableStringify(previousDocument.styleRef) === stableStringify(styleRef);
   const document = {
     schemaVersion: STUDIO_DOCUMENT_VERSION,
     projectId: String(projectId),
@@ -552,6 +559,21 @@ export const rebaseStudioHistoryRestore = ({ currentDocument, restoredSnapshot, 
   };
   validateStudioProjectDocument(rebased);
   return rebased;
+};
+
+// Restore checkpoint content onto the newest matching revision and audit history.
+export const restoreStudioProjectCheckpoint = ({
+  projectId, restoredSnapshot, currentDocument, savedDocument,
+}) => {
+  const latest = [currentDocument, savedDocument, restoredSnapshot.studioDocument]
+    .filter(document => document?.projectId === projectId)
+    .sort((left, right) => right.revision - left.revision)[0] || null;
+  return {
+    ...restoredSnapshot,
+    studioDocument: rebaseStudioHistoryRestore({
+      currentDocument: latest, restoredSnapshot, projectId,
+    }),
+  };
 };
 
 export const projectDocumentToLegacyTimeline = (document, priorTimeline) => {
@@ -701,8 +723,8 @@ export const validateStudioProjectDocument = document => {
     const segment = maps[0].segments[0];
     const duration = occurrence.sourceRange.endTick - occurrence.sourceRange.startTick;
     if (
-      JSON.stringify(segment.sourceRange) !== JSON.stringify(occurrence.sourceRange) ||
-      JSON.stringify(segment.programmeRange) !== JSON.stringify(occurrence.programmeRange) ||
+      stableStringify(segment.sourceRange) !== stableStringify(occurrence.sourceRange) ||
+      stableStringify(segment.programmeRange) !== stableStringify(occurrence.programmeRange) ||
       segment.clipLocalRange?.space !== "clip_local" ||
       segment.clipLocalRange.startTick !== 0 ||
       segment.clipLocalRange.endTick !== duration ||
@@ -752,7 +774,7 @@ export const validateStudioProjectDocument = document => {
     programmeSpeedKeys: document.programmeSpeedKeys,
     fallbackSpeed: document.fallbackSpeed,
   });
-  if (JSON.stringify(document.outputTimeMap) !== JSON.stringify(expectedOutputMap)) {
+  if (stableStringify(document.outputTimeMap) !== stableStringify(expectedOutputMap)) {
     fail("INVALID_OUTPUT_MAP", "Output map disagrees with the saved speed plan.");
   }
   if (!Array.isArray(document.constraints?.locks)) fail("INVALID_LOCK", "Locks must be an array.");
@@ -821,7 +843,7 @@ export const validateStudioProjectDocument = document => {
           "proposalFingerprint", "decision", "reviewerUid", "reviewedAt"];
         if (
           !server ||
-          JSON.stringify(Object.keys(server).sort()) !== JSON.stringify(serverFields.sort()) ||
+          stableStringify(Object.keys(server).sort()) !== stableStringify(serverFields.sort()) ||
           !/^[a-f0-9]{64}$/i.test(server.serverReviewId || "") ||
           server.projectId !== document.projectId ||
           server.proposalId !== receipt.proposalId ||

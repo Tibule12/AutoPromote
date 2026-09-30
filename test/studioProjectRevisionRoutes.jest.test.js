@@ -1,8 +1,10 @@
 const express = require("express");
 const crypto = require("crypto");
 const request = require("supertest");
-const { adaptStudioSnapshotToDocument } = require("../frontend/src/components/studioProjectDocument");
-const { executeStudioCommandBatch } = require("../frontend/src/components/studioCommands");
+const { adaptStudioSnapshotToDocument, restoreStudioProjectCheckpoint } =
+  require("../frontend/src/components/studioProjectDocument");
+const { executeStudioCommandBatch, undoStudioCommandBatch } =
+  require("../frontend/src/components/studioCommands");
 const {
   prepareStudioDirectorProposal,
   createStudioDirectorReviewReceipt,
@@ -333,4 +335,59 @@ test("accepts real frontend adapter, split command and rejected review documents
     uid: "reviewer-1", projectId: source.projectId, firestore,
   });
   expect(current.document).toEqual(rejected.document);
+  const checkpoint = restoreStudioProjectCheckpoint({
+    projectId: source.projectId,
+    restoredSnapshot: {
+      timeline: [{ id: "main", sourceClipId: "source-a", startRequest: 0, endRequest: 20 }],
+      studioDocument: source,
+    },
+    savedDocument: split.document,
+    currentDocument: rejected.document,
+  }).studioDocument;
+  expect(checkpoint.revision).toBe(rejected.document.revision + 1);
+  expect(checkpoint.clipOccurrences).toEqual(source.clipOccurrences);
+  expect(checkpoint.directorReviewJournal).toEqual(rejected.document.directorReviewJournal);
+  expect(checkpoint.idempotency).toEqual(rejected.document.idempotency);
+  expect((await post({ document: checkpoint })).status).toBe(201);
+  expect((await post({ document: checkpoint })).status).toBe(200);
+});
+
+test("a captioned two-minute project remains registrable after sixty cuts and undos", async () => {
+  const source = adaptStudioSnapshotToDocument({
+    projectId: "captioned-edit-session",
+    snapshot: {
+      timeline: [{ id: "main", sourceClipId: "source", startRequest: 0, endRequest: 120 }],
+      captionSegments: Array.from({ length: 80 }, (_, index) => ({
+        id: `caption-${index}`, sourceClipId: "source", start: index, end: index + 0.8,
+        text: "This is a realistic caption segment in an ordinary two minute video.",
+      })),
+    },
+  });
+  let edited = source;
+  for (let cut = 1; cut <= 60; cut++) {
+    edited = executeStudioCommandBatch(edited, {
+      projectId: source.projectId, baseRevision: edited.revision,
+      idempotencyKey: `cut-${cut}`, actor: { type: "human", id: "reviewer-1" },
+      operations: [{
+        type: "split_clip", target: { occurrenceId: cut === 1 ? "main" : `tail-${cut - 1}` },
+        at: { space: "source", ticks: cut * 90_000 },
+        newOccurrenceIds: { left: `clip-${cut}`, right: `tail-${cut}` },
+      }],
+    }).document;
+  }
+  expect(edited.clipOccurrences).toHaveLength(61);
+  expect(Buffer.byteLength(JSON.stringify(edited), "utf8")).toBeLessThan(MAX_DOCUMENT_BYTES);
+  expect((await post({ document: edited })).status).toBe(201);
+  let reopened = (await getCurrentOwnedStudioProjectRevision({
+    uid: "reviewer-1", projectId: source.projectId, firestore,
+  })).document;
+  for (let undo = 1; undo <= 60; undo++) {
+    reopened = undoStudioCommandBatch(reopened, {
+      baseRevision: reopened.revision, actor: { type: "human", id: "reviewer-1" },
+      idempotencyKey: `undo-${undo}`,
+    }).document;
+  }
+  expect(reopened.clipOccurrences).toEqual(source.clipOccurrences);
+  expect(reopened.layers).toEqual(source.layers);
+  expect((await post({ document: reopened })).status).toBe(201);
 });

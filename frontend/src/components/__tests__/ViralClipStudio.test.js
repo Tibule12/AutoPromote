@@ -8,6 +8,7 @@ import * as studioCommands from "../studioCommands";
 import * as studioProjectDocument from "../studioProjectDocument";
 import * as studioDirectorProposals from "../studioDirectorProposals";
 import * as studioDirectorEvidenceProposals from "../studioDirectorEvidenceProposals";
+import * as studioProjectStore from "../viralStudioProjectStore";
 import { secondsToTicks } from "../studioTime";
 
 jest.mock("../../utils/clipWorkflowAnalytics", () => ({
@@ -4449,6 +4450,56 @@ describe("ViralClipStudio timeline sequencing", () => {
         : item
     )).digest("hex")).toBe(reviewed.documentFingerprint);
     applySpy.mockRestore();
+  });
+
+  test("restoring a checkpoint registers a fresh revision before Director approval", async () => {
+    const savedSnapshot = {
+      orderedClips: [{ id: "clip-checkpoint", start: 0, end: 20, duration: 20 }],
+      selectedClipId: "clip-checkpoint",
+      timeline: [{ id: "main", sourceClipId: "clip-checkpoint", startRequest: 0, endRequest: 20,
+        url: "https://example.com/source.mp4" }],
+      overlays: [], motionScenes: [], threeDScenes: [], speedKeyframes: [],
+    };
+    const original = studioProjectDocument.adaptStudioSnapshotToDocument({
+      snapshot: savedSnapshot, projectId: "checkpoint-project",
+    });
+    const listSpy = jest.spyOn(studioProjectStore, "listViralStudioProjects").mockResolvedValue([{
+      id: original.projectId, name: "Checkpoint project", updatedAt: Date.now(),
+      snapshot: { ...savedSnapshot, studioDocument: { ...original, revision: 6 } },
+      versions: [{ name: "Original cut", snapshot: { ...savedSnapshot, studioDocument: original } }],
+    }]);
+    const saveSpy = jest.spyOn(studioProjectStore, "saveViralStudioProject")
+      .mockImplementation(async project => ({ ...project, updatedAt: Date.now() }));
+    const onDirectorReview = jest.fn();
+    mockDirectorReviewServer();
+    try {
+      render(<ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={savedSnapshot.orderedClips}
+        directorProposalRequest={{
+          proposalId: "after-checkpoint", idempotencyKey: "checkpoint-trim", directorId: "director",
+          operation: { type: "trim_clip", target: { occurrenceId: "main" },
+            keep: { space: "source", startTick: 0, endTick: secondsToTicks(10) } },
+        }}
+        onDirectorReview={onDirectorReview} onSave={jest.fn()} onCancel={jest.fn()}
+      />);
+      fireEvent.click(await screen.findByRole("button", {
+        name: "Restore previous version of Checkpoint project",
+      }));
+      fireEvent.click(screen.getByTestId("studio-director-review-open"));
+      fireEvent.click(await screen.findByTestId("studio-director-review-approve"));
+      await waitFor(() => expect(onDirectorReview).toHaveBeenCalledTimes(1));
+      const registration = global.fetch.mock.calls.find(([url]) =>
+        String(url).endsWith("/api/studio/director/projects/revisions"));
+      const registered = JSON.parse(registration[1].body).document;
+      expect(registered.projectId).toBe(original.projectId);
+      expect(registered.revision).toBeGreaterThan(6);
+      expect(registered.clipOccurrences[0].sourceRange.endTick).toBe(secondsToTicks(20));
+      expect(screen.getByTestId("timeline-output-time")).toHaveTextContent("0:10.0");
+    } finally {
+      listSpy.mockRestore();
+      saveSpy.mockRestore();
+    }
   });
 
   test("records a rejected Director split without changing the timeline", async () => {
