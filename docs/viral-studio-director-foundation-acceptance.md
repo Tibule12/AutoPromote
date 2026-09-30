@@ -2,7 +2,7 @@
 
 **Status: COMPLETE against the original 14 foundation acceptance criteria, 30 September 2026.** This receipt closes the safe foundation requested in the original brief. It does not qualify the full AI Director, L4 acceleration, or pixel-perfect parity across renderers. No production deployment was performed.
 
-Follow-up review found four correctness defects in this accepted foundation. Their fixes and regression coverage are recorded in [Director foundation review fixes](viral-studio-director-review-fixes.md); the measurements below describe the original acceptance run.
+Follow-up review found four correctness defects in this accepted foundation. Their fixes and regression coverage are recorded in [Director foundation review fixes](viral-studio-director-review-fixes.md). Server-side deterministic command replay was added after acceptance. The measurements below describe the original acceptance run.
 
 ## A–C. Branch, commits, and files
 
@@ -31,6 +31,12 @@ Implementation commit IDs, in order:
 - **K. Conformance:** Synthetic timing fixtures and paired frontend/Python tests compare canonical sequence and timing with browser preview mapping, render payload, and worker interpretation. Coverage includes duplicate occurrences, linked trims, captions, cuts, long speed ramps, and changed render ranges. The full-minute real-media Playwright case passed.
 - **L. 3D parity:** Shared pose fixtures test browser/Blender numeric motion. Audio-reactive intensity, opacity/fade, light direction, font family/weight, and related fields are classified by actual support in the field matrix. This is a classification and numeric-pose foundation, not pixel parity or an HQ/GPU claim. JSON and owned-artifact boundaries remain in force.
 
+### Post-acceptance Director review gate
+
+Before recording a new approval or rejection, the authenticated review route reads the current owner-scoped project head and replays the proposed command batch against its stored canonical document. The server loads a committed Node bundle built from the browser's pure command kernel, dry-runs the batch, hashes the resulting canonical preview document, and requires that hash to equal the proposal's `previewFingerprint`. Invalid or locked commands, stale project heads, preview mismatches, and an unavailable replay kernel prevent a new decision. A legacy decision without the replay-verification version cannot be upgraded by retry; it requires a new proposal. The browser still checks its current document and preview before applying an approved command.
+
+This proves deterministic command output for the document submitted under the authenticated UID. It does not prove independent ownership of a browser-created project ID, that the submitted document equals the user's actual editor state, or pixel-level agreement with a rendered video. It does not enable automatic application, GPU work, or production deployment.
+
 ## M–N. Current verification and limits
 
 | Check                                                                                               |                                                                                                                                 Result |
@@ -49,5 +55,5 @@ The complete frontend set was not rerun after changing that one test expectation
 
 ## O–P. Remaining scope
 
-- **O. Foundation blockers:** None against the original 14 criteria. The registered document is an authenticated browser submission, and the preview fingerprint is still computed in the browser. The foundation does not claim independent proof of browser state, automatic editing, renderer pixel parity, or GPU qualification.
-- **P. Optional next phase:** A trusted server-side command kernel could recompute the proposed result from the registered document and check the preview fingerprint before recording a review. This is separate from foundation acceptance. Human approval and automatic-application restrictions remain.
+- **O. Foundation blockers:** None against the original 14 criteria. The registered document is an authenticated browser submission; the server now independently recomputes the canonical command result and verifies its preview fingerprint before recording a new review. The foundation does not claim independent proof of browser state, automatic editing, renderer pixel parity, or GPU qualification.
+- **P. Further work:** Independent proof of the browser's saved project state and rendered media remains outside this accepted foundation. Human approval is still required and automatic application remains disabled.
