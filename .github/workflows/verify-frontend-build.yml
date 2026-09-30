@@ -26,6 +26,9 @@ jobs:
         working-directory: frontend
         run: npm ci
 
+      - name: Check Studio Director server replay bundle
+        run: npm run check:studio-director-replay
+
       - name: Build frontend
         working-directory: frontend
         run: npm run build

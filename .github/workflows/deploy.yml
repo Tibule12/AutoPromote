@@ -19,12 +19,25 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "20"
+          node-version: "22.22.0"
           cache: "npm"
           cache-dependency-path: package-lock.json
 
       - name: Install backend dependencies
         run: npm ci
+
+      - name: Install frontend replay build dependencies
+        run: npm --prefix frontend ci
+
+      - name: Check Studio Director server replay bundle
+        run: npm run check:studio-director-replay
+
+      - name: Test Studio Director replay and review route
+        env:
+          FIREBASE_ADMIN_BYPASS: "1"
+          CI_ROUTE_IMPORTS: "1"
+          OPENAI_LOGGING_ENABLED: "1"
+        run: npx jest --runInBand --testTimeout=20000 --runTestsByPath test/studioDirectorReplayService.jest.test.js test/studioDirectorReviewRoutes.jest.test.js
 
       - name: Run backend tests
         run: node simple-test.js
