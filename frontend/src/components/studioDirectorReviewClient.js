@@ -38,6 +38,22 @@ export const postStudioDirectorReviewDecision = async ({ proposal, decision, tok
     reviewError("SERVER_REVIEW_INVALID", "The review service returned an invalid response. No edit was applied.");
   }
   if (!response.ok) {
+    if (response.status === 409 && payload?.error === "project_revision_missing") {
+      reviewError("PROJECT_REVISION_MISSING",
+        "The saved project version is missing. Review the edit again. No edit was applied.");
+    }
+    if (response.status === 409 && payload?.error === "project_revision_mismatch") {
+      reviewError("PROJECT_REVISION_MISMATCH",
+        "The project version differs from the server record. Review the edit again. No edit was applied.");
+    }
+    if (response.status === 409 && payload?.error === "project_revision_target_mismatch") {
+      reviewError("PROJECT_REVISION_TARGET_MISMATCH",
+        "The proposed edit targets different project content. Review the edit again. No edit was applied.");
+    }
+    if (response.status === 503 && payload?.error === "project_revision_unavailable") {
+      reviewError("PROJECT_REVISION_UNAVAILABLE",
+        "The review service could not verify the saved project version. Try again later. No edit was applied.");
+    }
     if (response.status === 409 && payload?.error === "source_shot_evidence_mismatch") {
       reviewError("SOURCE_SHOT_EVIDENCE_MISMATCH",
         "The source-shot evidence does not match the server record. Analyze this source again. No edit was applied.");

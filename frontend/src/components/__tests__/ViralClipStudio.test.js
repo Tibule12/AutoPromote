@@ -1,5 +1,5 @@
 import React from "react";
-import { webcrypto } from "crypto";
+import { createHash, webcrypto } from "crypto";
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { getAuth } from "firebase/auth";
 import ViralClipStudio from "../ViralClipStudio";
@@ -57,8 +57,30 @@ describe("ViralClipStudio timeline sequencing", () => {
   const originalCanvasGetContext = window.HTMLCanvasElement.prototype.getContext;
   let consoleErrorSpy;
 
-  const mockDirectorReviewServer = overrides => {
+  const mockDirectorReviewServer = (overrides, revisionOverrides) => {
     global.fetch.mockImplementation((url, options) => {
+      if (String(url).endsWith("/api/studio/director/projects/revisions")) {
+        const { document } = JSON.parse(options.body);
+        const canonical = JSON.stringify(document, (_key, item) =>
+          item && typeof item === "object" && !Array.isArray(item)
+            ? Object.fromEntries(Object.keys(item).sort().map(key => [key, item[key]]))
+            : item
+        );
+        return Promise.resolve({
+          ok: true,
+          status: 201,
+          json: () => Promise.resolve({
+            ok: true,
+            projectId: document.projectId,
+            revision: document.revision,
+            documentFingerprint: createHash("sha256").update(canonical).digest("hex"),
+            serverRevisionId: "e".repeat(64),
+            registeredAt: "2026-09-30T12:00:00.000Z",
+            duplicate: false,
+            ...revisionOverrides,
+          }),
+        });
+      }
       if (!String(url).endsWith("/api/studio/director/reviews")) {
         return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
       }
@@ -4411,6 +4433,21 @@ describe("ViralClipStudio timeline sequencing", () => {
       expect.stringContaining("/api/studio/director/reviews"),
       expect.objectContaining({ headers: expect.objectContaining({ Authorization: "Bearer token" }) })
     );
+    const revisionCallIndex = global.fetch.mock.calls.findIndex(([url]) =>
+      String(url).endsWith("/api/studio/director/projects/revisions"));
+    const reviewCallIndex = global.fetch.mock.calls.findIndex(([url]) =>
+      String(url).endsWith("/api/studio/director/reviews"));
+    expect(revisionCallIndex).toBeGreaterThanOrEqual(0);
+    expect(reviewCallIndex).toBeGreaterThan(revisionCallIndex);
+    const registered = JSON.parse(global.fetch.mock.calls[revisionCallIndex][1].body).document;
+    const reviewed = JSON.parse(global.fetch.mock.calls[reviewCallIndex][1].body).proposal;
+    expect(registered.projectId).toBe(reviewed.projectId);
+    expect(registered.revision).toBe(reviewed.baseRevision);
+    expect(createHash("sha256").update(JSON.stringify(registered, (_key, item) =>
+      item && typeof item === "object" && !Array.isArray(item)
+        ? Object.fromEntries(Object.keys(item).sort().map(key => [key, item[key]]))
+        : item
+    )).digest("hex")).toBe(reviewed.documentFingerprint);
     applySpy.mockRestore();
   });
 
@@ -4452,7 +4489,8 @@ describe("ViralClipStudio timeline sequencing", () => {
       decision: "reject",
       reviewReceipt: { reviewerId: "test-user", decision: "reject" },
       serverReview: { serverReviewId: "f".repeat(64), decision: "reject" },
-      document: { revision: 0, directorReviewJournal: [expect.objectContaining({
+      document: { revision: 1, directorReviewJournal: [expect.objectContaining({
+        reviewRevision: 1,
         serverReview: expect.objectContaining({ serverReviewId: "f".repeat(64) }),
       })] },
     });
@@ -4488,8 +4526,18 @@ describe("ViralClipStudio timeline sequencing", () => {
     await act(async () => {
       fireEvent.click(within(panel).getByTestId("studio-director-review-approve"));
     });
-    expect(within(panel).getByRole("alert")).toHaveTextContent(/review service is unavailable/i);
+    expect(within(panel).getByRole("alert")).toHaveTextContent(/project version service is unavailable/i);
     expect(screen.getByTestId("timeline-output-time")).toHaveTextContent("0:20.0");
+    expect(onDirectorReview).not.toHaveBeenCalled();
+
+    fireEvent.click(within(panel).getByTestId("studio-director-review-open"));
+    await within(panel).findByTestId("studio-director-review-approve");
+    mockDirectorReviewServer({}, { documentFingerprint: "b".repeat(64) });
+    await act(async () => {
+      fireEvent.click(within(panel).getByTestId("studio-director-review-approve"));
+    });
+    expect(within(panel).getByRole("alert")).toHaveTextContent(/different version/i);
+    expect(global.fetch.mock.calls.some(([url]) => String(url).endsWith("/api/studio/director/reviews"))).toBe(false);
     expect(onDirectorReview).not.toHaveBeenCalled();
 
     fireEvent.click(within(panel).getByTestId("studio-director-review-open"));
@@ -4549,6 +4597,54 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(within(panel).getByRole("alert")).toHaveTextContent(/Decision recorded on the server; no local edit was applied/i);
     expect(screen.getByTestId("timeline-output-time")).toHaveTextContent("0:20.0");
     expect(within(panel).queryByTestId("studio-director-review-approve")).toBeNull();
+    expect(onDirectorReview).not.toHaveBeenCalled();
+  });
+
+  test("does not record a decision if the project changes while its version is being saved", async () => {
+    const onDirectorReview = jest.fn();
+    mockDirectorReviewServer();
+    render(
+      <ViralClipStudio
+        videoUrl="https://example.com/source.mp4"
+        clips={[{ id: "clip-review", start: 0, end: 20, duration: 20 }]}
+        directorProposalRequest={{
+          proposalId: "proposal-registration-race",
+          idempotencyKey: "director-registration-race",
+          directorId: "bounded-director",
+          operation: {
+            type: "trim_clip", target: { occurrenceId: "main" },
+            keep: { space: "source", startTick: 0, endTick: secondsToTicks(15) },
+          },
+        }}
+        onDirectorReview={onDirectorReview}
+        onSave={jest.fn()}
+        onCancel={jest.fn()}
+      />
+    );
+    fireEvent.click(screen.getByTestId("studio-director-review-open"));
+    const panel = screen.getByTestId("studio-director-review");
+    await within(panel).findByTestId("studio-director-review-approve");
+    const serverFetch = global.fetch.getMockImplementation();
+    let releaseRegistration;
+    const pendingRegistration = new Promise(resolve => { releaseRegistration = resolve; });
+    global.fetch.mockImplementation((url, options) =>
+      String(url).endsWith("/api/studio/director/projects/revisions")
+        ? pendingRegistration
+        : serverFetch(url, options)
+    );
+    act(() => { fireEvent.click(within(panel).getByTestId("studio-director-review-approve")); });
+    await waitFor(() => expect(global.fetch.mock.calls.some(([url]) =>
+      String(url).endsWith("/api/studio/director/projects/revisions"))).toBe(true));
+    const afterVideo = screen.getByTestId("studio-after-video");
+    Object.defineProperty(afterVideo, "currentTime", { configurable: true, writable: true, value: 8 });
+    fireEvent.timeUpdate(afterVideo);
+    fireEvent.click(screen.getByTestId("timeline-quick-split"));
+    const registrationCall = global.fetch.mock.calls.find(([url]) =>
+      String(url).endsWith("/api/studio/director/projects/revisions"));
+    await act(async () => { releaseRegistration(await serverFetch(...registrationCall)); });
+    expect(within(panel).getByRole("alert")).toHaveTextContent(/changed while saving its version/i);
+    expect(within(panel).getByTestId("studio-director-review-open")).toHaveTextContent("Review again");
+    expect(global.fetch.mock.calls.some(([url]) => String(url).endsWith("/api/studio/director/reviews"))).toBe(false);
     expect(onDirectorReview).not.toHaveBeenCalled();
   });
 

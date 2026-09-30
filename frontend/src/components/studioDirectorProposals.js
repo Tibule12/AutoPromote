@@ -273,9 +273,17 @@ export const recordStudioDirectorReviewRejection = async ({
     }
     return { document, duplicate: true, reviewRecord: prior };
   }
-  const record = reviewRecord(reviewReceipt, null, serverRecord);
+  if (document.revision !== proposal.baseRevision) {
+    proposalError("STALE_REVISION", "Project changed after the Director review.");
+  }
+  if (await digest(document) !== proposal.documentFingerprint) {
+    proposalError("DOCUMENT_CHANGED", "Project content changed after proposal preparation.");
+  }
+  const reviewRevision = document.revision + 1;
+  const record = { ...reviewRecord(reviewReceipt, null, serverRecord), reviewRevision };
   const next = {
     ...document,
+    revision: reviewRevision,
     directorReviewJournal: [...(document.directorReviewJournal || []), record],
   };
   validateStudioProjectDocument(next);

@@ -787,8 +787,8 @@ export const validateStudioProjectDocument = document => {
   ) {
     fail("INVALID_REVISION_STATE", "Command journal and idempotency receipts are required.");
   }
-  // Review records are separate from revision entries: a rejection does not
-  // edit the timeline, and Undo must continue to inspect the latest command.
+  // Review records are separate from command journal entries. A rejection
+  // advances the document revision without changing timeline content.
   // The reviewer ID is a client claim until a server verifies the identity.
   if (document.directorReviewJournal !== undefined) {
     if (!Array.isArray(document.directorReviewJournal))
@@ -836,9 +836,14 @@ export const validateStudioProjectDocument = document => {
         }
       }
       if (receipt.decision === "reject") {
-        if (record.commandJournalId !== null)
+        if (record.commandJournalId !== null ||
+            (record.reviewRevision !== undefined &&
+              (!Number.isSafeInteger(record.reviewRevision) || record.reviewRevision < 1 ||
+                record.reviewRevision > document.revision)))
           fail("INVALID_DIRECTOR_REVIEW", "A rejected proposal cannot name a command.");
       } else {
+        if (record.reviewRevision !== undefined)
+          fail("INVALID_DIRECTOR_REVIEW", "An approved review cannot name a rejection revision.");
         const command = document.journal.find(entry => entry.journalId === record.commandJournalId);
         if (
           !command ||

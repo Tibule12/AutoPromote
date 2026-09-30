@@ -101,4 +101,18 @@ describe("Director review server client", () => {
     }));
     await rejectCode(submit(), "SOURCE_SHOT_EVIDENCE_UNAVAILABLE");
   });
+
+  test("reports missing, mismatched and unavailable project versions distinctly", async () => {
+    for (const [status, error, code] of [
+      [409, "project_revision_missing", "PROJECT_REVISION_MISSING"],
+      [409, "project_revision_mismatch", "PROJECT_REVISION_MISMATCH"],
+      [409, "project_revision_target_mismatch", "PROJECT_REVISION_TARGET_MISMATCH"],
+      [503, "project_revision_unavailable", "PROJECT_REVISION_UNAVAILABLE"],
+    ]) {
+      global.fetch = jest.fn(() => Promise.resolve({
+        ok: false, status, json: () => Promise.resolve({ error }),
+      }));
+      await expect(submit()).rejects.toMatchObject({ code, message: expect.stringMatching(/No edit was applied/) });
+    }
+  });
 });

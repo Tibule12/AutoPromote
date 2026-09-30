@@ -149,11 +149,12 @@ test("rejected review survives save and blocks a conflicting approval", async ()
     proposal,
     reviewReceipt: receipt,
   });
-  expect(rejected.document.revision).toBe(document.revision);
+  expect(rejected.document.revision).toBe(document.revision + 1);
   expect(rejected.document.clipOccurrences).toEqual(document.clipOccurrences);
   expect(rejected.document.journal).toEqual([]);
   expect(rejected.reviewRecord).toMatchObject({
     commandJournalId: null,
+    reviewRevision: document.revision + 1,
     identityStatus: "client_claim_unverified",
     receipt: { decision: "reject", reviewerId: "human-reviewer" },
   });
@@ -171,6 +172,41 @@ test("rejected review survives save and blocks a conflicting approval", async ()
   await rejectCode(applyStudioDirectorProposal({
     document: reopened, proposal, reviewReceipt: await review(proposal),
   }), "REVIEW_CONFLICT");
+});
+
+test("rejected reviews advance revisions while preserving Undo of the previous edit", async () => {
+  const document = makeDocument();
+  const { proposal: approvedProposal } = await prepare(document);
+  const approved = await applyStudioDirectorProposal({
+    document, proposal: approvedProposal, reviewReceipt: await review(approvedProposal),
+  });
+  const { proposal: rejectedProposal } = await prepareStudioDirectorProposal(approved.document, {
+    proposalId: "proposal-2",
+    idempotencyKey: "director-edit-2",
+    directorId: "bounded-director",
+    operation: {
+      type: "trim_clip", target: { occurrenceId: "left" },
+      keep: { space: "source", startTick: 0, endTick: secondsToTicks(7) },
+    },
+  });
+  const rejected = await recordStudioDirectorReviewRejection({
+    document: approved.document,
+    proposal: rejectedProposal,
+    reviewReceipt: await review(rejectedProposal, "reject"),
+  });
+  expect(rejected.document.revision).toBe(2);
+  expect(rejected.document.journal).toEqual(approved.document.journal);
+  const undone = undoStudioCommandBatch(rejected.document, {
+    baseRevision: 2, actor: { type: "human", id: "reviewer" }, idempotencyKey: "undo-after-rejection",
+  });
+  expect(undone.document.revision).toBe(3);
+  expect(undone.document.clipOccurrences).toEqual(document.clipOccurrences);
+  expect(undone.document.directorReviewJournal).toEqual(rejected.document.directorReviewJournal);
+  await rejectCode(recordStudioDirectorReviewRejection({
+    document: { ...approved.document, revision: 2 },
+    proposal: rejectedProposal,
+    reviewReceipt: await review(rejectedProposal, "reject"),
+  }), "STALE_REVISION");
 });
 
 test("review journal rejects broken command links and never claims verified identity", async () => {

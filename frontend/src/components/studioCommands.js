@@ -497,7 +497,19 @@ export const undoStudioCommandBatch = (document, { baseRevision, actor, idempote
   if (document.revision !== baseRevision)
     commandError("STALE_REVISION", "Project changed since undo was prepared.");
   const last = document.journal?.[document.journal.length - 1];
-  if (!last || last.newRevision !== document.revision || !last.inverse)
+  // Rejection receipts advance the canonical revision while leaving the
+  // timeline intact. They may follow an undoable command without hiding it.
+  const reviewOnlyRevisions = new Set((document.directorReviewJournal || [])
+    .filter(record => record.receipt?.decision === "reject")
+    .map(record => record.reviewRevision));
+  const interveningCount = last ? document.revision - last.newRevision : -1;
+  const interveningRevisionsAreReviews = interveningCount >= 0 &&
+    interveningCount <= reviewOnlyRevisions.size &&
+    Array.from({ length: interveningCount },
+      (_, index) => last.newRevision + index + 1)
+      .every(revision => reviewOnlyRevisions.has(revision));
+  if (!last || last.newRevision > document.revision || !last.inverse ||
+      !interveningRevisionsAreReviews)
     commandError("UNDO_UNAVAILABLE", "No latest command batch can be undone.");
   const newRevision = document.revision + 1;
   const restored = {

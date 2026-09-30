@@ -121,6 +121,7 @@ import {
 } from "./studioDirectorProposals";
 import { describeStudioDirectorReview } from "./studioDirectorReviewDiff";
 import { postStudioDirectorReviewDecision } from "./studioDirectorReviewClient";
+import { registerStudioDirectorProjectRevision } from "./studioDirectorProjectRevisionClient";
 import { buildSourceShotDirectorSplitRequest } from "./studioDirectorEvidenceProposals";
 import { secondsToTicks, ticksToSeconds } from "./studioTime";
 import {
@@ -8718,6 +8719,24 @@ const ViralClipStudio = ({
         throw stale;
       }
       const editorSignature = lastSnapshotSignatureRef.current;
+      await registerStudioDirectorProjectRevision({
+        document: directorReview.document,
+        proposal: directorReview.proposal,
+        token,
+      });
+      if (auth.currentUser?.uid !== reviewer.uid) {
+        throw new Error("Your sign-in changed while saving the project version. No decision was recorded.");
+      }
+      const registeredSnapshot = latestEditorSnapshotRef.current?.();
+      if (activeProjectIdRef.current !== projectId ||
+          serializeSnapshot(directorProposalRequestRef.current) !== directorReview.requestSignature ||
+          lastSnapshotSignatureRef.current !== editorSignature ||
+          !registeredSnapshot?.studioDocument ||
+          serializeSnapshot(registeredSnapshot.studioDocument) !== serializeSnapshot(snapshot.studioDocument)) {
+        const stale = new Error("The project changed while saving its version. Review the edit again.");
+        stale.code = "STALE_REVIEW";
+        throw stale;
+      }
       serverReview = await postStudioDirectorReviewDecision({
         proposal: directorReview.proposal,
         decision,
@@ -8795,7 +8814,9 @@ const ViralClipStudio = ({
       setDirectorReviewState(
         serverReview
           ? "server-recorded-stale"
-          : ["STALE_REVISION", "DOCUMENT_CHANGED", "PROJECT_MISMATCH", "PREVIEW_CHANGED", "STALE_REVIEW"]
+          : ["STALE_REVISION", "DOCUMENT_CHANGED", "PROJECT_MISMATCH", "PREVIEW_CHANGED", "STALE_REVIEW",
+            "PROJECT_REVISION_CONFLICT", "PROJECT_REVISION_STALE", "PROJECT_REVISION_MISSING", "PROJECT_REVISION_MISMATCH",
+            "PROJECT_REVISION_TARGET_MISMATCH"]
           .includes(error.code)
           ? "stale"
           : "error"
