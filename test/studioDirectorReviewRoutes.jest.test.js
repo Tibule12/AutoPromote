@@ -22,17 +22,40 @@ const stableStringify = value => JSON.stringify(value, (_key, item) =>
 );
 const hash = value => crypto.createHash("sha256").update(stableStringify(value)).digest("hex");
 const sourceRange = { space: "source", startTick: 0, endTick: 1_800_000 };
+const programmeRange = { space: "programme", startTick: 0, endTick: 1_800_000 };
 const projectDocument = () => ({
-  schemaVersion: 1,
-  projectId: "project-1",
-  revision: 4,
-  assets: [{
-    assetId: "source:asset-1", sourceId: "asset-1",
-    identityState: "legacy_reference_unverified",
-  }],
+  schemaVersion: 1, projectId: "project-1", revision: 4,
+  clock: { ticksPerSecond: 90_000, interval: "half_open" },
+  output: {
+    aspectRatio: "9:16", requestedResolution: "1080p",
+    frameRate: { numerator: 30, denominator: 1 }, codec: "h264",
+    audioCodec: "aac", audioSampleRate: null, audioSampleRatePolicy: "worker_selected",
+  },
+  assets: [{ assetId: "source:asset-1", sourceId: "asset-1",
+    identityState: "legacy_reference_unverified" }],
   clipOccurrences: [{
     occurrenceId: "main", assetId: "source:asset-1", sourceRange,
+    programmeRange, timeMapId: "map:main",
+    playback: { direction: "forward", freeze: false,
+      rate: { numerator: 1, denominator: 1 } },
   }],
+  timeMaps: [{
+    timeMapId: "map:main", occurrenceId: "main",
+    segments: [{ sourceRange,
+      clipLocalRange: { space: "clip_local", startTick: 0, endTick: 1_800_000 },
+      programmeRange, rate: { numerator: 1, denominator: 1 },
+      direction: "forward", freeze: false }],
+  }],
+  layers: [], linkedTiming: { cues: {}, keys: {} }, audioGraph: {},
+  constraints: { locks: [] }, styleRef: null, analysisRefs: [],
+  programmeSpeedKeys: [], fallbackSpeed: 1,
+  outputTimeMap: [{ programmeRange,
+    outputRange: { space: "output", startTick: 0, endTick: 1_800_000 },
+    rateNumerator: 1, rateDenominator: 1 }],
+  journal: [], idempotency: {}, directorReviewJournal: [],
+  compatibility: { legacySnapshotVersion: 1,
+    projection: "clip_occurrences_canonical_other_fields_legacy",
+    layerComposition: "separate_worker_stages" },
 });
 const headPath = (uid = "reviewer-1") =>
   `users/${uid}/studioDirectorProjects/${crypto.createHash("sha256").update("project-1").digest("hex")}`;
@@ -41,7 +64,9 @@ const seedHead = (uid = "reviewer-1", document = projectDocument()) => {
   store.set(headPath(uid), {
     schemaVersion: 1, ownerUid: uid, projectId: document.projectId,
     revision: document.revision, documentFingerprint,
-    serverRevisionId: "f".repeat(64), registeredAt: new Date().toISOString(),
+    serverRevisionId: crypto.createHash("sha256")
+      .update(`${document.projectId}\0${document.revision}`).digest("hex"),
+    registeredAt: new Date().toISOString(),
     documentJson: stableStringify(document),
   });
 };

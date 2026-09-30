@@ -4,6 +4,7 @@ const authMiddleware = require("../authMiddleware");
 const { db } = require("../firebaseAdmin");
 const { getOwnedStudioSourceBinding } = require("../services/studioDirectorProjectBinding");
 const { getOwnedSourceShotArtifact } = require("../services/studioSourceShotArtifactService");
+const { parseStudioProjectHeadRecord } = require("../services/studioProjectRevisionService");
 
 const router = express.Router();
 const REVIEW_VERSION = 1;
@@ -180,30 +181,17 @@ const ownedProjectHeadRef = (uid, projectId) => db.collection("users").doc(uid)
   .collection("studioDirectorProjects").doc(sha256(projectId));
 
 const storedDocumentForReview = (head, uid, proposal) => {
-  if (!head || head.schemaVersion !== 1 || head.ownerUid !== uid ||
-      head.projectId !== proposal.projectId ||
-      !Number.isSafeInteger(head.revision) || head.revision < 0 ||
-      !validHash(head.documentFingerprint) ||
-      !validHash(head.serverRevisionId) ||
-      typeof head.documentJson !== "string") {
-    throw reviewFailure(503, "project_revision_unavailable");
-  }
-  let document;
+  let parsed;
   try {
-    document = JSON.parse(head.documentJson);
+    parsed = parseStudioProjectHeadRecord(head, uid, proposal.projectId);
   } catch (_) {
     throw reviewFailure(503, "project_revision_unavailable");
   }
-  if (!plainObject(document) || document.projectId !== head.projectId ||
-      document.revision !== head.revision ||
-      sha256(stableStringify(document)) !== head.documentFingerprint) {
-    throw reviewFailure(503, "project_revision_unavailable");
-  }
-  if (head.revision !== proposal.baseRevision ||
-      head.documentFingerprint !== proposal.documentFingerprint) {
+  if (parsed.revision !== proposal.baseRevision ||
+      parsed.documentFingerprint !== proposal.documentFingerprint) {
     throw reviewFailure(409, "project_revision_mismatch");
   }
-  return document;
+  return parsed.document;
 };
 
 const assertStoredProposalTarget = (document, proposal) => {
