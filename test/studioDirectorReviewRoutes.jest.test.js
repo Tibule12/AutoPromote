@@ -6,6 +6,9 @@ const authMiddleware = require("../src/authMiddleware");
 const router = require("../src/routes/studioDirectorReviewRoutes");
 const { assertOwnedStudioSourceBinding } = require("../src/services/studioDirectorProjectBinding");
 const { persistSourceShotArtifact } = require("../src/services/studioSourceShotArtifactService");
+const { computeStudioDirectorPreviewFingerprint } = require("../src/services/studioDirectorReplayService");
+const { adaptStudioSnapshotToDocument } = require("../frontend/src/components/studioProjectDocument");
+const { prepareStudioDirectorProposal } = require("../frontend/src/components/studioDirectorProposals");
 
 const store = new Map();
 const originalCollection = db.collection;
@@ -51,7 +54,7 @@ const projectDocument = () => ({
   programmeSpeedKeys: [], fallbackSpeed: 1,
   outputTimeMap: [{ programmeRange,
     outputRange: { space: "output", startTick: 0, endTick: 1_800_000 },
-    rateNumerator: 1, rateDenominator: 1 }],
+    rateNumerator: 1_000_000, rateDenominator: 1_000_000 }],
   journal: [], idempotency: {}, directorReviewJournal: [],
   compatibility: { legacySnapshotVersion: 1,
     projection: "clip_occurrences_canonical_other_fields_legacy",
@@ -78,20 +81,29 @@ const split = () => ({
   preconditions: { sourceRange },
 });
 const proposal = (operation = split(), evidence, document = projectDocument()) => {
+  const batch = {
+    projectId: "project-1",
+    baseRevision: 4,
+    idempotencyKey: "edit-1",
+    actor: { type: "ai", id: "director" },
+    operations: [operation],
+  };
+  let previewFingerprint;
+  try {
+    previewFingerprint = computeStudioDirectorPreviewFingerprint({ document, batch });
+  } catch (_) {
+    // Malformed and intentionally unexecutable proposals still need a valid
+    // fingerprint shape to exercise the route's own rejection path.
+    previewFingerprint = "b".repeat(64);
+  }
   const core = {
     schemaVersion: 1,
     proposalId: "proposal-1",
     projectId: "project-1",
     baseRevision: 4,
     documentFingerprint: hash(document),
-    previewFingerprint: "b".repeat(64),
-    batch: {
-      projectId: "project-1",
-      baseRevision: 4,
-      idempotencyKey: "edit-1",
-      actor: { type: "ai", id: "director" },
-      operations: [operation],
-    },
+    previewFingerprint,
+    batch,
     ...(evidence ? { evidence } : {}),
   };
   return { ...core, proposalFingerprint: hash(core) };
@@ -135,6 +147,11 @@ const post = (body, uid = "reviewer-1") =>
   request(app).post("/api/studio/director/reviews")
     .set("Authorization", `Bearer test-token-for-${uid}`)
     .send(body);
+
+beforeAll(() => {
+  Object.defineProperty(globalThis, "crypto", { configurable: true, value: crypto.webcrypto });
+  globalThis.TextEncoder = require("util").TextEncoder;
+});
 
 beforeEach(() => {
   store.clear();
@@ -229,11 +246,74 @@ test("server derives UID and time, writes once, and replays the same immutable d
   expect(Date.parse(first.body.reviewedAt)).not.toBeNaN();
   expect(paths[0]).toBe(`users/reviewer-1/studioDirectorReviews/${first.body.serverReviewId}`);
   expect(store.get(paths[0]).proposal).toEqual(body.proposal);
+  expect(store.get(paths[0]).previewVerificationVersion).toBe(1);
   seedHead("reviewer-1", { ...projectDocument(), revision: 5 });
   const replay = await post(body);
   expect(replay.status).toBe(200);
   expect(replay.body).toEqual({ ...first.body, duplicate: true });
   expect(store.size).toBe(2);
+});
+
+test("browser-prepared proposal passes server replay against its registered document", async () => {
+  const document = adaptStudioSnapshotToDocument({
+    projectId: "project-1",
+    snapshot: {
+      orderedClips: [{ id: "asset-1", start: 0, end: 20 }],
+      selectedClipId: "asset-1",
+      timeline: [{ id: "main", sourceClipId: "asset-1", startRequest: 0, endRequest: 20 }],
+    },
+  });
+  const prepared = await prepareStudioDirectorProposal(document, {
+    proposalId: "browser-proposal",
+    idempotencyKey: "browser-edit",
+    directorId: "director",
+    operation: {
+      type: "trim_clip", target: { occurrenceId: "main" },
+      keep: { space: "source", startTick: 0, endTick: 1_350_000 },
+    },
+  });
+  seedHead("reviewer-1", document);
+  const result = await post({ proposal: prepared.proposal, decision: "approve" });
+  expect(result.status).toBe(201);
+  expect(result.body).toMatchObject({
+    ok: true, proposalId: "browser-proposal", decision: "approve", duplicate: false,
+  });
+  expect(store.get(`users/reviewer-1/studioDirectorReviews/${result.body.serverReviewId}`)
+    .previewVerificationVersion).toBe(1);
+});
+
+test("forged preview fingerprints fail before an immutable decision is written", async () => {
+  seedHead();
+  const forged = rehash({ ...proposal(), previewFingerprint: "a".repeat(64) });
+  const result = await post({ proposal: forged, decision: "approve" });
+  expect(result.status).toBe(409);
+  expect(result.body.error).toBe("preview_fingerprint_mismatch");
+  expect([...store.keys()].filter(path => path.includes("studioDirectorReviews"))).toHaveLength(0);
+});
+
+test("locked edits fail server replay even with a syntactically valid proposal", async () => {
+  const document = projectDocument();
+  document.constraints.locks.push({
+    lockId: "locked-cut", occurrenceId: "main", mode: "preserve",
+    sourceRange: { space: "source", startTick: 700_000, endTick: 740_000 },
+  });
+  seedHead("reviewer-1", document);
+  const result = await post({ proposal: proposal(split(), undefined, document), decision: "approve" });
+  expect(result.status).toBe(409);
+  expect(result.body.error).toBe("proposal_replay_rejected");
+  expect([...store.keys()].filter(path => path.includes("studioDirectorReviews"))).toHaveLength(0);
+});
+
+test("legacy decisions cannot be replayed as server-verified reviews", async () => {
+  seedHead();
+  const body = { proposal: proposal(), decision: "approve" };
+  const first = await post(body);
+  expect(first.status).toBe(201);
+  delete store.get(`users/reviewer-1/studioDirectorReviews/${first.body.serverReviewId}`)
+    .previewVerificationVersion;
+  const retry = await post(body);
+  expect(retry.status).toBe(409);
+  expect(retry.body.error).toBe("review_requires_reproposal");
 });
 
 test("review requires the authenticated owner's current stored revision", async () => {

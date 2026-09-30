@@ -5,6 +5,7 @@ const { db } = require("../firebaseAdmin");
 const { getOwnedStudioSourceBinding } = require("../services/studioDirectorProjectBinding");
 const { getOwnedSourceShotArtifact } = require("../services/studioSourceShotArtifactService");
 const { parseStudioProjectHeadRecord } = require("../services/studioProjectRevisionService");
+const { computeStudioDirectorPreviewFingerprint } = require("../services/studioDirectorReplayService");
 
 const router = express.Router();
 const REVIEW_VERSION = 1;
@@ -218,6 +219,22 @@ const assertStoredProposalTarget = (document, proposal) => {
   }
 };
 
+const assertServerPreviewMatches = (document, proposal) => {
+  let computed;
+  try {
+    computed = computeStudioDirectorPreviewFingerprint({ document, batch: proposal.batch });
+  } catch (error) {
+    if (error?.code === "DIRECTOR_REPLAY_REJECTED") {
+      throw reviewFailure(409, "proposal_replay_rejected");
+    }
+    throw reviewFailure(503, "proposal_replay_unavailable");
+  }
+  if (!validHash(computed)) throw reviewFailure(503, "proposal_replay_unavailable");
+  if (computed !== proposal.previewFingerprint) {
+    throw reviewFailure(409, "preview_fingerprint_mismatch");
+  }
+};
+
 const assertSameReview = (prior, serverReviewId, proposal, decision, reviewerUid) => {
   if (!prior || prior.schemaVersion !== REVIEW_VERSION ||
       prior.serverReviewId !== serverReviewId ||
@@ -232,6 +249,11 @@ const assertSameReview = (prior, serverReviewId, proposal, decision, reviewerUid
       prior.previewFingerprint !== proposal.previewFingerprint ||
       prior.decision !== decision || prior.reviewerUid !== reviewerUid) {
     throw reviewFailure(409, "review_conflict");
+  }
+  // Decisions written before server-side command replay cannot be upgraded by
+  // a retry. A new proposal receives a new verified decision.
+  if (prior.previewVerificationVersion !== 1) {
+    throw reviewFailure(409, "review_requires_reproposal");
   }
   return prior;
 };
@@ -269,8 +291,8 @@ const verifiedSourceShotEvidence = async (reviewerUid, proposal) => {
 };
 
 // The registered project document is a browser-supplied owner-scoped snapshot.
-// The transaction checks the current stored head and records one decision, but
-// the rendered preview remains a browser claim checked by the local editor.
+// The transaction replays the command against its current stored head before
+// recording one decision. Rendered pixels remain a browser-side preview.
 router.post("/", authMiddleware, async (req, res) => {
   const reviewerUid = req.user?.uid;
   if (!validReviewerUid(reviewerUid) || !req.userId || req.userId !== reviewerUid)
@@ -305,6 +327,7 @@ router.post("/", authMiddleware, async (req, res) => {
     proposalFingerprint: proposal.proposalFingerprint,
     documentFingerprint: proposal.documentFingerprint,
     previewFingerprint: proposal.previewFingerprint,
+    previewVerificationVersion: 1,
     decision,
     reviewerUid,
     reviewedAt: new Date().toISOString(),
@@ -323,6 +346,7 @@ router.post("/", authMiddleware, async (req, res) => {
       if (!head.exists) throw reviewFailure(409, "project_revision_missing");
       const document = storedDocumentForReview(head.data(), reviewerUid, proposal);
       assertStoredProposalTarget(document, proposal);
+      assertServerPreviewMatches(document, proposal);
       transaction.create(recordRef, record);
       return { record, duplicate: false };
     });
