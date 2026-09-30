@@ -1,5 +1,11 @@
 # Viral Clip Studio Director foundation (v1)
 
+**Foundation status: complete against the original 14 acceptance criteria.** The
+server-side preview recomputation described below is a separate future phase;
+it is not required to complete this foundation. See the
+[acceptance receipt](viral-studio-director-foundation-acceptance.md) for the
+delivered scope and verification.
+
 This is an incremental editing boundary for Viral Clip Studio. It does not change Cam Combiner and does not start an autonomous AI Director or a GPU job. The existing Studio snapshot, React history, preview and worker render paths remain active while manual split, trim-start and trim-end move through the headless command kernel.
 
 ## Canonical project boundary
@@ -36,6 +42,6 @@ The client submits the complete bounded proposal and decision to `/api/studio/di
 
 The receipt digest detects changes to the local workflow record; it is **not** a signature. Local records retain `client_claim_unverified`; their `serverReviewId` points to the authoritative authenticated decision. The project revision service proves that the proposal matches a canonical snapshot submitted under the authenticated UID at review time. It does not independently prove ownership of a browser-created project ID, that this snapshot describes the browser's actual state, or that the rendered preview matches its claimed fingerprint. Normal Studio project saves still live in browser IndexedDB; the server receives a canonical revision when a Director decision is attempted, rather than every local edit. The per-user source binding proves that this authenticated user submitted those source bytes with those project and asset IDs. Source-shot proposals have server-verified analysis evidence. Other caller-supplied proposals remain envelope-validated and checked against the stored occurrence and range, without an analysis artifact. The client command kernel rechecks its document and preview before applying. There is no LLM call, DOM automation or automatic clip edit, and no production deployment.
 
-## Next bounded step
+## Optional next phase
 
 Recompute a proposed command's result from the registered document in a trusted server-side kernel and verify the preview fingerprint before recording a decision. Keep human approval and automatic application disabled.
