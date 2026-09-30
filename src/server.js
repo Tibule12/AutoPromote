@@ -1304,6 +1304,8 @@ try {
   // Director review envelopes are intentionally small even though media APIs
   // use a larger global JSON limit.
   app.use("/api/studio/director/reviews", express.json({ limit: "24kb" }));
+  // Canonical project revisions are bounded below Firestore's document limit.
+  app.use("/api/studio/director/projects/revisions", express.json({ limit: "550kb" }));
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ extended: true, limit: "50mb", parameterLimit: 1000 }));
 
@@ -1347,6 +1349,12 @@ try {
     routeLimiter({ windowHint: "studio_director_reviews" }),
     codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (_req, _res, next) => next(),
     require("./routes/studioDirectorReviewRoutes")
+  );
+  app.use(
+    "/api/studio/director/projects/revisions",
+    routeLimiter({ windowHint: "studio_director_project_revisions" }),
+    codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (_req, _res, next) => next(),
+    require("./routes/studioProjectRevisionRoutes")
   );
   // Require latest terms before allowing access to content routes
   if (requireAcceptedTerms) {
