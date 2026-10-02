@@ -171,3 +171,20 @@ test("lineage rejects stale bases and removal of prior evidence", async () => {
     revision: removed, firestore })).rejects.toMatchObject({
     code: "PROJECT_INTELLIGENCE_INVALID" });
 });
+
+test("route rejects incompatible supersession without advancing the stored head", async () => {
+  const film = miniFilmFixture();
+  expect((await post(film)).status).toBe(201);
+  const core = clone(film);
+  delete core.revisionId;
+  delete core.sourceAssetSetDigest;
+  delete core.analysisDependencyDigests;
+  core.baseRevisionId = film.revisionId;
+  core.captureGroups.push({ ...clone(core.captureGroups[1]),
+    groupId: "capture:t2:unrelated", captureEventId: "other:event",
+    supersedes: "capture:t2" });
+  expect((await post(createProjectIntelligenceRevision(core))).status).toBe(400);
+  const current = await getOwnedProjectIntelligence({ uid: ownerUid, projectId, firestore });
+  expect(current.record.revisionId).toBe(film.revisionId);
+  expect(firestore.data.size).toBe(3);
+});

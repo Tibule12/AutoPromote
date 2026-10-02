@@ -205,7 +205,7 @@ const validateStudioProjectRevisionDocument = document => {
       ref.cacheKey.length <= 512)) throw invalid();
   if (document.projectIntelligenceRefs !== undefined &&
       (!Array.isArray(document.projectIntelligenceRefs) ||
-        document.projectIntelligenceRefs.length > 32 ||
+        document.projectIntelligenceRefs.length > 1 ||
         !document.projectIntelligenceRefs.every(ref => ownKeys(ref,
           ["revisionId", "manifestHash", "dependencyDigest"]) &&
           validHash(ref.revisionId) && validHash(ref.manifestHash) &&

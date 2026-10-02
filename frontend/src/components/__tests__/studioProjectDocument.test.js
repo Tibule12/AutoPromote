@@ -1,6 +1,7 @@
 import {
   adaptStudioSnapshotToDocument,
   projectDocumentToLegacyTimeline,
+  rebaseStudioHistoryRestore,
   reconcileStudioDocument,
   validateStudioProjectDocument,
 } from "../studioProjectDocument";
@@ -90,6 +91,13 @@ test("Project Intelligence reference survives serialization without dense eviden
     previousDocument: roundTrip }).projectIntelligenceRefs).toEqual([ref]);
   expect(() => validateStudioProjectDocument({ ...first,
     projectIntelligenceRefs: [{ ...ref, denseAnalysis: { words: ["oops"] } }] })).toThrow();
+  expect(() => validateStudioProjectDocument({ ...first,
+    projectIntelligenceRefs: [ref, { ...ref, revisionId: "d".repeat(64) }] })).toThrow();
+  const restored = rebaseStudioHistoryRestore({ currentDocument: first,
+    restoredSnapshot: snapshot(), projectId: "project-1" });
+  expect(restored.projectIntelligenceRefs).toEqual([ref]);
+  expect(() => validateStudioProjectDocument({ ...first,
+    projectIntelligenceRefs: [] })).not.toThrow();
 });
 
 test("legacy projection retains source media metadata while using canonical source ranges", () => {

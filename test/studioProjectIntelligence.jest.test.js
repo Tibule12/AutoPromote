@@ -2,6 +2,7 @@ const {
   createProjectIntelligenceRevision, validateAssetManifest,
   validateProjectIntelligenceRevision, assertRevisionTransition,
   mapCaptureClockTick, summarizeProjectIntelligence, stableStringify,
+  findProjectIntelligenceFindings,
 } = require("../src/services/studioProjectIntelligenceContract");
 const { miniFilmFixture, promoFixture } =
   require("./fixtures/studioProjectIntelligenceFixtures");
@@ -35,6 +36,9 @@ describe("Project Intelligence V1 contracts", () => {
     const film = miniFilmFixture();
     const summary = summarizeProjectIntelligence(film);
     expect(summary.captureGroups).toHaveLength(2);
+    expect(summary.captureGroups[0]).toMatchObject({
+      captureEventId: "scene1:take1", anchorAssetId: "scene1_take1_camA",
+    });
     expect(summary.captureGroups[0].members.map(member => member.role))
       .toEqual(["camera", "camera", "external_audio"]);
     expect(summary.assertions.find(item => item.assertionId === "unknown:reaction").state)
@@ -116,6 +120,145 @@ describe("Project Intelligence V1 contracts", () => {
     expect(corrected.evidenceRefs).toContainEqual(core.evidenceRefs.at(-1));
   });
 
+  test.each([
+    ["captureGroups", "groupId", "capture:t2", "captureEventId", "unrelated:event"],
+    ["captureGroups", "groupId", "capture:t2", "anchorAssetId", "scene1_take2_camB"],
+    ["assertions", "assertionId", "external:t1", "relation", "simultaneous_with"],
+    ["assertions", "assertionId", "external:t1", "from.id", "scene1_take2_external"],
+    ["assertions", "assertionId", "external:t1", "to.id", "scene1_take2_camA"],
+    ["syncMappings", "mappingId", "sync:t1external", "sourceStreamId",
+      "scene1_take2_external:audio:0"],
+    ["syncMappings", "mappingId", "sync:t1external", "referenceStreamId",
+      "scene1_take1_camB:video:0"],
+    ["dialogueUnits", "dialogueUnitId", "dialogue:leaving", "dialogueKey",
+      "unrelated:dialogue"],
+    ["dialogueUnits", "dialogueUnitId", "dialogue:leaving", "scriptUnitId",
+      "script:unrelated"],
+    ["coverage", "coverageId", "coverage:wide", "beatId", "exit"],
+    ["coverage", "coverageId", "coverage:wide", "sourceRange.endTick", 360_000],
+    ["coverage", "coverageId", "coverage:reaction", "assetId", "insert"],
+    ["continuityObservations", "observationId", "continuity:red", "beatId", "exit"],
+    ["continuityObservations", "observationId", "continuity:red", "continuityKey",
+      "wardrobe"],
+    ["continuityObservations", "observationId", "continuity:red", "subjectId",
+      "actor:two"],
+    ["continuityObservations", "observationId", "continuity:red", "type",
+      "wardrobe_state"],
+  ])("%s cannot supersede an unrelated %s through %s", (field, key, priorId,
+    changedField, newValue) => {
+    const film = miniFilmFixture();
+    const altered = next(film, core => {
+      const prior = core[field].find(item => item[key] === priorId);
+      const successor = clone(prior);
+      successor[key] = `${priorId}:unrelated`;
+      successor.supersedes = priorId;
+      const parts = changedField.split(".");
+      if (parts.length === 1) successor[parts[0]] = newValue;
+      else successor[parts[0]][parts[1]] = newValue;
+      core[field].push(successor);
+    });
+    expect(() => validateProjectIntelligenceRevision(altered))
+      .toThrow(expect.objectContaining({ code: "PROJECT_INTELLIGENCE_SUPERSESSION" }));
+  });
+
+  test("camera role cannot supersede take membership for the same asset", () => {
+    const film = miniFilmFixture();
+    const altered = next(film, core => core.assertions.push({
+      ...clone(core.assertions.find(item => item.assertionId === "camera:t1a")),
+      assertionId: "take:cam-disguised", relation: "take_membership",
+      to: { kind: "take", id: "take2" }, supersedes: "camera:t1a",
+    }));
+    expect(() => validateProjectIntelligenceRevision(altered))
+      .toThrow(expect.objectContaining({ code: "PROJECT_INTELLIGENCE_SUPERSESSION" }));
+  });
+
+  test("value correction and same capture event membership correction retain identity", () => {
+    const film = miniFilmFixture();
+    const corrected = next(film, core => {
+      core.assertions.push({ ...clone(core.assertions.find(item =>
+        item.assertionId === "camera:t1a")), assertionId: "camera:t1a:corrected",
+      to: { kind: "camera", id: "cameraC" }, supersedes: "camera:t1a" });
+      core.captureGroups.push({ ...clone(core.captureGroups[1]),
+        groupId: "capture:t2:corrected", supersedes: "capture:t2",
+        members: core.captureGroups[1].members.slice(0, 2) });
+    });
+    expect(() => assertRevisionTransition(film, corrected)).not.toThrow();
+    const summary = summarizeProjectIntelligence(corrected);
+    expect(summary.assertions.find(item => item.assertionId === "camera:t1a"))
+      .toBeUndefined();
+    expect(summary.captureGroups.find(item => item.groupId === "capture:t2"))
+      .toBeUndefined();
+  });
+
+  test.each([
+    ["captureGroups", "groupId", "capture:t1"],
+    ["assertions", "assertionId", "conflict:alternate"],
+    ["dialogueUnits", "dialogueUnitId", "dialogue:leaving"],
+    ["continuityObservations", "observationId", "continuity:red"],
+  ])("proposed %s cannot deactivate a verified human decision", (field, key, priorId) => {
+    const film = miniFilmFixture();
+    const attacked = next(film, core => {
+      const successor = clone(core[field].find(item => item[key] === priorId));
+      successor[key] = `${priorId}:proposed_attack`;
+      successor.state = "proposed";
+      successor.review = null;
+      successor.supersedes = priorId;
+      core[field].push(successor);
+    });
+    expect(() => validateProjectIntelligenceRevision(attacked))
+      .toThrow(expect.objectContaining({ code: "PROJECT_INTELLIGENCE_SUPERSESSION" }));
+    if (field === "assertions") {
+      const findings = findProjectIntelligenceFindings(attacked);
+      expect(findings.some(item => item.code === "PROJECT_INTELLIGENCE_CONFLICT"))
+        .toBe(true);
+    }
+  });
+
+  test("a rejected human decision requires a new human review to reopen", () => {
+    const film = miniFilmFixture();
+    const rejected = next(film, core => core.assertions.push({
+      ...clone(core.assertions.find(item => item.assertionId === "external:t1")),
+      assertionId: "external:t1:rejected", state: "rejected",
+      review: { reviewerUid: film.ownerUid, reviewedAt: "2026-10-02T01:00:00Z" },
+      supersedes: "external:t1",
+    }));
+    expect(() => assertRevisionTransition(film, rejected)).not.toThrow();
+    const proposed = next(rejected, core => core.assertions.push({
+      ...clone(core.assertions.find(item => item.assertionId === "external:t1:rejected")),
+      assertionId: "external:t1:unreviewed", state: "proposed", review: null,
+      supersedes: "external:t1:rejected",
+    }));
+    expect(() => validateProjectIntelligenceRevision(proposed))
+      .toThrow(expect.objectContaining({ code: "PROJECT_INTELLIGENCE_SUPERSESSION" }));
+    const reopened = next(rejected, core => core.assertions.push({
+      ...clone(core.assertions.find(item => item.assertionId === "external:t1:rejected")),
+      assertionId: "external:t1:reopened", state: "human_verified",
+      review: { reviewerUid: film.ownerUid, reviewedAt: "2026-10-02T02:00:00Z" },
+      supersedes: "external:t1:rejected",
+    }));
+    expect(() => assertRevisionTransition(rejected, reopened)).not.toThrow();
+  });
+
+  test("unknown cannot supersede a claim and a reviewed rejection may replace verification", () => {
+    const film = miniFilmFixture();
+    const unknown = next(film, core => core.assertions.push({
+      ...clone(core.assertions.find(item => item.assertionId === "external:t1")),
+      assertionId: "external:t1:unknown", state: "unknown", review: null,
+      supersedes: "external:t1",
+    }));
+    expect(() => validateProjectIntelligenceRevision(unknown))
+      .toThrow(expect.objectContaining({ code: "PROJECT_INTELLIGENCE_SUPERSESSION" }));
+    const rejected = next(film, core => core.assertions.push({
+      ...clone(core.assertions.find(item => item.assertionId === "camera:t1a")),
+      assertionId: "camera:t1a:rejected", state: "rejected",
+      review: { reviewerUid: film.ownerUid, reviewedAt: "2026-10-02T01:00:00Z" },
+      supersedes: "camera:t1a",
+    }));
+    expect(() => assertRevisionTransition(film, rejected)).not.toThrow();
+    expect(summarizeProjectIntelligence(rejected).assertions.find(item =>
+      item.assertionId === "camera:t1a")).toBeUndefined();
+  });
+
   test("verified contradictions block dependent planning", () => {
     const { findings, planningBlocked } = validateProjectIntelligenceRevision(miniFilmFixture());
     expect(planningBlocked).toBe(true);
@@ -155,7 +298,8 @@ describe("Project Intelligence V1 contracts", () => {
     expect(() => assertRevisionTransition(film, revised)).not.toThrow();
     expect(revised.evidenceRefs).toEqual(film.evidenceRefs);
     const unscripted = next(promoFixture(), core => core.dialogueUnits.push({
-      dialogueUnitId: "dialogue:promo", origin: "unscripted", scriptUnitId: null,
+      dialogueUnitId: "dialogue:promo", dialogueKey: "promo:dialogue:fix",
+      origin: "unscripted", scriptUnitId: null,
       reviewedWording: "We fixed the upload issue.", candidates: [{
         assetId: "talking_head", sourceRange: { space: "source", startTick: 0,
           endTick: 90_000 }, utteranceEvidenceId: "evidence:talking_head",

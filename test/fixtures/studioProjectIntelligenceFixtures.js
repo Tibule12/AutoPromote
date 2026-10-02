@@ -78,12 +78,14 @@ const miniFilmFixture = () => {
   value.evidenceRefs.push(declaration(assets[3], "Raw utterance: I'm leaving tomorrow",
     "human_transcription", ":utterance:t2"));
   value.captureGroups = [
-    { groupId: "capture:t1", members: [
+    { groupId: "capture:t1", captureEventId: "scene1:take1",
+      anchorAssetId: assets[0].assetId, members: [
       { assetId: assets[0].assetId, role: "camera" },
       { assetId: assets[1].assetId, role: "camera" },
       { assetId: assets[2].assetId, role: "external_audio" },
     ], ...lifecycle("human_verified", ["evidence:scene1_take1_camA"]) },
-    { groupId: "capture:t2", members: [
+    { groupId: "capture:t2", captureEventId: "scene1:take2",
+      anchorAssetId: assets[3].assetId, members: [
       { assetId: assets[3].assetId, role: "camera" },
       { assetId: assets[4].assetId, role: "camera" },
       { assetId: assets[5].assetId, role: "external_audio" },
@@ -120,7 +122,8 @@ const miniFilmFixture = () => {
     ...lifecycle("proposed", ["evidence:scene1_take1_external"]),
   }];
   value.dialogueUnits = [{
-    dialogueUnitId: "dialogue:leaving", origin: "scripted", scriptUnitId: "script:17",
+    dialogueUnitId: "dialogue:leaving", dialogueKey: "scene1:dialogue:leaving",
+    origin: "scripted", scriptUnitId: "script:17",
     reviewedWording: "I can't keep doing this. I'm leaving tomorrow.",
     candidates: [
       { assetId: assets[0].assetId, sourceRange: sourceRange(90_000, 270_000),

@@ -5,6 +5,14 @@ const MAX_BYTES = 256 * 1024;
 const HASH = /^[a-f0-9]{64}$/;
 const ID = /^[A-Za-z0-9][A-Za-z0-9._:@+-]{0,159}$/;
 const STATES = ["unknown", "proposed", "human_verified", "rejected"];
+// Rows are the state being replaced; columns are permitted successor states.
+// Only a new human review may correct or reopen a human decision.
+const SUCCESSOR_STATES = Object.freeze({
+  unknown: ["proposed", "human_verified", "rejected"],
+  proposed: ["proposed", "human_verified", "rejected"],
+  human_verified: ["human_verified", "rejected"],
+  rejected: ["human_verified"],
+});
 const LEVELS = ["unknown", "low", "medium", "high"];
 const ORIGINS = ["human_declared", "heuristic", "model_inferred"];
 const SHOT_ROLES = ["unknown", "establishing", "wide", "medium", "medium_close_up",
@@ -71,6 +79,40 @@ const sourceAssetSetDigest = assets => digest(assets.map(asset =>
 const dependencyDigests = evidenceRefs => [...new Set(evidenceRefs
   .filter(item => item.kind === "source_shot_artifact")
   .map(item => item.artifactHash))].sort();
+const RECORD_IDS = Object.freeze({ captureGroups: "groupId", assertions: "assertionId",
+  syncMappings: "mappingId", dialogueUnits: "dialogueUnitId",
+  coverage: "coverageId", continuityObservations: "observationId" });
+const valueRelations = new Set(["scene_membership", "take_membership", "camera_role",
+  "shot_role", "camera_motion"]);
+const compatibleSuccessor = (field, prior, next) => {
+  switch (field) {
+    case "captureGroups":
+      return prior.captureEventId === next.captureEventId &&
+        prior.anchorAssetId === next.anchorAssetId;
+    case "assertions":
+      return prior.relation === next.relation &&
+        stableStringify(prior.from) === stableStringify(next.from) &&
+        prior.to.kind === next.to.kind &&
+        stableStringify(prior.sourceRange) === stableStringify(next.sourceRange) &&
+        (valueRelations.has(prior.relation) || prior.to.id === next.to.id);
+    case "syncMappings":
+      return prior.sourceStreamId === next.sourceStreamId &&
+        prior.referenceStreamId === next.referenceStreamId;
+    case "dialogueUnits":
+      return prior.dialogueKey === next.dialogueKey && prior.origin === next.origin &&
+        prior.scriptUnitId === next.scriptUnitId;
+    case "coverage":
+      return prior.beatId === next.beatId && prior.assetId === next.assetId &&
+        stableStringify(prior.sourceRange) === stableStringify(next.sourceRange);
+    case "continuityObservations":
+      return prior.beatId === next.beatId && prior.subjectId === next.subjectId &&
+        prior.continuityKey === next.continuityKey && prior.type === next.type &&
+        prior.assetId === next.assetId &&
+        stableStringify(prior.sourceRange) === stableStringify(next.sourceRange);
+    default:
+      return false;
+  }
+};
 
 const provenance = (value, path) => {
   exact(value, ["origin", "producerId", "method"], [], path);
@@ -227,6 +269,8 @@ const validateProjectIntelligenceRevision = revision => {
       text(evidence.statement, path);
     } else if (evidence.kind === "source_shot_artifact") {
       hash(evidence.artifactHash, path);
+      // Existing source-shot records expose one engine identifier. This V1
+      // adapter is not the generic analysis artifact identity planned later.
       if (evidence.configHash !== null) fail("PROJECT_INTELLIGENCE_EVIDENCE", path);
       id(evidence.modelRevision, path);
       if (evidence.analysisType !== "source_shots" || evidence.statement !== null)
@@ -252,10 +296,14 @@ const validateProjectIntelligenceRevision = revision => {
   list(revision.captureGroups, 200, "captureGroups");
   revision.captureGroups.forEach((group, index) => {
     const path = `captureGroups[${index}]`;
-    exact(group, ["groupId", "members", "state", "provenance", "uncertainty",
+    exact(group, ["groupId", "captureEventId", "anchorAssetId", "members",
+      "state", "provenance", "uncertainty",
       "review", "evidenceRefs", "supersedes"], [], path);
-    id(group.groupId, path); list(group.members, 16, path);
+    id(group.groupId, path); id(group.captureEventId, path);
+    id(group.anchorAssetId, path); list(group.members, 16, path);
     if (!group.members.length) fail("PROJECT_INTELLIGENCE_CAPTURE_GROUP", path);
+    if (!group.members.some(member => member.assetId === group.anchorAssetId))
+      fail("PROJECT_INTELLIGENCE_CAPTURE_GROUP", path);
     group.members.forEach(member => {
       exact(member, ["assetId", "role"], [], path);
       if (!assetIds.has(member.assetId) ||
@@ -331,10 +379,10 @@ const validateProjectIntelligenceRevision = revision => {
   list(revision.dialogueUnits, 500, "dialogueUnits");
   revision.dialogueUnits.forEach((unit, index) => {
     const path = `dialogueUnits[${index}]`;
-    exact(unit, ["dialogueUnitId", "origin", "scriptUnitId", "reviewedWording",
+    exact(unit, ["dialogueUnitId", "dialogueKey", "origin", "scriptUnitId", "reviewedWording",
       "candidates", "state", "provenance", "uncertainty", "review", "evidenceRefs",
       "supersedes"], [], path);
-    id(unit.dialogueUnitId, path);
+    id(unit.dialogueUnitId, path); id(unit.dialogueKey, path);
     if (!["scripted", "unscripted"].includes(unit.origin) ||
         (unit.origin === "scripted" ? unit.scriptUnitId === null : unit.scriptUnitId !== null))
       fail("PROJECT_INTELLIGENCE_DIALOGUE", path);
@@ -406,21 +454,19 @@ const validateProjectIntelligenceRevision = revision => {
     lifecycle(observation, path, evidenceIds, revision.ownerUid);
   });
   unique(revision.continuityObservations, "observationId", "continuityObservations");
-  const collections = [revision.captureGroups, revision.assertions, revision.syncMappings,
-    revision.dialogueUnits, revision.coverage, revision.continuityObservations];
-  for (const items of collections) {
-    const byId = new Map(items.map(item => [item.groupId || item.assertionId || item.mappingId ||
-      item.dialogueUnitId || item.coverageId || item.observationId, item]));
+  const collections = [["captureGroups", revision.captureGroups],
+    ["assertions", revision.assertions], ["syncMappings", revision.syncMappings],
+    ["dialogueUnits", revision.dialogueUnits], ["coverage", revision.coverage],
+    ["continuityObservations", revision.continuityObservations]];
+  for (const [field, items] of collections) {
+    const recordId = item => item[RECORD_IDS[field]];
+    const byId = new Map(items.map(item => [recordId(item), item]));
     for (const item of items) {
       if (item.supersedes === null) continue;
       const prior = byId.get(item.supersedes);
-      if (!prior || prior === item || prior.supersedes === (item.groupId || item.assertionId ||
-          item.mappingId || item.dialogueUnitId || item.coverageId || item.observationId) ||
-          item.state === "unknown") fail("PROJECT_INTELLIGENCE_SUPERSESSION", item.supersedes);
-      if (item.state === "human_verified" || item.state === "rejected") {
-        if (prior.state === "rejected")
-          fail("PROJECT_INTELLIGENCE_SUPERSESSION", item.supersedes);
-      }
+      if (!prior || prior === item || !compatibleSuccessor(field, prior, item) ||
+          !SUCCESSOR_STATES[prior.state].includes(item.state))
+        fail("PROJECT_INTELLIGENCE_SUPERSESSION", item.supersedes);
     }
     const superseded = items.filter(item => item.supersedes !== null).map(item => item.supersedes);
     if (new Set(superseded).size !== superseded.length)
@@ -457,14 +503,19 @@ const mapCaptureClockTick = (mapping, sourceTick) => {
     floorTick: Number(floor), remainderNumerator: (numerator - floor * denominator).toString() };
 };
 
-const active = items => {
-  const superseded = new Set(items.filter(item => item.supersedes !== null).map(item => item.supersedes));
-  return items.filter(item => !superseded.has(item.assertionId || item.observationId || item.groupId ||
-    item.mappingId || item.dialogueUnitId || item.coverageId));
+const active = (items, field) => {
+  const byId = new Map(items.map(item => [item[RECORD_IDS[field]], item]));
+  const superseded = new Set(items.filter(item => {
+    const prior = byId.get(item.supersedes);
+    return prior && compatibleSuccessor(field, prior, item) &&
+      SUCCESSOR_STATES[prior.state]?.includes(item.state);
+  }).map(item => item.supersedes));
+  return items.filter(item => !superseded.has(item[RECORD_IDS[field]]));
 };
 const findProjectIntelligenceFindings = revision => {
   const findings = [];
-  const verified = active(revision.assertions).filter(item => item.state === "human_verified");
+  const verified = active(revision.assertions, "assertions")
+    .filter(item => item.state === "human_verified");
   const single = ["scene_membership", "take_membership", "camera_role"];
   for (const relation of single) {
     const groups = new Map();
@@ -493,7 +544,7 @@ const findProjectIntelligenceFindings = revision => {
           ...sameCapture.filter(claim => root(claim.from.id) === root(item.from.id))
             .map(claim => claim.assertionId)] });
   }
-  const observations = active(revision.continuityObservations)
+  const observations = active(revision.continuityObservations, "continuityObservations")
     .filter(item => item.state === "human_verified");
   const byKey = new Map();
   for (const item of observations) {
@@ -507,7 +558,7 @@ const findProjectIntelligenceFindings = revision => {
         claims.map(item => item.observationId), beatId: claims[0].beatId });
   }
   for (const beat of revision.beats) {
-    if (!active(revision.coverage).some(item => item.beatId === beat.beatId &&
+    if (!active(revision.coverage, "coverage").some(item => item.beatId === beat.beatId &&
         item.state !== "rejected"))
       findings.push({ code: "MISSING_BEAT_COVERAGE", beatId: beat.beatId });
   }
@@ -556,24 +607,26 @@ const summarizeProjectIntelligence = revision => {
       durationTicks: asset.durationTicks, mediaType: asset.mediaType,
       technical: asset.technical, streams: asset.streams })),
     evidenceCatalog: revision.evidenceRefs,
-    captureGroups: active(revision.captureGroups).map(group => ({
-      groupId: group.groupId, members: group.members, state: group.state,
+    captureGroups: active(revision.captureGroups, "captureGroups").map(group => ({
+      groupId: group.groupId, captureEventId: group.captureEventId,
+      anchorAssetId: group.anchorAssetId, members: group.members, state: group.state,
       evidenceRefs: group.evidenceRefs, provenance: group.provenance,
       uncertainty: group.uncertainty, review: group.review })),
-    assertions: active(revision.assertions),
-    syncMappings: active(revision.syncMappings).map(item => ({ mappingId: item.mappingId,
+    assertions: active(revision.assertions, "assertions"),
+    syncMappings: active(revision.syncMappings, "syncMappings")
+      .map(item => ({ mappingId: item.mappingId,
       sourceStreamId: item.sourceStreamId, referenceStreamId: item.referenceStreamId,
       offsetTicks: item.offsetTicks, rateNumerator: item.rateNumerator,
       rateDenominator: item.rateDenominator, residualMaxTicks: item.residualMaxTicks,
       method: item.method, coveredSourceRange: item.coveredSourceRange,
       uncertainty: item.uncertainty, state: item.state, evidenceRefs: item.evidenceRefs,
       provenance: item.provenance, review: item.review })),
-    dialogueUnits: active(revision.dialogueUnits),
-    continuityObservations: active(revision.continuityObservations),
+    dialogueUnits: active(revision.dialogueUnits, "dialogueUnits"),
+    continuityObservations: active(revision.continuityObservations, "continuityObservations"),
     beats: revision.beats.map(beat => ({ ...beat,
-      candidates: active(revision.coverage).filter(item => item.beatId === beat.beatId &&
+      candidates: active(revision.coverage, "coverage").filter(item => item.beatId === beat.beatId &&
         item.state !== "rejected"),
-      coverageState: active(revision.coverage).some(item => item.beatId === beat.beatId &&
+      coverageState: active(revision.coverage, "coverage").some(item => item.beatId === beat.beatId &&
         item.state !== "rejected") ? "candidate_available" : "missing" })),
     findings, planningBlocked,
   };

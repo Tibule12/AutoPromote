@@ -20,7 +20,7 @@ const {
   validateStudioProjectRevisionDocument,
 } = require("../src/services/studioProjectRevisionService");
 const { miniFilmFixture } = require("./fixtures/studioProjectIntelligenceFixtures");
-const { stableStringify, digest } =
+const { stableStringify, digest, createProjectIntelligenceRevision } =
   require("../src/services/studioProjectIntelligenceContract");
 
 const clone = value => structuredClone(value);
@@ -176,6 +176,27 @@ test("canonical Intelligence refs require an owned immutable stored revision", a
   }, revision.ownerUid)).status).toBe(400);
   expect((await post({ document: { ...canonical, revision: 5,
     projectIntelligenceRefs: [ref, ref] },
+  }, revision.ownerUid)).status).toBe(400);
+  const laterCore = clone(revision);
+  delete laterCore.revisionId;
+  delete laterCore.sourceAssetSetDigest;
+  delete laterCore.analysisDependencyDigests;
+  laterCore.baseRevisionId = revision.revisionId;
+  laterCore.beats.push({ beatId: "later", title: "Later", origin: "human_supplied" });
+  const later = createProjectIntelligenceRevision(laterCore);
+  const laterJson = stableStringify(later);
+  const laterRef = { revisionId: later.revisionId,
+    manifestHash: crypto.createHash("sha256").update(laterJson).digest("hex"),
+    dependencyDigest: digest(later.analysisDependencyDigests) };
+  const laterKey = crypto.createHash("sha256")
+    .update(`${later.projectId}\0${later.revisionId}`).digest("hex");
+  firestore.data.set(`users/${later.ownerUid}/studioProjectIntelligenceRevisions/${laterKey}`,
+    { schemaVersion: 1, ownerUid: later.ownerUid, projectId: later.projectId,
+      revisionId: later.revisionId, baseRevisionId: later.baseRevisionId,
+      manifestHash: laterRef.manifestHash, dependencyDigest: laterRef.dependencyDigest,
+      revisionJson: laterJson, createdAt: "2026-10-02T01:00:00Z", createdBy: later.ownerUid });
+  expect((await post({ document: { ...canonical, revision: 5,
+    projectIntelligenceRefs: [ref, laterRef] },
   }, revision.ownerUid)).status).toBe(400);
   expect((await post({ document: { ...canonical, revision: 5,
     projectId: "foreign-project" },

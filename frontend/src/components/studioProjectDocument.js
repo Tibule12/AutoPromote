@@ -809,7 +809,7 @@ export const validateStudioProjectDocument = document => {
     fail("INVALID_ANALYSIS_REF", "Analysis references must be an array.");
   if (document.projectIntelligenceRefs !== undefined) {
     if (!Array.isArray(document.projectIntelligenceRefs) ||
-        document.projectIntelligenceRefs.length > 32 ||
+        document.projectIntelligenceRefs.length > 1 ||
         new Set(document.projectIntelligenceRefs.map(ref => ref?.revisionId)).size !==
           document.projectIntelligenceRefs.length ||
         !document.projectIntelligenceRefs.every(ref =>
