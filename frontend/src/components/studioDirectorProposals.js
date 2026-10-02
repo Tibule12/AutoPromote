@@ -9,6 +9,7 @@ import {
   reconcileStudioDocument,
   validateStudioProjectDocument,
 } from "./studioProjectDocument";
+import { isStudioCapabilityDirectorAllowed } from "./studioCapabilities";
 
 export const STUDIO_DIRECTOR_PROPOSAL_VERSION = 1;
 export const STUDIO_DIRECTOR_REVIEW_IDENTITY_STATUS = "client_claim_unverified";
@@ -41,7 +42,8 @@ const digest = async value => {
 };
 
 const assertBoundedOperation = (document, operation) => {
-  if (!operation || !["split_clip", "trim_clip"].includes(operation.type)) {
+  if (!operation || !["split_clip", "trim_clip"].includes(operation.type) ||
+      !isStudioCapabilityDirectorAllowed(operation.type)) {
     proposalError("UNSUPPORTED_DIRECTOR_OPERATION", "Director proposals support one split or edge trim.");
   }
   const occurrence = document.clipOccurrences.find(

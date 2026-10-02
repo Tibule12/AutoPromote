@@ -46,6 +46,20 @@ const split = (id = "main", at = 8, left = "left", right = "right") => ({
   newOccurrenceIds: { left, right },
 });
 
+test("AI actor requires the explicit Director capability gate", () => {
+  const document = adaptStudioSnapshotToDocument({
+    snapshot: sourceSnapshot(), projectId: "project",
+  });
+  const allowed = { ...batch(document, [split()]),
+    actor: { type: "ai", id: "reviewed-director" } };
+  expect(() => dryRunStudioCommandBatch(document, allowed)).not.toThrow();
+  const blocked = { ...allowed, operations: [{ type: "preserve_range",
+    target: { occurrenceId: "main" },
+    range: { space: "source", startTick: 0, endTick: 90_000 }, lockId: "lock-1" }] };
+  expect(() => dryRunStudioCommandBatch(document, blocked))
+    .toThrow(/not released/);
+});
+
 test("dry run reports read/write sets without mutating the project", () => {
   const document = adaptStudioSnapshotToDocument({
     snapshot: sourceSnapshot(),

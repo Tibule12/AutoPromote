@@ -1,4 +1,4 @@
-import { getStudioCapability } from "./studioCapabilities";
+import { getStudioCapability, isStudioCapabilityDirectorAllowed } from "./studioCapabilities";
 import {
   applyStudioCommandInverse,
   createStudioCommandInverse,
@@ -90,6 +90,9 @@ export const validateStudioCommandBatch = batch => {
         "UNSUPPORTED_CAPABILITY",
         `Capability ${operation.type || "unknown"} is unavailable.`
       );
+    if (batch.actor.type === "ai" && !isStudioCapabilityDirectorAllowed(operation.type))
+      commandError("UNSUPPORTED_DIRECTOR_OPERATION",
+        `Director capability ${operation.type || "unknown"} is not released.`);
     if (operation.type === "split_clip") {
       expectKeys(
         operation,

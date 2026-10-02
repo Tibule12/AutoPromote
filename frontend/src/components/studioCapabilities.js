@@ -1,7 +1,7 @@
 // Director-facing inventory of executable Viral Clip Studio operations.
 // A UI control or a validated request field alone is not evidence of rendering.
 // Bump the registry version when a capability's contract or support changes.
-export const STUDIO_CAPABILITY_REGISTRY_VERSION = 3;
+export const STUDIO_CAPABILITY_REGISTRY_VERSION = 4;
 
 const objectSchema = (properties, required = []) => ({
   type: "object",
@@ -505,7 +505,15 @@ const deepFreeze = value => {
 
 // The registry is data, not a dispatch table. Only migrated commands use it as
 // an authorization gate; legacy entries document real render paths and gaps.
-export const STUDIO_CAPABILITIES = deepFreeze(entries);
+export const STUDIO_CAPABILITIES = deepFreeze(entries.map(entry => {
+  const reviewedDirectorCommand = ["split_clip", "trim_clip"].includes(entry.id);
+  return { ...entry, directorPermission: {
+    directorCommandSupported: reviewedDirectorCommand,
+    serverValidated: reviewedDirectorCommand,
+    rendererVerified: reviewedDirectorCommand,
+    releaseEnabled: reviewedDirectorCommand,
+  } };
+}));
 const byId = new Map(STUDIO_CAPABILITIES.map(entry => [entry.id, entry]));
 
 export function getStudioCapability(id) {
@@ -514,4 +522,12 @@ export function getStudioCapability(id) {
 
 export function isStudioCapabilityExecutable(id) {
   return getStudioCapability(id)?.executable === true;
+}
+
+export function isStudioCapabilityDirectorAllowed(id) {
+  const capability = getStudioCapability(id);
+  const permission = capability?.directorPermission;
+  return capability?.executable === true && permission?.directorCommandSupported === true &&
+    permission.serverValidated === true && permission.rendererVerified === true &&
+    permission.releaseEnabled === true;
 }

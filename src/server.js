@@ -1306,6 +1306,7 @@ try {
   app.use("/api/studio/director/reviews", express.json({ limit: "24kb" }));
   // Canonical project revisions are bounded below Firestore's document limit.
   app.use("/api/studio/director/projects/revisions", express.json({ limit: "550kb" }));
+  app.use("/api/studio/director/projects/intelligence", express.json({ limit: "270kb" }));
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ extended: true, limit: "50mb", parameterLimit: 1000 }));
 
@@ -1355,6 +1356,12 @@ try {
     routeLimiter({ windowHint: "studio_director_project_revisions" }),
     codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (_req, _res, next) => next(),
     require("./routes/studioProjectRevisionRoutes")
+  );
+  app.use(
+    "/api/studio/director/projects/intelligence",
+    routeLimiter({ windowHint: "studio_project_intelligence" }),
+    codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (_req, _res, next) => next(),
+    require("./routes/studioProjectIntelligenceRoutes")
   );
   // Require latest terms before allowing access to content routes
   if (requireAcceptedTerms) {

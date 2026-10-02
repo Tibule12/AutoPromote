@@ -3,6 +3,7 @@ import path from "path";
 import {
   getStudioCapability,
   isStudioCapabilityExecutable,
+  isStudioCapabilityDirectorAllowed,
   STUDIO_CAPABILITIES,
   STUDIO_CAPABILITY_REGISTRY_VERSION,
 } from "../studioCapabilities";
@@ -11,7 +12,7 @@ import { STUDIO_3D_FIELD_PARITY, getStudio3DFieldParity } from "../threeD/studio
 import poseFixture from "../threeD/fixtures/pose-parity-v1.json";
 
 test("registry has unique versioned entries with traceable execution evidence", () => {
-  expect(STUDIO_CAPABILITY_REGISTRY_VERSION).toBe(3);
+  expect(STUDIO_CAPABILITY_REGISTRY_VERSION).toBe(4);
   expect(new Set(STUDIO_CAPABILITIES.map(item => item.id)).size).toBe(STUDIO_CAPABILITIES.length);
   for (const item of STUDIO_CAPABILITIES) {
     expect(item).toMatchObject({
@@ -36,6 +37,12 @@ test("registry has unique versioned entries with traceable execution evidence", 
     }
     expect(["exact", "approximate", "unsupported"]).toContain(item.supportStatus);
     expect(getStudioCapability(item.id)).toBe(item);
+    expect(item.directorPermission).toEqual(expect.objectContaining({
+      directorCommandSupported: expect.any(Boolean), serverValidated: expect.any(Boolean),
+      rendererVerified: expect.any(Boolean), releaseEnabled: expect.any(Boolean),
+    }));
+    expect(isStudioCapabilityDirectorAllowed(item.id))
+      .toBe(["split_clip", "trim_clip"].includes(item.id));
     if (
       item.supportStatus === "unsupported" ||
       ["blocked", "unverified"].includes(item.releaseState)

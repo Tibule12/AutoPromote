@@ -409,6 +409,8 @@ export const adaptStudioSnapshotToDocument = ({ snapshot, projectId, previousDoc
   const analysisRefs = (snapshot.analysisRefs || previousDocument?.analysisRefs || []).map(ref =>
     createSemanticAnalysisReference(ref)
   );
+  const projectIntelligenceRefs = snapshot.projectIntelligenceRefs ||
+    previousDocument?.projectIntelligenceRefs || [];
   const styleRef = snapshot.styleRef || previousDocument?.styleRef || null;
   const programmeSpeedKeys = (snapshot.speedKeyframes || [])
     .map(key => ({
@@ -456,6 +458,8 @@ export const adaptStudioSnapshotToDocument = ({ snapshot, projectId, previousDoc
     stableStringify(previousDocument.output) === stableStringify(output) &&
     stableStringify(previousDocument.audioGraph) === stableStringify(audioGraph) &&
     stableStringify(previousDocument.analysisRefs) === stableStringify(analysisRefs) &&
+    stableStringify(previousDocument.projectIntelligenceRefs || []) ===
+      stableStringify(projectIntelligenceRefs) &&
     stableStringify(previousDocument.programmeSpeedKeys) === stableStringify(programmeSpeedKeys) &&
     previousDocument.fallbackSpeed === fallbackSpeed &&
     stableStringify(previousDocument.styleRef) === stableStringify(styleRef);
@@ -502,6 +506,7 @@ export const adaptStudioSnapshotToDocument = ({ snapshot, projectId, previousDoc
     },
     styleRef,
     analysisRefs,
+    projectIntelligenceRefs,
     programmeSpeedKeys,
     fallbackSpeed,
     outputTimeMap: buildStudioOutputTimeMap({
@@ -556,6 +561,7 @@ export const rebaseStudioHistoryRestore = ({ currentDocument, restoredSnapshot, 
     ],
     idempotency: currentDocument.idempotency,
     directorReviewJournal: currentDocument.directorReviewJournal || [],
+    projectIntelligenceRefs: currentDocument.projectIntelligenceRefs || [],
   };
   validateStudioProjectDocument(rebased);
   return rebased;
@@ -801,6 +807,20 @@ export const validateStudioProjectDocument = document => {
   });
   if (!Array.isArray(document.analysisRefs))
     fail("INVALID_ANALYSIS_REF", "Analysis references must be an array.");
+  if (document.projectIntelligenceRefs !== undefined) {
+    if (!Array.isArray(document.projectIntelligenceRefs) ||
+        document.projectIntelligenceRefs.length > 32 ||
+        new Set(document.projectIntelligenceRefs.map(ref => ref?.revisionId)).size !==
+          document.projectIntelligenceRefs.length ||
+        !document.projectIntelligenceRefs.every(ref =>
+          ref && typeof ref === "object" && !Array.isArray(ref) &&
+          Object.keys(ref).sort().join(",") ===
+            "dependencyDigest,manifestHash,revisionId" &&
+          [ref.revisionId, ref.manifestHash, ref.dependencyDigest]
+            .every(value => typeof value === "string" && /^[a-f0-9]{64}$/.test(value)))) {
+      fail("INVALID_PROJECT_INTELLIGENCE_REF", "Invalid Project Intelligence reference.");
+    }
+  }
   if (
     !Array.isArray(document.journal) ||
     !document.idempotency ||

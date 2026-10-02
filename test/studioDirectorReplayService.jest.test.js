@@ -90,12 +90,14 @@ test("locked, stale, and duplicate commands are rejected without a fingerprint",
   const document = adaptStudioSnapshotToDocument({
     snapshot: sourceSnapshot(), projectId: "project-1",
   });
-  const locked = executeStudioCommandBatch(document, commandBatch(document, {
+  const lockBatch = commandBatch(document, {
     type: "preserve_range",
     target: { occurrenceId: "main" },
     lockId: "preserve-seven",
     range: { space: "source", startTick: 6 * 90_000, endTick: 8 * 90_000 },
-  }, "lock" )).document;
+  }, "lock");
+  lockBatch.actor = { type: "human", id: "test-editor" };
+  const locked = executeStudioCommandBatch(document, lockBatch).document;
   expect(() => computeStudioDirectorPreviewFingerprint({
     document: locked, batch: commandBatch(locked, splitOperation(), "locked-split"),
   })).toThrow(expect.objectContaining({

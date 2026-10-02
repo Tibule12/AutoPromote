@@ -9,6 +9,7 @@ const DOCUMENT_FIELDS = [
   "clipOccurrences", "timeMaps", "layers", "linkedTiming", "audioGraph",
   "constraints", "styleRef", "analysisRefs", "programmeSpeedKeys", "fallbackSpeed",
   "outputTimeMap", "journal", "idempotency", "directorReviewJournal", "compatibility",
+  "projectIntelligenceRefs",
 ];
 
 const plain = value => {
@@ -154,7 +155,9 @@ const validOutputMap = (segments, programmeDuration) => {
 };
 
 const validateStudioProjectRevisionDocument = document => {
-  if (!ownKeys(document, DOCUMENT_FIELDS) || !boundedJsonTree(document) ||
+  if (!allowedKeys(document, DOCUMENT_FIELDS.filter(key =>
+    key !== "projectIntelligenceRefs"), ["projectIntelligenceRefs"]) ||
+      !boundedJsonTree(document) ||
       document.schemaVersion !== SCHEMA_VERSION || !validId(document.projectId) ||
       !Number.isSafeInteger(document.revision) || document.revision < 0 ||
       !ownKeys(document.clock, ["ticksPerSecond", "interval"]) ||
@@ -200,6 +203,15 @@ const validateStudioProjectRevisionDocument = document => {
       validId(ref.artifactId) && validHash(ref.manifestContentHash) &&
       validHash(ref.sourceContentHash) && typeof ref.cacheKey === "string" &&
       ref.cacheKey.length <= 512)) throw invalid();
+  if (document.projectIntelligenceRefs !== undefined &&
+      (!Array.isArray(document.projectIntelligenceRefs) ||
+        document.projectIntelligenceRefs.length > 32 ||
+        !document.projectIntelligenceRefs.every(ref => ownKeys(ref,
+          ["revisionId", "manifestHash", "dependencyDigest"]) &&
+          validHash(ref.revisionId) && validHash(ref.manifestHash) &&
+          validHash(ref.dependencyDigest)) ||
+        new Set(document.projectIntelligenceRefs.map(ref => ref.revisionId)).size !==
+          document.projectIntelligenceRefs.length)) throw invalid();
   if (!document.programmeSpeedKeys.every(key => ownKeys(key,
     ["atProgrammeTick", "rate", "easing"]) && validTick(key.atProgrammeTick) &&
     Number.isFinite(key.rate) && key.rate > 0 && typeof key.easing === "string")) throw invalid();
@@ -282,6 +294,24 @@ const registerOwnedStudioProjectRevision = async ({ uid, document, firestore = d
         ? parseStudioProjectHeadRecord(headSnapshot.data(), uid, projectId) : null;
       const prior = revisionSnapshot.exists
         ? parseStudioProjectHeadRecord(revisionSnapshot.data(), uid, projectId) : null;
+      if (document.projectIntelligenceRefs?.length) {
+        const { intelligenceRevisionRef, parseProjectIntelligenceRecord } =
+          require("./studioProjectIntelligenceService");
+        const referenced = await Promise.all(document.projectIntelligenceRefs.map(ref =>
+          transaction.get(intelligenceRevisionRef(firestore, uid, projectId, ref.revisionId))));
+        for (let index = 0; index < referenced.length; index += 1) {
+          const ref = document.projectIntelligenceRefs[index];
+          if (!referenced[index].exists) throw invalid();
+          let stored;
+          try {
+            stored = parseProjectIntelligenceRecord(referenced[index].data(), {
+              uid, projectId, revisionId: ref.revisionId,
+            });
+          } catch (_) { throw invalid(); }
+          if (stored.manifestHash !== ref.manifestHash ||
+              stored.dependencyDigest !== ref.dependencyDigest) throw invalid();
+        }
+      }
       if (prior) {
         if (prior.documentFingerprint !== documentFingerprint) throw conflict();
         if (!head || head.revision < revision) throw unavailable();

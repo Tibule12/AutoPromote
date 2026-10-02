@@ -19,6 +19,9 @@ const {
   registerOwnedStudioProjectRevision,
   validateStudioProjectRevisionDocument,
 } = require("../src/services/studioProjectRevisionService");
+const { miniFilmFixture } = require("./fixtures/studioProjectIntelligenceFixtures");
+const { stableStringify, digest } =
+  require("../src/services/studioProjectIntelligenceContract");
 
 const clone = value => structuredClone(value);
 const snapshot = value => ({ exists: value !== undefined, data: () => clone(value) });
@@ -146,6 +149,37 @@ test("route requires Firebase identity and never trusts a claimed owner", async 
   const spoofed = await post({ document: document(), ownerUid: "victim" });
   expect(spoofed.status).toBe(400);
   expect(firestore.data.size).toBe(0);
+});
+
+test("canonical Intelligence refs require an owned immutable stored revision", async () => {
+  const revision = miniFilmFixture();
+  const revisionJson = stableStringify(revision);
+  const manifestHash = crypto.createHash("sha256").update(revisionJson).digest("hex");
+  const ref = { revisionId: revision.revisionId, manifestHash,
+    dependencyDigest: digest(revision.analysisDependencyDigests) };
+  const canonical = { ...document(), projectId: revision.projectId,
+    projectIntelligenceRefs: [ref] };
+  expect((await post({ document: canonical }, revision.ownerUid)).status).toBe(400);
+  const key = crypto.createHash("sha256")
+    .update(`${revision.projectId}\0${revision.revisionId}`).digest("hex");
+  const path = `users/${revision.ownerUid}/studioProjectIntelligenceRevisions/${key}`;
+  firestore.data.set(path, { schemaVersion: 1, ownerUid: revision.ownerUid,
+    projectId: revision.projectId, revisionId: revision.revisionId,
+    baseRevisionId: null, manifestHash, dependencyDigest: ref.dependencyDigest,
+    revisionJson, createdAt: "2026-10-02T00:00:00Z", createdBy: revision.ownerUid });
+  expect((await post({ document: canonical }, revision.ownerUid)).status).toBe(201);
+  expect((await post({ document: { ...canonical, revision: 5,
+    projectIntelligenceRefs: [{ ...ref, manifestHash: "f".repeat(64) }] },
+  }, revision.ownerUid)).status).toBe(400);
+  expect((await post({ document: { ...canonical, revision: 5,
+    projectIntelligenceRefs: [{ ...ref, dense: { words: ["untrusted"] } }] },
+  }, revision.ownerUid)).status).toBe(400);
+  expect((await post({ document: { ...canonical, revision: 5,
+    projectIntelligenceRefs: [ref, ref] },
+  }, revision.ownerUid)).status).toBe(400);
+  expect((await post({ document: { ...canonical, revision: 5,
+    projectId: "foreign-project" },
+  }, revision.ownerUid)).status).toBe(400);
 });
 
 test("transaction creates immutable revision and current head, then replays exact registration", async () => {

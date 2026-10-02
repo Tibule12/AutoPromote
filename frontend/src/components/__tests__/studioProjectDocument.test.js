@@ -75,6 +75,23 @@ test("adapts duplicate source occurrences with separate IDs and half-open progra
   });
 });
 
+test("Project Intelligence reference survives serialization without dense evidence", () => {
+  const ref = { revisionId: "a".repeat(64), manifestHash: "b".repeat(64),
+    dependencyDigest: "c".repeat(64) };
+  const first = adaptStudioSnapshotToDocument({
+    snapshot: { ...snapshot(), projectIntelligenceRefs: [ref],
+      denseAnalysis: { wordArray: Array(1000).fill("private") } },
+    projectId: "project-1",
+  });
+  const roundTrip = JSON.parse(JSON.stringify(first));
+  expect(roundTrip.projectIntelligenceRefs).toEqual([ref]);
+  expect(JSON.stringify(roundTrip)).not.toContain("private");
+  expect(adaptStudioSnapshotToDocument({ snapshot: snapshot(), projectId: "project-1",
+    previousDocument: roundTrip }).projectIntelligenceRefs).toEqual([ref]);
+  expect(() => validateStudioProjectDocument({ ...first,
+    projectIntelligenceRefs: [{ ...ref, denseAnalysis: { words: ["oops"] } }] })).toThrow();
+});
+
 test("legacy projection retains source media metadata while using canonical source ranges", () => {
   const legacy = snapshot();
   const document = adaptStudioSnapshotToDocument({ snapshot: legacy, projectId: "project-1" });
