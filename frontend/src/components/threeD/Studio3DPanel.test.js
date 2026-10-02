@@ -19,6 +19,8 @@ test("edits controls, duplicates, resets, deletes and requests real HQ preview",
   expect(onChange).toHaveBeenLastCalledWith([expect.objectContaining({ text: "New title" })]);
   fireEvent.click(screen.getByRole("button", { name: "Advanced" }));
   expect(screen.getByText("Extrusion")).toBeTruthy();
+  expect(screen.getByRole("note").textContent).toContain("audio response");
+  expect(screen.getByRole("note").textContent).toContain("720p");
   fireEvent.click(screen.getByRole("button", { name: /Add pose keyframe/ }));
   expect(onChange.mock.lastCall[0][0].keyframes).toHaveLength(1);
   fireEvent.click(screen.getByRole("button", { name: "Duplicate" }));

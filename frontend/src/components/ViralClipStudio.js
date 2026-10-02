@@ -111,6 +111,27 @@ import {
   findCreatorBeat,
 } from "./studioCreatorRecipes";
 import { rippleTimedItems, rippleTimelineKeys } from "./studioTimelineEdits";
+import {
+  reconcileStudioDocument,
+  rebaseStudioHistoryRestore,
+  restoreStudioProjectCheckpoint,
+} from "./studioProjectDocument";
+import { MINIMUM_SPLIT_DISTANCE_TICKS, runStudioCommandOnSnapshot } from "./studioCommands";
+import {
+  createStudioDirectorReviewReceipt,
+  prepareStudioDirectorProposal,
+  recordStudioDirectorReviewRejectionOnSnapshot,
+  runStudioDirectorProposalOnSnapshot,
+} from "./studioDirectorProposals";
+import { describeStudioDirectorReview } from "./studioDirectorReviewDiff";
+import { postStudioDirectorReviewDecision } from "./studioDirectorReviewClient";
+import { registerStudioDirectorProjectRevision } from "./studioDirectorProjectRevisionClient";
+import { buildSourceShotDirectorSplitRequest } from "./studioDirectorEvidenceProposals";
+import { secondsToTicks, ticksToSeconds } from "./studioTime";
+import {
+  assertStudioExportTimelineMatchesDocument,
+  assertStudioSpeedPlanMatchesDocument,
+} from "./studioRenderCompiler";
 import { detectAudioBeats } from "./flowEditUtils";
 import {
   analyzeAudioBufferBeats,
@@ -1392,6 +1413,18 @@ const formatPreviewTimePrecise = value => {
   return `${minutes}:${seconds}`;
 };
 
+const formatDirectorReviewRange = range => {
+  if (!range) return "—";
+  if (Number.isSafeInteger(range.atTick)) {
+    return `${range.atTick} ticks (${ticksToSeconds(range.atTick).toFixed(5)}s)`;
+  }
+  if (!Number.isSafeInteger(range.startTick) || !Number.isSafeInteger(range.endTick)) {
+    return "—";
+  }
+  return `${range.startTick}–${range.endTick} ticks ` +
+    `(${ticksToSeconds(range.startTick).toFixed(5)}–${ticksToSeconds(range.endTick).toFixed(5)}s)`;
+};
+
 const formatEditorDuration = value => {
   const totalSeconds = Math.max(0, Number(value) || 0);
   const hours = Math.floor(totalSeconds / 3600);
@@ -2628,6 +2661,8 @@ const ViralClipStudio = ({
   isWorkflowPaused = false,
   currentMusic,
   onMusicChange,
+  directorProposalRequest = null,
+  onDirectorReview,
 }) => {
   const [orderedClips, setOrderedClips] = useState(clips || []);
   const [selectedClip, setSelectedClip] = useState((clips || [])[0]);
@@ -2750,10 +2785,16 @@ const ViralClipStudio = ({
   const [activeCreativeTool, setActiveCreativeTool] = useState("moments");
   const [workspaceMode, setWorkspaceMode] = useState("creator");
   const [projectId, setProjectId] = useState(() => createSecureId("viral-project"));
+  const [localDirectorProposal, setLocalDirectorProposal] = useState(null);
+  const incomingDirectorProposalRequest = directorProposalRequest ||
+    (localDirectorProposal?.projectId === projectId ? localDirectorProposal.request : null);
   const [projectName, setProjectName] = useState("Untitled viral edit");
   const [savedProjects, setSavedProjects] = useState([]);
   const [projectSaveState, setProjectSaveState] = useState("unsaved");
   const [projectSavedAt, setProjectSavedAt] = useState(null);
+  const [directorReview, setDirectorReview] = useState(null);
+  const [directorReviewState, setDirectorReviewState] = useState("idle");
+  const [directorReviewError, setDirectorReviewError] = useState("");
   const [timelineZoom, setTimelineZoom] = useState(1);
   const [timelineDockExpanded, setTimelineDockExpanded] = useState(true);
   const [timelineDockHeight, setTimelineDockHeight] = useState(188);
@@ -3104,12 +3145,16 @@ const ViralClipStudio = ({
   const consumedCameraMasterIdsRef = useRef(new Set());
   const consumedInitialFilesRef = useRef(new WeakSet());
   const activeProjectIdRef = useRef(projectId);
+  const directorProposalRequestRef = useRef(incomingDirectorProposalRequest);
   const attemptedSourceRefreshRef = useRef(new Set());
   activeProjectIdRef.current = projectId;
+  directorProposalRequestRef.current = incomingDirectorProposalRequest;
   const quickMusicFileInputRef = useRef(null);
   const audioSourceInputRef = useRef(null);
   const previewSourceCacheRef = useRef(new Map());
   const undoStackRef = useRef([]);
+  const studioDocumentRef = useRef(null);
+  const latestEditorSnapshotRef = useRef(null);
   const redoStackRef = useRef([]);
   const lastSnapshotRef = useRef(null);
   const lastSnapshotSignatureRef = useRef(null);
@@ -3327,7 +3372,8 @@ const ViralClipStudio = ({
     return uploadResult.url;
   };
 
-  const getEditorSnapshot = () => ({
+  const getEditorSnapshot = () => {
+    const snapshot = {
     orderedClips,
     projectMedia,
     angleGroups,
@@ -3442,7 +3488,25 @@ const ViralClipStudio = ({
     creatorPreview,
     splitExportEnabled,
     splitExportHooks,
-  });
+    };
+    try {
+      const studioDocument = reconcileStudioDocument({
+        snapshot,
+        projectId,
+        storedDocument: studioDocumentRef.current,
+      });
+      studioDocumentRef.current = studioDocument;
+      snapshot.studioDocument = studioDocument;
+    } catch (error) {
+      // A source may have no known duration while its media metadata loads.
+      // The legacy editor can still hold that transient state; commands require
+      // a validated document once the duration arrives.
+      if (error.code !== "INVALID_SOURCE_RANGE") throw error;
+      snapshot.studioDocument = null;
+    }
+    return snapshot;
+  };
+  latestEditorSnapshotRef.current = getEditorSnapshot;
 
   const refreshSavedProjects = async () => {
     try {
@@ -3493,14 +3557,22 @@ const ViralClipStudio = ({
         ].slice(-12);
     setProjectSaveState("saving");
     try {
+      const savedSnapshot = cloneSnapshot(snapshot || getEditorSnapshot());
+      if (duplicate && savedSnapshot.studioDocument) {
+        savedSnapshot.studioDocument = reconcileStudioDocument({
+          snapshot: savedSnapshot,
+          projectId: nextId,
+        });
+      }
       const saved = await saveViralStudioProject({
         id: nextId,
         name: duplicate ? `${nextName} copy` : nextName,
         createdAt: duplicate ? Date.now() : projectCreatedAtRef.current,
-        snapshot: cloneSnapshot(snapshot || getEditorSnapshot()),
+        snapshot: savedSnapshot,
         versions,
       });
       if (duplicate) {
+        studioDocumentRef.current = savedSnapshot.studioDocument || null;
         setProjectId(saved.id);
         setProjectName(saved.name);
         projectCreatedAtRef.current = saved.createdAt;
@@ -3649,7 +3721,19 @@ const ViralClipStudio = ({
 
   const restoreProjectVersion = (project, version) => {
     if (!version?.snapshot) return;
-    const restoredSnapshot = rehydrateStoredProjectSnapshot(version.snapshot);
+    let restoredSnapshot;
+    try {
+      restoredSnapshot = restoreStudioProjectCheckpoint({
+        projectId: project.id,
+        restoredSnapshot: rehydrateStoredProjectSnapshot(version.snapshot),
+        currentDocument: project.id === projectId
+          ? getEditorSnapshot().studioDocument : null,
+        savedDocument: project.snapshot?.studioDocument || null,
+      });
+    } catch (error) {
+      setStudioActionMessage(error.message || "This checkpoint could not be restored.");
+      return;
+    }
     activeProjectIdRef.current = project.id;
     attemptedSourceRefreshRef.current.clear();
     applyEditorSnapshot(restoredSnapshot);
@@ -3785,6 +3869,20 @@ const ViralClipStudio = ({
   };
 
   const applyEditorSnapshot = snapshot => {
+    if (isRestoringHistoryRef.current && studioDocumentRef.current) {
+      try {
+        studioDocumentRef.current = rebaseStudioHistoryRestore({
+          currentDocument: studioDocumentRef.current,
+          restoredSnapshot: snapshot,
+          projectId,
+        });
+      } catch (error) {
+        if (error.code !== "INVALID_SOURCE_RANGE") throw error;
+        studioDocumentRef.current = null;
+      }
+    } else {
+      studioDocumentRef.current = snapshot.studioDocument || null;
+    }
     const normalizedClips = snapshot.orderedClips || [];
     const normalizedOverlays = snapshot.overlays || [];
     setOrderedClips(normalizedClips);
@@ -7501,6 +7599,7 @@ const ViralClipStudio = ({
 
   const analyzeSpeakerFaces = async (mode = "anchored") => {
     if (faceTrackingStatus === "processing") return;
+    if (mode === "source_shots") setLocalDirectorProposal(null);
     const generation = ++faceTrackingGeneration.current;
     const clipId = currentTimelineClip?.id;
     const split = effectiveSmartCropMode === "center" && reframeAspect !== "16:9";
@@ -7512,6 +7611,16 @@ const ViralClipStudio = ({
     setFaceTrackingStatus("processing");
     setFaceTrackingMessage("Detecting real faces. Existing framing stays unchanged until results arrive…");
     try {
+      let sourceShotAssetId = null;
+      if (mode === "source_shots") {
+        const sourceDocument = getEditorSnapshot().studioDocument;
+        sourceShotAssetId = sourceDocument?.clipOccurrences.find(
+          occurrence => occurrence.occurrenceId === String(clipId)
+        )?.assetId || null;
+        if (!sourceShotAssetId) {
+          throw new Error("Source timing is still loading. Try camera-cut analysis again shortly.");
+        }
+      }
       const source = getSafeMediaSource(currentTimelineClip?.url || videoUrl);
       const file = currentTimelineClip?.file || selectedClip?.file;
       let blob = file instanceof Blob ? file : null;
@@ -7532,6 +7641,10 @@ const ViralClipStudio = ({
       body.append("start", String(window.start));
       body.append("end", String(window.end));
       body.append("mode", mode);
+      if (mode === "source_shots") {
+        body.append("projectId", projectId);
+        body.append("sourceAssetId", sourceShotAssetId);
+      }
       const token = await getMediaAuthToken();
       if (!token) throw new Error("Sign in to analyze this source.");
       const response = await fetch(`${API_BASE_URL}/api/media/track-studio-faces`, {
@@ -7698,13 +7811,30 @@ const ViralClipStudio = ({
           if (naturalGrade) applyFinishPreset(naturalGrade);
         }
       }
+      if (mode === "source_shots" && !split) {
+        try {
+          const snapshot = getEditorSnapshot();
+          const request = snapshot.studioDocument && buildSourceShotDirectorSplitRequest({
+            document: snapshot.studioDocument,
+            occurrenceId: String(clipId),
+            analysis: result,
+            preferredSourceTick: secondsToTicks(Number(videoTime || window.start || 0)),
+            proposalId: createSecureId("source-shot-proposal"),
+            idempotencyKey: createSecureId("source-shot-command"),
+          });
+          setLocalDirectorProposal(request ? { projectId, request } : null);
+        } catch (proposalError) {
+          setLocalDirectorProposal(null);
+          console.warn("Source-shot analysis had no reviewable clip boundary", proposalError);
+        }
+      }
       const coverage = slots.map(slot => `${slot}: ${Math.round((result.tracks[slot].coverage || 0)*100)}%`).join(" · ");
       setFaceTrackingStatus("ready");
       const editPlan = result.editPlan;
       setFaceTrackingMessage(mode === "source_shots"
         ? editPlan
-          ? `Editable podcast first cut applied (${coverage}; ${result.sceneCuts?.length || 0} camera cuts; ${editPlan.splitSuggestions?.length || 0} clean Director splits). Picture fill, face-safe captions, Studio Natural grade and one rounded frame now match preview and export. Review marked cuts.`
-          : `Source-shot draft applied (${coverage}; ${result.sceneCuts?.length || 0} cuts). Review every cut.`
+          ? `Podcast layout draft applied (${coverage}; ${result.sceneCuts?.length || 0} camera cuts; ${editPlan.splitSuggestions?.length || 0} two-person layout suggestions). Picture fill, face-safe captions, Studio Natural grade and one rounded frame now match preview and export. Review marked cuts. Any proposed clip split below needs separate approval.`
+          : `Source-shot draft applied (${coverage}; ${result.sceneCuts?.length || 0} cuts). Review every cut. Any proposed clip split below needs separate approval.`
         : `Face-follow draft applied (${coverage}). Review camera cuts and missed faces. This detects faces, not who is speaking.`);
     } catch (error) {
       if (generation !== faceTrackingGeneration.current) return;
@@ -8458,36 +8588,52 @@ const ViralClipStudio = ({
       return;
     }
 
-    const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
+    const splitTick = secondsToTicks(clipStart + splitPoint);
+    if (splitTick - secondsToTicks(clipStart) < MINIMUM_SPLIT_DISTANCE_TICKS ||
+        secondsToTicks(Number(sourceWindow.end)) - splitTick < MINIMUM_SPLIT_DISTANCE_TICKS) {
+      setStudioActionMessage("Move the playhead at least 0.2s from either clip edge.");
+      return;
+    }
+    const baseline = getEditorSnapshot();
+    if (!baseline.studioDocument) {
+      setStudioActionMessage("Clip source timing is still loading. Try the split again shortly.");
+      return;
+    }
+    const cutHistoryBaseline = cloneSnapshot(baseline);
     pendingHistoryBaselineRef.current = cutHistoryBaseline;
     cutHistoryTransactionRef.current = {
       baseline: cutHistoryBaseline,
       appliedSignature: null,
       appliedTimelineSignature: null,
     };
-
-    const sourceClipId = currentTimelineClip.sourceClipId || currentTimelineClip.id;
-    const clipLeft = {
-      ...currentTimelineClip,
-      id: createSecureId("split-left"),
-      sourceClipId,
-      startRequest: clipStart,
-      endRequest: clipStart + splitPoint,
-    };
-    const clipRight = {
-      ...currentTimelineClip,
-      id: createSecureId("split-right"),
-      sourceClipId,
-      startRequest: clipStart + splitPoint,
-      endRequest: Number(sourceWindow.end || clipStart + localDuration),
-    };
-
-    setTimeline(previous => [
-      ...previous.slice(0, activeTimelineIndex),
-      clipLeft,
-      clipRight,
-      ...previous.slice(activeTimelineIndex + 1),
-    ]);
+    try {
+      const result = runStudioCommandOnSnapshot({
+        snapshot: baseline,
+        projectId,
+        batch: {
+          projectId,
+          baseRevision: baseline.studioDocument.revision,
+          idempotencyKey: createSecureId("split-command"),
+          actor: { type: "human", id: "viral-studio-ui" },
+          operations: [{
+            type: "split_clip",
+            target: { occurrenceId: String(currentTimelineClip.id) },
+            at: { space: "source", ticks: splitTick },
+            newOccurrenceIds: {
+              left: createSecureId("split-left"),
+              right: createSecureId("split-right"),
+            },
+          }],
+        },
+      });
+      studioDocumentRef.current = result.document;
+      setTimeline(result.snapshot.timeline);
+    } catch (error) {
+      pendingHistoryBaselineRef.current = null;
+      cutHistoryTransactionRef.current = null;
+      setStudioActionMessage(error.message || "Clip could not be split.");
+      return;
+    }
     setActiveTimelineIndex(activeTimelineIndex + 1);
     setStudioActionMessage(`Clip split at ${formatPreviewTimePrecise(splitPoint)}! You now have 2 independent clips.`);
   };
@@ -8513,6 +8659,193 @@ const ViralClipStudio = ({
     setStudioActionMessage("Clip removed from timeline. Tap Undo if you change your mind.");
   };
 
+  const applyLinkedCommandSnapshot = result => {
+    const next = result.snapshot;
+    studioDocumentRef.current = result.document;
+    setTimeline(next.timeline);
+    setOverlays(next.overlays);
+    setSoundEffects(next.soundEffects);
+    setVoiceovers(next.voiceovers);
+    setAdjustmentLayers(next.adjustmentLayers);
+    setMotionScenes(next.motionScenes);
+    setThreeDScenes(next.threeDScenes);
+    setMotionKeyframes(next.motionKeyframes);
+    setSpeedKeyframes(next.speedKeyframes);
+    setFinishKeyframes(next.finishKeyframes);
+    setReframeKeyframes(next.reframeKeyframes);
+    setReframeModeCuts(next.reframeModeCuts);
+    setSpeakerFocusCuts(next.speakerFocusCuts);
+    setSpeakerStackFraming(next.speakerStackFraming);
+    setAudioKeyframes(next.audioKeyframes);
+  };
+
+  const openDirectorReview = async () => {
+    if (!incomingDirectorProposalRequest || directorReviewState === "working") return;
+    setDirectorReviewState("working");
+    setDirectorReviewError("");
+    try {
+      const snapshot = getEditorSnapshot();
+      if (!snapshot.studioDocument) {
+        throw new Error("Clip source timing is still loading. Try the review again shortly.");
+      }
+      const { proposal, preview } = await prepareStudioDirectorProposal(
+        snapshot.studioDocument,
+        incomingDirectorProposalRequest
+      );
+      const prepared = {
+        requestSignature: serializeSnapshot(incomingDirectorProposalRequest),
+        document: cloneSnapshot(snapshot.studioDocument),
+        proposal: cloneSnapshot(proposal),
+        previewDocument: cloneSnapshot(preview.previewDocument),
+      };
+      prepared.diff = describeStudioDirectorReview({
+        document: prepared.document,
+        previewDocument: prepared.previewDocument,
+        proposal: prepared.proposal,
+      });
+      setDirectorReview(prepared);
+      setDirectorReviewState("ready");
+    } catch (error) {
+      setDirectorReview(null);
+      setDirectorReviewState("error");
+      setDirectorReviewError(error.message || "The incoming edit could not be reviewed.");
+    }
+  };
+
+  const decideDirectorReview = async decision => {
+    if (!directorReview || directorReviewState !== "ready") return;
+    setDirectorReviewState("working");
+    setDirectorReviewError("");
+    let serverReview = null;
+    try {
+      const auth = getAuth();
+      const reviewer = auth?.currentUser;
+      if (!reviewer?.uid || typeof reviewer.getIdToken !== "function") {
+        throw new Error("Sign in with Firebase before reviewing this edit.");
+      }
+      const token = await reviewer.getIdToken();
+      if (!token || auth.currentUser?.uid !== reviewer.uid) {
+        throw new Error("Your sign-in changed. Sign in again before reviewing this edit.");
+      }
+      const snapshot = getEditorSnapshot();
+      if (!snapshot.studioDocument ||
+          serializeSnapshot(snapshot.studioDocument) !== serializeSnapshot(directorReview.document)) {
+        const stale = new Error("The project changed after this preview. Review the edit again.");
+        stale.code = "STALE_REVIEW";
+        throw stale;
+      }
+      const editorSignature = lastSnapshotSignatureRef.current;
+      await registerStudioDirectorProjectRevision({
+        document: directorReview.document,
+        proposal: directorReview.proposal,
+        token,
+      });
+      if (auth.currentUser?.uid !== reviewer.uid) {
+        throw new Error("Your sign-in changed while saving the project version. No decision was recorded.");
+      }
+      const registeredSnapshot = latestEditorSnapshotRef.current?.();
+      if (activeProjectIdRef.current !== projectId ||
+          serializeSnapshot(directorProposalRequestRef.current) !== directorReview.requestSignature ||
+          lastSnapshotSignatureRef.current !== editorSignature ||
+          !registeredSnapshot?.studioDocument ||
+          serializeSnapshot(registeredSnapshot.studioDocument) !== serializeSnapshot(snapshot.studioDocument)) {
+        const stale = new Error("The project changed while saving its version. Review the edit again.");
+        stale.code = "STALE_REVIEW";
+        throw stale;
+      }
+      serverReview = await postStudioDirectorReviewDecision({
+        proposal: directorReview.proposal,
+        decision,
+        token,
+        reviewerUid: reviewer.uid,
+      });
+      if (auth.currentUser?.uid !== reviewer.uid) {
+        throw new Error("Your sign-in changed during review. No local edit was applied.");
+      }
+      const latestSnapshot = latestEditorSnapshotRef.current?.();
+      if (activeProjectIdRef.current !== projectId ||
+          serializeSnapshot(directorProposalRequestRef.current) !== directorReview.requestSignature ||
+          lastSnapshotSignatureRef.current !== editorSignature ||
+          !latestSnapshot?.studioDocument ||
+          serializeSnapshot(latestSnapshot.studioDocument) !== serializeSnapshot(snapshot.studioDocument)) {
+        const stale = new Error(
+          "The server recorded the decision, but this project changed. Request a new proposal before editing."
+        );
+        stale.code = "SERVER_REVIEW_LOCAL_STALE";
+        throw stale;
+      }
+      const reviewReceipt = await createStudioDirectorReviewReceipt({
+        proposal: directorReview.proposal,
+        reviewerId: serverReview.reviewerUid,
+        decision,
+        reviewedAt: serverReview.reviewedAt,
+      });
+      const result = decision === "approve"
+        ? await runStudioDirectorProposalOnSnapshot({
+            snapshot: latestSnapshot, projectId, proposal: directorReview.proposal,
+            reviewReceipt, serverReview,
+          })
+        : await recordStudioDirectorReviewRejectionOnSnapshot({
+            snapshot: latestSnapshot, projectId, proposal: directorReview.proposal,
+            reviewReceipt, serverReview,
+          });
+      const beforeCommit = latestEditorSnapshotRef.current?.();
+      if (!beforeCommit?.studioDocument ||
+          serializeSnapshot(beforeCommit.studioDocument) !== serializeSnapshot(latestSnapshot.studioDocument)) {
+        throw new Error("The project changed while the server review was being applied locally.");
+      }
+      if (decision === "approve") {
+        const baseline = cloneSnapshot(latestSnapshot);
+        pendingHistoryBaselineRef.current = baseline;
+        cutHistoryTransactionRef.current = {
+          baseline,
+          appliedSignature: null,
+          appliedTimelineSignature: null,
+        };
+        applyLinkedCommandSnapshot(result);
+        setStudioActionMessage("Reviewed Director edit applied to the timeline. Undo restores it.");
+      } else {
+        studioDocumentRef.current = result.document;
+        const reviewedSnapshot = cloneSnapshot(result.snapshot);
+        lastSnapshotRef.current = reviewedSnapshot;
+        lastSnapshotSignatureRef.current = serializeSnapshot(
+          getHistoryRelevantSnapshot(reviewedSnapshot)
+        );
+        scheduleProjectAutosave(reviewedSnapshot);
+        setStudioActionMessage("Incoming Director edit rejected. The timeline was not changed.");
+      }
+      setDirectorReviewState(decision === "approve" ? "approved" : "rejected");
+      try {
+        await onDirectorReview?.({
+          decision,
+          proposal: directorReview.proposal,
+          reviewReceipt,
+          serverReview,
+          document: result.document,
+        });
+      } catch (callbackError) {
+        console.warn("Director review notification failed", callbackError);
+      }
+    } catch (error) {
+      setDirectorReviewState(
+        serverReview
+          ? "server-recorded-stale"
+          : ["STALE_REVISION", "DOCUMENT_CHANGED", "PROJECT_MISMATCH", "PREVIEW_CHANGED", "STALE_REVIEW",
+            "PROJECT_REVISION_CONFLICT", "PROJECT_REVISION_STALE", "PROJECT_REVISION_MISSING", "PROJECT_REVISION_MISMATCH",
+            "PROJECT_REVISION_TARGET_MISMATCH"]
+          .includes(error.code)
+          ? "stale"
+          : "error"
+      );
+      setDirectorReviewError(serverReview
+        ? `Decision recorded on the server; no local edit was applied. ${error.message || "Request a new proposal."}`
+        : error.message || "The review could not be recorded.");
+    }
+  };
+
+  const visibleDirectorReview = incomingDirectorProposalRequest && directorReview?.requestSignature ===
+    serializeSnapshot(incomingDirectorProposalRequest) ? directorReview : null;
+
   const trimClipStartToPlayhead = () => {
     if (!currentTimelineClip) return;
     const sourceWindow = getTimelineClipWindow(currentTimelineClip);
@@ -8526,22 +8859,45 @@ const ViralClipStudio = ({
       setStudioActionMessage("Move playhead to where you want the clip to start.");
       return;
     }
-    const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
+    const baseline = getEditorSnapshot();
+    if (!baseline.studioDocument) {
+      setStudioActionMessage("Clip source timing is still loading. Try the trim again shortly.");
+      return;
+    }
+    const cutHistoryBaseline = cloneSnapshot(baseline);
     pendingHistoryBaselineRef.current = cutHistoryBaseline;
     cutHistoryTransactionRef.current = {
       baseline: cutHistoryBaseline,
       appliedSignature: null,
       appliedTimelineSignature: null,
     };
-    const updatedClip = {
-      ...currentTimelineClip,
-      startRequest: clipStart + localTime,
-    };
-    const removedStart = getTimelineOffsetForIndex(activeTimelineIndex);
-    rippleLinkedTimeline(removedStart, removedStart + localTime);
-    setTimeline(previous =>
-      previous.map((c, idx) => (idx === activeTimelineIndex ? updatedClip : c))
-    );
+    try {
+      const result = runStudioCommandOnSnapshot({
+        snapshot: baseline,
+        projectId,
+        batch: {
+          projectId,
+          baseRevision: baseline.studioDocument.revision,
+          idempotencyKey: createSecureId("trim-start-command"),
+          actor: { type: "human", id: "viral-studio-ui" },
+          operations: [{
+            type: "trim_clip",
+            target: { occurrenceId: String(currentTimelineClip.id) },
+            keep: {
+              space: "source",
+              startTick: secondsToTicks(clipStart + localTime),
+              endTick: secondsToTicks(Number(sourceWindow.end)),
+            },
+          }],
+        },
+      });
+      applyLinkedCommandSnapshot(result);
+    } catch (error) {
+      pendingHistoryBaselineRef.current = null;
+      cutHistoryTransactionRef.current = null;
+      setStudioActionMessage(error.message || "Clip could not be trimmed.");
+      return;
+    }
     setStudioActionMessage(`Trimmed start to ${formatPreviewTimePrecise(localTime)}. Everything before it is removed.`);
   };
 
@@ -8558,22 +8914,45 @@ const ViralClipStudio = ({
       setStudioActionMessage("Move playhead to where you want the clip to end.");
       return;
     }
-    const cutHistoryBaseline = cloneSnapshot(getEditorSnapshot());
+    const baseline = getEditorSnapshot();
+    if (!baseline.studioDocument) {
+      setStudioActionMessage("Clip source timing is still loading. Try the trim again shortly.");
+      return;
+    }
+    const cutHistoryBaseline = cloneSnapshot(baseline);
     pendingHistoryBaselineRef.current = cutHistoryBaseline;
     cutHistoryTransactionRef.current = {
       baseline: cutHistoryBaseline,
       appliedSignature: null,
       appliedTimelineSignature: null,
     };
-    const updatedClip = {
-      ...currentTimelineClip,
-      endRequest: clipStart + localTime,
-    };
-    const clipOffset = getTimelineOffsetForIndex(activeTimelineIndex);
-    rippleLinkedTimeline(clipOffset + localTime, clipOffset + sourceWindow.duration);
-    setTimeline(previous =>
-      previous.map((c, idx) => (idx === activeTimelineIndex ? updatedClip : c))
-    );
+    try {
+      const result = runStudioCommandOnSnapshot({
+        snapshot: baseline,
+        projectId,
+        batch: {
+          projectId,
+          baseRevision: baseline.studioDocument.revision,
+          idempotencyKey: createSecureId("trim-end-command"),
+          actor: { type: "human", id: "viral-studio-ui" },
+          operations: [{
+            type: "trim_clip",
+            target: { occurrenceId: String(currentTimelineClip.id) },
+            keep: {
+              space: "source",
+              startTick: secondsToTicks(clipStart),
+              endTick: secondsToTicks(clipStart + localTime),
+            },
+          }],
+        },
+      });
+      applyLinkedCommandSnapshot(result);
+    } catch (error) {
+      pendingHistoryBaselineRef.current = null;
+      cutHistoryTransactionRef.current = null;
+      setStudioActionMessage(error.message || "Clip could not be trimmed.");
+      return;
+    }
     setStudioActionMessage(`Trimmed end to ${formatPreviewTimePrecise(localTime)}. Everything after it is removed.`);
   };
 
@@ -10918,6 +11297,11 @@ const ViralClipStudio = ({
       })
     );
 
+    const canonicalDocument = getEditorSnapshot().studioDocument;
+    if (canonicalDocument) {
+      assertStudioExportTimelineMatchesDocument(canonicalDocument, exportSegments);
+    }
+
     if (!addHook || !exportSegments[activeTimelineIndex]) {
       return exportSegments;
     }
@@ -11419,6 +11803,25 @@ const ViralClipStudio = ({
 
       setOverlays(newOverlays);
       setExportStatusLabel("Starting render...");
+      const speedDocument = getEditorSnapshot().studioDocument;
+      const speedPlanDuration = speedDocument
+        ? ticksToSeconds(speedDocument.clipOccurrences.at(-1)?.programmeRange.endTick || 0)
+        : outputTimelineDuration;
+      const exportSpeedSegments = speedKeyframes.length
+        ? buildSpeedSegmentsFromKeyframes({
+            keyframes: speedKeyframes,
+            duration: speedPlanDuration,
+            fallback: previewSpeed,
+          })
+        : [{
+            startTime: 0,
+            endTime: speedPlanDuration,
+            rate: previewSpeed,
+            pitchPreserved: true,
+          }];
+      if (speedDocument) {
+        assertStudioSpeedPlanMatchesDocument(speedDocument, exportSpeedSegments);
+      }
       await onSave(selectedClip, normalizedOverlays, {
         autoCaptions,
         captionReviewCopy,
@@ -11429,20 +11832,7 @@ const ViralClipStudio = ({
         captionSegments: exportCaptionSegments,
         translateCaptionsToEnglish,
         previewSpeed,
-        speedSegments: speedKeyframes.length
-          ? buildSpeedSegmentsFromKeyframes({
-              keyframes: speedKeyframes,
-              duration: outputTimelineDuration,
-              fallback: previewSpeed,
-            })
-          : [
-              {
-                startTime: 0,
-                endTime: outputTimelineDuration,
-                rate: previewSpeed,
-                pitchPreserved: true,
-              },
-            ],
+        speedSegments: exportSpeedSegments,
         pacingLevel,
         creativeIntent,
         studioPlan: selectedClip?.studioEditPlan || selectedClip?.studio_edit_plan || null,
@@ -18348,6 +18738,130 @@ const ViralClipStudio = ({
                     These are the same media, timings and audio decisions shown in After. Click a
                     track to inspect that exact frame.
                   </p>
+
+                  {incomingDirectorProposalRequest ? (
+                    <section
+                      className="studio-director-review"
+                      aria-label="Incoming Director edit review"
+                      data-testid="studio-director-review"
+                    >
+                      <div className="studio-director-review__heading">
+                        <div>
+                          <span className="panel-kicker">Incoming proposal</span>
+                          <h4>Review one suggested cut</h4>
+                          <p>The timeline stays unchanged until you approve this exact preview.</p>
+                        </div>
+                        {(!visibleDirectorReview || ["stale", "error"].includes(directorReviewState)) ? (
+                          <button
+                            type="button"
+                            onClick={() => void openDirectorReview()}
+                            disabled={directorReviewState === "working"}
+                            data-testid="studio-director-review-open"
+                          >
+                            {visibleDirectorReview ? "Review again" : "Review incoming edit"}
+                          </button>
+                        ) : null}
+                      </div>
+                      {directorReviewError ? (
+                        <p className="studio-director-review__error" role="alert">
+                          {directorReviewError}
+                        </p>
+                      ) : null}
+                      {directorReviewState === "working" ? (
+                        <p role="status">Checking the proposal and signed-in reviewer…</p>
+                      ) : null}
+                      {visibleDirectorReview ? (
+                        <>
+                          <div className="studio-director-review__meta">
+                            <span>Proposal <code>{visibleDirectorReview.proposal.proposalId}</code></span>
+                            <span>Base revision {visibleDirectorReview.proposal.baseRevision}</span>
+                            <span>{visibleDirectorReview.diff.operationLabel}</span>
+                          </div>
+                          {visibleDirectorReview.proposal.evidence?.type === "source_shot_boundary" ? (
+                            <div className="studio-director-review__evidence"
+                              data-testid="studio-director-review-evidence">
+                              <strong>Detected source-shot boundary — proposed split requiring review</strong>
+                              <span>Source boundary {formatDirectorReviewRange({
+                                atTick: visibleDirectorReview.proposal.evidence.boundaryTick,
+                              })}</span>
+                              <span>Provider {visibleDirectorReview.proposal.evidence.provider}</span>
+                              <span>Engine {visibleDirectorReview.proposal.evidence.engine}</span>
+                              <span>Analysis artifact <code title={visibleDirectorReview.proposal.evidence.artifactHash}>
+                                {visibleDirectorReview.proposal.evidence.artifactHash.slice(0, 12)}…
+                              </code></span>
+                              <span>Source bytes SHA-256 <code title={visibleDirectorReview.proposal.evidence.sourceSha256}>
+                                {visibleDirectorReview.proposal.evidence.sourceSha256.slice(0, 12)}…
+                              </code></span>
+                              <span>Sample coverage {(visibleDirectorReview.proposal.evidence.sampleCoverage * 100).toFixed(1)}% (coverage, not model confidence)</span>
+                              <span>Source identity {visibleDirectorReview.proposal.evidence.sourceIdentityState}</span>
+                            </div>
+                          ) : null}
+                          <div className="studio-director-review__table-wrap">
+                            <table>
+                              <caption>Exact before and after source and programme timing, in ticks</caption>
+                              <thead>
+                                <tr>
+                                  <th scope="col">Item</th>
+                                  <th scope="col">Source before</th>
+                                  <th scope="col">Source after</th>
+                                  <th scope="col">Programme before</th>
+                                  <th scope="col">Programme after</th>
+                                  <th scope="col">Cue trim before</th>
+                                  <th scope="col">Cue trim after</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {[...visibleDirectorReview.diff.clipRows,
+                                  ...visibleDirectorReview.diff.timingRows].map((row, index) => (
+                                  <tr key={`${row.label}-${index}`} data-testid={`studio-director-review-row-${index}`}>
+                                    <th scope="row">{row.label}</th>
+                                    <td>{formatDirectorReviewRange(row.beforeSourceRange)}</td>
+                                    <td>{formatDirectorReviewRange(row.afterSourceRange)}</td>
+                                    <td>{formatDirectorReviewRange(row.beforeProgrammeRange)}</td>
+                                    <td>{formatDirectorReviewRange(row.afterProgrammeRange)}</td>
+                                    <td>{formatDirectorReviewRange(Number.isSafeInteger(row.beforeTrimStartTick)
+                                      ? { atTick: row.beforeTrimStartTick } : null)}</td>
+                                    <td>{formatDirectorReviewRange(Number.isSafeInteger(row.afterTrimStartTick)
+                                      ? { atTick: row.afterTrimStartTick } : null)}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                          {visibleDirectorReview.diff.timingRows.length === 0 ? (
+                            <p>No linked cue or key timing changes.</p>
+                          ) : null}
+                          {directorReviewState === "ready" ? (
+                            <div className="studio-director-review__actions">
+                              <button
+                                type="button"
+                                className="is-approve"
+                                onClick={() => void decideDirectorReview("approve")}
+                                data-testid="studio-director-review-approve"
+                              >
+                                Approve and apply
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => void decideDirectorReview("reject")}
+                                data-testid="studio-director-review-reject"
+                              >
+                                Reject proposal
+                              </button>
+                            </div>
+                          ) : null}
+                          {["approved", "rejected"].includes(directorReviewState) ? (
+                            <p role="status">
+                              {directorReviewState === "approved"
+                                ? "Approval recorded on the server; edit applied to this project."
+                                : "Rejection recorded on the server. The timeline is unchanged."}
+                            </p>
+                          ) : null}
+                          <small>The server records the signed-in reviewer and decision; this project keeps a linked copy.</small>
+                        </>
+                      ) : null}
+                    </section>
+                  ) : null}
 
                   <div className="compact-timeline-row compact-source-row">
                     <span>Video</span>

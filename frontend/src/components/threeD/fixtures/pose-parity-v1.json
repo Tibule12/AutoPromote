@@ -1,0 +1,108 @@
+{
+  "version": 1,
+  "scene": {
+    "id": "pose-parity",
+    "template": "cinematic_title",
+    "startTime": 2,
+    "duration": 5,
+    "x": 50,
+    "y": 50,
+    "z": 0,
+    "scale": 1,
+    "rotationX": 0,
+    "rotationY": 0,
+    "rotationZ": 0,
+    "entrance": "dolly",
+    "hold": "float",
+    "exit": "fade",
+    "intensity": 0.65,
+    "keyframes": [
+      {
+        "id": "start",
+        "time": 2,
+        "easing": "linear",
+        "values": {
+          "x": 50,
+          "y": 50,
+          "z": 0,
+          "scale": 1,
+          "rotationX": 0,
+          "rotationY": 0,
+          "rotationZ": 0
+        }
+      },
+      {
+        "id": "end",
+        "time": 4,
+        "easing": "linear",
+        "values": {
+          "x": 74,
+          "y": 50,
+          "z": 0,
+          "scale": 1,
+          "rotationX": 0,
+          "rotationY": 0,
+          "rotationZ": 0
+        }
+      }
+    ]
+  },
+  "samples": [
+    {
+      "time": 2,
+      "pose": {
+        "x": 0,
+        "y": 0,
+        "z": -3,
+        "scale": 0.72,
+        "rotationX": 0,
+        "rotationY": 0,
+        "rotationZ": 0,
+        "opacity": 0,
+        "progress": 0
+      }
+    },
+    {
+      "time": 2.375,
+      "pose": {
+        "x": 0.375,
+        "y": 0.027731739023873048,
+        "z": -0.375,
+        "scale": 0.965,
+        "rotationX": 0,
+        "rotationY": 0,
+        "rotationZ": 0,
+        "opacity": 0.875,
+        "progress": 0.075
+      }
+    },
+    {
+      "time": 3,
+      "pose": {
+        "x": 1,
+        "y": 0.051869739303410836,
+        "z": 0,
+        "scale": 1,
+        "rotationX": 0,
+        "rotationY": 0,
+        "rotationZ": 0,
+        "opacity": 1,
+        "progress": 0.2
+      }
+    },
+    {
+      "time": 6.75,
+      "pose": {
+        "x": 2,
+        "y": 0.03878436292684135,
+        "z": 0,
+        "scale": 1,
+        "rotationX": 0,
+        "rotationY": 0,
+        "rotationZ": 0,
+        "opacity": 0.8377160030052593,
+        "progress": 0.95
+      }
+    }
+  ]
+}

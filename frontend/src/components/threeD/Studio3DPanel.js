@@ -98,6 +98,7 @@ export default function Studio3DPanel({ scenes = [], onChange, focusId, onSelect
         {scene.assetName ? <small className="studio-3d-asset-name">Asset: {scene.assetName}</small> : null}
       </div>
       {mode === "advanced" ? <div className="studio-3d-fields studio-3d-advanced">
+        <p className="studio-3d-parity-note" role="note">Several advanced settings are not reflected in the rendered clip. Font, weight, scene easing, audio response, light direction, shadows, reflections, background and quality do not change it. Scene fade opacity is also missing from the rendered clip. 3D output is capped at 720p and 30 fps; check the generated preview before export.</p>
         <SelectControl label="Font family" value={scene.fontFamily} options={["studio", "sans", "serif"]} onChange={fontFamily => change({ fontFamily })} />
         <SelectControl label="Weight" value={scene.fontWeight} options={["regular", "bold", "black"]} onChange={fontWeight => change({ fontWeight })} />
         <SelectControl label="Alignment" value={scene.textAlign} options={["left", "center", "right"]} onChange={textAlign => change({ textAlign })} />

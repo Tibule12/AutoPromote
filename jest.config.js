@@ -92,7 +92,7 @@ module.exports = {
       displayName: "frontend",
       // Use node environment unless jest-environment-jsdom is available; this avoids validation errors during CI.
       testEnvironment: process.env.JEST_FORCE_NODE_ENV === "1" ? "node" : "jsdom",
-      testMatch: ["<rootDir>/frontend/src/**/__tests__/**"],
+      testMatch: ["<rootDir>/frontend/src/**/__tests__/**/*.test.{js,jsx,ts,tsx}"],
       setupFilesAfterEnv: ["<rootDir>/frontend/src/setupTests.js"],
       moduleNameMapper: {
         "\\.(css|less|scss|sass)$": "<rootDir>/test/__mocks__/styleMock.js",

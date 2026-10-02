@@ -40,6 +40,11 @@ const {
   verifyMulticamRenderInputs,
 } = require("./services/multicamUploadService");
 const { getStudioSourceBucket, resolveOwnedStudioVideoSource } = require("./services/studioSourceService");
+const { assertOwnedStudioSourceBinding } = require("./services/studioDirectorProjectBinding");
+const {
+  persistSourceShotArtifact,
+  projectSourceShotAnalysis,
+} = require("./services/studioSourceShotArtifactService");
 const { getMulticamStoragePaths } = require("./services/storageCleanupService");
 const { createStudio3DPreview, getOwnedStudio3DPreview, resolveStudio3DExport } = require("./services/studio3DService");
 const { getClipLearningProfile } = require("./services/clipOutcomeLearningService");
@@ -1154,13 +1159,69 @@ router.post("/track-studio-faces", requireTesterEditingFeature("audioExtract"), 
           !anchor || [anchor.x, anchor.y].some(value => !Number.isFinite(value) || value < 0 || value > 100))) {
       return res.status(400).json({ error: "Choose one or two anchors and up to 15 minutes" });
     }
+    let sourceSha256;
+    if (mode === "source_shots") {
+      // The project and asset IDs are declared by this local Studio document;
+      // the uploaded bytes and worker result are observed by the server.
+      if (!req.user?.uid || !req.userId || req.user.uid !== req.userId) {
+        return res.status(401).json({ error: "Sign in to analyze this source" });
+      }
+      const validStudioId = value => typeof value === "string" && value.length > 0 &&
+        value.length <= 160 && value === value.trim() && value !== "." && value !== ".." &&
+        !/[\x00-\x1f\x7f/]/.test(value);
+      if (!validStudioId(req.body.projectId) || !validStudioId(req.body.sourceAssetId)) {
+        return res.status(400).json({
+          code: "PROJECT_SOURCE_BINDING_INVALID",
+          error: "Choose a Studio project and source before analysis",
+        });
+      }
+      sourceSha256 = crypto.createHash("sha256").update(req.file.buffer).digest("hex");
+      const sourceAssetId = req.body.sourceAssetId;
+      if (typeof sourceAssetId === "string" && sourceAssetId.includes(":sha256:")) {
+        const qualifiedHash = /:sha256:([a-f0-9]{64})$/.exec(sourceAssetId)?.[1];
+        if (qualifiedHash !== sourceSha256) {
+          return res.status(409).json({
+            code: "SOURCE_SHOT_ASSET_HASH_MISMATCH",
+            error: "The selected Studio source no longer matches its recorded bytes",
+          });
+        }
+      }
+    }
     temporaryFile = admin.storage().bucket().file(`temp_tracking/${req.user.uid}/${uuidv4()}.mp4`);
     await temporaryFile.save(req.file.buffer, { resumable: false, metadata: { contentType: req.file.mimetype } });
     const [url] = await temporaryFile.getSignedUrl({ action: "read", expires: Date.now() + 15*60*1000 });
     const response = await postToMediaWorker("/track-studio-faces", { video_url: url, anchors, start, end, mode }, 720000);
-    res.json(response.data);
+    if (mode === "source_shots") {
+      const artifactInput = {
+        uid: req.user.uid,
+        projectId: req.body.projectId,
+        sourceAssetId: req.body.sourceAssetId,
+        sourceSha256,
+        analysis: response.data,
+      };
+      // A failed or malformed worker result must not permanently claim an
+      // asset ID for these uploaded bytes.
+      projectSourceShotAnalysis(artifactInput);
+      await assertOwnedStudioSourceBinding({
+        uid: artifactInput.uid,
+        projectId: artifactInput.projectId,
+        sourceAssetId: artifactInput.sourceAssetId,
+        sourceSha256: artifactInput.sourceSha256,
+      });
+      const sourceShotArtifact = await persistSourceShotArtifact(artifactInput);
+      return res.json({ ...response.data, sourceShotArtifact });
+    }
+    return res.json(response.data);
   } catch (error) {
-    res.status(error.response?.status === 422 ? 422 : 500).json({ error: "Face analysis failed. Your existing framing has not been changed." });
+    if (["PROJECT_SOURCE_BINDING_INVALID", "PROJECT_SOURCE_CONFLICT", "PROJECT_SOURCE_STORE_UNAVAILABLE",
+      "SOURCE_SHOT_ANALYSIS_INVALID", "SOURCE_SHOT_ARTIFACT_UNAVAILABLE"].includes(error.code)) {
+      return res.status(error.statusCode || 503).json({
+        error: error.message,
+        code: error.code,
+      });
+    }
+    return res.status(error.response?.status === 422 ? 422 : 500)
+      .json({ error: "Face analysis failed. Your existing framing has not been changed." });
   } finally {
     if (temporaryFile) await temporaryFile.delete().catch(() => {});
   }

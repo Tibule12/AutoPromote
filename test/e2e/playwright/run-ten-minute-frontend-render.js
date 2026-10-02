@@ -731,7 +731,10 @@ async function main() {
   if (verifyStudioButtons) {
     await page.getByRole("button", { name: /^Close media/ }).click();
     await page.locator(".creative-tool-rail").getByRole("button", { name: "Reframe", exact: true }).click();
-    await seekOutputTimeline(168);
+    // The reviewed plan has tightly spaced camera cuts around 168s. Keep the
+    // playback-control checks within its longest uninterrupted shot so a
+    // scheduled Director cut cannot hide the split-crop inspector mid-check.
+    await seekOutputTimeline(548);
     const programme = page.getByTestId("studio-after-video");
     const loadingPreview = page.locator(".after-preview-loading");
     const assertPlaying = async label => {
@@ -761,16 +764,19 @@ async function main() {
       await page.getByRole("button", { name: mode, exact: true }).click();
       await assertPlaying(`${mode} comparison mode`);
     }
+    await seekOutputTimeline(548);
     await page.getByTestId("preview-quick-both-cams").click();
     const reviewedTopZoom = await page.getByLabel("top split zoom").inputValue();
     await assertPlaying("Show Everyone");
     await page.getByTestId("preview-quick-track-speaker").click();
     await assertPlaying("Solo Speaker");
+    await seekOutputTimeline(548);
     await page.getByTestId("preview-quick-both-cams").click();
     if (await page.getByLabel("top split zoom").inputValue() !== reviewedTopZoom) {
       throw new Error("Show Everyone reset the reviewed panel crop");
     }
     await page.getByTestId("preview-quick-track-speaker").click();
+    await seekOutputTimeline(548);
     await exerciseToggle("preview-dock-toggle-btn", "true", "false", "Canvas dock");
     await exerciseToggle("preview-media-toggle", "true", "false", "Media rail");
     await page.getByTestId("preview-fit-full").click();
@@ -794,6 +800,7 @@ async function main() {
     await page.getByTestId("preview-fullscreen-button").click();
     await assertPlaying("Fullscreen");
     await page.getByRole("button", { name: "Exit preview", exact: true }).click();
+    await seekOutputTimeline(548);
     await exerciseToggle("preview-safe-zones", "true", "false", "Safe zones");
     await exerciseToggle("preview-grid", "true", "false", "Grid");
     await page.getByTestId("preview-tools").click();
