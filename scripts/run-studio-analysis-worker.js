@@ -16,6 +16,11 @@ if (process.env.ENABLE_STUDIO_ANALYSIS_WORKER !== "true") {
   });
   const pause = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
   (async () => {
+    if (process.env.STUDIO_ANALYSIS_WORKER_ONCE === "true") {
+      const worked = await processNextStudioAnalysisJob({ workerId });
+      console.log(`[StudioAnalysisWorker] One pass ${worked ? "processed" : "found no due job"}`);
+      return;
+    }
     while (!stopping) {
       try {
         const worked = await processNextStudioAnalysisJob({ workerId });

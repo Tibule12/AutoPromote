@@ -95,8 +95,11 @@ worker and is not started by the web server. Configure the process supervisor
 to restart it after a crash. Polling is one job at a time per process; multiple
 processes can compete safely for claims.
 
-This milestone has no deployment or end-to-end Cloud Run receipt. The tests
-cover idempotency, competing claims, retry, cancellation fencing, abandoned
+An isolated staging Cloud Run Job completed a queued synthetic source-shot job
+and published both artifact receipts; see the [staging deployment and result
+proof](viral-studio-analysis-staging-20261003.md). This is a manual, one-pass
+staging worker. The production worker and Studio frontend flag remain off.
+The tests cover idempotency, competing claims, retry, cancellation fencing, abandoned
 staging, exhausted leases, owner-scoped routes, result reads, client polling,
 and application through the existing editor crop logic. It also covers owned
 source submission, generation pinning, worker hashing, durable source retention,

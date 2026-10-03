@@ -1,0 +1,14 @@
+FROM node:22-slim
+
+WORKDIR /app
+ENV NODE_ENV=production
+
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
+
+COPY firebaseAdmin.js firebaseConfig.server.js ./
+COPY src ./src
+COPY scripts/run-studio-analysis-worker.js ./scripts/run-studio-analysis-worker.js
+
+USER node
+CMD ["node", "scripts/run-studio-analysis-worker.js"]
