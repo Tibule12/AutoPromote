@@ -17,6 +17,9 @@ jest.mock("../src/services/studioSourceShotArtifactService", () => ({
   persistSourceShotArtifact: jest.fn(),
   projectSourceShotAnalysis: jest.fn(),
 }));
+jest.mock("../src/services/studioAnalysisArtifactService", () => ({
+  persistSourceShotAnalysisArtifact: jest.fn(),
+}));
 jest.mock("../src/creditSystem", () => ({ deductCredits: jest.fn(), refundCredits: jest.fn(), getCreditBreakdown: jest.fn() }));
 jest.mock("../src/services/billingService", () => ({ getEffectiveTierSnapshot: jest.fn().mockResolvedValue({ testerAccess: null }) }));
 jest.mock("../src/services/videoEditingService", () => jest.fn().mockImplementation(() => ({})));
@@ -29,6 +32,8 @@ const {
   persistSourceShotArtifact,
   projectSourceShotAnalysis,
 } = require("../src/services/studioSourceShotArtifactService");
+const { persistSourceShotAnalysisArtifact } =
+  require("../src/services/studioAnalysisArtifactService");
 const routes = require("../src/mediaRoutes");
 const app = express();
 app.use("/api/media", routes);
@@ -47,6 +52,10 @@ beforeEach(() => {
     projectId: "project-1", sourceAssetId: "source:asset-1",
     analysisRange: { space: "source", startTick: 0, endTick: 5400000 },
     createdAt: "2026-09-29T00:00:00.000Z",
+  });
+  persistSourceShotAnalysisArtifact.mockResolvedValue({
+    artifactHash: "c".repeat(64), analysisType: "source_shots",
+    projectId: "project-1", sourceAssetId: "source:asset-1",
   });
 });
 
@@ -89,11 +98,28 @@ test("forwards explicit source-shot mode without requiring separate cameras", as
     uid: "tracking-user", projectId: "project-1", sourceAssetId: "source:asset-1",
     sourceSha256, analysis: { tracks: {}, sceneCuts: [49.5] },
   }));
+  expect(persistSourceShotAnalysisArtifact).toHaveBeenCalledWith(expect.objectContaining({
+    uid: "tracking-user", projectId: "project-1", sourceAssetId: "source:asset-1",
+    sourceSha256, request: { mode: "source_shots", start: 0, end: 60,
+      anchors: { solo: { x: 34, y: 47 } } },
+  }));
   expect(projectSourceShotAnalysis.mock.invocationCallOrder[0])
     .toBeLessThan(assertOwnedStudioSourceBinding.mock.invocationCallOrder[0]);
   expect(assertOwnedStudioSourceBinding.mock.invocationCallOrder[0])
     .toBeLessThan(persistSourceShotArtifact.mock.invocationCallOrder[0]);
   expect(response.body.sourceShotArtifact.artifactHash).toBe("a".repeat(64));
+  expect(response.body.analysisArtifact.artifactHash).toBe("c".repeat(64));
+});
+
+test("does not report successful analysis when the immutable analysis receipt cannot be stored", async () => {
+  axios.post.mockResolvedValue({ data: { tracks: {}, sceneCuts: [49.5] } });
+  persistSourceShotAnalysisArtifact.mockRejectedValueOnce(Object.assign(
+    new Error("unavailable"), { code: "STUDIO_ANALYSIS_ARTIFACT_UNAVAILABLE", statusCode: 503 }
+  ));
+  const response = await send({ solo: { x: 34, y: 47 } })
+    .field("mode", "source_shots").expect(503);
+  expect(response.body).not.toHaveProperty("analysisArtifact");
+  expect(mockDelete).toHaveBeenCalledTimes(1);
 });
 
 test("accepts a complete ten-minute podcast analysis range", async () => {

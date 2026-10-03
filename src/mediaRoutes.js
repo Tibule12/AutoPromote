@@ -45,6 +45,8 @@ const {
   persistSourceShotArtifact,
   projectSourceShotAnalysis,
 } = require("./services/studioSourceShotArtifactService");
+const { persistSourceShotAnalysisArtifact } =
+  require("./services/studioAnalysisArtifactService");
 const { getMulticamStoragePaths } = require("./services/storageCleanupService");
 const { createStudio3DPreview, getOwnedStudio3DPreview, resolveStudio3DExport } = require("./services/studio3DService");
 const { getClipLearningProfile } = require("./services/clipOutcomeLearningService");
@@ -1209,12 +1211,18 @@ router.post("/track-studio-faces", requireTesterEditingFeature("audioExtract"), 
         sourceSha256: artifactInput.sourceSha256,
       });
       const sourceShotArtifact = await persistSourceShotArtifact(artifactInput);
-      return res.json({ ...response.data, sourceShotArtifact });
+      const analysisArtifact = await persistSourceShotAnalysisArtifact({
+        ...artifactInput,
+        request: { mode, start, end, anchors },
+      });
+      return res.json({ ...response.data, sourceShotArtifact, analysisArtifact });
     }
     return res.json(response.data);
   } catch (error) {
     if (["PROJECT_SOURCE_BINDING_INVALID", "PROJECT_SOURCE_CONFLICT", "PROJECT_SOURCE_STORE_UNAVAILABLE",
-      "SOURCE_SHOT_ANALYSIS_INVALID", "SOURCE_SHOT_ARTIFACT_UNAVAILABLE"].includes(error.code)) {
+      "SOURCE_SHOT_ANALYSIS_INVALID", "SOURCE_SHOT_ARTIFACT_UNAVAILABLE",
+      "STUDIO_ANALYSIS_ARTIFACT_INVALID", "STUDIO_ANALYSIS_ARTIFACT_UNAVAILABLE",
+      "STUDIO_ANALYSIS_SOURCE_UNVERIFIED"].includes(error.code)) {
       return res.status(error.statusCode || 503).json({
         error: error.message,
         code: error.code,

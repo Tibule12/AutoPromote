@@ -1363,6 +1363,11 @@ try {
     codeqlLimiter && codeqlLimiter.writes ? codeqlLimiter.writes : (_req, _res, next) => next(),
     require("./routes/studioProjectIntelligenceRoutes")
   );
+  app.use(
+    "/api/studio/director/analysis-artifacts",
+    routeLimiter({ windowHint: "studio_analysis_artifacts" }),
+    require("./routes/studioAnalysisArtifactRoutes")
+  );
   // Require latest terms before allowing access to content routes
   if (requireAcceptedTerms) {
     app.use(
