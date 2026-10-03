@@ -13,12 +13,16 @@ jest.mock("../src/services/studioDirectorProjectBinding", () => ({
 jest.mock("../src/services/studioSourceShotArtifactService", () => ({
   getOwnedSourceShotArtifact: jest.fn(),
 }));
+jest.mock("../src/services/studioAnalysisArtifactService", () => ({
+  getOwnedAnalysisArtifact: jest.fn(),
+}));
 jest.mock("../src/services/studioProjectRevisionService", () => ({
   parseStudioProjectHeadRecord: jest.fn(() => ({ revision: 1 })),
 }));
 
 const { getOwnedStudioSourceBinding } = require("../src/services/studioDirectorProjectBinding");
 const { getOwnedSourceShotArtifact } = require("../src/services/studioSourceShotArtifactService");
+const { getOwnedAnalysisArtifact } = require("../src/services/studioAnalysisArtifactService");
 const { registerOwnedProjectIntelligence, getOwnedProjectIntelligence } =
   require("../src/services/studioProjectIntelligenceService");
 const router = require("../src/routes/studioProjectIntelligenceRoutes");
@@ -62,6 +66,7 @@ beforeEach(() => {
   db.runTransaction = firestore.runTransaction;
   getOwnedStudioSourceBinding.mockReset();
   getOwnedSourceShotArtifact.mockReset();
+  getOwnedAnalysisArtifact.mockReset();
   getOwnedStudioSourceBinding.mockImplementation(async ({ sourceAssetId }) => {
     const asset = miniFilmFixture().assets.find(item => item.assetId === sourceAssetId);
     return asset ? { sourceSha256: asset.contentHash } : null;
@@ -145,6 +150,49 @@ test("source shot evidence must resolve to the matching immutable owner artifact
     workerResultSha256 });
   await expect(registerOwnedProjectIntelligence({ uid: ownerUid,
     revision, firestore })).resolves.toMatchObject({ revisionId: revision.revisionId });
+});
+
+test("generic analysis evidence requires the exact server artifact and its source-shot dependency", async () => {
+  const film = miniFilmFixture();
+  const core = clone(film);
+  delete core.revisionId;
+  delete core.sourceAssetSetDigest;
+  delete core.analysisDependencyDigests;
+  const asset = film.assets[0];
+  const artifactHash = "a".repeat(64);
+  const sourceShotHash = "b".repeat(64);
+  const workerResultHash = "c".repeat(64);
+  const configHash = "d".repeat(64);
+  core.evidenceRefs.push({ evidenceId: "evidence:analysis:t1",
+    kind: "analysis_artifact", sourceAssetId: asset.sourceRef.sourceAssetId,
+    sourceContentHash: asset.contentHash, artifactHash, analysisType: "source_shots",
+    modelRevision: "opencv-yunet-source-shot-follow", configHash,
+    dependencyHashes: [sourceShotHash], statement: null });
+  const revision = createProjectIntelligenceRevision(core);
+  const call = () => registerOwnedProjectIntelligence({ uid: ownerUid,
+    revision, firestore });
+  getOwnedAnalysisArtifact.mockResolvedValue(null);
+  await expect(call()).rejects.toMatchObject({ code: "PROJECT_INTELLIGENCE_SOURCE_UNVERIFIED" });
+  getOwnedAnalysisArtifact.mockResolvedValue({ projectId,
+    sourceAssetId: asset.sourceRef.sourceAssetId, sourceSha256: asset.contentHash,
+    analysisType: "source_shots", modelRevision: "opencv-yunet-source-shot-follow",
+    engine: "opencv-yunet-source-shot-follow", configHash,
+    dependencyHashes: [sourceShotHash], contentHash: workerResultHash });
+  getOwnedSourceShotArtifact.mockResolvedValue(null);
+  await expect(call()).rejects.toMatchObject({ code: "PROJECT_INTELLIGENCE_SOURCE_UNVERIFIED" });
+  getOwnedSourceShotArtifact.mockResolvedValue({ projectId,
+    sourceAssetId: asset.sourceRef.sourceAssetId, sourceSha256: asset.contentHash,
+    engine: "opencv-yunet-source-shot-follow", workerResultSha256: workerResultHash });
+  await expect(call()).resolves.toMatchObject({ revisionId: revision.revisionId });
+  const forged = clone(revision);
+  forged.evidenceRefs.at(-1).configHash = "e".repeat(64);
+  const forgedCore = clone(forged);
+  delete forgedCore.revisionId;
+  delete forgedCore.sourceAssetSetDigest;
+  delete forgedCore.analysisDependencyDigests;
+  await expect(registerOwnedProjectIntelligence({ uid: ownerUid,
+    revision: createProjectIntelligenceRevision(forgedCore), firestore }))
+    .rejects.toMatchObject({ code: "PROJECT_INTELLIGENCE_SOURCE_UNVERIFIED" });
 });
 
 test("lineage rejects stale bases and removal of prior evidence", async () => {

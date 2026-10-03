@@ -2,6 +2,7 @@ const crypto = require("crypto");
 const { db } = require("../firebaseAdmin");
 const { getOwnedStudioSourceBinding } = require("./studioDirectorProjectBinding");
 const { getOwnedSourceShotArtifact } = require("./studioSourceShotArtifactService");
+const { getOwnedAnalysisArtifact } = require("./studioAnalysisArtifactService");
 const { parseStudioProjectHeadRecord } = require("./studioProjectRevisionService");
 const {
   validateProjectIntelligenceRevision, assertRevisionTransition,
@@ -71,6 +72,29 @@ const verifyOwnedSources = async ({ uid, revision, firestore }) => {
       throw unauthorizedAsset();
   }
   for (const evidence of revision.evidenceRefs) {
+    if (evidence.kind === "analysis_artifact") {
+      let artifact, dependency;
+      try {
+        artifact = await getOwnedAnalysisArtifact({ uid,
+          artifactHash: evidence.artifactHash, firestore });
+        if (artifact) dependency = await getOwnedSourceShotArtifact({ uid,
+          artifactHash: artifact.dependencyHashes[0], firestore });
+      } catch (_) { throw unavailable(); }
+      if (!artifact || !dependency || artifact.projectId !== revision.projectId ||
+          artifact.sourceAssetId !== evidence.sourceAssetId ||
+          artifact.sourceSha256 !== evidence.sourceContentHash ||
+          artifact.analysisType !== evidence.analysisType ||
+          artifact.modelRevision !== evidence.modelRevision ||
+          artifact.configHash !== evidence.configHash ||
+          stableStringify(artifact.dependencyHashes) !==
+            stableStringify(evidence.dependencyHashes) ||
+          dependency.projectId !== artifact.projectId ||
+          dependency.sourceAssetId !== artifact.sourceAssetId ||
+          dependency.sourceSha256 !== artifact.sourceSha256 ||
+          dependency.workerResultSha256 !== artifact.contentHash ||
+          dependency.engine !== artifact.engine) throw unauthorizedAsset();
+      continue;
+    }
     if (evidence.kind !== "source_shot_artifact") continue;
     let artifact;
     try {

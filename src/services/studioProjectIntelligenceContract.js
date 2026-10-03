@@ -77,7 +77,8 @@ const digest = value => crypto.createHash("sha256").update(stableStringify(value
 const sourceAssetSetDigest = assets => digest(assets.map(asset =>
   [asset.assetId, asset.contentHash]).sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
 const dependencyDigests = evidenceRefs => [...new Set(evidenceRefs
-  .filter(item => item.kind === "source_shot_artifact")
+  .filter(item => item.kind === "source_shot_artifact" ||
+    item.kind === "analysis_artifact")
   .map(item => item.artifactHash))].sort();
 const RECORD_IDS = Object.freeze({ captureGroups: "groupId", assertions: "assertionId",
   syncMappings: "mappingId", dialogueUnits: "dialogueUnitId",
@@ -274,6 +275,12 @@ const validateProjectIntelligenceRevision = revision => {
       if (evidence.configHash !== null) fail("PROJECT_INTELLIGENCE_EVIDENCE", path);
       id(evidence.modelRevision, path);
       if (evidence.analysisType !== "source_shots" || evidence.statement !== null)
+        fail("PROJECT_INTELLIGENCE_EVIDENCE", path);
+    } else if (evidence.kind === "analysis_artifact") {
+      hash(evidence.artifactHash, path);
+      hash(evidence.configHash, path);
+      id(evidence.analysisType, path); id(evidence.modelRevision, path);
+      if (evidence.statement !== null || evidence.dependencyHashes.length === 0)
         fail("PROJECT_INTELLIGENCE_EVIDENCE", path);
     } else fail("PROJECT_INTELLIGENCE_EVIDENCE", path);
   });
