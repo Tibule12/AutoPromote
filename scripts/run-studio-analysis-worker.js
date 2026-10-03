@@ -17,8 +17,19 @@ if (process.env.ENABLE_STUDIO_ANALYSIS_WORKER !== "true") {
   const pause = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
   (async () => {
     if (process.env.STUDIO_ANALYSIS_WORKER_ONCE === "true") {
-      const worked = await processNextStudioAnalysisJob({ workerId });
-      console.log(`[StudioAnalysisWorker] One pass ${worked ? "processed" : "found no due job"}`);
+      const requested = Number(process.env.STUDIO_ANALYSIS_WORKER_MAX_PASSES || 4);
+      const maxPasses =
+        Number.isInteger(requested) && requested >= 1 && requested <= 20 ? requested : 4;
+      const startDeadline = Date.now() + 2 * 60 * 1000;
+      let processed = 0;
+      while (
+        processed < maxPasses &&
+        Date.now() < startDeadline &&
+        (await processNextStudioAnalysisJob({ workerId }))
+      ) {
+        processed += 1;
+      }
+      console.log(`[StudioAnalysisWorker] Bounded batch processed ${processed} due items`);
       return;
     }
     while (!stopping) {
