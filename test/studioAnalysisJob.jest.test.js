@@ -1,0 +1,379 @@
+const crypto = require("crypto");
+
+jest.mock("../src/services/studioDirectorProjectBinding", () => ({
+  getOwnedStudioSourceBinding: jest.fn().mockResolvedValue(null),
+  assertOwnedStudioSourceBinding: jest.fn().mockResolvedValue({}),
+}));
+jest.mock("../src/services/studioSourceShotArtifactService", () => ({
+  projectSourceShotAnalysis: jest.fn(),
+  persistSourceShotArtifact: jest.fn().mockResolvedValue({ artifactHash: "a".repeat(64) }),
+}));
+jest.mock("../src/services/studioAnalysisArtifactService", () => ({
+  persistSourceShotAnalysisArtifact: jest.fn(),
+}));
+
+const {
+  createStudioAnalysisJob,
+  getOwnedStudioAnalysisJob,
+  cancelStudioAnalysisJob,
+  getOwnedStudioAnalysisResult,
+  claimJob,
+  renewLease,
+  processStudioAnalysisJob,
+  processNextStudioAnalysisJob,
+} = require("../src/services/studioAnalysisJobService");
+const { assertOwnedStudioSourceBinding } = require("../src/services/studioDirectorProjectBinding");
+const {
+  projectSourceShotAnalysis,
+  persistSourceShotArtifact,
+} = require("../src/services/studioSourceShotArtifactService");
+const {
+  persistSourceShotAnalysisArtifact,
+} = require("../src/services/studioAnalysisArtifactService");
+
+const fakeFirestore = () => {
+  const docs = new Map();
+  let lock = Promise.resolve();
+  const ref = path => ({
+    path,
+    id: path.split("/").pop(),
+    get: async () => ({ exists: docs.has(path), data: () => structuredClone(docs.get(path)) }),
+    create: async value => {
+      if (docs.has(path)) throw Object.assign(new Error("exists"), { code: 6 });
+      docs.set(path, structuredClone(value));
+    },
+  });
+  const firestore = {
+    docs,
+    collection: name => ({
+      doc: id => ref(`${name}/${id}`),
+      where: (field, op, value) => ({
+        where: (dueField, dueOp, dueValue) => ({
+          limit: count => ({
+            get: async () => ({
+              docs: [...docs.entries()]
+                .filter(
+                  ([path, record]) =>
+                    path.startsWith(`${name}/`) &&
+                    (op !== "==" || record[field] === value) &&
+                    (dueOp !== "<=" || record[dueField] <= dueValue)
+                )
+                .slice(0, count)
+                .map(([path, record]) => ({
+                  id: path.split("/").pop(),
+                  data: () => structuredClone(record),
+                  ref: ref(path),
+                })),
+            }),
+          }),
+        }),
+      }),
+    }),
+    runTransaction: work => {
+      const result = lock.then(() =>
+        work({
+          get: reference => reference.get(),
+          update: (reference, patch) =>
+            docs.set(reference.path, { ...docs.get(reference.path), ...structuredClone(patch) }),
+        })
+      );
+      lock = result.catch(() => {});
+      return result;
+    },
+  };
+  return firestore;
+};
+
+const fakeStorage = () => {
+  const objects = new Map();
+  let saves = 0;
+  let deletes = 0;
+  return {
+    objects,
+    get saves() {
+      return saves;
+    },
+    get deletes() {
+      return deletes;
+    },
+    file: path => ({
+      save: async (buffer, options) => {
+        if (objects.has(path)) throw Object.assign(new Error("exists"), { code: 412 });
+        saves++;
+        objects.set(path, {
+          buffer: Buffer.from(buffer),
+          metadata: {
+            size: String(buffer.length),
+            metadata: options.metadata.metadata,
+          },
+        });
+      },
+      getMetadata: async () => {
+        if (!objects.has(path)) throw new Error("missing source");
+        return [objects.get(path).metadata];
+      },
+      getSignedUrl: async () => ["https://storage.example.test/source"],
+      download: async () => [Buffer.from(objects.get(path).buffer)],
+      delete: async () => {
+        deletes++;
+        objects.delete(path);
+      },
+    }),
+  };
+};
+
+const source = Buffer.from("bounded-test-source");
+const input = overrides => ({
+  uid: "owner-1",
+  requestId: "request-0001",
+  projectId: "project-1",
+  sourceAssetId: "asset-1",
+  sourceSha256: crypto.createHash("sha256").update(source).digest("hex"),
+  buffer: source,
+  mode: "source_shots",
+  start: 0,
+  end: 60,
+  anchors: { solo: { x: 40, y: 50 } },
+  ...overrides,
+});
+
+const stable = value =>
+  JSON.stringify(value, (_key, item) =>
+    item && typeof item === "object" && !Array.isArray(item)
+      ? Object.fromEntries(
+          Object.keys(item)
+            .sort()
+            .map(key => [key, item[key]])
+        )
+      : item
+  );
+const hash = value => crypto.createHash("sha256").update(value).digest("hex");
+beforeEach(() => {
+  jest.clearAllMocks();
+  projectSourceShotAnalysis.mockImplementation(({ analysis }) => ({
+    workerResultSha256: hash(stable(analysis)),
+  }));
+  persistSourceShotAnalysisArtifact.mockImplementation(async ({ analysis }) => ({
+    artifactHash: "b".repeat(64),
+    contentHash: hash(stable(analysis)),
+  }));
+});
+
+test("idempotent upload queues once and rejects a reused key with changed source or settings", async () => {
+  const firestore = fakeFirestore(),
+    storage = fakeStorage();
+  const first = await createStudioAnalysisJob(input(), { firestore, storage });
+  const repeated = await createStudioAnalysisJob(input(), { firestore, storage });
+  expect(first).toMatchObject({ status: "queued", attempts: 0 });
+  expect(repeated).toEqual(first);
+  expect(storage.saves).toBe(1);
+  await expect(
+    createStudioAnalysisJob(input({ end: 50 }), { firestore, storage })
+  ).rejects.toMatchObject({ code: "STUDIO_ANALYSIS_IDEMPOTENCY_CONFLICT" });
+  await expect(
+    createStudioAnalysisJob(input({ sourceSha256: "a".repeat(64) }), { firestore, storage })
+  ).rejects.toMatchObject({ code: "STUDIO_ANALYSIS_JOB_INVALID" });
+  expect(
+    await getOwnedStudioAnalysisJob({ uid: "stranger", jobId: first.jobId, firestore })
+  ).toBeNull();
+});
+
+test("one worker wins the claim; cancellation fences the worker result", async () => {
+  const firestore = fakeFirestore(),
+    storage = fakeStorage();
+  const queued = await createStudioAnalysisJob(input(), { firestore, storage });
+  const [one, two] = await Promise.all([
+    claimJob({ jobId: queued.jobId, workerId: "worker-1", firestore }),
+    claimJob({ jobId: queued.jobId, workerId: "worker-2", firestore }),
+  ]);
+  expect([one, two].filter(Boolean)).toHaveLength(1);
+  const winner = one || two;
+  expect(await renewLease({ jobId: queued.jobId, token: winner.leaseToken, firestore })).toBe(true);
+  await expect(
+    cancelStudioAnalysisJob({ uid: "stranger", jobId: queued.jobId, firestore, storage })
+  ).resolves.toBeNull();
+  const cancelled = await cancelStudioAnalysisJob({
+    uid: "owner-1",
+    jobId: queued.jobId,
+    firestore,
+    storage,
+  });
+  expect(cancelled.status).toBe("cancelled");
+  expect(await renewLease({ jobId: queued.jobId, token: winner.leaseToken, firestore })).toBe(
+    false
+  );
+  expect(await claimJob({ jobId: queued.jobId, workerId: "worker-3", firestore })).toBeNull();
+});
+
+test("transient failure retries once, then stores immutable receipts and deletes staged source", async () => {
+  const firestore = fakeFirestore(),
+    storage = fakeStorage();
+  const queued = await createStudioAnalysisJob(input(), { firestore, storage });
+  let time = Date.now() + 1000;
+  const clock = () => time;
+  const failed = await processStudioAnalysisJob({
+    jobId: queued.jobId,
+    workerId: "worker-1",
+    firestore,
+    storage,
+    clock,
+    runWorker: async () => {
+      throw new Error("offline");
+    },
+  });
+  expect(failed).toBeNull();
+  let state = await getOwnedStudioAnalysisJob({ uid: "owner-1", jobId: queued.jobId, firestore });
+  expect(state).toMatchObject({
+    status: "queued",
+    attempts: 1,
+    failureCode: "STUDIO_ANALYSIS_WORKER_FAILED",
+  });
+  expect(
+    await processNextStudioAnalysisJob({
+      workerId: "worker-2",
+      firestore,
+      storage,
+      clock,
+      runWorker: async () => ({}),
+    })
+  ).toBe(false);
+  time += 61000;
+  const succeeded = await processNextStudioAnalysisJob({
+    workerId: "worker-2",
+    firestore,
+    storage,
+    clock,
+    runWorker: async () => ({ engine: "opencv-yunet-source-shot-follow" }),
+  });
+  expect(succeeded).toBe(true);
+  state = await getOwnedStudioAnalysisJob({ uid: "owner-1", jobId: queued.jobId, firestore });
+  expect(state).toMatchObject({
+    status: "completed",
+    attempts: 2,
+    sourceShotArtifact: { artifactHash: "a".repeat(64) },
+    analysisArtifact: { artifactHash: "b".repeat(64) },
+  });
+  expect(assertOwnedStudioSourceBinding).toHaveBeenCalledTimes(1);
+  expect(persistSourceShotArtifact).toHaveBeenCalledTimes(1);
+  expect(persistSourceShotAnalysisArtifact).toHaveBeenCalledTimes(1);
+  expect(storage.objects.size).toBe(1);
+  expect(
+    await getOwnedStudioAnalysisResult({ uid: "owner-1", jobId: queued.jobId, firestore, storage })
+  ).toEqual({ engine: "opencv-yunet-source-shot-follow" });
+  expect(
+    await getOwnedStudioAnalysisResult({ uid: "stranger", jobId: queued.jobId, firestore, storage })
+  ).toBeNull();
+  const resultKey = [...storage.objects.keys()].find(path => path.endsWith(".json"));
+  storage.objects.get(resultKey).buffer = Buffer.from('{"tampered":true}');
+  await expect(
+    getOwnedStudioAnalysisResult({ uid: "owner-1", jobId: queued.jobId, firestore, storage })
+  ).rejects.toMatchObject({ code: "STUDIO_ANALYSIS_JOB_UNAVAILABLE" });
+});
+
+test("terminal worker rejection never publishes artifacts or retries", async () => {
+  const firestore = fakeFirestore(),
+    storage = fakeStorage();
+  const queued = await createStudioAnalysisJob(input(), { firestore, storage });
+  await processStudioAnalysisJob({
+    jobId: queued.jobId,
+    workerId: "worker-1",
+    firestore,
+    storage,
+    runWorker: async () => {
+      throw { response: { status: 422 } };
+    },
+  });
+  expect(
+    await getOwnedStudioAnalysisJob({ uid: "owner-1", jobId: queued.jobId, firestore })
+  ).toMatchObject({ status: "failed", attempts: 1 });
+  expect(persistSourceShotArtifact).not.toHaveBeenCalled();
+  expect(storage.objects.size).toBe(0);
+});
+
+test("cancelling an active worker fences publication and cleans its staged source", async () => {
+  const firestore = fakeFirestore(),
+    storage = fakeStorage();
+  const queued = await createStudioAnalysisJob(input(), { firestore, storage });
+  let release;
+  const waiting = new Promise(resolve => {
+    release = resolve;
+  });
+  const processing = processStudioAnalysisJob({
+    jobId: queued.jobId,
+    workerId: "worker-1",
+    firestore,
+    storage,
+    runWorker: () => waiting,
+  });
+  // Wait until the transaction has claimed the job and the worker is waiting.
+  for (let attempt = 0; attempt < 20; attempt++) {
+    const state = await getOwnedStudioAnalysisJob({
+      uid: "owner-1",
+      jobId: queued.jobId,
+      firestore,
+    });
+    if (state.status === "running") break;
+    await new Promise(resolve => setImmediate(resolve));
+  }
+  await cancelStudioAnalysisJob({ uid: "owner-1", jobId: queued.jobId, firestore, storage });
+  release({ engine: "opencv-yunet-source-shot-follow" });
+  await processing;
+  expect(persistSourceShotArtifact).not.toHaveBeenCalled();
+  expect(storage.objects.size).toBe(0);
+  expect(
+    await getOwnedStudioAnalysisJob({ uid: "owner-1", jobId: queued.jobId, firestore })
+  ).toMatchObject({ status: "cancelled" });
+});
+
+test("two crashed leases exhaust retries and clean the source", async () => {
+  const firestore = fakeFirestore(),
+    storage = fakeStorage();
+  const queued = await createStudioAnalysisJob(input(), { firestore, storage });
+  let time = Date.now() + 1000;
+  const clock = () => time;
+  expect(
+    await claimJob({ jobId: queued.jobId, workerId: "worker-1", firestore, clock })
+  ).toMatchObject({ attempts: 1 });
+  time += 16 * 60 * 1000;
+  expect(
+    await claimJob({ jobId: queued.jobId, workerId: "worker-2", firestore, clock })
+  ).toMatchObject({ attempts: 2 });
+  time += 16 * 60 * 1000;
+  expect(
+    await processNextStudioAnalysisJob({
+      workerId: "worker-3",
+      firestore,
+      storage,
+      clock,
+      runWorker: async () => ({}),
+    })
+  ).toBe(true);
+  expect(
+    await getOwnedStudioAnalysisJob({ uid: "owner-1", jobId: queued.jobId, firestore })
+  ).toMatchObject({ status: "failed", failureCode: "STUDIO_ANALYSIS_LEASE_EXPIRED" });
+  expect(storage.objects.size).toBe(0);
+});
+
+test("abandoned staging expires and deletes its source", async () => {
+  const firestore = fakeFirestore(),
+    storage = fakeStorage();
+  const queued = await createStudioAnalysisJob(input(), { firestore, storage });
+  const path = `studio_analysis_jobs/${queued.jobId}`;
+  firestore.docs.set(path, {
+    ...firestore.docs.get(path),
+    status: "staging",
+    updatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+  });
+  expect(
+    await processNextStudioAnalysisJob({
+      workerId: "worker-1",
+      firestore,
+      storage,
+      runWorker: async () => ({}),
+    })
+  ).toBe(true);
+  expect(
+    await getOwnedStudioAnalysisJob({ uid: "owner-1", jobId: queued.jobId, firestore })
+  ).toMatchObject({ status: "failed", failureCode: "STUDIO_ANALYSIS_STAGING_EXPIRED" });
+  expect(storage.objects.size).toBe(0);
+});

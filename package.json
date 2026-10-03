@@ -9,6 +9,7 @@
     "validate-imports": "node ./autopromote-functions/validate-imports.js",
     "start": "node src/server.js",
     "start:worker": "cross-env ENABLE_BACKGROUND_JOBS=true node worker.js",
+    "start:studio-analysis-worker": "cross-env ENABLE_STUDIO_ANALYSIS_WORKER=true node scripts/run-studio-analysis-worker.js",
     "start:all": "node scripts/start-all.js",
     "cron:diagnosis": "node scripts/run-diagnosis-job.js",
     "start:dev": "NODE_ENV=development nodemon src/server.js",

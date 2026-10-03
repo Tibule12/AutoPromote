@@ -47,6 +47,13 @@ const {
 } = require("./services/studioSourceShotArtifactService");
 const { persistSourceShotAnalysisArtifact } =
   require("./services/studioAnalysisArtifactService");
+const {
+  MAX_SOURCE_BYTES,
+  createStudioAnalysisJob,
+  getOwnedStudioAnalysisJob,
+  getOwnedStudioAnalysisResult,
+  cancelStudioAnalysisJob,
+} = require("./services/studioAnalysisJobService");
 const { getMulticamStoragePaths } = require("./services/storageCleanupService");
 const { createStudio3DPreview, getOwnedStudio3DPreview, resolveStudio3DExport } = require("./services/studio3DService");
 const { getClipLearningProfile } = require("./services/clipOutcomeLearningService");
@@ -849,6 +856,9 @@ const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 500 * 1024 * 1024 }, // 500MB Limit
 });
+const studioAnalysisUpload = multer({
+  storage: multer.memoryStorage(), limits: { fileSize: MAX_SOURCE_BYTES, files: 1 },
+});
 
 // Cloud Run render Jobs cannot carry a Firebase user token. This callback is
 // intentionally mounted before user auth and protected by a dedicated managed
@@ -1140,6 +1150,68 @@ router.post("/estimate", async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to estimate costs" });
   }
 });
+
+// Durable CPU source-shot analysis. A worker process consumes queued records;
+// this request only stages the source and returns the owner-scoped job receipt.
+router.post("/studio-analysis-jobs", requireTesterEditingFeature("audioExtract"),
+  (req, res, next) => studioAnalysisUpload.single("file")(req, res, error => {
+    if (error?.code === "LIMIT_FILE_SIZE")
+      return res.status(413).json({ code: "STUDIO_ANALYSIS_SOURCE_TOO_LARGE" });
+    if (error) return res.status(400).json({ code: "STUDIO_ANALYSIS_UPLOAD_INVALID" });
+    return next();
+  }), async (req, res) => {
+    try {
+      if (!req.user?.uid || req.user.uid !== req.userId || !req.file)
+        return res.status(400).json({ code: "STUDIO_ANALYSIS_JOB_INVALID" });
+      let anchors;
+      try { anchors = JSON.parse(req.body?.anchors || ""); }
+      catch (_) { return res.status(400).json({ code: "STUDIO_ANALYSIS_JOB_INVALID" }); }
+      const sourceSha256 = crypto.createHash("sha256").update(req.file.buffer).digest("hex");
+      const job = await createStudioAnalysisJob({
+        uid: req.user.uid, requestId: req.body.requestId,
+        projectId: req.body.projectId, sourceAssetId: req.body.sourceAssetId,
+        sourceSha256, buffer: req.file.buffer, anchors,
+        mode: req.body.mode, start: req.body.start, end: req.body.end,
+      });
+      return res.status(job.status === "queued" ? 202 : 200).json(job);
+    } catch (error) {
+      return res.status(error.statusCode || 503).json({
+        code: error.code || "STUDIO_ANALYSIS_JOB_UNAVAILABLE",
+      });
+    }
+  });
+
+router.get("/studio-analysis-jobs/:jobId", requireTesterEditingFeature("audioExtract"),
+  async (req, res) => {
+    try {
+      const job = await getOwnedStudioAnalysisJob({ uid: req.user.uid, jobId: req.params.jobId });
+      return job ? res.json(job) : res.status(404).json({ code: "STUDIO_ANALYSIS_JOB_NOT_FOUND" });
+    } catch (error) {
+      return res.status(error.statusCode || 503).json({ code: error.code || "STUDIO_ANALYSIS_JOB_UNAVAILABLE" });
+    }
+  });
+
+router.get("/studio-analysis-jobs/:jobId/result", requireTesterEditingFeature("audioExtract"),
+  async (req, res) => {
+    try {
+      const result = await getOwnedStudioAnalysisResult({
+        uid: req.user.uid, jobId: req.params.jobId,
+      });
+      return result ? res.json(result) : res.status(404).json({ code: "STUDIO_ANALYSIS_JOB_NOT_FOUND" });
+    } catch (error) {
+      return res.status(error.statusCode || 503).json({ code: error.code || "STUDIO_ANALYSIS_JOB_UNAVAILABLE" });
+    }
+  });
+
+router.post("/studio-analysis-jobs/:jobId/cancel", requireTesterEditingFeature("audioExtract"),
+  async (req, res) => {
+    try {
+      const job = await cancelStudioAnalysisJob({ uid: req.user.uid, jobId: req.params.jobId });
+      return job ? res.json(job) : res.status(404).json({ code: "STUDIO_ANALYSIS_JOB_NOT_FOUND" });
+    } catch (error) {
+      return res.status(error.statusCode || 503).json({ code: error.code || "STUDIO_ANALYSIS_JOB_UNAVAILABLE" });
+    }
+  });
 
 // Route: POST /api/media/transcribe
 router.post("/track-studio-faces", requireTesterEditingFeature("audioExtract"), upload.single("file"), async (req, res) => {
