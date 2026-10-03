@@ -3,8 +3,10 @@
 Branch: `agent/director-analysis-orchestration-v1`. This is an additive CPU
 orchestration slice for the existing `opencv-yunet-source-shot-follow` worker.
 The manual `/api/media/track-studio-faces` flow remains available. The Studio
-frontend does not submit jobs or poll them yet. No GPU, production worker, or
-autonomous edit is deployed by this branch.
+frontend can submit and poll jobs with `REACT_APP_ENABLE_STUDIO_ANALYSIS_JOBS=true`
+after the server prerequisites are deployed. The switch defaults off and uses
+the existing synchronous path for sources over 100 MiB. No GPU, production
+worker, or autonomous edit is deployed by this branch.
 
 ## API
 
@@ -69,8 +71,7 @@ processes can compete safely for claims.
 
 This milestone has no deployment or end-to-end Cloud Run receipt. The tests
 cover idempotency, competing claims, retry, cancellation fencing, abandoned
-staging, exhausted leases, owner-scoped routes, and result reads. The next
-client slice can submit jobs, poll statuses, and load the verified raw result
-without changing the editor's existing crop logic. Object cleanup after a
+staging, exhausted leases, owner-scoped routes, result reads, client polling,
+and application through the existing editor crop logic. Object cleanup after a
 crash between raw-result upload and job completion is still an operational
 retention task; a later janitor should remove unreferenced result objects.

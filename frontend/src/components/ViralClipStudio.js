@@ -34,6 +34,7 @@ import { splitCaptionSegmentsForReadability } from "./captionReadability";
 import { buildTimedScriptDraft } from "../utils/captionDrafts";
 import { buildTranscriptGroundedBRollSuggestions } from "./storyBeatPlanner";
 import { getMediaAuthToken } from "../utils/mediaAuth";
+import { runStudioSourceShotJob } from "./studioAnalysisJobClient";
 import useCinematicEffects, { CINEMATIC_PRESETS, buildCinematicCssFilter } from "../hooks/useCinematicEffects";
 import StudioFinishLayers from "./StudioFinishLayers";
 import StudioFinishRack from "./StudioFinishRack";
@@ -7647,11 +7648,27 @@ const ViralClipStudio = ({
       }
       const token = await getMediaAuthToken();
       if (!token) throw new Error("Sign in to analyze this source.");
-      const response = await fetch(`${API_BASE_URL}/api/media/track-studio-faces`, {
-        method: "POST", headers: { Authorization: `Bearer ${token}` }, body,
-      });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || result.detail || "Face analysis failed.");
+      let result;
+      if (mode === "source_shots" &&
+          process.env.REACT_APP_ENABLE_STUDIO_ANALYSIS_JOBS === "true" &&
+          blob.size <= 100 * 1024 * 1024) {
+        body.append("requestId", createSecureId("studio-analysis"));
+        result = await runStudioSourceShotJob({
+          apiBaseUrl: API_BASE_URL, token, formData: body,
+          isCurrent: () => generation === faceTrackingGeneration.current,
+          onStatus: status => setFaceTrackingMessage(
+            status === "running"
+              ? "Analyzing camera cuts. Your current framing stays available while this runs…"
+              : "Camera-cut analysis is queued. Your current framing stays available…"
+          ),
+        });
+      } else {
+        const response = await fetch(`${API_BASE_URL}/api/media/track-studio-faces`, {
+          method: "POST", headers: { Authorization: `Bearer ${token}` }, body,
+        });
+        result = await response.json();
+        if (!response.ok) throw new Error(result.error || result.detail || "Face analysis failed.");
+      }
       if (generation !== faceTrackingGeneration.current) return;
       const offset = getTimelineOffsetForIndex(activeTimelineIndex);
       const keys = slot => (result.tracks?.[slot]?.keyframes || []).map(mark => ({ ...(split ? mark : coordinates.toPosition(mark)),

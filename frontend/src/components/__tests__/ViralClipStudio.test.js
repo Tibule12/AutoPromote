@@ -8,6 +8,7 @@ import * as studioCommands from "../studioCommands";
 import * as studioProjectDocument from "../studioProjectDocument";
 import * as studioDirectorProposals from "../studioDirectorProposals";
 import * as studioDirectorEvidenceProposals from "../studioDirectorEvidenceProposals";
+import * as studioAnalysisJobClient from "../studioAnalysisJobClient";
 import * as studioProjectStore from "../viralStudioProjectStore";
 import { secondsToTicks } from "../studioTime";
 
@@ -4697,6 +4698,40 @@ describe("ViralClipStudio timeline sequencing", () => {
     expect(within(panel).getByTestId("studio-director-review-open")).toHaveTextContent("Review again");
     expect(global.fetch.mock.calls.some(([url]) => String(url).endsWith("/api/studio/director/reviews"))).toBe(false);
     expect(onDirectorReview).not.toHaveBeenCalled();
+  });
+
+  test("source-shot analysis uses the queued job path when enabled", async () => {
+    const originalFlag = process.env.REACT_APP_ENABLE_STUDIO_ANALYSIS_JOBS;
+    process.env.REACT_APP_ENABLE_STUDIO_ANALYSIS_JOBS = "true";
+    const run = jest.spyOn(studioAnalysisJobClient, "runStudioSourceShotJob").mockResolvedValue({
+      mode: "source_shots", engine: "opencv-yunet-source-shot-follow",
+      start: 0, end: 20, sceneCuts: [8], reviewRequired: true,
+      decodeFailures: [],
+      tracks: { solo: { coverage: 0.9, keyframes: [
+        { time: 0, x: 38, y: 47 }, { time: 20, x: 46, y: 48 },
+      ] } },
+      sourceShotArtifact: { artifactHash: "d".repeat(64) },
+      analysisArtifact: { artifactHash: "e".repeat(64) },
+    });
+    try {
+      global.fetch.mockResolvedValue({ ok: true,
+        blob: () => Promise.resolve(new Blob(["video"], { type: "video/mp4" })) });
+      render(<ViralClipStudio videoUrl="https://example.com/source.mp4"
+        clips={[{ id: "clip-queued", start: 0, end: 20, duration: 20 }]}
+        onSave={jest.fn()} onCancel={jest.fn()} />);
+      fireEvent.click(screen.getByTestId("preview-quick-track-speaker"));
+      fireEvent.click(screen.getByTestId("analyze-source-shots"));
+      await waitFor(() => expect(run).toHaveBeenCalledTimes(1));
+      expect(run.mock.calls[0][0].formData.get("requestId")).toMatch(/^studio-analysis-/);
+      expect(run.mock.calls[0][0].formData.get("mode")).toBe("source_shots");
+      expect(global.fetch.mock.calls.some(([url]) =>
+        String(url).endsWith("/api/media/track-studio-faces"))).toBe(false);
+      await screen.findByText(/Source-shot draft applied/i);
+    } finally {
+      run.mockRestore();
+      if (originalFlag === undefined) delete process.env.REACT_APP_ENABLE_STUDIO_ANALYSIS_JOBS;
+      else process.env.REACT_APP_ENABLE_STUDIO_ANALYSIS_JOBS = originalFlag;
+    }
   });
 
   test("source-shot analysis offers one evidence-bound split without applying it", async () => {
