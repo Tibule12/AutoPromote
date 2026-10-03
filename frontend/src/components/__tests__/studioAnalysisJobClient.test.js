@@ -89,3 +89,35 @@ test("a lost upload response retries the same request body and receives its exis
   expect(fetchImpl.mock.calls[0][1].body).toBe(base.formData);
   expect(fetchImpl.mock.calls[1][1].body).toBe(base.formData);
 });
+
+test("owned source submits JSON and retries with the same request ID", async () => {
+  const fetchImpl = jest.fn()
+    .mockRejectedValueOnce(new Error("connection lost"))
+    .mockResolvedValueOnce(response(receipt))
+    .mockResolvedValueOnce(response({ mode: "source_shots", tracks: { solo: {} } }));
+  const sourceRequest = { requestId: "owned-request-1", projectId: "project-1",
+    sourceAssetId: "asset-1", storagePath: "studio/sources/owner-1/video.mp4",
+    mode: "source_shots", start: 0, end: 60,
+    anchors: { solo: { x: 40, y: 50 } } };
+  await runStudioSourceShotJob({ ...base, sourceRequest, fetchImpl });
+  expect(fetchImpl.mock.calls[0][0]).toBe(
+    "https://api.example.test/api/media/studio-analysis-jobs/from-source"
+  );
+  expect(fetchImpl.mock.calls[0][1].body).toBe(JSON.stringify(sourceRequest));
+  expect(fetchImpl.mock.calls[1][1].body).toBe(JSON.stringify(sourceRequest));
+  expect(fetchImpl.mock.calls[0][1].headers["Content-Type"]).toBe("application/json");
+});
+
+test("replaced owned source reports a terminal identity conflict", async () => {
+  const fetchImpl = jest.fn()
+    .mockResolvedValueOnce(response(receipt))
+    .mockResolvedValueOnce({ ok: false, status: 409,
+      json: async () => ({ code: "STUDIO_ANALYSIS_SOURCE_CHANGED" }) });
+  await expect(runStudioSourceShotJob({ ...base, sourceRequest: {
+    requestId: "owned-request-1", storagePath: "studio/sources/owner-1/video.mp4",
+  }, fetchImpl })).rejects.toMatchObject({
+    code: "STUDIO_ANALYSIS_SOURCE_CHANGED",
+    message: "Source video changed. Run analysis again.",
+  });
+  expect(fetchImpl).toHaveBeenCalledTimes(2);
+});

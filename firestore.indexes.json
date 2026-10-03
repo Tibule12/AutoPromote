@@ -4,6 +4,14 @@
       "collectionGroup": "studio_analysis_jobs",
       "queryScope": "COLLECTION",
       "fields": [
+        { "fieldPath": "cleanupPending", "order": "ASCENDING" },
+        { "fieldPath": "cleanupAfter", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "studio_analysis_jobs",
+      "queryScope": "COLLECTION",
+      "fields": [
         { "fieldPath": "status", "order": "ASCENDING" },
         { "fieldPath": "nextAttemptAt", "order": "ASCENDING" }
       ]

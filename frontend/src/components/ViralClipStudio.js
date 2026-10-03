@@ -7623,9 +7623,16 @@ const ViralClipStudio = ({
         }
       }
       const source = getSafeMediaSource(currentTimelineClip?.url || videoUrl);
+      const durableStoragePath = currentTimelineClip?.sourceStoragePath ||
+        currentTimelineClip?.storagePath ||
+        (currentTimelineClip?.id === "main" ? sourceStoragePath : null);
+      const useDurableSource = mode === "source_shots" &&
+        process.env.REACT_APP_ENABLE_STUDIO_ANALYSIS_JOBS === "true" &&
+        typeof durableStoragePath === "string" &&
+        durableStoragePath.startsWith("studio/sources/");
       const file = currentTimelineClip?.file || selectedClip?.file;
-      let blob = file instanceof Blob ? file : null;
-      if (!blob) {
+      let blob = useDurableSource ? null : (file instanceof Blob ? file : null);
+      if (!useDurableSource && !blob) {
         const response = await fetch(source);
         if (!response.ok) throw new Error("Source video could not be read.");
         blob = await response.blob();
@@ -7636,32 +7643,63 @@ const ViralClipStudio = ({
         aspectWidth/aspectHeight, speakerTrackZoom);
       const anchors = split ? { top: speakerStackFraming.top, bottom: speakerStackFraming.bottom }
         : { solo: coordinates.anchor };
-      const body = new FormData();
-      body.append("file", blob, file?.name || "studio-source.mp4");
-      body.append("anchors", JSON.stringify(anchors));
-      body.append("start", String(window.start));
-      body.append("end", String(window.end));
-      body.append("mode", mode);
-      if (mode === "source_shots") {
-        body.append("projectId", projectId);
-        body.append("sourceAssetId", sourceShotAssetId);
+      let body = null;
+      if (!useDurableSource) {
+        body = new FormData();
+        body.append("file", blob, file?.name || "studio-source.mp4");
+        body.append("anchors", JSON.stringify(anchors));
+        body.append("start", String(window.start));
+        body.append("end", String(window.end));
+        body.append("mode", mode);
+        if (mode === "source_shots") {
+          body.append("projectId", projectId);
+          body.append("sourceAssetId", sourceShotAssetId);
+        }
       }
       const token = await getMediaAuthToken();
       if (!token) throw new Error("Sign in to analyze this source.");
       let result;
       if (mode === "source_shots" &&
           process.env.REACT_APP_ENABLE_STUDIO_ANALYSIS_JOBS === "true" &&
-          blob.size <= 100 * 1024 * 1024) {
-        body.append("requestId", createSecureId("studio-analysis"));
-        result = await runStudioSourceShotJob({
-          apiBaseUrl: API_BASE_URL, token, formData: body,
-          isCurrent: () => generation === faceTrackingGeneration.current,
-          onStatus: status => setFaceTrackingMessage(
-            status === "running"
-              ? "Analyzing camera cuts. Your current framing stays available while this runs…"
-              : "Camera-cut analysis is queued. Your current framing stays available…"
-          ),
-        });
+          (useDurableSource || blob.size <= 100 * 1024 * 1024)) {
+        const sourceRequestFields = useDurableSource ? {
+          projectId, sourceAssetId: sourceShotAssetId,
+          storagePath: durableStoragePath, anchors,
+          mode, start: window.start, end: window.end,
+        } : null;
+        const resumeKey = sourceRequestFields
+          ? `studio-analysis-resume:${JSON.stringify(sourceRequestFields)}` : null;
+        let requestId = null;
+        try { if (resumeKey) requestId = globalThis.sessionStorage.getItem(resumeKey); }
+        catch (_) { /* Storage may be disabled in the browser. */ }
+        if (!requestId || !/^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$/.test(requestId))
+          requestId = createSecureId("studio-analysis");
+        try { if (resumeKey) globalThis.sessionStorage.setItem(resumeKey, requestId); }
+        catch (_) { /* The job remains usable without local resume state. */ }
+        if (body) body.append("requestId", requestId);
+        try {
+          result = await runStudioSourceShotJob({
+            apiBaseUrl: API_BASE_URL, token, formData: body,
+            ...(sourceRequestFields ? { sourceRequest: {
+              ...sourceRequestFields, requestId,
+            } } : {}),
+            isCurrent: () => generation === faceTrackingGeneration.current,
+            onStatus: status => setFaceTrackingMessage(
+              status === "running"
+                ? "Analyzing camera cuts. Your current framing stays available while this runs…"
+                : "Camera-cut analysis is queued. Your current framing stays available…"
+            ),
+          });
+          try { if (resumeKey) globalThis.sessionStorage.removeItem(resumeKey); }
+          catch (_) { /* The result is already available. */ }
+        } catch (error) {
+          if (resumeKey && (error.terminal || ["STUDIO_ANALYSIS_IDEMPOTENCY_CONFLICT",
+            "STUDIO_ANALYSIS_SOURCE_CHANGED"].includes(error.code))) {
+            try { globalThis.sessionStorage.removeItem(resumeKey); }
+            catch (_) { /* The next submission can still report the conflict. */ }
+          }
+          throw error;
+        }
       } else {
         const response = await fetch(`${API_BASE_URL}/api/media/track-studio-faces`, {
           method: "POST", headers: { Authorization: `Bearer ${token}` }, body,

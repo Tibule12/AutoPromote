@@ -4734,6 +4734,69 @@ describe("ViralClipStudio timeline sequencing", () => {
     }
   });
 
+  test("durable source analysis sends its owned path without downloading video in the editor", async () => {
+    const originalFlag = process.env.REACT_APP_ENABLE_STUDIO_ANALYSIS_JOBS;
+    process.env.REACT_APP_ENABLE_STUDIO_ANALYSIS_JOBS = "true";
+    const run = jest.spyOn(studioAnalysisJobClient, "runStudioSourceShotJob").mockResolvedValue({
+      mode: "source_shots", engine: "opencv-yunet-source-shot-follow",
+      start: 0, end: 20, sceneCuts: [8], reviewRequired: true,
+      decodeFailures: [], tracks: { solo: { coverage: 0.9, keyframes: [
+        { time: 0, x: 38, y: 47 }, { time: 20, x: 46, y: 48 },
+      ] } },
+      sourceShotArtifact: { artifactHash: "d".repeat(64) },
+      analysisArtifact: { artifactHash: "e".repeat(64) },
+    });
+    try {
+      render(<ViralClipStudio videoUrl="https://example.com/source.mp4"
+        sourceStoragePath="studio/sources/test-user/recording.mp4"
+        clips={[{ id: "main", start: 0, end: 20, duration: 20,
+          url: "https://example.com/source.mp4" }]}
+        onSave={jest.fn()} onCancel={jest.fn()} />);
+      fireEvent.click(screen.getByTestId("preview-quick-track-speaker"));
+      fireEvent.click(screen.getByTestId("analyze-source-shots"));
+      await waitFor(() => expect(run).toHaveBeenCalledTimes(1));
+      expect(run.mock.calls[0][0].formData).toBeNull();
+      expect(run.mock.calls[0][0].sourceRequest).toMatchObject({
+        storagePath: "studio/sources/test-user/recording.mp4", mode: "source_shots",
+      });
+      expect(global.fetch.mock.calls.some(([url]) =>
+        String(url) === "https://example.com/source.mp4")).toBe(false);
+      await screen.findByText(/Source-shot draft applied/i);
+    } finally {
+      run.mockRestore();
+      window.sessionStorage.clear();
+      if (originalFlag === undefined) delete process.env.REACT_APP_ENABLE_STUDIO_ANALYSIS_JOBS;
+      else process.env.REACT_APP_ENABLE_STUDIO_ANALYSIS_JOBS = originalFlag;
+    }
+  });
+
+  test("retrying an interrupted owned-source analysis resumes its request ID", async () => {
+    const originalFlag = process.env.REACT_APP_ENABLE_STUDIO_ANALYSIS_JOBS;
+    process.env.REACT_APP_ENABLE_STUDIO_ANALYSIS_JOBS = "true";
+    const run = jest.spyOn(studioAnalysisJobClient, "runStudioSourceShotJob")
+      .mockRejectedValue(new Error("Studio analysis is still running. Try again later."));
+    try {
+      render(<ViralClipStudio videoUrl="https://example.com/source.mp4"
+        sourceStoragePath="studio/sources/test-user/recording.mp4"
+        clips={[{ id: "main", start: 0, end: 20, duration: 20,
+          url: "https://example.com/source.mp4" }]}
+        onSave={jest.fn()} onCancel={jest.fn()} />);
+      fireEvent.click(screen.getByTestId("preview-quick-track-speaker"));
+      fireEvent.click(screen.getByTestId("analyze-source-shots"));
+      await waitFor(() => expect(run).toHaveBeenCalledTimes(1));
+      await screen.findByText(/still running/i);
+      fireEvent.click(screen.getByTestId("analyze-source-shots"));
+      await waitFor(() => expect(run).toHaveBeenCalledTimes(2));
+      expect(run.mock.calls[1][0].sourceRequest.requestId)
+        .toBe(run.mock.calls[0][0].sourceRequest.requestId);
+    } finally {
+      run.mockRestore();
+      window.sessionStorage.clear();
+      if (originalFlag === undefined) delete process.env.REACT_APP_ENABLE_STUDIO_ANALYSIS_JOBS;
+      else process.env.REACT_APP_ENABLE_STUDIO_ANALYSIS_JOBS = originalFlag;
+    }
+  });
+
   test("source-shot analysis offers one evidence-bound split without applying it", async () => {
     const onDirectorReview = jest.fn();
     const requestSpy = jest.spyOn(studioDirectorEvidenceProposals, "buildSourceShotDirectorSplitRequest");

@@ -50,6 +50,7 @@ const { persistSourceShotAnalysisArtifact } =
 const {
   MAX_SOURCE_BYTES,
   createStudioAnalysisJob,
+  createStudioAnalysisJobFromOwnedSource,
   getOwnedStudioAnalysisJob,
   getOwnedStudioAnalysisResult,
   cancelStudioAnalysisJob,
@@ -1153,6 +1154,30 @@ router.post("/estimate", async (req, res) => {
 
 // Durable CPU source-shot analysis. A worker process consumes queued records;
 // this request only stages the source and returns the owner-scoped job receipt.
+router.post("/studio-analysis-jobs/from-source", requireTesterEditingFeature("audioExtract"),
+  async (req, res) => {
+    try {
+      if (!req.user?.uid || req.user.uid !== req.userId)
+        return res.status(401).json({ code: "STUDIO_ANALYSIS_JOB_INVALID" });
+      let anchors = req.body?.anchors;
+      if (typeof anchors === "string") {
+        try { anchors = JSON.parse(anchors); }
+        catch (_) { return res.status(400).json({ code: "STUDIO_ANALYSIS_JOB_INVALID" }); }
+      }
+      const job = await createStudioAnalysisJobFromOwnedSource({
+        uid: req.user.uid, requestId: req.body?.requestId,
+        projectId: req.body?.projectId, sourceAssetId: req.body?.sourceAssetId,
+        storagePath: req.body?.storagePath, mode: req.body?.mode,
+        start: req.body?.start, end: req.body?.end, anchors,
+      });
+      return res.status(job.status === "queued" ? 202 : 200).json(job);
+    } catch (error) {
+      return res.status(error.statusCode || 503).json({
+        code: error.code || "STUDIO_ANALYSIS_JOB_UNAVAILABLE",
+      });
+    }
+  });
+
 router.post("/studio-analysis-jobs", requireTesterEditingFeature("audioExtract"),
   (req, res, next) => studioAnalysisUpload.single("file")(req, res, error => {
     if (error?.code === "LIMIT_FILE_SIZE")

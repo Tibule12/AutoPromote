@@ -1,4 +1,5 @@
 const crypto = require("crypto");
+const { Readable } = require("stream");
 
 jest.mock("../src/services/studioDirectorProjectBinding", () => ({
   getOwnedStudioSourceBinding: jest.fn().mockResolvedValue(null),
@@ -14,6 +15,7 @@ jest.mock("../src/services/studioAnalysisArtifactService", () => ({
 
 const {
   createStudioAnalysisJob,
+  createStudioAnalysisJobFromOwnedSource,
   getOwnedStudioAnalysisJob,
   cancelStudioAnalysisJob,
   getOwnedStudioAnalysisResult,
@@ -21,8 +23,12 @@ const {
   renewLease,
   processStudioAnalysisJob,
   processNextStudioAnalysisJob,
+  cleanupStudioAnalysisJobObjects,
 } = require("../src/services/studioAnalysisJobService");
-const { assertOwnedStudioSourceBinding } = require("../src/services/studioDirectorProjectBinding");
+const {
+  assertOwnedStudioSourceBinding,
+  getOwnedStudioSourceBinding,
+} = require("../src/services/studioDirectorProjectBinding");
 const {
   projectSourceShotAnalysis,
   persistSourceShotArtifact,
@@ -89,6 +95,7 @@ const fakeStorage = () => {
   let saves = 0;
   let deletes = 0;
   return {
+    name: "test-bucket",
     objects,
     get saves() {
       return saves;
@@ -96,7 +103,10 @@ const fakeStorage = () => {
     get deletes() {
       return deletes;
     },
-    file: path => ({
+    getFiles: async ({ prefix }) => [[...objects.keys()]
+      .filter(path => path.startsWith(prefix))
+      .map(path => ({ name: path, delete: async () => { deletes++; objects.delete(path); } }))],
+    file: (path, options = {}) => ({
       save: async (buffer, options) => {
         if (objects.has(path)) throw Object.assign(new Error("exists"), { code: 412 });
         saves++;
@@ -109,8 +119,18 @@ const fakeStorage = () => {
         });
       },
       getMetadata: async () => {
-        if (!objects.has(path)) throw new Error("missing source");
+        if (!objects.has(path))
+          throw Object.assign(new Error("missing source"), { code: 404 });
+        if (options.generation &&
+            String(objects.get(path).metadata.generation) !== String(options.generation))
+          throw Object.assign(new Error("source generation changed"), { code: 404 });
         return [objects.get(path).metadata];
+      },
+      createReadStream: () => {
+        if (options.generation &&
+            String(objects.get(path)?.metadata.generation) !== String(options.generation))
+          throw new Error("source generation changed");
+        return Readable.from([Buffer.from(objects.get(path).buffer)]);
       },
       getSignedUrl: async () => ["https://storage.example.test/source"],
       download: async () => [Buffer.from(objects.get(path).buffer)],
@@ -123,6 +143,15 @@ const fakeStorage = () => {
 };
 
 const source = Buffer.from("bounded-test-source");
+const ownedPath = "studio/sources/owner-1/recording.mp4";
+const addOwnedSource = (storage, overrides = {}) => storage.objects.set(ownedPath, {
+  buffer: Buffer.from(source),
+  metadata: {
+    size: String(source.length), generation: "123", contentType: "video/mp4",
+    metadata: { ownerUid: "owner-1", purpose: "studio_source" },
+    ...overrides,
+  },
+});
 const input = overrides => ({
   uid: "owner-1",
   requestId: "request-0001",
@@ -376,4 +405,164 @@ test("abandoned staging expires and deletes its source", async () => {
     await getOwnedStudioAnalysisJob({ uid: "owner-1", jobId: queued.jobId, firestore })
   ).toMatchObject({ status: "failed", failureCode: "STUDIO_ANALYSIS_STAGING_EXPIRED" });
   expect(storage.objects.size).toBe(0);
+});
+
+test("owned durable source is hashed by the worker and retained after completion", async () => {
+  const firestore = fakeFirestore(), storage = fakeStorage();
+  addOwnedSource(storage);
+  const args = { uid: "owner-1", requestId: "owned-request-1",
+    projectId: "project-1", sourceAssetId: "asset-1", storagePath: ownedPath,
+    mode: "source_shots", start: 0, end: 60,
+    anchors: { solo: { x: 40, y: 50 } } };
+  const queued = await createStudioAnalysisJobFromOwnedSource(args,
+    { firestore, sourceStorage: storage });
+  expect(await createStudioAnalysisJobFromOwnedSource(args,
+    { firestore, sourceStorage: storage })).toEqual(queued);
+  expect(queued).toMatchObject({ status: "queued", sourceSha256: null });
+  await processStudioAnalysisJob({ jobId: queued.jobId, workerId: "worker-1",
+    firestore, storage, runWorker: async () => ({ engine: "opencv-yunet-source-shot-follow" }) });
+  const state = await getOwnedStudioAnalysisJob({ uid: "owner-1", jobId: queued.jobId, firestore });
+  expect(state).toMatchObject({ status: "completed", sourceSha256: hash(source) });
+  expect(await createStudioAnalysisJobFromOwnedSource(args,
+    { firestore, sourceStorage: storage })).toMatchObject({
+    jobId: queued.jobId, status: "completed", sourceSha256: hash(source),
+  });
+  expect(assertOwnedStudioSourceBinding).toHaveBeenCalledWith(expect.objectContaining({
+    sourceSha256: hash(source),
+  }));
+  expect(storage.objects.has(ownedPath)).toBe(true);
+  expect(storage.objects.size).toBe(2);
+  expect(await getOwnedStudioAnalysisResult({ uid: "owner-1", jobId: queued.jobId,
+    firestore, storage })).toMatchObject({ engine: "opencv-yunet-source-shot-follow" });
+  storage.objects.get(ownedPath).metadata.generation = "124";
+  await expect(getOwnedStudioAnalysisResult({ uid: "owner-1", jobId: queued.jobId,
+    firestore, storage })).rejects.toMatchObject({ code: "STUDIO_ANALYSIS_SOURCE_CHANGED" });
+});
+
+test("owned source rejects wrong owner, changed generation and a conflicting binding", async () => {
+  const firestore = fakeFirestore(), storage = fakeStorage();
+  const args = { uid: "owner-1", requestId: "owned-request-2",
+    projectId: "project-1", sourceAssetId: "asset-1", storagePath: ownedPath,
+    mode: "source_shots", start: 0, end: 60,
+    anchors: { solo: { x: 40, y: 50 } } };
+  await expect(createStudioAnalysisJobFromOwnedSource(args,
+    { firestore, sourceStorage: storage })).rejects.toMatchObject({
+    code: "STUDIO_ANALYSIS_SOURCE_MISSING",
+  });
+  addOwnedSource(storage, { metadata: { ownerUid: "stranger", purpose: "studio_source" } });
+  await expect(createStudioAnalysisJobFromOwnedSource(args,
+    { firestore, sourceStorage: storage })).rejects.toMatchObject({
+    code: "STUDIO_ANALYSIS_SOURCE_FORBIDDEN",
+  });
+  addOwnedSource(storage);
+  const queued = await createStudioAnalysisJobFromOwnedSource(args,
+    { firestore, sourceStorage: storage });
+  storage.objects.get(ownedPath).metadata.generation = "124";
+  await processStudioAnalysisJob({ jobId: queued.jobId, workerId: "worker-1",
+    firestore, storage, runWorker: async () => ({}) });
+  expect(await getOwnedStudioAnalysisJob({ uid: "owner-1", jobId: queued.jobId, firestore }))
+    .toMatchObject({ status: "failed", failureCode: "STUDIO_ANALYSIS_SOURCE_UNVERIFIED" });
+  expect(storage.objects.has(ownedPath)).toBe(true);
+  addOwnedSource(storage);
+  getOwnedStudioSourceBinding.mockResolvedValueOnce({ sourceSha256: "f".repeat(64) });
+  const other = await createStudioAnalysisJobFromOwnedSource({ ...args, requestId: "owned-request-3" },
+    { firestore, sourceStorage: storage });
+  await processStudioAnalysisJob({ jobId: other.jobId, workerId: "worker-2",
+    firestore, storage, runWorker: async () => ({}) });
+  expect(await getOwnedStudioAnalysisJob({ uid: "owner-1", jobId: other.jobId, firestore }))
+    .toMatchObject({ status: "failed", failureCode: "PROJECT_SOURCE_CONFLICT" });
+});
+
+test("owned source refuses a false byte count or hash-qualified asset", async () => {
+  const firestore = fakeFirestore(), storage = fakeStorage();
+  addOwnedSource(storage);
+  const args = { uid: "owner-1", requestId: "owned-request-5",
+    projectId: "project-1", sourceAssetId: "asset-1", storagePath: ownedPath,
+    mode: "source_shots", start: 0, end: 60,
+    anchors: { solo: { x: 40, y: 50 } } };
+  storage.objects.get(ownedPath).metadata.size = String(source.length + 1);
+  const wrongSize = await createStudioAnalysisJobFromOwnedSource(args,
+    { firestore, sourceStorage: storage });
+  await processStudioAnalysisJob({ jobId: wrongSize.jobId, workerId: "worker-1",
+    firestore, storage, runWorker: async () => ({}) });
+  expect(await getOwnedStudioAnalysisJob({ uid: "owner-1", jobId: wrongSize.jobId, firestore }))
+    .toMatchObject({ status: "failed", failureCode: "STUDIO_ANALYSIS_SOURCE_UNVERIFIED" });
+  expect(persistSourceShotArtifact).not.toHaveBeenCalled();
+
+  addOwnedSource(storage);
+  const wrongHash = await createStudioAnalysisJobFromOwnedSource({ ...args,
+    requestId: "owned-request-6", sourceAssetId: `asset-1:sha256:${"f".repeat(64)}` },
+  { firestore, sourceStorage: storage });
+  await processStudioAnalysisJob({ jobId: wrongHash.jobId, workerId: "worker-2",
+    firestore, storage, runWorker: async () => ({}) });
+  expect(await getOwnedStudioAnalysisJob({ uid: "owner-1", jobId: wrongHash.jobId, firestore }))
+    .toMatchObject({ status: "failed", failureCode: "SOURCE_SHOT_ASSET_HASH_MISMATCH" });
+  expect(persistSourceShotArtifact).not.toHaveBeenCalled();
+});
+
+test("janitor removes orphan results and keeps the completed receipt object", async () => {
+  const firestore = fakeFirestore(), storage = fakeStorage();
+  const queued = await createStudioAnalysisJob(input(), { firestore, storage });
+  await processStudioAnalysisJob({ jobId: queued.jobId, workerId: "worker-1",
+    firestore, storage, runWorker: async () => ({ engine: "opencv-yunet-source-shot-follow" }) });
+  const path = `studio_analysis_jobs/${queued.jobId}`;
+  const record = firestore.docs.get(path);
+  firestore.docs.set(path, { ...record, cleanupAfter: new Date(0).toISOString() });
+  const orphanPath = `studio/analysis-results/owner-1/${queued.jobId}/${"f".repeat(64)}.json`;
+  storage.objects.set(orphanPath, { buffer: Buffer.from("orphan"), metadata: {} });
+  expect(await processNextStudioAnalysisJob({ workerId: "janitor-1", firestore, storage,
+    runWorker: async () => { throw new Error("cleanup must not run inference"); } }))
+    .toBe(true);
+  expect(storage.objects.has(orphanPath)).toBe(false);
+  expect(storage.objects.size).toBe(1);
+  expect(firestore.docs.get(path)).toMatchObject({ cleanupPending: false });
+});
+
+test("cancelled owned job keeps its source and retries an interrupted orphan cleanup", async () => {
+  const firestore = fakeFirestore(), storage = fakeStorage();
+  addOwnedSource(storage);
+  const queued = await createStudioAnalysisJobFromOwnedSource({
+    uid: "owner-1", requestId: "owned-request-4", projectId: "project-1",
+    sourceAssetId: "asset-1", storagePath: ownedPath, mode: "source_shots",
+    start: 0, end: 60, anchors: { solo: { x: 40, y: 50 } },
+  }, { firestore, sourceStorage: storage });
+  await cancelStudioAnalysisJob({ uid: "owner-1", jobId: queued.jobId, firestore, storage });
+  const path = `studio_analysis_jobs/${queued.jobId}`;
+  firestore.docs.set(path, { ...firestore.docs.get(path),
+    cleanupAfter: new Date(0).toISOString() });
+  const orphanPath = `studio/analysis-results/owner-1/${queued.jobId}/${"f".repeat(64)}.json`;
+  storage.objects.set(orphanPath, { buffer: Buffer.from("orphan"), metadata: {} });
+  const originalGetFiles = storage.getFiles;
+  storage.getFiles = async () => [[{ name: orphanPath, delete: async () => {
+    throw new Error("storage temporarily unavailable");
+  } }]];
+  await expect(cleanupStudioAnalysisJobObjects({ jobId: queued.jobId, firestore, storage }))
+    .rejects.toThrow("temporarily unavailable");
+  expect(firestore.docs.get(path).cleanupPending).toBe(true);
+  storage.getFiles = originalGetFiles;
+  expect(await cleanupStudioAnalysisJobObjects({ jobId: queued.jobId, firestore, storage }))
+    .toBe(true);
+  expect(storage.objects.has(orphanPath)).toBe(false);
+  expect(storage.objects.has(ownedPath)).toBe(true);
+});
+
+test("a cleanup outage does not stall queued analysis", async () => {
+  const firestore = fakeFirestore(), storage = fakeStorage();
+  const finished = await createStudioAnalysisJob(input(), { firestore, storage });
+  await processStudioAnalysisJob({ jobId: finished.jobId, workerId: "worker-1",
+    firestore, storage, runWorker: async () => ({ engine: "opencv-yunet-source-shot-follow" }) });
+  const finishedPath = `studio_analysis_jobs/${finished.jobId}`;
+  firestore.docs.set(finishedPath, { ...firestore.docs.get(finishedPath),
+    cleanupAfter: new Date(0).toISOString() });
+  const next = await createStudioAnalysisJob(input({ requestId: "request-0002" }),
+    { firestore, storage });
+  storage.getFiles = async () => { throw new Error("list unavailable"); };
+  const log = jest.spyOn(console, "error").mockImplementation(() => {});
+  try {
+    expect(await processNextStudioAnalysisJob({ workerId: "worker-2", firestore, storage,
+      runWorker: async () => ({ engine: "opencv-yunet-source-shot-follow" }) })).toBe(true);
+  } finally { log.mockRestore(); }
+  expect(await getOwnedStudioAnalysisJob({ uid: "owner-1", jobId: next.jobId, firestore }))
+    .toMatchObject({ status: "completed" });
+  expect(firestore.docs.get(finishedPath).cleanupPending).toBe(true);
 });

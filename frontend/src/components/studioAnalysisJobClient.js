@@ -21,7 +21,12 @@ const request = async (fetchImpl, url, token, options = {}) => {
   }
   const body = await parseJson(response);
   if (!response.ok) {
-    const error = new Error(body.error || body.code || "Studio analysis request failed.");
+    const sourceChanged = ["STUDIO_ANALYSIS_SOURCE_CHANGED",
+      "STUDIO_ANALYSIS_IDEMPOTENCY_CONFLICT"].includes(body.code);
+    const error = new Error(sourceChanged
+      ? "Source video changed. Run analysis again."
+      : body.error || body.code || "Studio analysis request failed.");
+    error.code = body.code;
     error.retryable = response.status >= 500;
     throw error;
   }
@@ -34,6 +39,7 @@ export const runStudioSourceShotJob = async ({
   apiBaseUrl,
   token,
   formData,
+  sourceRequest,
   isCurrent = () => true,
   onStatus = () => {},
   fetchImpl = fetch,
@@ -54,7 +60,12 @@ export const runStudioSourceShotJob = async ({
       }
     }
   };
-  let job = await requestWithRetry(root, { method: "POST", body: formData });
+  const submission = sourceRequest
+    ? { url: `${root}/from-source`, options: { method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(sourceRequest) } }
+    : { url: root, options: { method: "POST", body: formData } };
+  let job = await requestWithRetry(submission.url, submission.options);
   const jobId = job.jobId;
   if (!/^[a-f0-9]{64}$/.test(jobId || ""))
     throw new Error("Studio analysis returned an invalid job ID.");
@@ -73,8 +84,11 @@ export const runStudioSourceShotJob = async ({
         analysisArtifact: job.analysisArtifact,
       };
     }
-    if (job.status === "failed" || job.status === "cancelled")
-      throw new Error(job.failureCode || `Studio analysis ${job.status}.`);
+    if (job.status === "failed" || job.status === "cancelled") {
+      const error = new Error(job.failureCode || `Studio analysis ${job.status}.`);
+      error.terminal = true;
+      throw error;
+    }
     if (!["staging", "queued", "running"].includes(job.status))
       throw new Error("Studio analysis returned an unknown status.");
     if (Date.now() >= deadline)

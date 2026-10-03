@@ -10,6 +10,7 @@ jest.mock("../src/authMiddleware", () => (req, _res, next) => {
 jest.mock("../src/services/studioAnalysisJobService", () => ({
   MAX_SOURCE_BYTES: 100 * 1024 * 1024,
   createStudioAnalysisJob: jest.fn(),
+  createStudioAnalysisJobFromOwnedSource: jest.fn(),
   getOwnedStudioAnalysisJob: jest.fn(),
   getOwnedStudioAnalysisResult: jest.fn(),
   cancelStudioAnalysisJob: jest.fn(),
@@ -27,6 +28,7 @@ jest.mock("firebase-admin", () => ({ storage: jest.fn(), firestore: jest.fn() })
 
 const jobs = require("../src/services/studioAnalysisJobService");
 const app = express();
+app.use(express.json());
 app.use("/api/media", require("../src/mediaRoutes"));
 
 beforeEach(() => jest.clearAllMocks());
@@ -62,6 +64,23 @@ test("malformed anchors fail before creating a job", async () => {
     .attach("file", Buffer.from("x"), "source.mp4")
     .expect(400);
   expect(jobs.createStudioAnalysisJob).not.toHaveBeenCalled();
+});
+
+test("owned source submission forwards path and settings without browser video bytes", async () => {
+  jobs.createStudioAnalysisJobFromOwnedSource.mockResolvedValue({
+    jobId: "a".repeat(64), status: "queued",
+  });
+  const response = await request(app)
+    .post("/api/media/studio-analysis-jobs/from-source")
+    .send({ requestId: "owned-request-1", projectId: "project-1",
+      sourceAssetId: "asset-1", storagePath: "studio/sources/owner-1/video.mp4",
+      mode: "source_shots", start: 0, end: 60,
+      anchors: { solo: { x: 40, y: 50 } } });
+  expect(response.status).toBe(202);
+  expect(jobs.createStudioAnalysisJobFromOwnedSource).toHaveBeenCalledWith(
+    expect.objectContaining({ uid: "owner-1",
+      storagePath: "studio/sources/owner-1/video.mp4" })
+  );
 });
 
 test("read and cancel use authenticated owner and hide unknown jobs", async () => {

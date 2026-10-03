@@ -12,13 +12,17 @@ const {
   persistSourceShotArtifact,
 } = require("./studioSourceShotArtifactService");
 const { persistSourceShotAnalysisArtifact } = require("./studioAnalysisArtifactService");
+const { getStudioSourceBucket, getStudioSourcePathKind } =
+  require("./studioSourceService");
 
 const MAX_SOURCE_BYTES = 100 * 1024 * 1024;
+const MAX_DURABLE_SOURCE_BYTES = 2 * 1024 * 1024 * 1024;
 const MAX_RESULT_BYTES = 20 * 1024 * 1024;
 const MAX_ATTEMPTS = 2;
 const LEASE_MS = 15 * 60 * 1000;
 const STAGING_TIMEOUT_MS = 60 * 60 * 1000;
 const WORKER_TIMEOUT_MS = 12 * 60 * 1000;
+const CLEANUP_DELAY_MS = 16 * 60 * 1000;
 const SHA = /^[a-f0-9]{64}$/;
 const ID = /^[A-Za-z0-9][A-Za-z0-9._:@+-]{0,159}$/;
 const requestIdPattern = /^[A-Za-z0-9][A-Za-z0-9_-]{7,127}$/;
@@ -45,10 +49,20 @@ const problem = (code, statusCode) => Object.assign(new Error(code), { code, sta
 const invalid = () => problem("STUDIO_ANALYSIS_JOB_INVALID", 400);
 const unavailable = () => problem("STUDIO_ANALYSIS_JOB_UNAVAILABLE", 503);
 const nowIso = () => new Date().toISOString();
+const cleanupAt = (clock = Date.now, delay = CLEANUP_DELAY_MS) =>
+  new Date(clock() + delay).toISOString();
 const jobRef = (firestore, jobId) => firestore.collection("studio_analysis_jobs").doc(jobId);
 const objectPath = (uid, jobId) => `temp/studio-analysis/${uid}/${jobId}.mp4`;
 const bucketFor = () => admin.storage().bucket();
-const sourceFile = (storage, record) => storage.file(record.sourceObjectPath);
+const sourceBucket = (storage, record) => record.sourceOwned && record.sourceBucketName &&
+    storage.name !== record.sourceBucketName
+    ? admin.storage().bucket(record.sourceBucketName) : storage;
+const sourceFile = (storage, record) =>
+  sourceBucket(storage, record).file(record.sourceObjectPath,
+    record.sourceGeneration ? { generation: record.sourceGeneration } : undefined);
+const deleteTemporarySource = async (storage, record) => {
+  if (!record.sourceOwned) await sourceFile(storage, record).delete().catch(() => {});
+};
 const resultPath = (uid, jobId, resultSha256) =>
   `studio/analysis-results/${uid}/${jobId}/${resultSha256}.json`;
 const jobIdFor = (uid, requestId) => hash(`${uid}\0${requestId}`);
@@ -76,7 +90,6 @@ const normalizeRequest = ({
   projectId,
   sourceAssetId,
   sourceSha256,
-  buffer,
   start,
   end,
   anchors,
@@ -97,11 +110,7 @@ const normalizeRequest = ({
     !requestIdPattern.test(requestId || "") ||
     !studioId(projectId) ||
     !studioId(sourceAssetId) ||
-    !SHA.test(sourceSha256 || "") ||
-    !Buffer.isBuffer(buffer) ||
-    buffer.length < 1 ||
-    buffer.length > MAX_SOURCE_BYTES ||
-    hash(buffer) !== sourceSha256 ||
+    (sourceSha256 !== null && !SHA.test(sourceSha256 || "")) ||
     mode !== "source_shots" ||
     !Number.isFinite(request.start) ||
     !Number.isFinite(request.end) ||
@@ -116,7 +125,7 @@ const normalizeRequest = ({
   )
     throw invalid();
   const qualifiedHash = /:sha256:([a-f0-9]{64})$/.exec(sourceAssetId)?.[1];
-  if (sourceAssetId.includes(":sha256:") && qualifiedHash !== sourceSha256)
+  if (sourceSha256 && sourceAssetId.includes(":sha256:") && qualifiedHash !== sourceSha256)
     throw problem("SOURCE_SHOT_ASSET_HASH_MISMATCH", 409);
   return request;
 };
@@ -134,6 +143,9 @@ const sameJob = (record, { uid, jobId, fingerprint }) => {
 // The Firestore staging record is created before the GCS object. Repeating the
 // same request can finish staging after a process exits between these steps.
 const createStudioAnalysisJob = async (input, { firestore = db, storage = bucketFor() } = {}) => {
+  if (!Buffer.isBuffer(input.buffer) || input.buffer.length < 1 ||
+      input.buffer.length > MAX_SOURCE_BYTES || hash(input.buffer) !== input.sourceSha256)
+    throw invalid();
   const request = normalizeRequest(input);
   const { uid, requestId, buffer } = input;
   const jobId = jobIdFor(uid, requestId);
@@ -215,6 +227,60 @@ const createStudioAnalysisJob = async (input, { firestore = db, storage = bucket
   return result;
 };
 
+const createStudioAnalysisJobFromOwnedSource = async (input, {
+  firestore = db, sourceStorage = getStudioSourceBucket("durable_studio"),
+} = {}) => {
+  const { uid, requestId, storagePath } = input;
+  if (getStudioSourcePathKind(storagePath, uid) !== "durable_studio")
+    throw problem("STUDIO_ANALYSIS_SOURCE_FORBIDDEN", 403);
+  const request = normalizeRequest({ ...input, sourceSha256: null });
+  let metadata;
+  try { [metadata] = await sourceStorage.file(storagePath).getMetadata(); }
+  catch (error) {
+    if (Number(error?.code || error?.statusCode) === 404)
+      throw problem("STUDIO_ANALYSIS_SOURCE_MISSING", 404);
+    throw unavailable();
+  }
+  const custom = metadata?.metadata || {};
+  const size = Number(metadata?.size);
+  const generation = String(metadata?.generation || "");
+  const contentType = String(metadata?.contentType || "").toLowerCase();
+  if (custom.ownerUid !== uid || !["studio_source", "studio_project"].includes(custom.purpose))
+    throw problem("STUDIO_ANALYSIS_SOURCE_FORBIDDEN", 403);
+  if (!Number.isSafeInteger(size) || size < 1 || size > MAX_DURABLE_SOURCE_BYTES ||
+      !/^\d+$/.test(generation) || !sourceStorage.name ||
+      !(contentType.startsWith("video/") ||
+        (contentType === "application/octet-stream" &&
+          /\.(mp4|m4v|mov|webm|mkv|avi|mpeg|mpg|mts|ts)$/i.test(storagePath))))
+    throw problem("STUDIO_ANALYSIS_SOURCE_INVALID", 422);
+  const expiry = Date.parse(custom.deleteAfter || "");
+  if (Number.isFinite(expiry) && expiry <= Date.now())
+    throw problem("STUDIO_ANALYSIS_SOURCE_EXPIRED", 410);
+  const source = {
+    sourceOwned: true, sourceObjectPath: storagePath,
+    sourceBucketName: sourceStorage.name, sourceGeneration: generation,
+    sourceSizeBytes: size,
+  };
+  const fingerprint = requestFingerprint({ ...request, ...source });
+  const jobId = jobIdFor(uid, requestId);
+  const ref = jobRef(firestore, jobId);
+  const timestamp = nowIso();
+  const record = {
+    schemaVersion: 1, jobId, ownerUid: uid, requestFingerprint: fingerprint,
+    ...request, ...source, status: "queued", attempts: 0,
+    nextAttemptAt: timestamp, createdAt: timestamp, updatedAt: timestamp,
+  };
+  try {
+    await ref.create(record);
+    return publicJob(record);
+  } catch (error) {
+    if (![6, "already-exists", "ALREADY_EXISTS"].includes(error?.code)) throw unavailable();
+    const snapshot = await ref.get();
+    if (!snapshot.exists) throw unavailable();
+    return publicJob(sameJob(snapshot.data(), { uid, jobId, fingerprint }));
+  }
+};
+
 const getOwnedStudioAnalysisJob = async ({ uid, jobId, firestore = db }) => {
   if (!ID.test(uid || "") || !SHA.test(jobId || "")) throw invalid();
   const snapshot = await jobRef(firestore, jobId).get();
@@ -238,6 +304,21 @@ const getOwnedStudioAnalysisResult = async ({
     record.analysisArtifact?.contentHash !== record.resultSha256
   )
     throw problem("STUDIO_ANALYSIS_RESULT_NOT_READY", 409);
+  if (record.sourceOwned) {
+    let sourceMetadata;
+    try {
+      [sourceMetadata] = await sourceBucket(storage, record)
+        .file(record.sourceObjectPath).getMetadata();
+    } catch (error) {
+      if (Number(error?.code || error?.statusCode) === 404)
+        throw problem("STUDIO_ANALYSIS_SOURCE_CHANGED", 409);
+      throw unavailable();
+    }
+    if (String(sourceMetadata?.generation || "") !== record.sourceGeneration ||
+        Number(sourceMetadata?.size) !== record.sourceSizeBytes ||
+        sourceMetadata?.metadata?.ownerUid !== uid)
+      throw problem("STUDIO_ANALYSIS_SOURCE_CHANGED", 409);
+  }
   const file = storage.file(resultPath(uid, jobId, record.resultSha256));
   const [metadata] = await file.getMetadata();
   if (
@@ -264,32 +345,34 @@ const cancelStudioAnalysisJob = async ({ uid, jobId, firestore = db, storage = b
     const snapshot = await transaction.get(ref);
     if (!snapshot.exists || snapshot.data().ownerUid !== uid) return null;
     const record = snapshot.data();
-    if (["completed", "failed", "cancelled"].includes(record.status)) return publicJob(record);
+    if (["completed", "failed", "cancelled"].includes(record.status))
+      return { public: publicJob(record), record };
     const updated = {
       ...record,
       status: "cancelled",
       updatedAt: nowIso(),
       leaseToken: null,
       leaseUntil: null,
+      cleanupPending: true,
+      cleanupAfter: cleanupAt(),
     };
     transaction.update(ref, {
       status: updated.status,
       updatedAt: updated.updatedAt,
       leaseToken: null,
       leaseUntil: null,
+      cleanupPending: updated.cleanupPending,
+      cleanupAfter: updated.cleanupAfter,
     });
-    return publicJob(updated);
+    return { public: publicJob(updated), record: updated };
   });
-  if (result?.status === "cancelled") {
+  if (result?.public.status === "cancelled") {
     // Repeated cancellation also retries cleanup after an interrupted delete.
     // An in-flight worker may receive a source-read failure; it is fenced from
     // publishing because the job no longer owns a lease.
-    await storage
-      .file(objectPath(uid, jobId))
-      .delete()
-      .catch(() => {});
+    await deleteTemporarySource(storage, result.record);
   }
-  return result;
+  return result?.public || null;
 };
 
 const claimJob = async ({ jobId, workerId, firestore = db, clock = Date.now }) => {
@@ -340,6 +423,8 @@ const failExhaustedLease = async ({ jobId, firestore, clock }) =>
       leaseToken: null,
       leaseUntil: null,
       updatedAt: nowIso(),
+      cleanupPending: true,
+      cleanupAfter: cleanupAt(clock),
     });
     return record;
   });
@@ -359,7 +444,11 @@ const finishJob = async ({ job, patch, firestore = db }) =>
     const ref = jobRef(firestore, job.jobId);
     const snapshot = await transaction.get(ref);
     if (!snapshot.exists || !ownsLease(snapshot.data(), job.leaseToken)) return false;
-    transaction.update(ref, { ...patch, leaseToken: null, leaseUntil: null, updatedAt: nowIso() });
+    transaction.update(ref, {
+      ...patch, leaseToken: null, leaseUntil: null, updatedAt: nowIso(),
+      ...(patch.status === "completed" || patch.status === "failed"
+        ? { cleanupPending: true, cleanupAfter: cleanupAt() } : {}),
+    });
     return true;
   });
 
@@ -390,8 +479,39 @@ const permanentFailure = error =>
     "PROJECT_SOURCE_CONFLICT",
     "SOURCE_SHOT_ASSET_HASH_MISMATCH",
     "STUDIO_ANALYSIS_SOURCE_UNVERIFIED",
+    "STUDIO_ANALYSIS_SOURCE_INVALID",
+    "STUDIO_ANALYSIS_SOURCE_EXPIRED",
     "STUDIO_ANALYSIS_RESULT_INVALID",
   ].includes(error?.code);
+
+const hashPinnedSource = async (file, expectedSize) => {
+  const digest = crypto.createHash("sha256");
+  let bytes = 0;
+  try {
+    for await (const chunk of file.createReadStream()) {
+      bytes += chunk.length;
+      if (bytes > expectedSize || bytes > MAX_DURABLE_SOURCE_BYTES)
+        throw problem("STUDIO_ANALYSIS_SOURCE_UNVERIFIED", 409);
+      digest.update(chunk);
+    }
+  } catch (error) {
+    if (error?.code === "STUDIO_ANALYSIS_SOURCE_UNVERIFIED") throw error;
+    throw unavailable();
+  }
+  if (bytes !== expectedSize) throw problem("STUDIO_ANALYSIS_SOURCE_UNVERIFIED", 409);
+  return digest.digest("hex");
+};
+
+const recordPinnedSourceHash = async ({ job, sourceSha256, firestore }) =>
+  firestore.runTransaction(async transaction => {
+    const ref = jobRef(firestore, job.jobId);
+    const snapshot = await transaction.get(ref);
+    if (!snapshot.exists || !ownsLease(snapshot.data(), job.leaseToken)) return false;
+    if (snapshot.data().sourceSha256 && snapshot.data().sourceSha256 !== sourceSha256)
+      throw problem("STUDIO_ANALYSIS_SOURCE_UNVERIFIED", 409);
+    transaction.update(ref, { sourceSha256 });
+    return true;
+  });
 
 const processStudioAnalysisJob = async ({
   jobId,
@@ -404,10 +524,7 @@ const processStudioAnalysisJob = async ({
   const job = await claimJob({ jobId, workerId, firestore, clock });
   if (!job) {
     const exhausted = await failExhaustedLease({ jobId, firestore, clock });
-    if (exhausted)
-      await sourceFile(storage, exhausted)
-        .delete()
-        .catch(() => {});
+    if (exhausted) await deleteTemporarySource(storage, exhausted);
     return null;
   }
   const file = sourceFile(storage, job);
@@ -417,16 +534,37 @@ const processStudioAnalysisJob = async ({
   interval.unref?.();
   let terminal = false;
   try {
-    const [metadata] = await file.getMetadata();
-    if (
-      metadata?.metadata?.ownerUid !== job.ownerUid ||
-      metadata?.metadata?.sourceSha256 !== job.sourceSha256 ||
-      metadata?.metadata?.jobId !== jobId ||
-      !Number.isSafeInteger(Number(metadata.size)) ||
-      Number(metadata.size) < 1 ||
-      Number(metadata.size) > MAX_SOURCE_BYTES
-    )
+    let metadata;
+    try { [metadata] = await file.getMetadata(); }
+    catch (error) {
+      if (job.sourceOwned && Number(error?.code || error?.statusCode) === 404)
+        throw problem("STUDIO_ANALYSIS_SOURCE_UNVERIFIED", 409);
+      throw error;
+    }
+    const custom = metadata?.metadata || {};
+    const sourceSize = Number(metadata?.size);
+    const expiry = Date.parse(custom.deleteAfter || "");
+    if (custom.ownerUid !== job.ownerUid || !Number.isSafeInteger(sourceSize) ||
+        sourceSize < 1 || (job.sourceOwned
+          ? (String(metadata.generation || "") !== job.sourceGeneration ||
+            sourceSize !== job.sourceSizeBytes || sourceSize > MAX_DURABLE_SOURCE_BYTES ||
+            !["studio_source", "studio_project"].includes(custom.purpose) ||
+            (Number.isFinite(expiry) && expiry <= clock()))
+          : (custom.sourceSha256 !== job.sourceSha256 || custom.jobId !== jobId ||
+            sourceSize > MAX_SOURCE_BYTES)))
       throw problem("STUDIO_ANALYSIS_SOURCE_UNVERIFIED", 409);
+    if (job.sourceOwned && !job.sourceSha256) {
+      const sourceSha256 = await hashPinnedSource(file, sourceSize);
+      const qualifiedHash = /:sha256:([a-f0-9]{64})$/.exec(job.sourceAssetId)?.[1];
+      if (job.sourceAssetId.includes(":sha256:") && qualifiedHash !== sourceSha256)
+        throw problem("SOURCE_SHOT_ASSET_HASH_MISMATCH", 409);
+      const binding = await getOwnedStudioSourceBinding({ uid: job.ownerUid,
+        projectId: job.projectId, sourceAssetId: job.sourceAssetId, firestore });
+      if (binding && binding.sourceSha256 !== sourceSha256)
+        throw problem("PROJECT_SOURCE_CONFLICT", 409);
+      if (!await recordPinnedSourceHash({ job, sourceSha256, firestore })) return null;
+      job.sourceSha256 = sourceSha256;
+    }
     const [signedUrl] = await file.getSignedUrl({ action: "read", expires: clock() + LEASE_MS });
     const analysis = await runWorker(job, signedUrl);
     const input = {
@@ -514,14 +652,48 @@ const processStudioAnalysisJob = async ({
     return null;
   } finally {
     clearInterval(interval);
-    if (terminal) await file.delete().catch(() => {});
+    if (terminal) await deleteTemporarySource(storage, job);
     else {
       const snapshot = await jobRef(firestore, jobId)
         .get()
         .catch(() => null);
-      if (snapshot?.data()?.status === "cancelled") await file.delete().catch(() => {});
+      if (snapshot?.data()?.status === "cancelled") await deleteTemporarySource(storage, job);
     }
   }
+};
+
+// The terminal receipt determines which result object survives. Waiting past
+// the worker timeout also covers a cancelled worker that was still uploading.
+const cleanupStudioAnalysisJobObjects = async ({
+  jobId, firestore = db, storage = bucketFor(), clock = Date.now,
+}) => {
+  if (!SHA.test(jobId || "")) throw invalid();
+  const ref = jobRef(firestore, jobId);
+  const snapshot = await ref.get();
+  if (!snapshot.exists) return false;
+  const record = snapshot.data();
+  if (!record.cleanupPending || Date.parse(record.cleanupAfter || "") > clock() ||
+      !["completed", "failed", "cancelled"].includes(record.status) ||
+      !ID.test(record.ownerUid || "") || record.jobId !== jobId)
+    return false;
+  const prefix = `studio/analysis-results/${record.ownerUid}/${jobId}/`;
+  const keep = record.status === "completed" && SHA.test(record.resultSha256 || "")
+    ? resultPath(record.ownerUid, jobId, record.resultSha256) : null;
+  const [files] = await storage.getFiles({ prefix });
+  for (const file of files) {
+    if (file.name !== keep) await file.delete({ ignoreNotFound: true });
+  }
+  if (!record.sourceOwned)
+    await storage.file(record.sourceObjectPath).delete({ ignoreNotFound: true });
+  return firestore.runTransaction(async transaction => {
+    const current = await transaction.get(ref);
+    if (!current.exists || current.data().status !== record.status ||
+        current.data().cleanupAfter !== record.cleanupAfter ||
+        current.data().resultSha256 !== record.resultSha256)
+      return false;
+    transaction.update(ref, { cleanupPending: false, cleanedAt: nowIso() });
+    return true;
+  });
 };
 
 const processNextStudioAnalysisJob = async ({
@@ -531,6 +703,22 @@ const processNextStudioAnalysisJob = async ({
   runWorker = callFaceWorker,
   clock = Date.now,
 }) => {
+  try {
+    const dueCleanup = await firestore.collection("studio_analysis_jobs")
+      .where("cleanupPending", "==", true)
+      .where("cleanupAfter", "<=", new Date(clock()).toISOString())
+      .limit(10).get();
+    for (const doc of dueCleanup.docs) {
+      try {
+        if (await cleanupStudioAnalysisJobObjects({ jobId: doc.id, firestore, storage, clock }))
+          return true;
+      } catch (error) {
+        console.error("[StudioAnalysisWorker] Cleanup will retry:", error?.code || error?.message);
+      }
+    }
+  } catch (error) {
+    console.error("[StudioAnalysisWorker] Cleanup query will retry:", error?.code || error?.message);
+  }
   for (const [status, dueField] of [
     ["queued", "nextAttemptAt"],
     ["running", "leaseUntil"],
@@ -582,13 +770,13 @@ const processNextStudioAnalysisJob = async ({
         status: "failed",
         failureCode: "STUDIO_ANALYSIS_STAGING_EXPIRED",
         updatedAt: nowIso(),
+        cleanupPending: true,
+        cleanupAfter: cleanupAt(clock),
       });
       return snapshot.data();
     });
     if (record) {
-      await sourceFile(storage, record)
-        .delete()
-        .catch(() => {});
+      await deleteTemporarySource(storage, record);
       return true;
     }
   }
@@ -598,6 +786,7 @@ const processNextStudioAnalysisJob = async ({
 module.exports = {
   MAX_SOURCE_BYTES,
   createStudioAnalysisJob,
+  createStudioAnalysisJobFromOwnedSource,
   getOwnedStudioAnalysisJob,
   getOwnedStudioAnalysisResult,
   cancelStudioAnalysisJob,
@@ -605,5 +794,6 @@ module.exports = {
   renewLease,
   processStudioAnalysisJob,
   processNextStudioAnalysisJob,
+  cleanupStudioAnalysisJobObjects,
   jobIdFor,
 };
