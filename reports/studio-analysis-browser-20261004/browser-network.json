@@ -1,0 +1,835 @@
+[
+  {
+    "at": "2026-10-04T12:04:51.418Z",
+    "method": "POST",
+    "path": "/api/media/studio-analysis-jobs/from-source",
+    "status": 202,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:04:55.471Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:04:59.870Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:05:04.482Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:05:07.864Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:05:11.854Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:05:15.577Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:05:19.649Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:05:24.114Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:05:28.543Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:05:33.359Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:05:38.029Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:05:42.450Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:05:47.075Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:05:51.348Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:05:56.133Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:06:00.478Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:06:05.220Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:06:10.183Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:06:14.599Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:06:18.841Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:06:23.100Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:06:27.699Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:06:32.477Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:06:37.550Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:06:42.445Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:06:47.037Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:06:51.242Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:06:55.321Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:07:00.653Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:07:05.436Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:07:10.157Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:07:14.896Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:07:19.688Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:07:24.473Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:07:29.135Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:07:33.933Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:07:38.430Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:07:43.632Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:07:48.698Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:07:53.457Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:07:58.127Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:08:03.323Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:08:07.804Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:08:12.714Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:08:17.091Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:08:21.364Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:08:25.825Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:08:30.790Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "queued"
+  },
+  {
+    "at": "2026-10-04T12:08:35.194Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:08:39.846Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:08:44.231Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:08:48.219Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:08:53.101Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:08:58.038Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:09:02.495Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:09:06.840Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:09:11.685Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:09:16.484Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:09:21.187Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:09:25.852Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:09:29.862Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:09:34.629Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:09:39.154Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:09:44.044Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:09:48.542Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:09:52.864Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:09:57.489Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:10:02.455Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:10:07.312Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:10:12.260Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:10:16.633Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:10:21.155Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:10:25.456Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:10:30.941Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:10:36.231Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:10:40.777Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:10:45.656Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:10:49.919Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:10:54.153Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:10:59.108Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:11:03.610Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:11:08.536Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:11:12.650Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:11:17.230Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:11:22.089Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:11:26.888Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:11:31.517Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:11:36.714Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:11:41.538Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:11:46.511Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:11:51.221Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:11:56.409Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:12:01.071Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:12:06.434Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:12:10.836Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:12:15.824Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:12:20.104Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:12:25.113Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:12:29.695Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:12:34.134Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:12:38.804Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:12:43.243Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:12:47.940Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:12:51.786Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:12:56.521Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:13:00.854Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:13:05.632Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:13:10.447Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:13:15.510Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:13:19.998Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:13:24.593Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:13:28.871Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:13:33.692Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:13:38.108Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:13:42.434Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:13:47.191Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "running"
+  },
+  {
+    "at": "2026-10-04T12:13:52.580Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "status": 200,
+    "jobStatus": "completed"
+  },
+  {
+    "at": "2026-10-04T12:13:57.449Z",
+    "method": "GET",
+    "path": "/api/media/studio-analysis-jobs/bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6/result",
+    "status": 200,
+    "jobStatus": null
+  }
+]

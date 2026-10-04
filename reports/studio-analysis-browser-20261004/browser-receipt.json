@@ -1,0 +1,86 @@
+{
+  "passed": true,
+  "startedAt": "2026-10-04T12:04:04.625Z",
+  "completedAt": "2026-10-04T12:14:51.098Z",
+  "projectId": "autopromote-staging-2026",
+  "browser": "Chromium",
+  "realFirebaseAuth": true,
+  "authBypass": false,
+  "mockedRequests": 0,
+  "productionEditorComponent": true,
+  "apiHost": "localhost; production media router backed by staging Firebase",
+  "cloudWorker": "studio-analysis-once-9574q",
+  "jobId": "bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+  "states": [
+    "queued",
+    "running",
+    "completed"
+  ],
+  "sourceRangeSeconds": 600,
+  "sceneCuts": 143,
+  "framingPoints": 1277,
+  "timelineCuts": 144,
+  "sampledCoverage": 0.99765625,
+  "projectBindingVerified": true,
+  "previousFramingPreservedWhileQueued": true,
+  "localCheckpointSaved": true,
+  "resultSha256": "e8c725943577c7bbc9b275443efa9e2a074a7abd814e391d4dc9ab06c33ae98c",
+  "authorization": [
+    {
+      "label": "owner",
+      "status": 200
+    },
+    {
+      "label": "other owner",
+      "status": 404
+    },
+    {
+      "label": "unauthenticated",
+      "status": 401
+    },
+    {
+      "label": "test-token bypass rejected",
+      "status": 401
+    }
+  ],
+  "playbackChecks": [
+    {
+      "label": "before submission",
+      "beforeTime": 9.786169,
+      "currentTime": 12.03547,
+      "paused": false,
+      "muted": false,
+      "volume": 1,
+      "readyState": 4
+    },
+    {
+      "label": "while queued",
+      "beforeTime": 25.96927,
+      "currentTime": 28.493402,
+      "paused": false,
+      "muted": false,
+      "volume": 1,
+      "readyState": 4
+    },
+    {
+      "label": "while running",
+      "beforeTime": 248.342187,
+      "currentTime": 251.200565,
+      "paused": false,
+      "muted": false,
+      "volume": 1,
+      "readyState": 4
+    },
+    {
+      "label": "after result applied",
+      "beforeTime": 586.437394,
+      "currentTime": 592.967618,
+      "paused": false,
+      "muted": false,
+      "volume": 1,
+      "readyState": 4
+    }
+  ],
+  "pageErrors": [],
+  "proofScope": "Production Studio component in a localhost acceptance host; dashboard navigation and public deployment excluded"
+}

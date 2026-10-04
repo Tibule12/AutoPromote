@@ -1,0 +1,638 @@
+[
+  {
+    "id": "viral-project-2a532e5c-2c75-4651-9981-a523f689d10d",
+    "name": "Ten-minute podcast · staging acceptance",
+    "createdAt": 1791115447175,
+    "snapshot": {
+      "orderedClips": [
+        {
+          "id": "staging-range-600",
+          "url": "[private staging source or credential]",
+          "name": "Ten-minute podcast",
+          "start": 0,
+          "end": 600,
+          "duration": 600,
+          "sourceDuration": 601.002086,
+          "sourceStoragePath": "studio/sources/staging-smoke/ten-minute-20261004-4a6efc07.mp4"
+        }
+      ],
+      "projectMedia": [
+        {
+          "id": "primary-studio/sources/staging-smoke/ten-minute-20261004-4a6efc07.mp4",
+          "name": "Ten-minute podcast · staging acceptance",
+          "url": "[private staging source or credential]",
+          "file": null,
+          "isLocal": false,
+          "isPrimary": true,
+          "storagePath": "studio/sources/staging-smoke/ten-minute-20261004-4a6efc07.mp4",
+          "sourceStoragePath": "studio/sources/staging-smoke/ten-minute-20261004-4a6efc07.mp4",
+          "duration": 601.002086,
+          "status": "ready",
+          "progress": 100
+        }
+      ],
+      "angleGroups": [],
+      "activeAngleGroupId": null,
+      "selectedClipId": "staging-range-600",
+      "overlays": [],
+      "activeOverlayId": null,
+      "videoFit": "cover",
+      "safeFaceFraming": false,
+      "faceAnchorPreset": "center",
+      "autoCaptions": false,
+      "captionStyle": "bold_pop",
+      "captionPosition": "bottom_center",
+      "captionScale": 1,
+      "captionTextOverride": "",
+      "captionSegments": [],
+      "translateCaptionsToEnglish": false,
+      "previewSpeed": 1,
+      "pacingLevel": "balanced",
+      "creativeIntent": "energy",
+      "creativeEffectsEnabled": false,
+      "creativePreset": "auto_story",
+      "creativeIntensity": "bold",
+      "finishFx": {
+        "precisionGrade": false,
+        "exposureStops": 0,
+        "lift": 0,
+        "gamma": 1,
+        "gain": 1,
+        "tint": 0,
+        "preset": null,
+        "brightness": 1,
+        "contrast": 1,
+        "saturation": 1,
+        "temperature": 0,
+        "sharpness": 0,
+        "vignette": 0,
+        "blur": 0,
+        "blurMode": "edge",
+        "blurStart": -1,
+        "blurEnd": -1,
+        "zoom": 1,
+        "zoomAnchor": "center",
+        "overlayType": "",
+        "overlayOpacity": 0.4,
+        "overlayColor": "#000000",
+        "filmGrain": 0,
+        "chromaticAberration": 0,
+        "vhsTracking": 0,
+        "lightLeak": 0,
+        "letterbox": 0,
+        "fadeIn": 0,
+        "fadeOut": 0
+      },
+      "podcastVisualizer": {
+        "enabled": false,
+        "mode": "wave",
+        "color": "#72f7ff",
+        "intensity": 0.75,
+        "position": "bottom"
+      },
+      "finishKeyframes": [],
+      "beatSnapEnabled": true,
+      "contentProfile": "auto",
+      "cutRangeStart": null,
+      "cutRangeEnd": null,
+      "joinTransition": "auto",
+      "joinTransitionDuration": 0.18,
+      "smartCrop": true,
+      "smartCropMode": "speaker_track",
+      "reframeAspect": "9:16",
+      "speakerTrackZoom": 1,
+      "reframeKeyframes": [],
+      "speakerStackFraming": {
+        "dividerPercent": 50,
+        "gapPercent": 1.2,
+        "cardGapPercent": 2.5,
+        "roundedCards": true,
+        "cardInsetPercent": 2.5,
+        "cardRadiusPercent": 8,
+        "secondaryXPercent": 80,
+        "secondaryYPercent": 20,
+        "secondarySizePercent": 30,
+        "top": {
+          "x": 50,
+          "y": 50,
+          "zoom": 1
+        },
+        "bottom": {
+          "x": 50,
+          "y": 50,
+          "zoom": 1
+        },
+        "third": {
+          "x": 50,
+          "y": 50,
+          "zoom": 1
+        },
+        "fourth": {
+          "x": 50,
+          "y": 50,
+          "zoom": 1
+        }
+      },
+      "speakerStackSourceIds": {
+        "top": null,
+        "bottom": null,
+        "third": null,
+        "fourth": null
+      },
+      "speakerStackOffsets": {
+        "top": 0,
+        "bottom": 0,
+        "third": 0,
+        "fourth": 0
+      },
+      "speakerStackSources": [],
+      "speakerStackCameraCount": 2,
+      "speakerStackLayout": "stack_2",
+      "speakerStackSyncConfirmed": false,
+      "speakerFocusCuts": [],
+      "reframeModeCuts": [],
+      "activeReframeKeyframeId": null,
+      "enhanceQuality": false,
+      "silenceRemoval": false,
+      "silenceThreshold": -35,
+      "minSilenceDuration": 0.75,
+      "removeWatermark": false,
+      "watermarkMode": "adaptive",
+      "brandWatermark": true,
+      "brandWatermarkVariant": "studio",
+      "brandWatermarkText": "AutoPromote · Viral Clip Studio",
+      "mainFrame": {
+        "insetPercent": 2.5,
+        "radiusPercent": 6,
+        "background": "studio_black",
+        "enabled": true
+      },
+      "exportSettings": {
+        "resolution": "1080p",
+        "fps": "30",
+        "codec": "h264",
+        "quality": "high",
+        "videoBitrate": "auto",
+        "targetFileSizeMb": "",
+        "audioCodec": "aac",
+        "audioBitrate": "192",
+        "colorSpace": "rec709"
+      },
+      "manualWatermarkRegions": [],
+      "activeWatermarkRegionId": null,
+      "addHook": false,
+      "hookText": "THIS CHANGES FAST",
+      "hookTemplate": "blur_reveal",
+      "hookIntroSeconds": 3,
+      "hookStartTime": 0.8,
+      "hookEndTime": 3.8,
+      "hookBlurBackground": true,
+      "hookDarkOverlay": true,
+      "hookFreezeFrame": false,
+      "hookZoomScale": 1.08,
+      "hookTextAnimation": "slide-up",
+      "hookPreviewLoop": false,
+      "hookFocusPoint": {
+        "x": 50,
+        "y": 42
+      },
+      "addMusic": false,
+      "muteOriginalAudio": false,
+      "musicSelection": "upbeat_pop.mp3",
+      "musicSearchMode": false,
+      "safeSearch": true,
+      "musicVolume": 0.15,
+      "musicDucking": true,
+      "musicDuckingStrength": 0.35,
+      "musicTrack": null,
+      "soundEffects": [],
+      "audioRemix": {
+        "version": 1,
+        "enabled": false,
+        "preset": "slowed_reverb",
+        "speed": 0.82,
+        "pitch": -3,
+        "bass": 8,
+        "clarity": 2,
+        "air": 1,
+        "reverb": 68,
+        "intensity": 75,
+        "keepPitch": false,
+        "contentType": "auto",
+        "target": "master",
+        "outputGain": 0,
+        "levelMatch": true,
+        "quality": "studio"
+      },
+      "activeSoundEffectId": null,
+      "extractedAudio": null,
+      "bRollCadence": "balanced",
+      "timeline": [
+        {
+          "id": "main",
+          "name": "Ten-minute podcast · staging acceptance",
+          "url": "[private staging source or credential]",
+          "storagePath": "studio/sources/staging-smoke/ten-minute-20261004-4a6efc07.mp4",
+          "sourceStoragePath": "studio/sources/staging-smoke/ten-minute-20261004-4a6efc07.mp4",
+          "duration": 601.002086,
+          "startRequest": 0,
+          "endRequest": 600
+        }
+      ],
+      "activeTimelineIndex": 0,
+      "timelineZoom": 1,
+      "timelineEditTool": "select",
+      "timelineSnapping": true,
+      "linkedSelection": true,
+      "rippleMode": false,
+      "trackStates": {
+        "video": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        },
+        "adjustment": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        },
+        "graphics": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        },
+        "broll": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        },
+        "captions": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        },
+        "originalAudio": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        },
+        "voiceover": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        },
+        "music": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        },
+        "sfx": {
+          "visible": true,
+          "locked": false,
+          "muted": false,
+          "solo": false
+        }
+      },
+      "motionKeyframes": [],
+      "motionScenes": [],
+      "threeDScenes": [],
+      "motionTargetId": "main-video",
+      "compositeTargetId": "main-video",
+      "mainTransform": {
+        "id": "main-video",
+        "name": "Main video",
+        "type": "video",
+        "x": 50,
+        "y": 50,
+        "scale": 1,
+        "rotation": 0,
+        "opacity": 1,
+        "cropX": 0,
+        "cropY": 0
+      },
+      "audioKeyframes": {
+        "originalAudio": [],
+        "masterPodcast": [],
+        "voiceover": [],
+        "music": [],
+        "broll": [],
+        "sfx": []
+      },
+      "speedKeyframes": [],
+      "voiceovers": [],
+      "adjustmentLayers": [],
+      "compoundClips": [],
+      "audioAutomationSource": "originalAudio",
+      "audioRestoration": {
+        "enabled": true,
+        "preset": "natural",
+        "voiceIsolation": false,
+        "denoise": 22,
+        "deEsser": 18,
+        "humFrequency": 50,
+        "compressor": 35,
+        "limiter": -1,
+        "loudness": -14,
+        "eq": {
+          "low": 0,
+          "mid": 0,
+          "high": 0
+        }
+      },
+      "proxySettings": {
+        "enabled": true,
+        "resolution": "720p",
+        "codec": "h264",
+        "status": "source_ready"
+      },
+      "stabilization": {
+        "enabled": false,
+        "strength": 35,
+        "crop": "adaptive",
+        "rollingShutter": false
+      },
+      "advancedColor": {
+        "lutName": "",
+        "lutFile": null,
+        "lutIntensity": 100,
+        "curve": {
+          "shadows": 0,
+          "midtones": 0,
+          "highlights": 0
+        },
+        "hsl": {
+          "hue": 0,
+          "saturation": 0,
+          "luminance": 0
+        }
+      },
+      "creatorPreview": {
+        "enabled": true,
+        "section": "reactions",
+        "activeDemo": "",
+        "intensity": 62,
+        "duration": 0.8,
+        "zoom": 1.34,
+        "x": 78,
+        "y": 68,
+        "color": "#ffcb67",
+        "accent": "#7457ff",
+        "text": "THIS CHANGED EVERYTHING",
+        "name": "",
+        "role": "",
+        "entity": "",
+        "emoji": "🤯",
+        "rank": 3,
+        "tracking": false,
+        "maskShape": "person",
+        "transition": "whip",
+        "introStyle": "cinematic",
+        "reactionMode": "instant",
+        "comparisonLeft": "",
+        "comparisonRight": ""
+      },
+      "splitExportEnabled": false,
+      "splitExportHooks": [],
+      "studioDocument": {
+        "schemaVersion": 1,
+        "projectId": "viral-project-2a532e5c-2c75-4651-9981-a523f689d10d",
+        "revision": 2,
+        "clock": {
+          "ticksPerSecond": 90000,
+          "interval": "half_open"
+        },
+        "output": {
+          "aspectRatio": "9:16",
+          "requestedResolution": "1080p",
+          "frameRate": {
+            "numerator": 30,
+            "denominator": 1
+          },
+          "codec": "h264",
+          "audioCodec": "aac",
+          "audioSampleRate": null,
+          "audioSampleRatePolicy": "worker_selected"
+        },
+        "assets": [
+          {
+            "assetId": "source:main",
+            "sourceId": "main",
+            "storagePath": "studio/sources/staging-smoke/ten-minute-20261004-4a6efc07.mp4",
+            "identityState": "legacy_reference_unverified"
+          }
+        ],
+        "clipOccurrences": [
+          {
+            "occurrenceId": "main",
+            "assetId": "source:main",
+            "sourceRange": {
+              "space": "source",
+              "startTick": 0,
+              "endTick": 54000000
+            },
+            "programmeRange": {
+              "space": "programme",
+              "startTick": 0,
+              "endTick": 54000000
+            },
+            "timeMapId": "map:main",
+            "playback": {
+              "direction": "forward",
+              "freeze": false,
+              "rate": {
+                "numerator": 1,
+                "denominator": 1
+              }
+            }
+          }
+        ],
+        "timeMaps": [
+          {
+            "timeMapId": "map:main",
+            "occurrenceId": "main",
+            "segments": [
+              {
+                "sourceRange": {
+                  "space": "source",
+                  "startTick": 0,
+                  "endTick": 54000000
+                },
+                "clipLocalRange": {
+                  "space": "clip_local",
+                  "startTick": 0,
+                  "endTick": 54000000
+                },
+                "programmeRange": {
+                  "space": "programme",
+                  "startTick": 0,
+                  "endTick": 54000000
+                },
+                "rate": {
+                  "numerator": 1,
+                  "denominator": 1
+                },
+                "direction": "forward",
+                "freeze": false
+              }
+            ]
+          }
+        ],
+        "layers": [],
+        "linkedTiming": {
+          "cues": {
+            "soundEffects": [],
+            "voiceovers": [],
+            "adjustmentLayers": []
+          },
+          "keys": {
+            "motionKeyframes": [],
+            "finishKeyframes": [],
+            "reframeKeyframes": [],
+            "reframeModeCuts": [],
+            "speakerFocusCuts": [],
+            "audioKeyframes.originalAudio": [],
+            "audioKeyframes.masterPodcast": [],
+            "audioKeyframes.voiceover": [],
+            "audioKeyframes.music": [],
+            "audioKeyframes.broll": [],
+            "audioKeyframes.sfx": []
+          }
+        },
+        "audioGraph": {
+          "legacySnapshotRef": "audioRemix",
+          "routes": [
+            {
+              "trackId": "video",
+              "state": {
+                "visible": true,
+                "locked": false,
+                "muted": false,
+                "solo": false
+              }
+            },
+            {
+              "trackId": "adjustment",
+              "state": {
+                "visible": true,
+                "locked": false,
+                "muted": false,
+                "solo": false
+              }
+            },
+            {
+              "trackId": "graphics",
+              "state": {
+                "visible": true,
+                "locked": false,
+                "muted": false,
+                "solo": false
+              }
+            },
+            {
+              "trackId": "broll",
+              "state": {
+                "visible": true,
+                "locked": false,
+                "muted": false,
+                "solo": false
+              }
+            },
+            {
+              "trackId": "captions",
+              "state": {
+                "visible": true,
+                "locked": false,
+                "muted": false,
+                "solo": false
+              }
+            },
+            {
+              "trackId": "originalAudio",
+              "state": {
+                "visible": true,
+                "locked": false,
+                "muted": false,
+                "solo": false
+              }
+            },
+            {
+              "trackId": "voiceover",
+              "state": {
+                "visible": true,
+                "locked": false,
+                "muted": false,
+                "solo": false
+              }
+            },
+            {
+              "trackId": "music",
+              "state": {
+                "visible": true,
+                "locked": false,
+                "muted": false,
+                "solo": false
+              }
+            },
+            {
+              "trackId": "sfx",
+              "state": {
+                "visible": true,
+                "locked": false,
+                "muted": false,
+                "solo": false
+              }
+            }
+          ],
+          "routing": {
+            "muteOriginalAudio": false,
+            "musicDucking": true,
+            "musicDuckingStrength": 0.35,
+            "musicTrackId": null
+          }
+        },
+        "constraints": {
+          "locks": []
+        },
+        "styleRef": null,
+        "analysisRefs": [],
+        "projectIntelligenceRefs": [],
+        "programmeSpeedKeys": [],
+        "fallbackSpeed": 1,
+        "outputTimeMap": [
+          {
+            "programmeRange": {
+              "space": "programme",
+              "startTick": 0,
+              "endTick": 54000000
+            },
+            "outputRange": {
+              "space": "output",
+              "startTick": 0,
+              "endTick": 54000000
+            },
+            "rateNumerator": 1000000,
+            "rateDenominator": 1000000
+          }
+        ],
+        "journal": [],
+        "idempotency": {},
+        "directorReviewJournal": [],
+        "compatibility": {
+          "legacySnapshotVersion": 1,
+          "projection": "clip_occurrences_canonical_other_fields_legacy",
+          "layerComposition": "separate_worker_stages"
+        }
+      }
+    },
+    "versions": [],
+    "updatedAt": 1791115475470
+  }
+]

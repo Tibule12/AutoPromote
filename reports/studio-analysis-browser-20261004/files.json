@@ -1,0 +1,89 @@
+{
+  "files": [
+    {
+      "path": "backend-authorization.json",
+      "bytes": 629,
+      "sha256": "17efce714981b0f318f5269d8284c3bf460ad6055f5c3aea82d8423777733f54"
+    },
+    {
+      "path": "browser-network.json",
+      "bytes": 26799,
+      "sha256": "8799d7a7e8d4506833105a09a5df0d2aded0674365c5a7325d53e721737192fb"
+    },
+    {
+      "path": "browser-receipt.json",
+      "bytes": 2138,
+      "sha256": "05b75e8acf6a70f15250848f19dd90772a95c51b5723f844aea392f1f321057a"
+    },
+    {
+      "path": "browser-result.json",
+      "bytes": 285021,
+      "sha256": "cd6a83490c46c5d7ecbfa170d9fadebddb395ce5b0ad6ad3d03688757d259556"
+    },
+    {
+      "path": "browser-submission.json",
+      "bytes": 976,
+      "sha256": "5f6a0b6f6474b8eebc62bdf5347ad15949e572f6aad458f045292dae0b6337ec"
+    },
+    {
+      "path": "cloud-analysis-artifact.json",
+      "bytes": 3471,
+      "sha256": "c5563e0614e6852a37f37c06a48e5f89274b1e4ac69ad262f6a9f9ae49c87bad"
+    },
+    {
+      "path": "cloud-execution.json",
+      "bytes": 4287,
+      "sha256": "da6d586485a1fafa9c48ba713f87982f36bdfaa8cc3a168c57deadaad5bfd10b"
+    },
+    {
+      "path": "cloud-job.json",
+      "bytes": 2502,
+      "sha256": "856ed4082a40d202baa0daf12612e012c12d5fa99a833f4797a7b23d410195a1"
+    },
+    {
+      "path": "cloud-result-metadata.json",
+      "bytes": 1840,
+      "sha256": "15f07c401f3672d1976cf7d5fb0006d970e0a2f3f899e9d672f4daf5e94140b6"
+    },
+    {
+      "path": "cloud-result.json",
+      "bytes": 152536,
+      "sha256": "e8c725943577c7bbc9b275443efa9e2a074a7abd814e391d4dc9ab06c33ae98c"
+    },
+    {
+      "path": "cloud-source-shot-artifact.json",
+      "bytes": 2770,
+      "sha256": "96cb90cb58c0531b749eb948a2ab997a7744c49a91cd03840d041a0118003011"
+    },
+    {
+      "path": "collection.json",
+      "bytes": 207,
+      "sha256": "e66b421cc516f45197b30edf4747231fcb3fc13882a57921d4c8b8da295f0cf3"
+    },
+    {
+      "path": "editor-after.json",
+      "bytes": 1957047,
+      "sha256": "80bf23d2b9749563bd2f6dd4d492a362dbb590e5b84e4f32b3f8884ab9b37c0a"
+    },
+    {
+      "path": "editor-before.json",
+      "bytes": 17319,
+      "sha256": "7f310705f8164dac41c221683d5017b254d9f591fd611b8855b04ebad4ae2a6b"
+    },
+    {
+      "path": "source-media.json",
+      "bytes": 295,
+      "sha256": "c37780a03ab5bed8d649400c2e0b3156776baf5d9828b7801e6c98806e629e78"
+    },
+    {
+      "path": "source-metadata.json",
+      "bytes": 1193,
+      "sha256": "ecc82aaea168a4c60f92206999d922663f1043897a2981368ca7413482c6babb"
+    },
+    {
+      "path": "visuals.json",
+      "bytes": 1120,
+      "sha256": "3a8f352dd26e4a439b5170d5ce42b0de2bf7dee4b9464b85f0309cf882e9a769"
+    }
+  ]
+}

@@ -1,5 +1,15 @@
 # Ten-minute Studio analysis staging gate — October 4, 2026
 
+The subsequent [real frontend browser gate](../reports/studio-analysis-browser-20261004/README.md)
+passed with actual staging Firebase sign-in, the production Studio component and
+media router, and the cloud worker. It observed all three job states, applied
+all 143 cuts and 1,277 framing points, and saved the project while preserving
+monitored playback. Its [browser receipt](../reports/studio-analysis-browser-20261004/browser-receipt.json)
+and [independent verification](../reports/studio-analysis-browser-20261004/verification.json)
+are separate from the component tests below. The acceptance API and frontend
+were hosted locally; public deployment and dashboard navigation remain outside
+that gate.
+
 Open the [actual evidence bundle](../reports/studio-analysis-ten-minute-20261004/README.md),
 [stored analysis JSON](../reports/studio-analysis-ten-minute-20261004/repaired-analysis-result.json),
 [Cloud Run execution receipt](../reports/studio-analysis-ten-minute-20261004/repaired-execution.json),

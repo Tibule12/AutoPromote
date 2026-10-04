@@ -1,0 +1,33 @@
+{
+  "request": {
+    "projectId": "viral-project-2a532e5c-2c75-4651-9981-a523f689d10d",
+    "sourceAssetId": "source:main",
+    "storagePath": "studio/sources/staging-smoke/ten-minute-20261004-4a6efc07.mp4",
+    "anchors": {
+      "solo": {
+        "x": 50,
+        "y": 50
+      }
+    },
+    "mode": "source_shots",
+    "start": 0,
+    "end": 600,
+    "requestId": "studio-analysis-2479e419-18c9-4eee-a366-b435eaa747f9"
+  },
+  "receipt": {
+    "jobId": "bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+    "projectId": "viral-project-2a532e5c-2c75-4651-9981-a523f689d10d",
+    "sourceAssetId": "source:main",
+    "sourceSha256": null,
+    "status": "queued",
+    "attempts": 0,
+    "maxAttempts": 2,
+    "createdAt": "2026-10-04T12:04:50.595Z",
+    "updatedAt": "2026-10-04T12:04:50.595Z",
+    "nextAttemptAt": "2026-10-04T12:04:50.595Z",
+    "failureCode": null,
+    "sourceShotArtifact": null,
+    "analysisArtifact": null,
+    "resultSha256": null
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "passed": true,
+  "checkedAt": "2026-10-04T12:13:38.993Z",
+  "realFirebaseUsers": 2,
+  "projectId": "autopromote-staging-2026",
+  "jobId": "bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+  "checks": [
+    {
+      "name": "other owner job",
+      "status": 404
+    },
+    {
+      "name": "other owner result",
+      "status": 404
+    },
+    {
+      "name": "missing auth",
+      "status": 401
+    },
+    {
+      "name": "test token",
+      "status": 401
+    },
+    {
+      "name": "E2E header",
+      "status": 401
+    },
+    {
+      "name": "other owner source submission",
+      "status": 403
+    }
+  ]
+}

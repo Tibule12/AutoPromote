@@ -1,0 +1,30 @@
+{
+  "storage": "Local ignored artifacts; source footage is not pushed",
+  "files": [
+    {
+      "path": "../../artifacts/studio-analysis-browser-20261004/frontend-before.png",
+      "bytes": 691752,
+      "sha256": "8037c287152802af81d873bad7d0c6a0bb4b4a78f3a556855728fff8b43eb2dd"
+    },
+    {
+      "path": "../../artifacts/studio-analysis-browser-20261004/frontend-queued.png",
+      "bytes": 691542,
+      "sha256": "256fb7e54f37d17ace8235600975a7ccab57939fcc04794662a1bae66c548211"
+    },
+    {
+      "path": "../../artifacts/studio-analysis-browser-20261004/frontend-running.png",
+      "bytes": 639263,
+      "sha256": "95477055db587b9f1a3217a0f8f3d6253e24dde56862f8fe0b446b19d4f03a11"
+    },
+    {
+      "path": "../../artifacts/studio-analysis-browser-20261004/frontend-applied.png",
+      "bytes": 655659,
+      "sha256": "775944ba8504ffc0b0dce13be8859c827e28e79303618d8f23a676d02363731d"
+    },
+    {
+      "path": "../../artifacts/studio-analysis-browser-20261004/frontend-browser.webm",
+      "bytes": 77293763,
+      "sha256": "b9b82435b500117c50bc73702882b422c2cc9dabe8a82a23fbe5742b677dfb58"
+    }
+  ]
+}

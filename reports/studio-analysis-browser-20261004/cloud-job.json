@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "jobId": "bdacfd34ce78efb7d8615f77229a3ff7db827087289488f08206a9c19f2928e6",
+  "ownerUid": "staging-smoke",
+  "requestFingerprint": "68ccebae9b00d78e10e84ba9d98cba58d3f5ff745921949f9dfc87d422db851d",
+  "projectId": "viral-project-2a532e5c-2c75-4651-9981-a523f689d10d",
+  "sourceAssetId": "source:main",
+  "mode": "source_shots",
+  "start": 0,
+  "end": 600,
+  "anchors": {
+    "solo": {
+      "x": 50,
+      "y": 50
+    }
+  },
+  "sourceOwned": true,
+  "sourceObjectPath": "studio/sources/staging-smoke/ten-minute-20261004-4a6efc07.mp4",
+  "sourceBucketName": "autopromote-staging-2026.firebasestorage.app",
+  "sourceGeneration": "1791107066573616",
+  "sourceSizeBytes": 726725520,
+  "createdAt": "2026-10-04T12:04:50.595Z",
+  "workerId": "studio-9278785abeb8dcf4",
+  "failureCode": null,
+  "nextAttemptAt": null,
+  "attempts": 1,
+  "sourceSha256": "4a6efc07f90860a22d4fcbebd0ff77ae6bc72907491631e3e217099a2bddeb8c",
+  "leaseUntil": null,
+  "resultSha256": "e8c725943577c7bbc9b275443efa9e2a074a7abd814e391d4dc9ab06c33ae98c",
+  "analysisArtifact": {
+    "artifactHash": "babf09d4d54bcb3fef7f1a151918b511bc28f6b3044321681e2bb16d718bc8a6",
+    "projectId": "viral-project-2a532e5c-2c75-4651-9981-a523f689d10d",
+    "sourceAssetId": "source:main",
+    "sourceSha256": "4a6efc07f90860a22d4fcbebd0ff77ae6bc72907491631e3e217099a2bddeb8c",
+    "analysisType": "source_shots",
+    "modelRevision": "opencv-yunet-source-shot-follow",
+    "configHash": "ef70600d7a055251a7865680c25757d64a8daf03fca24e8270b61f9f43c5513d",
+    "contentHash": "e8c725943577c7bbc9b275443efa9e2a074a7abd814e391d4dc9ab06c33ae98c",
+    "dependencyHashes": [
+      "a891213ab8c1a66191b97e245c79696b98d3a26e0b1260f8a1d600cc31471971"
+    ],
+    "analysisRange": {
+      "space": "source",
+      "startTick": 0,
+      "endTick": 54000000
+    },
+    "createdAt": "2026-10-04T12:13:50.108Z"
+  },
+  "cleanupPending": true,
+  "leaseToken": null,
+  "sourceShotArtifact": {
+    "artifactHash": "a891213ab8c1a66191b97e245c79696b98d3a26e0b1260f8a1d600cc31471971",
+    "sourceSha256": "4a6efc07f90860a22d4fcbebd0ff77ae6bc72907491631e3e217099a2bddeb8c",
+    "projectId": "viral-project-2a532e5c-2c75-4651-9981-a523f689d10d",
+    "sourceAssetId": "source:main",
+    "analysisRange": {
+      "space": "source",
+      "startTick": 0,
+      "endTick": 54000000
+    },
+    "createdAt": "2026-10-04T12:13:49.972Z"
+  },
+  "cleanupAfter": "2026-10-04T12:29:50.376Z",
+  "status": "completed",
+  "updatedAt": "2026-10-04T12:13:50.376Z"
+}

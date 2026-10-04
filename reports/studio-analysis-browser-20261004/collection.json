@@ -1,0 +1,5 @@
+{
+  "collectedAt": "2026-10-04T12:18:36.626Z",
+  "projectId": "autopromote-staging-2026",
+  "source": "Independent authenticated staging Firestore, GCS and Cloud Run reads; tokens and signed URLs excluded"
+}
