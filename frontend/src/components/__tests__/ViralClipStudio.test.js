@@ -198,6 +198,79 @@ describe("ViralClipStudio timeline sequencing", () => {
     jest.clearAllMocks();
   });
 
+  test("batch media stays ordered in the library until explicitly placed, with isolated failures", async () => {
+    const previousCreateUrl = URL.createObjectURL;
+    const previousRevokeUrl = URL.revokeObjectURL;
+    let urlIndex = 0, activeUploads = 0, peakUploads = 0;
+    URL.createObjectURL = jest.fn(() => `blob:http://localhost/batch-${++urlIndex}`);
+    URL.revokeObjectURL = jest.fn();
+    document.createElement.mockImplementation(tag => {
+      const node = originalCreateElement(tag);
+      if (tag === "video") {
+        Object.defineProperty(node, "duration", { configurable: true,
+          get: () => String(node.getAttribute("src") || "").includes("/main.mp4") ? 12 : 5 });
+        const setAttribute = node.setAttribute.bind(node);
+        node.setAttribute = (name, value) => {
+          setAttribute(name, value);
+          if (name === "src") setTimeout(() => node.dispatchEvent(new Event("loadedmetadata")), 0);
+        };
+        let source = "";
+        Object.defineProperty(node, "src", { configurable: true, get: () => source,
+          set: value => { source = value; setTimeout(() => node.dispatchEvent(new Event("loadedmetadata")), 0); } });
+      }
+      return node;
+    });
+    const pending = [];
+    uploadSourceFileViaBackend.mockImplementation(({ file }) => new Promise((resolve, reject) => {
+      activeUploads++;
+      peakUploads = Math.max(peakUploads, activeUploads);
+      pending.push({ file, finish: () => {
+        activeUploads--;
+        if (file.name === "Scene 06.mp4") reject(new Error("Fixture upload failure"));
+        else resolve({ url: `https://example.com/${encodeURIComponent(file.name)}`, storagePath: `studio/sources/test-user/${file.name}` });
+      } });
+    }));
+    try {
+      const { unmount } = render(<ViralClipStudio videoUrl="https://example.com/main.mp4"
+        sourceStoragePath="studio/sources/test-user/main.mp4" sourceName="Main.mp4"
+        clips={[{ id: "main", start: 0, end: 12, duration: 12, url: "https://example.com/main.mp4" }]} onCancel={jest.fn()} />);
+      const files = Array.from({ length: 13 }, (_, i) => new File(["video"], `Scene ${String(i + 1).padStart(2, "0")}.mp4`, { type: "video/mp4" }));
+      fireEvent.change(screen.getByTestId("project-media-import-input"), { target: { files: [...files, new File([], "empty.mp4", { type: "video/mp4" })] } });
+      expect(screen.getByRole("tab", { name: "Media" })).toHaveAttribute("aria-selected", "true");
+      expect(screen.getByTestId("project-media-library").querySelectorAll("article")).toHaveLength(12);
+      expect(screen.queryByTestId("pro-video-clip-2")).not.toBeInTheDocument();
+      await waitFor(() => expect(uploadSourceFileViaBackend).toHaveBeenCalledTimes(3));
+      while (uploadSourceFileViaBackend.mock.calls.length < 13 || pending.length) {
+        const batch = pending.splice(0).reverse();
+        await act(async () => { batch.forEach(item => item.finish()); await new Promise(resolve => setTimeout(resolve, 10)); });
+      }
+      expect(peakUploads).toBe(3);
+      fireEvent.click(screen.getByRole("button", { name: /Show more videos/ }));
+      const names = Array.from(screen.getByTestId("project-media-library").querySelectorAll(".studio-media-card__body > strong")).map(node => node.textContent);
+      expect(names).toEqual(["Main.mp4", ...files.map(file => file.name)]);
+      expect(screen.getByText("Save failed")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Retry upload" })).toBeInTheDocument();
+      fireEvent.change(screen.getByRole("searchbox", { name: "Search project media" }), { target: { value: "Scene 13" } });
+      const library = screen.getByTestId("project-media-library");
+      expect(library.querySelectorAll("article")).toHaveLength(1);
+      fireEvent.click(within(library).getByRole("button", { name: "Preview Scene 13.mp4" }));
+      const programme = screen.getByTestId("studio-after-video");
+      programme.currentTime = 4;
+      fireEvent.timeUpdate(programme);
+      fireEvent.click(within(library).getByRole("button", { name: "Add as B-roll" }));
+      expect(parseFloat(screen.getByTestId("pro-broll-clip-1").style.left)).toBeCloseTo(100 / 3, 2);
+      expect(within(library).getByText("Used as B-roll")).toBeInTheDocument();
+      fireEvent.click(within(library).getByRole("button", { name: "Add to sequence" }));
+      expect(screen.getByTestId("pro-video-clip-2")).toHaveTextContent("Scene 13.mp4");
+      expect(screen.getByTestId("pro-video-clip-2")).toHaveAttribute("data-start-time", "12");
+      expect(within(library).getByText("In sequence")).toBeInTheDocument();
+      unmount();
+    } finally {
+      URL.createObjectURL = previousCreateUrl;
+      URL.revokeObjectURL = previousRevokeUrl;
+    }
+  });
+
   test("groups film camera takes manually and exports the chosen angle range", async () => {
     const onSave = jest.fn(() => Promise.resolve());
     render(<ViralClipStudio
@@ -218,9 +291,10 @@ describe("ViralClipStudio timeline sequencing", () => {
 
     const media = screen.getByRole("region", { name: "Project media bin" });
     await within(media).findByRole("button", { name: "Preview Camera B.mp4" });
-    const addButtons = within(media).getAllByRole("button", { name: "Select for camera take" });
-    expect(addButtons).toHaveLength(2);
-    addButtons.forEach(button => fireEvent.click(button));
+    for (const name of ["Camera A.mp4", "Camera B.mp4"]) {
+      fireEvent.click(within(media).getByRole("button", { name: `Preview ${name}` }));
+      fireEvent.click(within(media).getByRole("button", { name: "Select for camera take" }));
+    }
     fireEvent.change(within(media).getByLabelText("Take name"), { target: { value: "Scene 4 take 2" } });
     fireEvent.click(within(media).getByRole("button", { name: "Create camera take (2)" }));
     const filmTake = screen.getByRole("region", { name: "Saved film camera takes" });
@@ -1340,7 +1414,9 @@ describe("ViralClipStudio timeline sequencing", () => {
     ).toBeInTheDocument();
     expect(screen.queryByTestId("timeline-hook-block")).not.toBeInTheDocument();
     expect(screen.getByTestId("timeline-original-audio")).toHaveTextContent("Original voice");
-    expect(sourceTrack.querySelectorAll(".compact-filmstrip-frame").length).toBeGreaterThan(1);
+    expect(sourceTrack.querySelectorAll("video")).toHaveLength(0);
+    expect(screen.getByTestId("studio-pro-timeline").querySelector(".pro-source-filmstrip"))
+      .toBeInTheDocument();
 
     fireEvent.click(sourceTrack, { clientX: 100 });
     expect(afterVideo.currentTime).toBeCloseTo(5, 1);

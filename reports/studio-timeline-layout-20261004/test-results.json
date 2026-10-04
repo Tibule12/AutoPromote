@@ -1,0 +1,123 @@
+{
+  "passed": true,
+  "uniquePassedTests": 23,
+  "fullSuiteRerun": false,
+  "evidence": [
+    {
+      "name": "source clicks seek the clicked output time across trimmed clips, including a scrolled lane",
+      "status": "passed",
+      "receipt": "jest-timeline.json"
+    },
+    {
+      "name": "the current framing block follows the preview playhead and empty tracks stay accessible",
+      "status": "passed",
+      "receipt": "jest-timeline.json"
+    },
+    {
+      "name": "zoom keeps the current edit centered and Fit restores the complete time axis",
+      "status": "passed",
+      "receipt": "jest-timeline.json"
+    },
+    {
+      "name": "trimmed source lengths determine clip width and the next clip's start",
+      "status": "passed",
+      "receipt": "jest-timeline.json"
+    },
+    {
+      "name": "short framing cuts retain exact timing widths instead of covering later cuts",
+      "status": "passed",
+      "receipt": "jest-timeline.json"
+    },
+    {
+      "name": "motion scenes are selectable from their own lane and seek to their actual time",
+      "status": "passed",
+      "receipt": "jest-timeline.json"
+    },
+    {
+      "name": "timed color adjustment block moves and trims the exported grade interval",
+      "status": "passed",
+      "receipt": "jest-timeline.json"
+    },
+    {
+      "name": "auto-motion button in toolbar triggers onAutoGenerateMotionBeats",
+      "status": "passed",
+      "receipt": "jest-timeline.json"
+    },
+    {
+      "name": "motion clip supports dragging to move and trimming edges",
+      "status": "passed",
+      "receipt": "jest-timeline.json"
+    },
+    {
+      "name": "a failed source stops sampling that source and leaves the timeline usable",
+      "status": "passed",
+      "receipt": "jest-timeline.json"
+    },
+    {
+      "name": "filmstrip uses one separate muted decoder, bounds source seeks and releases it on unmount",
+      "status": "passed",
+      "receipt": "jest-timeline.json"
+    },
+    {
+      "name": "ViralClipStudioPanel uploads and validates the source before opening the original Studio controller",
+      "status": "passed",
+      "receipt": "jest-timeline.json"
+    },
+    {
+      "name": "ViralClipStudioPanel accepts a dropped video through the same authenticated upload flow",
+      "status": "passed",
+      "receipt": "jest-timeline.json"
+    },
+    {
+      "name": "ViralClipStudioPanel stages additional selected videos for Studio's project library",
+      "status": "passed",
+      "receipt": "jest-timeline.json"
+    },
+    {
+      "name": "ViralClipStudioPanel keeps Studio blocked and shows the upload failure",
+      "status": "passed",
+      "receipt": "jest-timeline.json"
+    },
+    {
+      "name": "ViralClipStudio timeline sequencing shows a live visual timeline that seeks the same After preview",
+      "status": "passed",
+      "receipt": "jest-editor-final.json"
+    },
+    {
+      "name": "ViralClipStudio timeline sequencing places and edits built-in sound effects on the live timeline with undo and redo",
+      "status": "passed",
+      "receipt": "jest-editor-final.json"
+    },
+    {
+      "name": "ViralClipStudio timeline sequencing quick trim retimes motion and its linked sound and undo restores both",
+      "status": "passed",
+      "receipt": "jest-editor-final.json"
+    },
+    {
+      "name": "ViralClipStudio timeline sequencing supports 1-click simple editing toolbar for split, trim, delete, and 1-tap framing",
+      "status": "passed",
+      "receipt": "jest-editor-final.json"
+    },
+    {
+      "name": "ViralClipStudio timeline sequencing source-shot analysis uses the queued job path when enabled",
+      "status": "passed",
+      "receipt": "jest-editor-final.json"
+    },
+    {
+      "name": "ViralClipStudio timeline sequencing durable source analysis sends its owned path without downloading video in the editor",
+      "status": "passed",
+      "receipt": "jest-editor-final.json"
+    },
+    {
+      "name": "ViralClipStudio timeline sequencing batch media stays ordered in the library until explicitly placed, with isolated failures",
+      "status": "passed",
+      "receipt": "jest-media.json"
+    },
+    {
+      "name": "ViralClipStudio timeline sequencing groups film camera takes manually and exports the chosen angle range",
+      "status": "passed",
+      "receipt": "jest-media.json"
+    }
+  ],
+  "initialGateNote": "The original editor gate failed an obsolete compact video-thumbnail DOM assertion. The corrected seek test and all six selected editor tests pass; earlier raw receipts are retained. Batch import is tested with mocked uploads, including out-of-order completion and one isolated failure."
+}

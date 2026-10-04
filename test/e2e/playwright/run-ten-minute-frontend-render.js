@@ -1,3 +1,4 @@
+const { clickStudioControl } = require("./studio-timeline-layout");
 const { chromium } = require("@playwright/test");
 const { execFileSync, spawn, spawnSync } = require("child_process");
 const fs = require("fs");
@@ -631,6 +632,7 @@ async function main() {
   console.log("[frontend-proof] loading 10-minute saved edit");
   await page.getByRole("button", { name: "Show media", exact: true }).click();
   const savedProjects = page.locator(".studio-saved-projects");
+  await page.locator(".studio-project-rail__head > summary").click();
   await savedProjects.locator("summary").click();
   await savedProjects.getByText("10m Podcast · Captions + Director Splits + Grade", { exact: true }).click();
 
@@ -751,10 +753,10 @@ async function main() {
     };
     const exerciseToggle = async (testId, firstState, secondState, label) => {
       const button = page.getByTestId(testId);
-      await button.click();
+      await clickStudioControl(page, button);
       if (await button.getAttribute("aria-pressed") !== firstState) throw new Error(`${label} failed first state`);
       await assertPlaying(`${label} first state`);
-      await button.click();
+      await clickStudioControl(page, button);
       if (await button.getAttribute("aria-pressed") !== secondState) throw new Error(`${label} failed return state`);
       await assertPlaying(`${label} return state`);
     };
@@ -765,27 +767,27 @@ async function main() {
       await assertPlaying(`${mode} comparison mode`);
     }
     await seekOutputTimeline(548);
-    await page.getByTestId("preview-quick-both-cams").click();
+    await clickStudioControl(page, page.getByTestId("preview-quick-both-cams"));
     const reviewedTopZoom = await page.getByLabel("top split zoom").inputValue();
     await assertPlaying("Show Everyone");
-    await page.getByTestId("preview-quick-track-speaker").click();
+    await clickStudioControl(page, page.getByTestId("preview-quick-track-speaker"));
     await assertPlaying("Solo Speaker");
     await seekOutputTimeline(548);
-    await page.getByTestId("preview-quick-both-cams").click();
+    await clickStudioControl(page, page.getByTestId("preview-quick-both-cams"));
     if (await page.getByLabel("top split zoom").inputValue() !== reviewedTopZoom) {
       throw new Error("Show Everyone reset the reviewed panel crop");
     }
-    await page.getByTestId("preview-quick-track-speaker").click();
+    await clickStudioControl(page, page.getByTestId("preview-quick-track-speaker"));
     await seekOutputTimeline(548);
     await exerciseToggle("preview-dock-toggle-btn", "true", "false", "Canvas dock");
     await exerciseToggle("preview-media-toggle", "true", "false", "Media rail");
-    await page.getByTestId("preview-fit-full").click();
+    await clickStudioControl(page, page.getByTestId("preview-fit-full"));
     await assertPlaying("Fit full");
     await page.screenshot({ path: path.join(proofDir, "frontend-after-fit-full-rounded.png") });
     const frameRadiusAfterFit = await page.getByTestId("hook-preview-frame").evaluate(frame =>
       parseFloat(getComputedStyle(frame).borderTopLeftRadius)
     );
-    await page.getByTestId("preview-fill-canvas").click();
+    await clickStudioControl(page, page.getByTestId("preview-fill-canvas"));
     await assertPlaying("Fill canvas");
     await page.screenshot({ path: path.join(proofDir, "frontend-after-fill-canvas-rounded.png") });
     const frameRadiusAfterFill = await page.getByTestId("hook-preview-frame").evaluate(frame =>
@@ -797,7 +799,7 @@ async function main() {
     if (await page.getByTestId("main-footage-frame-toggle").getAttribute("data-rounded-locked") !== "true") {
       throw new Error("Rounded frame lock is missing");
     }
-    await page.getByTestId("preview-fullscreen-button").click();
+    await clickStudioControl(page, page.getByTestId("preview-fullscreen-button"));
     await assertPlaying("Fullscreen");
     await page.getByRole("button", { name: "Exit preview", exact: true }).click();
     await seekOutputTimeline(548);
@@ -1095,9 +1097,9 @@ async function main() {
     }
 
     const initialFramingClips = await page.locator('[data-testid^="pro-framing-clip-"]').count();
-    await page.getByTestId("preview-quick-both-cams").click();
+    await clickStudioControl(page, page.getByTestId("preview-quick-both-cams"));
     await verifyContinuousPlayback("Show Everyone edit");
-    await page.getByTestId("preview-quick-track-speaker").click();
+    await clickStudioControl(page, page.getByTestId("preview-quick-track-speaker"));
     await verifyContinuousPlayback("Solo Speaker edit");
     const recordedFramingClips = await page.locator('[data-testid^="pro-framing-clip-"]').count();
     // An action that lands within 80 ms of an existing detected camera cut

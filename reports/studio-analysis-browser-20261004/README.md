@@ -1,5 +1,11 @@
 # Studio frontend browser proof — October 4, 2026
 
+**Visual correction:** the user found the timeline clipped into the tools column
+in these original captures. The 48 checks below establish functional analysis
+acceptance; they missed the grid placement defect. See the
+[timeline repair and browser geometry gate](../studio-timeline-layout-20261004/README.md)
+for the correction and updated screenshots.
+
 **Status: real browser acceptance passed.** Chromium signed in to the isolated
 `autopromote-staging-2026` Firebase project and exercised the production
 `ViralClipStudio` component and `AuthProvider`. The local acceptance host mounted

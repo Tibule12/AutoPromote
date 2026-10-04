@@ -1,4 +1,6 @@
 import React from "react";
+import TimelineSourceFilmstrip from "./TimelineSourceFilmstrip";
+import StudioControlMenu from "./StudioControlMenu";
 
 const EDIT_TOOLS = [
   ["select", "V", "Select"],
@@ -26,6 +28,13 @@ const TRACK_DEFINITIONS = [
 
 const percentAt = (time, duration) =>
   `${Math.max(0, Math.min(100, (Number(time || 0) / Math.max(0.1, duration)) * 100))}%`;
+
+const timecode = time => {
+  const seconds = Math.max(0, Number(time || 0));
+  return `${Math.floor(seconds / 60)}:${Math.floor(seconds % 60)
+    .toString()
+    .padStart(2, "0")}`;
+};
 
 const TrackControls = ({ trackId, state, onChange }) => (
   <div className="pro-track-controls">
@@ -97,7 +106,8 @@ const BrollClip = ({
   const [isSnapped, setIsSnapped] = React.useState(false);
 
   const resolveSnap = (targetTime, threshold = 0.18) => {
-    if (!snapping || !snapTargets || !snapTargets.length) return { time: targetTime, snapped: false };
+    if (!snapping || !snapTargets || !snapTargets.length)
+      return { time: targetTime, snapped: false };
     let closest = targetTime;
     let minDelta = threshold;
     let didSnap = false;
@@ -112,41 +122,56 @@ const BrollClip = ({
     return { time: closest, snapped: didSnap };
   };
 
-  const handlePointerDownBody = (e) => {
+  const handlePointerDownBody = e => {
     e.stopPropagation();
-    try { e.target.setPointerCapture(e.pointerId); } catch (_) {}
+    try {
+      e.target.setPointerCapture(e.pointerId);
+    } catch (_) {}
     const isSlip = allowSlip && Boolean(e.altKey || e.shiftKey);
     dragRef.current = {
       type: isSlip ? "slip" : "move",
       startX: e.clientX,
       startParam: isSlip ? Number(item.sourceStartTime || 0) : start,
-      laneWidth: Math.max(1, e.currentTarget.parentElement.parentElement.getBoundingClientRect().width),
+      laneWidth: Math.max(
+        1,
+        e.currentTarget.parentElement.parentElement.getBoundingClientRect().width
+      ),
     };
   };
 
-  const handlePointerDownLeft = (e) => {
+  const handlePointerDownLeft = e => {
     e.stopPropagation();
-    try { e.target.setPointerCapture(e.pointerId); } catch (_) {}
+    try {
+      e.target.setPointerCapture(e.pointerId);
+    } catch (_) {}
     dragRef.current = {
       type: "trim-start",
       startX: e.clientX,
       startParam: start,
-      laneWidth: Math.max(1, e.currentTarget.parentElement.parentElement.getBoundingClientRect().width),
+      laneWidth: Math.max(
+        1,
+        e.currentTarget.parentElement.parentElement.getBoundingClientRect().width
+      ),
     };
   };
 
-  const handlePointerDownRight = (e) => {
+  const handlePointerDownRight = e => {
     e.stopPropagation();
-    try { e.target.setPointerCapture(e.pointerId); } catch (_) {}
+    try {
+      e.target.setPointerCapture(e.pointerId);
+    } catch (_) {}
     dragRef.current = {
       type: "trim-end",
       startX: e.clientX,
       startParam: duration,
-      laneWidth: Math.max(1, e.currentTarget.parentElement.parentElement.getBoundingClientRect().width),
+      laneWidth: Math.max(
+        1,
+        e.currentTarget.parentElement.parentElement.getBoundingClientRect().width
+      ),
     };
   };
 
-  const handlePointerMove = (e) => {
+  const handlePointerMove = e => {
     if (!dragRef.current) return;
     const { type, startX, startParam, laneWidth } = dragRef.current;
     const deltaX = e.clientX - startX;
@@ -185,9 +210,11 @@ const BrollClip = ({
     }
   };
 
-  const handlePointerUp = (e) => {
+  const handlePointerUp = e => {
     if (dragRef.current) {
-      try { e.target.releasePointerCapture(e.pointerId); } catch (_) {}
+      try {
+        e.target.releasePointerCapture(e.pointerId);
+      } catch (_) {}
       dragRef.current = null;
       setIsSnapped(false);
     }
@@ -220,8 +247,8 @@ const BrollClip = ({
         onPointerDown={handlePointerDownLeft}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
-        onMouseEnter={(e) => (e.target.style.background = "rgba(255,255,255,0.3)")}
-        onMouseLeave={(e) => (e.target.style.background = "transparent")}
+        onMouseEnter={e => (e.target.style.background = "rgba(255,255,255,0.3)")}
+        onMouseLeave={e => (e.target.style.background = "transparent")}
       />
       <div
         style={{
@@ -238,7 +265,16 @@ const BrollClip = ({
         onPointerUp={handlePointerUp}
         onClick={onClick}
       >
-        <span style={{ pointerEvents: 'none', overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" }}>{itemLabel}</span>
+        <span
+          style={{
+            pointerEvents: "none",
+            overflow: "hidden",
+            whiteSpace: "nowrap",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {itemLabel}
+        </span>
       </div>
       <div
         style={{
@@ -253,8 +289,8 @@ const BrollClip = ({
         onPointerDown={handlePointerDownRight}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
-        onMouseEnter={(e) => (e.target.style.background = "rgba(255,255,255,0.3)")}
-        onMouseLeave={(e) => (e.target.style.background = "transparent")}
+        onMouseEnter={e => (e.target.style.background = "rgba(255,255,255,0.3)")}
+        onMouseLeave={e => (e.target.style.background = "transparent")}
       />
     </div>
   );
@@ -275,7 +311,8 @@ const AudioSplitClip = ({
   const dragRef = React.useRef(null);
 
   const resolveSnap = (targetTime, threshold = 0.18) => {
-    if (!snapping || !snapTargets || !snapTargets.length) return { time: targetTime, snapped: false };
+    if (!snapping || !snapTargets || !snapTargets.length)
+      return { time: targetTime, snapped: false };
     let closest = targetTime;
     let minDelta = threshold;
     let didSnap = false;
@@ -290,9 +327,11 @@ const AudioSplitClip = ({
     return { time: closest, snapped: didSnap };
   };
 
-  const handlePointerDownLeft = (e) => {
+  const handlePointerDownLeft = e => {
     e.stopPropagation();
-    try { e.target.setPointerCapture(e.pointerId); } catch (_) {}
+    try {
+      e.target.setPointerCapture(e.pointerId);
+    } catch (_) {}
     dragRef.current = {
       type: "trim-start",
       startX: e.clientX,
@@ -301,9 +340,11 @@ const AudioSplitClip = ({
     };
   };
 
-  const handlePointerDownRight = (e) => {
+  const handlePointerDownRight = e => {
     e.stopPropagation();
-    try { e.target.setPointerCapture(e.pointerId); } catch (_) {}
+    try {
+      e.target.setPointerCapture(e.pointerId);
+    } catch (_) {}
     dragRef.current = {
       type: "trim-end",
       startX: e.clientX,
@@ -312,7 +353,7 @@ const AudioSplitClip = ({
     };
   };
 
-  const handlePointerMove = (e) => {
+  const handlePointerMove = e => {
     if (!dragRef.current) return;
     const { type, startX, startOffset, laneWidth } = dragRef.current;
     const deltaX = e.clientX - startX;
@@ -325,23 +366,33 @@ const AudioSplitClip = ({
       const snapRes = resolveSnap(targetTime);
       const finalOffset = snapRes.snapped ? snapRes.time - Number(item.outputStart || 0) : clamped;
       if (onAudioTrim) {
-        onAudioTrim(item.originalIndex ?? index, { audioTrimOffsetStart: Math.round(finalOffset * 100) / 100 });
+        onAudioTrim(item.originalIndex ?? index, {
+          audioTrimOffsetStart: Math.round(finalOffset * 100) / 100,
+        });
       }
     } else if (type === "trim-end") {
       const rawNewOffset = startOffset + deltaSeconds;
       const clamped = Math.max(-0.5, Math.min(3.0, rawNewOffset));
-      const targetTime = Number(item.outputStart || 0) + Number(item.videoDuration ?? item.duration ?? 0) + clamped;
+      const targetTime =
+        Number(item.outputStart || 0) + Number(item.videoDuration ?? item.duration ?? 0) + clamped;
       const snapRes = resolveSnap(targetTime);
-      const finalOffset = snapRes.snapped ? snapRes.time - (Number(item.outputStart || 0) + Number(item.videoDuration ?? item.duration ?? 0)) : clamped;
+      const finalOffset = snapRes.snapped
+        ? snapRes.time -
+          (Number(item.outputStart || 0) + Number(item.videoDuration ?? item.duration ?? 0))
+        : clamped;
       if (onAudioTrim) {
-        onAudioTrim(item.originalIndex ?? index, { audioTrimOffsetEnd: Math.round(finalOffset * 100) / 100 });
+        onAudioTrim(item.originalIndex ?? index, {
+          audioTrimOffsetEnd: Math.round(finalOffset * 100) / 100,
+        });
       }
     }
   };
 
-  const handlePointerUp = (e) => {
+  const handlePointerUp = e => {
     if (dragRef.current) {
-      try { e.target.releasePointerCapture(e.pointerId); } catch (_) {}
+      try {
+        e.target.releasePointerCapture(e.pointerId);
+      } catch (_) {}
       dragRef.current = null;
     }
   };
@@ -433,7 +484,8 @@ const MotionClip = ({
   const [isSnapped, setIsSnapped] = React.useState(false);
 
   const resolveSnap = (targetTime, threshold = 0.18) => {
-    if (!snapping || !snapTargets || !snapTargets.length) return { time: targetTime, snapped: false };
+    if (!snapping || !snapTargets || !snapTargets.length)
+      return { time: targetTime, snapped: false };
     let closest = targetTime;
     let minDelta = threshold;
     let didSnap = false;
@@ -448,9 +500,11 @@ const MotionClip = ({
     return { time: closest, snapped: didSnap };
   };
 
-  const handlePointerDownBody = (e) => {
+  const handlePointerDownBody = e => {
     e.stopPropagation();
-    try { e.currentTarget.setPointerCapture(e.pointerId); } catch (_) {}
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch (_) {}
     const laneEl = e.currentTarget.closest(".pro-track-lane") || e.currentTarget.parentElement;
     const lw = laneEl?.getBoundingClientRect?.()?.width;
     dragRef.current = {
@@ -461,10 +515,13 @@ const MotionClip = ({
     };
   };
 
-  const handlePointerDownLeft = (e) => {
+  const handlePointerDownLeft = e => {
     e.stopPropagation();
-    try { e.currentTarget.setPointerCapture(e.pointerId); } catch (_) {}
-    const laneEl = e.currentTarget.closest(".pro-track-lane") || e.currentTarget.parentElement?.parentElement;
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch (_) {}
+    const laneEl =
+      e.currentTarget.closest(".pro-track-lane") || e.currentTarget.parentElement?.parentElement;
     const lw = laneEl?.getBoundingClientRect?.()?.width;
     dragRef.current = {
       type: "trim-start",
@@ -475,10 +532,13 @@ const MotionClip = ({
     };
   };
 
-  const handlePointerDownRight = (e) => {
+  const handlePointerDownRight = e => {
     e.stopPropagation();
-    try { e.currentTarget.setPointerCapture(e.pointerId); } catch (_) {}
-    const laneEl = e.currentTarget.closest(".pro-track-lane") || e.currentTarget.parentElement?.parentElement;
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch (_) {}
+    const laneEl =
+      e.currentTarget.closest(".pro-track-lane") || e.currentTarget.parentElement?.parentElement;
     const lw = laneEl?.getBoundingClientRect?.()?.width;
     dragRef.current = {
       type: "trim-end",
@@ -488,7 +548,7 @@ const MotionClip = ({
     };
   };
 
-  const handlePointerMove = (e) => {
+  const handlePointerMove = e => {
     if (!dragRef.current) return;
     const { type, startX, startParam, startDuration, laneWidth } = dragRef.current;
     const safeLaneWidth = Math.max(1, Number(laneWidth || 1));
@@ -519,8 +579,10 @@ const MotionClip = ({
     }
   };
 
-  const handlePointerUp = (e) => {
-    try { e.currentTarget.releasePointerCapture(e.pointerId); } catch (_) {}
+  const handlePointerUp = e => {
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch (_) {}
     dragRef.current = null;
     setIsSnapped(false);
   };
@@ -576,12 +638,31 @@ const MotionClip = ({
         }}
         onPointerDown={handlePointerDownLeft}
         title="Drag to trim start"
-        onMouseEnter={(e) => (e.target.style.background = "rgba(255,255,255,0.35)")}
-        onMouseLeave={(e) => (e.target.style.background = "transparent")}
+        onMouseEnter={e => (e.target.style.background = "rgba(255,255,255,0.35)")}
+        onMouseLeave={e => (e.target.style.background = "transparent")}
       />
-      <div style={{ display: "flex", alignItems: "center", gap: "4px", width: "100%", height: "100%", overflow: "hidden", padding: "0 6px" }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "4px",
+          width: "100%",
+          height: "100%",
+          overflow: "hidden",
+          padding: "0 6px",
+        }}
+      >
         <span style={{ fontSize: "0.65rem" }}>{icon}</span>
-        <span style={{ pointerEvents: "none", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis", fontSize: "0.58rem", fontWeight: 700 }}>
+        <span
+          style={{
+            pointerEvents: "none",
+            overflow: "hidden",
+            whiteSpace: "nowrap",
+            textOverflow: "ellipsis",
+            fontSize: "0.58rem",
+            fontWeight: 700,
+          }}
+        >
           {itemLabel}
         </span>
       </div>
@@ -597,8 +678,8 @@ const MotionClip = ({
         }}
         onPointerDown={handlePointerDownRight}
         title="Drag to trim duration"
-        onMouseEnter={(e) => (e.target.style.background = "rgba(255,255,255,0.35)")}
-        onMouseLeave={(e) => (e.target.style.background = "transparent")}
+        onMouseEnter={e => (e.target.style.background = "rgba(255,255,255,0.35)")}
+        onMouseLeave={e => (e.target.style.background = "transparent")}
       />
     </div>
   );
@@ -628,6 +709,8 @@ export default function StudioProTimeline({
   trackStates,
   onTrackStateChange,
   timelineSegments,
+  activeTool,
+  sourceFrames = [],
   overlays,
   captionSegments,
   soundEffects,
@@ -682,8 +765,62 @@ export default function StudioProTimeline({
   onAlignCutsToBeat,
   _onAlignBRollToBeat,
 }) {
+  const scrollRef = React.useRef(null);
+  const [showEmptyTracks, setShowEmptyTracks] = React.useState(false);
+  const focusedTrack = {
+    reframe: "framing",
+    captions: "captions",
+    titles: "graphics",
+    motion: "motion",
+    broll: "broll",
+    sound: "originalAudio",
+    finish: "adjustment",
+    creatorfx: "adjustment",
+    hook: "video",
+    pacing: "motion",
+    composite: "adjustment",
+    cut: "video",
+    moments: "video",
+  }[activeTool];
+  React.useEffect(() => {
+    const scroll = scrollRef.current;
+    const row = scroll?.querySelector(`[data-testid="pro-track-row-${focusedTrack}"]`);
+    if (!row) return;
+    const visible = scroll.getBoundingClientRect();
+    const track = row.getBoundingClientRect();
+    if (track.top >= visible.top + 29 && track.bottom <= visible.bottom) return;
+    const top =
+      row.getBoundingClientRect().top - scroll.getBoundingClientRect().top + scroll.scrollTop;
+    scroll.scrollTop = Math.max(0, top - 29);
+  }, [focusedTrack]);
   const safeDuration = Math.max(0.1, Number(duration || 0.1));
-  const visibleWidth = `${Math.max(100, Number(zoom || 1) * 100)}%`;
+  const safeZoom = Math.max(1, Math.min(32, Number(zoom || 1)));
+  const playheadRef = React.useRef(0);
+  playheadRef.current = Number(playhead || 0);
+  React.useLayoutEffect(() => {
+    const scroll = scrollRef.current;
+    const lane = scroll?.querySelector(".pro-track-lane");
+    if (!lane) return;
+    const axisWidth = lane.getBoundingClientRect().width;
+    const headerWidth = lane.parentElement
+      .querySelector(".pro-track-header")
+      .getBoundingClientRect().width;
+    scroll.scrollLeft =
+      safeZoom === 1
+        ? 0
+        : Math.max(
+            0,
+            headerWidth +
+              (playheadRef.current / safeDuration) * axisWidth -
+              (scroll.clientWidth + headerWidth) / 2
+          );
+  }, [safeZoom, safeDuration]);
+  const tickInterval =
+    [0.1, 0.25, 0.5, 1, 2, 5, 10, 15, 30, 60, 120, 300, 600, 1800, 3600].find(
+      interval => interval >= safeDuration / safeZoom / 10
+    ) || Math.ceil(safeDuration / safeZoom / 10 / 3600) * 3600;
+  const tickCount = Math.min(500, Math.floor(safeDuration / tickInterval) + 1);
+  const visibleWidth = `${safeZoom * 100}%`;
   const titles = (overlays || []).filter(item => item.type === "text" && !item.isCaption);
   const broll = (overlays || []).filter(item => item.bRollMode);
   const framingItems = [...(framingCuts || [])]
@@ -699,18 +836,23 @@ export default function StudioProTimeline({
         cut.zoom > 1
           ? `Camera punch ${Number(cut.zoom).toFixed(2)}×`
           : cut.mode === "center"
-          ? "Show Everyone"
-          : cut.mode === "speaker_track"
-            ? "Solo Speaker"
-            : cut.mode === "group_stack"
-              ? "Multi-Camera"
-              : "Reframe off",
+            ? "Show Everyone"
+            : cut.mode === "speaker_track"
+              ? "Solo Speaker"
+              : cut.mode === "group_stack"
+                ? "Multi-Camera"
+                : "Reframe off",
     }));
+  const activeFraming = framingItems.find(
+    cut => Number(playhead || 0) >= cut.time && Number(playhead || 0) < cut.time + cut.duration
+  );
   const sourceSequence = (timelineSegments || []).reduce((sequence, item, index) => {
     const start = Number(item.startRequest ?? item.start_time ?? item.start ?? 0);
     const end = Number(item.endRequest ?? item.end_time ?? item.end);
-    const itemDuration = Math.max(0.04,
-      Number.isFinite(end) && end > start ? end - start : Number(item.duration) || 0.04);
+    const itemDuration = Math.max(
+      0.04,
+      Number.isFinite(end) && end > start ? end - start : Number(item.duration) || 0.04
+    );
     const outputStart = sequence.reduce(
       (total, sequenceItem) => total + Number(sequenceItem.duration || 0),
       0
@@ -820,7 +962,7 @@ export default function StudioProTimeline({
               title="Split clip at playhead"
               data-testid="pro-quick-split"
             >
-              ✂️ Split
+              Split
             </button>
             <button
               type="button"
@@ -829,7 +971,7 @@ export default function StudioProTimeline({
               title="Cut everything before playhead"
               data-testid="pro-quick-trim-start"
             >
-              ⏮️ Trim Start
+              Trim Start
             </button>
             <button
               type="button"
@@ -838,7 +980,7 @@ export default function StudioProTimeline({
               title="Cut everything after playhead"
               data-testid="pro-quick-trim-end"
             >
-              ⏭️ Trim End
+              Trim End
             </button>
             {canDelete && (
               <button
@@ -848,207 +990,233 @@ export default function StudioProTimeline({
                 title="Delete selected clip"
                 data-testid="pro-quick-delete"
               >
-                🗑️ Delete
+                Delete
               </button>
             )}
-            {onToggleCaptions && (
-              <button
-                type="button"
-                className={`pro-quick-btn ${captionsActive ? "is-active" : ""}`}
-                onClick={onToggleCaptions}
-                title={captionsActive ? "Captions active (click to disable)" : "Turn on auto-captions"}
-                data-testid="pro-quick-captions"
-              >
-                {captionsActive ? "💬 Captions On" : "💬 Captions"}
-              </button>
-            )}
-            {onToggleSilence && (
-              <button
-                type="button"
-                className={`pro-quick-btn ${silenceRemovalActive ? "is-active" : ""}`}
-                onClick={onToggleSilence}
-                title="Toggle 1-click silence dead-air removal (virtual skip preview)"
-                data-testid="pro-quick-silence"
-              >
-                {silenceRemovalActive ? "⚡ Silences Cut" : "⚡ Cut Silences"}
-              </button>
-            )}
-            {onRippleCutSilence && (
-              <button
-                type="button"
-                className="pro-quick-btn pro-ripple-cut-btn"
-                onClick={onRippleCutSilence}
-                disabled={isRippleCutting}
-                title="Physically slice dead-air pauses out of the timeline and ripple all tracks"
-                data-testid="pro-quick-ripple-silence"
-              >
-                {isRippleCutting ? "⏳ Slicing..." : "⚡ Ripple-Cut Dead Air"}
-              </button>
-            )}
-            {onSetDualCam && (
-              <button
-                type="button"
-                className={`pro-quick-btn ${isDualCamActive ? "is-active" : ""}`}
-                onClick={onSetDualCam}
-                title="Stack 16:9 podcast hosts vertically in 9:16 dual-cam"
-                data-testid="pro-quick-both-cams"
-              >
-                👥 Show Everyone
-              </button>
-            )}
-            {onSetAutoReframe && (
-              <button
-                type="button"
-                className={`pro-quick-btn ${isAutoReframeActive ? "is-active" : ""}`}
-                onClick={onSetAutoReframe}
-                title="Open speaker close-up, zoom and reviewed framing points"
-                data-testid="pro-quick-reframe"
-              >
-                🎯 Solo Speaker
-              </button>
-            )}
-            {onTogglePunchAtPlayhead && (
-              <button
-                type="button"
-                className={`pro-quick-btn ${isPlayheadPunched ? "is-active is-punched" : ""}`}
-                onClick={onTogglePunchAtPlayhead}
-                title="Toggle 1.25× camera punch-in at playhead (Hotkey: Z)"
-                data-testid="pro-quick-punch"
-                style={isPlayheadPunched ? {
-                  background: "linear-gradient(135deg, #a855f7, #ec4899)",
-                  borderColor: "#f472b6",
-                  color: "#fff",
-                  fontWeight: 600,
-                } : undefined}
-              >
-                {isPlayheadPunched ? "🎯 Punched (Z)" : "🎯 Punch In (Z)"}
-              </button>
-            )}
-            {onAutoGeneratePunchIns && (
-              <button
-                type="button"
-                className="pro-quick-btn"
-                onClick={onAutoGeneratePunchIns}
-                title="Auto-generate viral cadence punch-ins across the whole sequence"
-                data-testid="pro-quick-auto-punch"
-              >
-                ⚡ Auto-Punch
-              </button>
-            )}
-            {onAutoGenerateMotionBeats && (
-              <button
-                type="button"
-                className="pro-quick-btn"
-                onClick={onAutoGenerateMotionBeats}
-                title="Auto-generate viral motion graphics & retention cues from transcript"
-                data-testid="pro-quick-auto-motion"
-              >
-                ✨ Auto-Motion
-              </button>
-            )}
-            {onToggleJCutAtPlayhead && (
-              <button
-                type="button"
-                className={`pro-quick-btn ${hasActiveJCut ? "is-active" : ""}`}
-                onClick={onToggleJCutAtPlayhead}
-                title="J-Cut (0.8s): Dialogue pre-lap starts incoming audio before video cuts"
-                data-testid="pro-quick-jcut"
-                style={hasActiveJCut ? {
-                  background: "linear-gradient(135deg, #06b6d4, #0891b2)",
-                  borderColor: "#22d3ee",
-                  color: "#fff",
-                  fontWeight: 600,
-                } : undefined}
-              >
-                {hasActiveJCut ? "🎧 J-Cut Active" : "🎧 J-Cut (0.8s)"}
-              </button>
-            )}
-            {onToggleLCutAtPlayhead && (
-              <button
-                type="button"
-                className={`pro-quick-btn ${hasActiveLCut ? "is-active" : ""}`}
-                onClick={onToggleLCutAtPlayhead}
-                title="L-Cut (0.8s): Dialogue trail continues audio after video cuts away"
-                data-testid="pro-quick-lcut"
-                style={hasActiveLCut ? {
-                  background: "linear-gradient(135deg, #8b5cf6, #7c3aed)",
-                  borderColor: "#a78bfa",
-                  color: "#fff",
-                  fontWeight: 600,
-                } : undefined}
-              >
-                {hasActiveLCut ? "🎧 L-Cut Active" : "🎧 L-Cut (0.8s)"}
-              </button>
-            )}
-            {musicBeatMarkers && musicBeatMarkers.length > 0 && onBeatSnappingChange && (
-              <button
-                type="button"
-                className={`pro-quick-btn ${beatSnapping ? "is-active" : ""}`}
-                onClick={() => onBeatSnappingChange(!beatSnapping)}
-                title={`Magnetic Beat Snapping: Snap clips & cuts to ${musicBeatMarkers.length} music beats`}
-                data-testid="pro-quick-beat-snap"
-                style={beatSnapping ? {
-                  background: "linear-gradient(135deg, #10b981, #059669)",
-                  borderColor: "#34d399",
-                  color: "#fff",
-                  fontWeight: 600,
-                } : undefined}
-              >
-                {beatSnapping ? `🧲 Beats (${musicBeatMarkers.length})` : "🧲 Beat Snap"}
-              </button>
-            )}
-            {musicBeatMarkers && musicBeatMarkers.length > 0 && onAlignCutsToBeat && (
-              <button
-                type="button"
-                className="pro-quick-btn"
-                onClick={onAlignCutsToBeat}
-                title="Align sequence cuts to nearest musical beat transients"
-                data-testid="pro-quick-align-beats"
-              >
-                🎵 Cut to Beat
-              </button>
-            )}
-            {onToggleDirectorMode && (
-              <button
-                type="button"
-                className={`pro-quick-btn is-director ${isDirectorModeActive ? "is-active" : ""}`}
-                onClick={onToggleDirectorMode}
-                title="Live Multicam Director Mode: Switch camera angles in real time using keys 1, 2, 3, 4"
-                data-testid="pro-quick-director"
-                style={{
-                  background: isDirectorModeActive ? "linear-gradient(135deg, #ef4444, #dc2626)" : undefined,
-                  borderColor: isDirectorModeActive ? "#f87171" : undefined,
-                  color: isDirectorModeActive ? "#fff" : undefined,
-                  fontWeight: 600,
-                }}
-              >
-                {isDirectorModeActive ? "🔴 Director Live [1-4]" : "🎬 Director Mode"}
-              </button>
-            )}
-            {onUndo && (
-              <button
-                type="button"
-                className="pro-quick-btn"
-                onClick={onUndo}
-                disabled={!canUndo}
-                title="Undo edit"
-                data-testid="pro-quick-undo"
-              >
-                ↩ Undo
-              </button>
-            )}
-            {onRedo && (
-              <button
-                type="button"
-                className="pro-quick-btn"
-                onClick={onRedo}
-                disabled={!canRedo}
-                title="Redo edit"
-                data-testid="pro-quick-redo"
-              >
-                ↪ Redo
-              </button>
-            )}
+            <StudioControlMenu className="pro-more-actions" label="More actions">
+              <div className="studio-control-menu__content">
+                {onToggleCaptions && (
+                  <button
+                    type="button"
+                    className={`pro-quick-btn ${captionsActive ? "is-active" : ""}`}
+                    onClick={onToggleCaptions}
+                    title={
+                      captionsActive
+                        ? "Captions active (click to disable)"
+                        : "Turn on auto-captions"
+                    }
+                    data-testid="pro-quick-captions"
+                  >
+                    {captionsActive ? "💬 Captions On" : "💬 Captions"}
+                  </button>
+                )}
+                {onToggleSilence && (
+                  <button
+                    type="button"
+                    className={`pro-quick-btn ${silenceRemovalActive ? "is-active" : ""}`}
+                    onClick={onToggleSilence}
+                    title="Toggle 1-click silence dead-air removal (virtual skip preview)"
+                    data-testid="pro-quick-silence"
+                  >
+                    {silenceRemovalActive ? "⚡ Silences Cut" : "⚡ Cut Silences"}
+                  </button>
+                )}
+                {onRippleCutSilence && (
+                  <button
+                    type="button"
+                    className="pro-quick-btn pro-ripple-cut-btn"
+                    onClick={onRippleCutSilence}
+                    disabled={isRippleCutting}
+                    title="Physically slice dead-air pauses out of the timeline and ripple all tracks"
+                    data-testid="pro-quick-ripple-silence"
+                  >
+                    {isRippleCutting ? "⏳ Slicing..." : "⚡ Ripple-Cut Dead Air"}
+                  </button>
+                )}
+                {onSetDualCam && (
+                  <button
+                    type="button"
+                    className={`pro-quick-btn ${isDualCamActive ? "is-active" : ""}`}
+                    onClick={onSetDualCam}
+                    title="Stack 16:9 podcast hosts vertically in 9:16 dual-cam"
+                    data-testid="pro-quick-both-cams"
+                  >
+                    👥 Show Everyone
+                  </button>
+                )}
+                {onSetAutoReframe && (
+                  <button
+                    type="button"
+                    className={`pro-quick-btn ${isAutoReframeActive ? "is-active" : ""}`}
+                    onClick={onSetAutoReframe}
+                    title="Open speaker close-up, zoom and reviewed framing points"
+                    data-testid="pro-quick-reframe"
+                  >
+                    🎯 Solo Speaker
+                  </button>
+                )}
+                {onTogglePunchAtPlayhead && (
+                  <button
+                    type="button"
+                    className={`pro-quick-btn ${isPlayheadPunched ? "is-active is-punched" : ""}`}
+                    onClick={onTogglePunchAtPlayhead}
+                    title="Toggle 1.25× camera punch-in at playhead (Hotkey: Z)"
+                    data-testid="pro-quick-punch"
+                    style={
+                      isPlayheadPunched
+                        ? {
+                            background: "linear-gradient(135deg, #a855f7, #ec4899)",
+                            borderColor: "#f472b6",
+                            color: "#fff",
+                            fontWeight: 600,
+                          }
+                        : undefined
+                    }
+                  >
+                    {isPlayheadPunched ? "🎯 Punched (Z)" : "🎯 Punch In (Z)"}
+                  </button>
+                )}
+                {onAutoGeneratePunchIns && (
+                  <button
+                    type="button"
+                    className="pro-quick-btn"
+                    onClick={onAutoGeneratePunchIns}
+                    title="Auto-generate viral cadence punch-ins across the whole sequence"
+                    data-testid="pro-quick-auto-punch"
+                  >
+                    ⚡ Auto-Punch
+                  </button>
+                )}
+                {onAutoGenerateMotionBeats && (
+                  <button
+                    type="button"
+                    className="pro-quick-btn"
+                    onClick={onAutoGenerateMotionBeats}
+                    title="Auto-generate viral motion graphics & retention cues from transcript"
+                    data-testid="pro-quick-auto-motion"
+                  >
+                    ✨ Auto-Motion
+                  </button>
+                )}
+                {onToggleJCutAtPlayhead && (
+                  <button
+                    type="button"
+                    className={`pro-quick-btn ${hasActiveJCut ? "is-active" : ""}`}
+                    onClick={onToggleJCutAtPlayhead}
+                    title="J-Cut (0.8s): Dialogue pre-lap starts incoming audio before video cuts"
+                    data-testid="pro-quick-jcut"
+                    style={
+                      hasActiveJCut
+                        ? {
+                            background: "linear-gradient(135deg, #06b6d4, #0891b2)",
+                            borderColor: "#22d3ee",
+                            color: "#fff",
+                            fontWeight: 600,
+                          }
+                        : undefined
+                    }
+                  >
+                    {hasActiveJCut ? "🎧 J-Cut Active" : "🎧 J-Cut (0.8s)"}
+                  </button>
+                )}
+                {onToggleLCutAtPlayhead && (
+                  <button
+                    type="button"
+                    className={`pro-quick-btn ${hasActiveLCut ? "is-active" : ""}`}
+                    onClick={onToggleLCutAtPlayhead}
+                    title="L-Cut (0.8s): Dialogue trail continues audio after video cuts away"
+                    data-testid="pro-quick-lcut"
+                    style={
+                      hasActiveLCut
+                        ? {
+                            background: "linear-gradient(135deg, #8b5cf6, #7c3aed)",
+                            borderColor: "#a78bfa",
+                            color: "#fff",
+                            fontWeight: 600,
+                          }
+                        : undefined
+                    }
+                  >
+                    {hasActiveLCut ? "🎧 L-Cut Active" : "🎧 L-Cut (0.8s)"}
+                  </button>
+                )}
+                {musicBeatMarkers && musicBeatMarkers.length > 0 && onBeatSnappingChange && (
+                  <button
+                    type="button"
+                    className={`pro-quick-btn ${beatSnapping ? "is-active" : ""}`}
+                    onClick={() => onBeatSnappingChange(!beatSnapping)}
+                    title={`Magnetic Beat Snapping: Snap clips & cuts to ${musicBeatMarkers.length} music beats`}
+                    data-testid="pro-quick-beat-snap"
+                    style={
+                      beatSnapping
+                        ? {
+                            background: "linear-gradient(135deg, #10b981, #059669)",
+                            borderColor: "#34d399",
+                            color: "#fff",
+                            fontWeight: 600,
+                          }
+                        : undefined
+                    }
+                  >
+                    {beatSnapping ? `🧲 Beats (${musicBeatMarkers.length})` : "🧲 Beat Snap"}
+                  </button>
+                )}
+                {musicBeatMarkers && musicBeatMarkers.length > 0 && onAlignCutsToBeat && (
+                  <button
+                    type="button"
+                    className="pro-quick-btn"
+                    onClick={onAlignCutsToBeat}
+                    title="Align sequence cuts to nearest musical beat transients"
+                    data-testid="pro-quick-align-beats"
+                  >
+                    🎵 Cut to Beat
+                  </button>
+                )}
+                {onToggleDirectorMode && (
+                  <button
+                    type="button"
+                    className={`pro-quick-btn is-director ${isDirectorModeActive ? "is-active" : ""}`}
+                    onClick={onToggleDirectorMode}
+                    title="Live Multicam Director Mode: Switch camera angles in real time using keys 1, 2, 3, 4"
+                    data-testid="pro-quick-director"
+                    style={{
+                      background: isDirectorModeActive
+                        ? "linear-gradient(135deg, #ef4444, #dc2626)"
+                        : undefined,
+                      borderColor: isDirectorModeActive ? "#f87171" : undefined,
+                      color: isDirectorModeActive ? "#fff" : undefined,
+                      fontWeight: 600,
+                    }}
+                  >
+                    {isDirectorModeActive ? "🔴 Director Live [1-4]" : "🎬 Director Mode"}
+                  </button>
+                )}
+                {onUndo && (
+                  <button
+                    type="button"
+                    className="pro-quick-btn"
+                    onClick={onUndo}
+                    disabled={!canUndo}
+                    title="Undo edit"
+                    data-testid="pro-quick-undo"
+                  >
+                    ↩ Undo
+                  </button>
+                )}
+                {onRedo && (
+                  <button
+                    type="button"
+                    className="pro-quick-btn"
+                    onClick={onRedo}
+                    disabled={!canRedo}
+                    title="Redo edit"
+                    data-testid="pro-quick-redo"
+                  >
+                    ↪ Redo
+                  </button>
+                )}
+              </div>
+            </StudioControlMenu>
           </div>
         )}
         <div className="pro-edit-tools" role="toolbar" aria-label="Timeline edit tools">
@@ -1067,6 +1235,14 @@ export default function StudioProTimeline({
           ))}
         </div>
         <div className="pro-timeline-switches">
+          <button
+            type="button"
+            className={showEmptyTracks ? "is-on" : ""}
+            aria-pressed={showEmptyTracks}
+            onClick={() => setShowEmptyTracks(value => !value)}
+          >
+            {showEmptyTracks ? "Hide empty tracks" : "Show empty tracks"}
+          </button>
           <button
             type="button"
             className={snapping ? "is-on" : ""}
@@ -1088,26 +1264,54 @@ export default function StudioProTimeline({
           >
             ⇥ Ripple
           </button>
-          <label>
-            <span>Zoom</span>
+          <div className="pro-timeline-zoom" role="group" aria-label="Timeline zoom controls">
+            <button
+              type="button"
+              aria-label="Zoom out timeline"
+              disabled={safeZoom <= 1}
+              onClick={() => onZoomChange?.(Math.max(1, safeZoom / 2))}
+            >
+              −
+            </button>
             <input
               type="range"
+              aria-label="Timeline zoom"
               min={1}
-              max={8}
+              max={32}
               step={0.25}
-              value={zoom}
-              onChange={event => onZoomChange(Number(event.target.value))}
+              value={safeZoom}
+              onChange={event => onZoomChange?.(Number(event.target.value))}
             />
-          </label>
+            <button
+              type="button"
+              aria-label="Zoom in timeline"
+              disabled={safeZoom >= 32}
+              onClick={() => onZoomChange?.(Math.min(32, safeZoom * 2))}
+            >
+              +
+            </button>
+            <button
+              type="button"
+              onClick={() => onZoomChange?.(1)}
+              aria-label="Fit entire timeline"
+            >
+              Fit
+            </button>
+            <output aria-label="Timeline zoom level">{safeZoom}×</output>
+          </div>
         </div>
       </div>
 
-      <div className="pro-timeline-scroll">
+      <div className="pro-timeline-scroll" ref={scrollRef}>
         <div className="pro-timeline-content" style={{ width: visibleWidth }}>
           <div className="pro-time-ruler" onClick={onSeek} role="presentation">
-            {Array.from({ length: 11 }, (_, index) => (
-              <i key={index} style={{ left: `${index * 10}%` }}>
-                <span>{((safeDuration * index) / 10).toFixed(1)}s</span>
+            {Array.from({ length: tickCount }, (_, index) => (
+              <i key={index} style={{ left: percentAt(index * tickInterval, safeDuration) }}>
+                <span>
+                  {tickInterval < 1
+                    ? (index * tickInterval).toFixed(1) + "s"
+                    : timecode(index * tickInterval)}
+                </span>
               </i>
             ))}
             <b className="pro-playhead" style={{ left: percentAt(playhead, safeDuration) }} />
@@ -1116,6 +1320,7 @@ export default function StudioProTimeline({
           {TRACK_DEFINITIONS.map(([trackId, code, label, type]) => {
             const state = trackStates[trackId] || {};
             const items = clipsForTrack(trackId);
+            if (!showEmptyTracks && !items.length && trackId !== focusedTrack) return null;
             const automation =
               trackId === "graphics" || trackId === "broll"
                 ? motionKeyframes
@@ -1126,7 +1331,7 @@ export default function StudioProTimeline({
               <div
                 key={trackId}
                 data-testid={`pro-track-row-${trackId}`}
-                className={`pro-track-row is-${type} ${state.visible === false ? "is-hidden" : ""}`}
+                className={`pro-track-row is-${type} ${state.visible === false ? "is-hidden" : ""} ${trackId === focusedTrack ? "is-focused" : ""}`}
                 style={
                   trackId === "adjustment" && items.length > 1
                     ? { "--pro-track-lanes": Math.min(items.length, 3) }
@@ -1139,12 +1344,17 @@ export default function StudioProTimeline({
                   <TrackControls trackId={trackId} state={state} onChange={onTrackStateChange} />
                 </div>
                 <div className="pro-track-lane" onClick={onSeek} role="presentation">
+                  {trackId === "video" ? <TimelineSourceFilmstrip frames={sourceFrames} /> : null}
                   <b className="pro-playhead" style={{ left: percentAt(playhead, safeDuration) }} />
                   {trackId === "music" && musicBeatMarkers && musicBeatMarkers.length > 0 && (
-                    <div className="pro-beat-markers-overlay" style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 2 }}>
+                    <div
+                      className="pro-beat-markers-overlay"
+                      style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 2 }}
+                    >
                       {musicBeatMarkers.map((bm, bIdx) => {
                         const t = typeof bm === "number" ? bm : Number(bm?.time ?? 0);
-                        const isDownbeat = typeof bm === "object" ? Boolean(bm?.isDownbeat) : bIdx % 4 === 0;
+                        const isDownbeat =
+                          typeof bm === "object" ? Boolean(bm?.isDownbeat) : bIdx % 4 === 0;
                         if (t < 0 || t > safeDuration) return null;
                         return (
                           <div
@@ -1221,15 +1431,15 @@ export default function StudioProTimeline({
                               trackId === "framing"
                                 ? "reframe"
                                 : trackId === "graphics"
-                                ? "titles"
-                                : trackId === "broll"
-                                  ? "broll"
-                                  : trackId === "music" ||
-                                      trackId === "sfx" ||
-                                      trackId === "voiceover" ||
-                                      trackId === "originalAudio"
-                                    ? "sound"
-                                    : null
+                                  ? "titles"
+                                  : trackId === "broll"
+                                    ? "broll"
+                                    : trackId === "music" ||
+                                        trackId === "sfx" ||
+                                        trackId === "voiceover" ||
+                                        trackId === "originalAudio"
+                                      ? "sound"
+                                      : null
                             );
                             onSeek?.(event, start);
                           }}
@@ -1284,11 +1494,15 @@ export default function StudioProTimeline({
                       <button
                         key={item.id || `${trackId}-${index}`}
                         type="button"
-                        className={`pro-track-clip ${item.isPunch ? "pro-punch-clip" : ""}`}
+                        className={`pro-track-clip ${item.isPunch ? "pro-punch-clip" : ""} ${Number(playhead || 0) >= start && Number(playhead || 0) < start + itemDuration ? "is-at-playhead" : ""}`}
                         data-testid={`pro-${trackId}-clip-${index + 1}`}
+                        data-start-time={start}
+                        data-end-time={start + itemDuration}
+                        data-framing-mode={trackId === "framing" ? item.mode : undefined}
+                        data-framing-punch={trackId === "framing" ? item.zoom > 1 : undefined}
                         style={{
                           left: percentAt(start, safeDuration),
-                          width: `${Math.max(1.2, (itemDuration / safeDuration) * 100)}%`,
+                          width: `${Math.max(0, (itemDuration / safeDuration) * 100)}%`,
                           ...(trackId === "adjustment" && items.length > 1
                             ? {
                                 top: `${5 + (index % 3) * 23}px`,
@@ -1298,13 +1512,15 @@ export default function StudioProTimeline({
                             : {}),
                           ...(item.isPunch
                             ? {
-                                background: "linear-gradient(135deg, rgba(168, 85, 247, 0.45), rgba(236, 72, 153, 0.45))",
+                                background:
+                                  "linear-gradient(135deg, rgba(168, 85, 247, 0.45), rgba(236, 72, 153, 0.45))",
                                 borderColor: "rgba(236, 72, 153, 0.75)",
                                 color: "#fdf2f8",
                               }
                             : {}),
                         }}
                         title={`${itemLabel} · ${start.toFixed(2)}s–${(start + itemDuration).toFixed(2)}s`}
+                        aria-label={`${itemLabel} · ${start.toFixed(2)}s–${(start + itemDuration).toFixed(2)}s`}
                         onClick={event => {
                           event.stopPropagation();
                           if (trackId === "motion") {
@@ -1329,7 +1545,19 @@ export default function StudioProTimeline({
                                       ? "sound"
                                       : null
                           );
-                          onSeek?.(event, start);
+                          if (
+                            (trackId === "video" || trackId === "originalAudio") &&
+                            event.detail > 0
+                          ) {
+                            const lane = event.currentTarget.parentElement.getBoundingClientRect();
+                            const ratio = Math.max(
+                              0,
+                              Math.min(1, (event.clientX - lane.left) / Math.max(1, lane.width))
+                            );
+                            onSeek?.(event, ratio * safeDuration);
+                          } else {
+                            onSeek?.(event, start);
+                          }
                         }}
                       >
                         <span>{itemLabel}</span>
@@ -1347,7 +1575,9 @@ export default function StudioProTimeline({
                         />
                       ))
                     : null}
-                  {(trackId === "video" || trackId === "originalAudio") && silenceRegions && silenceRegions.length > 0
+                  {(trackId === "video" || trackId === "originalAudio") &&
+                  silenceRegions &&
+                  silenceRegions.length > 0
                     ? silenceRegions.map((zone, zIdx) => (
                         <div
                           key={`silence-zone-${zIdx}`}
@@ -1372,7 +1602,12 @@ export default function StudioProTimeline({
         <span>{editTool} tool</span>
         <span>{snapping ? "Magnetic snapping" : "Free movement"}</span>
         <span>{linkedSelection ? "Audio/video linked" : "Audio/video independent"}</span>
-        <strong>Timeline and preview share the same edit state</strong>
+        <strong data-testid="pro-current-edit">
+          {timecode(playhead)}
+          {activeFraming
+            ? ` · ${activeFraming.name} · ${timecode(activeFraming.time)}–${timecode(activeFraming.time + activeFraming.duration)}`
+            : ""}
+        </strong>
       </footer>
     </section>
   );

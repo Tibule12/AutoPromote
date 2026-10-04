@@ -1,0 +1,70 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "check": "Full gate source unchanged: frontend/src/components/ViralClipStudio.js",
+      "passed": true
+    },
+    {
+      "check": "Full gate stylesheet differs only by final Media-tab scope correction",
+      "passed": true
+    },
+    {
+      "check": "Full gate source unchanged: frontend/src/components/StudioProTimeline.js",
+      "passed": true
+    },
+    {
+      "check": "Full gate source unchanged: frontend/src/components/StudioControlMenu.js",
+      "passed": true
+    },
+    {
+      "check": "Full gate source unchanged: frontend/src/components/TimelineSourceFilmstrip.js",
+      "passed": true
+    },
+    {
+      "check": "Full gate source unchanged: test/e2e/playwright/run-studio-timeline-layout.js",
+      "passed": true
+    },
+    {
+      "check": "Full gate source unchanged: test/e2e/playwright/studio-timeline-layout.js",
+      "passed": true
+    },
+    {
+      "check": "Full gate source unchanged: scripts/run-studio-analysis-browser-preview.js",
+      "passed": true
+    },
+    {
+      "check": "Full gate source unchanged: test/e2e/playwright/studio-analysis-staging-entry.jsx",
+      "passed": true
+    },
+    {
+      "check": "Final tab gate source unchanged: frontend/src/components/ViralClipStudio.css",
+      "passed": true
+    },
+    {
+      "check": "Final tab gate source unchanged: test/e2e/playwright/run-studio-library-tabs.js",
+      "passed": true
+    },
+    {
+      "check": "Full browser gate passed with 23 layout checks and no new analysis jobs",
+      "passed": true
+    },
+    {
+      "check": "14-card presentation uses one visible placement-action group and working search",
+      "passed": true
+    },
+    {
+      "check": "Compiled library tab gate passes nine checks and no new analysis jobs",
+      "passed": true
+    },
+    {
+      "check": "All six actual source thumbnails decoded",
+      "passed": true
+    },
+    {
+      "check": "23 focused regression tests pass",
+      "passed": true
+    }
+  ],
+  "scope": "Verify saved browser receipts, their exact tested sources and report screenshots. Cloud batch uploads and public deployment were not exercised."
+}

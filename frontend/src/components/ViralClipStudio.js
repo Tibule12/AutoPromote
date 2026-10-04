@@ -171,53 +171,10 @@ import {
 } from "./audio/audioRemixPreview";
 import "./audio/audioRemixTimeline.css";
 import "./ViralClipStudio.css"; // We'll create this CSS next
+import TimelineSourceFilmstrip from "./TimelineSourceFilmstrip";
+import StudioControlMenu from "./StudioControlMenu";
 
 const Studio3DCanvas = React.lazy(() => import("./threeD/Studio3DCanvas"));
-
-const TimelineVideoThumbnail = ({ src, previewTime, style }) => {
-  const thumbnailRef = useRef(null);
-
-  useEffect(() => {
-    const video = thumbnailRef.current;
-    if (!video) return undefined;
-
-    const showRequestedFrame = () => {
-      const duration = Number(video.duration || 0);
-      const requestedTime = Math.max(0, Number(previewTime || 0));
-      const targetTime =
-        duration > 0 ? Math.min(requestedTime, Math.max(0, duration - 0.04)) : requestedTime;
-      if (!Number.isFinite(targetTime)) return;
-      try {
-        video.currentTime = targetTime;
-      } catch (error) {
-        console.log("Timeline thumbnail seek skipped", error);
-      }
-    };
-
-    video.addEventListener("loadedmetadata", showRequestedFrame);
-    video.addEventListener("durationchange", showRequestedFrame);
-    if (video.readyState >= 1) showRequestedFrame();
-
-    return () => {
-      video.removeEventListener("loadedmetadata", showRequestedFrame);
-      video.removeEventListener("durationchange", showRequestedFrame);
-    };
-  }, [previewTime, src]);
-
-  return (
-    <SafeVideo
-      ref={thumbnailRef}
-      src={src}
-      muted
-      playsInline
-      preload="metadata"
-      tabIndex={-1}
-      aria-hidden="true"
-      className="compact-filmstrip-frame"
-      style={style}
-    />
-  );
-};
 
 const RAINBOW_COLORS = [
   "#FF9AA2", // Soft Red
@@ -2798,10 +2755,11 @@ const ViralClipStudio = ({
   const [directorReviewError, setDirectorReviewError] = useState("");
   const [timelineZoom, setTimelineZoom] = useState(1);
   const [timelineDockExpanded, setTimelineDockExpanded] = useState(true);
-  const [timelineDockHeight, setTimelineDockHeight] = useState(188);
+  const [timelineDockHeight, setTimelineDockHeight] = useState(280);
   const timelineResizeRef = useRef(null);
   const [previewDockSide, setPreviewDockSide] = useState("center");
   const [projectRailExpanded, setProjectRailExpanded] = useState(false);
+  const [projectRailTab, setProjectRailTab] = useState("media");
   const [timelineEditTool, setTimelineEditTool] = useState("select");
   const [timelineSnapping, setTimelineSnapping] = useState(true);
   const [linkedSelection, setLinkedSelection] = useState(true);
@@ -15196,6 +15154,7 @@ const ViralClipStudio = ({
     }));
     setProjectMedia(current => [...current, ...assets]);
     setSelectedProjectMediaId(assets[0].id);
+    setProjectRailTab("media");
     setProjectRailExpanded(true);
     setMediaImportMessage(
       `${assets.length} ${assets.length === 1 ? "video" : "videos"} added to your media library. Save completes per file; choose a ready video to place it in the edit.` +
@@ -16607,11 +16566,12 @@ const ViralClipStudio = ({
             activeTool={activeCreativeTool}
             onSelect={selectCreativeTool}
           />
-          <aside className="studio-project-rail" aria-label="Project navigator">
+          <aside className="studio-project-rail" aria-label="Project navigator" data-active-tab={projectRailTab}>
             <button type="button" className="studio-media-close" onClick={() => setProjectRailExpanded(false)}>
               Close media ×
             </button>
-            <div className="studio-project-rail__head">
+            <details className="studio-project-rail__head">
+              <summary title={projectName}>{projectName || "Untitled project"}</summary>
               <span>Project</span>
               <label className="studio-project-name-field">
                 <span className="sr-only">Project name</span>
@@ -16693,9 +16653,15 @@ const ViralClipStudio = ({
                   </div>
                 </details>
               ) : null}
-            </div>
+            </details>
 
-            <nav className="studio-workflow-nav" aria-label="Clip Studio workflow">
+            <div className="studio-library-tabs" role="tablist" aria-label="Project library">
+              {[["media", "Media"], ["sequence", "Sequence"], ["moments", "Moments"]].map(([id, label]) => (
+                <button key={id} type="button" role="tab" aria-selected={projectRailTab === id}
+                  onClick={() => setProjectRailTab(id)}>{label}</button>
+              ))}
+            </div>
+            <nav className="studio-workflow-nav" aria-label="Clip Studio workflow" hidden>
               <div className="studio-workflow-nav__intro">
                 <span>Editing route</span>
                 <strong>Moment to finished short</strong>
@@ -16728,7 +16694,7 @@ const ViralClipStudio = ({
               </div>
             </nav>
 
-            <section className="studio-project-list" aria-labelledby="studio-sequence-heading">
+            <section className="studio-project-list" aria-labelledby="studio-sequence-heading" hidden={projectRailTab !== "sequence"}>
               <div className="studio-project-list__heading">
                 <div>
                   <span>Sequence</span>
@@ -16772,7 +16738,7 @@ const ViralClipStudio = ({
               </div>
             </section>
 
-            <section className="studio-project-list" aria-labelledby="studio-moments-heading">
+            <section className="studio-project-list" aria-labelledby="studio-moments-heading" hidden={projectRailTab !== "moments"}>
               <div className="studio-project-list__heading">
                 <div>
                   <span>Discovery</span>
@@ -16818,7 +16784,7 @@ const ViralClipStudio = ({
               </div>
             </section>
 
-            <section className="studio-media-bin" aria-label="Project media bin">
+            <section className="studio-media-bin" aria-label="Project media bin" hidden={projectRailTab !== "media"}>
               <div className="studio-project-list__heading">
                 <div>
                   <span>Media</span>
@@ -16827,7 +16793,7 @@ const ViralClipStudio = ({
                 <i>{projectMedia.length}</i>
               </div>
               <p className="studio-media-bin__help">
-                Import all your scenes first. Preview each take, then choose where it goes. Camera angles are grouped separately.
+                Import your videos here, then choose what belongs in the edit. Sequence adds to the end; B-roll starts at the playhead.
               </p>
               <input
                 ref={projectMediaInputRef}
@@ -16862,15 +16828,16 @@ const ViralClipStudio = ({
                   setMediaBinVisibleCount(12);
                 }}
               />
-              {selectedProjectMedia?.url ? (
-                <div className="studio-media-bin__preview" aria-label="Selected project video preview">
+              {projectRailExpanded && selectedProjectMedia?.url ? (
+                <details className="studio-media-bin__preview" key={selectedProjectMedia.id} aria-label="Selected project video preview">
+                  <summary>Source preview · {selectedProjectMedia.name}</summary>
                   <video
                     key={`${selectedProjectMedia.id}-${selectedProjectMedia.url}`}
                     src={getSafeMediaSource(selectedProjectMedia.url) || undefined}
                     poster={selectedProjectMedia.poster || undefined}
                     controls
                     playsInline
-                    preload="metadata"
+                    preload="none"
                     onError={() => {
                       const path = selectedProjectMedia.storagePath;
                       if (path && !attemptedSourceRefreshRef.current.has(path)) {
@@ -16881,7 +16848,7 @@ const ViralClipStudio = ({
                   />
                   <strong title={selectedProjectMedia.name}>{selectedProjectMedia.name}</strong>
                   <small>Preview only · use the buttons below to place this video in your edit.</small>
-                </div>
+                </details>
               ) : null}
               <div className="studio-media-bin__library" data-testid="project-media-library">
                 {visibleProjectMedia.map(item => {
@@ -16896,7 +16863,7 @@ const ViralClipStudio = ({
                         aria-pressed={selectedProjectMediaId === item.id}
                         onClick={() => setSelectedProjectMediaId(item.id)}
                       >
-                        {item.poster ? <img src={item.poster} alt="" /> : <span aria-hidden="true">▶</span>}
+                        {item.poster ? <img src={item.poster} alt="" loading="lazy" /> : <span aria-hidden="true">▶</span>}
                       </button>
                       <div className="studio-media-card__body">
                         <strong title={item.name}>{item.name}</strong>
@@ -16913,10 +16880,21 @@ const ViralClipStudio = ({
                                     : item.status === "unavailable" ? "Link needs refresh"
                                       : "In current edit"}
                         </small>
+                        {timeline.some(clip => clip.sourceMediaId === item.id || (item.storagePath && (clip.storagePath || clip.sourceStoragePath) === item.storagePath)) ?
+                          <small className="studio-media-card__usage">In sequence</small> : null}
+                        {overlays.some(overlay => overlay.sourceMediaId === item.id) ?
+                          <small className="studio-media-card__usage">Used as B-roll</small> : null}
                         {item.error ? <small className="studio-media-card__error">{item.error}</small> : null}
                       </div>
-                      <div className="studio-media-card__actions">
-                        <button type="button" onClick={() => setSelectedProjectMediaId(item.id)}>Preview</button>
+                      <div className="studio-media-card__actions" hidden={selectedProjectMediaId !== item.id && !["failed", "needs_upload", "unavailable"].includes(item.status)}>
+                        {selectedProjectMediaId === item.id ? <>
+                        <button type="button" onClick={() => {
+                          setSelectedProjectMediaId(item.id);
+                          window.requestAnimationFrame(() => {
+                            const viewer = document.querySelector(".studio-media-bin__preview");
+                            if (viewer) viewer.open = true;
+                          });
+                        }}>Preview</button>
                         <button type="button" disabled={!ready} onClick={() => appendProjectMediaToSequence(item)}>
                           Add to sequence
                         </button>
@@ -16931,6 +16909,7 @@ const ViralClipStudio = ({
                         >
                           {selectedAsCamera ? "✓ In camera take" : "Select for camera take"}
                         </button>
+                        </> : null}
                         {(item.status === "failed" || item.status === "needs_upload") && item.file instanceof Blob ? (
                           <button type="button" onClick={() => void uploadProjectMediaAsset(item)}>Retry upload</button>
                         ) : null}
@@ -16957,7 +16936,8 @@ const ViralClipStudio = ({
                   Show more videos ({matchingProjectMedia.length - mediaBinVisibleCount} left)
                 </button>
               ) : null}
-              <section className="studio-media-bin__camera" aria-label="Film camera takes">
+              <details className="studio-media-bin__camera" aria-label="Film camera takes" open={selectedCameraMediaIds.length > 0}>
+                <summary>Group camera angles{selectedCameraMediaIds.length ? ` (${selectedCameraMediaIds.length} selected)` : ""}</summary>
                 <strong>Camera takes for your movie</strong>
                 <small>Choose 2–{MAX_STUDIO_ANGLES} videos of the same moment. Set where each starts, then choose each shot yourself. Studio will keep the cuts you place in the sequence.</small>
                 <label>
@@ -16985,7 +16965,7 @@ const ViralClipStudio = ({
                     {cameraGroupStatus === "opening" ? "Opening podcast editor…" : "Open Podcast Cam Combiner for automatic podcast cuts"}
                   </button>
                 ) : null}
-              </section>
+              </details>
               {angleGroups.length ? (
                 <section className="studio-angle-groups" aria-label="Saved film camera takes">
                   <strong>Film camera takes</strong>
@@ -17252,8 +17232,27 @@ const ViralClipStudio = ({
                   onClick={toggleComparisonPlayback}
                   aria-label={isPreviewPaused ? "Play comparison" : "Pause comparison"}
                 >
-                  {isPreviewPaused ? "▶ Play comparison" : "❚❚ Pause comparison"}
+                  <span aria-hidden="true">{isPreviewPaused ? "▶" : "Ⅱ"}</span>
                 </button>
+                <button
+                  type="button"
+                  className="studio-monitor-toggle"
+                  aria-pressed={projectRailExpanded}
+                  data-testid="preview-media-toggle"
+                  onClick={() => setProjectRailExpanded(current => !current)}
+                >
+                  {projectRailExpanded ? "Hide media" : "Show media"}
+                </button>
+                <button
+                  type="button"
+                  className="studio-monitor-toggle"
+                  aria-pressed={timelineDockExpanded}
+                  data-testid="preview-timeline-toggle"
+                  onClick={() => setTimelineDockExpanded(current => !current)}
+                >
+                  {timelineDockExpanded ? "Hide timeline" : "Show timeline"}
+                </button>
+                <StudioControlMenu className="studio-view-options" label="View options">
                 <div className="preview-display-controls" aria-label="Preview display controls">
                   <div className="preview-reframe-quick-group" aria-label="Quick camera framing">
                     <button
@@ -17290,15 +17289,6 @@ const ViralClipStudio = ({
                     }
                   >
                     {previewDockSide === "side" ? "⧉ Center canvas" : "⊞ Dock canvas right"}
-                  </button>
-                  <button
-                    type="button"
-                    className={projectRailExpanded ? "is-active" : ""}
-                    aria-pressed={projectRailExpanded}
-                    data-testid="preview-media-toggle"
-                    onClick={() => setProjectRailExpanded(current => !current)}
-                  >
-                    {projectRailExpanded ? "Hide media" : "Show media"}
                   </button>
                   {usesPanelFraming ? (
                     <button
@@ -17385,16 +17375,8 @@ const ViralClipStudio = ({
                   <button type="button" data-testid="preview-tools" onClick={() => setCommandPaletteOpen(true)}>
                     ⌘K Tools
                   </button>
-                  <button
-                    type="button"
-                    className={timelineDockExpanded ? "is-active" : ""}
-                    aria-pressed={timelineDockExpanded}
-                    data-testid="preview-timeline-toggle"
-                    onClick={() => setTimelineDockExpanded(current => !current)}
-                  >
-                    {timelineDockExpanded ? "Hide timeline" : "Show timeline"}
-                  </button>
                 </div>
+                </StudioControlMenu>
               </div>
 
               <div className="preview-device-column">
@@ -18932,17 +18914,9 @@ const ViralClipStudio = ({
                         style={{ left: `${liveTimelinePlayheadLeft}%` }}
                       />
                       <span className="compact-source-filmstrip" aria-hidden="true">
-                        {liveTimelineFilmstripFrames.map(frame => (
-                          <TimelineVideoThumbnail
-                            key={frame.id}
-                            src={frame.src}
-                            previewTime={frame.previewTime}
-                            style={{
-                              left: `${frame.left}%`,
-                              width: `${frame.width}%`,
-                            }}
-                          />
-                        ))}
+                        {!timelineDockExpanded ? (
+                          <TimelineSourceFilmstrip frames={liveTimelineFilmstripFrames} />
+                        ) : null}
                       </span>
                       <span className="compact-source-scrim" aria-hidden="true" />
                       {normalizedPendingCutRange ? (
@@ -28004,6 +27978,8 @@ const ViralClipStudio = ({
               onRippleModeChange={setRippleMode}
               trackStates={trackStates}
               timelineSegments={timeline}
+              activeTool={activeCreativeTool}
+              sourceFrames={liveTimelineFilmstripFrames}
               onTrackStateChange={(trackId, changes) =>
                 setTrackStates(current => ({
                   ...current,

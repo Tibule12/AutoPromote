@@ -8,6 +8,7 @@ const path = require("path");
 const { execFile } = require("child_process");
 const { promisify } = require("util");
 const { chromium } = require("@playwright/test");
+const { assertStudioTimelineLayout, clickStudioControl } = require("./studio-timeline-layout");
 const execute = promisify(execFile);
 const root = path.resolve(__dirname, "../../..");
 const folder = path.join(root, "artifacts/studio-analysis-browser-20261004");
@@ -75,7 +76,8 @@ async function main() {
   const requests = [],
     pageErrors = [],
     statuses = new Set(),
-    playbackChecks = [];
+    playbackChecks = [],
+    layoutChecks = [];
   let submitted = null,
     result = null,
     execution = null;
@@ -142,6 +144,7 @@ async function main() {
     const play = page.getByRole("button", { name: "Play comparison", exact: false });
     if (await play.isVisible()) await play.click();
     const assertPlaying = async label => {
+      layoutChecks.push(await assertStudioTimelineLayout(page, label));
       const programme = page.getByTestId("studio-after-video");
       const beforeTime = await programme.evaluate(video => video.currentTime);
       await page.waitForTimeout(1000);
@@ -237,7 +240,7 @@ async function main() {
     assert(statuses.has("queued") && statuses.has("running") && statuses.has("completed"));
     assert(capturedRunning);
     await page.getByRole("button", { name: "Show media", exact: true }).click();
-    await page.getByTestId("studio-save-project").click();
+    await clickStudioControl(page, page.getByTestId("studio-save-project"));
     await page.waitForFunction(() => document.body.innerText.includes("Saved locally"), null, {
       timeout: 30000,
     });
@@ -305,6 +308,7 @@ async function main() {
       resultSha256: crypto.createHash("sha256").update(JSON.stringify(result)).digest("hex"),
       authorization,
       playbackChecks,
+      layoutChecks,
       pageErrors,
       proofScope:
         "Production Studio component in a localhost acceptance host; dashboard navigation and public deployment excluded",

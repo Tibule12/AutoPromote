@@ -1,0 +1,11 @@
+{
+  "projectId": "autopromote-staging-2026",
+  "ownerStatus": 200,
+  "sourceResolved": true,
+  "failureCode": null,
+  "failureMessage": null,
+  "signedReadStatus": 206,
+  "readBytes": 4096,
+  "anonymousStatus": 401,
+  "otherOwnerStatus": 403
+}

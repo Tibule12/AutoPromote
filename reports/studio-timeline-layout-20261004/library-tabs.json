@@ -1,0 +1,599 @@
+{
+  "passed": true,
+  "completedAt": "2026-10-04T15:14:32.726Z",
+  "scope": "Compiled production component and CSS; real staging Firebase sign-in; selected library pane visibility at three desktop sizes",
+  "submittedJobs": 0,
+  "pageErrors": [],
+  "checks": [
+    {
+      "label": "1440x1000 / Sequence tab",
+      "layout": {
+        "left": 0,
+        "right": 1440,
+        "top": 64,
+        "bottom": 1000,
+        "width": 1440,
+        "height": 936
+      },
+      "dock": {
+        "left": 0,
+        "right": 1440,
+        "top": 720,
+        "bottom": 1000,
+        "width": 1440,
+        "height": 280
+      },
+      "timeline": {
+        "left": 0,
+        "right": 1440,
+        "top": 730,
+        "bottom": 1000,
+        "width": 1440,
+        "height": 270
+      },
+      "toolbar": {
+        "left": 1,
+        "right": 1439,
+        "top": 731,
+        "bottom": 793.65625,
+        "width": 1438,
+        "height": 62.65625
+      },
+      "scroll": {
+        "left": 1,
+        "right": 1439,
+        "top": 793.65625,
+        "bottom": 951.328125,
+        "width": 1438,
+        "height": 157.671875
+      },
+      "preview": {
+        "left": 336.796875,
+        "right": 1080,
+        "top": 64,
+        "bottom": 720,
+        "width": 743.203125,
+        "height": 656
+      },
+      "tools": {
+        "left": 0,
+        "right": 92,
+        "top": 64,
+        "bottom": 720,
+        "width": 92,
+        "height": 656
+      },
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "label": "1440x1000 / Moments tab",
+      "layout": {
+        "left": 0,
+        "right": 1440,
+        "top": 64,
+        "bottom": 1000,
+        "width": 1440,
+        "height": 936
+      },
+      "dock": {
+        "left": 0,
+        "right": 1440,
+        "top": 720,
+        "bottom": 1000,
+        "width": 1440,
+        "height": 280
+      },
+      "timeline": {
+        "left": 0,
+        "right": 1440,
+        "top": 730,
+        "bottom": 1000,
+        "width": 1440,
+        "height": 270
+      },
+      "toolbar": {
+        "left": 1,
+        "right": 1439,
+        "top": 731,
+        "bottom": 793.65625,
+        "width": 1438,
+        "height": 62.65625
+      },
+      "scroll": {
+        "left": 1,
+        "right": 1439,
+        "top": 793.65625,
+        "bottom": 951.328125,
+        "width": 1438,
+        "height": 157.671875
+      },
+      "preview": {
+        "left": 336.796875,
+        "right": 1080,
+        "top": 64,
+        "bottom": 720,
+        "width": 743.203125,
+        "height": 656
+      },
+      "tools": {
+        "left": 0,
+        "right": 92,
+        "top": 64,
+        "bottom": 720,
+        "width": 92,
+        "height": 656
+      },
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "label": "1440x1000 / Media tab",
+      "layout": {
+        "left": 0,
+        "right": 1440,
+        "top": 64,
+        "bottom": 1000,
+        "width": 1440,
+        "height": 936
+      },
+      "dock": {
+        "left": 0,
+        "right": 1440,
+        "top": 720,
+        "bottom": 1000,
+        "width": 1440,
+        "height": 280
+      },
+      "timeline": {
+        "left": 0,
+        "right": 1440,
+        "top": 730,
+        "bottom": 1000,
+        "width": 1440,
+        "height": 270
+      },
+      "toolbar": {
+        "left": 1,
+        "right": 1439,
+        "top": 731,
+        "bottom": 793.65625,
+        "width": 1438,
+        "height": 62.65625
+      },
+      "scroll": {
+        "left": 1,
+        "right": 1439,
+        "top": 793.65625,
+        "bottom": 951.328125,
+        "width": 1438,
+        "height": 157.671875
+      },
+      "preview": {
+        "left": 336.796875,
+        "right": 1080,
+        "top": 64,
+        "bottom": 720,
+        "width": 743.203125,
+        "height": 656
+      },
+      "tools": {
+        "left": 0,
+        "right": 92,
+        "top": 64,
+        "bottom": 720,
+        "width": 92,
+        "height": 656
+      },
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      }
+    },
+    {
+      "label": "1280x800 / Sequence tab",
+      "layout": {
+        "left": 0,
+        "right": 1280,
+        "top": 64,
+        "bottom": 800,
+        "width": 1280,
+        "height": 736
+      },
+      "dock": {
+        "left": 0,
+        "right": 1280,
+        "top": 520,
+        "bottom": 800,
+        "width": 1280,
+        "height": 280
+      },
+      "timeline": {
+        "left": 0,
+        "right": 1280,
+        "top": 530,
+        "bottom": 800,
+        "width": 1280,
+        "height": 270
+      },
+      "toolbar": {
+        "left": 1,
+        "right": 1279,
+        "top": 531,
+        "bottom": 615.65625,
+        "width": 1278,
+        "height": 84.65625
+      },
+      "scroll": {
+        "left": 1,
+        "right": 1279,
+        "top": 615.65625,
+        "bottom": 762.328125,
+        "width": 1278,
+        "height": 146.671875
+      },
+      "preview": {
+        "left": 309.59375,
+        "right": 960,
+        "top": 64,
+        "bottom": 520,
+        "width": 650.40625,
+        "height": 456
+      },
+      "tools": {
+        "left": 0,
+        "right": 92,
+        "top": 64,
+        "bottom": 520,
+        "width": 92,
+        "height": 456
+      },
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    },
+    {
+      "label": "1280x800 / Moments tab",
+      "layout": {
+        "left": 0,
+        "right": 1280,
+        "top": 64,
+        "bottom": 800,
+        "width": 1280,
+        "height": 736
+      },
+      "dock": {
+        "left": 0,
+        "right": 1280,
+        "top": 520,
+        "bottom": 800,
+        "width": 1280,
+        "height": 280
+      },
+      "timeline": {
+        "left": 0,
+        "right": 1280,
+        "top": 530,
+        "bottom": 800,
+        "width": 1280,
+        "height": 270
+      },
+      "toolbar": {
+        "left": 1,
+        "right": 1279,
+        "top": 531,
+        "bottom": 615.65625,
+        "width": 1278,
+        "height": 84.65625
+      },
+      "scroll": {
+        "left": 1,
+        "right": 1279,
+        "top": 615.65625,
+        "bottom": 762.328125,
+        "width": 1278,
+        "height": 146.671875
+      },
+      "preview": {
+        "left": 309.59375,
+        "right": 960,
+        "top": 64,
+        "bottom": 520,
+        "width": 650.40625,
+        "height": 456
+      },
+      "tools": {
+        "left": 0,
+        "right": 92,
+        "top": 64,
+        "bottom": 520,
+        "width": 92,
+        "height": 456
+      },
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    },
+    {
+      "label": "1280x800 / Media tab",
+      "layout": {
+        "left": 0,
+        "right": 1280,
+        "top": 64,
+        "bottom": 800,
+        "width": 1280,
+        "height": 736
+      },
+      "dock": {
+        "left": 0,
+        "right": 1280,
+        "top": 520,
+        "bottom": 800,
+        "width": 1280,
+        "height": 280
+      },
+      "timeline": {
+        "left": 0,
+        "right": 1280,
+        "top": 530,
+        "bottom": 800,
+        "width": 1280,
+        "height": 270
+      },
+      "toolbar": {
+        "left": 1,
+        "right": 1279,
+        "top": 531,
+        "bottom": 615.65625,
+        "width": 1278,
+        "height": 84.65625
+      },
+      "scroll": {
+        "left": 1,
+        "right": 1279,
+        "top": 615.65625,
+        "bottom": 762.328125,
+        "width": 1278,
+        "height": 146.671875
+      },
+      "preview": {
+        "left": 309.59375,
+        "right": 960,
+        "top": 64,
+        "bottom": 520,
+        "width": 650.40625,
+        "height": 456
+      },
+      "tools": {
+        "left": 0,
+        "right": 92,
+        "top": 64,
+        "bottom": 520,
+        "width": 92,
+        "height": 456
+      },
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    },
+    {
+      "label": "1000x800 / Sequence tab",
+      "layout": {
+        "left": 0,
+        "right": 1000,
+        "top": 68,
+        "bottom": 800,
+        "width": 1000,
+        "height": 732
+      },
+      "dock": {
+        "left": 0,
+        "right": 1000,
+        "top": 520,
+        "bottom": 800,
+        "width": 1000,
+        "height": 280
+      },
+      "timeline": {
+        "left": 0,
+        "right": 1000,
+        "top": 530,
+        "bottom": 800,
+        "width": 1000,
+        "height": 270
+      },
+      "toolbar": {
+        "left": 1,
+        "right": 999,
+        "top": 531,
+        "bottom": 640,
+        "width": 998,
+        "height": 109
+      },
+      "scroll": {
+        "left": 1,
+        "right": 999,
+        "top": 640,
+        "bottom": 773,
+        "width": 998,
+        "height": 133
+      },
+      "preview": {
+        "left": 312,
+        "right": 1000,
+        "top": 68,
+        "bottom": 520,
+        "width": 688,
+        "height": 452
+      },
+      "tools": {
+        "left": 0,
+        "right": 92,
+        "top": 68,
+        "bottom": 520,
+        "width": 92,
+        "height": 452
+      },
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "viewport": {
+        "width": 1000,
+        "height": 800
+      }
+    },
+    {
+      "label": "1000x800 / Moments tab",
+      "layout": {
+        "left": 0,
+        "right": 1000,
+        "top": 68,
+        "bottom": 800,
+        "width": 1000,
+        "height": 732
+      },
+      "dock": {
+        "left": 0,
+        "right": 1000,
+        "top": 520,
+        "bottom": 800,
+        "width": 1000,
+        "height": 280
+      },
+      "timeline": {
+        "left": 0,
+        "right": 1000,
+        "top": 530,
+        "bottom": 800,
+        "width": 1000,
+        "height": 270
+      },
+      "toolbar": {
+        "left": 1,
+        "right": 999,
+        "top": 531,
+        "bottom": 640,
+        "width": 998,
+        "height": 109
+      },
+      "scroll": {
+        "left": 1,
+        "right": 999,
+        "top": 640,
+        "bottom": 773,
+        "width": 998,
+        "height": 133
+      },
+      "preview": {
+        "left": 312,
+        "right": 1000,
+        "top": 68,
+        "bottom": 520,
+        "width": 688,
+        "height": 452
+      },
+      "tools": {
+        "left": 0,
+        "right": 92,
+        "top": 68,
+        "bottom": 520,
+        "width": 92,
+        "height": 452
+      },
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "viewport": {
+        "width": 1000,
+        "height": 800
+      }
+    },
+    {
+      "label": "1000x800 / Media tab",
+      "layout": {
+        "left": 0,
+        "right": 1000,
+        "top": 68,
+        "bottom": 800,
+        "width": 1000,
+        "height": 732
+      },
+      "dock": {
+        "left": 0,
+        "right": 1000,
+        "top": 520,
+        "bottom": 800,
+        "width": 1000,
+        "height": 280
+      },
+      "timeline": {
+        "left": 0,
+        "right": 1000,
+        "top": 530,
+        "bottom": 800,
+        "width": 1000,
+        "height": 270
+      },
+      "toolbar": {
+        "left": 1,
+        "right": 999,
+        "top": 531,
+        "bottom": 640,
+        "width": 998,
+        "height": 109
+      },
+      "scroll": {
+        "left": 1,
+        "right": 999,
+        "top": 640,
+        "bottom": 773,
+        "width": 998,
+        "height": 133
+      },
+      "preview": {
+        "left": 312,
+        "right": 1000,
+        "top": 68,
+        "bottom": 520,
+        "width": 688,
+        "height": 452
+      },
+      "tools": {
+        "left": 0,
+        "right": 92,
+        "top": 68,
+        "bottom": 520,
+        "width": 92,
+        "height": 452
+      },
+      "paddingLeft": 0,
+      "paddingRight": 0,
+      "viewport": {
+        "width": 1000,
+        "height": 800
+      }
+    }
+  ],
+  "testedSourceHashes": {
+    "frontend/src/components/ViralClipStudio.css": "688fb4be2ae4f053a2c7c1512c3ae27c63519155d2f252794dbd88cd9cef47d9",
+    "test/e2e/playwright/run-studio-library-tabs.js": "0017697a8258a9db92b6ff27bcee46e40f71f5ca305cb631d7ae0c01f80c4b01"
+  },
+  "testedBundleSha256": "45ab821bcacd6c82fa55ca00bb291597878245bfb060e5ac8c89f7eca11023e2"
+}

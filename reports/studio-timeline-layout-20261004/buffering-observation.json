@@ -1,0 +1,27 @@
+{
+  "stage": "Stress attempt before duplicate thumbnail videos were removed",
+  "currentTime": 454.553832,
+  "paused": false,
+  "muted": false,
+  "volume": 1,
+  "seeking": false,
+  "readyState": 2,
+  "networkState": 2,
+  "error": null,
+  "buffered": [
+    [
+      0,
+      34.876
+    ],
+    [
+      141.75,
+      152.25
+    ],
+    [
+      446.25,
+      454.516667
+    ]
+  ],
+  "playbackRate": 1,
+  "conclusion": "Playback lacked future buffered data; this observation does not establish a sole cause."
+}

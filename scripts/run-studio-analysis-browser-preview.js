@@ -37,6 +37,13 @@ admin.initializeApp({
   storageBucket: boot.firebase.storageBucket,
   databaseURL: process.env.FIREBASE_DATABASE_URL,
 });
+// User ADC reads staging objects but has no client_email for URL signing. The
+// storage SDK signs through real IAM using the same staging signer as preparation.
+// No private key, signed-response fixture or authorization bypass is used.
+const stagingStorageAuth = admin.storage().bucket().storage.authClient;
+stagingStorageAuth.getCredentials = async () => ({
+  client_email: `studio-analysis-smoke@${projectId}.iam.gserviceaccount.com`,
+});
 const express = require("express");
 const authMiddleware = require("../src/authMiddleware");
 const { getPlanCapabilities } = require("../src/config/subscriptionPlans");
@@ -53,11 +60,12 @@ app.get("/api/users/profile", authMiddleware, async (req, res) => {
     res.status(503).json({ error: "STAGING_PROFILE_UNAVAILABLE" });
   }
 });
-// Only analysis endpoints from the production media router are exposed here.
+// Analysis and owned saved-source resolution use the production media router.
 app.use(
   "/api/media",
   (req, res, next) => {
-    if (!/^\/studio-analysis-jobs(?:\/|$)/.test(req.path)) return res.sendStatus(404);
+    if (!/^\/(?:studio-analysis-jobs(?:\/|$)|studio-assets\/resolve$)/.test(req.path))
+      return res.sendStatus(404);
     next();
   },
   require("../src/mediaRoutes")

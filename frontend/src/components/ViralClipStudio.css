@@ -10859,6 +10859,91 @@ body.dashboard-mode.viral-studio-open {
   opacity: 0.34;
 }
 
+.pro-track-row.is-focused .pro-track-header {
+  background: #271b42;
+}
+
+.pro-track-clip.is-at-playhead {
+  outline: 2px solid #d4baff;
+  outline-offset: -2px;
+}
+
+.pro-track-row.is-video {
+  min-height: 60px;
+}
+.pro-track-row.is-video .pro-track-clip,
+[data-testid="pro-track-row-framing"] .pro-track-clip[data-framing-mode] {
+  min-width: 0;
+  box-sizing: border-box;
+}
+[data-testid="pro-track-row-framing"] .pro-track-clip {
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  container-type: inline-size;
+  background: #263b54;
+  color: #d5eaff;
+  box-shadow: inset -1px 0 rgba(153, 184, 214, 0.45);
+}
+[data-testid="pro-track-row-framing"] .pro-track-clip:nth-of-type(even) {
+  filter: brightness(1.15);
+}
+[data-testid="pro-track-row-framing"] .pro-track-clip[data-framing-mode="center"] {
+  background: #214841;
+}
+[data-testid="pro-track-row-framing"] .pro-track-clip[data-framing-mode="group_stack"] {
+  background: #46365a;
+}
+[data-testid="pro-track-row-framing"] .pro-track-clip[data-framing-punch="true"] {
+  background: #51422e;
+  color: #ffe6bc;
+}
+[data-testid="pro-track-row-framing"] .pro-track-clip > span {
+  display: none;
+}
+@container (min-width: 120px) {
+  [data-testid="pro-track-row-framing"] .pro-track-clip > span {
+    display: block;
+    padding: 0 8px;
+  }
+}
+[data-testid="pro-track-row-framing"] .pro-track-clip.is-at-playhead {
+  background: #554275;
+  outline-color: #e2ceff;
+}
+.pro-source-filmstrip {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.pro-source-frame {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  overflow: hidden;
+  background-size: auto 100%;
+  background-repeat: repeat-x;
+  opacity: 0.85;
+}
+.pro-source-frame img {
+  width: auto;
+  max-width: none;
+  height: 100%;
+  object-fit: contain;
+}
+.is-video .pro-track-clip {
+  background: linear-gradient(180deg, rgba(26, 14, 48, 0.15), rgba(26, 14, 48, 0.85));
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: 4px;
+}
+
+.pro-time-ruler {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
 .pro-track-header {
   display: grid;
   grid-template-columns: 25px minmax(0, 1fr);
@@ -11194,7 +11279,7 @@ body.dashboard-mode.viral-studio-open {
   background: rgba(4, 9, 22, 0.94);
 }
 
-.studio-project-list:first-of-type {
+.studio-project-rail[data-active-tab="media"] .studio-project-list:first-of-type {
   display: none;
 }
 
@@ -15365,21 +15450,111 @@ body.dashboard-mode.viral-studio-open {
   gap: 8px;
 }
 .studio-pro-timeline .pro-quick-actions {
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  width: 100%;
   min-width: 0;
   max-width: 100%;
   flex-shrink: 1;
   box-sizing: border-box;
+}
+.studio-pro-timeline .pro-quick-actions > button {
+  flex: 0 0 auto;
+}
+.studio-pro-timeline .pro-timeline-toolbar {
+  gap: 4px 12px;
+}
+.studio-pro-timeline .pro-timeline-switches {
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+.pro-timeline-zoom {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 8px;
+}
+.pro-timeline-zoom button {
+  min-width: 26px;
+  min-height: 26px;
+  padding: 2px 6px;
+  border: 1px solid #2d3950;
+  border-radius: 5px;
+  background: #101a2b;
+  color: #cbd7e7;
+  cursor: pointer;
+}
+.pro-timeline-zoom button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.pro-timeline-zoom output {
+  min-width: 30px;
+  color: #a9b9ce;
+  font-size: 11px;
+}
+.pro-track-header {
+  position: sticky;
+  left: 0;
+  z-index: 35;
 }
 .viral-studio-overlay.ap-dashboard-redesign
   .hook-broll-only-mode
   .studio-pro-timeline-dock.is-open {
   position: relative;
   inset: auto;
-  height: var(--timeline-dock-height, 188px) !important;
+  grid-column: 1 / -1;
+  min-width: 0;
+  height: var(--timeline-dock-height, 280px) !important;
   max-height: none !important;
   display: flex;
   flex-direction: column;
+}
+/* Match the workspace's named grid areas. Without these assignments the dock
+   is auto-placed in the tools column, clipping every timeline track. */
+@media (min-width: 821px) {
+  .viral-studio-overlay.ap-dashboard-redesign
+    .hook-broll-only-mode
+    .studio-layout
+    > .creative-tool-rail {
+    grid-area: tools;
+  }
+  .viral-studio-overlay.ap-dashboard-redesign
+    .hook-broll-only-mode
+    .studio-layout
+    > .phone-preview-container {
+    grid-area: preview;
+  }
+  .viral-studio-overlay.ap-dashboard-redesign
+    .hook-broll-only-mode
+    .studio-layout
+    > .studio-sidebar {
+    grid-area: sidebar;
+  }
+  .viral-studio-overlay.ap-dashboard-redesign
+    .hook-broll-only-mode
+    .studio-layout
+    > .studio-pro-timeline-dock {
+    grid-area: timeline;
+  }
+  .viral-studio-overlay.ap-dashboard-redesign
+    .hook-broll-only-mode.project-rail-closed
+    .studio-project-rail {
+    display: none;
+  }
+}
+@media (min-width: 821px) and (max-width: 1120px) {
+  .viral-studio-overlay.ap-dashboard-redesign
+    .hook-broll-only-mode.project-rail-closed
+    .studio-layout {
+    grid-template-columns: 92px minmax(0, 1fr) minmax(280px, 0.7fr);
+    grid-template-areas: "tools preview sidebar" "timeline timeline timeline";
+  }
+  .viral-studio-overlay.ap-dashboard-redesign
+    .hook-broll-only-mode.project-rail-closed
+    .studio-layout.preview-layout-side {
+    grid-template-areas: "tools sidebar preview" "timeline timeline timeline";
+  }
 }
 .studio-timeline-resize {
   flex: 0 0 10px;
@@ -16612,4 +16787,241 @@ body.dashboard-mode.viral-studio-open {
   border-color: #38bdf8;
   color: #ffffff;
   box-shadow: 0 0 8px rgba(56, 189, 248, 0.3);
+}
+
+/* Keep the monitor and current edit primary; secondary controls open on demand. */
+.studio-control-menu {
+  position: relative;
+  color: #b8c5d7;
+  font-size: 12px;
+}
+.studio-control-menu > summary {
+  list-style: none;
+  padding: 7px 10px;
+  border: 1px solid #293448;
+  border-radius: 6px;
+  background: #101827;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.studio-control-menu > summary::-webkit-details-marker {
+  display: none;
+}
+.studio-control-menu > summary::after {
+  content: "⌄";
+  margin-left: 8px;
+  color: #8495ad;
+}
+.studio-control-menu[open] > summary {
+  border-color: #8b67d2;
+  color: #eee5ff;
+}
+.studio-control-menu__content {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 0;
+  z-index: 80;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  width: min(340px, calc(100vw - 32px));
+  max-height: 360px;
+  overflow-y: auto;
+  padding: 12px;
+  border: 1px solid #334055;
+  border-radius: 10px;
+  background: #101827;
+  box-shadow: 0 12px 36px #0009;
+}
+.studio-control-menu__content .pro-quick-btn {
+  min-height: 32px;
+  justify-content: flex-start;
+  font-size: 12px;
+}
+.studio-pro-timeline {
+  overflow: visible;
+}
+.studio-pro-timeline .pro-quick-actions {
+  width: auto;
+  overflow: visible;
+  padding-right: 0;
+  margin-right: 0;
+  border-right: 0;
+}
+.pro-edit-tools button,
+.pro-timeline-switches > button,
+.pro-track-header > strong {
+  font-size: 11px;
+  font-weight: 600;
+}
+.pro-time-ruler > i > span {
+  font-size: 10px;
+  color: #a0aec1;
+}
+.studio-pro-timeline > footer {
+  font-size: 11px;
+}
+.studio-pro-timeline > footer > strong {
+  max-width: 58%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #d7c6f3;
+}
+@media (min-width: 821px) {
+  .viral-studio-overlay.ap-dashboard-redesign .hook-broll-only-mode .preview-panel {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 12px;
+    padding: 12px;
+  }
+  .viral-studio-overlay.ap-dashboard-redesign .hook-broll-only-mode .preview-panel > .panel-heading {
+    display: flex !important;
+    flex-direction: row;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    height: auto;
+    min-height: 32px;
+    overflow: visible;
+    padding: 0 0 10px !important;
+    border: 0;
+    border-bottom: 1px solid #263044;
+    border-radius: 0;
+    background: transparent;
+  }
+  .hook-broll-only-mode .preview-panel > .panel-heading > div:first-child {
+    margin-right: auto;
+  }
+  .hook-broll-only-mode .preview-panel > .panel-heading .panel-kicker {
+    display: none;
+  }
+  .hook-broll-only-mode .preview-panel > .panel-heading .preview-mode-switch {
+    display: flex;
+    width: auto;
+    gap: 2px;
+    padding: 3px;
+  }
+  .hook-broll-only-mode .preview-panel > .panel-heading .preview-mode-switch button {
+    flex: 0 0 auto;
+    min-height: 28px;
+    padding: 5px 8px;
+    font-size: 11px;
+  }
+  .hook-broll-only-mode .preview-panel > .panel-heading .comparison-play-button {
+    min-width: 30px;
+    min-height: 30px;
+    padding: 4px;
+  }
+  .studio-monitor-toggle {
+    padding: 7px 8px;
+    border: 1px solid #293448;
+    border-radius: 6px;
+    background: #101827;
+    color: #b8c5d7;
+    font-size: 11px;
+    cursor: pointer;
+  }
+  .viral-studio-overlay.ap-dashboard-redesign .hook-broll-only-mode .studio-view-options .preview-display-controls {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    z-index: 80;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    width: 300px;
+    max-width: calc(100vw - 32px);
+    max-height: 360px;
+    overflow-y: auto !important;
+    box-sizing: border-box;
+    padding: 12px;
+    border: 1px solid #334055;
+    border-radius: 10px;
+    background: #101827;
+    box-shadow: 0 12px 36px #0009;
+  }
+  .hook-broll-only-mode .studio-view-options .preview-display-controls button,
+  .hook-broll-only-mode .studio-view-options .preview-frame-lock {
+    min-height: 32px;
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+  .hook-broll-only-mode .preview-intelligence-stack span:nth-child(n+3) {
+    display: none;
+  }
+  .hook-broll-only-mode .clip-inspector-tabs {
+    display: none;
+  }
+}
+
+.studio-project-rail [hidden] {
+  display: none !important;
+}
+.studio-library-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 8px;
+  background: #0b1321;
+}
+.studio-library-tabs button {
+  flex: 1;
+  padding: 8px 4px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: #96a8c0;
+  font-size: 12px;
+  cursor: pointer;
+}
+.studio-library-tabs button[aria-selected="true"] {
+  background: #2f224c;
+  color: #eadfff;
+}
+.studio-media-bin__library {
+  max-height: 420px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.studio-media-card {
+  grid-template-columns: 72px minmax(0, 1fr);
+  padding: 8px;
+  gap: 8px;
+}
+.studio-media-card__thumb {
+  width: 72px;
+  height: 48px;
+}
+.studio-media-card__body strong {
+  font-size: 11px;
+}
+.studio-media-card__body small {
+  font-size: 10px;
+}
+.studio-media-card__usage {
+  color: #bb9dec !important;
+}
+.studio-media-card__actions button {
+  font-size: 11px;
+}
+.studio-project-rail__head > summary,
+.studio-media-bin__preview > summary,
+.studio-media-bin__camera > summary {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #c9d5e5;
+  font-size: 12px;
+  cursor: pointer;
+}
+.studio-project-rail__head:not([open]) > :not(summary),
+.studio-media-bin__preview:not([open]) > :not(summary),
+.studio-media-bin__camera:not([open]) > :not(summary) {
+  display: none !important;
+}
+.studio-project-rail__head > summary {
+  padding: 8px 0;
 }

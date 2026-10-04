@@ -3,6 +3,7 @@ const { execFileSync } = require("child_process");
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
+const { assertStudioTimelineLayout, clickStudioControl } = require("./studio-timeline-layout");
 
 // Keep complete recordings for visual review, including successful runs. The
 // two workflows below intentionally use different source footage.
@@ -547,13 +548,13 @@ test("records playable voice-over, edits takes, restores audio after reload and 
   await page.getByRole("button", { name: "Unmute take", exact: true }).click();
   await page.getByRole("button", { name: "Show media", exact: true }).click();
   await page.getByLabel("Project name", { exact: true }).fill("Voice-over QA checkpoint");
-  await page.getByTestId("studio-save-project").click();
+  await clickStudioControl(page, page.getByTestId("studio-save-project"));
   await expect(page.locator(".studio-project-save-state")).toContainText("Saved locally");
   const originalUrl = await audio.getAttribute("src");
   await page.reload({ waitUntil: "networkidle" });
   await open();
   await page.getByRole("button", { name: "Show media", exact: true }).click();
-  await page.locator(".studio-saved-projects summary").click();
+  await clickStudioControl(page, page.locator(".studio-saved-projects summary"));
   await page.locator(".studio-saved-projects").getByRole("button", { name: /Voice-over QA checkpoint/ }).first().click();
   await expect(audio).not.toHaveAttribute("src", originalUrl);
   await rail.getByRole("button", { name: "Sound", exact: true }).click();
@@ -617,12 +618,13 @@ test("proves new motion studio editing, linked audio, timeline seeking and local
     await page.getByRole("button", { name: "After", exact: true }).click();
   };
   await open();
-  await page.getByRole("button", { name: "Fit full", exact: true }).click();
+  await clickStudioControl(page, page.getByTestId("preview-fit-full"));
   const toolRail = page.locator(".creative-tool-rail");
   await toolRail.getByRole("button", { name: "Reframe", exact: true }).click();
   await page.getByTestId("auto-reframe-toggle").check();
   for (const [width, height] of [[1440, 900], [1100, 900], [1000, 800]]) {
     await page.setViewportSize({ width, height });
+    await assertStudioTimelineLayout(page, `${width}x${height}`);
     await expect.poll(() => page.locator(".studio-header-actions .close-btn").evaluate(button => {
       const r = button.getBoundingClientRect();
       return button.contains(document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2));
@@ -647,19 +649,19 @@ test("proves new motion studio editing, linked audio, timeline seeking and local
       expect(geometry.width).toBeGreaterThan(Math.min(geometry.availableWidth, geometry.availableHeight * w / h) * .95);
       await page.screenshot({ path: testInfo.outputPath(`frame-${width}-${aspect}.png`) });
       if (aspect === "9-16") {
-        await page.getByRole("button", { name: "Fill canvas", exact: true }).click();
+        await clickStudioControl(page, page.getByTestId("preview-fill-canvas"));
         await expect(page.getByTestId("studio-after-video")).toHaveCSS("object-fit", "cover");
         await page.screenshot({ path: testInfo.outputPath(`frame-${width}-portrait-fill.png`) });
-        await page.getByRole("button", { name: "Fit full", exact: true }).click();
+        await clickStudioControl(page, page.getByTestId("preview-fit-full"));
         await expect(page.getByTestId("studio-after-video")).toHaveCSS("object-fit", "contain");
       }
     }
   }
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.getByTestId("preview-quick-both-cams").click();
+  await clickStudioControl(page, page.getByTestId("preview-quick-both-cams"));
   await expect(page.getByTestId("reframe-aspect-9-16")).toHaveAttribute("aria-pressed", "true");
-  await expect(page.getByRole("button", { name: "Fit full", exact: true })).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "Fill canvas", exact: true })).toHaveCount(0);
+  await expect(page.getByTestId("preview-fit-full")).toHaveCount(0);
+  await expect(page.getByTestId("preview-fill-canvas")).toHaveCount(0);
   await expect(page.getByTestId("edit-panel-crops")).toHaveText("Adjust split crops");
   await page.getByRole("button", { name: "Hide timeline", exact: true }).click();
   await page.getByLabel("top split horizontal").fill("34");
@@ -683,7 +685,7 @@ test("proves new motion studio editing, linked audio, timeline seeking and local
   // disables tracking. Enable tracking after choosing the preset so the new
   // points belong to the visible two-panel layout.
   await page.getByLabel("Edited output position").fill("1");
-  await page.getByTestId("preview-quick-both-cams").click();
+  await clickStudioControl(page, page.getByTestId("preview-quick-both-cams"));
   await page.getByLabel("top split horizontal").fill("34");
   await page.getByLabel("bottom split horizontal").fill("89");
   await page.getByLabel("Track both speakers").check();
@@ -708,7 +710,7 @@ test("proves new motion studio editing, linked audio, timeline seeking and local
   await expect(page.getByTestId("reframe-preserve-frame")).toHaveAttribute("aria-pressed", "true");
   expect(state.faceTrackingRequests).toBe(2);
   await page.screenshot({ path: testInfo.outputPath("detected-follow-draft-api-contract.png") });
-  await page.getByTestId("preview-quick-track-speaker").click();
+  await clickStudioControl(page, page.getByTestId("preview-quick-track-speaker"));
   await expect(page.getByTestId("reframe-follow-subject")).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: "Left Speaker", exact: false }).click();
   await page.getByLabel("Manual frame horizontal position").fill("29");
@@ -760,16 +762,16 @@ test("proves new motion studio editing, linked audio, timeline seeking and local
   await page.getByTestId("pro-quick-trim-start").click();
   await expect(page.getByLabel("Motion start", { exact: true })).toHaveValue("3");
   await expect(page.getByTestId("pro-sfx-clip-1")).toBeAttached();
-  await page.getByTestId("pro-quick-undo").click();
+  await clickStudioControl(page, page.getByTestId("pro-quick-undo"));
   await expect(page.getByLabel("Motion start", { exact: true })).toHaveValue("5");
-  await page.getByTestId("pro-quick-redo").click();
+  await clickStudioControl(page, page.getByTestId("pro-quick-redo"));
   await expect(page.getByLabel("Motion start", { exact: true })).toHaveValue("3");
   await page.getByLabel("Edited output position").fill("3.7");
   await page.getByLabel("Preview master volume").fill("45");
   await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("muted", false);
   await page.getByRole("button", { name: "Show media", exact: true }).click();
   await page.getByLabel("Project name", { exact: true }).fill("Motion QA checkpoint");
-  await page.getByTestId("studio-save-project").click();
+  await clickStudioControl(page, page.getByTestId("studio-save-project"));
   await expect(page.locator(".studio-project-save-state")).toContainText("Saved locally");
   const saved = await page.evaluate(() => new Promise((resolve, reject) => {
     const req = indexedDB.open("autopromote-viral-studio");
@@ -786,7 +788,7 @@ test("proves new motion studio editing, linked audio, timeline seeking and local
   await page.reload({ waitUntil: "networkidle" });
   await open();
   await page.getByRole("button", { name: "Show media", exact: true }).click();
-  await page.locator(".studio-saved-projects summary").click();
+  await clickStudioControl(page, page.locator(".studio-saved-projects summary"));
   await page.locator(".studio-saved-projects").getByRole("button", { name: /Motion QA checkpoint/ }).first().click();
   await toolRail.getByRole("button", { name: /Motion/ }).click();
   await expect(page.getByLabel("Motion headline", { exact: true })).toHaveValue("@AUTOPROMOTE");
@@ -920,7 +922,7 @@ test("records the focused Motion workflow and verifies its export payload", asyn
   await page.getByRole("button", { name: "Open Creator Studio", exact: true }).click();
   await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("readyState", 4);
   await page.getByRole("button", { name: "After", exact: true }).click();
-  await page.getByRole("button", { name: "Fit full", exact: true }).click();
+  await clickStudioControl(page, page.getByTestId("preview-fit-full"));
   const rail = page.getByRole("navigation", { name: "Creative tools" });
   await rail.getByRole("button", { name: /Motion/ }).click();
   const presets = [
@@ -971,8 +973,8 @@ test("records the focused Motion workflow and verifies its export payload", asyn
   await page.getByRole("button", { name: "Remove scene", exact: true }).click();
   await page.getByLabel("Edited output position").fill("2");
   await page.getByTestId("pro-quick-trim-start").click();
-  await page.getByTestId("pro-quick-undo").click();
-  await page.getByTestId("pro-quick-redo").click();
+  await clickStudioControl(page, page.getByTestId("pro-quick-undo"));
+  await clickStudioControl(page, page.getByTestId("pro-quick-redo"));
   await page.getByLabel("Edited output position").fill("3.7");
   await expect(page.getByText("Loading edited preview…", { exact: true })).toHaveCount(0, {
     timeout: 15000,
@@ -1360,23 +1362,23 @@ test("runs the production Viral Clip Studio feature workflow with real playable 
   await page.getByRole("tab", { name: "Creator Studio" }).click();
   await expect(workspace).toHaveAttribute("data-workspace-mode", "creator");
 
-  await page.getByRole("button", { name: "Fit full", exact: true }).click();
-  await expect(page.getByRole("button", { name: "Fit full", exact: true })).toHaveAttribute(
+  await clickStudioControl(page, page.getByTestId("preview-fit-full"));
+  await expect(page.getByTestId("preview-fit-full")).toHaveAttribute(
     "aria-pressed",
     "true"
   );
-  await page.getByRole("button", { name: "Fill canvas", exact: true }).click();
-  await page.getByRole("button", { name: "Safe zones", exact: true }).click();
-  await page.getByRole("button", { name: "Grid", exact: true }).click();
-  await expect(page.getByRole("button", { name: "Safe zones", exact: true })).toHaveAttribute(
+  await clickStudioControl(page, page.getByTestId("preview-fill-canvas"));
+  await clickStudioControl(page, page.getByTestId("preview-safe-zones"));
+  await clickStudioControl(page, page.getByTestId("preview-grid"));
+  await expect(page.getByTestId("preview-safe-zones")).toHaveAttribute(
     "aria-pressed",
     "true"
   );
-  await expect(page.getByRole("button", { name: "Grid", exact: true })).toHaveAttribute(
+  await expect(page.getByTestId("preview-grid")).toHaveAttribute(
     "aria-pressed",
     "true"
   );
-  await page.getByTestId("preview-fullscreen-button").click();
+  await clickStudioControl(page, page.getByTestId("preview-fullscreen-button"));
   await expect(page.getByTestId("hook-preview-frame")).toHaveClass(/preview-expanded/);
   await expect(page.getByRole("button", { name: "After", exact: true })).toHaveAttribute(
     "aria-pressed",
@@ -1387,8 +1389,8 @@ test("runs the production Viral Clip Studio feature workflow with real playable 
     return box ? box.height / 900 : 0;
   }).toBeGreaterThan(0.92);
   await page.getByRole("button", { name: "Exit preview", exact: true }).click();
-  await page.getByRole("button", { name: "Safe zones", exact: true }).click();
-  await page.getByRole("button", { name: "Grid", exact: true }).click();
+  await clickStudioControl(page, page.getByTestId("preview-safe-zones"));
+  await clickStudioControl(page, page.getByTestId("preview-grid"));
 
   const toolRail = page.locator(".creative-tool-rail");
   const inspector = page.getByTestId("clip-studio-inspector");
@@ -1480,7 +1482,7 @@ test("runs the production Viral Clip Studio feature workflow with real playable 
   await expect(inspector.getByText("3 poses", { exact: true })).toBeVisible();
   await page.getByLabel("Edited output position").fill("0.8");
   // A fitting issue is not zoom proof: use the full real frame for this check.
-  await page.getByRole("button", { name: "Fit full", exact: true }).click();
+  await clickStudioControl(page, page.getByTestId("preview-fit-full"));
   await captureLiveProof(path.join("test-results", "studio-motion-keyframes.png"));
   await inspector.getByRole("button", { name: "Reset transform", exact: true }).click();
   await expect(inspector.getByText("0 poses", { exact: true })).toBeVisible();
@@ -1881,7 +1883,7 @@ test("runs the production Viral Clip Studio feature workflow with real playable 
   await expect(page.getByTestId("pro-sfx-clip-1")).toBeVisible();
 
   await page.getByRole("button", { name: "Show media", exact: true }).click();
-  await page.getByTestId("studio-save-project").click();
+  await clickStudioControl(page, page.getByTestId("studio-save-project"));
   await expect(page.locator(".studio-project-save-state")).toContainText("Saved locally");
   await page.getByRole("button", { name: "Hide media", exact: true }).click();
 
@@ -1973,7 +1975,7 @@ test("records focused proof of the synchronized two-speaker stack", async ({ pag
     .check();
   await inspector.getByTestId("reframe-speaker-stack").click();
   await inspector.getByTestId("reframe-aspect-9-16").click();
-  await expect(page.getByRole("button", { name: "Fit full", exact: true })).toHaveCount(0);
+  await expect(page.getByTestId("preview-fit-full")).toHaveCount(0);
   await expect(page.getByTestId("edit-panel-crops")).toHaveText("Adjust camera crops");
   await page.getByRole("button", { name: "Hide timeline", exact: true }).click();
 
@@ -2000,7 +2002,7 @@ test("records focused proof of the synchronized two-speaker stack", async ({ pag
     topVideo.evaluate(video => video.currentTime),
     bottomVideo.evaluate(video => video.currentTime),
   ]);
-  await page.getByTestId("preview-fullscreen-button").click();
+  await clickStudioControl(page, page.getByTestId("preview-fullscreen-button"));
   await expect(page.getByTestId("hook-preview-frame")).toHaveClass(/preview-expanded/);
   await page.getByRole("button", { name: "Play edited preview" }).click();
   await expect
@@ -2120,7 +2122,7 @@ test("proves the three-input hero and duo multicamera layout", async ({ page }) 
   await inspector.getByTestId("reframe-speaker-stack").click();
   await inspector.getByLabel("Camera 3 horizontal position").fill("30");
   await expect(page.getByTestId("reframe-preview-status")).toContainText("3 cameras live");
-  await expect(page.getByRole("button", { name: "Fit full", exact: true })).toHaveCount(0);
+  await expect(page.getByTestId("preview-fit-full")).toHaveCount(0);
   await expect(page.getByTestId("edit-panel-crops")).toHaveText("Adjust camera crops");
   await page.getByRole("button", { name: "Hide timeline", exact: true }).click();
 
@@ -2144,7 +2146,7 @@ test("proves the three-input hero and duo multicamera layout", async ({ page }) 
   const startTimes = await Promise.all(
     cameraVideos.map(video => video.evaluate(element => element.currentTime))
   );
-  await page.getByTestId("preview-fullscreen-button").click();
+  await clickStudioControl(page, page.getByTestId("preview-fullscreen-button"));
   await page.getByRole("button", { name: "Play edited preview" }).click();
   await expect
     .poll(() => programmeVideo.evaluate(video => video.currentTime), { timeout: 10000 })
@@ -2229,7 +2231,7 @@ test("proves the four-input multicamera grid with moving synchronized test views
   await inspector.getByLabel("Camera 3 horizontal position").fill("30");
   await inspector.getByLabel("Camera 4 horizontal position").fill("70");
   await expect(page.getByTestId("reframe-preview-status")).toContainText("4 cameras live");
-  await expect(page.getByRole("button", { name: "Fit full", exact: true })).toHaveCount(0);
+  await expect(page.getByTestId("preview-fit-full")).toHaveCount(0);
   await expect(page.getByTestId("edit-panel-crops")).toHaveText("Adjust camera crops");
   await page.getByRole("button", { name: "Hide timeline", exact: true }).click();
 
@@ -2255,7 +2257,7 @@ test("proves the four-input multicamera grid with moving synchronized test views
   const startTimes = await Promise.all(
     cameraVideos.map(video => video.evaluate(element => element.currentTime))
   );
-  await page.getByTestId("preview-fullscreen-button").click();
+  await clickStudioControl(page, page.getByTestId("preview-fullscreen-button"));
   await page.getByRole("button", { name: "Play edited preview" }).click();
   await expect
     .poll(() => programmeVideo.evaluate(video => video.currentTime), { timeout: 10000 })
@@ -2301,7 +2303,7 @@ test("keeps comparison monitors fitted and transport usable at every output aspe
   await page.locator(".creative-tool-rail").getByRole("button", { name: "Reframe", exact: true }).click();
   await page.getByTestId("auto-reframe-toggle").check();
   // This is a manually reviewed host crop, not an automatic-tracking claim.
-  await page.getByTestId("preview-quick-track-speaker").click();
+  await clickStudioControl(page, page.getByTestId("preview-quick-track-speaker"));
   await page.getByRole("button", { name: "Left Speaker", exact: false }).click();
   await page.getByLabel("Manual frame horizontal position").fill("29");
   for (const width of [1440, 1280, 1100, 1000]) {
@@ -2354,7 +2356,7 @@ test("keeps comparison monitors fitted and transport usable at every output aspe
   for (const mediaOpen of [false, true]) {
     if (mediaOpen) await page.getByRole("button", { name: "Show media", exact: true }).click();
     for (const dock of ["side", "center"]) {
-      await page.getByTestId("preview-dock-toggle-btn").click();
+      await clickStudioControl(page, page.getByTestId("preview-dock-toggle-btn"));
       const rects = await page.locator(".studio-layout").evaluate(layout => {
         const selectors = [".creative-tool-rail", ".studio-project-rail", ".phone-preview-container", ".studio-sidebar"];
         return selectors.map(s => layout.querySelector(s)).filter(el => el && el.getBoundingClientRect().width > 0)
@@ -2380,7 +2382,7 @@ test("keeps comparison monitors fitted and transport usable at every output aspe
   }
   await page.getByRole("button", { name: "Hide media", exact: true }).click();
   await page.getByRole("button", { name: "After", exact: true }).click();
-  await page.getByTestId("preview-quick-both-cams").click();
+  await clickStudioControl(page, page.getByTestId("preview-quick-both-cams"));
   await expect(page.locator(".preview-mode-switch").getByRole("button", { name: "After", exact: true })).toHaveAttribute("aria-pressed", "true");
 });
 
@@ -2402,7 +2404,7 @@ test("follows existing camera cuts using real full-minute analysis in the progra
   await page.locator('.viral-studio-entry-panel input[type="file"]').setInputFiles(source);
   await page.getByRole("button", { name: "Open Creator Studio", exact: true }).click();
   await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("readyState", 4);
-  await page.getByTestId("preview-quick-track-speaker").click();
+  await clickStudioControl(page, page.getByTestId("preview-quick-track-speaker"));
   await page.getByRole("button", { name: "Left Speaker", exact: false }).click();
   await page.getByLabel("Manual frame horizontal position").fill("29");
   await page.getByLabel("Speaker zoom").fill("1.05");
@@ -2446,7 +2448,13 @@ test("follows existing camera cuts using real full-minute analysis in the progra
   for (const [width, height] of [[1280, 800], [1440, 900]]) {
     await page.setViewportSize({ width, height });
     const frame = page.getByTestId("hook-preview-frame");
-    await expect.poll(() => frame.evaluate(f => f.getBoundingClientRect().height)).toBeGreaterThan(height*.52);
+    await expect.poll(() => frame.evaluate(f => {
+      const picture = f.getBoundingClientRect();
+      const shell = f.parentElement.getBoundingClientRect();
+      const controls = f.parentElement.querySelector(".preview-custom-controls").getBoundingClientRect();
+      const availableHeight = Math.min(shell.height - controls.height - 8, shell.width * 16/9);
+      return picture.height / Math.max(1, availableHeight);
+    })).toBeGreaterThan(.95);
     const geometry = await frame.evaluate(f => {
       const r = f.getBoundingClientRect();
       const timeline = document.querySelector(".studio-pro-timeline-dock").getBoundingClientRect();
@@ -2463,9 +2471,9 @@ test("follows existing camera cuts using real full-minute analysis in the progra
   const handle = page.getByRole("separator", { name: "Resize timeline" });
   await handle.focus();
   await handle.press("ArrowUp");
-  await expect(handle).toHaveAttribute("aria-valuenow", "212");
+  await expect(handle).toHaveAttribute("aria-valuenow", "304");
   await handle.press("ArrowDown");
-  await expect(handle).toHaveAttribute("aria-valuenow", "188");
+  await expect(handle).toHaveAttribute("aria-valuenow", "280");
   await expect(page.getByTestId("main-footage-frame-toggle")).toHaveAttribute("data-rounded-locked", "true");
   await expect.poll(() => page.getByTestId("hook-preview-frame").evaluate(frame =>
     parseFloat(getComputedStyle(frame).borderTopLeftRadius)
@@ -2513,7 +2521,7 @@ test("switches the full-minute programme from Show Everyone to a solo speaker at
   await page.getByRole("button", { name: "After", exact: true }).click();
 
   await page.getByLabel("Edited output position").fill("1.5");
-  await page.getByTestId("preview-quick-both-cams").click();
+  await clickStudioControl(page, page.getByTestId("preview-quick-both-cams"));
   await expect(page.getByTestId("reframe-preserve-frame")).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByTestId("source-split-editor")).toBeVisible();
   await expect(page.getByLabel("bottom split zoom")).toHaveValue("1");
@@ -2528,7 +2536,7 @@ test("switches the full-minute programme from Show Everyone to a solo speaker at
 
   await page.getByLabel("Edited output position").fill("53.6");
   await expect.poll(() => video.evaluate(element => element.currentTime)).toBeCloseTo(53.6, 1);
-  await page.getByTestId("preview-quick-track-speaker").click();
+  await clickStudioControl(page, page.getByTestId("preview-quick-track-speaker"));
   await expect(page.getByTestId("reframe-follow-subject")).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByTestId("source-split-editor")).toHaveCount(0);
   await expect(page.getByTestId("pro-framing-clip-3")).toContainText("Solo Speaker");
@@ -2569,7 +2577,7 @@ test("proves precision grade, curves and imported LUT on the full 60 second sour
   await expect(page.getByTestId("studio-after-video")).toHaveJSProperty("readyState", 4);
   await page.getByRole("button", { name: "After", exact: true }).click();
   await page.getByLabel("Edited output position").fill("3");
-  await page.getByTestId("preview-quick-track-speaker").click();
+  await clickStudioControl(page, page.getByTestId("preview-quick-track-speaker"));
   await page.getByRole("button", { name: "Left Speaker", exact: false }).click();
   await page.getByLabel("Manual frame horizontal position").fill("29");
   await page.locator(".creative-tool-rail").getByRole("button", { name: "Color", exact: true }).click();
@@ -2737,7 +2745,7 @@ test("records the complete frontend-first creator feature tour without rendering
   const programme = page.getByTestId("studio-after-video");
   const workbench = page.getByTestId("creator-workbench");
   const presentPreview = async (hold = 620) => {
-    await page.getByTestId("preview-fullscreen-button").click();
+    await clickStudioControl(page, page.getByTestId("preview-fullscreen-button"));
     await expect(page.getByTestId("hook-preview-frame")).toHaveClass(/preview-expanded/);
     await page.waitForTimeout(hold);
     await page.getByRole("button", { name: "Exit preview", exact: true }).click();
@@ -3037,7 +3045,7 @@ test("records the complete frontend-first creator feature tour without rendering
     .getByTestId("brand-watermark-preview")
     .getAttribute("data-position");
   await page.getByRole("button", { name: "Play comparison", exact: true }).click();
-  await page.getByTestId("preview-fullscreen-button").click();
+  await clickStudioControl(page, page.getByTestId("preview-fullscreen-button"));
   await expect(page.getByTestId("brand-watermark-preview")).not.toHaveAttribute(
     "data-position",
     initialWatermarkPosition,

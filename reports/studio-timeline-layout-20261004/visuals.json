@@ -1,0 +1,45 @@
+{
+  "scope": "Final passing full browser gate; real staging source; 14 references to one source in the batch display fixture; three report screenshots included in Git; no public deployment",
+  "screenshots": [
+    {
+      "path": "reports/studio-timeline-layout-20261004/images/frontend-fixed.png",
+      "bytes": 594124,
+      "sha256": "b8bc36eb7a1fca1e19a222349f06edb37aa85492f8ad9be423f517c2e1386113"
+    },
+    {
+      "path": "reports/studio-timeline-layout-20261004/images/frontend-zoomed.png",
+      "bytes": 564249,
+      "sha256": "cc76060e8cc42146d390828f6f2416d5c3c9a5359f179610a6ef68e6c6162753"
+    },
+    {
+      "path": "reports/studio-timeline-layout-20261004/images/media-library-batch.png",
+      "bytes": 616444,
+      "sha256": "9f239be09bb4ef952e3bcb86001696eecaec7df940248c60bb06495c842ffaed"
+    },
+    {
+      "path": "artifacts/studio-timeline-layout-20261004/layout-1440-closed-center.png",
+      "bytes": 591176,
+      "sha256": "fbddb9caa52c689eeb7dad16e538da88a784d101685c555f2ec31ce3cd310019"
+    },
+    {
+      "path": "artifacts/studio-timeline-layout-20261004/layout-1440-open-center.png",
+      "bytes": 641723,
+      "sha256": "7775d80af38e6411719abfed83ae831f02f39c46bd2636f06f081165b6ff000e"
+    },
+    {
+      "path": "artifacts/studio-timeline-layout-20261004/layout-1000-closed-center.png",
+      "bytes": 304605,
+      "sha256": "223e386e69d8203a6f2d839491a960a2e093b585f2dddd19fac69e24395e1785"
+    },
+    {
+      "path": "artifacts/studio-timeline-layout-20261004/layout-1000-open-center.png",
+      "bytes": 314629,
+      "sha256": "6d26481f57adb874d65a337203c807961a74470d9de5ad09b0b247e4ba18081d"
+    },
+    {
+      "path": "artifacts/studio-timeline-layout-20261004/negative-control.png",
+      "bytes": 416917,
+      "sha256": "03d3abf18de95d539e6c7b980bee708e289ab46f67fcb30d27598ebb797bff55"
+    }
+  ]
+}
