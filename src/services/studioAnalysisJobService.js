@@ -33,6 +33,7 @@ const studioId = value =>
   value === value.trim() &&
   value !== "." &&
   value !== ".." &&
+  // eslint-disable-next-line no-control-regex -- Reject control characters in Firestore identifiers.
   !/[\x00-\x1f\x7f/]/.test(value);
 const hash = value => crypto.createHash("sha256").update(value).digest("hex");
 const stable = value =>
@@ -65,6 +66,52 @@ const deleteTemporarySource = async (storage, record) => {
 };
 const resultPath = (uid, jobId, resultSha256) =>
   `studio/analysis-results/${uid}/${jobId}/${resultSha256}.json`;
+// Storage metadata is not proof of the object bytes. Bound the read as chunks
+// arrive, then verify both the declared byte count and the immutable digest.
+const readVerifiedResultBytes = async ({
+  file,
+  uid,
+  jobId,
+  resultSha256,
+  expectedSize,
+  invalidResult = unavailable,
+}) => {
+  let metadata;
+  try {
+    [metadata] = await file.getMetadata();
+  } catch (_) {
+    throw unavailable();
+  }
+  const size = Number(metadata?.size);
+  if (
+    metadata?.metadata?.ownerUid !== uid ||
+    metadata?.metadata?.jobId !== jobId ||
+    metadata?.metadata?.resultSha256 !== resultSha256 ||
+    metadata?.metadata?.purpose !== "studio-analysis-result" ||
+    !Number.isSafeInteger(size) ||
+    size < 1 ||
+    size > MAX_RESULT_BYTES ||
+    (expectedSize !== undefined && size !== expectedSize)
+  )
+    throw invalidResult();
+  const digest = crypto.createHash("sha256"),
+    chunks = [];
+  let length = 0;
+  try {
+    for await (const chunk of file.createReadStream()) {
+      length += chunk.length;
+      if (length > size || length > MAX_RESULT_BYTES) throw invalidResult();
+      digest.update(chunk);
+      chunks.push(chunk);
+    }
+  } catch (error) {
+    if (["STUDIO_ANALYSIS_JOB_UNAVAILABLE", "STUDIO_ANALYSIS_RESULT_INVALID"].includes(error?.code))
+      throw error;
+    throw unavailable();
+  }
+  if (length !== size || digest.digest("hex") !== resultSha256) throw invalidResult();
+  return Buffer.concat(chunks, length);
+};
 const jobIdFor = (uid, requestId) => hash(`${uid}\0${requestId}`);
 const requestFingerprint = request => hash(stable(request));
 const publicJob = record => ({
@@ -320,17 +367,12 @@ const getOwnedStudioAnalysisResult = async ({
       throw problem("STUDIO_ANALYSIS_SOURCE_CHANGED", 409);
   }
   const file = storage.file(resultPath(uid, jobId, record.resultSha256));
-  const [metadata] = await file.getMetadata();
-  if (
-    metadata?.metadata?.ownerUid !== uid ||
-    metadata?.metadata?.jobId !== jobId ||
-    metadata?.metadata?.resultSha256 !== record.resultSha256 ||
-    Number(metadata.size) > MAX_RESULT_BYTES ||
-    Number(metadata.size) < 1
-  )
-    throw unavailable();
-  const [bytes] = await file.download();
-  if (bytes.length > MAX_RESULT_BYTES || hash(bytes) !== record.resultSha256) throw unavailable();
+  const bytes = await readVerifiedResultBytes({
+    file,
+    uid,
+    jobId,
+    resultSha256: record.resultSha256,
+  });
   try {
     return JSON.parse(bytes.toString("utf8"));
   } catch (_) {
@@ -429,25 +471,38 @@ const failExhaustedLease = async ({ jobId, firestore, clock }) =>
     return record;
   });
 
-const ownsLease = (record, token) => record?.status === "running" && record.leaseToken === token;
+const ownsLease = (record, token, now) =>
+  record?.status === "running" &&
+  typeof token === "string" &&
+  token.length > 0 &&
+  record.leaseToken === token &&
+  Date.parse(record.leaseUntil || "") > now;
 const renewLease = async ({ jobId, token, firestore = db, clock = Date.now }) =>
   firestore.runTransaction(async transaction => {
     const ref = jobRef(firestore, jobId);
     const snapshot = await transaction.get(ref);
-    if (!snapshot.exists || !ownsLease(snapshot.data(), token)) return false;
-    transaction.update(ref, { leaseUntil: new Date(clock() + LEASE_MS).toISOString() });
+    const now = clock();
+    if (!snapshot.exists || !ownsLease(snapshot.data(), token, now)) return false;
+    transaction.update(ref, {
+      leaseUntil: new Date(now + LEASE_MS).toISOString(),
+    });
     return true;
   });
 
-const finishJob = async ({ job, patch, firestore = db }) =>
+const finishJob = async ({ job, patch, firestore = db, clock = Date.now }) =>
   firestore.runTransaction(async transaction => {
     const ref = jobRef(firestore, job.jobId);
     const snapshot = await transaction.get(ref);
-    if (!snapshot.exists || !ownsLease(snapshot.data(), job.leaseToken)) return false;
+    const now = clock();
+    if (!snapshot.exists || !ownsLease(snapshot.data(), job.leaseToken, now)) return false;
     transaction.update(ref, {
-      ...patch, leaseToken: null, leaseUntil: null, updatedAt: nowIso(),
+      ...patch,
+      leaseToken: null,
+      leaseUntil: null,
+      updatedAt: new Date(now).toISOString(),
       ...(patch.status === "completed" || patch.status === "failed"
-        ? { cleanupPending: true, cleanupAfter: cleanupAt() } : {}),
+        ? { cleanupPending: true, cleanupAfter: cleanupAt(() => now) }
+        : {}),
     });
     return true;
   });
@@ -502,11 +557,11 @@ const hashPinnedSource = async (file, expectedSize) => {
   return digest.digest("hex");
 };
 
-const recordPinnedSourceHash = async ({ job, sourceSha256, firestore }) =>
+const recordPinnedSourceHash = async ({ job, sourceSha256, firestore, clock }) =>
   firestore.runTransaction(async transaction => {
     const ref = jobRef(firestore, job.jobId);
     const snapshot = await transaction.get(ref);
-    if (!snapshot.exists || !ownsLease(snapshot.data(), job.leaseToken)) return false;
+    if (!snapshot.exists || !ownsLease(snapshot.data(), job.leaseToken, clock())) return false;
     if (snapshot.data().sourceSha256 && snapshot.data().sourceSha256 !== sourceSha256)
       throw problem("STUDIO_ANALYSIS_SOURCE_UNVERIFIED", 409);
     transaction.update(ref, { sourceSha256 });
@@ -562,7 +617,7 @@ const processStudioAnalysisJob = async ({
         projectId: job.projectId, sourceAssetId: job.sourceAssetId, firestore });
       if (binding && binding.sourceSha256 !== sourceSha256)
         throw problem("PROJECT_SOURCE_CONFLICT", 409);
-      if (!await recordPinnedSourceHash({ job, sourceSha256, firestore })) return null;
+      if (!await recordPinnedSourceHash({ job, sourceSha256, firestore, clock })) return null;
       job.sourceSha256 = sourceSha256;
     }
     const [signedUrl] = await file.getSignedUrl({ action: "read", expires: clock() + LEASE_MS });
@@ -585,7 +640,7 @@ const processStudioAnalysisJob = async ({
     )
       throw problem("STUDIO_ANALYSIS_RESULT_INVALID", 422);
     const current = await jobRef(firestore, jobId).get();
-    if (!ownsLease(current.data(), job.leaseToken)) return null;
+    if (!ownsLease(current.data(), job.leaseToken, clock())) return null;
     await assertOwnedStudioSourceBinding(input);
     const sourceShotArtifact = await persistSourceShotArtifact(input);
     const analysisArtifact = await persistSourceShotAnalysisArtifact({
@@ -594,6 +649,8 @@ const processStudioAnalysisJob = async ({
     });
     if (analysisArtifact.contentHash !== resultSha256)
       throw problem("STUDIO_ANALYSIS_RESULT_INVALID", 422);
+    const beforeUpload = await jobRef(firestore, jobId).get();
+    if (!ownsLease(beforeUpload.data(), job.leaseToken, clock())) return null;
     const resultFile = storage.file(resultPath(job.ownerUid, jobId, resultSha256));
     try {
       await resultFile.save(resultBytes, {
@@ -612,17 +669,18 @@ const processStudioAnalysisJob = async ({
     } catch (error) {
       if (![412, "conditionNotMet"].includes(error?.code)) throw error;
     }
-    const [resultMetadata] = await resultFile.getMetadata();
-    if (
-      resultMetadata?.metadata?.ownerUid !== job.ownerUid ||
-      resultMetadata?.metadata?.jobId !== jobId ||
-      resultMetadata?.metadata?.resultSha256 !== resultSha256 ||
-      Number(resultMetadata.size) !== resultBytes.length
-    )
-      throw unavailable();
+    await readVerifiedResultBytes({
+      file: resultFile,
+      uid: job.ownerUid,
+      jobId,
+      resultSha256,
+      expectedSize: resultBytes.length,
+      invalidResult: () => problem("STUDIO_ANALYSIS_RESULT_INVALID", 422),
+    });
     terminal = await finishJob({
       job,
       firestore,
+      clock,
       patch: {
         status: "completed",
         sourceShotArtifact,
@@ -638,11 +696,12 @@ const processStudioAnalysisJob = async ({
       ? error.code
       : "STUDIO_ANALYSIS_WORKER_FAILED";
     terminal =
-      !retry && (await finishJob({ job, firestore, patch: { status: "failed", failureCode } }));
+      !retry && (await finishJob({ job, firestore, clock, patch: { status: "failed", failureCode } }));
     if (retry)
       await finishJob({
         job,
         firestore,
+        clock,
         patch: {
           status: "queued",
           failureCode,

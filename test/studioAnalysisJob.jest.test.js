@@ -234,6 +234,432 @@ test("one worker wins the claim; cancellation fences the worker result", async (
   expect(await claimJob({ jobId: queued.jobId, workerId: "worker-3", firestore })).toBeNull();
 });
 
+test.each(["at-expiry", "after-expiry", "invalid-expiry"])(
+  "%s lease cannot be renewed by its previous worker",
+  async mode => {
+    const firestore = fakeFirestore(),
+      storage = fakeStorage();
+    const queued = await createStudioAnalysisJob(input(), {
+      firestore,
+      storage,
+    });
+    let time = Date.now() + 1000;
+    const clock = () => time;
+    const claimed = await claimJob({
+      jobId: queued.jobId,
+      workerId: "worker-1",
+      firestore,
+      clock,
+    });
+    time = Date.parse(claimed.leaseUntil) + (mode === "after-expiry" ? 1 : 0);
+    const path = `studio_analysis_jobs/${queued.jobId}`;
+    if (mode === "invalid-expiry") firestore.docs.get(path).leaseUntil = "invalid";
+    const before = structuredClone(firestore.docs.get(path));
+    expect(
+      await renewLease({
+        jobId: queued.jobId,
+        token: claimed.leaseToken,
+        firestore,
+        clock,
+      })
+    ).toBe(false);
+    expect(firestore.docs.get(path)).toEqual(before);
+  }
+);
+
+test("expired inference cannot publish evidence and a new worker recovers the job", async () => {
+  const firestore = fakeFirestore(),
+    storage = fakeStorage();
+  const queued = await createStudioAnalysisJob(input(), { firestore, storage });
+  let time = Date.now() + 1000;
+  const clock = () => time;
+  await processStudioAnalysisJob({
+    jobId: queued.jobId,
+    workerId: "expired-worker",
+    firestore,
+    storage,
+    clock,
+    runWorker: async job => {
+      time = Date.parse(job.leaseUntil);
+      return { engine: "opencv-yunet-source-shot-follow" };
+    },
+  });
+  expect(persistSourceShotArtifact).not.toHaveBeenCalled();
+  expect(persistSourceShotAnalysisArtifact).not.toHaveBeenCalled();
+  expect(firestore.docs.get(`studio_analysis_jobs/${queued.jobId}`)).toMatchObject({
+    status: "running",
+    attempts: 1,
+  });
+  expect(storage.objects.size).toBe(1);
+  await processStudioAnalysisJob({
+    jobId: queued.jobId,
+    workerId: "recovery-worker",
+    firestore,
+    storage,
+    clock,
+    runWorker: async () => ({ engine: "opencv-yunet-source-shot-follow" }),
+  });
+  expect(
+    await getOwnedStudioAnalysisJob({
+      uid: "owner-1",
+      jobId: queued.jobId,
+      firestore,
+    })
+  ).toMatchObject({ status: "completed", attempts: 2 });
+});
+
+test("lease expiry during source hashing cannot bind or analyze the owned source", async () => {
+  const firestore = fakeFirestore(),
+    storage = fakeStorage();
+  addOwnedSource(storage);
+  const queued = await createStudioAnalysisJobFromOwnedSource(
+    {
+      uid: "owner-1",
+      requestId: "owned-expiry-1",
+      projectId: "project-1",
+      sourceAssetId: "asset-1",
+      storagePath: ownedPath,
+      mode: "source_shots",
+      start: 0,
+      end: 60,
+      anchors: { solo: { x: 40, y: 50 } },
+    },
+    { firestore, sourceStorage: storage }
+  );
+  let time = Date.now() + 1000;
+  const clock = () => time,
+    originalFile = storage.file;
+  storage.file = (path, options) => {
+    const file = originalFile(path, options);
+    if (path === ownedPath)
+      file.createReadStream = () =>
+        Readable.from(
+          (async function* () {
+            time += 15 * 60 * 1000;
+            yield source;
+          })()
+        );
+    return file;
+  };
+  const runWorker = jest.fn();
+  await processStudioAnalysisJob({
+    jobId: queued.jobId,
+    workerId: "expired-worker",
+    firestore,
+    storage,
+    clock,
+    runWorker,
+  });
+  expect(runWorker).not.toHaveBeenCalled();
+  expect(firestore.docs.get(`studio_analysis_jobs/${queued.jobId}`)).toMatchObject({
+    status: "running",
+    sourceSha256: null,
+  });
+  expect(assertOwnedStudioSourceBinding).not.toHaveBeenCalled();
+  expect(storage.objects.has(ownedPath)).toBe(true);
+});
+
+test("lease expiry during artifact writing cannot upload or complete a result", async () => {
+  const firestore = fakeFirestore(),
+    storage = fakeStorage();
+  const queued = await createStudioAnalysisJob(input(), { firestore, storage });
+  let time = Date.now() + 1000;
+  const clock = () => time;
+  persistSourceShotAnalysisArtifact.mockImplementationOnce(async ({ analysis }) => {
+    time += 15 * 60 * 1000;
+    return {
+      artifactHash: "b".repeat(64),
+      contentHash: hash(stable(analysis)),
+    };
+  });
+  await processStudioAnalysisJob({
+    jobId: queued.jobId,
+    workerId: "expired-worker",
+    firestore,
+    storage,
+    clock,
+    runWorker: async () => ({ engine: "opencv-yunet-source-shot-follow" }),
+  });
+  expect(firestore.docs.get(`studio_analysis_jobs/${queued.jobId}`)).toMatchObject({
+    status: "running",
+    attempts: 1,
+  });
+  expect(storage.objects.size).toBe(1);
+});
+
+test("lease expiry during result upload cannot complete or delete the retry source", async () => {
+  const firestore = fakeFirestore(),
+    storage = fakeStorage();
+  const queued = await createStudioAnalysisJob(input(), { firestore, storage });
+  let time = Date.now() + 1000;
+  const clock = () => time,
+    originalFile = storage.file;
+  storage.file = (path, options) => {
+    const file = originalFile(path, options),
+      save = file.save;
+    if (path.endsWith(".json"))
+      file.save = async (...args) => {
+        await save(...args);
+        time += 15 * 60 * 1000;
+      };
+    return file;
+  };
+  await processStudioAnalysisJob({
+    jobId: queued.jobId,
+    workerId: "expired-worker",
+    firestore,
+    storage,
+    clock,
+    runWorker: async () => ({ engine: "opencv-yunet-source-shot-follow" }),
+  });
+  expect(firestore.docs.get(`studio_analysis_jobs/${queued.jobId}`)).toMatchObject({
+    status: "running",
+    attempts: 1,
+  });
+  expect(storage.objects.has(`temp/studio-analysis/owner-1/${queued.jobId}.mp4`)).toBe(true);
+  storage.file = originalFile;
+  await processStudioAnalysisJob({
+    jobId: queued.jobId,
+    workerId: "recovery-worker",
+    firestore,
+    storage,
+    clock,
+    runWorker: async () => ({ engine: "opencv-yunet-source-shot-follow" }),
+  });
+  expect(
+    await getOwnedStudioAnalysisJob({
+      uid: "owner-1",
+      jobId: queued.jobId,
+      firestore,
+    })
+  ).toMatchObject({ status: "completed", attempts: 2 });
+  expect(storage.objects.size).toBe(1);
+});
+
+test("expired worker failure cannot queue a retry or replace the lease owner", async () => {
+  const firestore = fakeFirestore(),
+    storage = fakeStorage();
+  const queued = await createStudioAnalysisJob(input(), { firestore, storage });
+  let time = Date.now() + 1000;
+  const clock = () => time;
+  await processStudioAnalysisJob({
+    jobId: queued.jobId,
+    workerId: "expired-worker",
+    firestore,
+    storage,
+    clock,
+    runWorker: async job => {
+      time = Date.parse(job.leaseUntil);
+      throw new Error("late network failure");
+    },
+  });
+  expect(firestore.docs.get(`studio_analysis_jobs/${queued.jobId}`)).toMatchObject({
+    status: "running",
+    workerId: "expired-worker",
+    failureCode: null,
+  });
+});
+
+test("an active heartbeat extends authority beyond the originally claimed deadline", async () => {
+  const firestore = fakeFirestore(),
+    storage = fakeStorage();
+  const queued = await createStudioAnalysisJob(input(), { firestore, storage });
+  let time = Date.now() + 1000;
+  const clock = () => time;
+  await processStudioAnalysisJob({
+    jobId: queued.jobId,
+    workerId: "worker-1",
+    firestore,
+    storage,
+    clock,
+    runWorker: async job => {
+      time += 13 * 60 * 1000;
+      expect(
+        await renewLease({
+          jobId: job.jobId,
+          token: job.leaseToken,
+          firestore,
+          clock,
+        })
+      ).toBe(true);
+      time += 3 * 60 * 1000;
+      expect(time).toBeGreaterThan(Date.parse(job.leaseUntil));
+      return { engine: "opencv-yunet-source-shot-follow" };
+    },
+  });
+  expect(
+    await getOwnedStudioAnalysisJob({
+      uid: "owner-1",
+      jobId: queued.jobId,
+      firestore,
+    })
+  ).toMatchObject({ status: "completed", attempts: 1 });
+});
+
+test.each([false, true])(
+  "reclaimed lease survives the old worker's return (failure=%s)",
+  async failure => {
+    const firestore = fakeFirestore(),
+      storage = fakeStorage();
+    const queued = await createStudioAnalysisJob(input(), {
+      firestore,
+      storage,
+    });
+    let time = Date.now() + 1000,
+      successor;
+    const clock = () => time;
+    await processStudioAnalysisJob({
+      jobId: queued.jobId,
+      workerId: "old-worker",
+      firestore,
+      storage,
+      clock,
+      runWorker: async job => {
+        time = Date.parse(job.leaseUntil);
+        successor = await claimJob({
+          jobId: job.jobId,
+          workerId: "new-worker",
+          firestore,
+          clock,
+        });
+        if (failure) throw new Error("old worker failed");
+        return { engine: "opencv-yunet-source-shot-follow" };
+      },
+    });
+    expect(firestore.docs.get(`studio_analysis_jobs/${queued.jobId}`)).toMatchObject({
+      status: "running",
+      attempts: 2,
+      workerId: "new-worker",
+      leaseToken: successor.leaseToken,
+      failureCode: null,
+    });
+    expect(storage.objects.size).toBe(1);
+    expect(persistSourceShotArtifact).not.toHaveBeenCalled();
+  }
+);
+
+test.each([false, true])(
+  "existing result bytes must match their immutable hash (corrupt=%s)",
+  async corrupt => {
+    const firestore = fakeFirestore(),
+      storage = fakeStorage();
+    const queued = await createStudioAnalysisJob(input(), {
+      firestore,
+      storage,
+    });
+    const analysis = { engine: "opencv-yunet-source-shot-follow" },
+      bytes = Buffer.from(stable(analysis));
+    const resultSha256 = hash(bytes),
+      path = `studio/analysis-results/owner-1/${queued.jobId}/${resultSha256}.json`;
+    storage.objects.set(path, {
+      buffer: corrupt ? Buffer.alloc(bytes.length, 32) : bytes,
+      metadata: {
+        size: String(bytes.length),
+        contentType: "application/json",
+        metadata: {
+          ownerUid: "owner-1",
+          jobId: queued.jobId,
+          resultSha256,
+          purpose: "studio-analysis-result",
+        },
+      },
+    });
+    await processStudioAnalysisJob({
+      jobId: queued.jobId,
+      workerId: "worker-1",
+      firestore,
+      storage,
+      runWorker: async () => analysis,
+    });
+    expect(
+      await getOwnedStudioAnalysisJob({
+        uid: "owner-1",
+        jobId: queued.jobId,
+        firestore,
+      })
+    ).toMatchObject(
+      corrupt
+        ? {
+            status: "failed",
+            failureCode: "STUDIO_ANALYSIS_RESULT_INVALID",
+            attempts: 1,
+          }
+        : { status: "completed", resultSha256 }
+    );
+  }
+);
+
+test.each(["not-a-number", "1.5"])("result read refuses invalid stored size %s", async size => {
+  const firestore = fakeFirestore(),
+    storage = fakeStorage();
+  const queued = await createStudioAnalysisJob(input(), {
+    firestore,
+    storage,
+  });
+  await processStudioAnalysisJob({
+    jobId: queued.jobId,
+    workerId: "worker-1",
+    firestore,
+    storage,
+    runWorker: async () => ({ engine: "opencv-yunet-source-shot-follow" }),
+  });
+  const path = [...storage.objects.keys()].find(path => path.endsWith(".json"));
+  storage.objects.get(path).metadata.size = size;
+  await expect(
+    getOwnedStudioAnalysisResult({
+      uid: "owner-1",
+      jobId: queued.jobId,
+      firestore,
+      storage,
+    })
+  ).rejects.toMatchObject({ code: "STUDIO_ANALYSIS_JOB_UNAVAILABLE" });
+});
+
+test("result read stops an oversized stream even when metadata claims a bounded size", async () => {
+  const firestore = fakeFirestore(),
+    storage = fakeStorage();
+  const queued = await createStudioAnalysisJob(input(), { firestore, storage });
+  await processStudioAnalysisJob({
+    jobId: queued.jobId,
+    workerId: "worker-1",
+    firestore,
+    storage,
+    runWorker: async () => ({ engine: "opencv-yunet-source-shot-follow" }),
+  });
+  const originalFile = storage.file;
+  let stopped = false,
+    stream;
+  storage.file = (path, options) => {
+    const file = originalFile(path, options);
+    if (path.endsWith(".json"))
+      file.createReadStream = () => {
+        stream = Readable.from(
+          (async function* () {
+            try {
+              yield Buffer.alloc(21 * 1024 * 1024);
+              yield Buffer.alloc(1024);
+            } finally {
+              stopped = true;
+            }
+          })(),
+          { highWaterMark: 1 }
+        );
+        return stream;
+      };
+    return file;
+  };
+  await expect(
+    getOwnedStudioAnalysisResult({
+      uid: "owner-1",
+      jobId: queued.jobId,
+      firestore,
+      storage,
+    })
+  ).rejects.toMatchObject({ code: "STUDIO_ANALYSIS_JOB_UNAVAILABLE" });
+  expect(stopped).toBe(true);
+  expect(stream.destroyed).toBe(true);
+});
+
 test("transient failure retries once, then stores immutable receipts and deletes staged source", async () => {
   const firestore = fakeFirestore(),
     storage = fakeStorage();

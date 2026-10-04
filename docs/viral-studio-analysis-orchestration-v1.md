@@ -51,6 +51,26 @@ Expired second leases and staging records older than an hour fail terminally.
 Terminal jobs remove the temporary uploaded video. Completed result objects
 remain available for authenticated reads.
 
+Worker authority requires both the current lease token and an unexpired deadline
+in the transactional record. A heartbeat may extend a live lease; it cannot
+revive an expired or malformed deadline. Source-hash updates, retries, failure
+and completion use that same check. A late worker leaves the expired job for a
+replacement worker to reclaim, retaining its temporary source. Completion also
+rechecks authority after artifact writing and result upload. An immutable artifact
+or result object written while a lease expires may remain orphaned until the
+existing delayed cleanup; it cannot become the job's completed result without
+the current, live lease.
+
+Result reads verify owner, job, purpose and an integer byte count, then stream
+with a 20 MiB limit enforced as chunks arrive. The streamed count must match
+metadata and the SHA-256 must match the immutable result identity. Publication
+performs the same byte verification before recording completion, including
+create-only conflicts where the object already exists. A corrupt existing object
+fails the job with `STUDIO_ANALYSIS_RESULT_INVALID`; it is not overwritten. A
+temporary Storage read failure remains retryable. This adds one bounded result
+read before completion. See the [backend integrity verification](../reports/studio-backend-integrity-20261004/README.md)
+for local expiry, recovery and corrupt-object evidence.
+
 For an owned source, the editor keeps the request ID in session storage under
 the exact project, asset, path, range, and anchor settings. Repeating the
 analysis after a reload, when the same project is restored, uses that ID to

@@ -1,0 +1,13 @@
+{
+  "algorithm": "SHA-256",
+  "files": {
+    "README.md": "cb580858a1c5b6e529c0f3d713dcd5da0128936f25b56e040e95253da04524b1",
+    "baseline.json": "5b44d8191f0aed82d8660b35c8c460dd30104143b16923098d19c504ccaa953f",
+    "delivery-verification.json": "6607f73a380c529ea41fcf52703aa94dc4165d66053970c34e5439d0e7e332ec",
+    "lint.json": "aeea8215aaa2e32ef17c9fc57432f3efd6db6e1bd6faa4f6f30acb884f881375",
+    "negative-control.json": "fc5a43c8dff1ac42f6762c53a61303630eaf4ef5c89db11bfc29a9e77ba7a3ea",
+    "python-regression.log": "378d9dc710241e601e438d40632268b9c3e682178865efdf07c0741ec2aef74c",
+    "python-regression.xml": "ad4edce3ef73cee3fccf71c7a58e3aeab5623703871ad2056acd9b94558da2c3",
+    "regression.json": "e5e290214835570baa84dba231304f04e71d0da348f73d7012fd35c6501b97ad"
+  }
+}

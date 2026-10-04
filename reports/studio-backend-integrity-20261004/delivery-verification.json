@@ -1,0 +1,222 @@
+{
+  "passed": true,
+  "verifiedAt": "2026-10-04T17:54:32.763645+00:00",
+  "branch": "agent/director-analysis-staging-browser-v1",
+  "baselineCommit": "9a7fbfc706c2961067c8e14261e5abf6c63ba16c",
+  "scope": "Local repository tests; simulated Firestore, Storage and external services. CPU Python detector and bounded FFmpeg fixtures. No cloud or GPU operations or deployment.",
+  "checks": [
+    {
+      "label": "Baseline has 54 passes and no failures",
+      "passed": true
+    },
+    {
+      "label": "Final Jest has 147 passes across fourteen complete suites",
+      "passed": true
+    },
+    {
+      "label": "No suite runtime errors",
+      "passed": true
+    },
+    {
+      "label": "All reported assertions ran and passed",
+      "passed": true
+    },
+    {
+      "label": "All twenty-nine queue cases pass",
+      "passed": true
+    },
+    {
+      "label": "Negative control reproduces twelve failures without a runtime error",
+      "passed": true
+    },
+    {
+      "label": "Python tests and subtests pass with no skips",
+      "passed": true,
+      "detail": {
+        "tests": 94,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "label": "Python parent/subtest counts recorded",
+      "passed": true
+    },
+    {
+      "label": "Lint clean for both touched JavaScript files",
+      "passed": true
+    },
+    {
+      "label": "Job exports remain unchanged",
+      "passed": true
+    },
+    {
+      "label": "Public job receipt fields remain unchanged",
+      "passed": true
+    },
+    {
+      "label": "Source and request limits unchanged",
+      "passed": true
+    },
+    {
+      "label": "Node syntax checks pass",
+      "passed": true,
+      "detail": [
+        {
+          "file": "src/services/studioAnalysisJobService.js",
+          "exitCode": 0
+        },
+        {
+          "file": "test/studioAnalysisJob.jest.test.js",
+          "exitCode": 0
+        }
+      ]
+    },
+    {
+      "label": "Diff whitespace check passes",
+      "passed": true
+    },
+    {
+      "label": "Frontend product files unchanged",
+      "passed": true
+    },
+    {
+      "label": "Worker Python and deployment configuration unchanged",
+      "passed": true
+    },
+    {
+      "label": "Branch retains the verified frontend commit",
+      "passed": true
+    },
+    {
+      "label": "Report evidence links resolve",
+      "passed": true,
+      "detail": []
+    }
+  ],
+  "sourceHashes": {
+    "docs/viral-studio-analysis-orchestration-v1.md": "22e81bb379998f274cd088c4201e858e3d60d41c500c61a7bf988bfadaaad4e4",
+    "frontend/src/components/__tests__/studioAnalysisJobClient.test.js": "97d3a1091a6833a8bd7faed1fb280ecc14e546b6ea4cdfe7db71488e99ddfe06",
+    "python_media_worker/main_media_server.py": "6b64482619e9ef16de48af4dcf8df9c1fd662f0c351e242c30e4aced0ca43501",
+    "python_media_worker/studio_analysis_analyzer.py": "a9df3d55b2815bb1ac9a170aad7133fb5392ac9b6efb9b9989f73a7f58cd7d52",
+    "python_media_worker/studio_face_tracking.py": "443db42f02bbd7976f6d2597b3f83fb7e80901e4fabd51c60069b39f9f2c8bc6",
+    "python_media_worker/test_studio_analysis_analyzer.py": "d5d6cb1b27bbce6f1f0f8b2acb532cba42173ddb75fb441127cfd2246e424d3b",
+    "python_media_worker/test_studio_face_tracking.py": "752528e2c2184b3b61024a430882c06ea860e3fb28891e450db4ac9dd800cadf",
+    "python_media_worker/test_viral_render_contract.py": "84ad975046145ecf64de50488bef8cbeafc898b1c43bd82ec5eb58ac291a78a6",
+    "python_media_worker/viral_render_contract.py": "d5a7bdee894a366f39d7a7176b9fb43590da8d0143320ca0d6fe4b58e4487304",
+    "src/__tests__/mediaRoutes.studioSources.test.js": "040cf2af7dfacd9de5a472cb3509231439c4dae20421222a429da58024614151",
+    "src/services/studioAnalysisJobService.js": "f94f78ce9fff5258a7a9e46e5e49426bfa06adccfb7ebbeb9c54bbbd2a3ab269",
+    "test/mediaRenderMulticam.jest.test.js": "2e12012c86307c49bba062c39a603227fd31958d79653bf6b3179abbf9d01359",
+    "test/studioAnalysisArtifact.jest.test.js": "104f4bd4e9bc2628f80b504136a59d57c1d8fa779c3598655c33e5d0b266963f",
+    "test/studioAnalysisArtifactRoutes.jest.test.js": "2e28f33e97def92d6f14eab069033797cb3f4606d1f33a63beb485e5846c2b70",
+    "test/studioAnalysisJob.jest.test.js": "54a622b99b0bf13b3400e45e65de35bf9781331346b60a2400a382fd9780d460",
+    "test/studioAnalysisJobRoutes.jest.test.js": "e328a4083f0e31727ed7e48049f2d5166fe2b1a2922a3a053f345e8b78cbc6d0",
+    "test/studioDirectorProjectBinding.jest.test.js": "386571b263d539eae5ec62dd6675af07e4fafc15ab78a0041604d7c0df59c2fa",
+    "test/studioDirectorReplayService.jest.test.js": "d52caf994aab11bafd819508d93a2cd1c47972b1dc78b0cd79c3fece946740ef",
+    "test/studioDirectorReviewRoutes.jest.test.js": "5d8e647f00a4c806776ba34b24644e8e491ca2ece80faeba4654a8a0b019033b",
+    "test/studioProjectIntelligence.jest.test.js": "8165a9cd7cbc616ab0276a1d48603eb6a60e9bfc462a50279df619e73332a7e6",
+    "test/studioProjectIntelligenceService.jest.test.js": "24d1b8c6abdfe150e824e54e72b5bf2bd7e38ced6a2fdcf5bf77ac37c3d5d3fe",
+    "test/studioProjectRevisionRoutes.jest.test.js": "f72bb5c6945cbed351e0764d394fe3fb9baa9f9a2fba4dea6c1f5d90215f684d",
+    "test/studioSourceShotArtifact.jest.test.js": "cb6aec94dc68dc969dfe32589cd475f049195aade608e53a7ba034a7a05fd3b0"
+  },
+  "jestSuites": [
+    {
+      "file": "frontend/src/components/__tests__/studioAnalysisJobClient.test.js",
+      "passed": 7
+    },
+    {
+      "file": "test/studioAnalysisJob.jest.test.js",
+      "passed": 29
+    },
+    {
+      "file": "test/studioProjectRevisionRoutes.jest.test.js",
+      "passed": 12
+    },
+    {
+      "file": "test/studioDirectorReviewRoutes.jest.test.js",
+      "passed": 19
+    },
+    {
+      "file": "test/studioProjectIntelligence.jest.test.js",
+      "passed": 33
+    },
+    {
+      "file": "test/studioProjectIntelligenceService.jest.test.js",
+      "passed": 7
+    },
+    {
+      "file": "src/__tests__/mediaRoutes.studioSources.test.js",
+      "passed": 11
+    },
+    {
+      "file": "test/mediaRenderMulticam.jest.test.js",
+      "passed": 4
+    },
+    {
+      "file": "test/studioAnalysisJobRoutes.jest.test.js",
+      "passed": 5
+    },
+    {
+      "file": "test/studioAnalysisArtifactRoutes.jest.test.js",
+      "passed": 2
+    },
+    {
+      "file": "test/studioDirectorReplayService.jest.test.js",
+      "passed": 3
+    },
+    {
+      "file": "test/studioAnalysisArtifact.jest.test.js",
+      "passed": 5
+    },
+    {
+      "file": "test/studioDirectorProjectBinding.jest.test.js",
+      "passed": 5
+    },
+    {
+      "file": "test/studioSourceShotArtifact.jest.test.js",
+      "passed": 5
+    }
+  ],
+  "pythonTests": {
+    "parentsPassed": 66,
+    "subtestsPassed": 28,
+    "junit": {
+      "tests": 94,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "passedQueueTestNames": [
+    "idempotent upload queues once and rejects a reused key with changed source or settings",
+    "one worker wins the claim; cancellation fences the worker result",
+    "at-expiry lease cannot be renewed by its previous worker",
+    "after-expiry lease cannot be renewed by its previous worker",
+    "invalid-expiry lease cannot be renewed by its previous worker",
+    "expired inference cannot publish evidence and a new worker recovers the job",
+    "lease expiry during source hashing cannot bind or analyze the owned source",
+    "lease expiry during artifact writing cannot upload or complete a result",
+    "lease expiry during result upload cannot complete or delete the retry source",
+    "expired worker failure cannot queue a retry or replace the lease owner",
+    "an active heartbeat extends authority beyond the originally claimed deadline",
+    "reclaimed lease survives the old worker's return (failure=false)",
+    "reclaimed lease survives the old worker's return (failure=true)",
+    "existing result bytes must match their immutable hash (corrupt=false)",
+    "existing result bytes must match their immutable hash (corrupt=true)",
+    "result read refuses invalid stored size not-a-number",
+    "result read refuses invalid stored size 1.5",
+    "result read stops an oversized stream even when metadata claims a bounded size",
+    "transient failure retries once, then stores immutable receipts and deletes staged source",
+    "terminal worker rejection never publishes artifacts or retries",
+    "cancelling an active worker fences publication and cleans its staged source",
+    "two crashed leases exhaust retries and clean the source",
+    "abandoned staging expires and deletes its source",
+    "owned durable source is hashed by the worker and retained after completion",
+    "owned source rejects wrong owner, changed generation and a conflicting binding",
+    "owned source refuses a false byte count or hash-qualified asset",
+    "janitor removes orphan results and keeps the completed receipt object",
+    "cancelled owned job keeps its source and retries an interrupted orphan cleanup",
+    "a cleanup outage does not stall queued analysis"
+  ]
+}
