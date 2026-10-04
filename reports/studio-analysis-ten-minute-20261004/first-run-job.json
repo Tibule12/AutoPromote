@@ -1,0 +1,67 @@
+{
+  "jobId": "dd9573d0a99fdfd5df5079a5ade31fe03d4276688cecdfe3872eeb0578188aec",
+  "status": "completed",
+  "attempts": 1,
+  "analysisArtifact": {
+    "projectId": "staging-ten-minute-20261004",
+    "configHash": "6b1ac7ce730bd1f8df1a405be0da9b0714a716fe4079c1bd80bdd890feac6958",
+    "artifactHash": "462713a5036b403186c9f6d54d2d55f994a0b871a3ed701fac236abac4f6b210",
+    "contentHash": "25c20ddd7df8eacf78d393f7e354f60410055318b2d2e2ad43f30de335347f5a",
+    "analysisRange": {
+      "space": "source",
+      "startTick": 0,
+      "endTick": 54000000
+    },
+    "createdAt": "2026-10-04T10:21:13.623Z",
+    "sourceSha256": "4a6efc07f90860a22d4fcbebd0ff77ae6bc72907491631e3e217099a2bddeb8c",
+    "dependencyHashes": [
+      "47b22fabbea4a711512da1f60808c46b5f6426286d87459a634bb108fe313316"
+    ],
+    "modelRevision": "opencv-yunet-source-shot-follow",
+    "analysisType": "source_shots",
+    "sourceAssetId": "source:sha256:4a6efc07f90860a22d4fcbebd0ff77ae6bc72907491631e3e217099a2bddeb8c"
+  },
+  "leaseToken": null,
+  "end": 600,
+  "updatedAt": "2026-10-04T10:21:13.875Z",
+  "leaseUntil": null,
+  "sourceGeneration": "1791107066573616",
+  "requestFingerprint": "d74a6a48312dbba624a4e79bcd9f315b570e62504f34b332f24f6f156517034b",
+  "sourceSizeBytes": 726725520,
+  "sourceOwned": true,
+  "sourceSha256": "4a6efc07f90860a22d4fcbebd0ff77ae6bc72907491631e3e217099a2bddeb8c",
+  "projectId": "staging-ten-minute-20261004",
+  "resultSha256": "25c20ddd7df8eacf78d393f7e354f60410055318b2d2e2ad43f30de335347f5a",
+  "schemaVersion": 1,
+  "mode": "source_shots",
+  "failureCode": null,
+  "cleanupAfter": "2026-10-04T10:37:13.875Z",
+  "cleanupPending": false,
+  "nextAttemptAt": null,
+  "anchors": {
+    "solo": {
+      "x": 34,
+      "y": 47
+    }
+  },
+  "cleanedAt": "2026-10-04T10:46:22.742Z",
+  "ownerUid": "staging-smoke",
+  "sourceObjectPath": "studio/sources/staging-smoke/ten-minute-20261004-4a6efc07.mp4",
+  "workerId": "studio-45bf2164b99a850a",
+  "sourceBucketName": "autopromote-staging-2026.firebasestorage.app",
+  "start": 0,
+  "createdAt": "2026-10-04T09:48:53.778Z",
+  "sourceAssetId": "source:sha256:4a6efc07f90860a22d4fcbebd0ff77ae6bc72907491631e3e217099a2bddeb8c",
+  "sourceShotArtifact": {
+    "sourceAssetId": "source:sha256:4a6efc07f90860a22d4fcbebd0ff77ae6bc72907491631e3e217099a2bddeb8c",
+    "artifactHash": "47b22fabbea4a711512da1f60808c46b5f6426286d87459a634bb108fe313316",
+    "projectId": "staging-ten-minute-20261004",
+    "analysisRange": {
+      "space": "source",
+      "startTick": 0,
+      "endTick": 54000000
+    },
+    "sourceSha256": "4a6efc07f90860a22d4fcbebd0ff77ae6bc72907491631e3e217099a2bddeb8c",
+    "createdAt": "2026-10-04T10:21:13.541Z"
+  }
+}

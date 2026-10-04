@@ -1,0 +1,206 @@
+[
+  {
+    "insertId": "mst6epdeeig",
+    "labels": {
+      "run.googleapis.com/execution_name": "studio-analysis-once-nsnlf"
+    },
+    "logName": "projects/autopromote-staging-2026/logs/cloudaudit.googleapis.com%2Fsystem_event",
+    "protoPayload": {
+      "@type": "type.googleapis.com/google.cloud.audit.AuditLog",
+      "methodName": "/Jobs.RunJob",
+      "resourceName": "namespaces/autopromote-staging-2026/executions/studio-analysis-once-nsnlf",
+      "response": {
+        "@type": "type.googleapis.com/google.cloud.run.v1.Execution",
+        "apiVersion": "run.googleapis.com/v1",
+        "kind": "Execution",
+        "metadata": {
+          "annotations": {
+            "run.googleapis.com/client-name": "gcloud",
+            "run.googleapis.com/client-version": "586.0.0",
+            "run.googleapis.com/creator": "tmtshwelo21@gmail.com",
+            "run.googleapis.com/execution-environment": "gen2",
+            "run.googleapis.com/lastModifier": "tmtshwelo21@gmail.com",
+            "run.googleapis.com/operation-id": "c6369c20-8c20-4822-afa3-2f0f672382e8"
+          },
+          "creationTimestamp": "2026-10-04T10:44:08.627385Z",
+          "generation": 1,
+          "labels": {
+            "client.knative.dev/nonce": "cek_xux_vay",
+            "cloud.googleapis.com/location": "us-central1",
+            "run.googleapis.com/job": "studio-analysis-once",
+            "run.googleapis.com/jobGeneration": "4",
+            "run.googleapis.com/jobResourceVersion": "1791109281490513",
+            "run.googleapis.com/jobUid": "5f78c9ab-4c28-4cb4-9fe9-893cc6b94589"
+          },
+          "name": "studio-analysis-once-nsnlf",
+          "namespace": "583435862235",
+          "ownerReferences": [
+            {
+              "apiVersion": "serving.knative.dev/v1",
+              "blockOwnerDeletion": true,
+              "controller": true,
+              "kind": "Job",
+              "name": "studio-analysis-once",
+              "uid": "5f78c9ab-4c28-4cb4-9fe9-893cc6b94589"
+            }
+          ],
+          "resourceVersion": "AAZdAZCht2k",
+          "selfLink": "/apis/run.googleapis.com/v1/namespaces/583435862235/executions/studio-analysis-once-nsnlf",
+          "uid": "8814a695-b7eb-47b5-87ec-720b8f0273fe"
+        },
+        "spec": {
+          "parallelism": 1,
+          "taskCount": 1,
+          "template": {
+            "spec": {
+              "containers": [
+                {
+                  "env": [
+                    {
+                      "name": "ENABLE_STUDIO_ANALYSIS_WORKER",
+                      "value": "true"
+                    },
+                    {
+                      "name": "STUDIO_ANALYSIS_WORKER_ONCE",
+                      "value": "true"
+                    },
+                    {
+                      "name": "FIREBASE_STORAGE_BUCKET",
+                      "value": "autopromote-staging-2026.firebasestorage.app"
+                    },
+                    {
+                      "name": "MEDIA_WORKER_URL",
+                      "value": "https://studio-face-analyzer-583435862235.us-central1.run.app"
+                    },
+                    {
+                      "name": "WORKER_AUTH_MODE",
+                      "value": "oidc"
+                    },
+                    {
+                      "name": "FIREBASE_DATABASE_URL",
+                      "value": "https://autopromote-staging-2026.firebaseio.com"
+                    },
+                    {
+                      "name": "STUDIO_ANALYSIS_WORKER_MAX_PASSES",
+                      "value": "4"
+                    }
+                  ],
+                  "image": "us-central1-docker.pkg.dev/autopromote-staging-2026/studio-analysis/worker@sha256:d0bde70ef153b0684dd405de6ce48cad129cd73947261dd0909706bdecd8de61",
+                  "resources": {
+                    "limits": {
+                      "cpu": "1",
+                      "memory": "1Gi"
+                    }
+                  }
+                }
+              ],
+              "maxRetries": 0,
+              "serviceAccountName": "studio-analysis-smoke@autopromote-staging-2026.iam.gserviceaccount.com",
+              "timeoutSeconds": "960"
+            }
+          }
+        },
+        "status": {
+          "completionTime": "2026-10-04T10:52:42.283056Z",
+          "conditions": [
+            {
+              "lastTransitionTime": "2026-10-04T10:52:42.283056Z",
+              "message": "Execution completed successfully in 8m18.81s.",
+              "status": "True",
+              "type": "Completed"
+            },
+            {
+              "lastTransitionTime": "2026-10-04T10:44:09.476757Z",
+              "message": "Provisioned imported containers.",
+              "status": "True",
+              "type": "ResourcesAvailable"
+            },
+            {
+              "lastTransitionTime": "2026-10-04T10:46:20.759742Z",
+              "message": "Started deployed execution in 2m11.28s.",
+              "status": "True",
+              "type": "Started"
+            },
+            {
+              "lastTransitionTime": "2026-10-04T10:44:09.375915Z",
+              "message": "Imported container image.",
+              "status": "True",
+              "type": "ContainerReady"
+            },
+            {
+              "lastTransitionTime": "2026-10-04T10:52:43.131753Z",
+              "message": "System will retry after 00:00 from lastTransitionTime for attempt 0.",
+              "reason": "ImmediateRetry",
+              "severity": "Info",
+              "status": "True",
+              "type": "Retry"
+            }
+          ],
+          "logUri": "https://console.cloud.google.com/logs/viewer?project=autopromote-staging-2026&advancedFilter=resource.type%3D%22cloud_run_job%22%0Aresource.labels.job_name%3D%22studio-analysis-once%22%0Aresource.labels.location%3D%22us-central1%22%0Alabels.%22run.googleapis.com/execution_name%22%3D%22studio-analysis-once-nsnlf%22",
+          "observedGeneration": 1,
+          "startTime": "2026-10-04T10:44:23.468255Z",
+          "succeededCount": 1
+        }
+      },
+      "serviceName": "run.googleapis.com",
+      "status": {
+        "message": "Execution studio-analysis-once-nsnlf has completed successfully."
+      }
+    },
+    "receiveTimestamp": "2026-10-04T10:52:43.796161032Z",
+    "resource": {
+      "labels": {
+        "job_name": "studio-analysis-once",
+        "location": "us-central1",
+        "project_id": "autopromote-staging-2026"
+      },
+      "type": "cloud_run_job"
+    },
+    "severity": "INFO",
+    "timestamp": "2026-10-04T10:52:43.160014Z"
+  },
+  {
+    "insertId": "6ac22ff50008da95d2f32412",
+    "labels": {
+      "container_name": "worker",
+      "instanceId": "0010dd860784216f35d0575e4292c551ebfcf7e3f0ce5a49ec3e0e0bad72de35dfbb7bc2d551b61f952b81b4590f4e79a031fe021a57d95e2ed7b65f31a9098cbf4d4bf84d942649a76553b80ab81ca456fb3cb707f4c50d3e0c22",
+      "run.googleapis.com/execution_name": "studio-analysis-once-nsnlf",
+      "run.googleapis.com/task_attempt": "0",
+      "run.googleapis.com/task_index": "0"
+    },
+    "logName": "projects/autopromote-staging-2026/logs/run.googleapis.com%2Fvarlog%2Fsystem",
+    "receiveTimestamp": "2026-10-04T10:52:37.586618523Z",
+    "resource": {
+      "labels": {
+        "job_name": "studio-analysis-once",
+        "location": "us-central1",
+        "project_id": "autopromote-staging-2026"
+      },
+      "type": "cloud_run_job"
+    },
+    "severity": "INFO",
+    "textPayload": "Container called exit(0).",
+    "timestamp": "2026-10-04T10:52:37.580131Z"
+  },
+  {
+    "insertId": "6ac22ff50007d90feb5e06c1",
+    "labels": {
+      "instanceId": "0010dd860784216f35d0575e4292c551ebfcf7e3f0ce5a49ec3e0e0bad72de35dfbb7bc2d551b61f952b81b4590f4e79a031fe021a57d95e2ed7b65f31a9098cbf4d4bf84d942649a76553b80ab81ca456fb3cb707f4c50d3e0c22",
+      "run.googleapis.com/execution_name": "studio-analysis-once-nsnlf",
+      "run.googleapis.com/task_attempt": "0",
+      "run.googleapis.com/task_index": "0"
+    },
+    "logName": "projects/autopromote-staging-2026/logs/run.googleapis.com%2Fstdout",
+    "receiveTimestamp": "2026-10-04T10:52:37.523495897Z",
+    "resource": {
+      "labels": {
+        "job_name": "studio-analysis-once",
+        "location": "us-central1",
+        "project_id": "autopromote-staging-2026"
+      },
+      "type": "cloud_run_job"
+    },
+    "textPayload": "[StudioAnalysisWorker] Bounded batch processed 2 due items",
+    "timestamp": "2026-10-04T10:52:37.514319Z"
+  }
+]

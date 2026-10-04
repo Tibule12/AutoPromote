@@ -1,0 +1,12 @@
+{
+  "bindings": [
+    {
+      "members": [
+        "serviceAccount:studio-analysis-smoke@autopromote-staging-2026.iam.gserviceaccount.com"
+      ],
+      "role": "roles/run.invoker"
+    }
+  ],
+  "etag": "BwZc7aoDQUs=",
+  "version": 1
+}

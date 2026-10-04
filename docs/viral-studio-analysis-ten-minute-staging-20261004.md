@@ -1,5 +1,15 @@
 # Ten-minute Studio analysis staging gate — October 4, 2026
 
+Open the [actual evidence bundle](../reports/studio-analysis-ten-minute-20261004/README.md),
+[stored analysis JSON](../reports/studio-analysis-ten-minute-20261004/repaired-analysis-result.json),
+[Cloud Run execution receipt](../reports/studio-analysis-ten-minute-20261004/repaired-execution.json),
+and [35-check cloud verification](../reports/studio-analysis-ten-minute-20261004/cloud-verification.json).
+The successful execution is also visible directly in
+[Google Cloud Console](https://console.cloud.google.com/run/jobs/executions/details/us-central1/studio-analysis-once-nsnlf?project=autopromote-staging-2026).
+The [fresh local/cloud comparison receipt](../reports/studio-analysis-ten-minute-20261004/local-cloud-comparison.json)
+also retains the complete baseline output and proves full JSON equality using
+the same source bytes.
+
 **Status: ten-minute staging gate passed after media-runtime repair.** This gate uses the isolated
 `autopromote-staging-2026` project, its private CPU analyzer and a manually
 triggered Cloud Run worker. Production analysis jobs and the Studio frontend

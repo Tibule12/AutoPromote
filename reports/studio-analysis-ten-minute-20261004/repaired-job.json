@@ -1,0 +1,66 @@
+{
+  "leaseToken": null,
+  "failureCode": null,
+  "updatedAt": "2026-10-04T10:52:37.433Z",
+  "createdAt": "2026-10-04T10:34:32.249Z",
+  "jobId": "ebb46e963c64c8eab4b9b56c828857e0c87f237b0c732991930dffced8fd0964",
+  "projectId": "staging-ten-minute-20261004",
+  "attempts": 1,
+  "cleanupAfter": "2026-10-04T11:08:37.433Z",
+  "sourceSizeBytes": 726725520,
+  "sourceBucketName": "autopromote-staging-2026.firebasestorage.app",
+  "leaseUntil": null,
+  "analysisArtifact": {
+    "projectId": "staging-ten-minute-20261004",
+    "modelRevision": "opencv-yunet-source-shot-follow",
+    "analysisRange": {
+      "space": "source",
+      "endTick": 54000000,
+      "startTick": 0
+    },
+    "configHash": "6b1ac7ce730bd1f8df1a405be0da9b0714a716fe4079c1bd80bdd890feac6958",
+    "contentHash": "e8c725943577c7bbc9b275443efa9e2a074a7abd814e391d4dc9ab06c33ae98c",
+    "artifactHash": "e8e17321d2cf753d263b7a64f1238b92bd8c8d1ff9e6c19f8f0874a02920851f",
+    "analysisType": "source_shots",
+    "sourceAssetId": "source:sha256:4a6efc07f90860a22d4fcbebd0ff77ae6bc72907491631e3e217099a2bddeb8c",
+    "createdAt": "2026-10-04T10:52:37.170Z",
+    "sourceSha256": "4a6efc07f90860a22d4fcbebd0ff77ae6bc72907491631e3e217099a2bddeb8c",
+    "dependencyHashes": [
+      "085681fb226b9844d24104b45889fa5e57119259a1bda4c650d111d2ed3ad877"
+    ]
+  },
+  "start": 0,
+  "nextAttemptAt": null,
+  "sourceSha256": "4a6efc07f90860a22d4fcbebd0ff77ae6bc72907491631e3e217099a2bddeb8c",
+  "sourceGeneration": "1791107066573616",
+  "schemaVersion": 1,
+  "anchors": {
+    "solo": {
+      "x": 34,
+      "y": 47
+    }
+  },
+  "sourceOwned": true,
+  "sourceObjectPath": "studio/sources/staging-smoke/ten-minute-20261004-4a6efc07.mp4",
+  "requestFingerprint": "d74a6a48312dbba624a4e79bcd9f315b570e62504f34b332f24f6f156517034b",
+  "resultSha256": "e8c725943577c7bbc9b275443efa9e2a074a7abd814e391d4dc9ab06c33ae98c",
+  "workerId": "studio-32b8e7a0a23e52fd",
+  "status": "completed",
+  "cleanupPending": true,
+  "sourceShotArtifact": {
+    "artifactHash": "085681fb226b9844d24104b45889fa5e57119259a1bda4c650d111d2ed3ad877",
+    "sourceSha256": "4a6efc07f90860a22d4fcbebd0ff77ae6bc72907491631e3e217099a2bddeb8c",
+    "createdAt": "2026-10-04T10:52:37.066Z",
+    "sourceAssetId": "source:sha256:4a6efc07f90860a22d4fcbebd0ff77ae6bc72907491631e3e217099a2bddeb8c",
+    "analysisRange": {
+      "space": "source",
+      "endTick": 54000000,
+      "startTick": 0
+    },
+    "projectId": "staging-ten-minute-20261004"
+  },
+  "ownerUid": "staging-smoke",
+  "sourceAssetId": "source:sha256:4a6efc07f90860a22d4fcbebd0ff77ae6bc72907491631e3e217099a2bddeb8c",
+  "mode": "source_shots",
+  "end": 600
+}

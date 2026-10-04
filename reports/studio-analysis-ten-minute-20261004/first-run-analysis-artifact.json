@@ -1,0 +1,53 @@
+{
+  "ownerUid": "staging-smoke",
+  "schemaVersion": 1,
+  "artifactHash": "462713a5036b403186c9f6d54d2d55f994a0b871a3ed701fac236abac4f6b210",
+  "sourceSha256": "4a6efc07f90860a22d4fcbebd0ff77ae6bc72907491631e3e217099a2bddeb8c",
+  "engine": "opencv-yunet-source-shot-follow",
+  "analysisRange": {
+    "startTick": 0,
+    "endTick": 54000000,
+    "space": "source"
+  },
+  "sourceAssetId": "source:sha256:4a6efc07f90860a22d4fcbebd0ff77ae6bc72907491631e3e217099a2bddeb8c",
+  "projection": {
+    "preflightPassed": true,
+    "sceneCutTicks": [
+      4455000,
+      4725000,
+      9472500,
+      9922500,
+      12757500,
+      13882500,
+      16831500,
+      17415000,
+      24660000,
+      25110000,
+      30487500,
+      30871500,
+      32715000,
+      32985000,
+      36450000,
+      36699000,
+      39892500,
+      40162500
+    ],
+    "reviewRequired": true,
+    "decodeFailureCount": 0
+  },
+  "streamId": null,
+  "modelRevision": "opencv-yunet-source-shot-follow",
+  "producer": "studio-face-tracking-python",
+  "dependencyHashes": [
+    "47b22fabbea4a711512da1f60808c46b5f6426286d87459a634bb108fe313316"
+  ],
+  "createdAt": "2026-10-04T10:21:13.623Z",
+  "failedIntervals": [],
+  "contentHash": "25c20ddd7df8eacf78d393f7e354f60410055318b2d2e2ad43f30de335347f5a",
+  "configHash": "6b1ac7ce730bd1f8df1a405be0da9b0714a716fe4079c1bd80bdd890feac6958",
+  "analysisType": "source_shots",
+  "projectId": "staging-ten-minute-20261004",
+  "sampleCoverage": 0.882645,
+  "coverageBasis": "sampled_observations_only",
+  "coveredIntervals": []
+}

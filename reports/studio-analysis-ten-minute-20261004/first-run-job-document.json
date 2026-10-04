@@ -1,0 +1,202 @@
+{
+  "name": "projects/autopromote-staging-2026/databases/(default)/documents/studio_analysis_jobs/dd9573d0a99fdfd5df5079a5ade31fe03d4276688cecdfe3872eeb0578188aec",
+  "fields": {
+    "jobId": {
+      "stringValue": "dd9573d0a99fdfd5df5079a5ade31fe03d4276688cecdfe3872eeb0578188aec"
+    },
+    "status": {
+      "stringValue": "completed"
+    },
+    "attempts": {
+      "integerValue": "1"
+    },
+    "analysisArtifact": {
+      "mapValue": {
+        "fields": {
+          "projectId": {
+            "stringValue": "staging-ten-minute-20261004"
+          },
+          "configHash": {
+            "stringValue": "6b1ac7ce730bd1f8df1a405be0da9b0714a716fe4079c1bd80bdd890feac6958"
+          },
+          "artifactHash": {
+            "stringValue": "462713a5036b403186c9f6d54d2d55f994a0b871a3ed701fac236abac4f6b210"
+          },
+          "contentHash": {
+            "stringValue": "25c20ddd7df8eacf78d393f7e354f60410055318b2d2e2ad43f30de335347f5a"
+          },
+          "analysisRange": {
+            "mapValue": {
+              "fields": {
+                "space": {
+                  "stringValue": "source"
+                },
+                "startTick": {
+                  "integerValue": "0"
+                },
+                "endTick": {
+                  "integerValue": "54000000"
+                }
+              }
+            }
+          },
+          "createdAt": {
+            "stringValue": "2026-10-04T10:21:13.623Z"
+          },
+          "sourceSha256": {
+            "stringValue": "4a6efc07f90860a22d4fcbebd0ff77ae6bc72907491631e3e217099a2bddeb8c"
+          },
+          "dependencyHashes": {
+            "arrayValue": {
+              "values": [
+                {
+                  "stringValue": "47b22fabbea4a711512da1f60808c46b5f6426286d87459a634bb108fe313316"
+                }
+              ]
+            }
+          },
+          "modelRevision": {
+            "stringValue": "opencv-yunet-source-shot-follow"
+          },
+          "analysisType": {
+            "stringValue": "source_shots"
+          },
+          "sourceAssetId": {
+            "stringValue": "source:sha256:4a6efc07f90860a22d4fcbebd0ff77ae6bc72907491631e3e217099a2bddeb8c"
+          }
+        }
+      }
+    },
+    "leaseToken": {
+      "nullValue": null
+    },
+    "end": {
+      "integerValue": "600"
+    },
+    "updatedAt": {
+      "stringValue": "2026-10-04T10:21:13.875Z"
+    },
+    "leaseUntil": {
+      "nullValue": null
+    },
+    "sourceGeneration": {
+      "stringValue": "1791107066573616"
+    },
+    "requestFingerprint": {
+      "stringValue": "d74a6a48312dbba624a4e79bcd9f315b570e62504f34b332f24f6f156517034b"
+    },
+    "sourceSizeBytes": {
+      "integerValue": "726725520"
+    },
+    "sourceOwned": {
+      "booleanValue": true
+    },
+    "sourceSha256": {
+      "stringValue": "4a6efc07f90860a22d4fcbebd0ff77ae6bc72907491631e3e217099a2bddeb8c"
+    },
+    "projectId": {
+      "stringValue": "staging-ten-minute-20261004"
+    },
+    "resultSha256": {
+      "stringValue": "25c20ddd7df8eacf78d393f7e354f60410055318b2d2e2ad43f30de335347f5a"
+    },
+    "schemaVersion": {
+      "integerValue": "1"
+    },
+    "mode": {
+      "stringValue": "source_shots"
+    },
+    "failureCode": {
+      "nullValue": null
+    },
+    "cleanupAfter": {
+      "stringValue": "2026-10-04T10:37:13.875Z"
+    },
+    "cleanupPending": {
+      "booleanValue": false
+    },
+    "nextAttemptAt": {
+      "nullValue": null
+    },
+    "anchors": {
+      "mapValue": {
+        "fields": {
+          "solo": {
+            "mapValue": {
+              "fields": {
+                "x": {
+                  "integerValue": "34"
+                },
+                "y": {
+                  "integerValue": "47"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "cleanedAt": {
+      "stringValue": "2026-10-04T10:46:22.742Z"
+    },
+    "ownerUid": {
+      "stringValue": "staging-smoke"
+    },
+    "sourceObjectPath": {
+      "stringValue": "studio/sources/staging-smoke/ten-minute-20261004-4a6efc07.mp4"
+    },
+    "workerId": {
+      "stringValue": "studio-45bf2164b99a850a"
+    },
+    "sourceBucketName": {
+      "stringValue": "autopromote-staging-2026.firebasestorage.app"
+    },
+    "start": {
+      "integerValue": "0"
+    },
+    "createdAt": {
+      "stringValue": "2026-10-04T09:48:53.778Z"
+    },
+    "sourceAssetId": {
+      "stringValue": "source:sha256:4a6efc07f90860a22d4fcbebd0ff77ae6bc72907491631e3e217099a2bddeb8c"
+    },
+    "sourceShotArtifact": {
+      "mapValue": {
+        "fields": {
+          "sourceAssetId": {
+            "stringValue": "source:sha256:4a6efc07f90860a22d4fcbebd0ff77ae6bc72907491631e3e217099a2bddeb8c"
+          },
+          "artifactHash": {
+            "stringValue": "47b22fabbea4a711512da1f60808c46b5f6426286d87459a634bb108fe313316"
+          },
+          "projectId": {
+            "stringValue": "staging-ten-minute-20261004"
+          },
+          "analysisRange": {
+            "mapValue": {
+              "fields": {
+                "space": {
+                  "stringValue": "source"
+                },
+                "startTick": {
+                  "integerValue": "0"
+                },
+                "endTick": {
+                  "integerValue": "54000000"
+                }
+              }
+            }
+          },
+          "sourceSha256": {
+            "stringValue": "4a6efc07f90860a22d4fcbebd0ff77ae6bc72907491631e3e217099a2bddeb8c"
+          },
+          "createdAt": {
+            "stringValue": "2026-10-04T10:21:13.541Z"
+          }
+        }
+      }
+    }
+  },
+  "createTime": "2026-10-04T09:48:54.409349Z",
+  "updateTime": "2026-10-04T10:46:22.795827Z"
+}

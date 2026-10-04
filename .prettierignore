@@ -12,3 +12,6 @@ npm-debug.log
 yarn-error.log
 **/package-lock.json
 **/pnpm-lock.yaml
+
+# Preserve downloaded evidence bytes and provider snapshots.
+reports/studio-analysis-ten-minute-20261004/*.json

@@ -1,0 +1,113 @@
+{
+  "artifacts": {
+    "images": [
+      "us-central1-docker.pkg.dev/autopromote-staging-2026/studio-analysis/face-analyzer:6c7f7ab3-dc37-46d5-ad4d-3d4782cbd445"
+    ]
+  },
+  "createTime": "2026-10-04T10:29:03.417693099Z",
+  "finishTime": "2026-10-04T10:31:15.229669Z",
+  "id": "6c7f7ab3-dc37-46d5-ad4d-3d4782cbd445",
+  "images": [
+    "us-central1-docker.pkg.dev/autopromote-staging-2026/studio-analysis/face-analyzer:6c7f7ab3-dc37-46d5-ad4d-3d4782cbd445"
+  ],
+  "logUrl": "https://console.cloud.google.com/cloud-build/builds/6c7f7ab3-dc37-46d5-ad4d-3d4782cbd445?project=583435862235",
+  "logsBucket": "gs://583435862235.cloudbuild-logs.googleusercontent.com",
+  "name": "projects/583435862235/locations/global/builds/6c7f7ab3-dc37-46d5-ad4d-3d4782cbd445",
+  "options": {
+    "logging": "LEGACY",
+    "pool": {}
+  },
+  "projectId": "autopromote-staging-2026",
+  "queueTtl": "3600s",
+  "results": {
+    "buildStepImages": [
+      "sha256:001fb4a870a84485cf198c80002f7af42f6456f2dbc261d70a0b5f0111470df4"
+    ],
+    "buildStepOutputs": [
+      ""
+    ],
+    "images": [
+      {
+        "artifactRegistryPackage": "projects/autopromote-staging-2026/locations/us-central1/repositories/studio-analysis/packages/face-analyzer/versions/sha256:7e5246ca5fbfdcb6280e52ed89f011dee03a90229c8aae500fe293ca5b4d50f3",
+        "digest": "sha256:7e5246ca5fbfdcb6280e52ed89f011dee03a90229c8aae500fe293ca5b4d50f3",
+        "name": "us-central1-docker.pkg.dev/autopromote-staging-2026/studio-analysis/face-analyzer:6c7f7ab3-dc37-46d5-ad4d-3d4782cbd445",
+        "pushTiming": {
+          "endTime": "2026-10-04T10:31:13.736069161Z",
+          "startTime": "2026-10-04T10:30:30.946019545Z"
+        }
+      }
+    ]
+  },
+  "serviceAccount": "projects/autopromote-staging-2026/serviceAccounts/583435862235-compute@developer.gserviceaccount.com",
+  "source": {
+    "storageSource": {
+      "bucket": "autopromote-staging-2026_cloudbuild",
+      "generation": "1791109741964508",
+      "object": "source/1791109736.901604-d41a1b1e3d974fe489c848f5c72fb7b9.tgz"
+    }
+  },
+  "sourceProvenance": {
+    "fileHashes": {
+      "gs://autopromote-staging-2026_cloudbuild/source/1791109736.901604-d41a1b1e3d974fe489c848f5c72fb7b9.tgz#1791109741964508": {
+        "fileHash": [
+          {
+            "type": "MD5",
+            "value": "5Ra24sSTbshws3RhldF0JQ=="
+          },
+          {
+            "type": "SHA256",
+            "value": "Y082zn1zaKo94vyvYOHFaFqk2t4FZfGuXyfxCvSYGUo="
+          }
+        ]
+      }
+    },
+    "resolvedStorageSource": {
+      "bucket": "autopromote-staging-2026_cloudbuild",
+      "generation": "1791109741964508",
+      "object": "source/1791109736.901604-d41a1b1e3d974fe489c848f5c72fb7b9.tgz"
+    }
+  },
+  "startTime": "2026-10-04T10:29:04.447874760Z",
+  "status": "SUCCESS",
+  "steps": [
+    {
+      "args": [
+        "build",
+        "-f",
+        "Dockerfile.studio-analysis",
+        "-t",
+        "us-central1-docker.pkg.dev/autopromote-staging-2026/studio-analysis/face-analyzer:6c7f7ab3-dc37-46d5-ad4d-3d4782cbd445",
+        "."
+      ],
+      "name": "gcr.io/cloud-builders/docker",
+      "pullTiming": {
+        "endTime": "2026-10-04T10:29:09.026649991Z",
+        "startTime": "2026-10-04T10:29:09.020554246Z"
+      },
+      "status": "SUCCESS",
+      "timing": {
+        "endTime": "2026-10-04T10:30:30.885925368Z",
+        "startTime": "2026-10-04T10:29:09.020554246Z"
+      }
+    }
+  ],
+  "timeout": "3600s",
+  "timing": {
+    "BUILD": {
+      "endTime": "2026-10-04T10:30:30.945860438Z",
+      "startTime": "2026-10-04T10:29:08.363241176Z"
+    },
+    "FETCHSOURCE": {
+      "endTime": "2026-10-04T10:29:08.363019476Z",
+      "startTime": "2026-10-04T10:29:04.904648866Z"
+    },
+    "PUSH": {
+      "endTime": "2026-10-04T10:31:13.736307211Z",
+      "startTime": "2026-10-04T10:30:30.946017793Z"
+    },
+    "STORAGE_SOURCE": {
+      "endTime": "2026-10-04T10:29:08.363019476Z",
+      "startTime": "2026-10-04T10:29:04.904648866Z"
+    }
+  }
+}

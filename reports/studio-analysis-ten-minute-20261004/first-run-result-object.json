@@ -1,0 +1,26 @@
+{
+  "kind": "storage#object",
+  "id": "autopromote-staging-2026.firebasestorage.app/studio/analysis-results/staging-smoke/dd9573d0a99fdfd5df5079a5ade31fe03d4276688cecdfe3872eeb0578188aec/25c20ddd7df8eacf78d393f7e354f60410055318b2d2e2ad43f30de335347f5a.json/1791109273774677",
+  "selfLink": "https://www.googleapis.com/storage/v1/b/autopromote-staging-2026.firebasestorage.app/o/studio%2Fanalysis-results%2Fstaging-smoke%2Fdd9573d0a99fdfd5df5079a5ade31fe03d4276688cecdfe3872eeb0578188aec%2F25c20ddd7df8eacf78d393f7e354f60410055318b2d2e2ad43f30de335347f5a.json",
+  "mediaLink": "https://storage.googleapis.com/download/storage/v1/b/autopromote-staging-2026.firebasestorage.app/o/studio%2Fanalysis-results%2Fstaging-smoke%2Fdd9573d0a99fdfd5df5079a5ade31fe03d4276688cecdfe3872eeb0578188aec%2F25c20ddd7df8eacf78d393f7e354f60410055318b2d2e2ad43f30de335347f5a.json?generation=1791109273774677&alt=media",
+  "name": "studio/analysis-results/staging-smoke/dd9573d0a99fdfd5df5079a5ade31fe03d4276688cecdfe3872eeb0578188aec/25c20ddd7df8eacf78d393f7e354f60410055318b2d2e2ad43f30de335347f5a.json",
+  "bucket": "autopromote-staging-2026.firebasestorage.app",
+  "generation": "1791109273774677",
+  "metageneration": "1",
+  "contentType": "application/json",
+  "storageClass": "STANDARD",
+  "size": "109296",
+  "md5Hash": "DNLlotYm03dd3MG2bdt6xA==",
+  "crc32c": "drLRuA==",
+  "etag": "CNXUkYCSoJcDEAE=",
+  "timeCreated": "2026-10-04T10:21:13.782Z",
+  "updated": "2026-10-04T10:21:13.782Z",
+  "timeStorageClassUpdated": "2026-10-04T10:21:13.782Z",
+  "timeFinalized": "2026-10-04T10:21:13.782Z",
+  "metadata": {
+    "ownerUid": "staging-smoke",
+    "jobId": "dd9573d0a99fdfd5df5079a5ade31fe03d4276688cecdfe3872eeb0578188aec",
+    "resultSha256": "25c20ddd7df8eacf78d393f7e354f60410055318b2d2e2ad43f30de335347f5a",
+    "purpose": "studio-analysis-result"
+  }
+}

@@ -47,3 +47,6 @@ node_modules/** -text
 
 # Exclude package-lock.json from line ending conversion (it should remain with LF)
 package-lock.json -text
+
+# Keep cloud analysis evidence byte-for-byte for SHA-256 verification.
+reports/studio-analysis-ten-minute-20261004/*-analysis-result.json -text

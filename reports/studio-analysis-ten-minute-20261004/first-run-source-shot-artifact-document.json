@@ -1,0 +1,127 @@
+{
+  "name": "projects/autopromote-staging-2026/databases/(default)/documents/users/staging-smoke/studioSourceShotArtifacts/47b22fabbea4a711512da1f60808c46b5f6426286d87459a634bb108fe313316",
+  "fields": {
+    "ownerUid": {
+      "stringValue": "staging-smoke"
+    },
+    "artifactHash": {
+      "stringValue": "47b22fabbea4a711512da1f60808c46b5f6426286d87459a634bb108fe313316"
+    },
+    "analysisRange": {
+      "mapValue": {
+        "fields": {
+          "startTick": {
+            "integerValue": "0"
+          },
+          "endTick": {
+            "integerValue": "54000000"
+          },
+          "space": {
+            "stringValue": "source"
+          }
+        }
+      }
+    },
+    "sampleCoverage": {
+      "doubleValue": 0.882645
+    },
+    "reviewRequired": {
+      "booleanValue": true
+    },
+    "sourceSha256": {
+      "stringValue": "4a6efc07f90860a22d4fcbebd0ff77ae6bc72907491631e3e217099a2bddeb8c"
+    },
+    "preflightPassed": {
+      "booleanValue": true
+    },
+    "createdAt": {
+      "stringValue": "2026-10-04T10:21:13.541Z"
+    },
+    "mode": {
+      "stringValue": "source_shots"
+    },
+    "sourceAssetId": {
+      "stringValue": "source:sha256:4a6efc07f90860a22d4fcbebd0ff77ae6bc72907491631e3e217099a2bddeb8c"
+    },
+    "engine": {
+      "stringValue": "opencv-yunet-source-shot-follow"
+    },
+    "projectId": {
+      "stringValue": "staging-ten-minute-20261004"
+    },
+    "sceneCutTicks": {
+      "arrayValue": {
+        "values": [
+          {
+            "integerValue": "4455000"
+          },
+          {
+            "integerValue": "4725000"
+          },
+          {
+            "integerValue": "9472500"
+          },
+          {
+            "integerValue": "9922500"
+          },
+          {
+            "integerValue": "12757500"
+          },
+          {
+            "integerValue": "13882500"
+          },
+          {
+            "integerValue": "16831500"
+          },
+          {
+            "integerValue": "17415000"
+          },
+          {
+            "integerValue": "24660000"
+          },
+          {
+            "integerValue": "25110000"
+          },
+          {
+            "integerValue": "30487500"
+          },
+          {
+            "integerValue": "30871500"
+          },
+          {
+            "integerValue": "32715000"
+          },
+          {
+            "integerValue": "32985000"
+          },
+          {
+            "integerValue": "36450000"
+          },
+          {
+            "integerValue": "36699000"
+          },
+          {
+            "integerValue": "39892500"
+          },
+          {
+            "integerValue": "40162500"
+          }
+        ]
+      }
+    },
+    "schemaVersion": {
+      "integerValue": "1"
+    },
+    "workerResultSha256": {
+      "stringValue": "25c20ddd7df8eacf78d393f7e354f60410055318b2d2e2ad43f30de335347f5a"
+    },
+    "decodeFailures": {
+      "integerValue": "0"
+    },
+    "editPlanVersion": {
+      "integerValue": "1"
+    }
+  },
+  "createTime": "2026-10-04T10:21:13.577270Z",
+  "updateTime": "2026-10-04T10:21:13.577270Z"
+}

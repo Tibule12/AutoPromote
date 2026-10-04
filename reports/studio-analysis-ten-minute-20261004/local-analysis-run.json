@@ -1,0 +1,13 @@
+{
+  "startedAt": "2026-10-04T11:06:30.358994+00:00",
+  "completedAt": "2026-10-04T11:11:40.649840+00:00",
+  "elapsedSeconds": 310.279,
+  "sourceSha256": "4a6efc07f90860a22d4fcbebd0ff77ae6bc72907491631e3e217099a2bddeb8c",
+  "sourceBytes": 726725520,
+  "opencvVersion": "4.11.0",
+  "ffmpegVersion": "ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers",
+  "cuts": 143,
+  "keyframes": 1277,
+  "missing": 3,
+  "coverage": 0.99765625
+}

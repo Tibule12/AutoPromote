@@ -1,0 +1,42 @@
+{
+  "ownerUid": "staging-smoke",
+  "artifactHash": "47b22fabbea4a711512da1f60808c46b5f6426286d87459a634bb108fe313316",
+  "analysisRange": {
+    "startTick": 0,
+    "endTick": 54000000,
+    "space": "source"
+  },
+  "sampleCoverage": 0.882645,
+  "reviewRequired": true,
+  "sourceSha256": "4a6efc07f90860a22d4fcbebd0ff77ae6bc72907491631e3e217099a2bddeb8c",
+  "preflightPassed": true,
+  "createdAt": "2026-10-04T10:21:13.541Z",
+  "mode": "source_shots",
+  "sourceAssetId": "source:sha256:4a6efc07f90860a22d4fcbebd0ff77ae6bc72907491631e3e217099a2bddeb8c",
+  "engine": "opencv-yunet-source-shot-follow",
+  "projectId": "staging-ten-minute-20261004",
+  "sceneCutTicks": [
+    4455000,
+    4725000,
+    9472500,
+    9922500,
+    12757500,
+    13882500,
+    16831500,
+    17415000,
+    24660000,
+    25110000,
+    30487500,
+    30871500,
+    32715000,
+    32985000,
+    36450000,
+    36699000,
+    39892500,
+    40162500
+  ],
+  "schemaVersion": 1,
+  "workerResultSha256": "25c20ddd7df8eacf78d393f7e354f60410055318b2d2e2ad43f30de335347f5a",
+  "decodeFailures": 0,
+  "editPlanVersion": 1
+}

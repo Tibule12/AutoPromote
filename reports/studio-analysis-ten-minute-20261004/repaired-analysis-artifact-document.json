@@ -1,0 +1,535 @@
+{
+  "name": "projects/autopromote-staging-2026/databases/(default)/documents/users/staging-smoke/studioAnalysisArtifacts/e8e17321d2cf753d263b7a64f1238b92bd8c8d1ff9e6c19f8f0874a02920851f",
+  "fields": {
+    "sourceSha256": {
+      "stringValue": "4a6efc07f90860a22d4fcbebd0ff77ae6bc72907491631e3e217099a2bddeb8c"
+    },
+    "projection": {
+      "mapValue": {
+        "fields": {
+          "preflightPassed": {
+            "booleanValue": true
+          },
+          "decodeFailureCount": {
+            "integerValue": "0"
+          },
+          "sceneCutTicks": {
+            "arrayValue": {
+              "values": [
+                {
+                  "integerValue": "4455000"
+                },
+                {
+                  "integerValue": "4725000"
+                },
+                {
+                  "integerValue": "4815000"
+                },
+                {
+                  "integerValue": "5154000"
+                },
+                {
+                  "integerValue": "5670000"
+                },
+                {
+                  "integerValue": "5715000"
+                },
+                {
+                  "integerValue": "7717500"
+                },
+                {
+                  "integerValue": "8101500"
+                },
+                {
+                  "integerValue": "8257500"
+                },
+                {
+                  "integerValue": "8550000"
+                },
+                {
+                  "integerValue": "8595000"
+                },
+                {
+                  "integerValue": "8685000"
+                },
+                {
+                  "integerValue": "8730000"
+                },
+                {
+                  "integerValue": "8865000"
+                },
+                {
+                  "integerValue": "8934000"
+                },
+                {
+                  "integerValue": "9337500"
+                },
+                {
+                  "integerValue": "9472500"
+                },
+                {
+                  "integerValue": "9922500"
+                },
+                {
+                  "integerValue": "11542500"
+                },
+                {
+                  "integerValue": "11610000"
+                },
+                {
+                  "integerValue": "11655000"
+                },
+                {
+                  "integerValue": "11947500"
+                },
+                {
+                  "integerValue": "12352500"
+                },
+                {
+                  "integerValue": "12397500"
+                },
+                {
+                  "integerValue": "12511500"
+                },
+                {
+                  "integerValue": "12712500"
+                },
+                {
+                  "integerValue": "12757500"
+                },
+                {
+                  "integerValue": "13882500"
+                },
+                {
+                  "integerValue": "14040000"
+                },
+                {
+                  "integerValue": "14244000"
+                },
+                {
+                  "integerValue": "14287500"
+                },
+                {
+                  "integerValue": "14422500"
+                },
+                {
+                  "integerValue": "14580000"
+                },
+                {
+                  "integerValue": "15930000"
+                },
+                {
+                  "integerValue": "16042500"
+                },
+                {
+                  "integerValue": "16087500"
+                },
+                {
+                  "integerValue": "16132500"
+                },
+                {
+                  "integerValue": "16402500"
+                },
+                {
+                  "integerValue": "16831500"
+                },
+                {
+                  "integerValue": "17415000"
+                },
+                {
+                  "integerValue": "17595000"
+                },
+                {
+                  "integerValue": "17820000"
+                },
+                {
+                  "integerValue": "17932500"
+                },
+                {
+                  "integerValue": "18517500"
+                },
+                {
+                  "integerValue": "18811500"
+                },
+                {
+                  "integerValue": "19329000"
+                },
+                {
+                  "integerValue": "19755000"
+                },
+                {
+                  "integerValue": "19800000"
+                },
+                {
+                  "integerValue": "19890000"
+                },
+                {
+                  "integerValue": "20340000"
+                },
+                {
+                  "integerValue": "23490000"
+                },
+                {
+                  "integerValue": "23917500"
+                },
+                {
+                  "integerValue": "24031500"
+                },
+                {
+                  "integerValue": "24435000"
+                },
+                {
+                  "integerValue": "24660000"
+                },
+                {
+                  "integerValue": "25110000"
+                },
+                {
+                  "integerValue": "25267500"
+                },
+                {
+                  "integerValue": "25740000"
+                },
+                {
+                  "integerValue": "25809000"
+                },
+                {
+                  "integerValue": "25942500"
+                },
+                {
+                  "integerValue": "26235000"
+                },
+                {
+                  "integerValue": "26302500"
+                },
+                {
+                  "integerValue": "26776500"
+                },
+                {
+                  "integerValue": "27294000"
+                },
+                {
+                  "integerValue": "27360000"
+                },
+                {
+                  "integerValue": "27495000"
+                },
+                {
+                  "integerValue": "27540000"
+                },
+                {
+                  "integerValue": "27607500"
+                },
+                {
+                  "integerValue": "27721500"
+                },
+                {
+                  "integerValue": "27900000"
+                },
+                {
+                  "integerValue": "27990000"
+                },
+                {
+                  "integerValue": "28417500"
+                },
+                {
+                  "integerValue": "28710000"
+                },
+                {
+                  "integerValue": "28800000"
+                },
+                {
+                  "integerValue": "29250000"
+                },
+                {
+                  "integerValue": "29409000"
+                },
+                {
+                  "integerValue": "29475000"
+                },
+                {
+                  "integerValue": "30060000"
+                },
+                {
+                  "integerValue": "30217500"
+                },
+                {
+                  "integerValue": "30397500"
+                },
+                {
+                  "integerValue": "30487500"
+                },
+                {
+                  "integerValue": "30871500"
+                },
+                {
+                  "integerValue": "32625000"
+                },
+                {
+                  "integerValue": "32670000"
+                },
+                {
+                  "integerValue": "32715000"
+                },
+                {
+                  "integerValue": "32985000"
+                },
+                {
+                  "integerValue": "33052500"
+                },
+                {
+                  "integerValue": "33165000"
+                },
+                {
+                  "integerValue": "33954000"
+                },
+                {
+                  "integerValue": "34020000"
+                },
+                {
+                  "integerValue": "34335000"
+                },
+                {
+                  "integerValue": "34380000"
+                },
+                {
+                  "integerValue": "34447500"
+                },
+                {
+                  "integerValue": "34492500"
+                },
+                {
+                  "integerValue": "34651500"
+                },
+                {
+                  "integerValue": "34807500"
+                },
+                {
+                  "integerValue": "34897500"
+                },
+                {
+                  "integerValue": "35010000"
+                },
+                {
+                  "integerValue": "35079000"
+                },
+                {
+                  "integerValue": "35212500"
+                },
+                {
+                  "integerValue": "35302500"
+                },
+                {
+                  "integerValue": "35437500"
+                },
+                {
+                  "integerValue": "35595000"
+                },
+                {
+                  "integerValue": "35707500"
+                },
+                {
+                  "integerValue": "35821500"
+                },
+                {
+                  "integerValue": "35977500"
+                },
+                {
+                  "integerValue": "36112500"
+                },
+                {
+                  "integerValue": "36226500"
+                },
+                {
+                  "integerValue": "36450000"
+                },
+                {
+                  "integerValue": "36699000"
+                },
+                {
+                  "integerValue": "36742500"
+                },
+                {
+                  "integerValue": "36900000"
+                },
+                {
+                  "integerValue": "36967500"
+                },
+                {
+                  "integerValue": "37192500"
+                },
+                {
+                  "integerValue": "37867500"
+                },
+                {
+                  "integerValue": "38341500"
+                },
+                {
+                  "integerValue": "38565000"
+                },
+                {
+                  "integerValue": "38655000"
+                },
+                {
+                  "integerValue": "38902500"
+                },
+                {
+                  "integerValue": "38947500"
+                },
+                {
+                  "integerValue": "38992500"
+                },
+                {
+                  "integerValue": "39330000"
+                },
+                {
+                  "integerValue": "39645000"
+                },
+                {
+                  "integerValue": "39849000"
+                },
+                {
+                  "integerValue": "39892500"
+                },
+                {
+                  "integerValue": "40162500"
+                },
+                {
+                  "integerValue": "40882500"
+                },
+                {
+                  "integerValue": "41085000"
+                },
+                {
+                  "integerValue": "41152500"
+                },
+                {
+                  "integerValue": "41311500"
+                },
+                {
+                  "integerValue": "47317500"
+                },
+                {
+                  "integerValue": "47430000"
+                },
+                {
+                  "integerValue": "47634000"
+                },
+                {
+                  "integerValue": "47902500"
+                },
+                {
+                  "integerValue": "48375000"
+                },
+                {
+                  "integerValue": "48420000"
+                },
+                {
+                  "integerValue": "49095000"
+                },
+                {
+                  "integerValue": "49140000"
+                },
+                {
+                  "integerValue": "49567500"
+                },
+                {
+                  "integerValue": "52111500"
+                },
+                {
+                  "integerValue": "52290000"
+                },
+                {
+                  "integerValue": "53325000"
+                },
+                {
+                  "integerValue": "53460000"
+                }
+              ]
+            }
+          },
+          "reviewRequired": {
+            "booleanValue": true
+          }
+        }
+      }
+    },
+    "configHash": {
+      "stringValue": "6b1ac7ce730bd1f8df1a405be0da9b0714a716fe4079c1bd80bdd890feac6958"
+    },
+    "coverageBasis": {
+      "stringValue": "sampled_observations_only"
+    },
+    "artifactHash": {
+      "stringValue": "e8e17321d2cf753d263b7a64f1238b92bd8c8d1ff9e6c19f8f0874a02920851f"
+    },
+    "createdAt": {
+      "stringValue": "2026-10-04T10:52:37.170Z"
+    },
+    "producer": {
+      "stringValue": "studio-face-tracking-python"
+    },
+    "analysisType": {
+      "stringValue": "source_shots"
+    },
+    "coveredIntervals": {
+      "arrayValue": {}
+    },
+    "projectId": {
+      "stringValue": "staging-ten-minute-20261004"
+    },
+    "ownerUid": {
+      "stringValue": "staging-smoke"
+    },
+    "modelRevision": {
+      "stringValue": "opencv-yunet-source-shot-follow"
+    },
+    "contentHash": {
+      "stringValue": "e8c725943577c7bbc9b275443efa9e2a074a7abd814e391d4dc9ab06c33ae98c"
+    },
+    "analysisRange": {
+      "mapValue": {
+        "fields": {
+          "space": {
+            "stringValue": "source"
+          },
+          "startTick": {
+            "integerValue": "0"
+          },
+          "endTick": {
+            "integerValue": "54000000"
+          }
+        }
+      }
+    },
+    "engine": {
+      "stringValue": "opencv-yunet-source-shot-follow"
+    },
+    "sourceAssetId": {
+      "stringValue": "source:sha256:4a6efc07f90860a22d4fcbebd0ff77ae6bc72907491631e3e217099a2bddeb8c"
+    },
+    "sampleCoverage": {
+      "doubleValue": 0.997656
+    },
+    "failedIntervals": {
+      "arrayValue": {}
+    },
+    "schemaVersion": {
+      "integerValue": "1"
+    },
+    "streamId": {
+      "nullValue": null
+    },
+    "dependencyHashes": {
+      "arrayValue": {
+        "values": [
+          {
+            "stringValue": "085681fb226b9844d24104b45889fa5e57119259a1bda4c650d111d2ed3ad877"
+          }
+        ]
+      }
+    }
+  },
+  "createTime": "2026-10-04T10:52:37.229133Z",
+  "updateTime": "2026-10-04T10:52:37.229133Z"
+}

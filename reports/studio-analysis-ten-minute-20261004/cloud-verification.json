@@ -1,0 +1,156 @@
+{
+  "verifiedAt": "2026-10-04T11:09:25.276Z",
+  "scope": "cloud snapshots",
+  "passed": true,
+  "passedChecks": 35,
+  "totalChecks": 35,
+  "analyzerSeconds": 364.546700886,
+  "sourceSha256": "4a6efc07f90860a22d4fcbebd0ff77ae6bc72907491631e3e217099a2bddeb8c",
+  "resultSha256": "e8c725943577c7bbc9b275443efa9e2a074a7abd814e391d4dc9ab06c33ae98c",
+  "sceneCuts": 143,
+  "keyframes": 1277,
+  "missingSamples": 3,
+  "sampledFaceCoverage": 0.99765625,
+  "checks": [
+    {
+      "name": "Pinned source generation, size and owner",
+      "passed": true
+    },
+    {
+      "name": "first-run: completed in one attempt",
+      "passed": true
+    },
+    {
+      "name": "first-run: exact stored JSON hash",
+      "passed": true
+    },
+    {
+      "name": "first-run: canonical result hash",
+      "passed": true
+    },
+    {
+      "name": "first-run: source identity",
+      "passed": true
+    },
+    {
+      "name": "first-run: object receipt",
+      "passed": true
+    },
+    {
+      "name": "first-run: source-shot content-addressed record",
+      "passed": true
+    },
+    {
+      "name": "first-run: source-shot scope",
+      "passed": true
+    },
+    {
+      "name": "first-run: analysis content-addressed record",
+      "passed": true
+    },
+    {
+      "name": "first-run: analysis scope",
+      "passed": true
+    },
+    {
+      "name": "first-run: artifact content and dependency",
+      "passed": true
+    },
+    {
+      "name": "first-run: projected cut timestamps",
+      "passed": true
+    },
+    {
+      "name": "first-run: analysis range",
+      "passed": true
+    },
+    {
+      "name": "first-run: sampled coverage recalculation",
+      "passed": true
+    },
+    {
+      "name": "repaired: completed in one attempt",
+      "passed": true
+    },
+    {
+      "name": "repaired: exact stored JSON hash",
+      "passed": true
+    },
+    {
+      "name": "repaired: canonical result hash",
+      "passed": true
+    },
+    {
+      "name": "repaired: source identity",
+      "passed": true
+    },
+    {
+      "name": "repaired: object receipt",
+      "passed": true
+    },
+    {
+      "name": "repaired: source-shot content-addressed record",
+      "passed": true
+    },
+    {
+      "name": "repaired: source-shot scope",
+      "passed": true
+    },
+    {
+      "name": "repaired: analysis content-addressed record",
+      "passed": true
+    },
+    {
+      "name": "repaired: analysis scope",
+      "passed": true
+    },
+    {
+      "name": "repaired: artifact content and dependency",
+      "passed": true
+    },
+    {
+      "name": "repaired: projected cut timestamps",
+      "passed": true
+    },
+    {
+      "name": "repaired: analysis range",
+      "passed": true
+    },
+    {
+      "name": "repaired: sampled coverage recalculation",
+      "passed": true
+    },
+    {
+      "name": "Repaired 143 cuts, 1277 keyframes, 3 missing samples",
+      "passed": true
+    },
+    {
+      "name": "Confirmed 53.5-second cut restored",
+      "passed": true
+    },
+    {
+      "name": "Repaired edit-plan preflight",
+      "passed": true
+    },
+    {
+      "name": "Successful Cloud Run execution",
+      "passed": true
+    },
+    {
+      "name": "Pinned analyzer revision and resources",
+      "passed": true
+    },
+    {
+      "name": "Successful image build with matching digest",
+      "passed": true
+    },
+    {
+      "name": "Analyzer returned HTTP 200 below worker limit",
+      "passed": true
+    },
+    {
+      "name": "Private analyzer invocation scope",
+      "passed": true
+    }
+  ]
+}

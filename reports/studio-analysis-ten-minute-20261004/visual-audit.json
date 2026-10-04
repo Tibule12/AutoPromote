@@ -1,0 +1,34 @@
+{
+  "sourceSha256": "4a6efc07f90860a22d4fcbebd0ff77ae6bc72907491631e3e217099a2bddeb8c",
+  "cutTime": 53.5,
+  "firstRunDetected": false,
+  "repairedRunDetected": true,
+  "imagePath": "artifacts/studio-analysis-ten-minute-20261004/camera-cut-proof.png",
+  "imageSha256": "ecf687476fce4f930b932b6a3f98cd0b642f05d62b00ea4f9844d37dcd862c62",
+  "frames": [
+    {
+      "frameTime": 53.45,
+      "reportedPoint": {
+        "cut": false,
+        "origin": "face_detection",
+        "reviewRequired": false,
+        "time": 53,
+        "x": 34.863,
+        "y": 34.885
+      },
+      "frameSha256": "5506427819f86544785c36ed4d0ef3333af7b1c39d66aa146f1c77f01d7fe566"
+    },
+    {
+      "frameTime": 53.55,
+      "reportedPoint": {
+        "cut": true,
+        "origin": "face_detection",
+        "reviewRequired": true,
+        "time": 53.5,
+        "x": 65.635,
+        "y": 29.059
+      },
+      "frameSha256": "a261aaac53fc65ebc89798d314a445ef44d1b91404841ca769857b78dfe6d44e"
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "collectedAt": "2026-10-04T11:05:24.609240+00:00",
+  "projectId": "autopromote-staging-2026",
+  "source": "Authenticated read-only Google Cloud CLI and REST reads. Tokens and signed URLs are excluded. Account-email annotations removed from Cloud Run snapshots."
+}

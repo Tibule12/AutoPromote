@@ -1,0 +1,72 @@
+[
+  {
+    "httpRequest": {
+      "latency": "364.546700886s",
+      "protocol": "HTTP/1.1",
+      "remoteIp": "2600:1900:0:2d0b::1300",
+      "requestMethod": "POST",
+      "requestSize": "2014",
+      "requestUrl": "https://studio-face-analyzer-583435862235.us-central1.run.app/track-studio-faces",
+      "responseSize": "154108",
+      "serverIp": "2600:1900:4240:200::",
+      "status": 200,
+      "userAgent": "axios/1.18.1"
+    },
+    "insertId": "6ac22ff4000e2ca8c264e035",
+    "labels": {
+      "instanceId": "0010dd8607f1e27d215ed7fae7b64654af108987e1e7b46d4bfe3aeb8b113abf1c4bd997d65d8af4d925ac17c42700ca2d44af389fd830b283cbbc930e467b96616fec8bbf52b0113c566d4c51ef"
+    },
+    "logName": "projects/autopromote-staging-2026/logs/run.googleapis.com%2Frequests",
+    "receiveTimestamp": "2026-10-04T10:52:36.936577795Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "studio-face-analyzer",
+        "location": "us-central1",
+        "project_id": "autopromote-staging-2026",
+        "revision_name": "studio-face-analyzer-00005-67p",
+        "service_name": "studio-face-analyzer"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "INFO",
+    "spanId": "ae4b47e875b3b157",
+    "timestamp": "2026-10-04T10:46:32.328588Z",
+    "trace": "projects/autopromote-staging-2026/traces/47fffa8ca014bc0c2e4811630405686f",
+    "traceSampled": true
+  },
+  {
+    "httpRequest": {
+      "latency": "453.505619362s",
+      "protocol": "HTTP/1.1",
+      "remoteIp": "2600:1900:0:2d00::1501",
+      "requestMethod": "POST",
+      "requestSize": "2019",
+      "requestUrl": "https://studio-face-analyzer-583435862235.us-central1.run.app/track-studio-faces",
+      "responseSize": "110670",
+      "serverIp": "2600:1900:4242:200::",
+      "status": 200,
+      "userAgent": "axios/1.18.1"
+    },
+    "insertId": "6ac22899000665c062cdc58b",
+    "labels": {
+      "instanceId": "0010dd8607cb8271c9c6ac4a4e1e806d3af018719f9be30cf0972841f6ef24979807932304b5ea56b2ca75b639879a8c7c096285eaedbdb6310f0cc7c81f9f0f3e245579fd004d04e692c48f2a"
+    },
+    "logName": "projects/autopromote-staging-2026/logs/run.googleapis.com%2Frequests",
+    "receiveTimestamp": "2026-10-04T10:21:13.426593813Z",
+    "resource": {
+      "labels": {
+        "configuration_name": "studio-face-analyzer",
+        "location": "us-central1",
+        "project_id": "autopromote-staging-2026",
+        "revision_name": "studio-face-analyzer-00004-bq8",
+        "service_name": "studio-face-analyzer"
+      },
+      "type": "cloud_run_revision"
+    },
+    "severity": "INFO",
+    "spanId": "e60220d922a728d9",
+    "timestamp": "2026-10-04T10:13:39.792653Z",
+    "trace": "projects/autopromote-staging-2026/traces/363d8393df88253e90a0ab739a479454",
+    "traceSampled": true
+  }
+]

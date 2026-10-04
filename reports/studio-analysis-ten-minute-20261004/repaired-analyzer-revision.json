@@ -1,0 +1,116 @@
+{
+  "apiVersion": "serving.knative.dev/v1",
+  "kind": "Revision",
+  "metadata": {
+    "annotations": {
+      "autoscaling.knative.dev/maxScale": "1",
+      "run.googleapis.com/client-name": "gcloud",
+      "run.googleapis.com/client-version": "587.0.0",
+      "run.googleapis.com/execution-environment": "gen2",
+      "run.googleapis.com/operation-id": "ae39fe8d-e105-489a-afa2-27bc2c457cf5",
+      "run.googleapis.com/startup-cpu-boost": "true",
+      "serving.knative.dev/creator": "tmtshwelo21@gmail.com"
+    },
+    "creationTimestamp": "2026-10-04T10:32:22.662577Z",
+    "generation": 1,
+    "labels": {
+      "client.knative.dev/nonce": "hdyzvkhxhe",
+      "cloud.googleapis.com/location": "us-central1",
+      "run.googleapis.com/startupProbeType": "Default",
+      "serving.knative.dev/configuration": "studio-face-analyzer",
+      "serving.knative.dev/configurationGeneration": "5",
+      "serving.knative.dev/route": "studio-face-analyzer",
+      "serving.knative.dev/service": "studio-face-analyzer",
+      "serving.knative.dev/serviceUid": "dec6ffd2-0037-45f1-9e71-4a46d76e85cc"
+    },
+    "name": "studio-face-analyzer-00005-67p",
+    "namespace": "583435862235",
+    "ownerReferences": [
+      {
+        "apiVersion": "serving.knative.dev/v1",
+        "blockOwnerDeletion": true,
+        "controller": true,
+        "kind": "Configuration",
+        "name": "studio-face-analyzer",
+        "uid": "835a7d3c-d512-4700-8554-98dd1763180e"
+      }
+    ],
+    "resourceVersion": "AAZdAUjpcZ4",
+    "selfLink": "/apis/serving.knative.dev/v1/namespaces/583435862235/revisions/studio-face-analyzer-00005-67p",
+    "uid": "b914f859-10d2-45ac-8afe-65079164f64a"
+  },
+  "spec": {
+    "containerConcurrency": 1,
+    "containers": [
+      {
+        "env": [
+          {
+            "name": "FIREBASE_STORAGE_BUCKET",
+            "value": "autopromote-staging-2026.firebasestorage.app"
+          }
+        ],
+        "image": "us-central1-docker.pkg.dev/autopromote-staging-2026/studio-analysis/face-analyzer@sha256:7e5246ca5fbfdcb6280e52ed89f011dee03a90229c8aae500fe293ca5b4d50f3",
+        "name": "face-analyzer-1",
+        "ports": [
+          {
+            "containerPort": 8080,
+            "name": "http1"
+          }
+        ],
+        "resources": {
+          "limits": {
+            "cpu": "4",
+            "memory": "4Gi"
+          }
+        },
+        "startupProbe": {
+          "failureThreshold": 1,
+          "periodSeconds": 240,
+          "tcpSocket": {
+            "port": 8080
+          },
+          "timeoutSeconds": 240
+        }
+      }
+    ],
+    "serviceAccountName": "studio-analysis-smoke@autopromote-staging-2026.iam.gserviceaccount.com",
+    "timeoutSeconds": 900
+  },
+  "status": {
+    "conditions": [
+      {
+        "lastTransitionTime": "2026-10-04T10:32:38.678332Z",
+        "message": "Deploying revision succeeded in 16.01s.",
+        "status": "True",
+        "type": "Ready"
+      },
+      {
+        "lastTransitionTime": "2026-10-04T10:32:38.766658Z",
+        "severity": "Info",
+        "status": "True",
+        "type": "Active"
+      },
+      {
+        "lastTransitionTime": "2026-10-04T10:32:38.632012Z",
+        "message": "Containers became healthy in 6.62s.",
+        "status": "True",
+        "type": "ContainerHealthy"
+      },
+      {
+        "lastTransitionTime": "2026-10-04T10:32:30.248748Z",
+        "message": "Container image import completed in 6.85s.",
+        "status": "True",
+        "type": "ContainerReady"
+      },
+      {
+        "lastTransitionTime": "2026-10-04T10:32:31.843320Z",
+        "message": "Provisioning imported containers completed in 1.59s. Checking container health. This will wait for up to 4m for the configured startup probe, including an initial delay of 0s.",
+        "status": "True",
+        "type": "ResourcesAvailable"
+      }
+    ],
+    "imageDigest": "us-central1-docker.pkg.dev/autopromote-staging-2026/studio-analysis/face-analyzer@sha256:7e5246ca5fbfdcb6280e52ed89f011dee03a90229c8aae500fe293ca5b4d50f3",
+    "logUrl": "https://console.cloud.google.com/logs/viewer?project=autopromote-staging-2026&resource=cloud_run_revision/service_name/studio-face-analyzer/revision_name/studio-face-analyzer-00005-67p&advancedFilter=resource.type%3D%22cloud_run_revision%22%0Aresource.labels.service_name%3D%22studio-face-analyzer%22%0Aresource.labels.revision_name%3D%22studio-face-analyzer-00005-67p%22",
+    "observedGeneration": 1
+  }
+}

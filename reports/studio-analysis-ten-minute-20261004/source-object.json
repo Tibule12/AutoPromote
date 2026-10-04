@@ -1,0 +1,24 @@
+{
+  "kind": "storage#object",
+  "id": "autopromote-staging-2026.firebasestorage.app/studio/sources/staging-smoke/ten-minute-20261004-4a6efc07.mp4/1791107066573616",
+  "selfLink": "https://www.googleapis.com/storage/v1/b/autopromote-staging-2026.firebasestorage.app/o/studio%2Fsources%2Fstaging-smoke%2Ften-minute-20261004-4a6efc07.mp4",
+  "mediaLink": "https://storage.googleapis.com/download/storage/v1/b/autopromote-staging-2026.firebasestorage.app/o/studio%2Fsources%2Fstaging-smoke%2Ften-minute-20261004-4a6efc07.mp4?generation=1791107066573616&alt=media",
+  "name": "studio/sources/staging-smoke/ten-minute-20261004-4a6efc07.mp4",
+  "bucket": "autopromote-staging-2026.firebasestorage.app",
+  "generation": "1791107066573616",
+  "metageneration": "1",
+  "contentType": "video/mp4",
+  "storageClass": "STANDARD",
+  "size": "726725520",
+  "crc32c": "vMXrjw==",
+  "componentCount": 15,
+  "etag": "CLDm1OOJoJcDEAE=",
+  "timeCreated": "2026-10-04T09:44:26.640Z",
+  "updated": "2026-10-04T09:44:26.640Z",
+  "timeStorageClassUpdated": "2026-10-04T09:44:26.640Z",
+  "timeFinalized": "2026-10-04T09:44:26.640Z",
+  "metadata": {
+    "ownerUid": "staging-smoke",
+    "purpose": "studio_source"
+  }
+}

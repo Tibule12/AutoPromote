@@ -1,0 +1,160 @@
+{
+  "name": "projects/autopromote-staging-2026/databases/(default)/documents/users/staging-smoke/studioAnalysisArtifacts/462713a5036b403186c9f6d54d2d55f994a0b871a3ed701fac236abac4f6b210",
+  "fields": {
+    "ownerUid": {
+      "stringValue": "staging-smoke"
+    },
+    "schemaVersion": {
+      "integerValue": "1"
+    },
+    "artifactHash": {
+      "stringValue": "462713a5036b403186c9f6d54d2d55f994a0b871a3ed701fac236abac4f6b210"
+    },
+    "sourceSha256": {
+      "stringValue": "4a6efc07f90860a22d4fcbebd0ff77ae6bc72907491631e3e217099a2bddeb8c"
+    },
+    "engine": {
+      "stringValue": "opencv-yunet-source-shot-follow"
+    },
+    "analysisRange": {
+      "mapValue": {
+        "fields": {
+          "startTick": {
+            "integerValue": "0"
+          },
+          "endTick": {
+            "integerValue": "54000000"
+          },
+          "space": {
+            "stringValue": "source"
+          }
+        }
+      }
+    },
+    "sourceAssetId": {
+      "stringValue": "source:sha256:4a6efc07f90860a22d4fcbebd0ff77ae6bc72907491631e3e217099a2bddeb8c"
+    },
+    "projection": {
+      "mapValue": {
+        "fields": {
+          "preflightPassed": {
+            "booleanValue": true
+          },
+          "sceneCutTicks": {
+            "arrayValue": {
+              "values": [
+                {
+                  "integerValue": "4455000"
+                },
+                {
+                  "integerValue": "4725000"
+                },
+                {
+                  "integerValue": "9472500"
+                },
+                {
+                  "integerValue": "9922500"
+                },
+                {
+                  "integerValue": "12757500"
+                },
+                {
+                  "integerValue": "13882500"
+                },
+                {
+                  "integerValue": "16831500"
+                },
+                {
+                  "integerValue": "17415000"
+                },
+                {
+                  "integerValue": "24660000"
+                },
+                {
+                  "integerValue": "25110000"
+                },
+                {
+                  "integerValue": "30487500"
+                },
+                {
+                  "integerValue": "30871500"
+                },
+                {
+                  "integerValue": "32715000"
+                },
+                {
+                  "integerValue": "32985000"
+                },
+                {
+                  "integerValue": "36450000"
+                },
+                {
+                  "integerValue": "36699000"
+                },
+                {
+                  "integerValue": "39892500"
+                },
+                {
+                  "integerValue": "40162500"
+                }
+              ]
+            }
+          },
+          "reviewRequired": {
+            "booleanValue": true
+          },
+          "decodeFailureCount": {
+            "integerValue": "0"
+          }
+        }
+      }
+    },
+    "streamId": {
+      "nullValue": null
+    },
+    "modelRevision": {
+      "stringValue": "opencv-yunet-source-shot-follow"
+    },
+    "producer": {
+      "stringValue": "studio-face-tracking-python"
+    },
+    "dependencyHashes": {
+      "arrayValue": {
+        "values": [
+          {
+            "stringValue": "47b22fabbea4a711512da1f60808c46b5f6426286d87459a634bb108fe313316"
+          }
+        ]
+      }
+    },
+    "createdAt": {
+      "stringValue": "2026-10-04T10:21:13.623Z"
+    },
+    "failedIntervals": {
+      "arrayValue": {}
+    },
+    "contentHash": {
+      "stringValue": "25c20ddd7df8eacf78d393f7e354f60410055318b2d2e2ad43f30de335347f5a"
+    },
+    "configHash": {
+      "stringValue": "6b1ac7ce730bd1f8df1a405be0da9b0714a716fe4079c1bd80bdd890feac6958"
+    },
+    "analysisType": {
+      "stringValue": "source_shots"
+    },
+    "projectId": {
+      "stringValue": "staging-ten-minute-20261004"
+    },
+    "sampleCoverage": {
+      "doubleValue": 0.882645
+    },
+    "coverageBasis": {
+      "stringValue": "sampled_observations_only"
+    },
+    "coveredIntervals": {
+      "arrayValue": {}
+    }
+  },
+  "createTime": "2026-10-04T10:21:13.647762Z",
+  "updateTime": "2026-10-04T10:21:13.647762Z"
+}

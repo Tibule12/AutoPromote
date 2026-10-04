@@ -1,0 +1,122 @@
+{
+  "apiVersion": "run.googleapis.com/v1",
+  "kind": "Execution",
+  "metadata": {
+    "annotations": {
+      "run.googleapis.com/client-name": "gcloud",
+      "run.googleapis.com/client-version": "586.0.0",
+      "run.googleapis.com/execution-environment": "gen2",
+      "run.googleapis.com/operation-id": "112086ac-fae6-4b4b-83c3-9a73f5e6a745"
+    },
+    "creationTimestamp": "2026-10-04T10:09:51.943885Z",
+    "generation": 1,
+    "labels": {
+      "client.knative.dev/nonce": "cek_xux_vay",
+      "cloud.googleapis.com/location": "us-central1",
+      "run.googleapis.com/job": "studio-analysis-once",
+      "run.googleapis.com/jobGeneration": "4",
+      "run.googleapis.com/jobResourceVersion": "1791027760830996",
+      "run.googleapis.com/jobUid": "5f78c9ab-4c28-4cb4-9fe9-893cc6b94589"
+    },
+    "name": "studio-analysis-once-bl74l",
+    "namespace": "583435862235",
+    "ownerReferences": [
+      {
+        "apiVersion": "serving.knative.dev/v1",
+        "blockOwnerDeletion": true,
+        "controller": true,
+        "kind": "Job",
+        "name": "studio-analysis-once",
+        "uid": "5f78c9ab-4c28-4cb4-9fe9-893cc6b94589"
+      }
+    ],
+    "resourceVersion": "AAZdASB6Y6w",
+    "selfLink": "/apis/run.googleapis.com/v1/namespaces/583435862235/executions/studio-analysis-once-bl74l",
+    "uid": "f1e46a01-9a93-439d-a6e8-24045668c1ae"
+  },
+  "spec": {
+    "parallelism": 1,
+    "taskCount": 1,
+    "template": {
+      "spec": {
+        "containers": [
+          {
+            "env": [
+              {
+                "name": "ENABLE_STUDIO_ANALYSIS_WORKER",
+                "value": "true"
+              },
+              {
+                "name": "STUDIO_ANALYSIS_WORKER_ONCE",
+                "value": "true"
+              },
+              {
+                "name": "FIREBASE_STORAGE_BUCKET",
+                "value": "autopromote-staging-2026.firebasestorage.app"
+              },
+              {
+                "name": "MEDIA_WORKER_URL",
+                "value": "https://studio-face-analyzer-583435862235.us-central1.run.app"
+              },
+              {
+                "name": "WORKER_AUTH_MODE",
+                "value": "oidc"
+              },
+              {
+                "name": "FIREBASE_DATABASE_URL",
+                "value": "https://autopromote-staging-2026.firebaseio.com"
+              },
+              {
+                "name": "STUDIO_ANALYSIS_WORKER_MAX_PASSES",
+                "value": "4"
+              }
+            ],
+            "image": "us-central1-docker.pkg.dev/autopromote-staging-2026/studio-analysis/worker@sha256:d0bde70ef153b0684dd405de6ce48cad129cd73947261dd0909706bdecd8de61",
+            "resources": {
+              "limits": {
+                "cpu": "1",
+                "memory": "1Gi"
+              }
+            }
+          }
+        ],
+        "maxRetries": 0,
+        "serviceAccountName": "studio-analysis-smoke@autopromote-staging-2026.iam.gserviceaccount.com",
+        "timeoutSeconds": "960"
+      }
+    }
+  },
+  "status": {
+    "completionTime": "2026-10-04T10:21:19.711273Z",
+    "conditions": [
+      {
+        "lastTransitionTime": "2026-10-04T10:21:19.711273Z",
+        "message": "Execution completed successfully in 11m16.31s.",
+        "status": "True",
+        "type": "Completed"
+      },
+      {
+        "lastTransitionTime": "2026-10-04T10:09:52.781869Z",
+        "message": "Provisioned imported containers.",
+        "status": "True",
+        "type": "ResourcesAvailable"
+      },
+      {
+        "lastTransitionTime": "2026-10-04T10:13:28.253924Z",
+        "message": "Started deployed execution in 3m35.47s.",
+        "status": "True",
+        "type": "Started"
+      },
+      {
+        "lastTransitionTime": "2026-10-04T10:09:52.693161Z",
+        "message": "Imported container image.",
+        "status": "True",
+        "type": "ContainerReady"
+      }
+    ],
+    "logUri": "https://console.cloud.google.com/logs/viewer?project=autopromote-staging-2026&advancedFilter=resource.type%3D%22cloud_run_job%22%0Aresource.labels.job_name%3D%22studio-analysis-once%22%0Aresource.labels.location%3D%22us-central1%22%0Alabels.%22run.googleapis.com/execution_name%22%3D%22studio-analysis-once-bl74l%22",
+    "observedGeneration": 1,
+    "startTime": "2026-10-04T10:10:03.392313Z",
+    "succeededCount": 1
+  }
+}
