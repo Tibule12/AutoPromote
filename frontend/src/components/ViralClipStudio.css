@@ -16868,7 +16868,7 @@ body.dashboard-mode.viral-studio-open {
   white-space: nowrap;
   color: #d7c6f3;
 }
-@media (min-width: 821px) {
+@media (min-width: 0px) {
   .viral-studio-overlay.ap-dashboard-redesign .hook-broll-only-mode .preview-panel {
     display: grid !important;
     grid-template-columns: minmax(0, 1fr);
@@ -16895,7 +16895,8 @@ body.dashboard-mode.viral-studio-open {
   .hook-broll-only-mode .preview-panel > .panel-heading > div:first-child {
     margin-right: auto;
   }
-  .hook-broll-only-mode .preview-panel > .panel-heading .panel-kicker {
+  .hook-broll-only-mode .preview-panel > .panel-heading .panel-kicker,
+  .hook-broll-only-mode .preview-panel > .panel-heading .panel-description {
     display: none;
   }
   .hook-broll-only-mode .preview-panel > .panel-heading .preview-mode-switch {
@@ -17024,4 +17025,123 @@ body.dashboard-mode.viral-studio-open {
 }
 .studio-project-rail__head > summary {
   padding: 8px 0;
+}
+
+/* Stack editing surfaces in working order on small screens. The inspector
+   follows the timeline so its long forms do not separate it from the monitor. */
+@media (max-width: 820px) {
+  .viral-studio-overlay.ap-dashboard-redesign .hook-broll-only-mode .studio-header {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+    gap: 4px 8px;
+    min-height: 0;
+    max-height: none;
+    padding: 8px 12px;
+  }
+  .hook-broll-only-mode .studio-header-copy {
+    grid-column: 1;
+    grid-row: 1;
+    min-width: 0;
+  }
+  .hook-broll-only-mode .studio-header-actions {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .hook-broll-only-mode .studio-header-center {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    min-width: 0;
+    width: 100%;
+  }
+  .hook-broll-only-mode .studio-workspace-mode,
+  .hook-broll-only-mode .studio-workspace-mode__tabs {
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .viral-studio-overlay.ap-dashboard-redesign .hook-broll-only-mode .studio-layout,
+  .viral-studio-overlay.ap-dashboard-redesign .hook-broll-only-mode .studio-layout.preview-layout-side,
+  .viral-studio-overlay.ap-dashboard-redesign .hook-broll-only-mode.project-rail-open .studio-layout,
+  .viral-studio-overlay.ap-dashboard-redesign .hook-broll-only-mode.project-rail-open .studio-layout.preview-layout-side {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-areas: "tools" "rail" "preview" "timeline" "sidebar" !important;
+    grid-template-rows: 64px 360px clamp(400px, 52dvh, 520px) auto auto !important;
+    align-content: start;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+  .viral-studio-overlay.ap-dashboard-redesign .hook-broll-only-mode.project-rail-closed .studio-layout,
+  .viral-studio-overlay.ap-dashboard-redesign .hook-broll-only-mode.project-rail-closed .studio-layout.preview-layout-side {
+    grid-template-areas: "tools" "preview" "timeline" "sidebar" !important;
+    grid-template-rows: 64px clamp(400px, 52dvh, 520px) auto auto !important;
+  }
+  .hook-broll-only-mode .studio-layout > .creative-tool-rail {
+    grid-area: tools;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    height: 64px;
+    min-height: 64px;
+    box-sizing: border-box;
+    flex-wrap: nowrap;
+  }
+  .hook-broll-only-mode .creative-tool-rail button {
+    flex: 0 0 70px;
+  }
+  .hook-broll-only-mode .studio-layout > .phone-preview-container {
+    grid-area: preview;
+    min-height: 0;
+    height: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+  .hook-broll-only-mode .studio-layout > .studio-pro-timeline-dock {
+    grid-area: timeline;
+  }
+  .viral-studio-overlay.ap-dashboard-redesign .hook-broll-only-mode .studio-layout > .studio-sidebar {
+    grid-area: sidebar;
+    display: block !important;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  .viral-studio-overlay.ap-dashboard-redesign .hook-broll-only-mode.project-rail-closed .studio-project-rail {
+    display: none !important;
+  }
+  .viral-studio-overlay.ap-dashboard-redesign .hook-broll-only-mode.project-rail-open .studio-project-rail {
+    height: auto;
+    max-height: 360px;
+  }
+  .hook-broll-only-mode .studio-project-rail__head {
+    display: block;
+  }
+  .hook-broll-only-mode .studio-library-tabs {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    flex-shrink: 0;
+  }
+  .hook-broll-only-mode .preview-panel > .panel-heading .panel-description,
+  .viral-studio-overlay.ap-dashboard-redesign .hook-broll-only-mode .preview-intelligence-stack {
+    display: none;
+  }
+  .viral-studio-overlay.ap-dashboard-redesign .hook-broll-only-mode .preview-device-column {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+  }
+}
+
+/* Short landscape windows scroll the workspace instead of shrinking the
+   programme picture underneath its controls. */
+@media (min-width: 821px) and (max-height: 600px) {
+  .viral-studio-overlay.ap-dashboard-redesign .hook-broll-only-mode .studio-layout {
+    grid-template-rows: minmax(420px, 1fr) auto !important;
+    overflow-y: auto;
+  }
+  .hook-broll-only-mode .preview-panel > .panel-heading .panel-description,
+  .viral-studio-overlay.ap-dashboard-redesign .hook-broll-only-mode .preview-intelligence-stack {
+    display: none;
+  }
 }

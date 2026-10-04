@@ -2756,6 +2756,14 @@ const ViralClipStudio = ({
   const [timelineZoom, setTimelineZoom] = useState(1);
   const [timelineDockExpanded, setTimelineDockExpanded] = useState(true);
   const [timelineDockHeight, setTimelineDockHeight] = useState(280);
+  const [studioViewportHeight, setStudioViewportHeight] = useState(() => window.innerHeight);
+  const timelineHeightLimit = Math.max(148, Math.min(480, studioViewportHeight - 220));
+  const displayedTimelineHeight = Math.min(timelineDockHeight, timelineHeightLimit);
+  useEffect(() => {
+    const updateHeight = () => setStudioViewportHeight(window.innerHeight);
+    window.addEventListener("resize", updateHeight);
+    return () => window.removeEventListener("resize", updateHeight);
+  }, []);
   const timelineResizeRef = useRef(null);
   const [previewDockSide, setPreviewDockSide] = useState("center");
   const [projectRailExpanded, setProjectRailExpanded] = useState(false);
@@ -3121,6 +3129,7 @@ const ViralClipStudio = ({
   const pendingHistoryBaselineRef = useRef(null);
   const cutHistoryTransactionRef = useRef(null);
   const previewPlaybackIntentRef = useRef(true);
+  const previewWindowRef = useRef(null);
   const phoneFrameRef = useRef(null);
   const studioSidebarRef = useRef(null);
   const watermarkDragRef = useRef(null);
@@ -12166,7 +12175,8 @@ const ViralClipStudio = ({
 
   // Handle video element duration load to set clip max duration
   const handleLoadedMetadata = () => {
-    if (videoRef.current) {
+    // A finished render has its own duration; it must not rewrite source clips.
+    if (videoRef.current && !renderedOutputUrl) {
       const dur = videoRef.current.duration;
       setTimeline(prev =>
         prev.map((item, idx) =>
@@ -12175,11 +12185,9 @@ const ViralClipStudio = ({
                 ...item,
                 duration: dur,
                 endRequest:
-                  item.endRequest !== null && item.endRequest !== undefined ? item.endRequest : dur,
+                  item.endRequest ?? (item.id === "main" ? selectedClip?.end : null) ?? dur,
                 startRequest:
-                  item.startRequest !== null && item.startRequest !== undefined
-                    ? item.startRequest
-                    : 0,
+                  item.startRequest ?? (item.id === "main" ? selectedClip?.start : null) ?? 0,
               }
             : item
         )
@@ -12612,6 +12620,9 @@ const ViralClipStudio = ({
 
     const handleTimeUpdate = () => {
       setVideoTime(video.currentTime);
+      // Scrubbing a paused edit must not trigger playback loops or skip footage.
+      // Rendered output is already a complete sequence with its own clock.
+      if (video.paused || renderedOutputUrl) return;
 
       const currentClip = timeline[activeTimelineIndex];
       if (!currentClip) return;
@@ -12723,7 +12734,14 @@ const ViralClipStudio = ({
           setActiveTimelineIndex(nextIndex);
         } else {
           // Sequence finished: Loop back to START of the sequence (Clip 1 / Main Video)
-          setActiveTimelineIndex(0);
+          if (activeTimelineIndex === 0) {
+            hookPreviewSequenceRef.current = { active: false };
+            video.currentTime = startTime;
+            setVideoTime(startTime);
+            if (previewPlaybackIntentRef.current) safePlayMediaElement(video);
+          } else {
+            setActiveTimelineIndex(0);
+          }
         }
       }
     };
@@ -12747,6 +12765,7 @@ const ViralClipStudio = ({
     silenceRemoval,
     timeline,
     trimPreviewLoop,
+    renderedOutputUrl,
   ]);
 
   // Effect: Switch video Source when activeTimelineIndex changes OR Jump when selecting a viral clip
@@ -12756,6 +12775,9 @@ const ViralClipStudio = ({
       const clipWindow = getTimelineClipWindow(clip);
       const pendingSeek = pendingTimelineSeekRef.current;
       const hasPendingSeek = pendingSeek?.index === activeTimelineIndex;
+      const previous = previewWindowRef.current;
+      const sameClip = previous?.clipId === clip.id && previous.renderedOutputUrl === renderedOutputUrl;
+      const windowChanged = !sameClip || previous.start !== clipWindow.start || previous.end !== clipWindow.end;
       const targetStart = renderedOutputUrl
         ? 0
         : hasPendingSeek
@@ -12767,19 +12789,27 @@ const ViralClipStudio = ({
       const currentSrc = videoRef.current.src;
       const afterSource = renderedOutputUrl || clip.url;
       if (currentSrc !== afterSource && afterSource) {
+        // Refreshing a private source link preserves the current editing frame.
+        const refreshedTime = sameClip && !hasPendingSeek
+          ? clampNumber(videoRef.current.currentTime, clipWindow.start, clipWindow.end, targetStart)
+          : targetStart;
         setIsAfterPreviewReady(Boolean(videoRef.current?.readyState >= 2));
         applySafeMediaSource(videoRef.current, afterSource);
-        // Reset to start
-        videoRef.current.currentTime = targetStart;
+        videoRef.current.currentTime = refreshedTime;
+        setVideoTime(refreshedTime);
         if (previewPlaybackIntentRef.current) {
           safePlayMediaElement(videoRef.current);
         }
       }
       // 2. Handle JUMP within the same file when the active timeline window changes
       else {
-        // Only jump if we are far from the start time (prevents fighting with playback)
-        if (Math.abs(videoRef.current.currentTime - targetStart) > 0.5 && !isDragging) {
-          videoRef.current.currentTime = targetStart;
+        // Metadata and unrelated timeline edits must not rewind the monitor.
+        const nextTime = sameClip && !hasPendingSeek
+          ? clampNumber(videoRef.current.currentTime, clipWindow.start, clipWindow.end, targetStart)
+          : targetStart;
+        if (windowChanged && Math.abs(videoRef.current.currentTime - nextTime) > 0.001 && !isDragging) {
+          videoRef.current.currentTime = nextTime;
+          setVideoTime(nextTime);
           // Ensure playing
           if (previewPlaybackIntentRef.current && videoRef.current.paused) {
             safePlayMediaElement(videoRef.current);
@@ -12793,6 +12823,9 @@ const ViralClipStudio = ({
         setVideoTime(targetStart);
         if (pendingSeek.play) safePlayMediaElement(videoRef.current);
       }
+      if (!isDragging) previewWindowRef.current = {
+        clipId: clip.id, start: clipWindow.start, end: clipWindow.end, renderedOutputUrl,
+      };
     }
   }, [activeTimelineIndex, timeline, selectedClip, isDragging, renderedOutputUrl]);
 
@@ -16658,6 +16691,20 @@ const ViralClipStudio = ({
             <div className="studio-library-tabs" role="tablist" aria-label="Project library">
               {[["media", "Media"], ["sequence", "Sequence"], ["moments", "Moments"]].map(([id, label]) => (
                 <button key={id} type="button" role="tab" aria-selected={projectRailTab === id}
+                  id={`studio-library-tab-${id}`} aria-controls={`studio-library-panel-${id}`}
+                  tabIndex={projectRailTab === id ? 0 : -1}
+                  onKeyDown={event => {
+                    const ids = ["media", "sequence", "moments"];
+                    const current = ids.indexOf(id);
+                    const next = event.key === "ArrowRight" ? (current + 1) % ids.length
+                      : event.key === "ArrowLeft" ? (current + ids.length - 1) % ids.length
+                        : event.key === "Home" ? 0 : event.key === "End" ? ids.length - 1 : null;
+                    if (next === null) return;
+                    event.preventDefault();
+                    event.stopPropagation();
+                    setProjectRailTab(ids[next]);
+                    event.currentTarget.parentElement.querySelector(`#studio-library-tab-${ids[next]}`).focus();
+                  }}
                   onClick={() => setProjectRailTab(id)}>{label}</button>
               ))}
             </div>
@@ -16694,7 +16741,7 @@ const ViralClipStudio = ({
               </div>
             </nav>
 
-            <section className="studio-project-list" aria-labelledby="studio-sequence-heading" hidden={projectRailTab !== "sequence"}>
+            <section className="studio-project-list" id="studio-library-panel-sequence" role="tabpanel" aria-labelledby="studio-library-tab-sequence" hidden={projectRailTab !== "sequence"}>
               <div className="studio-project-list__heading">
                 <div>
                   <span>Sequence</span>
@@ -16738,7 +16785,7 @@ const ViralClipStudio = ({
               </div>
             </section>
 
-            <section className="studio-project-list" aria-labelledby="studio-moments-heading" hidden={projectRailTab !== "moments"}>
+            <section className="studio-project-list" id="studio-library-panel-moments" role="tabpanel" aria-labelledby="studio-library-tab-moments" hidden={projectRailTab !== "moments"}>
               <div className="studio-project-list__heading">
                 <div>
                   <span>Discovery</span>
@@ -16784,7 +16831,7 @@ const ViralClipStudio = ({
               </div>
             </section>
 
-            <section className="studio-media-bin" aria-label="Project media bin" hidden={projectRailTab !== "media"}>
+            <section className="studio-media-bin" id="studio-library-panel-media" role="tabpanel" aria-labelledby="studio-library-tab-media" hidden={projectRailTab !== "media"}>
               <div className="studio-project-list__heading">
                 <div>
                   <span>Media</span>
@@ -27935,21 +27982,21 @@ const ViralClipStudio = ({
           </div>
 
           <div
-            style={{ "--timeline-dock-height": `${timelineDockHeight}px` }}
+            style={{ "--timeline-dock-height": `${displayedTimelineHeight}px` }}
             className={`studio-pro-timeline-dock ${
               timelineDockExpanded ? "is-open" : "is-closed"
             }`}
           >
             <div className="studio-timeline-resize" role="separator" tabIndex={0}
               aria-label="Resize timeline" aria-orientation="horizontal"
-              aria-valuemin={148} aria-valuemax={480} aria-valuenow={timelineDockHeight}
+              aria-valuemin={148} aria-valuemax={timelineHeightLimit} aria-valuenow={displayedTimelineHeight}
               onPointerDown={event => {
-                timelineResizeRef.current = { y: event.clientY, height: timelineDockHeight };
+                timelineResizeRef.current = { y: event.clientY, height: displayedTimelineHeight };
                 event.currentTarget.setPointerCapture(event.pointerId);
               }}
               onPointerMove={event => {
                 if (!timelineResizeRef.current) return;
-                setTimelineDockHeight(Math.max(148, Math.min(480, window.innerHeight*.55,
+                setTimelineDockHeight(Math.max(148, Math.min(timelineHeightLimit,
                   timelineResizeRef.current.height + timelineResizeRef.current.y - event.clientY)));
               }}
               onPointerUp={() => { timelineResizeRef.current = null; }}
@@ -27957,8 +28004,8 @@ const ViralClipStudio = ({
               onKeyDown={event => {
                 if (!["ArrowUp", "ArrowDown"].includes(event.key)) return;
                 event.preventDefault();
-                setTimelineDockHeight(current => Math.max(148, Math.min(480, window.innerHeight*.55,
-                  current + (event.key === "ArrowUp" ? 24 : -24))));
+                setTimelineDockHeight(current => Math.max(148, Math.min(timelineHeightLimit,
+                  Math.min(current, timelineHeightLimit) + (event.key === "ArrowUp" ? 24 : -24))));
               }}
               title="Drag to resize the timeline; use arrow keys when focused">
               <span />

@@ -198,6 +198,89 @@ describe("ViralClipStudio timeline sequencing", () => {
     jest.clearAllMocks();
   });
 
+  const mountNativePreview = () => {
+    const props = { videoUrl: "https://example.com/source.mp4",
+      clips: [{ id: "range", start: 2, end: 8, duration: 6, sourceDuration: 12 }],
+      onCancel: jest.fn() };
+    const rendered = render(<ViralClipStudio {...props} />);
+    const video = screen.getByTestId("studio-after-video");
+    let paused = true;
+    Object.defineProperties(video, {
+      currentTime: { configurable: true, writable: true, value: 5 },
+      duration: { configurable: true, value: 12 },
+      paused: { configurable: true, get: () => paused },
+    });
+    video.play = jest.fn(() => { paused = false; video.dispatchEvent(new Event("play")); return Promise.resolve(); });
+    video.pause = jest.fn(() => { paused = true; video.dispatchEvent(new Event("pause")); });
+    return { video, props, ...rendered };
+  };
+
+  test("metadata reload preserves the selected trim and paused editing frame", () => {
+    const { video } = mountNativePreview();
+    fireEvent.loadedMetadata(video);
+    expect(video.currentTime).toBe(5);
+    expect(video.paused).toBe(true);
+    expect(screen.getByTestId("pro-video-clip-1")).toHaveAttribute("data-start-time", "0");
+    expect(screen.getByTestId("pro-video-clip-1")).toHaveAttribute("data-end-time", "6");
+    fireEvent.loadedMetadata(video);
+    expect(video.currentTime).toBe(5);
+  });
+
+  test("paused scrubbing at the trimmed end stays on that frame", () => {
+    const { video } = mountNativePreview();
+    video.currentTime = 8;
+    fireEvent.timeUpdate(video);
+    expect(video.currentTime).toBe(8);
+    expect(video.paused).toBe(true);
+    expect(screen.getByTestId("pro-current-edit")).toHaveTextContent("0:06");
+  });
+
+  test("a playing single-clip sequence loops at its trimmed end", () => {
+    const { video } = mountNativePreview();
+    fireEvent.click(screen.getByRole("button", { name: /Play comparison/ }));
+    video.currentTime = 8.1;
+    fireEvent.timeUpdate(video);
+    expect(video.currentTime).toBe(2);
+    expect(video.paused).toBe(false);
+  });
+
+  test("rendered output metadata does not replace the editable source range", async () => {
+    const { video, props, rerender } = mountNativePreview();
+    fireEvent.loadedMetadata(video);
+    rerender(<ViralClipStudio {...props} renderedOutput={{ url: "https://example.com/rendered.mp4" }} />);
+    Object.defineProperty(video, "duration", { configurable: true, value: 3 });
+    fireEvent.loadedMetadata(video);
+    expect(screen.getByTestId("pro-video-clip-1")).toHaveAttribute("data-end-time", "6");
+    await act(async () => { await video.play(); });
+    video.currentTime = 3;
+    fireEvent.timeUpdate(video);
+    expect(video.currentTime).toBe(3);
+  });
+
+  test("library tabs support arrow keys, wraparound and Home/End with one tab stop", () => {
+    mountNativePreview();
+    fireEvent.click(screen.getByRole("button", { name: "Show media" }));
+    const media = screen.getByRole("tab", { name: "Media" });
+    const sequence = screen.getByRole("tab", { name: "Sequence" });
+    const moments = screen.getByRole("tab", { name: "Moments" });
+    media.focus();
+    fireEvent.keyDown(media, { key: "ArrowRight" });
+    expect(sequence).toHaveFocus();
+    expect(sequence).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("tabpanel", { name: "Sequence" })).toBeVisible();
+    fireEvent.keyDown(sequence, { key: "End" });
+    expect(moments).toHaveFocus();
+    fireEvent.keyDown(moments, { key: "ArrowRight" });
+    expect(media).toHaveFocus();
+    fireEvent.keyDown(media, { key: "ArrowLeft" });
+    expect(moments).toHaveFocus();
+    fireEvent.keyDown(moments, { key: "Home" });
+    expect(media).toHaveFocus();
+    expect(sequence).toHaveAttribute("tabindex", "-1");
+    expect(moments).toHaveAttribute("tabindex", "-1");
+    expect(media).toHaveAttribute("aria-controls", screen.getByRole("tabpanel", { name: "Media" }).id);
+  });
+
   test("batch media stays ordered in the library until explicitly placed, with isolated failures", async () => {
     const previousCreateUrl = URL.createObjectURL;
     const previousRevokeUrl = URL.revokeObjectURL;
@@ -289,7 +372,7 @@ describe("ViralClipStudio timeline sequencing", () => {
       onCancel={jest.fn()}
     />);
 
-    const media = screen.getByRole("region", { name: "Project media bin" });
+    const media = screen.getByRole("tabpanel", { name: "Media" });
     await within(media).findByRole("button", { name: "Preview Camera B.mp4" });
     for (const name of ["Camera A.mp4", "Camera B.mp4"]) {
       fireEvent.click(within(media).getByRole("button", { name: `Preview ${name}` }));
@@ -2317,6 +2400,7 @@ describe("ViralClipStudio timeline sequencing", () => {
 
     const previewVideo = document.querySelector(".studio-video");
     expect(previewVideo).not.toBeNull();
+    Object.defineProperty(previewVideo, "paused", { configurable: true, value: false });
 
     Object.defineProperty(previewVideo, "currentTime", {
       configurable: true,
@@ -2376,6 +2460,7 @@ describe("ViralClipStudio timeline sequencing", () => {
 
     const previewVideo = document.querySelector(".studio-video");
     expect(previewVideo).not.toBeNull();
+    Object.defineProperty(previewVideo, "paused", { configurable: true, value: false });
 
     Object.defineProperty(previewVideo, "currentTime", {
       configurable: true,

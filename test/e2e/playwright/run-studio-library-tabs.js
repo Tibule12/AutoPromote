@@ -31,7 +31,7 @@ async function main() {
       for (const tab of ["Sequence", "Moments", "Media"]) {
         await page.getByRole("tab", { name: tab, exact: true }).click();
         const selector = tab === "Media" ? ".studio-media-bin" :
-          `[aria-labelledby="studio-${tab.toLowerCase()}-heading"]`;
+          `#studio-library-panel-${tab.toLowerCase()}`;
         assert(await page.locator(selector).isVisible(), `${tab} pane must be visible`);
         assert.equal(await page.locator(".studio-project-rail").getAttribute("data-active-tab"), tab.toLowerCase());
         if (tab !== "Media") assert(await page.locator(".studio-media-bin").isHidden());

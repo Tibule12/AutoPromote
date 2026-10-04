@@ -1,0 +1,95 @@
+{
+  "passed": true,
+  "verifiedAt": "2026-10-04T16:07:04.275Z",
+  "scope": "Saved local browser and unit-test receipts, unchanged tested sources, compiled bundle, fixture and original screenshots. Public deployment and rendered-file verification were not exercised.",
+  "checks": [
+    {
+      "label": "Tested source matches: frontend/src/components/ViralClipStudio.js",
+      "passed": true
+    },
+    {
+      "label": "Tested source matches: frontend/src/components/ViralClipStudio.css",
+      "passed": true
+    },
+    {
+      "label": "Tested source matches: frontend/src/components/StudioControlMenu.js",
+      "passed": true
+    },
+    {
+      "label": "Tested source matches: scripts/run-studio-interaction-preview.js",
+      "passed": true
+    },
+    {
+      "label": "Tested source matches: test/e2e/playwright/run-studio-interactions.js",
+      "passed": true
+    },
+    {
+      "label": "Tested source matches: test/e2e/playwright/studio-interaction-entry.jsx",
+      "passed": true
+    },
+    {
+      "label": "Tested bundle matches",
+      "passed": true
+    },
+    {
+      "label": "Native media fixture matches",
+      "passed": true
+    },
+    {
+      "label": "17 browser checks pass",
+      "passed": true
+    },
+    {
+      "label": "Zero page errors and API requests",
+      "passed": true
+    },
+    {
+      "label": "All six responsive sizes exercised",
+      "passed": true
+    },
+    {
+      "label": "Phone and both tablet media libraries exercised",
+      "passed": true
+    },
+    {
+      "label": "16 focused regressions pass",
+      "passed": true
+    },
+    {
+      "label": "Lint has zero errors and matches previous warnings",
+      "passed": true
+    },
+    {
+      "label": "Landscape picture and transport are reachable",
+      "passed": true
+    },
+    {
+      "label": "Original screenshot preserved: phone-editor.png",
+      "passed": true
+    },
+    {
+      "label": "Original screenshot preserved: tablet-editor.png",
+      "passed": true
+    },
+    {
+      "label": "Original screenshot preserved: phone-library.png",
+      "passed": true
+    },
+    {
+      "label": "Original screenshot preserved: landscape-monitor.png",
+      "passed": true
+    }
+  ],
+  "sourceHashes": {
+    "frontend/src/components/ViralClipStudio.js": "b63842cc2f1a0acc486620a97c935628e1a7fd36541b34f5366a0d562252cac8",
+    "frontend/src/components/ViralClipStudio.css": "7d0edd0571f7b6f806423ca9c3c2129fbab18fcdbafa5da3005acc0794e901d6",
+    "frontend/src/components/StudioControlMenu.js": "c90884ac27b7adbd6db86163709cbe1078f9de24e1ceaee8cad753b358e94033",
+    "scripts/run-studio-interaction-preview.js": "aab657e8096c79c2af7ca5aab59e1b794159935d4f8e7a7b541a50be2e6b0e6b",
+    "test/e2e/playwright/run-studio-interactions.js": "3ab2f02365ea8edadab027dff8907ace0b0df033c3482bea6fa2bb593daa7069",
+    "test/e2e/playwright/studio-interaction-entry.jsx": "23d8ca8741bbdecfa070a3e0d082af649fb2a598db76d5b2e350b00946e7f7c8",
+    "frontend/src/components/__tests__/StudioControlMenu.test.js": "4424dcf7938a8fc6ec493d914c5bf24bbe0fcf1c6f18f37be88d43885774aab5",
+    "frontend/src/components/__tests__/ViralClipStudio.test.js": "c54a16d770393b7482c2c62713205ab602bc12159f41b9c1dd9da0a69e392210",
+    "test/e2e/playwright/run-studio-library-tabs.js": "b5d8415a0a6fad4b0aba98c5c2e31c3d3c18adbecc0e9c57f1d2aeb2b2751f5f",
+    "test/e2e/playwright/run-studio-timeline-layout.js": "d1f2571fd7b2636a190aeecb7312ff7967607167cb740b462ac1e1f1be0555ee"
+  }
+}

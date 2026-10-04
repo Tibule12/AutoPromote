@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "scope": "Native vertical scroll to the programme picture in the tested local fixture",
+  "viewport": {
+    "width": 844,
+    "height": 390
+  },
+  "picture": {
+    "x": 268.171875,
+    "y": 80,
+    "width": 90,
+    "height": 160,
+    "bottom": 240
+  },
+  "transport": {
+    "y": 248,
+    "height": 82,
+    "bottom": 330
+  },
+  "scrollTop": 127
+}

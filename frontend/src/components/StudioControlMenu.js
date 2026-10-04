@@ -14,7 +14,9 @@ export default function StudioControlMenu({ className = "", label, children }) {
       ref={ref}
       className={`studio-control-menu ${className}`}
       onKeyDown={event => {
-        if (event.key === "Escape") {
+        if (event.key === "Escape" && ref.current.open) {
+          event.preventDefault();
+          event.stopPropagation();
           ref.current.open = false;
           ref.current.querySelector("summary").focus();
         }

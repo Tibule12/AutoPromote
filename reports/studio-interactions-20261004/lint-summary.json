@@ -1,0 +1,87 @@
+{
+  "passed": true,
+  "configuration": "frontend/.eslintrc.js with Jest globals; process-only brace-expansion callable-export compatibility",
+  "errors": 0,
+  "warnings": 11,
+  "baselineWarnings": 11,
+  "testWarningsUnchanged": true,
+  "files": [
+    {
+      "path": "frontend/src/components/StudioControlMenu.js",
+      "errors": 0,
+      "warnings": 0
+    },
+    {
+      "path": "frontend/src/components/ViralClipStudio.js",
+      "errors": 0,
+      "warnings": 0
+    },
+    {
+      "path": "frontend/src/components/__tests__/StudioControlMenu.test.js",
+      "errors": 0,
+      "warnings": 0
+    },
+    {
+      "path": "frontend/src/components/__tests__/ViralClipStudio.test.js",
+      "errors": 0,
+      "warnings": 11
+    }
+  ],
+  "warningsInExistingTest": [
+    {
+      "rule": "no-unused-vars",
+      "severity": 1,
+      "message": "'_container' is assigned a value but never used."
+    },
+    {
+      "rule": "no-unused-vars",
+      "severity": 1,
+      "message": "'_container' is assigned a value but never used."
+    },
+    {
+      "rule": "no-unused-vars",
+      "severity": 1,
+      "message": "'_container' is assigned a value but never used."
+    },
+    {
+      "rule": "no-unused-vars",
+      "severity": 1,
+      "message": "'_container' is assigned a value but never used."
+    },
+    {
+      "rule": "no-unused-vars",
+      "severity": 1,
+      "message": "'_container' is assigned a value but never used."
+    },
+    {
+      "rule": "no-unused-vars",
+      "severity": 1,
+      "message": "'_container' is assigned a value but never used."
+    },
+    {
+      "rule": "no-unused-vars",
+      "severity": 1,
+      "message": "'_container' is assigned a value but never used."
+    },
+    {
+      "rule": "no-unused-vars",
+      "severity": 1,
+      "message": "'_container' is assigned a value but never used."
+    },
+    {
+      "rule": "no-unused-vars",
+      "severity": 1,
+      "message": "'_container' is assigned a value but never used."
+    },
+    {
+      "rule": "no-unused-vars",
+      "severity": 1,
+      "message": "'_container' is assigned a value but never used."
+    },
+    {
+      "rule": "no-unused-vars",
+      "severity": 1,
+      "message": "'_container' is assigned a value but never used."
+    }
+  ]
+}

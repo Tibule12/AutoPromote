@@ -1,0 +1,57 @@
+{
+  "algorithm": "SHA-256",
+  "files": {
+    "README.md": {
+      "sha256": "7d4b7ee3f0e7ce147a4032c6c3b7ffcd2fa89898d9c2c85771b7493ec0a9b445",
+      "bytes": 4777
+    },
+    "browser.json": {
+      "sha256": "669da99ae596110bdf5e5b37c80dc236df4f1b11886c3065265fe592cb307ce8",
+      "bytes": 7769
+    },
+    "delivery-verification.json": {
+      "sha256": "6f8638ecf0f87f106a4a5a673fed2f272b61f61457013adb85eb6e9719c833c4",
+      "bytes": 3456
+    },
+    "images/landscape-monitor.png": {
+      "sha256": "e6e088a374a06e536368a6a5b91ed9d060279d8a7e56c49bcb5df53fd97666ac",
+      "bytes": 89204
+    },
+    "images/phone-editor.png": {
+      "sha256": "b57f00d16a40e4d6a30b57fd3726d9407c8c2c881305eb14eb290ea35b1c69c0",
+      "bytes": 107915
+    },
+    "images/phone-library.png": {
+      "sha256": "e565847e3cd1950cbe9751555594cdb91aaca9a12329dfe2fd248bfc4b21dd32",
+      "bytes": 82548
+    },
+    "images/tablet-editor.png": {
+      "sha256": "42ca1fbda32d74db9c5daf7499317a9efe9b06c7f39cf0c421bfc289de22afe3",
+      "bytes": 190885
+    },
+    "jest-regression.json": {
+      "sha256": "1e4944f6766a6a1bef17f1ea2dcc47f60b3dfe57dc21b0efdf90a293ead11f41",
+      "bytes": 29652
+    },
+    "landscape-monitor.json": {
+      "sha256": "260da73903791857d7ffbd2f7b68c5cacdaa9b4698dc304ef6b03e1446768936",
+      "bytes": 367
+    },
+    "lint-summary.json": {
+      "sha256": "203f56c9ca2baab322d904a3606672a6649a83161535c9029096d12935aee3ef",
+      "bytes": 2242
+    }
+  },
+  "sourceHashes": {
+    "frontend/src/components/ViralClipStudio.js": "b63842cc2f1a0acc486620a97c935628e1a7fd36541b34f5366a0d562252cac8",
+    "frontend/src/components/ViralClipStudio.css": "7d0edd0571f7b6f806423ca9c3c2129fbab18fcdbafa5da3005acc0794e901d6",
+    "frontend/src/components/StudioControlMenu.js": "c90884ac27b7adbd6db86163709cbe1078f9de24e1ceaee8cad753b358e94033",
+    "scripts/run-studio-interaction-preview.js": "aab657e8096c79c2af7ca5aab59e1b794159935d4f8e7a7b541a50be2e6b0e6b",
+    "test/e2e/playwright/run-studio-interactions.js": "3ab2f02365ea8edadab027dff8907ace0b0df033c3482bea6fa2bb593daa7069",
+    "test/e2e/playwright/studio-interaction-entry.jsx": "23d8ca8741bbdecfa070a3e0d082af649fb2a598db76d5b2e350b00946e7f7c8",
+    "frontend/src/components/__tests__/StudioControlMenu.test.js": "4424dcf7938a8fc6ec493d914c5bf24bbe0fcf1c6f18f37be88d43885774aab5",
+    "frontend/src/components/__tests__/ViralClipStudio.test.js": "c54a16d770393b7482c2c62713205ab602bc12159f41b9c1dd9da0a69e392210",
+    "test/e2e/playwright/run-studio-library-tabs.js": "b5d8415a0a6fad4b0aba98c5c2e31c3d3c18adbecc0e9c57f1d2aeb2b2751f5f",
+    "test/e2e/playwright/run-studio-timeline-layout.js": "d1f2571fd7b2636a190aeecb7312ff7967607167cb740b462ac1e1f1be0555ee"
+  }
+}

@@ -378,9 +378,9 @@ async function main() {
         cards: await library.locator("article").count(),
         visibleActionGroups: await library.locator(".studio-media-card__actions:visible").count(),
         hiddenSequence: await page
-          .locator('[aria-labelledby="studio-sequence-heading"]')
+          .locator('#studio-library-panel-sequence')
           .isHidden(),
-        hiddenMoments: await page.locator('[aria-labelledby="studio-moments-heading"]').isHidden(),
+        hiddenMoments: await page.locator('#studio-library-panel-moments').isHidden(),
         libraryHeight: await library.evaluate(node => node.getBoundingClientRect().height),
       };
       assert.equal(batchLibraryCheck.visibleActionGroups, 1);
