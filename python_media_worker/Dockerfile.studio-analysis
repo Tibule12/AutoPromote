@@ -1,4 +1,4 @@
-FROM python:3.10-slim
+FROM python:3.10-slim-bookworm
 
 ENV PORT=8080 PYTHONDONTWRITEBYTECODE=1
 WORKDIR /app

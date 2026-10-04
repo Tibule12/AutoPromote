@@ -100,6 +100,10 @@ and published both artifact receipts; see the [staging deployment and result
 proof](viral-studio-analysis-staging-20261003.md). This is a manually triggered,
 bounded staging worker paired with a private staging analyzer. The production
 analysis-job worker and Studio frontend flag remain off.
+The [ten-minute staging recheck](viral-studio-analysis-ten-minute-staging-20261004.md)
+pinpointed an FFmpeg 7 camera-cut miss, pinned the analyzer to a Bookworm
+runtime, and verified a full result equal to local output on the representative
+podcast excerpt.
 The tests cover idempotency, competing claims, retry, cancellation fencing, abandoned
 staging, exhausted leases, owner-scoped routes, result reads, client polling,
 and application through the existing editor crop logic. It also covers owned

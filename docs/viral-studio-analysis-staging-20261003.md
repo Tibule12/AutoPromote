@@ -113,3 +113,9 @@ It refuses credentials from another project and can queue a job without
 processing it (`STUDIO_ANALYSIS_SMOKE_QUEUE_ONLY=true`) or verify an existing
 job (`STUDIO_ANALYSIS_SMOKE_VERIFY_JOB_ID=<jobId>`). It requires an explicitly
 supplied staging credential and CPU worker URL; neither is stored in the repo.
+
+The subsequent [ten-minute podcast staging gate](viral-studio-analysis-ten-minute-staging-20261004.md)
+found a material FFmpeg 7 cut-detection regression, pinned the private analyzer
+to Debian Bookworm's FFmpeg 5.1, and verified a fresh 143-cut result whose full
+JSON matched the local analysis. The production worker and frontend flag remain
+off.

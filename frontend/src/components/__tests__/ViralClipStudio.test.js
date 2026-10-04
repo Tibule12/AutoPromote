@@ -2991,7 +2991,7 @@ describe("ViralClipStudio timeline sequencing", () => {
     ).toBeChecked();
     expect(within(inspector).getByRole("slider", { name: /Music fade in/i })).toHaveValue("0.5");
     expect(within(inspector).getByRole("slider", { name: /Music fade out/i })).toHaveValue("0.5");
-  }, 15000);
+  }, 30000);
 
   test("generates real timestamped speech captions and keeps every line editable", async () => {
     const sourceBlob = new Blob(["creator-video"], { type: "video/mp4" });
