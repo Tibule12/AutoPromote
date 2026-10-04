@@ -1,0 +1,97 @@
+
+> autopromote-frontend@1.0.0 test
+> react-scripts test --watch=false --runInBand --runTestsByPath src/components/__tests__/ViralClipStudio.test.js -t runs a podcast cutaway with original, overlay, and mixed audio modes --json --outputFile=/home/tibule12/Projects/AutoPromte/AutoPromote/reports/studio-analysis-ten-minute-20261004/frontend-retry-tests.json
+
+PASS src/components/__tests__/ViralClipStudio.test.js (26.541 s)
+  ViralClipStudio timeline sequencing
+    ✓ runs a podcast cutaway with original, overlay, and mixed audio modes (25634 ms)
+    ○ skipped groups film camera takes manually and exports the chosen angle range
+    ○ skipped uses Quick, Creator and Signature as views over one shared edit
+    ○ skipped exposes functional Auto Reframe controls in the editor inspector
+    ○ skipped exports Show Everyone as two reviewed source crops without requiring extra cameras
+    ○ skipped applies reusable podcast analysis as an editable rounded Director timeline
+    ○ skipped lets the creator disable the AutoPromote signature in preview and export
+    ○ skipped exports a four-camera grid with every source, offset, and framing anchor
+    ○ skipped creator zoom uses editable keys and reaches the render contract without a scratch animation
+    ○ skipped creator speed ramps reach export as pitch-preserved timeline segments
+    ○ skipped beat sync without analysed music does not invent markers or insert an impact
+    ○ skipped commits a reviewed speaker lower third to the exportable timeline
+    ○ skipped monitors preview audio and submits reviewed camera cuts with reaction geometry
+    ○ skipped applies a Signature finish preset to After without touching Before
+    ○ skipped previews a signature transformation and includes it in the export contract
+    ○ skipped keeps Motion Sculpture independent from Hook and shows its intensity target
+    ○ skipped uses delayed source frames for Beat Echo preview and export
+    ○ skipped shows backend retry and render progress inside the Studio export controls
+    ○ skipped loads a completed render into After and exposes explicit output actions
+    ○ skipped removes a marked middle range and exports retained segments with a join style
+    ○ skipped accepts exact cut times and can trim an unwanted opening section
+    ○ skipped keeps Hook off initially and only enables it explicitly
+    ○ skipped shows a live visual timeline that seeks the same After preview
+    ○ skipped dragging the selected hook range does not toggle selection mode
+    ○ skipped allows choosing a hook point from the timeline and setting it as the hook
+    ○ skipped setting a hook point freezes the chosen opening moment
+    ○ skipped allows clearing hook text completely
+    ○ skipped captures preview focus targeting and exports cover frame metadata
+    ○ skipped uses face-aware hook banner placement and freeze-text offset in the preview
+    ○ skipped allows appended clips to be reordered in the timeline
+    ○ skipped keeps the same timeline clip active after reordering
+    ○ skipped allows detected viral moments to be reordered
+    ○ skipped supports undo and redo for overlay edits
+    ○ skipped preserves uploaded B-roll through duplicate, delete, undo, and redo
+    ○ skipped undoes and redoes Make It Hit as one reversible edit
+    ○ skipped keeps only original-audio controls in the studio
+    ○ skipped exports mute-original-audio without background audio options
+    ○ skipped materializes blob-backed main timeline clips before export
+    ○ skipped exports the selected hook once and removes the duplicate span from the main clip
+    ○ skipped suggests a hook segment from video analysis and applies it
+    ○ skipped selected hook segment plays as the opening during normal playback
+    ○ skipped preview hook once plays the selected range first then jumps back to clip start
+    ○ skipped scores clips, explains why they work, and highlights the best pick
+    ○ skipped improves a weak clip and exports it to a chosen short-form destination
+    ○ skipped opens with synchronized before and after comparison
+    ○ skipped supports minute-long B-roll with explicit return, loop, and hold behavior
+    ○ skipped adds images as timed creative inserts with B-roll layouts and image controls
+    ○ skipped selects the exact visual layer from the live timeline and opens After controls
+    ○ skipped recognizes uploaded B-roll that already covers the suggested beats
+    ○ skipped keeps uploaded background sound enabled with speech-aware ducking
+    ○ skipped generates real timestamped speech captions and keeps every line editable
+    ○ skipped keeps the existing caption track when English translation is not confirmed
+    ○ skipped captions a full uploaded podcast by secure storage reference without downloading it into the browser
+    ○ skipped shows an actionable error for the uploaded WhatsApp video and allows a retry
+    ○ skipped keeps reviewed captions when regeneration fails
+    ○ skipped completed caption jobs with zero usable lines fail without inventing captions
+    ○ skipped can add a truthful choir sound cue after speech recognition rejects the video
+    ○ skipped pasted lyrics can be reviewed and reach the render contract across the full clip
+    ○ skipped imports a plain TXT lyric sheet as a timed draft
+    ○ skipped empty English translation reports no reliable words rather than unconfirmed translation
+    ○ skipped turns a reviewed spoken story beat into approved licensed moving footage
+    ○ skipped does not invent subtitles when the worker finds no usable words
+    ○ skipped shows uncertain choir words as editable captions that need wording review
+    ○ skipped does not preview Cyrillic syllable loops seen in the live choir run
+    ○ skipped rejects repeated longer Cyrillic words from the live choir retest
+    ○ skipped pauses a captioned render until editable timed lines exist
+    ○ skipped previews Creative Director captions and pacing without starting a render
+    ○ skipped uses one reliable render action for the selected export destination
+    ○ skipped places and edits built-in sound effects on the live timeline with undo and redo
+    ○ skipped groups motion poses, exposes the canvas path, and submits the same animation plan
+    ○ skipped uploads a custom sound effect, previews it, and includes timed SFX in export options
+    ○ skipped quick trim retimes motion and its linked sound and undo restores both
+    ○ skipped supports 1-click simple editing toolbar for split, trim, delete, and 1-tap framing
+    ○ skipped reviews exact Director trim timing and applies only after signed-in approval
+    ○ skipped restoring a checkpoint registers a fresh revision before Director approval
+    ○ skipped records a rejected Director split without changing the timeline
+    ○ skipped server failure or mismatched reviewer never applies a Director edit
+    ○ skipped reports a server-recorded review separately if sign-in changes before local apply
+    ○ skipped does not record a decision if the project changes while its version is being saved
+    ○ skipped source-shot analysis uses the queued job path when enabled
+    ○ skipped durable source analysis sends its owned path without downloading video in the editor
+    ○ skipped retrying an interrupted owned-source analysis resumes its request ID
+    ○ skipped source-shot analysis offers one evidence-bound split without applying it
+    ○ skipped blocks review without Firebase sign-in and marks a changed preview stale
+
+Test Suites: 1 passed, 1 total
+Tests:       83 skipped, 1 passed, 84 total
+Snapshots:   0 total
+Time:        27.004 s, estimated 571 s
+Ran all test suites within paths "src/components/__tests__/ViralClipStudio.test.js".
+Test results written to: ../reports/studio-analysis-ten-minute-20261004/frontend-retry-tests.json

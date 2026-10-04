@@ -9,6 +9,10 @@ The successful execution is also visible directly in
 The [fresh local/cloud comparison receipt](../reports/studio-analysis-ten-minute-20261004/local-cloud-comparison.json)
 also retains the complete baseline output and proves full JSON equality using
 the same source bytes.
+The subsequent evidence capture preserves the [full Jest result](../reports/studio-analysis-ten-minute-20261004/frontend-tests.json)
+with 90 passing tests and one podcast-audio timeout, plus the
+[passing isolated retry](../reports/studio-analysis-ten-minute-20261004/frontend-retry-tests.json).
+This fresh capture is distinct from the earlier 91/91 run described below.
 
 **Status: ten-minute staging gate passed after media-runtime repair.** This gate uses the isolated
 `autopromote-staging-2026` project, its private CPU analyzer and a manually

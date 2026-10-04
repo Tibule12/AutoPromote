@@ -17,6 +17,10 @@ were removed from the Cloud Run execution snapshots.
 - [Source object metadata](source-object.json) and [result object metadata](repaired-result-object.json).
 - [Image build receipt](analyzer-build.json), [deployed revision](repaired-analyzer-revision.json), and [invocation IAM](analyzer-iam.json).
 - [Fresh local/cloud comparison](local-cloud-comparison.json), [complete local result](local-analysis-result.json), and [local run receipt](local-analysis-run.json).
+- [Captured frontend suite](frontend-tests.json) and [run receipt](frontend-test-run.json): 90 passed, one timeout.
+- [Isolated retry](frontend-retry-tests.json) and [retry receipt](frontend-retry-run.json): the timed-out test passed.
+- [Complete evidence verification](verification.json).
+- [SHA-256 manifest of captured files](files.json).
 
 Open the live [Cloud Run execution](https://console.cloud.google.com/run/jobs/executions/details/us-central1/studio-analysis-once-nsnlf?project=autopromote-staging-2026),
 [Cloud Build](https://console.cloud.google.com/cloud-build/builds/6c7f7ab3-dc37-46d5-ad4d-3d4782cbd445?project=autopromote-staging-2026),
@@ -41,6 +45,24 @@ its byte hash before analysis. It completed in 310.279 seconds. Canonical hashin
 of its full JSON and the cloud JSON produced the same
 `e8c725943577c7bbc9b275443efa9e2a074a7abd814e391d4dc9ab06c33ae98c`
 digest. Every cut, keyframe and edit-plan field is therefore retained for comparison.
+
+The fresh frontend evidence capture ran alongside local analysis. It passed
+90 of 91 assertions; the podcast cutaway audio test exceeded its existing
+30-second test budget. Its isolated retry passed in a 27.768-second process.
+Both raw Jest results and logs are preserved. This fresh full suite run had a
+timeout failure; the isolated retry does not erase that fact or change the test
+budget. The original 91/91 run remains the earlier terminal result cited in the
+report.
+
+Check the full saved evidence, including the exact local comparison and both
+frontend test receipts:
+
+```sh
+node scripts/verify-studio-analysis-ten-minute-proof.js
+```
+
+The complete verification receipt explicitly records `fullRunPassed: false`
+and `isolatedRetryPassed: true` for the fresh frontend capture.
 
 The local source-frame audit image is
 `artifacts/studio-analysis-ten-minute-20261004/camera-cut-proof.png`.

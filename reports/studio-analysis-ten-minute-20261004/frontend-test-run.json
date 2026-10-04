@@ -1,0 +1,18 @@
+{
+  "startedAt": "2026-10-04T11:05:46.853624+00:00",
+  "completedAt": "2026-10-04T11:15:18.437779+00:00",
+  "elapsedSeconds": 571.584,
+  "exitCode": 1,
+  "command": [
+    "npm",
+    "test",
+    "--",
+    "--watch=false",
+    "--runInBand",
+    "--runTestsByPath",
+    "src/components/__tests__/studioAnalysisJobClient.test.js",
+    "src/components/__tests__/ViralClipStudio.test.js",
+    "--json",
+    "--outputFile=/home/tibule12/Projects/AutoPromte/AutoPromote/reports/studio-analysis-ten-minute-20261004/frontend-tests.json"
+  ]
+}

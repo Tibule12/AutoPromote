@@ -1,0 +1,52 @@
+
+> autopromote-frontend@1.0.0 test
+> react-scripts test --watch=false --runInBand --runTestsByPath src/components/__tests__/studioAnalysisJobClient.test.js src/components/__tests__/ViralClipStudio.test.js --json --outputFile=/home/tibule12/Projects/AutoPromte/AutoPromote/reports/studio-analysis-ten-minute-20261004/frontend-tests.json
+
+FAIL src/components/__tests__/ViralClipStudio.test.js (570.001 s)
+  ● Console
+
+    console.error
+      The current testing environment is not configured to support act(...)
+
+      181 |     });
+      182 |     consoleErrorSpy = jest.spyOn(console, "error").mockImplementation((...args) => {
+    > 183 |       originalConsoleError(...args);
+          |       ^
+      184 |     });
+      185 |   });
+      186 |
+
+      at console.<anonymous> (src/components/__tests__/ViralClipStudio.test.js:183:7)
+      at isConcurrentActEnvironment (node_modules/react-dom/cjs/react-dom-client.development.js:16329:17)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-dom/cjs/react-dom-client.development.js:18755:7)
+      at scheduleUpdateOnFiber (node_modules/react-dom/cjs/react-dom-client.development.js:16409:11)
+      at dispatchSetStateInternal (node_modules/react-dom/cjs/react-dom-client.development.js:9170:13)
+      at setPreviewingSoundEffectId (node_modules/react-dom/cjs/react-dom-client.development.js:9127:7)
+      at stopSoundEffectPlayback (src/components/ViralClipStudio.js:6161:28)
+      at src/components/ViralClipStudio.js:6376:9
+      at Timeout.task (node_modules/jsdom/lib/jsdom/browser/Window.js:516:19)
+
+  ● ViralClipStudio timeline sequencing › runs a podcast cutaway with original, overlay, and mixed audio modes
+
+    thrown: "Exceeded timeout of 30000 ms for a test.
+    Use jest.setTimeout(newTimeout) to increase the timeout value, if this is a long-running test."
+
+      2508 |   });
+      2509 |
+    > 2510 |   test("runs a podcast cutaway with original, overlay, and mixed audio modes", async () => {
+           |   ^
+      2511 |     const createdVideos = setupVideoCreateElementMock();
+      2512 |     render(
+      2513 |       <ViralClipStudio
+
+      at src/components/__tests__/ViralClipStudio.test.js:2510:3
+      at Object.<anonymous> (src/components/__tests__/ViralClipStudio.test.js:49:1)
+
+PASS src/components/__tests__/studioAnalysisJobClient.test.js
+
+Test Suites: 1 failed, 1 passed, 2 total
+Tests:       1 failed, 90 passed, 91 total
+Snapshots:   0 total
+Time:        570.659 s
+Ran all test suites within paths "src/components/__tests__/studioAnalysisJobClient.test.js", "src/components/__tests__/ViralClipStudio.test.js".
+Test results written to: ../reports/studio-analysis-ten-minute-20261004/frontend-tests.json
