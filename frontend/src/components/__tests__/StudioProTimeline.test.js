@@ -2,6 +2,118 @@ import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import StudioProTimeline from "../StudioProTimeline";
 
+test("B-roll right trim reports the absolute output end away from zero", () => {
+  const onOverlayTrim = jest.fn();
+  render(
+    <StudioProTimeline
+      duration={20}
+      trackStates={{}}
+      overlays={[
+        {
+          id: "cutaway",
+          type: "video",
+          bRollMode: "pip",
+          startTime: 5,
+          duration: 3,
+          src: "https://example.com/cutaway.mp4",
+        },
+      ]}
+      onOverlayTrim={onOverlayTrim}
+    />
+  );
+  const clip = screen.getByTestId("pro-broll-clip-1");
+  jest.spyOn(clip.parentElement, "getBoundingClientRect").mockReturnValue({ width: 1000 });
+  const right = clip.lastElementChild;
+  right.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true, clientX: 400 }));
+  right.dispatchEvent(new MouseEvent("pointermove", { bubbles: true, clientX: 450 }));
+  expect(onOverlayTrim).toHaveBeenCalledWith("cutaway", "end", 9);
+});
+
+test("locked B-roll keeps selection and seeking but rejects move, slip and trim gestures", () => {
+  const move = jest.fn(),
+    trim = jest.fn(),
+    slip = jest.fn(),
+    select = jest.fn(),
+    seek = jest.fn();
+  render(
+    <StudioProTimeline
+      duration={20}
+      trackStates={{ broll: { locked: true } }}
+      overlays={[
+        {
+          id: "cutaway",
+          type: "video",
+          bRollMode: "pip",
+          startTime: 5,
+          duration: 3,
+          src: "https://example.com/cutaway.mp4",
+        },
+      ]}
+      onOverlayMove={move}
+      onOverlayTrim={trim}
+      onOverlaySlip={slip}
+      onSelectOverlay={select}
+      onSeek={seek}
+    />
+  );
+  const clip = screen.getByTestId("pro-broll-clip-1");
+  jest.spyOn(clip.parentElement, "getBoundingClientRect").mockReturnValue({ width: 1000 });
+  for (const handle of [...clip.children]) {
+    handle.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true, clientX: 400 }));
+    handle.dispatchEvent(new MouseEvent("pointermove", { bubbles: true, clientX: 450 }));
+    handle.dispatchEvent(new MouseEvent("pointerup", { bubbles: true, clientX: 450 }));
+  }
+  clip.children[1].dispatchEvent(
+    new MouseEvent("pointerdown", { bubbles: true, clientX: 400, altKey: true })
+  );
+  clip.children[1].dispatchEvent(new MouseEvent("pointermove", { bubbles: true, clientX: 450 }));
+  expect(move).not.toHaveBeenCalled();
+  expect(trim).not.toHaveBeenCalled();
+  expect(slip).not.toHaveBeenCalled();
+  fireEvent.click(clip.children[1]);
+  expect(select).toHaveBeenCalledWith("cutaway");
+  expect(seek).toHaveBeenCalled();
+});
+
+test.each([
+  [
+    "adjustment",
+    {
+      adjustmentLayers: [
+        { id: "grade", startTime: 5, duration: 3, effects: { color: { brightness: 0.1 } } },
+      ],
+    },
+    "onAdjustmentMove",
+    "onAdjustmentTrim",
+  ],
+  [
+    "motion",
+    { motionScenes: [{ id: "title", startTime: 5, duration: 3, preset: "title", name: "Title" }] },
+    "onMotionMove",
+    "onMotionTrim",
+  ],
+  ["originalAudio", { timelineSegments: [{ id: "source", duration: 20 }] }, null, "onAudioTrim"],
+])("%s timing lock rejects timeline gestures", (track, items, moveKey, trimKey) => {
+  const mutate = jest.fn();
+  const callbacks = { [trimKey]: mutate, ...(moveKey ? { [moveKey]: mutate } : {}) };
+  render(
+    <StudioProTimeline
+      duration={20}
+      trackStates={{ [track]: { locked: true } }}
+      {...items}
+      {...callbacks}
+    />
+  );
+  const clip = screen.getByTestId(`pro-track-row-${track}`).querySelector(".pro-track-clip");
+  jest.spyOn(clip.parentElement, "getBoundingClientRect").mockReturnValue({ width: 1000 });
+  for (const handle of [...clip.children]) {
+    handle.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true, clientX: 400 }));
+    handle.dispatchEvent(new MouseEvent("pointermove", { bubbles: true, clientX: 450 }));
+    handle.dispatchEvent(new MouseEvent("pointerup", { bubbles: true, clientX: 450 }));
+  }
+  expect(mutate).not.toHaveBeenCalled();
+});
+
 test("source clicks seek the clicked output time across trimmed clips, including a scrolled lane", () => {
   const onSeek = jest.fn();
   render(

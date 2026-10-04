@@ -16961,6 +16961,9 @@ body.dashboard-mode.viral-studio-open {
 .studio-project-rail [hidden] {
   display: none !important;
 }
+.pro-track-row.is-locked .pro-track-clip > div {
+  cursor: default !important;
+}
 .studio-library-tabs {
   display: flex;
   gap: 4px;

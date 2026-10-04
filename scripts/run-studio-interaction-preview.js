@@ -5,7 +5,10 @@ const fs = require("fs");
 const path = require("path");
 const express = require("express");
 const root = path.resolve(__dirname, "..");
-const folder = path.join(root, "artifacts/studio-interactions-20261004");
+const folder = path.resolve(
+  root,
+  process.env.STUDIO_INTERACTION_FOLDER || "artifacts/studio-interactions-20261004"
+);
 const port = Number(process.env.STUDIO_INTERACTION_PORT || 5007);
 // Firebase modules require client configuration at import time. The editor
 // fixture has no signed-in user and never calls Firebase or the cloud API.
@@ -57,6 +60,45 @@ if (!fs.existsSync(fixture)) {
   if (result.status !== 0)
     throw new Error(
       result.error?.message || result.stderr || "FFmpeg could not generate the video fixture"
+    );
+}
+const secondFixture = path.join(folder, "fixture-second.mp4");
+if (!fs.existsSync(secondFixture)) {
+  const result = require("child_process").spawnSync(
+    "ffmpeg",
+    [
+      "-hide_banner",
+      "-loglevel",
+      "error",
+      "-f",
+      "lavfi",
+      "-i",
+      "color=c=blue:size=640x360:rate=24",
+      "-f",
+      "lavfi",
+      "-i",
+      "sine=frequency=880:sample_rate=44100",
+      "-t",
+      "4",
+      "-c:v",
+      "libx264",
+      "-preset",
+      "ultrafast",
+      "-pix_fmt",
+      "yuv420p",
+      "-c:a",
+      "aac",
+      "-b:a",
+      "64k",
+      "-movflags",
+      "+faststart",
+      secondFixture,
+    ],
+    { encoding: "utf8" }
+  );
+  if (result.status !== 0)
+    throw new Error(
+      result.error?.message || result.stderr || "Could not generate the second fixture"
     );
 }
 process.env.NODE_ENV = "development";
@@ -120,6 +162,7 @@ webpack(config, (error, stats) => {
       )
   );
   app.get("/fixture.mp4", (_req, res) => res.sendFile(path.join(folder, "fixture.mp4")));
+  app.get("/fixture-second.mp4", (_req, res) => res.sendFile(secondFixture));
   app.use(express.static(config.output.path));
   app.listen(port, "127.0.0.1", () =>
     console.log(JSON.stringify({ ready: true, port, cloudApi: false, signedIn: false }))

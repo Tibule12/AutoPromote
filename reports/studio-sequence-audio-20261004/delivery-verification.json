@@ -1,0 +1,180 @@
+{
+  "passed": true,
+  "verifiedAt": "2026-10-04T17:34:03.110610+00:00",
+  "baselineCommit": "233c7948665a9a16741d1ef22486917410b98bb5",
+  "scope": "Local editor and native browser evidence; authenticated editor export callback in Jest only. Cloud rendering and deployment not exercised.",
+  "checks": [
+    {
+      "label": "Sequence browser completed eight checks",
+      "passed": true
+    },
+    {
+      "label": "Interaction browser completed seventeen checks",
+      "passed": true
+    },
+    {
+      "label": "Both browsers had zero page errors",
+      "passed": true
+    },
+    {
+      "label": "Both browsers had zero API requests",
+      "passed": true
+    },
+    {
+      "label": "Native EOF observed for both distinct source files",
+      "passed": true
+    },
+    {
+      "label": "New source resumes natively after EOF",
+      "passed": true
+    },
+    {
+      "label": "Signed-out export gate exercised",
+      "passed": true
+    },
+    {
+      "label": "Forty-eight focused regressions pass",
+      "passed": true
+    },
+    {
+      "label": "Trimmed multi-source export integration passes",
+      "passed": true
+    },
+    {
+      "label": "Forty-nine different tests were executed",
+      "passed": true
+    },
+    {
+      "label": "Both small timing suites run completely",
+      "passed": true
+    },
+    {
+      "label": "Five controls fail against original production code",
+      "passed": true
+    },
+    {
+      "label": "Lint has zero errors",
+      "passed": true
+    },
+    {
+      "label": "Lint warnings match baseline",
+      "passed": true
+    },
+    {
+      "label": "Sequence browser source hashes match delivered files",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "label": "Interaction browser source hashes match delivered files",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "label": "Both receipts bind the compiled bundle",
+      "passed": true
+    },
+    {
+      "label": "Two distinct generated fixtures match their hashes",
+      "passed": true
+    },
+    {
+      "label": "Browser fixture matches interaction fixture hash",
+      "passed": true
+    },
+    {
+      "label": "Report links resolve",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "label": "Diff has no whitespace errors",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "label": "Node runner syntax checks pass",
+      "passed": true,
+      "detail": [
+        {
+          "file": "scripts/run-studio-interaction-preview.js",
+          "exitCode": 0
+        },
+        {
+          "file": "test/e2e/playwright/run-studio-sequence-audio.js",
+          "exitCode": 0
+        },
+        {
+          "file": "test/e2e/playwright/run-studio-interactions.js",
+          "exitCode": 0
+        }
+      ]
+    }
+  ],
+  "codeHashes": {
+    "frontend/src/components/StudioControlMenu.js": "c90884ac27b7adbd6db86163709cbe1078f9de24e1ceaee8cad753b358e94033",
+    "frontend/src/components/StudioProTimeline.js": "51734df235a9997653594b41d24866e80e2dde0ef41f9c2311967533442bb207",
+    "frontend/src/components/ViralClipStudio.css": "eaee907e8be6fb25fdca1e77e0fc6051e4000f40544e49b29edc4981510f8f96",
+    "frontend/src/components/ViralClipStudio.js": "9c353f5084c86e8e75d1ae440af7c48a348fb8840bd5e1fcfeb779f5ba34cf16",
+    "frontend/src/components/__tests__/StudioProTimeline.test.js": "43dc60b4beeb0dbb3fab8d8f082389da9c2b30439a4d7d240a678a3e5d7cd1ae",
+    "frontend/src/components/__tests__/ViralClipStudio.test.js": "9a35fecc2b6d1e2c5cfd9a675e74b2271faf511db14c571fcec2e71fdf033e52",
+    "frontend/src/components/__tests__/studioOverlayTiming.test.js": "f35541090b37f0f3d8c009b2238aa456114b3c430d57f6faf3768a56b3880da0",
+    "frontend/src/components/studioOverlayTiming.js": "7f9d851e39d752473a80eb80a525448dd93752eabc4466e7c711daccd50a20f8",
+    "scripts/run-studio-interaction-preview.js": "f33fa4e0c69429dc98b185d9fd6751299d4b13b274ec08ac8cfc9ec2860ee1ad",
+    "test/e2e/playwright/run-studio-interactions.js": "7f082423b1d18a497b83c82098e060f2c5d9fd2baaeb0bd35a413d17a3b3982e",
+    "test/e2e/playwright/run-studio-sequence-audio.js": "26f237b2d241449b3348a750e32473f4acbccd097cedd9008b2b1c9e255a4ce8",
+    "test/e2e/playwright/studio-interaction-entry.jsx": "90d8c2595e697f6b42a87d50bf615844930863d072a485032c343460bdec3d4b"
+  },
+  "passedTestNames": [
+    "ViralClipStudio timeline sequencing metadata reload preserves the selected trim and paused editing frame",
+    "ViralClipStudio timeline sequencing paused scrubbing at the trimmed end stays on that frame",
+    "ViralClipStudio timeline sequencing a playing single-clip sequence loops at its trimmed end",
+    "ViralClipStudio timeline sequencing native source EOF loops a full-length clip while user-paused EOF stays paused",
+    "ViralClipStudio timeline sequencing a loading source resumes when playable only while playback is requested",
+    "ViralClipStudio timeline sequencing an immediate second-source import retains the first selected range before its metadata arrives",
+    "ViralClipStudio timeline sequencing source timing lock blocks both trim toolbars while seeking stays available",
+    "ViralClipStudio timeline sequencing background extraction sync respects original-track mute, solo and automation after reopening",
+    "ViralClipStudio timeline sequencing rendered output metadata does not replace the editable source range",
+    "ViralClipStudio timeline sequencing batch media stays ordered in the library until explicitly placed, with isolated failures",
+    "ViralClipStudio timeline sequencing groups film camera takes manually and exports the chosen angle range",
+    "ViralClipStudio timeline sequencing exports a four-camera grid with every source, offset, and framing anchor",
+    "ViralClipStudio timeline sequencing commits a reviewed speaker lower third to the exportable timeline",
+    "ViralClipStudio timeline sequencing loads a completed render into After and exposes explicit output actions",
+    "ViralClipStudio timeline sequencing allows appended clips to be reordered in the timeline",
+    "ViralClipStudio timeline sequencing keeps the same timeline clip active after reordering",
+    "ViralClipStudio timeline sequencing preserves uploaded B-roll through duplicate, delete, undo, and redo",
+    "ViralClipStudio timeline sequencing exports mute-original-audio without background audio options",
+    "ViralClipStudio timeline sequencing materializes blob-backed main timeline clips before export",
+    "ViralClipStudio timeline sequencing exports the selected hook once and removes the duplicate span from the main clip",
+    "ViralClipStudio timeline sequencing selected hook segment plays as the opening during normal playback",
+    "ViralClipStudio timeline sequencing preview hook once plays the selected range first then jumps back to clip start",
+    "ViralClipStudio timeline sequencing keeps uploaded background sound enabled with speech-aware ducking",
+    "ViralClipStudio timeline sequencing quick trim retimes motion and its linked sound and undo restores both",
+    "ViralClipStudio timeline sequencing supports 1-click simple editing toolbar for split, trim, delete, and 1-tap framing",
+    "B-roll right trim reports the absolute output end away from zero",
+    "locked B-roll keeps selection and seeking but rejects move, slip and trim gestures",
+    "adjustment timing lock rejects timeline gestures",
+    "motion timing lock rejects timeline gestures",
+    "originalAudio timing lock rejects timeline gestures",
+    "source clicks seek the clicked output time across trimmed clips, including a scrolled lane",
+    "the current framing block follows the preview playhead and empty tracks stay accessible",
+    "zoom keeps the current edit centered and Fit restores the complete time axis",
+    "trimmed source lengths determine clip width and the next clip's start",
+    "short framing cuts retain exact timing widths instead of covering later cuts",
+    "motion scenes are selectable from their own lane and seek to their actual time",
+    "timed color adjustment block moves and trims the exported grade interval",
+    "auto-motion button in toolbar triggers onAutoGenerateMotionBeats",
+    "motion clip supports dragging to move and trimming edges",
+    "programme layer at 0s keeps its position after source trim",
+    "programme layer at 2s keeps its position after source trim",
+    "programme layer at 5s keeps its position after source trim",
+    "programme layer at 9.9s keeps its position after source trim",
+    "second occurrence uses its own source range even when source identities repeat",
+    "hook reordering maps programme 5.5s onto the retained source content",
+    "hook reordering maps programme 2s onto the retained source content",
+    "hook reordering maps programme 8s onto the retained source content",
+    "legacy source captions map once while untimed graphics stay untimed",
+    "ViralClipStudio timeline sequencing trimmed multi-source export preserves programme times for titles and B-roll"
+  ],
+  "bundleSha256": "2b59b24fbd2e4b56574d311a36020f56fd947d0ab58f3a1642dfdaa5da8af1ac"
+}

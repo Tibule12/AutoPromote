@@ -1,0 +1,336 @@
+{
+  "passed": true,
+  "completedAt": "2026-10-04T17:29:15.017Z",
+  "scope": "Local production component and native video fixture; real IndexedDB; no sign-in, cloud uploads, analysis or export jobs",
+  "checks": [
+    {
+      "label": "Native 12-second source retains its selected 2–8-second range"
+    },
+    {
+      "label": "Metadata event preserves the paused editing frame"
+    },
+    {
+      "label": "Paused scrub reaches the trimmed end without looping"
+    },
+    {
+      "label": "Native playback loops at the trimmed end instead of continuing into excluded footage"
+    },
+    {
+      "label": "Keyboard Undo and Redo restore the complete trim"
+    },
+    {
+      "label": "Keyboard library navigation selects the matching accessible pane"
+    },
+    {
+      "label": "IndexedDB checkpoint survives reload and restores the selected trim"
+    },
+    {
+      "label": "Escape closes the open menu before closing the expanded preview"
+    },
+    {
+      "label": "1440x1000 timeline fits the screen",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "timeline": {
+        "x": 0,
+        "y": 730,
+        "width": 1440,
+        "height": 270,
+        "right": 1440,
+        "bottom": 1000
+      },
+      "monitor": {
+        "x": 92,
+        "y": 64,
+        "width": 948,
+        "height": 656,
+        "right": 1040,
+        "bottom": 720
+      },
+      "picture": {
+        "x": 432.46875,
+        "y": 176,
+        "width": 266.0625,
+        "height": 473,
+        "right": 698.53125,
+        "bottom": 649
+      },
+      "transport": {
+        "x": 117,
+        "y": 657,
+        "width": 897,
+        "height": 42,
+        "right": 1014,
+        "bottom": 699
+      },
+      "close": {
+        "x": 1387,
+        "y": 16.296875,
+        "width": 37,
+        "height": 37,
+        "right": 1424,
+        "bottom": 53.296875
+      }
+    },
+    {
+      "label": "1000x800 timeline fits the screen",
+      "viewport": {
+        "width": 1000,
+        "height": 800
+      },
+      "timeline": {
+        "x": 0,
+        "y": 530,
+        "width": 999.984375,
+        "height": 270,
+        "right": 999.984375,
+        "bottom": 800
+      },
+      "monitor": {
+        "x": 92,
+        "y": 68,
+        "width": 534.109375,
+        "height": 452,
+        "right": 626.109375,
+        "bottom": 520
+      },
+      "picture": {
+        "x": 298.578125,
+        "y": 224,
+        "width": 120.9375,
+        "height": 215,
+        "right": 419.515625,
+        "bottom": 439
+      },
+      "transport": {
+        "x": 122,
+        "y": 447,
+        "width": 474.109375,
+        "height": 42,
+        "right": 596.109375,
+        "bottom": 489
+      },
+      "close": {
+        "x": 947,
+        "y": 15,
+        "width": 37,
+        "height": 37,
+        "right": 984,
+        "bottom": 52
+      }
+    },
+    {
+      "label": "820x1024 timeline fits the screen",
+      "viewport": {
+        "width": 820,
+        "height": 1024
+      },
+      "timeline": {
+        "x": 0,
+        "y": 698,
+        "width": 820,
+        "height": 270,
+        "right": 820,
+        "bottom": 968
+      },
+      "monitor": {
+        "x": 0,
+        "y": 158,
+        "width": 820,
+        "height": 520,
+        "right": 820,
+        "bottom": 678
+      },
+      "picture": {
+        "x": 314.9375,
+        "y": 259,
+        "width": 190.125,
+        "height": 338,
+        "right": 505.0625,
+        "bottom": 597
+      },
+      "transport": {
+        "x": 30,
+        "y": 605,
+        "width": 760,
+        "height": 42,
+        "right": 790,
+        "bottom": 647
+      },
+      "close": {
+        "x": 771,
+        "y": 8,
+        "width": 37,
+        "height": 37,
+        "right": 808,
+        "bottom": 45
+      }
+    },
+    {
+      "label": "820x1024 media library remains reachable and fits the screen"
+    },
+    {
+      "label": "768x1024 timeline fits the screen",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "timeline": {
+        "x": 0,
+        "y": 698,
+        "width": 768,
+        "height": 270,
+        "right": 768,
+        "bottom": 968
+      },
+      "monitor": {
+        "x": 0,
+        "y": 158,
+        "width": 768,
+        "height": 520,
+        "right": 768,
+        "bottom": 678
+      },
+      "picture": {
+        "x": 288.9375,
+        "y": 259,
+        "width": 190.125,
+        "height": 338,
+        "right": 479.0625,
+        "bottom": 597
+      },
+      "transport": {
+        "x": 30,
+        "y": 605,
+        "width": 708,
+        "height": 42,
+        "right": 738,
+        "bottom": 647
+      },
+      "close": {
+        "x": 628,
+        "y": 8,
+        "width": 37,
+        "height": 37,
+        "right": 665,
+        "bottom": 45
+      }
+    },
+    {
+      "label": "768x1024 media library remains reachable and fits the screen"
+    },
+    {
+      "label": "390x844 timeline fits the screen",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "timeline": {
+        "x": 0,
+        "y": 573.875,
+        "width": 390,
+        "height": 270,
+        "right": 390,
+        "bottom": 843.875
+      },
+      "monitor": {
+        "x": 0,
+        "y": 115,
+        "width": 390,
+        "height": 438.875,
+        "right": 390,
+        "bottom": 553.875
+      },
+      "picture": {
+        "x": 144.6875,
+        "y": 254,
+        "width": 100.609375,
+        "height": 178.859375,
+        "right": 245.296875,
+        "bottom": 432.859375
+      },
+      "transport": {
+        "x": 30,
+        "y": 440.875,
+        "width": 330,
+        "height": 82,
+        "right": 360,
+        "bottom": 522.875
+      },
+      "close": {
+        "x": 250,
+        "y": 8,
+        "width": 37,
+        "height": 37,
+        "right": 287,
+        "bottom": 45
+      }
+    },
+    {
+      "label": "390x844 media library remains reachable and fits the screen"
+    },
+    {
+      "label": "844x390 timeline fits the screen",
+      "viewport": {
+        "width": 844,
+        "height": 390
+      },
+      "timeline": {
+        "x": 0,
+        "y": 230,
+        "width": 844,
+        "height": 160,
+        "right": 844,
+        "bottom": 390
+      },
+      "monitor": {
+        "x": 92,
+        "y": -200,
+        "width": 442.34375,
+        "height": 420,
+        "right": 534.34375,
+        "bottom": 220
+      },
+      "picture": {
+        "x": 268.171875,
+        "y": -61,
+        "width": 90,
+        "height": 160,
+        "right": 358.171875,
+        "bottom": 99
+      },
+      "transport": {
+        "x": 122,
+        "y": 107,
+        "width": 382.34375,
+        "height": 82,
+        "right": 504.34375,
+        "bottom": 189
+      },
+      "close": {
+        "x": 791,
+        "y": 15,
+        "width": 37,
+        "height": 37,
+        "right": 828,
+        "bottom": 52
+      }
+    }
+  ],
+  "pageErrors": [],
+  "apiRequests": [],
+  "sourceHashes": {
+    "frontend/src/components/ViralClipStudio.js": "9c353f5084c86e8e75d1ae440af7c48a348fb8840bd5e1fcfeb779f5ba34cf16",
+    "frontend/src/components/ViralClipStudio.css": "eaee907e8be6fb25fdca1e77e0fc6051e4000f40544e49b29edc4981510f8f96",
+    "frontend/src/components/StudioControlMenu.js": "c90884ac27b7adbd6db86163709cbe1078f9de24e1ceaee8cad753b358e94033",
+    "frontend/src/components/StudioProTimeline.js": "51734df235a9997653594b41d24866e80e2dde0ef41f9c2311967533442bb207",
+    "frontend/src/components/studioOverlayTiming.js": "7f9d851e39d752473a80eb80a525448dd93752eabc4466e7c711daccd50a20f8",
+    "scripts/run-studio-interaction-preview.js": "f33fa4e0c69429dc98b185d9fd6751299d4b13b274ec08ac8cfc9ec2860ee1ad",
+    "test/e2e/playwright/run-studio-interactions.js": "7f082423b1d18a497b83c82098e060f2c5d9fd2baaeb0bd35a413d17a3b3982e",
+    "test/e2e/playwright/studio-interaction-entry.jsx": "90d8c2595e697f6b42a87d50bf615844930863d072a485032c343460bdec3d4b"
+  },
+  "bundleSha256": "2b59b24fbd2e4b56574d311a36020f56fd947d0ab58f3a1642dfdaa5da8af1ac",
+  "fixtureSha256": "02827c6f2d1a5fde0fd1d193f7ec63c3f00b359a808d831472ed4a7af2053e2b"
+}

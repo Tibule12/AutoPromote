@@ -1,0 +1,287 @@
+{
+  "passed": true,
+  "completedAt": "2026-10-04T17:32:40.261Z",
+  "scope": "Local production Studio, two FFmpeg source files, native decoder and pointer gestures. Signed-out export is blocked. Synthetic storage metadata permits local placement only. No cloud auth, uploads, export payload or encoded render are exercised.",
+  "checks": [
+    {
+      "label": "Two distinct native source files form a 16-second sequence"
+    },
+    {
+      "label": "Native 12-second source EOF advances into the 4-second second video"
+    },
+    {
+      "label": "Native EOF of the last video loops to the first source and keeps playing"
+    },
+    {
+      "label": "Dragging B-roll end away from zero keeps the 5-second start and extends to 9 seconds"
+    },
+    {
+      "label": "Locked B-roll rejects an actual captured pointer trim"
+    },
+    {
+      "label": "Original-audio mute remains applied after a media synchronization event"
+    },
+    {
+      "label": "Source trim retimes B-roll once onto the 14-second edited sequence"
+    },
+    {
+      "label": "Signed-out export displays the sign-in requirement and never invokes the export callback"
+    }
+  ],
+  "pageErrors": [],
+  "apiRequests": [],
+  "mediaEvents": [
+    {
+      "name": "loadstart",
+      "time": 11.800623052959502,
+      "duration": null,
+      "paused": true,
+      "src": "http://127.0.0.1:5007/fixture.mp4"
+    },
+    {
+      "name": "loadedmetadata",
+      "time": 11.800623,
+      "duration": 12,
+      "paused": true,
+      "src": "http://127.0.0.1:5007/fixture.mp4"
+    },
+    {
+      "name": "seeked",
+      "time": 11.800623,
+      "duration": 12,
+      "paused": true,
+      "src": "http://127.0.0.1:5007/fixture.mp4"
+    },
+    {
+      "name": "canplay",
+      "time": 11.800623,
+      "duration": 12,
+      "paused": true,
+      "src": "http://127.0.0.1:5007/fixture.mp4"
+    },
+    {
+      "name": "play",
+      "time": 11.800623,
+      "duration": 12,
+      "paused": false,
+      "src": "http://127.0.0.1:5007/fixture.mp4"
+    },
+    {
+      "name": "pause",
+      "time": 12,
+      "duration": 12,
+      "paused": true,
+      "src": "http://127.0.0.1:5007/fixture.mp4"
+    },
+    {
+      "name": "ended",
+      "time": 12,
+      "duration": 12,
+      "paused": true,
+      "src": "http://127.0.0.1:5007/fixture.mp4"
+    },
+    {
+      "name": "loadstart",
+      "time": 0,
+      "duration": null,
+      "paused": true,
+      "src": "http://127.0.0.1:5007/fixture-second.mp4"
+    },
+    {
+      "name": "loadedmetadata",
+      "time": 0,
+      "duration": 4,
+      "paused": true,
+      "src": "http://127.0.0.1:5007/fixture-second.mp4"
+    },
+    {
+      "name": "canplay",
+      "time": 0,
+      "duration": 4,
+      "paused": false,
+      "src": "http://127.0.0.1:5007/fixture-second.mp4"
+    },
+    {
+      "name": "play",
+      "time": 0.365402,
+      "duration": 4,
+      "paused": false,
+      "src": "http://127.0.0.1:5007/fixture-second.mp4"
+    },
+    {
+      "name": "pause",
+      "time": 4,
+      "duration": 4,
+      "paused": true,
+      "src": "http://127.0.0.1:5007/fixture-second.mp4"
+    },
+    {
+      "name": "seeked",
+      "time": 3.800623,
+      "duration": 4,
+      "paused": true,
+      "src": "http://127.0.0.1:5007/fixture-second.mp4"
+    },
+    {
+      "name": "canplay",
+      "time": 3.800623,
+      "duration": 4,
+      "paused": true,
+      "src": "http://127.0.0.1:5007/fixture-second.mp4"
+    },
+    {
+      "name": "play",
+      "time": 3.800623,
+      "duration": 4,
+      "paused": false,
+      "src": "http://127.0.0.1:5007/fixture-second.mp4"
+    },
+    {
+      "name": "pause",
+      "time": 4,
+      "duration": 4,
+      "paused": true,
+      "src": "http://127.0.0.1:5007/fixture-second.mp4"
+    },
+    {
+      "name": "ended",
+      "time": 4,
+      "duration": 4,
+      "paused": true,
+      "src": "http://127.0.0.1:5007/fixture-second.mp4"
+    },
+    {
+      "name": "loadstart",
+      "time": 0,
+      "duration": null,
+      "paused": true,
+      "src": "http://127.0.0.1:5007/fixture.mp4"
+    },
+    {
+      "name": "loadedmetadata",
+      "time": 0,
+      "duration": 12,
+      "paused": true,
+      "src": "http://127.0.0.1:5007/fixture.mp4"
+    },
+    {
+      "name": "canplay",
+      "time": 0,
+      "duration": 12,
+      "paused": false,
+      "src": "http://127.0.0.1:5007/fixture.mp4"
+    },
+    {
+      "name": "play",
+      "time": 0.378492,
+      "duration": 12,
+      "paused": false,
+      "src": "http://127.0.0.1:5007/fixture.mp4"
+    },
+    {
+      "name": "pause",
+      "time": 3.808927,
+      "duration": 12,
+      "paused": true,
+      "src": "http://127.0.0.1:5007/fixture.mp4"
+    },
+    {
+      "name": "seeked",
+      "time": 4.996884,
+      "duration": 12,
+      "paused": true,
+      "src": "http://127.0.0.1:5007/fixture.mp4"
+    },
+    {
+      "name": "canplay",
+      "time": 4.996884,
+      "duration": 12,
+      "paused": true,
+      "src": "http://127.0.0.1:5007/fixture.mp4"
+    },
+    {
+      "name": "seeked",
+      "time": 4.996884,
+      "duration": 12,
+      "paused": true,
+      "src": "http://127.0.0.1:5007/fixture.mp4"
+    },
+    {
+      "name": "canplay",
+      "time": 4.996884,
+      "duration": 12,
+      "paused": true,
+      "src": "http://127.0.0.1:5007/fixture.mp4"
+    },
+    {
+      "name": "seeked",
+      "time": 8.934579,
+      "duration": 12,
+      "paused": true,
+      "src": "http://127.0.0.1:5007/fixture.mp4"
+    },
+    {
+      "name": "canplay",
+      "time": 8.934579,
+      "duration": 12,
+      "paused": true,
+      "src": "http://127.0.0.1:5007/fixture.mp4"
+    },
+    {
+      "name": "seeked",
+      "time": 9.943925,
+      "duration": 12,
+      "paused": true,
+      "src": "http://127.0.0.1:5007/fixture.mp4"
+    },
+    {
+      "name": "canplay",
+      "time": 9.943925,
+      "duration": 12,
+      "paused": true,
+      "src": "http://127.0.0.1:5007/fixture.mp4"
+    },
+    {
+      "name": "seeked",
+      "time": 2.00623,
+      "duration": 12,
+      "paused": true,
+      "src": "http://127.0.0.1:5007/fixture.mp4"
+    },
+    {
+      "name": "canplay",
+      "time": 2.00623,
+      "duration": 12,
+      "paused": true,
+      "src": "http://127.0.0.1:5007/fixture.mp4"
+    },
+    {
+      "name": "seeked",
+      "time": 5.504675,
+      "duration": 12,
+      "paused": true,
+      "src": "http://127.0.0.1:5007/fixture.mp4"
+    },
+    {
+      "name": "canplay",
+      "time": 5.504675,
+      "duration": 12,
+      "paused": true,
+      "src": "http://127.0.0.1:5007/fixture.mp4"
+    }
+  ],
+  "sourceHashes": {
+    "frontend/src/components/ViralClipStudio.js": "9c353f5084c86e8e75d1ae440af7c48a348fb8840bd5e1fcfeb779f5ba34cf16",
+    "frontend/src/components/StudioProTimeline.js": "51734df235a9997653594b41d24866e80e2dde0ef41f9c2311967533442bb207",
+    "frontend/src/components/ViralClipStudio.css": "eaee907e8be6fb25fdca1e77e0fc6051e4000f40544e49b29edc4981510f8f96",
+    "frontend/src/components/studioOverlayTiming.js": "7f9d851e39d752473a80eb80a525448dd93752eabc4466e7c711daccd50a20f8",
+    "scripts/run-studio-interaction-preview.js": "f33fa4e0c69429dc98b185d9fd6751299d4b13b274ec08ac8cfc9ec2860ee1ad",
+    "test/e2e/playwright/studio-interaction-entry.jsx": "90d8c2595e697f6b42a87d50bf615844930863d072a485032c343460bdec3d4b",
+    "test/e2e/playwright/run-studio-sequence-audio.js": "26f237b2d241449b3348a750e32473f4acbccd097cedd9008b2b1c9e255a4ce8"
+  },
+  "bundleSha256": "2b59b24fbd2e4b56574d311a36020f56fd947d0ab58f3a1642dfdaa5da8af1ac",
+  "fixtureHashes": {
+    "first": "02827c6f2d1a5fde0fd1d193f7ec63c3f00b359a808d831472ed4a7af2053e2b",
+    "second": "b331417c4e1687ea2e58e4ab8545fe3572c6b922bba466228dce54785dadd4fa"
+  }
+}

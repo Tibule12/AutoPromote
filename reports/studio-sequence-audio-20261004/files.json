@@ -1,0 +1,17 @@
+{
+  "algorithm": "SHA-256",
+  "files": {
+    "README.md": "a09fe3527ad20228e84932a52dc6b728aba749bb2b0a558714ca1fd3e42b7664",
+    "delivery-verification.json": "46dc289300a1c5e726dfdf233b159c3582b37010d752448fd0f04767b4cf3cb2",
+    "images/edited-sequence.png": "927cdeb8352fdc3adf898aa25d1dc623d5bdce9e38723f39dcae4350a50d6be2",
+    "images/phone-editor.png": "0b67f240134518025cf1eb279264d2eb5b2ed28f4efef06d02834336df6d28a0",
+    "images/phone-library.png": "fba7237e51a1b8ab551146cc7c867a601c9afd223609026dc2c98e839227895c",
+    "import-before.json": "dfc82f60a4842a74df2d0c965e1bf888308675d4a46f810bd1d618f3fce48305",
+    "interaction-browser.json": "c40850175fa5bfd0db93f4d51c5f09c42566988db4f5612e614b80cf8730dc68",
+    "jest-export.json": "bfe730e140ac23e81c926ca026a9aa9d18546aaada8b940033473a6ad9384b92",
+    "jest-regression.json": "6633ddbff201253cac707ffa3bfc562214b42092c8f93e5c537de0059fb02649",
+    "lint-summary.json": "26504be9f94d163045b6703b9b10885808db09a3be909139b60e985313e6d0b8",
+    "negative-control.json": "c9ec72b35446dbcc644094e87373dfdec7def05f631f78fae64ef3ee46b48861",
+    "sequence-browser.json": "d37b93a8ac2ed69843773ac26db1e5d8a5c2b596882d696f31aba9628ed00abd"
+  }
+}

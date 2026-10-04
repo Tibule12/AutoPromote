@@ -198,10 +198,10 @@ describe("ViralClipStudio timeline sequencing", () => {
     jest.clearAllMocks();
   });
 
-  const mountNativePreview = () => {
+  const mountNativePreview = (overrides = {}) => {
     const props = { videoUrl: "https://example.com/source.mp4",
       clips: [{ id: "range", start: 2, end: 8, duration: 6, sourceDuration: 12 }],
-      onCancel: jest.fn() };
+      onCancel: jest.fn(), ...overrides };
     const rendered = render(<ViralClipStudio {...props} />);
     const video = screen.getByTestId("studio-after-video");
     let paused = true;
@@ -242,6 +242,262 @@ describe("ViralClipStudio timeline sequencing", () => {
     fireEvent.timeUpdate(video);
     expect(video.currentTime).toBe(2);
     expect(video.paused).toBe(false);
+  });
+
+  test("native source EOF loops a full-length clip while user-paused EOF stays paused", () => {
+    const { video } = mountNativePreview({
+      clips: [{ id: "full", start: 0, end: 12, duration: 12 }],
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Play comparison" }));
+    act(() => {
+      video.pause();
+    }); // Native EOF pauses before dispatching ended.
+    video.currentTime = 12;
+    fireEvent.ended(video);
+    expect(video.currentTime).toBe(0);
+    expect(video.paused).toBe(false);
+    fireEvent.click(screen.getByRole("button", { name: "Pause comparison" }));
+    video.currentTime = 12;
+    fireEvent.ended(video);
+    expect(video.paused).toBe(true);
+  });
+
+  test("a loading source resumes when playable only while playback is requested", () => {
+    const { video } = mountNativePreview();
+    fireEvent.click(screen.getByRole("button", { name: "Play comparison" }));
+    act(() => {
+      video.pause();
+    }); // Decoder reload pauses the native element.
+    fireEvent.canPlay(video);
+    expect(video.paused).toBe(false);
+    fireEvent.click(screen.getByRole("button", { name: "Pause comparison" }));
+    fireEvent.canPlay(video);
+    expect(video.paused).toBe(true);
+  });
+
+  test("an immediate second-source import retains the first selected range before its metadata arrives", () => {
+    mountNativePreview({
+      importedCameraMaster: {
+        id: "second",
+        name: "Second source",
+        duration: 4,
+        url: "https://example.com/second.mp4",
+        storagePath: "studio/sources/second.mp4",
+      },
+    });
+    expect(screen.getByTestId("pro-video-clip-1")).toHaveAttribute(
+      "data-end-time",
+      "6",
+    );
+    expect(screen.getByTestId("pro-video-clip-2")).toHaveAttribute(
+      "data-start-time",
+      "6",
+    );
+    expect(screen.getByTestId("pro-video-clip-2")).toHaveAttribute(
+      "data-end-time",
+      "10",
+    );
+  });
+
+  test("source timing lock blocks both trim toolbars while seeking stays available", () => {
+    const { video } = mountNativePreview();
+    fireEvent.loadedMetadata(video);
+    fireEvent.timeUpdate(video);
+    const row = screen.getByTestId("pro-track-row-video");
+    fireEvent.click(within(row).getByRole("button", { name: "Lock track" }));
+    expect(screen.getByTestId("pro-quick-trim-end")).toBeDisabled();
+    fireEvent.click(screen.getByTestId("timeline-quick-trim-end"));
+    expect(screen.getByTestId("pro-video-clip-1")).toHaveAttribute(
+      "data-end-time",
+      "6",
+    );
+    fireEvent.click(screen.getByTestId("pro-video-clip-1"), { detail: 0 });
+    expect(video.currentTime).toBe(2);
+    video.currentTime = 5;
+    fireEvent.timeUpdate(video);
+    fireEvent.click(within(row).getByRole("button", { name: "Unlock track" }));
+    fireEvent.click(screen.getByTestId("pro-quick-trim-end"));
+    expect(screen.getByTestId("pro-video-clip-1")).toHaveAttribute(
+      "data-end-time",
+      "3",
+    );
+    expect(video.currentTime).toBe(5);
+  });
+
+  test("background extraction sync respects original-track mute, solo and automation after reopening", async () => {
+    const snapshot = {
+      orderedClips: [{ id: "audio", start: 0, end: 12, duration: 12 }],
+      selectedClipId: "audio",
+      timeline: [
+        {
+          id: "main",
+          url: "https://example.com/source.mp4",
+          duration: 12,
+          startRequest: 0,
+          endRequest: 12,
+        },
+      ],
+      overlays: [],
+      extractedAudio: {
+        url: "https://example.com/background.mp3",
+        mode: "mix",
+        enabled: true,
+        duration: 12,
+        volume: 0.7,
+      },
+      trackStates: { originalAudio: { muted: true } },
+      audioKeyframes: {
+        originalAudio: [
+          { id: "volume", time: 0, property: "volume", value: 40 },
+        ],
+      },
+    };
+    const list = jest
+      .spyOn(studioProjectStore, "listViralStudioProjects")
+      .mockResolvedValue([
+        {
+          id: "audio-project",
+          name: "Audio checkpoint",
+          updatedAt: Date.now(),
+          snapshot,
+          versions: [],
+        },
+      ]);
+    try {
+      const { video } = mountNativePreview();
+      fireEvent.click(
+        await screen.findByRole("button", { name: /^Audio checkpoint/ }),
+      );
+      await waitFor(() => expect(video.muted).toBe(true));
+      fireEvent.play(video);
+      fireEvent.seeked(video);
+      fireEvent.rateChange(video);
+      expect(video.muted).toBe(true);
+      const row = screen.getByTestId("pro-track-row-originalAudio");
+      fireEvent.click(
+        within(row).getByRole("button", { name: "Unmute track" }),
+      );
+      expect(video.muted).toBe(false);
+      expect(video.volume).toBeCloseTo(0.4);
+      fireEvent.rateChange(video);
+      expect(video.volume).toBeCloseTo(0.4);
+      fireEvent.click(
+        screen.getByRole("button", { name: "Show empty tracks" }),
+      );
+      fireEvent.click(
+        within(screen.getByTestId("pro-track-row-music")).getByRole("button", {
+          name: "Solo track",
+        }),
+      );
+      expect(video.muted).toBe(true);
+      fireEvent.rateChange(video);
+      expect(video.muted).toBe(true);
+    } finally {
+      list.mockRestore();
+    }
+  });
+
+  test("trimmed multi-source export preserves programme times for titles and B-roll", async () => {
+    const onSave = jest.fn();
+    const snapshot = {
+      orderedClips: [
+        { id: "range", start: 10, end: 20, duration: 10, sourceDuration: 40 },
+      ],
+      selectedClipId: "range",
+      timeline: [
+        {
+          id: "main",
+          url: "https://example.com/source.mp4",
+          duration: 40,
+          startRequest: 10,
+          endRequest: 20,
+        },
+        {
+          id: "second",
+          sourceClipId: "range",
+          url: "https://example.com/second.mp4",
+          duration: 40,
+          startRequest: 30,
+          endRequest: 34,
+        },
+      ],
+      overlays: [
+        {
+          id: "title",
+          type: "text",
+          text: "Programme title",
+          clipId: "main",
+          startTime: 5,
+          duration: 1,
+        },
+        {
+          id: "cutaway",
+          type: "video",
+          name: "Cutaway",
+          src: "https://example.com/cutaway.mp4",
+          bRollMode: "pip",
+          clipId: "second",
+          startTime: 12,
+          duration: 2,
+        },
+      ],
+    };
+    const list = jest
+      .spyOn(studioProjectStore, "listViralStudioProjects")
+      .mockResolvedValue([
+        {
+          id: "trimmed-project",
+          name: "Trimmed export checkpoint",
+          updatedAt: Date.now(),
+          snapshot,
+          versions: [],
+        },
+      ]);
+    try {
+      mountNativePreview({ onSave });
+      fireEvent.click(
+        await screen.findByRole("button", {
+          name: /^Trimmed export checkpoint/,
+        }),
+      );
+      await waitFor(() =>
+        expect(screen.getByTestId("pro-video-clip-2")).toHaveAttribute(
+          "data-end-time",
+          "14",
+        ),
+      );
+      await act(async () => {
+        await clickRenderFinalClip();
+      });
+      await waitFor(() => expect(onSave).toHaveBeenCalled());
+      const [, layers, options] = onSave.mock.calls[0];
+      expect(layers).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ id: "title", start_time: 5, duration: 1 }),
+          expect.objectContaining({
+            id: "cutaway",
+            start_time: 12,
+            duration: 2,
+          }),
+        ]),
+      );
+      expect(options.timelineSegments).toEqual([
+        expect.objectContaining({
+          id: "main",
+          start_time: 10,
+          end_time: 20,
+          duration: 10,
+        }),
+        expect.objectContaining({
+          id: "second",
+          start_time: 30,
+          end_time: 34,
+          duration: 4,
+        }),
+      ]);
+    } finally {
+      list.mockRestore();
+    }
   });
 
   test("rendered output metadata does not replace the editable source range", async () => {

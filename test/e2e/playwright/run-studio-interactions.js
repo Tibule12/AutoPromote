@@ -6,7 +6,9 @@ const path = require("path");
 const { chromium } = require("@playwright/test");
 const { assertStudioTimelineLayout } = require("./studio-timeline-layout");
 const root = path.resolve(__dirname, "../../..");
-const folder = path.join(root, "artifacts/studio-interactions-20261004");
+const folder = path.resolve(
+  root, process.env.STUDIO_INTERACTION_FOLDER || "artifacts/studio-interactions-20261004"
+);
 
 async function main() {
   const browser = await chromium.launch({ headless: true, args: ["--disable-gpu"] });
@@ -189,7 +191,7 @@ async function main() {
           };
         };
         return {
-          viewport: { width: innerWidth, height: innerHeight },
+          viewport: { width: window.innerWidth, height: window.innerHeight },
           timeline: rect(".studio-pro-timeline"),
           monitor: rect(".phone-preview-container"),
           picture: rect('[data-testid="hook-preview-frame"]'),
@@ -293,6 +295,8 @@ async function main() {
       "frontend/src/components/ViralClipStudio.js",
       "frontend/src/components/ViralClipStudio.css",
       "frontend/src/components/StudioControlMenu.js",
+      "frontend/src/components/StudioProTimeline.js",
+      "frontend/src/components/studioOverlayTiming.js",
       "scripts/run-studio-interaction-preview.js",
       "test/e2e/playwright/run-studio-interactions.js",
       "test/e2e/playwright/studio-interaction-entry.jsx",

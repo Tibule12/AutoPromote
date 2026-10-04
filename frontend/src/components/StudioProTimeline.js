@@ -1,6 +1,7 @@
 import React from "react";
 import TimelineSourceFilmstrip from "./TimelineSourceFilmstrip";
 import StudioControlMenu from "./StudioControlMenu";
+import { STUDIO_AUDIO_TRACKS } from "./studioAudioTracks";
 
 const EDIT_TOOLS = [
   ["select", "V", "Select"],
@@ -41,7 +42,9 @@ const TrackControls = ({ trackId, state, onChange }) => (
     <button
       type="button"
       className={state.visible === false ? "is-off" : ""}
-      aria-label={`${state.visible === false ? "Show" : "Hide"} track`}
+      aria-label={`${state.visible === false ? "Emphasize" : "Dim"} timeline track`}
+      title="Change the timeline display"
+      aria-pressed={state.visible === false}
       onClick={() => onChange(trackId, { visible: state.visible === false })}
     >
       ◉
@@ -50,26 +53,34 @@ const TrackControls = ({ trackId, state, onChange }) => (
       type="button"
       className={state.locked ? "is-on" : ""}
       aria-label={`${state.locked ? "Unlock" : "Lock"} track`}
+      aria-pressed={!!state.locked}
+      title="Protect timeline timing; selection and playback stay available"
       onClick={() => onChange(trackId, { locked: !state.locked })}
     >
       {state.locked ? "▣" : "□"}
     </button>
-    <button
-      type="button"
-      className={state.muted ? "is-on" : ""}
-      aria-label={`${state.muted ? "Unmute" : "Mute"} track`}
-      onClick={() => onChange(trackId, { muted: !state.muted })}
-    >
-      M
-    </button>
-    <button
-      type="button"
-      className={state.solo ? "is-on" : ""}
-      aria-label={`${state.solo ? "Unsolo" : "Solo"} track`}
-      onClick={() => onChange(trackId, { solo: !state.solo })}
-    >
-      S
-    </button>
+    {STUDIO_AUDIO_TRACKS.includes(trackId) ? (
+      <>
+        <button
+          type="button"
+          className={state.muted ? "is-on" : ""}
+          aria-label={`${state.muted ? "Unmute" : "Mute"} track`}
+          aria-pressed={!!state.muted}
+          onClick={() => onChange(trackId, { muted: !state.muted })}
+        >
+          M
+        </button>
+        <button
+          type="button"
+          className={state.solo ? "is-on" : ""}
+          aria-label={`${state.solo ? "Unsolo" : "Solo"} track`}
+          aria-pressed={!!state.solo}
+          onClick={() => onChange(trackId, { solo: !state.solo })}
+        >
+          S
+        </button>
+      </>
+    ) : null}
   </div>
 );
 
@@ -101,6 +112,7 @@ const BrollClip = ({
   onOverlaySlip,
   onClick,
   allowSlip = true,
+  locked = false,
 }) => {
   const dragRef = React.useRef(null);
   const [isSnapped, setIsSnapped] = React.useState(false);
@@ -124,6 +136,7 @@ const BrollClip = ({
 
   const handlePointerDownBody = e => {
     e.stopPropagation();
+    if (locked) return;
     try {
       e.target.setPointerCapture(e.pointerId);
     } catch (_) {}
@@ -141,6 +154,7 @@ const BrollClip = ({
 
   const handlePointerDownLeft = e => {
     e.stopPropagation();
+    if (locked) return;
     try {
       e.target.setPointerCapture(e.pointerId);
     } catch (_) {}
@@ -157,6 +171,7 @@ const BrollClip = ({
 
   const handlePointerDownRight = e => {
     e.stopPropagation();
+    if (locked) return;
     try {
       e.target.setPointerCapture(e.pointerId);
     } catch (_) {}
@@ -172,7 +187,7 @@ const BrollClip = ({
   };
 
   const handlePointerMove = e => {
-    if (!dragRef.current) return;
+    if (locked || !dragRef.current) return;
     const { type, startX, startParam, laneWidth } = dragRef.current;
     const deltaX = e.clientX - startX;
     const deltaSeconds = (deltaX / laneWidth) * safeDuration;
@@ -204,9 +219,9 @@ const BrollClip = ({
     } else if (type === "trim-end") {
       const rawEnd = Math.max(0.1, start + startParam + deltaSeconds);
       const snapRes = resolveSnap(rawEnd);
-      const newDur = Math.max(0.1, snapRes.time - start);
+      const endTime = Math.max(start + 0.1, snapRes.time);
       setIsSnapped(snapRes.snapped);
-      if (onOverlayTrim) onOverlayTrim(item.id, "end", newDur);
+      if (onOverlayTrim) onOverlayTrim(item.id, "end", endTime);
     }
   };
 
@@ -307,6 +322,7 @@ const AudioSplitClip = ({
   snapTargets,
   onAudioTrim,
   onClick,
+  locked = false,
 }) => {
   const dragRef = React.useRef(null);
 
@@ -329,6 +345,7 @@ const AudioSplitClip = ({
 
   const handlePointerDownLeft = e => {
     e.stopPropagation();
+    if (locked) return;
     try {
       e.target.setPointerCapture(e.pointerId);
     } catch (_) {}
@@ -342,6 +359,7 @@ const AudioSplitClip = ({
 
   const handlePointerDownRight = e => {
     e.stopPropagation();
+    if (locked) return;
     try {
       e.target.setPointerCapture(e.pointerId);
     } catch (_) {}
@@ -354,7 +372,7 @@ const AudioSplitClip = ({
   };
 
   const handlePointerMove = e => {
-    if (!dragRef.current) return;
+    if (locked || !dragRef.current) return;
     const { type, startX, startOffset, laneWidth } = dragRef.current;
     const deltaX = e.clientX - startX;
     const deltaSeconds = (deltaX / laneWidth) * safeDuration;
@@ -479,6 +497,7 @@ const MotionClip = ({
   onMotionMove,
   onMotionTrim,
   onClick,
+  locked = false,
 }) => {
   const dragRef = React.useRef(null);
   const [isSnapped, setIsSnapped] = React.useState(false);
@@ -502,6 +521,7 @@ const MotionClip = ({
 
   const handlePointerDownBody = e => {
     e.stopPropagation();
+    if (locked) return;
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
     } catch (_) {}
@@ -517,6 +537,7 @@ const MotionClip = ({
 
   const handlePointerDownLeft = e => {
     e.stopPropagation();
+    if (locked) return;
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
     } catch (_) {}
@@ -534,6 +555,7 @@ const MotionClip = ({
 
   const handlePointerDownRight = e => {
     e.stopPropagation();
+    if (locked) return;
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
     } catch (_) {}
@@ -549,7 +571,7 @@ const MotionClip = ({
   };
 
   const handlePointerMove = e => {
-    if (!dragRef.current) return;
+    if (locked || !dragRef.current) return;
     const { type, startX, startParam, startDuration, laneWidth } = dragRef.current;
     const safeLaneWidth = Math.max(1, Number(laneWidth || 1));
     const currentX = Number(e.clientX ?? startX);
@@ -729,6 +751,7 @@ export default function StudioProTimeline({
   onSelectOverlay,
   onSelectTool,
   onSplit,
+  splitLocked = trackStates?.video?.locked,
   onTrimStart,
   onTrimEnd,
   onDelete,
@@ -959,6 +982,7 @@ export default function StudioProTimeline({
               type="button"
               className="pro-quick-btn is-primary"
               onClick={onSplit}
+              disabled={!!splitLocked}
               title="Split clip at playhead"
               data-testid="pro-quick-split"
             >
@@ -968,6 +992,7 @@ export default function StudioProTimeline({
               type="button"
               className="pro-quick-btn"
               onClick={onTrimStart}
+              disabled={!!trackStates?.video?.locked}
               title="Cut everything before playhead"
               data-testid="pro-quick-trim-start"
             >
@@ -977,6 +1002,7 @@ export default function StudioProTimeline({
               type="button"
               className="pro-quick-btn"
               onClick={onTrimEnd}
+              disabled={!!trackStates?.video?.locked}
               title="Cut everything after playhead"
               data-testid="pro-quick-trim-end"
             >
@@ -987,6 +1013,7 @@ export default function StudioProTimeline({
                 type="button"
                 className="pro-quick-btn is-danger"
                 onClick={onDelete}
+                disabled={!!trackStates?.video?.locked}
                 title="Delete selected clip"
                 data-testid="pro-quick-delete"
               >
@@ -1026,7 +1053,7 @@ export default function StudioProTimeline({
                     type="button"
                     className="pro-quick-btn pro-ripple-cut-btn"
                     onClick={onRippleCutSilence}
-                    disabled={isRippleCutting}
+                    disabled={isRippleCutting || !!trackStates?.video?.locked}
                     title="Physically slice dead-air pauses out of the timeline and ripple all tracks"
                     data-testid="pro-quick-ripple-silence"
                   >
@@ -1331,7 +1358,7 @@ export default function StudioProTimeline({
               <div
                 key={trackId}
                 data-testid={`pro-track-row-${trackId}`}
-                className={`pro-track-row is-${type} ${state.visible === false ? "is-hidden" : ""} ${trackId === focusedTrack ? "is-focused" : ""}`}
+                className={`pro-track-row is-${type} ${state.visible === false ? "is-hidden" : ""} ${state.locked ? "is-locked" : ""} ${trackId === focusedTrack ? "is-focused" : ""}`}
                 style={
                   trackId === "adjustment" && items.length > 1
                     ? { "--pro-track-lanes": Math.min(items.length, 3) }
@@ -1396,6 +1423,7 @@ export default function StudioProTimeline({
                           snapping={snapping}
                           snapTargets={snapTargets}
                           onOverlayMove={onAdjustmentMove}
+                          locked={!!state.locked}
                           onOverlayTrim={onAdjustmentTrim}
                           allowSlip={false}
                           onClick={event => {
@@ -1420,6 +1448,7 @@ export default function StudioProTimeline({
                           snapping={snapping}
                           snapTargets={snapTargets}
                           onOverlayMove={onOverlayMove}
+                          locked={!!state.locked}
                           onOverlayTrim={onOverlayTrim}
                           onOverlaySlip={onOverlaySlip}
                           onClick={event => {
@@ -1459,6 +1488,7 @@ export default function StudioProTimeline({
                           snapping={snapping}
                           snapTargets={snapTargets}
                           onAudioTrim={onAudioTrim}
+                          locked={!!state.locked}
                           onClick={event => {
                             event.stopPropagation();
                             onSelectTool?.("sound");
@@ -1480,6 +1510,7 @@ export default function StudioProTimeline({
                           snapping={snapping}
                           snapTargets={snapTargets}
                           onMotionMove={onMotionMove}
+                          locked={!!state.locked}
                           onMotionTrim={onMotionTrim}
                           onClick={event => {
                             event.stopPropagation();

@@ -1,0 +1,389 @@
+{
+  "baselineCommit": "233c7948665a9a16741d1ef22486917410b98bb5",
+  "compatibility": "Process-only callable-export wrapper for installed brace-expansion; dependencies unchanged.",
+  "current": [
+    {
+      "file": "frontend/src/components/ViralClipStudio.js",
+      "errors": 0,
+      "warnings": 0,
+      "messages": []
+    },
+    {
+      "file": "frontend/src/components/StudioProTimeline.js",
+      "errors": 0,
+      "warnings": 0,
+      "messages": []
+    },
+    {
+      "file": "frontend/src/components/studioOverlayTiming.js",
+      "errors": 0,
+      "warnings": 0,
+      "messages": []
+    },
+    {
+      "file": "frontend/src/components/__tests__/ViralClipStudio.test.js",
+      "errors": 0,
+      "warnings": 11,
+      "messages": [
+        {
+          "ruleId": "no-unused-vars",
+          "severity": 1,
+          "message": "'_container' is assigned a value but never used.",
+          "line": 1766,
+          "column": 24,
+          "nodeType": "Identifier",
+          "messageId": "unusedVar",
+          "endLine": 1766,
+          "endColumn": 34
+        },
+        {
+          "ruleId": "no-unused-vars",
+          "severity": 1,
+          "message": "'_container' is assigned a value but never used.",
+          "line": 1793,
+          "column": 24,
+          "nodeType": "Identifier",
+          "messageId": "unusedVar",
+          "endLine": 1793,
+          "endColumn": 34
+        },
+        {
+          "ruleId": "no-unused-vars",
+          "severity": 1,
+          "message": "'_container' is assigned a value but never used.",
+          "line": 1864,
+          "column": 24,
+          "nodeType": "Identifier",
+          "messageId": "unusedVar",
+          "endLine": 1864,
+          "endColumn": 34
+        },
+        {
+          "ruleId": "no-unused-vars",
+          "severity": 1,
+          "message": "'_container' is assigned a value but never used.",
+          "line": 1948,
+          "column": 24,
+          "nodeType": "Identifier",
+          "messageId": "unusedVar",
+          "endLine": 1948,
+          "endColumn": 34
+        },
+        {
+          "ruleId": "no-unused-vars",
+          "severity": 1,
+          "message": "'_container' is assigned a value but never used.",
+          "line": 2055,
+          "column": 24,
+          "nodeType": "Identifier",
+          "messageId": "unusedVar",
+          "endLine": 2055,
+          "endColumn": 34
+        },
+        {
+          "ruleId": "no-unused-vars",
+          "severity": 1,
+          "message": "'_container' is assigned a value but never used.",
+          "line": 2143,
+          "column": 24,
+          "nodeType": "Identifier",
+          "messageId": "unusedVar",
+          "endLine": 2143,
+          "endColumn": 34
+        },
+        {
+          "ruleId": "no-unused-vars",
+          "severity": 1,
+          "message": "'_container' is assigned a value but never used.",
+          "line": 2181,
+          "column": 24,
+          "nodeType": "Identifier",
+          "messageId": "unusedVar",
+          "endLine": 2181,
+          "endColumn": 34
+        },
+        {
+          "ruleId": "no-unused-vars",
+          "severity": 1,
+          "message": "'_container' is assigned a value but never used.",
+          "line": 2509,
+          "column": 24,
+          "nodeType": "Identifier",
+          "messageId": "unusedVar",
+          "endLine": 2509,
+          "endColumn": 34
+        },
+        {
+          "ruleId": "no-unused-vars",
+          "severity": 1,
+          "message": "'_container' is assigned a value but never used.",
+          "line": 2580,
+          "column": 24,
+          "nodeType": "Identifier",
+          "messageId": "unusedVar",
+          "endLine": 2580,
+          "endColumn": 34
+        },
+        {
+          "ruleId": "no-unused-vars",
+          "severity": 1,
+          "message": "'_container' is assigned a value but never used.",
+          "line": 2637,
+          "column": 24,
+          "nodeType": "Identifier",
+          "messageId": "unusedVar",
+          "endLine": 2637,
+          "endColumn": 34
+        },
+        {
+          "ruleId": "no-unused-vars",
+          "severity": 1,
+          "message": "'_container' is assigned a value but never used.",
+          "line": 2695,
+          "column": 24,
+          "nodeType": "Identifier",
+          "messageId": "unusedVar",
+          "endLine": 2695,
+          "endColumn": 34
+        }
+      ]
+    },
+    {
+      "file": "frontend/src/components/__tests__/StudioProTimeline.test.js",
+      "errors": 0,
+      "warnings": 0,
+      "messages": []
+    },
+    {
+      "file": "frontend/src/components/__tests__/studioOverlayTiming.test.js",
+      "errors": 0,
+      "warnings": 0,
+      "messages": []
+    },
+    {
+      "file": "scripts/run-studio-interaction-preview.js",
+      "errors": 0,
+      "warnings": 0,
+      "messages": []
+    },
+    {
+      "file": "test/e2e/playwright/studio-interaction-entry.jsx",
+      "errors": 0,
+      "warnings": 0,
+      "messages": []
+    },
+    {
+      "file": "test/e2e/playwright/run-studio-sequence-audio.js",
+      "errors": 0,
+      "warnings": 0,
+      "messages": []
+    },
+    {
+      "file": "test/e2e/playwright/run-studio-interactions.js",
+      "errors": 0,
+      "warnings": 0,
+      "messages": []
+    }
+  ],
+  "baseline": [
+    {
+      "file": "frontend/src/components/ViralClipStudio.js",
+      "errors": 0,
+      "warnings": 0,
+      "messages": []
+    },
+    {
+      "file": "frontend/src/components/StudioProTimeline.js",
+      "errors": 0,
+      "warnings": 0,
+      "messages": []
+    },
+    {
+      "file": "frontend/src/components/__tests__/ViralClipStudio.test.js",
+      "errors": 0,
+      "warnings": 11,
+      "messages": [
+        {
+          "ruleId": "no-unused-vars",
+          "severity": 1,
+          "message": "'_container' is assigned a value but never used.",
+          "line": 1510,
+          "column": 24,
+          "nodeType": "Identifier",
+          "messageId": "unusedVar",
+          "endLine": 1510,
+          "endColumn": 34
+        },
+        {
+          "ruleId": "no-unused-vars",
+          "severity": 1,
+          "message": "'_container' is assigned a value but never used.",
+          "line": 1537,
+          "column": 24,
+          "nodeType": "Identifier",
+          "messageId": "unusedVar",
+          "endLine": 1537,
+          "endColumn": 34
+        },
+        {
+          "ruleId": "no-unused-vars",
+          "severity": 1,
+          "message": "'_container' is assigned a value but never used.",
+          "line": 1608,
+          "column": 24,
+          "nodeType": "Identifier",
+          "messageId": "unusedVar",
+          "endLine": 1608,
+          "endColumn": 34
+        },
+        {
+          "ruleId": "no-unused-vars",
+          "severity": 1,
+          "message": "'_container' is assigned a value but never used.",
+          "line": 1692,
+          "column": 24,
+          "nodeType": "Identifier",
+          "messageId": "unusedVar",
+          "endLine": 1692,
+          "endColumn": 34
+        },
+        {
+          "ruleId": "no-unused-vars",
+          "severity": 1,
+          "message": "'_container' is assigned a value but never used.",
+          "line": 1799,
+          "column": 24,
+          "nodeType": "Identifier",
+          "messageId": "unusedVar",
+          "endLine": 1799,
+          "endColumn": 34
+        },
+        {
+          "ruleId": "no-unused-vars",
+          "severity": 1,
+          "message": "'_container' is assigned a value but never used.",
+          "line": 1887,
+          "column": 24,
+          "nodeType": "Identifier",
+          "messageId": "unusedVar",
+          "endLine": 1887,
+          "endColumn": 34
+        },
+        {
+          "ruleId": "no-unused-vars",
+          "severity": 1,
+          "message": "'_container' is assigned a value but never used.",
+          "line": 1925,
+          "column": 24,
+          "nodeType": "Identifier",
+          "messageId": "unusedVar",
+          "endLine": 1925,
+          "endColumn": 34
+        },
+        {
+          "ruleId": "no-unused-vars",
+          "severity": 1,
+          "message": "'_container' is assigned a value but never used.",
+          "line": 2253,
+          "column": 24,
+          "nodeType": "Identifier",
+          "messageId": "unusedVar",
+          "endLine": 2253,
+          "endColumn": 34
+        },
+        {
+          "ruleId": "no-unused-vars",
+          "severity": 1,
+          "message": "'_container' is assigned a value but never used.",
+          "line": 2324,
+          "column": 24,
+          "nodeType": "Identifier",
+          "messageId": "unusedVar",
+          "endLine": 2324,
+          "endColumn": 34
+        },
+        {
+          "ruleId": "no-unused-vars",
+          "severity": 1,
+          "message": "'_container' is assigned a value but never used.",
+          "line": 2381,
+          "column": 24,
+          "nodeType": "Identifier",
+          "messageId": "unusedVar",
+          "endLine": 2381,
+          "endColumn": 34
+        },
+        {
+          "ruleId": "no-unused-vars",
+          "severity": 1,
+          "message": "'_container' is assigned a value but never used.",
+          "line": 2439,
+          "column": 24,
+          "nodeType": "Identifier",
+          "messageId": "unusedVar",
+          "endLine": 2439,
+          "endColumn": 34
+        }
+      ]
+    },
+    {
+      "file": "frontend/src/components/__tests__/StudioProTimeline.test.js",
+      "errors": 0,
+      "warnings": 0,
+      "messages": []
+    },
+    {
+      "file": "scripts/run-studio-interaction-preview.js",
+      "errors": 0,
+      "warnings": 0,
+      "messages": []
+    },
+    {
+      "file": "test/e2e/playwright/studio-interaction-entry.jsx",
+      "errors": 1,
+      "warnings": 0,
+      "messages": [
+        {
+          "ruleId": "no-restricted-globals",
+          "severity": 2,
+          "message": "Unexpected use of 'location'.",
+          "line": 7,
+          "column": 19,
+          "nodeType": "Identifier",
+          "messageId": "defaultMessage",
+          "endLine": 7,
+          "endColumn": 27
+        }
+      ]
+    },
+    {
+      "file": "test/e2e/playwright/run-studio-interactions.js",
+      "errors": 2,
+      "warnings": 0,
+      "messages": [
+        {
+          "ruleId": "no-restricted-globals",
+          "severity": 2,
+          "message": "Unexpected use of 'innerWidth'.",
+          "line": 192,
+          "column": 30,
+          "nodeType": "Identifier",
+          "messageId": "defaultMessage",
+          "endLine": 192,
+          "endColumn": 40
+        },
+        {
+          "ruleId": "no-restricted-globals",
+          "severity": 2,
+          "message": "Unexpected use of 'innerHeight'.",
+          "line": 192,
+          "column": 50,
+          "nodeType": "Identifier",
+          "messageId": "defaultMessage",
+          "endLine": 192,
+          "endColumn": 61
+        }
+      ]
+    }
+  ]
+}
