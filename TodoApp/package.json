@@ -21,7 +21,7 @@
     "react": "19.0.0",
     "react-native": "0.79.6",
     "react-native-webview": "13.16.1",
-    "undici": "^7.29.0"
+    "undici": "^7.29.1"
   },
   "devDependencies": {
     "@babel/core": "^7.29.7"
@@ -47,7 +47,7 @@
     "node-forge": "1.4.0",
     "tar": "^7.5.22",
     "@expo/cli": {
-      "undici": "6.28.0"
+      "undici": "6.28.1"
     },
     "uuid": "^14.0.0",
     "ws": "8.21.0",
