@@ -193,12 +193,16 @@ service cloud.firestore {
     match /studio_model_capability_capacity/{document=**} {
       allow read, write: if false;
     }
+    match /studio_subject_vfx_jobs/{document=**} { allow read, write: if false; }
+    match /studio_subject_vfx_requests/{document=**} { allow read, write: if false; }
+    match /studio_subject_vfx_capacity/{document=**} { allow read, write: if false; }
 
     // Rules are additive: explicitly exclude server model collections from
     // this broad admin rule so a client cannot forge evidence or free capacity.
     match /{collection}/{document=**} {
       allow read, write: if !(collection in ['studio_model_capability_jobs',
-        'studio_model_capability_artifacts', 'studio_model_capability_capacity'])
+        'studio_model_capability_artifacts', 'studio_model_capability_capacity',
+        'studio_subject_vfx_jobs','studio_subject_vfx_requests','studio_subject_vfx_capacity'])
         && (isAdmin() || isServiceAccount());
     }
   }

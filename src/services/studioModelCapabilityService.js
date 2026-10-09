@@ -11,6 +11,49 @@ async function ownedModelArtifact({ uid, artifactHash, firestore }) {
   const db = firestore || require('../firebaseAdmin').db;
   return verifyArtifact(await new FirestoreArtifactStore(db).get(artifactHash), { ownerUid:uid });
 }
+// Resolve a saved mask into bounded, generation-pinned worker inputs. Effects
+// may change without inference; changed segmentation prompts require a new mask.
+async function resolveSubjectMaskInputs({ownerUid,scene,modelArtifactRef,sourceSha256,sourceGeneration,signFiles=true,firestore,bucket}) {
+  if(process.env.STUDIO_MODEL_RUNTIME_ENABLED!=='true')throw fail('MODEL_CAPABILITY_RUNTIME_OFFLINE',503);
+  const studio=require('../generated/studioDirectorReplayKernel.cjs');
+  const {referenceFor,editableSubjectScene}=require('../modelRuntime/studioAdapter');
+  const ref=studio.createModelArtifactReference(modelArtifactRef);
+  const a=await ownedModelArtifact({uid:ownerUid,artifactHash:ref.artifactHash,firestore});
+  if(a.capability!=='segment_subject' || hash(ref)!==hash(referenceFor(a)) ||
+     scene.sourceId!==a.sourceAssetId || sourceSha256!==a.sourceSha256 ||
+     String(sourceGeneration)!==a.provenance.sourceGeneration ||
+     Math.round(scene.sourceRange.start*90000)!==a.sourceRange.startTick ||
+     Math.round(scene.sourceRange.end*90000)!==a.sourceRange.endTick)
+    throw fail('MODEL_SUBJECT_SOURCE_MISMATCH',409);
+  const expected=editableSubjectScene({segmentation:a,sourceStoragePath:scene.sourceStoragePath,effects:scene.effects,id:scene.id});
+  if(hash(scene.prompt)!==hash(expected.scene.prompt))throw fail('MODEL_SUBJECT_PROMPT_CHANGED',409);
+  const db=firestore || require('../firebaseAdmin').db;
+  const head=await db.collection('users').doc(ownerUid).collection('studioDirectorProjects').doc(hash(a.projectId)).get();
+  if(!head.exists)throw fail('MODEL_PROJECT_UNREGISTERED',409);
+  const parsed=require('./studioProjectRevisionService').parseStudioProjectHeadRecord(head.data(),ownerUid,a.projectId);
+  if(parsed.revision<a.projectRevision || !parsed.document.assets.some(asset =>
+    (asset.sourceId===a.sourceAssetId || asset.assetId===a.sourceAssetId) &&
+    asset.contentHash===a.sourceSha256 && asset.storagePath===scene.sourceStoragePath))
+    throw fail('MODEL_PROJECT_SOURCE_MISMATCH',409);
+  if(!signFiles)return {artifactHash:a.artifactHash,sourceSha256:a.sourceSha256,manifestSha256:a.output.maskManifest.sha256,
+    projectId:a.projectId,projectRevision:a.projectRevision,model:a.model,revision:a.revision,checkpoint:a.checkpoint,modelVersion:a.modelVersion};
+  const storage=bucket || require('firebase-admin').storage().bucket(process.env.STUDIO_MODEL_ARTIFACT_BUCKET);
+  const files={};
+  for(const [key,name] of [['normalizedSource','normalized_source.mp4'],['maskBundle',a.output.maskBundle.name]]) {
+    const f=a.files.find(file=>file.name===name);
+    const prefix=`studio/model-runtime/executions/${ownerUid}/${a.provenance.jobId}/${a.provenance.attemptToken}/outputs/`;
+    if(!f || f.storagePath!==prefix+name || !/^[0-9]+$/.test(f.generation) || f.bytes>75*1024**2)
+      throw fail('MODEL_SUBJECT_FILE_INVALID',409);
+    const file=storage.file(f.storagePath,{generation:f.generation}),[meta]=await file.getMetadata();
+    if(meta.metadata?.ownerUid!==ownerUid || meta.metadata?.sha256!==f.sha256 ||
+       meta.metadata?.purpose!=='model_capability_artifact' || String(meta.generation)!==f.generation || Number(meta.size)!==f.bytes)
+      throw fail('MODEL_SUBJECT_FILE_CHANGED',409);
+    const [url]=await file.getSignedUrl({action:'read',expires:Date.now()+20*60000,queryParams:{generation:f.generation}});
+    files[key]={url,sha256:f.sha256,bytes:f.bytes};
+  }
+  return {schemaVersion:1,artifactHash:a.artifactHash,sourceSha256:a.sourceSha256,sourceRange:a.sourceRange,files,
+    manifestSha256:a.output.maskManifest.sha256,frameCount:a.output.frameCount,width:a.output.width,height:a.output.height};
+}
 async function createStudioModelRuntime() {
   if (process.env.STUDIO_MODEL_RUNTIME_ENABLED !== 'true') throw fail('MODEL_CAPABILITY_RUNTIME_OFFLINE',503);
   const admin = require('firebase-admin');
@@ -58,4 +101,4 @@ async function importGeneratedResult({ownerUid,jobId}) {
   return importGeneratedSource({ownerUid,projectId:job.request.projectId,artifact:result.artifact,
     bucket:admin.storage().bucket(process.env.STUDIO_MODEL_ARTIFACT_BUCKET),bindSource:assertOwnedStudioSourceBinding});
 }
-module.exports={getRuntime,createStudioModelRuntime,ownedModelArtifact,importGeneratedResult};
+module.exports={getRuntime,createStudioModelRuntime,ownedModelArtifact,importGeneratedResult,resolveSubjectMaskInputs};

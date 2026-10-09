@@ -984,12 +984,17 @@ router.post('/studio-broll/jobs/:jobId/recheck',requireTesterEditingFeature('cli
   }catch(error){return bRollError(res,error);}
 });
 
-router.post("/studio-subject-vfx", requireTesterEditingFeature("clipRender"), async (req,res) => {
+const requireModelSubjectFounder=(req,res,next)=>{
+  if(!req.body?.modelArtifactRef)return next();
+  return requireModelRuntimeFounder[0](req,res,()=>requireModelRuntimeFounder[1](req,res,next));
+};
+router.post("/studio-subject-vfx", requireTesterEditingFeature("clipRender"),requireModelSubjectFounder, async (req,res) => {
   try {
-    if (!req.body || Object.keys(req.body).sort().join() !== "clientRequestId,scene") return res.status(422).json({message:"Invalid subject render request."});
-    const result=await createSubjectVfxPreview({ownerUid:req.user.uid,scene:req.body.scene,clientRequestId:req.body.clientRequestId});
+    if (!req.body || !['clientRequestId,scene','clientRequestId,modelArtifactRef,scene'].includes(Object.keys(req.body).sort().join())) return res.status(422).json({message:"Invalid subject render request."});
+    const result=await createSubjectVfxPreview({ownerUid:req.user.uid,scene:req.body.scene,clientRequestId:req.body.clientRequestId,modelArtifactRef:req.body.modelArtifactRef});
     return res.status(202).json(result);
-  } catch(error) { return res.status(error.statusCode || 422).json({message:error.message}); }
+  } catch(error) { return res.status(error.statusCode || 422).json({message:String(error.code || '').startsWith('MODEL_')
+    ? 'The saved subject mask is unavailable or no longer matches this source and selection. Your edit is preserved.' : error.message}); }
 });
 router.get("/studio-subject-vfx/:jobId", requireTesterEditingFeature("clipRender"), async (req,res) => {
   try { return res.json(await getSubjectVfxPreview({ownerUid:req.user.uid,jobId:req.params.jobId})); }

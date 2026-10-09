@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-10-09T14:20:21.874199+00:00",
+  "updatedAt": "2026-10-09T14:59:36.139879+00:00",
   "sourceOfTruth": "docs/STUDIO-COMPLETION-CONTRACT.md",
   "baseline": {
     "checkpoint": "docs/HANDOFF-studio-reliability-repair-20261008.md",
@@ -8437,5 +8437,32 @@
     ],
     "nextSharedTaskId": "S02",
     "nextModelIntegration": "TAPNext++"
+  },
+  "modelRuntimeSubjectBridge20261009": {
+    "at": "2026-10-09T14:59:36.139879+00:00",
+    "status": "PARTIAL_PRODUCT_INTEGRATION",
+    "evidenceRefs": [
+      "reports/model-capability-runtime-v1-20261009/SUBJECT-BRIDGE-FOLLOWUP.md",
+      "reports/model-capability-runtime-v1-20261009/proof/subject-bridge/verification.json",
+      "reports/model-capability-runtime-v1-20261009/subject-bridge-checks/summary.json"
+    ],
+    "scope": "Existing native panel request wiring and owned CPU subject-preview/export bridge; real mask/source bytes through HTTP CPU worker, inspected output. Authenticated browser lifecycle unverified.",
+    "readinessPromotion": false,
+    "paidGpuJobsStarted": 0,
+    "newModelExecutions": 0,
+    "runtimeChecks": 40,
+    "subjectServiceAndComponentChecks": 26,
+    "canonicalDirectorIntelligenceChecks": 24,
+    "cpuWorkerChecks": 11,
+    "clientSecurityEmulatorChecks": 1,
+    "normalAuthenticatedStudioFlow": "UNVERIFIED",
+    "previewFinalParityPromotion": false,
+    "remainingBlockers": [
+      "Integrated authenticated founder/admin capability request, review/import, meaningful edits, undo/save/cold reopen, preview and owned final render/download remain unverified.",
+      "CPU composition image/service configuration is defined but has not been built or deployed; production runtime flag remains off.",
+      "Remaining legacy provider migration, TAPNext++, broad media, normal accounts, operational/load, audio and full paired preview/final qualification remain open."
+    ],
+    "nextRuntimeTask": "Complete the integrated authenticated founder/admin lifecycle through the existing Studio/Director graph.",
+    "nextSharedTaskId": "S02"
   }
 }

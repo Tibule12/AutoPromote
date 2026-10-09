@@ -1,6 +1,7 @@
 const crypto = require("crypto");
 jest.mock("axios", () => ({ post: jest.fn(), get: jest.fn(), delete: jest.fn() }));
 jest.mock("firebase-admin", () => ({ firestore: jest.fn(), storage: jest.fn() }));
+jest.mock('../src/services/studioModelCapabilityService',()=>({resolveSubjectMaskInputs:jest.fn()}));
 const admin = require("firebase-admin"),
   axios = require("axios");
 const {
@@ -130,6 +131,34 @@ beforeEach(() => {
 afterEach(() => {
   delete process.env.STUDIO_NVIDIA_VFX_URL;
   delete process.env.STUDIO_NVIDIA_VFX_SECRET;
+  delete process.env.STUDIO_MODEL_VFX_URL;
+  delete process.env.STUDIO_MODEL_VFX_SECRET;
+});
+
+test('verified model masks create a real CPU preview job and use the unchanged owned export contract',async()=>{
+  process.env.STUDIO_MODEL_VFX_URL='http://127.0.0.1:6199';
+  process.env.STUDIO_MODEL_VFX_SECRET='s'.repeat(32);
+  const modelArtifactRef={artifactHash:'e'.repeat(64)},sourceSha256='b'.repeat(64),manifestSha256='f'.repeat(64);
+  objects.get(scene().sourceStoragePath).metadata.sha256=sourceSha256;
+  const resolver=require('../src/services/studioModelCapabilityService').resolveSubjectMaskInputs;
+  resolver.mockResolvedValue({artifactHash:modelArtifactRef.artifactHash,sourceSha256,manifestSha256});
+  axios.post.mockImplementation(async(_url,spec)=>({data:{jobId:spec.jobId}}));
+  const {jobId}=await createSubjectVfxPreview({ownerUid,scene:scene(),clientRequestId:'model-mask-preview-123',modelArtifactRef});
+  expect(axios.post.mock.calls[0][0]).toBe('http://127.0.0.1:6199/jobs');
+  expect(axios.post.mock.calls[0][1].modelInput.artifactHash).toBe(modelArtifactRef.artifactHash);
+  expect(documents.has('studio_subject_vfx_capacity/nvidia')).toBe(false);
+  const preview=await finish(jobId,{encoder:'libx264',modelArtifactHash:modelArtifactRef.artifactHash,
+    gpuCount:0,elapsed_seconds:1,mask_manifest_sha256:manifestSha256,implementation_sha256:'a'.repeat(64)});
+  expect(preview.receipt.derivativeArtifactHash).toMatch(/^[a-f0-9]{64}$/);
+  expect(saves).toHaveLength(2);
+  expect(await resolveSubjectVfxExport(exportItems(jobId))).toHaveLength(1);
+  expect(resolver.mock.calls.at(-1)[0]).toMatchObject({ownerUid,signFiles:false,sourceSha256,sourceGeneration:'123'});
+  expect(documents.has('studio_subject_vfx_capacity/model_artifact_cpu')).toBe(false);
+});
+
+test.each([null,false,[], 'not-a-reference'])('malformed mask reference never falls back to inference: %j',async(modelArtifactRef)=>{
+  await expect(createSubjectVfxPreview({ownerUid,scene:scene(),clientRequestId:'invalid-mask-ref-123',modelArtifactRef})).rejects.toMatchObject({statusCode:422});
+  expect(axios.post).not.toHaveBeenCalled();
 });
 
 test("owned completed preview resolves to the same source-bound export artifact after splitting", async () => {

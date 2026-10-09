@@ -1,7 +1,9 @@
-"""Authenticated single-job NVIDIA worker with a persisted journal and cutoff.
+"""Authenticated single-job VFX worker with a persisted journal.
 
 Run only inside a newly authorized GPU window. No automatic model downloads,
 cloud credentials, job resubmission after restart, or CPU inference fallback.
+The separately configured model_artifact_cpu mode reuses frozen masks through
+the same protocol; it performs deterministic composition and never probes GPUs.
 """
 import hashlib
 import hmac
@@ -22,13 +24,16 @@ lock=threading.Lock()
 process_lock=threading.Lock()
 processes={}
 
+def cpu_mode():
+    return os.environ.get("STUDIO_VFX_MODE")=="model_artifact_cpu"
+
 def root():
     directory=Path(os.environ.get("STUDIO_VFX_JOB_ROOT","/data/studio-subject-vfx"))
     directory.mkdir(parents=True,exist_ok=True)
     return directory
 
 def auth(request):
-    secret=os.environ.get("STUDIO_NVIDIA_VFX_SECRET","")
+    secret=os.environ.get("STUDIO_MODEL_VFX_SECRET" if cpu_mode() else "STUDIO_NVIDIA_VFX_SECRET","")
     if len(secret)<32 or not hmac.compare_digest(request.headers.get("authorization",""),f"Bearer {secret}"):
         raise HTTPException(401,"Invalid worker authorization")
 
@@ -75,15 +80,16 @@ def run_job(job_id):
         with process_lock:
             state=read(job_id)
             if state["status"]=="cancelled": return
-            if remaining()<60: raise RuntimeError("Authorized NVIDIA window has ended")
+            if not cpu_mode() and remaining()<60: raise RuntimeError("Authorized NVIDIA window has ended")
             state["status"]="processing"; save(directory,state)
             log=(directory/"render.log").open("wb")
-            process=subprocess.Popen([sys.executable,str(Path(__file__).with_name("studio_subject_vfx_job.py")),"--spec",str(directory/"spec.json")],stdout=log,stderr=log,start_new_session=True)
+            script="studio_model_subject_vfx_job.py" if cpu_mode() else "studio_subject_vfx_job.py"
+            process=subprocess.Popen([sys.executable,str(Path(__file__).with_name(script)),"--spec",str(directory/"spec.json")],stdout=log,stderr=log,start_new_session=True)
             processes[job_id]=process
         try:
-            process.wait(timeout=min(1100,max(1,remaining()-15)))
+            process.wait(timeout=1100 if cpu_mode() else min(1100,max(1,remaining()-15)))
         except subprocess.TimeoutExpired:
-            stop(process); raise RuntimeError("Render stopped before its NVIDIA deadline")
+            stop(process); raise RuntimeError("CPU composition timed out" if cpu_mode() else "Render stopped before its NVIDIA deadline")
         finally: log.close()
         with process_lock:
             state=read(job_id)
@@ -110,6 +116,7 @@ def reconcile_restart():
 @app.get("/health")
 def health(request:Request):
     auth(request)
+    if cpu_mode():return {"provider":"deterministic_cpu","available":not lock.locked(),"gpuCount":0}
     return {"provider":"nvidia","available":remaining()>60 and not lock.locked() and gpu_available(),"secondsRemaining":max(0,remaining())}
 
 @app.post("/jobs",status_code=202)
@@ -119,21 +126,31 @@ async def create(request:Request):
     if len(body)>32000: raise HTTPException(413,"Subject spec too large")
     try: spec=json.loads(body)
     except ValueError: raise HTTPException(422,"Invalid subject spec")
-    if (not isinstance(spec,dict) or set(spec)!={"jobId","ownerUid","requestHash","sourceUrl","scene"}
+    fields={"jobId","ownerUid","requestHash","sourceUrl","scene"} | ({"modelInput"} if cpu_mode() else set())
+    if (not isinstance(spec,dict) or set(spec)!=fields
         or not isinstance(spec["requestHash"],str) or not re.fullmatch(r"[a-f0-9]{64}",spec["requestHash"])
         or not isinstance(spec["ownerUid"],str) or not re.fullmatch(r"[A-Za-z0-9_-]{1,128}",spec["ownerUid"])
         or not isinstance(spec["sourceUrl"],str) or len(spec["sourceUrl"])>8192
         or not isinstance(spec["scene"],dict)):
         raise HTTPException(422,"Invalid subject spec")
+    if cpu_mode():
+        try:
+            try:from .studio_model_subject_vfx_job import valid_model_input,storage_url
+            except ImportError:from studio_model_subject_vfx_job import valid_model_input,storage_url
+            valid_model_input(spec['modelInput']);storage_url(spec['sourceUrl'])
+        except (ValueError,TypeError,KeyError):raise HTTPException(422,"Invalid model artifact spec")
     directory=work(spec["jobId"])
-    fingerprint=hashlib.sha256(json.dumps({key:value for key,value in spec.items() if key!="sourceUrl"},sort_keys=True,separators=(",",":")).encode()).hexdigest()
+    identity={key:value for key,value in spec.items() if key!="sourceUrl"}
+    if cpu_mode():identity={**identity,"modelInput":{**spec['modelInput'],"files":{
+        key:{k:v for k,v in file.items() if k!='url'} for key,file in spec['modelInput']['files'].items()}}}
+    fingerprint=hashlib.sha256(json.dumps(identity,sort_keys=True,separators=(",",":")).encode()).hexdigest()
     with process_lock:
         if (directory/"state.json").exists():
             previous=read(spec["jobId"])
             if previous["fingerprint"]!=fingerprint: raise HTTPException(409,"Job ID belongs to another render")
             return {"jobId":spec["jobId"],"status":previous["status"],"reused":True}
-        if remaining()<60: raise HTTPException(503,"No authorized NVIDIA window")
-        if not gpu_available() or not lock.acquire(blocking=False): raise HTTPException(429,"NVIDIA GPU is already occupied or unavailable")
+        if not cpu_mode() and remaining()<60: raise HTTPException(503,"No authorized NVIDIA window")
+        if (not cpu_mode() and not gpu_available()) or not lock.acquire(blocking=False): raise HTTPException(429,"Subject renderer is already occupied or unavailable")
         try:
             directory.mkdir(mode=0o700)
             (directory/"spec.json").write_text(json.dumps(spec));os.chmod(directory/"spec.json",0o600)

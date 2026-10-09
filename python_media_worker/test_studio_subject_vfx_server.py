@@ -71,3 +71,24 @@ def test_compute_occupancy_probe_refuses_existing_processes(monkeypatch):
     run=Mock(side_effect=[Mock(stdout="NVIDIA L40S\n"),Mock(stdout="4352\n")]);monkeypatch.setattr(worker.subprocess,"run",run)
     assert not worker.gpu_available()
     assert "--query-compute-apps=pid" in run.call_args_list[1].args[0]
+
+def test_cpu_artifact_composition_never_probes_or_requires_gpu(client,monkeypatch):
+    monkeypatch.setenv('STUDIO_VFX_MODE','model_artifact_cpu')
+    monkeypatch.setenv('STUDIO_MODEL_VFX_SECRET',SECRET)
+    monkeypatch.delenv('NVIDIA_SERVICE_DEADLINE_EPOCH')
+    gpu=Mock(side_effect=AssertionError('CPU composition must not probe a GPU'))
+    monkeypatch.setattr(worker,'gpu_available',gpu)
+    value=spec()
+    value['modelInput']={'schemaVersion':1,'artifactHash':'b'*64,'sourceSha256':'c'*64,
+        'sourceRange':{'space':'source','startTick':180000,'endTick':720000},
+        'manifestSha256':'d'*64,'frameCount':144,'width':960,'height':540,
+        'files':{key:{'url':'https://storage.googleapis.com/bucket/'+key+'?signature=one','sha256':'e'*64,'bytes':1024}
+                 for key in ['normalizedSource','maskBundle']}}
+    assert client.post('/jobs',json=value,headers=HEADERS).status_code==202
+    assert client.get('/health',headers=HEADERS).json()['gpuCount']==0
+    for ref in value['modelInput']['files'].values():ref['url']=ref['url'].replace('one','two')
+    response=client.post('/jobs',json=value,headers=HEADERS)
+    assert response.status_code==202 and response.json()['reused']
+    value['modelInput']['artifactHash']='f'*64
+    assert client.post('/jobs',json=value,headers=HEADERS).status_code==409
+    gpu.assert_not_called()

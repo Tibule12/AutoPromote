@@ -24,6 +24,7 @@ service firebase.storage {
       // request.path includes b/<bucket>/o before object segments. Check it
       // for list requests, which have no resource metadata to inspect.
       return (request.path[3] == 'temp' && request.path[4] == 'studio-analysis') ||
+        request.path[3] == 'temp_studio_vfx' ||
         (request.path[3] == 'studio' && request.path[4] == 'analysis-results') ||
         (request.path[3] == 'studio' && request.path[4] == 'model-runtime') ||
         (request.path[3] == 'studio' && request.path[4] == 'sources' &&
@@ -42,6 +43,9 @@ service firebase.storage {
       allow read, write: if false;
     }
     match /studio/model-runtime/{allPaths=**} {
+      allow read, write: if false;
+    }
+    match /temp_studio_vfx/{allPaths=**} {
       allow read, write: if false;
     }
 

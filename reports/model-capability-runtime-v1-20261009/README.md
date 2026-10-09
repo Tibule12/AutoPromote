@@ -1,5 +1,7 @@
 # Model Capability Runtime V1 — private vertical proof complete
 
+The broader requested product integration is **not complete**. The missing normal subject-preview/export bridge has since been implemented and CPU-verified; [current follow-up and remaining authenticated workflow](SUBJECT-BRIDGE-FOLLOWUP.md) supersede that specific blocker below. The private proof receipts remain historical evidence.
+
 Branch: `agent/model-capability-runtime-v1`. Assessment: 2026-10-09T14:20:21.874199+00:00.
 
 The common runtime executed Qwen3-VL, Grounding DINO, SAM2.1 and Wan2.2, persisted immutable source-bound artifacts, loaded five references and two video assets into one canonical Studio project, and rendered the actual masked source plus actual moving generated B-roll through the existing AutoPromote renderer. The corrected 1080p/24fps final contains 181 frames / 7.541667 seconds. Actual decoded pixels and muted native playback were inspected. No frontend redesign, Cam Combiner change, production application/rules deployment or main merge occurred.

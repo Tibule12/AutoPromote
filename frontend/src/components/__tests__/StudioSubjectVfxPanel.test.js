@@ -32,8 +32,8 @@ const deferred = () => {
 };
 const response = data => ({ ok: true, json: async () => data });
 let sequence = 0;
-function Harness() {
-  const [items, setItems] = useState([{ scene: scene(), enabled: true }]);
+function Harness({modelArtifactRef}) {
+  const [items, setItems] = useState([{ scene: scene(), enabled: true,...(modelArtifactRef?{modelArtifactRef}:{}) }]);
   return (
     <>
       <StudioSubjectVfxPanel
@@ -106,6 +106,19 @@ test("rapid submissions dispatch one job, and approval requires actual preview p
   fireEvent.change(screen.getByDisplayValue("STORY"), { target: { value: "NEW STORY" } });
   expect(screen.queryByLabelText(/I reviewed the sound/)).not.toBeInTheDocument();
   expect(fetch.mock.calls.filter(([, options]) => options.method === "POST")).toHaveLength(1);
+});
+
+test('a saved runtime mask is forwarded without model choices through the existing preview controls',async()=>{
+  const modelArtifactRef={kind:'model_capability',schemaVersion:1,artifactHash:'b'.repeat(64),
+    sourceAssetId:'source-a',sourceContentHash:'c'.repeat(64),capability:'segment_subject',
+    sourceRange:{space:'source',startTick:180000,endTick:720000}};
+  fetch.mockResolvedValueOnce(response({jobId:result.jobId})).mockResolvedValueOnce(response(result));
+  render(<Harness modelArtifactRef={modelArtifactRef}/>);
+  fireEvent.click(screen.getByRole('button',{name:'Render subject preview'}));
+  await screen.findByLabelText(/I reviewed the sound/);
+  const body=JSON.parse(fetch.mock.calls.find(([,options])=>options.method==='POST')[1].body);
+  expect(body).toEqual({scene:scene(),clientRequestId:expect.any(String),modelArtifactRef});
+  expect(screen.getByTestId('saved')).toHaveTextContent(modelArtifactRef.artifactHash);
 });
 test("a render cannot overwrite edits made while it was running", async () => {
   const completed = deferred();

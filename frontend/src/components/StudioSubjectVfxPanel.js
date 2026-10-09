@@ -304,7 +304,8 @@ export default function StudioSubjectVfxPanel({
             : null;
       const created = savedJobId
         ? { jobId: savedJobId }
-        : await request("POST", "", { scene, clientRequestId }, signal);
+        : await request("POST", "", { scene, clientRequestId,
+            ...(item.modelArtifactRef?{modelArtifactRef:item.modelArtifactRef}:{}) }, signal);
       if (!isCurrent()) return;
       if (typeof created.jobId !== "string" || !/^[-A-Za-z0-9_]{8,128}$/.test(created.jobId))
         throw new Error("The renderer did not confirm this job. Retry the saved request.");

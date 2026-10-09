@@ -1,0 +1,26 @@
+...........                                                              [100%]
+=============================== warnings summary ===============================
+../../../.cache/autopromote-cinematic-runtime/worker-venv/lib/python3.12/site-packages/starlette/testclient.py:37
+  /home/tibule12/.cache/autopromote-cinematic-runtime/worker-venv/lib/python3.12/site-packages/starlette/testclient.py:37: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]
+
+python_media_worker/studio_subject_vfx_server.py:107
+  /home/tibule12/Projects/AutoPromte/AutoPromote-model-runtime-v1/python_media_worker/studio_subject_vfx_server.py:107: DeprecationWarning:
+          on_event is deprecated, use lifespan event handlers instead.
+
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+
+    @app.on_event("startup")
+
+../../../.cache/autopromote-cinematic-runtime/worker-venv/lib/python3.12/site-packages/fastapi/applications.py:4495
+  /home/tibule12/.cache/autopromote-cinematic-runtime/worker-venv/lib/python3.12/site-packages/fastapi/applications.py:4495: DeprecationWarning:
+          on_event is deprecated, use lifespan event handlers instead.
+
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+
+    return self.router.on_event(event_type)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+11 passed, 3 warnings in 0.94s

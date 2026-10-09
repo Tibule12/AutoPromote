@@ -1,0 +1,7 @@
+FROM python:3.12.11-slim
+ENV PYTHONPATH=/app/python_media_worker PYTHONUNBUFFERED=1 STUDIO_VFX_MODE=model_artifact_cpu
+RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg fonts-dejavu-core && rm -rf /var/lib/apt/lists/*
+RUN pip install --no-cache-dir numpy==1.26.4 Pillow==11.3.0 requests==2.32.5 fastapi==0.116.1 uvicorn==0.35.0
+WORKDIR /app
+COPY python_media_worker/studio_subject_vfx_server.py python_media_worker/studio_model_subject_vfx_job.py python_media_worker/studio_subject_matte.py python_media_worker/studio_vfx_plan.py python_media_worker/
+CMD ["python3","-m","uvicorn","studio_subject_vfx_server:app","--host","0.0.0.0","--port","8080"]

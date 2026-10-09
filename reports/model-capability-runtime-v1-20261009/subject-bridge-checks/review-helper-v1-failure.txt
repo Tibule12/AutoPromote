@@ -1,0 +1,12 @@
+Invalid duration for option ss: .5
+Error parsing options for input file /home/tibule12/Projects/AutoPromte/AutoPromote-model-runtime-v1/reports/model-capability-runtime-v1-20261009/proof/subject-bridge/preview.mp4.
+Error opening input files: Invalid argument
+Traceback (most recent call last):
+  File "/home/tibule12/Projects/AutoPromte/AutoPromote-model-runtime-v1/scripts/model-runtime/verify_subject_bridge.py", line 85, in <module>
+    if __name__=='__main__':main()
+                            ^^^^^^
+  File "/home/tibule12/Projects/AutoPromte/AutoPromote-model-runtime-v1/scripts/model-runtime/verify_subject_bridge.py", line 72, in main
+    subprocess.run(['ffmpeg','-v','error','-y','-ss','.5','-i',str(path),'-frames:v','1',str(output/'preview-frame.png')],check=True)
+  File "/usr/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['ffmpeg', '-v', 'error', '-y', '-ss', '.5', '-i', '/home/tibule12/Projects/AutoPromte/AutoPromote-model-runtime-v1/reports/model-capability-runtime-v1-20261009/proof/subject-bridge/preview.mp4', '-frames:v', '1', '/home/tibule12/Projects/AutoPromte/AutoPromote-model-runtime-v1/reports/model-capability-runtime-v1-20261009/proof/subject-bridge/preview-frame.png']' returned non-zero exit status 234.

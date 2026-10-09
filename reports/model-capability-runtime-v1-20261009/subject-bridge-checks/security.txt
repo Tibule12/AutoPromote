@@ -1,0 +1,5 @@
+✔ model evidence and GPU capacity are server-only for regular and admin clients (11751.930189ms)
+ℹ tests 1
+ℹ pass 1
+ℹ fail 0
+✔  Script exited successfully (code 0)

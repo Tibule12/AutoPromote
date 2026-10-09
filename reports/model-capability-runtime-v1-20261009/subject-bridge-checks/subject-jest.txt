@@ -1,0 +1,5 @@
+Test Suites: 2 passed, 2 total
+Tests:       26 passed, 26 total
+Snapshots:   0 total
+Time:        2.141 s, estimated 3 s
+Ran all test suites within paths "test/studioSubjectVfxService.jest.test.js", "frontend/src/components/__tests__/StudioSubjectVfxPanel.test.js" in 2 projects.

@@ -1,5 +1,7 @@
 # Model Capability Runtime V1
 
+The existing Studio subject-effects panel can submit its saved generic mask reference through `/studio-subject-vfx`. The backend resolves project/source/hash/generation/prompt bindings and dispatches deterministic composition to the existing worker protocol in `model_artifact_cpu` mode. `STUDIO_MODEL_VFX_URL`/`STUDIO_MODEL_VFX_SECRET` configure that CPU worker. Its separate image definition has no CUDA, Torch or weights. Preview review and the existing final export resolver retain their contracts; no new model inference is needed for effect-only edits. [Follow-up evidence and unqualified authenticated lifecycle](../reports/model-capability-runtime-v1-20261009/SUBJECT-BRIDGE-FOLLOWUP.md).
+
 Branch: `agent/model-capability-runtime-v1`. The inherited Studio working source
 was preserved in baseline commit `2aaec02b`; runtime changes follow that commit.
 No production service is deployed, no production feature flag is changed, and

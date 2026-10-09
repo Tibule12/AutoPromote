@@ -1,0 +1,5 @@
+Test Suites: 3 passed, 3 total
+Tests:       24 passed, 24 total
+Snapshots:   0 total
+Time:        1.965 s, estimated 2 s
+Ran all test suites within paths "test/studioProjectRevisionRoutes.jest.test.js", "test/studioDirectorReplayService.jest.test.js", "test/studioProjectIntelligenceService.jest.test.js".
