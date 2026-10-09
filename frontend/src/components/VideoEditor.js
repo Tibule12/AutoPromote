@@ -151,6 +151,7 @@ function VideoEditor({
   images = [],
   hideCreationWorkflows = false,
   initialProjectFiles = [],
+  initialSavedProject = null,
 }) {
   const { editing, credits: subscriptionCredits } = useSubscription();
   const [videoSrc, setVideoSrc] = useState("");
@@ -200,6 +201,8 @@ function VideoEditor({
 
   const [processedFile, setProcessedFile] = useState(null);
   const [viralRenderedFile, setViralRenderedFile] = useState(null);
+  const [recoveryProjectId, setRecoveryProjectId] = useState(initialSavedProject?.id);
+  const studioEditRevisionRef = useRef(0);
   const [desktopToolsAvailable, setDesktopToolsAvailable] = useState(canUseDesktopEditingTools);
   // Wait until the media source is ready before mounting Studio. Mounting it with
   // an empty source and immediately replacing that source aborts Firefox's fetch.
@@ -245,7 +248,7 @@ function VideoEditor({
     return `${safeName || "edited-video"}.mp4`;
   };
 
-  const handleDownloadVideo = async sourceOverride => {
+  const handleDownloadVideo = async (sourceOverride, downloadOverride = null) => {
     const downloadSource =
       typeof sourceOverride === "string" ? sourceOverride : processedFile?.url || videoSrc;
     if (!downloadSource) {
@@ -257,7 +260,21 @@ function VideoEditor({
       const downloadName =
         typeof sourceOverride === "string" ? "viral_clip_rendered.mp4" : getDownloadFileName();
 
-      if (processedFile instanceof File || processedFile instanceof Blob) {
+      if (typeof downloadOverride === "string" && downloadOverride) {
+        // Owner-checked storage access signs an attachment disposition. Let
+        // the browser stream the file to disk instead of buffering a large
+        // recovered export as a JavaScript blob before a download can begin.
+        const link = document.createElement("a");
+        link.href = sanitizeUrl(downloadOverride);
+        link.download = downloadName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setStatusMessage("Download started.");
+        return;
+      }
+
+      if (typeof sourceOverride !== "string" && (processedFile instanceof File || processedFile instanceof Blob)) {
         const objectUrl = URL.createObjectURL(processedFile);
         const link = document.createElement("a");
         link.href = objectUrl;
@@ -270,12 +287,23 @@ function VideoEditor({
         return;
       }
 
-      const response = await fetch(downloadSource, { mode: "cors" });
-      if (!response.ok) {
-        throw new Error(`Download failed with status ${response.status}`);
+      let blob;
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        try {
+          // A full file download must not reuse a video player's cached range.
+          // Retry this idempotent GET once if its transport/body read fails.
+          const response = await fetch(downloadSource, { mode: "cors", cache: "no-store" });
+          if (!response.ok) {
+            const error = new Error(`Download failed with status ${response.status}`);
+            error.retryableDownload = response.status === 408 || response.status === 429 || response.status >= 500;
+            throw error;
+          }
+          blob = await response.blob();
+          break;
+        } catch (error) {
+          if (attempt > 0 || !(error instanceof TypeError || error.retryableDownload)) throw error;
+        }
       }
-
-      const blob = await response.blob();
       const objectUrl = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = objectUrl;
@@ -1126,10 +1154,17 @@ function VideoEditor({
 
   useEffect(() => {
     const uid = getAuth().currentUser?.uid;
-    const attempt = loadViralRenderAttempt(uid);
-    if (!attempt) return undefined;
+    const attempt = loadViralRenderAttempt(uid, recoveryProjectId);
+    // A global last-render receipt must not cover a different saved project,
+    // or restore a legacy branded video into the clean Studio workspace.
+    if (!attempt || (recoveryProjectId && (attempt.studioProjectId !== recoveryProjectId ||
+        attempt.brandWatermark !== false))) {
+      setRenderRecovery(null);
+      return undefined;
+    }
 
     recoveryDismissedRef.current = false;
+    const recoveryEditRevision = studioEditRevisionRef.current;
     let stopped = false;
     let timer = null;
     let missingChecks = 0;
@@ -1170,6 +1205,10 @@ function VideoEditor({
         if (stopped || recoveryDismissedRef.current) return;
         const status = String(job.status || "queued");
         if (status === "completed") {
+          if (studioEditRevisionRef.current !== recoveryEditRevision) {
+            setRenderRecovery(null);
+            return;
+          }
           const result = job.result || {};
           const outputUrl = sanitizeUrl(
             job.outputUrl || job.output_url || result.url || result.output_url
@@ -1180,6 +1219,7 @@ function VideoEditor({
             type: "video/mp4",
             url: outputUrl,
             previewUrl: outputUrl,
+            downloadUrl: job.downloadUrl || null,
             thumbnailUrl: result.thumbnailUrl || job.thumbnailUrl || null,
             audioProof: result.audioProof || job.audioProof || null,
             captionReviewCopy: attempt.captionReviewCopy,
@@ -1222,15 +1262,16 @@ function VideoEditor({
       if (timer) clearTimeout(timer);
       requestRef.current?.abort();
     };
-  }, [renderRecoveryRetry]);
+  }, [renderRecoveryRetry, recoveryProjectId]);
 
   const dismissRenderRecovery = () => {
     recoveryDismissedRef.current = true;
-    clearViralRenderAttempt(getAuth().currentUser?.uid, renderRecovery?.requestId);
+    clearViralRenderAttempt(getAuth().currentUser?.uid, renderRecovery?.requestId, recoveryProjectId);
     setRenderRecovery(null);
   };
 
   const handleViralRender = async (selectedClip, overlays, extraOptions = {}) => {
+    const submittedEditRevision = studioEditRevisionRef.current;
     if (["checking", "processing", "unavailable", "missing"].includes(renderRecovery?.status)) {
       setStatusMessage(
         "Your previous render may still be processing. Check its status or dismiss recovery before starting another render."
@@ -1324,6 +1365,8 @@ function VideoEditor({
       saveViralRenderAttempt(user?.uid, {
         requestId: renderRequestId,
         captionReviewCopy: extraOptions.captionReviewCopy === true,
+        studioProjectId: extraOptions.studioProjectId,
+        brandWatermark: payload.brand_watermark,
       });
 
       // NOTE: backend 'mediaRoutes.js' expects 'fileUrl' and 'options'.
@@ -1475,12 +1518,15 @@ function VideoEditor({
         const debugText = await response.text();
         console.error("Backend Error Text:", debugText);
         let backendMessage = "Rendering failed";
+        let backendCode = "";
         try {
           const errJson = JSON.parse(debugText);
           backendMessage = errJson.detail || errJson.details || errJson.message || backendMessage;
+          backendCode = errJson.code || "";
         } catch (_parseError) {}
-        if ([400, 402, 403, 409, 422].includes(response.status)) {
-          clearViralRenderAttempt(user?.uid, renderRequestId);
+        if ([400, 402, 403, 409, 422].includes(response.status) ||
+            ["STUDIO_RENDER_WORKER_UNAVAILABLE", "STUDIO_RENDER_WORKER_BUSY"].includes(backendCode)) {
+          clearViralRenderAttempt(user?.uid, renderRequestId, recoveryProjectId);
           viralRenderAttemptRef.current = null;
         }
         throw new Error(
@@ -1606,6 +1652,7 @@ function VideoEditor({
           name: `viral_clip_rendered.mp4`,
           type: "video/mp4",
           url: renderedUrl,
+          downloadUrl: result.downloadUrl || null,
           thumbnailUrl: result.thumbnailUrl || null,
           coverFrame: result.coverFrame || null,
           thumbnailFrame: result.thumbnailFrame || null,
@@ -1634,7 +1681,12 @@ function VideoEditor({
                 }
               : null,
         };
-        setProcessedFile(fakeFile);
+        if (studioEditRevisionRef.current !== submittedEditRevision) {
+          setStatusMessage("The earlier edit finished rendering. Render the current edit to review its latest changes.");
+          return fakeFile;
+        }
+        // Keep the original editor source. A completed Studio export must not
+        // become the input for the next edit or silently replace its source.
         setViralRenderedFile({ ...fakeFile, previewUrl: urlWithCacheBuster });
         setStatusMessage(
           fakeFile.audioProof?.verified
@@ -1658,7 +1710,7 @@ function VideoEditor({
           ? "Stopped waiting for the render. Check its server status before starting another."
           : "Error rendering clip: " + msg
       );
-      if (loadViralRenderAttempt(getAuth().currentUser?.uid)) {
+      if (loadViralRenderAttempt(getAuth().currentUser?.uid, initialSavedProject?.id)) {
         setRenderRecoveryRetry(value => value + 1);
       }
       // Keep the studio open on error/cancel so the user can retry or adjust settings
@@ -1830,7 +1882,7 @@ function VideoEditor({
       renderedFile={viralRenderedFile}
       onDismiss={dismissRenderRecovery}
       onRetry={() => setRenderRecoveryRetry(value => value + 1)}
-      onDownload={url => void handleDownloadVideo(url)}
+      onDownload={url => void handleDownloadVideo(url, viralRenderedFile?.downloadUrl)}
       onUse={renderedFile => {
         onSave?.(renderedFile);
         setClipSuggestions(null);
@@ -1900,6 +1952,7 @@ function VideoEditor({
             sourceName={processedFile?.name || file?.name || "Original source video"}
             sourceStoragePath={processedFile?.storagePath || file?.storagePath || null}
             initialProjectFiles={initialProjectFiles}
+            initialSavedProject={initialSavedProject}
             importedCameraMaster={importedCameraMaster}
             isWorkflowPaused={showMultiCamCombiner}
             onOpenCameraAngles={handleOpenCameraAngles}
@@ -1917,8 +1970,26 @@ function VideoEditor({
             onStatusChange={setStatusMessage}
             renderStatus={statusMessage}
             renderedOutput={viralRenderedFile}
+            onProjectOpened={id => {
+              studioEditRevisionRef.current += 1;
+              setViralRenderedFile(null);
+              setRenderRecovery(null);
+              setRecoveryProjectId(id);
+              setRenderRecoveryRetry(value => value + 1);
+            }}
+            onEditInvalidated={() => {
+              studioEditRevisionRef.current += 1;
+              if (viralRenderedFile || renderRecovery?.status === "completed") {
+                clearViralRenderAttempt(getAuth().currentUser?.uid, undefined, recoveryProjectId);
+                recoveryDismissedRef.current = true;
+                setRenderRecovery(null);
+              }
+              setViralRenderedFile(null);
+              setRenderRecovery(current => current?.status === "completed" ? null : current);
+              if (!processing) setStatusMessage("");
+            }}
             renderRecoveryPanel={renderRecovery ? recoveryPanel : null}
-            onDownloadRendered={handleDownloadVideo}
+            onDownloadRendered={() => handleDownloadVideo(viralRenderedFile?.url, viralRenderedFile?.downloadUrl)}
             onUseRendered={() => {
               if (!viralRenderedFile || viralRenderedFile.captionReviewCopy) return;
               onSave?.(viralRenderedFile);

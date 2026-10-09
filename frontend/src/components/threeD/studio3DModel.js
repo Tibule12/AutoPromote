@@ -20,6 +20,25 @@ const finite = (value, fallback) => Number.isFinite(Number(value)) ? Number(valu
 const between = (value, min, max, fallback) => Math.max(min, Math.min(max, finite(value, fallback)));
 const choice = (value, choices, fallback) => choices.includes(value) ? value : fallback;
 const color = (value, fallback) => /^#[0-9a-f]{6}$/i.test(String(value || "")) ? value : fallback;
+// A bounded cache identity survives project normalisation. This is only the
+// browser's stale-preview check; the API independently verifies SHA-256 and
+// ownership before using any rendered frames.
+function sceneRevisionToken(serialized) {
+  let first = 2166136261, second = 2246822519;
+  for (let index = 0; index < serialized.length; index += 1) {
+    const character = serialized.charCodeAt(index);
+    first = Math.imul(first ^ character, 16777619);
+    second = Math.imul(second ^ character, 3266489917);
+  }
+  const hex = value => (value >>> 0).toString(16).padStart(8, "0");
+  return `scene-v2:${serialized.length.toString(36)}:${hex(first)}${hex(second)}`;
+}
+const previewRevision = raw => {
+  const value = String(raw || "");
+  // Complete legacy revisions can migrate without rendering again. Truncated
+  // legacy revisions remain stale; they cannot establish matching content.
+  return value.startsWith("{") && value.endsWith("}") ? sceneRevisionToken(value) : value;
+};
 // eslint-disable-next-line no-control-regex
 const clean = (value, max) => String(value ?? "").replace(/[<>\u0000-\u001f]/g, " ").slice(0, max);
 const KEYFRAME_BOUNDS = {
@@ -93,7 +112,7 @@ export function normalizeStudio3DScene(raw = {}) {
     enabled: raw.enabled !== false,
     quality: choice(raw.quality, ["draft", "preview", "high"], "preview"),
     hqPreviewUrl: clean(raw.hqPreviewUrl, 2048),
-    hqPreviewRevision: clean(raw.hqPreviewRevision, 128),
+    hqPreviewRevision: clean(previewRevision(raw.hqPreviewRevision), 128),
     hqPreviewJobId: clean(raw.hqPreviewJobId, 100),
     keyframes: normalizeKeyframes(raw.keyframes, startTime, startTime + duration),
   };
@@ -110,7 +129,7 @@ export function studio3DSceneRevision(scene) {
     hqPreviewJobId: _hqPreviewJobId,
     ...renderValues
   } = normalizeStudio3DScene(scene);
-  return JSON.stringify(renderValues);
+  return sceneRevisionToken(JSON.stringify(renderValues));
 }
 
 export function studio3DPose(raw, time) {

@@ -7,6 +7,54 @@ import sys
 import bpy
 
 
+def configure_render_device(scene):
+    """Select actual Cycles devices; explicit GPU requests never silently use CPU."""
+    mode = os.environ.get("STUDIO_3D_DEVICE", "eevee").lower()
+    if mode not in {"eevee", "auto", "cpu", "cuda", "optix"}:
+        raise ValueError("STUDIO_3D_DEVICE must be eevee, auto, cpu, cuda or optix")
+    if mode == "eevee":
+        try:
+            scene.render.engine = "BLENDER_EEVEE_NEXT"
+        except TypeError:
+            scene.render.engine = "BLENDER_EEVEE"
+        info = {"backend": "EEVEE", "devices": [], "gpu_verified": False}
+    else:
+        scene.render.engine = "CYCLES"
+        scene.cycles.samples = max(1, min(256, int(os.environ.get("STUDIO_3D_SAMPLES", "32"))))
+        scene.cycles.seed = 0
+        scene.cycles.use_animated_seed = False
+        scene.cycles.use_denoising = True
+        preferences = bpy.context.preferences.addons["cycles"].preferences
+        info = {"backend": "CPU", "devices": [], "gpu_verified": False}
+        errors = []
+        for backend in (() if mode == "cpu" else ("OPTIX", "CUDA") if mode == "auto" else (mode.upper(),)):
+            try:
+                preferences.compute_device_type = backend
+                preferences.get_devices()
+                selected = [device for device in preferences.devices if device.type == backend]
+                if not selected:
+                    raise RuntimeError(f"No {backend} render devices")
+                for device in preferences.devices:
+                    device.use = device.type == backend
+                scene.cycles.device = "GPU"
+                if backend == "OPTIX":
+                    # Blender defaults to OIDN with accurate CPU prefiltering.
+                    # Keep NVIDIA renders on the available OptiX denoiser.
+                    scene.cycles.denoiser = "OPTIX"
+                info = {"backend": backend, "devices": [device.name for device in selected], "gpu_verified": True}
+                info["denoiser"] = scene.cycles.denoiser
+                break
+            except (TypeError, RuntimeError) as error:
+                errors.append(str(error))
+        if not info["gpu_verified"]:
+            if mode in {"cuda", "optix"}:
+                raise RuntimeError("Requested Cycles GPU backend unavailable: " + "; ".join(errors))
+            scene.cycles.device = "CPU"
+            info["fallback_reasons"] = errors
+    print(json.dumps({"event": "render_device", "engine": scene.render.engine, **info}), flush=True)
+    return info
+
+
 def rgba(value, alpha=1):
     value = value.lstrip("#")
     channels = [int(value[i:i + 2], 16) / 255 for i in (0, 2, 4)]
@@ -45,12 +93,15 @@ def simple_material(name, color, metallic=0, roughness=.4, emission=0):
     return mat
 
 
-def text_object(value, size, mat, parent, scene, y=0):
+def text_object(value, size, mat, parent, scene, y=0, dimensional=True):
     curve = bpy.data.curves.new("Extruded title", "FONT")
+    font_path = os.environ.get("STUDIO_3D_FONT_PATH") if dimensional else os.environ.get("STUDIO_3D_SECONDARY_FONT_PATH", os.environ.get("STUDIO_3D_FONT_PATH"))
+    if font_path:
+        curve.font = bpy.data.fonts.load(font_path, check_existing=True)
     curve.body = value or " "
     curve.size = size
-    curve.extrude = scene["extrusionDepth"] / 2
-    curve.bevel_depth = scene["bevel"]
+    curve.extrude = scene["extrusionDepth"] / 2 if dimensional else 0
+    curve.bevel_depth = scene["bevel"] if dimensional else 0
     curve.bevel_resolution = 2
     curve.align_x = scene.get("textAlign", "center").upper()
     curve.align_y = "CENTER"
@@ -81,10 +132,7 @@ def setup_scene(spec, asset_file=None):
     bpy.ops.object.delete(use_global=False)
     s = spec["scene"]
     world = bpy.context.scene
-    try:
-        world.render.engine = "BLENDER_EEVEE_NEXT"
-    except TypeError:
-        world.render.engine = "BLENDER_EEVEE"
+    configure_render_device(world)
     world.render.resolution_x = spec["width"]
     world.render.resolution_y = spec["height"]
     world.render.resolution_percentage = 100
@@ -110,7 +158,7 @@ def setup_scene(spec, asset_file=None):
     title.name = "Main wordmark"
     subtitle = None
     if s["secondary"]:
-        subtitle = text_object(s["secondary"], .28, sub, root, s, -.7 * s["lineSpacing"])
+        subtitle = text_object(s["secondary"], .28, sub, root, s, -.7 * s["lineSpacing"], dimensional=False)
         subtitle.name = "Supporting line"
     template = s["template"]
     aspect = spec["width"] / spec["height"]
@@ -155,7 +203,8 @@ def setup_scene(spec, asset_file=None):
         hero_plate = cube("Bevelled hero plate", (0, 0, -.34), (8.2, 3.3 if template == "comparison_card" else 2.35, .12), plate, root)
         top_edge = cube("Top accent edge", (0, 1.17, -.25), (7.8, .022, .025), accent, root)
     if template in {"cinematic_title", "speaker_intro", "comparison_card"}:
-        cube("Light underline", (0, -.8, .1), (5.2, .035, .035), accent, root)
+        underline_y = -1.12 * s["lineSpacing"] if s["secondary"] else -.8
+        cube("Light underline", (0, underline_y, .1), (5.2, .022, .025), accent, root)
     if template in {"neon_logo", "audio_reactive_text"}:
         bpy.ops.mesh.primitive_torus_add(major_radius=2.02, minor_radius=.022, location=(0, 0, -.65))
         ring = bpy.context.object
@@ -204,18 +253,37 @@ def setup_scene(spec, asset_file=None):
     rim.data.energy = 360
     rim.data.color = (.52, .63, 1)
     rim.data.size = 4
+    # Apply the shared pose opacity to the rendered alpha on every frame.
+    # Work in straight alpha so fading does not distort the glow's RGB values.
+    world.use_nodes = True
+    nodes = world.node_tree.nodes
+    nodes.clear()
+    render = nodes.new("CompositorNodeRLayers")
+    image_output = render.outputs["Image"]
     if s["bloom"] > .05:
-        world.use_nodes = True
-        nodes = world.node_tree.nodes
-        nodes.clear()
-        render = nodes.new("CompositorNodeRLayers")
         glare = nodes.new("CompositorNodeGlare")
         glare.glare_type = "FOG_GLOW"
         glare.quality = "MEDIUM"
         glare.threshold = max(1.1, 2.3 - s["bloom"])
-        output = nodes.new("CompositorNodeComposite")
         world.node_tree.links.new(render.outputs["Image"], glare.inputs["Image"])
-        world.node_tree.links.new(glare.outputs["Image"], output.inputs["Image"])
+        image_output = glare.outputs["Image"]
+    straight = nodes.new("CompositorNodePremulKey")
+    straight.mapping = "PREMUL_TO_STRAIGHT"
+    world.node_tree.links.new(image_output, straight.inputs["Image"])
+    opacity = nodes.new("CompositorNodeMath")
+    opacity.name = "Timeline opacity"
+    opacity.operation = "MULTIPLY"
+    opacity.inputs[1].default_value = 1
+    world.node_tree.links.new(render.outputs["Alpha"], opacity.inputs[0])
+    alpha = nodes.new("CompositorNodeSetAlpha")
+    alpha.mode = "REPLACE_ALPHA"
+    world.node_tree.links.new(straight.outputs["Image"], alpha.inputs["Image"])
+    world.node_tree.links.new(opacity.outputs[0], alpha.inputs["Alpha"])
+    premultiplied = nodes.new("CompositorNodePremulKey")
+    premultiplied.mapping = "STRAIGHT_TO_PREMUL"
+    world.node_tree.links.new(alpha.outputs["Image"], premultiplied.inputs["Image"])
+    output = nodes.new("CompositorNodeComposite")
+    world.node_tree.links.new(premultiplied.outputs["Image"], output.inputs["Image"])
     animated = {
         "title": title,
         "subtitle": subtitle,
@@ -380,6 +448,7 @@ def main():
         root.location = current["position"]
         root.scale = (current["scale"],) * 3
         root.rotation_euler = tuple(math.radians(angle) for angle in current["rotation"])
+        world.node_tree.nodes["Timeline opacity"].inputs[1].default_value = current["opacity"]
         if spec["scene"]["template"] == "neon_logo":
             animate_logo(animated, index / spec["fps"], spec["duration"])
         camera.location.x = math.sin(index / spec["fps"] * .6) * spec["scene"]["cameraMotion"] * .22

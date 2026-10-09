@@ -1,0 +1,11 @@
+{
+  "source": "https://github.com/rsms/inter/releases/tag/v4.1",
+  "archiveSha256": "9883fdd4a49d4fb66bd8177ba6625ef9a64aa45899767dde3d36aa425756b11e",
+  "license": "Inter-LICENSE.txt",
+  "files": {
+    "Inter-ExtraBold.ttf": "e6756ad5690b77606aa62249a7b420d9902d45cae4b0048a24911fd4324b0a22",
+    "Inter-SemiBold.ttf": "78a843fade9d4612a5567302fb595b56976eb5fcebf4fea5a5912d638bafcde3",
+    "Inter-Regular.ttf": "40d692fce188e4471e2b3cba937be967878f631ad3ebbbdcd587687c7ebe0c82",
+    "Inter-Black.ttf": "6342d3ea6dc088b43867f615e807d898adf100c93edb978b8e52c5eb71a264da"
+  }
+}

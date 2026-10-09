@@ -2,12 +2,15 @@ import React from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { uploadSourceFileViaBackend } from "../../utils/sourceUpload";
 import ViralClipStudioPanel from "../ViralClipStudioPanel";
+import * as projectStore from "../../components/viralStudioProjectStore";
 
 const mockVideoEditor = jest.fn();
 const mockGetIdToken = jest.fn();
+let mockSubscriptionLoading = false;
+let mockStudioAllowed = true;
 
 jest.mock("../../hooks/useSubscription", () => ({
-  useSubscription: () => ({ canUseFeature: () => true }),
+  useSubscription: () => ({ canUseFeature: () => mockStudioAllowed, loading: mockSubscriptionLoading }),
 }));
 
 jest.mock("../../utils/sourceUpload", () => ({
@@ -27,6 +30,8 @@ jest.mock("../../components/VideoEditor", () => props => {
 
 describe("ViralClipStudioPanel", () => {
   beforeEach(() => {
+    mockSubscriptionLoading = false;
+    mockStudioAllowed = true;
     mockVideoEditor.mockClear();
     mockGetIdToken.mockReset();
     mockGetIdToken.mockResolvedValue("firebase-token");
@@ -36,6 +41,29 @@ describe("ViralClipStudioPanel", () => {
       storagePath: "uploads/videos/user/source.mp4",
       size: 5,
     });
+  });
+
+  test("a saved project waits for the paid profile instead of redirecting to Billing", async () => {
+    const project = { id: "saved-edit", name: "Saved edit", snapshot: { projectMedia: [
+      { name: "source.mp4", duration: 12, storagePath: "uploads/videos/user/source.mp4" }
+    ] } };
+    const listing = jest.spyOn(projectStore, "listViralStudioProjects").mockResolvedValue([project]);
+    const originalFetch = global.fetch;
+    global.fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ({ url: "https://media.example.com/source.mp4" }) });
+    mockSubscriptionLoading = true; mockStudioAllowed = false;
+    const onUpgrade = jest.fn();
+    try {
+      const view = render(<ViralClipStudioPanel onUpgrade={onUpgrade} />);
+      const button = await screen.findByRole("button", { name: "Saved edit" });
+      expect(button).toBeDisabled(); fireEvent.click(button);
+      expect(onUpgrade).not.toHaveBeenCalled();
+      mockSubscriptionLoading = false; mockStudioAllowed = true;
+      view.rerender(<ViralClipStudioPanel onUpgrade={onUpgrade} />);
+      expect(button).toBeEnabled(); fireEvent.click(button);
+      await screen.findByText("Real Viral Clip Studio controller");
+      expect(mockVideoEditor.mock.calls.at(-1)[0].initialSavedProject).toEqual(project);
+      expect(onUpgrade).not.toHaveBeenCalled();
+    } finally { listing.mockRestore(); global.fetch = originalFetch; }
   });
 
   test("uploads and validates the source before opening the original Studio controller", async () => {

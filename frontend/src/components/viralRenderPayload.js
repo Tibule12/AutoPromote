@@ -292,6 +292,7 @@ export const buildViralRenderData = ({
     extraOptions.captionSegments,
     normalizeCaptionSegmentsForRender
   );
+  addDefined(payload, "caption_coverage_mode", extraOptions.captionCoverageMode, String);
   addDefined(payload, "caption_review_copy", extraOptions.captionReviewCopy, Boolean);
   addDefined(
     payload,
@@ -330,12 +331,8 @@ export const buildViralRenderData = ({
   addDefined(payload, "remove_watermark", extraOptions.removeWatermark, Boolean);
   addDefined(payload, "watermark_mode", extraOptions.watermarkMode);
   addDefined(payload, "watermark_regions", extraOptions.manualWatermarkRegions);
-  // Default existing projects to branded exports, but preserve an explicit
-  // creator choice for a clean export all the way to the renderer.
-  payload.brand_watermark = extraOptions.brandWatermark !== false;
-  addDefined(payload, "watermark_text", extraOptions.brandWatermarkText);
-  addDefined(payload, "brand_watermark_variant", extraOptions.brandWatermarkVariant);
-  addDefined(payload, "brand_watermark_schedule", extraOptions.brandWatermarkSchedule);
+  // Never add platform branding to Studio output, including legacy snapshots.
+  payload.brand_watermark = false;
   addDefined(payload, "output_settings", extraOptions.outputSettings);
 
   addDefined(payload, "add_hook", extraOptions.addHook, Boolean);
@@ -372,6 +369,7 @@ export const buildViralRenderData = ({
   // together all the way to the media API. Dropping this field makes the live
   // 3D preview look correct while the exported video contains no 3D layer.
   addDefined(payload, "threeDGraphics", extraOptions.threeDGraphics);
+  addDefined(payload, "subjectVfx", extraOptions.subjectVfx);
   addDefined(payload, "mute_audio", extraOptions.muteAudio, Boolean);
   addDefined(payload, "export_destination", extraOptions.exportDestination);
 

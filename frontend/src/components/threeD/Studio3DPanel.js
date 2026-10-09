@@ -4,20 +4,28 @@ import {
   STUDIO_3D_KEYFRAME_FIELDS, STUDIO_3D_TEMPLATES, createStudio3DScene, normalizeStudio3DScene,
 } from "./studio3DModel";
 import "./studio3D.css";
+import { getStudioCapability } from "../studioCapabilities";
 
 const uniqueId = () => `studio-3d-${globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`}`;
 
-function NumberControl({ label, value, min, max, step = 0.01, onChange }) {
+const UNSUPPORTED_FINAL_FIELDS = new Set([
+  "fontFamily", "fontWeight", "easing", "audioReactiveIntensity", "lightDirection",
+  "shadows", "reflections", "background", "quality",
+]);
+const unavailableTitle = "Unavailable: this setting is not implemented in final 3D rendering.";
+const unsupportedModes = getStudioCapability("three_d_scene").unsupportedSceneModes;
+
+function NumberControl({ label, value, min, max, step = 0.01, onChange, disabled = false }) {
   return <label className="studio-3d-control">
     <span>{label}</span>
-    <input type="number" value={value} min={min} max={max} step={step} onChange={event => onChange(Number(event.target.value))} />
+    <input type="number" disabled={disabled} title={disabled ? unavailableTitle : undefined} value={value} min={min} max={max} step={step} onChange={event => onChange(Number(event.target.value))} />
   </label>;
 }
 
-function SelectControl({ label, value, options, onChange }) {
+function SelectControl({ label, value, options, onChange, disabled = false, unavailableOptions = [] }) {
   return <label className="studio-3d-control"><span>{label}</span>
-    <select value={value} onChange={event => onChange(event.target.value)}>
-      {options.map(option => <option key={option} value={option}>{option.replaceAll("_", " ")}</option>)}
+    <select aria-label={label} disabled={disabled} title={disabled ? unavailableTitle : undefined} value={value} onChange={event => onChange(event.target.value)}>
+      {options.map(option => <option key={option} value={option} disabled={unavailableOptions.includes(option)}>{option.replaceAll("_", " ")}</option>)}
     </select>
   </label>;
 }
@@ -73,7 +81,7 @@ export default function Studio3DPanel({ scenes = [], onChange, focusId, onSelect
   return <section className="studio-3d-panel" aria-label="3D Motion designer" data-testid="studio-3d-panel">
     <div className="studio-3d-heading"><span className="panel-kicker">Editable 3D on your timeline</span><h4>3D Motion Director</h4><p>Build the scene live. Generate a high-quality preview only when you want to check the final finish.</p></div>
     <div className="studio-3d-template-grid" role="group" aria-label="3D templates">
-      {STUDIO_3D_TEMPLATES.map(template => <button type="button" key={template.id} onClick={() => add(template.id)} title={`Add ${template.name} at playhead`}>
+      {STUDIO_3D_TEMPLATES.map(template => <button type="button" key={template.id} disabled={unsupportedModes.template.includes(template.id) || unsupportedModes.entrance.includes(template.entrance)} onClick={() => add(template.id)} title={`Add ${template.name} at playhead`}>
         <span style={{ background: template.accent }} /><strong>{template.name}</strong><small>Add at playhead</small>
       </button>)}
     </div>
@@ -88,7 +96,7 @@ export default function Studio3DPanel({ scenes = [], onChange, focusId, onSelect
         <label className="studio-3d-control wide"><span>Main text</span><input maxLength={80} value={scene.text} onChange={event => change({ text: event.target.value })} /></label>
         <label className="studio-3d-control wide"><span>Supporting line</span><input maxLength={100} value={scene.secondary} onChange={event => change({ secondary: event.target.value })} /></label>
         <SelectControl label="Material" value={scene.material} options={STUDIO_3D_MATERIALS} onChange={material => change({ material })} />
-        <SelectControl label="Entrance" value={scene.entrance} options={STUDIO_3D_ANIMATIONS} onChange={entrance => change({ entrance })} />
+        <SelectControl label="Entrance" value={scene.entrance} options={STUDIO_3D_ANIMATIONS} unavailableOptions={unsupportedModes.entrance} onChange={entrance => change({ entrance })} />
         <label className="studio-3d-control"><span>Primary colour</span><input type="color" value={scene.primaryColor} onChange={event => change({ primaryColor: event.target.value })} /></label>
         <label className="studio-3d-control"><span>Glow colour</span><input type="color" value={scene.glowColor} onChange={event => change({ glowColor: event.target.value })} /></label>
         <NumberControl label="Start (s)" value={scene.startTime} min={0} max={duration} onChange={setStart} />
@@ -98,25 +106,25 @@ export default function Studio3DPanel({ scenes = [], onChange, focusId, onSelect
         {scene.assetName ? <small className="studio-3d-asset-name">Asset: {scene.assetName}</small> : null}
       </div>
       {mode === "advanced" ? <div className="studio-3d-fields studio-3d-advanced">
-        <p className="studio-3d-parity-note" role="note">Several advanced settings are not reflected in the rendered clip. Font, weight, scene easing, audio response, light direction, shadows, reflections, background and quality do not change it. Scene fade opacity is also missing from the rendered clip. 3D output is capped at 720p and 30 fps; check the generated preview before export.</p>
-        <SelectControl label="Font family" value={scene.fontFamily} options={["studio", "sans", "serif"]} onChange={fontFamily => change({ fontFamily })} />
-        <SelectControl label="Weight" value={scene.fontWeight} options={["regular", "bold", "black"]} onChange={fontWeight => change({ fontWeight })} />
+        <p className="studio-3d-parity-note" role="note">Unavailable controls are disabled: font, weight, scene easing, audio response, light direction, shadows, reflections, background and quality. Their saved values are retained. Pose keyframe easing and scene fades are supported. 3D output is capped at 720p and 30 fps; check the generated preview before export.</p>
+        <SelectControl label="Font family" disabled value={scene.fontFamily} options={["studio", "sans", "serif"]} onChange={fontFamily => change({ fontFamily })} />
+        <SelectControl label="Weight" disabled value={scene.fontWeight} options={["regular", "bold", "black"]} onChange={fontWeight => change({ fontWeight })} />
         <SelectControl label="Alignment" value={scene.textAlign} options={["left", "center", "right"]} onChange={textAlign => change({ textAlign })} />
-        <SelectControl label="Easing" value={scene.easing} options={STUDIO_3D_EASINGS} onChange={easing => change({ easing })} />
-        <SelectControl label="Hold" value={scene.hold} options={["still", "float", "pulse", "orbit"]} onChange={hold => change({ hold })} />
-        <SelectControl label="Exit" value={scene.exit} options={["fade", "dolly", "spin", "burst"]} onChange={exit => change({ exit })} />
-        <SelectControl label="Background" value={scene.background} options={["transparent", "dark", "light"]} onChange={background => change({ background })} />
-        <SelectControl label="Quality" value={scene.quality} options={["draft", "preview", "high"]} onChange={quality => change({ quality })} />
+        <SelectControl label="Easing" disabled value={scene.easing} options={STUDIO_3D_EASINGS} onChange={easing => change({ easing })} />
+        <SelectControl label="Hold" value={scene.hold} options={["still", "float", "pulse", "orbit"]} unavailableOptions={unsupportedModes.hold} onChange={hold => change({ hold })} />
+        <SelectControl label="Exit" value={scene.exit} options={["fade", "dolly", "spin", "burst"]} unavailableOptions={unsupportedModes.exit} onChange={exit => change({ exit })} />
+        <SelectControl label="Background" disabled value={scene.background} options={["transparent", "dark", "light"]} onChange={background => change({ background })} />
+        <SelectControl label="Quality" disabled value={scene.quality} options={["draft", "preview", "high"]} onChange={quality => change({ quality })} />
         {[ ["X (%)", "x", 5, 95, 1], ["Y (%)", "y", 5, 95, 1], ["Z", "z", -4, 4, 0.1], ["Scale", "scale", 0.2, 3, 0.01],
           ["Rotate X", "rotationX", -180, 180, 1], ["Rotate Y", "rotationY", -180, 180, 1], ["Rotate Z", "rotationZ", -180, 180, 1],
           ["Extrusion", "extrusionDepth", 0.01, 1.5, 0.01], ["Bevel", "bevel", 0, 0.2, 0.01], ["Line spacing", "lineSpacing", 0.7, 2, 0.01],
           ["Focal length", "focalLength", 24, 85, 1], ["Camera motion", "cameraMotion", 0, 1, 0.01],
           ["Light direction", "lightDirection", -180, 180, 1], ["Light intensity", "lightIntensity", 0, 5, 0.1],
           ["Bloom", "bloom", 0, 1, 0.01], ["Audio response", "audioReactiveIntensity", 0, 1, 0.01],
-          ["Layer order", "layerOrder", 0, 100, 1] ].map(([label, field, min, max, step]) => <NumberControl key={field} label={label} value={scene[field]} min={min} max={max} step={step} onChange={value => change({ [field]: value })} />)}
+          ["Layer order", "layerOrder", 0, 100, 1] ].map(([label, field, min, max, step]) => <NumberControl key={field} label={label} disabled={UNSUPPORTED_FINAL_FIELDS.has(field)} value={scene[field]} min={min} max={max} step={step} onChange={value => change({ [field]: value })} />)}
         <label className="studio-3d-control"><span>Secondary colour</span><input type="color" value={scene.secondaryColor} onChange={event => change({ secondaryColor: event.target.value })} /></label>
         <label className="studio-3d-control"><span>Light colour</span><input type="color" value={scene.lightColor} onChange={event => change({ lightColor: event.target.value })} /></label>
-        {[ ["Shadows", "shadows"], ["Reflections", "reflections"], ["Enabled", "enabled"] ].map(([label, field]) => <label className="studio-3d-check" key={field}><input type="checkbox" checked={scene[field]} onChange={event => change({ [field]: event.target.checked })} />{label}</label>)}
+        {[ ["Shadows", "shadows"], ["Reflections", "reflections"], ["Enabled", "enabled"] ].map(([label, field]) => <label className="studio-3d-check" key={field}><input type="checkbox" disabled={UNSUPPORTED_FINAL_FIELDS.has(field)} title={UNSUPPORTED_FINAL_FIELDS.has(field) ? unavailableTitle : undefined} checked={scene[field]} onChange={event => change({ [field]: event.target.checked })} />{label}</label>)}
         <div className="studio-3d-keyframes wide">
           <button type="button" onClick={addPoseKeyframe}>Add pose keyframe at {Number(playhead).toFixed(2)}s</button>
           {scene.keyframes.length ? <div aria-label="3D pose keyframes">

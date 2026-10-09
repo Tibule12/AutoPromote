@@ -1,0 +1,459 @@
+{
+  "schemaVersion": 1,
+  "checkpoint": "docs/HANDOFF-START-HERE-20261007.md",
+  "authorization": "User explicitly authorized existing NVIDIA GPU for this QA sprint on 2026-10-07. Stop instance after sprint; retain storage.",
+  "rules": {
+    "mocksAllowed": false,
+    "authBypassAllowed": false,
+    "capabilityTimeboxMinutes": 25,
+    "passRequires": "Real user path plus valid output, independent technical verification, visual review where applicable, persistence/roundtrip; audio requires listening.",
+    "engineOnlyResults": "Retain as foundation evidence; never promote to end-to-end PASS.",
+    "newFeaturesAllowed": false,
+    "brandingOrLogoWorkAllowed": false
+  },
+  "representativeSource": {
+    "path": "reports/studio-stability-20261007/media/podcast-12s.mp4",
+    "type": "existing real podcast excerpt",
+    "durationSeconds": 12,
+    "width": 1280,
+    "height": 720,
+    "noNewCreativeContent": true
+  },
+  "cases": [
+    {
+      "id": "media_ingest",
+      "capability": "Media ingest",
+      "gpuExpectation": "optional",
+      "userFlow": "Choose Videos \u2192 upload real podcast \u2192 validate metadata \u2192 open Creator Studio",
+      "assertions": [
+        "Owner-bound uploaded media exists",
+        "Preview decodes the actual source",
+        "Source duration and dimensions match local ffprobe"
+      ],
+      "timeboxMinutes": 25,
+      "initialStatus": "BLOCKED",
+      "initialReason": "Not executed in this sprint",
+      "executableCommand": "node test/e2e/playwright/studio-stability/run.js render media_ingest"
+    },
+    {
+      "id": "preview",
+      "capability": "Preview",
+      "gpuExpectation": "browser",
+      "userFlow": "Play \u2192 pause \u2192 seek \u2192 Before/After/Compare \u2192 resume",
+      "assertions": [
+        "Presented frames change during playback",
+        "Source/programme clocks match after seek",
+        "No frozen/black output or duplicated audio"
+      ],
+      "timeboxMinutes": 25,
+      "initialStatus": "BLOCKED",
+      "initialReason": "Not executed in this sprint",
+      "executableCommand": "node test/e2e/playwright/studio-stability/run.js render preview"
+    },
+    {
+      "id": "final_render",
+      "capability": "Final render",
+      "gpuExpectation": "required",
+      "userFlow": "Export \u2192 Render \u2192 poll actual owned job \u2192 After playback \u2192 Download",
+      "assertions": [
+        "Real API and NVIDIA worker run",
+        "Final decode, clock and aspect are valid",
+        "After shows the actual returned file"
+      ],
+      "timeboxMinutes": 25,
+      "initialStatus": "BLOCKED",
+      "initialReason": "Not executed in this sprint",
+      "executableCommand": "node test/e2e/playwright/studio-stability/run.js render final_render"
+    },
+    {
+      "id": "captions",
+      "capability": "Captions",
+      "gpuExpectation": "required",
+      "userFlow": "Captions \u2192 generate real ASR \u2192 edit a cue \u2192 approve or render review copy \u2192 export",
+      "assertions": [
+        "No stub transcript",
+        "Edited words and cue timing persist and burn in correctly",
+        "Draft/review publication guard remains"
+      ],
+      "timeboxMinutes": 25,
+      "initialStatus": "BLOCKED",
+      "initialReason": "Not executed in this sprint",
+      "executableCommand": "node test/e2e/playwright/studio-stability/run.js render captions"
+    },
+    {
+      "id": "reframing",
+      "capability": "Reframing",
+      "gpuExpectation": "optional",
+      "userFlow": "Reframe \u2192 9:16 speaker or focus framing \u2192 preview \u2192 final render",
+      "assertions": [
+        "No stretched source",
+        "Chosen subject stays in frame",
+        "Preview decision survives export"
+      ],
+      "timeboxMinutes": 25,
+      "initialStatus": "BLOCKED",
+      "initialReason": "Not executed in this sprint",
+      "executableCommand": "node test/e2e/playwright/studio-stability/run.js render reframing"
+    },
+    {
+      "id": "overlays",
+      "capability": "Overlays",
+      "gpuExpectation": "optional",
+      "userFlow": "Graphics \u2192 add text + image \u2192 time and position \u2192 export",
+      "assertions": [
+        "Both layers are visible only in their ranges",
+        "Text readable and image aspect preserved",
+        "Saved placement matches export"
+      ],
+      "timeboxMinutes": 25,
+      "initialStatus": "BLOCKED",
+      "initialReason": "Not executed in this sprint",
+      "executableCommand": "node test/e2e/playwright/studio-stability/run.js render overlays"
+    },
+    {
+      "id": "motion_graphics",
+      "capability": "Motion graphics",
+      "gpuExpectation": "optional",
+      "userFlow": "Motion \u2192 choose 2D preset \u2192 edit text/timing/keyframes \u2192 export",
+      "assertions": [
+        "Actual alpha layer rendered",
+        "Animation moves between inspected frames",
+        "No black matte or clipping"
+      ],
+      "timeboxMinutes": 25,
+      "initialStatus": "BLOCKED",
+      "initialReason": "Not executed in this sprint",
+      "executableCommand": "node test/e2e/playwright/studio-stability/run.js render motion_graphics"
+    },
+    {
+      "id": "masking",
+      "capability": "Masking / subject isolation",
+      "gpuExpectation": "required",
+      "userFlow": "Composite \u2192 Subject effects \u2192 select source and subject \u2192 render \u2192 review \u2192 export",
+      "assertions": [
+        "Real source-bound SAM2 matte",
+        "Correct subject at start/middle/end and camera cuts",
+        "Edges/occlusions visually usable"
+      ],
+      "timeboxMinutes": 25,
+      "initialStatus": "BLOCKED",
+      "initialReason": "Not executed in this sprint",
+      "executableCommand": "node test/e2e/playwright/studio-stability/run.js render masking"
+    },
+    {
+      "id": "tracking",
+      "capability": "Tracking",
+      "gpuExpectation": "required",
+      "userFlow": "Reframe/Composite \u2192 seed subject \u2192 track source \u2192 use moving callout \u2192 export",
+      "assertions": [
+        "Real track/artifact exists",
+        "Callout follows intended subject",
+        "No drift at cuts or lost target"
+      ],
+      "timeboxMinutes": 25,
+      "initialStatus": "BLOCKED",
+      "initialReason": "Not executed in this sprint",
+      "executableCommand": "node test/e2e/playwright/studio-stability/run.js render tracking"
+    },
+    {
+      "id": "depth_occlusion",
+      "capability": "Depth / occlusion",
+      "gpuExpectation": "required",
+      "userFlow": "Composite \u2192 text behind subject + Background parallax \u2192 render \u2192 export",
+      "assertions": [
+        "Foreground occludes text correctly",
+        "Camera movement exposes no missing pixels",
+        "Distinguish 2.5D parallax from depth estimation"
+      ],
+      "timeboxMinutes": 25,
+      "initialStatus": "BLOCKED",
+      "initialReason": "Not executed in this sprint",
+      "executableCommand": "node test/e2e/playwright/studio-stability/run.js render depth_occlusion"
+    },
+    {
+      "id": "segmentation",
+      "capability": "Segmentation",
+      "gpuExpectation": "required",
+      "userFlow": "Composite \u2192 generate subject matte \u2192 change background grade \u2192 export",
+      "assertions": [
+        "Foreground retained and background alone changes",
+        "No identity switch or broken cut reset",
+        "Hair/microphone edges reviewed"
+      ],
+      "timeboxMinutes": 25,
+      "initialStatus": "BLOCKED",
+      "initialReason": "Not executed in this sprint",
+      "executableCommand": "node test/e2e/playwright/studio-stability/run.js render segmentation"
+    },
+    {
+      "id": "three_d",
+      "capability": "3D",
+      "gpuExpectation": "required",
+      "userFlow": "Motion \u2192 3D Motion \u2192 create non-brand title \u2192 HQ preview \u2192 composite export",
+      "assertions": [
+        "Editable scene roundtrips",
+        "Owned same-revision HQ job completes",
+        "Alpha composite matches placement"
+      ],
+      "timeboxMinutes": 25,
+      "initialStatus": "BLOCKED",
+      "initialReason": "Not executed in this sprint",
+      "executableCommand": "node test/e2e/playwright/studio-stability/nvidia-3d.js"
+    },
+    {
+      "id": "blender",
+      "capability": "Blender rendering",
+      "gpuExpectation": "required",
+      "userFlow": "Same Studio 3D HQ request \u2192 real Blender job \u2192 preview + alpha \u2192 export",
+      "assertions": [
+        "Actual NVIDIA OptiX/CUDA render receipt",
+        "Nonblank alpha and valid motion",
+        "Studio receives owned render; a standalone CLI render is insufficient"
+      ],
+      "timeboxMinutes": 25,
+      "initialStatus": "BLOCKED",
+      "initialReason": "Not executed in this sprint",
+      "executableCommand": "node test/e2e/playwright/studio-stability/nvidia-3d.js"
+    },
+    {
+      "id": "compositing",
+      "capability": "Compositing",
+      "gpuExpectation": "optional",
+      "userFlow": "Combine source with existing text/image/2D motion and reviewed subject result in separate real edits \u2192 preview \u2192 export",
+      "assertions": [
+        "Required layer order and alpha correct",
+        "No dropped source audio",
+        "No preview/export stage mismatch"
+      ],
+      "timeboxMinutes": 25,
+      "initialStatus": "BLOCKED",
+      "initialReason": "Not executed in this sprint",
+      "executableCommand": "node test/e2e/playwright/studio-stability/run.js render compositing"
+    },
+    {
+      "id": "vfx",
+      "capability": "VFX",
+      "gpuExpectation": "required",
+      "userFlow": "Composite \u2192 existing subject background grade/parallax \u2192 preview/review \u2192 export; Creator FX presets require separate qualification",
+      "assertions": [
+        "Chosen existing effect changes pixels",
+        "Source identity and clock retained",
+        "No silent omitted effect"
+      ],
+      "timeboxMinutes": 25,
+      "initialStatus": "BLOCKED",
+      "initialReason": "Not executed in this sprint",
+      "executableCommand": "node test/e2e/playwright/studio-stability/run.js render vfx"
+    },
+    {
+      "id": "audio",
+      "capability": "Audio",
+      "gpuExpectation": "optional",
+      "userFlow": "Sound \u2192 source gain + external track + ducking/fades \u2192 preview \u2192 export",
+      "assertions": [
+        "Expected audible tracks and timing",
+        "No silent/dropout/clipped export",
+        "Listening review required in addition to measurements"
+      ],
+      "timeboxMinutes": 25,
+      "initialStatus": "BLOCKED",
+      "initialReason": "Not executed in this sprint",
+      "executableCommand": "node test/e2e/playwright/studio-stability/run.js render audio"
+    },
+    {
+      "id": "generated_image",
+      "capability": "Generated image assets",
+      "gpuExpectation": "required",
+      "userFlow": "Existing Studio generation entry \u2192 actual provider \u2192 import result \u2192 use overlay \u2192 save/export",
+      "assertions": [
+        "Reachable real user path",
+        "Real GPU generation and provenance",
+        "Generated pixels survive project/export"
+      ],
+      "timeboxMinutes": 25,
+      "initialStatus": "BLOCKED",
+      "initialReason": "Not executed in this sprint",
+      "executableCommand": "node test/e2e/playwright/studio-stability/readiness.js"
+    },
+    {
+      "id": "generated_video",
+      "capability": "Generated video assets",
+      "gpuExpectation": "required",
+      "userFlow": "Existing Studio generation entry \u2192 actual provider \u2192 import result \u2192 timeline \u2192 save/export",
+      "assertions": [
+        "Reachable real user path",
+        "Real GPU generation and playable video",
+        "Generated motion survives project/export"
+      ],
+      "timeboxMinutes": 25,
+      "initialStatus": "BLOCKED",
+      "initialReason": "Not executed in this sprint",
+      "executableCommand": "node test/e2e/playwright/studio-stability/readiness.js"
+    },
+    {
+      "id": "generated_raw",
+      "capability": "Generated raw content",
+      "gpuExpectation": "required",
+      "userFlow": "Existing brief/raw-content entry \u2192 actual private job \u2192 review \u2192 open Studio \u2192 save/export",
+      "assertions": [
+        "No mocked generation",
+        "Owner-scoped reviewed source imports",
+        "Not a screenplay plan or CLI-only proof"
+      ],
+      "timeboxMinutes": 25,
+      "initialStatus": "BLOCKED",
+      "initialReason": "Not executed in this sprint",
+      "executableCommand": "node test/e2e/playwright/studio-stability/readiness.js"
+    },
+    {
+      "id": "save_reload",
+      "capability": "Save / reload",
+      "gpuExpectation": "inherited",
+      "userFlow": "Save named QA project \u2192 hard reload \u2192 open saved project \u2192 preview/export",
+      "assertions": [
+        "Original source re-resolved through owned path",
+        "Layers/captions/audio/timing identical",
+        "No credential URL dependency in persistent document"
+      ],
+      "timeboxMinutes": 25,
+      "initialStatus": "BLOCKED",
+      "initialReason": "Not executed in this sprint",
+      "executableCommand": "node test/e2e/playwright/studio-stability/run.js render save_reload"
+    },
+    {
+      "id": "project_revisions",
+      "capability": "Project revisions",
+      "gpuExpectation": "inherited",
+      "userFlow": "Save baseline \u2192 edit \u2192 save revision \u2192 restore previous version \u2192 export",
+      "assertions": [
+        "Revision and canonical document consistent",
+        "Restored output matches previous state",
+        "Newer media/continuity is not silently overwritten"
+      ],
+      "timeboxMinutes": 25,
+      "initialStatus": "BLOCKED",
+      "initialReason": "Not executed in this sprint",
+      "executableCommand": "node test/e2e/playwright/studio-stability/run.js render project_revisions"
+    },
+    {
+      "id": "export",
+      "capability": "Export",
+      "gpuExpectation": "required",
+      "userFlow": "Export chosen format \u2192 wait \u2192 Download video \u2192 replay downloaded bytes \u2192 reload/recover job",
+      "assertions": [
+        "Real file from real completed job",
+        "Download checksum/size match server artifact",
+        "Usable correct duration/audio/aspect"
+      ],
+      "timeboxMinutes": 25,
+      "initialStatus": "BLOCKED",
+      "initialReason": "Not executed in this sprint",
+      "executableCommand": "node test/e2e/playwright/studio-stability/run.js render export"
+    },
+    {
+      "id": "cuts_speed",
+      "capability": "Cuts / trim / speed",
+      "gpuExpectation": "optional",
+      "userFlow": "Split source \u2192 trim/ripple \u2192 .5x/2x speed \u2192 undo/redo \u2192 render",
+      "assertions": [
+        "Source/programme offsets and output duration correct",
+        "Captions/layers/audio retime correctly",
+        "Reload/export preserves decisions"
+      ],
+      "timeboxMinutes": 25,
+      "initialStatus": "BLOCKED",
+      "initialReason": "Not executed in this sprint",
+      "executableCommand": "node test/e2e/playwright/studio-stability/cuts-speed.js"
+    },
+    {
+      "id": "b_roll",
+      "capability": "B-roll / multi-source",
+      "gpuExpectation": "optional",
+      "userFlow": "Import real second video \u2192 place/trim/loop B-roll \u2192 choose audio rule \u2192 export",
+      "assertions": [
+        "Actual secondary source uploads",
+        "No stale first-source frame at transition",
+        "Audio routing matches visible controls"
+      ],
+      "timeboxMinutes": 25,
+      "initialStatus": "BLOCKED",
+      "initialReason": "Not executed in this sprint",
+      "executableCommand": "node test/e2e/playwright/studio-stability/broll.js"
+    },
+    {
+      "id": "color",
+      "capability": "Color / finish",
+      "gpuExpectation": "optional",
+      "userFlow": "Color \u2192 grade/LUT or adjustment layer \u2192 preview \u2192 export",
+      "assertions": [
+        "Grade changes intended range only",
+        "Pixel appearance reviewed",
+        "Chosen settings persist"
+      ],
+      "timeboxMinutes": 25,
+      "initialStatus": "BLOCKED",
+      "initialReason": "Not executed in this sprint",
+      "executableCommand": "node test/e2e/playwright/studio-stability/run.js render color"
+    },
+    {
+      "id": "audio_restoration",
+      "capability": "Audio restoration",
+      "gpuExpectation": "optional",
+      "userFlow": "Sound \u2192 restoration controls \u2192 preview \u2192 render",
+      "assertions": [
+        "Actual existing audio filters run",
+        "Speech retained without artifacts",
+        "Listen to source and processed result"
+      ],
+      "timeboxMinutes": 25,
+      "initialStatus": "BLOCKED",
+      "initialReason": "Not executed in this sprint",
+      "executableCommand": "node test/e2e/playwright/studio-stability/run.js render audio_restoration"
+    },
+    {
+      "id": "voiceover_sfx",
+      "capability": "Voice-over / SFX",
+      "gpuExpectation": "optional",
+      "userFlow": "Sound \u2192 import existing speech/audio clip \u2192 place/fade \u2192 export",
+      "assertions": [
+        "Real owned audio uploads",
+        "Onset/duration and gains correct",
+        "Listening review completed"
+      ],
+      "timeboxMinutes": 25,
+      "initialStatus": "BLOCKED",
+      "initialReason": "Not executed in this sprint",
+      "executableCommand": "node test/e2e/playwright/studio-stability/audio-import.js"
+    },
+    {
+      "id": "three_d_audio",
+      "capability": "3D audio reactivity",
+      "gpuExpectation": "required",
+      "userFlow": "Motion \u2192 Audio-Reactive 3D Text \u2192 HQ preview \u2192 export",
+      "assertions": [
+        "Audio envelope reaches final renderer",
+        "Export reacts to actual audio",
+        "Unsupported controls must not be called passing"
+      ],
+      "timeboxMinutes": 25,
+      "initialStatus": "BLOCKED",
+      "initialReason": "Not executed in this sprint",
+      "executableCommand": "node test/e2e/playwright/studio-stability/blocked-3d.js"
+    },
+    {
+      "id": "director",
+      "capability": "Director / analysis",
+      "gpuExpectation": "required",
+      "userFlow": "Request source analysis \u2192 review supported split/trim proposal \u2192 apply \u2192 export",
+      "assertions": [
+        "Actual analysis job/evidence not mock",
+        "User-approved supported edit executes",
+        "Revision evidence and output remain consistent"
+      ],
+      "timeboxMinutes": 25,
+      "initialStatus": "BLOCKED",
+      "initialReason": "Not executed in this sprint",
+      "executableCommand": "node test/e2e/playwright/studio-stability/director.js"
+    }
+  ]
+}

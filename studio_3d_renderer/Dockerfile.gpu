@@ -1,0 +1,23 @@
+# Official Blender includes Cycles CUDA/OptiX; Ubuntu's apt build does not.
+FROM ubuntu:24.04
+ARG BLENDER_VERSION=4.5.9
+ARG BLENDER_SHA256=dcdc3eca6c9825bb35a8033b689c053f3cb5a9b0cd2a61b2eac2a49436b4ad3d
+ENV DEBIAN_FRONTEND=noninteractive PYTHONUNBUFFERED=1
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl xz-utils ffmpeg python3 python3-venv ca-certificates libegl1 libgl1 \
+    libx11-6 libxi6 libxrender1 libxfixes3 libxkbcommon0 libsm6 \
+    && rm -rf /var/lib/apt/lists/*
+RUN curl -fsSL --retry 3 -A 'Mozilla/5.0' \
+    "https://download.blender.org/release/Blender4.5/blender-${BLENDER_VERSION}-linux-x64.tar.xz" -o /tmp/blender.tar.xz \
+    && echo "${BLENDER_SHA256}  /tmp/blender.tar.xz" | sha256sum -c - \
+    && mkdir /opt/blender && tar -xJf /tmp/blender.tar.xz --strip-components=1 -C /opt/blender \
+    && rm /tmp/blender.tar.xz
+RUN python3 -m venv /opt/renderer-venv
+COPY requirements.txt /app/requirements.txt
+RUN /opt/renderer-venv/bin/pip install --no-cache-dir -r /app/requirements.txt
+COPY spec.py blender_scene.py render.py check_devices.py /app/
+WORKDIR /app
+ENV PATH=/opt/renderer-venv/bin:/opt/blender:$PATH \
+    NVIDIA_DRIVER_CAPABILITIES=compute,utility,video,graphics,display \
+    STUDIO_3D_DEVICE=auto STUDIO_3D_SAMPLES=32
+ENTRYPOINT ["python3", "/app/render.py"]

@@ -343,6 +343,32 @@ test("corrupt stored head fails closed", async () => {
   expect(firestore.data.size).toBe(2);
 });
 
+test("the server enforces the shared versioned editable-state contract", () => {
+  const current = adaptStudioSnapshotToDocument({ projectId: "project-1", snapshot: {
+    timeline: [{ id: "main", sourceClipId: "source", startRequest: 0, endRequest: 12 }],
+    overlays: [{ id: "title", type: "text", startTime: 1, duration: 2, text: "Story" }],
+    soundEffects: [{ id: "cue", builtIn: true, tone: "impact", startTime: 2, duration: .5,
+      volume: .4, fadeOut: .1 }],
+  } });
+  expect(() => validateStudioProjectRevisionDocument(current)).not.toThrow();
+  for (const change of [
+    d => { d.compatibility.editableStateVersion = 99; },
+    d => { d.linkedTiming.cues.soundEffects[0].parameterSchemaVersion = 99; },
+    d => { d.layers[0].parameters.url = "https://signed.test/access-only"; },
+    d => { d.audioGraph.settings.unknownEffect = true; },
+    d => { d.visualGraph.parameterSchemaVersion = 99; },
+    d => { d.editGraph.parameterSchemaVersion = 99; },
+    d => { d.editGraph.settings.unknownEffect = true; },
+    d => { d.editGraph.media.push({ id: "camera", url: "https://signed.test/camera" }); },
+    d => { d.clipOccurrences[0].parameters.unknownEffect = true; },
+    d => { d.visualGraph.settings.unknownEffect = true; },
+    d => { d.visualGraph.cameraSources.push({ id: "camera", url: "https://signed.test/camera" }); },
+  ]) {
+    const changed = clone(current); change(changed);
+    expect(() => validateStudioProjectRevisionDocument(changed)).toThrow("STUDIO_PROJECT_REVISION_INVALID");
+  }
+});
+
 test("accepts real frontend adapter, split command and rejected review documents", async () => {
   Object.defineProperty(globalThis, "crypto", { configurable: true, value: crypto.webcrypto });
   const source = adaptStudioSnapshotToDocument({

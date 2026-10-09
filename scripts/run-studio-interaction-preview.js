@@ -163,6 +163,17 @@ webpack(config, (error, stats) => {
   );
   app.get("/fixture.mp4", (_req, res) => res.sendFile(path.join(folder, "fixture.mp4")));
   app.get("/fixture-second.mp4", (_req, res) => res.sendFile(secondFixture));
+  const podcastSource = process.env.STUDIO_PODCAST_SOURCE;
+  const captionArtifact = process.env.STUDIO_GPU_CAPTION_ARTIFACT;
+  if (podcastSource) app.get("/podcast-source-45s.mp4", (_req, res) => res.sendFile(path.resolve(root, podcastSource)));
+  if (captionArtifact) app.get("/gpu-caption-artifact.json", (_req, res) => res.sendFile(path.resolve(root, captionArtifact)));
+  const factoryRoot = process.env.STUDIO_CONTENT_FACTORY_ROOT;
+  if (factoryRoot) {
+    // Local evidence only: the production component opens actual generated
+    // source files and its own saved project. No backend/auth bypass exists.
+    app.get("/content-factory-project.json", (_req, res) => res.sendFile(path.join(path.resolve(root, factoryRoot), "studio-fixture-project.json")));
+    app.use("/factory-media", express.static(path.resolve(root, factoryRoot), { dotfiles: "deny", index: false }));
+  }
   app.use(express.static(config.output.path));
   app.listen(port, "127.0.0.1", () =>
     console.log(JSON.stringify({ ready: true, port, cloudApi: false, signedIn: false }))

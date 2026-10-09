@@ -1,0 +1,14 @@
+FROM autopromote-wan-cuda:20261006
+# Separate runtime: preserve the video renderer, narration and CPU fallback.
+RUN pip3 install --no-cache-dir --no-deps torchaudio==2.7.1+cu126 torchvision==0.22.1+cu126 \
+    --index-url https://download.pytorch.org/whl/cu126
+RUN pip3 install --no-cache-dir loguru==0.7.3 librosa==0.11.0 soundfile==0.13.1 \
+    pypinyin==0.53.0 py3langid==0.3.0 hangul-romanize==0.1.0 num2words==0.5.14 \
+    cutlet==0.5.0 fugashi==1.4.0 unidic-lite==1.0.8 pytorch-lightning==2.5.1 \
+    peft==0.17.0
+RUN pip3 install --no-cache-dir --no-deps \
+    https://github.com/ace-step/ACE-Step/archive/1bee4c9f5b43e30995f8d4d33b3919197ce1bd68.zip
+RUN pip3 install --no-cache-dir spacy==3.8.4
+RUN python3 -c "from acestep.pipeline_ace_step import ACEStepPipeline"
+ENV HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
+WORKDIR /work

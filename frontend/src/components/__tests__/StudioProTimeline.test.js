@@ -1,6 +1,35 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
-import StudioProTimeline from "../StudioProTimeline";
+import StudioProTimeline, {buildTimelineCaptionRegions} from "../StudioProTimeline";
+
+test("2x programme clock matches export while clip selection preserves source edit coordinates", () => {
+  const seek = jest.fn();
+  const selectOverlay = jest.fn();
+  render(<StudioProTimeline duration={12} playhead={6} playbackRate={2} trackStates={{}}
+    timelineSegments={[{ id: "a", name: "First", duration: 3 }, { id: "b", name: "Second", duration: 9 }]}
+    onSeek={seek} onSelectOverlay={selectOverlay} />);
+  const ruler = screen.getByTestId("pro-time-ruler");
+  expect(ruler.getAttribute("data-output-duration")).toBe("6");
+  expect(ruler.textContent).toContain("0:06");
+  expect(ruler.textContent).not.toContain("0:12");
+  expect(screen.getByTestId("pro-current-edit").textContent).toBe("0:03");
+  const second = screen.getByTestId("pro-video-clip-2");
+  expect(second.textContent).toContain("4.5s");
+  expect(second.getAttribute("aria-label")).toContain("1.50s–6.00s");
+  fireEvent.click(second);
+  expect(selectOverlay).toHaveBeenCalledWith(null);
+  expect(seek.mock.lastCall[1]).toBe(3);
+});
+
+test("caption cues retain individual timing, wording and selection across overlaps and gaps",()=>{
+  const cues=[{id:"a",startTime:0,duration:2,text:"First",textReviewRequired:true},{id:"b",startTime:1,duration:2,text:"Second"},{id:"c",startTime:5,duration:1,text:"Payoff",textReviewed:true}];
+  const before=JSON.stringify(cues);const regions=buildTimelineCaptionRegions(cues);
+  expect(regions).toHaveLength(3);
+  expect(regions[0]).toMatchObject({id:"a",startTime:0,duration:2,lane:0,name:"First · Review words"});
+  expect(regions[1]).toMatchObject({id:"b",startTime:1,duration:2,lane:1,name:"Second"});
+  expect(regions[2]).toMatchObject({id:"c",startTime:5,duration:1,lane:0,name:"Payoff"});
+  expect(JSON.stringify(cues)).toBe(before);
+});
 
 test("B-roll right trim reports the absolute output end away from zero", () => {
   const onOverlayTrim = jest.fn();

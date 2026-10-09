@@ -123,6 +123,7 @@
   "scripts": {
     "postinstall": "node ../scripts/patch-brace-expansion-compat.js",
     "start": "node scripts/start-react.js",
+    "start:landing": "node scripts/preview-public-homepage.js",
     "build": "react-scripts build",
     "format": "prettier --write \"src/**/*.{js,jsx,css}\"",
     "format:check": "prettier --check \"src/**/*.{js,jsx,css}\"",

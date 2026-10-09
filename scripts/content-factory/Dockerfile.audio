@@ -1,0 +1,7 @@
+FROM autopromote-wan-cuda:20261006
+RUN apt-get update && apt-get install -y --no-install-recommends espeak-ng libsndfile1 \
+    && rm -rf /var/lib/apt/lists/*
+RUN pip3 install --no-cache-dir kokoro==0.9.4 'misaki[en]==0.9.4' soundfile==0.13.1
+RUN pip3 install --no-cache-dir https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
+ENV HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
+WORKDIR /work

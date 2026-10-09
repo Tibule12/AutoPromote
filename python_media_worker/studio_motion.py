@@ -4,6 +4,7 @@ Keys use the retained timeline clock, before speed changes or added overlays.
 Only numeric data is interpolated into FFmpeg expressions.
 """
 import math
+import re
 
 
 def finite(value, default=0.0):
@@ -80,6 +81,35 @@ def _property_keys(plan, property_name):
     ]
 
 
+def _identity_curve(keys, base, identity):
+    """Skip pixel masks only when every accepted curve value is the identity.
+
+    Clip-boundary compilation creates constant opacity/crop keys even when an
+    editor never changes those fields. Easing cannot change a constant curve.
+    Match automation_expression's acceptance and fallback rules.
+    """
+    return abs(base - identity) < .00001 and all(
+        abs(finite(key.get("value"), base) - identity) < .00001
+        for key in keys if finite(key.get("time"), -1) >= 0
+    )
+
+
+def _curve_bounds(keys, base):
+    points = {}
+    for key in keys or []:
+        time = finite(key.get("time"), -1)
+        if time >= 0:
+            points[time] = {**key, "value": finite(key.get("value"), base)}
+    ordered = [points[t] for t in sorted(points)]
+    values = [base, *[key["value"] for key in ordered]]
+    for left, right in zip(ordered, ordered[1:]):
+        if right.get("easing") == "bezier":
+            # automation_expression uses these same piecewise-linear samples.
+            values.extend(left["value"] + (right["value"] - left["value"]) *
+                          easing_value(i / 32, "bezier", right.get("curve")) for i in range(33))
+    return min(values), max(values)
+
+
 def build_studio_motion_filter(motion, width, height):
     """Build the programme transform seen in the browser Motion inspector.
 
@@ -129,29 +159,41 @@ def build_studio_motion_filter(motion, width, height):
     ]
 
     rotation = automation_expression(rotation_keys, base_rotation)
-    if rotation_keys or abs(base_rotation) > .00001:
-        filters.append(
-            f"rotate=angle='PI/180*({rotation})':ow={width}:oh={height}:c=black"
-        )
-
     x_expression = automation_expression(x_keys, base_x)
     y_expression = automation_expression(y_keys, base_y)
-    if x_keys or y_keys or abs(base_x - 50) > .00001 or abs(base_y - 50) > .00001:
-        filters.extend([
-            f"pad={width * 3}:{height * 3}:{width}:{height}:color=black",
-            f"crop={width}:{height}:"
-            f"x='{width}-(({x_expression})-50)*{width}/100':"
-            f"y='{height}-(({y_expression})-50)*{height}/100'",
-        ])
+    if (rotation_keys or abs(base_rotation) > .00001 or x_keys or y_keys
+            or abs(base_x - 50) > .00001 or abs(base_y - 50) > .00001):
+        max_scale = max(.1, min(8, _curve_bounds(scale_keys, base)[1] * finish_zoom))
+        if rotation_keys:
+            rotated_width = rotated_height = math.hypot(width, height) * max_scale
+        else:
+            angle = math.radians(base_rotation)
+            rotated_width = (abs(math.cos(angle)) * width + abs(math.sin(angle)) * height) * max_scale
+            rotated_height = (abs(math.sin(angle)) * width + abs(math.cos(angle)) * height) * max_scale
+        dx = max(abs(v - 50) for v in _curve_bounds(x_keys, base_x)) * width / 100
+        dy = max(abs(v - 50) for v in _curve_bounds(y_keys, base_y)) * height / 100
+        canvas_width = math.ceil((max(width, width * max_scale, rotated_width) + 2 * dx) / 2) * 2
+        canvas_height = math.ceil((max(height, height * max_scale, rotated_height) + 2 * dy) / 2) * 2
+        # Preserve the complete scaled source through rotation/translation.
+        # Cropping before translation permanently destroys pixels that the
+        # browser's combined affine transform brings back into the programme.
+        filters = [filters[0],
+            f"pad={canvas_width}:{canvas_height}:x=(ow-iw)/2:y=(oh-ih)/2:eval=frame:color=black"]
+        if rotation_keys or abs(base_rotation) > .00001:
+            filters.append(f"rotate=angle='PI/180*({rotation})':ow={canvas_width}:oh={canvas_height}:c=black")
+        filters.append(f"crop={width}:{height}:"
+                       f"x='{(canvas_width-width)/2}-(({x_expression})-50)*{width}/100':"
+                       f"y='{(canvas_height-height)/2}-(({y_expression})-50)*{height}/100'")
 
-    opacity = automation_expression(opacity_keys, base_opacity)
-    crop_x = automation_expression(crop_x_keys, base_crop_x)
-    crop_y = automation_expression(crop_y_keys, base_crop_y)
-    if (
-        opacity_keys or crop_x_keys or crop_y_keys
-        or abs(base_opacity - 1) > .00001
-        or abs(base_crop_x) > .00001
-        or abs(base_crop_y) > .00001
+    # geq uses uppercase T for frame time; scale/crop/rotate use lowercase t.
+    # These curves share one clock but must use the filter's actual variable.
+    opacity = re.sub(r"\bt\b", "T", automation_expression(opacity_keys, base_opacity))
+    crop_x = re.sub(r"\bt\b", "T", automation_expression(crop_x_keys, base_crop_x))
+    crop_y = re.sub(r"\bt\b", "T", automation_expression(crop_y_keys, base_crop_y))
+    if not (
+        _identity_curve(opacity_keys, base_opacity, 1)
+        and _identity_curve(crop_x_keys, base_crop_x, 0)
+        and _identity_curve(crop_y_keys, base_crop_y, 0)
     ):
         mask = (
             f"({opacity})*gte(X,W*({crop_x})/100)*lte(X,W*(1-({crop_x})/100))"

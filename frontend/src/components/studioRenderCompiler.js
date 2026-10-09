@@ -1,5 +1,6 @@
 import { createOutputTimeMap, createTimeRange, secondsToTicks, ticksToSeconds } from "./studioTime";
-import { validateStudioProjectDocument } from "./studioProjectDocument";
+import { projectStudioLinkedTimingToSnapshot, validateStudioProjectDocument } from "./studioProjectDocument";
+import { buildAdvancedColorCube } from "./studioColorCube";
 
 const fail = (code, message) => {
   const error = new Error(message);
@@ -7,8 +8,8 @@ const fail = (code, message) => {
   throw error;
 };
 
-// This compiler covers the migrated sequence boundary. Legacy overlays,
-// motion, audio and hook transformations still use their existing render paths.
+// Sequence and migrated visual decisions compile from the shared document.
+// Hook/composition staging and worker rasterization still need parity qualification.
 export const compileStudioTimelineForRender = document => {
   validateStudioProjectDocument(document);
   return document.clipOccurrences.map(occurrence => {
@@ -21,6 +22,70 @@ export const compileStudioTimelineForRender = document => {
       duration: ticksToSeconds(occurrence.sourceRange.endTick - occurrence.sourceRange.startTick),
     };
   });
+};
+
+const visualRenderState = document => {
+  validateStudioProjectDocument(document);
+  if (document.compatibility?.visualStateVersion !== 1)
+    fail("UNMIGRATED_VISUAL_STATE", "Reconcile the saved visual state before compiling its render.");
+  return { ...JSON.parse(JSON.stringify(document.visualGraph.settings)),
+    ...projectStudioLinkedTimingToSnapshot(document) };
+};
+
+// Extracted from the production export builder. The preview hydrates these
+// same canonical decisions; this does not assert rasterization/pixel parity.
+export const compileStudioFinishForRender = document => {
+  const state = visualRenderState(document);
+  const fx = state.finishFx || {}, transform = state.mainTransform || {}, frame = state.mainFrame || {};
+  const colorFields = ["preset", "exposureStops", "lift", "gamma", "gain", "tint",
+    "brightness", "contrast", "saturation", "temperature", "sharpness", "vignette"];
+  return {
+    color_cube: buildAdvancedColorCube(state.advancedColor),
+    main_frame: { enabled: frame.enabled !== false, shape: "round", inset_percent: frame.insetPercent,
+      border_radius_percent: frame.radiusPercent, background: frame.background },
+    color: { ...Object.fromEntries(colorFields.filter(field => fx[field] !== undefined)
+      .map(field => [field, fx[field]])), precisionGrade: !!fx.precisionGrade },
+    motion: { zoom: fx.zoom, zoom_anchor: fx.zoomAnchor, base_scale: transform.scale ?? 1,
+      scale_keyframes: (state.motionKeyframes || []).filter(key => key.targetId === "main-video" && key.property === "scale"),
+      base_transform: compileBaseTransform(transform),
+      keyframes: (state.motionKeyframes || []).filter(key => key.targetId === "main-video") },
+    texture: { film_grain: fx.filmGrain, chromatic_aberration: fx.chromaticAberration,
+      vhs_tracking: fx.vhsTracking, light_leak: fx.lightLeak },
+    visualizer: { ...state.podcastVisualizer, source: "original_speech" },
+    keyframes: (state.finishKeyframes || []).map(key => ({ id: key.id,
+      time: Number(key.time || 0), values: { ...key.values }, interpolation: "linear" })),
+  };
+};
+
+const compileBaseTransform = layer => ({
+  x: Number(layer.x ?? 50), y: Number(layer.y ?? 50), scale: Number(layer.scale ?? 1),
+  rotation: Number(layer.rotation ?? 0), opacity: Number(layer.opacity ?? 1),
+  crop_x: Number(layer.cropX ?? 0), crop_y: Number(layer.cropY ?? 0),
+});
+
+export const compileStudioCompositionForRender = document => {
+  const state = visualRenderState(document);
+  return { version: 1, coordinate_space: "canvas_percent", preview_timebase: "output_timeline_seconds",
+    layers: [state.mainTransform || { id: "main-video", type: "video" },
+      ...state.overlays.filter(overlay => !overlay.isCaption)].map(layer => ({
+      id: layer.id, name: layer.name || layer.text || "Visual layer", type: layer.type || "visual",
+      base_transform: compileBaseTransform(layer), anchor_x: Number(layer.anchorX ?? 50),
+      anchor_y: Number(layer.anchorY ?? 50), effects: {
+        blur: Number(layer.blur || 0),
+        glow: { enabled: !!layer.glow?.enabled, color: layer.glow?.color || "#8b5cf6",
+          radius: Number(layer.glow?.radius || 0), intensity: Number(layer.glow?.intensity || 0) },
+        shadow: { enabled: !!layer.layerShadow?.enabled, color: layer.layerShadow?.color || "#000000",
+          blur: Number(layer.layerShadow?.blur || 0), opacity: Number(layer.layerShadow?.opacity || 0),
+          x: Number(layer.layerShadow?.x || 0), y: Number(layer.layerShadow?.y || 0) },
+        motion_blur: { enabled: !!layer.motionBlur?.enabled, samples: Number(layer.motionBlur?.samples || 1),
+          shutter: Number(layer.motionBlur?.shutter || 0) },
+      },
+      motion_keyframes: (state.motionKeyframes || []).filter(key => String(key.targetId) === String(layer.id))
+        .map(key => ({ id: key.id, property: key.property, time: Number(key.time || 0),
+          value: Number(key.value || 0), easing: key.easing || "ease_in_out",
+          ...(key.curve ? { curve: key.curve.map(Number) } : {}) })),
+    })),
+  };
 };
 
 export const assertStudioExportTimelineMatchesDocument = (document, renderSegments) => {

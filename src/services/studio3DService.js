@@ -1,6 +1,7 @@
 const crypto = require("crypto");
 const admin = require("firebase-admin");
 const { GoogleAuth } = require("google-auth-library");
+const nvidia = require("./studio3DNvidia");
 
 const TEMPLATES = new Set(["cinematic_title", "neon_logo", "chrome_lyric", "audio_reactive_text", "floating_callout", "impact_explosion", "speaker_intro", "comparison_card"]);
 const MATERIALS = new Set(["chrome", "glass", "neon", "gold", "matte", "holographic"]);
@@ -52,11 +53,48 @@ function stableSceneHash(scene) {
 
 function studio3DBucket() {
   const name = process.env.STUDIO_3D_BUCKET;
+  // Retained GPU execution uses the application's existing private bucket.
+  // Cloud Run retains its explicitly configured, isolated bucket requirement.
+  if (!name && nvidia.configuration(process.env, { requireWindow: false })) return admin.storage().bucket();
   if (!name || !/^[-a-z0-9.]{3,222}$/.test(name)) throw new Error("Private 3D storage bucket is not configured");
   return admin.storage().bucket(name);
 }
 
 async function dispatchStudio3DJob(jobId) {
+  const config = nvidia.configuration();
+  if (config) {
+    const db = admin.firestore();
+    const jobRef = db.collection("studio_3d_jobs").doc(jobId);
+    const doc = await jobRef.get();
+    const job = doc.data();
+    if (!doc.exists || job.status !== "queued" || job.spec?.ownerUid !== job.ownerUid) throw new Error("Invalid retained NVIDIA job");
+    const leaseRef = db.collection("studio_3d_capacity").doc("global");
+    const execution = (async () => {
+      try {
+        const lease = (await leaseRef.get()).data();
+        if (lease?.jobId !== jobId || !Number.isSafeInteger(lease.expiresAtMs)) throw new Error('NVIDIA job capacity lease was lost');
+        const boundedConfig = { ...config, deadline: Math.min(config.deadline, Math.floor(lease.expiresAtMs / 1000)) };
+        const { receipt, outputs } = await nvidia.render({ config: boundedConfig, jobId, spec: job.spec, bucket: studio3DBucket(),
+          onRendering: () => jobRef.update({ status: "rendering", startedAt: admin.firestore.FieldValue.serverTimestamp() }) });
+        await jobRef.update({ status: "completed", completedAt: admin.firestore.FieldValue.serverTimestamp(),
+          previewPath: outputs[0].destination, overlayPath: outputs[1].destination,
+          previewBytes: outputs[0].bytes, overlayBytes: outputs[1].bytes, renderReceipt: receipt });
+      } catch (error) {
+        console.error("[Studio3D] retained NVIDIA render failed", { jobId, code: error.code, signal: error.signal,
+          message: String(error.message).slice(0, 500),
+          stderr: String(error.stderr || '').replace(/https?:\/\/\S+/g, '[media URL]').slice(-4000) });
+        await jobRef.update({ status: "failed", completedAt: admin.firestore.FieldValue.serverTimestamp(),
+          errorCode: error.code === 75 ? "GPU_CAPACITY_BUSY" : "RENDER_FAILED" });
+      } finally {
+        await db.runTransaction(async tx => {
+          const current = await tx.get(leaseRef);
+          if (current.data()?.jobId === jobId) tx.delete(leaseRef);
+        });
+      }
+    })();
+    execution.catch(error => console.error("[Studio3D] job persistence failed", { jobId, message: String(error.message).slice(0, 200) }));
+    return `nvidia-ssh/${jobId}`;
+  }
   const project = process.env.GOOGLE_CLOUD_PROJECT || process.env.GCLOUD_PROJECT;
   if (!project) throw new Error("3D GPU project is not configured");
   const job = process.env.STUDIO_3D_JOB_NAME || "viral-studio-3d-renderer";
@@ -68,7 +106,7 @@ async function dispatchStudio3DJob(jobId) {
 }
 
 async function createStudio3DPreview({ ownerUid, scene, aspect = "9:16", clientRequestId }) {
-  if (!/^[A-Za-z0-9_-]{1,128}$/.test(ownerUid || "") || !/^[A-Za-z0-9_-]{8,100}$/.test(clientRequestId || "")) throw new Error("Invalid request identity");
+  if (!/^[A-Za-z0-9_-]{1,100}$/.test(ownerUid || "") || !/^[A-Za-z0-9_-]{8,100}$/.test(clientRequestId || "")) throw new Error("Invalid request identity");
   if (!["9:16", "16:9", "1:1"].includes(aspect)) throw new Error("Invalid preview aspect ratio");
   const clean = validateStudio3DScene(scene, ownerUid);
   const sourceBucket = admin.storage().bucket();
@@ -91,17 +129,21 @@ async function createStudio3DPreview({ ownerUid, scene, aspect = "9:16", clientR
   }
   const jobRef = db.collection("studio_3d_jobs").doc(jobId);
   const hash = stableSceneHash(clean);
+  const config = nvidia.configuration();
+  // Check transport capacity before charging a new request's daily allowance.
+  // Idempotent polling/retries can still resolve an already accepted request.
+  if (config && !(await requestRef.get()).exists) await nvidia.available(config);
   const now = Date.now();
   const result = await db.runTransaction(async tx => {
     const [existing, lease, userUsage, globalUsage] = await Promise.all([tx.get(requestRef), tx.get(leaseRef), tx.get(userUsageRef), tx.get(globalUsageRef)]);
     if (existing.exists) {
       const previous = existing.data();
-      if (previous.hash !== hash) throw new Error("Idempotency key was reused for a different scene");
+      if (previous.hash !== hash || previous.aspect !== aspect) throw new Error("Idempotency key was reused for a different scene or aspect");
       return { jobId: previous.jobId, reused: true };
     }
     if (lease.exists && Number(lease.data().expiresAtMs) > now) throw new Error("3D preview capacity is busy; retry shortly");
     if (Number(userUsage.data()?.count || 0) >= 4 || Number(globalUsage.data()?.count || 0) >= 20) throw new Error("3D preview daily limit reached");
-    tx.create(requestRef, { ownerUid, hash, jobId, createdAtMs: now });
+    tx.create(requestRef, { ownerUid, hash, aspect, jobId, createdAtMs: now });
     tx.set(leaseRef, { jobId, ownerUid, expiresAtMs: now + 20 * 60 * 1000 });
     tx.set(userUsageRef, { count: Number(userUsage.data()?.count || 0) + 1, day, ownerUid });
     tx.set(globalUsageRef, { count: Number(globalUsage.data()?.count || 0) + 1, day });
@@ -130,6 +172,7 @@ async function getOwnedStudio3DPreview({ ownerUid, jobId }) {
   const data = doc.data();
   const response = { jobId, status: data.status, hash: data.hash, errorCode: data.errorCode || null };
   if (data.status === "completed" && data.previewPath) {
+    if (data.renderReceipt) response.renderReceipt = data.renderReceipt;
     const [url] = await studio3DBucket().file(data.previewPath).getSignedUrl({ action: "read", expires: Date.now() + 15 * 60 * 1000 });
     response.url = url;
   }

@@ -1,0 +1,140 @@
+{
+  "status": "ORIGINAL_LOGO_FOR_FOUNDER_REVIEW",
+  "model": "authored vector geometry / no generative inference",
+  "tool": "SVG / outlined typography / CPU Cairo raster export",
+  "sourceBrief": "Create a new AutoPromote logo from scratch.",
+  "settings": {
+    "symbolColors": [
+      "#aa8aff",
+      "#8453f6"
+    ],
+    "ink": "#0b0d15",
+    "ivory": "#f4f0ff",
+    "fontWeight": 620
+  },
+  "story": {
+    "about": "Raw creative pieces become a coherent identity.",
+    "whyCare": "A recognisable mark lets viewers associate finished work with AutoPromote.",
+    "hook": "An upward diagonal meets a forward folded shape.",
+    "beginning": "Two independent geometric components.",
+    "development": "The components join into a compact A/P-inspired monogram.",
+    "tension": "The open counter and diagonal seam withhold the complete silhouette.",
+    "payoff": "The parts read as one strong symbol beside AutoPromote.",
+    "ending": "A clean, readable brand lockup.",
+    "withheld": "For a later ident: the complete wordmark until the symbol resolves.",
+    "amplify": [
+      "The diagonal join",
+      "The open counter",
+      "The final two-tone silhouette"
+    ],
+    "remove": [
+      "Glowing strokes",
+      "Decorative particles",
+      "Generic film reels",
+      "The former rocket artwork"
+    ]
+  },
+  "nativeGeometry": "logo-geometry.json",
+  "artifacts": [
+    {
+      "path": "autopromote-logo-dark.svg",
+      "sha256": "c6d095a706cb917761914ebaad37a669391758f47ec45a9b9bc815643047283e",
+      "bytes": 16228,
+      "role": "editable_vector"
+    },
+    {
+      "path": "autopromote-logo-dark.png",
+      "sha256": "4e936e2954bb317e0d0453bc1130ffd1b873cda9ec28075667eb4829b2c422ab",
+      "bytes": 37453,
+      "role": "raster_export"
+    },
+    {
+      "path": "autopromote-logo-light.svg",
+      "sha256": "03a270ea9462ec0861f37334136af425d0682f3909ff1ee59e81968adf965f9e",
+      "bytes": 16228,
+      "role": "editable_vector"
+    },
+    {
+      "path": "autopromote-logo-light.png",
+      "sha256": "1a3aec9269c269bfc996ab23eaec9713ee3198a6b93edc9a2534017a217f86e6",
+      "bytes": 39172,
+      "role": "raster_export"
+    },
+    {
+      "path": "autopromote-logo-white.svg",
+      "sha256": "9d8db7979852fd9fb13c92d838610a0574907a670313dce65f3d907642dc320d",
+      "bytes": 16228,
+      "role": "editable_vector"
+    },
+    {
+      "path": "autopromote-logo-white.png",
+      "sha256": "1bd76e520c1aa7ea1f468250dd6f36eed3a1e0313d4581d57cc616025ca9834c",
+      "bytes": 29939,
+      "role": "raster_export"
+    },
+    {
+      "path": "autopromote-logo-black.svg",
+      "sha256": "6cca1663665f38dd388d15615645e7c652fc3234086f96e4a2228addd72e879b",
+      "bytes": 16228,
+      "role": "editable_vector"
+    },
+    {
+      "path": "autopromote-logo-black.png",
+      "sha256": "d4fa59538fc3b0cecff6c9c1c553dec0b5f09d9f1c22b665567858804b46ba22",
+      "bytes": 27327,
+      "role": "raster_export"
+    },
+    {
+      "path": "autopromote-symbol.svg",
+      "sha256": "f9a35773622feb5cafeeb4dec33ed500731b43beaadc546a6092541443984de2",
+      "bytes": 547,
+      "role": "editable_vector"
+    },
+    {
+      "path": "autopromote-symbol.png",
+      "sha256": "bc42b89f6ae1aee25b794d4dbd83e58f4db22105b1717cec092ae558f539ec40",
+      "bytes": 28613,
+      "role": "raster_export"
+    },
+    {
+      "path": "autopromote-symbol-white.svg",
+      "sha256": "6c3e5feee1daf161be8ff405c2202ebdaf62153668522ed0b2d6c0ac2826ab11",
+      "bytes": 547,
+      "role": "editable_vector"
+    },
+    {
+      "path": "autopromote-symbol-white.png",
+      "sha256": "68d0a1e89f3f5208174f952b5ddc32732f71c263ed90175d05b3f54549a38410",
+      "bytes": 21482,
+      "role": "raster_export"
+    },
+    {
+      "path": "autopromote-app-icon.svg",
+      "sha256": "522a03023a6e423c751ed2906749380834b3a0a337f836b74c0718586e0b0249",
+      "bytes": 646,
+      "role": "editable_vector"
+    },
+    {
+      "path": "autopromote-app-icon.png",
+      "sha256": "abc854c9a46902647808296ab57a4dc8a24db367708c5ede9d07366b61906da0",
+      "bytes": 35572,
+      "role": "raster_export"
+    },
+    {
+      "path": "brand-preview.svg",
+      "sha256": "28f508015856da35dee98f749cd8a9fddc5499e4559fd5ea7dcc9ed174eb3312",
+      "bytes": 17836,
+      "role": "editable_vector"
+    },
+    {
+      "path": "brand-preview.png",
+      "sha256": "777aa46869c36ac2f9d21bf98d83e80ea0707fe28ce0d80b6e15d5f3712f8578",
+      "bytes": 44155,
+      "role": "raster_export"
+    }
+  ],
+  "scriptSha256": "4fbd2583aae626686493d1dcb2ac4f12c6ab44b582fea730bb164a92cb3bca5e",
+  "gpuUsed": false,
+  "publicAppChanged": false,
+  "identIntegrationStatus": "not_integrated; new vector asset is prepared for a dedicated reveal"
+}

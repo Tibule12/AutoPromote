@@ -10,6 +10,7 @@ const { buildWorkerRequestConfig } = require("./utils/cloudRunAuth");
 // The service file exports an instance by default? No, let's check.
 const VideoEditingService = require("./services/videoEditingService");
 const videoEditingService = new VideoEditingService(); // Instantiate for general use
+const { refreshOwnedStudioOutput } = require("./services/studioWorkerOutputService");
 
 const authMiddleware = require("./authMiddleware");
 const { deductCredits, refundCredits, getCreditBreakdown } = require("./creditSystem");
@@ -57,6 +58,7 @@ const {
 } = require("./services/studioAnalysisJobService");
 const { getMulticamStoragePaths } = require("./services/storageCleanupService");
 const { createStudio3DPreview, getOwnedStudio3DPreview, resolveStudio3DExport } = require("./services/studio3DService");
+const { createSubjectVfxPreview, getSubjectVfxPreview, cancelSubjectVfxPreview, resolveSubjectVfxExport } = require("./services/studioSubjectVfxService");
 const { getClipLearningProfile } = require("./services/clipOutcomeLearningService");
 const {
   deleteOwnedTemporaryVideoSource,
@@ -300,6 +302,7 @@ const viralRenderAttemptResponse = (jobId, data) => {
     detail: data.detail || null,
     error: data.status === "failed" ? data.error || "Rendering failed" : null,
     outputUrl,
+    downloadUrl: completed ? data.downloadUrl || null : null,
     result: outputUrl ? { url: outputUrl } : null,
     creditsRefunded: Boolean(data.creditsRefunded),
   };
@@ -599,8 +602,12 @@ const resolveViralTimelineSources = async ({
   }
 
   const resolvedByPath = new Map();
-  if (primaryStoragePath) resolvedByPath.set(primaryStoragePath, primarySource.outputUrl);
+  if (primaryStoragePath) {
+    await require('./services/studioBRollGenerationService').assertGeneratedBRollExport({ownerUid:userId,storagePath:primaryStoragePath});
+    resolvedByPath.set(primaryStoragePath, primarySource.outputUrl);
+  }
   const resolvePath = async path => {
+    await require('./services/studioBRollGenerationService').assertGeneratedBRollExport({ownerUid:userId,storagePath:path});
     if (!resolvedByPath.has(path)) {
       const source = await resolveOwnedStudioVideoSource({ storagePath: path, userId });
       resolvedByPath.set(path, source.signedUrl);
@@ -912,6 +919,64 @@ router.post("/internal/multicam-job-failed", async (req, res) => {
 // Middleware to verify Firebase Token and attach user
 // Replaced local 'protect' with standard 'authMiddleware' for consistency
 router.use(authMiddleware);
+
+const studioBRoll = require('./services/studioBRollGenerationService');
+const bRollError = (res,error) => res.status(error.statusCode || 503).json({
+  success:false,code:error.code || 'BROLL_UNAVAILABLE',
+  message:error.statusCode ? error.message : 'Generated B-roll is unavailable. Your edit is preserved.'});
+router.post('/studio-broll/jobs',requireTesterEditingFeature('clipRender'),async(req,res)=>{
+  try {return res.status(202).json({success:true,job:await studioBRoll.createBRollJob({ownerUid:req.user.uid,input:req.body})});}
+  catch(error){return bRollError(res,error);}
+});
+router.get('/studio-broll/jobs',requireTesterEditingFeature('clipRender'),async(req,res)=>{
+  try {return res.json({success:true,jobs:await studioBRoll.listBRollJobs({ownerUid:req.user.uid,projectId:req.query.projectId})});}
+  catch(error){return bRollError(res,error);}
+});
+router.get('/studio-broll/jobs/:jobId',requireTesterEditingFeature('clipRender'),async(req,res)=>{
+  try {return res.json({success:true,job:await studioBRoll.getBRollJob({ownerUid:req.user.uid,jobId:req.params.jobId})});}
+  catch(error){return bRollError(res,error);}
+});
+router.post('/studio-broll/jobs/:jobId/review',requireTesterEditingFeature('clipRender'),async(req,res)=>{
+  try {
+    if(!req.body || Object.keys(req.body).sort().join()!=='contentHash,decision,shotId')
+      return res.status(400).json({success:false,code:'BROLL_REVIEW_INVALID'});
+    return res.json({success:true,job:await studioBRoll.reviewBRollShot({ownerUid:req.user.uid,jobId:req.params.jobId,...req.body})});
+  }catch(error){return bRollError(res,error);}
+});
+router.post('/studio-broll/jobs/:jobId/recheck',requireTesterEditingFeature('clipRender'),async(req,res)=>{
+  try {
+    if(!req.body || Object.keys(req.body).sort().join()!=='contentHash,shotId')
+      return res.status(400).json({success:false,code:'BROLL_REVIEW_INVALID'});
+    return res.status(202).json({success:true,job:await studioBRoll.recheckBRollShot({ownerUid:req.user.uid,jobId:req.params.jobId,...req.body})});
+  }catch(error){return bRollError(res,error);}
+});
+
+router.post("/studio-subject-vfx", requireTesterEditingFeature("clipRender"), async (req,res) => {
+  try {
+    if (!req.body || Object.keys(req.body).sort().join() !== "clientRequestId,scene") return res.status(422).json({message:"Invalid subject render request."});
+    const result=await createSubjectVfxPreview({ownerUid:req.user.uid,scene:req.body.scene,clientRequestId:req.body.clientRequestId});
+    return res.status(202).json(result);
+  } catch(error) { return res.status(error.statusCode || 422).json({message:error.message}); }
+});
+router.get("/studio-subject-vfx/:jobId", requireTesterEditingFeature("clipRender"), async (req,res) => {
+  try { return res.json(await getSubjectVfxPreview({ownerUid:req.user.uid,jobId:req.params.jobId})); }
+  catch(error) {
+    // Keep transport/storage failures diagnosable without logging signed media
+    // URLs, request headers, credentials or the worker's complete response.
+    const detail = String(error.message || "Subject status lookup failed")
+      .replace(/https?:\/\/\S+/g, "[url]")
+      .replace(/Bearer\s+\S+/gi, "Bearer [redacted]").slice(0, 600);
+    console.warn("[studio-subject-vfx] Status lookup failed", {
+      jobId: req.params.jobId, code: error.code || null,
+      status: error.statusCode || error.response?.status || null, detail,
+    });
+    return res.status(error.statusCode || 503).json({message:error.statusCode ? error.message : "Could not check this subject render."});
+  }
+});
+router.delete("/studio-subject-vfx/:jobId", requireTesterEditingFeature("clipRender"), async (req,res) => {
+  try { return res.json(await cancelSubjectVfxPreview({ownerUid:req.user.uid,jobId:req.params.jobId})); }
+  catch(error) { return res.status(error.statusCode || 503).json({message:error.statusCode ? error.message : "Could not cancel this subject render."}); }
+});
 
 router.post("/studio-assets/resolve", requireTesterEditingFeature("clipRender"), async (req, res) => {
   try {
@@ -1632,12 +1697,29 @@ router.post(
         }
       }
     }
+    if (isViralClipRender && Object.prototype.hasOwnProperty.call(options?.viralData || {}, "subjectVfx")) {
+      try {
+        const subjectVfx=await resolveSubjectVfxExport({ownerUid:userId,items:options.viralData.subjectVfx,timeline:resolvedOptions.viralData.timeline_segments});
+        resolvedOptions={...resolvedOptions,viralData:{...resolvedOptions.viralData,subjectVfx}};
+      } catch(error) { return res.status(error.statusCode || 422).json({message:error.message}); }
+    }
     console.log("[MediaRoute] Received request:", {
       hasSource: Boolean(fileUrl),
       renderJobId: resolvedSource.renderJobId,
       isViralClipRender,
       hasThreeDGraphics: Boolean(resolvedOptions?.viralData?.threeDGraphics?.length),
     });
+
+    // Check the same worker used by processVideo before charging or creating a
+    // job. A stopped NVIDIA worker must not leave a creator waiting on a render
+    // that could never start, or temporarily deduct credits for that attempt.
+    if (isViralClipRender) {
+      try { await videoEditingService.assertRenderWorkerReady(); }
+      catch (error) {
+        return res.status(error.statusCode || 503).json({ success: false,
+          code: error.code || "STUDIO_RENDER_WORKER_UNAVAILABLE", message: error.message });
+      }
+    }
 
     // 1. Deduct Credits
     let creditReceipt = null;
@@ -1768,6 +1850,12 @@ router.get("/viral-render-attempt/:requestId", async (req, res) => {
     }
     const data = doc.data();
     const refundResult = await refundViralRenderJobIfNeeded(userId, jobId, data);
+    const durablePath = data.outputStoragePath || data.result?.outputStoragePath;
+    if (data.status === "completed" && typeof durablePath === "string" &&
+        durablePath.startsWith("studio/exports/")) {
+      data.outputUrl = await refreshOwnedStudioOutput({ storagePath: durablePath, userId, jobId });
+      data.downloadUrl = await refreshOwnedStudioOutput({ storagePath: durablePath, userId, jobId, download: true });
+    }
     return res.json({
       ...viralRenderAttemptResponse(jobId, data),
       creditsRefunded: Boolean(data.creditsRefunded || refundResult?.success),
@@ -3017,6 +3105,15 @@ router.get("/status/:jobId", async (req, res) => {
       return res.status(403).json({ success: false, message: "Unauthorized access to job" });
     }
 
+    // Refresh private download access from the durable owner-bound object,
+    // independently of the worker's availability or the old signed URL expiry.
+    const durablePath = data.outputStoragePath || data.result?.outputStoragePath;
+    if (data.status === "completed" && data.options?.renderViral === true &&
+        typeof durablePath === "string" && durablePath.startsWith("studio/exports/")) {
+      data.outputUrl = await refreshOwnedStudioOutput({ storagePath: durablePath, userId, jobId });
+      data.downloadUrl = await refreshOwnedStudioOutput({ storagePath: durablePath, userId, jobId, download: true });
+    }
+
     await refundCleanAudioSyncJobIfNeeded(userId, jobId, data, "worker_failed");
     await refundMulticamRenderJobIfNeeded(userId, jobId, data, "status_poll_failed_job");
     await refundViralRenderJobIfNeeded(userId, jobId, data, "status_poll_failed_job");
@@ -3045,6 +3142,7 @@ router.get("/status/:jobId", async (req, res) => {
           ...(data.result || {}),
           url: completedViralOutputUrl,
           output_url: completedViralOutputUrl,
+          downloadUrl: data.downloadUrl || null,
         }
       : sanitizeResultForApproval(data.result, approvalView);
     const rawRenderCheckpoint =

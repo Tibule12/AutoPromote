@@ -1,0 +1,141 @@
+.studio-subject-vfx {
+  padding: 18px;
+  border-bottom: 1px solid #a38aff30;
+  color: #e9e3f4;
+  font-size: 12px;
+}
+.studio-subject-vfx header > span {
+  color: #bca4e5;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+}
+.studio-subject-vfx h4 {
+  font-size: 17px;
+  margin: 9px 0;
+}
+.studio-subject-vfx p {
+  line-height: 1.65;
+  color: #b7adca;
+}
+.studio-subject-vfx input,
+.studio-subject-vfx select {
+  min-width: 0;
+  width: 100%;
+  color: #e9e3f4;
+  padding: 7px;
+  background: #151220;
+  border: 1px solid #625277;
+  border-radius: 5px;
+}
+.studio-subject-vfx input[type="checkbox"] {
+  width: auto;
+  accent-color: #bca4e5;
+}
+.studio-subject-vfx input[type="color"] {
+  padding: 2px;
+  height: 32px;
+}
+.studio-subject-vfx label {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  align-items: center;
+  margin: 10px 0;
+  text-transform: capitalize;
+}
+.studio-subject-vfx button {
+  color: #e9e3f4;
+  background: #332743;
+  border: 1px solid #6a4f86;
+  border-radius: 5px;
+  font: inherit;
+  padding: 8px;
+  cursor: pointer;
+}
+.studio-subject-vfx button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.studio-subject-vfx button[aria-pressed="true"] {
+  background: #604385;
+}
+.subject-vfx-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0;
+  width: 100%;
+}
+.subject-vfx-actions > input {
+  width: 65px;
+}
+.subject-vfx-actions > select {
+  flex: 1;
+  width: auto;
+}
+.subject-vfx-source {
+  position: relative;
+  background: #090710;
+}
+.subject-vfx-source video {
+  display: block;
+  width: 100%;
+  height: 180px;
+  object-fit: contain;
+  cursor: crosshair;
+}
+.subject-vfx-source > span {
+  display: block;
+  padding: 7px;
+  font-size: 10px;
+  color: #b7adca;
+}
+.subject-vfx-point {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border: 1px solid white;
+  border-radius: 50%;
+  background: #744fc2;
+  color: white;
+  font-style: normal;
+  font-size: 12px;
+  pointer-events: none;
+}
+.subject-vfx-point.is-background {
+  background: #a52f58;
+}
+.studio-subject-vfx fieldset {
+  border: 1px solid #a38aff30;
+  border-radius: 6px;
+  margin: 15px 0;
+  padding: 12px;
+}
+.studio-subject-vfx fieldset label {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.studio-subject-vfx legend {
+  color: #cfb2f6;
+}
+.subject-vfx-result video {
+  width: 100%;
+  display: block;
+  background: #080710;
+}
+.subject-vfx-proposal {
+  border: 1px solid #a38aff30;
+  padding: 12px;
+  margin-top: 12px;
+}
+.subject-vfx-limit {
+  font-size: 10px;
+}
+.studio-subject-vfx :focus-visible {
+  outline: 2px solid #bca4e5;
+  outline-offset: 3px;
+}

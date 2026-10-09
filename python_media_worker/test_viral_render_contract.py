@@ -12,6 +12,7 @@ from unittest.mock import AsyncMock, patch
 from python_media_worker.viral_render_contract import (
     build_caption_override_transcript,
     build_edited_caption_transcript,
+    build_delivery_video_clock_filter,
     build_segment_transition_filters,
     build_speed_filter_complex,
     find_uncovered_caption_speech_ranges,
@@ -28,6 +29,8 @@ from python_media_worker.main_media_server import (
     ViralOverlay,
     apply_manual_reframe_keyframes,
     apply_viral_brand_watermark,
+    apply_viral_caption_review_stamp,
+    build_viral_caption_review_filter,
     build_viral_brand_watermark_asset,
     build_studio_adjustment_timeline_filter,
     build_group_stack_filter,
@@ -56,6 +59,38 @@ from python_media_worker.main_media_server import (
 
 
 class ViralRenderContractTests(unittest.TestCase):
+    def test_editor_can_disable_the_main_frame_without_changing_reviewed_framing(self):
+        plan = {"main_frame": {"enabled": False},
+                "reframe": {"aspect": "16:9", "timeline_cuts": [{"time": 0, "mode": "center"}]}}
+        self.assertTrue(preflight_studio_podcast_timeline(plan, 12)["passed"])
+        self.assertEqual(build_main_video_frame_filter(plan, 1280, 720), "")
+        plan["main_frame"] = {"enabled": True, "shape": "triangle", "border_radius_percent": 6}
+        self.assertFalse(preflight_studio_podcast_timeline(plan, 12)["passed"])
+
+    def test_wide_show_everyone_does_not_require_split_speaker_crops(self):
+        receipt = preflight_studio_podcast_timeline({
+            "main_frame": {"enabled": True, "shape": "round", "border_radius_percent": 6},
+            "reframe": {"aspect": "16:9", "timeline_cuts": [{"time": 0, "mode": "center"}]},
+        }, 1)
+        self.assertTrue(receipt["passed"], receipt)
+
+    def test_real_wide_show_everyone_preserves_both_sides_on_cpu(self):
+        with tempfile.TemporaryDirectory() as directory, patch.dict(os.environ, {"VIRAL_EXPORT_ENCODER": "cpu"}):
+            source, output = str(Path(directory) / "source.mp4"), str(Path(directory) / "output.mp4")
+            subprocess.run(["ffmpeg", "-v", "error", "-f", "lavfi", "-i",
+                "color=c=red:s=320x180:r=10:d=1,drawbox=x=160:y=0:w=160:h=180:color=blue:t=fill",
+                "-c:v", "libx264", "-threads", "1", "-y", source], check=True, capture_output=True)
+            asyncio.run(render_reframe_timeline_sequential(source, output, 320, 180, 320, 180,
+                1, [{"time": 0, "mode": "center"}], job_id="wide-center-test"))
+            pixels = subprocess.run(["ffmpeg", "-v", "error", "-i", output, "-frames:v", "1",
+                "-pix_fmt", "rgb24", "-f", "rawvideo", "-"], check=True, capture_output=True).stdout
+            self.assertEqual(len(pixels), 320 * 180 * 3)
+            left, right = (90 * 320 + 40) * 3, (90 * 320 + 280) * 3
+            self.assertGreater(pixels[left], 200)
+            self.assertLess(pixels[left + 2], 20)
+            self.assertGreater(pixels[right + 2], 200)
+            self.assertLess(pixels[right], 20)
+
     def test_podcast_preflight_blocks_reaction_window_enlargement(self):
         receipt = preflight_studio_podcast_timeline({
             "main_frame": {"enabled": True, "shape": "round", "border_radius_percent": 10},
@@ -134,22 +169,35 @@ class ViralRenderContractTests(unittest.TestCase):
         self.assertIn("1:a?", concat_command)
         self.assertIn("copy", concat_command)
 
-    def test_caption_review_copy_is_stamped_and_keeps_audio(self):
+    def test_caption_review_copy_preserves_picture_frames_and_audio_on_cpu(self):
         with tempfile.TemporaryDirectory(prefix="viral-review-copy-") as temp:
             output = str(Path(temp) / "source.mp4")
             created = subprocess.run([
                 "ffmpeg", "-v", "error", "-f", "lavfi", "-i",
-                "color=c=navy:s=180x320:r=10:d=1", "-f", "lavfi", "-i",
-                "sine=frequency=440:duration=1", "-c:v", "libx264", "-c:a", "aac",
+                "color=c=navy:s=180x320:r=30:d=2.033333", "-f", "lavfi", "-i",
+                "sine=frequency=440:duration=2.033333", "-c:v", "libx264", "-c:a", "aac",
                 "-shortest", "-y", output,
             ], capture_output=True)
             self.assertEqual(created.returncode, 0, created.stderr.decode())
-            receipt = asyncio.run(apply_viral_brand_watermark(
-                output, "qa-review-copy", 180, 320,
-                {"resolution": "source", "fps": "source", "codec": "h264"},
-                caption_review_copy=True,
-            ))
+            def picture_stream():
+                probe = subprocess.run([
+                    "ffprobe", "-v", "error", "-count_frames", "-show_streams",
+                    "-of", "json", output,
+                ], capture_output=True, text=True, check=True)
+                return next(stream for stream in json.loads(probe.stdout)["streams"]
+                            if stream["codec_type"] == "video")
+
+            before = picture_stream()
+            with patch.dict(os.environ, {"VIRAL_EXPORT_ENCODER": "cpu"}):
+                receipt = asyncio.run(apply_viral_caption_review_stamp(
+                    output, "qa-review-copy", 180, 320,
+                    {"resolution": "source", "fps": "source", "codec": "h264"},
+                ))
+            after = picture_stream()
+            self.assertEqual(int(after["nb_read_frames"]), int(before["nb_read_frames"]))
+            self.assertAlmostEqual(float(after["duration"]), float(before["duration"]), places=3)
             self.assertTrue(receipt["caption_review_copy"])
+            self.assertFalse(receipt["platform_branding"])
             self.assertEqual(receipt["status"], "burned_in")
             probed = subprocess.run([
                 "ffprobe", "-v", "error", "-show_entries", "stream=codec_type",
@@ -1185,6 +1233,75 @@ class ViralRenderContractTests(unittest.TestCase):
         self.assertEqual(len(soft["audio_filters"]), 2)
         self.assertEqual(clean["video_filters"], [])
         self.assertEqual(len(clean["audio_filters"]), 1)
+
+    def test_speed_cut_survives_thirty_to_sixty_fps_delivery_without_late_frames(self):
+        # Two source regions share the actual Studio 30fps intermediate clock.
+        # The cut at source 3s must be blue at output 1.5s after a 2x edit,
+        # including the later 60fps delivery conversion and ordinary AAC mux.
+        with tempfile.TemporaryDirectory() as temp:
+            source, speed, delivery = [str(Path(temp) / name) for name in ['source.mp4', 'speed.mp4', 'delivery.mp4']]
+            subprocess.run(['ffmpeg', '-v', 'error', '-f', 'lavfi', '-i',
+                "color=c=red:s=160x90:r=30:d=12,drawbox=x=0:y=0:w=iw:h=ih:color=blue:t=fill:enable='gte(t,3)'",
+                '-f', 'lavfi', '-i', 'sine=frequency=440:duration=12',
+                '-c:v', 'libx264', '-preset', 'veryfast', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-y', source], check=True)
+            subprocess.run(['ffmpeg', '-v', 'error', '-i', source, '-filter_complex',
+                build_speed_filter_complex(normalize_speed_plan(12, preview_speed=2), True),
+                '-map', '[v_speed]', '-map', '[a_speed]', '-c:v', 'libx264', '-preset', 'veryfast',
+                '-c:a', 'aac', '-y', speed], check=True)
+            subprocess.run(['ffmpeg', '-v', 'error', '-i', speed, '-vf', 'fps=60',
+                '-an', '-t', '6', '-c:v', 'libx264', '-preset', 'veryfast', '-y', delivery], check=True)
+            frames = subprocess.check_output(['ffmpeg', '-v', 'error', '-i', delivery,
+                '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-'])
+            size = 160 * 90 * 3
+            self.assertEqual(len(frames) // size, 360)
+            pixel = frames[90 * size + (45 * 160 + 80) * 3:90 * size + (45 * 160 + 80) * 3 + 3]
+            self.assertGreater(pixel[2], 180, 'The mapped cut is still showing the previous red source frame')
+            self.assertLess(pixel[0], 50)
+            probe = json.loads(subprocess.check_output(['ffprobe', '-v', 'error',
+                '-show_entries', 'stream=codec_type,duration,nb_frames', '-of', 'json', speed]))
+            video = next(s for s in probe['streams'] if s['codec_type'] == 'video')
+            self.assertEqual(int(video['nb_frames']), 180)
+            self.assertAlmostEqual(float(video['duration']), 6, delta=1/60)
+
+    def test_two_times_speed_at_sixty_fps_preserves_every_ordered_source_frame(self):
+        with tempfile.TemporaryDirectory() as temp:
+            source, output = [str(Path(temp) / name) for name in ['source.mkv', 'output.mkv']]
+            subprocess.run(['ffmpeg', '-v', 'error', '-f', 'lavfi', '-i',
+                'testsrc2=s=160x90:r=30:d=6', '-c:v', 'ffv1', '-threads', '1', source], check=True)
+            graph = build_speed_filter_complex(normalize_speed_plan(6, preview_speed=2), False, output_fps=60)
+            subprocess.run(['ffmpeg', '-v', 'error', '-i', source, '-filter_complex', graph,
+                '-map', '[v_speed]', '-c:v', 'ffv1', '-threads', '1', output], check=True)
+            def frames(file):
+                return subprocess.check_output(['ffmpeg', '-v', 'error', '-i', file,
+                    '-pix_fmt', 'yuv420p', '-f', 'rawvideo', '-'])
+            original, sped_up = frames(source), frames(output)
+            self.assertEqual(len(sped_up), 180 * 160 * 90 * 3 // 2)
+            self.assertEqual(sped_up, original, '60fps delivery dropped or reordered real source frames')
+
+    def test_short_alpha_overlay_preserves_delivery_tail_and_mapped_cut(self):
+        with tempfile.TemporaryDirectory() as temp:
+            source, alpha, output = [str(Path(temp) / name) for name in ['source.mp4', 'alpha.mov', 'output.mp4']]
+            subprocess.run(['ffmpeg', '-v', 'error', '-f', 'lavfi', '-i',
+                "color=c=red:s=160x90:r=30:d=6,drawbox=x=0:y=0:w=iw:h=ih:color=blue:t=fill:enable='gte(t,1.5)'",
+                '-c:v', 'libx264', '-threads', '1', '-pix_fmt', 'yuv420p', '-y', source], check=True)
+            subprocess.run(['ffmpeg', '-v', 'error', '-f', 'lavfi', '-i',
+                'color=c=green@0.5:s=16x16:r=24:d=1,format=rgba',
+                '-c:v', 'qtrle', '-threads', '1', '-y', alpha], check=True)
+            delivery_clock = build_delivery_video_clock_filter(60, 6, 30)
+            graph = '[1:v]setpts=(PTS-STARTPTS)*0.5[a];[0:v][a]overlay=0:0:eof_action=pass:repeatlast=0[v];'
+            subprocess.run(['ffmpeg', '-v', 'error', '-i', source, '-i', alpha,
+                '-filter_complex', graph + f'[v]{delivery_clock}[out]', '-map', '[out]',
+                '-t', '6', '-c:v', 'libx264', '-threads', '1', '-y', output], check=True)
+            frames = subprocess.check_output(['ffmpeg', '-v', 'error', '-i', output,
+                '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-'])
+            size = 160 * 90 * 3
+            self.assertEqual(len(frames) // size, 360, 'Short alpha input truncated the programme picture tail')
+            def pixel(frame):
+                offset = frame * size + (45 * 160 + 80) * 3
+                return frames[offset:offset + 3]
+            self.assertGreater(pixel(89)[0], 180)
+            self.assertGreater(pixel(90)[2], 180)
+            self.assertGreater(pixel(359)[2], 180)
 
     def test_ffmpeg_speed_filter_preserves_audio_and_changes_duration(self):
         with tempfile.TemporaryDirectory() as temp_dir:

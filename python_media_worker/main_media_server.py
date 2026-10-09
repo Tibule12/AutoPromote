@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, UploadFile, File, BackgroundTasks, R
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Optional, Union, Dict, Any
+from typing import List, Optional, Union, Dict, Any, Literal
 import sys
 import time
 import subprocess
@@ -59,6 +59,10 @@ try:
     from .viral_render_contract import (
         build_caption_override_transcript,
         build_edited_caption_transcript,
+        build_delivery_video_clock_filter,
+        build_studio_timeline_mux_args,
+        resolve_studio_audio_bitrate,
+        build_studio_audio_delivery_filter,
         build_segment_transition_filters,
         build_speed_filter_complex,
         find_uncovered_caption_speech_ranges,
@@ -73,6 +77,10 @@ except ImportError:
     from viral_render_contract import (
         build_caption_override_transcript,
         build_edited_caption_transcript,
+        build_delivery_video_clock_filter,
+        build_studio_timeline_mux_args,
+        resolve_studio_audio_bitrate,
+        build_studio_audio_delivery_filter,
         build_segment_transition_filters,
         build_speed_filter_complex,
         find_uncovered_caption_speech_ranges,
@@ -294,7 +302,9 @@ ALLOW_DIRECT_SOURCE_UPLOAD = env_flag(
     default=not IS_PRODUCTION_ENV,
 )
 
-FIREBASE_STATUS_UPDATES_ENABLED = bool(firebase_admin._apps)
+FIREBASE_STATUS_UPDATES_ENABLED = env_flag(
+    "FIREBASE_STATUS_UPDATES_ENABLED", default=bool(firebase_admin._apps)
+)
 MEDIA_WORKER_TASK_SECRET = os.getenv("MEDIA_WORKER_TASK_SECRET", "")
 if IS_PRODUCTION_ENV and not MEDIA_WORKER_TASK_SECRET:
     logger.warning("MEDIA_WORKER_TASK_SECRET is not set in production — task endpoints are unprotected!")
@@ -351,6 +361,14 @@ def get_faster_whisper_device():
     ).strip().lower()
     if configured and configured != "auto":
         return configured
+    # Faster-Whisper executes through CTranslate2 and does not require Torch.
+    # Probe its own backend first so a CUDA worker without Torch uses its GPU.
+    try:
+        import ctranslate2
+        if ctranslate2.get_cuda_device_count() > 0:
+            return "cuda"
+    except Exception:
+        pass
     try:
         import torch
         if torch.cuda.is_available():
@@ -423,6 +441,8 @@ def get_faster_whisper_model(model_name=None):
     try:
         loaded = load_faster_whisper_model(device, compute_type)
     except ValueError as exc:
+        if env_flag("FASTER_WHISPER_STRICT", default=False):
+            raise
         fallback_device = "cpu"
         fallback_compute_type = "int8"
         fallback_cache_key = f"{fallback_device}::{fallback_compute_type}::{resolved_model_name}"
@@ -499,7 +519,7 @@ def _detect_gpu_encoder():
                 "-f",
                 "lavfi",
                 "-i",
-                "color=size=64x64:rate=1:duration=1",
+                "color=size=320x180:rate=1:duration=1",
                 "-c:v",
                 "h264_nvenc",
                 "-f",
@@ -637,6 +657,7 @@ def validate_final_viral_delivery(
     *,
     expected_duration,
     expected_audio,
+    planned_black_ranges=None,
 ):
     """Reject technically broken exports before they are published to a creator."""
     media = validate_rendered_media(output_path, expected_audio=expected_audio)
@@ -647,6 +668,26 @@ def validate_final_viral_delivery(
     if duration_delta > tolerance:
         raise RuntimeError(
             f"Final viral clip duration differs from the edit plan by {duration_delta:.2f}s"
+        )
+
+    # Audio can keep an MP4's container duration correct after its video ends.
+    # Validate the picture stream independently to catch a frozen export tail.
+    stream_summary = probe_media_stream_summary(output_path)
+    video_stream = next(
+        (stream for stream in stream_summary.get("streams", []) if stream.get("codec_type") == "video"),
+        {},
+    )
+    try:
+        picture_duration = float(video_stream["duration"])
+        rate_parts = str(video_stream.get("avg_frame_rate") or "30/1").split("/")
+        picture_fps = float(rate_parts[0]) / float(rate_parts[1])
+    except (KeyError, ValueError, ZeroDivisionError, IndexError):
+        raise RuntimeError("Final viral clip picture timing could not be verified")
+    picture_tolerance = 1.0 / max(1.0, picture_fps) + 0.000001
+    picture_delta = abs(picture_duration - actual_duration)
+    if picture_delta > picture_tolerance:
+        raise RuntimeError(
+            f"Final viral clip picture ends {picture_delta:.2f}s away from its delivery duration"
         )
 
     black_probe = subprocess.run(
@@ -660,6 +701,8 @@ def validate_final_viral_delivery(
         text=True,
         check=False,
     )
+    if black_probe.returncode:
+        raise RuntimeError("Final viral clip black-section check failed to decode the export")
     black_ranges = []
     for match in re.finditer(
         r"black_start:([0-9.]+)\s+black_end:([0-9.]+)\s+black_duration:([0-9.]+)",
@@ -667,12 +710,35 @@ def validate_final_viral_delivery(
     ):
         start, end, duration = (float(value) for value in match.groups())
         black_ranges.append({"start": start, "end": end, "duration": duration})
+    # Dedicated studio idents deliberately open in darkness. They must declare
+    # exact editorial ranges; all other internal black sections still fail.
+    planned = planned_black_ranges or []
+    if not isinstance(planned, (list, tuple)) or len(planned) > 8:
+        raise ValueError("Invalid planned black ranges")
+    for interval in planned:
+        if (not isinstance(interval, dict)
+            or set(interval) != {"start", "end", "reason"}
+            or isinstance(interval.get("start"), bool)
+            or isinstance(interval.get("end"), bool)
+            or not isinstance(interval.get("start"), (int, float))
+            or not isinstance(interval.get("end"), (int, float))
+            or not 0 <= interval["start"] < interval["end"] <= target_duration
+            or interval["end"] - interval["start"] > 2.0
+            or not isinstance(interval.get("reason"), str)
+            or not 1 <= len(interval["reason"].strip()) <= 500):
+            raise ValueError("Invalid planned black ranges")
+    if sum(interval["end"] - interval["start"] for interval in planned) > 6.0:
+        raise ValueError("Planned black ranges exceed the editorial budget")
+    black_tolerance = max(0.045, 1.0 / max(1.0, picture_fps))
     unplanned_black = [
         item
         for item in black_ranges
         if item["duration"] >= 0.30
         and item["start"] > 0.12
         and item["end"] < actual_duration - 0.12
+        and not any(item["start"] >= interval["start"] - black_tolerance
+                    and item["end"] <= interval["end"] + black_tolerance
+                    for interval in planned)
     ]
     if unplanned_black:
         raise RuntimeError("Final viral clip contains an unplanned black section")
@@ -687,7 +753,14 @@ def validate_final_viral_delivery(
             "tolerance": round(tolerance, 3),
         },
         "audio_expected": bool(expected_audio),
+        "picture_timing": {
+            "duration": round(picture_duration, 3),
+            "container_duration": round(actual_duration, 3),
+            "delta": round(picture_delta, 3),
+            "tolerance": round(picture_tolerance, 3),
+        },
         "black_ranges": black_ranges,
+        "planned_black_ranges": planned,
         "browser_delivery": "h264_yuv420p_faststart",
     }
 
@@ -1015,7 +1088,7 @@ def redact_sensitive_urls_in_text(value):
     return sanitized.encode("utf-8") if was_bytes else sanitized
 
 
-async def materialize_video_input(video_url, local_path, keep_audio=False, max_long_edge=None):
+async def materialize_video_input(video_url, local_path, keep_audio=False, max_long_edge=None, preserve_source_bytes=False):
     source = str(video_url or "").strip()
     if not source:
         raise HTTPException(status_code=400, detail="video_url is required")
@@ -1065,6 +1138,31 @@ async def materialize_video_input(video_url, local_path, keep_audio=False, max_l
 
     # Security: only allow http/https URLs — reject local file paths and file:// URIs
     if source.startswith("http://") or source.startswith("https://"):
+        if preserve_source_bytes:
+            # Reviewed subject artifacts bind to the uploaded file's SHA-256,
+            # before CFR normalization. Encoding here would invalidate every
+            # genuine source. Downstream segment rendering still normalizes it.
+            def download_original_bytes():
+                partial_path = resolved_local_path + ".part"
+                try:
+                    request = urllib.request.Request(source, headers={"User-Agent": "Mozilla/5.0"})
+                    with urllib.request.urlopen(request, timeout=120) as response, open(partial_path, "wb") as output:
+                        total = 0
+                        while True:
+                            block = response.read(1024 * 1024)
+                            if not block:
+                                break
+                            total += len(block)
+                            if total > 512 * 1024 * 1024:
+                                raise ValueError("Reviewed subject source exceeds 512 MB")
+                            output.write(block)
+                    os.replace(partial_path, resolved_local_path)
+                finally:
+                    if os.path.exists(partial_path):
+                        os.remove(partial_path)
+            await asyncio.to_thread(download_original_bytes)
+            await validate_materialized_file(resolved_local_path, 0, "Reviewed original source download")
+            return resolved_local_path
         # Download ONCE and probe locally instead of probing the URL first (eliminates double download)
         logger.info("Downloading source video: %s", redact_media_locator_for_logs(source))
         download_start = time.time()
@@ -1188,6 +1286,9 @@ async def materialize_video_input(video_url, local_path, keep_audio=False, max_l
         raise HTTPException(status_code=404, detail=f"Input video not found: {absolute_source}")
 
     if absolute_source != os.path.abspath(resolved_local_path):
+        if preserve_source_bytes:
+            await asyncio.to_thread(shutil.copyfile, absolute_source, resolved_local_path)
+            return resolved_local_path
         # Transcode local copy to CFR to eliminate iPhone VFR drift
         await run_subprocess_async(
             [
@@ -1276,8 +1377,10 @@ async def materialize_cached_media_input(source_url, local_path, cache_key=None,
     return resolved_local_path
 
 
-async def materialize_audio_input(source_url, local_path, sample_rate=None):
-    """Materialize any URL/local media as mono WAV for sync-only analysis."""
+async def materialize_audio_input(source_url, local_path, sample_rate=None, channels=1):
+    """Decode audio; sync analysis defaults to mono, delivery buses request stereo."""
+    if type(channels) is not int or channels not in (1, 2):
+        raise HTTPException(status_code=400, detail="Audio channels must be 1 or 2")
     source = str(source_url or "").strip()
     if not source:
         raise HTTPException(status_code=400, detail="source_url is required")
@@ -1313,7 +1416,7 @@ async def materialize_audio_input(source_url, local_path, sample_rate=None):
         input_source,
         "-vn",
         "-ac",
-        "1",
+        str(channels),
         "-ar",
         str(sample_rate or MULTICAM_SYNC_SAMPLE_RATE),
         "-acodec",
@@ -2015,6 +2118,26 @@ def transcribe_captions_with_provider(file_path, *, translate_to_english=False, 
         ),
     )
 
+def transcription_model_has_unmapped_languages(model_name):
+    """Swivuriso's decoder token is not evidence of the spoken language.
+
+    Its converted model card documents seven languages absent from Whisper's
+    language token inventory. Retained local caches use neutral folder names,
+    so recognise that pinned model card as well as the repository name.
+    """
+    selected = str(model_name or os.getenv("FASTER_WHISPER_MODEL") or "")
+    if "swivuriso" in selected.lower():
+        return True
+    if os.path.isdir(selected):
+        try:
+            with open(os.path.join(selected, "README.md"), encoding="utf-8") as handle:
+                card = handle.read(16384)
+            return "Swivuriso" in card and "faster-whisper's language set does not include" in card
+        except (OSError, UnicodeError):
+            pass
+    return False
+
+
 def transcribe_with_hints(file_path, *, word_timestamps=False, language=None, prompt_hint="", task=None, model_name=None):
     normalized_language = normalize_transcription_language(language)
     engine = get_transcription_engine()
@@ -2072,7 +2195,9 @@ def transcribe_with_hints(file_path, *, word_timestamps=False, language=None, pr
             return {
                 "text": " ".join(segment.get("text", "").strip() for segment in segments).strip(),
                 "segments": segments,
-                "language": getattr(info, "language", None),
+                "language": None if transcription_model_has_unmapped_languages(model_name) else getattr(info, "language", None),
+                "decoder_language": getattr(info, "language", None),
+                "language_probability": getattr(info, "language_probability", None),
                 "duration": getattr(info, "duration", None),
                 "engine": "faster-whisper",
             }
@@ -2108,6 +2233,9 @@ def transcribe_with_hints(file_path, *, word_timestamps=False, language=None, pr
     result = model.transcribe(file_path, **transcription_options)
     if isinstance(result, dict):
         result["engine"] = "openai-whisper"
+        if transcription_model_has_unmapped_languages(model_name):
+            result["decoder_language"] = result.get("language")
+            result["language"] = None
     return result
 
 
@@ -6610,6 +6738,12 @@ def resolve_viral_export_profile(output_settings, source_width, source_height):
     crf_by_quality = {"draft": 27, "balanced": 23, "high": 19, "master": 16}
     crf = crf_by_quality[quality] + (2 if codec == "h265" else 0)
     encoder = "libx265" if codec == "h265" else "libx264"
+    encoder_preference = str(os.getenv("VIRAL_EXPORT_ENCODER", "auto")).strip().lower()
+    use_nvenc = codec == "h264" and encoder_preference != "cpu" and GPU_VIDEO_ENCODER == "h264_nvenc"
+    if codec == "h264" and encoder_preference == "nvenc" and not use_nvenc:
+        raise RuntimeError("Studio NVENC export was required, but the GPU encoder probe failed")
+    if use_nvenc:
+        encoder = "h264_nvenc"
     # Cloud Run's CPU fallback must finish inside the same bounded request as
     # the browser job. CRF remains the creator-facing quality control; faster
     # presets trade file size/encode efficiency, not resolution or frame rate.
@@ -6628,11 +6762,18 @@ def resolve_viral_export_profile(output_settings, source_width, source_height):
         "encoder": encoder,
         "quality": quality,
         "crf": crf,
-        "preset": preset_by_quality[quality],
+        "preset": "p4" if use_nvenc else preset_by_quality[quality],
     }
 
 
 def build_viral_export_encode_args(profile):
+    if profile["encoder"] == "h264_nvenc":
+        # NVENC uses constant quality with VBR; CRF is an x264/x265 option.
+        return [
+            "-c:v", "h264_nvenc", "-preset", profile.get("preset", "p4"),
+            "-rc", "vbr", "-cq", str(profile["crf"]), "-b:v", "0",
+            "-pix_fmt", "yuv420p",
+        ]
     args = [
         "-c:v",
         profile["encoder"],
@@ -6666,6 +6807,51 @@ def remove_replaced_temp_media(previous_path, replacement_path, approved_tmp_dir
         return False
     os.remove(previous_real)
     return True
+
+
+def build_viral_caption_review_filter(output_width, output_height):
+    """Keep the transcript review label readable and within the video bounds."""
+    width, height = max(1, int(output_width)), max(1, int(output_height))
+    lines = (["DRAFT CAPTIONS", "REVIEW BEFORE PUBLISHING"] if width < height else
+             ["DRAFT CAPTIONS - REVIEW BEFORE PUBLISHING"])
+    font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+    border = max(2, min(12, round(width * .02)))
+    available = max(1, width - border * 4)
+    size = max(6, min(28, round(width * .035)))
+    while size > 1:
+        font = ImageFont.truetype(font_path, size)
+        if max(font.getlength(line) for line in lines) <= available:
+            break
+        size -= 1
+    spacing = size + border * 2 + 2
+    bottom = max(border * 2, round(height * .075))
+    return ",".join(
+        f"drawtext=text='{line}':fontfile={font_path}:fontsize={size}:fontcolor=white:"
+        f"box=1:boxcolor=black@0.78:boxborderw={border}:"
+        f"x=(w-text_w)/2:y=h-{bottom}-{spacing * (len(lines) - index - 1)}-text_h"
+        for index, line in enumerate(lines)
+    )
+
+
+async def apply_viral_caption_review_stamp(output_path, job_id, output_width,
+                                           output_height, output_settings=None):
+    """Apply only a draft transcript label, independently of platform branding."""
+    profile = resolve_viral_export_profile(output_settings, output_width, output_height)
+    labeled_path = os.path.join(os.path.dirname(output_path), f"{job_id}_caption_review.mp4")
+    try:
+        await run_subprocess_async([
+            "ffmpeg", "-nostdin", "-i", output_path,
+            "-vf", build_viral_caption_review_filter(output_width, output_height),
+            "-map", "0:v:0", "-map", "0:a?", *build_viral_export_encode_args(profile),
+            "-c:a", "copy", "-movflags", "+faststart", "-t",
+            f"{get_media_duration(output_path):.6f}", "-y", labeled_path,
+        ], check=True, job_context=job_id, timeout_seconds=MEDIA_WORKER_SUBPROCESS_TIMEOUT_SECONDS)
+        os.replace(labeled_path, output_path)
+        return {"status": "burned_in", "caption_review_copy": True,
+                "platform_branding": False, "delivery": profile}
+    finally:
+        if os.path.exists(labeled_path):
+            os.remove(labeled_path)
 
 
 async def apply_viral_brand_watermark(
@@ -6716,6 +6902,18 @@ async def apply_viral_brand_watermark(
 
     x_expression = timed_position_expression("x", f"W-w-{margin_x}")
     y_expression = timed_position_expression("y", str(margin_y))
+    # Schedule coordinates anchor the asset's top-left corner. Bound the whole
+    # asset, including on narrow portrait outputs where the normal margin may
+    # exceed half the available space. Preserve the existing artwork and timing.
+    def bounded_position(expression, canvas, asset, margin):
+        safe_margin = f"min({margin}\\,max(0\\,({canvas}-{asset})/2))"
+        return (
+            f"min(max({safe_margin}\\,{canvas}-{asset}-{margin})\\,"
+            f"max({safe_margin}\\,{expression}))"
+        )
+
+    x_expression = bounded_position(x_expression, "W", "w", margin_x)
+    y_expression = bounded_position(y_expression, "H", "h", margin_y)
     branded_output_path = os.path.join(
         os.path.dirname(output_path),
         f"{job_id}_viral_branded.mp4",
@@ -6773,7 +6971,11 @@ async def apply_viral_brand_watermark(
                 "copy",
                 "-movflags",
                 "+faststart",
-                "-shortest",
+                # A looped PNG has a 25-fps clock and no natural end. -shortest
+                # drops buffered picture frames when the copied AAC ends first.
+                # Bound the watermark pass to the finished video instead.
+                "-t",
+                f"{get_media_duration(output_path):.6f}",
                 "-y",
                 branded_output_path,
             ],
@@ -8743,7 +8945,9 @@ def build_reframe_timeline_filter(
         parts.append(
             f"[rf_{index}_in]trim=start={start:.6f}:end={end:.6f},setpts=PTS-STARTPTS{trimmed}"
         )
-        if mode == "center":
+        if mode == "center" and abs(target_width / target_height - 16 / 9) < .01:
+            parts.append(build_safe_vertical_fit_filter(trimmed, composed, target_width, target_height))
+        elif mode == "center":
             graph = build_source_split_filter(
                 src_width, src_height, target_width, target_height,
                 localized_split_framing(start, end), input_label=trimmed, output_label=composed,
@@ -8951,7 +9155,9 @@ def preflight_studio_podcast_timeline(finish_plan, duration):
         if not math.isfinite(timestamp) or timestamp < 0 or timestamp >= float(duration) + .001:
             blockers.append("A framing cut is outside the rendered timeline")
             break
-    if any(str(cut.get("mode") or "").lower() == "center" for cut in cuts):
+    # The Studio shows the full source on a wide canvas. Split speaker crops
+    # belong to the taller Show Everyone layout; legacy plans omit the aspect.
+    if reframe.get("aspect") != "16:9" and any(str(cut.get("mode") or "").lower() == "center" for cut in cuts):
         split = reframe.get("split_source") or {}
         if not split.get("top") or not split.get("bottom"):
             blockers.append("Show Everyone needs two reviewed speaker crops")
@@ -8970,8 +9176,8 @@ def preflight_studio_podcast_timeline(finish_plan, duration):
                 )
     frame = finish_plan.get("main_frame") or {}
     radius = float(frame.get("border_radius_percent", frame.get("radiusPercent", 0)) or 0)
-    if not frame.get("enabled", True) or str(frame.get("shape") or "round").lower() != "round" or radius < 3:
-        blockers.append("Podcast output needs one rounded main frame in preview and export")
+    if frame.get("enabled", True) and (str(frame.get("shape") or "round").lower() != "round" or radius < 3):
+        blockers.append("An enabled footage frame needs supported rounded corners of at least 3 percent")
     keyframes = reframe.get("keyframes") or []
     if cuts and not keyframes:
         warnings.append("No reviewed face path is present; the crop will remain centered")
@@ -8986,7 +9192,9 @@ def build_reframe_segment_filter(
     director_zoom = float(segment.get("zoom") or 1)
     composed = "[segment_base]" if director_zoom > 1.001 else "[vout]"
     mode = segment.get("mode")
-    if mode == "center":
+    if mode == "center" and abs(target_width / target_height - 16 / 9) < .01:
+        graph = build_safe_vertical_fit_filter("[0:v]", composed, target_width, target_height)
+    elif mode == "center":
         split_framing = segment.get("split_framing") or {}
         top_offset = float((split_framing.get("top") or {}).get("source_time_offset_seconds", 0) or 0)
         bottom_offset = float((split_framing.get("bottom") or {}).get("source_time_offset_seconds", 0) or 0)
@@ -9046,7 +9254,7 @@ async def render_reframe_timeline_sequential(
             offsets = [
                 float((split_framing.get(slot) or {}).get("source_time_offset_seconds", 0) or 0)
                 for slot in ("top", "bottom")
-            ] if segment.get("mode") == "center" else [0.0, 0.0]
+            ] if segment.get("mode") == "center" and abs(target_width / target_height - 16 / 9) >= .01 else [0.0, 0.0]
             if segment.get("mode") == "speaker_track":
                 offsets = [float(segment.get("source_time_offset_seconds", 0) or 0)]
             active_offsets = [offset for offset in offsets if abs(offset) > 1e-6]
@@ -9066,8 +9274,8 @@ async def render_reframe_timeline_sequential(
                     alternate_input_label="[1:v]" if active_offsets else None,
                 ),
                 "-map", "[vout]", "-an",
-                "-c:v", GPU_VIDEO_ENCODER, "-preset", GPU_PRESET,
-                "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-y", segment_path,
+                *build_viral_export_encode_args(resolve_viral_export_profile({}, target_width, target_height)),
+                "-movflags", "+faststart", "-y", segment_path,
             ])
             await run_subprocess_async(
                 command, check=True, job_context=job_id,
@@ -9080,7 +9288,8 @@ async def render_reframe_timeline_sequential(
             "ffmpeg", "-f", "concat", "-safe", "0", "-i", concat_path,
             "-i", source_path,
             "-map", "0:v:0", "-map", "1:a?", "-c:v", "copy", "-c:a", "copy",
-            "-shortest", "-movflags", "+faststart", "-y", output_path,
+            *build_studio_timeline_mux_args(duration),
+            "-movflags", "+faststart", "-y", output_path,
         ], check=True, job_context=job_id, timeout_seconds=MEDIA_WORKER_SUBPROCESS_TIMEOUT_SECONDS)
     finally:
         for temporary_path in [*segment_paths, concat_path]:
@@ -11570,6 +11779,12 @@ def upload_file_to_firebase(local_path, destination_path=None):
             logger.error(f"Local media output fallback failed: {fallback_error}")
             return None
 
+    # A private NVIDIA worker may deliberately have no cloud credentials; the
+    # authenticated API retains the durable job. Avoid repeated ADC probes
+    # when its existing local-output transport is explicitly selected.
+    if env_flag("LOCAL_MEDIA_OUTPUT_ONLY"):
+        return local_output_fallback()
+
     try:
         bucket = storage.bucket()
         if not destination_path:
@@ -12106,7 +12321,10 @@ app = FastAPI(title="AutoPromote Media Worker (Python)")
 # Allow local frontend to call worker directly for ingest
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001", "http://127.0.0.1:3001"],
+    allow_origins=[origin.strip() for origin in os.getenv(
+        "MEDIA_WORKER_ALLOWED_ORIGINS",
+        "http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001",
+    ).split(",") if origin.strip()],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -12796,7 +13014,9 @@ async def preview_silence(request: SilencePreviewRequest):
     local_input_path = os.path.join(shared_tmp_dir, f"{job_id}_silence_preview_input.mp4")
 
     try:
-        await materialize_video_input(request.video_url, local_input_path)
+        # Audio activity must be measured from the original A/V input. The
+        # default video materializer deliberately drops audio for visual jobs.
+        await materialize_video_input(request.video_url, local_input_path, keep_audio=True)
         duration = get_media_duration(local_input_path)
         silence_threshold = clamp_float(request.silence_threshold_db, -60.0, -10.0)
         min_pause_length = clamp_float(request.min_silence_duration, 0.2, 3.0)
@@ -12830,6 +13050,7 @@ async def preview_silence(request: SilencePreviewRequest):
             "status": "completed",
             "job_id": job_id,
             "duration": duration,
+            "has_audio": has_audio_stream(local_input_path),
             "silence_segments": [
                 {
                     "start": round(float(start), 3),
@@ -30653,6 +30874,12 @@ class ViralOverlay(BaseModel):
     height: Optional[float] = None
     bg: Optional[str] = None 
     color: Optional[str] = None
+    fontFamily: str = "Inter"
+    fontWeight: int = 900
+    textAlign: Literal["left", "center", "right"] = "center"
+    strokeWidth: float = 0
+    shadow: Literal["none", "soft", "strong"] = "soft"
+    animation: Optional[Dict[str, Any]] = None
     start_time: Optional[float] = None
     duration: Optional[float] = None
     bRollMode: Optional[str] = None
@@ -30705,6 +30932,10 @@ class ViralOverlay(BaseModel):
 
 class ViralTimelineSegment(BaseModel):
     id: Optional[Union[str, int]] = None
+    # The compiler binds subject renders to the original source occurrence.
+    # Keep that identity through Pydantic parsing; legacy edits without subject
+    # effects need no binding and continue to use the optional default.
+    source_clip_id: Optional[Union[str, int]] = None
     url: str
     start_time: float = 0.0
     end_time: float
@@ -31050,7 +31281,8 @@ async def render_studio_finish_timeline_sequential(
         else:
             concat_command.append("-an")
         concat_command.extend([
-            "-c:v", "copy", "-shortest", "-movflags", "+faststart", "-y", output_path,
+            "-c:v", "copy", *build_studio_timeline_mux_args(duration),
+            "-movflags", "+faststart", "-y", output_path,
         ])
         await run_subprocess_async(
             concat_command, check=True, job_context=job_id,
@@ -31266,6 +31498,7 @@ class RenderViralRequest(BaseModel):
     caption_text_override: Optional[str] = None
     caption_segments: Optional[List[ViralCaptionSegment]] = None
     caption_review_copy: bool = False
+    caption_coverage_mode: Literal["full", "selected"] = "full"
     translate_captions_to_english: bool = False
     preview_speed: float = 1.0
     speed_segments: Optional[List[ViralSpeedSegment]] = None
@@ -31300,6 +31533,7 @@ class RenderViralRequest(BaseModel):
     cover_frame: Optional[CoverFrameRequest] = None
     thumbnail_frame: Optional[CoverFrameRequest] = None
     timeline_segments: Optional[List[ViralTimelineSegment]] = None
+    planned_black_ranges: Optional[List[Dict[str, Any]]] = None
     background_audio: Optional[BackgroundAudioTrack] = None
     add_music: bool = False
     music_url: Optional[str] = None
@@ -31317,6 +31551,7 @@ class RenderViralRequest(BaseModel):
     sound_effects: Optional[List[ViralSoundEffect]] = None
     motionGraphics: Optional[Dict[str, Any]] = None
     threeDGraphics: Optional[List[Dict[str, Any]]] = None
+    subjectVfx: Optional[List[Dict[str, Any]]] = None
     audio_remix: Optional[Dict[str, Any]] = None
     audioRemix: Optional[Dict[str, Any]] = None
     silence_removal: bool = False
@@ -31351,16 +31586,23 @@ async def render_viral_clip(request: RenderViralRequest):
     try:
         from .viral_motion_graphics import validate_design
         from .studio_3d_overlay import validate_resolved_overlays
+        from .studio_subject_vfx_export import validate_resolved_subject_vfx, match_subject_vfx
         from .viral_audio_remix import normalize_audio_remix
     except ImportError:
         # The production container starts this file as a top-level uvicorn
         # module, while the immutable-image test imports it as a package.
         from viral_motion_graphics import validate_design
         from studio_3d_overlay import validate_resolved_overlays
+        from studio_subject_vfx_export import validate_resolved_subject_vfx, match_subject_vfx
         from viral_audio_remix import normalize_audio_remix
     try:
         validate_design(request.motionGraphics, [effect.model_dump() for effect in request.sound_effects or []])
         validate_resolved_overlays(getattr(request, "threeDGraphics", None))
+        subject_items = validate_resolved_subject_vfx(getattr(request, "subjectVfx", None))
+        if subject_items and not request.timeline_segments:
+            raise ValueError("Subject renders require an explicit source timeline")
+        for segment in request.timeline_segments or []:
+            match_subject_vfx(subject_items, segment.source_clip_id, segment.start_time, segment.end_time)
         normalize_audio_remix(getattr(request, "audio_remix", None) or getattr(request, "audioRemix", None))
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
@@ -31459,6 +31701,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
     color_cube_path = None
     sound_effect_paths = []
     overlay_temp_paths = []
+    subject_render_paths = {}
+    verified_subject_sources = set()
     speed_adjusted_path = None
     cleanup_path = None
     creative_adjusted_path = None
@@ -31505,6 +31749,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 request.video_url,
                 input_path,
                 keep_audio=True,
+                preserve_source_bytes=bool(request.subjectVfx),
             )
         except Exception as e:
              err_msg = f"Failed to load video: {str(e)}"
@@ -31515,6 +31760,15 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
              raise HTTPException(status_code=400, detail=err_msg)
 
         source_has_audio = has_audio_stream(input_path)
+        if request.subjectVfx:
+            try:
+                from .studio_subject_vfx_export import download_subject_vfx
+            except ImportError:
+                from studio_subject_vfx_export import download_subject_vfx
+            for subject_item in request.subjectVfx:
+                subject_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_subject_{subject_item['jobId']}.mp4")
+                overlay_temp_paths.append(subject_path)
+                subject_render_paths[subject_item["jobId"]] = await asyncio.to_thread(download_subject_vfx, subject_item, subject_path)
         report_progress(15, "Source downloaded and verified")
 
         # 2. Pre-trim to duration or assemble timeline sequence
@@ -31546,8 +31800,20 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                         segment.url,
                         segment_source_path,
                         keep_audio=True,
+                        preserve_source_bytes=bool(request.subjectVfx),
                     )
 
+                segment_picture_path, segment_picture_start = segment_source_path, float(segment.start_time)
+                if request.subjectVfx:
+                    try:
+                        from .studio_subject_vfx_export import subject_video_input
+                    except ImportError:
+                        from studio_subject_vfx_export import subject_video_input
+                    segment_picture_path, segment_picture_start = await asyncio.to_thread(
+                        subject_video_input, request.subjectVfx, segment.source_clip_id,
+                        float(segment.start_time), float(segment.end_time), segment_source_path,
+                        subject_render_paths, verified_subject_sources,
+                    )
                 normalize_vf = (
                     f"scale={timeline_canvas_width}:{timeline_canvas_height}:"
                     "force_original_aspect_ratio=decrease,"
@@ -31560,12 +31826,15 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     segment.transition_duration,
                     has_audio=has_audio_stream(segment_source_path),
                 )
-                video_filters = [normalize_vf]
+                # Reviewed subject frames are 24 fps; ordinary sources can use
+                # another clock. Concat-copy needs a common time base or the
+                # following clip's timestamps stretch the exported sequence.
+                video_filters = [normalize_vf, "fps=30", "setpts=PTS-STARTPTS"]
                 video_filters.extend(transition_filters["video_filters"])
                 
                 # 1. Render Video (No Audio)
                 segment_v_cmd = [
-                    "ffmpeg", "-ss", str(segment.start_time), "-i", segment_source_path,
+                    "ffmpeg", "-ss", str(segment_picture_start), "-i", segment_picture_path,
                     "-t", str(segment_duration), "-vf", ",".join(video_filters),
                     "-map", "0:v:0", "-an",
                     "-c:v", "libx264", "-preset", "ultrafast",
@@ -31695,7 +31964,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 get_media_duration(trimmed_path)
                 or max(0.0, float(request.end_time) - float(request.start_time)),
             )
-            if caption_coverage_gaps and not request.caption_review_copy:
+            if caption_coverage_gaps and request.caption_coverage_mode == "full" and not request.caption_review_copy:
                 gap_summary = ", ".join(
                     f"{gap['start']:.1f}-{gap['end']:.1f}s"
                     for gap in caption_coverage_gaps[:5]
@@ -31714,6 +31983,18 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         reframe_target_width, reframe_target_height = get_reframe_output_dimensions(
             requested_reframe_aspect
         )
+        if str((request.output_settings or {}).get("resolution", "")).lower() == "source":
+            # The reframe presets use a 1080p canvas. "Source size" must use
+            # the native source budget rather than exporting that intermediate
+            # upscale as though it were the original resolution.
+            native_width, native_height = get_video_dimensions(trimmed_path)
+            if native_width > 0 and native_height > 0:
+                native_scale = min(
+                    native_width / reframe_target_width,
+                    native_height / reframe_target_height,
+                )
+                reframe_target_width = max(2, int(reframe_target_width * native_scale) // 2 * 2)
+                reframe_target_height = max(2, int(reframe_target_height * native_scale) // 2 * 2)
         manual_reframe_keyframes = finish_reframe_plan.get("keyframes") or []
 
         # Analyze the real picture, not letterbox/pillarbox pixels embedded in
@@ -32220,7 +32501,9 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         if speed_plan_changes_timing(speed_plan):
             speed_adjusted_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_speed.mp4")
             speed_has_audio = has_audio_stream(working_path)
-            speed_filter = build_speed_filter_complex(speed_plan, speed_has_audio)
+            speed_filter = build_speed_filter_complex(
+                speed_plan, speed_has_audio, (request.output_settings or {}).get("fps", 30),
+            )
             speed_cmd = [
                 "ffmpeg",
                 "-i",
@@ -32730,12 +33013,6 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         current_v_label = "0:v"
         input_idx = 1
 
-        # If ASS captions were generated, apply them as a video filter
-        if ass_subtitle_path and os.path.exists(ass_subtitle_path):
-            safe_ass = ass_subtitle_path.replace("\\", "/").replace(":", "\\:")
-            filter_chain.append(f"[{current_v_label}]ass='{safe_ass}'[v_captions];")
-            current_v_label = "v_captions"
-
         if request.add_hook and request.hook_text:
             rendered_hook_start = rendered_timeline_time(request.hook_start_time)
             rendered_hook_end = rendered_timeline_time(
@@ -33075,6 +33352,8 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
 
         def sanitize_ffmpeg_color(value, fallback="black@0.5"):
             raw = str(value or fallback).strip()
+            if raw.lower() == "transparent":
+                return "black@0.0"
             if raw.startswith("rgba"):
                 return fallback
             return raw.replace(",", "\\,")
@@ -33100,18 +33379,9 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             drawtext_cmd += enable_expr
             filter_chain.append(f"[{input_label}]{drawtext_cmd}[{output_label}]")
 
-        brand_watermark_raw = (
-            request.brand_watermark
-            if request.brand_watermark is not None
-            else request.brandWatermark
-        )
-        brand_watermark_enabled = (
-            VIRAL_BRAND_WATERMARK_DEFAULT
-            if brand_watermark_raw is None
-            else bool(brand_watermark_raw)
-        )
-        # Branding is applied as a transparent logo asset after the edit graph.
-        # Never fall back to boxed drawtext for an AutoPromote platform mark.
+        # Studio exports never add platform branding. Ignore legacy opt-ins;
+        # transcript review labels are a separate delivery requirement.
+        brand_watermark_enabled = False
 
         broll_tone_colors = {
             "proof": "0x091220@0.92",
@@ -33161,23 +33431,25 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 remember_overlay_block(txt, block_start, block_input)
                 continue
 
-            x_val = txt.x / 100.0
-            y_val = txt.y / 100.0
+            try:
+                from .studio_text import render_title_asset
+            except ImportError:
+                from studio_text import render_title_asset
+            text_asset = os.path.join(SHARED_TMP_DIR, f"{job_id}_title_{idx}.png")
+            text_motion = os.path.join(SHARED_TMP_DIR, f"{job_id}_title_{idx}.mov")
+            overlay_temp_paths.extend([text_asset, text_motion])
+            geometry = render_title_asset(txt.model_dump(), text_asset, base_width, base_height)
+            layer_plan = dict(composition_layer(request.composition_plan, txt.id) or {})
+            layer_plan.update(anchor_x=geometry["anchorX"], anchor_y=geometry["anchorY"])
+            rendered_title = txt.model_copy(update={key: value for key, value in geometry.items() if key != "lines"})
+            receipt = await asyncio.to_thread(render_image_layer_motion, text_asset, text_motion,
+                                             rendered_title, layer_plan, base_width, base_height,
+                                             rendered_timeline_duration, speed_plan, 30)
+            inputs.extend(["-itsoffset", f"{receipt['start_time']:.6f}", "-i", text_motion])
             next_label = f"text_overlay_{idx}"
-            append_drawtext(
-                current_v_label,
-                next_label,
-                txt.text,
-                x_expr=f"(w*{x_val})-(tw/2)",
-                y_expr=f"(h*{y_val})-(th/2)",
-                fontsize="h/20",
-                color=txt.color or "white",
-                box=True,
-                boxcolor=sanitize_ffmpeg_color(txt.bg, "black@0.5"),
-                enable_expr=enable_expr,
-            )
+            filter_chain.append(f"[{current_v_label}][{input_idx}:v]overlay=0:0:eof_action=pass:format=auto[{next_label}];")
             current_v_label = next_label
-
+            input_idx += 1
             remember_overlay_block(txt, block_start, block_input)
 
         # Media type must not override the editor's Send Back/Bring Forward
@@ -33235,6 +33507,17 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 input_idx += 1
                 current_v_label = next_label
 
+        # Full-screen B-roll previously covered already-burned words, while
+        # browser preview kept captions above the cutaway. Compose first.
+        try:
+            from .viral_render_contract import append_studio_caption_filter
+        except ImportError:
+            from viral_render_contract import append_studio_caption_filter
+        current_v_label = append_studio_caption_filter(
+            filter_chain, current_v_label, ass_subtitle_path,
+            os.path.join(os.path.dirname(__file__), "assets", "fonts"),
+        )
+
         if current_v_label != "output":
              # We should probably assign the last label to [output] for simplicity
              # But if filter chain is empty (no overlays), we just copy
@@ -33249,6 +33532,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     str(request.music_url).strip(),
                     downloaded_music_path,
                     sample_rate=48000,
+                    channels=2,
                 )
             else:
                 music_request = str(
@@ -33443,7 +33727,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 if url not in resolved_effect_audio:
                     effect_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_sfx_{effect_index}.wav")
                     sound_effect_paths.append(effect_path)
-                    resolved_effect_audio[url] = await materialize_audio_input(url, effect_path, sample_rate=48000)
+                    resolved_effect_audio[url] = await materialize_audio_input(url, effect_path, sample_rate=48000, channels=2)
             # Keep speech and effects on independent buses so their mute, solo
             # and volume automation behave exactly like the editor lanes.
             for bus in ("sfx", "voiceover"):
@@ -33454,7 +33738,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 effect_mix_path = os.path.join(SHARED_TMP_DIR, f"{job_id}_{bus}_mix.wav")
                 sound_effect_paths.append(effect_mix_path)
                 await asyncio.to_thread(write_sound_mix, effect_mix_path, bus_effects,
-                                        rendered_timeline_duration, speed_plan, resolved_effect_audio)
+                                        rendered_timeline_duration, speed_plan, resolved_effect_audio, channels=2)
                 inputs.extend(["-i", effect_mix_path])
                 automation = bus_automation(bus)
                 if automation:
@@ -33549,8 +33833,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                     f"duration=first:dropout_transition=2:normalize=0[a_mix_unpadded]"
                 )
             audio_filter_chain.append(
-                f"[a_mix_unpadded]apad=whole_dur={rendered_timeline_duration:.3f},"
-                f"atrim=0:{rendered_timeline_duration:.3f}[a_mix]"
+                f"[a_mix_unpadded]{build_studio_audio_delivery_filter(rendered_timeline_duration)}[a_mix]"
             )
 
         delivery_profile = resolve_viral_export_profile(
@@ -33567,7 +33850,16 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 f"scale={delivery_profile['width']}:{delivery_profile['height']}:flags=lanczos"
             )
         if delivery_profile["fps"]:
-            delivery_filters.append(f"fps={delivery_profile['fps']}")
+            picture = next((stream for stream in probe_media_stream_summary(working_path).get("streams", [])
+                            if stream.get("codec_type") == "video"), {})
+            try:
+                numerator, denominator = str(picture["avg_frame_rate"]).split("/")
+                source_fps = float(numerator) / float(denominator)
+                delivery_filters.append(build_delivery_video_clock_filter(
+                    delivery_profile["fps"], rendered_timeline_duration, source_fps,
+                ))
+            except (KeyError, ValueError, ZeroDivisionError):
+                raise RuntimeError("Studio source picture clock could not be verified")
         if request.output_settings is not None and not delivery_filters:
             delivery_filters.append("null")
         if delivery_filters:
@@ -33580,11 +33872,10 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
         # Build Command
         cmd = ["ffmpeg"]
         cmd.extend(inputs)
-        audio_bitrate = (
-            "256k"
-            if normalized_audio_remix["enabled"]
-            and normalized_audio_remix["quality"] == "studio"
-            else "160k"
+        audio_bitrate = resolve_studio_audio_bitrate(
+            request.output_settings,
+            studio_remix=normalized_audio_remix["enabled"]
+            and normalized_audio_remix["quality"] == "studio",
         )
 
         if not filter_chain and not audio_filter_chain:
@@ -33654,19 +33945,13 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
             }
 
         if os.path.exists(output_path):
-            brand_watermark_receipt = None
-            if brand_watermark_enabled:
+            brand_watermark_receipt = {"enabled": False, "status": "disabled_for_studio"}
+            caption_review_receipt = None
+            if request.caption_review_copy:
                 output_width, output_height = get_video_dimensions(output_path)
-                report_progress(88, "Applying the AutoPromote signature")
-                brand_watermark_receipt = await apply_viral_brand_watermark(
-                    output_path,
-                    job_id,
-                    output_width,
-                    output_height,
-                    request.output_settings,
-                    request.brand_watermark_schedule,
-                    request.brand_watermark_variant,
-                    request.caption_review_copy,
+                report_progress(88, "Labeling the caption review copy")
+                caption_review_receipt = await apply_viral_caption_review_stamp(
+                    output_path, job_id, output_width, output_height, request.output_settings,
                 )
             report_progress(90, "Verifying rendered video and audio")
             audio_expected = bool(
@@ -33683,6 +33968,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 output_path,
                 expected_duration=rendered_timeline_duration,
                 expected_audio=audio_expected,
+                planned_black_ranges=request.planned_black_ranges,
             )
             media_validation = final_quality_gate["media"]
             report_progress(95, "Uploading finished video")
@@ -33762,6 +34048,7 @@ async def render_viral_clip_impl(request: RenderViralRequest, provided_job_id: s
                 "brand_watermark": brand_watermark_enabled,
                 "caption_review_copy": bool(request.caption_review_copy),
                 "brand_watermark_receipt": brand_watermark_receipt,
+                "caption_review_receipt": caption_review_receipt,
                 "output_settings": delivery_profile,
                 "watermark_text": (
                     request.watermark_text

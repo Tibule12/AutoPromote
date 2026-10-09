@@ -70,7 +70,7 @@ export const rippleStudioSnapshotLinkedTimeline = (
   }
   if (snapshot.speakerStackFraming && typeof snapshot.speakerStackFraming === "object") {
     next.speakerStackFraming = { ...snapshot.speakerStackFraming };
-    for (const slot of ["top", "bottom"]) {
+    for (const slot of ["top", "bottom", "third", "fourth"]) {
       const framing = snapshot.speakerStackFraming[slot];
       if (!framing) continue;
       next.speakerStackFraming[slot] = { ...framing };

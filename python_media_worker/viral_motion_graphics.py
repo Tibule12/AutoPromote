@@ -508,7 +508,13 @@ def prepare_voiceover_samples(effect, source, speed_plan):
     return np.frombuffer(raw, dtype="<f4"), map_timeline_time(speed_plan, ranges[0][0])
 
 
-def write_sound_mix(path, effects, duration, speed_plan, resolved_audio):
+def write_sound_mix(path, effects, duration, speed_plan, resolved_audio, channels=1):
+    if type(channels) is not int or channels not in (1, 2):
+        raise ValueError("Sound mix channels must be 1 or 2")
+    def layout(samples):
+        if samples.ndim == 1:
+            return np.repeat(samples[:, None], channels, axis=1)
+        return samples
     prepared = []
     for e in effects:
         if e["volume"] <= 0:
@@ -521,29 +527,30 @@ def write_sound_mix(path, effects, duration, speed_plan, resolved_audio):
                 raise ValueError("Uploaded sound was not downloaded")
             if e.get("kind") == "voiceover":
                 samples, output_start = prepare_voiceover_samples(e, source, speed_plan)
-                prepared.append(({**e, "outputStart": output_start}, samples))
+                prepared.append(({**e, "outputStart": output_start}, layout(samples)))
                 continue
             raw = run(["ffmpeg", "-v", "error", "-nostdin", "-ss", str(e["trimStart"]), "-i", str(source),
-                       "-t", str(e["duration"]), "-vn", "-ac", "1", "-ar", str(SAMPLE_RATE), "-f", "f32le", "pipe:1"])
-            samples = np.frombuffer(raw, dtype="<f4").copy()
+                       "-t", str(e["duration"]), "-vn", "-ac", str(channels), "-ar", str(SAMPLE_RATE), "-f", "f32le", "pipe:1"])
+            samples = np.frombuffer(raw, dtype="<f4").reshape((-1, channels)).copy()
             if not len(samples):
                 raise ValueError("Uploaded sound trim has no audio samples")
             t = np.arange(len(samples))/SAMPLE_RATE
             envelope = np.minimum(1, np.minimum(t/max(.001, e["fadeIn"]), (e["duration"]-t)/max(.005, e["fadeOut"])))
-            samples *= envelope
-        prepared.append((e, samples))
+            samples *= envelope[:, None]
+        prepared.append((e, layout(samples)))
     with wave.open(str(path), "wb") as output:
-        output.setnchannels(1); output.setsampwidth(2); output.setframerate(SAMPLE_RATE)
+        output.setnchannels(channels); output.setsampwidth(2); output.setframerate(SAMPLE_RATE)
         # Bound memory independently of podcast length; preserve partial cues at the end.
         for first in range(0, math.ceil(duration*SAMPLE_RATE), SAMPLE_RATE):
             count = min(SAMPLE_RATE, math.ceil(duration*SAMPLE_RATE)-first)
             time = edit_clock((first+np.arange(count))/SAMPLE_RATE, speed_plan)
-            mix = np.zeros(count, dtype=np.float64)
+            mix = np.zeros((count, channels), dtype=np.float64)
             for e, samples in prepared:
                 if not len(samples):
                     continue
                 position = ((first+np.arange(count))/SAMPLE_RATE-e["outputStart"])*SAMPLE_RATE if e.get("kind") == "voiceover" else (time-e["startTime"])*SAMPLE_RATE
-                mix += np.interp(position, np.arange(len(samples)), samples, left=0, right=0)*e["volume"]
+                for channel in range(channels):
+                    mix[:, channel] += np.interp(position, np.arange(len(samples)), samples[:, channel], left=0, right=0)*e["volume"]
             output.writeframes((np.clip(mix, -.95, .95)*32767).astype("<i2").tobytes())
 
 

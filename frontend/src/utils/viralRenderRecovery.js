@@ -11,12 +11,16 @@ const storageFor = uid => {
 };
 
 const keyFor = uid => `${KEY_PREFIX}${uid}`;
+const projectKeyFor = (uid, projectId) => `${keyFor(uid)}:project:${encodeURIComponent(projectId)}`;
 
-export const loadViralRenderAttempt = uid => {
+export const loadViralRenderAttempt = (uid, projectId) => {
   const storage = storageFor(uid);
   if (!storage) return null;
   try {
-    const attempt = JSON.parse(storage.getItem(keyFor(uid)) || "null");
+    const scopedKey = projectId ? projectKeyFor(uid, projectId) : null;
+    const stored = scopedKey && storage.getItem(scopedKey);
+    const key = stored ? scopedKey : keyFor(uid);
+    const attempt = JSON.parse(stored || storage.getItem(key) || "null");
     if (
       !attempt ||
       typeof attempt.requestId !== "string" ||
@@ -24,8 +28,13 @@ export const loadViralRenderAttempt = uid => {
       !Number.isFinite(attempt.createdAt) ||
       Date.now() - attempt.createdAt > MAX_AGE_MS
     ) {
-      storage.removeItem(keyFor(uid));
+      storage.removeItem(key);
       return null;
+    }
+    if (projectId && attempt.studioProjectId !== projectId) return null;
+    if (scopedKey && !stored) {
+      // Preserve a matching pre-project receipt before another project renders.
+      try { storage.setItem(scopedKey, JSON.stringify(attempt)); } catch (_error) { /* Optional cache. */ }
     }
     return attempt;
   } catch (_error) {
@@ -37,24 +46,30 @@ export const saveViralRenderAttempt = (uid, attempt) => {
   const storage = storageFor(uid);
   if (!storage || !attempt?.requestId) return;
   try {
-    storage.setItem(
-      keyFor(uid),
-      JSON.stringify({
+    const value = JSON.stringify({
         requestId: attempt.requestId,
         createdAt: Number(attempt.createdAt) || Date.now(),
         captionReviewCopy: attempt.captionReviewCopy === true,
-      })
-    );
+        ...(attempt.studioProjectId ? { studioProjectId: String(attempt.studioProjectId) } : {}),
+        ...(typeof attempt.brandWatermark === "boolean" ? { brandWatermark: attempt.brandWatermark } : {}),
+      });
+    if (attempt.studioProjectId) storage.setItem(projectKeyFor(uid, String(attempt.studioProjectId)), value);
+    storage.setItem(keyFor(uid), value);
   } catch (_error) {
     // A blocked or full browser store must not prevent a render.
   }
 };
 
-export const clearViralRenderAttempt = (uid, requestId) => {
+export const clearViralRenderAttempt = (uid, requestId, projectId) => {
   const storage = storageFor(uid);
   if (!storage) return;
   try {
-    if (!requestId || loadViralRenderAttempt(uid)?.requestId === requestId) {
+    const latest = loadViralRenderAttempt(uid);
+    const scoped = projectId ? loadViralRenderAttempt(uid, projectId) : latest;
+    if (scoped?.studioProjectId && (!requestId || scoped.requestId === requestId)) {
+      storage.removeItem(projectKeyFor(uid, scoped.studioProjectId));
+    }
+    if ((!projectId || latest?.studioProjectId === projectId) && (!requestId || latest?.requestId === requestId)) {
       storage.removeItem(keyFor(uid));
     }
   } catch (_error) {

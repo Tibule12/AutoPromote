@@ -2,6 +2,7 @@ import React from "react";
 import TimelineSourceFilmstrip from "./TimelineSourceFilmstrip";
 import StudioControlMenu from "./StudioControlMenu";
 import { STUDIO_AUDIO_TRACKS } from "./studioAudioTracks";
+import "./StudioTimeline.css";
 
 const EDIT_TOOLS = [
   ["select", "V", "Select"],
@@ -35,6 +36,38 @@ const timecode = time => {
   return `${Math.floor(seconds / 60)}:${Math.floor(seconds % 60)
     .toString()
     .padStart(2, "0")}`;
+};
+
+export const buildTimelineCaptionRegions = captions => {
+  const regions = [];
+  const laneEnds = [];
+  for (const cue of [...(captions || [])].sort(
+    (a, b) => Number(a.startTime ?? a.start ?? 0) - Number(b.startTime ?? b.start ?? 0)
+  )) {
+    const start = Number(cue.startTime ?? cue.start ?? 0),
+      end = start + Number(cue.duration ?? Number(cue.end) - start);
+    if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) continue;
+    const review =
+      (cue.textReviewRequired === true ||
+        cue.text_review_required === true ||
+        cue.reviewRequired === true) &&
+      !(cue.textReviewed === true || cue.text_reviewed === true);
+    let lane = laneEnds.findIndex(value => value <= start + 0.002);
+    if (lane < 0) lane = laneEnds.length;
+    laneEnds[lane] = end;
+    regions.push({
+        ...cue,
+        startTime: start,
+        duration: end - start,
+        captionCount: 1,
+        reviewRequired: review,
+        lane,
+      });
+  }
+  return regions.map(region => ({
+    ...region,
+    name: `${region.text || "Caption"}${region.reviewRequired ? " · Review words" : ""}`,
+  }));
 };
 
 const TrackControls = ({ trackId, state, onChange }) => (
@@ -105,6 +138,7 @@ const BrollClip = ({
   duration,
   itemLabel,
   safeDuration,
+  displayRate = 1,
   snapping,
   snapTargets,
   onOverlayMove,
@@ -247,7 +281,7 @@ const BrollClip = ({
         boxShadow: isSnapped ? "0 0 0 2px #38bdf8, 0 0 14px rgba(56, 189, 248, 0.7)" : undefined,
         transition: "box-shadow 0.15s ease",
       }}
-      title={`${itemLabel} · ${start.toFixed(2)}s–${(start + duration).toFixed(2)}s${allowSlip ? " · (Hold Alt/Option to Slip source footage)" : ""}`}
+      title={`${itemLabel} · ${(start / displayRate).toFixed(2)}s–${((start + duration) / displayRate).toFixed(2)}s${allowSlip ? " · (Hold Alt/Option to Slip source footage)" : ""}`}
     >
       <div
         style={{
@@ -318,6 +352,7 @@ const AudioSplitClip = ({
   duration,
   itemLabel,
   safeDuration,
+  displayRate = 1,
   snapping,
   snapTargets,
   onAudioTrim,
@@ -417,8 +452,8 @@ const AudioSplitClip = ({
 
   const hasJCut = Number(item.audioTrimOffsetStart || 0) < -0.04;
   const hasLCut = Number(item.audioTrimOffsetEnd || 0) > 0.04;
-  const jCutDur = hasJCut ? Math.abs(item.audioTrimOffsetStart).toFixed(1) : null;
-  const lCutDur = hasLCut ? Number(item.audioTrimOffsetEnd).toFixed(1) : null;
+  const jCutDur = hasJCut ? (Math.abs(item.audioTrimOffsetStart) / displayRate).toFixed(1) : null;
+  const lCutDur = hasLCut ? (Number(item.audioTrimOffsetEnd) / displayRate).toFixed(1) : null;
 
   return (
     <div
@@ -492,6 +527,7 @@ const MotionClip = ({
   duration,
   itemLabel,
   safeDuration,
+  displayRate = 1,
   snapping,
   snapTargets,
   onMotionMove,
@@ -646,7 +682,7 @@ const MotionClip = ({
       onPointerDown={handlePointerDownBody}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
-      title={`${itemLabel} · ${start.toFixed(2)}s–${(start + duration).toFixed(2)}s`}
+      title={`${itemLabel} · ${(start / displayRate).toFixed(2)}s–${((start + duration) / displayRate).toFixed(2)}s`}
     >
       <div
         style={{
@@ -709,6 +745,7 @@ const MotionClip = ({
 
 export default function StudioProTimeline({
   duration,
+  playbackRate = 1,
   playhead,
   zoom,
   onZoomChange,
@@ -817,6 +854,9 @@ export default function StudioProTimeline({
     scroll.scrollTop = Math.max(0, top - 29);
   }, [focusedTrack]);
   const safeDuration = Math.max(0.1, Number(duration || 0.1));
+  // Authored edits retain their source coordinates. Only the displayed clock
+  // changes with global playback speed, matching the programme and export.
+  const displayRate = Number.isFinite(Number(playbackRate)) && Number(playbackRate) > 0 ? Number(playbackRate) : 1;
   const safeZoom = Math.max(1, Math.min(32, Number(zoom || 1)));
   const playheadRef = React.useRef(0);
   playheadRef.current = Number(playhead || 0);
@@ -840,8 +880,8 @@ export default function StudioProTimeline({
   }, [safeZoom, safeDuration]);
   const tickInterval =
     [0.1, 0.25, 0.5, 1, 2, 5, 10, 15, 30, 60, 120, 300, 600, 1800, 3600].find(
-      interval => interval >= safeDuration / safeZoom / 10
-    ) || Math.ceil(safeDuration / safeZoom / 10 / 3600) * 3600;
+      interval => interval >= safeDuration / displayRate / safeZoom / 10
+    ) * displayRate || Math.ceil(safeDuration / displayRate / safeZoom / 10 / 3600) * 3600 * displayRate;
   const tickCount = Math.min(500, Math.floor(safeDuration / tickInterval) + 1);
   const visibleWidth = `${safeZoom * 100}%`;
   const titles = (overlays || []).filter(item => item.type === "text" && !item.isCaption);
@@ -920,7 +960,7 @@ export default function StudioProTimeline({
         })),
       ];
     if (trackId === "broll") return broll;
-    if (trackId === "captions") return captionSegments || [];
+    if (trackId === "captions") return buildTimelineCaptionRegions(captionSegments);
     if (trackId === "voiceover") return voiceovers || [];
     if (trackId === "sfx") return soundEffects || [];
     if (trackId === "music")
@@ -1331,13 +1371,13 @@ export default function StudioProTimeline({
 
       <div className="pro-timeline-scroll" ref={scrollRef}>
         <div className="pro-timeline-content" style={{ width: visibleWidth }}>
-          <div className="pro-time-ruler" onClick={onSeek} role="presentation">
+          <div className="pro-time-ruler" onClick={onSeek} role="presentation" data-testid="pro-time-ruler" data-output-duration={safeDuration / displayRate}>
             {Array.from({ length: tickCount }, (_, index) => (
               <i key={index} style={{ left: percentAt(index * tickInterval, safeDuration) }}>
                 <span>
-                  {tickInterval < 1
-                    ? (index * tickInterval).toFixed(1) + "s"
-                    : timecode(index * tickInterval)}
+                  {tickInterval / displayRate < 1
+                    ? (index * tickInterval / displayRate).toFixed(1) + "s"
+                    : timecode(index * tickInterval / displayRate)}
                 </span>
               </i>
             ))}
@@ -1360,7 +1400,9 @@ export default function StudioProTimeline({
                 data-testid={`pro-track-row-${trackId}`}
                 className={`pro-track-row is-${type} ${state.visible === false ? "is-hidden" : ""} ${state.locked ? "is-locked" : ""} ${trackId === focusedTrack ? "is-focused" : ""}`}
                 style={
-                  trackId === "adjustment" && items.length > 1
+                  trackId === "captions"
+                    ? { minHeight: `${Math.max(46, 14 + (1 + Math.max(0, ...items.map(item => item.lane || 0))) * 30)}px` }
+                    : trackId === "adjustment" && items.length > 1
                     ? { "--pro-track-lanes": Math.min(items.length, 3) }
                     : undefined
                 }
@@ -1396,7 +1438,7 @@ export default function StudioProTimeline({
                               background: isDownbeat ? "#f59e0b" : "rgba(56, 189, 248, 0.55)",
                               boxShadow: isDownbeat ? "0 0 5px rgba(245, 158, 11, 0.7)" : undefined,
                             }}
-                            title={`Beat ${bIdx + 1}: ${t.toFixed(2)}s${isDownbeat ? " (Downbeat)" : ""}`}
+                            title={`Beat ${bIdx + 1}: ${(t / displayRate).toFixed(2)}s${isDownbeat ? " (Downbeat)" : ""}`}
                           />
                         );
                       })}
@@ -1420,6 +1462,7 @@ export default function StudioProTimeline({
                           duration={itemDuration}
                           itemLabel={itemLabel}
                           safeDuration={safeDuration}
+                          displayRate={displayRate}
                           snapping={snapping}
                           snapTargets={snapTargets}
                           onOverlayMove={onAdjustmentMove}
@@ -1445,6 +1488,7 @@ export default function StudioProTimeline({
                           duration={itemDuration}
                           itemLabel={itemLabel}
                           safeDuration={safeDuration}
+                          displayRate={displayRate}
                           snapping={snapping}
                           snapTargets={snapTargets}
                           onOverlayMove={onOverlayMove}
@@ -1485,6 +1529,7 @@ export default function StudioProTimeline({
                           duration={itemDuration}
                           itemLabel={itemLabel}
                           safeDuration={safeDuration}
+                          displayRate={displayRate}
                           snapping={snapping}
                           snapTargets={snapTargets}
                           onAudioTrim={onAudioTrim}
@@ -1507,6 +1552,7 @@ export default function StudioProTimeline({
                           duration={itemDuration}
                           itemLabel={itemLabel}
                           safeDuration={safeDuration}
+                          displayRate={displayRate}
                           snapping={snapping}
                           snapTargets={snapTargets}
                           onMotionMove={onMotionMove}
@@ -1534,6 +1580,7 @@ export default function StudioProTimeline({
                         style={{
                           left: percentAt(start, safeDuration),
                           width: `${Math.max(0, (itemDuration / safeDuration) * 100)}%`,
+                          ...(trackId === "captions" ? { top: `${7 + (item.lane || 0) * 30}px`, bottom: "auto", height: "28px" } : {}),
                           ...(trackId === "adjustment" && items.length > 1
                             ? {
                                 top: `${5 + (index % 3) * 23}px`,
@@ -1550,10 +1597,12 @@ export default function StudioProTimeline({
                               }
                             : {}),
                         }}
-                        title={`${itemLabel} · ${start.toFixed(2)}s–${(start + itemDuration).toFixed(2)}s`}
-                        aria-label={`${itemLabel} · ${start.toFixed(2)}s–${(start + itemDuration).toFixed(2)}s`}
+                        title={`${itemLabel} · ${(start / displayRate).toFixed(2)}s–${((start + itemDuration) / displayRate).toFixed(2)}s`}
+                        aria-label={`${itemLabel} · ${(start / displayRate).toFixed(2)}s–${((start + itemDuration) / displayRate).toFixed(2)}s`}
                         onClick={event => {
                           event.stopPropagation();
+                          if (trackId === "video" || trackId === "originalAudio")
+                            onSelectOverlay?.(null);
                           if (trackId === "motion") {
                             onSelectMotion?.(item.id);
                             onSelectTool?.("motion");
@@ -1561,20 +1610,22 @@ export default function StudioProTimeline({
                           if (trackId === "graphics" || trackId === "broll")
                             onSelectOverlay?.(item.id);
                           onSelectTool?.(
-                            trackId === "framing"
+                            item.toolId || (trackId === "framing"
                               ? "reframe"
-                              : trackId === "graphics"
-                                ? "titles"
-                                : trackId === "broll"
-                                  ? "broll"
-                                  : trackId === "motion"
-                                    ? "motion"
-                                    : trackId === "music" ||
-                                        trackId === "sfx" ||
-                                        trackId === "voiceover" ||
-                                        trackId === "originalAudio"
-                                      ? "sound"
-                                      : null
+                              : trackId === "captions"
+                                ? "captions"
+                                : trackId === "graphics"
+                                  ? "titles"
+                                  : trackId === "broll"
+                                    ? "broll"
+                                    : trackId === "motion"
+                                      ? "motion"
+                                      : trackId === "music" ||
+                                          trackId === "sfx" ||
+                                          trackId === "voiceover" ||
+                                          trackId === "originalAudio"
+                                        ? "sound"
+                                        : null)
                           );
                           if (
                             (trackId === "video" || trackId === "originalAudio") &&
@@ -1591,7 +1642,14 @@ export default function StudioProTimeline({
                           }
                         }}
                       >
-                        <span>{itemLabel}</span>
+                        <span className={trackId === "video" ? "pro-video-clip-title" : undefined}>
+                          {itemLabel}
+                        </span>
+                        {trackId === "video" && (
+                          <small className="pro-video-clip-duration">
+                            {(itemDuration / displayRate).toFixed(1)}s
+                          </small>
+                        )}
                       </button>
                     );
                   })}
@@ -1602,7 +1660,7 @@ export default function StudioProTimeline({
                           className="pro-framing-speaker-cut"
                           data-testid={`pro-speaker-order-${cut.id}`}
                           style={{ left: percentAt(cut.time, safeDuration) }}
-                          title={`${cut.slot === "bottom" ? "Speaker 2" : "Speaker 1"} on top · ${Number(cut.time || 0).toFixed(2)}s`}
+                          title={`${cut.slot === "bottom" ? "Speaker 2" : "Speaker 1"} on top · ${(Number(cut.time || 0) / displayRate).toFixed(2)}s`}
                         />
                       ))
                     : null}
@@ -1618,7 +1676,7 @@ export default function StudioProTimeline({
                             left: percentAt(zone.timelineStart ?? zone.start, safeDuration),
                             width: `${Math.max(0.4, ((zone.duration || 0.1) / safeDuration) * 100)}%`,
                           }}
-                          title={`Dead-air pause: ${Number(zone.duration || 0).toFixed(2)}s`}
+                          title={`Dead-air pause: ${(Number(zone.duration || 0) / displayRate).toFixed(2)}s`}
                         />
                       ))
                     : null}
@@ -1634,9 +1692,9 @@ export default function StudioProTimeline({
         <span>{snapping ? "Magnetic snapping" : "Free movement"}</span>
         <span>{linkedSelection ? "Audio/video linked" : "Audio/video independent"}</span>
         <strong data-testid="pro-current-edit">
-          {timecode(playhead)}
+          {timecode(playhead / displayRate)}
           {activeFraming
-            ? ` · ${activeFraming.name} · ${timecode(activeFraming.time)}–${timecode(activeFraming.time + activeFraming.duration)}`
+            ? ` · ${activeFraming.name} · ${timecode(activeFraming.time / displayRate)}–${timecode((activeFraming.time + activeFraming.duration) / displayRate)}`
             : ""}
         </strong>
       </footer>

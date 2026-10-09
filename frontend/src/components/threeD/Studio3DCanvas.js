@@ -4,6 +4,7 @@ import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 import studioFont from "./helvetiker_bold.typeface.json";
 import { normalizeStudio3DScene, studio3DPose } from "./studio3DModel";
+import { studio3DCameraProjection } from "./studio3DProjection";
 import "./studio3D.css";
 
 const font = new FontLoader().parse(studioFont);
@@ -260,9 +261,13 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, audioLe
       world.add(group);
       return { scene, group };
     });
-    let width = 0, height = 0, raf;
+    let width = 0, height = 0, raf, lastPlayhead, lastAudioLevel;
     const draw = () => {
+      raf = requestAnimationFrame(draw);
+      if (document.hidden) return;
       const rect = host.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      const resized = rect.width !== width || rect.height !== height;
       if (rect.width && rect.height && (rect.width !== width || rect.height !== height)) {
         width = rect.width; height = rect.height;
         renderer.setSize(width, height, false);
@@ -271,6 +276,11 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, audioLe
         camera.updateProjectionMatrix();
       }
       const playhead = clockRef.current?.() ?? timeRef.current;
+      const reactive = objects.some(({ scene }) => scene.audioReactiveIntensity > 0);
+      const audio = reactive ? levelRef.current : 0;
+      if (!resized && playhead === lastPlayhead && audio === lastAudioLevel) return;
+      lastPlayhead = playhead;
+      lastAudioLevel = audio;
       for (const { scene, group } of objects) {
         const pose = studio3DPose(scene, playhead);
         group.visible = Boolean(pose);
@@ -292,11 +302,12 @@ export default function Studio3DCanvas({ scenes = [], time = 0, getTime, audioLe
         key.color.set(scene.lightColor);
         key.intensity = scene.lightIntensity / 2;
         key.position.set(Math.sin(scene.lightDirection * Math.PI / 180) * 6, 5, 8);
-        camera.fov = Math.max(25, Math.min(70, 70 - scene.focalLength * 0.55));
+        const projection = studio3DCameraProjection(scene, width / height, playhead - scene.startTime);
+        camera.fov = projection.verticalFov;
+        camera.position.set(projection.x, 0, projection.distance);
         camera.updateProjectionMatrix();
       }
       renderer.render(world, camera);
-      raf = requestAnimationFrame(draw);
     };
     draw();
     return () => {

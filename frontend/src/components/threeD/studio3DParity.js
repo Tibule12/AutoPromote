@@ -42,7 +42,7 @@ add(
 add(
   "entrance hold exit intensity",
   "approximate",
-  "Preset motion exists in both; some accepted modes have no distinct motion. Fade alpha is unsupported in Blender."
+  "Preset motion and fade alpha exist in both; distinct motion modes and paired alpha measurements remain unqualified."
 );
 add(
   "cameraMotion focalLength lightColor lightIntensity bloom",
@@ -62,7 +62,7 @@ add(
 add(
   "fontFamily fontWeight",
   "unsupported",
-  "Validated and shown in the UI, but both renderers use fixed fonts."
+  "Saved legacy values are retained; UI controls are disabled because final rendering uses fixed fonts."
 );
 add(
   "easing",
@@ -91,12 +91,12 @@ add(
   "The service uses a fixed bounded 720p/30fps render profile regardless of this field."
 );
 
-// The pose result is not a normalized scene field, but the fade omission is a
-// material parity defect and must remain visible to capability consumers.
+// Blender applies pose opacity through its Timeline opacity compositor node.
+// This wiring is established; paired browser/Blender fade pixels are not.
 add(
   "renderedOpacity",
-  "unsupported",
-  "Three.js applies pose.opacity to mesh materials; Blender computes it but never applies it to rendered alpha."
+  "approximate",
+  "Three.js applies pose.opacity to materials and Blender multiplies rendered alpha by pose.opacity; paired alpha/fade conformance remains unverified."
 );
 
 export const STUDIO_3D_FIELD_PARITY_VERSION = 1;

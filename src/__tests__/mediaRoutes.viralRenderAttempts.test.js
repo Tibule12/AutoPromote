@@ -3,6 +3,7 @@ const request = require("supertest");
 
 const mockDocs = new Map();
 const mockStartProcessingJob = jest.fn();
+const mockAssertRenderWorkerReady = jest.fn();
 const mockDispatches = [];
 
 const mockDocRef = id => ({
@@ -40,7 +41,10 @@ jest.mock("../creditSystem", () => ({
 }));
 
 jest.mock("../services/videoEditingService", () =>
-  jest.fn().mockImplementation(() => ({ startProcessingJob: mockStartProcessingJob }))
+  jest.fn().mockImplementation(() => ({
+    startProcessingJob: mockStartProcessingJob,
+    assertRenderWorkerReady: mockAssertRenderWorkerReady,
+  }))
 );
 
 jest.mock("../services/billingService", () => ({
@@ -72,6 +76,7 @@ describe("Viral Clip Studio render attempts", () => {
     jest.clearAllMocks();
     mockDocs.clear();
     mockDispatches.length = 0;
+    mockAssertRenderWorkerReady.mockResolvedValue({ ready: true });
     getCreditBreakdown.mockResolvedValue({ totalAvailable: 100, tier: "premium" });
     deductCredits.mockResolvedValue({
       success: true,
@@ -226,5 +231,15 @@ describe("Viral Clip Studio render attempts", () => {
     const response = await renderRequest(buildApp(), "bad id");
     expect(response.statusCode).toBe(400);
     expect(deductCredits).not.toHaveBeenCalled();
+  });
+
+  it("leaves no charge or phantom job when the render worker is unavailable", async () => {
+    mockAssertRenderWorkerReady.mockRejectedValueOnce(new Error("Render worker offline"));
+    const response = await renderRequest(buildApp());
+    expect(response.statusCode).toBe(503);
+    expect(response.body.code).toBe("STUDIO_RENDER_WORKER_UNAVAILABLE");
+    expect(deductCredits).not.toHaveBeenCalled();
+    expect(mockStartProcessingJob).not.toHaveBeenCalled();
+    expect(mockDocs.size).toBe(0);
   });
 });

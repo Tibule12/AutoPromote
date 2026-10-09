@@ -1,7 +1,7 @@
 // Director-facing inventory of executable Viral Clip Studio operations.
 // A UI control or a validated request field alone is not evidence of rendering.
 // Bump the registry version when a capability's contract or support changes.
-export const STUDIO_CAPABILITY_REGISTRY_VERSION = 4;
+export const STUDIO_CAPABILITY_REGISTRY_VERSION = 5;
 
 const objectSchema = (properties, required = []) => ({
   type: "object",
@@ -445,8 +445,8 @@ const entries = [
     unsupportedSceneModes: {
       template: ["audio_reactive_text"],
       hold: ["pulse"],
-      entrance: ["fade", "pulse", "float"],
-      exit: ["fade", "dolly", "burst"],
+      entrance: ["pulse", "float"],
+      exit: ["dolly", "burst"],
     },
     compatibility: [
       "production renderer availability has not been requalified since the 2026-09-16 audit",

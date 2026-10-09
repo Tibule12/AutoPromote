@@ -1,5 +1,6 @@
 """GPU job runner: validated JSON -> isolated Blender -> short encoded previews."""
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -47,7 +48,12 @@ def render_files(spec, temp_dir, asset_file=None):
     if asset_file:
         command.append(str(asset_file))
     emit("blender_start", width=spec["width"], height=spec["height"], fps=spec["fps"], duration=spec["duration"])
-    run(command)
+    blender_log = run(command)
+    device = None
+    for line in blender_log.splitlines():
+        if line.startswith('{"event": "render_device"'):
+            print(line, flush=True)
+            device = json.loads(line)
     pattern = str(frames / "frame_%04d.png")
     preview = root / "preview.mp4"
     overlay = root / "overlay.mov"
@@ -59,6 +65,14 @@ def render_files(spec, temp_dir, asset_file=None):
     if not stream or stream.get("width") != spec["width"] or stream.get("height") != spec["height"] or float(video_info["format"]["duration"]) < spec["duration"] - .15:
         raise RuntimeError("Encoded preview failed FFprobe validation")
     emit("render_validated", codec="h264", width=spec["width"], height=spec["height"], duration=video_info["format"]["duration"], preview_bytes=preview.stat().st_size, overlay_bytes=overlay.stat().st_size)
+    receipt = {"version": 1, "device": device, "artifacts": {}}
+    for artifact in (preview, overlay):
+        digest = hashlib.sha256()
+        with artifact.open("rb") as handle:
+            for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                digest.update(chunk)
+        receipt["artifacts"][artifact.name] = {"bytes": artifact.stat().st_size, "sha256": digest.hexdigest()}
+    (root / "receipt.json").write_text(json.dumps(receipt, sort_keys=True), encoding="utf-8")
     return preview, overlay
 
 
@@ -142,6 +156,7 @@ def main():
         preview, overlay = render_files(spec, temp, args.asset)
         (target / "preview.mp4").write_bytes(preview.read_bytes())
         (target / "overlay.mov").write_bytes(overlay.read_bytes())
+        (target / "receipt.json").write_bytes((Path(temp) / "receipt.json").read_bytes())
 
 
 if __name__ == "__main__":

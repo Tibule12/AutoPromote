@@ -1,0 +1,428 @@
+/* The normal-motion hero is a real Three.js scene. CSS styles its DOM controls. */
+html:has(.lp-page),
+body:has(.lp-page) {
+  overflow-x: clip;
+  overflow-y: visible;
+}
+.App:has(.lp-page) {
+  overflow: clip;
+}
+.lp-hero {
+  grid-template-columns: 0.75fr 1.25fr;
+}
+.lp-motion-scene {
+  min-width: 0;
+  position: relative;
+  width: 100%;
+}
+.lp-motion-surface {
+  height: 630px;
+  position: relative;
+}
+.lp-motion-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 450ms;
+}
+.lp-motion-scene.is-ready .lp-motion-canvas {
+  opacity: 1;
+}
+.lp-motion-fallback {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.lp-motion-fallback .lp-editor-scene {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  transform: scale(0.9);
+  transform-origin: center;
+}
+.lp-motion-fallback .lp-social-float {
+  right: 6%;
+}
+.lp-motion-fallback .lp-signal-moment {
+  right: 6%;
+}
+.lp-motion-fallback figcaption {
+  display: none;
+}
+.lp-film-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  border-top: 1px solid #80639e33;
+  padding: 13px 2px 7px;
+}
+.lp-film-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.lp-film-status > i {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #aa7df3;
+}
+.lp-film-status > span {
+  font-size: 8px;
+  letter-spacing: 1.4px;
+  color: #b298cd;
+}
+.lp-film-buttons {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.lp-film-buttons button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border: 0;
+  background: none;
+  padding: 5px 0;
+  font-size: 9px;
+  color: #c8b3db;
+}
+.lp-film-buttons button:disabled {
+  opacity: 0.4;
+  cursor: wait;
+}
+.lp-film-buttons .lp-icon {
+  width: 11px;
+  height: 11px;
+}
+.lp-film-caption {
+  font-size: 9px;
+  color: #aa9aba;
+  line-height: 1.6;
+  padding-top: 4px;
+}
+.lp-scene-cta {
+  position: absolute;
+  bottom: 94px;
+  right: 6%;
+  font-size: 11px;
+  min-height: 40px;
+  padding: 10px 16px;
+  animation: lp-cta-enter 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes lp-cta-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.lp-editing-story {
+  height: 420svh;
+  position: relative;
+  margin-top: 94px;
+}
+.lp-story-sticky {
+  height: 100svh;
+  min-height: 620px;
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.lp-story-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #75518e44;
+  padding-bottom: 16px;
+}
+.lp-story-top > span {
+  font-size: 10px;
+  color: #bca2d1;
+  letter-spacing: 2px;
+}
+.lp-story-layout {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  align-items: center;
+  gap: 64px;
+}
+.lp-story-copy {
+  padding: 24px 0;
+}
+.lp-story-label {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #c4a1e8;
+}
+.lp-story-copy h2 {
+  font-size: 40px;
+  line-height: 1.13;
+  letter-spacing: -1.7px;
+  color: #f6eefd;
+  margin: 14px 0 18px;
+}
+.lp-story-copy > p {
+  font-size: 13px;
+  color: #b8a8c7;
+  line-height: 1.9;
+}
+.lp-story-chapters {
+  list-style: none;
+  margin: 22px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.lp-story-chapters button {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 0;
+  background: none;
+  padding: 7px 0;
+  color: #a88bbd;
+  font-size: 11px;
+}
+.lp-story-chapters button[aria-current="step"] {
+  color: #f3d3ff;
+}
+.lp-story-chapters i {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #634779;
+}
+.lp-story-chapters [aria-current="step"] i {
+  background: #c285fd;
+  box-shadow: 0 0 10px #ba75fa66;
+}
+.lp-story-chapters button > span {
+  display: none;
+}
+.lp-story-copy > .lp-button {
+  min-height: 43px;
+  padding: 12px 17px;
+  font-size: 11px;
+}
+.lp-editing-story .lp-motion-surface {
+  height: min(600px, calc(100svh - 210px));
+}
+.lp-story-progress {
+  height: 2px;
+  margin-top: 20px;
+  background: #3d2c4d;
+  overflow: hidden;
+}
+.lp-story-progress i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #a546e7, #629bff);
+  transform: scaleX(var(--story-progress, 0));
+  transform-origin: left;
+}
+.lp-story-reduced > ol {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+}
+.lp-story-reduced li {
+  border-top: 1px solid #79589166;
+  padding-top: 18px;
+}
+.lp-story-reduced li > span {
+  font-size: 8px;
+  letter-spacing: 1px;
+  color: #b590d8;
+  text-transform: uppercase;
+}
+.lp-story-reduced h3 {
+  color: #ead9f7;
+  font-size: 19px;
+  line-height: 1.5;
+  margin: 12px 0;
+}
+.lp-story-reduced li p {
+  color: #aa9ab9;
+  font-size: 12px;
+  line-height: 1.9;
+}
+@media (min-width: 1600px) {
+  .lp-motion-surface {
+    height: 690px;
+  }
+}
+@media (max-width: 1250px) {
+  .lp-motion-surface {
+    height: 570px;
+  }
+  .lp-film-status > span {
+    font-size: 7px;
+    letter-spacing: 1px;
+  }
+  .lp-story-layout {
+    grid-template-columns: 265px minmax(0, 1fr);
+    gap: 26px;
+  }
+}
+@media (max-width: 1023px) {
+  .lp-hero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .lp-hero > .lp-motion-scene {
+    max-width: 760px;
+    margin-top: 26px;
+  }
+  .lp-motion-surface {
+    height: 620px;
+  }
+  .lp-story-layout {
+    grid-template-columns: 215px minmax(0, 1fr);
+    gap: 18px;
+  }
+  .lp-story-copy h2 {
+    font-size: 32px;
+  }
+  .lp-story-copy > p {
+    font-size: 12px;
+  }
+  .lp-story-chapters button {
+    font-size: 10px;
+  }
+  .lp-story-reduced > ol {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .lp-hero > .lp-motion-scene {
+    margin-top: 6px;
+  }
+  .lp-motion-surface {
+    height: 420px;
+  }
+  .lp-motion-scene.is-fallback .lp-motion-surface {
+    height: 470px;
+  }
+  .lp-film-status > span {
+    font-size: 6px;
+    letter-spacing: 0.7px;
+  }
+  .lp-film-buttons {
+    gap: 10px;
+  }
+  .lp-film-buttons button {
+    font-size: 8px;
+  }
+  .lp-film-caption {
+    font-size: 8px;
+  }
+  .lp-editing-story {
+    margin-top: 60px;
+    height: 430svh;
+  }
+  .lp-story-sticky {
+    min-height: 680px;
+  }
+  .lp-story-top {
+    padding-bottom: 12px;
+  }
+  .lp-story-top .lp-eyebrow {
+    font-size: 6px;
+    letter-spacing: 1.1px;
+  }
+  .lp-story-top > span {
+    font-size: 8px;
+  }
+  .lp-story-layout {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+  .lp-story-copy {
+    padding: 20px 0 0;
+  }
+  .lp-story-label {
+    font-size: 8px;
+  }
+  .lp-story-copy h2 {
+    font-size: 28px;
+    letter-spacing: -1px;
+    margin: 8px 0 10px;
+  }
+  .lp-story-copy > p {
+    font-size: 11px;
+    line-height: 1.8;
+  }
+  .lp-story-chapters {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin: 14px 0 0;
+  }
+  .lp-story-chapters button {
+    font-size: 0;
+    padding: 0;
+    gap: 0;
+  }
+  .lp-story-chapters i {
+    display: none;
+  }
+  .lp-story-chapters button > span {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border: 1px solid #76548c;
+    border-radius: 6px;
+    font-size: 8px;
+  }
+  .lp-story-chapters [aria-current="step"] > span {
+    background: #704299;
+    border-color: #b183d8;
+  }
+  .lp-story-copy > .lp-button {
+    display: none;
+  }
+  .lp-editing-story .lp-motion-surface {
+    height: min(370px, calc(100svh - 290px));
+    min-height: 295px;
+  }
+  .lp-editing-story .lp-motion-fallback .lp-editor-scene {
+    transform: scale(0.66);
+    transform-origin: top center;
+  }
+  .lp-story-progress {
+    margin-top: 15px;
+  }
+  .lp-scene-cta {
+    right: 2%;
+    bottom: 78px;
+    font-size: 8px;
+    min-height: 32px;
+    padding: 7px 10px;
+  }
+  .lp-scene-cta .lp-icon {
+    width: 11px;
+    height: 11px;
+  }
+  .lp-story-reduced > ol {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lp-motion-canvas {
+    transition: none;
+  }
+}

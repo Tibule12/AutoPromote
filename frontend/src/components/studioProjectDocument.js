@@ -8,6 +8,13 @@ import {
 import { createSemanticAnalysisReference } from "./studioSemanticTimeline";
 import { buildSpeedSegmentsFromKeyframes } from "./studioCreatorRecipes";
 
+import {
+  STUDIO_EDIT_SETTING_FIELDS, STUDIO_SOURCE_DECISION_FIELDS,
+  STUDIO_ADDITIONAL_LAYER_FIELDS, STUDIO_LAYER_BINDING_FIELDS, STUDIO_EXTRACTED_AUDIO_FIELDS,
+  STUDIO_OCCURRENCE_PARAMETER_FIELDS, STUDIO_MUSIC_MIX_FIELDS,
+  buildStudioEditGraph, projectStudioOwnedMedia, cloneStudioDecisionFields,
+} from "./studioEditDecisions";
+
 export const STUDIO_DOCUMENT_VERSION = 1;
 
 // Canonical server JSON sorts keys; object ordering must not count as an edit.
@@ -55,6 +62,25 @@ const assetReference = clip => {
 };
 
 const LAYER_PARAMETER_FIELDS = [
+  "version", "name", "secondary", "endTime", "assetStoragePath", "assetName",
+  "sourceStoragePath", "storagePath", "sourceClipId", "contentHash", "sha256",
+  "hqPreviewRevision", "hqPreviewJobId",
+  "textAlign", "lineSpacing", "primaryColor", "secondaryColor",
+  "extrusionDepth", "bevel", "rotationX", "rotationY", "rotationZ",
+  "hold", "intensity", "audioReactiveIntensity", "cameraMotion", "focalLength",
+  "lightDirection", "lightColor", "lightIntensity", "shadows", "reflections",
+  "bloom", "background",
+  "bg", "anchorX", "anchorY", "blendMode", "glow", "layerShadow", "motionBlur",
+  "cropX", "cropY", "blur", "sourceDuration", "aspectRatio",
+  "isCaption",
+  "shadow", "strokeWidth", "strokeColor",
+  "frameShape", "frame_shape", "borderRadius", "border_radius", "mediaFit", "media_fit",
+  "b_roll_mode", "coverMainVideo", "muteMainAudio", "useOverlayAudio",
+  "overlayAudioVolume", "sourceEndBehavior", "audioDucking", "audioDuckingStrength",
+  "kenBurns", "ken_burns", "placementMode", "placement_mode",
+  "isRainbow", "rainbowOffset", "bRollPlaceholder", "bRollApprovalStatus",
+  "sound", "soundVolume", "value", "prefix", "endX", "endY", "endScale",
+  "endRotation", "canvasMode", "canvasColor", "design",
   "text",
   "subtext",
   "supportingText",
@@ -101,6 +127,74 @@ const LAYER_PARAMETER_FIELDS = [
   "quality",
 ];
 
+const layerParameterFields = version => version === 3
+  ? [...LAYER_PARAMETER_FIELDS, ...STUDIO_ADDITIONAL_LAYER_FIELDS, ...STUDIO_LAYER_BINDING_FIELDS]
+  : version === 2 ? [...LAYER_PARAMETER_FIELDS, ...STUDIO_ADDITIONAL_LAYER_FIELDS] : LAYER_PARAMETER_FIELDS;
+
+// Access URLs and File/Blob payloads stay in the media store/snapshot. Persist
+// the owned reference and hash (when available), never an expiring URL identity.
+const cloneParameters = (item, fields) => JSON.parse(JSON.stringify(Object.fromEntries(
+  fields.filter(field => item[field] !== undefined).map(field => [field, item[field]])
+)));
+
+const AUDIO_CUE_PARAMETER_FIELDS = [
+  "enabled", "builtIn", "kind", "tone", "name", "label", "sourceClipId",
+  "sourceStoragePath", "storagePath", "contentHash", "sha256", "volume",
+  "muted", "fadeIn", "fadeOut", "pan", "audioMode", "rate", "pitchPreserved",
+];
+const cueParameterFields = collection => collection === "adjustmentLayers"
+  ? ["enabled", "name", "label", "preset", "opacity", "finishFx", "effects", "intensity"]
+  : AUDIO_CUE_PARAMETER_FIELDS;
+const AUDIO_SETTING_FIELDS = [
+  "addMusic", "musicSelection", "musicSearchMode", "safeSearch", "musicVolume",
+  "musicDucking", "musicDuckingStrength", "muteOriginalAudio", "audioRemix",
+  "musicLoop", "musicFadeIn", "musicFadeOut",
+  "audioRestoration", "audioAutomationSource",
+];
+const MUSIC_PARAMETER_FIELDS = [
+  "id", "name", "title", "sourceClipId", "sourceStoragePath", "storagePath",
+  "contentHash", "sha256", "volume", "fadeIn", "fadeOut", "loop",
+  "duration", "trimStart", "sourceStartTime", "enabled",
+];
+
+const VISUAL_SETTING_FIELDS = [
+  "mainTransform", "finishFx", "mainFrame", "advancedColor", "podcastVisualizer",
+  "videoFit", "safeFaceFraming", "faceAnchorPreset", "autoCaptions", "captionStyle",
+  "captionPosition", "captionScale", "captionTextOverride", "translateCaptionsToEnglish",
+  "smartCrop", "smartCropMode", "reframeAspect", "speakerTrackZoom",
+  "speakerStackFraming", "speakerStackSourceIds", "speakerStackOffsets",
+  "speakerStackCameraCount", "speakerStackLayout", "speakerStackSyncConfirmed",
+  "exportSettings", "stabilization", "enhanceQuality", "beatSnapEnabled",
+  "creativeIntent", "creativeEffectsEnabled", "creativePreset", "creativeIntensity", "pacingLevel",
+];
+const CAMERA_SOURCE_FIELDS = [
+  "id", "name", "duration", "sourceClipId", "sourceMediaId", "sourceStoragePath",
+  "storagePath", "contentHash", "sha256", "isProgrammeSource", "start", "end",
+  "startRequest", "endRequest", "offsetSeconds", "syncConfirmed",
+];
+const CAPTION_PARAMETER_FIELDS = [
+  "text", "reviewRequired", "textReviewed", "textReviewRequired", "speaker", "speakerLabel",
+  "language", "languageLabel", "languages", "languageConfidence", "transcriptConfidence",
+  "transcriptionReviewReasons", "translatedToEnglish", "captionPlacement", "captionIcon",
+  "captionAccent", "captionX", "captionY", "placement",
+];
+const CAMERA_SLOTS = ["top", "bottom", "third", "fourth"];
+const CAMERA_KEY_FIELDS = ["keyframes", "sourceTimeOffsetKeyframes", "source_time_offset_keyframes"];
+
+// Camera animation belongs to linked programme timing. Keeping a second copy
+// inside visual settings would restore pre-trim key times during reopening.
+const buildStudioVisualGraph = snapshot => {
+  const settings = cloneParameters(snapshot, VISUAL_SETTING_FIELDS);
+  for (const slot of CAMERA_SLOTS) {
+    for (const field of CAMERA_KEY_FIELDS) {
+      if (settings.speakerStackFraming?.[slot]) delete settings.speakerStackFraming[slot][field];
+    }
+  }
+  return { parameterSchemaVersion: 1, settings,
+    cameraSources: (snapshot.speakerStackSources || []).map(source => cloneParameters(source, CAMERA_SOURCE_FIELDS)),
+  };
+};
+
 const layerReference = (item, type, index) => ({
   layerId: String(item.id || `${type}-${index + 1}`),
   type,
@@ -118,12 +212,8 @@ const layerReference = (item, type, index) => ({
     : {}),
   compositionStage:
     type === "three_d" ? "final_alpha" : type === "motion" ? "worker_motion" : "worker_overlay",
-  parameters: Object.fromEntries(
-    LAYER_PARAMETER_FIELDS.filter(field => item[field] !== undefined).map(field => [
-      field,
-      item[field],
-    ])
-  ),
+  parameterSchemaVersion: 3,
+  parameters: cloneParameters(item, layerParameterFields(3)),
 });
 
 export const buildStudioLayersFromSnapshot = snapshot => [
@@ -132,6 +222,14 @@ export const buildStudioLayersFromSnapshot = snapshot => [
   ),
   ...(snapshot.motionScenes || []).map((item, index) => layerReference(item, "motion", index)),
   ...(snapshot.threeDScenes || []).map((item, index) => layerReference(item, "three_d", index)),
+  ...(snapshot.subjectVfxScenes || []).map(item => ({
+    layerId: item.scene.id, type: "subject_vfx", legacyCollection: "subjectVfxScenes",
+    compositionStage: "source_subject_vfx", parameters: {
+      scene: JSON.parse(JSON.stringify(item.scene)), enabled: item.enabled !== false,
+      ...(item.preview ? { preview: cloneStudioDecisionFields(item.preview, ["jobId", "revision", "reviewed", "receipt"]) } : {}),
+      ...(item.pending ? { pending: cloneStudioDecisionFields(item.pending, ["clientRequestId", "revision", "jobId"]) } : {}),
+    },
+  })),
   ...(snapshot.captionSegments || []).map(captionLayerReference),
 ];
 
@@ -150,6 +248,8 @@ const timedCueReference = (item, index, collection) => {
   return {
     cueId: String(item.id || `${collection}-${index + 1}`),
     type: item.type || null,
+    parameterSchemaVersion: 1,
+    parameters: cloneParameters(item, cueParameterFields(collection)),
     programmeRange:
       Number.isFinite(start) && Number.isFinite(duration) && start >= 0 && duration > 0
         ? createTimeRange("programme", secondsToTicks(start), secondsToTicks(start + duration))
@@ -168,7 +268,7 @@ const timedKeyReference = key => {
   const { time: _time, ...parameters } = key;
   return {
     atProgrammeTick: Number.isFinite(time) && time >= 0 ? secondsToTicks(time) : null,
-    parameters,
+    parameters: JSON.parse(JSON.stringify(parameters)),
   };
 };
 
@@ -187,7 +287,7 @@ export const buildStudioLinkedTimingFromSnapshot = snapshot => {
       (snapshot[collection] || []).map(timedKeyReference),
     ])
   );
-  for (const slot of ["top", "bottom"]) {
+  for (const slot of CAMERA_SLOTS) {
     for (const field of [
       "keyframes",
       "sourceTimeOffsetKeyframes",
@@ -211,7 +311,9 @@ export const projectStudioLinkedTimingToSnapshot = document => {
     overlays: [],
     motionScenes: [],
     threeDScenes: [],
+    subjectVfxScenes: [],
     speedKeyframes: (document.programmeSpeedKeys || []).map(key => ({
+      ...(key.id !== undefined ? { id: key.id } : {}),
       property: "speed",
       time: ticksToSeconds(key.atProgrammeTick),
       value: key.rate,
@@ -221,9 +323,9 @@ export const projectStudioLinkedTimingToSnapshot = document => {
   for (const layer of document.layers || []) {
     if (layer.type === "caption") continue;
     const collection = layer.legacyCollection;
-    if (!["overlays", "motionScenes", "threeDScenes"].includes(collection)) continue;
+    if (!["overlays", "motionScenes", "threeDScenes", "subjectVfxScenes"].includes(collection)) continue;
     const item = {
-      ...layer.parameters,
+      ...JSON.parse(JSON.stringify(layer.parameters)),
       id: layer.layerId,
       ...(layer.legacyType ? { type: layer.legacyType } : {}),
       ...(layer.programmeRange
@@ -239,6 +341,7 @@ export const projectStudioLinkedTimingToSnapshot = document => {
   }
   for (const collection of LINKED_CUE_COLLECTIONS) {
     snapshot[collection] = (document.linkedTiming?.cues?.[collection] || []).map(cue => ({
+      ...JSON.parse(JSON.stringify(cue.parameters || {})),
       id: cue.cueId,
       ...(cue.type ? { type: cue.type } : {}),
       ...(cue.programmeRange
@@ -255,7 +358,7 @@ export const projectStudioLinkedTimingToSnapshot = document => {
   }
   for (const [track, keys] of Object.entries(document.linkedTiming?.keys || {})) {
     const projected = keys.map(key => ({
-      ...key.parameters,
+      ...JSON.parse(JSON.stringify(key.parameters)),
       time: key.atProgrammeTick === null ? NaN : ticksToSeconds(key.atProgrammeTick),
     }));
     if (track.startsWith("speakerStackFraming.")) {
@@ -273,6 +376,135 @@ export const projectStudioLinkedTimingToSnapshot = document => {
   return snapshot;
 };
 
+// Shared editable projection for preview/export adapters. The caller supplies
+// transport only (URLs/files); all migrated creative decisions come from the
+// canonical document. Older v1 documents still use their intact saved snapshot.
+export const projectStudioEditableStateToSnapshot = (document, transportSnapshot = {}) => {
+  validateStudioProjectDocument(document);
+  if (document.compatibility?.editableStateVersion !== 1) return { ...transportSnapshot };
+  const projected = projectStudioLinkedTimingToSnapshot(document);
+  const result = { ...transportSnapshot };
+  if (document.compatibility?.editStateVersion === 1) {
+    for (const field of STUDIO_EDIT_SETTING_FIELDS) delete result[field];
+    Object.assign(result, JSON.parse(JSON.stringify(document.editGraph.settings)));
+    for (const [collection, graphKey] of [["projectMedia", "media"], ["orderedClips", "sources"]]) {
+      const prior = new Map((transportSnapshot[collection] || []).map(item => [String(item.id), item]));
+      result[collection] = document.editGraph[graphKey].map(item =>
+        projectStudioOwnedMedia(item, prior.get(String(item.id)), STUDIO_SOURCE_DECISION_FIELDS));
+    }
+    if (document.editGraph.hookBinding) {
+      const index = document.clipOccurrences.findIndex(item => item.occurrenceId === document.editGraph.hookBinding.occurrenceId);
+      if (index >= 0) result.activeTimelineIndex = index;
+    }
+    result.angleGroups = JSON.parse(JSON.stringify(document.editGraph.angleGroups));
+    result.extractedAudio = document.editGraph.extractedAudio === null ? null
+      : projectStudioOwnedMedia(document.editGraph.extractedAudio, transportSnapshot.extractedAudio, STUDIO_EXTRACTED_AUDIO_FIELDS);
+  }
+  if (document.compatibility?.visualStateVersion === 1) {
+    for (const field of VISUAL_SETTING_FIELDS) delete result[field];
+    Object.assign(result, JSON.parse(JSON.stringify(document.visualGraph.settings)));
+    result.captionSegments = document.layers.filter(layer => layer.type === "caption").map(layer => ({
+      ...JSON.parse(JSON.stringify(layer.parameters)), id: layer.layerId,
+      sourceClipId: layer.sourceId,
+      ...(layer.sourceRange ? {
+        start: ticksToSeconds(layer.sourceRange.startTick), end: ticksToSeconds(layer.sourceRange.endTick),
+        duration: ticksToSeconds(layer.sourceRange.endTick - layer.sourceRange.startTick),
+      } : {}),
+    }));
+    const prior = new Map((transportSnapshot.speakerStackSources || []).map(source => [String(source.id), source]));
+    result.speakerStackSources = document.visualGraph.cameraSources.map(source => {
+      const transport = { ...prior.get(String(source.id)) };
+      const oldPath = transport.sourceStoragePath || transport.storagePath;
+      const oldHash = transport.contentHash || transport.sha256;
+      for (const field of CAMERA_SOURCE_FIELDS) delete transport[field];
+      if ((source.sourceStoragePath || source.storagePath) !== oldPath ||
+        (source.contentHash || source.sha256) !== oldHash) {
+        for (const field of ["url", "src", "previewUrl", "file"]) delete transport[field];
+      }
+      return { ...transport, ...JSON.parse(JSON.stringify(source)) };
+    });
+  }
+  result.timeline = projectDocumentToLegacyTimeline(document, transportSnapshot.timeline || []);
+  result.speedKeyframes = projected.speedKeyframes;
+  result.previewSpeed = document.fallbackSpeed;
+  for (const track of Object.keys(document.linkedTiming.keys)) {
+    const base = track.split(".")[0];
+    if (!track.includes(".")) result[base] = projected[base];
+    else {
+      const [, slot, field] = track.split(".");
+      result[base] = { ...result[base] };
+      if (base === "audioKeyframes") result[base][slot] = projected[base][slot];
+      else result[base][slot] = { ...result[base][slot], [field]: projected[base][slot][field] };
+    }
+  }
+  for (const collection of ["overlays", "motionScenes", "threeDScenes", "subjectVfxScenes",
+    ...LINKED_CUE_COLLECTIONS]) {
+    const prior = new Map((transportSnapshot[collection] || []).map(item => [
+      String(item.id || item.scene?.id), item,
+    ]));
+    result[collection] = projected[collection].map(item => {
+      const old = prior.get(String(item.id));
+      if (collection === "subjectVfxScenes") {
+        // Old graph versions did not own job/review state. Preserve that legacy
+        // evidence until the explicit edit migration boundary is present.
+        if (document.compatibility?.editStateVersion !== 1) return { ...old, ...item };
+        const restored = { ...old, ...item };
+        for (const field of ["preview", "pending"]) {
+          if (!item[field]) delete restored[field];
+          else restored[field] = { ...JSON.parse(JSON.stringify(item[field])),
+            ...(item[field].jobId === old?.[field]?.jobId && item[field].revision === old?.[field]?.revision && old?.[field]?.url
+              ? { url: old[field].url } : {}) };
+        }
+        return restored;
+      }
+      const fields = LINKED_CUE_COLLECTIONS.includes(collection)
+        ? cueParameterFields(collection) : layerParameterFields(document.layers.find(layer => layer.layerId === item.id)?.parameterSchemaVersion);
+      // Delete covered legacy decisions first: removing a canonical field must
+      // not resurrect a stale value from a prior render/save snapshot.
+      const transport = { ...old };
+      for (const key of [...fields, "startTime", "duration", "trimStart", "sourceStartTime"])
+        delete transport[key];
+      const path = item.assetStoragePath || item.sourceStoragePath || item.storagePath;
+      const oldPath = old?.assetStoragePath || old?.sourceStoragePath || old?.storagePath;
+      const hash = item.contentHash || item.sha256;
+      const oldHash = old?.contentHash || old?.sha256;
+      if ((path && path !== oldPath) || (hash && hash !== oldHash)) {
+        for (const key of ["src", "url", "previewUrl", "assetUrl", "file", "isLocal"]) delete transport[key];
+      }
+      if (item.hqPreviewJobId !== old?.hqPreviewJobId ||
+        item.hqPreviewRevision !== old?.hqPreviewRevision) delete transport.hqPreviewUrl;
+      return { ...transport, ...item };
+    });
+  }
+  if (document.audioGraph?.parameterSchemaVersion === 1) {
+    for (const field of AUDIO_SETTING_FIELDS) delete result[field];
+    Object.assign(result, JSON.parse(JSON.stringify(document.audioGraph.settings)));
+    result.trackStates = Object.fromEntries(document.audioGraph.routes.map(({ trackId, state }) =>
+      [trackId, typeof state === "object" && state !== null ? JSON.parse(JSON.stringify(state)) : state]));
+    const music = document.audioGraph.music;
+    const old = transportSnapshot.musicTrack;
+    result.musicTrack = music === null ? null : {
+      ...old, ...music,
+    };
+    if (music !== null) {
+      for (const field of MUSIC_PARAMETER_FIELDS) {
+        if (!(field in music)) delete result.musicTrack[field];
+      }
+      if (music.id !== old?.id ||
+        (music.storagePath || music.sourceStoragePath) !== (old?.storagePath || old?.sourceStoragePath) ||
+        (music.contentHash || music.sha256) !== (old?.contentHash || old?.sha256)) {
+        delete result.musicTrack.url;
+        delete result.musicTrack.file;
+      }
+    }
+  }
+  if (document.compatibility?.editStateVersion === 1 && result.musicTrack) {
+    for (const field of STUDIO_MUSIC_MIX_FIELDS) delete result.musicTrack[field];
+    Object.assign(result.musicTrack, JSON.parse(JSON.stringify(document.editGraph.musicMix || {})));
+  }
+  return result;
+};
+
 const captionLayerReference = (segment, index) => {
   const start = Number(segment.start ?? segment.start_time ?? segment.startTime);
   const end = Number(segment.end ?? segment.end_time ?? segment.endTime);
@@ -287,12 +519,18 @@ const captionLayerReference = (segment, index) => {
     compositionStage: "worker_caption",
     ...(sourceRange ? { sourceRange } : {}),
     sourceId: segment.sourceClipId || segment.source_clip_id || null,
+    parameterSchemaVersion: 1,
     parameters: {
+      ...cloneParameters(segment, CAPTION_PARAMETER_FIELDS),
       text: String(segment.text || ""),
       reviewRequired: !!(segment.reviewRequired ?? segment.review_required),
       textReviewed: !!(segment.textReviewed ?? segment.text_reviewed),
       speaker: segment.speaker || segment.speaker_id || null,
       placement: segment.captionPlacement || segment.caption_placement || null,
+      ...(segment.captionPlacement !== undefined || segment.caption_placement !== undefined
+        ? { captionPlacement: segment.captionPlacement ?? segment.caption_placement } : {}),
+      ...(segment.textReviewRequired !== undefined || segment.text_review_required !== undefined
+        ? { textReviewRequired: !!(segment.textReviewRequired ?? segment.text_review_required) } : {}),
     },
   };
 };
@@ -374,6 +612,8 @@ export const adaptStudioSnapshotToDocument = ({ snapshot, projectId, previousDoc
         endTick: programmeTick + durationTick,
       },
       timeMapId: `map:${clip.id}`,
+      parameterSchemaVersion: 1,
+      parameters: cloneParameters(clip, STUDIO_OCCURRENCE_PARAMETER_FIELDS),
       playback: { direction: "forward", freeze: false, rate: { numerator: 1, denominator: 1 } },
     };
     programmeTick += durationTick;
@@ -381,6 +621,8 @@ export const adaptStudioSnapshotToDocument = ({ snapshot, projectId, previousDoc
   });
   const layers = buildStudioLayersFromSnapshot(snapshot);
   const linkedTiming = buildStudioLinkedTimingFromSnapshot(snapshot);
+  const visualGraph = buildStudioVisualGraph(snapshot);
+  const editGraph = buildStudioEditGraph(snapshot);
   const output = {
     aspectRatio: snapshot.reframeAspect || "9:16",
     requestedResolution: snapshot.exportSettings?.resolution || "1080p",
@@ -395,9 +637,12 @@ export const adaptStudioSnapshotToDocument = ({ snapshot, projectId, previousDoc
   };
   const audioGraph = {
     legacySnapshotRef: "audioRemix",
+    parameterSchemaVersion: 1,
+    settings: cloneParameters(snapshot, AUDIO_SETTING_FIELDS),
+    music: snapshot.musicTrack ? cloneParameters(snapshot.musicTrack, MUSIC_PARAMETER_FIELDS) : null,
     routes: Object.entries(snapshot.trackStates || {}).map(([trackId, state]) => ({
       trackId,
-      state: typeof state === "object" && state !== null ? { ...state } : state,
+      state: typeof state === "object" && state !== null ? JSON.parse(JSON.stringify(state)) : state,
     })),
     routing: {
       muteOriginalAudio: !!snapshot.muteOriginalAudio,
@@ -419,7 +664,8 @@ export const adaptStudioSnapshotToDocument = ({ snapshot, projectId, previousDoc
       rate: Number(key.value ?? key.rate ?? 1),
     }))
     .filter(key => key.property === "speed" && Number.isFinite(key.rate))
-    .map(({ atProgrammeTick, rate, easing }) => ({
+    .map(({ id, atProgrammeTick, rate, easing }) => ({
+      ...(id !== undefined ? { id: String(id) } : {}),
       atProgrammeTick,
       rate,
       easing: easing || "linear",
@@ -431,6 +677,8 @@ export const adaptStudioSnapshotToDocument = ({ snapshot, projectId, previousDoc
   const isSame =
     !!previousDocument &&
     sameOccurrenceProjection(previousDocument.clipOccurrences || [], clipOccurrences) &&
+    stableStringify((previousDocument.clipOccurrences || []).map(item => item.parameters)) ===
+      stableStringify(clipOccurrences.map(item => item.parameters)) &&
     stableStringify(
       previousDocument.assets.map(
         ({ assetId, sourceId, storagePath, contentHash, identityState }) => ({
@@ -457,6 +705,8 @@ export const adaptStudioSnapshotToDocument = ({ snapshot, projectId, previousDoc
     stableStringify(previousDocument.linkedTiming) === stableStringify(linkedTiming) &&
     stableStringify(previousDocument.output) === stableStringify(output) &&
     stableStringify(previousDocument.audioGraph) === stableStringify(audioGraph) &&
+    stableStringify(previousDocument.visualGraph) === stableStringify(visualGraph) &&
+    stableStringify(previousDocument.editGraph) === stableStringify(editGraph) &&
     stableStringify(previousDocument.analysisRefs) === stableStringify(analysisRefs) &&
     stableStringify(previousDocument.projectIntelligenceRefs || []) ===
       stableStringify(projectIntelligenceRefs) &&
@@ -494,6 +744,8 @@ export const adaptStudioSnapshotToDocument = ({ snapshot, projectId, previousDoc
     layers,
     linkedTiming,
     audioGraph,
+    visualGraph,
+    editGraph,
     constraints: {
       locks: (previousDocument?.constraints?.locks || []).filter(lock =>
         clipOccurrences.some(
@@ -520,6 +772,9 @@ export const adaptStudioSnapshotToDocument = ({ snapshot, projectId, previousDoc
     compatibility: {
       legacySnapshotVersion: 1,
       projection: "clip_occurrences_canonical_other_fields_legacy",
+      editableStateVersion: 1,
+      visualStateVersion: 1,
+      editStateVersion: 1,
       layerComposition: "separate_worker_stages",
     },
   };
@@ -595,13 +850,33 @@ export const projectDocumentToLegacyTimeline = (document, priorTimeline) => {
         `Cannot project ${occurrence.occurrenceId} without source media.`
       );
     const asset = document.assets.find(item => item.assetId === occurrence.assetId);
-    return {
+    const projected = {
       ...source,
       id: occurrence.occurrenceId,
       sourceClipId: asset?.sourceId || source.sourceClipId || source.id,
       startRequest: ticksToSeconds(occurrence.sourceRange.startTick),
       endRequest: ticksToSeconds(occurrence.sourceRange.endTick),
     };
+    if (occurrence.parameterSchemaVersion === 1) {
+      for (const field of STUDIO_OCCURRENCE_PARAMETER_FIELDS) delete projected[field];
+      Object.assign(projected, JSON.parse(JSON.stringify(occurrence.parameters)));
+    }
+    const priorPath = source.sourceStoragePath || source.storagePath;
+    const priorHash = source.contentHash || source.sha256;
+    if (asset.sourceId !== String(source.sourceClipId || source.id) ||
+      (asset.storagePath && asset.storagePath !== priorPath) ||
+      (asset.contentHash && asset.contentHash !== priorHash)) {
+      for (const key of ["url", "src", "previewUrl", "file", "isLocal"]) delete projected[key];
+    }
+    if (asset.storagePath) {
+      if (source.sourceStoragePath || !source.storagePath) projected.sourceStoragePath = asset.storagePath;
+      if (source.storagePath) projected.storagePath = asset.storagePath;
+    }
+    if (asset.contentHash) {
+      projected.contentHash = asset.contentHash;
+      if (source.sha256) projected.sha256 = asset.contentHash;
+    }
+    return projected;
   });
 };
 
@@ -617,6 +892,55 @@ export const validateStudioProjectDocument = document => {
     fail("INVALID_CLOCK", "Invalid Studio clock.");
   if (!Array.isArray(document.assets) || !Array.isArray(document.clipOccurrences))
     fail("INVALID_DOCUMENT", "Missing assets or clip occurrences.");
+  const validParameters = (parameters, fields) => parameters &&
+    typeof parameters === "object" && !Array.isArray(parameters) &&
+    Object.keys(parameters).every(key => fields.includes(key));
+  if (document.compatibility?.editStateVersion !== undefined) {
+    const graph = document.editGraph;
+    if (document.compatibility.editStateVersion !== 1 || graph?.parameterSchemaVersion !== 1 ||
+      !validParameters(graph.settings, STUDIO_EDIT_SETTING_FIELDS) ||
+      (graph.musicMix !== null && !validParameters(graph.musicMix, STUDIO_MUSIC_MIX_FIELDS)) ||
+      (graph.hookBinding !== null && (!validParameters(graph.hookBinding, ["occurrenceId"]) ||
+        !document.clipOccurrences.some(item => item.occurrenceId === graph.hookBinding.occurrenceId))) ||
+      document.clipOccurrences.some(item => item.parameterSchemaVersion !== 1 ||
+        !validParameters(item.parameters, STUDIO_OCCURRENCE_PARAMETER_FIELDS)) ||
+      ![graph.media, graph.sources].every(items => Array.isArray(items) &&
+        items.every(item => validParameters(item, STUDIO_SOURCE_DECISION_FIELDS))) ||
+      !Array.isArray(graph.angleGroups) || graph.angleGroups.some(group =>
+        !validParameters(group, ["id", "name", "angles", "sharedStart", "sharedEnd"]) ||
+        !Array.isArray(group.angles) || group.angles.some(angle => !validParameters(angle, ["assetId", "offsetSeconds"]))) ||
+      (graph.extractedAudio !== null && !validParameters(graph.extractedAudio, STUDIO_EXTRACTED_AUDIO_FIELDS)))
+      fail("INVALID_EDIT_STATE", "Unsupported or malformed remaining edit decisions.");
+  }
+  if (document.compatibility?.visualStateVersion !== undefined) {
+    if (document.compatibility.visualStateVersion !== 1 ||
+      document.visualGraph?.parameterSchemaVersion !== 1 ||
+      !validParameters(document.visualGraph.settings, VISUAL_SETTING_FIELDS) ||
+      !Array.isArray(document.visualGraph.cameraSources) ||
+      document.visualGraph.cameraSources.some(source => !validParameters(source, CAMERA_SOURCE_FIELDS)) ||
+      !Array.isArray(document.layers) || document.layers.some(layer => layer.type === "caption" &&
+        (layer.parameterSchemaVersion !== 1 || !validParameters(layer.parameters, CAPTION_PARAMETER_FIELDS)))) {
+      fail("INVALID_VISUAL_STATE", "Unsupported or malformed canonical visual state.");
+    }
+  }
+  if (document.compatibility?.editableStateVersion !== undefined) {
+    if (document.compatibility.editableStateVersion !== 1 ||
+      !Array.isArray(document.layers) ||
+      document.layers.some(layer => layer.type !== "caption" && layer.type !== "subject_vfx" &&
+        (![1, 2, 3].includes(layer.parameterSchemaVersion) || !validParameters(layer.parameters, layerParameterFields(layer.parameterSchemaVersion)))) ||
+      document.audioGraph?.parameterSchemaVersion !== 1 ||
+      !validParameters(document.audioGraph.settings, AUDIO_SETTING_FIELDS) ||
+      (document.audioGraph.music !== null &&
+        !validParameters(document.audioGraph.music, MUSIC_PARAMETER_FIELDS))) {
+      fail("INVALID_EDITABLE_STATE", "Unsupported or malformed editable parameter projection.");
+    }
+    for (const collection of document.linkedTiming === undefined ? [] : LINKED_CUE_COLLECTIONS) {
+      if (!Array.isArray(document.linkedTiming?.cues?.[collection]) ||
+        document.linkedTiming.cues[collection].some(cue =>
+          cue.parameterSchemaVersion !== 1 || !validParameters(cue.parameters, cueParameterFields(collection))))
+        fail("INVALID_EDITABLE_STATE", "Unsupported or malformed editable cue parameters.");
+    }
+  }
   if (document.linkedTiming !== undefined) {
     if (
       !document.linkedTiming ||
