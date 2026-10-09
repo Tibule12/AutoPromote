@@ -44,7 +44,8 @@
     "verify:frontend-build": "node ./scripts/verify-frontend-build.js",
     "build:studio-director-replay": "node ./scripts/build-studio-director-replay.js",
     "check:studio-director-replay": "node ./scripts/build-studio-director-replay.js --check",
-    "build:frontend": "(npm --prefix frontend ci && npm --prefix frontend run build) || (npm --prefix frontend install && npm --prefix frontend run build)"
+    "build:frontend": "(npm --prefix frontend ci && npm --prefix frontend run build) || (npm --prefix frontend install && npm --prefix frontend run build)",
+    "test:model-runtime": "node --test test/model-runtime/*.test.js"
   },
   "engines": {
     "node": ">=20.18.1"
@@ -83,7 +84,8 @@
     "resend": "^4.0.0",
     "streamifier": "^0.1.1",
     "undici": "^7.28.0",
-    "uuid": "^14.0.0"
+    "uuid": "^14.0.0",
+    "ajv": "6.15.0"
   },
   "overrides": {
     "axios": "^1.18.1",

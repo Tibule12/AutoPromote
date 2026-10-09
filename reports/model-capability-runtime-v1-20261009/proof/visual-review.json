@@ -1,0 +1,42 @@
+{
+  "reviewedAt": "2026-10-09T13:33:28.565195+00:00",
+  "reviewer": "Codex visual inspection of actual decoded artifact pixels",
+  "maskArtifactHash": "91399a80c757d52f360868c0373123feee364b7b9535e0e63ae7b0ed443d5ba7",
+  "segmentationVerified": true,
+  "generatedMotionVerified": true,
+  "maskObservations": [
+    "Selected main person remains the same through reviewed frames 0,9,18,27,36,45,54,63,71; all 72 masks independently hash and clock verified.",
+    "First-frame foreground is now opaque; microphone/boom and background remain predominantly outside person mask.",
+    "Fine object/plant boundary fragments remain; this is SAM segmentation with edge feathering, not calibrated hair matting."
+  ],
+  "scope": "Technical inspection, not founder creative approval or verified speech/audio/identity evidence.",
+  "compositeVerified": true,
+  "compositeObservations": [
+    "Actual 72-frame deterministic composite fully decoded; inspected frames 0,12,24,36,48,60.",
+    "ON AIR title visibly occludes behind foreground head; VISIBLE SUBJECT label and leader remain attached as body moves; background grade preserves foreground.",
+    "Initial title entrance is absent on frame 0 and visible at frame 12; this is existing compositor animation."
+  ],
+  "generatedArtifactHash": "8a7a8579d3d967f9239b0e05115b7b419fb72b115ace58214ed124b5059ed7c4",
+  "acceptedGeneratedRange": {
+    "space": "source",
+    "startTick": 45000,
+    "endTick": 453750
+  },
+  "generatedReviewedAt": "2026-10-09T14:11:17.764307+00:00",
+  "generatedObservations": [
+    "Both reel spoke positions change over actual decoded frames; coherent recording-device body remains visible through the shot. No still-image drift proxy was used.",
+    "An unrequested hand appears at the opening. Frames 0-11 are rejected; the final canonical edit starts at source frame 12 (0.5 seconds).",
+    "All 121 frames independently decoded; actual 5.041667s native muted playback reached completion. Two dropped playback frames were observed, without media decode errors.",
+    "Generated equipment is an illustration, not verified footage or a calibrated physical mechanism. No founder creative approval is inferred."
+  ],
+  "renderedProofVerified": true,
+  "renderedSha256": "cd0bb7a2113af3c36cbedd11d2ea227fb54db80c4e48cc161b08cf5ec78c696d",
+  "renderReviewedAt": "2026-10-09T14:16:52.006898+00:00",
+  "renderObservations": [
+    "Actual 181-frame final fully decoded and inspected at half-second intervals across both source and generated ranges.",
+    "Final source now contains real mask-based ON AIR occlusion and attached VISIBLE SUBJECT callout; earlier wrong-field render is rejected and retained separately.",
+    "Cut at frame 72 (3 seconds) enters generated source frame 12, excluding the unwanted initial hand. Both reels visibly move through the rest of the actual final movie.",
+    "Native headless muted final playback reached completion; 29 dropped presentation frames were observed while capturing screenshots. Independent full decode has no errors.",
+    "Picture duration 7.541667s; stereo 48kHz decoded audio 7.552s including AAC padding, no clipped samples. No human listening, founder creative approval or broad normal-account performance qualification."
+  ]
+}

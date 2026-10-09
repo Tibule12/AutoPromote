@@ -1,0 +1,62 @@
+{
+  "video_url": "http://127.0.0.1:8765/media/source.mp4",
+  "start_time": 0,
+  "end_time": 7.541666666666667,
+  "overlays": [],
+  "auto_captions": false,
+  "timeline_segments": [
+    {
+      "id": "proof-source",
+      "source_clip_id": "proof-source",
+      "start_time": 0,
+      "end_time": 3,
+      "duration": 3,
+      "url": "http://127.0.0.1:8765/media/source.mp4"
+    },
+    {
+      "id": "generated-occurrence",
+      "source_clip_id": "generated-8a7a8579d3d967f9239b0e05115b7b41",
+      "start_time": 0.5,
+      "end_time": 5.041666666666667,
+      "duration": 4.541666666666667,
+      "url": "http://127.0.0.1:8765/outputs/generate_video/generated_shot.mp4"
+    }
+  ],
+  "background_audio": null,
+  "hook_focus_point": null,
+  "cover_frame": null,
+  "thumbnail_frame": null,
+  "professional_cleanup": false,
+  "finish_plan": {
+    "version": 1,
+    "enabled": true,
+    "reframe": {
+      "enabled": true,
+      "aspect": "16:9",
+      "mode": "off"
+    }
+  },
+  "smart_crop": true,
+  "smart_crop_mode": "safe_fit",
+  "brand_watermark": false,
+  "output_settings": {
+    "audioCodec": "aac",
+    "codec": "h264",
+    "fps": 24,
+    "resolution": "1080p"
+  },
+  "subjectVfx": [
+    {
+      "jobId": "model-runtime-v1-subject-proof",
+      "ownerUid": "model-runtime-proof",
+      "source_clip_id": "proof-source",
+      "start_time": 0,
+      "end_time": 3,
+      "sha256": "cdf23dd598eff1d81dd3d89e3e74daa710a76f0184284d186d4fcc45ef6196a6",
+      "pixel_sha256": "b60748c4ce820e981b223e539907fd6c9c766c895d0774ab32f2e0d27f6044bf",
+      "source_sha256": "fe0bb5ab8e5e2ca8bd53d25e4d3f043fb55a6930280a7735cbdeeb14e44cb39e",
+      "url": "[private signed GCS URL redacted]"
+    }
+  ],
+  "mute_audio": false
+}

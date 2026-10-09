@@ -1,0 +1,94 @@
+{
+  "id": "4447c43e-47e2-4d67-ab28-f279b141d984",
+  "status": "SUCCESS",
+  "source": {
+    "storageSource": {
+      "bucket": "autopromote-cc6d3-viral-studio-3d",
+      "object": "studio/model-runtime/builds/20261009-v1/source.tar.gz",
+      "generation": "1791546354756104"
+    }
+  },
+  "createTime": "2026-10-09T12:16:59.523581193Z",
+  "startTime": "2026-10-09T12:17:00.430049722Z",
+  "finishTime": "2026-10-09T12:18:20.884623Z",
+  "results": {
+    "buildStepImages": [
+      "sha256:47ae396f09c1303b8653019811a8498470603d7ffefc29cb07c88f1f8cb3d19f"
+    ],
+    "buildStepOutputs": [
+      ""
+    ]
+  },
+  "steps": [
+    {
+      "name": "python:3.12.11-slim",
+      "args": [
+        "-c",
+        "pip install --no-cache-dir google-cloud-storage==3.4.1 requests==2.32.5 && python scripts/model-runtime/prepare_model.py --checkpoint \"$1\" --bucket \"$2\"",
+        "prepare",
+        "IDEA-Research/grounding-dino-tiny",
+        "autopromote-cc6d3-viral-studio-3d"
+      ],
+      "entrypoint": "bash",
+      "timing": {
+        "startTime": "2026-10-09T12:17:05.648799547Z",
+        "endTime": "2026-10-09T12:18:20.655657426Z"
+      },
+      "status": "SUCCESS",
+      "pullTiming": {
+        "startTime": "2026-10-09T12:17:05.648799547Z",
+        "endTime": "2026-10-09T12:17:12.963020711Z"
+      }
+    }
+  ],
+  "timeout": "3600s",
+  "projectId": "autopromote-cc6d3",
+  "sourceProvenance": {
+    "resolvedStorageSource": {
+      "bucket": "autopromote-cc6d3-viral-studio-3d",
+      "object": "studio/model-runtime/builds/20261009-v1/source.tar.gz",
+      "generation": "1791546354756104"
+    },
+    "fileHashes": {
+      "gs://autopromote-cc6d3-viral-studio-3d/studio/model-runtime/builds/20261009-v1/source.tar.gz#1791546354756104": {
+        "fileHash": [
+          {
+            "type": "MD5",
+            "value": "VVbNxN2f7dipiDwN8coeSg=="
+          },
+          {
+            "type": "SHA256",
+            "value": "HPSZqVrgb+gQg5jlkOggX2gyRlk2bsHRQALSyWH0Fmc="
+          }
+        ]
+      }
+    }
+  },
+  "options": {
+    "logging": "CLOUD_LOGGING_ONLY",
+    "pool": {}
+  },
+  "logUrl": "https://console.cloud.google.com/cloud-build/builds/4447c43e-47e2-4d67-ab28-f279b141d984?project=341498038874",
+  "tags": [
+    "model-runtime-v1",
+    "cpu-checkpoint-preparation",
+    "no-gpu"
+  ],
+  "timing": {
+    "STORAGE_SOURCE": {
+      "startTime": "2026-10-09T12:17:01.950262993Z",
+      "endTime": "2026-10-09T12:17:05.035491960Z"
+    },
+    "FETCHSOURCE": {
+      "startTime": "2026-10-09T12:17:01.950262993Z",
+      "endTime": "2026-10-09T12:17:05.035491960Z"
+    },
+    "BUILD": {
+      "startTime": "2026-10-09T12:17:05.035716889Z",
+      "endTime": "2026-10-09T12:18:20.655807464Z"
+    }
+  },
+  "queueTtl": "3600s",
+  "serviceAccount": "projects/autopromote-cc6d3/serviceAccounts/341498038874-compute@developer.gserviceaccount.com",
+  "name": "projects/341498038874/locations/global/builds/4447c43e-47e2-4d67-ab28-f279b141d984"
+}

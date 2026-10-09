@@ -1,0 +1,91 @@
+{
+  "id": "0a1f76e2-9c7b-4f6a-83ae-069fc71b7c8b",
+  "status": "SUCCESS",
+  "source": {
+    "storageSource": {
+      "bucket": "autopromote-cc6d3-viral-studio-3d",
+      "object": "studio/model-runtime/builds/20261009-v1/source.tar.gz",
+      "generation": "1791546354756104"
+    }
+  },
+  "createTime": "2026-10-09T11:51:24.702302413Z",
+  "startTime": "2026-10-09T11:51:26.875333991Z",
+  "finishTime": "2026-10-09T12:01:06.248613Z",
+  "results": {
+    "buildStepImages": [
+      "sha256:47ae396f09c1303b8653019811a8498470603d7ffefc29cb07c88f1f8cb3d19f"
+    ],
+    "buildStepOutputs": [
+      ""
+    ]
+  },
+  "steps": [
+    {
+      "name": "python:3.12.11-slim",
+      "args": [
+        "-c",
+        "pip install --no-cache-dir google-cloud-storage==3.4.1 requests==2.32.5 && python scripts/model-runtime/prepare_model.py --checkpoint Qwen/Qwen3-VL-4B-Instruct --bucket autopromote-cc6d3-viral-studio-3d"
+      ],
+      "entrypoint": "bash",
+      "timing": {
+        "startTime": "2026-10-09T11:51:30.436676157Z",
+        "endTime": "2026-10-09T12:01:06.026223597Z"
+      },
+      "status": "SUCCESS",
+      "pullTiming": {
+        "startTime": "2026-10-09T11:51:30.436676157Z",
+        "endTime": "2026-10-09T11:51:37.368223478Z"
+      }
+    }
+  ],
+  "timeout": "1800s",
+  "projectId": "autopromote-cc6d3",
+  "sourceProvenance": {
+    "resolvedStorageSource": {
+      "bucket": "autopromote-cc6d3-viral-studio-3d",
+      "object": "studio/model-runtime/builds/20261009-v1/source.tar.gz",
+      "generation": "1791546354756104"
+    },
+    "fileHashes": {
+      "gs://autopromote-cc6d3-viral-studio-3d/studio/model-runtime/builds/20261009-v1/source.tar.gz#1791546354756104": {
+        "fileHash": [
+          {
+            "type": "MD5",
+            "value": "VVbNxN2f7dipiDwN8coeSg=="
+          },
+          {
+            "type": "SHA256",
+            "value": "HPSZqVrgb+gQg5jlkOggX2gyRlk2bsHRQALSyWH0Fmc="
+          }
+        ]
+      }
+    }
+  },
+  "options": {
+    "logging": "CLOUD_LOGGING_ONLY",
+    "pool": {}
+  },
+  "logUrl": "https://console.cloud.google.com/cloud-build/builds/0a1f76e2-9c7b-4f6a-83ae-069fc71b7c8b?project=341498038874",
+  "tags": [
+    "model-runtime-v1",
+    "cpu-checkpoint-preparation",
+    "no-gpu"
+  ],
+  "timing": {
+    "STORAGE_SOURCE": {
+      "startTime": "2026-10-09T11:51:26.806826262Z",
+      "endTime": "2026-10-09T11:51:29.717908612Z"
+    },
+    "FETCHSOURCE": {
+      "startTime": "2026-10-09T11:51:26.806826262Z",
+      "endTime": "2026-10-09T11:51:29.717908612Z"
+    },
+    "BUILD": {
+      "startTime": "2026-10-09T11:51:29.718246370Z",
+      "endTime": "2026-10-09T12:01:06.026487796Z"
+    }
+  },
+  "queueTtl": "3600s",
+  "serviceAccount": "projects/autopromote-cc6d3/serviceAccounts/341498038874-compute@developer.gserviceaccount.com",
+  "name": "projects/341498038874/locations/global/builds/0a1f76e2-9c7b-4f6a-83ae-069fc71b7c8b"
+}

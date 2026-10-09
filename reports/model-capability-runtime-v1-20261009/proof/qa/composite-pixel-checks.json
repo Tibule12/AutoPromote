@@ -1,0 +1,8 @@
+{
+  "sha256": "cdf23dd598eff1d81dd3d89e3e74daa710a76f0184284d186d4fcc45ef6196a6",
+  "decodedFrames": 72,
+  "meanAdjacentFrameDifference": 2.252150026897496,
+  "maxAdjacentFrameDifference": 6.3676953125,
+  "manualVisualReviewRequired": true,
+  "scope": "Independent full decode and moving pixels; object motion/quality need visual inspection."
+}

@@ -6,6 +6,7 @@ import {
   TICKS_PER_SECOND,
 } from "./studioTime";
 import { createSemanticAnalysisReference } from "./studioSemanticTimeline";
+import { createModelArtifactReference } from "./studioModelArtifactReference";
 import { buildSpeedSegmentsFromKeyframes } from "./studioCreatorRecipes";
 
 import {
@@ -226,6 +227,8 @@ export const buildStudioLayersFromSnapshot = snapshot => [
     layerId: item.scene.id, type: "subject_vfx", legacyCollection: "subjectVfxScenes",
     compositionStage: "source_subject_vfx", parameters: {
       scene: JSON.parse(JSON.stringify(item.scene)), enabled: item.enabled !== false,
+      ...(item.modelArtifactRef ? { modelArtifactRef: createModelArtifactReference(item.modelArtifactRef) } : {}),
+      ...(item.trackingArtifactRef ? { trackingArtifactRef: createModelArtifactReference(item.trackingArtifactRef) } : {}),
       ...(item.preview ? { preview: cloneStudioDecisionFields(item.preview, ["jobId", "revision", "reviewed", "receipt"]) } : {}),
       ...(item.pending ? { pending: cloneStudioDecisionFields(item.pending, ["clientRequestId", "revision", "jobId"]) } : {}),
     },
@@ -384,6 +387,7 @@ export const projectStudioEditableStateToSnapshot = (document, transportSnapshot
   if (document.compatibility?.editableStateVersion !== 1) return { ...transportSnapshot };
   const projected = projectStudioLinkedTimingToSnapshot(document);
   const result = { ...transportSnapshot };
+  result.analysisRefs = JSON.parse(JSON.stringify(document.analysisRefs));
   if (document.compatibility?.editStateVersion === 1) {
     for (const field of STUDIO_EDIT_SETTING_FIELDS) delete result[field];
     Object.assign(result, JSON.parse(JSON.stringify(document.editGraph.settings)));
@@ -652,7 +656,7 @@ export const adaptStudioSnapshotToDocument = ({ snapshot, projectId, previousDoc
     },
   };
   const analysisRefs = (snapshot.analysisRefs || previousDocument?.analysisRefs || []).map(ref =>
-    createSemanticAnalysisReference(ref)
+    ref.kind === "model_capability" ? createModelArtifactReference(ref) : createSemanticAnalysisReference(ref)
   );
   const projectIntelligenceRefs = snapshot.projectIntelligenceRefs ||
     previousDocument?.projectIntelligenceRefs || [];
@@ -1223,7 +1227,23 @@ export const validateStudioProjectDocument = document => {
       }
     });
   }
+  document.layers.filter(layer => layer.type === "subject_vfx").forEach(layer => {
+    for (const [field, capability] of [["modelArtifactRef", "segment_subject"], ["trackingArtifactRef", "track_object"]]) {
+      const ref = layer.parameters[field];
+      if (!ref) continue;
+      createModelArtifactReference(ref);
+      const scene = layer.parameters.scene;
+      if (ref.capability !== capability || ref.sourceAssetId !== scene?.sourceId ||
+          ref.sourceRange.startTick !== secondsToTicks(scene?.sourceRange?.start) ||
+          ref.sourceRange.endTick !== secondsToTicks(scene?.sourceRange?.end))
+        fail("INVALID_MODEL_LAYER_REF", "A subject artifact must match its editable source and range.");
+    }
+  });
   document.analysisRefs.forEach(ref => {
+    if (ref.kind === "model_capability") {
+      createModelArtifactReference(ref);
+      return;
+    }
     const normalized = createSemanticAnalysisReference(ref);
     const fields = [
       "kind",

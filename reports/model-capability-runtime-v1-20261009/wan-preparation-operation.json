@@ -1,0 +1,53 @@
+{
+  "name": "operations/build/autopromote-cc6d3/YjllZjlkM2UtYjdjNy00Yjc2LWE5Y2EtNGQyYjhiODk5OTFk",
+  "metadata": {
+    "@type": "type.googleapis.com/google.devtools.cloudbuild.v1.BuildOperationMetadata",
+    "build": {
+      "id": "b9ef9d3e-b7c7-4b76-a9ca-4d2b8b89991d",
+      "status": "QUEUED",
+      "source": {
+        "storageSource": {
+          "bucket": "autopromote-cc6d3-viral-studio-3d",
+          "object": "studio/model-runtime/builds/20261009-v1/source.tar.gz",
+          "generation": "1791546354756104"
+        }
+      },
+      "createTime": "2026-10-09T12:36:46.935660396Z",
+      "steps": [
+        {
+          "name": "python:3.12.11-slim",
+          "args": [
+            "-c",
+            "pip install --no-cache-dir google-cloud-storage==3.4.1 requests==2.32.5 && python scripts/model-runtime/prepare_model.py --checkpoint \"$1\" --bucket \"$2\"",
+            "prepare",
+            "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+            "autopromote-cc6d3-viral-studio-3d"
+          ],
+          "entrypoint": "bash"
+        }
+      ],
+      "timeout": "3600s",
+      "projectId": "autopromote-cc6d3",
+      "sourceProvenance": {
+        "resolvedStorageSource": {
+          "bucket": "autopromote-cc6d3-viral-studio-3d",
+          "object": "studio/model-runtime/builds/20261009-v1/source.tar.gz",
+          "generation": "1791546354756104"
+        }
+      },
+      "options": {
+        "logging": "CLOUD_LOGGING_ONLY",
+        "pool": {}
+      },
+      "logUrl": "https://console.cloud.google.com/cloud-build/builds/b9ef9d3e-b7c7-4b76-a9ca-4d2b8b89991d?project=341498038874",
+      "tags": [
+        "model-runtime-v1",
+        "cpu-checkpoint-preparation",
+        "no-gpu"
+      ],
+      "queueTtl": "3600s",
+      "serviceAccount": "projects/autopromote-cc6d3/serviceAccounts/341498038874-compute@developer.gserviceaccount.com",
+      "name": "projects/341498038874/locations/global/builds/b9ef9d3e-b7c7-4b76-a9ca-4d2b8b89991d"
+    }
+  }
+}

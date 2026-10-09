@@ -1,0 +1,48 @@
+{
+  "kind": "generation",
+  "at": "2026-10-09T14:09:40.419Z",
+  "headless": true,
+  "muted": true,
+  "sha256": "a99e147db0e4410c124fb96cf81367b04fc078a4fc83abf75a511303078765a3",
+  "samples": [
+    {
+      "currentTime": 0.614839,
+      "paused": false,
+      "ended": false,
+      "frames": 19
+    },
+    {
+      "currentTime": 1.81636,
+      "paused": false,
+      "ended": false,
+      "frames": 47
+    },
+    {
+      "currentTime": 3.015191,
+      "paused": false,
+      "ended": false,
+      "frames": 77
+    },
+    {
+      "currentTime": 4.414564,
+      "paused": false,
+      "ended": false,
+      "frames": 110
+    }
+  ],
+  "before": {
+    "width": 1280,
+    "height": 704,
+    "duration": 5.041667,
+    "error": null
+  },
+  "after": {
+    "currentTime": 5.041667,
+    "ended": true,
+    "totalVideoFrames": 121,
+    "droppedVideoFrames": 2,
+    "error": null
+  },
+  "status": "PASS",
+  "scope": "Actual media playback; pixel/contact-sheet inspection is separately recorded. Audio muted, no human listening claimed."
+}

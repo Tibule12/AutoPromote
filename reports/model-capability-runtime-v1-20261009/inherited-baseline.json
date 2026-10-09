@@ -1,0 +1,2127 @@
+{
+  "sourceWorktree": "/home/tibule12/Projects/AutoPromte/AutoPromote-staging-browser-20261004",
+  "baseCommit": "7f7530ad",
+  "files": [
+    {
+      "path": ".gitignore",
+      "sha256": "2d5d0aee4713a633b6456b16631f7fbad44cde89c1b82f196d87282bda17b045",
+      "size": 1521
+    },
+    {
+      "path": "AGENTS.md",
+      "sha256": "d211aaca5bf2840867d534b4535f587302a21adec6a5d57fb2e79247701a0db9",
+      "size": 1344
+    },
+    {
+      "path": "assets/brand/autopromote-original-v1/README.md",
+      "sha256": "5c473560764b4c86eb84baa2c4dc3f5d50768d1d4a4d6da6781b4901f2675c3a",
+      "size": 2280
+    },
+    {
+      "path": "assets/brand/autopromote-original-v1/autopromote-app-icon.svg",
+      "sha256": "522a03023a6e423c751ed2906749380834b3a0a337f836b74c0718586e0b0249",
+      "size": 646
+    },
+    {
+      "path": "assets/brand/autopromote-original-v1/autopromote-logo-black.svg",
+      "sha256": "6cca1663665f38dd388d15615645e7c652fc3234086f96e4a2228addd72e879b",
+      "size": 16228
+    },
+    {
+      "path": "assets/brand/autopromote-original-v1/autopromote-logo-dark.svg",
+      "sha256": "c6d095a706cb917761914ebaad37a669391758f47ec45a9b9bc815643047283e",
+      "size": 16228
+    },
+    {
+      "path": "assets/brand/autopromote-original-v1/autopromote-logo-light.svg",
+      "sha256": "03a270ea9462ec0861f37334136af425d0682f3909ff1ee59e81968adf965f9e",
+      "size": 16228
+    },
+    {
+      "path": "assets/brand/autopromote-original-v1/autopromote-logo-white.svg",
+      "sha256": "9d8db7979852fd9fb13c92d838610a0574907a670313dce65f3d907642dc320d",
+      "size": 16228
+    },
+    {
+      "path": "assets/brand/autopromote-original-v1/autopromote-symbol-white.svg",
+      "sha256": "6c3e5feee1daf161be8ff405c2202ebdaf62153668522ed0b2d6c0ac2826ab11",
+      "size": 547
+    },
+    {
+      "path": "assets/brand/autopromote-original-v1/autopromote-symbol.svg",
+      "sha256": "f9a35773622feb5cafeeb4dec33ed500731b43beaadc546a6092541443984de2",
+      "size": 547
+    },
+    {
+      "path": "assets/brand/autopromote-original-v1/brand-asset.json",
+      "sha256": "0470aefb27c7168850cc97a769a95040adbf3a07de53641ae26653adf23dd80a",
+      "size": 4689
+    },
+    {
+      "path": "assets/brand/autopromote-original-v1/brand-preview.svg",
+      "sha256": "28f508015856da35dee98f749cd8a9fddc5499e4559fd5ea7dcc9ed174eb3312",
+      "size": 17836
+    },
+    {
+      "path": "assets/brand/autopromote-original-v1/logo-geometry.json",
+      "sha256": "c88e7a6e9c145f6ac8a50bd873cb5cab49ee6b4ef387e787cdf842b3548b082c",
+      "size": 18008
+    },
+    {
+      "path": "assets/brand/autopromote-original-v1/symbol-study-v2.svg",
+      "sha256": "109997ac1c125e483dd8d4d03311d4e5197ff2d3340ed820b24c24770ddd234f",
+      "size": 453
+    },
+    {
+      "path": "assets/brand/autopromote-original-v1/symbol-study.svg",
+      "sha256": "1b5b22e7eead83d7000ca420cbd2c90652ba8de12c298998f2ca6b04d9386447",
+      "size": 373
+    },
+    {
+      "path": "assets/brand/autopromote-original-v1/typography-license.txt",
+      "sha256": "65216953c5cc901d8c1a081493f36747e354ca1f3354494b5b467f17979548d3",
+      "size": 168
+    },
+    {
+      "path": "assets/brand/autopromote-original-v1/verification.json",
+      "sha256": "8bd8b4635b10041e1d240665f529837319437b7a52b7c7ad7b55e0f284a9a6a6",
+      "size": 388
+    },
+    {
+      "path": "docs/HANDOFF-START-HERE-20261007.md",
+      "sha256": "7d35837c8426eb0d11e70e7672b934955da7df869c98734a74b0a3c9c339c441",
+      "size": 18450
+    },
+    {
+      "path": "docs/HANDOFF-content-factory-20261007.md",
+      "sha256": "555303da2d4fab7b992368f6c3b80c5bfed18793ff08d48e94476256e9314e5f",
+      "size": 11371
+    },
+    {
+      "path": "docs/HANDOFF-founder-film-20261008.md",
+      "sha256": "652f296a27be9df1dc7af586c3102b0e61294cbc38ce0b6a31a7f292caa3f09e",
+      "size": 11472
+    },
+    {
+      "path": "docs/HANDOFF-l40s-vfx-20261006.md",
+      "sha256": "b742305cf20b9f596939790bc3a4543923802ec081794887b539a5943f9db2de",
+      "size": 30100
+    },
+    {
+      "path": "docs/HANDOFF-studio-founder-workflow-20261008.md",
+      "sha256": "821bc9a94c7d1089a96c3282215a6e4ba3d4259ea3b1039ae2c080925be0357f",
+      "size": 6629
+    },
+    {
+      "path": "docs/HANDOFF-studio-reliability-repair-20261008.md",
+      "sha256": "cd62233a823dd2e22c858f95abfb2e059251539003bd4fdb47a02db5c2a88d09",
+      "size": 6225
+    },
+    {
+      "path": "docs/HANDOFF-studio-stability-20261007.md",
+      "sha256": "d9f1b4a5a9245694e992bdea806a3b98f4ccc02ba262b721ec17b28d79e59a2c",
+      "size": 3381
+    },
+    {
+      "path": "docs/HANDOFF-studio-stability-gpu-20261008.md",
+      "sha256": "09984c15a28cf2d44bb33a207b96e7c29205292ef3b236e6d6c68042c2e54612",
+      "size": 8312
+    },
+    {
+      "path": "docs/HANDOFF-studio-stability-hour-20261008.md",
+      "sha256": "4e3637dbe6456c87f619443bbd0d9ef57ea7615374bc0a489195b5deb44093b2",
+      "size": 3930
+    },
+    {
+      "path": "docs/STUDIO-COMPLETION-CONTRACT.md",
+      "sha256": "45c7afbbd9d3b7905516145695b057bab2ba73667a70998022e8e15e6240f33d",
+      "size": 39137
+    },
+    {
+      "path": "docs/STUDIO-PRODUCT-READINESS.md",
+      "sha256": "4133dd43f14f4811818437dfda1c2ffd2c4ec02a2cf25e454d138d70e46553fb",
+      "size": 65202
+    },
+    {
+      "path": "docs/autopromote-creative-objective.md",
+      "sha256": "e590491e5246b4f65aaad5cc942c80d68394b22d49a53380990a6b9cfaf619be",
+      "size": 6303
+    },
+    {
+      "path": "docs/autopromote-visual-language.md",
+      "sha256": "ccc215fea4f3472b37aacfa3ff7d208939c0f2ae6ca3ee13f80bf29c7c1a9400",
+      "size": 6282
+    },
+    {
+      "path": "docs/browser-agent.md",
+      "sha256": "caef02d32cbf4a390ab0ba13981b99a15ba3285d7e3682b3bfd7f8d4f26900a1",
+      "size": 6093
+    },
+    {
+      "path": "docs/content-factory.md",
+      "sha256": "ccaab41319124421dd5d9d61eec4a12fd79fed5e07157b11d132393acf834f4c",
+      "size": 14131
+    },
+    {
+      "path": "docs/movie-production-direction.md",
+      "sha256": "1167f939893408ee3c02cd88f5de79eda860b32eeb7fbd4db7a7167e61a2c7ec",
+      "size": 3096
+    },
+    {
+      "path": "docs/viral-studio-rtx-qualification-20261006.md",
+      "sha256": "cb5f7b65355ad95e2e9f044ad195675ab99eb9df0f2d6cb22226f3f5cd9f5af8",
+      "size": 894
+    },
+    {
+      "path": "frontend/package.json",
+      "sha256": "887fd30c585b342011551acc8e4c9fc4c59ba93d0f1a6925d58289b3e7cb03e6",
+      "size": 4599
+    },
+    {
+      "path": "frontend/public/index.html",
+      "sha256": "25c2f0cd630b1131d860fe46f80e6edf6743b46aedf278b2f84021100f74da0c",
+      "size": 2219
+    },
+    {
+      "path": "frontend/public/landing/README.md",
+      "sha256": "90a27fd9001f02af5045623ca5b390ddc1051afc651499033161e5cea4efc296",
+      "size": 5821
+    },
+    {
+      "path": "frontend/public/landing/autopromote-violet-ribbon.webp",
+      "sha256": "86afdddb8675cfea003018e1d29c9703af281b614980787eda7c47feb528b1a9",
+      "size": 11396
+    },
+    {
+      "path": "frontend/public/landing/podcast-conversation.mp4",
+      "sha256": "260f7e4abfa68e51cafd244c19ee51b8b455f068ea0858f1faafa2b8a5cfeb40",
+      "size": 1232922
+    },
+    {
+      "path": "frontend/public/landing/podcast-conversation.webp",
+      "sha256": "8295000dfedef60acc1d718a500ca79edbc0d20fa653944440e24b820d6e885e",
+      "size": 69358
+    },
+    {
+      "path": "frontend/public/landing/podcast-guest.webp",
+      "sha256": "e973b141cd52d8e8a46b85885ced525b00bf8a9f172c44e1dc5d70fbaa71dbcd",
+      "size": 10468
+    },
+    {
+      "path": "frontend/public/landing/podcast-host.webp",
+      "sha256": "b75e7bb0a08db4cc0c40d23a8518f36666e89f3fe0eaaa872414e5ef2b2f8fb4",
+      "size": 16238
+    },
+    {
+      "path": "frontend/public/landing/podcast-motion.mp4",
+      "sha256": "f73a2b4ea4352d664cd38a8855daba4dacfc052554b01f8d591a422ebd8c8b2a",
+      "size": 101986
+    },
+    {
+      "path": "frontend/public/landing/podcast-preview.webp",
+      "sha256": "ac31ec000b50a7ecb4b5fe7837a5a23964d2845046d6b1facd8303864998f03d",
+      "size": 37790
+    },
+    {
+      "path": "frontend/public/landing/product-tour-analytics.webp",
+      "sha256": "af178093478ed9c63dadd9c18626b278ba2361ef061e48ba8b20ae9a1ea5b69f",
+      "size": 60016
+    },
+    {
+      "path": "frontend/public/landing/product-tour-l40s-vertical.webp",
+      "sha256": "a1ec91d39a8e4ce8cc12dfc10c6b0b06b09abdf37d9833714cf751e0cdae750a",
+      "size": 42224
+    },
+    {
+      "path": "frontend/public/landing/product-tour-l40s.vtt",
+      "sha256": "b757689ba4b32632c94cd51141bfc8bdd4e380eddedd3fee1349ccce903c87d9",
+      "size": 516
+    },
+    {
+      "path": "frontend/public/landing/product-tour-l40s.webp",
+      "sha256": "e54c6840711eaf6220e8c5f7c77fe3ec9d69d6ef6cfbaa3ec7308814b0a41e6c",
+      "size": 80718
+    },
+    {
+      "path": "frontend/public/landing/product-tour-schedule.webp",
+      "sha256": "9a295dd8f14c0c93ae5d5f466a1effbf64b4336dddfa948d1da945d695f04071",
+      "size": 62694
+    },
+    {
+      "path": "frontend/public/landing/product-tour-studio.webp",
+      "sha256": "18e185310bdfea5ac8a4553fc7212a29589ed8bb820edd17e52656db6ed1e626",
+      "size": 102506
+    },
+    {
+      "path": "frontend/public/landing/product-tour-uploads.webp",
+      "sha256": "e87f912eb543d504e49c81b98b8a5d8dfd8ffb1b9dbadde1fcb840249a0b72a2",
+      "size": 46992
+    },
+    {
+      "path": "frontend/public/landing/product-tour.mp4",
+      "sha256": "41ad0149b4e930dd2c28c276b36a91d6e7cccab7b5a422e610b03ac7869b2be7",
+      "size": 6561633
+    },
+    {
+      "path": "frontend/public/landing/product-tour.vtt",
+      "sha256": "ec78d4ecb7311f86da0929ff0a9e7a810805fc9f940a980fa437743cefebf3d5",
+      "size": 404
+    },
+    {
+      "path": "frontend/public/landing/product-tour.webp",
+      "sha256": "e87f912eb543d504e49c81b98b8a5d8dfd8ffb1b9dbadde1fcb840249a0b72a2",
+      "size": 46992
+    },
+    {
+      "path": "frontend/public/landing/studio-conversation-v2.webp",
+      "sha256": "2b26ded05c530de847f0623419e4f2e489a639718ed9b9a3a36765854eb5303f",
+      "size": 120572
+    },
+    {
+      "path": "frontend/public/landing/workspace-analytics.png",
+      "sha256": "fe7924677d67a0a7c7456c09c9e335b36f91295c1ca30286a0fab102dce86ecb",
+      "size": 315585
+    },
+    {
+      "path": "frontend/public/landing/workspace-calendar.png",
+      "sha256": "193d0cec4a2be4468eaa9651c17a11e4d1e1a07a9e85825a4ce5d403d3adf1ad",
+      "size": 364512
+    },
+    {
+      "path": "frontend/public/landing/workspace-publisher.png",
+      "sha256": "1b60e8834b53871d09bc62c5eee3db522e29d7551738e6f6cccfe90b5d319440",
+      "size": 391545
+    },
+    {
+      "path": "frontend/public/landing/workspace-studio.png",
+      "sha256": "9029571a0f09de52d854f35f640f4b8d94c1de5fb3259e0e63f512725ccc8dbf",
+      "size": 833053
+    },
+    {
+      "path": "frontend/scripts/preview-public-homepage.js",
+      "sha256": "22ea13dbf3ad277cccb348037f1671c5753594175432b1b57484d3997e27bb10",
+      "size": 969
+    },
+    {
+      "path": "frontend/src/DashboardRedesign.css",
+      "sha256": "6137e81c71a62b47e384bff8b54a94141b1e77a03ad3c8e033f931daaf823298",
+      "size": 105635
+    },
+    {
+      "path": "frontend/src/UserDashboardTabs/ViralClipStudioPanel.js",
+      "sha256": "f0a2e2bb6b31462e0db8784c27dbbf2af6c4c1610467ee0532cae42807c742c4",
+      "size": 16552
+    },
+    {
+      "path": "frontend/src/UserDashboardTabs/__tests__/ViralClipStudioPanel.test.js",
+      "sha256": "9062f45ebe6236123edb23ccc329b0c15411d0d3a539bb603cc0a9560e435381",
+      "size": 7624
+    },
+    {
+      "path": "frontend/src/WelcomePage.js",
+      "sha256": "e4b9c0f6b6928c3765e9215513e15fe784bd3ba9699e59f9ec8a412ff3706314",
+      "size": 6204
+    },
+    {
+      "path": "frontend/src/__tests__/LandingMotionLifecycle.test.js",
+      "sha256": "30dd4f64abee6d7c9c871cb31e8f7111a22d9f82c1e1e0e99a0c6e820ce26b3c",
+      "size": 3706
+    },
+    {
+      "path": "frontend/src/__tests__/LandingPageClaims.test.js",
+      "sha256": "592f06c55f66c17a2f7a3c10a2c15ce6f18c2269fca87493b77ba6cedb165725",
+      "size": 3465
+    },
+    {
+      "path": "frontend/src/__tests__/MotionAssetLayer.test.js",
+      "sha256": "ef3cb650ae94845ab20bfc44af257d03d4c7ad2aed4aa93ef7ee45577871160c",
+      "size": 4256
+    },
+    {
+      "path": "frontend/src/__tests__/ProductTourPlayer.test.js",
+      "sha256": "686fe2c07a6920bc5b5e91834caf77a51d24e4b380727dce1baad666306e2005",
+      "size": 3392
+    },
+    {
+      "path": "frontend/src/__tests__/PublicPages.copy.test.js",
+      "sha256": "c86655e9069392ca159c871600b75ffa4695a9d3eaf4e5bfe42a4e40e9e435c3",
+      "size": 5712
+    },
+    {
+      "path": "frontend/src/components/StudioControls.css",
+      "sha256": "0c8b329be89361d25522f0f4c36ba8be24360bafe499c4446ed93c807e9836a9",
+      "size": 4546
+    },
+    {
+      "path": "frontend/src/components/StudioFinishRack.js",
+      "sha256": "e797f58684b7be09d8068bbd7670ffeec48736178a70a196bf90b4edfae90d8d",
+      "size": 12974
+    },
+    {
+      "path": "frontend/src/components/StudioGeneratedBRollPanel.js",
+      "sha256": "3a0714845f710972eeca2c1f3705035ef93d0281cb9c474d137c05747e561022",
+      "size": 9155
+    },
+    {
+      "path": "frontend/src/components/StudioProTimeline.js",
+      "sha256": "b38f6ca7192fa6e93fde4eaa91c02e8b71fc33d20db3087bf1e883346c576646",
+      "size": 63585
+    },
+    {
+      "path": "frontend/src/components/StudioSubjectVfxPanel.css",
+      "sha256": "d005cb6b0f4a962e9b7ccce8af677d29178a2e753651dac4d4909033f8390b88",
+      "size": 2650
+    },
+    {
+      "path": "frontend/src/components/StudioSubjectVfxPanel.js",
+      "sha256": "1dd67d51ba606f70d2e457aa83aa1fd09587f93a9b3778965e66676a1916dab7",
+      "size": 30707
+    },
+    {
+      "path": "frontend/src/components/StudioTimeline.css",
+      "sha256": "f67d8061049ce3271d8a640fbe65e9f494d0f4136a38aa7fa966c066c7451fb5",
+      "size": 6786
+    },
+    {
+      "path": "frontend/src/components/TimelineSourceFilmstrip.js",
+      "sha256": "27d83ef320cb71cb91601aa0d869058b7945aef9c76a48712fd51a47a0a7663d",
+      "size": 5365
+    },
+    {
+      "path": "frontend/src/components/VideoEditor.js",
+      "sha256": "b300ec5c07595f5a4447387fe93e54945ff6ef6ef4ede231d1aab8c60fa3d4c9",
+      "size": 97905
+    },
+    {
+      "path": "frontend/src/components/ViralClipStudio.css",
+      "sha256": "e3e0488aff81a6ec6f46c8eca270492b71c61cd0e54368c96b20c71c58d891be",
+      "size": 364122
+    },
+    {
+      "path": "frontend/src/components/ViralClipStudio.js",
+      "sha256": "521f3fd600c374e1f85031194dc55a165e5975cb80247cdffbaf28fdbc7307ce",
+      "size": 1249674
+    },
+    {
+      "path": "frontend/src/components/ViralStudioChrome.js",
+      "sha256": "34c1a0df3e165b04f41c70a9b2d98b41c7e7736f08bb18f0270c3164173a7127",
+      "size": 7390
+    },
+    {
+      "path": "frontend/src/components/__tests__/StudioGeneratedBRollPanel.test.js",
+      "sha256": "647650d0374b082810bc6d506d11e146feb4f8b0013abe8f8d21da58a7097b59",
+      "size": 5476
+    },
+    {
+      "path": "frontend/src/components/__tests__/StudioProTimeline.test.js",
+      "sha256": "45a61cd2f7d0de826c9327e7036cfac63ecbad6fa61ba3231c4de7888f13c27b",
+      "size": 14943
+    },
+    {
+      "path": "frontend/src/components/__tests__/StudioSubjectVfxPanel.test.js",
+      "sha256": "2a0f3dc005fbaeff99f0c34b07a9654510e2e89c6899c5df4dc73931ddc38418",
+      "size": 7980
+    },
+    {
+      "path": "frontend/src/components/__tests__/VideoEditor.viralRenderRecovery.test.js",
+      "sha256": "5d29bd99fa25dbeb7a27da88a71c3fb1f6a5262c7fdbbbd963e68de8e91cabfd",
+      "size": 15042
+    },
+    {
+      "path": "frontend/src/components/__tests__/ViralClipStudio.test.js",
+      "sha256": "9c6645dfc389a9ebf1ac5f883d0e0c44257538469c3d08ef5066fa2cc6130ac3",
+      "size": 230006
+    },
+    {
+      "path": "frontend/src/components/__tests__/studioCanonicalDecisions.test.js",
+      "sha256": "e82b18cc442d882ed5d470f58e03d68c9e1b634dc637fcfaceca69cbe08301f3",
+      "size": 7423
+    },
+    {
+      "path": "frontend/src/components/__tests__/studioCanonicalMedia.test.js",
+      "sha256": "33af4f9c9e102a7504da638da6b49caec5c29da0811188d67c009aa20d11064e",
+      "size": 10541
+    },
+    {
+      "path": "frontend/src/components/__tests__/studioCanonicalVisual.test.js",
+      "sha256": "e32024963637202c4f2400acbb69062fe7dc58144e0ae7f56fa51cedfdce0153",
+      "size": 10980
+    },
+    {
+      "path": "frontend/src/components/__tests__/studioCapabilities.test.js",
+      "sha256": "6376a2091dcf6e1df20fe79688faa29ee75e768afc0070b530d64859d86d1dd9",
+      "size": 5974
+    },
+    {
+      "path": "frontend/src/components/__tests__/studioCaptionBulkEdit.test.js",
+      "sha256": "b8be50619779bec9302d7ed49aa7b227978f2c9fd5708f9d2a824928b25762f4",
+      "size": 1063
+    },
+    {
+      "path": "frontend/src/components/__tests__/studioCaptionCoverage.test.js",
+      "sha256": "fcee8eeb05d0cfec09820f522418729ba067305d2d4b49ffa12d2f24f309dc96",
+      "size": 1408
+    },
+    {
+      "path": "frontend/src/components/__tests__/studioCaptionPreviewStyle.test.js",
+      "sha256": "058747e4df02dd0fcecdf698d92ae0c60f373046b3bb712654a94f9e95a7a781",
+      "size": 5688
+    },
+    {
+      "path": "frontend/src/components/__tests__/studioEditableProjection.test.js",
+      "sha256": "8b1c80a1acdce99cbe7934285542ce1e937b4d9a5c72c67d540802d8f17d90a0",
+      "size": 9584
+    },
+    {
+      "path": "frontend/src/components/__tests__/studioHistoryMedia.test.js",
+      "sha256": "64d04d08066760f8ef0e5c0fde20b9ac900d5522cb7daf362000d04edd1128cb",
+      "size": 1905
+    },
+    {
+      "path": "frontend/src/components/__tests__/studioOverlayBinding.test.js",
+      "sha256": "d444d8dfa26838fdd2a4422294e13768354c6bc67bd0d8f41c9cd9b6969276f0",
+      "size": 1008
+    },
+    {
+      "path": "frontend/src/components/__tests__/studioSubjectVfxContract.test.js",
+      "sha256": "8031ff2f062a8ba7f81882e18e7e0f24da40308bd0acda47052d343e9a40490a",
+      "size": 5307
+    },
+    {
+      "path": "frontend/src/components/__tests__/studioTrackingCoordinates.test.js",
+      "sha256": "86478e52908e07345519bcf8014b2777458498fe9a0b9ca77e7acac5b7d38230",
+      "size": 1291
+    },
+    {
+      "path": "frontend/src/components/__tests__/studioVoiceover.test.js",
+      "sha256": "819bb5f889e1e2719d1339c949266fa99c072e12e69adb06b27143193c4cd52c",
+      "size": 3866
+    },
+    {
+      "path": "frontend/src/components/__tests__/viralRenderPayload.test.js",
+      "sha256": "3889f9d36c2ff46792e1b006864d6c663cf5645afbe28e3f80d80028562d7a3a",
+      "size": 19728
+    },
+    {
+      "path": "frontend/src/components/landing/BrandMotionBackdrop.js",
+      "sha256": "b648c17de83a2bad3a4c2aa41283a29ef3f6f1f4aca944e4c16d922d705f8a92",
+      "size": 2433
+    },
+    {
+      "path": "frontend/src/components/landing/DirectorShowcase.js",
+      "sha256": "788a77c3fdf18549f13e616edc50fdff07cc144d0b8f88f627e65df38a252107",
+      "size": 2542
+    },
+    {
+      "path": "frontend/src/components/landing/EditorHeroVisual.js",
+      "sha256": "9e183efa8f6fb8601c11ebe4863ebdff95d2ac761c357899c623bc31d2b9a259",
+      "size": 2972
+    },
+    {
+      "path": "frontend/src/components/landing/HeroSection.js",
+      "sha256": "90116071be1afbcc91cf8de987779002beb76fe03ac243e0771657304f207b08",
+      "size": 2903
+    },
+    {
+      "path": "frontend/src/components/landing/LandingCompositing.css",
+      "sha256": "ab40459bdd0409a39e5423839fa10f72e608961c0c10f13f480dd38da69518dc",
+      "size": 8273
+    },
+    {
+      "path": "frontend/src/components/landing/LandingCreators.js",
+      "sha256": "b2db726cdf92e63313604b675008215482728f2d2dd2c978d1213ec62fd50d60",
+      "size": 1241
+    },
+    {
+      "path": "frontend/src/components/landing/LandingDemo.js",
+      "sha256": "ba3e39ef2e6d20391abe762a74b76f3637a4693a48d6362e94d9b9dbabc921ba",
+      "size": 1311
+    },
+    {
+      "path": "frontend/src/components/landing/LandingEditingStory.js",
+      "sha256": "6536b9e2242b9ed51738b9901b346b9d29f1edd12330717dcc951a1667e16e0f",
+      "size": 4467
+    },
+    {
+      "path": "frontend/src/components/landing/LandingEditorial.css",
+      "sha256": "afa916c9d7a78e53265768d05058521a472e30243754dde67c388545a9bcef0c",
+      "size": 14669
+    },
+    {
+      "path": "frontend/src/components/landing/LandingFeatures.js",
+      "sha256": "5cdd2f35121648c08f52c75ce3444859b80cceb81e2ef07fd8fa3c741224d826",
+      "size": 2812
+    },
+    {
+      "path": "frontend/src/components/landing/LandingFooter.js",
+      "sha256": "b8802c1bd09278ade5f729b4152c8ab458f43e4261ee811e3eb39dd5ed5dd3a4",
+      "size": 2156
+    },
+    {
+      "path": "frontend/src/components/landing/LandingIcon.js",
+      "sha256": "4ec91a7ad0f7fc5da0aa940a5c8fd395e653f72c92ce976a92b1875eb23f24d5",
+      "size": 1102
+    },
+    {
+      "path": "frontend/src/components/landing/LandingMotion.css",
+      "sha256": "8035f996fd4a9227308e621f380f28a2ce524973dce46095d7bc694e315e84d5",
+      "size": 7979
+    },
+    {
+      "path": "frontend/src/components/landing/LandingNavbar.js",
+      "sha256": "9eeda39799b2af56dab23cd03428779dab204830a96b1b99b9e417f8001ae1b6",
+      "size": 2636
+    },
+    {
+      "path": "frontend/src/components/landing/LandingPage.css",
+      "sha256": "88380a1c2e536d53cb8e765cb838af1d1d5952ece8ebe8ef90a4becf5284fca0",
+      "size": 42473
+    },
+    {
+      "path": "frontend/src/components/landing/LandingProductShowcase.js",
+      "sha256": "7ef8ba2022976c65bb9b4c0e363f3a94736bc070bc1aa0beaffc51ff35d12fc2",
+      "size": 5031
+    },
+    {
+      "path": "frontend/src/components/landing/LandingWorkflow.js",
+      "sha256": "1a8a0cc4434c00aa6bba318ccd507b9c2aa64c1d6ac0adff84e5f0613a049b81",
+      "size": 582
+    },
+    {
+      "path": "frontend/src/components/landing/MotionAssetLayer.js",
+      "sha256": "ba3a5a021cd73f5a5591137b7a7d06489ece18469f2a5f9ef4d5e60b1f685e3c",
+      "size": 5866
+    },
+    {
+      "path": "frontend/src/components/landing/MotionEditingScene.js",
+      "sha256": "ebdce7bb63bc5e329349df8242cc1bc96c5005e76418273aa0c146b4f6d272e3",
+      "size": 7320
+    },
+    {
+      "path": "frontend/src/components/landing/MotionGraphicsLayer.js",
+      "sha256": "ceeb78a1b08c7501e4e4256f53c34d0a4418bfabc513cb0432f24455e2c6a4dd",
+      "size": 2373
+    },
+    {
+      "path": "frontend/src/components/landing/ProductTour.css",
+      "sha256": "94bced28c8fbe56fb6556db07742a6cf613a9230680978cc9ff6b3ad1269f6bd",
+      "size": 3929
+    },
+    {
+      "path": "frontend/src/components/landing/ProductTourPlayer.js",
+      "sha256": "29152e83c3438bf083bff4bd2e39e0334aa0b77cf8ee7fb5718baca1ccb96f85",
+      "size": 4182
+    },
+    {
+      "path": "frontend/src/components/landing/ProductVisuals.js",
+      "sha256": "1eb1e59aa7d4ffe45492385acfa53f49ec925229dd0f38f751bd5caaf8a1b045",
+      "size": 4033
+    },
+    {
+      "path": "frontend/src/components/landing/createEditingScene.js",
+      "sha256": "6d10b8237e3b24cf220abe76b5afc37b2af9fe7d50b16a29ebf1dad13883b79a",
+      "size": 30207
+    },
+    {
+      "path": "frontend/src/components/landing/editingSequence.js",
+      "sha256": "597c879653d710a88ea0d56a98d5d62ae7e2e326df63266f2e82de0cea53f61d",
+      "size": 2817
+    },
+    {
+      "path": "frontend/src/components/landing/motionAssetManifest.js",
+      "sha256": "0cf9aa974836eedbcac8fc1ac0a45e5d672c723db348946f5ca26017ba47885d",
+      "size": 1326
+    },
+    {
+      "path": "frontend/src/components/landing/motionMaterials.js",
+      "sha256": "837023ecbba20ced089f9134e080c7b9dcd2adcb6e56374a9ae8d40ea9b8debe",
+      "size": 3051
+    },
+    {
+      "path": "frontend/src/components/landing/productTour.js",
+      "sha256": "683312ed88033fdfefc579df99e23626916a8b0b72791277871478fc48c6c0ee",
+      "size": 798
+    },
+    {
+      "path": "frontend/src/components/landing/sceneTextures.js",
+      "sha256": "bc6f13bdac6dd686f246a7fdb6e2e76e081cd08deec005fd8908cb0d82119732",
+      "size": 3677
+    },
+    {
+      "path": "frontend/src/components/landing/useKineticTitle.js",
+      "sha256": "0544be8d4035ebef24794b3b0fca78b9bcdcc8fd6eaa19b3a3f812a2a61f2130",
+      "size": 3040
+    },
+    {
+      "path": "frontend/src/components/motion/fonts/DejaVuSans-Bold.ttf",
+      "sha256": "5c1247acef7f2b8522a31742c76d6adcb5569bacc0be7ceaa4dc39dd252ce895",
+      "size": 708920
+    },
+    {
+      "path": "frontend/src/components/motion/fonts/DejaVuSans.ttf",
+      "sha256": "ae7b7855e115a5966d8b1b3f80f254ccc117ec86f9965e202ee2940453837280",
+      "size": 759720
+    },
+    {
+      "path": "frontend/src/components/motion/fonts/Inter-Black.ttf",
+      "sha256": "6342d3ea6dc088b43867f615e807d898adf100c93edb978b8e52c5eb71a264da",
+      "size": 419968
+    },
+    {
+      "path": "frontend/src/components/motion/fonts/Inter-ExtraBold.ttf",
+      "sha256": "e6756ad5690b77606aa62249a7b420d9902d45cae4b0048a24911fd4324b0a22",
+      "size": 421796
+    },
+    {
+      "path": "frontend/src/components/motion/fonts/Inter-LICENSE.txt",
+      "sha256": "262481e844521b326f5ecd053e59b98c8b2da78c8ee1bdbb6e8174305e54935a",
+      "size": 4380
+    },
+    {
+      "path": "frontend/src/components/motion/fonts/Inter-Regular.ttf",
+      "sha256": "40d692fce188e4471e2b3cba937be967878f631ad3ebbbdcd587687c7ebe0c82",
+      "size": 411640
+    },
+    {
+      "path": "frontend/src/components/motion/fonts/Inter-SemiBold.ttf",
+      "sha256": "78a843fade9d4612a5567302fb595b56976eb5fcebf4fea5a5912d638bafcde3",
+      "size": 419744
+    },
+    {
+      "path": "frontend/src/components/motion/fonts/Inter-provenance.json",
+      "sha256": "8cdcfad4579e94dd0712aee26a6a753b750deed10d024dc5c242d0199beaf9de",
+      "size": 577
+    },
+    {
+      "path": "frontend/src/components/motion/fonts/Noto-LICENSE.txt",
+      "sha256": "075f91382875da1c4b491f1facf2586f55448705133264d98ce15cab6211b125",
+      "size": 5208
+    },
+    {
+      "path": "frontend/src/components/motion/fonts/NotoSansSymbols2-Regular.ttf",
+      "sha256": "876598db5f1e3bef2bc77c4d94c5b0d5d2c1620be4878a06f18fb5434e331688",
+      "size": 656852
+    },
+    {
+      "path": "frontend/src/components/studioCapabilities.js",
+      "sha256": "74769c00d6116c4f8ab8853827ce55cdec2e62b906fa74fb9528e48a06a5eaa1",
+      "size": 19376
+    },
+    {
+      "path": "frontend/src/components/studioCaptionBulkEdit.js",
+      "sha256": "1b075524429f8dbb7598cf0336d83ef0a1d7090da1ed53fe8e6e97702d85cfc1",
+      "size": 599
+    },
+    {
+      "path": "frontend/src/components/studioCaptionCoverage.js",
+      "sha256": "24868c65d96ab947abb25660f0ed1a440065fdacaf9aed97ba61eb9fd92a7337",
+      "size": 1915
+    },
+    {
+      "path": "frontend/src/components/studioCaptionFontMetrics.json",
+      "sha256": "268edf27d2a5ded1cf9c2131b41af35b8ca3f93445b2d621de7392c9f286c0c6",
+      "size": 849
+    },
+    {
+      "path": "frontend/src/components/studioCaptionPreviewStyle.js",
+      "sha256": "e2de6f382f518618df82ef25ac3ad824558c8d10a7e1cf99406e54ce99cdb549",
+      "size": 6409
+    },
+    {
+      "path": "frontend/src/components/studioCaptionRenderStyles.json",
+      "sha256": "b4cbdc06bcbc3a28b0a27dd26e3265212b7f469bd3686ad62cbe11e601f5e34a",
+      "size": 7786
+    },
+    {
+      "path": "frontend/src/components/studioCommandHistory.js",
+      "sha256": "fa5de765ffbd18874a34b676b0f16a254db252997ea77ab6704d9ed727ff60c8",
+      "size": 6022
+    },
+    {
+      "path": "frontend/src/components/studioCommands.js",
+      "sha256": "53233cb2616e5e2352d11987b0c9531348b63c6d77af3c23e45bad9234102294",
+      "size": 21734
+    },
+    {
+      "path": "frontend/src/components/studioEditDecisions.js",
+      "sha256": "965b83b11e59461e4b48a58dcd93e8048b6eff05935b88e7e909bf0566b22352",
+      "size": 3903
+    },
+    {
+      "path": "frontend/src/components/studioHistoryMedia.js",
+      "sha256": "efcacce14b08d4d28c1450ebc559e0aa97649b7ee2dde1611c707e6a979e2030",
+      "size": 588
+    },
+    {
+      "path": "frontend/src/components/studioOverlayBinding.js",
+      "sha256": "33b038ab6ea3c15960c0702f34248257310e8ca0076a7e4d61937335ba88cb2f",
+      "size": 562
+    },
+    {
+      "path": "frontend/src/components/studioProjectDocument.js",
+      "sha256": "dc181b0e06995b070946a005b9191f54c5b20d3823207cff948213e3fabbfafb",
+      "size": 55143
+    },
+    {
+      "path": "frontend/src/components/studioRenderCompiler.js",
+      "sha256": "220e3d6ad50a777355bbaf07e559ccea32e589463ab29d912af6be144be676b1",
+      "size": 8123
+    },
+    {
+      "path": "frontend/src/components/studioSubjectVfxContract.js",
+      "sha256": "ba54047d51eaa195e01c01b980078118cbd16ad18d937c0af8f69c87746f04ed",
+      "size": 8852
+    },
+    {
+      "path": "frontend/src/components/studioTitleLayout.js",
+      "sha256": "4beb4a543f19c42217feddb29054eb2d348bd930a0a6f5892e84ffffa66f9460",
+      "size": 1123
+    },
+    {
+      "path": "frontend/src/components/studioTrackingCoordinates.js",
+      "sha256": "5dd873064b82567328586aa4976e966d501cc26cdf7aaaf7e966fda33b91a514",
+      "size": 1267
+    },
+    {
+      "path": "frontend/src/components/studioTrimTransaction.js",
+      "sha256": "b16363f90bec8b7ba9c8a02190ad6f097fc73e24ebbca35c16289e3ed6710a50",
+      "size": 4103
+    },
+    {
+      "path": "frontend/src/components/studioVoiceover.js",
+      "sha256": "243399fc273806b05759dfae1af37731cdaa64633f03d684cf9b31a7e87217fd",
+      "size": 1704
+    },
+    {
+      "path": "frontend/src/components/threeD/Studio3DCanvas.js",
+      "sha256": "f47e6bfcb4729b369a45a5bc4df78a1d51c6416281bb78d8562a07d92121f5e8",
+      "size": 16594
+    },
+    {
+      "path": "frontend/src/components/threeD/Studio3DPanel.js",
+      "sha256": "3c49ef3824231f7f55bb880f19ceb1ba9eb36965d2298433f0b37485f98ecca3",
+      "size": 14207
+    },
+    {
+      "path": "frontend/src/components/threeD/Studio3DPanel.test.js",
+      "sha256": "e59bf560161f08b8f144291cd024af687cd84116100f458303506b4bae6f9173",
+      "size": 4967
+    },
+    {
+      "path": "frontend/src/components/threeD/studio3DModel.js",
+      "sha256": "648cc0899d9831c0425dca8b022a5c7119621523eb979f92ef747da530eb45eb",
+      "size": 10524
+    },
+    {
+      "path": "frontend/src/components/threeD/studio3DModel.test.js",
+      "sha256": "c602dc4a35c42e51de6c544673d42d743bf330897c9f5b806a79e352a3db6725",
+      "size": 3758
+    },
+    {
+      "path": "frontend/src/components/threeD/studio3DParity.js",
+      "sha256": "f1941d64ec4befe17f602a7831d41b054195af1e5513690699cc3492c0021e49",
+      "size": 3581
+    },
+    {
+      "path": "frontend/src/components/threeD/studio3DProjection.js",
+      "sha256": "4fe96dfc1498bfdf345808f7f4a2fe78ee3fccbd143b85b11f5d2e39d95ac68b",
+      "size": 662
+    },
+    {
+      "path": "frontend/src/components/threeD/studio3DProjection.test.js",
+      "sha256": "010c93f2ae027a8fcf07ece7ff2b77b6098c8d058e73cee41f1752e3dd669658",
+      "size": 1125
+    },
+    {
+      "path": "frontend/src/components/viralRenderPayload.js",
+      "sha256": "693956245422d442db89e8ec629aa4f1d2e80e350b839cf20931b7b88ea7dd5f",
+      "size": 16358
+    },
+    {
+      "path": "frontend/src/hooks/useSubscription.js",
+      "sha256": "09ce034e0daff0c962963253a79af4f4753e299ee39bf1983166bcfc1b5f6111",
+      "size": 2315
+    },
+    {
+      "path": "frontend/src/utils/__tests__/viralRenderRecovery.test.js",
+      "sha256": "e811d2b028b0a986c7aa287d2068ba730db0b1bdc1213c1bc615df3e87ee4823",
+      "size": 4492
+    },
+    {
+      "path": "frontend/src/utils/viralRenderRecovery.js",
+      "sha256": "33f5a1e15ebe24c23f4304fed15059b7948bd394cd94db329b93298b14c64d3e",
+      "size": 2926
+    },
+    {
+      "path": "python_media_worker/Dockerfile.gpu",
+      "sha256": "bdee7ae4ff3f171e696448584521fa42508b966ade75ad45c609b313b5f67f84",
+      "size": 1203
+    },
+    {
+      "path": "python_media_worker/Dockerfile.vfx",
+      "sha256": "ae059f7a0113dcfb2a6901e375e0d1ada264389a1a7f6770e8aaf3ea860e6f17",
+      "size": 1188
+    },
+    {
+      "path": "python_media_worker/assets/fonts/DejaVuSans-Bold.ttf",
+      "sha256": "5c1247acef7f2b8522a31742c76d6adcb5569bacc0be7ceaa4dc39dd252ce895",
+      "size": 708920
+    },
+    {
+      "path": "python_media_worker/assets/fonts/DejaVuSans.ttf",
+      "sha256": "ae7b7855e115a5966d8b1b3f80f254ccc117ec86f9965e202ee2940453837280",
+      "size": 759720
+    },
+    {
+      "path": "python_media_worker/assets/fonts/Inter-Black.ttf",
+      "sha256": "6342d3ea6dc088b43867f615e807d898adf100c93edb978b8e52c5eb71a264da",
+      "size": 419968
+    },
+    {
+      "path": "python_media_worker/assets/fonts/Inter-ExtraBold.ttf",
+      "sha256": "e6756ad5690b77606aa62249a7b420d9902d45cae4b0048a24911fd4324b0a22",
+      "size": 421796
+    },
+    {
+      "path": "python_media_worker/assets/fonts/Inter-LICENSE.txt",
+      "sha256": "262481e844521b326f5ecd053e59b98c8b2da78c8ee1bdbb6e8174305e54935a",
+      "size": 4380
+    },
+    {
+      "path": "python_media_worker/assets/fonts/Inter-Regular.ttf",
+      "sha256": "40d692fce188e4471e2b3cba937be967878f631ad3ebbbdcd587687c7ebe0c82",
+      "size": 411640
+    },
+    {
+      "path": "python_media_worker/assets/fonts/Inter-SemiBold.ttf",
+      "sha256": "78a843fade9d4612a5567302fb595b56976eb5fcebf4fea5a5912d638bafcde3",
+      "size": 419744
+    },
+    {
+      "path": "python_media_worker/assets/fonts/Inter-provenance.json",
+      "sha256": "8cdcfad4579e94dd0712aee26a6a753b750deed10d024dc5c242d0199beaf9de",
+      "size": 577
+    },
+    {
+      "path": "python_media_worker/assets/fonts/Noto-LICENSE.txt",
+      "sha256": "075f91382875da1c4b491f1facf2586f55448705133264d98ce15cab6211b125",
+      "size": 5208
+    },
+    {
+      "path": "python_media_worker/assets/fonts/NotoSansSymbols2-Regular.ttf",
+      "sha256": "876598db5f1e3bef2bc77c4d94c5b0d5d2c1620be4878a06f18fb5434e331688",
+      "size": 656852
+    },
+    {
+      "path": "python_media_worker/main_media_server.py",
+      "sha256": "5c36362ad8a84b377de33201c2bd1fdebdda7c51d6a8e0d73aa6679e9e24c635",
+      "size": 1564777
+    },
+    {
+      "path": "python_media_worker/requirements.txt",
+      "sha256": "ebfb3502e10ba1df9241c95ac06249c0f3c52d16cbe3ccc93a87afa1119e571b",
+      "size": 808
+    },
+    {
+      "path": "python_media_worker/studio_layer_motion.py",
+      "sha256": "9543f683e8466d967e5fb006f24489100d4fbdea5b58520031ab27a405c4518c",
+      "size": 10628
+    },
+    {
+      "path": "python_media_worker/studio_motion.py",
+      "sha256": "8e9f6fc9e3b9377ab7d361633fc8887dca131e9e9e72d7f878035b1a4dae2bc4",
+      "size": 10159
+    },
+    {
+      "path": "python_media_worker/studio_subject_matte.py",
+      "sha256": "bcb283fbfdba47f0f1d30d74f5463b0df3a420b5c9f757dd8005c1655a70d918",
+      "size": 13431
+    },
+    {
+      "path": "python_media_worker/studio_subject_vfx_export.py",
+      "sha256": "9307d4df26a76ece2ec1dd8dae1b129af89f77eba0a21e66c72975830847d058",
+      "size": 4931
+    },
+    {
+      "path": "python_media_worker/studio_subject_vfx_job.py",
+      "sha256": "c1e4f96eb8dd951003a1ee7a28f51c23df564f44b21ff69044e6e4b43ed58104",
+      "size": 5233
+    },
+    {
+      "path": "python_media_worker/studio_subject_vfx_server.py",
+      "sha256": "469cd5715619b42c017260efa2b7ded11b36c7da5e874864cbe4baeb498a7279",
+      "size": 7666
+    },
+    {
+      "path": "python_media_worker/studio_text.py",
+      "sha256": "4c741baf96b0a7ea1428bb239204d91a794c35c74f623fbf5993913e7c8314dc",
+      "size": 5291
+    },
+    {
+      "path": "python_media_worker/studio_vfx_plan.py",
+      "sha256": "ae1ef7099cee556acadfa125b3d2e7d3d1cfae7bdb44003b9023ceb45b07d7aa",
+      "size": 21055
+    },
+    {
+      "path": "python_media_worker/test_caption_model_language.py",
+      "sha256": "a5d4e70f8499fe64d7a022fe5b58774fd79a8968e51d15c6b3b814cb4f5ee9c4",
+      "size": 2413
+    },
+    {
+      "path": "python_media_worker/test_studio_audio_channels.py",
+      "sha256": "15e17fdb74c352119d078769ff04f3218f63e55893175d58023a1b8f64c3734a",
+      "size": 7397
+    },
+    {
+      "path": "python_media_worker/test_studio_audio_delivery_clock.py",
+      "sha256": "2b33abee77cc6a3ffb4f9d72411677a5411784a5173e3a15b7aee26c7c6c234d",
+      "size": 2343
+    },
+    {
+      "path": "python_media_worker/test_studio_cutaway_captions.py",
+      "sha256": "b000c761a6c184d38df0f9e516f04f74c9dad73fbd69650b3803f28f52e8e58a",
+      "size": 2622
+    },
+    {
+      "path": "python_media_worker/test_studio_delivery_timing.py",
+      "sha256": "24e0a05d728d5953e5a5844b0e57b02a37d9e1704fe9f47e6f4ce45a6c488f1c",
+      "size": 4310
+    },
+    {
+      "path": "python_media_worker/test_studio_export_audio_bitrate.py",
+      "sha256": "daaae2644a43bc1231e625583ecd9eaef524715212424a54d0e5b2eaeec7fe76",
+      "size": 2235
+    },
+    {
+      "path": "python_media_worker/test_studio_motion.py",
+      "sha256": "2cc8b772490bc70f29fde9eac3f78192bab0599d4237e157f935bba6a5b24762",
+      "size": 6852
+    },
+    {
+      "path": "python_media_worker/test_studio_nvenc_export.py",
+      "sha256": "06e9c5f5449465f1553aa49f7da3398b9a7480ba06d79ab01329e7f8c72633cb",
+      "size": 3109
+    },
+    {
+      "path": "python_media_worker/test_studio_subject_vfx_export.py",
+      "sha256": "5251dd7bdf1114fe833c753a15e01ada2659f3538e3e45083fae740fb233e026",
+      "size": 3171
+    },
+    {
+      "path": "python_media_worker/test_studio_subject_vfx_job.py",
+      "sha256": "53befb0e14f001cc2d3bf27f1b953bdf84d157b49c0debc6c191f9a6e6aa0a59",
+      "size": 2559
+    },
+    {
+      "path": "python_media_worker/test_studio_subject_vfx_server.py",
+      "sha256": "2169f1efaad3a717b6673deed197f786d388b4099fa5213053c27248c28c2b70",
+      "size": 3895
+    },
+    {
+      "path": "python_media_worker/test_studio_text.py",
+      "sha256": "cc1647bfd11417e724f6c5c301d318b723cd7e9b18e0fa96f9f47815a0c5abb7",
+      "size": 3343
+    },
+    {
+      "path": "python_media_worker/test_studio_timeline_mux.py",
+      "sha256": "8e0e443019bff99e3ff3d2b03603743ab5d2b30fb326a5bdf2e9bf55dd7a2eb8",
+      "size": 3947
+    },
+    {
+      "path": "python_media_worker/test_studio_vfx_plan.py",
+      "sha256": "a5eb5b85db9245d7b0fba6e5c03d4b35041bdb02d09e1a4adbd51b5e0775f6a6",
+      "size": 7062
+    },
+    {
+      "path": "python_media_worker/test_viral_motion_graphics.py",
+      "sha256": "549fe55fe39909fca505d461dab052040c81b992b6ab131ffaef56a6cae87484",
+      "size": 14812
+    },
+    {
+      "path": "python_media_worker/test_viral_render_contract.py",
+      "sha256": "1743dd8f89d94486320a9560a26042c6cce1658363a4a3933a8419be4333bf37",
+      "size": 63255
+    },
+    {
+      "path": "python_media_worker/test_whisper_cuda_selection.py",
+      "sha256": "23049db82f21551249984bbe82dd25deb675b660ae638912d391c72ed666b547",
+      "size": 4249
+    },
+    {
+      "path": "python_media_worker/viral_motion_graphics.py",
+      "sha256": "0c60e68007bf02aacaf9118e0ee0facbc7e40f7080f2058ffa83b3cc30cfea11",
+      "size": 34866
+    },
+    {
+      "path": "python_media_worker/viral_render_contract.py",
+      "sha256": "3f72f9b5a66f56b11d098226498475eb8e93c4ecf8d86221289eaea0d9a57d2c",
+      "size": 21369
+    },
+    {
+      "path": "scripts/browser-agent/Dockerfile.nvidia",
+      "sha256": "10d06233e891de22d5927ee50ddf07e399ad0d3c427290b30554dc655f4da6c1",
+      "size": 386
+    },
+    {
+      "path": "scripts/browser-agent/nvidia-planner.js",
+      "sha256": "d7e134c245046b34c1c97818a4273c3d7895534d366c3a59b5e3fbc3721d96a6",
+      "size": 2350
+    },
+    {
+      "path": "scripts/browser-agent/operator.js",
+      "sha256": "6f904fb1e3c82fd20ff4b3404f3a7dd66d290a0b7bcc925416b0a1d86ad036c2",
+      "size": 29780
+    },
+    {
+      "path": "scripts/browser-agent/planner.js",
+      "sha256": "cbaf96da392f0e1117d41a18049ace7b8ef5a9feadc9288dab5592e67097201a",
+      "size": 6117
+    },
+    {
+      "path": "scripts/content-factory/Dockerfile.audio",
+      "sha256": "91230e082c8c83fbbd228b25c812f7a04aff89746f0568f8c567f336337ba728",
+      "size": 452
+    },
+    {
+      "path": "scripts/content-factory/Dockerfile.music",
+      "sha256": "8ac0bc9a90a988378f7ae015317459f1b8372f924b7b769a7844b3d092432cb0",
+      "size": 832
+    },
+    {
+      "path": "scripts/content-factory/audit-welcome-cloud.py",
+      "sha256": "c47f6885135219f175f1c92f0717e9a839d6e6ea9453dcb07b15dcea73b9fd25",
+      "size": 4401
+    },
+    {
+      "path": "scripts/content-factory/capture-studio.js",
+      "sha256": "255680163e937b80f8f9516c448dd4b5d9fab4a95980c274b0d194277058da18",
+      "size": 9159
+    },
+    {
+      "path": "scripts/content-factory/collect-welcome-final.py",
+      "sha256": "934d42e638de23a6338200c6421def07ca9664e9fa4fe4522be3680bc7237566",
+      "size": 3747
+    },
+    {
+      "path": "scripts/content-factory/compile-welcome-story.js",
+      "sha256": "8c86714eb6398bdbf40eb750ef688bb6d24761cdbdfd1087c8ea36c7c747a163",
+      "size": 6694
+    },
+    {
+      "path": "scripts/content-factory/contact-sheet.py",
+      "sha256": "5cae56e3607a79656a1a790b6f50c3caf5018f0e29cf9eac9f16a93c1a55e70f",
+      "size": 2080
+    },
+    {
+      "path": "scripts/content-factory/create-original-brand.py",
+      "sha256": "4fbd2583aae626686493d1dcb2ac4f12c6ab44b582fea730bb164a92cb3bca5e",
+      "size": 8219
+    },
+    {
+      "path": "scripts/content-factory/dispatch-welcome-cloud.py",
+      "sha256": "55a1c516191cc168b464183d6594d9361e1c46030ebdbd91356d7b959055b7d9",
+      "size": 5516
+    },
+    {
+      "path": "scripts/content-factory/finish-welcome-proxy.py",
+      "sha256": "7f82e572e76eb23d58cf2fba335a75aeb14fac9595748cdf6adebf91fbc15c27",
+      "size": 2313
+    },
+    {
+      "path": "scripts/content-factory/founder-film/brand-ident-template.json",
+      "sha256": "e60a32780d8dea40f113886883e83e283a2a3f3fa2fe4211d2c9c2f0438f1570",
+      "size": 1138
+    },
+    {
+      "path": "scripts/content-factory/founder-film/browser-review.js",
+      "sha256": "6f58535758194f933b1a5756b3e0f5d040f111525778686aedbf4fb845f24333",
+      "size": 4276
+    },
+    {
+      "path": "scripts/content-factory/founder-film/check-speech.py",
+      "sha256": "046edb18d7e51889af8c977effc6cf713bda84a7c25f946f9455aee89d936e9d",
+      "size": 1454
+    },
+    {
+      "path": "scripts/content-factory/founder-film/cinematic-ident-v5.py",
+      "sha256": "64f7e48bb9775162a90373536ae43204f92b8bff3bb0ee8632e69afb7ee107e1",
+      "size": 10929
+    },
+    {
+      "path": "scripts/content-factory/founder-film/cinematic-ident.py",
+      "sha256": "a99bab485ed4d28ff76961cb2fb94d2ec2c51057eab4eee542cbc5114efcbe75",
+      "size": 10434
+    },
+    {
+      "path": "scripts/content-factory/founder-film/cinematic-vessel.py",
+      "sha256": "4e3a065d8ea940eeb22127c1255ab40adde16599009d10052c4ef649c60f2934",
+      "size": 20020
+    },
+    {
+      "path": "scripts/content-factory/founder-film/collect.py",
+      "sha256": "940d7ad4222922b50ec3278e3126324252780b249240a84b3b56a64cf6604bc8",
+      "size": 690
+    },
+    {
+      "path": "scripts/content-factory/founder-film/compile-production.js",
+      "sha256": "30b18fd392c35f116208678131dc99249cba196256c6a3ae2f5e43f28454ccdd",
+      "size": 8219
+    },
+    {
+      "path": "scripts/content-factory/founder-film/compile.js",
+      "sha256": "e7613d608bb9855b323008ce7878d83f88874c3ac5e0a470b8af1cd8cefbf6b2",
+      "size": 9518
+    },
+    {
+      "path": "scripts/content-factory/founder-film/encode.py",
+      "sha256": "e81adda0aeec2dacca5b3adb1595e7fc22fcbc3d3ea1774baefd2d5fee825cd6",
+      "size": 975
+    },
+    {
+      "path": "scripts/content-factory/founder-film/materialize-native-assets.py",
+      "sha256": "8d908ec61debb0289c2ea04808ca6efa843c4f04a3b772a09b8f7ebb8881d903",
+      "size": 2940
+    },
+    {
+      "path": "scripts/content-factory/founder-film/prepare.py",
+      "sha256": "959eb35ebcbe556692c4551bba3eb570959f4721ca31d8bb385c43c36315c39e",
+      "size": 4262
+    },
+    {
+      "path": "scripts/content-factory/founder-film/production-watchdog.py",
+      "sha256": "ca76ba4e5a8a0bb9ab413fe1b98b08be1931765a5e42101ff923ea17a4dea4e3",
+      "size": 1737
+    },
+    {
+      "path": "scripts/content-factory/founder-film/rebuild-scenes.py",
+      "sha256": "d165ab0526c6fc30d87b1781779df0533bf738452d2ec4f72966349cde8dd59f",
+      "size": 18985
+    },
+    {
+      "path": "scripts/content-factory/founder-film/rebuild-watchdog.py",
+      "sha256": "09ea8e3de8e81fd33d947ecefb003b896b52ff4abee02bde1318d06c1ebf146a",
+      "size": 1895
+    },
+    {
+      "path": "scripts/content-factory/founder-film/render-local.sh",
+      "sha256": "7101a5deb81fdb889e97c64f143ac82a9ba2b3242e3fff50083ae816bdff4147",
+      "size": 872
+    },
+    {
+      "path": "scripts/content-factory/founder-film/render-output.sh",
+      "sha256": "11e9e820d48611db7b0d535bdfcb65d62bbae8138ace1a2a1563d4ff26b8a044",
+      "size": 1152
+    },
+    {
+      "path": "scripts/content-factory/founder-film/review-assets.py",
+      "sha256": "f97ed08030f9232c0227ce52b981294f84f79551aa0e2b2b3cf4fd2d2bdcd285",
+      "size": 786
+    },
+    {
+      "path": "scripts/content-factory/founder-film/review.html",
+      "sha256": "ab1670e21d480f7b13b067f274c816dc5b66fbe890f31bb61b09d06b7f58aa62",
+      "size": 2351
+    },
+    {
+      "path": "scripts/content-factory/founder-film/run-assets-container.sh",
+      "sha256": "f1c50b6abdf916a39c45a1ccc9625f2a7926ec77390b05cdbef7daaca913b2ac",
+      "size": 162
+    },
+    {
+      "path": "scripts/content-factory/founder-film/run-assets.sh",
+      "sha256": "944ce936b7b72a18ea277f9b8bde606704a8966c40fd537f5cd37e58921f0838",
+      "size": 801
+    },
+    {
+      "path": "scripts/content-factory/founder-film/run-native-previews.sh",
+      "sha256": "943b2a0c2e0030063ca5b8e9eb6573e3142beaa8de21667ff193decef24fe04c",
+      "size": 1445
+    },
+    {
+      "path": "scripts/content-factory/founder-film/run-preview.sh",
+      "sha256": "99ca9c26ef07035e3c063706725a771f7611e28e90542a5fb7329e083203b0be",
+      "size": 907
+    },
+    {
+      "path": "scripts/content-factory/founder-film/run-v4-ident-preview-on-l40s.sh",
+      "sha256": "ff76cb35c2a4ba72c70376edfc7ea9301724eda5e2079a36ae435a68b4b33bdb",
+      "size": 2580
+    },
+    {
+      "path": "scripts/content-factory/founder-film/run-v4-story-preview-on-l40s.sh",
+      "sha256": "9f10c6622713c95fdbca95e9d28531c5cc22c10f169219f6cb53d767c0455ca9",
+      "size": 2550
+    },
+    {
+      "path": "scripts/content-factory/founder-film/run-v4-vace-on-l40s.sh",
+      "sha256": "b974263865ad246d54f82d0e2f06ac4a8997953b8bc0b6959ae91eaa840ac062",
+      "size": 3537
+    },
+    {
+      "path": "scripts/content-factory/founder-film/scene-refined.py",
+      "sha256": "ad57b0a5fca01ee2dbe00a554b69512939c01996900348a0c1b47b8325046384",
+      "size": 19916
+    },
+    {
+      "path": "scripts/content-factory/founder-film/scene.py",
+      "sha256": "b7e6d4509a422559aedc2b6cfe61d54bfe309dae5b3281f82c22aec79a3fa841",
+      "size": 17841
+    },
+    {
+      "path": "scripts/content-factory/founder-film/sheets.py",
+      "sha256": "1779983bfb318e8e91af4cff289fcdac1206f1e55dab70cd4eb1485e9b1c9de0",
+      "size": 608
+    },
+    {
+      "path": "scripts/content-factory/founder-film/short-sound.py",
+      "sha256": "ee671e16fd386600b079642bc21d40784d9c40a88975f118036c008fddd44c34",
+      "size": 1747
+    },
+    {
+      "path": "scripts/content-factory/founder-film/sound.py",
+      "sha256": "50242cea0831e2baf56f176b2df9a89584ba43e092ea99e1cbc5e78aee742185",
+      "size": 4505
+    },
+    {
+      "path": "scripts/content-factory/founder-film/story-relief-v4.py",
+      "sha256": "dfa66f35c091e6db7b53c4aef686599eb6de4b1cb3b0ba060f1ae48e8fa42266",
+      "size": 10911
+    },
+    {
+      "path": "scripts/content-factory/founder-film/v4-gpu-watchdog.py",
+      "sha256": "54345d7973bafb486b65b34c0a672318ce1c3b6757901f7786903b32cdcabaff",
+      "size": 4926
+    },
+    {
+      "path": "scripts/content-factory/founder-film/vector_geometry.py",
+      "sha256": "238e65386a1f7ffbc09ca1ea545fbaf58c7d13755041f67e525d1c7e679d1ea0",
+      "size": 2055
+    },
+    {
+      "path": "scripts/content-factory/founder-film/verify-v4-package.py",
+      "sha256": "4a610d29e4e0af802997e20c94b78a289147515b20de5588b7483da2f4fa5c47",
+      "size": 2060
+    },
+    {
+      "path": "scripts/content-factory/founder-film/watchdog.py",
+      "sha256": "82c812db30a11b85ef875093d3eee25ea806db1b1b80e5ad2ffcb4a8512720be",
+      "size": 1351
+    },
+    {
+      "path": "scripts/content-factory/generate-conditioned-video.py",
+      "sha256": "0d2318acdb3da70ae7f95302f557394efaf1c5d290452cb562bfaef85f10cba4",
+      "size": 13335
+    },
+    {
+      "path": "scripts/content-factory/generate-controlled-video.py",
+      "sha256": "b7a46849c53f1a1561d991f2e5311f408ddc3974f66e3ac66a9c3966ce1007a9",
+      "size": 7494
+    },
+    {
+      "path": "scripts/content-factory/generate-image.py",
+      "sha256": "7c09f5221b07f27e66d7c681514fecdc270cf20116290a3bca865c28ff6f2fdc",
+      "size": 5082
+    },
+    {
+      "path": "scripts/content-factory/generate-music.py",
+      "sha256": "eef9cb86752198d8565a8a8c088ea15036947d650e0e1991182de4431b06ff26",
+      "size": 3583
+    },
+    {
+      "path": "scripts/content-factory/generate-narration.py",
+      "sha256": "3e8fe5654eb7acfe0fa965f24e2a355fea40a82c6d330a2e08f4960ddf812e26",
+      "size": 3421
+    },
+    {
+      "path": "scripts/content-factory/make-brand-ident.py",
+      "sha256": "6acf5ac537aac84c64c12b0be91c4b8f3ea85aa383367e50dcc6e63fd6000708",
+      "size": 8710
+    },
+    {
+      "path": "scripts/content-factory/make-ident-audio.py",
+      "sha256": "e55430e40292f89f7c6a2f6dc2499d32db70dabbed2703d6403324db54b3564a",
+      "size": 2570
+    },
+    {
+      "path": "scripts/content-factory/make-layered-brand-ident.py",
+      "sha256": "ceef6ef41d62e524a46e1f755e4d250a3285075369349e0d6a42c8d96cc8fb47",
+      "size": 17258
+    },
+    {
+      "path": "scripts/content-factory/make-motion-asset.py",
+      "sha256": "bc25e6f7fdbf746e7d7c2a07ac41d0ed8a1428ee00d4d4e96e2fc1282d102b5d",
+      "size": 2316
+    },
+    {
+      "path": "scripts/content-factory/make-original-audio.py",
+      "sha256": "9e2da6a6d10d34bd1b56245c0e2dcfe7c794936d8d63fb21a7e44ec521ec18b4",
+      "size": 4207
+    },
+    {
+      "path": "scripts/content-factory/make-paper-ocean-3d.py",
+      "sha256": "04436e6833f66a90ae71690d655515c64f4672e4ef9e631e30f4ec1a9b555398",
+      "size": 6305
+    },
+    {
+      "path": "scripts/content-factory/make-paper-yacht-transformation.py",
+      "sha256": "3f296c23b6e17cdf24cfb6245fc9435a94f7ada58c45d62d70b4b0ac41efa18a",
+      "size": 16802
+    },
+    {
+      "path": "scripts/content-factory/make-studio-evidence-project.js",
+      "sha256": "25e7b30a0c0b3384d92c151531b0c39fe0af47d50f2925b73fe659a1ee99c9d5",
+      "size": 3906
+    },
+    {
+      "path": "scripts/content-factory/make-transformation-sound.py",
+      "sha256": "9bd6e4f4500c6ecd6b1c5a55eba2d7fc9720cfac17255a68e0018e232bddcbaf",
+      "size": 2779
+    },
+    {
+      "path": "scripts/content-factory/materialize-welcome-proxy.py",
+      "sha256": "8f57c6661e6b9402bb5292dd8285a2db4e2680fc3cc820ec17ab2916d3708017",
+      "size": 1155
+    },
+    {
+      "path": "scripts/content-factory/nvidia-creative.py",
+      "sha256": "cdf51cb3b1c07441957bf264857a18056f4d9df018ad99ffb66919c498547011",
+      "size": 7913
+    },
+    {
+      "path": "scripts/content-factory/package-welcome-delivery.py",
+      "sha256": "e3c6a035729a3404b6541fea9c82e57a102e588f5fb3a1563506ce382ecb2f9f",
+      "size": 1547
+    },
+    {
+      "path": "scripts/content-factory/package-welcome-workload.py",
+      "sha256": "8ba8a375fa48577af05eca3e7a79c6ab2dbb4b6c8e4305c8c36e27fafd920f5f",
+      "size": 2838
+    },
+    {
+      "path": "scripts/content-factory/persist-welcome-delivery.py",
+      "sha256": "0d20e4845ffdce8901cb8164126f688d254ccc9261df8ec3d7d065df95acd7a8",
+      "size": 1645
+    },
+    {
+      "path": "scripts/content-factory/prepare-asset-review.py",
+      "sha256": "7b3d7d1995a2beda4721ad639e718193134a6298ad9b670439253e45edc13f9e",
+      "size": 3346
+    },
+    {
+      "path": "scripts/content-factory/prepare-control-model.py",
+      "sha256": "9ab47a20b52a489f221b340c3366456dda4e5704d9609c8f23c70ddaa9694644",
+      "size": 3058
+    },
+    {
+      "path": "scripts/content-factory/prepare-flf-model.py",
+      "sha256": "ae7a371bc06a832b50d493c21ec2dbae7d58d115dd8d26153b05c5a50448bd08",
+      "size": 8780
+    },
+    {
+      "path": "scripts/content-factory/prepare-founder-v4-control.py",
+      "sha256": "4de767d9bde9a7bd71d157e111c327406f7447516dcf6faaf76f3c8eacaf0b2c",
+      "size": 7278
+    },
+    {
+      "path": "scripts/content-factory/prepare-image-model.py",
+      "sha256": "bab4095e6f91a4efb1572d8ac794f0cbba08d59e4d266e412ce145dd58ae0af3",
+      "size": 891
+    },
+    {
+      "path": "scripts/content-factory/prepare-logo-geometry.py",
+      "sha256": "f61348279a09859cfee9524a5decc24df106ad49551de234a1ca38f7e1c76ffd",
+      "size": 6454
+    },
+    {
+      "path": "scripts/content-factory/prepare-music-model.py",
+      "sha256": "17b1e6439ee7b357292776545fbadb149419039585ebf3b2b6fafc3395e4e841",
+      "size": 1830
+    },
+    {
+      "path": "scripts/content-factory/prepare-structural-guide.py",
+      "sha256": "e7ca2ea7be704b9404e7ee611d1c4cc75c99a262d7956a6120660325ecc1d48f",
+      "size": 4354
+    },
+    {
+      "path": "scripts/content-factory/prepare-video-model.py",
+      "sha256": "994aa94517fc7c21f08436225919e9413638afd20dca390fc04bcefa8b86a10e",
+      "size": 2151
+    },
+    {
+      "path": "scripts/content-factory/prepare-welcome-story.py",
+      "sha256": "66cb6a5dca329ed4dc24ee8c8e08936205ee7be63a3e7f070f5953181b60216c",
+      "size": 6459
+    },
+    {
+      "path": "scripts/content-factory/preview-transformation-scene.py",
+      "sha256": "97d590eb020b676a9d007006f5d5911ee64c4836aa0b4940a44418bb94bc571f",
+      "size": 1173
+    },
+    {
+      "path": "scripts/content-factory/project-motion-guide.py",
+      "sha256": "1373bde13fb7d8c1bf698cf256066979eed65a2db0cf902192b1e09b8fba9d44",
+      "size": 2401
+    },
+    {
+      "path": "scripts/content-factory/refine-conditioned-video.py",
+      "sha256": "09e261607c62a22033730ddc12ab05577b4e3296a45985dd5e48a32d82fc9799",
+      "size": 7831
+    },
+    {
+      "path": "scripts/content-factory/refine-video.py",
+      "sha256": "4cb8da3e64266163cf9973cb1fbf1f14c92c8cfd4b65cba15d879a574a9b75eb",
+      "size": 6144
+    },
+    {
+      "path": "scripts/content-factory/render-campaign.js",
+      "sha256": "cc666ae6091d91d2338dc1e5cf05b2e0cc33f08b548fe182128d53280bad9c56",
+      "size": 13651
+    },
+    {
+      "path": "scripts/content-factory/render-existing-studio.py",
+      "sha256": "e645fc3a6a03b0680bae3fa994cfeff985b218e76f5321b33ac1c231a46f698a",
+      "size": 5922
+    },
+    {
+      "path": "scripts/content-factory/render-transformation.js",
+      "sha256": "0fadfbe6017f4368763e117496d6d8700d8307ca209ebd39e838119012ce7ce4",
+      "size": 8031
+    },
+    {
+      "path": "scripts/content-factory/review-audio.py",
+      "sha256": "28b8fd6535e0d3845ee3c05fc490930a82e792ebbc916e42833c43674c103648",
+      "size": 911
+    },
+    {
+      "path": "scripts/content-factory/review-founder-transform.py",
+      "sha256": "8bd13e7e3480b3fdded73de7193043c2d095e14e63db2b855fbee83a323e904e",
+      "size": 4378
+    },
+    {
+      "path": "scripts/content-factory/serve-review.py",
+      "sha256": "96f268f8ab71cb1c76fc3c7de899c4cb1c5af9db7401866392f29e5fc665795e",
+      "size": 1365
+    },
+    {
+      "path": "scripts/content-factory/serve-welcome-story.py",
+      "sha256": "f1130325b595d602a546cb5f42ea51166675eec794ab955b134ce44b3ab9a7ad",
+      "size": 772
+    },
+    {
+      "path": "scripts/content-factory/test_conditioned_video_preflight.py",
+      "sha256": "913ff76ea915faa09b347d927ecfb1a7e09ea7744849d49ac6a55111977e6519",
+      "size": 3464
+    },
+    {
+      "path": "scripts/content-factory/transcribe-film.py",
+      "sha256": "c23d81dbfbec31269d45b2fd2a5e3cd10d0d85e9a9db256f7aaa36b386e83035",
+      "size": 1403
+    },
+    {
+      "path": "scripts/content-factory/write-welcome-note.py",
+      "sha256": "e206aa77ef323cda8ae1e609435072ffdbec3bae5c92044cd3d4ee246f32e494",
+      "size": 2944
+    },
+    {
+      "path": "scripts/generate-autopromote-l40s-motion.py",
+      "sha256": "92ff58395cf0625d31be6de92c01695ea89e279c3d256540c8ccc3ed7befc028",
+      "size": 11831
+    },
+    {
+      "path": "scripts/local_media_http.py",
+      "sha256": "907e552384b8355e1e33c107e62dc89f84c46097d7b206e079bcc377bfe4908f",
+      "size": 2397
+    },
+    {
+      "path": "scripts/prove-browser-agent-nvidia.js",
+      "sha256": "3c3cf4edd3a435189ddf3702fee81b246b0481882541b7852c638fbde43cf491",
+      "size": 4303
+    },
+    {
+      "path": "scripts/prove-browser-agent-welcome.js",
+      "sha256": "11d76e95b3083328c7c912598138d2b2ef8c344df553c9a5ec1a018e85b275f0",
+      "size": 2254
+    },
+    {
+      "path": "scripts/render-public-l40s-film.py",
+      "sha256": "580460964077cbd18535b221d64038a602edc880f5999173f011b3e628f7fca0",
+      "size": 15357
+    },
+    {
+      "path": "scripts/render-public-product-tour.py",
+      "sha256": "d7c3ac446e04d9c725f10695eb18ad48d75748dd6408339a8a1d97d9cb3002d3",
+      "size": 7924
+    },
+    {
+      "path": "scripts/render-vfx-editorial.py",
+      "sha256": "191aadc5921e2308ac6afbf2ec4d6386885f16eba418431fd98fc8d223eb0c99",
+      "size": 6151
+    },
+    {
+      "path": "scripts/run-browser-agent.js",
+      "sha256": "01500ef7433f3d50e9f3c707266b2734b3ab91ecbc4d301a93504511c9f0d084",
+      "size": 2053
+    },
+    {
+      "path": "scripts/run-content-factory.js",
+      "sha256": "6b6e6ff24c668e29c7d75e5721ae96a4f4537232a68098da2c5015ae3aa99968",
+      "size": 3046
+    },
+    {
+      "path": "scripts/run-nvidia-browser-planner.py",
+      "sha256": "678f4c021f39a5bd84582c431f76d54be278de00eb576e141b791e330b3321bd",
+      "size": 7679
+    },
+    {
+      "path": "scripts/run-screenplay-production.js",
+      "sha256": "e5a82e72b14eb5b14e39ce61a84f29ee2e940fb56590c0a00d6ea00dd1d7d6c0",
+      "size": 4360
+    },
+    {
+      "path": "scripts/run-studio-cpu-fallback-proof.py",
+      "sha256": "922a078203e44f808bae7f608811fb5353144d09810e30cfdf08511dc5f82477",
+      "size": 4036
+    },
+    {
+      "path": "scripts/run-studio-interaction-preview.js",
+      "sha256": "68b29353dbff05faa64443032e094e1cfb6aa326480a1b9f62ee821df603bd8c",
+      "size": 6216
+    },
+    {
+      "path": "scripts/run-studio-l40s-proof.py",
+      "sha256": "cce0a7bedec90a160e1d70f0656d7d07630647738fbd23b6b08ecefb47de8dae",
+      "size": 9512
+    },
+    {
+      "path": "scripts/run-studio-vfx-worker-proof.py",
+      "sha256": "98c5d1d6243c200328683a8a9cb2f81022fecf6f0604c446ed15070b1b578bf8",
+      "size": 3147
+    },
+    {
+      "path": "scripts/studio-director-replay-entry.js",
+      "sha256": "970eed57d6e447c10616336b529d86b49fcba3f32127d027a1d360afbf66820e",
+      "size": 786
+    },
+    {
+      "path": "scripts/sync-studio-caption-styles.py",
+      "sha256": "a3c4ae3e0aa502e4cf0164bb9b8b7af2299656dd53672a776e887b0c96eda92a",
+      "size": 1369
+    },
+    {
+      "path": "src/__tests__/mediaRoutes.viralRenderAttempts.test.js",
+      "sha256": "2b598369d75865c4ca34b6bfac3f082edcbf93311e7c76bafb1444c792bc1769",
+      "size": 8932
+    },
+    {
+      "path": "src/generated/studioDirectorReplayKernel.cjs",
+      "sha256": "55d0838266ada0dc78f96c223584807ef581ff1c47bc632824eb676d63db3e5a",
+      "size": 82605
+    },
+    {
+      "path": "src/mediaRoutes.js",
+      "sha256": "3b4abf80a008769899d9c5adc8cf0ee8298b939095776fd1308955fa2246a4ba",
+      "size": 137869
+    },
+    {
+      "path": "src/routes/adminContentFactoryRoutes.js",
+      "sha256": "5e964d1897257ef65ba169e451f72fc95703a95e0e07d7b3ae4737966185c166",
+      "size": 3128
+    },
+    {
+      "path": "src/server.js",
+      "sha256": "ca015fb8a4fa9a4591abf9321cd7589d42b313b2215aea73902ca24fa5245202",
+      "size": 138639
+    },
+    {
+      "path": "src/services/contentFactoryArtifactAccess.js",
+      "sha256": "3cd69ddf73d3ba0621f1039467b1e02e4ce78053ad55f89e05280e118c029476",
+      "size": 2287
+    },
+    {
+      "path": "src/services/contentFactoryContract.js",
+      "sha256": "4561d9064d363ad335d0279a4f5515d4230c2e1404015f9d30812f60e8bc1d68",
+      "size": 10320
+    },
+    {
+      "path": "src/services/contentFactoryIntelligenceAdapter.js",
+      "sha256": "faa4726c2a04bf0d86c7cd4de675235584f5bad291ed7bcfae9a8cdd354843f2",
+      "size": 3790
+    },
+    {
+      "path": "src/services/contentFactoryProviders.js",
+      "sha256": "8800914b936f9b7429c0532820ad450cfe57fbd40a4aa8697d8df76ae8c1f633",
+      "size": 64331
+    },
+    {
+      "path": "src/services/contentFactoryScenePerformance.js",
+      "sha256": "d871dc602a3af872dbecbbd8962f3142e286c9efc838c66bfc873b0db4e07610",
+      "size": 2995
+    },
+    {
+      "path": "src/services/contentFactorySchemas.js",
+      "sha256": "07772b8c943ed8c6bac1f21b4e342aa0845f8a59e026f75e68a4339bf4aa17c4",
+      "size": 3474
+    },
+    {
+      "path": "src/services/contentFactoryService.js",
+      "sha256": "60f32385149f3bfd179e50c764f012c5ca3c1ef04cb7354be907078c4dd15433",
+      "size": 21641
+    },
+    {
+      "path": "src/services/contentFactoryStore.js",
+      "sha256": "74afe454328d42dcd8681d82cf25cbed2fe6ca27eebedb578d2f2dbfe562e81c",
+      "size": 3573
+    },
+    {
+      "path": "src/services/contentFactoryStudioAdapter.js",
+      "sha256": "553b0711abea63c8e52a02fa25e9c0b848634a6fe9f497cb0afb2d8830520459",
+      "size": 7087
+    },
+    {
+      "path": "src/services/screenplayGroundingSchema.js",
+      "sha256": "ee00d659fa405b9bd2319111178dd6041f148365e29bf81037ecb29afa5f7c62",
+      "size": 1382
+    },
+    {
+      "path": "src/services/screenplayProductionContract.js",
+      "sha256": "2383b70df5208880325cb2015498004c24e945bfc9c1c4cf91d7bdd8b4bc80c5",
+      "size": 13722
+    },
+    {
+      "path": "src/services/screenplayProductionSchemas.js",
+      "sha256": "3ada885eebe41e1bf1e43ed3e68d9a607375516f8a659b362d652b008bce2e0c",
+      "size": 1233
+    },
+    {
+      "path": "src/services/screenplayProductionService.js",
+      "sha256": "b7fb191bdf46a48a5d482073e54f607201398691804a118807fe15638b4824f9",
+      "size": 11695
+    },
+    {
+      "path": "src/services/studio3DNvidia.js",
+      "sha256": "d3c38d49ad0a8ce3f49fe132aa2f763e2cd8e62e17c78b604e0a88fc82676f9e",
+      "size": 8931
+    },
+    {
+      "path": "src/services/studio3DService.js",
+      "sha256": "4f618bf32f0b84a5e1743291ac74a7d77e12505dbb9859f5c9325a478e1126dc",
+      "size": 16388
+    },
+    {
+      "path": "src/services/studioAnalysisJobService.js",
+      "sha256": "3f94773fbebdcde49f6984e56617eee003916c60b86b8e51e834bbf90f4e13e6",
+      "size": 31586
+    },
+    {
+      "path": "src/services/studioBRollGenerationService.js",
+      "sha256": "71026aed0b25f5617d864b459a80aaac690c95dd4ba569a524d13ae1a341c8d5",
+      "size": 20604
+    },
+    {
+      "path": "src/services/studioBRollPlanGrounding.js",
+      "sha256": "d3c3fbbf618fea13a98611bb9564f56bc2af24625b8c7a6936e410fb03715af8",
+      "size": 646
+    },
+    {
+      "path": "src/services/studioJobIdentity.js",
+      "sha256": "09a232d362f3f9b7840c40a04c9af3a084fa28bddb392478c2b7954851c40e86",
+      "size": 538
+    },
+    {
+      "path": "src/services/studioProjectIntelligenceContract.js",
+      "sha256": "1105234a2e225ef088a2555006a9d807ee64f846352d22fcb508a36709ca56f1",
+      "size": 36707
+    },
+    {
+      "path": "src/services/studioProjectRevisionService.js",
+      "sha256": "7dcf80d0c878d7536b193cc7c4155796cea273bf0f5c34608e874fa868618f3a",
+      "size": 18342
+    },
+    {
+      "path": "src/services/studioSubjectVfxService.js",
+      "sha256": "4e6e2ff076292d42d61e441b9d522d7a259a769504058db87d690cb9c81905f2",
+      "size": 13688
+    },
+    {
+      "path": "src/services/studioWorkerOutputService.js",
+      "sha256": "306634ed5fe610acc7b5ce24430856f144a24253719774ae1d7d3409348f47fd",
+      "size": 4964
+    },
+    {
+      "path": "src/services/studioWorkerRead.js",
+      "sha256": "82b0bbabb3740261472adab319172320ca80613e85f6b3fd8ce026da7a0ead5d",
+      "size": 953
+    },
+    {
+      "path": "src/services/videoEditingService.js",
+      "sha256": "661c7fe087f3299fb3941565fe0e10c963c576d9a51945aec00098d54681aced",
+      "size": 69940
+    },
+    {
+      "path": "studio_3d_renderer/Dockerfile.gpu",
+      "sha256": "3dcb5d0a50a09248c8d4b315cd862cee7d6116a772d1b35258ffe3cca992861c",
+      "size": 1322
+    },
+    {
+      "path": "studio_3d_renderer/assets/autopromote-logo-geometry.json",
+      "sha256": "3b2948e30841b2a94d01877dc8bef7420c7aa61e9b115f1071dd53158f9609a6",
+      "size": 19478
+    },
+    {
+      "path": "studio_3d_renderer/author_welcome_world.py",
+      "sha256": "6aa26ab9336ceaeed91823059e02d68ae047928a6fc1b4eece3271f23dce669b",
+      "size": 25527
+    },
+    {
+      "path": "studio_3d_renderer/blender_scene.py",
+      "sha256": "fe051c33ae89bbcdf541a768b137e2ef4b44767dd64b8b029e896fbd4766ec62",
+      "size": 21640
+    },
+    {
+      "path": "studio_3d_renderer/check_devices.py",
+      "sha256": "7dff24273b8aa31fe9a3f278ce578cfc98a16527b6f4989205d01d59181c06d1",
+      "size": 1368
+    },
+    {
+      "path": "studio_3d_renderer/qualify_gpu.py",
+      "sha256": "4334b75628bd307f0a08881cbe15d10350abe0a8363b724b4580c5cc709d4cc6",
+      "size": 10291
+    },
+    {
+      "path": "studio_3d_renderer/render.py",
+      "sha256": "31c2a16a02532b0898310ff95f4e4f7da0c5e17f37a3c2d175ef616f733e1885",
+      "size": 8469
+    },
+    {
+      "path": "studio_3d_renderer/welcome_cloud_job.py",
+      "sha256": "9acebdba05e75d43d2d06e9b6353d2c4f7a4835f6cbc466e45480db8ee3e9361",
+      "size": 9355
+    },
+    {
+      "path": "test/adminContentFactoryRoutes.jest.test.js",
+      "sha256": "9e31f9db562793cdbed0939e2bd9e654cca9cfc2744cff4f7e1b60102a559bea",
+      "size": 3648
+    },
+    {
+      "path": "test/browser-agent.test.js",
+      "sha256": "3f933ae65390c72b81fff654348b2611c638b4c61764781d899a35425e1652fc",
+      "size": 13278
+    },
+    {
+      "path": "test/contentFactory.jest.test.js",
+      "sha256": "5e28a4f7b49b3cdb943e40ff14d5fa64a28051fff0c519cbcc8c379fa26ba04a",
+      "size": 21867
+    },
+    {
+      "path": "test/contentFactoryArtifactAccess.jest.test.js",
+      "sha256": "2394ecdc6f2dd584c758049fa9f6fc8786447848aa7d75df2922e66d209486ce",
+      "size": 1563
+    },
+    {
+      "path": "test/contentFactoryScenePerformance.jest.test.js",
+      "sha256": "71563b738992cb8c3f9390875edf774007acad8c94ee7f98b9ff0b0838d1ed3c",
+      "size": 8765
+    },
+    {
+      "path": "test/e2e/inventory-studio-edit-decisions.py",
+      "sha256": "dd64f93a8f1100d560404784a582ce893043fed1f430709ef80cc62ae17d9785",
+      "size": 3996
+    },
+    {
+      "path": "test/e2e/playwright/capture-public-product-tour.js",
+      "sha256": "57803857cd4c73472ce7f9813d247d30e64910f43870f69d1c183bd1b49fa205",
+      "size": 11689
+    },
+    {
+      "path": "test/e2e/playwright/run-brand-motion-backdrop.js",
+      "sha256": "64da44a7d005239d56d5f633dfe43635347c71faac070a747787a4faa7902211",
+      "size": 4982
+    },
+    {
+      "path": "test/e2e/playwright/run-public-homepage-headline.js",
+      "sha256": "035d0f75142d3e225221df0dfaf1103230d629f0e6abf5fe5295be07af32dea4",
+      "size": 2664
+    },
+    {
+      "path": "test/e2e/playwright/run-public-homepage-media.js",
+      "sha256": "8c81b4c156a6c138bc54c72a27f1bb1089bc7cafbab2d29aa5124f797cfcac07",
+      "size": 3882
+    },
+    {
+      "path": "test/e2e/playwright/run-public-homepage.js",
+      "sha256": "d90c1deada20890a50221f90d5dc48a75ad005345f019d55f1414cab790cb6ff",
+      "size": 19100
+    },
+    {
+      "path": "test/e2e/playwright/run-public-product-tour.js",
+      "sha256": "7902fac8c9eeb626b8c3a04cce2aaef4757b8cf3b25e5d4a712ed20e329b6d0a",
+      "size": 8310
+    },
+    {
+      "path": "test/e2e/playwright/run-studio-l40s-podcast.js",
+      "sha256": "aad8e9e49969c69174cd94fb8917fed01ee270ffc6a1f65d071a61f320f04d99",
+      "size": 6403
+    },
+    {
+      "path": "test/e2e/playwright/run-studio-sequence-audio.js",
+      "sha256": "d3ded1cf766282849761b0f1b446bbac7bf9d72523a3f2f238cc145fec09654c",
+      "size": 12790
+    },
+    {
+      "path": "test/e2e/playwright/run-studio-timeline-readability.js",
+      "sha256": "56b79e2d93debabe30b2c47634f54d339a28947e440faf0cfdd3e53163f69a0d",
+      "size": 5837
+    },
+    {
+      "path": "test/e2e/playwright/run-vfx-editorial-review.js",
+      "sha256": "d3d8e18528002c08152b1fac1c108855d1a60a421b46d8e485dd6588ab11ce58",
+      "size": 2913
+    },
+    {
+      "path": "test/e2e/playwright/studio-interaction-entry.jsx",
+      "sha256": "e7f7c22751e6ff4bc7487548eabd9531365b54200380c1121f22d236d522d634",
+      "size": 3671
+    },
+    {
+      "path": "test/e2e/playwright/studio-stability/README.md",
+      "sha256": "73ca8de99bdd2ddc4bd9c33905e1f86d4ff64e736c17738a83de8bdf11d6ed51",
+      "size": 8366
+    },
+    {
+      "path": "test/e2e/playwright/studio-stability/audio-import.js",
+      "sha256": "8352cd0c5d9a6e34519aeb1a1da1eed325cb453c595b03a1266b50a8f90967fe",
+      "size": 1441
+    },
+    {
+      "path": "test/e2e/playwright/studio-stability/backend-qa.js",
+      "sha256": "768823c25aac2f30ee9a81a763483aaaf6067c25dfe228b757771c45616d991a",
+      "size": 1630
+    },
+    {
+      "path": "test/e2e/playwright/studio-stability/blocked-3d.js",
+      "sha256": "9ea99731f845715b3aea7b6ddb0489cfa1ac7e1d0e6e48b10067f5ca8ef8da55",
+      "size": 2381
+    },
+    {
+      "path": "test/e2e/playwright/studio-stability/broll.js",
+      "sha256": "d286e038ccd36add211cd002384ac709a211944e99d4b83dceb5b5e62a75d393",
+      "size": 1352
+    },
+    {
+      "path": "test/e2e/playwright/studio-stability/canonical-decisions-reopen.js",
+      "sha256": "04ded149adc41bef52992113c547bf18defcbc98a7d390f941e290fecbbea398",
+      "size": 16934
+    },
+    {
+      "path": "test/e2e/playwright/studio-stability/canonical-visual-export.js",
+      "sha256": "ff4fec665524a7691084298e8976388020cfb83d574dcbb18231b89beefde54e",
+      "size": 8191
+    },
+    {
+      "path": "test/e2e/playwright/studio-stability/canonical-visual-reopen.js",
+      "sha256": "5601b026bb32f63c704c4dd4c04105a7151d30de6860f71ba02b93f2c252f336",
+      "size": 15421
+    },
+    {
+      "path": "test/e2e/playwright/studio-stability/caption-continuation.js",
+      "sha256": "3356ec14d2943eadf0feceb329fb737097b81b44c7ccf660411f2714498a367e",
+      "size": 2872
+    },
+    {
+      "path": "test/e2e/playwright/studio-stability/caption-model-retest.js",
+      "sha256": "2376b988812df45784061d03e7c075e7e51beca190991bc88c33fd5e977caa41",
+      "size": 2901
+    },
+    {
+      "path": "test/e2e/playwright/studio-stability/compare-title-geometry.py",
+      "sha256": "9aa8663f23106dd2ecbf8d5c5371f4cb4f6916e55223225729713e27f6150bdf",
+      "size": 2592
+    },
+    {
+      "path": "test/e2e/playwright/studio-stability/controls-continuation.js",
+      "sha256": "1149028363af1ac51d3afb648eb4dc11d63bf22b0ce02a769340296daae7ba2b",
+      "size": 4165
+    },
+    {
+      "path": "test/e2e/playwright/studio-stability/cuts-speed.js",
+      "sha256": "0fc20c8afd5677a622b579c5b248ce80cf6fce53c8e97e4d32028a057b724583",
+      "size": 2493
+    },
+    {
+      "path": "test/e2e/playwright/studio-stability/director.js",
+      "sha256": "045f2e420d0412dd73f93688ccad1ae08b06b59855cff860885a8ddb0385fee4",
+      "size": 2876
+    },
+    {
+      "path": "test/e2e/playwright/studio-stability/download-ready.js",
+      "sha256": "be203ae12315f03947c4bf0bbfea06cfbaacd22d3f38011224f08661cf73a03b",
+      "size": 2466
+    },
+    {
+      "path": "test/e2e/playwright/studio-stability/flows.js",
+      "sha256": "150ba521efc9095807ff948f562157f71bc563b6d847f42d003e1dd4c31522d9",
+      "size": 7786
+    },
+    {
+      "path": "test/e2e/playwright/studio-stability/frame-controls.js",
+      "sha256": "52eab0095800137f7dd292010f47533a288bb73275a643e5f5042c7d85335374",
+      "size": 9929
+    },
+    {
+      "path": "test/e2e/playwright/studio-stability/gpu-continuation.js",
+      "sha256": "f9f58c2579d97faef1a9772e7101f57697c725a26fdd4ada538b0729bf901123",
+      "size": 5804
+    },
+    {
+      "path": "test/e2e/playwright/studio-stability/hour-regression.js",
+      "sha256": "d40337fb0a05442b5aaa49f33265be08270e0559bac040b88e9b4fb0191b3740",
+      "size": 5790
+    },
+    {
+      "path": "test/e2e/playwright/studio-stability/matrix.json",
+      "sha256": "c575f34815143eaca40e2014e6ae246757b1a3575fb4442dd55b5dab0b260219",
+      "size": 18592
+    },
+    {
+      "path": "test/e2e/playwright/studio-stability/native-trim-clock.js",
+      "sha256": "39214d5739777ac7c48187b0d756201db4176394405d1f1381bcc4d91d4571cd",
+      "size": 5713
+    },
+    {
+      "path": "test/e2e/playwright/studio-stability/nvidia-3d.js",
+      "sha256": "3f722b70d74fc321f1fe98b32c1c95e1bd6476234ecd6f165d65d6a6bb34b213",
+      "size": 6078
+    },
+    {
+      "path": "test/e2e/playwright/studio-stability/preview-final-pair.js",
+      "sha256": "6dbc5ace130b06eeaf5e375a288dd6dd77cacf9cb57c57f4f5ecbc73b1088894",
+      "size": 13955
+    },
+    {
+      "path": "test/e2e/playwright/studio-stability/readiness.js",
+      "sha256": "6ff68863dd2d146c8b085039b04fd81ef8d702536dcdffaaa44b6923bed191ff",
+      "size": 2143
+    },
+    {
+      "path": "test/e2e/playwright/studio-stability/recover-existing-export.js",
+      "sha256": "01c005c1406b324737f8928c767bd18da00822903ee13eedfc0e967e41522264",
+      "size": 4205
+    },
+    {
+      "path": "test/e2e/playwright/studio-stability/reframe-aspect-regression.js",
+      "sha256": "4cf742dd7f008625eda37ec72400c19a42bbf7153fdb96b28512d8be8ff91373",
+      "size": 2142
+    },
+    {
+      "path": "test/e2e/playwright/studio-stability/reload-continuation.js",
+      "sha256": "cb22846a649e0f17e2ee655c96b270e0b670cbbb53f19efc2cbc8564c1f0da41",
+      "size": 3482
+    },
+    {
+      "path": "test/e2e/playwright/studio-stability/run.js",
+      "sha256": "23775e05e2809277d67ad29a2778405ea35e297f888695c0f7d412ff34cb4ee0",
+      "size": 21139
+    },
+    {
+      "path": "test/e2e/playwright/studio-stability/speed-clock-retest.js",
+      "sha256": "fbb891d1a18e6987c955882e3fbff993b9e545507b8056edc7ee63ef7cc55957",
+      "size": 1204
+    },
+    {
+      "path": "test/e2e/playwright/studio-stability/split-title-retest.js",
+      "sha256": "5feb81dc6b37faa292faf8b4eb68b03838119646827f2628a65e9272ac27ec9b",
+      "size": 2556
+    },
+    {
+      "path": "test/e2e/playwright/studio-stability/subject-programme-retest.js",
+      "sha256": "db0f614134225f270f794a7d65a67e4897529cc6d1fb558736d2b730d77bc52a",
+      "size": 5726
+    },
+    {
+      "path": "test/e2e/playwright/studio-stability/subject-seven-effects.js",
+      "sha256": "2256ece602b7132e0bdca4c3ee309269a624036c1c543aec62aa557d8872cd37",
+      "size": 4958
+    },
+    {
+      "path": "test/e2e/playwright/studio-stability/subject-speed-parity.js",
+      "sha256": "eec44e347490107a7d2e02e23585f5fcb2d6116293c76fb660ad515c7fce67ba",
+      "size": 8119
+    },
+    {
+      "path": "test/e2e/playwright/studio-stability/three-d-reload.js",
+      "sha256": "2a5f80beb08ab4c9014c87539924be81d36219a46430a8c32ac8c4a1f7d06b0c",
+      "size": 3057
+    },
+    {
+      "path": "test/e2e/playwright/studio-stability/worker-qa.sh",
+      "sha256": "16b431b73edf9767b2b22e0ac1565316dcb51c3759250aa46403312cd2d9c1df",
+      "size": 2722
+    },
+    {
+      "path": "test/e2e/studio-capability-matrix.json",
+      "sha256": "a9b9b50f3e5e5e33600cfbe91557a24e62e0ce242a739c4a4f7f70490c088b4e",
+      "size": 376090
+    },
+    {
+      "path": "test/e2e/studio-combination-matrix.json",
+      "sha256": "3312bece3ae61e2a7abff7d53593b9b0293330f221413d28001284855d93136f",
+      "size": 100177
+    },
+    {
+      "path": "test/e2e/studio-preview-render-parity.json",
+      "sha256": "bb514d8575896d93b76876f4601d562afa760883fffa217b08f40b5bbad05e51",
+      "size": 86999
+    },
+    {
+      "path": "test/e2e/studio-worker-read-recovery.test.js",
+      "sha256": "cb257ccc85891d17dfd7be4e0b72580c9b0a3bf043dcf115230a34ceeba7c561",
+      "size": 1939
+    },
+    {
+      "path": "test/e2e/validate-studio-contract.js",
+      "sha256": "3f2ba614a88582d9b2f6af0ae6a79a0c42abfe46831bd929591c2d649ae98997",
+      "size": 11133
+    },
+    {
+      "path": "test/screenplayGroundingSchema.jest.test.js",
+      "sha256": "98d3257a361e7cbe188a606ce3e3ca6e879c1b08a95050e1adf0ca7815038d83",
+      "size": 937
+    },
+    {
+      "path": "test/screenplayProduction.jest.test.js",
+      "sha256": "e8d5987c869242213734b0ca961629d8bd28d067a7f7377b2bbd1bdab92ec3e1",
+      "size": 15658
+    },
+    {
+      "path": "test/studio3DNvidia.jest.test.js",
+      "sha256": "2a5120e37258efc33dfc99ad3367fb03da79bda980798c154084e23116955948",
+      "size": 2374
+    },
+    {
+      "path": "test/studioBRollGeneration.jest.test.js",
+      "sha256": "f0ec89296d5a334409d98a4bf9787c365f6ac37a5af66e933e7055ed09269f35",
+      "size": 4102
+    },
+    {
+      "path": "test/studioDirectorReplayService.jest.test.js",
+      "sha256": "89cb21593cde6e1f4acaf285768488cae8187af88664b1bc0a88e0dea983e6c8",
+      "size": 6339
+    },
+    {
+      "path": "test/studioProjectRevisionRoutes.jest.test.js",
+      "sha256": "75ddd51899f07734ca11546cf8ad16439de36460b9bb5fcbeab3d7bbf293a83e",
+      "size": 21269
+    },
+    {
+      "path": "test/studioSubjectVfxService.jest.test.js",
+      "sha256": "c77ae0f350ed0ae77032933978c05f4d28fb8433ffa02ac0e2c0defe3853704e",
+      "size": 9300
+    },
+    {
+      "path": "test/studioWorkerOutput.test.js",
+      "sha256": "33a059eb2bd3b15d2ca3559a1550424232c0bd936d0109d9bfedcb23ff0d74a3",
+      "size": 1360
+    }
+  ],
+  "note": "Inherited working source, not new runtime changes. Historical report directories are read-only references by convention; new evidence stays in this directory."
+}

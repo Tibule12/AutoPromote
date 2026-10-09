@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-10-09T10:45:11.366265+00:00",
+  "updatedAt": "2026-10-09T14:20:21.874199+00:00",
   "assessment": "Retained October8 audit plus scoped October9 native NVIDIA podcast delivery/recovery evidence; no full conformance, production or creative promotion.",
   "readinessStates": [
     "UNIMPLEMENTED",
@@ -1327,5 +1327,34 @@
     "readinessPromotion": false,
     "previewFinalParityPromotion": false,
     "qualifiesCustomerLifecycle": false
+  },
+  "privateModelCapabilityRuntime20261009": {
+    "at": "2026-10-09T14:20:21.874199+00:00",
+    "status": "PRIVATE_RUNTIME_AND_VERTICAL_PROOF_COMPLETE",
+    "evidenceRefs": [
+      "reports/model-capability-runtime-v1-20261009/README.md",
+      "reports/model-capability-runtime-v1-20261009/completion.json",
+      "reports/model-capability-runtime-v1-20261009/gpu-after-proof.json"
+    ],
+    "scope": "Real private runtime/canonical render, local signed-out editable lifecycle; no ordinary-account, creative or production qualification.",
+    "artifacts": 5,
+    "modelsExecuted": [
+      "Qwen3-VL",
+      "Grounding DINO",
+      "SAM2.1",
+      "Wan2.2"
+    ],
+    "tracking": "CPU geometry derived from real SAM masks; TAPNext++ unavailable",
+    "gpuActive": 0,
+    "remainingBlockers": [
+      "Production application, feature flags, Firestore/Storage rules and IAM rollout are staged only; normal-account lifecycle and twelve-gate release qualification remain open.",
+      "Legacy feature-owned providers remain compatible and are not all migrated. The private subject export transports a real owned resolved artifact; the normal API resolver still needs a generic artifact bridge.",
+      "TAPNext++ point correspondence is pinned but disabled; current tracking is deterministic geometry from real SAM masks.",
+      "Image-only source binding, multi-object tracking, broad media/occlusion/cut calibration, full preview/final conformance and operational load testing remain.",
+      "Wan cold checkpoint loading measured 568.60 seconds. Cache transport and production latency/cost budgets need further qualification.",
+      "Native screenshot playback dropped presentation frames; independent decode passes, but broad playback performance, fresh human listening and founder creative approval are not claimed."
+    ],
+    "nextSharedTaskId": "S02",
+    "nextModelIntegration": "TAPNext++"
   }
 }

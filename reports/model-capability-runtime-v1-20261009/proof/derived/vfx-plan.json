@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "source_sha256": "b1af4eac674d98267e92d70ca1fb590baf353161e005987acea98e795988e2a5",
+  "matte_sha256": "f16da7686bf8bd0ca31db15c819c1c8b12568ed8fbcea1b8b40aa5640a7eb307",
+  "effects": [
+    {
+      "id": "title",
+      "type": "text_behind",
+      "start": 0,
+      "end": 3,
+      "text": "ON AIR",
+      "x": 36,
+      "y": 28,
+      "font_size": 110,
+      "color": "#d8a5ff"
+    },
+    {
+      "id": "track",
+      "type": "tracked_callout",
+      "start": 0,
+      "end": 3,
+      "text": "VISIBLE SUBJECT",
+      "offset_x": 220,
+      "offset_y": -100,
+      "font_size": 20,
+      "color": "#ffffff",
+      "avoid_subject": true
+    },
+    {
+      "id": "grade",
+      "type": "background_grade",
+      "start": 0,
+      "end": 3,
+      "exposure": -0.35,
+      "saturation": 0.8,
+      "contrast": 1.08
+    }
+  ]
+}

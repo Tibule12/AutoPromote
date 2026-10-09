@@ -1,0 +1,430 @@
+{
+  "queriedAt": "2026-10-09T11:26:18.645853+00:00",
+  "sources": [
+    {
+      "checkpoint": "Qwen/Qwen3-VL-4B-Instruct",
+      "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+      "license": "apache-2.0",
+      "files": [
+        {
+          "path": ".gitattributes",
+          "size": 1519,
+          "sha256": null
+        },
+        {
+          "path": "README.md",
+          "size": 7133,
+          "sha256": null
+        },
+        {
+          "path": "chat_template.json",
+          "size": 5502,
+          "sha256": null
+        },
+        {
+          "path": "config.json",
+          "size": 1505,
+          "sha256": null
+        },
+        {
+          "path": "generation_config.json",
+          "size": 269,
+          "sha256": null
+        },
+        {
+          "path": "merges.txt",
+          "size": 1671839,
+          "sha256": null
+        },
+        {
+          "path": "model-00001-of-00002.safetensors",
+          "size": 4967229296,
+          "sha256": "30a01a0556622645a3cce87b655bbbbbc1f170c196099f1b666c93202c3339a9"
+        },
+        {
+          "path": "model-00002-of-00002.safetensors",
+          "size": 3908490048,
+          "sha256": "046296a2a387efb43b0c997d5833c789604d168834f6e0d3064bf7bb13d002a6"
+        },
+        {
+          "path": "model.safetensors.index.json",
+          "size": 64742,
+          "sha256": null
+        },
+        {
+          "path": "preprocessor_config.json",
+          "size": 390,
+          "sha256": null
+        },
+        {
+          "path": "tokenizer.json",
+          "size": 7032403,
+          "sha256": null
+        },
+        {
+          "path": "tokenizer_config.json",
+          "size": 10868,
+          "sha256": null
+        },
+        {
+          "path": "video_preprocessor_config.json",
+          "size": 385,
+          "sha256": null
+        },
+        {
+          "path": "vocab.json",
+          "size": 2776833,
+          "sha256": null
+        }
+      ]
+    },
+    {
+      "checkpoint": "IDEA-Research/grounding-dino-tiny",
+      "revision": "a2bb814dd30d776dcf7e30523b00659f4f141c71",
+      "license": "apache-2.0",
+      "files": [
+        {
+          "path": ".gitattributes",
+          "size": 1519,
+          "sha256": null
+        },
+        {
+          "path": "README.md",
+          "size": 2580,
+          "sha256": null
+        },
+        {
+          "path": "added_tokens.json",
+          "size": 82,
+          "sha256": null
+        },
+        {
+          "path": "config.json",
+          "size": 1644,
+          "sha256": null
+        },
+        {
+          "path": "model.safetensors",
+          "size": 689359096,
+          "sha256": "1a2412ef99bd74bcd3c2a246fa1e48581f8889a1300c9051974741314fc042f3"
+        },
+        {
+          "path": "preprocessor_config.json",
+          "size": 457,
+          "sha256": null
+        },
+        {
+          "path": "pytorch_model.bin",
+          "size": 691914602,
+          "sha256": "f4d69c8403b9a569d90362c5fe8c6ea93dee4c8f08166df5b39e5eca8d227bbe"
+        },
+        {
+          "path": "special_tokens_map.json",
+          "size": 125,
+          "sha256": null
+        },
+        {
+          "path": "tokenizer.json",
+          "size": 711396,
+          "sha256": null
+        },
+        {
+          "path": "tokenizer_config.json",
+          "size": 1237,
+          "sha256": null
+        },
+        {
+          "path": "vocab.txt",
+          "size": 231508,
+          "sha256": null
+        }
+      ]
+    },
+    {
+      "checkpoint": "facebook/sam2.1-hiera-small",
+      "revision": "ee5bba1d82bb8749febdf90f45e84b687142ba03",
+      "license": "apache-2.0",
+      "files": [
+        {
+          "path": ".gitattributes",
+          "size": 1519,
+          "sha256": null
+        },
+        {
+          "path": "README.md",
+          "size": 19974,
+          "sha256": null
+        },
+        {
+          "path": "config.json",
+          "size": 5698,
+          "sha256": null
+        },
+        {
+          "path": "model.safetensors",
+          "size": 184305280,
+          "sha256": "0a4067b11ce1e23d5229203f11c718a823060d15a4b23fa2372a7d4b77cbbc60"
+        },
+        {
+          "path": "preprocessor_config.json",
+          "size": 683,
+          "sha256": null
+        },
+        {
+          "path": "processor_config.json",
+          "size": 95,
+          "sha256": null
+        },
+        {
+          "path": "sam2.1_hiera_s.yaml",
+          "size": 3761,
+          "sha256": null
+        },
+        {
+          "path": "sam2.1_hiera_small.pt",
+          "size": 184416285,
+          "sha256": "6d1aa6f30de5c92224f8172114de081d104bbd23dd9dc5c58996f0cad5dc4d38"
+        },
+        {
+          "path": "video_preprocessor_config.json",
+          "size": 705,
+          "sha256": null
+        }
+      ]
+    },
+    {
+      "checkpoint": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+      "revision": "b8fff7315c768468a5333511427288870b2e9635",
+      "license": "apache-2.0",
+      "files": [
+        {
+          "path": ".gitattributes",
+          "size": 1860,
+          "sha256": null
+        },
+        {
+          "path": "README.md",
+          "size": 17633,
+          "sha256": null
+        },
+        {
+          "path": "assets/comp_effic.png",
+          "size": 202156,
+          "sha256": "75ee012dcfb08365bec67a3ec7afc126fc2817f79b9f80e38711792d4770e32b"
+        },
+        {
+          "path": "assets/logo.png",
+          "size": 56322,
+          "sha256": null
+        },
+        {
+          "path": "assets/moe_2.png",
+          "size": 527914,
+          "sha256": "4ea471ccb64349bd08bc9a78f336ae000e9ca3b40da9a652b8028b214a8c6093"
+        },
+        {
+          "path": "assets/moe_arch.png",
+          "size": 74900,
+          "sha256": null
+        },
+        {
+          "path": "assets/performance.png",
+          "size": 306535,
+          "sha256": "97ef99c13c8ae717a8a11c8d8ec927b69077c647cc6689755d08fc38e7fbb830"
+        },
+        {
+          "path": "assets/vae.png",
+          "size": 165486,
+          "sha256": "4aaea5e187f1c5908e15ade5bef24c9fb59882986bc3d2ad75f7fe820f3d772f"
+        },
+        {
+          "path": "examples/i2v_input.JPG",
+          "size": 250628,
+          "sha256": "077e3d965090c9028c69c00931675f42e1acc815c6eb450ab291b3b72d211a8e"
+        },
+        {
+          "path": "model_index.json",
+          "size": 499,
+          "sha256": null
+        },
+        {
+          "path": "scheduler/scheduler_config.json",
+          "size": 820,
+          "sha256": null
+        },
+        {
+          "path": "text_encoder/config.json",
+          "size": 855,
+          "sha256": null
+        },
+        {
+          "path": "text_encoder/model-00001-of-00003.safetensors",
+          "size": 4935812536,
+          "sha256": "a8e861969c7433e707cc5a74065d795d36cca07ec96eb6763eb4083df7248f58"
+        },
+        {
+          "path": "text_encoder/model-00002-of-00003.safetensors",
+          "size": 4983103192,
+          "sha256": "d57d948ece4837d850b7a859a4415121d57cacf8b9ee1d4db200c67f592902d7"
+        },
+        {
+          "path": "text_encoder/model-00003-of-00003.safetensors",
+          "size": 1442935480,
+          "sha256": "0da9ee284e21d1406df708788db1d502d95d75f69faa25cd26151bf8829b7c5f"
+        },
+        {
+          "path": "text_encoder/model.safetensors.index.json",
+          "size": 22476,
+          "sha256": null
+        },
+        {
+          "path": "tokenizer/special_tokens_map.json",
+          "size": 7079,
+          "sha256": null
+        },
+        {
+          "path": "tokenizer/spiece.model",
+          "size": 4548313,
+          "sha256": "e3909a67b780650b35cf529ac782ad2b6b26e6d1f849d3fbb6a872905f452458"
+        },
+        {
+          "path": "tokenizer/tokenizer.json",
+          "size": 16837459,
+          "sha256": "20a46ac256746594ed7e1e3ef733b83fbc5a6f0922aa7480eda961743de080ef"
+        },
+        {
+          "path": "tokenizer/tokenizer_config.json",
+          "size": 61758,
+          "sha256": null
+        },
+        {
+          "path": "transformer/config.json",
+          "size": 495,
+          "sha256": null
+        },
+        {
+          "path": "transformer/diffusion_pytorch_model-00001-of-00005.safetensors",
+          "size": 4978254344,
+          "sha256": "511bec832a201caa410d09c5ce7dbbf8ad2708c345d82038f684fc74cce982be"
+        },
+        {
+          "path": "transformer/diffusion_pytorch_model-00002-of-00005.safetensors",
+          "size": 4846784976,
+          "sha256": "7c42724912b1911429125dc50c0e9a49ccbada5a601b657d4ed2e15e7597c193"
+        },
+        {
+          "path": "transformer/diffusion_pytorch_model-00003-of-00005.safetensors",
+          "size": 4972658392,
+          "sha256": "e9c3d0c76de786566382f8258101fea973ae37681c6e9fe0e5fe1fb93b806424"
+        },
+        {
+          "path": "transformer/diffusion_pytorch_model-00004-of-00005.safetensors",
+          "size": 4846785080,
+          "sha256": "a331121771790939678db6f585553fd5184609f7d02593c699a4d241b0d834c5"
+        },
+        {
+          "path": "transformer/diffusion_pytorch_model-00005-of-00005.safetensors",
+          "size": 354751840,
+          "sha256": "78b655685c47efdb2349f36826bb101264e9f212a16325d584aeb5f53c88e719"
+        },
+        {
+          "path": "transformer/diffusion_pytorch_model.safetensors.index.json",
+          "size": 73297,
+          "sha256": null
+        },
+        {
+          "path": "vae/config.json",
+          "size": 1701,
+          "sha256": null
+        },
+        {
+          "path": "vae/diffusion_pytorch_model.safetensors",
+          "size": 2818777808,
+          "sha256": "62cd18f19438e35b32ac63020e2852f566e9b02f46b6cdbd87972a356e3c6f4b"
+        }
+      ]
+    },
+    {
+      "checkpoint": "google/tapnet",
+      "revision": "5d3fb48e76c5422841e38501514121e251beabb7",
+      "license": "apache-2.0",
+      "files": [
+        {
+          "path": ".gitattributes",
+          "size": 1519,
+          "sha256": null
+        },
+        {
+          "path": "README.md",
+          "size": 8560,
+          "sha256": null
+        },
+        {
+          "path": "bootstapir_checkpoint_v2.npy",
+          "size": 218818353,
+          "sha256": "a50d7e1c6fe42c13cad2a190437d61be879e2a4782318fb971826f75be17e4e2"
+        },
+        {
+          "path": "bootstapir_checkpoint_v2.pt",
+          "size": 218886140,
+          "sha256": "8493c7a69e02c85b9382fbb3c7b8b539b36bc08ede744b9e99feb739a0129f4b"
+        },
+        {
+          "path": "bootstapnext.pth",
+          "size": 978292409,
+          "sha256": "425eeff19437554a74742e1a9e1077dd1059248ecdd77a84c689ea2847fa80a4"
+        },
+        {
+          "path": "bootstapnext_ckpt.npz",
+          "size": 776980182,
+          "sha256": "19de6b1495555c2afb4b56e823a3f3c2fd7236eea05c53d98feab3cccd1b4a28"
+        },
+        {
+          "path": "causal_bootstapir_checkpoint.npy",
+          "size": 218818353,
+          "sha256": "7e1536f68d2ea5d90ac2b705ee621ae2874788b378596f90c7f24857146a5585"
+        },
+        {
+          "path": "causal_bootstapir_checkpoint.pt",
+          "size": 218887028,
+          "sha256": "87c1e752cf5ce56e3e2f7da460aeb4d40fc826d04ef2939bade86a5c7495377f"
+        },
+        {
+          "path": "causal_tapir_checkpoint.npy",
+          "size": 127043639,
+          "sha256": "6e1083f074f840ca6dc9b72e7c895eae3f4d266644dbbc6d3c3a852192855012"
+        },
+        {
+          "path": "checkpoint.npy",
+          "size": 33539010,
+          "sha256": "9ed157638d90d5e8b9b3338dca7f7d63c4660eafd96e42a8681fa7ebab386c31"
+        },
+        {
+          "path": "tapir_checkpoint_panning.npy",
+          "size": 124307770,
+          "sha256": "d258bf117311f6841be60666df465852c5cd8292c7f90bab7338d90a545ad8c0"
+        },
+        {
+          "path": "tapir_checkpoint_panning.pt",
+          "size": 124348474,
+          "sha256": "628611c656b3bd65d4a70fbf5526b62afe82d1b085ce6044685287fb78509daa"
+        },
+        {
+          "path": "tapnextpp_512.ckpt",
+          "size": 2532283010,
+          "sha256": "6cd0e793fdcface3063d63f8ed3819bcf74c2c0468fe1fef85acee4de2f3609f"
+        },
+        {
+          "path": "tapnextpp_ckpt.pt",
+          "size": 2532282370,
+          "sha256": "cb96a43444ccb4fbdb25d800b88c7ba196179a526e78f01b021a16b1c1eff6da"
+        },
+        {
+          "path": "track_autoencoder_ckpt.npz",
+          "size": 273413884,
+          "sha256": "05743748c50e3b8456e4f36f7d55bc652012bd14dc58c7eb66e9ad63cf9f0cae"
+        }
+      ]
+    }
+  ]
+}

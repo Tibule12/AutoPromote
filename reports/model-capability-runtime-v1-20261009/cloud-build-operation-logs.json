@@ -1,0 +1,242 @@
+{
+  "entries": [
+    {
+      "textPayload": "09d8fc1b386f: Pushed",
+      "insertId": "648f1745-1210-4879-994d-5ecbd2666e9a-1966",
+      "resource": {
+        "type": "build",
+        "labels": {
+          "project_id": "autopromote-cc6d3",
+          "build_id": "648f1745-1210-4879-994d-5ecbd2666e9a",
+          "build_trigger_id": ""
+        }
+      },
+      "timestamp": "2026-10-09T11:56:30.281782749Z",
+      "severity": "INFO",
+      "labels": {
+        "build_step": "PUSH:STDOUT",
+        "build_tags": "model-runtime-v1,cpu-image-build,no-production-traffic"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/cloudbuild",
+      "receiveTimestamp": "2026-10-09T11:56:30.858367589Z"
+    },
+    {
+      "protoPayload": {
+        "@type": "type.googleapis.com/google.cloud.audit.AuditLog",
+        "status": {},
+        "authenticationInfo": {
+          "principalEmail": "tmtshwelo21@gmail.com",
+          "principalSubject": "user:tmtshwelo21@gmail.com",
+          "oauthInfo": {
+            "oauthClientId": "32555940559.apps.googleusercontent.com"
+          }
+        },
+        "requestMetadata": {
+          "callerIp": "41.56.221.196",
+          "callerSuppliedUserAgent": "python-requests/2.31.0,gzip(gfe),gzip(gfe)",
+          "requestAttributes": {
+            "time": "2026-10-09T11:55:18.117028Z",
+            "auth": {}
+          },
+          "destinationAttributes": {}
+        },
+        "serviceName": "cloudbuild.googleapis.com",
+        "methodName": "google.devtools.cloudbuild.v1.CloudBuild.GetBuild",
+        "authorizationInfo": [
+          {
+            "resource": "projects/autopromote-cc6d3",
+            "permission": "cloudbuild.builds.get",
+            "granted": true,
+            "resourceAttributes": {},
+            "permissionType": "ADMIN_READ"
+          }
+        ],
+        "resourceName": "projects/autopromote-cc6d3/builds/648f1745-1210-4879-994d-5ecbd2666e9a",
+        "request": {
+          "@type": "type.googleapis.com/google.devtools.cloudbuild.v1.GetBuildRequest",
+          "projectId": "autopromote-cc6d3",
+          "id": "648f1745-1210-4879-994d-5ecbd2666e9a"
+        },
+        "resourceLocation": {
+          "currentLocations": [
+            "global"
+          ]
+        }
+      },
+      "insertId": "im3tbee3sc0p",
+      "resource": {
+        "type": "build",
+        "labels": {
+          "build_trigger_id": "",
+          "build_id": "648f1745-1210-4879-994d-5ecbd2666e9a",
+          "project_id": "autopromote-cc6d3"
+        }
+      },
+      "timestamp": "2026-10-09T11:55:17.949064Z",
+      "severity": "INFO",
+      "logName": "projects/autopromote-cc6d3/logs/cloudaudit.googleapis.com%2Fdata_access",
+      "receiveTimestamp": "2026-10-09T11:55:18.561960621Z"
+    },
+    {
+      "textPayload": "ece7c5daacf9: Pushed",
+      "insertId": "648f1745-1210-4879-994d-5ecbd2666e9a-1965",
+      "resource": {
+        "type": "build",
+        "labels": {
+          "build_id": "648f1745-1210-4879-994d-5ecbd2666e9a",
+          "project_id": "autopromote-cc6d3",
+          "build_trigger_id": ""
+        }
+      },
+      "timestamp": "2026-10-09T11:54:40.563040851Z",
+      "severity": "INFO",
+      "labels": {
+        "build_tags": "model-runtime-v1,cpu-image-build,no-production-traffic",
+        "build_step": "PUSH:STDOUT"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/cloudbuild",
+      "receiveTimestamp": "2026-10-09T11:54:40.806918886Z"
+    },
+    {
+      "textPayload": "b578fb322b7b: Pushed",
+      "insertId": "648f1745-1210-4879-994d-5ecbd2666e9a-1964",
+      "resource": {
+        "type": "build",
+        "labels": {
+          "build_id": "648f1745-1210-4879-994d-5ecbd2666e9a",
+          "project_id": "autopromote-cc6d3",
+          "build_trigger_id": ""
+        }
+      },
+      "timestamp": "2026-10-09T11:54:11.503225951Z",
+      "severity": "INFO",
+      "labels": {
+        "build_tags": "model-runtime-v1,cpu-image-build,no-production-traffic",
+        "build_step": "PUSH:STDOUT"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/cloudbuild",
+      "receiveTimestamp": "2026-10-09T11:54:11.811105918Z"
+    },
+    {
+      "textPayload": "5ef6645238f3: Pushed",
+      "insertId": "648f1745-1210-4879-994d-5ecbd2666e9a-1963",
+      "resource": {
+        "type": "build",
+        "labels": {
+          "build_id": "648f1745-1210-4879-994d-5ecbd2666e9a",
+          "project_id": "autopromote-cc6d3",
+          "build_trigger_id": ""
+        }
+      },
+      "timestamp": "2026-10-09T11:53:50.291616881Z",
+      "severity": "INFO",
+      "labels": {
+        "build_tags": "model-runtime-v1,cpu-image-build,no-production-traffic",
+        "build_step": "PUSH:STDOUT"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/cloudbuild",
+      "receiveTimestamp": "2026-10-09T11:53:50.805719282Z"
+    },
+    {
+      "textPayload": "4b7c01ed0534: Pushed",
+      "insertId": "648f1745-1210-4879-994d-5ecbd2666e9a-1962",
+      "resource": {
+        "type": "build",
+        "labels": {
+          "project_id": "autopromote-cc6d3",
+          "build_trigger_id": "",
+          "build_id": "648f1745-1210-4879-994d-5ecbd2666e9a"
+        }
+      },
+      "timestamp": "2026-10-09T11:53:44.218341939Z",
+      "severity": "INFO",
+      "labels": {
+        "build_tags": "model-runtime-v1,cpu-image-build,no-production-traffic",
+        "build_step": "PUSH:STDOUT"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/cloudbuild",
+      "receiveTimestamp": "2026-10-09T11:53:44.813727100Z"
+    },
+    {
+      "textPayload": "5d874d849ec6: Pushed",
+      "insertId": "648f1745-1210-4879-994d-5ecbd2666e9a-1961",
+      "resource": {
+        "type": "build",
+        "labels": {
+          "project_id": "autopromote-cc6d3",
+          "build_id": "648f1745-1210-4879-994d-5ecbd2666e9a",
+          "build_trigger_id": ""
+        }
+      },
+      "timestamp": "2026-10-09T11:53:39.038962520Z",
+      "severity": "INFO",
+      "labels": {
+        "build_step": "PUSH:STDOUT",
+        "build_tags": "model-runtime-v1,cpu-image-build,no-production-traffic"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/cloudbuild",
+      "receiveTimestamp": "2026-10-09T11:53:39.807295546Z"
+    },
+    {
+      "textPayload": "a2dd2dc8d2b5: Pushed",
+      "insertId": "648f1745-1210-4879-994d-5ecbd2666e9a-1960",
+      "resource": {
+        "type": "build",
+        "labels": {
+          "build_id": "648f1745-1210-4879-994d-5ecbd2666e9a",
+          "build_trigger_id": "",
+          "project_id": "autopromote-cc6d3"
+        }
+      },
+      "timestamp": "2026-10-09T11:53:38.178581341Z",
+      "severity": "INFO",
+      "labels": {
+        "build_tags": "model-runtime-v1,cpu-image-build,no-production-traffic",
+        "build_step": "PUSH:STDOUT"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/cloudbuild",
+      "receiveTimestamp": "2026-10-09T11:53:38.817559210Z"
+    },
+    {
+      "textPayload": "6020d84069cf: Pushed",
+      "insertId": "648f1745-1210-4879-994d-5ecbd2666e9a-1959",
+      "resource": {
+        "type": "build",
+        "labels": {
+          "build_id": "648f1745-1210-4879-994d-5ecbd2666e9a",
+          "build_trigger_id": "",
+          "project_id": "autopromote-cc6d3"
+        }
+      },
+      "timestamp": "2026-10-09T11:53:37.038746578Z",
+      "severity": "INFO",
+      "labels": {
+        "build_tags": "model-runtime-v1,cpu-image-build,no-production-traffic",
+        "build_step": "PUSH:STDOUT"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/cloudbuild",
+      "receiveTimestamp": "2026-10-09T11:53:37.804958522Z"
+    },
+    {
+      "textPayload": "d9ab1aaed362: Pushed",
+      "insertId": "648f1745-1210-4879-994d-5ecbd2666e9a-1958",
+      "resource": {
+        "type": "build",
+        "labels": {
+          "project_id": "autopromote-cc6d3",
+          "build_trigger_id": "",
+          "build_id": "648f1745-1210-4879-994d-5ecbd2666e9a"
+        }
+      },
+      "timestamp": "2026-10-09T11:53:37.003226763Z",
+      "severity": "INFO",
+      "labels": {
+        "build_step": "PUSH:STDOUT",
+        "build_tags": "model-runtime-v1,cpu-image-build,no-production-traffic"
+      },
+      "logName": "projects/autopromote-cc6d3/logs/cloudbuild",
+      "receiveTimestamp": "2026-10-09T11:53:37.804958522Z"
+    }
+  ],
+  "nextPageToken": "eqMHCp4HAdjKCLr-epiQ6VlEBbZNLjFVY86duWf910L05pgxT2Bb-RTWnP528NG3yJeJ9Y6xqzu0lfJySq2Bx2mAyp3-J9UMAawtBgbE3WcyRR317pjxah4bHNFgV2LNi0AFQoVRKNjqRrras6t1WG-nig65U5xHZfJ14f9Vsc2q3JCB-V1kJdj8o5KOuzkIY6Vb_hNmNGJL4dfpXZxag4CxrN_u_MJwIjaYuxh5WlpZN41NXR3g8YXLtjFAJX7vXqBhFat6y6tEZysxVWnNvrNArSHl0J8BBZ-T8TbwgSSbXr0yNn2BawuNZoN_uvoK9x3zX3-Ney3GNKiRyJEENMoR-Q_Ns5BFTXii6rw15LT5ba6yEUsTa4ftPAgh96um9A4zTefp7f6fNKPFCh7y3ff9Dzg7gskdcWsoWnE8z953e9ceC7QfpC572OuDFGDE935GB1NWOcoxlzEANk6JFgC01Q-L57CRdts0ruQibeNkXYr-Oge2FW0Kw-tg3IqjzKPGc-wrruEv8rdmV6_SZf3j5kGC8VWgU0UvDQt41Q27JPdipRlo2PYE2TRvkqlrWCbl7PQ_Uwv_dU_feKzs5KwW-tiNP3mgY_H3rd8cYFepczUhwFNJEqLhm-HE1CdTGVBqhIjLhAiBU0EhgQC4JoSEHK0c5LHKwZjRTVDDAk2acsFyCxJsfzWnHeuRzU5BmyDsNkKHZGWWK-cl8vUtTyIEQbBQkl8w9tXDrqVv3Mf5EPxAZgCRC093npXe7w2X0aURM8sYNxsmPDtFWvRZaguJ12cw6cQu4S8IY_cvdk1e_EcKVADPJ0gwAyxlNvAAEpfAi_LhCdPa8UTD9Ml1oNRX4e_kPhIE0ba_0CqTJNcuL3mOlSGnB-L6VGysjfkDonUjoMYwu_kOG82SPQrMsqp8uWUd2a3J4JUFu1tu8fciTaQSoKAwI1BCMwikzDdBEAKb6sc0oaWqzj0a4ISthU59lrNej2_u9Wq7MooNhrIIXmcqK_WdMDl3tySWWnxGHK0jTJ0WJVRW7fFKnoICwj3QLd6S5w3jwYW_d7DUX1grXqlaC9fSsiZIJmuMSdkbawYbywWakz3I1jT7ITyPZek4CeQ-JvRbTRPwtTrib3j1ixb3H7jECzleC97ZVR0-tB6_26r-FWj1Z-T6CCK94qtJm_Ooycf-dXIG1Qa-ffPHeidql9Mt9JvKJSmY4H1_6VcOV8g8_Oa4xVntlSYFO_yGk7wQAQ"
+}

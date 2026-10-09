@@ -1,0 +1,183 @@
+{
+  "schemaVersion": 1,
+  "purpose": "private_model_runtime_v1_proof",
+  "productionTraffic": false,
+  "createdAt": "2026-10-09T12:06:34.732747+00:00",
+  "workers": {
+    "vision-understanding:cuda": {
+      "jobName": "projects/autopromote-cc6d3/locations/us-central1/jobs/autopromote-model-v1-vision",
+      "image": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/autopromote-model-runtime-vision@sha256:b20050a777b6ccb53f162949e8e96e5ab4d95a19a88f482939e57109f1f889b4",
+      "gpuCount": 1,
+      "timeoutSeconds": 600,
+      "definition": {
+        "labels": {
+          "purpose": "model-runtime-v1-proof",
+          "production-traffic": "false",
+          "product": "autopromote"
+        },
+        "template": {
+          "parallelism": 1,
+          "taskCount": 1,
+          "template": {
+            "containers": [
+              {
+                "image": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/autopromote-model-runtime-vision@sha256:b20050a777b6ccb53f162949e8e96e5ab4d95a19a88f482939e57109f1f889b4",
+                "env": [
+                  {
+                    "name": "MODEL_ARTIFACT_BUCKET",
+                    "value": "autopromote-cc6d3-viral-studio-3d"
+                  }
+                ],
+                "resources": {
+                  "limits": {
+                    "cpu": "20",
+                    "memory": "80Gi",
+                    "nvidia.com/gpu": "1"
+                  }
+                }
+              }
+            ],
+            "maxRetries": 0,
+            "timeout": "600s",
+            "serviceAccount": "viral-studio-3d-renderer@autopromote-cc6d3.iam.gserviceaccount.com",
+            "executionEnvironment": "EXECUTION_ENVIRONMENT_GEN2",
+            "nodeSelector": {
+              "accelerator": "nvidia-rtx-pro-6000"
+            },
+            "gpuZonalRedundancyDisabled": true
+          }
+        }
+      }
+    },
+    "segmentation-tracking:cuda": {
+      "jobName": "projects/autopromote-cc6d3/locations/us-central1/jobs/autopromote-model-v1-segmentation",
+      "image": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/autopromote-model-runtime-segmentation@sha256:fe9c28582d15186c3306a5eafee64b47e72cc557789ba2e81aae90e59a48f25a",
+      "gpuCount": 1,
+      "timeoutSeconds": 600,
+      "definition": {
+        "labels": {
+          "purpose": "model-runtime-v1-proof",
+          "production-traffic": "false",
+          "product": "autopromote"
+        },
+        "template": {
+          "parallelism": 1,
+          "taskCount": 1,
+          "template": {
+            "containers": [
+              {
+                "image": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/autopromote-model-runtime-segmentation@sha256:fe9c28582d15186c3306a5eafee64b47e72cc557789ba2e81aae90e59a48f25a",
+                "env": [
+                  {
+                    "name": "MODEL_ARTIFACT_BUCKET",
+                    "value": "autopromote-cc6d3-viral-studio-3d"
+                  }
+                ],
+                "resources": {
+                  "limits": {
+                    "cpu": "20",
+                    "memory": "80Gi",
+                    "nvidia.com/gpu": "1"
+                  }
+                }
+              }
+            ],
+            "maxRetries": 0,
+            "timeout": "600s",
+            "serviceAccount": "viral-studio-3d-renderer@autopromote-cc6d3.iam.gserviceaccount.com",
+            "executionEnvironment": "EXECUTION_ENVIRONMENT_GEN2",
+            "nodeSelector": {
+              "accelerator": "nvidia-rtx-pro-6000"
+            },
+            "gpuZonalRedundancyDisabled": true
+          }
+        }
+      }
+    },
+    "video-generation:cuda": {
+      "jobName": "projects/autopromote-cc6d3/locations/us-central1/jobs/autopromote-model-v1-video",
+      "image": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/autopromote-model-runtime-video@sha256:51e4e736de0a9b530e1e50febbcfc6b52968a2bcd9df5b959d01eac8edf21510",
+      "gpuCount": 1,
+      "timeoutSeconds": 3300,
+      "definition": {
+        "labels": {
+          "purpose": "model-runtime-v1-proof",
+          "production-traffic": "false",
+          "product": "autopromote"
+        },
+        "template": {
+          "parallelism": 1,
+          "taskCount": 1,
+          "template": {
+            "containers": [
+              {
+                "image": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/autopromote-model-runtime-video@sha256:51e4e736de0a9b530e1e50febbcfc6b52968a2bcd9df5b959d01eac8edf21510",
+                "env": [
+                  {
+                    "name": "MODEL_ARTIFACT_BUCKET",
+                    "value": "autopromote-cc6d3-viral-studio-3d"
+                  }
+                ],
+                "resources": {
+                  "limits": {
+                    "cpu": "20",
+                    "memory": "80Gi",
+                    "nvidia.com/gpu": "1"
+                  }
+                }
+              }
+            ],
+            "maxRetries": 0,
+            "timeout": "3300s",
+            "serviceAccount": "viral-studio-3d-renderer@autopromote-cc6d3.iam.gserviceaccount.com",
+            "executionEnvironment": "EXECUTION_ENVIRONMENT_GEN2",
+            "nodeSelector": {
+              "accelerator": "nvidia-rtx-pro-6000"
+            },
+            "gpuZonalRedundancyDisabled": true
+          }
+        }
+      }
+    },
+    "segmentation-tracking:cpu": {
+      "jobName": "projects/autopromote-cc6d3/locations/us-central1/jobs/autopromote-model-v1-tracking-cpu",
+      "image": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/autopromote-model-runtime-tracking-cpu@sha256:4d8b3867d14e37c3962c3cd0fe9f017028cbdbea1a3cf2e29b257333b6f8bffd",
+      "gpuCount": 0,
+      "timeoutSeconds": 120,
+      "definition": {
+        "labels": {
+          "purpose": "model-runtime-v1-proof",
+          "production-traffic": "false",
+          "product": "autopromote"
+        },
+        "template": {
+          "parallelism": 1,
+          "taskCount": 1,
+          "template": {
+            "containers": [
+              {
+                "image": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/autopromote-model-runtime-tracking-cpu@sha256:4d8b3867d14e37c3962c3cd0fe9f017028cbdbea1a3cf2e29b257333b6f8bffd",
+                "env": [
+                  {
+                    "name": "MODEL_ARTIFACT_BUCKET",
+                    "value": "autopromote-cc6d3-viral-studio-3d"
+                  }
+                ],
+                "resources": {
+                  "limits": {
+                    "cpu": "2",
+                    "memory": "2Gi"
+                  }
+                }
+              }
+            ],
+            "maxRetries": 0,
+            "timeout": "120s",
+            "serviceAccount": "viral-studio-3d-renderer@autopromote-cc6d3.iam.gserviceaccount.com",
+            "executionEnvironment": "EXECUTION_ENVIRONMENT_GEN2"
+          }
+        }
+      }
+    }
+  }
+}

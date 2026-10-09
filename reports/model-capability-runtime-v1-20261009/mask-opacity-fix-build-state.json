@@ -1,0 +1,121 @@
+{
+  "id": "fcae9009-b330-41af-9c69-4b7e3a7c82bb",
+  "status": "SUCCESS",
+  "source": {
+    "storageSource": {
+      "bucket": "autopromote-cc6d3-viral-studio-3d",
+      "object": "studio/model-runtime/builds/14ef553e85860610d4450e47d74c86e2ed1127076e4453f741b1dfef0aa08e4e/source.tar.gz",
+      "generation": "1791551678176301"
+    }
+  },
+  "createTime": "2026-10-09T13:14:39.368753831Z",
+  "startTime": "2026-10-09T13:15:43.682128298Z",
+  "finishTime": "2026-10-09T13:17:36.166221Z",
+  "results": {
+    "images": [
+      {
+        "name": "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/autopromote-model-runtime-segmentation:source-14ef553e85860610",
+        "digest": "sha256:fe9c28582d15186c3306a5eafee64b47e72cc557789ba2e81aae90e59a48f25a",
+        "pushTiming": {
+          "startTime": "2026-10-09T13:17:32.991243315Z",
+          "endTime": "2026-10-09T13:17:36.071355253Z"
+        },
+        "artifactRegistryPackage": "projects/autopromote-cc6d3/locations/us-central1/repositories/thulani-repo/packages/autopromote-model-runtime-segmentation/versions/sha256:fe9c28582d15186c3306a5eafee64b47e72cc557789ba2e81aae90e59a48f25a"
+      }
+    ],
+    "buildStepImages": [
+      "sha256:40c2fb4fcd0ad51376eef166c2e7b2b40a3508d5776e2bf33db3783ab39d0f2e"
+    ],
+    "buildStepOutputs": [
+      ""
+    ]
+  },
+  "steps": [
+    {
+      "name": "gcr.io/cloud-builders/docker",
+      "args": [
+        "build",
+        "--build-arg",
+        "BASE_IMAGE=us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/autopromote-model-runtime-base@sha256:10dadd3acb2374a59267cd06b106c22e68f5eb40b277763e2cc7f0ec2ece80fa",
+        "-f",
+        "model_workers/Dockerfile.segmentation",
+        "-t",
+        "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/autopromote-model-runtime-segmentation:source-14ef553e85860610",
+        "."
+      ],
+      "timing": {
+        "startTime": "2026-10-09T13:15:49.491570029Z",
+        "endTime": "2026-10-09T13:17:32.912689242Z"
+      },
+      "status": "SUCCESS",
+      "pullTiming": {
+        "startTime": "2026-10-09T13:15:49.491570029Z",
+        "endTime": "2026-10-09T13:15:49.503181939Z"
+      }
+    }
+  ],
+  "timeout": "1800s",
+  "images": [
+    "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/autopromote-model-runtime-segmentation:source-14ef553e85860610"
+  ],
+  "projectId": "autopromote-cc6d3",
+  "sourceProvenance": {
+    "resolvedStorageSource": {
+      "bucket": "autopromote-cc6d3-viral-studio-3d",
+      "object": "studio/model-runtime/builds/14ef553e85860610d4450e47d74c86e2ed1127076e4453f741b1dfef0aa08e4e/source.tar.gz",
+      "generation": "1791551678176301"
+    },
+    "fileHashes": {
+      "gs://autopromote-cc6d3-viral-studio-3d/studio/model-runtime/builds/14ef553e85860610d4450e47d74c86e2ed1127076e4453f741b1dfef0aa08e4e/source.tar.gz#1791551678176301": {
+        "fileHash": [
+          {
+            "type": "MD5",
+            "value": "tzi9Q6yrjmHV6Y3HQeJqvA=="
+          },
+          {
+            "type": "SHA256",
+            "value": "FO9VPoWGBhDURQ5H10yG4u0RJwduRFP3QbHf7wqgjk4="
+          }
+        ]
+      }
+    }
+  },
+  "options": {
+    "machineType": "E2_HIGHCPU_8",
+    "diskSizeGb": "100",
+    "logging": "CLOUD_LOGGING_ONLY",
+    "pool": {}
+  },
+  "logUrl": "https://console.cloud.google.com/cloud-build/builds/fcae9009-b330-41af-9c69-4b7e3a7c82bb?project=341498038874",
+  "tags": [
+    "model-runtime-v1",
+    "cpu-image-build",
+    "no-production-traffic"
+  ],
+  "timing": {
+    "BUILD": {
+      "startTime": "2026-10-09T13:15:48.903620693Z",
+      "endTime": "2026-10-09T13:17:32.991109678Z"
+    },
+    "PUSH": {
+      "startTime": "2026-10-09T13:17:32.991242570Z",
+      "endTime": "2026-10-09T13:17:36.071461361Z"
+    },
+    "STORAGE_SOURCE": {
+      "startTime": "2026-10-09T13:15:46.463695562Z",
+      "endTime": "2026-10-09T13:15:48.903459713Z"
+    },
+    "FETCHSOURCE": {
+      "startTime": "2026-10-09T13:15:46.463695562Z",
+      "endTime": "2026-10-09T13:15:48.903459713Z"
+    }
+  },
+  "artifacts": {
+    "images": [
+      "us-central1-docker.pkg.dev/autopromote-cc6d3/thulani-repo/autopromote-model-runtime-segmentation:source-14ef553e85860610"
+    ]
+  },
+  "queueTtl": "3600s",
+  "serviceAccount": "projects/autopromote-cc6d3/serviceAccounts/341498038874-compute@developer.gserviceaccount.com",
+  "name": "projects/341498038874/locations/global/builds/fcae9009-b330-41af-9c69-4b7e3a7c82bb"
+}

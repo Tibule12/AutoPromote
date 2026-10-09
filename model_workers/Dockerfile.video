@@ -1,0 +1,10 @@
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+RUN pip install diffusers==0.36.0 imageio==2.37.0 imageio-ffmpeg==0.6.0 ftfy==6.3.1 \
+    && python3 -c "from diffusers.pipelines.wan.pipeline_wan import prompt_clean; assert prompt_clean('  rotating   reels  ') == 'rotating reels'"
+COPY contracts/model-capabilities-v1.json contracts/
+COPY config/model-runtime config/model-runtime
+COPY model_workers/common.py model_workers/main.py model_workers/
+COPY model_workers/adapters/video.py model_workers/adapters/
+ENV MODEL_WORKER_CLASS=video-generation HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
+CMD ["python3", "-m", "model_workers.main"]

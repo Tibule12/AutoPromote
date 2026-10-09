@@ -44,6 +44,9 @@ async def render(args):
         return target.as_uri()
     worker.upload_file_to_firebase=retain
     request=json.loads(args.request.read_text())
+    known=getattr(worker.RenderViralRequest,'model_fields',None) or worker.RenderViralRequest.__fields__
+    unknown=set(request)-set(known)
+    if unknown:raise ValueError('Unknown existing Studio render fields: '+', '.join(sorted(unknown)))
     encoders=[]
     original_run=worker.run_subprocess_async
     async def observe(command,**kwargs):

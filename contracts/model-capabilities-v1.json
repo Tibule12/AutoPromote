@@ -1,0 +1,934 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "schemaVersion": 1,
+  "clockRate": 90000,
+  "request": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "schemaVersion": {
+        "const": 1
+      },
+      "requestId": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@+-]{0,159}$"
+      },
+      "projectId": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@+-]{0,159}$"
+      },
+      "projectRevision": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 9007199254740991
+      },
+      "sourceAssetId": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@+-]{0,159}$"
+      },
+      "sourceSha256": {
+        "type": "string",
+        "pattern": "^[a-f0-9]{64}$"
+      },
+      "sourceStoragePath": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1024
+      },
+      "sourceRange": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "space": {
+            "const": "source"
+          },
+          "startTick": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "endTick": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "space",
+          "startTick",
+          "endTick"
+        ]
+      },
+      "capability": {
+        "enum": [
+          "understand_video",
+          "detect_object",
+          "segment_subject",
+          "track_object",
+          "generate_video"
+        ]
+      },
+      "parameters": {
+        "type": "object"
+      },
+      "dependencyHashes": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "minItems": 0,
+        "maxItems": 16
+      }
+    },
+    "required": [
+      "schemaVersion",
+      "requestId",
+      "projectId",
+      "projectRevision",
+      "sourceAssetId",
+      "sourceSha256",
+      "sourceStoragePath",
+      "sourceRange",
+      "capability",
+      "parameters",
+      "dependencyHashes"
+    ]
+  },
+  "inputs": {
+    "understand_video": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "sampleCount": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 16
+        },
+        "question": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      },
+      "required": [
+        "sampleCount",
+        "question"
+      ]
+    },
+    "detect_object": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "query": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "frameIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 899
+        },
+        "boxThreshold": {
+          "type": "number",
+          "minimum": 0.05,
+          "maximum": 0.95
+        },
+        "textThreshold": {
+          "type": "number",
+          "minimum": 0.05,
+          "maximum": 0.95
+        }
+      },
+      "required": [
+        "query",
+        "frameIndex",
+        "boxThreshold",
+        "textThreshold"
+      ]
+    },
+    "segment_subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "subjectId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@+-]{0,159}$"
+        },
+        "initialBox": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "points": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "position": {
+                "type": "array",
+                "items": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "minItems": 2,
+                "maxItems": 2
+              },
+              "label": {
+                "enum": [
+                  0,
+                  1
+                ]
+              }
+            },
+            "required": [
+              "position",
+              "label"
+            ]
+          },
+          "minItems": 0,
+          "maxItems": 16
+        },
+        "shotPrompts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "frameIndex": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 899
+              },
+              "box": {
+                "type": "array",
+                "items": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "minItems": 4,
+                "maxItems": 4
+              }
+            },
+            "required": [
+              "frameIndex",
+              "box"
+            ]
+          },
+          "minItems": 0,
+          "maxItems": 24
+        }
+      },
+      "required": [
+        "subjectId",
+        "initialBox",
+        "points",
+        "shotPrompts"
+      ]
+    },
+    "track_object": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "subjectId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@+-]{0,159}$"
+        },
+        "mode": {
+          "enum": [
+            "mask_centroid",
+            "points"
+          ]
+        },
+        "maskArtifactHash": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "points": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "minItems": 0,
+          "maxItems": 32
+        }
+      },
+      "required": [
+        "subjectId",
+        "mode",
+        "maskArtifactHash",
+        "points"
+      ]
+    },
+    "generate_video": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "enum": [
+            "text_to_video",
+            "image_to_video"
+          ]
+        },
+        "prompt": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000
+        },
+        "negativePrompt": {
+          "type": "string",
+          "maxLength": 2000
+        },
+        "seed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "width": {
+          "enum": [
+            1280,
+            704
+          ]
+        },
+        "height": {
+          "enum": [
+            704,
+            1280
+          ]
+        },
+        "frames": {
+          "enum": [
+            49,
+            73,
+            121
+          ]
+        },
+        "fps": {
+          "const": 24
+        },
+        "steps": {
+          "type": "integer",
+          "minimum": 20,
+          "maximum": 40
+        },
+        "guidance": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 8
+        }
+      },
+      "required": [
+        "mode",
+        "prompt",
+        "negativePrompt",
+        "seed",
+        "width",
+        "height",
+        "frames",
+        "fps",
+        "steps",
+        "guidance"
+      ]
+    }
+  },
+  "outputs": {
+    "understand_video": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000
+        },
+        "subjects": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@+-]{0,159}$"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500
+              },
+              "observedFrameIndices": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 31
+                },
+                "minItems": 1,
+                "maxItems": 32
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "description",
+              "observedFrameIndices"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 32
+        },
+        "observations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "frameIndex": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 31
+              },
+              "sourceTick": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              }
+            },
+            "required": [
+              "frameIndex",
+              "sourceTick",
+              "description"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 32
+        },
+        "coverageBasis": {
+          "const": "sampled_frames_only"
+        },
+        "confidence": {
+          "type": "null"
+        }
+      },
+      "required": [
+        "summary",
+        "subjects",
+        "observations",
+        "coverageBasis",
+        "confidence"
+      ]
+    },
+    "detect_object": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "frameIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 900
+        },
+        "sourceTick": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "query": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "detections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@+-]{0,159}$"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "box": {
+                "type": "array",
+                "items": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "minItems": 4,
+                "maxItems": 4
+              },
+              "score": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "box",
+              "score"
+            ]
+          },
+          "minItems": 0,
+          "maxItems": 64
+        },
+        "coordinateSpace": {
+          "const": "normalized_source"
+        },
+        "coverageBasis": {
+          "const": "single_frame_only"
+        }
+      },
+      "required": [
+        "frameIndex",
+        "sourceTick",
+        "query",
+        "detections",
+        "coordinateSpace",
+        "coverageBasis"
+      ]
+    },
+    "segment_subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "subjectId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@+-]{0,159}$"
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 32,
+          "maximum": 1920
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 32,
+          "maximum": 1920
+        },
+        "fpsNumerator": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 60
+        },
+        "fpsDenominator": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1001
+        },
+        "frameCount": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 900
+        },
+        "sourceRange": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "space": {
+              "const": "source"
+            },
+            "startTick": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "endTick": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "space",
+            "startTick",
+            "endTick"
+          ]
+        },
+        "maskManifest": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_./-]{0,180}$"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "bytes": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 536870912
+            },
+            "mediaType": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            }
+          },
+          "required": [
+            "name",
+            "sha256",
+            "bytes",
+            "mediaType"
+          ]
+        },
+        "maskBundle": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_./-]{0,180}$"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "bytes": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 536870912
+            },
+            "mediaType": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            }
+          },
+          "required": [
+            "name",
+            "sha256",
+            "bytes",
+            "mediaType"
+          ]
+        },
+        "coverageBasis": {
+          "const": "decoded_frames"
+        },
+        "confidence": {
+          "type": "null"
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "minItems": 0,
+          "maxItems": 900
+        }
+      },
+      "required": [
+        "subjectId",
+        "width",
+        "height",
+        "fpsNumerator",
+        "fpsDenominator",
+        "frameCount",
+        "sourceRange",
+        "maskManifest",
+        "maskBundle",
+        "coverageBasis",
+        "confidence",
+        "warnings"
+      ]
+    },
+    "track_object": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "subjectId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:@+-]{0,159}$"
+        },
+        "trackingKind": {
+          "enum": [
+            "object_mask_centroid",
+            "point"
+          ]
+        },
+        "coordinateSpace": {
+          "const": "normalized_source"
+        },
+        "sourceRange": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "space": {
+              "const": "source"
+            },
+            "startTick": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "endTick": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "space",
+            "startTick",
+            "endTick"
+          ]
+        },
+        "samples": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "frameIndex": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 900
+              },
+              "sourceTick": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "point": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "box": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "minItems": 4,
+                    "maxItems": 4
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "visible": {
+                "type": "boolean"
+              },
+              "confidence": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "frameIndex",
+              "sourceTick",
+              "point",
+              "box",
+              "visible",
+              "confidence"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 900
+        },
+        "dependencyArtifactHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "coverageBasis": {
+          "const": "decoded_frames"
+        }
+      },
+      "required": [
+        "subjectId",
+        "trackingKind",
+        "coordinateSpace",
+        "sourceRange",
+        "samples",
+        "dependencyArtifactHash",
+        "coverageBasis"
+      ]
+    },
+    "generate_video": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "video": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_./-]{0,180}$"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "bytes": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 536870912
+            },
+            "mediaType": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            }
+          },
+          "required": [
+            "name",
+            "sha256",
+            "bytes",
+            "mediaType"
+          ]
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 128,
+          "maximum": 1920
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 128,
+          "maximum": 1920
+        },
+        "fpsNumerator": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 60
+        },
+        "fpsDenominator": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1001
+        },
+        "frameCount": {
+          "type": "integer",
+          "minimum": 9,
+          "maximum": 241
+        },
+        "durationTicks": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "origin": {
+          "const": "generated_illustration"
+        },
+        "reviewRequired": {
+          "const": true
+        },
+        "confidence": {
+          "type": "null"
+        }
+      },
+      "required": [
+        "video",
+        "width",
+        "height",
+        "fpsNumerator",
+        "fpsDenominator",
+        "frameCount",
+        "durationTicks",
+        "origin",
+        "reviewRequired",
+        "confidence"
+      ]
+    }
+  },
+  "blob": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "name": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9_./-]{0,180}$"
+      },
+      "sha256": {
+        "type": "string",
+        "pattern": "^[a-f0-9]{64}$"
+      },
+      "bytes": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 536870912
+      },
+      "mediaType": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 100
+      }
+    },
+    "required": [
+      "name",
+      "sha256",
+      "bytes",
+      "mediaType"
+    ]
+  }
+}

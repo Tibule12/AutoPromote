@@ -1,0 +1,9 @@
+FROM python:3.12.11-slim
+ENV PYTHONPATH=/app PYTHONUNBUFFERED=1 MODEL_WORKER_CLASS=segmentation-tracking
+RUN pip install --no-cache-dir numpy==1.26.4 Pillow==11.3.0 google-cloud-storage==3.4.1 jsonschema==4.25.1 requests==2.32.5
+WORKDIR /app
+COPY contracts/model-capabilities-v1.json contracts/
+COPY config/model-runtime config/model-runtime
+COPY model_workers/common.py model_workers/main.py model_workers/
+COPY model_workers/adapters/segmentation.py model_workers/adapters/
+CMD ["python3", "-m", "model_workers.main"]

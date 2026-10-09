@@ -1,0 +1,13 @@
+{
+  "jobId": "model-runtime-v1-subject-proof",
+  "ownerUid": "model-runtime-proof",
+  "source_clip_id": "proof-source",
+  "start_time": 0,
+  "end_time": 3,
+  "sha256": "cdf23dd598eff1d81dd3d89e3e74daa710a76f0184284d186d4fcc45ef6196a6",
+  "pixel_sha256": "b60748c4ce820e981b223e539907fd6c9c766c895d0774ab32f2e0d27f6044bf",
+  "source_sha256": "fe0bb5ab8e5e2ca8bd53d25e4d3f043fb55a6930280a7735cbdeeb14e44cb39e",
+  "storagePath": "temp_studio_vfx/model-runtime-proof/model-runtime-v1-subject-proof/render.mp4",
+  "generation": "1791553086830909",
+  "signedUrlPersistedOnlyInPrivateInput": true
+}

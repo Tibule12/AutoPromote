@@ -1,0 +1,781 @@
+{
+  "schemaVersion": 1,
+  "auditedAt": "2026-10-09T13:41:06.425280+00:00",
+  "baselineCommit": "2aaec02b",
+  "scope": "Studio/Director AI-dependent controls, private generation paths, advertised adjacent capabilities and deterministic paths that could be confused with AI.",
+  "classificationMeaning": {
+    "DETERMINISTIC_REAL": "Actual algorithm/render path; not model inference.",
+    "AI_REAL": "Actual trained model implementation, with historical private evidence where present; not a PRO/production claim.",
+    "PROXY_ONLY": "Claimed intelligent/generative behavior is approximated by nonmatching filtering/animation/UI.",
+    "PARTIAL": "Real subset exists; broad capability/Studio lifecycle/integration incomplete.",
+    "MISSING_BACKEND": "No matching executable model backend at audited baseline."
+  },
+  "counts": {
+    "DETERMINISTIC_REAL": 11,
+    "PARTIAL": 14,
+    "AI_REAL": 8,
+    "MISSING_BACKEND": 6,
+    "PROXY_ONLY": 3
+  },
+  "features": [
+    {
+      "id": "director_commands",
+      "feature": "Director split/trim/reframe execution",
+      "classification": "DETERMINISTIC_REAL",
+      "runtimeCapability": null,
+      "implementation": "Shared 90k-clock command kernel, revision replay, review guards; FFmpeg final execution.",
+      "gap": "A Director label does not establish scene perception.",
+      "sourceRefs": [
+        "src/services/studioDirectorReplayService.js",
+        "frontend/src/components/studioDirectorProposals.js"
+      ]
+    },
+    {
+      "id": "director_scene_understanding",
+      "feature": "Director visual semantics and source selection",
+      "classification": "PARTIAL",
+      "runtimeCapability": "understand_video",
+      "implementation": "Private content-factory Qwen3-VL director/critic; general Studio source-shot analysis uses cuts and face observations.",
+      "gap": "Private Qwen inference is real, but no universal scene-understanding service/continuous semantic coverage at baseline.",
+      "sourceRefs": [
+        "src/services/contentFactoryProviders.js",
+        "scripts/content-factory/nvidia-creative.py",
+        "python_media_worker/studio_analysis_analyzer.py"
+      ]
+    },
+    {
+      "id": "director_screenplay",
+      "feature": "Screenplay scene grounding/coverage/continuity",
+      "classification": "PARTIAL",
+      "runtimeCapability": "understand_video",
+      "implementation": "Contracts, source assertions and grounded private scene plans exist.",
+      "gap": "Model assertions require verified artifacts and temporal coverage; whole-movie planning remains incomplete.",
+      "sourceRefs": [
+        "src/services/screenplayProductionService.js",
+        "src/services/screenplayGroundingSchema.js",
+        "src/services/studioProjectIntelligenceService.js"
+      ]
+    },
+    {
+      "id": "face_detection",
+      "feature": "Speaker/face detection",
+      "classification": "AI_REAL",
+      "runtimeCapability": "detect_object",
+      "implementation": "YuNet ONNX + optional MediaPipe; cascade fallback.",
+      "gap": "Only faces; cannot substitute for arbitrary text-conditioned object detection.",
+      "sourceRefs": [
+        "python_media_worker/studio_face_tracking.py",
+        "python_media_worker/main_media_server.py",
+        "python_media_worker/models/yunet/README.md"
+      ]
+    },
+    {
+      "id": "face_tracking",
+      "feature": "Speaker reframing and sampled face tracking",
+      "classification": "AI_REAL",
+      "runtimeCapability": "track_object",
+      "implementation": "Source-bound detected-face paths, shot-cut handling, missing intervals.",
+      "gap": "Sampled observations, not universal point/object correspondence or re-identification.",
+      "sourceRefs": [
+        "python_media_worker/studio_face_tracking.py",
+        "src/services/studioSourceShotArtifactService.js"
+      ]
+    },
+    {
+      "id": "scene_cuts",
+      "feature": "Shot-boundary evidence",
+      "classification": "DETERMINISTIC_REAL",
+      "runtimeCapability": "understand_video",
+      "implementation": "OpenCV/FFmpeg image differences and scene thresholds.",
+      "gap": "Detects picture boundaries, not semantic scene identity.",
+      "sourceRefs": [
+        "python_media_worker/studio_face_tracking.py",
+        "src/services/studioAnalysisArtifactService.js"
+      ]
+    },
+    {
+      "id": "object_detection",
+      "feature": "Open-vocabulary object/subject selection",
+      "classification": "MISSING_BACKEND",
+      "runtimeCapability": "detect_object",
+      "implementation": "No Grounding DINO production adapter at baseline.",
+      "gap": "The new pinned adapter must produce real detections before model-output qualification.",
+      "sourceRefs": [
+        "frontend/src/components/StudioSubjectVfxPanel.js",
+        "python_media_worker/main_media_server.py"
+      ]
+    },
+    {
+      "id": "sam_subject",
+      "feature": "Reusable subject segmentation and video mask propagation",
+      "classification": "AI_REAL",
+      "runtimeCapability": "segment_subject",
+      "implementation": "Pinned SAM2.1 tiny private L40S masks; immutable mask PNG cache consumed by VFX compositor.",
+      "gap": "Prior model path is per-feature/private worker, single subject, explicit cut prompts, no hair-matte guarantee.",
+      "sourceRefs": [
+        "python_media_worker/studio_subject_matte.py",
+        "src/services/studioSubjectVfxService.js"
+      ]
+    },
+    {
+      "id": "subject_tracking",
+      "feature": "Mask-derived subject position/callout attachment",
+      "classification": "AI_REAL",
+      "runtimeCapability": "track_object",
+      "implementation": "SAM2 mask centroids drive source-bound callouts.",
+      "gap": "Mask centroid is not a tracked physical point and confidence is not calibrated.",
+      "sourceRefs": [
+        "python_media_worker/studio_subject_matte.py",
+        "python_media_worker/studio_vfx_plan.py"
+      ]
+    },
+    {
+      "id": "point_tracking",
+      "feature": "Long-range arbitrary point tracking and occlusion re-detection",
+      "classification": "MISSING_BACKEND",
+      "runtimeCapability": "track_object",
+      "implementation": "TAPNext++ absent at baseline; public checkpoint now locked separately.",
+      "gap": "TAP adapter and qualification still required; do not silently substitute centroids for points.",
+      "sourceRefs": [
+        "frontend/src/components/studioTrackingCoordinates.js",
+        "frontend/src/components/StudioSubjectVfxPanel.js"
+      ]
+    },
+    {
+      "id": "generic_overlay_tracking",
+      "feature": "General image/video overlay motion tracking",
+      "classification": "PARTIAL",
+      "runtimeCapability": "track_object",
+      "implementation": "Manual/keyframe/face-coordinate paths and tracked subject callout subset.",
+      "gap": "No general arbitrary-object/planar tracking service across edits and cuts.",
+      "sourceRefs": [
+        "frontend/src/components/VideoEditor.js",
+        "frontend/src/components/studioTrackingCoordinates.js",
+        "python_media_worker/main_media_server.py"
+      ]
+    },
+    {
+      "id": "geometric_masks",
+      "feature": "Geometric masks and rounded cards",
+      "classification": "DETERMINISTIC_REAL",
+      "runtimeCapability": null,
+      "implementation": "Analytic alpha masks and normal compositing.",
+      "gap": "These shapes must never be called learned segmentation.",
+      "sourceRefs": [
+        "python_media_worker/main_media_server.py",
+        "frontend/src/components/studioEditDecisions.js"
+      ]
+    },
+    {
+      "id": "text_behind",
+      "feature": "Text behind a real segmented subject",
+      "classification": "AI_REAL",
+      "runtimeCapability": "segment_subject",
+      "implementation": "SAM mask occlusion + deterministic text placement.",
+      "gap": "Segmentation quality/occlusion boundaries require actual frame review.",
+      "sourceRefs": [
+        "python_media_worker/studio_subject_matte.py",
+        "python_media_worker/studio_vfx_plan.py",
+        "frontend/src/components/StudioSubjectVfxPanel.js"
+      ]
+    },
+    {
+      "id": "subject_fx",
+      "feature": "Subject rim glow/particles/background grade",
+      "classification": "AI_REAL",
+      "runtimeCapability": "segment_subject",
+      "implementation": "SAM subject masks followed by deterministic glow/particles/color composition.",
+      "gap": "Effects themselves are deterministic; broader modes are not generative editing.",
+      "sourceRefs": [
+        "python_media_worker/studio_vfx_plan.py",
+        "python_media_worker/studio_subject_matte.py"
+      ]
+    },
+    {
+      "id": "subject_depth",
+      "feature": "Background parallax and foreground occlusion",
+      "classification": "PARTIAL",
+      "runtimeCapability": "segment_subject",
+      "implementation": "Real SAM segmentation with small mask-derived 2.5D displacement.",
+      "gap": "No dense/metric depth model, no disoccluded scene reconstruction.",
+      "sourceRefs": [
+        "python_media_worker/studio_vfx_plan.py",
+        "frontend/src/components/StudioSubjectVfxPanel.js"
+      ]
+    },
+    {
+      "id": "dense_depth",
+      "feature": "Dense or metric scene depth and true 3D-aware editing",
+      "classification": "MISSING_BACKEND",
+      "runtimeCapability": "estimate_depth",
+      "implementation": "No learned dense depth runtime/artifact contract at baseline.",
+      "gap": "Future Depth Anything/metric depth integration needs its own contract and license review.",
+      "sourceRefs": [
+        "python_media_worker/studio_vfx_plan.py"
+      ]
+    },
+    {
+      "id": "selfie_foreground",
+      "feature": "CPU person/background separation in Motion Sculpture/Reality Break",
+      "classification": "AI_REAL",
+      "runtimeCapability": "segment_subject",
+      "implementation": "MediaPipe Selfie Segmentation on CPU.",
+      "gap": "Restricted person model; environment/skin refinement is heuristic, not learned semantic object editing.",
+      "sourceRefs": [
+        "python_media_worker/motion_sculpture.py",
+        "python_media_worker/content_aware_reality.py"
+      ]
+    },
+    {
+      "id": "presenter_polish",
+      "feature": "Presenter/face polish",
+      "classification": "PARTIAL",
+      "runtimeCapability": "segment_subject",
+      "implementation": "Mask-guided smoothing, color/skin heuristics, source-preserving filtering.",
+      "gap": "Not neural face restoration, identity-preserving generation or learned beauty retouch.",
+      "sourceRefs": [
+        "python_media_worker/motion_sculpture.py",
+        "python_media_worker/content_aware_reality.py",
+        "python_media_worker/main_media_server.py"
+      ]
+    },
+    {
+      "id": "reality_director",
+      "feature": "Reality Break source/transcript-grounded scene brief",
+      "classification": "PARTIAL",
+      "runtimeCapability": "understand_video",
+      "implementation": "Actual configured OpenAI multimodal call with source frames and literal transcript evidence.",
+      "gap": "Requires API credentials; uncertain transcript/brief output must not become human-verified fact.",
+      "sourceRefs": [
+        "python_media_worker/content_aware_reality.py"
+      ]
+    },
+    {
+      "id": "environment_generation",
+      "feature": "Generated environment images and empty studio background edits",
+      "classification": "PARTIAL",
+      "runtimeCapability": "generate_image",
+      "implementation": "Configured gpt-image generation/edit API and private SDXL adapter.",
+      "gap": "General normal Studio generated-image/raw asset lifecycle is unimplemented; availability is configuration-dependent.",
+      "sourceRefs": [
+        "python_media_worker/content_aware_reality.py",
+        "scripts/content-factory/generate-image.py",
+        "test/e2e/studio-capability-matrix.json"
+      ]
+    },
+    {
+      "id": "animated_still_proxy",
+      "feature": "Reality/story still-plate camera drift labelled as motion",
+      "classification": "PROXY_ONLY",
+      "runtimeCapability": null,
+      "implementation": "_animate_story_plate applies deterministic warps, motes and drift to one still.",
+      "gap": "No independently generated temporal content. Preserve it as a still effect only.",
+      "sourceRefs": [
+        "python_media_worker/content_aware_reality.py",
+        "python_media_worker/generate_video_broll_edit.py"
+      ]
+    },
+    {
+      "id": "story_stock",
+      "feature": "Real moving stock/video B-roll retrieval",
+      "classification": "DETERMINISTIC_REAL",
+      "runtimeCapability": null,
+      "implementation": "Pexels source retrieval and native moving clips.",
+      "gap": "Stock selection/placement is distinct from AI video generation.",
+      "sourceRefs": [
+        "python_media_worker/content_aware_reality.py",
+        "python_media_worker/studio_broll.py"
+      ]
+    },
+    {
+      "id": "generated_broll",
+      "feature": "Source-grounded generated moving B-roll",
+      "classification": "PARTIAL",
+      "runtimeCapability": "generate_video",
+      "implementation": "Actual private Wan2.2 5B on L40S; reviewed/hash-bound generated illustration imported into Studio.",
+      "gap": "Existing feature-owned SSH/deadline runtime; not common scale-to-zero execution or broad production qualification.",
+      "sourceRefs": [
+        "src/services/studioBRollGenerationService.js",
+        "scripts/generate-autopromote-l40s-motion.py"
+      ]
+    },
+    {
+      "id": "generated_raw_video",
+      "feature": "General editable image-to-video/text-to-video raw takes",
+      "classification": "PARTIAL",
+      "runtimeCapability": "generate_video",
+      "implementation": "Private Wan provider/checkpoint scripts and factory imports are real.",
+      "gap": "Ordinary Studio generated raw UI/backend release is missing; new runtime proof is separate from broad readiness.",
+      "sourceRefs": [
+        "src/services/contentFactoryProviders.js",
+        "scripts/content-factory/generate-conditioned-video.py",
+        "test/e2e/studio-capability-matrix.json"
+      ]
+    },
+    {
+      "id": "generative_editing",
+      "feature": "Masked video generation/editing, VACE/FLF/refinement",
+      "classification": "PARTIAL",
+      "runtimeCapability": "edit_video",
+      "implementation": "Pinned private Wan VACE/FLF/refinement scripts exist.",
+      "gap": "No common Studio artifact capability/release; larger-model/RTX paths remain unqualified.",
+      "sourceRefs": [
+        "scripts/content-factory/generate-controlled-video.py",
+        "scripts/content-factory/refine-video.py",
+        "scripts/content-factory/refine-conditioned-video.py"
+      ]
+    },
+    {
+      "id": "screen_replacement",
+      "feature": "Planar display/portal replacement",
+      "classification": "PARTIAL",
+      "runtimeCapability": "track_object",
+      "implementation": "OpenCV perspective warp using source-grounded/static surface quad.",
+      "gap": "This is planar composition, not persistent learned surface tracking across all frames.",
+      "sourceRefs": [
+        "python_media_worker/content_aware_reality.py"
+      ]
+    },
+    {
+      "id": "watermark_cleanup",
+      "feature": "Watermark region detection/tracking/cleanup",
+      "classification": "DETERMINISTIC_REAL",
+      "runtimeCapability": null,
+      "implementation": "Region scores/template tracking and FFmpeg blur/delogo cleanup.",
+      "gap": "No generative inpainting; cannot restore unknown original pixels.",
+      "sourceRefs": [
+        "python_media_worker/main_media_server.py"
+      ]
+    },
+    {
+      "id": "auto_captions",
+      "feature": "Automatic speech transcription/word timing/language",
+      "classification": "AI_REAL",
+      "runtimeCapability": "transcribe_audio",
+      "implementation": "Whisper/faster-whisper, Swivuriso and optional OpenAI diarized transcription.",
+      "gap": "Real model execution, but representative multilingual source is BROKEN for wording quality and remains review-required.",
+      "sourceRefs": [
+        "python_media_worker/main_media_server.py",
+        "python_media_worker/test_caption_model_language.py",
+        "test/e2e/studio-capability-matrix.json"
+      ]
+    },
+    {
+      "id": "diarization",
+      "feature": "Speaker/language diarization",
+      "classification": "PARTIAL",
+      "runtimeCapability": "diarize_audio",
+      "implementation": "Optional OpenAI gpt-4o-transcribe-diarize path, language classification; fallback transcript labels.",
+      "gap": "No universal calibrated speaker identity; language/diarization unavailable without configured provider.",
+      "sourceRefs": [
+        "python_media_worker/main_media_server.py"
+      ]
+    },
+    {
+      "id": "caption_rendering",
+      "feature": "Manual/edited captions, title typography and timing",
+      "classification": "DETERMINISTIC_REAL",
+      "runtimeCapability": null,
+      "implementation": "Canonical source-timed captions, deterministic glyph layout/final render.",
+      "gap": "Caption rendering quality does not imply transcript accuracy.",
+      "sourceRefs": [
+        "python_media_worker/studio_text.py",
+        "frontend/src/components/studioCaptionPreviewStyle.js"
+      ]
+    },
+    {
+      "id": "audio_filtering",
+      "feature": "Dialogue denoise, de-esser, loudness, EQ, compression",
+      "classification": "DETERMINISTIC_REAL",
+      "runtimeCapability": null,
+      "implementation": "Validated FFmpeg DSP filter chain.",
+      "gap": "Deterministic restoration, not neural source separation.",
+      "sourceRefs": [
+        "python_media_worker/studio_audio.py"
+      ]
+    },
+    {
+      "id": "voice_isolation_claim",
+      "feature": "Voice isolation control",
+      "classification": "PROXY_ONLY",
+      "runtimeCapability": "separate_audio",
+      "implementation": "voice_isolation selects stronger afftdn plus filtering.",
+      "gap": "UI wording exceeds implementation: no learned vocal/instrument/background separation.",
+      "sourceRefs": [
+        "python_media_worker/studio_audio.py",
+        "frontend/src/components/StudioCreatorWorkbench.js"
+      ]
+    },
+    {
+      "id": "audio_intelligence",
+      "feature": "Silence, beats, ducking, audio-reactive visuals",
+      "classification": "DETERMINISTIC_REAL",
+      "runtimeCapability": null,
+      "implementation": "Decoded waveform/energy/FFT, FFmpeg silence detection, deterministic envelope ducking.",
+      "gap": "No neural rhythm/semantic audio understanding or generated audio implied.",
+      "sourceRefs": [
+        "python_media_worker/main_media_server.py",
+        "python_media_worker/viral_audio_remix.py",
+        "frontend/src/components/audio/audioRemixModel.js"
+      ]
+    },
+    {
+      "id": "generated_music",
+      "feature": "AI instrumental/music generation",
+      "classification": "PARTIAL",
+      "runtimeCapability": "generate_audio",
+      "implementation": "Pinned private ACE-Step generation adapter and audio artifacts.",
+      "gap": "Normal Studio common audio-AI capability, source/music licensing metadata and listening qualification remain.",
+      "sourceRefs": [
+        "scripts/content-factory/generate-music.py",
+        "src/services/contentFactoryProviders.js"
+      ]
+    },
+    {
+      "id": "narration",
+      "feature": "AI narration/TTS",
+      "classification": "PARTIAL",
+      "runtimeCapability": "synthesize_speech",
+      "implementation": "Kokoro private model adapter; browser/recorded voiceover also exists.",
+      "gap": "Normal source-bound waveform lifecycle uses imported/recorded audio; no generic model runtime TTS contract yet.",
+      "sourceRefs": [
+        "scripts/content-factory/generate-narration.py",
+        "frontend/src/components/studioVoiceover.js"
+      ]
+    },
+    {
+      "id": "lip_sync",
+      "feature": "Generative lip sync or face reenactment",
+      "classification": "MISSING_BACKEND",
+      "runtimeCapability": "edit_video",
+      "implementation": "multicam_lipsync_repair is clock alignment, not generated mouth motion.",
+      "gap": "No neural lip-sync/reenactment capability. Preserve source face and sync authority.",
+      "sourceRefs": [
+        "python_media_worker/multicam_lipsync_repair.py"
+      ]
+    },
+    {
+      "id": "cam_combiner",
+      "feature": "Cam Combiner alignment/master audio/final synchronization",
+      "classification": "DETERMINISTIC_REAL",
+      "runtimeCapability": null,
+      "implementation": "Authoritative synchronization and deterministic render.",
+      "gap": "Explicitly preserved; model results never overwrite synchronization.",
+      "sourceRefs": [
+        "src/services/multicamUploadService.js",
+        "python_media_worker/main_media_server.py"
+      ]
+    },
+    {
+      "id": "motion_graphics",
+      "feature": "Kinetic typography, transitions, light effects and speed",
+      "classification": "DETERMINISTIC_REAL",
+      "runtimeCapability": null,
+      "implementation": "Existing authored/keyframed native motion and FFmpeg final composition.",
+      "gap": "Browser preview approximations are not learned generation.",
+      "sourceRefs": [
+        "python_media_worker/viral_motion_graphics.py",
+        "frontend/src/components/motion/motionModel.js"
+      ]
+    },
+    {
+      "id": "native_3d",
+      "feature": "Authored 3D logo/title/scene render",
+      "classification": "DETERMINISTIC_REAL",
+      "runtimeCapability": null,
+      "implementation": "Blender/OptiX and ordinary authored scene parameters.",
+      "gap": "A native 3D renderer is not a text-to-3D model; broad Studio 3D parity remains partial.",
+      "sourceRefs": [
+        "studio_3d_renderer/blender_scene.py",
+        "src/services/studio3DService.js"
+      ]
+    },
+    {
+      "id": "3d_audio_proxy",
+      "feature": "Advanced 3D audio-reactive field",
+      "classification": "PROXY_ONLY",
+      "runtimeCapability": null,
+      "implementation": "Browser reactive controls previously ignored by native final paths; unsupported controls disabled.",
+      "gap": "Do not qualify as AI or as functioning final-render reactivity.",
+      "sourceRefs": [
+        "frontend/src/components/threeD/Studio3DPanel.js",
+        "frontend/src/components/threeD/studio3DModel.js"
+      ]
+    },
+    {
+      "id": "3d_generation",
+      "feature": "AI mesh/scene/rig/material generation",
+      "classification": "MISSING_BACKEND",
+      "runtimeCapability": "generate_3d",
+      "implementation": "No learned 3D-generation worker.",
+      "gap": "Future worker class only; authored Blender assets must retain deterministic classification.",
+      "sourceRefs": [
+        "studio_3d_renderer/blender_scene.py"
+      ]
+    },
+    {
+      "id": "super_resolution",
+      "feature": "Learned video super-resolution/frame interpolation",
+      "classification": "MISSING_BACKEND",
+      "runtimeCapability": "enhance_video",
+      "implementation": "Current resolution/frame-rate delivery paths resize/resample deterministically.",
+      "gap": "No neural upscaler/interpolator worker; output 4K alone is not AI enhancement.",
+      "sourceRefs": [
+        "python_media_worker/main_media_server.py"
+      ]
+    }
+  ],
+  "sourceInventory": [
+    {
+      "path": "frontend/src/components/StudioCreatorWorkbench.js",
+      "commit": "2aaec02b",
+      "sha256": "fcdd46a003885f8e4243f23af0d99a9a02d746f8931d910048bfc4ca0143c57b"
+    },
+    {
+      "path": "frontend/src/components/StudioSubjectVfxPanel.js",
+      "commit": "2aaec02b",
+      "sha256": "1dd67d51ba606f70d2e457aa83aa1fd09587f93a9b3778965e66676a1916dab7"
+    },
+    {
+      "path": "frontend/src/components/VideoEditor.js",
+      "commit": "2aaec02b",
+      "sha256": "b300ec5c07595f5a4447387fe93e54945ff6ef6ef4ede231d1aab8c60fa3d4c9"
+    },
+    {
+      "path": "frontend/src/components/audio/audioRemixModel.js",
+      "commit": "2aaec02b",
+      "sha256": "02468dfc6a58f283e6b0f42ef881452fc28ca7e1f6b7f55c5175f465e09c9422"
+    },
+    {
+      "path": "frontend/src/components/motion/motionModel.js",
+      "commit": "2aaec02b",
+      "sha256": "64755a060e690e00f8cb641b616f9d6e02ed36a6e6a3b2358c9a575240f0dc6c"
+    },
+    {
+      "path": "frontend/src/components/studioCaptionPreviewStyle.js",
+      "commit": "2aaec02b",
+      "sha256": "e2de6f382f518618df82ef25ac3ad824558c8d10a7e1cf99406e54ce99cdb549"
+    },
+    {
+      "path": "frontend/src/components/studioDirectorProposals.js",
+      "commit": "2aaec02b",
+      "sha256": "21e0a9eb112ff847ad2295de122d68c1c41313b98b6f531648a1aa312df20efe"
+    },
+    {
+      "path": "frontend/src/components/studioEditDecisions.js",
+      "commit": "2aaec02b",
+      "sha256": "965b83b11e59461e4b48a58dcd93e8048b6eff05935b88e7e909bf0566b22352"
+    },
+    {
+      "path": "frontend/src/components/studioTrackingCoordinates.js",
+      "commit": "2aaec02b",
+      "sha256": "5dd873064b82567328586aa4976e966d501cc26cdf7aaaf7e966fda33b91a514"
+    },
+    {
+      "path": "frontend/src/components/studioVoiceover.js",
+      "commit": "2aaec02b",
+      "sha256": "243399fc273806b05759dfae1af37731cdaa64633f03d684cf9b31a7e87217fd"
+    },
+    {
+      "path": "frontend/src/components/threeD/Studio3DPanel.js",
+      "commit": "2aaec02b",
+      "sha256": "3c49ef3824231f7f55bb880f19ceb1ba9eb36965d2298433f0b37485f98ecca3"
+    },
+    {
+      "path": "frontend/src/components/threeD/studio3DModel.js",
+      "commit": "2aaec02b",
+      "sha256": "648cc0899d9831c0425dca8b022a5c7119621523eb979f92ef747da530eb45eb"
+    },
+    {
+      "path": "python_media_worker/content_aware_reality.py",
+      "commit": "2aaec02b",
+      "sha256": "eb3183d3e54ed9e535e16201bc86a56b297143c3b9f92c72e43b615c903876ce"
+    },
+    {
+      "path": "python_media_worker/generate_video_broll_edit.py",
+      "commit": "2aaec02b",
+      "sha256": "bc01ef4433e093eff9c0c06126e427afa32b23d572dfd2f6fa4f2f5dc4827826"
+    },
+    {
+      "path": "python_media_worker/main_media_server.py",
+      "commit": "2aaec02b",
+      "sha256": "5c36362ad8a84b377de33201c2bd1fdebdda7c51d6a8e0d73aa6679e9e24c635"
+    },
+    {
+      "path": "python_media_worker/models/yunet/README.md",
+      "commit": "2aaec02b",
+      "sha256": "0567a358b8dc3be713fa1f321d3d1e2a3217215735d23d9647c0a1da248ee464"
+    },
+    {
+      "path": "python_media_worker/motion_sculpture.py",
+      "commit": "2aaec02b",
+      "sha256": "d2f969e52fa149b3d2822a8cca48289ae5a104065425b0da7036b846378b647a"
+    },
+    {
+      "path": "python_media_worker/multicam_lipsync_repair.py",
+      "commit": "2aaec02b",
+      "sha256": "203e48f6592dd050ef08392545da339807db20ec7605656096d0c74d475d230a"
+    },
+    {
+      "path": "python_media_worker/studio_analysis_analyzer.py",
+      "commit": "2aaec02b",
+      "sha256": "a9df3d55b2815bb1ac9a170aad7133fb5392ac9b6efb9b9989f73a7f58cd7d52"
+    },
+    {
+      "path": "python_media_worker/studio_audio.py",
+      "commit": "2aaec02b",
+      "sha256": "e05aab41693d46b7c66364173bf12f485532a326583b6ef6b0e75a73baccc224"
+    },
+    {
+      "path": "python_media_worker/studio_broll.py",
+      "commit": "2aaec02b",
+      "sha256": "91aea4b2e40fe7c6e3219a8cca10a0e545a7440202d13e8d5d2f7e134038afd6"
+    },
+    {
+      "path": "python_media_worker/studio_face_tracking.py",
+      "commit": "2aaec02b",
+      "sha256": "443db42f02bbd7976f6d2597b3f83fb7e80901e4fabd51c60069b39f9f2c8bc6"
+    },
+    {
+      "path": "python_media_worker/studio_subject_matte.py",
+      "commit": "2aaec02b",
+      "sha256": "bcb283fbfdba47f0f1d30d74f5463b0df3a420b5c9f757dd8005c1655a70d918"
+    },
+    {
+      "path": "python_media_worker/studio_text.py",
+      "commit": "2aaec02b",
+      "sha256": "4c741baf96b0a7ea1428bb239204d91a794c35c74f623fbf5993913e7c8314dc"
+    },
+    {
+      "path": "python_media_worker/studio_vfx_plan.py",
+      "commit": "2aaec02b",
+      "sha256": "ae1ef7099cee556acadfa125b3d2e7d3d1cfae7bdb44003b9023ceb45b07d7aa"
+    },
+    {
+      "path": "python_media_worker/test_caption_model_language.py",
+      "commit": "2aaec02b",
+      "sha256": "a5d4e70f8499fe64d7a022fe5b58774fd79a8968e51d15c6b3b814cb4f5ee9c4"
+    },
+    {
+      "path": "python_media_worker/viral_audio_remix.py",
+      "commit": "2aaec02b",
+      "sha256": "89ff3ad667c91a4446be9a3fa686a97788dc4f40d3b268cef97dbf2a2fa879bf"
+    },
+    {
+      "path": "python_media_worker/viral_motion_graphics.py",
+      "commit": "2aaec02b",
+      "sha256": "0c60e68007bf02aacaf9118e0ee0facbc7e40f7080f2058ffa83b3cc30cfea11"
+    },
+    {
+      "path": "scripts/content-factory/generate-conditioned-video.py",
+      "commit": "2aaec02b",
+      "sha256": "0d2318acdb3da70ae7f95302f557394efaf1c5d290452cb562bfaef85f10cba4"
+    },
+    {
+      "path": "scripts/content-factory/generate-controlled-video.py",
+      "commit": "2aaec02b",
+      "sha256": "b7a46849c53f1a1561d991f2e5311f408ddc3974f66e3ac66a9c3966ce1007a9"
+    },
+    {
+      "path": "scripts/content-factory/generate-image.py",
+      "commit": "2aaec02b",
+      "sha256": "7c09f5221b07f27e66d7c681514fecdc270cf20116290a3bca865c28ff6f2fdc"
+    },
+    {
+      "path": "scripts/content-factory/generate-music.py",
+      "commit": "2aaec02b",
+      "sha256": "eef9cb86752198d8565a8a8c088ea15036947d650e0e1991182de4431b06ff26"
+    },
+    {
+      "path": "scripts/content-factory/generate-narration.py",
+      "commit": "2aaec02b",
+      "sha256": "3e8fe5654eb7acfe0fa965f24e2a355fea40a82c6d330a2e08f4960ddf812e26"
+    },
+    {
+      "path": "scripts/content-factory/nvidia-creative.py",
+      "commit": "2aaec02b",
+      "sha256": "cdf51cb3b1c07441957bf264857a18056f4d9df018ad99ffb66919c498547011"
+    },
+    {
+      "path": "scripts/content-factory/refine-conditioned-video.py",
+      "commit": "2aaec02b",
+      "sha256": "09e261607c62a22033730ddc12ab05577b4e3296a45985dd5e48a32d82fc9799"
+    },
+    {
+      "path": "scripts/content-factory/refine-video.py",
+      "commit": "2aaec02b",
+      "sha256": "4cb8da3e64266163cf9973cb1fbf1f14c92c8cfd4b65cba15d879a574a9b75eb"
+    },
+    {
+      "path": "scripts/generate-autopromote-l40s-motion.py",
+      "commit": "2aaec02b",
+      "sha256": "92ff58395cf0625d31be6de92c01695ea89e279c3d256540c8ccc3ed7befc028"
+    },
+    {
+      "path": "src/services/contentFactoryProviders.js",
+      "commit": "2aaec02b",
+      "sha256": "8800914b936f9b7429c0532820ad450cfe57fbd40a4aa8697d8df76ae8c1f633"
+    },
+    {
+      "path": "src/services/multicamUploadService.js",
+      "commit": "2aaec02b",
+      "sha256": "296d890d3e48299c816559a96d70211d430e8691740d8dafad13ed21a88a9f94"
+    },
+    {
+      "path": "src/services/screenplayGroundingSchema.js",
+      "commit": "2aaec02b",
+      "sha256": "ee00d659fa405b9bd2319111178dd6041f148365e29bf81037ecb29afa5f7c62"
+    },
+    {
+      "path": "src/services/screenplayProductionService.js",
+      "commit": "2aaec02b",
+      "sha256": "b7fb191bdf46a48a5d482073e54f607201398691804a118807fe15638b4824f9"
+    },
+    {
+      "path": "src/services/studio3DService.js",
+      "commit": "2aaec02b",
+      "sha256": "4f618bf32f0b84a5e1743291ac74a7d77e12505dbb9859f5c9325a478e1126dc"
+    },
+    {
+      "path": "src/services/studioAnalysisArtifactService.js",
+      "commit": "2aaec02b",
+      "sha256": "ac6ccde0b0891b6feb8c885f3a75fba0fe69e9f983396a52d3973045eece5fb3"
+    },
+    {
+      "path": "src/services/studioBRollGenerationService.js",
+      "commit": "2aaec02b",
+      "sha256": "71026aed0b25f5617d864b459a80aaac690c95dd4ba569a524d13ae1a341c8d5"
+    },
+    {
+      "path": "src/services/studioDirectorReplayService.js",
+      "commit": "2aaec02b",
+      "sha256": "cc63e872712efaa4cf89828d71fd2be6dc4a926e8fcfaf75b20e1b36094d77bf"
+    },
+    {
+      "path": "src/services/studioProjectIntelligenceService.js",
+      "commit": "2aaec02b",
+      "sha256": "cf69d0b591d9cc0a529ed49fec6b2f5d91753389c9b93ca59c33e2169028da5f"
+    },
+    {
+      "path": "src/services/studioSourceShotArtifactService.js",
+      "commit": "2aaec02b",
+      "sha256": "9a7404059f9368e5e80c30375c850b861ddae53f53f922782270dbe5f8a3928d"
+    },
+    {
+      "path": "src/services/studioSubjectVfxService.js",
+      "commit": "2aaec02b",
+      "sha256": "4e6e2ff076292d42d61e441b9d522d7a259a769504058db87d690cb9c81905f2"
+    },
+    {
+      "path": "studio_3d_renderer/blender_scene.py",
+      "commit": "2aaec02b",
+      "sha256": "fe051c33ae89bbcdf541a768b137e2ef4b44767dd64b8b029e896fbd4766ec62"
+    },
+    {
+      "path": "test/e2e/studio-capability-matrix.json",
+      "commit": "2aaec02b",
+      "sha256": "a9b9b50f3e5e5e33600cfbe91557a24e62e0ce242a739c4a4f7f70490c088b4e"
+    }
+  ],
+  "notQualification": "Source audit plus retained historical evidence. New runtime models are recorded in execution receipts; CPU mocks do not qualify model output."
+}

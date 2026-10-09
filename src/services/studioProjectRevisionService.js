@@ -4,6 +4,10 @@ const { db } = require("../firebaseAdmin");
 const SCHEMA_VERSION = 1;
 const MAX_DOCUMENT_BYTES = 512 * 1024;
 const MAX_ITEMS = 2_000;
+const validModelArtifactReference = ref => {
+  try { require('../generated/studioDirectorReplayKernel.cjs').createModelArtifactReference(ref); return true; }
+  catch (_) { return false; }
+};
 const DOCUMENT_FIELDS = [
   "schemaVersion", "projectId", "revision", "clock", "output", "assets",
   "clipOccurrences", "timeMaps", "layers", "linkedTiming", "audioGraph",
@@ -199,11 +203,20 @@ const validateStudioProjectRevisionDocument = document => {
       !document.constraints.locks.every(lock => plain(lock) && validId(lock.lockId) &&
         occurrenceIds.has(lock.occurrenceId) && lock.mode === "preserve" &&
         validRange(lock.sourceRange, "source"))) throw invalid();
-  if (!document.analysisRefs.every(ref => plain(ref) &&
+  if (!document.analysisRefs.every(ref => ref?.kind === "model_capability" ?
+      validModelArtifactReference(ref) : plain(ref) &&
       ref.kind === "semantic_timeline" && Number.isSafeInteger(ref.schemaVersion) &&
       validId(ref.artifactId) && validHash(ref.manifestContentHash) &&
       validHash(ref.sourceContentHash) && typeof ref.cacheKey === "string" &&
       ref.cacheKey.length <= 512)) throw invalid();
+  for (const layer of document.layers.filter(item => item.type === 'subject_vfx')) {
+    for (const [field,capability] of [['modelArtifactRef','segment_subject'],['trackingArtifactRef','track_object']]) {
+      const ref=layer.parameters[field],scene=layer.parameters.scene;
+      if(ref && (!validModelArtifactReference(ref) || ref.capability!==capability || ref.sourceAssetId!==scene?.sourceId ||
+        ref.sourceRange.startTick!==Math.round(scene?.sourceRange?.start*90000) ||
+        ref.sourceRange.endTick!==Math.round(scene?.sourceRange?.end*90000)))throw invalid();
+    }
+  }
   if (document.projectIntelligenceRefs !== undefined &&
       (!Array.isArray(document.projectIntelligenceRefs) ||
         document.projectIntelligenceRefs.length > 1 ||
@@ -305,6 +318,20 @@ const registerOwnedStudioProjectRevision = async ({ uid, document, firestore = d
         ? parseStudioProjectHeadRecord(headSnapshot.data(), uid, projectId) : null;
       const prior = revisionSnapshot.exists
         ? parseStudioProjectHeadRecord(revisionSnapshot.data(), uid, projectId) : null;
+      const modelRefs=[...document.analysisRefs.filter(item => item.kind === 'model_capability'),
+        ...document.layers.filter(layer=>layer.type==='subject_vfx').flatMap(layer=>
+          [layer.parameters.modelArtifactRef,layer.parameters.trackingArtifactRef].filter(Boolean))];
+      for (const ref of modelRefs) {
+        const artifactDoc = await transaction.get(firestore.collection('studio_model_capability_artifacts').doc(ref.artifactHash));
+        if (!artifactDoc.exists) throw invalid();
+        let artifact;
+        try { artifact = require('../modelRuntime/artifacts').verifyArtifact(JSON.parse(artifactDoc.data().artifactJson), {ownerUid:uid,projectId}); }
+        catch (_) { throw invalid(); }
+        if (artifact.sourceAssetId !== ref.sourceAssetId || artifact.sourceSha256 !== ref.sourceContentHash ||
+            artifact.capability !== ref.capability || !same(artifact.sourceRange,ref.sourceRange) ||
+            !document.assets.some(asset => (asset.sourceId === ref.sourceAssetId || asset.assetId === ref.sourceAssetId) && asset.contentHash === ref.sourceContentHash))
+          throw invalid();
+      }
       if (document.projectIntelligenceRefs?.length) {
         const { intelligenceRevisionRef, parseProjectIntelligenceRecord } =
           require("./studioProjectIntelligenceService");

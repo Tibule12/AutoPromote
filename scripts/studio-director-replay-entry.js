@@ -5,3 +5,4 @@ export { dryRunStudioCommandBatch } from "../frontend/src/components/studioComma
 export { adaptStudioSnapshotToDocument, validateStudioProjectDocument, projectStudioEditableStateToSnapshot } from "../frontend/src/components/studioProjectDocument";
 export { compileStudioTimelineForRender, assertStudioExportTimelineMatchesDocument, compileStudioFinishForRender, compileStudioCompositionForRender } from "../frontend/src/components/studioRenderCompiler";
 export { buildViralRenderData } from "../frontend/src/components/viralRenderPayload";
+export { createModelArtifactReference } from "../frontend/src/components/studioModelArtifactReference";

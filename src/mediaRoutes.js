@@ -920,6 +920,39 @@ router.post("/internal/multicam-job-failed", async (req, res) => {
 // Replaced local 'protect' with standard 'authMiddleware' for consistency
 router.use(authMiddleware);
 
+// Existing tester/admin authorization boundary. Disabled until private worker
+// digests/storage/IAM are explicitly configured; no public model selection.
+const modelCapability = require('./services/studioModelCapabilityService');
+const requireModelRuntimeFounder = [require('./middlewares/adminOnly'), (req,res,next) => {
+  const owners=(process.env.STUDIO_MODEL_RUNTIME_ADMIN_UIDS || process.env.CONTENT_FACTORY_ADMIN_UIDS || '').split(',').map(v=>v.trim()).filter(Boolean);
+  if (!owners.includes(req.user?.uid)) return res.status(403).json({success:false,code:'MODEL_RUNTIME_FOUNDER_REQUIRED'});
+  return next();
+}];
+const modelCapabilityError = (res, error) => res.status(error.statusCode || 503).json({
+  success: false, code: error.code || 'MODEL_CAPABILITY_UNAVAILABLE',
+  message: 'The capability result is unavailable. Your Studio edit is preserved.',
+});
+router.post('/studio-capabilities/requests', requireModelRuntimeFounder, requireTesterEditingFeature('clipRender'), async (req,res) => {
+  try { return res.status(202).json(await (await modelCapability.getRuntime()).submit({ownerUid:req.user.uid,input:req.body})); }
+  catch(error) { return modelCapabilityError(res,error); }
+});
+router.get('/studio-capabilities/jobs/:jobId', requireModelRuntimeFounder, requireTesterEditingFeature('clipRender'), async (req,res) => {
+  try { return res.json(await (await modelCapability.getRuntime()).reconcile({ownerUid:req.user.uid,jobId:req.params.jobId})); }
+  catch(error) { return modelCapabilityError(res,error); }
+});
+router.get('/studio-capabilities/jobs/:jobId/artifact', requireModelRuntimeFounder, requireTesterEditingFeature('clipRender'), async (req,res) => {
+  try { return res.json(await (await modelCapability.getRuntime()).getArtifact({ownerUid:req.user.uid,jobId:req.params.jobId})); }
+  catch(error) { return modelCapabilityError(res,error); }
+});
+router.post('/studio-capabilities/jobs/:jobId/cancel', requireModelRuntimeFounder, requireTesterEditingFeature('clipRender'), async (req,res) => {
+  try { return res.json(await (await modelCapability.getRuntime()).cancel({ownerUid:req.user.uid,jobId:req.params.jobId})); }
+  catch(error) { return modelCapabilityError(res,error); }
+});
+router.post('/studio-capabilities/jobs/:jobId/import', requireModelRuntimeFounder, requireTesterEditingFeature('clipRender'), async (req,res) => {
+  try { return res.json({media:await modelCapability.importGeneratedResult({ownerUid:req.user.uid,jobId:req.params.jobId})}); }
+  catch(error) { return modelCapabilityError(res,error); }
+});
+
 const studioBRoll = require('./services/studioBRollGenerationService');
 const bRollError = (res,error) => res.status(error.statusCode || 503).json({
   success:false,code:error.code || 'BROLL_UNAVAILABLE',

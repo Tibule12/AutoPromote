@@ -1,0 +1,6 @@
+{
+  "at": "2026-10-09T14:14:25.388466+00:00",
+  "sha256": "c934b4bd9329f4cb5b99f962fe1852bdeb77fb33521274cedecb99e504e3d31d",
+  "reason": "Decoded visual review found that the source stayed untreated. The proof assembler sent subject_vfx; existing RenderViralRequest requires subjectVfx, so the wrong field was ignored.",
+  "fix": "Preserve the existing subjectVfx field and reject unknown fields in the private renderer transport before rendering. No new GPU inference."
+}

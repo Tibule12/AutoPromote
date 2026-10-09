@@ -1,0 +1,11 @@
+{
+  "artifactHash": "91399a80c757d52f360868c0373123feee364b7b9535e0e63ae7b0ed443d5ba7",
+  "framesVerified": 72,
+  "sourceSha256": "fe0bb5ab8e5e2ca8bd53d25e4d3f043fb55a6930280a7735cbdeeb14e44cb39e",
+  "normalizedSourceSha256": "b1af4eac674d98267e92d70ca1fb590baf353161e005987acea98e795988e2a5",
+  "manifestSha256": "f16da7686bf8bd0ca31db15c819c1c8b12568ed8fbcea1b8b40aa5640a7eb307",
+  "coverageMin": 0.140025,
+  "coverageMax": 0.150716,
+  "shotCuts": [],
+  "manualVisualReviewRequired": true
+}

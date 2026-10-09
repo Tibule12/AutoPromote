@@ -1,0 +1,22 @@
+{
+  "phase": "complete",
+  "startedAt": "2026-10-09T14:11:38.364Z",
+  "headless": true,
+  "muted": true,
+  "scope": "Local production component and real artifact state; signed-out fixture does not qualify ordinary-account release gates.",
+  "pageErrors": [],
+  "saved": {
+    "projectId": "model-runtime-v1-proof-20261009",
+    "artifactCount": 5,
+    "mediaCount": 2,
+    "timelineCount": 2,
+    "maskArtifactHash": "91399a80c757d52f360868c0373123feee364b7b9535e0e63ae7b0ed443d5ba7",
+    "trackingArtifactHash": "21c54d4e659ebc4860b88b862f911c5d37fed602204949d1fe8555fc5d202e6b",
+    "editableTitle": "ON AIR EDIT",
+    "changedEditInvalidatesPreview": true
+  },
+  "coldReopen": true,
+  "modelReferencesRecovered": true,
+  "status": "PASS",
+  "finishedAt": "2026-10-09T14:12:09.173Z"
+}

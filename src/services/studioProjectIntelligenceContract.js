@@ -78,7 +78,7 @@ const sourceAssetSetDigest = assets => digest(assets.map(asset =>
   [asset.assetId, asset.contentHash]).sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
 const dependencyDigests = evidenceRefs => [...new Set(evidenceRefs
   .filter(item => item.kind === "source_shot_artifact" ||
-    item.kind === "analysis_artifact" || item.kind === "generated_asset")
+    item.kind === "analysis_artifact" || item.kind === "generated_asset" || item.kind === "model_artifact")
   .map(item => item.artifactHash))].sort();
 const RECORD_IDS = Object.freeze({ captureGroups: "groupId", assertions: "assertionId",
   syncMappings: "mappingId", dialogueUnits: "dialogueUnitId",
@@ -276,6 +276,12 @@ const validateProjectIntelligenceRevision = (revision, { allowServerGenerated = 
       if (evidence.configHash !== null) fail("PROJECT_INTELLIGENCE_EVIDENCE", path);
       id(evidence.modelRevision, path);
       if (evidence.analysisType !== "source_shots" || evidence.statement !== null)
+        fail("PROJECT_INTELLIGENCE_EVIDENCE", path);
+    } else if (evidence.kind === "model_artifact") {
+      hash(evidence.artifactHash, path); hash(evidence.configHash, path);
+      id(evidence.modelRevision, path);
+      if (!["understand_video", "detect_object", "segment_subject", "track_object", "generate_video"].includes(evidence.analysisType) ||
+          evidence.statement !== null || !evidence.dependencyHashes.length)
         fail("PROJECT_INTELLIGENCE_EVIDENCE", path);
     } else if (evidence.kind === "analysis_artifact") {
       hash(evidence.artifactHash, path);

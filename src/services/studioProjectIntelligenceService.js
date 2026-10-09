@@ -72,6 +72,16 @@ const verifyOwnedSources = async ({ uid, revision, firestore }) => {
       throw unauthorizedAsset();
   }
   for (const evidence of revision.evidenceRefs) {
+    if (evidence.kind === "model_artifact") {
+      const { ownedModelArtifact } = require('./studioModelCapabilityService');
+      const { evidenceFor } = require('../modelRuntime/contract');
+      let artifact;
+      try { artifact = await ownedModelArtifact({ uid, artifactHash:evidence.artifactHash, firestore }); }
+      catch (_) { throw unauthorizedAsset(); }
+      if (artifact.projectId !== revision.projectId ||
+          stableStringify(evidenceFor(artifact)) !== stableStringify(evidence)) throw unauthorizedAsset();
+      continue;
+    }
     if (evidence.kind === "analysis_artifact") {
       let artifact, dependency;
       try {

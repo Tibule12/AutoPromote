@@ -25,8 +25,11 @@ service firebase.storage {
       // for list requests, which have no resource metadata to inspect.
       return (request.path[3] == 'temp' && request.path[4] == 'studio-analysis') ||
         (request.path[3] == 'studio' && request.path[4] == 'analysis-results') ||
-        (resource != null && resource.name.matches('^(temp/studio-analysis|studio/analysis-results)/.*')) ||
-        (request.resource != null && request.resource.name.matches('^(temp/studio-analysis|studio/analysis-results)/.*'));
+        (request.path[3] == 'studio' && request.path[4] == 'model-runtime') ||
+        (request.path[3] == 'studio' && request.path[4] == 'sources' &&
+          request.path[6].matches('^model-[a-f0-9]{64}\\.mp4$')) ||
+        (resource != null && resource.name.matches('^(temp/studio-analysis|studio/(analysis-results|model-runtime))/.*')) ||
+        (request.resource != null && request.resource.name.matches('^(temp/studio-analysis|studio/(analysis-results|model-runtime))/.*'));
     }
 
     // These objects are written by Firebase Admin and read through the
@@ -36,6 +39,9 @@ service firebase.storage {
     }
 
     match /studio/analysis-results/{userId}/{allPaths=**} {
+      allow read, write: if false;
+    }
+    match /studio/model-runtime/{allPaths=**} {
       allow read, write: if false;
     }
 

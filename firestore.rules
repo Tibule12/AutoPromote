@@ -182,9 +182,24 @@ service cloud.firestore {
       allow delete: if request.auth != null && (resource.data.userId == request.auth.uid || isAdmin());
     }
 
-    // All other collections: only admins, service account, or backend
-    match /{document=**} {
-      allow read, write: if isAdmin() || isServiceAccount();
+    // Model receipts/capacity are server-owned, including for founder clients.
+    // Firebase Admin uses IAM and bypasses client Security Rules.
+    match /studio_model_capability_jobs/{document=**} {
+      allow read, write: if false;
+    }
+    match /studio_model_capability_artifacts/{document=**} {
+      allow read, write: if false;
+    }
+    match /studio_model_capability_capacity/{document=**} {
+      allow read, write: if false;
+    }
+
+    // Rules are additive: explicitly exclude server model collections from
+    // this broad admin rule so a client cannot forge evidence or free capacity.
+    match /{collection}/{document=**} {
+      allow read, write: if !(collection in ['studio_model_capability_jobs',
+        'studio_model_capability_artifacts', 'studio_model_capability_capacity'])
+        && (isAdmin() || isServiceAccount());
     }
   }
 }
