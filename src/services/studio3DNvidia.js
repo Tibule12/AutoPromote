@@ -76,9 +76,9 @@ async function render({ config, jobId, spec, bucket, onRendering }) {
   const container = `autopromote-studio-3d-${jobId}`;
   let launched = false;
   try {
-    await ssh(config, `umask 077; mkdir -p ${quote(remote + '/renderer')} ${quote(remote + '/output')}`);
+    await ssh(config, `umask 077; mkdir -p ${quote(remote + '/renderer/assets')} ${quote(remote + '/output')}`);
     const renderer = path.resolve(__dirname, '../..', 'studio_3d_renderer');
-    for (const name of ['spec.py', 'render.py', 'blender_scene.py']) await copy(config, path.join(renderer, name), `${remote}/renderer/${name}`);
+    for (const name of ['spec.py', 'render.py', 'blender_scene.py', 'brand_ident.py', 'vector_geometry.py', 'assets/autopromote-vector-logo.json']) await copy(config, path.join(renderer, name), `${remote}/renderer/${name}`);
     const specFile = path.join(directory, 'spec.json');
     await fs.writeFile(specFile, JSON.stringify(spec), { mode: 0o600 });
     await copy(config, specFile, `${remote}/spec.json`);

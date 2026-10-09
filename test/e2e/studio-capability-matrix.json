@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractVersion": 1,
-  "updatedAt": "2026-10-09T14:59:36.139879+00:00",
+  "updatedAt": "2026-10-09T16:10:46.949839+00:00",
   "sourceOfTruth": "docs/STUDIO-COMPLETION-CONTRACT.md",
   "baseline": {
     "checkpoint": "docs/HANDOFF-studio-reliability-repair-20261008.md",
@@ -8464,5 +8464,42 @@
     ],
     "nextRuntimeTask": "Complete the integrated authenticated founder/admin lifecycle through the existing Studio/Director graph.",
     "nextSharedTaskId": "S02"
+  },
+  "nativeLogoMotionFollowup20261009": {
+    "at": "2026-10-09T16:10:46.949839+00:00",
+    "assessment": "PRIVATE_DETERMINISTIC_LOGO_DELIVERY; model runtime product integration remains PARTIAL",
+    "report": "reports/model-capability-runtime-v1-20261009/LOGO-MOTION-FOLLOWUP.md",
+    "logoDelivery": {
+      "path": "reports/model-capability-runtime-v1-20261009/proof/logo-ident/final/final.mp4",
+      "sha256": "d01e727e620aa2c6f2d4a3051b97b586c31bfacd6be66fa0b8b31dcd864dbbd8",
+      "frames": 102,
+      "duration": 4.25,
+      "width": 1280,
+      "height": 720,
+      "generatedByAi": false
+    },
+    "combinedDelivery": {
+      "path": "reports/model-capability-runtime-v1-20261009/proof/logo-ident/combined/final.mp4",
+      "sha256": "8c72931f83ad1495fa4dba47d026fe76b51d1cdb280830e4aa66a63e849dae89",
+      "frames": 283,
+      "duration": 11.791666666666666
+    },
+    "actualNewNeuralExecutions": 0,
+    "additionalPaidGpuJobs": 0,
+    "localFirstNvencEncode": "Quadro M1200; retained, unselected",
+    "selectedFinalEncoder": "libx264 / CPU",
+    "renderProjectRevision": 5,
+    "localComponentSavedRevision": 6,
+    "localComponentMediaCount": 3,
+    "retainedModelArtifactRefs": 5,
+    "signedOutComponentSaveReopen": "PASS",
+    "normalAuthenticatedLifecycle": "UNVERIFIED",
+    "referenceCatalogQuality": "NOT_ESTABLISHED",
+    "founderCreativeApproval": false,
+    "readinessPromotion": false,
+    "fullPreviewFinalParity": "UNVERIFIED",
+    "deployment": false,
+    "mainMerge": false,
+    "nextRuntimeTask": "Complete authenticated request/review/import/edit/save/reopen/preview/export through existing controls."
   }
 }

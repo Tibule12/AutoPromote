@@ -1,0 +1,59 @@
+{
+  "startedAt": "2026-10-09T16:03:20.074Z",
+  "sha256": "8c72931f83ad1495fa4dba47d026fe76b51d1cdb280830e4aa66a63e849dae89",
+  "width": 1280,
+  "height": 720,
+  "duration": 11.791667,
+  "fps": 24,
+  "decodedFrames": 283,
+  "distinctFrameHashes": 283,
+  "nativePlayback": {
+    "headless": true,
+    "muted": true,
+    "after": {
+      "ended": true,
+      "error": null,
+      "totalVideoFrames": 283,
+      "droppedVideoFrames": 0
+    }
+  },
+  "samples": [
+    {
+      "currentTime": 0.525124,
+      "error": null,
+      "totalFrames": 17
+    },
+    {
+      "currentTime": 2.018206,
+      "error": null,
+      "totalFrames": 53
+    },
+    {
+      "currentTime": 4.020217,
+      "error": null,
+      "totalFrames": 101
+    },
+    {
+      "currentTime": 6.518751,
+      "error": null,
+      "totalFrames": 161
+    },
+    {
+      "currentTime": 8.51861,
+      "error": null,
+      "totalFrames": 209
+    },
+    {
+      "currentTime": 10.520853,
+      "error": null,
+      "totalFrames": 257
+    },
+    {
+      "currentTime": 11.517345,
+      "error": null,
+      "totalFrames": 281
+    }
+  ],
+  "scope": "Actual private delivery decode/playback. Visual judgment is recorded after inspecting the decoded images. No authenticated Studio or creative approval claim.",
+  "status": "DECODE_AND_NATIVE_PLAYBACK_PASS"
+}

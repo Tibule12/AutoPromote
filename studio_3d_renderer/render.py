@@ -2,6 +2,7 @@
 import argparse
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -44,11 +45,15 @@ def render_files(spec, temp_dir, asset_file=None):
     frames.mkdir(mode=0o700)
     spec_file = root / "spec.json"
     spec_file.write_text(json.dumps(spec, sort_keys=True), encoding="utf-8")
-    command = ["blender", "-b", "--factory-startup", "-noaudio", "--python", str(Path(__file__).with_name("blender_scene.py")), "--", str(spec_file), str(frames)]
+    command = ["blender", "-b", "--factory-startup", "-noaudio", "--python-exit-code", "1", "--python", str(Path(__file__).with_name("blender_scene.py")), "--", str(spec_file), str(frames)]
     if asset_file:
         command.append(str(asset_file))
     emit("blender_start", width=spec["width"], height=spec["height"], fps=spec["fps"], duration=spec["duration"])
     blender_log = run(command)
+    expected_count = math.ceil(spec['duration'] * spec['fps'])
+    expected_names = {f'frame_{index:04d}.png' for index in range(expected_count)}
+    if {p.name for p in frames.glob('frame_*.png')} != expected_names:
+        raise RuntimeError('Blender did not render the complete requested frame sequence')
     device = None
     for line in blender_log.splitlines():
         if line.startswith('{"event": "render_device"'):

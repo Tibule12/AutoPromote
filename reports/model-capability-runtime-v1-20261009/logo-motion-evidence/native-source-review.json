@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "parentArtifactHash": "20d772cde53574b9bc7258aa35f2540e49155213e21c338199d543daf474e7f7",
+  "reviewedAt": "2026-10-09T16:06:57.852Z",
+  "reviewKind": "decoded_native_picture_inspection",
+  "reviewer": "coding_agent",
+  "founderCreativeApproval": false,
+  "acceptedSourceRanges": [
+    {
+      "startTick": 0,
+      "endTick": 202500
+    },
+    {
+      "startTick": 360000,
+      "endTick": 540000
+    }
+  ],
+  "rejectedSourceRange": {
+    "startTick": 202500,
+    "endTick": 360000
+  },
+  "reason": "The wordmark entrance stretched the glyphs vertically. Exclude it and cut to the readable lockup.",
+  "futureImplementationFix": "Uniform glyph scale in studio_3d_renderer/brand_ident.py; the retained take was not silently relabelled as this corrected implementation.",
+  "programmeDuration": 4.25,
+  "projectRevision": 5,
+  "documentHash": "e2016c6e390b9f3404530dbc3a2b5adb3b3f3e5ee02256a697824d38795d6a20"
+}

@@ -3,6 +3,11 @@ import json
 import math
 import os
 import sys
+from pathlib import Path
+
+# Blender's --python entrypoint does not add its directory to sys.path.
+# Resolve packaged scene modules in both Cloud Run and the retained SSH image.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import bpy
 
@@ -17,6 +22,7 @@ def configure_render_device(scene):
             scene.render.engine = "BLENDER_EEVEE_NEXT"
         except TypeError:
             scene.render.engine = "BLENDER_EEVEE"
+        scene.eevee.taa_render_samples = max(1, min(256, int(os.environ.get("STUDIO_3D_SAMPLES", "32"))))
         info = {"backend": "EEVEE", "devices": [], "gpu_verified": False}
     else:
         scene.render.engine = "CYCLES"
@@ -128,6 +134,10 @@ def cube(name, location, scale, mat, parent):
 
 
 def setup_scene(spec, asset_file=None):
+    if (spec['scene']['template'] == 'neon_logo'
+            and spec['scene']['text'] == 'AutoPromote' and not asset_file):
+        from brand_ident import setup
+        return setup(spec, configure_render_device, simple_material)
     bpy.ops.object.select_all(action="SELECT")
     bpy.ops.object.delete(use_global=False)
     s = spec["scene"]
@@ -449,9 +459,13 @@ def main():
         root.scale = (current["scale"],) * 3
         root.rotation_euler = tuple(math.radians(angle) for angle in current["rotation"])
         world.node_tree.nodes["Timeline opacity"].inputs[1].default_value = current["opacity"]
-        if spec["scene"]["template"] == "neon_logo":
+        if animated.get('native_brand'):
+            from brand_ident import animate
+            animate(animated, camera, spec['scene'], index / spec['fps'], spec['duration'], spec['width'] / spec['height'])
+        elif spec["scene"]["template"] == "neon_logo":
             animate_logo(animated, index / spec["fps"], spec["duration"])
-        camera.location.x = math.sin(index / spec["fps"] * .6) * spec["scene"]["cameraMotion"] * .22
+        if not animated.get('native_brand'):
+            camera.location.x = math.sin(index / spec["fps"] * .6) * spec["scene"]["cameraMotion"] * .22
         world.render.filepath = os.path.join(out_dir, f"frame_{index:04d}.png")
         bpy.ops.render.render(write_still=True)
         print(json.dumps({"event": "frame", "current": index + 1, "total": frame_count}), flush=True)

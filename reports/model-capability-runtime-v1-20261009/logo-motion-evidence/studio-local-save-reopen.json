@@ -1,0 +1,17 @@
+{
+  "scope": "Actual existing Studio component/IndexedDB with real media and artifacts. Signed-out local fixture; no normal-authentication qualification.",
+  "at": "2026-10-09T16:06:58.371Z",
+  "headless": true,
+  "muted": true,
+  "errors": [],
+  "saved": {
+    "projectId": "model-runtime-v1-proof-20261009",
+    "mediaCount": 3,
+    "timelineCount": 4,
+    "modelArtifactRefs": 5,
+    "nativeSourceSha256": "e26616d0a5ff29ef56997da8a955e46211916bffc9598da0433fe3b365e752d0",
+    "canonicalRevision": 6
+  },
+  "status": "LOCAL_COMPONENT_SAVE_REOPEN_PASS",
+  "coldReopen": true
+}

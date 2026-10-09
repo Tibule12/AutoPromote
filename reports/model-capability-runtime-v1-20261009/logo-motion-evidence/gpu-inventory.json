@@ -1,0 +1,24 @@
+{
+  "at": "2026-10-09T15:48:15.952717+00:00",
+  "project": "autopromote-cc6d3",
+  "gpuJobs": [
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/jobs/autopromote-model-v1-video",
+      "accelerator": "nvidia-rtx-pro-6000"
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/jobs/autopromote-model-v1-segmentation",
+      "accelerator": "nvidia-rtx-pro-6000"
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/jobs/autopromote-model-v1-vision",
+      "accelerator": "nvidia-rtx-pro-6000"
+    },
+    {
+      "name": "projects/autopromote-cc6d3/locations/us-central1/jobs/viral-studio-rtx-qualification",
+      "accelerator": "nvidia-rtx-pro-6000"
+    }
+  ],
+  "gpuServices": [],
+  "activeGpuExecutions": []
+}

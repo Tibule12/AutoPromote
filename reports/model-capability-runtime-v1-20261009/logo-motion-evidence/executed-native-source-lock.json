@@ -1,0 +1,13 @@
+{
+  "implementationSha256": {
+    "brand_ident.py": "0b0698d2fb520b3a7a4a93f710b2121c77ca891f990cba777bf6453ef4e867be",
+    "vector_geometry.py": "238e65386a1f7ffbc09ca1ea545fbaf58c7d13755041f67e525d1c7e679d1ea0",
+    "blender_scene.py": "dbcc54eafa862e951f2745a255d7a51c5626f79d68d41e85b3e570319ed878ab",
+    "render.py": "b9e7ecbb968a6c6d927b17602ca5894201c3888f99174b9775f675007a5ff13e",
+    "spec.py": "0ce80e8d1f61220ebd01b8610fc143daf66973cc0d7c6c63d403f67738c22b11",
+    "assets/autopromote-vector-logo.json": "c88e7a6e9c145f6ac8a50bd873cb5cab49ee6b4ef387e787cdf842b3548b082c"
+  },
+  "device": "EEVEE / LIBGL_ALWAYS_SOFTWARE=1",
+  "samples": 8,
+  "paidGpuJobs": 0
+}

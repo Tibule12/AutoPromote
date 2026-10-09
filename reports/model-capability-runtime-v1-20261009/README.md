@@ -8,6 +8,8 @@ The common runtime executed Qwen3-VL, Grounding DINO, SAM2.1 and Wan2.2, persist
 
 **Review the movie:** [final.mp4](proof/final/final.mp4). [Final decoded frames](proof/qa/final-decoded-frames.png). [Visual review](proof/visual-review.json).
 
+Latest visual delivery: [actual logo motion and combined model proof](LOGO-MOTION-FOLLOWUP.md). That report records the rejected lettering section, selected CPU exports, local editor recovery, device accounting and remaining authenticated workflow. It does not promote the reference catalog or whole-Studio readiness.
+
 ## 1. Feature audit
 
 42 features across 50 baseline source files: {'DETERMINISTIC_REAL': 11, 'PARTIAL': 14, 'AI_REAL': 8, 'MISSING_BACKEND': 6, 'PROXY_ONLY': 3}. [Full feature table](../../docs/MODEL-CAPABILITY-FEATURE-AUDIT-V1.md), [exact baseline hashes](feature-audit.json). The baseline classification is distinct from this new private runtime proof. Voice-isolation DSP, still-plate drift and other proxies remain explicitly classified; no unsupported neural capability is inferred.
