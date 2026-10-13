@@ -33,7 +33,7 @@ export default function PublisherReleaseWorkspace({
   visited, forms, copyMaster, mode, setMode, deliveryFields, setDeliveryFields,
   timezone, setTimezone, timezones, delivery, deliveryError, frequency, setFrequency,
   customSchedule, setCustomSchedule, customFields, setCustomFields,
-  reviewOptions, getData, nextReason, submit, submitting, feedback, advanced, bestTime, onNavigate,
+  reviewOptions, getData, nextReason, submit, submitting, feedback, onNavigate,
 }) {
   const [assetQuery, setAssetQuery] = useState("");
   const [showAllAssets, setShowAllAssets] = useState(false);
@@ -118,7 +118,6 @@ export default function PublisherReleaseWorkspace({
               {!!issues[platform]?.length && <div className="release-issues" role="status"><strong>Before delivery</strong><ul>{issues[platform].map(issue => <li key={issue}>{issue}</li>)}</ul></div>}
               {forms(platform)}
             </section>)}
-            {advanced}
           </section>
           {step === 3 && <section className="release-card release-delivery" aria-label="Delivery settings"><h3>Delivery</h3><p>Choose when the completed posts are sent.</p>
             <div className="release-delivery-modes">{[["now", "Publish now", "Send to selected destinations now."], ["schedule", "Schedule", "Choose date, time and timezone."]].map(([id, name, help]) => <label key={id} className={mode === id ? "selected" : ""}><input type="radio" name="release-delivery" checked={mode === id} onChange={() => setMode(id)} /><strong>{name}</strong><span>{help}</span></label>)}</div>
@@ -131,7 +130,6 @@ export default function PublisherReleaseWorkspace({
               {customSchedule && selected.map(platform => <fieldset key={platform} className="release-custom-time"><legend>{getPlatformName(platform)}</legend><label>Date<input type="date" value={customFields[platform]?.date || deliveryFields.date} onChange={event => setCustomFields(platform, { ...customFields[platform], date: event.target.value })} /></label><label>Time<input type="time" value={customFields[platform]?.time || deliveryFields.time} onChange={event => setCustomFields(platform, { ...customFields[platform], time: event.target.value })} /></label></fieldset>)}
               {deliveryError && <p className="release-error" role="alert">{deliveryError}</p>}
             </>}
-            {bestTime}
           </section>}
           {step === 4 && <section className="release-card release-review" aria-label="Review release"><h3>Review your release</h3><p>{selected.length} destinations · {mode === "schedule" ? "Scheduled delivery" : "Publish now"}</p>
             {mode === "schedule" && delivery?.scheduledTime && <p className="release-exact-time">{formatScheduleTime(delivery.scheduledTime, timezone)} · {timezoneLabel(timezone, delivery.scheduledTime)}<small>Repeat: {frequency}</small></p>}

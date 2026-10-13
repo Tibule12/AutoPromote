@@ -10,6 +10,7 @@ const LinkedInForm = ({
   globalTitle,
   globalDescription,
   currentFile,
+  publisherRelease = false,
   onFileChange,
   onReviewAI,
   onFindViralClips,
@@ -160,7 +161,7 @@ const LinkedInForm = ({
         </div>
       )}
 
-      <div className="form-group-modern">
+      {!publisherRelease && <div className="form-group-modern">
         <label htmlFor="linkedin-file-input" className="form-label-bold">
           Video File
         </label>
@@ -254,7 +255,7 @@ const LinkedInForm = ({
             label="LinkedIn media preview"
           />
         )}
-      </div>
+      </div>}
 
       <div className="form-group-modern">
         <label>Post Text</label>
