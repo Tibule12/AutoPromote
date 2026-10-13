@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "reviewer": "Codex",
-  "reason": "Repository integration review: preserve existing qualification, document individual property controls and bind draft template revisions 1.1.0–1.1.2; retain security dependency updates and unchanged readiness.",
-  "reviewed_at": "2026-10-13T17:57:43.975Z",
+  "reason": "CI-only dependency review: upgrade the pinned Firebase CLI to support the retained patched stream-json major; no feature availability or readiness change.",
+  "reviewed_at": "2026-10-13T18:17:29.234Z",
   "catalog_sha256": "9a1ae0868cc99f489d80b2b9f305887470d3332753d207ed60bf12a8762c8fe9",
   "sources": [
     {
@@ -167,7 +167,7 @@
     },
     {
       "path": "package.json",
-      "sha256": "c1e7b57bfc17998d9d0ba1e4992bc6af1e5b6aae9efcdc65241081d94b4b34a2"
+      "sha256": "0e080bca545444fe048521b1442a3309ffee28694dfa9613eacdd48159a119e3"
     },
     {
       "path": "python_media_worker/studio_layer_motion.py",

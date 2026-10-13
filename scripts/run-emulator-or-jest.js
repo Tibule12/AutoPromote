@@ -4,7 +4,7 @@
 Orchestrate running the Firestore emulator for the full test suite.
 
 Behavior:
-- Prefer to use `npx firebase emulators:exec ...` which scopes env vars to the child process.
+- Run the repository's locked Firebase CLI with `emulators:exec`, scoping emulator env vars to the child process.
 - If `emulators:exec` fails in a way that indicates env discovery may be unreliable for the full test matrix,
   fall back to starting `emulators:start` in the background, wait until it's ready, set FIRESTORE_EMULATOR_HOST
   in the current process environment and run Jest directly so all workers reliably inherit the env.
@@ -14,6 +14,8 @@ Behavior:
 const { spawnSync, spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const { resolveFirebaseCli, firebaseCliFailure } = require('./firebase-cli');
+let firebaseCli;
 
 const WINDOWS_LAUNCHERS = new Set(['npm', 'npx']);
 
@@ -124,10 +126,10 @@ function tryRunFirebaseExec() {
       ? 'node -e "process.exit(0)"'
       : 'node ./scripts/exec-jest.js';
   console.log(
-    '[run-emulator-or-jest] Attempting: npx firebase emulators:exec --only firestore',
+    '[run-emulator-or-jest] Attempting: repository Firebase CLI emulators:exec --only firestore',
     JSON.stringify(childCommand)
   );
-  const res = runCommandSync('npx', ['firebase', 'emulators:exec', '--only', 'firestore', childCommand], {
+  const res = runCommandSync(process.execPath, [firebaseCli, 'emulators:exec', '--only', 'firestore', childCommand], {
     stdio: 'inherit',
     env: process.env,
   });
@@ -168,8 +170,8 @@ function runJestDirect(envExtras = {}) {
 
 function startEmulatorBackground({timeoutMs = 60_000} = {}) {
   return new Promise((resolve, reject) => {
-    console.log('[run-emulator-or-jest] Starting Firestore emulator in background: npx firebase emulators:start --only firestore');
-    const child = runCommand('npx', ['firebase', 'emulators:start', '--only', 'firestore'], {
+    console.log('[run-emulator-or-jest] Starting Firestore emulator in background: repository Firebase CLI emulators:start --only firestore');
+    const child = runCommand(process.execPath, [firebaseCli, 'emulators:start', '--only', 'firestore'], {
       stdio: ['ignore', 'pipe', 'pipe'],
       env: process.env,
     });
@@ -364,11 +366,11 @@ async function detectExistingEmulator() {
 
 (async function main() {
   try {
-    // Check firebase CLI availability first
-    const check = runCommandSync('npx', ['firebase', '--version'], { stdio: 'pipe' });
+    // Check the exact installed CLI, retaining the real startup error.
+    firebaseCli = resolveFirebaseCli();
+    const check = runCommandSync(process.execPath, [firebaseCli, '--version'], { stdio: 'pipe' });
     if (check.status !== 0) {
-      console.error('[run-emulator-or-jest] Firebase CLI (`firebase`) not available via npx.');
-      console.error('Install it locally with `npm install --save-dev firebase-tools` or set ALLOW_FALLBACK_NO_EMULATOR=1 to run tests without the emulator (not recommended for emulator-dependent tests).');
+      console.error('[run-emulator-or-jest] ' + firebaseCliFailure(check));
       if (process.env.ALLOW_FALLBACK_NO_EMULATOR === '1' || process.env.ALLOW_FALLBACK_NO_EMULATOR === 'true') {
         console.warn('[run-emulator-or-jest] ALLOW_FALLBACK_NO_EMULATOR set — running Jest directly (skipping emulator).');
         const fallback = runJestDirect();
