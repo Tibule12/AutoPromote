@@ -261,42 +261,6 @@ const SchedulesPanel = ({
 
   return (
     <section className="schedules-panel" aria-label="Schedule releases">
-      <div className="schedule-toolbar">
-        <div>
-          <strong>Releases</strong>
-          <span>
-            {showHistory
-              ? "All recent releases"
-              : upcoming.length
-                ? "Upcoming releases"
-                : "Recent release history"}
-            {" · "}One release, all its destinations, and the exact time in one place.
-          </span>
-        </div>
-        <div className="schedule-toolbar-actions">
-          {allReleases.length > upcoming.length && (
-            <button
-              className="schedule-history-toggle"
-              onClick={() => {
-                setShowHistory(!showHistory);
-                setSelectedId("");
-                setMediaFailed(false);
-              }}
-            >
-              {showHistory
-                ? "Show upcoming"
-                : `View history (${allReleases.length - upcoming.length})`}
-            </button>
-          )}
-          <button
-            className="schedule-primary"
-            onClick={() => (onNavigate ? onNavigate("upload") : setShowCreate(!showCreate))}
-          >
-            + Schedule post
-          </button>
-        </div>
-      </div>
-
       {showCreate && !onNavigate && (
         <form className="schedule-create-form" onSubmit={createSchedule}>
           <label>
@@ -374,6 +338,12 @@ const SchedulesPanel = ({
         <div className="schedule-empty">
           No scheduled releases yet. Choose a finished file in Publisher to schedule your first
           post.
+          <button
+            className="schedule-primary"
+            onClick={() => (onNavigate ? onNavigate("upload") : setShowCreate(!showCreate))}
+          >
+            + Schedule post
+          </button>
         </div>
       )}
 
@@ -381,18 +351,22 @@ const SchedulesPanel = ({
         <>
           <div className="schedule-kpis" aria-label="Schedule summary">
             <article>
+              <span className="schedule-kpi-icon releases" aria-hidden="true">▣</span>
               <strong>{releases.length}</strong>
               <span>Releases</span>
             </article>
             <article>
+              <span className="schedule-kpi-icon posts" aria-hidden="true">▤</span>
               <strong>{destinationCount}</strong>
               <span>Platform posts</span>
             </article>
             <article>
+              <span className="schedule-kpi-icon destinations" aria-hidden="true">➤</span>
               <strong>{platformCount}</strong>
               <span>Destinations</span>
             </article>
             <article>
+              <span className="schedule-kpi-icon paused" aria-hidden="true">Ⅱ</span>
               <strong>{pausedCount}</strong>
               <span>Paused</span>
             </article>
@@ -400,10 +374,18 @@ const SchedulesPanel = ({
 
           <div className="schedule-workspace">
             <nav className="schedule-release-list" aria-label="Releases">
-              <h3>Releases</h3>
+              <div className="schedule-list-heading">
+                <h3>Releases</h3>
+                <button
+                  className="schedule-primary"
+                  onClick={() => (onNavigate ? onNavigate("upload") : setShowCreate(!showCreate))}
+                >
+                  + New release
+                </button>
+              </div>
               {subjects.map(([subject, items]) => (
                 <div className="schedule-subject" key={subject}>
-                  <h4>{subject}</h4>
+                  <h4><span aria-hidden="true">{subject === "Coffee" ? "☕" : subject === "Cycling" ? "🚴" : subject === "Headphones" ? "🎧" : "▣"}</span>{subject}</h4>
                   {items.map(release => {
                     const zone = displayTimezone(
                       release.destinations[0]?.schedule,
@@ -414,27 +396,36 @@ const SchedulesPanel = ({
                         key={release.id}
                         className={`schedule-release-item ${selected?.id === release.id ? "selected" : ""}`}
                         aria-current={selected?.id === release.id ? "true" : undefined}
+                        aria-label={`${release.variant || release.title} ${dateLabel(release.time, zone)} ${clockLabel(release.time, zone)} ${zone}`}
                         onClick={() => selectRelease(release)}
                       >
-                        <span
-                          className={`schedule-variant ${release.variant === "Timeline" ? "timeline" : "final"}`}
-                        >
-                          {release.variant === "Timeline"
-                            ? "BEHIND THE EDIT"
-                            : release.variant === "Final Edit"
-                              ? "FINAL VIDEO"
-                              : "RELEASE"}
+                        <span className="schedule-release-date">
+                          <span aria-hidden="true">▣</span> {dateLabel(release.time, zone)}
                         </span>
-                        <strong>{release.variant || release.title}</strong>
-                        <small>
-                          {dateLabel(release.time, zone)} · {clockLabel(release.time, zone)} {zone}{" "}
-                          · {release.destinations.length} destinations
-                        </small>
+                        <span className="schedule-release-kind">
+                          <strong>{release.variant || release.title}</strong>
+                          <small className={`schedule-variant ${release.variant === "Timeline" ? "timeline" : "final"}`}>
+                            {release.variant === "Timeline" ? "BEHIND THE EDIT" : release.variant === "Final Edit" ? "FINAL VIDEO" : "RELEASE"}
+                          </small>
+                        </span>
+                        <span className="schedule-release-arrow" aria-hidden="true">›</span>
                       </button>
                     );
                   })}
                 </div>
               ))}
+              {allReleases.length > upcoming.length && (
+                <button
+                  className="schedule-history-toggle"
+                  onClick={() => {
+                    setShowHistory(!showHistory);
+                    setSelectedId("");
+                    setMediaFailed(false);
+                  }}
+                >
+                  {showHistory ? "Show upcoming" : `View history (${allReleases.length - upcoming.length})`}
+                </button>
+              )}
             </nav>
 
             {selected && (
@@ -450,12 +441,10 @@ const SchedulesPanel = ({
                           ? "FINAL VIDEO"
                           : "RELEASE"}
                     </span>
-                    <h3>{selected.title}</h3>
+                    <h3>{selected.subject}{selected.variant ? ` — ${selected.variant}` : ""}</h3>
                     {origin && <span className="schedule-origin">{origin}</span>}
                   </div>
-                  <strong className="schedule-aggregate">
-                    {aggregateStatus(selected.destinations)}
-                  </strong>
+                  <strong className="schedule-aggregate">{aggregateStatus(selected.destinations)}</strong>
                 </header>
                 <div className="schedule-detail-main">
                   <div className="schedule-media">
@@ -488,7 +477,7 @@ const SchedulesPanel = ({
                   </div>
                   <div className="schedule-overview">
                     <div className="schedule-copy">
-                      <strong>{previewTitle || selected.title}</strong>
+                      <strong>{previewTitle || "Post copy"}</strong>
                       <p>{firstCopy.caption || "No caption stored for this release."}</p>
                     </div>
                     <dl className="schedule-timing">
@@ -516,9 +505,7 @@ const SchedulesPanel = ({
                         destination.
                       </div>
                     )}
-                  </div>
-                </div>
-                <div className="schedule-destinations">
+                    <div className="schedule-destinations">
                   <h4>Destinations ({selected.destinations.length})</h4>
                   {selected.destinations.map(item => {
                     const copy = scheduleCopy(item.schedule, item.content || selected.content);
@@ -631,6 +618,8 @@ const SchedulesPanel = ({
                       </div>
                     );
                   })}
+                    </div>
+                  </div>
                 </div>
                 <div className="schedule-release-actions">
                   <button
@@ -664,8 +653,7 @@ const SchedulesPanel = ({
                   </button>
                 </div>
                 <p className="schedule-copy-limit">
-                  Copy edits affect one destination at a time. Expand a destination to manage it
-                  directly. Publishing and published posts cannot be changed here.
+                  Expand a destination for its exact copy, media, time and individual controls.
                 </p>
               </article>
             )}
@@ -675,10 +663,7 @@ const SchedulesPanel = ({
             <header>
               <div>
                 <h3>Release calendar</h3>
-                <p>
-                  Times shown with the timezone of each release. Select a card to inspect all
-                  destinations.
-                </p>
+                <p>Select a release to inspect all destinations. Times include the recorded or viewing timezone.</p>
               </div>
               <div className="schedule-legend">
                 {["Ready", "Scheduled", "Publishing", "Published", "Failed"].map(status => (
@@ -701,9 +686,7 @@ const SchedulesPanel = ({
                     onClick={() => selectRelease(release)}
                     aria-label={`Select ${release.title}, ${dateLabel(release.time, zone)}, ${release.destinations.length} destinations`}
                   >
-                    <small>
-                      {dateLabel(release.time, zone)} · {clockLabel(release.time, zone)} {zone}
-                    </small>
+                    <span className="schedule-calendar-date"><small>{dateLabel(release.time, zone)}</small><StatusPill status={release.destinations[0]?.status || "Ready"} /></span>
                     <span
                       className={`schedule-variant ${release.variant === "Timeline" ? "timeline" : "final"}`}
                     >
@@ -713,8 +696,8 @@ const SchedulesPanel = ({
                           ? "FINAL VIDEO"
                           : "RELEASE"}
                     </span>
-                    <strong>{release.title}</strong>
-                    <em>{aggregateStatus(release.destinations)}</em>
+                    <strong>{release.subject}{release.variant ? ` — ${release.variant}` : ""}</strong>
+                    <em>{release.destinations.length} destinations · {clockLabel(release.time, zone)} {zone}</em>
                     <span className="schedule-calendar-platforms">
                       {release.destinations.map(item => (
                         <span
